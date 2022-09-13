@@ -168,6 +168,9 @@ _fpa = {
       // Prevent an attempt to render the template in a block that has already been rendered in this request
       if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
 
+      // Potentially don't reload, especially if a sidebar request has been made
+      if (block.parents('[data-no-load]').length) return;
+
       _fpa.ajax_working(block);
       if (!options) options = {};
       if (!options.position) {
@@ -1059,13 +1062,21 @@ _fpa = {
         $('body').removeClass('table-results');
         $('html').css({ overflow: 'auto' });
         _fpa.reports.reset_window_scrolling();
+        if (_fpa.state.scroll_pos_before_modal != null)
+          _fpa.utils.scrollTo(_fpa.state.scroll_pos_before_modal, 0, 0, $(document));
       }
+
+      pm.off('shown.bs.modal');
+      pm.off('hidden.bs.modal');
     });
+
+    _fpa.state.scroll_pos_before_modal = $(document).scrollTop();
 
     pm.modal('show');
 
     pm.on('shown.bs.modal', function () {
       _fpa.utils.scrollTo(0, 0, 0, m)
+      $('html').css({ overflow: 'hidden' });
     })
 
     if (modal_index) {

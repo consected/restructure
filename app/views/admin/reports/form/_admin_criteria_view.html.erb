@@ -1,0 +1,34 @@
+<% if object_instance.persisted? 
+    @runner = object_instance.runner
+    @report = object_instance
+    @view_options = @report.report_options(fail_without_exception: true)&.view_options
+    begin
+%>  
+  <div class="admin-view report-criteria">
+    <div class="report-description">
+      <%= Formatter::Substitution.substitute(markdown_to_html(@report.description), data: current_user, ignore_missing: true).html_safe %>
+    </div>  
+    <div class="row report-criteria-fields">
+      <%= render partial: 'reports/criteria/fields' %>
+      <%= render partial: 'reports/criteria/inline_search_button_block' %>
+    </div>
+    <div class="form-group form-actions clearfix" style="border-color: transparent;">
+    <%= render partial: 'reports/criteria/search_buttons_block', locals: { embedded_report: true } %>
+    </div>
+
+    <%= render partial: 'reports/criteria_view_css' %>
+    <% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
+
+  </div>
+<% 
+  rescue => e
+%>
+<h3>Failure in criteria view</h3>
+<code><%= e %></code>
+<pre>
+<%= e.backtrace.join("\n") %>
+</pre>
+<% 
+    end
+  end 
+%>  

@@ -7,7 +7,7 @@
   top: 0;
   left: 0;
   display: block;
-  z-index: 200;
+  z-index: 2000;
 
   .secure-view-control-panel {
     padding: 8px 16px;
@@ -16,7 +16,7 @@
     position: absolute;
     width: 100%;
     min-height: 47px;
-    z-index: 200;
+    z-index: 2000;
     border-radius: 0;
 
     &.navbar-default {

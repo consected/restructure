@@ -28,8 +28,13 @@ gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being
 gem 'nokogiri', '1.13.6'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
-gem 'rails', '~> 5.2', '>= 5.2.7'
+# puma has been moved to all environments and will be included in the production packaging
+# this allows EB to run with the latest version of puma, without breaking if the preinstalled version
+# is lower or has different dependencies.
+# For this to work, Procfile must call puma with `bundle exec`
+gem 'puma'
 
+gem 'rails', '~> 5.2', '>= 5.2.7'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'
@@ -44,9 +49,9 @@ group :development do
   gem 'listen', '~> 3.7', '>= 3.7.1'
   # gem 'memory_profiler'
   # gem 'rack-mini-profiler'
-  gem 'solargraph', '~> 0.44.3'
-  gem 'solargraph-rails', '~> 0.3.1'
-  gem 'web-console', '~> 3.7'
+  gem 'solargraph'
+  gem 'solargraph-rails', '~> 0.2.0'
+  gem 'web-console'
 end
 
 group :development, :test do
@@ -78,7 +83,7 @@ end
 group :development, :production, :assets do
   gem 'execjs'
   gem 'sass-rails', '~> 5.1'
-  #gem 'therubyracer'
-  gem 'mini_racer', github: 'rubyjs/mini_racer', branch: 'refs/pull/186/head'
+  gem 'therubyracer'
+  #gem 'mini_racer', github: 'rubyjs/mini_racer', branch: 'refs/pull/186/head'
   gem 'uglifier', '>= 1.3.0'
 end

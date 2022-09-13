@@ -16,6 +16,43 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.106] - 2022-09-07
+
+- Bumped version
+
+## [8.0.105] - 2022-09-07
+
+- Bumped version
+
+## [8.0.103] - 2022-09-07
+
+- [Fixed] inability to edit report with bad options
+- [Fixed] table tree to only set up its own block
+- [Fixed] report_options causing errors in lists
+
+## [8.0.102] - 2022-09-07
+
+- [Fixed] tree view opacity during load
+- [Fixed] small issue with admin reports criteria
+- [Fixed] issues with show_modal
+
+## [8.0.101] - 2022-09-07
+
+- Bumped version
+
+## [8.0.98] - 2022-09-06
+
+### Transferred from Harvard @7.4.122 - 2022-09-06
+
+- [Added] view of report criteria in admin
+- [Fixed] failure trying to add a new redcap project
+
+### Viva
+
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
+
 ## [8.0.97] - 2022-08-30
 
 - [Added] show_if generation from Redcap branching logic

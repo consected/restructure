@@ -209,8 +209,8 @@ _fpa.postprocessors_reports = {
       _fpa.reports.results_subsearch(block);
       _fpa.reports.results_perform_action_link(block);
       _fpa.reports.results_select_items_for_form(block);
-      _fpa.reports_tree.show_table_as_tree($('.report-results-table-block table.tree-table'));
-      _fpa.form_utils.setup_tablesorter($('.report-results-table-block'));
+      _fpa.reports_tree.show_table_as_tree(block.find('.report-results-table-block table.tree-table'));
+      _fpa.form_utils.setup_tablesorter(block.find('.report-results-table-block'));
       block.find('.expandable').not('.attached-exp').on('click', function () {
         if ($(this).attr('disabled')) return;
         _fpa.form_utils.toggle_expandable($(this));
