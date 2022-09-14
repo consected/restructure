@@ -16,6 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] real handling of UI timezones and formats, using Luxon library
+- [Added] option when clicked to expand a master tab, others will be closed
+- [Added] image list to custom editor
+- [Added] server info Rails log search
+- [Fixed] iframe sandboxing
+- [Fixed] refresh outdated dynamic definitions
+- [Fixed] embedded report links and tree table table
+- [Fixed] incorrect handling of result data lookup for select fields when empty dataset
+- [Fixed] big select with absolutely unique field id
+- [Fixed] usability and editing issues in custom editor
+
 ## [8.0.106] - 2022-09-07
 
 - Bumped version
