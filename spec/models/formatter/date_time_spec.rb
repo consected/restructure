@@ -4,6 +4,8 @@ RSpec.describe Formatter::DateTime, type: :model do
   include ModelSupport
   include PlayerContactSupport
 
+
+
   it 'generates a date time string from Date and Time objects' do
     # Day before daylight savings time starts. Standard time is UTC -5 hours
     date = Date.parse('2015-03-07')
@@ -97,7 +99,7 @@ RSpec.describe Formatter::DateTime, type: :model do
     ca = @player_contact.created_at
     date = ca
     time = ca
-    zone = ca.zone
+    zone = ca.time_zone.name
 
     expect(Formatter::DateTime.format({ date: date, time: time, zone: zone }, iso: true, utc: true)).to eq ca.utc.to_s
   end

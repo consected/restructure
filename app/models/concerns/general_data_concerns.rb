@@ -218,7 +218,6 @@ module GeneralDataConcerns
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
       extras[:methods] << :resource_name if respond_to? :resource_name
-
       extras[:methods] << :updated_at_ts if respond_to? :updated_at
       extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :data if respond_to? :data

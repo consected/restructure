@@ -38,7 +38,7 @@ module AdminHandler
       return @latest_update if @latest_update && !force
 
       obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
-      @latest_update = obj&.updated_at || obj&.created_at
+      @latest_update = obj&.updated_at&.to_time || obj&.created_at&.to_time
     end
 
     #

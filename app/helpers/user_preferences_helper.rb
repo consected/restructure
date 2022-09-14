@@ -46,6 +46,9 @@ module UserPreferencesHelper
     }
   end
 
+  # Note that date and time formatter can also be found in the
+  # app/assets/javascripts/app/user_preferences.js for the front-end formatters
+  #
   # Time.current.strftime('%m/%d/%Y') == "02/18/2022"
   # Time.current.strftime('%d/%m/%Y') == "18/02/2022"
   DateFormats = {
