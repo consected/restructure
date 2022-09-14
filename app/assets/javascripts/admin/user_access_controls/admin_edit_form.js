@@ -25,10 +25,10 @@ _fpa_admin.user_access_controls.admin_edit_form = class {
 
   res_type_changed($el) {
     var val = $el.val()
-
-    $('#admin_user_access_control_resource_name').attr('data-big-select-subtype', val)
-    $('#admin_user_access_control_access optgroup[label]').hide()
-    $('#admin_user_access_control_access optgroup[label="' + val + '"]').show()
+    const fname = 'input[name="admin_user_access_control[resource_name]"]'
+    $(fname).attr('data-big-select-subtype', val)
+    $(`${fname} optgroup[label]`).hide()
+    $(`${fname} optgroup[label="' + val + '"]`).show()
   }
 
 }
