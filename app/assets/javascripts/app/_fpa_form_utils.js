@@ -1600,6 +1600,8 @@ _fpa.form_utils = {
 
     $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').not('.added-open-nt').each(function () {
       if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
 
       $(this).attr('target', '_blank');
       if ($(this).find('.glyphicon-new-window').length) return;
@@ -1607,6 +1609,9 @@ _fpa.form_utils = {
     }).addClass('added-open-nt');
 
     $('a[href$="#open-in-sidebar"]').not('.added-open').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
+
       $(this)
         .attr('target', '_blank')
         .attr('data-remote', 'true')
@@ -1630,6 +1635,8 @@ _fpa.form_utils = {
     }).addClass('added-open');
 
     $('a[href$="#open-embedded-report"]').not('.added-open-er').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
 
       var url = $(this).attr('href');
       url = url.replace('#open-embedded-report', '')
