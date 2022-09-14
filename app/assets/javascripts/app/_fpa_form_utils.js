@@ -1903,6 +1903,9 @@ _fpa.form_utils = {
 
         $edtools.hide();
         $eddiv.on('focus', function () {
+          // Protect against link dialog form being open, to avoid losing the selection
+          if ($(this).parent().find('.btn-group.open').length) return;
+
           $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
           $edtools.slideDown();
 
