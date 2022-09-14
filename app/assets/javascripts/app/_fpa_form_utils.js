@@ -1633,6 +1633,7 @@ _fpa.form_utils = {
 
       var url = $(this).attr('href');
       url = url.replace('#open-embedded-report', '')
+      url = url.replace('embed=true', '')
       if (url.indexOf('?') >= 0) {
         url = `${url}&embed=true#open-embedded-report`
       }

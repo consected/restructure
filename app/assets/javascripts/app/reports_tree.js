@@ -4,13 +4,16 @@
 _fpa.reports_tree = class {
 
   static show_table_as_tree($table) {
-    if (!$table.hasClass('tree-table')) return;
+    if (!$table.hasClass('tree-table') || $table.hasClass('tree-table-setup')) return;
 
-    let tree = new _fpa.reports_tree($table);
-    tree.setup()
-    tree.setup_header()
-    tree.setup_rows()
-    tree.finalize()
+    $table.addClass('tree-table-setup')
+    window.setTimeout(() => {
+      let tree = new _fpa.reports_tree($table);
+      tree.setup()
+      tree.setup_header()
+      tree.setup_rows()
+      tree.finalize()
+    }, 100)
   }
 
   constructor(table) {
