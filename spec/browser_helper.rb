@@ -34,7 +34,7 @@ module BrowserHelper
         puts 'if this blocks, run directly as:'
         puts xvfb_cmd.join(' ').to_s
         # Run the framebuffer and immediately return, then detach since we don't want this to eventually block
-        pid = spawn *xvfb_cmd
+        pid = spawn(*xvfb_cmd)
         Process.detach pid
         puts 'New Xvfb headless X server is running'
         `ps -p #{pid}`

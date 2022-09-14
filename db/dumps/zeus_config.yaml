@@ -795,7 +795,7 @@ app_type:
     process_name: ''
     table_name: activity_log_player_contact_phones
     category: ''
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   associated_dynamic_models: []
   associated_external_identifiers:
@@ -816,7 +816,7 @@ app_type:
     alphanumeric: 
     extra_fields: 
     category: scantrons
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   - id: 7
     name: sage_assignments
@@ -835,7 +835,7 @@ app_type:
     alphanumeric: 
     extra_fields: 
     category: sage
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   - id: 8
     name: sleep_assignments
@@ -854,7 +854,7 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     category: sleep
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   - id: 9
     name: grit_assignments
@@ -873,7 +873,7 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     category: grit
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   - id: 10
     name: pitt_bhi_assignments
@@ -892,7 +892,7 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     category: pitt-bhi
-    schema_name: extra_app
+    schema_name: ml_app
     user_email: 
   associated_reports:
   - id: 49

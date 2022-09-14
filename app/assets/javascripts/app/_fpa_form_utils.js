@@ -167,7 +167,7 @@ _fpa.form_utils = {
 
       dates.each(function () {
         var v = $(this).val();
-        if (v || v != '') {
+        if (v || v !== '') {
           var res = _fpa.form_utils.locale_date_to_iso(v);
           if (res) {
             $(this).val(res);
@@ -177,6 +177,7 @@ _fpa.form_utils = {
       }).removeClass('date-is-local');
     }
   },
+
 
   locale_date_to_iso(v) {
     if (!v) return;
@@ -1316,11 +1317,11 @@ _fpa.form_utils = {
 
     // force date type fields to use the date picker by making them fall back to text
     block.find('input[type="date"]').each(function () {
-      if ($(this).prop('type') == 'date') {
-        $(this).prop('type', 'datepicker');
-        $(this).addClass('force-datepicker');
+      const datePicker = $(this);
+      if (datePicker.prop('type') === 'date') {
+        datePicker.addClass('force-datepicker');
       }
-      $(this).attr('type', 'datepicker');
+      datePicker.prop('type', 'datepicker').prop('autocomplete', 'off');
     });
 
     // start by setting the date fields to show the date using the locale
@@ -1328,11 +1329,11 @@ _fpa.form_utils = {
     block.find('input[type="datepicker"]').not('.date-is-local').each(function () {
       var v = $(this).val();
 
-      if (v && v != '') {
+      if (!_fpa.utils.is_blank(v)) {
         var d = _fpa.utils.YMDtoLocale(v);
         $(this).val(d);
       }
-      $(this).addClass('date-is-local');
+      $(this).addClass('date-is-local').prop('autocomplete', 'off');
 
     });
 
