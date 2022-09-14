@@ -109,6 +109,15 @@ class Admin::ServerInfo
     'server identifier not available'
   end
 
+  def rails_log(regex)
+    logfilename = Rails.logger.instance_variable_get('@logdev').filename
+    max_count = 200
+    cmd = ['grep', '-m', max_count.to_s, '-E', regex, logfilename]
+    IO.popen(cmd).read
+  rescue StandardError
+    'log not available'
+  end
+
   def nfs_store_mount_dirs
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
     group_id_range = NfsStore::Manage::Filesystem.group_id_range
