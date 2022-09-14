@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.107] - 2022-09-14
 
 - [Added] real handling of UI timezones and formats, using Luxon library
 - [Added] option when clicked to expand a master tab, others will be closed
