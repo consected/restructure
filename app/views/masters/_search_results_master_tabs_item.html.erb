@@ -5,6 +5,7 @@
   categories = panel.contains&.categories
   resources = panel.contains&.resources
   initial_show = panel.view_options&.initial_show
+  close_others = panel.view_options&.close_others
   limit = panel.view_options&.limit
   default_panels = app_config_items(:open_panels)
   %>
@@ -13,8 +14,9 @@
     if default_panels.length > 0
       initial_show = 'trackers'.to_s.in?(default_panels)
     end
+    extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show ? 'on-open-click' : ''}"
   %>
-  <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
+  <li role="presentation" class="<%= extra_classes %>">
     <a href="/masters/{{id}}/trackers" data-panel-tab="trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" aria-expanded="false" class="scroll-to-expanded open-tracker collapsed">tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
   </li>
 
@@ -23,8 +25,9 @@
     if default_panels.length > 0
       initial_show = panel_name_us.to_s.in?(default_panels)
     end
+    extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show ? 'on-open-click' : ''}"
   %>
-  <li role="presentation" class="category-tab <%= initial_show ? 'on-open-click' : '' %>">
+  <li role="presentation" class="category-tab <%= extra_classes %>">
     <a href="#" data-panel-tab="<%= panel_name_us %>" data-toggle="collapse" data-target="#<%= panel_name%>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"><%= panel_label %></a>
   </li>
 
@@ -38,9 +41,9 @@
       end
 
       path = resource.gsub('__', '/').pluralize
-
+      extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show ? 'on-open-click' : ''}"
   %>
-  <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
+  <li role="presentation" class="<%= extra_classes %>">
     <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= path %>?limit=<%=limit%>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><%= panel_label %></a>
   </li>
   <%

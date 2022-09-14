@@ -62,8 +62,19 @@
 	<div class="btn-group">
 		<a class="btn btn-default btn-sm dropdown-toggle btn-wysiwyg-tb" data-toggle="dropdown" title="" data-original-title="Picture"><i class="glyphicon glyphicon-picture"></i></a>
 		<div class="dropdown-menu input-append">
-			<input class="span2" placeholder="image URL" type="text" data-edit="insertImage" >
-			<button class="btn" type="button">Add</button>
+			<div class="eddd-label">enter image URL</div>
+			<input class="span2" placeholder="enter image URL" type="text" data-edit="insertImage" >
+			<div class="eddd-label">or select stored file</div>
+			<%= render partial: 'common_templates/markdown_editor/image_list_selector', locals: {
+				form_object_instance: form_object_instance,
+				field_name_sym: :imglist,
+				form: form, 
+				form_object_item_type_us: form_object_item_type_us,
+				options: {
+					placeholder: 'select stored file'
+				}
+			} %>
+			<button class="btn btn-editor-add-image" type="button">Add</button>
 		</div>
 	</div>
 	<% end %>

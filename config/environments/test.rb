@@ -76,4 +76,7 @@ Rails.application.configure do
   config.cache_store = :file_store, fs_cache_path
 
   config.active_record.dump_schema_after_migration = false
+
+  # config.time_zone = 'Eastern Time (US & Canada)'
+  # config.active_record.default_timezone = :local
 end

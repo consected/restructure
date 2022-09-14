@@ -228,9 +228,9 @@ _fpa.postprocessors_reports = {
     $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"], [data-col-var-type="Date"] rldata').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
-      else if (val && val != '')
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtoLocale(val);
       $(this).html(d);
     }).addClass('td-date-formatted');
@@ -238,9 +238,9 @@ _fpa.postprocessors_reports = {
     $('td[data-col-var-type="Time"], [data-col-var-type="Time"] rldata').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val === 'Invalid DateTime')
         d = '';
-      else if (val && val != '')
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtimeToLocale(val);
       $(this).html(d);
     }).addClass('td-time-formatted');
@@ -248,11 +248,10 @@ _fpa.postprocessors_reports = {
     $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
       else if (val && val != '')
         d = _fpa.utils.YMDtimeToLocale(val);
-      console.log(d)
       if (d && d.split(' ').length > 1) d = d.split(' ').slice(1).join(' ')
       $(this).html(d);
     }).addClass('td-time-formatted');

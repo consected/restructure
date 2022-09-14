@@ -29,7 +29,9 @@ module ReportResults
       extra_classes += @col_classes[col_name] if @col_classes[col_name]
       if orig_col_content.instance_of?(Date) || orig_col_content.instance_of?(Time)
         # Keep an original version of the time, since the tag content will be updated with user preferences
+        orig_col_content = orig_col_content.utc if orig_col_content.respond_to?(:utc)
         time_attr = "data-time-orig-val=\"#{orig_col_content}\""
+        col_content = orig_col_content
       end
 
       header_content = alt_column_header(field_num) || @results.fields[field_num]

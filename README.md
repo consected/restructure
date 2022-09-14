@@ -254,9 +254,13 @@ to enable automatic authentication with your DB password, such as:
 
     localhost:5432:restr_test:username:mysecretpw
 
-To create a single test database for running rspec directly:
+To create a single test database for running rspec directly (uses sudo to connect as superuser **postgres**):
 
     app-scripts/create-test-db.sh 1
+
+... or if connecting to the database as the superuser over IP rather than OS user **postgres**
+
+    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/create-test-db.sh 1
 
 Make sure the Filestore mounts are in place:
 
@@ -275,6 +279,10 @@ For more rspec information, check [running rspec tests](docs/dev_reference/main/
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
 
     app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1
+
+... or if connecting to the database as the superuser over IP rather than OS user **postgres**
+
+    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/drop-test-db.sh 1; app-scripts/create-test-db.sh 1
 
 ### Running tests against AWS APIs
 
@@ -297,6 +305,10 @@ The following will create a set of test databases for the number of processor co
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
+... or if connecting to the database as the superuser over IP rather than OS user **postgres**
+
+    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/drop-test-db.sh; app-scripts/create-test-db.sh
+
 This will have created the database with the owner matching your current OS user. To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
 to enable automatic authentication with your DB password, such as:
 
@@ -316,6 +328,10 @@ To review failed results:
 The easiest way to deal with migrations is to drop the test database and recreate.
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
+
+... or if connecting to the database as the superuser over IP rather than OS user **postgres**
+
+    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/drop-test-db.sh; app-scripts/create-test-db.sh
 
 ## Future development themes
 

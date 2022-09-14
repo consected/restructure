@@ -140,7 +140,7 @@ RSpec.describe Formatter::Substitution, type: :model do
   it 'substitutes times and dates using user preferences for formatting' do
     # Day before daylight savings time starts. Standard time is UTC -5 hours
     date = Date.parse('2015-03-07')
-    time = Time.parse('14:56:04 EST')
+    time = Time.parse('14:56:04 AST')
 
     res = Formatter::DateTime.format({ date: date, time: time, zone: nil }, show_timezone: nil, current_user: @user)
 

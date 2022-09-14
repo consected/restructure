@@ -124,7 +124,8 @@ module EditFields
         end
       end
 
-      unless cl
+      # If the reslist was not generated (not even just empty)
+      unless reslist
         # Just get the resource by its resource name or alternatively its table name
         cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
 

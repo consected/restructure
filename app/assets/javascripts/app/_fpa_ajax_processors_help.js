@@ -16,7 +16,7 @@ _fpa.postprocessors_help = {
       }
       if (href.indexOf('/help') == 0) {
         $(this).attr('data-remote', 'true')
-        $(this).attr('href', href + '?display_as=embedded')
+        if (href.indexOf('display_as=embedded') < 0) $(this).attr('href', `${href}?display_as=embedded`);
         $(this).attr('data-working-target', '#help-sidebar-body')
       }
       else {
