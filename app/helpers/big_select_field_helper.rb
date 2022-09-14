@@ -21,7 +21,7 @@ module BigSelectFieldHelper
           not_done = false
           res = "#{res} #{big_select_field_main(form, field, v, subtype: k, options: options)}"
         else
-          res = "#{res} #{big_select_field_data(field_id, k, v)}"
+          res = "#{res} #{big_select_field_data(form, field_id, k, v)}"
         end
       end
       res.html_safe
@@ -68,20 +68,22 @@ module BigSelectFieldHelper
         #{field_overlay}
         #{field_html}
         #{popover_html}
-        #{big_select_field_data(field_id, subtype, data, options)}
+        #{big_select_field_data(form, field_id, subtype, data, options)}
       </span>
     END_HTML
       .html_safe
   end
 
-  def big_select_field_data(field_id, subtype, data, options = nil)
+  def big_select_field_data(form, field_id, subtype, data, options = nil)
     subtype ||= 'big_select_default'
     options ||= {}
 
+    form_id = form.options&.dig(:html, :id)
+    form_id = form_id.present? ? "##{form_id}" : 'form'
     predata = data&.transform_keys { |v| v.to_s.split(' >>>').first }
     <<~END_HTML
       <script>
-        var big_select_field = $('##{field_id}')[0]
+        var big_select_field = $('#{form_id} ##{field_id}')[0]
         big_select_field.big_select_options = big_select_field.big_select_options || #{options.to_json.html_safe};
         big_select_field.big_select_hash = big_select_field.big_select_hash || {};
         big_select_field.big_select_hash['#{subtype}'] = #{predata.to_json.html_safe};
