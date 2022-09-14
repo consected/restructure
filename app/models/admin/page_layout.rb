@@ -68,7 +68,7 @@ class Admin::PageLayout < Admin::AdminBase
   #   find_with: the alternative id (crosswalk or external id) to search for the master record with for standalone pages
   configure :view_options,
             with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls
-                     hide_activity_logs_header]
+                     hide_activity_logs_header close_others]
 
   # List options for dashboards list
   configure :list_options, with: %i[hide_in_list]

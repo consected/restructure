@@ -258,6 +258,8 @@ _fpa.postprocessors = {
     _fpa.postprocessors.tracker_events_handler(block, data);
 
     _fpa.postprocessors.extras_panel_handler(block);
+    _fpa.postprocessors.configure_master_tabs(block);
+
     block.addClass('loaded-master-main');
   },
 
@@ -376,6 +378,17 @@ _fpa.postprocessors = {
   extras_panel_handler: function (block) {
     _fpa.form_utils.on_open_click(block);
   },
+
+  configure_master_tabs: function (block) {
+    block.find('.tabs-close-others a[aria-expanded]').click(function () {
+      if ($(this).attr('aria-expanded') == 'true') return;
+
+      $(this).addClass('tab-clicked-now')
+      $(this).parents('.nav').first().find('a[aria-expanded="true"]').not('.tab-clicked-now').click();
+      $(this).removeClass('tab-clicked-now')
+    })
+  },
+
 
   item_flags_result_template: function (block, d) {
     _fpa.form_utils.format_block(block);
