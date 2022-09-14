@@ -194,7 +194,7 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
-    block.find('.use-big-select').each(function () {
+    block.find('.use-big-select').not('.big-select-su').each(function () {
       var label = '';
       $.big_select($(this),
         $('#primary-modal .modal-body'),
@@ -204,7 +204,7 @@ _fpa.form_utils = {
         $(this)[0].big_select_options
       );
 
-    })
+    }).addClass('big-select-su');
   },
 
   setup_select_filtering(block) {
