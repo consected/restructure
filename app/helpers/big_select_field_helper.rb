@@ -44,11 +44,18 @@ module BigSelectFieldHelper
     hide_popover = options[:hide_popover]
     extra_class = hide_popover ? 'big-select-use-overlay' : ''
 
-    field_html = form.text_field field,
-                                 class: "use-big-select #{extra_class}",
-                                 readonly: 'readonly',
-                                 id: field_id,
-                                 data: { 'big-select-subtype': subtype }
+    tf_options = {
+      class: "use-big-select #{extra_class}",
+      readonly: 'readonly',
+      id: field_id,
+      data: { 'big-select-subtype': subtype }
+    }
+
+    field_html = if options[:no_instance]
+                   text_field_tag field, options[:value], tf_options
+                 else
+                   form.text_field field, tf_options
+                 end
 
     if hide_popover
       field_overlay = text_field_tag :big_select_overlay, '',

@@ -372,7 +372,7 @@ _fpa.utils.pretty_print = function (stre, options_hash) {
   let startTime;
   let asTimestamp;
   if (stre && stre.length >= 8) {
-    if (stre.match(/^\d\d\d\d-\d\d-\d\d(?:t|T)\d\d:\d\d:\d\d(?:\.\d+)?(?:z|Z)/)) {
+    if (stre.match(/^\d\d\d\d-\d\d-\d\d(?:t|T)\d\d:\d\d:\d\d(?:\.\d+)?/)) {
       startTime = _fpa.utils.DateTime.fromISO(stre);
       asTimestamp = !stre.match(/(?:t|T)00:00:00(?:\.0+)?(?:z|Z)/);
     }

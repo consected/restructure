@@ -184,7 +184,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     res.on('click', '.big-select-item', function () {
       var val = $(this).attr('data-bsi-key')
       var $field = res.called_from_field
-      $field.val(val)
+      $field.val(val).change()
       set_info(val)
       if (after) after()
     })
