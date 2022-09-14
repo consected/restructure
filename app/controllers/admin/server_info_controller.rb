@@ -17,4 +17,15 @@ class Admin::ServerInfoController < AdminController
     @nfs_store_mount_dirs = si.nfs_store_mount_dirs
     render 'admin/server_info/index'
   end
+
+  def rails_log
+    si = Admin::ServerInfo.new(current_admin)
+    @search = params[:search]
+    @search = DateTime.now.iso8601[0..15].sub('T', ' ') if @search.blank?
+    # Make sure the regex is valid
+    Regexp.new(@search)
+
+    @rails_log = si.rails_log(@search)
+    render 'admin/server_info/rails_log'
+  end
 end

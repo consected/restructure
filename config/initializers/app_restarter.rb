@@ -2,6 +2,7 @@ class AppControl
   @@currently_defining_models = false
 
   def self.restart_server(not_delayed_job: nil, not_memcached: nil)
+    Rails.logger.warn 'Restart Server requested'
     if Rails.env.production?
       pid = spawn('app-scripts/restart_app_server.sh')
       Process.detach(pid)
@@ -16,6 +17,7 @@ class AppControl
   end
 
   def self.restart_delayed_job
+    Rails.logger.warn 'Restart delayed_job requested'
     pid = spawn('app-scripts/restart_delayed_job.sh')
     Process.detach(pid)
   rescue StandardError => e
@@ -23,6 +25,7 @@ class AppControl
   end
 
   def self.restart_memcached
+    Rails.logger.warn 'Restart Memcached requested'
     pid = spawn('app-scripts/restart_memcached.sh')
     Process.detach(pid)
   rescue StandardError => e
@@ -31,10 +34,11 @@ class AppControl
 
   def self.define_models
     if @@currently_defining_models
-      Rails.logger.info 'Already defining models'
+      Rails.logger.warn 'Already defining models'
       return
     end
 
+    Rails.logger.warn 'Define models requested'
     @@currently_defining_models = true
 
     ::ActivityLog.define_models
