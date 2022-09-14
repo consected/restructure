@@ -6613,10 +6613,10 @@ CREATE TABLE ref_data.datadic_variable_history (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
-    user_id bigint,
     contributor_type character varying,
     n_for_timepoints jsonb,
-    notes character varying
+    notes character varying,
+    user_id bigint
 );
 
 
@@ -6969,7 +6969,7 @@ CREATE TABLE ref_data.datadic_variables (
 -- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: Full Data Dictionary';
 
 
 --
