@@ -699,27 +699,31 @@ module CalcActions
 
       end
 
-      unless from_instance
+      if val_item_key == :exists
+        # Simply get a true result if instance found and {exists: true} or
+        # instance not found and {exists: false}
+        val = (!!expected_val == !!from_instance)
+      elsif !from_instance
         raise FphsException, "No referring record specified when using #{val_item_key} in " \
                              "#{@current_instance.class.name} #{@current_instance.id}"
-      end
+      else
+        # Now go ahead and get the possible values to use in the condition
+        val = []
+        # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
+        # showable filter since this might recurse infinitely
+        model_refs = from_instance.model_references(active_only: true, showable_only: false)
+        Rails.logger.info '*** No model_refs found' if model_refs.empty?
+        # filter it to return only those matching the required to_record_type (if necessary)
+        if to_table_name
+          model_refs = model_refs.select { |r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize }
+          Rails.logger.info "*** No model_refs found for table name: #{to_table_name}" if model_refs.empty?
+        end
 
-      # Now go ahead and get the possible values to use in the condition
-      val = []
-      # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
-      # showable filter since this might recurse infinitely
-      model_refs = from_instance.model_references(active_only: true, showable_only: false)
-      Rails.logger.info '*** No model_refs found' if model_refs.empty?
-      # filter it to return only those matching the required to_record_type (if necessary)
-      if to_table_name
-        model_refs = model_refs.select { |r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize }
-        Rails.logger.info "*** No model_refs found for table name: #{to_table_name}" if model_refs.empty?
-      end
-
-      # Get the specified attribute's value from each of the model references
-      # Generate an array, allowing the conditions to be IN any of these
-      model_refs.each do |mr|
-        val << mr.to_record.attributes[att]
+        # Get the specified attribute's value from each of the model references
+        # Generate an array, allowing the conditions to be IN any of these
+        model_refs.each do |mr|
+          val << mr.to_record.attributes[att]
+        end
       end
 
     elsif val_item_key == :user

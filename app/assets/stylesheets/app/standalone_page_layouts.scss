@@ -504,35 +504,38 @@ div.reset-row {
     margin: 1em auto;
   }
 
-  .list-workflow ul {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  .list-workflow .custom-editor-viewer
+  {
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-  .list-workflow ul li {
-    display: flex;
-    align-items: center;
-    min-height: 100px;
-    width: 150px;
-    background: rgb(40, 91, 129);
-    color: white;
-    vertical-align: middle;
-    border-radius: 5px 60px 60px 5px;
-    padding: 20px 20px 20px 15px;
-    margin: 10px;
-    text-align: left;
-    flex-shrink: 0;
-    font-size: 16px
-  }
+    ul li {
+      display: flex;
+      align-items: center;
+      min-height: 100px;
+      width: 150px;
+      background: rgb(40, 91, 129);
+      color: white;
+      vertical-align: middle;
+      border-radius: 5px 60px 60px 5px;
+      padding: 20px 20px 20px 15px;
+      margin: 10px;
+      text-align: left;
+      flex-shrink: 0;
+      font-size: 16px
+    }
 
-  .list-workflow ul li strong {
-    width: 100%;
+    ul li strong {
+      width: 100%;
+    }
+    ul li a {
+      color: white;
+    }
   }
-
-  .list-workflow ul li a {
-    color: white;
-  }
+  
 
   .h1-center h1 {
     text-align: center
@@ -546,9 +549,9 @@ div.reset-row {
     text-align: center;
   }
   
-.h3-center h4 {
-  text-align: center;
-}
+  .h3-center h4 {
+    text-align: center;
+  }
 }
 
 .page-embedded-block {
