@@ -64,16 +64,18 @@
 		<div class="dropdown-menu input-append">
 			<div class="eddd-label">enter image URL</div>
 			<input class="span2" placeholder="enter image URL" type="text" data-edit="insertImage" >
-			<div class="eddd-label">or select stored file</div>
-			<%= render partial: 'common_templates/markdown_editor/image_list_selector', locals: {
-				form_object_instance: form_object_instance,
-				field_name_sym: :imglist,
-				form: form, 
-				form_object_item_type_us: form_object_item_type_us,
-				options: {
-					placeholder: 'select stored file'
-				}
-			} %>
+			<% if form_object_instance.respond_to?(:master) && form_object_instance.master %>
+				<div class="eddd-label">or select stored file</div>
+				<%= render partial: 'common_templates/markdown_editor/image_list_selector', locals: {
+					form_object_instance: form_object_instance,
+					field_name_sym: :imglist,
+					form: form, 
+					form_object_item_type_us: form_object_item_type_us,
+					options: {
+						placeholder: 'select stored file'
+					}
+				} %>
+			<% end %>
 			<button class="btn btn-editor-add-image" type="button">Add</button>
 		</div>
 	</div>
