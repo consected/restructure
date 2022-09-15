@@ -19,7 +19,7 @@ export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 if [ "$@" ]; then
   specs=$@
 else
-  specs='spec/models spec/controllers spec/features spec/j.* spec/r.*'
+  specs='spec/models spec/controllers spec/features spec/r.*'
 fi
 
 for spec in ${specs}; do
