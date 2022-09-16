@@ -181,7 +181,8 @@ _fpa.app_specific = class {
         .attr('data-result-target-force', true)
         .attr(`data-${hyph_name}-id`, id)
         .attr('data-result-target', `#${block_id}`)
-        .attr('data-template', `${hyph_name}-result-template`);
+        .attr('data-template', `${hyph_name}-result-template`)
+        .attr('data-toggle', 'scrollto-target');
 
       var text = $(this).parents('.notes-text');
       var html = text.html();
