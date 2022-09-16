@@ -895,11 +895,15 @@ _fpa = {
             var res = {};
             res[di] = d;
             targets.each(function () {
-
+              var $target = $(this);
               // If a subscription was inside an element that has already been replaced, just return
-              if ($(this).parents('body').length === 0) return;
+              if ($target.parents('body').length === 0) return;
 
-              var pre = $(this).attr('data-preprocessor');
+              // By default, These preprocessors are defined on the target element, not the trigger,
+              // so each target is treated differently.
+              var pre = $target.attr('data-preprocessor');
+              // NOTE: the target element may be replaced through these functions
+              // $(this) is used on each to ensure that the latest target is used for each call
               _fpa.do_preprocessors(pre, $(this), data);
               put_in_position($(this), d);
               _fpa.do_postprocessors(pre, $(this), data);
@@ -908,10 +912,15 @@ _fpa = {
           });
 
           if (updated === 0) {
-            var target = $(this).attr('data-result-target');
+            var $trigger = $(this);
+            var target = $trigger.attr('data-result-target');
             if (target) {
-              var pre = $(this).attr('data-preprocessor');
+              // These preprocessors are defined on the triggering element (often a link)
+              // rather than an updated block (since there was no updated block)
+              var pre = $trigger.attr('data-preprocessor');
 
+              // NOTE: the target element may be replaced through these functions
+              // $(target) is used on each to ensure that the latest target is used for each call
               _fpa.do_preprocessors(pre, $(target), data);
               put_in_position($(target), html);
               _fpa.do_postprocessors(pre, $(target), data);
@@ -1027,7 +1036,7 @@ _fpa = {
   },
 
   // Show a bootstrap style modal dialog
-  show_modal: function (message, title, large, add_class, modal_index) {
+  show_modal: function (message, title, large, add_class, modal_index, callback) {
     if (!modal_index) modal_index = '';
     var pm = $(`#primary-modal${modal_index}`);
     var t = pm.find('.modal-title');
@@ -1077,6 +1086,7 @@ _fpa = {
     pm.on('shown.bs.modal', function () {
       _fpa.utils.scrollTo(0, 0, 0, m)
       $('html').css({ overflow: 'hidden' });
+      if (callback) callback(m);
     })
 
     if (modal_index) {
