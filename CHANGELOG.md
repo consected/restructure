@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
+- [Fixed] "close other tabs" for single master view
+- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
+
 ## [8.0.108] - 2022-09-15
 
 - [Fixed] various small bug
