@@ -2,7 +2,7 @@
 /* */
 _fpa.preprocessors = {
   before_all: function (block) {
-    _fpa.masters.get_results_block().removeClass('search-status-abort search-status-error search-status-done');
+    _fpa.reports.get_results_block().removeClass('search-status-abort search-status-error search-status-done');
 
     _fpa.form_utils.on_form_submit(block);
 
@@ -35,7 +35,7 @@ _fpa.postprocessors = {
   default: function (block, data, has_postprocessor) {
     _fpa.processor_handlers.form_setup($('form'));
 
-    _fpa.masters.get_results_block().addClass('search-status-done');
+    _fpa.reports.get_results_block().addClass('search-status-done');
 
     if (!$('body').hasClass('fixed-overlay') && !$('body').hasClass('modal-open')) {
       if (
@@ -448,7 +448,7 @@ _fpa.postprocessors = {
 
   after_error: function (block, status, error) {
     if (status == 'abort') {
-      _fpa.masters
+      _fpa.reports
         .get_results_block()
         .html(
           '<h3  class="text-center"><span class="glyphicon glyphicon-pause search-canceled" data-toggle="popover" data-trigger="click hover" data-content="search paused while new entries are added"></span></h3>'
@@ -458,7 +458,7 @@ _fpa.postprocessors = {
     } else {
       var e = '';
       if (status) e = status;
-      _fpa.masters.get_results_block().addClass('search-status-error');
+      _fpa.reports.get_results_block().addClass('search-status-error');
       _fpa.processor_handlers.form_setup(block);
     }
   },

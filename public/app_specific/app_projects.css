@@ -331,7 +331,8 @@ td.report-el pre {
   padding: 0;
 }
 
-#modal_results_block .report-results-inner {
+#modal_results_block .report-results-inner, 
+#modal_results_block_1 .report-results-inner {
   overflow-y: hidden;
 }
 
