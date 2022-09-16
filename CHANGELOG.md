@@ -16,6 +16,33 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Viva @8.0.109 - 2022-09-16
+
+- [Added] real handling of UI timezones and formats, using Luxon library
+- [Added] option when clicked to expand a master tab, others will be closed
+- [Added] image list to custom editor
+- [Added] server info Rails log search
+- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] "close other tabs" for single master view
+- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
+- [Fixed] iframe sandboxing
+- [Fixed] refresh outdated dynamic definitions
+- [Fixed] embedded report links and tree table table
+- [Fixed] incorrect handling of result data lookup for select fields when empty dataset
+- [Fixed] big select with absolutely unique field id
+- [Fixed] usability and editing issues in custom editor
+- [Fixed] inability to edit report with bad options
+- [Fixed] table tree to only set up its own block
+- [Fixed] report_options causing errors in lists
+- [Fixed] tree view opacity during load
+- [Fixed] small issue with admin reports criteria
+- [Fixed] issues with show_modal
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
+
 ## [8.0.43] - 2022-09-06
 
 ### Transferred from Harvard @7.4.122 - 2022-09-06
