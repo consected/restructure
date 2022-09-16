@@ -202,12 +202,26 @@ module SecureView
         self.path = Rails.cache.fetch(cache_key('renderedpath')) do
           create_temp_dir
 
+          # Avoid multiple threads and worker processes attempting to convert simultaneously
+          # We should make this a backend tasks, with reloading in the UI, but for now...
+          i = 0
+          if Rails.cache.read(:libreoffice_parsing)
+            # try anyway after 5 times
+            sleep 2
+            i += 1
+            break if i >= 5
+          end
+
+          Rails.cache.write :libreoffice_parsing, 'lock', expires_in: 10.seconds
+
           res = system(SecureView::Config.libreoffice_path,
                        '--headless',
                        '--convert-to', type,
                        '--outdir', temp_dir,
                        orig_path,
                        out: File::NULL, err: File::NULL)
+
+          Rails.cache.delete :libreoffice_parsing
           raise GeneralException, "Failed to convert file to #{type}" unless res
 
           conv_attempts += 1

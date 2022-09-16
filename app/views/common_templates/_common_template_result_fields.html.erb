@@ -176,7 +176,7 @@
     {{#unless ../prevent_edit}}
     <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker add-linked-tracker">
       <div class="panel panel-default panel-body">
-        <p class="add-tracker-label">Add a specific tracker status record related to this_value item:</p>
+        <p class="add-tracker-label">Add a specific tracker status record related to {{this_value}} item:</p>
         <p class="text-center">
         <a href="/masters/{{result_data.master_id}}/trackers/new?record_type=activity_log/{{implementation_class_name}}&record_id={{result_data.id}}&tracker[protocol_id]={{result_data.protocol_id}}&tracker[event_date]={{result_data.called_when}}" data-toggle="scrollto-result uncollapse" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{result_data.master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
         </p>

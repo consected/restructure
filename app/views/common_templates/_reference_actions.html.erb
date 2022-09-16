@@ -75,7 +75,7 @@
   {{/unless}}
   <% end %>
 <% end %>
-<div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list block-<%=caption_before_ref_type.to_s.hyphenate%> <%=elt_class%> alt-width">
+<div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list block-<%=caption_before_ref_type.to_s.hyphenate%> <%=elt_class%> alt-width  <%= ref_config[:prevent_reload_on_save] ? 'prevent-reload-on-reference-save' : '' %>">
   <div class="new-block model-reference-new-block" 
       id="<%= inner_data_target %>" 
       data-result-target-for-child="#<%= inner_data_target %>, #<%=ref_type.ns_hyphenate%>-<%= master_id %>-" 

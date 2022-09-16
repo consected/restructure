@@ -183,8 +183,12 @@ class Report < ActiveRecord::Base
   # Set up or return the report options class, parsing the text attribute #options.
   # Access configuration items directly as:
   #    report_options.<view_css | component | list_options ...>
-  def report_options
+  def report_options(fail_without_exception: nil)
     @report_options ||= OptionConfigs::ReportOptions.new self
+  rescue StandardError => e
+    return nil if fail_without_exception
+
+    raise e
   end
 
   def as_json(options = {})

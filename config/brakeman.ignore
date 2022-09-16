@@ -26,6 +26,39 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
+      "fingerprint": "112b4ae9ba92e195c2372be0ba3be3e831dd3fcb7ab9dceb45b64e2b901a9d49",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb",
+      "line": 9,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html(object_instance.description), :data => current_user, :ignore_missing => true)",
+      "render_path": [
+        {
+          "type": "template",
+          "name": "admin/reports/_def_block",
+          "line": 12,
+          "file": "app/views/admin/reports/_def_block.html.erb",
+          "rendered": {
+            "name": "admin/reports/form/_admin_criteria_view",
+            "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/reports/form/_admin_criteria_view"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
       "fingerprint": "13461696d535c988627af1a66521217926b205060f69fdc7513045f5d5feb124",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
@@ -793,6 +826,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-09-02 11:27:54 +0100",
+  "updated": "2022-09-07 19:14:48 +0100",
   "brakeman_version": "5.3.1"
 }

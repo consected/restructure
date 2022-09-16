@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="row well">
+    <h2>Rails Log</h2>
+    <%= form_with url: admin_server_info_rails_log_path, method: :get, class: 'form' do |f| %>
+    <%= f.label :search, 'search regex' %>
+    <%= f.text_field :search, value: @search, class: 'form-control', style: 'min-width: 500px' %>
+    <%= f.button 'search' %>
+    <% end %>
+  </div>
+</div>
+
+<div class="container rails-log">
+  <div class="row">
+<code>
+<pre id="rails-log-listing">
+<%= @rails_log %>
+</pre>
+</code>
+  </div>
+</div>

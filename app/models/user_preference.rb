@@ -48,6 +48,25 @@ class UserPreference < UserBase
       UserPreference.default_pattern_for_time_format
   end
 
+  def timezone_iana
+    #map to iana value tz
+    ActiveSupport::TimeZone::MAPPING[self.timezone]
+  end
+
+  # Override to always allow access. The caller is responsible for allowing access.
+  # Limited risk, even if misused.
+  def allows_current_user_access_to?(_perform, _with_options = nil)
+    true
+  end
+
+  def as_json(extras = {})
+    extras[:methods] ||= []
+    extras[:methods] << :timezone_iana
+    # Call #serializable_hash rather than super, since we don't want to return
+    # all the unnecessary attributes / methods provided by GeneralDataConcerns#as_json
+    serializable_hash(extras)
+  end
+
   def self.no_downcase_attributes
     %i[date_format time_format date_time_format timezone]
   end
@@ -94,22 +113,9 @@ class UserPreference < UserBase
     false
   end
 
-  # Override to always allow access. The caller is responsible for allowing access.
-  # Limited risk, even if misused.
-  def allows_current_user_access_to?(_perform, _with_options = nil)
-    true
-  end
-
-  def as_json(extras = {})
-    extras[:methods] ||= []
-
-    # Call #serializable_hash rather than super, since we don't want to return
-    # all the unnecessary attributes / methods provided by GeneralDataConcerns#as_json
-    serializable_hash(extras)
-  end
-
   # Make sure that as_json doesn't recurse
   undef user_preference
+
   add_model_to_list # always at the end of model
 
   private

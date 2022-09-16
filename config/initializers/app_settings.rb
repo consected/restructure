@@ -17,8 +17,8 @@ class Settings
   YearFieldPattern = '\\d{4,4}'
 
   # Inactivity timeouts for user / admin sessions
-  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).minutes.freeze
-  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).minutes.freeze
+  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
+  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
