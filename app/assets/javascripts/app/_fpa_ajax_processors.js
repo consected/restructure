@@ -277,6 +277,7 @@ _fpa.postprocessors = {
     if (data.masters && data.masters.length === 1) {
       _fpa.postprocessors.tracker_events_handler(block, data);
       _fpa.postprocessors.extras_panel_handler(block);
+      _fpa.postprocessors.configure_master_tabs(block);
     }
 
     // Capture the master data into state for later use around the application
@@ -313,6 +314,7 @@ _fpa.postprocessors = {
           _fpa.postprocessors.tracker_events_handler($(this), data);
 
           _fpa.postprocessors.extras_panel_handler($(this));
+          _fpa.postprocessors.configure_master_tabs(block);
 
           _fpa.utils.scrollTo($(this), 200, -50);
 
