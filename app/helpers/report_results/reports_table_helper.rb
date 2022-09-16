@@ -29,7 +29,9 @@ module ReportResults
       extra_classes += @col_classes[col_name] if @col_classes[col_name]
       if orig_col_content.instance_of?(Date) || orig_col_content.instance_of?(Time)
         # Keep an original version of the time, since the tag content will be updated with user preferences
+        orig_col_content = orig_col_content.utc if orig_col_content.respond_to?(:utc)
         time_attr = "data-time-orig-val=\"#{orig_col_content}\""
+        col_content = orig_col_content
       end
 
       res = <<~END_HTML
@@ -89,8 +91,11 @@ module ReportResults
       extra_classes = @col_classes[col_name] || ''
       extra_classes = "#{extra_classes} #{comment.present? ? 'has-comment' : 'no-comment'}"
 
+      extra_data = "data-db-col-type=\"#{@column_types[field_num]}\""
+      extra_data += ' data-sorter="sqlDate"' if @column_types[field_num]&.in?(['timestamp', 'date'])
+
       res = <<~END_HTML
-        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}">
+        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}" #{extra_data}>
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML

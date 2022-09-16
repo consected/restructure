@@ -45,7 +45,8 @@ Rails.application.routes.draw do
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
     resources :job_reviews, except: %i[show destroy]
-    resources :server_info
+    resources :server_info, only: [:index]
+    get 'server_info/rails_log', to: 'server_info#rails_log'
 
     resources :app_types, except: [:destroy] do
       member do

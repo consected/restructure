@@ -6,6 +6,8 @@ module EditFields
                   :value_attr, :label_attr, :group_split_char,
                   :no_assoc
 
+    FailedValuesArray = ['failed to get values', 'failed to get values'].freeze
+
     #
     # Gets the #data for each record for a select on an association or class name
     # @param [UserBase] form_object_instance the current instance for the form object
@@ -122,7 +124,8 @@ module EditFields
         end
       end
 
-      unless cl
+      # If the reslist was not generated (not even just empty)
+      unless reslist
         # Just get the resource by its resource name or alternatively its table name
         cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
 
@@ -162,8 +165,12 @@ module EditFields
     # exist prior to attempting the query.
     # @param [ActiveRecord::Relation] reslist
     # @param [UserBase] model
+    # @param [nil | Object | :default | :exception] on_fail_return - return the specified value
+    #                                               or array if the attribute configs are incorrect
+    #                                               :default - forces return of a 'failed to get values' array
+    #                                               :exception - raises and exception instead
     # @return [Array]
-    def list_for_defined_attributes(reslist, model)
+    def list_for_defined_attributes(reslist, model, on_fail_return: :default)
       arr_label_attr, pluck_attrs, do_subs_label = pluck_attrs_for(label_attr, model)
       arr_value_attr, val_pluck_attrs, do_subs_value = pluck_attrs_for(value_attr, model)
 
@@ -174,6 +181,9 @@ module EditFields
       pluck_attrs_strs = pluck_attrs.map(&:to_s)
 
       if (reslist.attribute_names & pluck_attrs_strs).sort != pluck_attrs_strs.sort
+        on_fail_return = FailedValuesArray if on_fail_return == :default
+        return on_fail_return unless on_fail_return == :exception
+
         raise FphsException,
               "Not all attributes from value_attr or label_attr (#{pluck_attrs_strs}) configs " \
               "are defined in #{reslist.model}: #{reslist.attribute_names} / #{model}"

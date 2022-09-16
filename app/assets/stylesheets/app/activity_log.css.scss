@@ -5,6 +5,9 @@
 .activity-logs-generic-block {
   margin-top: 0.8em;
   // margin-bottom: 1.4em;
+  &.ajax-running {
+    background: silver;
+  }
 }
 
 .activity-logs-header,

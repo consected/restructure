@@ -167,7 +167,7 @@ _fpa.form_utils = {
 
       dates.each(function () {
         var v = $(this).val();
-        if (v || v != '') {
+        if (v || v !== '') {
           var res = _fpa.form_utils.locale_date_to_iso(v);
           if (res) {
             $(this).val(res);
@@ -177,6 +177,7 @@ _fpa.form_utils = {
       }).removeClass('date-is-local');
     }
   },
+
 
   locale_date_to_iso(v) {
     if (!v) return;
@@ -194,7 +195,7 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
-    block.find('.use-big-select').each(function () {
+    block.find('.use-big-select').not('.big-select-su').each(function () {
       var label = '';
       $.big_select($(this),
         $('#primary-modal .modal-body'),
@@ -204,7 +205,7 @@ _fpa.form_utils = {
         $(this)[0].big_select_options
       );
 
-    })
+    }).addClass('big-select-su');
   },
 
   setup_select_filtering(block) {
@@ -1316,11 +1317,11 @@ _fpa.form_utils = {
 
     // force date type fields to use the date picker by making them fall back to text
     block.find('input[type="date"]').each(function () {
-      if ($(this).prop('type') == 'date') {
-        $(this).prop('type', 'datepicker');
-        $(this).addClass('force-datepicker');
+      const datePicker = $(this);
+      if (datePicker.prop('type') === 'date') {
+        datePicker.addClass('force-datepicker');
       }
-      $(this).attr('type', 'datepicker');
+      datePicker.prop('type', 'datepicker').prop('autocomplete', 'off');
     });
 
     // start by setting the date fields to show the date using the locale
@@ -1328,11 +1329,11 @@ _fpa.form_utils = {
     block.find('input[type="datepicker"]').not('.date-is-local').each(function () {
       var v = $(this).val();
 
-      if (v && v != '') {
+      if (!_fpa.utils.is_blank(v)) {
         var d = _fpa.utils.YMDtoLocale(v);
         $(this).val(d);
       }
-      $(this).addClass('date-is-local');
+      $(this).addClass('date-is-local').prop('autocomplete', 'off');
 
     });
 
@@ -1600,6 +1601,8 @@ _fpa.form_utils = {
 
     $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').not('.added-open-nt').each(function () {
       if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
 
       $(this).attr('target', '_blank');
       if ($(this).find('.glyphicon-new-window').length) return;
@@ -1607,6 +1610,9 @@ _fpa.form_utils = {
     }).addClass('added-open-nt');
 
     $('a[href$="#open-in-sidebar"]').not('.added-open').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
+
       $(this)
         .attr('target', '_blank')
         .attr('data-remote', 'true')
@@ -1614,15 +1620,28 @@ _fpa.form_utils = {
         .attr('data-target', '#help-sidebar')
         .attr('data-working-target', '#help-sidebar-body');
 
+      let href = $(this).attr('href').replace('#open-in-sidebar', '');
+
+      // Prevent the outer page reloading
+      $(this).parents('.standalone-page-col').attr('data-no-load', 'true')
+
+      if (href.indexOf('display_as=embedded') < 0) {
+        let sym = (href.indexOf('?') > 0) ? '&' : '?';
+        $(this).attr('href', `${href}${sym}display_as=embedded#open-in-sidebar`)
+      }
+
       $(this).click(function (ev) {
         ev.preventDefault()
       });
     }).addClass('added-open');
 
     $('a[href$="#open-embedded-report"]').not('.added-open-er').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
 
       var url = $(this).attr('href');
       url = url.replace('#open-embedded-report', '')
+      url = url.replace('embed=true', '')
       if (url.indexOf('?') >= 0) {
         url = `${url}&embed=true#open-embedded-report`
       }
@@ -1873,80 +1892,7 @@ _fpa.form_utils = {
   },
 
   setup_textarea_editor: function (block) {
-
-    block.find('.custom-editor-container').not('.edit-as-custom-setup').each(function () {
-      if ($(this).hasClass('edit-as-markdown')) {
-        var $edta = $(this).find('textarea.text-notes');
-        var $eddiv = $(this).find('div.custom-editor');
-        var edid = $eddiv.attr('id');
-        var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
-        var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
-        var wysiwygEditor = editor.wysiwygEditor;
-
-        $edtools.hide();
-        $eddiv.on('focus', function () {
-          $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
-          $edtools.slideDown();
-
-          if (_fpa.state.previous_wysiwyg_editor == editor) {
-            wysiwygEditor.restoreSelection()
-          }
-          else {
-            _fpa.state.previous_wysiwyg_editor = editor
-          }
-
-        }).on('change', function () {
-          $eddiv.data('editor-changed', true);
-          wysiwygEditor.saveSelection()
-        }).on('blur', function () {
-          wysiwygEditor.saveSelection()
-
-        }).on('paste', function () {
-          window.setTimeout(function () {
-            var obj = { html: editor.cleanHtml() };
-            var prev_html = obj.html;
-            var txt = _fpa.utils.html_to_markdown(obj);
-
-            if (prev_html != obj.html) {
-              editor.html(obj.html);
-            }
-
-            $edta.val(txt);
-            $eddiv.data('editor-changed', null);
-          }, 100);
-
-        });
-
-        var autoparse = function () {
-          if ($eddiv.length && $edta.length) {
-            if ($eddiv.data('editor-changed')) {
-              // Only if there has been a change
-              $eddiv.data('editor-changed', null);
-
-
-              var obj = { html: editor.cleanHtml() };
-              var txt = _fpa.utils.html_to_markdown(obj);
-
-              $edta.val(txt);
-            }
-
-            window.setTimeout(function () {
-              autoparse();
-            }, 500);
-          }
-        };
-        window.setTimeout(function () {
-          autoparse();
-        }, 500);
-      }
-    }).addClass('edit-as-custom-setup');
-
-    // setTimeout(function(){
-    //   var notes = block.find('.notes-block .list-group-item strong, .notes-block  .panel-body, .al-shrinkable > ul.list-group')
-    //   _fpa.utils.make_readable_notes_expandable(notes, 100, _fpa.form_utils.resize_children);
-    //
-    // }, 10);
-
+    _fpa.custom_editor.setup(block);
   },
 
   setup_filestore: function (block) {

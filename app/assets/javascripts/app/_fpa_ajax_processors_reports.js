@@ -30,9 +30,10 @@ _fpa.postprocessors_reports = {
   },
 
   embedded_report: function (block, data) {
-    _fpa.postprocessors_reports.reports_form(block, data);
+    _fpa.report_criteria.reports_form(block, data);
     block.find('[type="submit"].auto-run').click();
-
+    // Change the id, so that embedded report links inside the embedded report will function
+    $('#modal_results_block').prop('id', 'modal_results_block_1')
   },
 
   report_embed_dynamic_block: function (block, data) {
@@ -57,69 +58,8 @@ _fpa.postprocessors_reports = {
   },
 
   reports_form: function (block, data) {
-    _fpa.form_utils.format_block(block);
-    _fpa.masters.get_results_block().html('');
-
-
-    _fpa.masters.handle_search_form(block.find('form'));
-
-    var by_auto_search_btn = $('#report-form-auto-submitter-btn');
-    by_auto_search_btn.not('.asclick-attached').on('click', function () {
-      by_auto_search_btn.attr('data-submitted', 'true');
-    }).addClass('asclick-attached');
-
-    block.find('a.btn[data-attribute]').click(function (ev) {
-      ev.preventDefault();
-      var da = $(this).attr('data-attribute');
-
-      var v = $('#search_attrs_' + da);
-      var newval = v.val();
-      if (newval.length > 0) newval += "\n";
-      var from_f = $('#multiple_attrs_' + da);
-      var boxval = from_f.val();
-      // Prevent empty values being put into the list
-      if (boxval) {
-        newval += boxval;
-        v.val(newval);
-        from_f.val('');
-        v.change();
-        from_f.change();
-      }
-    });
-
-    block.find('form').not('.attached-complete-listener').on('submit', function () {
-      // If there is a multivalue criteria field, ensure a field in the text box is added when we submit the form
-      $('.multivalue-field-add').click();
-
-    }).on('ajax:complete', function () {
-      $('#search_attrs__filter_previous_').attr('checked', false);
-      $('#filter_on_block').html('');
-    }).addClass('attached-complete-listener');
-
-    var cb = $('#search_attrs__filter_previous_').not('.attached-click-listener');
-    var show_fob;
-    if (cb.length === 1 && cb.is(':checked')) {
-      window.setTimeout(function () {
-        $('a#get_filter_previous').click();
-      }, 100);
-      show_fob = true;
-    }
-
-    cb.on('change', function () {
-      if (!$('#search_attrs__filter_previous_').is(':checked')) {
-        $('#filter_on_block').html('');
-      } else {
-        window.setTimeout(function () {
-          $('a#get_filter_previous').click();
-        }, 100);
-      }
-      return false;
-    }).addClass('attached-click-listener');
-
-    if (!show_fob) block.find('[type="submit"].auto-run').click();
-
+    _fpa.report_criteria.reports_form(block, data);
   },
-
   reports_result: function (block, data) {
     block.removeClass('use-secure-view-on-links-setup');
     if (data) {
@@ -209,8 +149,8 @@ _fpa.postprocessors_reports = {
       _fpa.reports.results_subsearch(block);
       _fpa.reports.results_perform_action_link(block);
       _fpa.reports.results_select_items_for_form(block);
-      _fpa.reports_tree.show_table_as_tree($('.report-results-table-block table.tree-table'));
-      _fpa.form_utils.setup_tablesorter($('.report-results-table-block'));
+      _fpa.reports_tree.show_table_as_tree(block.find('.report-results-table-block table.tree-table'));
+      _fpa.form_utils.setup_tablesorter(block.find('.report-results-table-block'));
       block.find('.expandable').not('.attached-exp').on('click', function () {
         if ($(this).attr('disabled')) return;
         _fpa.form_utils.toggle_expandable($(this));
@@ -228,9 +168,9 @@ _fpa.postprocessors_reports = {
     $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"], [data-col-var-type="Date"] rldata').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
-      else if (val && val != '')
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtoLocale(val);
       $(this).html(d);
     }).addClass('td-date-formatted');
@@ -238,9 +178,9 @@ _fpa.postprocessors_reports = {
     $('td[data-col-var-type="Time"], [data-col-var-type="Time"] rldata').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val === 'Invalid DateTime')
         d = '';
-      else if (val && val != '')
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtimeToLocale(val);
       $(this).html(d);
     }).addClass('td-time-formatted');
@@ -248,11 +188,10 @@ _fpa.postprocessors_reports = {
     $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
       else if (val && val != '')
         d = _fpa.utils.YMDtimeToLocale(val);
-      console.log(d)
       if (d && d.split(' ').length > 1) d = d.split(' ').slice(1).join(' ')
       $(this).html(d);
     }).addClass('td-time-formatted');

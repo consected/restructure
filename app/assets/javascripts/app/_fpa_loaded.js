@@ -84,7 +84,8 @@ _fpa.loaded.default = function () {
   });
 
   if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0) {
-    var viewed = localStorage.getItem('viewed-introduction');
+    const key_viewed_intro = `viewed-introduction-${_fpa.state.current_user.email}`;
+    var viewed = localStorage.getItem(key_viewed_intro);
     if (!viewed) {
       var help_icon = $('a[data-target="#help-sidebar"]');
       var help_href = help_icon.attr('href');
@@ -94,7 +95,7 @@ _fpa.loaded.default = function () {
       })
 
     }
-    localStorage.setItem('viewed-introduction', true);
+    localStorage.setItem(key_viewed_intro, true);
   }
 
   // Finally, if a hash is set in the URL, jump to it:

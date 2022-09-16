@@ -3,6 +3,7 @@
   <h4>Important - switch to app ref-data to review and update Redcap information</h4>
 <% end%>
 <p><label>status</label> <span><%= object_instance.status %></span>&nbsp;
+  <% if object_instance.persisted? %>
         <%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
         data: {
           remote: true, 
@@ -11,6 +12,9 @@
           'result-target-force': "true"
         },
         class: 'btn btn-primary btn-sm' %>
+  <% else %>
+  new
+  <% end %>
 </p>
 <% 
 req = object_instance.redcap_client_requests.order(id: :desc).first 

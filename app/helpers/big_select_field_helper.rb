@@ -12,16 +12,17 @@ module BigSelectFieldHelper
   # @param [Hash] options
   # @return [String] - html result
   def big_select_field(form, field, data, subtype: nil, options: {})
+    @big_select_field_id = nil
     if options[:filtered]
       not_done = true
-      field_id = "#{form.object_name}_#{field}".to_sym
+      field_id = big_select_field_id # "#{form.object_name}_#{field}".to_sym
       res = ''
       data.each do |k, v|
         if not_done
           not_done = false
           res = "#{res} #{big_select_field_main(form, field, v, subtype: k, options: options)}"
         else
-          res = "#{res} #{big_select_field_data(field_id, k, v)}"
+          res = "#{res} #{big_select_field_data(form, field_id, k, v)}"
         end
       end
       res.html_safe
@@ -38,16 +39,23 @@ module BigSelectFieldHelper
   # @param [Hash] options
   # @return [String] - html result
   def big_select_field_main(form, field, data, subtype: nil, options: {})
-    field_id = "#{form.object_name}_#{field}"
+    field_id = big_select_field_id # "#{form.object_name}_#{field}"
 
     hide_popover = options[:hide_popover]
     extra_class = hide_popover ? 'big-select-use-overlay' : ''
 
-    field_html = form.text_field field,
-                                 class: "use-big-select #{extra_class}",
-                                 readonly: 'readonly',
-                                 id: field_id,
-                                 data: { 'big-select-subtype': subtype }
+    tf_options = {
+      class: "use-big-select #{extra_class}",
+      readonly: 'readonly',
+      id: field_id,
+      data: { 'big-select-subtype': subtype }
+    }
+
+    field_html = if options[:no_instance]
+                   text_field_tag field, options[:value], tf_options
+                 else
+                   form.text_field field, tf_options
+                 end
 
     if hide_popover
       field_overlay = text_field_tag :big_select_overlay, '',
@@ -68,26 +76,30 @@ module BigSelectFieldHelper
         #{field_overlay}
         #{field_html}
         #{popover_html}
-        #{big_select_field_data(field_id, subtype, data, options)}
+        #{big_select_field_data(subtype, data, options)}
       </span>
     END_HTML
       .html_safe
   end
 
-  def big_select_field_data(field_id, subtype, data, options = nil)
+  def big_select_field_data(subtype, data, options = nil)
     subtype ||= 'big_select_default'
     options ||= {}
 
     predata = data&.transform_keys { |v| v.to_s.split(' >>>').first }
     <<~END_HTML
       <script>
-        var big_select_field = $('##{field_id}')[0]
+        var big_select_field = $('##{big_select_field_id}')[0]
         big_select_field.big_select_options = big_select_field.big_select_options || #{options.to_json.html_safe};
         big_select_field.big_select_hash = big_select_field.big_select_hash || {};
         big_select_field.big_select_hash['#{subtype}'] = #{predata.to_json.html_safe};
       </script>
     END_HTML
       .html_safe
+  end
+
+  def big_select_field_id
+    @big_select_field_id ||= "bs-field-#{SecureRandom.hex(10)}"
   end
 
   #

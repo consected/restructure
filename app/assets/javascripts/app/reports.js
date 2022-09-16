@@ -1,6 +1,6 @@
 _fpa.loaded.reports = function () {
 
-  _fpa.postprocessors.reports_form($('.report-criteria'));
+  _fpa.report_criteria.reports_form($('.report-criteria'));
   $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
 
@@ -423,6 +423,9 @@ _fpa.reports = {
     });
   },
 
+  get_results_block: function () {
+    return $('#embed_results_block,#master_results_block').last();
+  },
 
 
 };

@@ -64,7 +64,7 @@ module LogExpectations
   def expect_tracker_event_to_include(date, protocol, sp, pe = nil, index = 0)
     items = [protocol, sp]
     items << pe if pe
-    etext = "#{date.strftime('%-m/%-d/%Y')} #{items.join(' / ')}"
+    etext = "#{date.strftime('%m/%d/%Y')} #{items.join(' / ')}"
 
     # Click the histories caption to expand
     histscap = all(LogTrackerHistoriesCaptionCss)[index]
