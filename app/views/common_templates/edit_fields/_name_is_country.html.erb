@@ -2,7 +2,12 @@
   form_object_instance[field_name_sym.to_s]&.upcase!
   options = field_options_for(form_object_instance, field_name_sym)
   options[:include_blank] = true unless options.has_key?(:include_blank)
-  options[:priority_countries] ||= ["US", "CA", "DE"];
+  options[:priority_countries] ||= Settings::DefaultCountrySelect
+=begin
+  Countries will be displayed in the provided order when the sort_provided is false;
+  otherwise, countries will be sorted by the user's locale.
+=end
+  options[:sort_provided] = false
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
 <%= form.country_select field_name_sym, options, {class: "form-control country-select input-sm", data: {attr_name: field_name_sym, object_name: form_object_item_type_us} } %>
