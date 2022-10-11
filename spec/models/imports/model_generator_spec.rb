@@ -30,7 +30,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   end
 
   it 'analyzes a CSV to guess at the field types' do
-    csv = File.read('spec/fixtures/import/test-types.csv')
+    csv = File.read('spec/fixtures/import/test-master.csv')
 
     mg = Imports::ModelGenerator.new(name: 'Test CSV',
                                      dynamic_model_table: 'test_csv_imports',
@@ -38,8 +38,8 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     res = mg.analyze_csv(csv)
 
     expect(res).to be_a Hash
-    expect(res.keys).to eq %i[a_string a_int a_float a_date a_time a_mixed_string a_boolean a_unknown a_string2]
-    expect(res.values).to eq %i[string integer float date datetime string boolean string string]
+    expect(res.keys).to eq %i[a_string a_int a_float a_date a_time a_mixed_string a_boolean a_unknown a_string2 master_id]
+    expect(res.values).to eq %i[string integer float date datetime string boolean string string references]
 
     expect(mg.generator_config.fields).to be_a mg.generator_config.class.class_for(:fields)
 
@@ -57,7 +57,8 @@ RSpec.describe Imports::ModelGenerator, type: :model do
         a_mixed_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
         a_boolean: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :boolean },
         a_unknown: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :string }
+        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :string },
+        master_id: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :references }
       }
     )
 
@@ -127,6 +128,12 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           caption:#{' '}
           comment:#{' '}
           no_downcase:#{' '}
+        master_id:
+          type: references
+          label:#{' '}
+          caption:#{' '}
+          comment:#{' '}
+          no_downcase:#{' '}
     END_TEXT
 
     mg.generator_config.fields[:a_time].caption = 'A time field'
@@ -142,7 +149,8 @@ RSpec.describe Imports::ModelGenerator, type: :model do
         a_mixed_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
         a_boolean: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :boolean },
         a_unknown: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string }
+        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        master_id: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :references }
       },
       options: { table_comment: 'Test CSV' }
     )
@@ -212,6 +220,12 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           no_downcase:#{' '}
         a_string2:
           type: string
+          label:#{' '}
+          caption:#{' '}
+          comment:#{' '}
+          no_downcase:#{' '}
+        master_id:
+          type: references
           label:#{' '}
           caption:#{' '}
           comment:#{' '}

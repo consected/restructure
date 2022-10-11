@@ -156,7 +156,8 @@ class Imports::Import < ActiveRecord::Base
            !new_obj.master &&
            new_obj.master_id
 
-          new_obj.master = Master.find(master_id)
+          # This will most likely fail, but provides an error back to the caller
+          new_obj.master = Master.find(new_obj.master_id)
         end
 
         new_obj.current_user ||= user if new_obj.respond_to? :current_user

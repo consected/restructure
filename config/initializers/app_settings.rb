@@ -37,6 +37,8 @@ class Settings
     regex_requirements: ENV['PW_REGEX_REQ']
   }.freeze
 
+  PasswordUnlockTimeMins = (ENV['PW_UNLOCK_TIME_MINS'] || 60).to_i.freeze
+
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
   # `public/app_specific/<app folder>`` and use the appropriate relative path `/app_specific/<app folder>` in the config.

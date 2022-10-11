@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 module ESignature
-  
   #
   # Provide e-signature support to an activity log style model.
   # To simplify the inclusion of this functionality in activity logs of arbitrary implementations
   # use:
   #   ESignature::ESignatureManager.enable_e_signature_for klass
   #
-  # which will only include the functionality if the appropriate e_signed_status 
+  # which will only include the functionality if the appropriate e_signed_status
   # field is present in the implementation.
   module ESignatureManager
     extend ActiveSupport::Concern
@@ -100,12 +99,19 @@ module ESignature
 
       @e_signed_authenticated = false
 
-      unless password.present? && otp_attempt.present?
-        @authentication_error = 'or two-factor authentication code is empty. Please try again.'
-        return
+      if User.two_factor_auth_disabled
+        unless password.present?
+          @authentication_error = 'is empty. Please try again.'
+          return
+        end
+        @e_signed_authenticated = current_user.valid_password?(password)
+      else
+        unless password.present? && otp_attempt.present?
+          @authentication_error = 'or two-factor authentication code is empty. Please try again.'
+          return
+        end
+        @e_signed_authenticated = current_user.valid_password?(password) && current_user.validate_one_time_code(otp_attempt)
       end
-
-      @e_signed_authenticated = current_user.valid_password?(password) && current_user.validate_one_time_code(otp_attempt)
 
       if @e_signed_authenticated
         current_user.failed_attempts = 0
@@ -117,13 +123,15 @@ module ESignature
 
         current_user.lock_access! if current_user.send :attempts_exceeded?
 
+        errstr_prefix = 'or two-factor authentication code ' unless User.two_factor_auth_disabled
+
         if current_user.access_locked?
-          @authentication_error = 'or two-factor authentication code is not correct. Account has been locked.'
+          @authentication_error = "#{errstr_prefix}is not correct. Account has been locked."
           current_user.locked_at = Time.now
         elsif current_user.send :last_attempt?
-          @authentication_error = 'or two-factor authentication code is not correct. One more attempt before account is locked.'
+          @authentication_error = "#{errstr_prefix}is not correct. One more attempt before account is locked."
         else
-          @authentication_error = 'or two-factor authentication code is not correct. Please try again.'
+          @authentication_error = "#{errstr_prefix}is not correct. Please try again."
         end
 
       end

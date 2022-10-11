@@ -91,7 +91,7 @@ module NfsStore
       @download.current_user = current_user
 
       retrieved_files = @download.retrieve_files_from selected_items_info
-      if retrieved_files&.length > 0
+      if retrieved_files&.length&.> 0
         filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
         @download.save!
         send_file @download.zip_file_path, filename: filename
@@ -259,7 +259,7 @@ module NfsStore
         format = params[:format]
         download_path = "#{download_path}.#{format}" if format.present?
         dl = Download.find_download_by_path(@container, download_path)
-        not_found unless dl
+        return not_found unless dl
 
         @retrieval_type = dl.retrieval_type
         @download_id = dl.id

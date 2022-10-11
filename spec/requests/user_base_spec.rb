@@ -47,33 +47,65 @@ describe 'csrf protection' do
     parts['token'] if parts
   end
 
-  before :example do
-    ActionController::Base.allow_forgery_protection = true
-    @user = create_user(nil, '', create_master: true).first
+  describe 'login and CSRF protection covers actions' do
+    before :example do
+      ActionController::Base.allow_forgery_protection = true
+      @user = create_user(nil, '', create_master: true).first
 
-    @master = create_master
-    @token = login_user
+      @master = create_master
+      @token = login_user
+    end
+
+    after :example do
+      ActionController::Base.allow_forgery_protection = false
+    end
+
+    it 'logs in to add a master record' do
+      last_master = Master.reorder('').last.id
+      expect(controller.current_user.can?(:create_master)).to be_truthy
+      expect(@token).not_to be_nil
+      expect(@token).to eq retrieve_authenticity_token
+
+      expect(post_with_token('/masters/create', {}, @token)).to be_in [200, 302]
+      expect(Master.reorder('').last.id).to be > last_master
+    end
+
+    it 'logs in, but fails to add a master record due to missing CSRF token' do
+      expect(post_with_token('/masters/create', {}, '')).to eq(422)
+    end
+
+    it 'logs in, but fails to add a master record due to bad CSRF token' do
+      expect(post_with_token('/masters/create', {}, "#{retrieve_authenticity_token}1")).to eq(422)
+    end
+
+    it 'logs in, and successfully creates a master record' do
+      expect(post_with_token('/masters/create', {}, retrieve_authenticity_token)).to eq(302)
+    end
   end
 
-  after :example do
-    ActionController::Base.allow_forgery_protection = false
-  end
+  describe 'login and CSRF protection covers MFA lookup requests' do
+    before :example do
+      ActionController::Base.allow_forgery_protection = true
+      @user = create_user(nil, '', create_master: true).first
+    end
 
-  it 'logs in to add a master record' do
-    last_master = Master.reorder('').last.id
-    expect(controller.current_user.can?(:create_master)).to be_truthy
-    expect(@token).not_to be_nil
-    expect(@token).to eq retrieve_authenticity_token
+    after :example do
+      ActionController::Base.allow_forgery_protection = false
+    end
 
-    expect(post_with_token('/masters/create', {}, @token)).to be_in [200, 302]
-    expect(Master.reorder('').last.id).to be > last_master
-  end
+    it 'attempts to get MFA requirement, but fails due to missing CSRF token' do
+      get '/users/sign_in'
+      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, '')).to eq(422)
+    end
 
-  it 'logs in, but fails to add a master record due to missing CSRF token' do
-    expect(post_with_token('/masters/create', {}, '')).to eq(422)
-  end
+    it 'attempts to get MFA requirement, and gets a valid response' do
+      get '/users/sign_in'
+      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, header_authenticity_token)).to eq(200)
+    end
 
-  it 'logs in, but fails to add a master record due to bad CSRF token' do
-    expect(post_with_token('/masters/create', {}, "#{retrieve_authenticity_token}1")).to eq(422)
+    it 'attempts to get MFA requirement, but fails due to bad CSRF token' do
+      get '/users/sign_in'
+      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, "#{retrieve_authenticity_token}1")).to eq(422)
+    end
   end
 end
