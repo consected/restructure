@@ -66,7 +66,10 @@ module Utilities
       IO.popen(cmd, perm) do |stdinout|
         Timeout.timeout(MaxRunTime) do
           t1 = Thread.new do
-            stdinout.write pipe_in if pipe_in
+            if pipe_in
+              stdinout.write pipe_in
+              stdinout.close_write
+            end
           end
 
           t2 = Thread.new do

@@ -1,0 +1,5 @@
+a_string,a_int,a_float,a_date,a_time,a_mixed_string,a_boolean,a_unknown,a_string2,master_id
+abc,123,4,2020-12-02,2020-12-02 15:43:00,4,true,,,100000
+def,456,5,2021-06-07,2021-06-07 12:00:00,2021-06-07 12:00:00,false,,,100001
+ghi,9,9.99,,,87,true,,,100002
+jkl,,,2021-06-07,2021-06-07 12:00:00,false,,,,100003

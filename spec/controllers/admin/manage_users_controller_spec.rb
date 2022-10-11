@@ -206,6 +206,88 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
 
         expect(response).to render_template '_index'
       end
+
+      it 'generates a new 2FA for the user' do
+        create_item
+        put :update, params: { id: item_id, reset_two_factor_auth: '1', user: { disabled: 'false' } }
+        expect(flash[:warning]).to_not be_present
+        expect(assigns(:user)).to eq @manage_user
+        expect(assigns(:user).new_two_factor_auth_code).not_to be nil
+
+        expect(response).to render_template '_index'
+      end
+
+      it 'unlock expired account for the user' do
+        create_item
+        @manage_user.password_updated_at = 5000.days.ago
+        @manage_user.save!
+        # expect(@manage_user.expires_in).to be < 0
+        put :update, params: { id: item_id, extend_expiration: '1', user: { disabled: 'false' } }
+        expect(flash[:warning]).to_not be_present
+        expect(assigns(:user)).to eq @manage_user
+        expect(assigns(:user).expires_in).to eq 5
+
+        expect(response).to render_template '_index'
+      end
+
+      it 'unlock failed password attempts for the user' do
+        create_item
+        @manage_user.failed_attempts = 1000
+        @manage_user.locked_at = 1.second.ago
+        @manage_user.save!
+        put :update, params: { id: item_id, unlock_failed_attempts: '1', user: { disabled: 'false' } }
+        expect(flash[:warning]).to_not be_present
+        expect(assigns(:user)).to eq @manage_user
+        expect(assigns(:user).locked_at).to be nil
+
+        expect(response).to render_template '_index'
+      end
+    end
+  end
+
+  describe 'limited admin capabilities' do
+    context 'update a disallowed controller' do
+      before_each_login_limited_admin with_capabilities: ['colleges']
+      let(:new_attributes) do
+        new_attribs
+      end
+
+      it 'ensures the admin is authorized to reset a user' do
+        expect(@admin.capabilities).to eq ['colleges']
+        create_item
+        @manage_user.failed_attempts = 1000
+        @manage_user.locked_at = 1.second.ago
+        @manage_user.save!
+        @manage_user.reload
+
+        put :update, params: { id: item_id, unlock_failed_attempts: '1', user: { disabled: 'false' } }
+        expect(assigns(:user)).to eq @manage_user
+        expect(assigns(:user).locked_at).not_to be nil
+
+        expect(response).to render_template 'layouts/error_page'
+      end
+    end
+
+    context 'update an allowed controller' do
+      before_each_login_limited_admin with_capabilities: ['manage_users']
+      let(:new_attributes) do
+        new_attribs
+      end
+
+      it 'ensures the admin is authorized to reset a user' do
+        expect(@admin.capabilities).to eq ['manage_users']
+        create_item
+        @manage_user.failed_attempts = 1000
+        @manage_user.locked_at = 1.second.ago
+        @manage_user.save!
+        @manage_user.reload
+
+        put :update, params: { id: item_id, unlock_failed_attempts: '1', user: { disabled: 'false' } }
+        expect(assigns(:user)).to eq @manage_user
+        expect(assigns(:user).locked_at).to be nil
+
+        expect(response).to render_template '_index'
+      end
     end
   end
 

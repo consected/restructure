@@ -37,13 +37,13 @@ module ControllerMacros
     [user, good_password]
   end
 
-  def self.create_admin
+  def self.create_admin(with_capabilities: nil)
     a = Admin.order(id: :desc).first
     r = 1
     r = a.id + 1 if a
     good_admin_email = "ctestadmin-tester#{r}@testing.com"
 
-    admin = Admin.create! email: good_admin_email
+    admin = Admin.create! email: good_admin_email, capabilities: with_capabilities
 
     # Save a new password, as required to handle temp passwords
     admin = Admin.find(admin.id)
@@ -81,6 +81,20 @@ module ControllerMacros
   def before_each_login_admin
     before(:each) do
       admin, = ControllerMacros.create_admin
+
+      @request.env['devise.mapping'] = Devise.mappings[:admin]
+
+      sign_in admin
+      raise 'Admin not logged in' unless subject.current_admin
+
+      @admin = admin
+    end
+  end
+
+  def before_each_login_limited_admin(with_capabilities:)
+    before(:each) do
+      sign_out @admin if @admin
+      admin, = ControllerMacros.create_admin with_capabilities: with_capabilities
 
       @request.env['devise.mapping'] = Devise.mappings[:admin]
 

@@ -86,15 +86,24 @@ describe 'admin sign in process', driver: :app_firefox_driver do
 
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-
       click_button 'Log in'
     end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
+    end
+
     expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
   end
 
   it 'should sign in with 2FA even if it is disabled for users' do
-    Settings::TwoFactorAuthDisabledForUser = true
+    Settings.const_set('TwoFactorAuthDisabledForUser', true)
+    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
     expect(User.two_factor_auth_disabled).to be true
     expect(Admin.two_factor_auth_disabled).to be false
 
@@ -114,10 +123,18 @@ describe 'admin sign in process', driver: :app_firefox_driver do
 
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-
       click_button 'Log in'
     end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
+    end
+
     expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
   end
 
@@ -132,7 +149,6 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: ''
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
       click_button 'Log in'
     end
 
@@ -145,6 +161,14 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password + ' '
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
       fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
       click_button 'Log in'
     end
@@ -157,6 +181,14 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @final_good_email
       fill_in 'Password', with: ' ' + @final_good_password
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
       fill_in 'Two-Factor Authentication Code', with: @final_admin.current_otp
       click_button 'Log in'
     end
@@ -173,9 +205,18 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @final_good_email
       fill_in 'Password', with: @final_good_password
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
       fill_in 'Two-Factor Authentication Code', with: @final_admin.current_otp
       click_button 'Log in'
     end
+
     have_css '.flash .alert'
 
     fa = all('.flash .alert')[0]
@@ -192,6 +233,14 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @d_email
       fill_in 'Password', with: @d_pw
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
       fill_in 'Two-Factor Authentication Code', with: @d_admin.current_otp
       click_button 'Log in'
     end

@@ -7,28 +7,45 @@
 
   <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage.html_safe %></div><% end %>
 
+  <% unless resource.two_factor_auth_disabled %>
+  <%= form_for(resource, as: resource_name, url: '/bad_request', remote: true, html: { id: 'mfa-step1' }) do |f| %>
+    <%= f.hidden_field :email, id: 'step1-email' %>
+    <%= f.hidden_field :password, id: 'step1-password' %>
+    <%= hidden_field_tag :resource_type, resource_name %>
+  <% end %>
+  <% end %>
+
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-    <div class="form-group-non full-width">
-      <%= f.label :email %><br />
-      <%= f.email_field :email, autocomplete: "username", autofocus: true, class: 'form-control', required: true %>
-    </div>
+    <div class="login-user-password-block">
+      <div class="form-group-non full-width">
+        <%= f.label :email %><br />
+        <%= f.email_field :email, autocomplete: "username", autofocus: true, class: 'form-control', required: true %>
+      </div>
 
-    <div class="form-group-non full-width">
-      <%= f.label :password %><br />
-      <%= f.password_field :password, autocomplete: "current-password", class: 'form-control', required: true %>
+      <div class="form-group-non full-width">
+        <%= f.label :password %><br />
+        <%= f.password_field :password, autocomplete: "current-password", class: 'form-control', required: true %>
+      </div>
     </div>
-
-    <% unless resource.two_factor_auth_disabled %>
-    <div class="form-group-non full-width">
-      <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %><br />
-      <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
-    </div>
-    <% end %>
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
 
+    <% unless resource.two_factor_auth_disabled %>
+    <div class="login-2fa-block" style="display: none;">
+      <div class="form-group-non full-width">
+        <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %>
+        <p class="help-block">
+          Open the authenticator app on your mobile device that you used to set up your account.<br />
+          View the entry named <b><%=Settings::TwoFactorAuthIssuer%> (<%=resource_name%>)</b>.<br />
+          Enter the 6 digit number presented, then click <b>Log in</b>.<br />
+        </p>
+        <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
+      </div>
+    </div>
 
-    <div class="" style="margin: 0.8em 0;">
-        <%= f.submit "Log in", class: 'btn btn-primary' %>
+    <% end %>
+
+    <div class="login-final-submit" style="margin: 0.8em 0; ">
+      <%= f.submit "Log in", class: 'btn btn-primary btn-login-final-submit', data: {disable_with: 'checking...', orig_value: 'Log in'} %>
     </div>
 
   <% end %>

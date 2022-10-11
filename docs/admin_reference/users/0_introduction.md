@@ -17,5 +17,6 @@ Administration is provided in [Usernames and Passwords](/admin/manage_users)
 
 ## Contents
 
-- [Profile Configuration](user_profile_configuration.md)
+- [Profile Configuration and Management](user_profile_configuration.md)
 - [Login and Lock-Out](login_and_lockout.md)
+- [Account Notifications](account_notifications.md)

@@ -6,13 +6,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
-    Settings::AllowUsersToRegister = false
+    Settings.const_set('AllowUsersToRegister', false)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabledForUser = true
+    Settings.const_set('TwoFactorAuthDisabledForUser', true)
+    Settings.const_set('TwoFactorAuthDisabledForAdmin', true)
 
     # create a user, then disable it
     @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
@@ -60,6 +61,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
   it 'should prevent invalid sign in' do
     expect(User.two_factor_auth_disabled).to be true
+    expect(Admin.two_factor_auth_disabled).to be true
     validate_setup
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
