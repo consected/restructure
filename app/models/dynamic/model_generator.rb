@@ -68,7 +68,11 @@ module Dynamic
 
       options = YAML.dump default_options
 
-      foreign_key_name = 'master_id' if field_list.split.include?('master_id')
+      fla = field_list.split
+      if fla.include?('master_id')
+        foreign_key_name = 'master_id'
+        @field_list = fla.select { |f| f != 'master_id' }.join(' ')
+      end
 
       if dynamic_model
         @dynamic_model = dynamic_model

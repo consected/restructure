@@ -5,6 +5,9 @@ require 'bcrypt'
 module StandardAuthentication
   extend ActiveSupport::Concern
 
+  # Number of days to extend a user's password expiration by for short term re-enabling of accounts
+  ExtendExpirationDays = 5
+
   included do
     before_validation :setup_new_password, on: :create
     validates_uniqueness_of :email, case_sensitive: false, allow_blank: false, if: :email_changed?
@@ -224,6 +227,19 @@ module StandardAuthentication
   # Reset the two factor auth secret
   def reset_two_factor_auth
     setup_two_factor_auth
+  end
+
+  #
+  # Allow an admin to extend the expiration date for user accounts by 5 days
+  def extend_expiration
+    self.password_updated_at = (self.class.expire_password_after - ExtendExpirationDays).days.ago
+  end
+
+  #
+  # Allow an admin to unlock the account if number of failed password
+  # attempts was reached and we don't want to wait for the timeout
+  def unlock_failed_attempts
+    unlock_access!
   end
 
   #

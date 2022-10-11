@@ -220,7 +220,7 @@ class Imports::ImportsController < ApplicationController
     array_cols = {}
 
     fields.each do |f|
-      if item_class.columns.find { |c| c.name == f.to_s }.array?
+      if item_class.columns.find { |c| c.name == f.to_s }&.array?
         array_cols[f] = []
       else
         allow_cols << f
@@ -240,7 +240,7 @@ class Imports::ImportsController < ApplicationController
     if @readonly
       (permitted_params false).map(&:to_sym)
     else
-      (permitted_params).map(&:to_sym)
+      permitted_params.map(&:to_sym)
     end
   end
 

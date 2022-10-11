@@ -16,6 +16,24 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @7.4.127 - 2022-10-11
+
+- [Added] two step MFA at login
+- [Changed] help information for 2FA setup and login
+- [Added] seeds for user notifications report and supporting admin items
+- [Added] configuration specific documentation for "manage users" and improved template documentation
+- [Added] admin functions to unlock user accounts
+- [Added] e_signature script class to refactor and avoid client side errors
+- [Fixed] issue viewing dynamic model definition when the db table is missing
+- [Fixed] CSV generation and import of files with master_id field
+- [Fixed] alert showing if any master record is open in list, even if it is not the master record with the alert
+- [Fixed] blocking on piped processes
+- [Fixed] general selection preparation for dynamic definitions with no master association
+- [Fixed] initialization loading of full database of edit field selections
+- [Fixed] handling of filestore exceptions in regular controllers
+
 ## [8.0.44] - 2022-09-16
 
 ### Transferred from Viva @8.0.109 - 2022-09-16

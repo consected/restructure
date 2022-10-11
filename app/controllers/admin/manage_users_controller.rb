@@ -4,10 +4,23 @@ class Admin::ManageUsersController < AdminController
   def update
     if params[:gen_new_pw] == '1'
       @user.force_password_reset
-      logger.info 'Force password reset'
+      logger.warn 'Force password reset'
     end
 
-    @user.reset_two_factor_auth if params[:reset_two_factor_auth]
+    if params[:reset_two_factor_auth]
+      @user.reset_two_factor_auth
+      logger.warn 'Force 2FA reset'
+    end
+
+    if params[:extend_expiration]
+      @user.extend_expiration
+      logger.warn 'Extend user password expiration'
+    end
+
+    if params[:unlock_failed_attempts]
+      @user.unlock_failed_attempts
+      logger.warn 'Unlock user password failed attempts'
+    end
 
     @user.current_admin = current_admin
     if @user.update(secure_params)

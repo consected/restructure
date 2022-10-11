@@ -37,7 +37,7 @@
         {
           "type": "template",
           "name": "admin/reports/_def_block",
-          "line": 12,
+          "line": 20,
           "file": "app/views/admin/reports/_def_block.html.erb",
           "rendered": {
             "name": "admin/reports/form/_admin_criteria_view",
@@ -325,7 +325,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/admin/server_info.rb",
-      "line": 117,
+      "line": 132,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
       "render_path": null,
@@ -712,7 +712,7 @@
       "check_name": "EOLRails",
       "message": "Support for Rails 5.2.8.1 ended on 2022-06-01",
       "file": "Gemfile.lock",
-      "line": 245,
+      "line": 244,
       "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
       "code": null,
       "render_path": null,

@@ -211,6 +211,13 @@ Rails.application.routes.draw do
   as :user do
     root to: 'pages#home', as: 'authenticated_user_root'
   end
+
+  # post 'mfa/step1', to: 'mfa#step1'
+  resource :mfa, only: [] do
+    member do
+      post :step1, controller: :mfa, format: :json
+    end
+  end
   # END: Users and Admins related routes
 
   # mount NfsStore::Engine, at: "/nfs_store"

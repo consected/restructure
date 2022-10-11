@@ -68,4 +68,10 @@
     one_time_setup();
   });
   <% end %>
+
+  <% if controller_name == 'sessions' %>
+  $('html').ready(function () {
+    _fpa.loaded.login();
+  });
+  <% end %>
 </script>
