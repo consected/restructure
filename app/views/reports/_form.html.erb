@@ -4,8 +4,10 @@
   # make sure markdown escaping doesn't break substitutions
   # description = @report.description&.gsub('\\_', '_')
   description = @report.description
+  extra_classes = "report-rn--#{@report.alt_resource_name}"
+
 %>
-<div class="report-criteria container-fluid" id="<%= @criteria_block_id %>-block">
+<div class="report-criteria container-fluid <%=extra_classes%>" id="<%= @criteria_block_id %>-block">
   <div class="report-description">
     <%= Formatter::Substitution.substitute(markdown_to_html(description), data: current_user).html_safe %>
   </div>

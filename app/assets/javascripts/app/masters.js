@@ -8,10 +8,6 @@ _fpa.masters = {
 
     max_results: 100,
 
-    get_results_block: function () {
-        return $('#embed_results_block,#master_results_block').last();
-    },
-
     switch_id_on_click: function (block) {
         block.find('.switch_id').not('attached-switch-click').click(function (ev) {
             ev.preventDefault();
@@ -30,117 +26,11 @@ _fpa.masters = {
         }).addClass('attached-switch-click');
     },
 
-    handle_search_form: function (forms) {
-
-        // There are currently two search forms available. Step through each of these in turn
-        forms.each(function () {
-            var f = $(this);
-
-            f.find('input[type="submit"]').on('click', function (e) {
-                if (_fpa.state.search_running) {
-                    e.preventDefault();
-                    return;
-                }
-            });
-
-            // For every input and drop down on the form that is not a
-            // typeahead field and is not already processed
-            // check for changes
-            // We add a class attached-change at the end to indicate that this field has been
-            // has been processed and should not have another listener attached. Can avoid hard to debug
-            // issues and provide extra information when looking at what has and hasn't been changed in the DOM
-            f.find('input, select, textarea').not('.no-auto-submit, .tt-input, .attached-change, [type="submit"]').on('change', function (e) {
-
-                // Cancel any search-related Ajax requests that are still running
-                _fpa.cancel_remote();
-
-
-                // Handle the [data-only-for] marked up fields as special cases.
-                // These fields will not automatically submit the form when changed, since they
-                // are typically used to filter the content of a related select field.
-                var dof = $(this).attr('data-only-for');
-                var v = $(this).val();
-                var all_null = true;
-                if (dof) {
-                    // Allow multiple fields, any one of which may be entered
-                    $(dof).each(function () {
-                        var el = $(this);
-                        if (el.val() !== null && el.val() !== '' && !el.hasClass('prevent-submit')) all_null = false;
-                    });
-                }
-                if (!dof || !all_null) {
-                    // Assuming that we are not in data-only-for field, and all the fields on the form are not null,
-                    // then fire a submit
-                    // We do this within a timeout, to allow any DOM changes and CSS transitions to smoothly work through
-                    // otherwise the result is a very jerky experience
-                    // We delay longer than necessary to allow a form submit button click to process first, preventing this blocking
-                    // a valid button click
-                    window.setTimeout(function () {
-                        if (!_fpa.state.search_running) {
-                            var bel = f.find('[type="submit"].auto-submitter');
-                            if (bel.length > 0) {
-                                bel.click();
-                                _fpa.state.search_running = true;
-                            }
-                        }
-                    }, 20);
-                }
-                // Clean up after ourselves
-                $('.prevent-submit').removeClass('prevent-submit');
-
-            }).addClass('attached-change');
-
-            // Specifically for typeahead fields, we need to explicitly submit on blur. We assume that a typeahead can not
-            // be a data-only-for field
-            f.find('input.tt-input').not('.attached-change').on('blur', function (e) {
-                window.setTimeout(function () {
-                    f.find('[type="submit"].auto-submitter').click();
-                }, 1);
-            }).addClass('attached-change');
-
-
-
-
-            f.find('[type="submit"]').click(function () {
-                var v = $(this).val();
-                var dov = false;
-                if (v === 'csv' || v === 'json') {
-                    dov = true;
-                }
-                var f = $(this).parents('form').first();
-                // Must use data('remote') to disable the rails AJAX delegation. Setting the attribute doesn't work.
-                f.data('remote', !dov).attr('target', (dov ? v : null));
-                // For the report forms, set the 'part' to return appropriate results
-                f.find('input[name="part"]').val(dov ? '' : 'results');
-
-                if (dov) {
-                    $('#master_results_block').html('<h3 class="text-center">Exported ' + v + '</h3>');
-
-                    // UJS disables the buttons, but only ajax responses re-enable them.
-                    // For csv and json export requests, re-enable by hand
-                    window.setTimeout(function () {
-                        console.log('here')
-                        f.find('input[type="submit"][disabled], button[type="submit"][disabled]').attr('disabled', null).prop('disabled', null);
-                    }, 1500);
-                }
-            });
-        }).on('keypress', function (e) {
-            // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
-            _fpa.cancel_remote();
-        }).on('submit', function () {
-            // When we submit the form, give the user a visual spinner so they know what's going on
-            // This also clears existing search results to make it clear when a result is complete
-            if ($(this).data('remote'))
-                _fpa.masters.get_results_block().html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
-        });
-
-    },
-
     // Function called when the main search page loads, initializing seach form specific functionality
     set_fields_to_search: function () {
         var forms = $('.search_master, form.search_report');
 
-        _fpa.masters.handle_search_form(forms);
+        _fpa.report_criteria.handle_search_form(forms);
 
         $('.clear-fields').not('.attached-clear-fields').on('click', function (ev) {
             if ($(this).attr('disabled')) return;
@@ -207,7 +97,7 @@ _fpa.loaded.masters = function () {
         _fpa.preprocessors.before_all($(this));
     });
 
-    _fpa.masters.handle_search_form($('form.auto_search_master'));
+    _fpa.report_criteria.handle_search_form($('form.auto_search_master'));
 
 
     // Prevent auto run reports under certain circumstances

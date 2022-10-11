@@ -37,7 +37,7 @@
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>
             <td class="user-app-list"><% list_item.accessible_app_types.each do |a| %>
-                <p><span><%= a.label %></span></p>
+                <p><span><%= a&.label %></span></p>
               <% end %>
             </td>
             <td><%= list_item.do_not_email ? 'do not email' : ''%></td>

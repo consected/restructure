@@ -1,5 +1,12 @@
 .admin-buttons-block {
   margin: 8px;
+  z-index: 5;
+  position: relative;
+}
+
+.report-admin-submit-block {
+  z-index: 5;
+  position: relative;
 }
 
 .admin-details-section {

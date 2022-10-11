@@ -603,7 +603,7 @@ class Admin::MigrationGenerator
     return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
 
     puts "Running migration from #{db_migration_dirname}"
-    Rails.logger.info "Running migration from #{db_migration_dirname}"
+    Rails.logger.warn "Running migration from #{db_migration_dirname}"
 
     Timeout.timeout(60) do
       # Outside the current transaction

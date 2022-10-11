@@ -314,15 +314,11 @@
   });
 
   Handlebars.registerHelper('date_time', function (text) {
-    if (text) {
-      var ds = new Date(Date.parse(text));
-      var d = ds.toLocaleString();
-      return new Handlebars.SafeString(d);
-    } else {
-      var ds = new Date();
-      var d = ds.toLocaleString();
-      return new Handlebars.SafeString(d);
-    }
+    const d = (text) ? _fpa.utils.DateTime.fromISO(text) : _fpa.utils.DateTime.now();
+    const formatted = (d.isValid) ?
+        d.toFormat(UserPreferences.date_time_format()) :
+        text;
+    return new Handlebars.SafeString(formatted);
   });
 
 
@@ -408,21 +404,17 @@
   // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
   Handlebars.registerHelper('local_date', function (date_string, unknown, options) {
     if (date_string === null || date_string === '') return unknown;
-    var startTime = date_string; //
-    var testTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
+    const startTime = _fpa.utils.DateTime.fromISO(date_string)
 
-
-    if (!testTime || testTime == 'Invalid Date') {
+    if (!startTime.isValid) {
       if (options.hash.return_string)
         return date_string;
       else
         return unknown;
     }
 
-    // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
-    return new Date(startTime).toLocaleDateString(undefined, { timeZone: "UTC" });
-
-
+    const format = UserPreferences.date_format();
+    return startTime.toUTC().toFormat(format);
   });
 
   Handlebars.registerHelper('and', function (a, b, options) {
@@ -466,15 +458,18 @@
   });
 
 
-  Handlebars.registerHelper('local_time', function (stre, options) {
-    if (!stre || stre == '' || !stre.length) return;
-    if (options && !options.hash) options.hash = {};
-    var s = stre.toString();
-    if (s.toLowerCase().indexOf('pm') > 1 || s.toLowerCase().indexOf('am') > 1)
-      return s;
-    var s = new Date(s);
-    var stz = new Date(s.getTime() + (s.getTimezoneOffset() * 60000));
-    return stz.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  Handlebars.registerHelper('local_time', function (stre) {
+    if (!stre || stre === '' || !stre.length) return;
+    let s = stre.toString();
+
+    s = new Date(s);
+    if (s.toString() === 'Invalid Date') return stre;
+
+    const d = _fpa.utils.DateTime.fromJSDate(s);
+    if (!d.isValid) return stre;
+
+    const format = UserPreferences.time_format();
+    return d.toUTC().toFormat(format);
   });
 
 

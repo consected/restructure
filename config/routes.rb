@@ -45,7 +45,8 @@ Rails.application.routes.draw do
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
     resources :job_reviews, except: %i[show destroy]
-    resources :server_info
+    resources :server_info, only: [:index]
+    get 'server_info/rails_log', to: 'server_info#rails_log'
 
     resources :app_types, except: [:destroy] do
       member do
@@ -209,6 +210,13 @@ Rails.application.routes.draw do
 
   as :user do
     root to: 'pages#home', as: 'authenticated_user_root'
+  end
+
+  # post 'mfa/step1', to: 'mfa#step1'
+  resource :mfa, only: [] do
+    member do
+      post :step1, controller: :mfa, format: :json
+    end
   end
   # END: Users and Admins related routes
 

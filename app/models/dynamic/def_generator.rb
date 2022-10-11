@@ -100,15 +100,25 @@ module Dynamic
         # (and therefore we are on our first load and everything will have just been set up) just return
         return if utd || utd.nil?
 
+        Rails.logger.warn "Refreshing outdated #{name}"
+
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
         defs.each do |d|
           rn = d.resource_name
           u = d.updated_at
           m = Resources::Models.find_by(resource_name: rn)&.model&.definition
-          # Skip if the model was previous set and the updated timestamps match AND the implementation class is defined
-          next if m && m.updated_at == u && d.implementation_class_defined?(fail_without_exception: true)
 
+          klass = if d.is_a? ExternalIdentifier
+                    Object
+                  else
+                    d.class.name.constantize
+                  end
+
+          # Skip if the model was previous set and the updated timestamps match AND the implementation class is defined
+          next if m && m.updated_at == u && d.implementation_class_defined?(klass, fail_without_exception: true)
+
+          Rails.logger.warn "Refreshing #{rn}, last updated at #{u}"
           this_is_new = !m
           any_new ||= this_is_new
           d.force_regenerate = true

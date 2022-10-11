@@ -65,8 +65,9 @@ module EditFields
     # Only called by SelectFieldHandler.list_record_data_for_select after initialization
     def generate_record_data
       cl, reslist = record_data_class_and_results
-
-      if cl.nil?
+      if cl.nil? && reslist.empty?
+        Rails.logger.info "No results returned for #{assoc_or_class_name} - possibly has a master association but no master specified"
+      elsif cl.nil?
         Rails.logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
       elsif cl.attribute_names.include?('rank')
         reslist_data = list_for_rank(reslist)
@@ -97,12 +98,15 @@ module EditFields
     def record_data_class_and_results
       assoc_name = assoc_or_class_name.pluralize
 
-      unless no_assoc
-        if Master.get_all_associations.include?(assoc_name)
+      unless no_assoc || !form_object_instance.respond_to?(:master)
+        if form_object_instance.master.nil?
+          # It is not valid for us to attempt to retrieve records not tied to a master record
+          #  when we are expecting an association
+          reslist = []
+        elsif Master.get_all_associations.include?(assoc_name)
           # We matched one of the possible classes an activity log be used with (really these are master associations)
           # It is possible the master is not set yet, so skip it in that case
-          reslist = form_object_instance.master.send(assoc_name) if form_object_instance.master
-
+          reslist = form_object_instance.master.send(assoc_name)
           cl = reslist&.first&.class
         elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? assoc_or_class_name
           # We matched one of the valid item and rec_types
@@ -120,11 +124,17 @@ module EditFields
             break
           end
 
-          cl = reslist.first&.class
+          cl = reslist&.first&.class
         end
+
+        # Just in case there was no matching master association or activity log record type association,
+        # but we have been told there is a master association expected, set the result list
+        # to blank to ensure that a full database of records is not loaded unexpectedly.
+        reslist ||= []
       end
 
-      unless cl
+      # If the reslist was not generated (not even just empty)
+      unless reslist
         # Just get the resource by its resource name or alternatively its table name
         cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
 

@@ -17,8 +17,8 @@ class Settings
   YearFieldPattern = '\\d{4,4}'
 
   # Inactivity timeouts for user / admin sessions
-  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).minutes.freeze
-  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).minutes.freeze
+  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
+  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
@@ -36,6 +36,8 @@ class Settings
     regex: ENV['PW_REGEX'],
     regex_requirements: ENV['PW_REGEX_REQ']
   }.freeze
+
+  PasswordUnlockTimeMins = (ENV['PW_UNLOCK_TIME_MINS'] || 60).to_i.freeze
 
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in

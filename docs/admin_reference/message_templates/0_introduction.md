@@ -21,6 +21,19 @@ For SMS messages, layout and content are plain text.
 
 The content of a message is substituted into its layout in the position indicated by `\{\{main_content\}\}`
 
+### User Account Notifications
+
+Users are notified by email when certain events occur related to their accounts.
+
+These require a layout template, named `general server notification` and the following email content templates:
+
+- `server password expiration reminder`
+- `server registration confirmation`
+- `server password reset instructions`
+- `server password changed`
+
+When a new server is initially set up, these templates are created automatically. They should be edited to match the brand and content required by the organization.
+
 ### Dialog Templates
 
 The *dialog* message type provides a mechanism for displaying lengthy sections of text within dynamic definition forms.
@@ -54,6 +67,8 @@ used in the following forms / pages:
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form
 - `ui first login` - information for a new user on first login
+
+### HTML Markup Snippets
+
 - `ui page css - {app type name}` - plain CSS to place in a *style* block in the *head* section
 - `ui page js - {app type name}` - plain Javascript to place in a *style* block in the *head* section
-  - **NOTE:** use `_fpa.loaded.custom = function () { }` to ensure actions are only called after the page has loaded
