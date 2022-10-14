@@ -251,7 +251,9 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
 
-# TODO add the missing constants related to timezone
+  # IMPORTANT: add any app setting config variable to the following array
+  # that is worthy of showing to the admin users,
+  # so it can be displayed in the server info admin view.
   AppSettingsVars = %w[
     PageTitle EnvironmentName BaseUrl
     OnlyLoadAppTypes
