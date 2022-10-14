@@ -226,7 +226,7 @@ class Settings
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   # If setting more than one country, separate them with a blank-space.
   # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
-  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %i[us ie gb de gr au nz]).freeze
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %w[us ie gb de gr au nz]).freeze
 
   # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
   # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
@@ -247,4 +247,30 @@ class Settings
 
   # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
   DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
+
+  # Set the priority listing for the country select
+  DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
+
+# TODO add the missing constants related to timezone
+  AppSettingsVars = %w[
+    PageTitle EnvironmentName BaseUrl
+    OnlyLoadAppTypes
+    DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
+    UserTimeout AdminTimeout OsWordsFile PasswordConfig
+    NotificationsFromEmail AdminEmail BatchUserEmail
+    TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
+    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
+    LoginIssuesUrl LoginMessage
+    SearchResultsLimit
+    DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
+    DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
+    ScriptedJobDirectory
+    DisableVDef AllowDynamicMigrations
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
+    InvitationCode
+    CountryCodesForTimezones DefaultUserTimezone
+    DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
+    DefaultCountrySelect
+  ].freeze
+
 end
