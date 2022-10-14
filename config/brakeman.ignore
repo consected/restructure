@@ -37,7 +37,7 @@
         {
           "type": "template",
           "name": "admin/reports/_def_block",
-          "line": 12,
+          "line": 20,
           "file": "app/views/admin/reports/_def_block.html.erb",
           "rendered": {
             "name": "admin/reports/form/_admin_criteria_view",
@@ -325,7 +325,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/admin/server_info.rb",
-      "line": 117,
+      "line": 132,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
       "render_path": null,
@@ -742,7 +742,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/reports/_form.html.erb",
-      "line": 10,
+      "line": 12,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html(Report.find_by_id_or_resource_name(params[:id]).description), :data => current_user)",
       "render_path": [
@@ -793,6 +793,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-09-07 19:14:48 +0100",
+  "updated": "2022-10-11 10:50:16 +0100",
   "brakeman_version": "5.3.1"
 }

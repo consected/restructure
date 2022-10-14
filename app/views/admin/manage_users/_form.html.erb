@@ -4,32 +4,44 @@
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :email %>
-    <%=f.email_field :email, required: true%>
+    <%=f.email_field :email, required: true %>
   </div>
   <div class="form-group">
     <%= f.label :first_name %>
-    <%=f.text_field :first_name, required: true%>
+    <%=f.text_field :first_name, required: true %>
   </div>
   <div class="form-group">
     <%= f.label :last_name %>
-    <%=f.text_field :last_name, required: true%>
+    <%=f.text_field :last_name, required: true %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>
     <%= f.label :disable %>
   </div>
-  <% if object_instance.id %>
   <div class="form-group">
-    <%= check_box_tag :gen_new_pw%>
-    <%= label_tag :gen_new_pw, 'Generate new password' %>
-  </div>
-  <div class="form-group">
-    <%= check_box_tag :reset_two_factor_auth%>
-    <%= label_tag :reset_two_factor_auth, 'Reset two factor auth' %>
-  </div>
-  <div class="form-group">
-    <%= f.check_box :do_not_email%>
+    <%= f.check_box :do_not_email %>
     <%= label_tag :do_not_email, 'Do not email' %>
+  </div>
+  <% if object_instance.id %>
+  <div>
+    <div class="form-group">
+      <%= check_box_tag :gen_new_pw %>
+      <%= label_tag :gen_new_pw, 'Generate new password' %>
+    </div>
+    <% unless User.two_factor_auth_disabled %>
+    <div class="form-group">
+      <%= check_box_tag :reset_two_factor_auth %>
+      <%= label_tag :reset_two_factor_auth, 'Reset two factor auth' %>
+    </div>
+    <% end %>
+    <div class="form-group">
+      <%= check_box_tag :extend_expiration %>
+      <%= label_tag :extend_expiration, 'Unlock expired account' %>
+    </div>
+    <div class="form-group">
+      <%= check_box_tag :unlock_failed_attempts %>
+      <%= label_tag :unlock_failed_attempts, 'Unlock failed password attempts' %>
+    </div>
   </div>
   <%end%>
   <div class="form-group">

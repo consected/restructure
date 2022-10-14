@@ -11,8 +11,8 @@ describe 'API tokens and CSRF', js: true, driver: :app_firefox_driver do
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabledForUser = false
-    Settings::TwoFactorAuthDisabledForAdmin = false
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
+    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
 
     # create a user, then disable it
     @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))

@@ -6,13 +6,13 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
-    Settings::AllowUsersToRegister = false
+    Settings.const_set('AllowUsersToRegister', false)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabledForUser = false
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
 
     # create a user, then disable it
     @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
@@ -40,6 +40,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     within '#new_user' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_user', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_user' do
       fill_in 'Two-Factor Authentication Code', with: @user.current_otp
       click_button 'Log in'
     end
@@ -53,6 +61,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     within '#new_user' do
       fill_in 'Email', with: @d_email
       fill_in 'Password', with: @d_pw
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_user', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_user' do
       fill_in 'Two-Factor Authentication Code', with: @d_user.current_otp
       click_button 'Log in'
     end
@@ -68,10 +84,10 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: ''
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
-
       click_button 'Log in'
     end
+
+    expect(page).not_to have_selector('.login-2fa-block', visible: true)
 
     fail_message = '× Invalid email, password or two-factor authentication code.'
 
@@ -81,8 +97,15 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password + ' '
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
+      click_button 'Log in'
+    end
 
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
       click_button 'Log in'
     end
 
@@ -92,8 +115,15 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: ' ' + @good_password
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
+      click_button 'Log in'
+    end
 
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
       click_button 'Log in'
     end
 

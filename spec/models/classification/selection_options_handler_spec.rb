@@ -90,7 +90,9 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def = ActivityLog::PlayerContactPhone.definition
     cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
 
+    sleep 1
     al_def.extra_log_types = <<~END_DEF
+      # Ensure the new def saves: #{SecureRandom.hex(10)}
       step_1:
         label: Step 1
         fields:

@@ -5,7 +5,9 @@
   <span class="e-signature-password">password</span>
   <%= password_field_tag 'user[password]', nil, options.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us, autocomplete: 'current-password'}}) %>
 </div>
+<% unless User.two_factor_auth_disabled %>
 <div class="e-signed-how-fields">
   <span class="e-signature-otp-attempt">two-factor authentication code</span>
   <%= text_field_tag 'user[otp_attempt]', nil, options.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", pattern: "\\d{6}"}}) %>
 </div>
+<% end %>

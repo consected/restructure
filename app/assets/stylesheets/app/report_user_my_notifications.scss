@@ -1,0 +1,33 @@
+.data-results.report-container.report-rn--user__my_notifications {
+
+    .report-list {
+        max-width: 960px;
+         margin: 0 auto; background-color: '#f8f8f8'
+    }
+    
+    .report-list-el[data-col-type="from_user_email"] {
+      float: left;
+    }
+  
+    .report-list-el[data-col-type="created_at"] {
+      float: left ;
+      margin-bottom: 0.6em
+    }
+  
+    .report-list-el[data-col-type="subject"],
+    .report-list-el[data-col-type="generated_content"] {
+      float: none;
+       clear: both
+    }
+  
+    .report-list-header-item {
+      min-width: 0; 
+      margin-left: 1.2em;
+      margin-right: 1.2em
+    }
+  
+    .report-list-el[data-col-type="from_user_email"] .report-list-header-item {
+      margin-left: 0;
+      margin-bottom: 0.6em;
+    }
+}

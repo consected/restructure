@@ -58,7 +58,8 @@ body#body-top {
   &.sessions,
   &.confirmations,
   &.passwords,
-  &.registrations {
+  &.registrations,
+  &.help {
     filter: none;
     opacity: 1;
     transition: filter 0.5s ease;
@@ -524,6 +525,14 @@ a[data-toggle="collapse"].master-expander.collapsed {
   margin-top: 10px;
   line-height: 1em;
   margin-bottom: 6px;
+
+  .help-block {
+    line-height: 1.4em;
+    font-size: 95%;
+  }
+}
+form#new_user {
+  margin-top: 22px;
 }
 
 #error_explanation h2 {
