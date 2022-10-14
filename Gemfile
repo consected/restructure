@@ -9,7 +9,7 @@ gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
 gem 'aws-sdk-sns', '~> 1'
 gem 'bootsnap'
-gem 'country_select'
+gem 'country_select', '~> 8.0'
 gem 'crass', '~> 1.0.4'
 gem 'daemons'
 gem 'dalli'
@@ -34,7 +34,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma'
 
-gem 'rails', '~> 5.2', '>= 5.2.7'
+gem 'rails', '~> 5.2', '>= 5.2.8.1'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'
