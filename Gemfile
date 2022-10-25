@@ -32,7 +32,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # this allows EB to run with the latest version of puma, without breaking if the preinstalled version
 # is lower or has different dependencies.
 # For this to work, Procfile must call puma with `bundle exec`
-gem 'puma'
+gem 'puma', '~> 5.6'
 
 gem 'rails', '~> 5.2', '>= 5.2.8.1'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
