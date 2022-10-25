@@ -140,8 +140,7 @@ RSpec.describe Formatter::Substitution, type: :model do
   it 'substitutes times and dates using user preferences for formatting' do
     # Day before daylight savings time starts. Standard time is UTC -5 hours
     date = Date.parse('2015-03-07')
-    time = Time.parse('14:56:04 AST')
-
+    time = Time.parse('14:56:04 EST')
     res = Formatter::DateTime.format({ date: date, time: time, zone: nil }, show_timezone: nil, current_user: @user)
 
     # expect(res).to eq '03/07/2022 2:56 pm EST'
@@ -171,12 +170,12 @@ RSpec.describe Formatter::Substitution, type: :model do
       {{#if blank_val}}ignores blanks{{else}}blank was skipped{{/if}}
 
       {{#if true_val}}
-      It can also handle muliple
+      It can also handle multiple
       lines in the results.
       OK?
       {{/if}}
 
-      {{#if false_val}}Not shown{{else}}It can also handle muliple
+      {{#if false_val}}Not shown{{else}}It can also handle multiple
       lines in the else results.
       Good?{{/if}}
 
@@ -210,14 +209,14 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(if_blocks[3][4]).to eq 'but does show {{int_val}} else'
 
     expect(if_blocks[6][0]).to eq %({{#if true_val}}
-It can also handle muliple
+It can also handle multiple
 lines in the results.
 OK?
 {{/if}})
 
     expect(if_blocks[6][1]).to eq 'true_val'
     expect(if_blocks[6][2]).to eq %(
-It can also handle muliple
+It can also handle multiple
 lines in the results.
 OK?
 )
@@ -225,14 +224,14 @@ OK?
     expect(if_blocks[6][3]).to be nil
     expect(if_blocks[6][4]).to eq nil
 
-    expect(if_blocks[7][0]).to eq %({{#if false_val}}Not shown{{else}}It can also handle muliple
+    expect(if_blocks[7][0]).to eq %({{#if false_val}}Not shown{{else}}It can also handle multiple
 lines in the else results.
 Good?{{/if}})
     expect(if_blocks[7][1]).to eq 'false_val'
     expect(if_blocks[7][2]).to eq 'Not shown'
     expect(if_blocks[7][3]).to be_truthy
 
-    expect(if_blocks[7][4]).to eq %(It can also handle muliple
+    expect(if_blocks[7][4]).to eq %(It can also handle multiple
 lines in the else results.
 Good?)
 
@@ -259,12 +258,12 @@ Good?)
       blank was skipped
 
 
-      It can also handle muliple
+      It can also handle multiple
       lines in the results.
       OK?
 
 
-      It can also handle muliple
+      It can also handle multiple
       lines in the else results.
       Good?
 
