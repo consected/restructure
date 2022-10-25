@@ -15,7 +15,7 @@ if [ ! -d ${DEST} ]; then
   exit 2
 fi
 
-EXCLUDE='database.yml favicon.png structure.sql schema.rb .git'
+EXCLUDE='database.yml favicon.png structure.sql schema.rb .git app_default_settings.rb'
 
 cd ${DEST}
 git pull

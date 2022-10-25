@@ -7,7 +7,7 @@ if [ -z "$1" ]; then
 fi
 
 SRC="$1"
-EXCLUDE='database.yml favicon.png app/assets/images/restructure-logo.svg structure.sql schema.rb'
+EXCLUDE='database.yml favicon.png app/assets/images/restructure-logo.svg structure.sql schema.rb app_default_settings.rb'
 
 cd $(dirname $0)/..
 
