@@ -4,23 +4,6 @@
 # Handle server actions such as restarts and showing
 # server settings to admins to assist with identifying issues
 class Admin::ServerInfo
-  AppSettingsVars = %w[
-    PageTitle EnvironmentName BaseUrl
-    OnlyLoadAppTypes
-    DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
-    UserTimeout AdminTimeout OsWordsFile PasswordConfig
-    NotificationsFromEmail AdminEmail BatchUserEmail
-    TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
-    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
-    LoginIssuesUrl LoginMessage
-    SearchResultsLimit
-    DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
-    DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
-    ScriptedJobDirectory
-    DisableVDef AllowDynamicMigrations
-    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
-    InvitationCode
-  ].freeze
 
   NfsStoreSettingsVars = %w[
     nfs_store_directory
@@ -37,7 +20,7 @@ class Admin::ServerInfo
   # @return [Hash]
   def app_settings
     settings = {}
-    AppSettingsVars.each do |a|
+    Settings::AppSettingsVars.each do |a|
       val = Settings.const_get(a)
     rescue StandardError => e
       val = e.to_s
