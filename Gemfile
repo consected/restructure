@@ -25,7 +25,7 @@ gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mime-types'
 gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
-gem 'nokogiri', '1.13.6'
+gem 'nokogiri', '1.13.9'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
 # puma has been moved to all environments and will be included in the production packaging
