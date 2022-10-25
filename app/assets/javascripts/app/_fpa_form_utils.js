@@ -1938,37 +1938,7 @@ _fpa.form_utils = {
   },
 
   setup_e_signature: function (block, force) {
-
-    var els = block.find('.e-signature-container');
-    if (!force) {
-      els = els.not('.e-signature-setup');
-    }
-
-    els.each(function () {
-      var _this = this;
-
-      $(_this).find('.e-sign-print-frame').not('.click-ev-attached').on('click', function () {
-        var i = $(_this).find('.e_signature_document_iframe')[0];
-        i.contentWindow.print();
-      }).addClass('click-ev-attached');
-
-      window.setTimeout(function () {
-        var c = $(_this).find('.e_signature_document');
-        var html = c.val();
-
-        var i = $(_this).find('.e_signature_document_iframe');
-        i.attr('srcdoc', html);
-        window.setTimeout(function () {
-          var body = i[0].contentDocument.body;
-          if (body)
-            i.height(body.offsetHeight + 50);
-          else
-            i.height(500);
-
-        }, 200);
-
-      }, 10);
-    }).addClass('e-signature-setup');
+    _fpa.e_signature.setup(block, force);
   },
 
   setup_error_clear: function (block) {

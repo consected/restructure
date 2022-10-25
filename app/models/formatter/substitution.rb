@@ -16,7 +16,7 @@ module Formatter
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/.freeze
 
     #
-    # Perform subsititions on the the text, using either a Hash of data or an object item.
+    # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
     #
     # Substitution text examples:
@@ -208,6 +208,11 @@ module Formatter
       data[:password_age_limit] = Settings::PasswordAgeLimit
       data[:password_reminder_days] = Settings::PasswordReminderDays
       data[:password_max_attempts] = Settings::PasswordMaxAttempts
+      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
+      data[:password_min_length] = Settings::PasswordConfig[:min_length]
+      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
+      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
+      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
       data[:mfa_disabled] = User.two_factor_auth_disabled
       data[:login_issues_url] = Settings::LoginIssuesUrl
       data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil

@@ -5,6 +5,7 @@
   end
   @criteria_block_id = "report-criteria-container-#{SecureRandom.hex}"
   extra_classes = @report.report_options.view_options.hide_criteria_panel ? 'hidden' : ''
+  extra_classes += " report-rn--#{@report.alt_resource_name}"
 %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
 <script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">

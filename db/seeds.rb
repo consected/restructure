@@ -45,7 +45,7 @@ def auto_admin
 end
 
 def log(txt)
-  # puts "#{Time.now} #{txt}"
+  puts "#{Time.now} #{txt}" unless Rails.env.test?
   Rails.logger.info txt
 end
 

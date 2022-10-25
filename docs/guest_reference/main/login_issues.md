@@ -3,7 +3,7 @@
 If you are having trouble logging in, check you have followed the [login information](README.md), especially if this is your first time logging in.
 {{#if mfa_disabled}} {{else}}
 
-The first time you login you should *not* enter anything in the **Two-Factor Authentication Code** field. For subsequent logins, sometimes it is necessary to close the authenticator app on your mobile device and reopen it to get it to refresh correctly
+The first time you login you should _not_ enter anything in the **Two-Factor Authentication Code** field. For subsequent logins, sometimes it is necessary to close the authenticator app on your mobile device and reopen it to get it to refresh correctly
 {{/if}}
 
 ---

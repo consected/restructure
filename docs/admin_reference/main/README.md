@@ -44,3 +44,7 @@ A separate developer's reference, including API samples, is available in the [De
 - [User Access Controls](../user_access_controls/0_introduction.md)
 - [File Filters](../filters/0_introduction.md)
 - [Manage Administrators](../admins/0_introduction.md)
+
+### Messaging
+
+- [Message Templates](../message_templates/0_introduction.md)
