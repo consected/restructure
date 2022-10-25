@@ -16,6 +16,16 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] default settings for organization specific settings not to be transferred up/downstream
+
+### Transferred from Viva @8.0.112 - 2022-10-25
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Changed] README for bindfs
+- [Fixed] bugs, comments
+
 ## [8.0.45] - 2022-10-11
 
 ### Transferred from Harvard @7.4.127 - 2022-10-11
