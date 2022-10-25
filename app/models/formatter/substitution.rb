@@ -16,7 +16,7 @@ module Formatter
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/.freeze
 
     #
-    # Perform subsititions on the the text, using either a Hash of data or an object item.
+    # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
     #
     # Substitution text examples:
