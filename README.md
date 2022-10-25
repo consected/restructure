@@ -158,6 +158,10 @@ A Fuse filesystem can also be used as external storage rather than
 the home directories, and will be used if there is a Fuse filesystem mounted at `/media/$USER/Data` by skipping
 `app-scripts/setup-init-mounts.sh`
 
+**NOTE:** this is unlikely to work on MacOS, the it relies on Linux tools such as `bindfs`, `mountpoint`, etc.
+
+A mechanism to allow the Filestore component to work against a local directory tree could provide partial functionality (but tests will fail when exercising permissions), but has not been developed at this stage. The ability for `bindfs` to manipulate the owners and permissions seen by end users is core to the full functionality.
+
 ### Setup a new admin user
 
 Set up a new admin user:
