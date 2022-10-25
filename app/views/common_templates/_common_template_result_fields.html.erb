@@ -98,6 +98,11 @@
       {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
     </li>
 
+  {{else is field_type 'includes' '^redcap_tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
+      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
+    </li>
+
   {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
     <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
     {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
@@ -171,7 +176,7 @@
     {{#unless ../prevent_edit}}
     <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker add-linked-tracker">
       <div class="panel panel-default panel-body">
-        <p class="add-tracker-label">Add a specific tracker status record related to this_value item:</p>
+        <p class="add-tracker-label">Add a specific tracker status record related to {{this_value}} item:</p>
         <p class="text-center">
         <a href="/masters/{{result_data.master_id}}/trackers/new?record_type=activity_log/{{implementation_class_name}}&record_id={{result_data.id}}&tracker[protocol_id]={{result_data.protocol_id}}&tracker[event_date]={{result_data.called_when}}" data-toggle="scrollto-result uncollapse" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{result_data.master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
         </p>

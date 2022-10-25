@@ -167,7 +167,7 @@ _fpa.form_utils = {
 
       dates.each(function () {
         var v = $(this).val();
-        if (v || v != '') {
+        if (v || v !== '') {
           var res = _fpa.form_utils.locale_date_to_iso(v);
           if (res) {
             $(this).val(res);
@@ -177,6 +177,7 @@ _fpa.form_utils = {
       }).removeClass('date-is-local');
     }
   },
+
 
   locale_date_to_iso(v) {
     if (!v) return;
@@ -194,7 +195,7 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
-    block.find('.use-big-select').each(function () {
+    block.find('.use-big-select').not('.big-select-su').each(function () {
       var label = '';
       $.big_select($(this),
         $('#primary-modal .modal-body'),
@@ -204,7 +205,7 @@ _fpa.form_utils = {
         $(this)[0].big_select_options
       );
 
-    })
+    }).addClass('big-select-su');
   },
 
   setup_select_filtering(block) {
@@ -892,7 +893,11 @@ _fpa.form_utils = {
 
     block.addClass('use-secure-view-on-links-setup');
 
-    _fpa.secure_view.setup_links(block, 'a.use-secure-view');
+    // Ensure that the viewer is set up with the user's capabilities to view and download
+    var sv_opt = { allow_actions: null };
+    sv_opt.allow_actions = _fpa.state.user_can;
+
+    _fpa.secure_view.setup_links(block, 'a.use-secure-view', sv_opt);
     block.on('click', 'a.use-secure-view', function (ev) {
       ev.preventDefault();
     });
@@ -1312,11 +1317,11 @@ _fpa.form_utils = {
 
     // force date type fields to use the date picker by making them fall back to text
     block.find('input[type="date"]').each(function () {
-      if ($(this).prop('type') == 'date') {
-        $(this).prop('type', 'datepicker');
-        $(this).addClass('force-datepicker');
+      const datePicker = $(this);
+      if (datePicker.prop('type') === 'date') {
+        datePicker.addClass('force-datepicker');
       }
-      $(this).attr('type', 'datepicker');
+      datePicker.prop('type', 'datepicker').prop('autocomplete', 'off');
     });
 
     // start by setting the date fields to show the date using the locale
@@ -1324,11 +1329,11 @@ _fpa.form_utils = {
     block.find('input[type="datepicker"]').not('.date-is-local').each(function () {
       var v = $(this).val();
 
-      if (v && v != '') {
+      if (!_fpa.utils.is_blank(v)) {
         var d = _fpa.utils.YMDtoLocale(v);
         $(this).val(d);
       }
-      $(this).addClass('date-is-local');
+      $(this).addClass('date-is-local').prop('autocomplete', 'off');
 
     });
 
@@ -1594,18 +1599,67 @@ _fpa.form_utils = {
       _fpa.form_utils.resize_labels(uc)
     }, 200)
 
-    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').each(function () {
+    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').not('.added-open-nt').each(function () {
       if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
 
       $(this).attr('target', '_blank');
       if ($(this).find('.glyphicon-new-window').length) return;
       $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
-    });
+    }).addClass('added-open-nt');
 
-    $('a[href$="#open-in-sidebar"], a[href^="mailto:"], a[href^="tel:"]').each(function () {
-      $(this).attr('target', '_blank').attr('data-remote', "true").attr('data-toggle', "collapse")
-        .attr('data-target', "#help-sidebar").attr('data-working-target', "#help-sidebar-body");
-    });
+    $('a[href$="#open-in-sidebar"]').not('.added-open').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
+
+      $(this)
+        .attr('target', '_blank')
+        .attr('data-remote', 'true')
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#help-sidebar')
+        .attr('data-working-target', '#help-sidebar-body');
+
+      let href = $(this).attr('href').replace('#open-in-sidebar', '');
+
+      // Prevent the outer page reloading
+      $(this).parents('.standalone-page-col').attr('data-no-load', 'true')
+
+      if (href.indexOf('display_as=embedded') < 0) {
+        let sym = (href.indexOf('?') > 0) ? '&' : '?';
+        $(this).attr('href', `${href}${sym}display_as=embedded#open-in-sidebar`)
+      }
+
+      $(this).click(function (ev) {
+        ev.preventDefault()
+      });
+    }).addClass('added-open');
+
+    $('a[href$="#open-embedded-report"]').not('.added-open-er').each(function () {
+      // Protect against being in an editor
+      if ($(this).parents('.edit-as-custom').length) return;
+
+      var url = $(this).attr('href');
+      url = url.replace('#open-embedded-report', '')
+      url = url.replace('embed=true', '')
+      if (url.indexOf('?') >= 0) {
+        url = `${url}&embed=true#open-embedded-report`
+      }
+      else {
+        url = `${url}?embed=true#open-embedded-report`
+      }
+
+      $(this)
+        .attr('href', url)
+        .attr('data-remote', 'true')
+        .attr('data-preprocessor', "embedded_report")
+        .attr('data-parent', 'primary-modal')
+        .attr('data-result-target', '#modal_results_block')
+        .attr('data-target', '#modal_results_block')
+        .attr('data-target-force', 'true')
+        ;
+    }).addClass('added-open-er');
+
 
   },
 
@@ -1838,80 +1892,7 @@ _fpa.form_utils = {
   },
 
   setup_textarea_editor: function (block) {
-
-    block.find('.custom-editor-container').not('.edit-as-custom-setup').each(function () {
-      if ($(this).hasClass('edit-as-markdown')) {
-        var $edta = $(this).find('textarea.text-notes');
-        var $eddiv = $(this).find('div.custom-editor');
-        var edid = $eddiv.attr('id');
-        var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
-        var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
-        var wysiwygEditor = editor.wysiwygEditor;
-
-        $edtools.hide();
-        $eddiv.on('focus', function () {
-          $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
-          $edtools.slideDown();
-
-          if (_fpa.state.previous_wysiwyg_editor == editor) {
-            wysiwygEditor.restoreSelection()
-          }
-          else {
-            _fpa.state.previous_wysiwyg_editor = editor
-          }
-
-        }).on('change', function () {
-          $eddiv.data('editor-changed', true);
-          wysiwygEditor.saveSelection()
-        }).on('blur', function () {
-          wysiwygEditor.saveSelection()
-
-        }).on('paste', function () {
-          window.setTimeout(function () {
-            var obj = { html: editor.cleanHtml() };
-            var prev_html = obj.html;
-            var txt = _fpa.utils.html_to_markdown(obj);
-
-            if (prev_html != obj.html) {
-              editor.html(obj.html);
-            }
-
-            $edta.val(txt);
-            $eddiv.data('editor-changed', null);
-          }, 100);
-
-        });
-
-        var autoparse = function () {
-          if ($eddiv.length && $edta.length) {
-            if ($eddiv.data('editor-changed')) {
-              // Only if there has been a change
-              $eddiv.data('editor-changed', null);
-
-
-              var obj = { html: editor.cleanHtml() };
-              var txt = _fpa.utils.html_to_markdown(obj);
-
-              $edta.val(txt);
-            }
-
-            window.setTimeout(function () {
-              autoparse();
-            }, 500);
-          }
-        };
-        window.setTimeout(function () {
-          autoparse();
-        }, 500);
-      }
-    }).addClass('edit-as-custom-setup');
-
-    // setTimeout(function(){
-    //   var notes = block.find('.notes-block .list-group-item strong, .notes-block  .panel-body, .al-shrinkable > ul.list-group')
-    //   _fpa.utils.make_readable_notes_expandable(notes, 100, _fpa.form_utils.resize_children);
-    //
-    // }, 10);
-
+    _fpa.custom_editor.setup(block);
   },
 
   setup_filestore: function (block) {
@@ -1957,37 +1938,7 @@ _fpa.form_utils = {
   },
 
   setup_e_signature: function (block, force) {
-
-    var els = block.find('.e-signature-container');
-    if (!force) {
-      els = els.not('.e-signature-setup');
-    }
-
-    els.each(function () {
-      var _this = this;
-
-      $(_this).find('.e-sign-print-frame').not('.click-ev-attached').on('click', function () {
-        var i = $(_this).find('.e_signature_document_iframe')[0];
-        i.contentWindow.print();
-      }).addClass('click-ev-attached');
-
-      window.setTimeout(function () {
-        var c = $(_this).find('.e_signature_document');
-        var html = c.val();
-
-        var i = $(_this).find('.e_signature_document_iframe');
-        i.attr('srcdoc', html);
-        window.setTimeout(function () {
-          var body = i[0].contentDocument.body;
-          if (body)
-            i.height(body.offsetHeight + 50);
-          else
-            i.height(500);
-
-        }, 200);
-
-      }, 10);
-    }).addClass('e-signature-setup');
+    _fpa.e_signature.setup(block, force);
   },
 
   setup_error_clear: function (block) {

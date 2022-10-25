@@ -19,6 +19,12 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SESSION_TOKEN
 #
 
+if ENV['QUICK']
+  ENV['SKIP_BROWSER_SETUP'] = 'true'
+  ENV['SKIP_DB_SETUP'] = 'true'
+  ENV['SKIP_APP_SETUP'] = 'true'
+end
+
 unless ENV['IGNORE_MFA'] == 'true'
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''
@@ -109,7 +115,7 @@ unless ENV['SKIP_DB_SETUP']
   put_now 'Enforce migrations'
   ActiveRecord::Migration.maintain_test_schema!
 
-  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb; rm -f db/app_migrations/test/*test_*.rb`
 
   sql = <<~END_SQL
     DROP SCHEMA IF EXISTS redcap_test CASCADE;
@@ -121,7 +127,11 @@ unless ENV['SKIP_DB_SETUP']
     delete from schema_migrations where version in (
       '20211105105700',
       '20211105105701',
-      '20211105105702'
+      '20211105105702',
+      '20210215184600',
+      '20210215184601',
+      '20210305184601',
+      '20211101051705'
     );
   END_SQL
 
@@ -164,7 +174,7 @@ RSpec.configure do |config|
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP']
+    Rake::Task['assets:precompile'].invoke if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP'])
     put_now 'Done before suite'
   end
 

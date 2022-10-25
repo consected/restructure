@@ -26,7 +26,7 @@ module Redcap
 
       #
       # Add redcap_repeat_instrument and redcap_repeat_instance fields to the hash of fields in this form
-      # @param [Hash] fields <description>
+      # @param [Hash] fields
       # @param [Redcap::DataDictionary] in_form
       def self.add_repeat_instrument_fields(fields, data_dictionary)
         fields[:redcap_repeat_instrument] = repeat_instrument_field(data_dictionary)
@@ -39,6 +39,17 @@ module Redcap
       # @param [Redcap::DataDictionary] in_form
       def self.add_survey_identifier_field(fields, data_dictionary)
         fields[survey_identifier_field_name] = survey_identifier_field(data_dictionary)
+      end
+
+      #
+      # Add summary fields for multiple choice checkbox field definition
+      # @param [Hash] fields
+      # @param [Redcap::DataDictionaries::Form] form
+      # @param [Redcap::DataDictionaries::Field] field
+      def self.add_summary_fields(fields, form, field)
+        return unless field.field_type.name == :checkbox
+
+        fields[field.chosen_array_field_name] = checkbox_chosen_array_field(form, field)
       end
 
       # The full record may have a redcap_survey_identifier field if project admin
@@ -113,7 +124,7 @@ module Redcap
       # A redcap_repeat_instrument field representation to support the extra field
       # that Redcap adds for repeating instruments
       # @param [Redcap::DataDictionaries::Form] form
-      # @return [Redcap::DataDictionary]
+      # @return [Redcap::DataDictionaries::Field]
       def self.repeat_instrument_field(data_dictionary)
         field_metadata = {
           field_name: :redcap_repeat_instrument,
@@ -126,13 +137,27 @@ module Redcap
       # A redcap_repeat_instrument field representation to support the extra field
       # that Redcap adds for repeating instruments
       # @param [Redcap::DataDictionaries::Form] form
-      # @return [Redcap::DataDictionary]
+      # @return [Redcap::DataDictionaries::Field]
       def self.repeat_instance_field(data_dictionary)
         field_metadata = {
           field_name: :redcap_repeat_instance,
           field_type: 'repeat'
         }
         Field.new(nil, field_metadata, data_dictionary: data_dictionary)
+      end
+
+      #
+      # A summary chosen array field for projects that have summary fields to
+      # capture all the responses from individual multiple choice columns
+      # @param [Redcap::DataDictionaries::Form] form
+      # @param [Redcap::DataDictionaries::Field] cb_field
+      # @return [Redcap::DataDictionaries::Field]
+      def self.checkbox_chosen_array_field(form, cb_field)
+        field_metadata = {
+          field_name: cb_field.chosen_array_field_name,
+          field_type: 'checkbox_chosen_array'
+        }
+        Field.new(form, field_metadata, data_dictionary: form.data_dictionary)
       end
     end
   end

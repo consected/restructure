@@ -250,6 +250,8 @@ class ActivityLog < ActiveRecord::Base
   def self.open_activity_log(activity_log_type, id, current_user)
     al_class = activity_log_class_from_type activity_log_type
     activity_log = al_class.find_by_id_or_secondary_key(id)
+    return unless activity_log
+
     activity_log.current_user = current_user
     unless activity_log.allows_current_user_access_to? :access
       raise FsException::NoAccess,

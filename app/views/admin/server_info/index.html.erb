@@ -1,7 +1,8 @@
 <div class="container">
   <div class="row">
     <h1>Server Information</h1>
-    <p><code><%= @instance_id%></code></p>
+    <p class="si-instance-id"><code><%= @instance_id%></code></p>
+    <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
   </div>
   <div class="row">
       <h3>Restart Server, DelayedJob and Clear Memcached</h3>
@@ -14,6 +15,8 @@
       <% end %>
       <h3>View Exception Log</h3>
       <%= link_to link_label_open_in_new('open log'), "/reports/z_admin__exception_log", target: "exceptionlog" %>
+      <h3>Search Rails Log</h3>
+      <%= link_to link_label_open_in_new('search Rails log'), admin_server_info_rails_log_path, target: "railslog" %>
   </div>
 
   <div class="row">  

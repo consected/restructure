@@ -25,6 +25,7 @@
 //= require jquery.hotkeys/jquery.hotkeys
 // Note: moment is required with the min file to avoid the need to transcompile
 //= require moment/min/moment-with-locales.min
+//= require luxon/build/global/luxon
 //= require typeahead.js/dist/typeahead.bundle.js
 //= require jquery-timepicker/jquery.timepicker
 //= require textarea-autogrow/textarea-autogrow
@@ -34,6 +35,7 @@
 //= require chosen-js/chosen.jquery
 //= require tablesorter/dist/js/jquery.tablesorter
 //= require jquery-mask-plugin/dist/jquery.mask
+//= require jsTreeTable/treeTable.js
 // Note FullCalendar is frozen at 4.2.0 to avoid needing to transcompile
 //= require @fullcalendar/core/main
 //= require @fullcalendar/interaction/main

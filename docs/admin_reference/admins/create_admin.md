@@ -16,12 +16,12 @@ To add a new user, or reset the password and unlock an existing user
 
 ---
 
-**NOTE:** this will not reset the two factor authentication secret.
+**NOTE:** this will not reset the two-factor authentication secret.
 
 ---
 
-To reset the two factor authentication secret as well as resetting the password:
+To reset the two-factor authentication secret as well as resetting the password:
 
     reset_secret=yes fphs-scripts/add_admin.sh email@hms.harvard.edu
 
-The first login after a new admin has been created, or a two factor authentication secret has been reset, the admin user will be presented with a barcode to setup an Authenticator app.
+The first login after a new admin has been created, or a two-factor authentication secret has been reset, the admin user will be presented with a barcode to setup an Authenticator app.

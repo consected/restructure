@@ -1,5 +1,12 @@
 .admin-buttons-block {
   margin: 8px;
+  z-index: 5;
+  position: relative;
+}
+
+.report-admin-submit-block {
+  z-index: 5;
+  position: relative;
 }
 
 .admin-details-section {
@@ -98,4 +105,11 @@ ul.admin-options-tag-list {
   .toc {
     margin-bottom: 30px;
   }
+}
+
+.admin-info-col {
+
+  max-width: 50%; 
+  flex-grow: 1; 
+  min-width: 250px;
 }

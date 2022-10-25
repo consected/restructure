@@ -23,7 +23,7 @@
     {{else}}
     <span class="glyphicon glyphicon-ban-circle"></span>
     {{/if}}
-    <i>{{to_record_label}}</i> {{substring (pretty_string to_record_data return_string=true remove_tags=true) 0 100 }}
+    <i class="mr-item-label" id="{{ns_hyphenate to_record_label}}">{{to_record_label}}</i> {{substring (pretty_string to_record_data return_string=true remove_tags=true) 0 100 }}
   </span>
   <span class="selectable-model-reference-result-action pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-link" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-linkholder"  data-preprocessor="model_references_item">
       {{#if disabled}}

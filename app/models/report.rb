@@ -86,6 +86,7 @@ class Report < ActiveRecord::Base
     i = parts.first
     # Allow hyphenated categories to be matched with underscores
     its = [i, i.gsub('_', '-'), i.gsub('_', ' ')].uniq
+    its << nil if i == '_default'
     res = where(item_type: its, short_name: parts.last).first
     raise ActiveRecord::RecordNotFound unless res || nil_for_no_match
 
@@ -182,8 +183,12 @@ class Report < ActiveRecord::Base
   # Set up or return the report options class, parsing the text attribute #options.
   # Access configuration items directly as:
   #    report_options.<view_css | component | list_options ...>
-  def report_options
+  def report_options(fail_without_exception: nil)
     @report_options ||= OptionConfigs::ReportOptions.new self
+  rescue StandardError => e
+    return nil if fail_without_exception
+
+    raise e
   end
 
   def as_json(options = {})

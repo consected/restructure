@@ -6,13 +6,14 @@ describe 'user sign in process for users that can self register', js: true, driv
   include ModelSupport
 
   before(:all) do
-    Settings::AllowUsersToRegister = true
+    Settings.const_set('AllowUsersToRegister', true)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabled = false
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
+    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
 
     create_admin
 
@@ -70,9 +71,18 @@ describe 'user sign in process for users that can self register', js: true, driv
     expect(@user.disabled).to be_falsey
 
     visit '/users/sign_in'
+    has_css? '.ready-for-2fa'
     within '#new_user' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_user', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_user' do
       fill_in 'Two-Factor Authentication Code', with: otp
       click_button 'Log in'
     end
@@ -84,9 +94,18 @@ describe 'user sign in process for users that can self register', js: true, driv
     expect(@d_user.disabled).to be true
 
     visit '/users/sign_in'
+    has_css? '.ready-for-2fa'
     within '#new_user' do
       fill_in 'Email', with: @d_email
       fill_in 'Password', with: @d_pw
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_user', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_user' do
       fill_in 'Two-Factor Authentication Code', with: @d_user.current_otp
       click_button 'Log in'
     end
@@ -100,35 +119,52 @@ describe 'user sign in process for users that can self register', js: true, driv
     # login_as @user, scope: :user
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+    has_css? '.ready-for-2fa'
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: ''
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
-
       click_button 'Log in'
     end
+
+    expect(page).not_to have_selector('.login-2fa-block', visible: true)
 
     fail_message = '× Invalid email, password or two-factor authentication code.'
 
     expect(page).to have_css 'input:invalid'
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+    has_css? '.ready-for-2fa'
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password + ' '
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
+      click_button 'Log in'
+    end
 
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
       click_button 'Log in'
     end
 
     expect(page).to have_css '.flash .alert', text: fail_message
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+    has_css? '.ready-for-2fa'
     within '#new_admin' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: ' ' + @good_password
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
+      click_button 'Log in'
+    end
 
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
       click_button 'Log in'
     end
 
@@ -136,6 +172,6 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   after(:all) do
-    Settings::AllowUsersToRegister = false
+    Settings.const_set('AllowUsersToRegister', false)
   end
 end

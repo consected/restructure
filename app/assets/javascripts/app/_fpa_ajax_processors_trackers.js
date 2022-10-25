@@ -16,7 +16,8 @@ _fpa.postprocessors_trackers = {
             var done_sp = [];
             var desc = '';
             var title;
-            var master = data.master || data.masters[0];
+            var master = data.master;
+            if (!master && data.masters.length === 1) master = data.masters[0];
 
             if (!master) return;
 

@@ -50,6 +50,8 @@ class ReportsController < UserBaseController
       @runner.count_only = true
     end
 
+    @force_run = params[:force_run] == 'true'
+
     unless (@report.searchable || show_authorized?) && (current_admin || @report.can_access?(current_user))
       @no_masters = true
       return

@@ -2,7 +2,20 @@
 <% if current_admin&.matching_user_app_type&.name != 'ref-data' %>
   <h4>Important - switch to app ref-data to review and update Redcap information</h4>
 <% end%>
-<p><label>status</label> <span><%= object_instance.status %></span></p>
+<p><label>status</label> <span><%= object_instance.status %></span>&nbsp;
+  <% if object_instance.persisted? %>
+        <%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
+        data: {
+          remote: true, 
+          target: "##{object_instance.resource_name.hyphenate}--",
+          'result-target': "##{object_instance.resource_name.hyphenate}--",
+          'result-target-force': "true"
+        },
+        class: 'btn btn-primary btn-sm' %>
+  <% else %>
+  new
+  <% end %>
+</p>
 <% 
 req = object_instance.redcap_client_requests.order(id: :desc).first 
 if req&.result 
@@ -77,41 +90,43 @@ end
       target: '_blank' %></p>
   <% end %>
   <hr/>
-  <p>
-    <%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
-    data: {
-      remote: true, 
-      target: "##{object_instance.resource_name.hyphenate}--",
-      'result-target': "##{object_instance.resource_name.hyphenate}--",
-      'result-target-force': "true"
-    },
-    class: 'btn btn-primary btn-sm' %>
-  </p>
-  <% if object_instance.dynamic_model_ready? %>
-    <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
-          method: :post, 
-          remote: true, 
-          class: 'btn btn-warning btn-sm' %></p>
-    <p><%= link_to 'retrieve user list', request_users_redcap_project_admin_path(id: object_instance.id), 
-          method: :post, 
-          remote: true, 
-          class: 'btn btn-warning btn-sm' %></p>
-    <p><%= link_to 'retrieve data collection instruments list', request_data_collection_instruments_redcap_project_admin_path(id: object_instance.id), 
-          method: :post, 
-          remote: true, 
-          class: 'btn btn-warning btn-sm' %></p>
-  <% end %>
-  <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
-    <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), 
-          method: :post, 
-          remote: true, 
-          class: 'btn btn-warning btn-sm' %></p>
-  <% end %>
-  <hr/>
-  <p>
-    <%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
-    remote: true,
-    class: 'btn btn-danger btn-sm',
-    method: :post %>
-  </p>
+  <div style="display: flex;">
+    <div class="admin-info-col">
+      <% if object_instance.dynamic_model_ready? %>
+        <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+        <p><%= link_to 'retrieve user list', request_users_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+        <p><%= link_to 'retrieve data collection instruments list', request_data_collection_instruments_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+      <% end %>
+      <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
+        <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+      <% end %>
+    </div>
+    <div class="admin-info-col">
+
+      <p>
+        <%= link_to 'update dynamic model', update_dynamic_model_redcap_project_admin_path(object_instance), 
+        remote: true,
+        class: 'btn btn-danger btn-sm',
+        method: :post %>
+      </p>  
+      <p>
+        <%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
+        remote: true,
+        class: 'btn btn-danger btn-sm',
+        method: :post %>
+      </p>
+    </div>
+  </div>
 <% end %>

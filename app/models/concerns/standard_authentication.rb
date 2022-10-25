@@ -5,6 +5,9 @@ require 'bcrypt'
 module StandardAuthentication
   extend ActiveSupport::Concern
 
+  # Number of days to extend a user's password expiration by for short term re-enabling of accounts
+  ExtendExpirationDays = 5
+
   included do
     before_validation :setup_new_password, on: :create
     validates_uniqueness_of :email, case_sensitive: false, allow_blank: false, if: :email_changed?
@@ -29,7 +32,10 @@ module StandardAuthentication
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
-      Settings::TwoFactorAuthDisabled
+      return Settings::TwoFactorAuthDisabledForUser if self == User
+      return Settings::TwoFactorAuthDisabledForAdmin if self == Admin
+
+      nil
     end
 
     #
@@ -59,13 +65,51 @@ module StandardAuthentication
     #
     # Config for password complexity
     def password_config
-      Settings::PasswordEntropyConfig
+      Settings::PasswordConfig
+    end
+
+    #
+    # Is the supplied password strong enough, based on either entropy, regex, or other future rules
+    # @param [String] password
+    # @param [Hash] result - Hash to be updated with result {test:, result:, reason:}
+    # @return [true|false]
+    def password_strong_enough(password, result: nil)
+      result ||= {}
+
+      min_entropy = password_config[:min_entropy]
+
+      if min_entropy > 0
+        entropy_strength = calculate_entropy_strength(password)
+
+        if entropy_strength < min_entropy
+          result.merge! test: :entropy,
+                        result: false,
+                        reason: "strength is #{(entropy_strength.to_f / min_entropy * 100).to_i}%. " \
+                                'Try to use a mix of upper and lower case, symbols and numbers, ' \
+                                'and avoid dictionary words.'
+
+          return false
+        end
+      end
+
+      unless password_regex_matched?(password)
+        result.merge! test: :regex,
+                      result: false,
+                      reason: "is not complex enough. #{password_config[:regex_requirements]}"
+
+        return false
+      end
+
+      result.merge! test: :all, result: true
+      true
     end
 
     #
     # Calculate password strength, setting up the strength checker based on
-    # Settings::PasswordEntropyConfig
-    def calculate_strength(password)
+    # Settings::PasswordConfig
+    # @param [String] password
+    # @return [Integer]
+    def calculate_entropy_strength(password)
       c = password_config
       # extra_dictionary_words: is specified in the config and points to any method in this class.
       # In reality it is likely to be :word_list
@@ -73,6 +117,19 @@ module StandardAuthentication
                                                     use_dictionary: true,
                                                     extra_dictionary_words: send(c[:extra_dictionary_words]))
       checker.calculate_entropy password
+    end
+
+    #
+    # Checks the supplied password matches the configured regex, if there is one
+    # @param [String] password
+    # @return [true|false]
+    def password_regex_matched?(password)
+      c = password_config
+      return true if c[:regex].blank?
+
+      reg = Regexp.new(c[:regex])
+
+      reg.match?(password)
     end
 
     #
@@ -173,6 +230,19 @@ module StandardAuthentication
   end
 
   #
+  # Allow an admin to extend the expiration date for user accounts by 5 days
+  def extend_expiration
+    self.password_updated_at = (self.class.expire_password_after - ExtendExpirationDays).days.ago
+  end
+
+  #
+  # Allow an admin to unlock the account if number of failed password
+  # attempts was reached and we don't want to wait for the timeout
+  def unlock_failed_attempts
+    unlock_access!
+  end
+
+  #
   # Validate that the provided two-factor authentication code is valid for the user
   # @param code (String) - the code to check
   # @return (Boolean) - true if valid
@@ -192,7 +262,7 @@ module StandardAuthentication
     i = 0
     until res
       generated_password = Devise.friendly_token.first(16)
-      res = (self.class.calculate_strength(generated_password) >= self.class.password_config[:min_entropy])
+      res = self.class.password_strong_enough(generated_password)
       i += 1
     end
 
@@ -213,14 +283,12 @@ module StandardAuthentication
   #
   # Validation to check the password strength is sufficient
   def check_strength
-    return unless errors.any? && password
+    return if errors.any? || password.nil?
 
-    res = self.class.calculate_strength(password)
-    c = self.class.password_config
-    return true if res >= c[:min_entropy]
+    res = {}
+    return true if self.class.password_strong_enough(password, result: res)
 
-    errors.add :password,
-               "strength is #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
+    errors.add :password, res[:reason]
     false
   end
 

@@ -37,6 +37,14 @@ module FeatureSupport
       within '#new_user' do
         fill_in 'Email', with: @good_email
         fill_in 'Password', with: @good_password
+        click_button 'Log in'
+      end
+
+      expect(page).to have_selector('.login-2fa-block', visible: true)
+      expect(page).to have_selector('#new_user', visible: true)
+      expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+      within '#new_user' do
         fill_in 'Two-Factor Authentication Code', with: @user.current_otp
         click_button 'Log in'
       end

@@ -1,6 +1,6 @@
 _fpa.loaded.reports = function () {
 
-  _fpa.postprocessors.reports_form($('.report-criteria'));
+  _fpa.report_criteria.reports_form($('.report-criteria'));
   $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
 
@@ -349,6 +349,20 @@ _fpa.reports = {
     if (res.length === 0)
       $t.prepend(b);
 
+    // Add a default item that will allow all items to be removed if needed. Without this, there must always be at least one
+    // result sent.
+    var $el = $('#seicb-0').clone();
+    $el.prop('id', 'seicb-default');
+    var defval = JSON.parse($el.val());
+    defval.id = null;
+    defval.init_value = true;
+    $el.val(JSON.stringify(defval));
+    $el.attr('checked', true)
+    $el.hide();
+    console.log($el);
+    $('.report-files-actions').append($el);
+
+
   },
 
   // If the update list, add to list or remove from list submit buttons are 
@@ -407,7 +421,11 @@ _fpa.reports = {
       });
 
     });
-  }
+  },
+
+  get_results_block: function () {
+    return $('#embed_results_block,#master_results_block').last();
+  },
 
 
 };

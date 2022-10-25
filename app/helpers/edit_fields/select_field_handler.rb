@@ -6,6 +6,8 @@ module EditFields
                   :value_attr, :label_attr, :group_split_char,
                   :no_assoc
 
+    FailedValuesArray = ['failed to get values', 'failed to get values'].freeze
+
     #
     # Gets the #data for each record for a select on an association or class name
     # @param [UserBase] form_object_instance the current instance for the form object
@@ -63,8 +65,9 @@ module EditFields
     # Only called by SelectFieldHandler.list_record_data_for_select after initialization
     def generate_record_data
       cl, reslist = record_data_class_and_results
-
-      if cl.nil?
+      if cl.nil? && reslist.empty?
+        Rails.logger.info "No results returned for #{assoc_or_class_name} - possibly has a master association but no master specified"
+      elsif cl.nil?
         Rails.logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
       elsif cl.attribute_names.include?('rank')
         reslist_data = list_for_rank(reslist)
@@ -95,12 +98,15 @@ module EditFields
     def record_data_class_and_results
       assoc_name = assoc_or_class_name.pluralize
 
-      unless no_assoc
-        if Master.get_all_associations.include?(assoc_name)
+      unless no_assoc || !form_object_instance.respond_to?(:master)
+        if form_object_instance.master.nil?
+          # It is not valid for us to attempt to retrieve records not tied to a master record
+          #  when we are expecting an association
+          reslist = []
+        elsif Master.get_all_associations.include?(assoc_name)
           # We matched one of the possible classes an activity log be used with (really these are master associations)
           # It is possible the master is not set yet, so skip it in that case
-          reslist = form_object_instance.master.send(assoc_name) if form_object_instance.master
-
+          reslist = form_object_instance.master.send(assoc_name)
           cl = reslist&.first&.class
         elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? assoc_or_class_name
           # We matched one of the valid item and rec_types
@@ -118,11 +124,17 @@ module EditFields
             break
           end
 
-          cl = reslist.first&.class
+          cl = reslist&.first&.class
         end
+
+        # Just in case there was no matching master association or activity log record type association,
+        # but we have been told there is a master association expected, set the result list
+        # to blank to ensure that a full database of records is not loaded unexpectedly.
+        reslist ||= []
       end
 
-      unless cl
+      # If the reslist was not generated (not even just empty)
+      unless reslist
         # Just get the resource by its resource name or alternatively its table name
         cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
 
@@ -162,8 +174,12 @@ module EditFields
     # exist prior to attempting the query.
     # @param [ActiveRecord::Relation] reslist
     # @param [UserBase] model
+    # @param [nil | Object | :default | :exception] on_fail_return - return the specified value
+    #                                               or array if the attribute configs are incorrect
+    #                                               :default - forces return of a 'failed to get values' array
+    #                                               :exception - raises and exception instead
     # @return [Array]
-    def list_for_defined_attributes(reslist, model)
+    def list_for_defined_attributes(reslist, model, on_fail_return: :default)
       arr_label_attr, pluck_attrs, do_subs_label = pluck_attrs_for(label_attr, model)
       arr_value_attr, val_pluck_attrs, do_subs_value = pluck_attrs_for(value_attr, model)
 
@@ -174,6 +190,9 @@ module EditFields
       pluck_attrs_strs = pluck_attrs.map(&:to_s)
 
       if (reslist.attribute_names & pluck_attrs_strs).sort != pluck_attrs_strs.sort
+        on_fail_return = FailedValuesArray if on_fail_return == :default
+        return on_fail_return unless on_fail_return == :exception
+
         raise FphsException,
               "Not all attributes from value_attr or label_attr (#{pluck_attrs_strs}) configs " \
               "are defined in #{reslist.model}: #{reslist.attribute_names} / #{model}"

@@ -42,6 +42,7 @@ module Redcap
     # This is only intended to be called from a background job.
     def retrieve_validate_store
       retrieve
+      summarize_fields
       validate
       store
     end
@@ -49,9 +50,42 @@ module Redcap
     #
     # Immediately retrieve records from REDCap.
     # This is only intended to be called from a background job.
+    # Each record is a Hash, keyed by a symbol
     # @return [Array{Hash}]
     def retrieve
       self.records = project_admin.api_client.records
+    end
+
+    #
+    # Summarize the multiple choice checkbox fields into _chosen_array fields
+    # if the project requests it
+    # The method runs through each of the columns, and for any fields requiring
+    # summarization adds them to all the records in the current @records set.
+    # At this point, prior to storage, the individual checkbox fields return a string
+    # value "1" checked, or "0" unchecked. We check for "1" and add the
+    # field value represented by that checkbox to the array. Subsequent tag_select UI field
+    # processing can display these options appropriately, and SQL can make comparisons
+    # against this single field without needing knowledge of additional options that may be
+    # added in the future.
+    def summarize_fields
+      return unless project_admin.data_options.add_multi_choice_summary_fields
+
+      all_rc_fields = data_dictionary.all_fields
+      all_rc_fields.each do |_name, field|
+        next unless field.field_type.name == :checkbox
+
+        next unless field.has_checkbox_summary_array?
+
+        ccfs = field.checkbox_choice_fields
+        next unless ccfs.present?
+
+        cf_name = field.chosen_array_field_name
+        records.each do |rec|
+          vals = ccfs.map { |ccf| rec[ccf.to_sym] == '1' && DataDictionaries::Field.choice_field_value(ccf) }
+                     .select { |item| item }
+          rec[cf_name] = vals
+        end
+      end
     end
 
     #
@@ -145,9 +179,9 @@ module Redcap
       end
 
       result = {
-        created_ids: created_ids,
-        updated_ids: updated_ids,
-        unchanged_ids: unchanged_ids,
+        count_created_ids: created_ids&.length,
+        count_updated_ids: updated_ids&.length,
+        count_unchanged_ids: unchanged_ids&.length,
         table: project_admin.dynamic_model_table,
         errors: errors,
         imported_files: imported_files.map { |i| "#{i.path}/#{i.file_name}" }
@@ -194,7 +228,7 @@ module Redcap
     # All fields expected to be retrieved from REDCap to be stored as a record
     # @return [Hash{Symbol => Redcap::DataDictionaries::Field}]
     def all_data_dictionary_fields
-      @all_data_dictionary_fields ||= data_dictionary.all_retrievable_fields
+      @all_data_dictionary_fields ||= data_dictionary.all_retrievable_fields(summary_fields: true)
     end
 
     #

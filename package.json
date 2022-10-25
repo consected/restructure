@@ -25,12 +25,18 @@
     "jquery.hotkeys": "https://github.com/consected/jquery.hotkeys",
     "jquery.scrollto": "^2.1.2",
     "js-yaml": "^3.14.0",
+    "jsTreeTable": "https://github.com/consected/jsTreeTable",
+    "luxon": "^3.0.1",
     "megamark": "^3.3.0",
-    "moment": "^2.29.1",
+    "moment": "^2.29.3",
     "sortablejs": "^1.13.0",
     "spark-md5": "^3.0.1",
     "tablesorter": "^2.31.3",
     "textarea-autogrow": "^1.0.0",
     "typeahead.js": "^0.11.1"
+  },
+  "devDependencies": {
+    "jasmine-browser-runner": "^1.1.0",
+    "jasmine-core": "^4.3.0"
   }
 }

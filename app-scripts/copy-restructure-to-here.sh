@@ -20,7 +20,7 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
   docs/admin_reference docs/user_reference docs/dev_reference \
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
 
-  rsync -av --update --exclude="${EXCLUDE}" ${SRC}/${FROM}/ ${FROM}/
+  rsync -crv --delete --exclude="${EXCLUDE}" ${SRC}/${FROM}/ ${FROM}/
 done
 
 for FROM in \

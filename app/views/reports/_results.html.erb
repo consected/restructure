@@ -2,8 +2,10 @@
   result_tables = @runner.result_tables_by_index || []
   @outer_block_id = "report-container-#{SecureRandom.hex}"
   no_results_scroll = embedded_report || @report.report_options.view_options.no_results_scroll
+  extra_classes = embedded_report ? 'report-is-embedded' : ''
+  extra_classes += " report-rn--#{@report.alt_resource_name}"
 %>
-<div class="data-results report-container <%= embedded_report ? 'report-is-embedded' : '' %>" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
+<div class="data-results report-container <%=extra_classes%>" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
   <div class="<%= @runner.count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
     <% unless embedded_report %>

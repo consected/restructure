@@ -16,6 +16,146 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.110] - 2022-10-11
+
+### Transferred from ReStructure @8.0.45 - 2022-10-11
+
+- [Added] two step MFA at login
+- [Changed] help information for 2FA setup and login
+- [Added] seeds for user notifications report and supporting admin items
+- [Added] configuration specific documentation for "manage users" and improved template documentation
+- [Added] admin functions to unlock user accounts
+- [Added] e_signature script class to refactor and avoid client side errors
+- [Fixed] issue viewing dynamic model definition when the db table is missing
+- [Fixed] CSV generation and import of files with master_id field
+- [Fixed] alert showing if any master record is open in list, even if it is not the master record with the alert
+- [Fixed] blocking on piped processes
+- [Fixed] general selection preparation for dynamic definitions with no master association
+- [Fixed] initialization loading of full database of edit field selections
+- [Fixed] handling of filestore exceptions in regular controllers
+
+## [8.0.109] - 2022-09-16
+
+- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
+- [Fixed] "close other tabs" for single master view
+- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
+
+## [8.0.108] - 2022-09-15
+
+- [Fixed] various small bug
+
+## [8.0.107] - 2022-09-14
+
+- [Added] real handling of UI timezones and formats, using Luxon library
+- [Added] option when clicked to expand a master tab, others will be closed
+- [Added] image list to custom editor
+- [Added] server info Rails log search
+- [Fixed] iframe sandboxing
+- [Fixed] refresh outdated dynamic definitions
+- [Fixed] embedded report links and tree table table
+- [Fixed] incorrect handling of result data lookup for select fields when empty dataset
+- [Fixed] big select with absolutely unique field id
+- [Fixed] usability and editing issues in custom editor
+
+## [8.0.106] - 2022-09-07
+
+- Bumped version
+
+## [8.0.105] - 2022-09-07
+
+- Bumped version
+
+## [8.0.103] - 2022-09-07
+
+- [Fixed] inability to edit report with bad options
+- [Fixed] table tree to only set up its own block
+- [Fixed] report_options causing errors in lists
+
+## [8.0.102] - 2022-09-07
+
+- [Fixed] tree view opacity during load
+- [Fixed] small issue with admin reports criteria
+- [Fixed] issues with show_modal
+
+## [8.0.101] - 2022-09-07
+
+- Bumped version
+
+## [8.0.98] - 2022-09-06
+
+### Transferred from Harvard @7.4.122 - 2022-09-06
+
+- [Added] view of report criteria in admin
+- [Fixed] failure trying to add a new redcap project
+
+### Viva
+
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
+
+## [8.0.97] - 2022-08-30
+
+- [Added] show_if generation from Redcap branching logic
+- [Added] jasmine-browser-runner to replace old gem and support script app-scripts/jasmine-serve.sh
+- [Added] ability to force update of a redcap dynamic model
+- [Added] Redcap pull generation of array summary fields for multiple choice checkboxes
+- [Added] multilevel functionality to report trees
+
+## [8.0.96] - 2022-08-19
+
+- [Testing] bootsnap
+- [Added] password regex option and refactored entropy results
+- [Added] disabling of 2FA for user and admin independently
+- [Changed] new and edit password forms for usability
+- [Fixed] sandbox of iframes (reports and message notifications) to allow popups from links
+
+## [8.0.95] - 2022-08-15
+
+Attempting build to fix mini_portile2 issue again
+
+## [8.0.94] - 2022-08-15
+
+Attempting build to fix mini_portile2 issue
+
+## [8.0.93] - 2022-08-15
+
+- Rebuilt with clean build container
+
+## [8.0.91] - 2022-08-15
+
+- Bumped version
+- Rebuild to fix missing gem mini_portile from vendor/cache
+
+## [8.0.89] - 2022-08-15
+
+- [Added] tree view option for reports
+- [Added] ui templates for messages in change and forgot password form
+- [Fixed] field types not being passed to UI templates for standard subject types
+
+### Transfer from ReStructure 8.0.37 - 2022-08-15
+
+- [Added] ui templates for messages in change and forgot password form
+- [Fixed] field types not being passed to UI templates for standard subject types
+- [Changed] login issues help for self registration
+- [Added] is-(not-?)embedded-report class to report criteria and results blocks
+- [Changed] report list checkboxes so the last item in the list can be removed
+- [Changed] links to reports in lists to use name rather than id
+- [Changed] reporting of redcap stored record requests to give counts rather than list of items
+- [Fixed] scrolling on go_to_master save action
+- [Fixed] inability to download files in secure viewer when opened from a link outside a filestore browser
+- [Fixed] bug getting random value from uninitialized handlebars helper state
+- [Fixed] mailto links
+- [Fixed] open-in-sidebar from study info pages
+- [Added] overflow storage to handle local_storage quota
+- [Added] ability for report page to force to run with a param ?force_run=true
+- [Added] open-embedded-report hash options for URLs in content
+- [Added] edit_as: general_selection: to override standard general selection definition for a field to use
+- [Added] page_embedded_block to study info
+- [Fixed] issue with redcap admin NFS container
+- [Added] ui templates for messages in change and forgot password form
+- [Fixed] field types not being passed to UI templates for standard subject types
+
 ## [8.0.88] - 2022-07-05
 
 - [Added] other_user_is_creator from reference option

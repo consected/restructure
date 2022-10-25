@@ -193,7 +193,8 @@ module GeneralDataConcerns
       edit_as = opt[:edit_as] if opt
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || an).to_s
-      next unless alt_fn.start_with?('select_record_')
+      alt_gs = edit_as[:general_selection]
+      next unless alt_gs || alt_fn.start_with?('select_record_')
 
       entries = allselects[an.to_sym]&.map do |e|
         [e.last, { name: e.first }]
@@ -217,7 +218,6 @@ module GeneralDataConcerns
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
       extras[:methods] << :resource_name if respond_to? :resource_name
-
       extras[:methods] << :updated_at_ts if respond_to? :updated_at
       extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :data if respond_to? :data

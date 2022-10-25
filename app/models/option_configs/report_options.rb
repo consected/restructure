@@ -18,9 +18,10 @@ module OptionConfigs
                                       view_as search_button_label report_auto_submit_on_change
                                       no_results_scroll show_all_booleans_as_checkboxed
                                       hide_list_labels_for_empty_content
-                                      force_show_search_button]
+                                      force_show_search_button no_sorting]
 
     configure :list_options, with: %i[hide_in_list list_description]
+    configure :tree_view_options, with: %i[num_levels column_levels expand_level]
     configure :view_css, with: %i[classes selectors media_queries]
     configure :criteria_css, with: %i[classes selectors media_queries]
     configure :master_results_css, with: %i[classes selectors media_queries]

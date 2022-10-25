@@ -158,7 +158,7 @@ Devise.setup do |config|
 
   # ==> Configuration for :validatable
   # Range for password length.
-  config.password_length = (Rails.env.test? ? 4..72 : 10..72)
+  config.password_length = (Rails.env.test? ? 4..72 : Settings::PasswordConfig[:min_length]..72)
 
   # Email regex used to validate email formats. It simply asserts that
   # one (and only one) @ exists in the given string. This is mainly
@@ -191,7 +191,7 @@ Devise.setup do |config|
   config.maximum_attempts = Settings::PasswordMaxAttempts
 
   # Time interval to unlock the account if :time is enabled as unlock_strategy.
-  config.unlock_in = 1.hour
+  config.unlock_in = Settings::PasswordUnlockTimeMins.minutes
 
   # Allow a longer drift on two-factor authentication codes
   config.otp_allowed_drift = Settings::TwoFactorAuthDrift

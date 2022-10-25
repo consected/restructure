@@ -3,6 +3,7 @@
 class ApplicationController < ActionController::Base
   include ControllerUtils
   include AppExceptionHandler
+  include NfsStore::FsExceptionHandler
   include AppConfigurationsHelper
   include NavHandler
   include UserActionLogging

@@ -21,6 +21,19 @@ For SMS messages, layout and content are plain text.
 
 The content of a message is substituted into its layout in the position indicated by `\{\{main_content\}\}`
 
+### User Account Notifications
+
+Users are notified by email when certain events occur related to their accounts.
+
+These require a layout template, named `general server notification` and the following email content templates:
+
+- `server password expiration reminder`
+- `server registration confirmation`
+- `server password reset instructions`
+- `server password changed`
+
+When a new server is initially set up, these templates are created automatically. They should be edited to match the brand and content required by the organization.
+
 ### Dialog Templates
 
 The *dialog* message type provides a mechanism for displaying lengthy sections of text within dynamic definition forms.
@@ -46,8 +59,16 @@ used in the following forms / pages:
 - `ui admin login` - administrator login form
 - `ui new user registration` - user self-registration form
 - `ui resend confirmation code` - form to request a registration confirmation code to be resent
-- `ui change password` - password change form
+- `ui user change password` - password change form
+- `ui user forgot password` - forgot password form
+- `ui admin change password` - password change form
+- `ui admin forgot password` - forgot password form
 - `ui resend unlock code` - form to request a locked account be unlocked
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form
 - `ui first login` - information for a new user on first login
+
+### HTML Markup Snippets
+
+- `ui page css - {app type name}` - plain CSS to place in a *style* block in the *head* section
+- `ui page js - {app type name}` - plain Javascript to place in a *style* block in the *head* section

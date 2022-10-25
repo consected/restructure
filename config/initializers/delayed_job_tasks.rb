@@ -46,28 +46,30 @@ Rails.application.configure do
         end
       end
 
-      res = Delayed::Job.lookup_jobs_by_class('SmsDeliveryStatusRefreshTask', queue: 'recurring-tasks')
-      if res.empty?
-        Rails.logger.info 'Scheduling the SMS delivery refresh task'
-        SmsDeliveryStatusRefreshTask.schedule!
-      end
+      if Settings.bulk_msg_app
+        res = Delayed::Job.lookup_jobs_by_class('SmsDeliveryStatusRefreshTask', queue: 'recurring-tasks')
+        if res.empty?
+          Rails.logger.info 'Scheduling the SMS delivery refresh task'
+          SmsDeliveryStatusRefreshTask.schedule!
+        end
 
-      res = Delayed::Job.lookup_jobs_by_class('PhoneTypeRefreshTask', queue: 'recurring-tasks')
-      if res.empty?
-        Rails.logger.info 'Scheduling the phone type refresh task'
-        PhoneTypeRefreshTask.schedule!
-      end
+        res = Delayed::Job.lookup_jobs_by_class('PhoneTypeRefreshTask', queue: 'recurring-tasks')
+        if res.empty?
+          Rails.logger.info 'Scheduling the phone type refresh task'
+          PhoneTypeRefreshTask.schedule!
+        end
 
-      res = Delayed::Job.lookup_jobs_by_class('ZeusShortLinkClick', queue: 'recurring-tasks')
-      if res.empty?
-        Rails.logger.info 'Scheduling the short link click refresh task'
-        ShortLinkClicksRefreshTask.schedule!
-      end
+        res = Delayed::Job.lookup_jobs_by_class('ZeusShortLinkClick', queue: 'recurring-tasks')
+        if res.empty?
+          Rails.logger.info 'Scheduling the short link click refresh task'
+          ShortLinkClicksRefreshTask.schedule!
+        end
 
-      res = Delayed::Job.lookup_jobs_by_class('SmsOptOutRefreshTask', queue: 'recurring-tasks')
-      if res.empty?
-        Rails.logger.info 'Scheduling the SMS opt out refresh task'
-        SmsOptOutRefreshTask.schedule!
+        res = Delayed::Job.lookup_jobs_by_class('SmsOptOutRefreshTask', queue: 'recurring-tasks')
+        if res.empty?
+          Rails.logger.info 'Scheduling the SMS opt out refresh task'
+          SmsOptOutRefreshTask.schedule!
+        end
       end
 
     end

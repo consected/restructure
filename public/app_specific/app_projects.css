@@ -331,7 +331,8 @@ td.report-el pre {
   padding: 0;
 }
 
-#modal_results_block .report-results-inner {
+#modal_results_block .report-results-inner, 
+#modal_results_block_1 .report-results-inner {
   overflow-y: hidden;
 }
 
@@ -517,4 +518,25 @@ form ul.list-group > li.list-group-item.caption-before.activity-log--project-ass
 
 .ui-timepicker-container.ui-timepicker-standard {
   font-size: 16px;
+}
+
+.nav .dropdown span.glyphicon.glyphicon-question-sign:after {
+  content: "Help";
+  padding-left: 0.4em;
+  font-family: var(--content-font-family);
+  font-size: var(--content-font-size);
+  vertical-align: top;
+}
+
+.nav .dropdown span.glyphicon.glyphicon-user:after {
+  content: "User Profile";
+  padding-left: 0.4em;
+  font-family: var(--content-font-family);
+  font-size: var(--content-font-size);
+  vertical-align: top;
+}
+
+ul.nav.navbar-nav li a .glyphicon {
+  vertical-align: top;
+  padding-right: 0.2em;
 }
