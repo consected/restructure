@@ -34,6 +34,13 @@ module UserSupport
       user.save!
     end
 
+    if user.two_factor_setup_required?
+      user.otp_required_for_login = true
+      user.new_two_factor_auth_code = false
+    end
+    user.save!
+    expect(user.two_factor_setup_required?).to be_falsey
+
     @user_authentication_token = user.authentication_token
 
     # # Can't reload, as that doesn't clear non-db attributes
@@ -223,7 +230,10 @@ module UserSupport
     user = User.active.find_by(email: @good_email)
     expect(user).to be_a User
     expect(user.id).to equal @user.id
+    validate_scantron_setup
+  end
 
+  def validate_scantron_setup
     return if defined? Scantron
 
     puts 'Scantron was not defined!'

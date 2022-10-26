@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Settings
-  DefaultMigrationSchema = 'ml_app'
-  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || 'restrdba'
+  DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
+  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || DefaultSettings::DefaultSchemaOwner
 
   # Does not set the prefix, just specifies what we search by in jobs
-  GlobalIdPrefix = 'fpa1'
+  GlobalIdPrefix = DefaultSettings::GlobalIdPrefix
 
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze
@@ -42,7 +42,7 @@ class Settings
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
   # `public/app_specific/<app folder>`` and use the appropriate relative path `/app_specific/<app folder>` in the config.
-  DefaultLogo = 'restructure-logo.svg'
+  DefaultLogo = DefaultSettings::DefaultLogo
 
   # Force a 'from email' address for notifications
   # If not set (nil), then the current user email address will be used,
@@ -50,7 +50,7 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || ENV['FROM_EMAIL']
   # Email address for admin contact
-  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'admin@restructure'
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || DefaultSettings::AdminEmail
   # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
   BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
 
@@ -62,7 +62,7 @@ class Settings
   TwoFactorAuthDisabledForAdmin = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'admin'])
 
   # App name that appears within 2FA authenticator app
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || DefaultSettings::TwoFactorAuthIssuer
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
@@ -90,7 +90,7 @@ class Settings
   # using the curly substitution {{base_url}}
   BaseUrl = ENV['BASE_URL'] || '(not set)'
   # title tag page title, appears in tab or browser heading
-  PageTitle = ENV['PAGE_TITLE'] || 'ReStructure'
+  PageTitle = ENV['PAGE_TITLE'] || DefaultSettings::PageTitle
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
@@ -180,9 +180,9 @@ class Settings
   # Length of a short code
   ShortcodeLength = 6
   # Website enabled public bucket for shortlink files
-  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
+  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || DefaultSettings::DefaultShortLinkS3Bucket
   # Log bucket for link clicks to be recorded and retrieved for analytics
-  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
+  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || DefaultSettings::DefaultShortLinkLogS3Bucket
   LogBucketPrefix = 'access/'
 
   # Default table names (and associated configs) for the primary CRM (Zeus) app
@@ -218,7 +218,7 @@ class Settings
   # Alternative to blindly using inflector acronyms.
   # This array of acronyms will be enforced for titleize only, avoiding
   # existing expectations around class names being broken
-  CaptionAcronyms = %w[IPA IPAs BHS PI PIs HMS FPHS MD RA RAs].freeze
+  CaptionAcronyms = DefaultSettings::CaptionAcronyms
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
@@ -228,7 +228,7 @@ class Settings
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   # If setting more than one country, separate them with a blank-space.
   # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
-  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %i[us ie gb de gr au nz]).freeze
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %w[us ie gb de gr au nz]).freeze
 
   # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
   # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
@@ -249,4 +249,31 @@ class Settings
 
   # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
   DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
+
+  # Set the priority listing for the country select
+  DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
+
+  # IMPORTANT: add any app setting config variable to the following array
+  # that is worthy of showing to the admin users,
+  # so it can be displayed in the server info admin view.
+  AppSettingsVars = %w[
+    PageTitle EnvironmentName BaseUrl
+    OnlyLoadAppTypes
+    DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
+    UserTimeout AdminTimeout OsWordsFile PasswordConfig
+    NotificationsFromEmail AdminEmail BatchUserEmail
+    TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
+    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
+    LoginIssuesUrl LoginMessage
+    SearchResultsLimit
+    DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
+    DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
+    ScriptedJobDirectory
+    DisableVDef AllowDynamicMigrations
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
+    InvitationCode
+    CountryCodesForTimezones DefaultUserTimezone
+    DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
+    DefaultCountrySelect
+  ].freeze
 end

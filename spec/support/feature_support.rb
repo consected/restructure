@@ -12,6 +12,8 @@ module FeatureSupport
   def login
     just_signed_in = false
     already_signed_in = false
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
+    expect(@user.two_factor_setup_required?).to be_falsey
 
     3.times do
       return if user_logged_in?

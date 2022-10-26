@@ -16,7 +16,6 @@ RSpec.describe Redcap::DataRecords, type: :model do
     reset_mocks
 
     mock_full_requests
-    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_full_*.rb`
 
     tn = "redcap_test.test_full_rc#{rand 100_000_000_000_000}_recs"
     @project_admin = rc = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q3',

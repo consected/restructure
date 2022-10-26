@@ -98,6 +98,12 @@ module EditFields
     def record_data_class_and_results
       assoc_name = assoc_or_class_name.pluralize
 
+      target = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
+      if target
+        target_class = target[:model]
+        no_assoc ||= target_class.no_master_association || !target_class.new.respond_to?(:master)
+      end
+
       unless no_assoc || !form_object_instance.respond_to?(:master)
         if form_object_instance.master.nil?
           # It is not valid for us to attempt to retrieve records not tied to a master record
@@ -134,15 +140,13 @@ module EditFields
       end
 
       # If the reslist was not generated (not even just empty)
-      unless reslist
+      if !reslist && target_class
         # Just get the resource by its resource name or alternatively its table name
-        cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
-
-        if cl
-          cl = cl[:model]
-          reslist = cl.all
-        end
+        cl = target_class
+        reslist = cl.all
       end
+
+      reslist ||= []
 
       reslist = reslist.active if reslist.respond_to?(:active)
       reslist = reslist.distinct if reslist.respond_to?(:distinct)

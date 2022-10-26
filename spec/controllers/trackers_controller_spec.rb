@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe TrackersController, type: :controller do
+  include UserSupport
   include TrackerSupport
 
   def item
@@ -16,6 +17,7 @@ RSpec.describe TrackersController, type: :controller do
   before :each do
     admin, = ControllerMacros.create_admin
     @admin = admin
+    validate_scantron_setup
   end
 
   let(:valid_attributes) do

@@ -19,7 +19,7 @@ _fpa.loaded.preload = function () {
 };
 _fpa.loaded.default = function () {
 
-  _fpa.clean_cache();
+  _fpa.cache.clean();
 
   _fpa.timed_flash_fadeout();
   _fpa.form_utils.format_block();
@@ -83,7 +83,7 @@ _fpa.loaded.default = function () {
     _fpa.printing.appPrintHandler();
   });
 
-  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0) {
+  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0 && _fpa.status.controller !== 'registrations') {
     const key_viewed_intro = `viewed-introduction-${_fpa.state.current_user.email}`;
     var viewed = localStorage.getItem(key_viewed_intro);
     if (!viewed) {
@@ -104,16 +104,16 @@ _fpa.loaded.default = function () {
   target = decodeURIComponent(target);
   // If no target provided, check if a login page previously cached one and use it instead
   if (!target && !$('body.sessions').length) {
-    var hash_res = _fpa.cache('login-redirect-hash');
+    var hash_res = _fpa.cache.fetch('login-redirect-hash');
     target = hash_res && hash_res.hash;
-    _fpa.set_cache('login-redirect-hash', {})
+    _fpa.cache.store('login-redirect-hash', {})
   }
 
   // Ensure a sensible target is passed
   if (target && target.length > 5) {
     // If we are on a login page, we need to store the hash, since it isn't passed to the server
     if ($('body.sessions').length) {
-      _fpa.set_cache('login-redirect-hash', { hash: target });
+      _fpa.cache.store('login-redirect-hash', { hash: target });
     }
     else {
 

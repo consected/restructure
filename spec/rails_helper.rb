@@ -59,6 +59,11 @@ include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 
+`mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+`mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
+`mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*test_imports*.rb`
+`rm -f db/app_migrations/test/*test_*.rb`
+
 put_now 'Devise and warden'
 require 'devise'
 include Warden::Test::Helpers
@@ -114,8 +119,6 @@ unless ENV['SKIP_DB_SETUP']
   # If you are not using ActiveRecord, you can remove this line.
   put_now 'Enforce migrations'
   ActiveRecord::Migration.maintain_test_schema!
-
-  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb; rm -f db/app_migrations/test/*test_*.rb`
 
   sql = <<~END_SQL
     DROP SCHEMA IF EXISTS redcap_test CASCADE;
