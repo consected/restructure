@@ -71,7 +71,7 @@ module ReportResults
     # For example: ['timestamp', 'date', 'varchar', 'int4']
     # @return [Array{String}]
     def column_types
-      @results&.type_map&.coders&.map(&:name) || []
+      @results&.type_map&.coders&.map { |c| c&.name || '__unknown__' } || []
     end
   end
 end

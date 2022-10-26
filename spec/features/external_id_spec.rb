@@ -9,6 +9,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   include BhsImportConfig # automatically imports the BHS app
 
   before(:all) do
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
     BhsImportConfig.import_config
     SetupHelper.feature_setup
 
@@ -25,6 +26,8 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     end
 
     @user, @good_password = create_user
+    expect(@user.two_factor_auth_disabled).to be false
+    expect(@user.two_factor_setup_required?).to be_falsey
     @good_email = @user.email
     resource_name = :bhs_assignments
     # Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: , current_admin: @admin, user: @user
@@ -39,6 +42,8 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     ActivityLog.define_models
     validate_setup
     validate_bhs_setup
+
+    expect(@user.two_factor_setup_required?).to be_falsey
   end
 
   before :each do

@@ -122,6 +122,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     have_css '#advanced_search_master.ajax-running'
     dismiss_modal
+    sleep 1
     have_css '#master_results_block'
     expect(page).to have_css '#master_results_block', text: ''
     have_css '#search_count'
@@ -155,7 +156,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     #    if t.first.text == '0'
     #      t.click
     #    end
-    have_css '.tracker-block.collapse.in'
+    have_css "##{h}.tracker-block.collapse.in"
 
     # Validate that we don't already have a protocol / sub process tracked for this player
     protocol = Classification::Protocol.active.selectable.find_by(name: 'Q1')
@@ -267,7 +268,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       click_link 'show history'
     end
 
-    find 'tbody.tracker-history.collapse.in', wait: 5
+    have_css "##{h}.tracker-history.collapse.in"
 
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: pe_orig.name.captionize
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: @user.email.to_s
@@ -303,7 +304,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     h = open_player_element items.first, items
 
     # We know the tracker has records, so open it
-    have_css '.tracker-block.collapse.in'
+    have_css "##{h}.tracker-block.collapse.in"
 
     # Validate the current protocol item appears as expected
     expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
@@ -314,7 +315,8 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     within 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"]' do
       click_link 'show history'
     end
-    find 'tbody.tracker-history.collapse.in', wait: 5
+
+    have_css "##{h}.tracker-history.collapse.in"
 
     # The previous item is there still
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
@@ -395,7 +397,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       click_link 'show history'
     end
 
-    have_css "##{h} " + 'tbody.tracker-history.collapse.in'
+    have_css "##{h}.tracker-history.collapse.in"
 
     # The previous item is there still
     expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp_orig.name}/i

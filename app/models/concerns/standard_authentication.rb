@@ -254,6 +254,12 @@ module StandardAuthentication
   end
 
   #
+  # Ensure 2FA has been set up if required
+  def two_factor_setup_required?
+    !two_factor_auth_disabled && !(otp_secret.present? && otp_required_for_login)
+  end
+
+  #
   # Generate a random password for a user
   # Capture the plain text password in the @new_password attribute
   # @return (String) - Generated plain text password

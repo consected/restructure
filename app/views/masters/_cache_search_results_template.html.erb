@@ -1,12 +1,12 @@
 <%
   part = nil
-  cache_res = Rails.cache.fetch partial_cache_key(:master__search_results_template) do
-    part = render partial: 'masters/search_results_template'
-    ActiveSupport::Gzip.compress(part)
-  end
-
   if Rails.configuration.action_controller.perform_caching == false
-    Rails.cache.delete partial_cache_key(:master__search_results_template)
+    part, _ = render_and_compress_partial('masters/search_results_template')
+  else
+    cache_res = Rails.cache.fetch partial_cache_key(:master__search_results_template) do
+      part, comp = render_and_compress_partial('masters/search_results_template')
+      comp
+    end
   end
 %>
 <%= part || ActiveSupport::Gzip.decompress(cache_res).html_safe %>

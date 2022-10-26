@@ -6,7 +6,6 @@ _fpa = {
     caption_before: {},
     dialog_before: {},
     template_config: {},
-    background_loading: {},
     template_config_versions: {},
   },
 
@@ -15,7 +14,6 @@ _fpa = {
   version: '0',
   remote_request: null,
   remote_request_block: null,
-  overflow_local_storage: {},
 
   non_versioned_template_types: [
     'trackers',
@@ -107,7 +105,7 @@ _fpa = {
         var id = $(this).attr('id');
 
         id = id.replace('-partial', '');
-        console.log(Handlebars.CompileOptions);
+
         var fnTemplate = Handlebars.compile($(this).html(), _fpa.HandlebarsCompileOptions);
         Handlebars.registerPartial(id, fnTemplate);
         _fpa.partials[id] = fnTemplate;
