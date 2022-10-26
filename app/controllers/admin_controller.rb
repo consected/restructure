@@ -9,6 +9,9 @@ class AdminController < ApplicationController
   helper_method :object_has_admin_parent?, :object_name, :editor_code_type,
                 :filter_params_permitted, :filter_params_hash, :filter_params
 
+  # Ensure 2FA has been set up if required
+  before_action -> { redirect_to '/admins/show_otp' if current_admin.two_factor_setup_required? }
+
   before_action :check_capabilities!
 
   protected

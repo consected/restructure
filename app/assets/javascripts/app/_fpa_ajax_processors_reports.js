@@ -127,8 +127,8 @@ _fpa.postprocessors_reports = {
 
                 col_types = table_cell_types[t];
                 var idname = col_types[i];
-                _fpa.set_definition(i, function () {
-                  var pe = _fpa.cache(i);
+                _fpa.cache.get_definition(i, function () {
+                  var pe = _fpa.cache.fetch(i);
                   var cells = $('td[data-col-table="' + t + '"][data-col-type="' + idname + '"]');
                   cells.each(function () {
                     var cell = $(this);

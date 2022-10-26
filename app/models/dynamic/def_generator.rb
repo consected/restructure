@@ -193,7 +193,7 @@ module Dynamic
     # Decide whether to regenerate a model based on it not existing already in the namespace
     # @return [Class | nil] truthy result unless the model exists in the namespace
     def prevent_regenerate_model
-      return if force_regenerate
+      return if force_regenerate || !ready_to_generate?
 
       got_class = begin
         full_implementation_class_name.constantize

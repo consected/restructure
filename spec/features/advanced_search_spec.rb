@@ -80,15 +80,15 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     have_css '#advanced_search_master.ajax-running'
 
     expect(page).to have_css '#search_count', text: /[0-9]+/
+    expect(page).to have_css 'a.master-expander.attached-me-click'
 
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
       expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/)
     end
 
-    have_css('a.master-expander.attached-me-click')
-
     have_css("a.master-expander.attached-me-click[data-target='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header")
-    page.all(:css, "a.master-expander.attached-me-click[data-target='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header").first.click
+    got_header = page.all(:css, "a.master-expander.attached-me-click[data-target='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header").first
+    got_header&.click
 
     # expect the player section to expand
     expect(page).to have_css "#master-#{@full_player_info.master_id}-main-container.collapse.in"
