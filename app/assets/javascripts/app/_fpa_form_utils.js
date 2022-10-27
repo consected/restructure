@@ -314,8 +314,8 @@ _fpa.form_utils = {
     post += (data.extra_log_type ? '-extra_log_type+' + data.extra_log_type : '');
     var cname = 'general_selections' + post;
 
-    _fpa.set_definition(cname, function () {
-      var pe = _fpa.cache(cname);
+    _fpa.cache.get_definition(cname, function () {
+      var pe = _fpa.cache.fetch(cname);
       // _general_selections may be passed as an attribute in the response data
       if (!data._general_selections) data._general_selections = {};
       for (var k in data) {
@@ -438,7 +438,7 @@ _fpa.form_utils = {
   setup_typeahead: function (element, list, name, limit, options) {
 
     if (typeof list === 'string')
-      list = _fpa.cache(list);
+      list = _fpa.cache.fetch(list);
 
     var items = new Bloodhound({
       datumTokenizer: Bloodhound.tokenizers.whitespace,
@@ -1573,7 +1573,7 @@ _fpa.form_utils = {
 
     block.find('input.college-input.typeahead').not('.attached-college_ta').addClass('attached-college_ta').each(function () {
       var el = $(this);
-      _fpa.set_definition('colleges', function () {
+      _fpa.cache.get_definition('colleges', function () {
         _fpa.form_utils.setup_typeahead(el, 'colleges', "colleges");
       });
     });

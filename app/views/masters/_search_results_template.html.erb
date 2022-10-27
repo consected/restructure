@@ -113,7 +113,7 @@
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
 <script>
-  _fpa.cache_definitions(<%= all_cnames.to_json.html_safe %>);
+  _fpa.cache.get_definitions(<%= all_cnames.to_json.html_safe %>);
 </script>
 
 

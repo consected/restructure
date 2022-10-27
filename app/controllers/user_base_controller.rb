@@ -60,4 +60,6 @@ class UserBaseController < ApplicationController
   before_action :authenticate_user!
   # The #secure_params method is memoized. This can cause specs to fail since they reuse controllers
   before_action -> { @secure_params = nil }
+  # Ensure 2FA has been set up if required
+  before_action -> { redirect_to '/users/show_otp' if current_user.two_factor_setup_required? }
 end

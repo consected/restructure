@@ -19,7 +19,7 @@ _fpa_admin.user_roles.admin_edit_form = class {
 
     block.find('#admin_user_role_role_name').not('.added-user-role-typeahead').each(function () {
       var el = $(this);
-      _fpa.set_definition('user_roles', function () {
+      _fpa.cache.get_definition('user_roles', function () {
         _fpa.form_utils.setup_typeahead(el, 'user_roles', "user_roles", 50);
       });
     }).addClass('added-user-role-typeahead');

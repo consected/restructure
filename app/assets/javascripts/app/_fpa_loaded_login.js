@@ -22,7 +22,7 @@ _fpa.loaded.login = function () {
       if (data.need_2fa) {
         $('.login-user-password-block').hide();
         $('.login-2fa-block').show();
-        $('#user_otp_attempt').attr('required', true);
+        $('#user_otp_attempt, #admin_otp_attempt').attr('required', true).focus();
       }
       else {
         $('form#new_user, form#new_admin').submit();
