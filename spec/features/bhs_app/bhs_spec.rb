@@ -18,6 +18,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   before :all do
     BhsImportConfig.import_config
     SetupHelper.feature_setup
+    Settings.const_set('TwoFactorAuthDisabledForUser', false)
     seed_database
     create_data_set_outside_tx
 
