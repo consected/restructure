@@ -106,10 +106,10 @@ _fpa.postprocessors_trackers = {
         }).addClass('link-attached');
 
         block.find('.tracker-event_name[data-event-id], .tracker-history-event_name[data-event-id]').not('.te-desc-attached').each(function () {
-            _fpa.set_definition('protocol_events', function () {
+            _fpa.cache.get_definition('protocol_events', function () {
                 var e = $(this);
                 var evid = e.attr('data-event-id');
-                var pe = _fpa.cache('protocol_events');
+                var pe = _fpa.cache.fetch('protocol_events');
                 var p = _fpa.get_item_by('id', pe, evid);
                 if (p && p.description) {
                     var title = p.name;
@@ -176,9 +176,9 @@ _fpa.postprocessors_trackers = {
         }
 
         if (data.tracker && (data.tracker._created || data.tracker._updated)) {
-            _fpa.set_definition('protocol_events', function () {
+            _fpa.cache.get_definition('protocol_events', function () {
                 var evid = data.tracker.protocol_event_id;
-                var pe = _fpa.cache('protocol_events');
+                var pe = _fpa.cache.fetch('protocol_events');
                 var p = _fpa.get_item_by('id', pe, evid);
 
                 // Quick fix - disable notifications if they are happening. Otherwise they will continue to fire until next refresh.

@@ -29,6 +29,7 @@ shared_examples 'a standard user controller' do
       setup_access :app_type, access: :read, resource_type: :general
     end
 
+    validate_scantron_setup
     expect(Classification::AccuracyScore.active.where(value: 881)).to exist
   end
 

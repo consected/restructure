@@ -8,8 +8,6 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   before :all do
     create_admin
 
-    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-    `mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*test_imports*.rb`
 
     csv = File.read('spec/fixtures/import/test-types.csv')
     ds = Imports::ModelGenerator.new dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs",

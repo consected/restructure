@@ -37,33 +37,26 @@ Rails.application.config.to_prepare do
 
                           @resource_name = @resource.class.name.downcase
 
-                          if controller_name == 'registrations' && action_name.in?(['show_otp', 'test_otp'])
-                            return
-                          elsif controller_name == 'sessions' && action_name == 'destroy'
-                            return
-                          elsif !@resource.two_factor_auth_disabled
-                            if @resource.otp_secret.present? && !@resource.otp_required_for_login
-                              redirect_to "/#{@resource_name.pluralize}/show_otp"
-                            end
-                          end
+                          return if controller_name == 'registrations' && action_name.in?(['show_otp', 'test_otp'])
+                          return if controller_name == 'sessions' && action_name == 'destroy'
+                          return unless @resource.two_factor_setup_required?
+
+                          # The user hasn't completed the required OTP setup so go to the setup page
+                          redirect_to "/#{@resource_name.pluralize}/show_otp"
                         })
 
   DeviseController.send(:define_method, :show_otp) do
     redirect_to('/') && return unless signed_in?
 
     @resource = resource_name == :user ? current_user : current_admin
-
-    unless @resource && !@resource.two_factor_auth_disabled && @resource.otp_secret.present? && !@resource.otp_required_for_login
-      redirect_to('/') && return
-    end
-
     @resource_name = @resource.class.name.downcase
-    # A secret was previously generated, and the user has not yet confirmed it (so it is not set as "required for login")
-    # Continue with the action
+    redirect_to('/') && return unless @resource.two_factor_setup_required?
+    # The user hasn't completed the required OTP setup, so continue with the action
   end
 
   DeviseController.send(:define_method, :test_otp) do
-    redirect_to '/' unless signed_in?
+    redirect_to('/') && return unless signed_in?
+
     @resource = resource_name == :user ? current_user : current_admin
     @resource_name = @resource.class.name.downcase
 
@@ -71,9 +64,12 @@ Rails.application.config.to_prepare do
 
     res = @resource.validate_one_time_code code
 
-    flash[:notice] = 'Two-Factor Authentication Code was incorrect. Please try again.' unless res
-
-    redirect_to '/'
+    if res
+      redirect_to '/'
+    else
+      flash[:notice] = 'Two-Factor Authentication Code was incorrect. Wait for the code on your authenticator app to change, then try again.'
+      redirect_to "/#{@resource_name.pluralize}/show_otp"
+    end
   end
 
   Devise::SessionsController.send(:after_action) do

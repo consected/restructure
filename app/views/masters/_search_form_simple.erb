@@ -52,7 +52,7 @@
   </div>
 <%end%>
 <script>
-  _fpa.set_definition('colleges', function(){
+  _fpa.cache.get_definition('colleges', function(){
     _fpa.form_utils.setup_typeahead('input.simple-college-input', 'colleges', "colleges");
   });
 

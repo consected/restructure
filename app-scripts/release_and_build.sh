@@ -26,6 +26,10 @@ if [ ! -z "${GITSTATUS}" ]; then
 fi
 
 git pull
+if [ $? != 0 ]; then
+  echo "Failed initial git pull on $(git branch --show-current)"
+  exit 2
+fi
 
 cl_ur=$(grep '## Unreleased' CHANGELOG.md)
 if [ -z "${cl_ur}" ]; then
