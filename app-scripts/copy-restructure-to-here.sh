@@ -7,7 +7,7 @@ if [ -z "$1" ]; then
 fi
 
 SRC="$1"
-EXCLUDE='database.yml favicon.png app/assets/images/restructure-logo.svg initializers/app_default_settings.rb .git assets/stylesheets/app_vars.scss'
+EXCLUDE='database.yml favicon.png assets/images/restructure-logo.svg assets/images/project-viva-logo.png initializers/app_default_settings.rb .git assets/stylesheets/app_vars.scss'
 
 for e in ${EXCLUDE}; do
   EXCLUDES="${EXCLUDES} --exclude=${e}"

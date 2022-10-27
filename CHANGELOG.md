@@ -16,6 +16,18 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from ReStructure @8.0.48 - 2022-10-27
+
+- [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
+- [Added] cache handling to avoid multiple requests for definitions being made and refactored Javascript \_fpa.cache
+- [Changed] caching of master search results template
+- [Changed] handling of select_record_from... to handle no associations cleanly when the target has no master association
+- [Changed] first time help page to not load during 2FA setup
+- [Changed] 2FA so setup can't be skipped
+- [Added] default settings for organization specific settings not to be transferred up/downstream
+
 ## [8.0.112] - 2022-10-25
 
 - [Added] configuration for country select dropdown - priority items are configurable
