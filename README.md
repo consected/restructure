@@ -20,7 +20,7 @@ If you find a bug, please add an issue with details of how to reproduce it. If y
 
 Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the _Football Players Health Study_.
 
-Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future development themes) for the themes we have in mind.
+Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future-development-themes) for the themes we have in mind.
 
 ## Features
 
@@ -272,11 +272,11 @@ Make sure the Filestore mounts are in place:
 
 Run the test suite:
 
-    IGNORE_MFA=true bundle exec rspec
+    bundle exec rspec
 
 Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 
-    bundle exec rspec
+    NO_AWS_MOCKS=true bundle exec rspec
 
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 
@@ -290,16 +290,19 @@ It is recommended to periodically drop and recreate the test database, since ove
 
 ### Running tests against AWS APIs
 
-There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out,
-although at least one should run an SMS notification as an integration test, and to allow a comparison against
-CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
+There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out.
+
+If you wish to test against live AWS APIs to ensure the integration remains correct, this can be done.
+
+The environment variable `NO_AWS_MOCKS=true` disables the API mocks, allowing the real AWS API endpoints to be exercised.
+
+Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
 
     export AWS_PROFILE=<profile name in ~/.aws/config>
 
-On well secured AWS accounts, you may have MFA configured. Either setup your credentials file to include the appropriate
-`aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
-
-The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
+On well secured AWS accounts, you may have MFA configured. Set up your credentials file to include the appropriate
+`aws_access_key_id` and `aws_secret_access_key` for these. Then run `AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb` to
+authenticate with your MFA token.
 
 ### Parallel test
 

@@ -3,11 +3,12 @@
 #
 # Setup WebMock stubs for AWS API calls, allowing them to act
 # provide consistent results and work without an AWS_PROFILE being set.
-# For stubs to be set, ensure the environment variable IGNORE_MFA=true
+# By default, stubs are used. 
+# To test against the live AWS API, ensure the environment variable `NO_AWS_MOCKS=true`
 # is set
 module AwsApiStubs
   def setup_stub(type, result: nil)
-    return unless ENV['IGNORE_MFA'] == 'true'
+    return if ENV['NO_AWS_MOCKS'] == 'true'
 
     # puts 'Stubbing AWS API calls'
     setup_default_aws_stubs
