@@ -185,7 +185,7 @@ module ReportsHelper
     use_dropdown = report_criteria_use_dropdown_options(config, value)
     return unless use_dropdown
 
-    options.merge!(include_blank: 'select')
+    options.merge!(include_blank: 'select', class: 'form-control')
     select_tag("search_attrs[#{name}]", use_dropdown, options)
   end
 
