@@ -635,6 +635,10 @@ _fpa.form_utils = {
           else if (iter_data.embedded_item) {
             got = iter_data.embedded_item[next_tag];
           }
+          else if (next_tag.indexOf('glyphicon_') === 0) {
+            const icon = next_tag.replace('glyphicon_', '').replace('_', '-')
+            got = `<span class="glyphicon glyphicon-${icon}"></span>`
+          }
 
           if (got) {
             iter_data = got
