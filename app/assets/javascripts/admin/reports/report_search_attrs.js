@@ -188,8 +188,8 @@ class ReportSearchAttr {
     this.def_block.selections = val;
   }
 
-  get defined_selector() {
-    return this.def_block.defined_selector;
+  get selections() {
+    return this.def_block.selections;
   }
 
   set defined_selector(val) {
@@ -236,6 +236,16 @@ class ReportSearchAttr {
 
   get no_disabled() {
     return !this.def_block.disabled;
+  }
+
+  get filter_selector() {
+    return this.def_block.filter_selector;
+  }
+
+  set filter_selector(val) {
+    if (!val) return;
+
+    this.def_block.filter_selector = val;
   }
 
   get yaml() {

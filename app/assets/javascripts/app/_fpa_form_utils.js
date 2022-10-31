@@ -229,7 +229,8 @@ _fpa.form_utils = {
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
     $(`${el} optgroup[label]`).hide();
-    $(`${el} optgroup[label="${val}"]`).show();
+    // Case insensitivr filtering
+    $(`${el} optgroup[label="${val}" i]`).show();
   },
 
 
