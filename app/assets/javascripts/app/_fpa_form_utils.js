@@ -229,7 +229,8 @@ _fpa.form_utils = {
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
     $(`${el} optgroup[label]`).hide();
-    $(`${el} optgroup[label="${val}"]`).show();
+    // Case insensitivr filtering
+    $(`${el} optgroup[label="${val}" i]`).show();
   },
 
 
@@ -633,6 +634,10 @@ _fpa.form_utils = {
           }
           else if (iter_data.embedded_item) {
             got = iter_data.embedded_item[next_tag];
+          }
+          else if (next_tag.indexOf('glyphicon_') === 0) {
+            const icon = next_tag.replace('glyphicon_', '').replace('_', '-')
+            got = `<span class="glyphicon glyphicon-${icon}"></span>`
           }
 
           if (got) {
