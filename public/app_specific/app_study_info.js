@@ -204,6 +204,7 @@ _fpa.app_specific = class {
   handle_glyphicons() {
     const processor = this;
     const block = this.block;
+    if (block.find('.custom-editor-container').length) return;
 
     var text = block.html();
     var res = text.match(/{{glyphicon_[a-z_]+}}/g);
