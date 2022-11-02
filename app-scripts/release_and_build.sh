@@ -89,6 +89,8 @@ fi
 
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
+  git checkout new-master && git pull
+  git checkout ${FROM_BRANCH}
   git flow release start ${NEWVER}
   RES=$?
   if [ "$RES" != "0" ]; then
