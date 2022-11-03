@@ -25,10 +25,19 @@ if ENV['QUICK']
   ENV['SKIP_APP_SETUP'] = 'true'
 end
 
+# By default, AWS APIs are mocked. Real AWS APIs can be exercised
+# by setting environment variable `NO_AWS_MOCKS=true`
+# When mocks are used by default, we also skip the AWS check for MFA authentication checks that follow.
+ENV['IGNORE_MFA'] = 'true' unless ENV['NO_AWS_MOCKS'] == 'true'
+
 unless ENV['IGNORE_MFA'] == 'true'
+  # Check if MFA setup is required to access the AWS API and exit if it has not been set up.
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''
-    put_now "AWS MFA is needed. Run\n  AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb"
+    put_now "AWS MFA is needed. Run\n
+    export AWS_PROFILE=<profile name>
+    export AWS_ACCT_ID=<account id>
+    app-scripts/aws_mfa_set.rb"
     exit
   end
 end
