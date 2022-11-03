@@ -5,11 +5,13 @@
 # If `./setup-init-mounts.sh` has not been run previously (only required one time)
 # then run it first.
 
+FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+
 if [ -z "$MOUNTPOINT" ]; then
   if [ -d /media/$USER/Data ]; then
     MOUNTPOINT=/media/$USER/Data
   else
-    MOUNTPOINT=/home/$USER/dev-filestore
+    MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
   fi
 fi
 
@@ -19,7 +21,7 @@ if [ -z "$MOUNT_ROOT" ]; then
   if [ -d /mnt/fphsfs ]; then
     MOUNT_ROOT=/mnt/fphsfs
   else
-    MOUNT_ROOT=/home/$USER/dev-bind-fs
+    MOUNT_ROOT=${FS_TEST_BASE}/dev-bind-fs
   fi
 fi
 
