@@ -28,7 +28,7 @@ fi
 WEBAPP_USER=${WEBAPP_USER:=$USER}
 
 mountpoint -q $MOUNT_ROOT/gid600
-if [ $? == 0 ]; then
+if [ $? == 0 ] && [ "$(getent passwd 600)" ]; then
   # Already set up. No need to continue.
 
   echo "mountpoint OK"
