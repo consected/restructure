@@ -25,7 +25,7 @@ if [ -z "$MOUNT_ROOT" ]; then
   fi
 fi
 
-WEBAPP_USER=${USER}
+WEBAPP_USER=${WEBAPP_USER:=$USER}
 
 mountpoint -q $MOUNT_ROOT/gid600
 if [ $? == 0 ]; then
