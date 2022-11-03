@@ -62,13 +62,23 @@ module NavHandler
     setup_admin_sub_nav(admin_sub)
     setup_user_sub_nav(user_sub)
 
+    help_url = app_config_text(:help_index_path, help_index_path(display_as: :embedded))
+
+    help_extras = if help_url.index('http') == 0
+                    { target: 'help-page' }
+                  else
+                    {
+                      'data-remote': 'true',
+                      'data-toggle': 'uncollapse',
+                      'data-target': '#help-sidebar',
+                      'data-working-target': '#help-sidebar-body'
+                    }
+                  end
+
     @secondary_navs << {
       label: '<span class="glyphicon glyphicon-question-sign" title="help"></span>',
-      url: help_index_path(display_as: :embedded),
-      extras: {
-        'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar',
-        'data-working-target': '#help-sidebar-body'
-      }
+      url: help_url,
+      extras: help_extras
     }
 
     return unless current_user || current_admin

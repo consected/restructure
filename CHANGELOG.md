@@ -16,6 +16,18 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.117] - 2022-11-02
+
+- [Added] handling of help sidebar navigation and editor tag cleanup
+- [Added] glyphicon substitutions in study info pages
+
+## [8.0.115] - 2022-11-01
+
+- [Added] app configuration option for "help index path" - allows help icon to link to a portal page for example
+- [Changed] styling of editor dialogs
+- [Changed] running of tests to mock AWS APIs by default
+- [Fixed] glyphicon substitution in show mode
+
 ## [8.0.113] - 2022-10-27
 
 ### Transferred from ReStructure @8.0.48 - 2022-10-27

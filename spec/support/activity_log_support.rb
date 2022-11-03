@@ -157,6 +157,7 @@ module ActivityLogSupport
   end
 
   def self.cleanup_matching_activity_logs(item_type, rec_type, process_name, excluding_id: nil, admin: nil)
+    process_name = ['', nil] if process_name.blank?
     others = ActivityLog.works_with_all(item_type, rec_type, process_name)
     others = others.where.not(id: excluding_id) if excluding_id
     others.each do |o|
