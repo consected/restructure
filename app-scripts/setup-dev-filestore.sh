@@ -33,7 +33,7 @@ if [ $? == 0 ]; then
   exit
 fi
 
-if [ "$(whoami)" == 'root' ]; then
+if [ "$(whoami)" == 'root' ] && [ -z ${FS_FORCE_ROOT} ]; then
   echo Do not run as sudo
   exit
 else
