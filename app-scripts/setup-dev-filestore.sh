@@ -57,7 +57,7 @@ if [ "${RAILS_ENV}" != 'test' ]; then
   sudo getent group 601 || sudo groupadd --gid 601 nfs_store_group_1
   sudo getent passwd 600 || sudo useradd --user-group --uid 600 nfsuser
   sudo usermod -a --groups=599,600,601 $WEBAPP_USER
-  sudo mkdir -p $FS_ROOT
+  sudo mkdir -p $FS_ROOT/main
   sudo mkdir -p $MOUNT_ROOT/gid600
   sudo mkdir -p $MOUNT_ROOT/gid601
 fi
@@ -66,8 +66,9 @@ sudo mountpoint -q $MOUNT_ROOT/gid601 || sudo bindfs --map=@601/@599 --create-fo
 
 mountpoint -q $MOUNT_ROOT/gid600
 if [ $? == 1 ]; then
+  ls -als $MOUNT_ROOT
   echo "Failed to setup mountpoint"
-  exit
+  exit 1
 else
   echo "mountpoint OK"
   exit
