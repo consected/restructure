@@ -69,13 +69,11 @@ group :development, :test do
 end
 
 group :test do
-  gem 'capybara', '~> 2.18'
-  # gem 'capybara', '~> 3.36'
+  gem 'capybara'
   gem 'database_cleaner'
   # gem 'database_cleaner', '~> 2.0', '>= 2.0.1'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '3.4.4'
-  # gem 'selenium-webdriver', '4.1'
+  gem 'selenium-webdriver'
   gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'
