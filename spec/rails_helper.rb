@@ -47,7 +47,8 @@ end
 put_now 'Require spec_helper'
 require 'spec_helper'
 put_now 'Require environment'
-require File.expand_path('../config/environment', __dir__)
+
+require File.expand_path('../../config/environment', __FILE__)
 put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!

@@ -11,9 +11,6 @@ module ActivityLogControllerHandler
     # when a controller is created as a file in a namespaced folder, so rather
     # than fighting it, just force the known parent here.
     # TODO test by removing.
-    def parent
-      ::ActivityLog
-    end
 
     def item_controller
       @item_controller = parent_type.to_s.pluralize

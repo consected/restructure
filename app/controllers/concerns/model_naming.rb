@@ -13,8 +13,8 @@ module ModelNaming
   def primary_model
     return @primary_model if @primary_model
 
-    @primary_model = if self.class.parent.name != 'Object'
-                       "#{self.class.parent.name}::#{object_name.camelize}".constantize
+    @primary_model = if self.class.module_parent.name != 'Object'
+                       "#{self.class.module_parent.name}::#{object_name.camelize}".constantize
                      else
                        controller_name.classify.constantize
                      end
@@ -27,8 +27,8 @@ module ModelNaming
   # notice the double underscore for namespaced models to indicate the delimiter
   # to remain consistent with the associations
   def full_object_name
-    if self.class.parent.name != 'Object'
-      "#{self.class.parent.name.underscore}__#{controller_name.singularize}"
+    if self.class.module_parent.name != 'Object'
+      "#{self.class.module_parent.underscore}__#{controller_name.singularize}"
     else
       controller_name.singularize
     end
@@ -38,8 +38,8 @@ module ModelNaming
   # for example player_contacts or activity_log__player_contacts_phones
   # notice the double underscore for namespaced models to indicate the delimiter
   def objects_name
-    if self.class.parent.name != 'Object'
-      "#{self.class.parent.name.underscore}__#{controller_name}".to_sym
+    if self.class.module_parent.name != 'Object'
+      "#{self.class.module_parent.name.underscore}__#{controller_name}".to_sym
     else
       controller_name.to_sym
     end
