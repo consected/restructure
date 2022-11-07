@@ -47,7 +47,9 @@ module BrowserHelper
     end
 
     cb = Capybara
-    cb.server = :webrick
+    cb.server = :puma
+    # cb.threadsafe = true
+    cb.reuse_server = false
 
     cb.register_driver :app_firefox_driver do |app|
       options = Selenium::WebDriver::Firefox::Options.new
@@ -57,12 +59,12 @@ module BrowserHelper
       options.add_preference('browser.download.manager.showWhenStarting', false)
       options.add_preference('browser.helperApps.neverAsk.saveToDisk', 'text/csv')
       options.add_preference('csvjs.disabled', true)
-
       Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+      Capybara::Selenium::Driver.new(app, browser: :firefox)
     end
 
     cb.current_driver = :app_firefox_driver
-    cb.default_max_wait_time = 25
+    cb.default_max_wait_time = 2.5
 
     puts '--> Done setup browser'
   end
