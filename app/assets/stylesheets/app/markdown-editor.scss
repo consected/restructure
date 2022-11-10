@@ -3,4 +3,21 @@
     width: 150px;
     max-width: 150px;
   }
+
+  .dropdown-menu.input-append {
+    padding: 20px;
+    min-width: 300px;
+    background-color: #f3f3f3;
+    input.form-control, select.form-control {
+      margin-bottom: 10px;
+      border: rgb(192, 192, 192) 1px solid !important;
+      min-height: 20px;
+    }
+
+    button {
+      border: rgb(192, 192, 192) 1px solid;
+      background-color: rgb(255, 255, 255);
+    }
+  }
+
 }

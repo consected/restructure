@@ -8,12 +8,16 @@ configs.each do |name, config|
   e = ExternalIdentifier.active.where(external_id_attribute: name).first
   pattern = e.external_id_edit_pattern if e && !e.blank?
   field_val = @runner.search_attr_values[name]
+  options = {
+    pattern: pattern
+  }
 
+  options['data-filter-selector'] = config.filter_selector if config.filter_selector
   # Add up to 4 fields to a row. Restart the row every 4
 %>
   <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%>
   <div class="col-md-8 col-lg-6 <%= config.hidden ? 'hidden' : '' %>" style="padding-bottom: 1em;">
-    <%= report_criteria_field name, config, field_val, pattern: pattern %>
+    <%= report_criteria_field name, config, field_val, options %>
   </div>
 <% 
   i += 1

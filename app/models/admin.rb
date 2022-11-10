@@ -21,7 +21,7 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_creating_admin, on: :create
 
   validate :only_allow_disable
-  after_save :unlock_account, on: :update
+  after_update :unlock_account
 
   def enabled?
     !disabled

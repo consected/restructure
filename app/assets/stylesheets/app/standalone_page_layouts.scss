@@ -127,6 +127,10 @@ div.reset-row,
       }
     }
 
+    em {
+      padding-right: 0.15em;
+    }
+
     .embedded-items-item {
       flex-grow: 1;
       li[data-field-name="title"] {
@@ -495,6 +499,16 @@ div.reset-row {
     }
   }
 
+  .image-screenshots { 
+    .custom-editor img.loaded-image,
+    .custom-editor-viewer img.loaded-image {
+      max-width: 800px;
+      box-shadow: 2px 2px 4px silver;
+      border: 1px solid rgb(192, 192, 192);
+      display: block;
+      margin: 17px auto;
+    }
+  }
 
   .table-header-hide thead {
     display: none;

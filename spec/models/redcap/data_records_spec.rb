@@ -184,8 +184,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
-        dr.summarize_fields
-expect do
+    dr.summarize_fields
+    expect do
       dr.validate
     end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
   end
@@ -466,7 +466,7 @@ expect do
       rc.data_options.add_multi_choice_summary_fields = true
       rc.current_admin = @admin
       rc.save!
-      `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_rc*.rb`
+
       ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model

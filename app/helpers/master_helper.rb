@@ -19,4 +19,16 @@ module MasterHelper
   def hide_pro_info_tabs?
     app_config_set(:hide_pro_info) || app_config_set(:hide_secondary_info)
   end
+
+  #
+  # Render the specified partial, then compress it, returning both original and compressed results
+  # @param [String] partial - standard partial name
+  # @return [Array] both results [uncompressed partial, compressed value]
+  def render_and_compress_partial(partial)
+    Rails.logger.info "render_and_compress_partial(#{partial})"
+    part = render partial: partial
+    comp = ActiveSupport::Gzip.compress(part)
+
+    [part, comp]
+  end
 end

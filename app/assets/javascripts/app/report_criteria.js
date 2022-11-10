@@ -134,6 +134,10 @@ _fpa.report_criteria = class {
 
 
 
+      f.find('[data-filter-selector]').on('change', function () {
+        var fts = $(this).attr('data-filter-selector')
+        _fpa.form_utils.select_filtering_changed($(this).val(), `[name="search_attrs[${fts}]"]`)
+      })
 
       f.find('[type="submit"]').click(function () {
         var v = $(this).val();

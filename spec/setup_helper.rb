@@ -87,7 +87,7 @@ module SetupHelper
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         dirname = 'db/migrations'
-        mc = ActiveRecord::MigrationContext.new(dirname)
+        mc = ActiveRecord::MigrationContext.new(dirname, ActiveRecord::SchemaMigration)
         if mc.needs_migration?
           puts 'Running migrations'
           mc.migrate
