@@ -229,7 +229,7 @@ _fpa.form_utils = {
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
     $(`${el} optgroup[label]`).hide();
-    // Case insensitivr filtering
+    // Case insensitive filtering
     $(`${el} optgroup[label="${val}" i]`).show();
   },
 
@@ -1528,7 +1528,7 @@ _fpa.form_utils = {
           el.removeClass('hidden');
           $(this).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
         });
-        el.on('hide.bs.collapse', function () {});
+        el.on('hide.bs.collapse', function () { });
       })
       .addClass('attached-force-collapse');
 
@@ -1572,11 +1572,7 @@ _fpa.form_utils = {
           });
         } else {
           var h = $(
-            '<a data-toggle="popover" data-content="' +
-              title +
-              '" class="add-icon glyphicon glyphicon-' +
-              icon +
-              '"></a>'
+            `<a data-toggle="popover" data-content="${title}" class="add-icon glyphicon glyphicon-${icon}"></a>`
           );
           $(this).append(h);
           h.popover({ trigger: 'hover click', placement: 'bottom' });
