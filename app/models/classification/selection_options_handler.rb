@@ -44,6 +44,7 @@ class Classification::SelectionOptionsHandler
   def label_for(field_name, field_value)
     field_value = field_value.to_s
     res = edit_as_alt_option_label_for(field_name, field_value) if user_base_object
+    res ||= edit_as_select_field(field_name, field_value) if user_base_object
     res ||= general_selection_label_for(field_name, field_value)
     res ||= get_field_label_for(field_name, field_value)
     res || field_value
@@ -77,6 +78,24 @@ class Classification::SelectionOptionsHandler
     # If alt options are defined, return the key for the matching value, since
     # the key is the label we want to return.
     edit_as_alt_options_for(field_name)&.key(field_value)
+  end
+
+  #
+  # Get the label for the actual field value, based on
+  # dynamic definition extra options {field_options: {edit_as: field_type: select_...}}
+  # @param [String | Symbol] field_name
+  # @param [Object] field_value
+  # @return [Object| nil]
+  def edit_as_select_field(field_name, field_value)
+    return unless field_value
+
+    @all_edit_as_select_field ||= self.class.all_edit_as_select_field(user_base_object)
+    return unless @all_edit_as_select_field
+
+    f = @all_edit_as_select_field[field_name.to_sym]
+    return unless f
+
+    f.find { |v| v&.last&.to_s == field_value&.to_s }&.first
   end
 
   #
@@ -180,12 +199,12 @@ class Classification::SelectionOptionsHandler
           nil
         end
         fndefs[fn] = res if res
-      elsif alt_fn.start_with?('select_record_')
+      elsif alt_fn.index(/^(tag_)?select_record_/)
         group_split_char = edit_as[:group_split_char]
         value_attr = edit_as[:value_attr] || :data
         label_attr = edit_as[:label_attr] || :data
 
-        assoc_or_class_name = alt_fn.sub(/^select_record_(id_)?from_(table_)?/, '').singularize
+        assoc_or_class_name = alt_fn.sub(/^(tag_)?select_record_(id_)?from_(table_)?/, '').singularize
 
         got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
                                                                                   assoc_or_class_name,

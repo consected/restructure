@@ -241,9 +241,14 @@ module ReportResults
     def cell_content_for_tags
       return cell_content unless cell_content.present?
 
-      lis = cell_content.reject(&:blank?)
-                        .map { |c| "<li class=\"report-result-cell-tags\">#{html_escape c}</li>" }
-                        .join("\n")
+      result = []
+      cell_content.each do |cell_content_item|
+        result << selection_options.label_for(col_name, cell_content_item)
+      end
+
+      lis = result.reject(&:blank?)
+                  .map { |c| "<li class=\"report-result-cell-tags\">#{html_escape c}</li>" }
+                  .join("\n")
 
       html = <<~END_HTML
         <ul class="report-result-cell-tags">
