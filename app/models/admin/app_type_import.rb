@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-module Admin::AppTypeImport
+class Admin
+  module AppTypeImport
   extend ActiveSupport::Concern
 
   included do
@@ -301,4 +302,5 @@ module Admin::AppTypeImport
       end
     end
   end
-end
+  end
+  end

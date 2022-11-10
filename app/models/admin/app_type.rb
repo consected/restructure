@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-class Admin::AppType < Admin::AdminBase
+class Admin
+class AppType < Admin::AdminBase
   self.table_name = 'app_types'
   include AdminHandler
   include SelectorCache
@@ -313,4 +314,5 @@ class Admin::AppType < Admin::AdminBase
     migration_generator = Admin::MigrationGenerator.new(default_schema_name)
     migration_generator.add_schema
   end
+end
 end
