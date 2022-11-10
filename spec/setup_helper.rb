@@ -72,7 +72,8 @@ module SetupHelper
     puts 'DB validation'
 
     # Ensure we are set up for this test
-    res = File.read("#{ENV['HOME']}/.pgpass").include? db_name
+    pgpass = File.read("#{ENV['HOME']}/.pgpass")
+    res = pgpass.include?(db_name) || pgpass.include?('localhost:5432:*')
     raise ".pgpass does not contain entry for database #{db_name}" unless res
 
     q = ActiveRecord::Base.connection.execute "select * from pg_catalog.pg_roles where rolname='fphsetl'"

@@ -16,6 +16,37 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
+
+## [8.0.48] - 2022-10-27
+
+- [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
+
+## [8.0.47] - 2022-10-26
+
+### Transferred from Harvard @7.4.134 - 2022-10-26
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Added] cache handling to avoid multiple requests for definitions being made and refactored Javascript \_fpa.cache
+- [Changed] README for bindfs
+- [Changed] caching of master search results template
+- [Changed] handling of select_record_from... to handle no associations cleanly when the target has no master association
+- [Changed] first time help page to not load during 2FA setup
+- [Changed] 2FA so setup can't be skipped
+- [Fixed] bugs, comments
+
+## [8.0.46] - 2022-10-25
+
+- [Added] default settings for organization specific settings not to be transferred up/downstream
+
+### Transferred from Viva @8.0.112 - 2022-10-25
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Changed] README for bindfs
+- [Fixed] bugs, comments
+
 ## [8.0.45] - 2022-10-11
 
 ### Transferred from Harvard @7.4.127 - 2022-10-11

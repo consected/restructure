@@ -16,6 +16,7 @@
 # Example on a production server: `RAILS_ENV=production app-scripts/setup_filestore_app.sh 1`
 
 APP_TYPE_ID=$1
+FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
 
 if [ -z "$APP_TYPE_ID" ]; then
   echo "Call with argument <app_type_id>"
@@ -30,7 +31,7 @@ if [ -z "$MOUNTPOINT" ]; then
     if [ -d /media/$USER/Data ]; then
       MOUNTPOINT=/media/$USER/Data
     else
-      MOUNTPOINT=/home/$USER/dev-filestore
+      MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
     fi
 
   fi
