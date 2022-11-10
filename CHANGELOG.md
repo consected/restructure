@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.49] - 2022-11-10
 
 - [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
 

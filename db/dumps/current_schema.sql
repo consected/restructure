@@ -3,8 +3,8 @@ begin;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.7
--- Dumped by pg_dump version 12.7
+-- Dumped from database version 12.11
+-- Dumped by pg_dump version 12.11
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
