@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
+
 ## [8.0.48] - 2022-10-27
 
 - [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
