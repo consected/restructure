@@ -170,7 +170,7 @@ column_options:
     column_name: Label
 
   show_as: # Special ways for showing specified columns
-    column_name: url | checkbox | options | list | embedded_block | fixed-pre
+    column_name: url | checkbox | options | list | tags | embedded_block | fixed-pre
     # show the result as a: 
     # url - link to be opened in a new tab
     #   The content should be formatted using Markdown format
@@ -197,7 +197,7 @@ column_options:
 
     # options - pretty presentation of a hash of {key: value} pairs
     # list - pretty presentation of a list (array) - bulletpoint default styling
-    # tags - alternative to the list, showing items a tag items
+    # tags - alternative to the list, showing items as tag items
     # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
     # markdown - markdown text converted to HTML
 
