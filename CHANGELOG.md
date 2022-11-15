@@ -22,7 +22,14 @@ release will be created for any release tested in production, and may be marked 
 
 ### Transferred from Viva @8.0.118 - 2022-11-15
 
-- Prep transfer
+- [Added] correct lookup of choice_label and tags in reports, with formatting of tags on submitting edit report changes
+- [Changed] import error message
+- [Added] handling of help sidebar navigation and editor tag cleanup
+- [Added] glyphicon substitutions in study info pages
+- [Added] app configuration option for "help index path" - allows help icon to link to a portal page for example
+- [Changed] styling of editor dialogs
+- [Changed] running of tests to mock AWS APIs by default
+- [Fixed] glyphicon substitution in show mode
 
 ## [8.0.48] - 2022-10-27
 
