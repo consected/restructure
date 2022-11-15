@@ -3,7 +3,7 @@
 NUM_WORKERS=${NUM_WORKERS:=1}
 
 if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
-  echo "Didn't run restarter - not an AWS environment"
+  # echo "Didn't run restarter - not an AWS environment"
   exit
 fi
 

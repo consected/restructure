@@ -54,7 +54,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Log in'
       end
 
-      expect(page).to have_css '.flash .alert', text: '× Signed in successfully'
+      expect(page).to have_css '.flash .alert', text: "×\nSigned in successfully."
     end
 
     it 'should prevent sign in if user disabled' do
@@ -75,7 +75,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Log in'
       end
 
-      expect(page).to have_css '.flash .alert', text: '× This account has been disabled.'
+      expect(page).to have_css '.flash .alert', text: "×\nThis account has been disabled."
     end
 
     it 'should prevent invalid sign in' do
@@ -91,7 +91,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
       expect(page).not_to have_selector('.login-2fa-block', visible: true)
 
-      fail_message = '× Invalid email, password or two-factor authentication code.'
+      fail_message = "×\nInvalid email, password or two-factor authentication code."
 
       expect(page).to have_css 'input:invalid'
 
@@ -183,7 +183,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Submit Code'
       end
 
-      expect(page).to have_css '.flash .alert', text: '× Two-Factor Authentication Code was incorrect. Wait for the code on your authenticator app to change, then try again.'
+      expect(page).to have_css '.flash .alert', text: "×\nTwo-Factor Authentication Code was incorrect. Wait for the code on your authenticator app to change, then try again."
 
       within '#form-validate-otp' do
         fill_in 'Two-Factor Authentication Code', with: @user.current_otp

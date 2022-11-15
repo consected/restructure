@@ -16,6 +16,82 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
+
+## [8.0.48] - 2022-10-27
+
+- [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
+
+## [8.0.47] - 2022-10-26
+
+### Transferred from Harvard @7.4.134 - 2022-10-26
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Added] cache handling to avoid multiple requests for definitions being made and refactored Javascript \_fpa.cache
+- [Changed] README for bindfs
+- [Changed] caching of master search results template
+- [Changed] handling of select_record_from... to handle no associations cleanly when the target has no master association
+- [Changed] first time help page to not load during 2FA setup
+- [Changed] 2FA so setup can't be skipped
+- [Fixed] bugs, comments
+
+## [8.0.46] - 2022-10-25
+
+- [Added] default settings for organization specific settings not to be transferred up/downstream
+
+### Transferred from Viva @8.0.112 - 2022-10-25
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Changed] README for bindfs
+- [Fixed] bugs, comments
+
+## [8.0.45] - 2022-10-11
+
+### Transferred from Harvard @7.4.127 - 2022-10-11
+
+- [Added] two step MFA at login
+- [Changed] help information for 2FA setup and login
+- [Added] seeds for user notifications report and supporting admin items
+- [Added] configuration specific documentation for "manage users" and improved template documentation
+- [Added] admin functions to unlock user accounts
+- [Added] e_signature script class to refactor and avoid client side errors
+- [Fixed] issue viewing dynamic model definition when the db table is missing
+- [Fixed] CSV generation and import of files with master_id field
+- [Fixed] alert showing if any master record is open in list, even if it is not the master record with the alert
+- [Fixed] blocking on piped processes
+- [Fixed] general selection preparation for dynamic definitions with no master association
+- [Fixed] initialization loading of full database of edit field selections
+- [Fixed] handling of filestore exceptions in regular controllers
+
+## [8.0.44] - 2022-09-16
+
+### Transferred from Viva @8.0.109 - 2022-09-16
+
+- [Added] real handling of UI timezones and formats, using Luxon library
+- [Added] option when clicked to expand a master tab, others will be closed
+- [Added] image list to custom editor
+- [Added] server info Rails log search
+- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] "close other tabs" for single master view
+- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
+- [Fixed] iframe sandboxing
+- [Fixed] refresh outdated dynamic definitions
+- [Fixed] embedded report links and tree table table
+- [Fixed] incorrect handling of result data lookup for select fields when empty dataset
+- [Fixed] big select with absolutely unique field id
+- [Fixed] usability and editing issues in custom editor
+- [Fixed] inability to edit report with bad options
+- [Fixed] table tree to only set up its own block
+- [Fixed] report_options causing errors in lists
+- [Fixed] tree view opacity during load
+- [Fixed] small issue with admin reports criteria
+- [Fixed] issues with show_modal
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
+
 ## [8.0.43] - 2022-09-06
 
 ### Transferred from Harvard @7.4.122 - 2022-09-06
