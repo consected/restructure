@@ -103,12 +103,14 @@ unless ENV['SKIP_DB_SETUP']
   raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
 end
 
-put_now 'Filestore mount'
-res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
-if res != "mountpoint OK\n"
-  put_now res
-  put_now 'Run app-scripts/setup-dev-filestore.sh and try again'
-  exit
+unless ENV['SKIP_FS_SETUP']
+  put_now 'Filestore mount'
+  res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
+  if res != "mountpoint OK\n"
+    put_now res
+    put_now 'Run app-scripts/setup-dev-filestore.sh and try again'
+    exit
+  end
 end
 
 put_now 'Require more'
