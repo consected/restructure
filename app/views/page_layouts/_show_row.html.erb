@@ -5,7 +5,7 @@
     cols = row['cols'] || []
     row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
 %>
-<div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>">
+<div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>" data-req-path="<%=request.path%>">
   <% cols.each do |col|
       col_label = col['label'] || ''
       col_header = col['header'] || ''

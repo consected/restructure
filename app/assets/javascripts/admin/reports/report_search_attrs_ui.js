@@ -163,6 +163,7 @@ class ReportSearchAttrsUi {
       var resource_name = $('#search_attrs_resource_name').val();
       var selections_yaml = _this.ra_config_selections && _this.ra_config_selections.getValue();
       var conditions_yaml = _this.ra_conditions && _this.ra_conditions.getValue();
+      var filter_selector = $('#search_filter_selector').val();
 
       $('#search_attr_instruction').removeClass('hidden');
       $('#search_attr_insert_name').html(':' + name);
@@ -178,8 +179,16 @@ class ReportSearchAttrsUi {
       rsa.conditions = rsa.load_value_hash(conditions_yaml);
       rsa.filter = filter;
       rsa.defined_selector = defined_selector;
-      rsa.default = rsa.load_value_list(defval);
+      if (multi.indexOf('multiple') >= 0) {
+        // If this is a multi selector type field, set the default as a list, split by newlines
+        rsa.default = rsa.load_value_list(defval);
+      }
+      else {
+        // If this is a text field, just set the value directly
+        rsa.default = defval;
+      }
       rsa.disabled = no_disabled;
+      rsa.filter_selector = filter_selector;
 
       // Update the YAML editor
       var yaml = rsas.yaml;

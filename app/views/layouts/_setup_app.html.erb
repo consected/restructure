@@ -52,10 +52,10 @@
     <% unless Rails.env.test? %>
     _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
     <% end %>
-    _fpa.clean_cache();
+    _fpa.cache.clean();
   });
   <% else %>
-    _fpa.clean_cache();
+    _fpa.cache.clean();
     window.setTimeout(function() {
       _fpa.status.loaded_templates = true;
       one_time_setup();

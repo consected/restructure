@@ -483,6 +483,8 @@ module Formatter
           )
           .order(position: :asc)
           .first
+      elsif an == 'app_configurations' && master.current_user
+        Admin::AppConfiguration.all_for(master.current_user)
       elsif an.in?(allowable_associations(item.class))
         item.send(an)
       elsif an.in? allowable_master_associations

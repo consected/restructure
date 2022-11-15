@@ -24,11 +24,12 @@ _fpa_admin.user_access_controls.admin_edit_form = class {
   }
 
   res_type_changed($el) {
-    var val = $el.val()
-    const fname = 'input[name="admin_user_access_control[resource_name]"]'
-    $(fname).attr('data-big-select-subtype', val)
-    $(`${fname} optgroup[label]`).hide()
-    $(`${fname} optgroup[label="' + val + '"]`).show()
+    const val = $el.val()
+    const rn_fname = 'input[name="admin_user_access_control[resource_name]"]'
+    const a_fname = 'select[name="admin_user_access_control[access]"]'
+    $(rn_fname).attr('data-big-select-subtype', val)
+    $(`${a_fname} optgroup[label]`).hide()
+    $(`${a_fname} optgroup[label="${val}"]`).show()
   }
 
 }

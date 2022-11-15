@@ -46,6 +46,10 @@
     width: 100%;
     display: flex;
     flex-flow: column;
+
+    .help-embedded-content {
+      margin-bottom: 20px;
+    }
   }
 
   #help-sidebar-header {
