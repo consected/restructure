@@ -4,9 +4,9 @@
 
 In ReStructure repo:
 
-- Find the latest commit transferred from Private Repo to ReStructure (or vice versa) `git log --all --max-count=10 --grep=tx-`
+- Find the latest commit transferred from Private Repo to ReStructure (or vice versa) `git log --all --max-count=10 --grep=Transferred`
 - Check it out `git checkout <commit-id>`
-- Set the current version variable: `RESTR_VERSION=$(cat version.txt)`
+- Set the current version variable: `RESTR_VERSION=$(cat ../../<private-repo-dir>/restructure/version.txt)`
 - Create a new branch `git checkout -b tx-<harvard|viva|etc>-@${RESTR_VERSION}`
 
 In Private repo:
@@ -15,7 +15,8 @@ In Private repo:
 
 In ReStructure repo:
 
-- Merge **develop** into the new branch to incorporate existing changes: `git merge --no-commit --ff-only develop`
+- `git commit -a -m "Initial transfer`
+- Merge **develop** into the new branch to incorporate existing changes: `git merge --no-commit develop`
 - Review the changes, which should just reflect those related to the last transfer - take care with:
   - config/initializers/app_settings.rb
   - config/database.yml
@@ -36,18 +37,19 @@ less -r tmp/failing_specs.log
 - Commit the changes: `git commit -a -m "Transferred from <Harvard|Viva|etc> @${RESTR_VERSION}"`
 - Push the branch
 - Checkout **develop** branch: `git checkout develop`
-- Merge the transfer branch back into **develop**: `git merge --no-commit --ff-only rx-restructure-@${RESTR_VERSION}`
+- Merge the transfer branch back into **develop**: `git merge --no-commit rx-restructure-@${RESTR_VERSION}`
 
 ## From ReStructure to Private Repo
 
 In Private repo:
 
-- Find the latest commit transferred from ReStructure to Private Repo (or vice versa) `git log --all --max-count=10 --grep=tx-`
+- Find the latest commit transferred from ReStructure to Private Repo (or vice versa) `git log --all --max-count=10 --grep=Transferred`
 - Check it out `git checkout <commit-id>`
 - Set the ReStructure current version variable: `RESTR_VERSION=$(cat ../../restructure/restructure/version.txt)`
 - Create a new branch `git checkout -b tx-restructure-@${RESTR_VERSION}`
 - Run `app-scripts/copy-restructure-to-here.sh ../../restructure/restructure`
-- Merge **develop** into the new branch to incorporate existing changes: `git merge --no-commit --ff-only develop`
+- `git commit -a -m "Initial transfer`
+- Merge **develop** into the new branch to incorporate existing changes: `git merge --no-commit develop`
 - Run:
 
 ```sh
@@ -65,4 +67,4 @@ less -r tmp/failing_specs.log
 - Commit the changes: `git commit -a -m "Transferred from ReStructure @${RESTR_VERSION}"`
 - Push the branch
 - Checkout **develop** branch: `git checkout develop`
-- Merge the transfer branch back into **develop**: `git merge --no-commit --ff-only rx-restructure-@${RESTR_VERSION}`
+- Merge the transfer branch back into **develop**: `git merge --no-commit rx-restructure-@${RESTR_VERSION}`
