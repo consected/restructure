@@ -20,6 +20,10 @@ release will be created for any release tested in production, and may be marked 
 
 - [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
 
+### Transferred from Viva @8.0.118 - 2022-11-15
+
+- Prep transfer
+
 ## [8.0.48] - 2022-10-27
 
 - [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
