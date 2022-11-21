@@ -681,11 +681,21 @@ module HandlesUserBase
   def write_created_by_user
     return true unless attribute_names.include? 'created_by_user_id'
 
+    # Failsafe, in case this is already set
+    return true if attributes['created_by_user_id']
+
     # Special handling for editable reports and dynamic models with no_master_association set
     if respond_to?(:user_id) && respond_to?(:current_user) && (
       !self.class.respond_to?(:no_master_association) || self.class.no_master_association
     )
-      write_attribute :created_by_user_id, current_user
+      return unless current_user
+
+      cuid = if current_user.is_a? Integer
+               current_user
+             elsif current_user.respond_to? :id
+               current_user.id
+             end
+      write_attribute :created_by_user_id, cuid
       return
     end
 
@@ -696,9 +706,6 @@ module HandlesUserBase
       raise "bad user (for master #{master}) being pulled from master_user when creating record " \
             "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end
-
-    # Failsafe, in case this is already set
-    return true if attributes['created_by_user_id']
 
     write_attribute :created_by_user_id, mu.id
   end
