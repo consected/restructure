@@ -736,7 +736,7 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple]').not('.attached-chosen');
+    var sels = block.find('select[multiple], .report-criteria-fields-block select').not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
