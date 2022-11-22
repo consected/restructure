@@ -7,7 +7,8 @@ In ReStructure repo:
 - Find the latest commit transferred from Private Repo to ReStructure (or vice versa) `git log --all --max-count=10 --grep=Transferred`
 - Check it out `git checkout <commit-id>`
 - Set the current version variable: `RESTR_VERSION=$(cat ../../<private-repo-dir>/restructure/version.txt)`
-- Create a new branch `git checkout -b tx-<harvard|viva|etc>-@${RESTR_VERSION}`
+- Set the private repo name (harvard|viva|etc): `OTHER_REPO=harvard|viva|etc`
+- Create a new branch `git checkout -b tx-${OTHER_REPO}-@${RESTR_VERSION}`
 
 In Private repo:
 
@@ -34,10 +35,10 @@ less -r tmp/failing_specs.log
 ```
 
 - Update the _CHANGELOG.md_ to include the appropriate changes
-- Commit the changes: `git commit -a -m "Transferred from <Harvard|Viva|etc> @${RESTR_VERSION}"`
+- Commit the changes: `git commit -a -m 'Updated CHANGELOG'`
 - Push the branch
 - Checkout **develop** branch: `git checkout develop`
-- Merge the transfer branch back into **develop**: `git merge --no-commit rx-restructure-@${RESTR_VERSION}`
+- Merge the transfer branch back into **develop**: `git merge tx-${OTHER_REPO}-@${RESTR_VERSION} -m "Transferred from ${OTHER_REPO} @${RESTR_VERSION}"`
 
 ## From ReStructure to Private Repo
 
@@ -64,7 +65,7 @@ less -r tmp/failing_specs.log
 ```
 
 - Update the _CHANGELOG.md_ to include the appropriate changes
-- Commit the changes: `git commit -a -m "Transferred from ReStructure @${RESTR_VERSION}"`
+- Commit the changes: `git commit -a -m 'Updated CHANGELOG'`
 - Push the branch
 - Checkout **develop** branch: `git checkout develop`
-- Merge the transfer branch back into **develop**: `git merge --no-commit rx-restructure-@${RESTR_VERSION}`
+- Merge the transfer branch back into **develop**: `git merge tx-restructure-@${RESTR_VERSION} -m "Transferred from ${OTHER_REPO} @${RESTR_VERSION}"`
