@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] created_by_user_id for items that do not have a master association (transferred directly from Harvard)
+- [Added] simple mechanism for substituting list_id into report criteria text
+- [Changed] report criteria select fields to setup with "chosen" even if not multiple
+
 ## [8.0.118] - 2022-11-10
 
 - [Added] correct lookup of choice_label and tags in reports, with formatting of tags on submitting edit report changes
