@@ -389,6 +389,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       click_button 'Update Tracker'
     end
 
+    sleep 4
     have_css '.master-expander'
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] span.record-meta', text: @user.email.to_s
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] .tracker-event_date', text: %r{10/0?1/2125}
