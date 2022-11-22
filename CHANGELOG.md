@@ -20,6 +20,12 @@ release will be created for any release tested in production, and may be marked 
 
 - [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
 
+### Transferred from Viva @8.0.119 - 2022-11-22
+
+- [Fixed] created_by_user_id for items that do not have a master association (transferred directly from Harvard)
+- [Added] simple mechanism for substituting list_id into report criteria text
+- [Changed] report criteria select fields to setup with "chosen" even if not multiple
+
 ### Transferred from Viva @8.0.118 - 2022-11-15
 
 - [Added] correct lookup of choice_label and tags in reports, with formatting of tags on submitting edit report changes
