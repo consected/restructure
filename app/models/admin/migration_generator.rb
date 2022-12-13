@@ -253,6 +253,14 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
+  # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
+  def self.migration_context(dirname)
+    schema_migration = ActiveRecord::Base.connection.schema_migration
+    ActiveRecord::MigrationContext.new(dirname, schema_migration)
+  end
+
+  #
   # Create a migration to add a schema
   # @param [String] export_type - a suffix to add to the migration name,
   #                               such as 'app-export'
@@ -609,7 +617,7 @@ class Admin::MigrationGenerator
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
-          ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+          migration_context(db_migration_dirname).migrate
           # Don't dump until a build, otherwise differences in individual development environments
           # force unnecessary and confusing commits
           # pid = spawn('bin/rake db:structure:dump')

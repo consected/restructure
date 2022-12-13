@@ -155,7 +155,7 @@ unless ENV['SKIP_DB_SETUP']
   # We need to ensure that dynamic tables are in place before we setup dynamic models
   # in each example, otherwise the tests lock up.
   db_migration_dirname = Rails.root.join('spec/migrations')
-  ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+  Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
   puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
 end
 
