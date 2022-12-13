@@ -7,10 +7,10 @@
 # for transfers to be performed (see: docs/dev_reference/main/how-to-copy-to-restructure.md)
 class DefaultSettings
   AdminEmail = 'admin@restructure'
-  DefaultLogo = 'project-viva-logo.png'
-  DefaultSchemaOwner = 'vivadba'
-  TwoFactorAuthIssuer = 'VivaPortal'
-  PageTitle = 'Viva Portal'
+  DefaultLogo = 'restructure-logo.svg'
+  DefaultSchemaOwner = 'restrdba'
+  TwoFactorAuthIssuer = 'ReStructure'
+  PageTitle = 'ReStructure'
   DefaultShortLinkS3Bucket = (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
   DefaultShortLinkLogS3Bucket = (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   DefaultMigrationSchema = 'ml_app'

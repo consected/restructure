@@ -261,9 +261,38 @@ _fpa.postprocessors_reports = {
       id = '';
     }
 
+    var show_as = {};
+    $('.table-header[data-col-show-as]').not('[data-col-show-as=""]').each(function () {
+      const sa = $(this).attr('data-col-show-as');
+      const name = $(this).attr('data-col-name');
+      show_as[name] = sa;
+    })
+
     for (var i in data.report_item) {
-      if (data.report_item.hasOwnProperty(i))
-        row.find('[data-col-type="' + i + '"]').first().html(data.report_item[i]);
+      if (data.report_item.hasOwnProperty(i)) {
+        var cell_content = data.report_item[i];
+        var cell = row.find('[data-col-type="' + i + '"]').first();
+
+        // Format the cell if it is an array or show_as specifies it is tags
+        var is_array = cell.attr('data-col-var-type') === 'Array';
+        var is_tags = show_as[i] == 'tags';
+        if (cell_content && (is_array || is_tags)) {
+          var ul_class = is_tags ? 'report-result-cell-tags' : 'report-list-items'
+          var $res = $(`<ul class="${ul_class}"></ul>`)
+          cell_content.forEach((item) => {
+            if (!item || item == '') return;
+
+            var li = document.createElement('li');
+            li.className = ul_class;
+            li.innerHTML = item;
+            $res.append(li)
+          })
+
+          cell_content = $res;
+        }
+
+        cell.html(cell_content);
+      }
     };
 
     row.show();

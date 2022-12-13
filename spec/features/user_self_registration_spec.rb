@@ -25,7 +25,10 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     unless @template_user.app_type_id
+      grant_user_app_access @template_user
       @template_user.app_type_id = Admin::AppType.all_ids_available_to(@template_user).first
+      at1 = @template_user.app_type_id
+      expect(at1).not_to be nil
       @template_user.current_admin = @admin
       @template_user.save!
     end
@@ -87,7 +90,7 @@ describe 'user sign in process for users that can self register', js: true, driv
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× Signed in successfully'
+    expect(page).to have_css '.flash .alert', text: "×\nSigned in successfully."
   end
 
   it 'should prevent sign in if user disabled' do
@@ -110,7 +113,7 @@ describe 'user sign in process for users that can self register', js: true, driv
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× This account has been disabled.'
+    expect(page).to have_css '.flash .alert', text: "×\nThis account has been disabled."
   end
 
   it 'should prevent invalid sign in' do
@@ -127,8 +130,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     expect(page).not_to have_selector('.login-2fa-block', visible: true)
-
-    fail_message = '× Invalid email, password or two-factor authentication code.'
+    fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css 'input:invalid'
 

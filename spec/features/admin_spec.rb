@@ -98,7 +98,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
+    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
   end
 
   it 'should sign in with 2FA even if it is disabled for users' do
@@ -135,7 +135,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
+    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
   end
 
   it 'should prevent invalid sign in' do
@@ -173,7 +173,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    fail_message = '× Invalid email, password or two-factor authentication code.'
+    fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css '.flash .alert', text: fail_message
 
@@ -221,7 +221,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
 
     fa = all('.flash .alert')[0]
     if fa
-      just_signed_in = (fa.text == '× Signed in successfully.')
+      just_signed_in = (fa.text == "×\nSigned in successfully.")
       puts fa.text unless just_signed_in
     end
 

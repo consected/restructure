@@ -16,39 +16,57 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.117] - 2022-11-02
+## [8.0.49] - 2022-11-10
 
+- [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
+
+### Transferred from Viva @8.0.119 - 2022-11-22
+
+- [Fixed] created_by_user_id for items that do not have a master association (transferred directly from Harvard)
+- [Added] simple mechanism for substituting list_id into report criteria text
+- [Changed] report criteria select fields to setup with "chosen" even if not multiple
+
+### Transferred from Viva @8.0.118 - 2022-11-15
+
+- [Added] correct lookup of choice_label and tags in reports, with formatting of tags on submitting edit report changes
+- [Changed] import error message
 - [Added] handling of help sidebar navigation and editor tag cleanup
 - [Added] glyphicon substitutions in study info pages
-
-## [8.0.115] - 2022-11-01
-
 - [Added] app configuration option for "help index path" - allows help icon to link to a portal page for example
 - [Changed] styling of editor dialogs
 - [Changed] running of tests to mock AWS APIs by default
 - [Fixed] glyphicon substitution in show mode
 
-## [8.0.113] - 2022-10-27
-
-### Transferred from ReStructure @8.0.48 - 2022-10-27
+## [8.0.48] - 2022-10-27
 
 - [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
+
+## [8.0.47] - 2022-10-26
+
+### Transferred from Harvard @7.4.134 - 2022-10-26
+
+- [Added] configuration for country select dropdown - priority items are configurable
 - [Added] cache handling to avoid multiple requests for definitions being made and refactored Javascript \_fpa.cache
+- [Changed] README for bindfs
 - [Changed] caching of master search results template
 - [Changed] handling of select_record_from... to handle no associations cleanly when the target has no master association
 - [Changed] first time help page to not load during 2FA setup
 - [Changed] 2FA so setup can't be skipped
+- [Fixed] bugs, comments
+
+## [8.0.46] - 2022-10-25
+
 - [Added] default settings for organization specific settings not to be transferred up/downstream
 
-## [8.0.112] - 2022-10-25
+### Transferred from Viva @8.0.112 - 2022-10-25
 
 - [Added] configuration for country select dropdown - priority items are configurable
 - [Changed] README for bindfs
 - [Fixed] bugs, comments
 
-## [8.0.110] - 2022-10-11
+## [8.0.45] - 2022-10-11
 
-### Transferred from ReStructure @8.0.45 - 2022-10-11
+### Transferred from Harvard @7.4.127 - 2022-10-11
 
 - [Added] two step MFA at login
 - [Changed] help information for 2FA setup and login
@@ -64,106 +82,65 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] initialization loading of full database of edit field selections
 - [Fixed] handling of filestore exceptions in regular controllers
 
-## [8.0.109] - 2022-09-16
+## [8.0.44] - 2022-09-16
 
-- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
-- [Fixed] "close other tabs" for single master view
-- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
-
-## [8.0.108] - 2022-09-15
-
-- [Fixed] various small bug
-
-## [8.0.107] - 2022-09-14
+### Transferred from Viva @8.0.109 - 2022-09-16
 
 - [Added] real handling of UI timezones and formats, using Luxon library
 - [Added] option when clicked to expand a master tab, others will be closed
 - [Added] image list to custom editor
 - [Added] server info Rails log search
+- [Changed] handling of report criteria forms, refactoring to allow fix to support embedded reports linked from embedded reports to work
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] "close other tabs" for single master view
+- [Fixed] scroll to on embedded forms and option to prevent reload of parent on save of reference to fix save_action scrolling
 - [Fixed] iframe sandboxing
 - [Fixed] refresh outdated dynamic definitions
 - [Fixed] embedded report links and tree table table
 - [Fixed] incorrect handling of result data lookup for select fields when empty dataset
 - [Fixed] big select with absolutely unique field id
 - [Fixed] usability and editing issues in custom editor
-
-## [8.0.106] - 2022-09-07
-
-- Bumped version
-
-## [8.0.105] - 2022-09-07
-
-- Bumped version
-
-## [8.0.103] - 2022-09-07
-
 - [Fixed] inability to edit report with bad options
 - [Fixed] table tree to only set up its own block
 - [Fixed] report_options causing errors in lists
-
-## [8.0.102] - 2022-09-07
-
 - [Fixed] tree view opacity during load
 - [Fixed] small issue with admin reports criteria
 - [Fixed] issues with show_modal
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
 
-## [8.0.101] - 2022-09-07
-
-- Bumped version
-
-## [8.0.98] - 2022-09-06
+## [8.0.43] - 2022-09-06
 
 ### Transferred from Harvard @7.4.122 - 2022-09-06
 
 - [Added] view of report criteria in admin
 - [Fixed] failure trying to add a new redcap project
 
-### Viva
+## [8.0.42] - 2022-09-01
 
-- [Changed] modal scrolling control and secure view over modals
-- [Fixed] open-in-sidebar for study info pages
-- [Fixed] small issue with tree table attempting to setup regular table reports
+- Bumped version
 
-## [8.0.97] - 2022-08-30
+## [8.0.39] - 2022-09-01
+
+### Transferred from Viva @8.0.97 - 2022-09-01
 
 - [Added] show_if generation from Redcap branching logic
 - [Added] jasmine-browser-runner to replace old gem and support script app-scripts/jasmine-serve.sh
 - [Added] ability to force update of a redcap dynamic model
 - [Added] Redcap pull generation of array summary fields for multiple choice checkboxes
 - [Added] multilevel functionality to report trees
-
-## [8.0.96] - 2022-08-19
-
-- [Testing] bootsnap
+- [Added] bootsnap
 - [Added] password regex option and refactored entropy results
 - [Added] disabling of 2FA for user and admin independently
-- [Changed] new and edit password forms for usability
-- [Fixed] sandbox of iframes (reports and message notifications) to allow popups from links
-
-## [8.0.95] - 2022-08-15
-
-Attempting build to fix mini_portile2 issue again
-
-## [8.0.94] - 2022-08-15
-
-Attempting build to fix mini_portile2 issue
-
-## [8.0.93] - 2022-08-15
-
-- Rebuilt with clean build container
-
-## [8.0.91] - 2022-08-15
-
-- Bumped version
-- Rebuild to fix missing gem mini_portile from vendor/cache
-
-## [8.0.89] - 2022-08-15
-
 - [Added] tree view option for reports
 - [Added] ui templates for messages in change and forgot password form
+- [Changed] new and edit password forms for usability
+- [Fixed] sandbox of iframes (reports and message notifications) to allow popups from links
 - [Fixed] field types not being passed to UI templates for standard subject types
 
-### Transfer from ReStructure 8.0.37 - 2022-08-15
+## [8.0.37] - 2022-08-15
+
+### Transferred from Harvard @7.4.120a - 2022-08-15
 
 - [Added] ui templates for messages in change and forgot password form
 - [Fixed] field types not being passed to UI templates for standard subject types
@@ -183,66 +160,41 @@ Attempting build to fix mini_portile2 issue
 - [Added] edit_as: general_selection: to override standard general selection definition for a field to use
 - [Added] page_embedded_block to study info
 - [Fixed] issue with redcap admin NFS container
+
+## [8.0.36] - 2022-08-05
+
 - [Added] ui templates for messages in change and forgot password form
 - [Fixed] field types not being passed to UI templates for standard subject types
 
-## [8.0.88] - 2022-07-05
+## [8.0.35] - 2022-07-18
+
+### Transferred from Viva @8.0.88 - 2022-07-18
 
 - [Added] other_user_is_creator from reference option
-
-## [8.0.86] - 2022-07-04
-
 - [Fixed] context issue with edit form captions
-
-## [8.0.85] - 2022-07-04
-
 - [Added] reference definition without_reference: outside_master
 - [Fixed] passing user_preference to front end
-
-## [8.0.84] - 2022-06-30
-
 - [Added] ability for standalone pages to be loaded in the help sidebar
 - [Added] escaping for curly brackets in substitutions
 - [Changed] documentation for optional MFA and added substitution info
-
-## [8.0.83] - 2022-06-29
-
 - [Added] invitation code to registration
 - [Added] view_original_case field option to prevent the UI capitalizing downcased fields
 - [Fixed] help sidebar in standalone help pages
-
-## [8.0.82] - 2022-06-29
-
 - [Added] first login sidebar popup
-
-## [8.0.81] - 2022-06-29
-
 - [Added] notifications option to user menu and updated help with notifications page
 - [Added] help link handling in study info pages
 - [Changed] substitutions to allow glyphicons and notifications_from_email address
-
-## [8.0.80] - 2022-06-28
-
 - [Fixed] issue with nested ordered lists in markdown editor
 - [Fixed] hiding modal on submitting embedded form & no_report_scroll not enabling full page scroll
 - [Fixed] search doc with download/in route form - plus refactored to DRY code
-
-## [8.0.79] - 2022-06-27
-
 - [Added] message template UI blocks for registration forms and user preferences
 - [Added] admin documentation for message templates
 - [Added] caption before references with extra log types
 - [Added] on_master_id as embedded_report extension
 - [Changed] expand_reference action to scroll to result
 - [Fixed] issue where activity log panels don't get fully scrolled to
-
-## [8.0.78] - 2022-06-23
-
 - [Fixed] issue where report list updates fail if user only has view_report_not_list access
 - [Updated] expand_reference documentation
-
-## [8.0.76] - 2022-060-22
-
 - [Added] preprocessing to CSV imports for array fields
 - [Added] sample use of API in Ruby scripts
 - [Added] study info content migrator using api
@@ -250,9 +202,9 @@ Attempting build to fix mini_portile2 issue
 - [Changed] allowable fields in import CSV to allow "disabled"
 - [Fixed] issue where incorrect page layout nav configuration breaks UI completely
 
-## [8.0.75] - 2022-06-14
+## [8.0.34] - 2022-06-13
 
-### Transfer from ReStructure 8.0.34 - 2022-06-14
+### Transfer from Harvard 7.4.111 - 2022-06-13
 
 - [Added] new_caption option
 - [Added] returning JSON data related to created_by_user for current instance and master
@@ -265,11 +217,13 @@ Attempting build to fix mini_portile2 issue
 - [Fixed] select from record configs again
 - [Fixed] incorrect titleization of substitutions within UI
 
-### Transfer from ReStructure 8.0.31 - 2022-06-01
+### Transfer from Harvard 7.4.106 - 2022-06-01
 
 - [Fixed] issue related to definition loading and select from record configs
 
-## [8.0.74] - 2022-05-31
+## [8.0.31] - 2022-06-01
+
+### Transferred from Viva @8.0.74 - 2022-06-01
 
 - [Added] admin capabilities to allow admins to be restricted in what they can administer
 - [Added] responsive styling to secure viewer
@@ -277,70 +231,29 @@ Attempting build to fix mini_portile2 issue
 - [Added] option for nfs_store: view_options: show_file_links_as: path to enable path URI in filestore browser
 - [Added] path based access to container files, and a link provided in stored file and archived file forms
 - [Added] consistent secondary key handling for activity logs
-
-## [8.0.73] - 2022-05-25
-
 - [Added] download of files using a download_path param
-- [Fixed] failure attempting to edit external id
-
-## [8.0.72] - 2022-05-24
-
 - [Added] showing select*from*... values based on live data and master associations, not just dynamic definitions
 - [Added] global app definition of nav links, and ability for icon to be used without a label
-- [Fixed] date and time formatting in reports presented as lists
-
-## [8.0.71] - 2022-05-23
-
 - [Added] show_as iframe for report cell and fixed tags handling
-- [Fixed] handling of always_use_this_for_access_control, save trigger success and skip_if_exists
-
-## [8.0.70] - 2022-05-18
-
 - [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
+- [Added] if block substitions
 - [Changed] if block substitutions to allow for multiline text
+
+- [Fixed] failure attempting to edit external id
+- [Fixed] date and time formatting in reports presented as lists
+- [Fixed] handling of always_use_this_for_access_control, save trigger success and skip_if_exists
 - [Fixed] calc action to use conditions consistently
-
-## [8.0.69] - 2022-05-17
-
 - [Fixed] issue with if block substitutions
 - [Fixed] bug with using document secure viewer on second load of report results
-
-## [8.0.68] - 2022-05-17
-
-- [Added] if block substitions
-
-## [8.0.67] - 2022-05-17
-
 - [Fixed] migrations related to reference views
-
-## [8.0.66] - 2022-05-17
-
 - [Fixed] css for hiding empty captions
 - [Fixed] issue adding new dynamic models
-
-## [8.0.65] - 2022-05-16
-
 - [Fixed] recursive calling of save trigger within update_this and pull_external_data
 - [Fixed] references: showable_if: calculation causing infinite recursion
 
-## [8.0.64] - 2022-05-16
+## [8.0.30] - 2022-05-13
 
-### Transfer from ReStructure 8.0.30 - 2022-05-16
-
-- [Changed] de/re-identification job failure handling for reliability
-- [Changed] dynamic definition code to DRY common usages
-
-## [8.0.63] - 2022-05-13
-
-- [Changed] rules so master_id can be provided as a regular field, not a foreign key (for Redcap data for example)
-- [Changed] handling of redcap pull to ignore excess fields in dynamic model
-- [Fixed] dynamic migrations adding master_id foreign key field after creation
-
-## [8.0.62] - 2022-05-11
-
-- [Fixed] show_if issues with object fields and referenced dynamic_models
-
-## [8.0.61] - 2022-05-11
+### Transferred from Viva @8.0.63 - 2022-05-13
 
 - [Added] field_options: field_name: preset_value: option
 - [Added] direct embed ability through options or field definitions
@@ -348,44 +261,29 @@ Attempting build to fix mini_portile2 issue
 - [Added] pull_external_data save trigger
 - [Added] full markdown support for master list header title
 - [Added] change_user_roles option for_user to specify non-current user, and allow lookup of role names with calc reference
+- [Added] tag select for records from tables / dynamic models
 - [Changed] parallel tests script and specs for reliability
+- [Changed] rules so master_id can be provided as a regular field, not a foreign key (for Redcap data for example)
+- [Changed] handling of redcap pull to ignore excess fields in dynamic model
+- [Changed] embedded_block to allow formatting of link and allow models related to a master to edit
+- [Changed] gemfile to include puma in all environments, to allow latest version to be installed on beanstalk
+- [Changed] styling of user profile panel
+- [Fixed] dynamic migrations adding master_id foreign key field after creation
+- [Fixed] show_if issues with object fields and referenced dynamic_models
 - [Fixed] curly substitutions in javascript to traverse full dotted path
 - [Fixed] substitutions for markdown to HTML incorrectly identifying HTML documents
 - [Fixed] datepicker being hidden by modal view
 - [Fixed] issue with caching of user roles and access controls not clearing when new role added
-
-## [8.0.60] - 2022-04-22
-
-- [Changed] embedded_block to allow formatting of link and allow models related to a master to edit
-- [Added] tag select for records from tables / dynamic models
 - [Fixed] issue with created_by_user_id
-
-## [8.0.59] - 2022-04-21
-
-- [Changed] gemfile to include puma in all environments, to allow latest version to be installed on beanstalk
-- [Changed] styling of user profile panel
 - [Fixed] issue with view_options in model references
 
-## [8.0.58] - 2022-04-12
+## [8.0.29] - 2022-04-12
+
+### Transferred from Viva @8.0.58 - 2022-04-12
 
 - [Added] view_css support to regular panels
 - [Added] force_not_valid option in create/update_reference and update_this
 - [Added] ability for save_action to return the first result that matches an if condition
-- [Fixed] Fixed issue with simple true in show_if and save_action
-- [Fixed] specs for stubbing and activity log definitions
-- [Fixed] issues with dynamic reloading
-- [Updated] puma to 5.6.4 - Procfile for AWS Beanstalk created during deployment must start the web: entry with bundle exec to use the bundled version
-
-## [8.0.57] - 2022-03-31
-
-Interim release for testing only
-
-## [8.0.56] - 2022-03-30
-
-Interim release for testing only
-
-## [8.0.55] - 2022-03-28
-
 - [Added] users as a table to calculate against in \*\_if evaluations
 - [Added] save_action expand_reference
 - [Added] media queries to view css options
@@ -395,16 +293,14 @@ Interim release for testing only
 - [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
 - [Fixed] limited_access_control using association master_created_by_user
 - [Fixed] issue loading images when window not focused
+- [Fixed] Fixed issue with simple true in show_if and save_action
+- [Fixed] specs for stubbing and activity log definitions
+- [Fixed] issues with dynamic reloading
+- [Updated] puma to 5.6.4 - Procfile for AWS Beanstalk created during deployment must start the web: entry with bundle exec to use the bundled version
 
-## [8.0.54] - 2022-03-16
+## [8.0.28] - 2022-03-08
 
-Interim release for testing only
-
-## [8.0.53] - 2022-03-15
-
-Interim release for testing only
-
-## [8.0.52] - 2022-03-08
+### Transferred from Viva @8.0.52 - 2022-03-08
 
 - [Added] paths and resource names when referencing activity log types
 - [Added] much more consistent handling of resource names with **Resources::Models**
@@ -422,41 +318,9 @@ Interim release for testing only
 - [Changed] app migrations to ignore removed columns if ALLOW_DROP_COLUMNS not set
 - [Fixed] handling of admin filters to consistently show correct app selection
 
-## [8.0.51] - 2022-03-03
+## [8.0.27] - 2022-02-09
 
-Interim release for testing only
-
-## [8.0.50] - 2022-03-03
-
-Interim release for testing only
-
-## [8.0.49] - 2022-03-02
-
-Interim release for testing only
-
-## [8.0.48] - 2022-03-01
-
-Interim release for testing only
-
-## [8.0.46] - 2022-02-24
-
-Interim release for testing only
-
-## [8.0.45] - 2022-02-24
-
-Interim release for testing only
-
-## [8.0.44] - 2022-02-24
-
-Interim release for testing only
-
-## [8.0.43] - 2022-02-23
-
-Interim release for testing only
-
-## [8.0.41] - 2022-02-11
-
-### Transfer from ReStructure 8.0.27 - 2022-02-10
+### Transferred from Harvard @7.4.96 - 2022-02-09
 
 - [Fixed] pregenerated and non-editable external identifier fields not to show
 - [Changed] export of app-export migrations to go to a single app directory, not each schema directory
@@ -466,63 +330,18 @@ Interim release for testing only
 - [Added] app type components page for easy viewing and navigation around an app
 - [Added] ability to filter admin resources by id, ids or resource name
 
-## [8.0.40] - 2022-01-24
+## [8.0.26] - 2022-01-12
 
-- [Added] ability to show embedded block from an embedded report in a second modal
-
-## [8.0.39] - 2022-01-11
-
-- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
-
-## [8.0.38] - 2022-01-11
-
-- [Updated] release script to allow clean container to be requested
-- [Updated] change_user_roles trigger to allow app_type to be specified
-
-## [8.0.37] - 2022-01-11
-
-- [Added] ability to specify multiple checkboxes in report select items
-- [Fixed] bug by supressing notification when the admins change their passwords
-- [Updated] css for mobile responsiveness, css vars and app styles
-- [Updated] document library to correctly link to source repository
-- [Updated] admin scripts to improve server configuration
-
-## [8.0.35] - 2022-01-06
-
-- [Bumped] version
-
-## [8.0.33] - 2022-01-06
+### Transferred from Viva @8.0.39
 
 - [Added] user self-registration, email confirmation and password reset
-
-### Transfer from ReStructure 8.0.24 - 2021-12-20
-
-- [Added] scripted job script for OCR
-- [Added] logic to avoid too many refreshes on browser
-- [Added] PDF and office doc search (within a single document) in secure view
-- [Changed] scripted job for better job feedback and documentation
-- [Changed] activity log documentation to improve filestore information
-- [Changed] report list functionality to results list view
-- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
-- [Fixed] multiple bugs
-
-## [8.0.32] - 2021-12-14
-
-- [Added] demo release
-
-## [8.0.30] - 2021-12-07
-
-- [Fixed] scrolling issue with report result lists
-
-## [8.0.29] - 2021-12-07
-
-- [Fixed] report criteria select_from_model defaults
-
-## [8.0.28] - 2021-12-03
-
-- [Changed] rebuild
-
-## [8.0.27] - 2021-12-03
+- [Changed] release script to allow clean container to be requested
+- [Changed] change_user_roles trigger to allow app_type to be specified
+- [Changed] ability to specify multiple checkboxes in report select items
+- [Changed] css for mobile responsiveness, css vars and app styles
+- [Changed] document library to correctly link to source repository
+- [Changed] admin scripts to improve server configuration
+- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
 
 ## [8.0.25] - 2021-12-20
 
@@ -568,13 +387,7 @@ Interim release for testing only
 - [Added] report edit and criteria select fields to use models more effectively and provide grouping
 - [Fixed] migrations with references that don't produce views
 
-## [8.0.26] - 2021-11-24
-
-- [Added] better handling of report results list with full set of column types from the table
-- [Added] report edit and criteria select fields to use models more effectively and provide grouping
-- [Fixed] migrations with references that don't produce views
-
-## [8.0.25] - 2021-11-22
+## [8.0.22] - 2021-11-22
 
 - [Added] changes to allow report record edit and create to work with arbitrary models
 - [Added] report view*as option to show results as a \_transposed_table*
@@ -586,26 +399,17 @@ Interim release for testing only
 - [Changed] updated to latest gems
 - [Fixed] bugfixes
 
-## [8.0.24] - 2021-11-16
-
-- Bump version
-
-## [8.0.23] - 2021-11-16
-
-## [8.0.22] - 2021-11-15
-
 ### Transfer from Harvard @7.4.71.1 - 2021-11-15
 
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] report edit forms and results format and submit dates correctly
 - [Fixed] form, credential and trigger bugs
-- [Fixed] - bugfixes
 
 ## [8.0.21] - 2021-11-11
 
-- [Fixed] production environment use of encryption salt
+## [8.0.21] - 2021-11-11
 
-## [8.0.20] - 2021-11-10
+## [8.0.20] - 2021-11-11
 
 ### Transfer from Harvard @7.4.72 - 2021-11-10
 
@@ -622,11 +426,7 @@ Interim release for testing only
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
 
-## [8.0.19] - 2021-11-01
-
-- [Added] Documentation for a private repository fork
-
-NOTE: this build is largely to test the new private repository is complete and can be built
+## [8.0.19] - 2021-11-10
 
 ## [8.0.18] - 2021-11-01
 

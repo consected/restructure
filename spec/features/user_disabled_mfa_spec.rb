@@ -44,7 +44,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× Signed in successfully'
+    expect(page).to have_css '.flash .alert', text: "×\nSigned in successfully."
   end
 
   it 'should prevent sign in if user disabled' do
@@ -56,7 +56,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× This account has been disabled.'
+    expect(page).to have_css '.flash .alert', text: "×\nThis account has been disabled."
   end
 
   it 'should prevent invalid sign in' do
@@ -72,7 +72,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    fail_message = '× Invalid email, password or two-factor authentication code.'
+    fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css 'input:invalid'
 

@@ -22,6 +22,10 @@ RSpec.describe 'Activity Log definition', type: :model do
       # Set up additional steps in the activity log definition
       # Find the actual current version of the definition
       al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+      ActivityLog.active.where(item_type: al_def.item_type).where.not(id: al_def.id).each do |oal|
+        oal.current_admin = @admin
+        oal.disable!
+      end
 
       config = <<~ENDDEF
         step_1:

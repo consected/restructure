@@ -27,6 +27,7 @@ gem 'mime-types'
 gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
 gem 'nokogiri', '1.13.9'
 gem 'pg', '~> 1.4', '>= 1.4.3'
+
 gem 'webpacker'
 
 
@@ -36,7 +37,9 @@ gem 'webpacker'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma', '~> 6.0'
 
+
 gem 'rails', '~> 6.0', '>= 6.0.6'
+
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'

@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --project-color: #5e4096;
   --link-color: #5e4096;
   --link-darker-color: #472f72;
@@ -19,7 +19,7 @@
   --table-font-size: 16px;
   --table-head-font-family: "Assistant", sans-serif;
   --table-head-font-size: 15px;
-}
+} */
 
 @font-face {
   font-family: "Assistant";
@@ -317,7 +317,7 @@ td.report-el pre {
 
 #modal_results_block .report-results-inner,
 #modal_results_block_1 .report-results-inner {
-    overflow-y: hidden;
+  overflow-y: hidden;
 }
 
 .model-reference-disabled {
