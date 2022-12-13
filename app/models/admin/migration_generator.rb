@@ -617,7 +617,7 @@ class Admin::MigrationGenerator
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
-          migration_context(db_migration_dirname).migrate
+          self.class.migration_context(db_migration_dirname).migrate
           # Don't dump until a build, otherwise differences in individual development environments
           # force unnecessary and confusing commits
           # pid = spawn('bin/rake db:structure:dump')
