@@ -1,6 +1,8 @@
 # Filestore Setup
 
-Filestore is a component that provides upload, management and download of medical and project files.
+Filestore is a component that provides upload, management and download of medical and project files. This document is targeted at
+production use of Filestore on a Linux platform. For development with Filestore on macOS, see [README.md](../README.md) and
+`app-scripts/setup-dev-filestore.sh`
 
 Edit the file `config/initializers/nfs_store_config.rb`
 
