@@ -43,10 +43,12 @@ module Dynamic
       res = versioned_definition.option_type_config_for option_type,
                                                         result_if_empty: :first_config
       unless res || option_type.blank? || option_type == :blank || option_type == :blank_log
-        if Rails.env.test?
-          puts "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
+        unless option_type.start_with?('ignore_missing_')
+          if Rails.env.test?
+            puts "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
+          end
+          logger.warn "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
         end
-        logger.warn "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
         res = current_definition.option_type_config_for option_type,
                                                         result_if_empty: :first_config
       end
