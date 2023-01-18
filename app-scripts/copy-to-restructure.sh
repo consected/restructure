@@ -15,7 +15,12 @@ if [ ! -d ${DEST} ]; then
   exit 2
 fi
 
-EXCLUDE='database.yml favicon.png structure.sql schema.rb .git'
+EXCLUDE='database.yml favicon.png app/assets/images/restructure-logo.svg initializers/app_default_settings.rb .git assets/stylesheets/app_vars.scss'
+
+for e in ${EXCLUDE}; do
+  EXCLUDES="${EXCLUDES} --exclude=${e}"
+done
+
 
 cd ${DEST}
 git pull
@@ -35,7 +40,7 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
   mkdir -p "${DEST}/${FROM}"
   echo "${FROM}"
-  rsync -crv --delete --exclude="${EXCLUDE}" "${FROM}/" "${DEST}/${FROM}"/
+  rsync -crv --delete ${EXCLUDES} "${FROM}/" "${DEST}/${FROM}"/
 done
 
 mkdir -p ${DEST}/docs
@@ -44,7 +49,7 @@ mkdir -p ${DEST}/db/dumps/development-data
 for FROM in \
   yarn.lock package.json \
   docs/filestore-setup.md \
-  db/seeds.rb db/dumps/development-data/data-only-dump.sql db/demo-data.zip \
+  db/seeds.rb \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
   app-scripts/release_and_build.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
