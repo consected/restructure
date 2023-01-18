@@ -13,8 +13,19 @@ class PagesController < ApplicationController
     redirect_to home_url
   end
 
+  def app_home
+    home_url = if current_user && !current_admin
+                 app_config_text :app_home_url, app_config_text(:logo_link, '/masters')
+               else
+                 '/'
+               end
+    redirect_to home_url
+  end
+
   def index
     unless current_user && !current_admin
+      @is_admin_index = true
+      @app_type = current_user&.app_type || current_admin.matching_user&.app_type || Admin::AppType.active.first
       render 'index', layout: 'admin_application'
       return
     end

@@ -60,7 +60,7 @@ shared_examples 'a standard admin controller' do
     it 'assigns the requested item as @var' do
       create_item
 
-      expect(get: "#{path_prefix}/#{object_symbol}/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(get: "#{path_prefix}/#{object_symbol}/#{item_id}")
     end
   end
 
@@ -176,7 +176,7 @@ shared_examples 'a standard admin controller' do
     before_each_login_admin
     it 'never destroys the requested item' do
       create_item
-      expect(delete: "#{path_prefix}/#{object_symbol}/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(delete: "#{path_prefix}/#{object_symbol}/#{item_id}")
       #      delete :destroy, {:id => item_id}
       #      expect(response).to have_http_status(401)
     end

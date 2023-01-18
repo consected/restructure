@@ -41,14 +41,17 @@ class DynamicModel::DynamicModelsController < UserBaseController
 
   #
   # Remove items that are not showable, based on showable_if in the default options config
-  # If dynamic model doesn't relate to a master there will be no master objects
-  # Just return with an empty result
+  # In some special cases (user profile related items) there may not be a connection directly to this
+  # master record, so the current user will not be set, but the set of @master_objects will be in place.
+  # Set the current_user for these items so that they can be handled within the showable_if evaluation.
+  # If there are no @master_objects set we just return with an empty (not nil) result.
   def filter_records
     return [] unless @master_objects
     return @master_objects if @master_objects.is_a? Array
 
     pk = @implementation_class.primary_key
     @filtered_ids = @master_objects
+                    .each { |i| i.current_user.nil? && i.respond_to?(:current_user=) && i.current_user ||= current_user }
                     .select { |i| i.class.definition.default_options&.calc_if(:showable_if, i) }
                     .map { |o| o.attributes[pk] }
     @master_objects = @master_objects.where(pk => @filtered_ids)

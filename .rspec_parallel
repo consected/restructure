@@ -1,4 +1,4 @@
---format progress
+--format documentation
 --format ParallelTests::RSpec::SummaryLogger --out tmp/spec_summary.log
---format progress
+--format documentation
 --format ParallelTests::RSpec::FailuresLogger --out tmp/failing_specs.log

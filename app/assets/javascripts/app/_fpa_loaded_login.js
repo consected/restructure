@@ -3,6 +3,12 @@ _fpa.loaded.login = function () {
   let allow_submit = false;
   const el_mfa_form = $('#mfa-step1')[0];
 
+  // Force email usernames to lowercase in the form
+  $('#user_email, #admin_email').on('blur change', function () {
+    const email = $(this).val();
+    $(this).val(email.toLowerCase());
+  });
+
   if (!el_mfa_form || $('.login-block').length === 0) return;
 
   const $form = $('form#new_user, form#new_admin');
@@ -18,7 +24,7 @@ _fpa.loaded.login = function () {
 
       // Reset the caption on the submit button
       $btn_final.attr('disabled', null).val(orig_final_caption);
-      console.log($btn_final.val())
+
       if (data.need_2fa) {
         $('.login-user-password-block').hide();
         $('.login-2fa-block').show();
@@ -34,7 +40,8 @@ _fpa.loaded.login = function () {
     if (allow_submit) return;
 
     ev.preventDefault();
-    const email = $('#user_email, #admin_email').val();
+    // Force email usernames to lowercase in the form
+    const email = $('#user_email, #admin_email').val().toLowerCase();
     const password = $('#user_password, #admin_password').val();
 
     $('#step1-email').val(email);

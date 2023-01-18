@@ -6,14 +6,14 @@ describe 'user sign in process for users that can self register', js: true, driv
   include ModelSupport
 
   before(:all) do
-    Settings.const_set('AllowUsersToRegister', true)
+    change_setting('AllowUsersToRegister', true)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings.const_set('TwoFactorAuthDisabledForUser', false)
-    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
 
     create_admin
 
@@ -175,6 +175,6 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   after(:all) do
-    Settings.const_set('AllowUsersToRegister', false)
+    change_setting('AllowUsersToRegister', false)
   end
 end

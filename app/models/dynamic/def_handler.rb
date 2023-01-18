@@ -287,6 +287,15 @@ module Dynamic
       @use_current_version = configurations && configurations[:use_current_version]
     end
 
+    def prevent_migrations
+      return @prevent_migrations if @prevent_migrations_set
+
+      @prevent_migrations_set = true
+      # Parse option configs if necessary
+      option_configs
+      @prevent_migrations = configurations && configurations[:prevent_migrations]
+    end
+
     # Return result based on the current
     # list of model defintions based on them being available in
     # the active app types.
@@ -453,6 +462,18 @@ module Dynamic
       klass = Object
       klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
       klass
+    end
+
+    #
+    # Returns :table or :view if the underlying database object is a table or a view.
+    # Returns nil if no underlying object is found
+    # @return [Symbol | nil]
+    def table_or_view
+      return unless Admin::MigrationGenerator.table_or_view_exists? table_name
+
+      return :table if Admin::MigrationGenerator.table_exists? table_name
+
+      :view
     end
   end
 end

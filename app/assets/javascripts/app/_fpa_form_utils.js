@@ -228,9 +228,13 @@ _fpa.form_utils = {
 
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
-    $(`${el} optgroup[label]`).hide();
+    $(`${el} optgroup[label]`).hide().attr('disabled', 'disabled');
     // Case insensitive filtering
-    $(`${el} optgroup[label="${val}" i]`).show();
+    $(`${el} optgroup[label="${val}" i]`).show().attr('disabled', null);
+    if ($(el).hasClass('attached-chosen')) {
+      // Refresh the associate chosen.js values if chosen is attached to this field
+      $(el).trigger('chosen:updated');
+    }
   },
 
   data_from_form: function (block) {
@@ -269,6 +273,12 @@ _fpa.form_utils = {
     return form_data;
   },
 
+  // Since the select_from_... fields
+  // may be tied through a master association to the current instance,
+  // it is not possible to cache the results directly based on a dynamic definition
+  // and it must be handled at the time of the request.
+  // Therefore this function does not actually provide data that is useful to the front end
+  /*
   get_general_selections: function (data) {
     if (!data) return;
 
@@ -329,6 +339,7 @@ _fpa.form_utils = {
       }
     });
   },
+  */
 
   handle_sub_list_filters: function ($control, init) {
     var $a = $control;
@@ -736,7 +747,9 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple], .report-criteria-fields-block select').not('.attached-chosen');
+    var sels = block
+      .find('select[multiple], .report-criteria-fields-block select, .use-chosen select')
+      .not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
@@ -746,7 +759,12 @@ _fpa.form_utils = {
           var no_sel_text = 'no tags selected';
           var alt_nst = sel.attr('data-nothing-selected-text');
           if (alt_nst) no_sel_text = alt_nst;
-          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false });
+          sel.chosen({
+            width: '100%',
+            placeholder_text_multiple: no_sel_text,
+            hide_results_on_select: false,
+            display_disabled_options: false,
+          });
 
           sel.on('chosen:showing_dropdown', function (evt, params) {
             // Access the element
@@ -923,6 +941,7 @@ _fpa.form_utils = {
   // to just show the name and retain the id in an attribute
   // The select item that drives the change must have an attribute data-filters-select
   // with css selector pointing to the select element to be filtered on change
+  // NOTE: disabled attribute is set to ensure chosen.js correctly hides options
   setup_form_filtered_select: function (block) {
     block
       .find('select[data-filters-select]')
@@ -932,12 +951,16 @@ _fpa.form_utils = {
         var filter_sel = $el.attr('data-filters-select');
         $el.on('change', function () {
           var val = $el.val();
-          $(filter_sel + ' optgroup[data-group-num]').hide();
-          $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+          $(`${filter_sel} optgroup[data-group-num]`).hide().attr('disabled', 'disabled');
+          $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+          if ($(filter_sel).hasClass('attached-chosen')) {
+            // Refresh the associate chosen.js values if chosen is attached to this field
+            $(filter_sel).trigger('chosen:updated');
+          }
         });
 
         var val = $el.val();
-        $(filter_sel + ' optgroup[label]')
+        $(`${filter_sel} optgroup[label]`)
           .each(function () {
             if (!$(this).attr('data-group-num')) {
               var l = $(this).attr('label');
@@ -948,8 +971,13 @@ _fpa.form_utils = {
               $(this).attr('data-group-num', ls[first]);
             }
           })
-          .hide();
-        $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+          .hide()
+          .attr('disabled', 'disabled');
+        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+        if ($(filter_sel).hasClass('attached-chosen')) {
+          // Refresh the associate chosen.js values if chosen is attached to this field
+          $(filter_sel).trigger('chosen:updated');
+        }
       })
       .addClass('filters-select-attached');
   },
@@ -1528,7 +1556,7 @@ _fpa.form_utils = {
           el.removeClass('hidden');
           $(this).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
         });
-        el.on('hide.bs.collapse', function () { });
+        el.on('hide.bs.collapse', function () {});
       })
       .addClass('attached-force-collapse');
 
@@ -1678,6 +1706,7 @@ _fpa.form_utils = {
         }
 
         $(this).click(function (ev) {
+          $('#help-sidebar').collapse('show');
           ev.preventDefault();
         });
       })
@@ -1926,14 +1955,26 @@ _fpa.form_utils = {
   setup_textarea_autogrow: function (block) {
     block.find('textarea').each(function () {
       var textarea = $(this)[0];
-      var growingTextarea = new Autogrow(textarea);
       textarea.style.resize = 'none';
       textarea.style.boxSizing = 'content-box';
-      $(this).click(function () {
-        if ($(this).hasClass('done-auto-grow')) return;
-        $(this).addClass('done-auto-grow');
-        growingTextarea.autogrowFn();
-      });
+
+      const $td = $(this).parent('td');
+      if ($td.length) {
+        const h = $td.height();
+        $(this).css({ minHeight: `${h}px` });
+      }
+
+      $(this)
+        .on('click focus', function () {
+          if ($(this).hasClass('done-auto-grow')) return;
+
+          $(this).addClass('done-auto-grow');
+          var growingTextarea = new Autogrow(textarea);
+          growingTextarea.autogrowFn();
+        })
+        .on('blur', function () {
+          $(this).removeClass('done-auto-grow');
+        });
     });
 
     setTimeout(function () {
@@ -2158,6 +2199,17 @@ _fpa.form_utils = {
       .addClass('image-to-load');
   },
 
+  // Check for changes and handle prompt to save
+  setup_change_handling: function (block) {
+    block
+      .find('input, select, textarea')
+      .not('.setup-change-handling')
+      .on('keypress change', function () {
+        $(this).addClass('field-was-changed');
+      })
+      .addClass('setup-change-handling');
+  },
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
     if (!block) {
@@ -2205,6 +2257,7 @@ _fpa.form_utils = {
     _fpa.form_utils.set_image_classes(block);
     _fpa.form_utils.setup_big_select_fields(block);
     _fpa.form_utils.setup_select_filtering(block);
+    _fpa.form_utils.setup_change_handling(block);
 
     block.removeClass('formatting-block');
   },

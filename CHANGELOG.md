@@ -66,6 +66,100 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.45] - 2022-10-11
 
+### Transferred from Harvard @7.4.152 - 2023-01-17
+
+- [Changed] the admin panel to present the app components, consistent styling and better admin buttons flash
+- [Fixed] duplicate class attribute
+- [Added] form change checking and warning if navigating or performing activity log action that would lose changes
+- [Added] useful error message for update_reference when no reference found
+- [Changed] session timeout counter to clear the flash if another tab has refreshed the session
+- [Fixed] constant autoloading error
+- [Fixed] error where id not available in editable report row
+- [Added] configuration of logging levels
+- [Fixed] Markdown editor add image, which only showed selectable images from first container in app
+- [Change] to ensure a portal page shows a Not Found error if a page with the matching slug is not found
+- [Changed] handling of requests that don't have a matching route, to avoid spamming of the logs
+- [Added] warning to user if there is an error that breaks the markdown editor saving changes
+- [Fixed] page layouts to ensure dashboards can show activity logs in a traditional view (rather than as a info page layout)
+- [Fixed] dashboard charts when view_options not set
+- [Added] the merging of editable table rows with static cells
+- [Fixed] report result viewing to show based on configurations
+- [Added] report view_options.prevent_adding_items to prevent create in editable reports even if user has access to create report entries
+- [Fixed] report edit breaks resizable textarea
+- [Added] activity log admin clickable activities
+- [Added] more information to activity log details panel
+- [Added] report results handler to add blocks based on specific array fields
+- [Added] report results_handler view option to add custom handlers
+- [Added] ability to add chosen.js to more fields and fixed filtering
+- [Added] rspec method to change app settings without spamming results
+- [Changed] general selections so that they are not cached on the front end, since this is incorrect, and may also expose data to users in the Javascript console
+- [Changed] login to force username to be lowercase
+- [Changed] print css to resize report results block to be full set of data
+- [Changed] styles to allow better handling of hidden file attachment blocks
+- [Fixed] handling of calc_if against uncommon cases, especially current user evaluations
+- [Fixed] issue returning incorrect values in selections for template configs
+- [Fixed] capitalization in multi\_ fields
+- [Fixed] admin report controller item type filter name display
+- [Added] information to the update_reference documentation
+- [Changed] handling of dynamic options parsing to provide more information, especially in app type imports
+- [Changed] grep of Rails log to include additional context after match
+- [Fixed] regression of use_current_version
+- [Fixed] sidebar not showing when link clicked in certain pages or blocks
+- [Fixed] infinite recursion on a tag*select*... field definition
+- [Changed] build script to handle removed gems
+- [Changed] grouping of production gems that really only should be used for asset build
+- [Changed] viewing of the the admin password change document intended for end users
+
+## [8.0.49] - 2022-11-10
+
+- [Changed] feature rspecs to use latest Capybara and Selenium, and support a new Docker test container
+
+### Transferred from Viva @8.0.119 - 2022-11-22
+
+- [Fixed] created_by_user_id for items that do not have a master association (transferred directly from Harvard)
+- [Added] simple mechanism for substituting list_id into report criteria text
+- [Changed] report criteria select fields to setup with "chosen" even if not multiple
+
+### Transferred from Viva @8.0.118 - 2022-11-15
+
+- [Added] correct lookup of choice_label and tags in reports, with formatting of tags on submitting edit report changes
+- [Changed] import error message
+- [Added] handling of help sidebar navigation and editor tag cleanup
+- [Added] glyphicon substitutions in study info pages
+- [Added] app configuration option for "help index path" - allows help icon to link to a portal page for example
+- [Changed] styling of editor dialogs
+- [Changed] running of tests to mock AWS APIs by default
+- [Fixed] glyphicon substitution in show mode
+
+## [8.0.48] - 2022-10-27
+
+- [Changed] version of Puma to the new 6.0 - to test breaking changes in staging environment
+
+## [8.0.47] - 2022-10-26
+
+### Transferred from Harvard @7.4.134 - 2022-10-26
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Added] cache handling to avoid multiple requests for definitions being made and refactored Javascript \_fpa.cache
+- [Changed] README for bindfs
+- [Changed] caching of master search results template
+- [Changed] handling of select_record_from... to handle no associations cleanly when the target has no master association
+- [Changed] first time help page to not load during 2FA setup
+- [Changed] 2FA so setup can't be skipped
+- [Fixed] bugs, comments
+
+## [8.0.46] - 2022-10-25
+
+- [Added] default settings for organization specific settings not to be transferred up/downstream
+
+### Transferred from Viva @8.0.112 - 2022-10-25
+
+- [Added] configuration for country select dropdown - priority items are configurable
+- [Changed] README for bindfs
+- [Fixed] bugs, comments
+
+## [8.0.45] - 2022-10-11
+
 ### Transferred from Harvard @7.4.127 - 2022-10-11
 
 - [Added] two step MFA at login

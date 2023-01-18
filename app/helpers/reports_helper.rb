@@ -6,10 +6,14 @@ module ReportsHelper
   end
 
   def creatable?
-    @creatable = @report.editable_data? && (current_admin || current_user&.can?(:create_report_data))
+    @creatable = @report.creatable_data? &&
+                 (current_admin || current_user&.can?(:create_report_data)) &&
+                 !@view_options&.prevent_adding_items
   end
 
   def report_edit_btn(id)
+    return unless id
+
     rp = edit_report_path(id, report_id: @report.id, filter: filter_params_permitted)
     link_to '',
             rp,

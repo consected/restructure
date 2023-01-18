@@ -102,8 +102,8 @@ describe 'admin sign in process', driver: :app_firefox_driver do
   end
 
   it 'should sign in with 2FA even if it is disabled for users' do
-    Settings.const_set('TwoFactorAuthDisabledForUser', true)
-    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
     expect(User.two_factor_auth_disabled).to be true
     expect(Admin.two_factor_auth_disabled).to be false
 

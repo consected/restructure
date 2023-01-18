@@ -139,6 +139,20 @@ body.page-loading {
   .navbar-nav > li > a {
     color: rgb(69, 69, 69);
   }
+
+  .logged-in-as-admin li a.btn {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: 8px;
+
+    &:hover {
+          background-color: rgb(235, 147, 22);
+    }
+  }
+}
+
+.admin_page .logged-in-as-admin {
+  display: none;
 }
 
 h2.no-results-msg {

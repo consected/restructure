@@ -16,73 +16,82 @@ _fpa.custom_editor = class {
 
   setup_editor_container($this) {
     if ($this.hasClass('edit-as-markdown')) {
-      var $edta = $this.find('textarea.text-notes');
-      var $eddiv = $this.find('div.custom-editor');
-      var edid = $eddiv.attr('id');
-      var $edtools = $this.find('.btn-toolbar[data-target="#' + edid + '"]');
-      var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
-      var wysiwygEditor = editor.wysiwygEditor;
+      try {
+        var $edta = $this.find('textarea.text-notes');
+        var $eddiv = $this.find('div.custom-editor');
+        var edid = $eddiv.attr('id');
+        var $edtools = $this.find('.btn-toolbar[data-target="#' + edid + '"]');
+        var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
+        var wysiwygEditor = editor.wysiwygEditor;
 
-      $edtools.hide();
-      $eddiv.on('focus', function () {
-        // Protect against link dialog form being open, to avoid losing the selection
-        if ($(this).parent().find('.btn-group.open').length) return;
+        $edtools.hide();
+        $eddiv.on('focus', function () {
+          // Protect against link dialog form being open, to avoid losing the selection
+          if ($(this).parent().find('.btn-group.open').length) return;
 
-        $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
-        $edtools.slideDown();
+          $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
+          $edtools.slideDown();
 
-        if (_fpa.state.previous_wysiwyg_editor == editor) {
-          wysiwygEditor.restoreSelection()
-        }
-        else {
-          _fpa.state.previous_wysiwyg_editor = editor
-        }
-
-      }).on('change', function () {
-        $eddiv.data('editor-changed', true);
-        wysiwygEditor.saveSelection()
-      }).on('blur', function () {
-        wysiwygEditor.saveSelection()
-
-      }).on('paste', function () {
-        window.setTimeout(function () {
-          var obj = { html: editor.cleanHtml() };
-          var prev_html = obj.html;
-          var txt = _fpa.utils.html_to_markdown(obj);
-
-          if (prev_html != obj.html) {
-            editor.html(obj.html);
+          if (_fpa.state.previous_wysiwyg_editor == editor) {
+            wysiwygEditor.restoreSelection()
+          }
+          else {
+            _fpa.state.previous_wysiwyg_editor = editor
           }
 
-          $edta.val(txt);
-          $eddiv.data('editor-changed', null);
-        }, 100);
+        }).on('change', function () {
+          $eddiv.data('editor-changed', true);
+          wysiwygEditor.saveSelection()
+          $edta.trigger('change');
+        }).on('blur', function () {
+          wysiwygEditor.saveSelection()
 
-      });
-
-      // Setup periodic parsing of the html if there have been changes to the editor
-      var autoparse = function () {
-        if ($eddiv.length && $edta.length) {
-          if ($eddiv.data('editor-changed')) {
-            // Only if there has been a change
-            $eddiv.data('editor-changed', null);
-
-
+        }).on('paste', function () {
+          window.setTimeout(function () {
             var obj = { html: editor.cleanHtml() };
+            var prev_html = obj.html;
             var txt = _fpa.utils.html_to_markdown(obj);
 
+            if (prev_html != obj.html) {
+              editor.html(obj.html);
+            }
+
             $edta.val(txt);
+            $eddiv.data('editor-changed', null);
+            $edta.trigger('change');
+          }, 100);
+
+        });
+
+        // Setup periodic parsing of the html if there have been changes to the editor
+        var autoparse = function () {
+          if ($eddiv.length && $edta.length) {
+            if ($eddiv.data('editor-changed')) {
+              // Only if there has been a change
+              $eddiv.data('editor-changed', null);
+
+
+              var obj = { html: editor.cleanHtml() };
+              var txt = _fpa.utils.html_to_markdown(obj);
+
+              $edta.val(txt);
+            }
+
+            window.setTimeout(function () {
+              autoparse();
+            }, 500);
           }
+        };
 
-          window.setTimeout(function () {
-            autoparse();
-          }, 500);
-        }
-      };
+        window.setTimeout(function () {
+          autoparse();
+        }, 500);
 
-      window.setTimeout(function () {
-        autoparse();
-      }, 500);
+      }
+      catch (err) {
+        _fpa.flash_notice(`Failed to update editor. Copy the text to the clipboard, open this form in a new tab, then if the text looks incomplete paste the new text then save the new editor and close this one.`);
+        console.log(err);
+      }
     }
   }
 

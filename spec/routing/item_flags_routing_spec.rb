@@ -21,7 +21,7 @@ RSpec.describe ItemFlagsController, type: :routing do
     end
 
     it 'routes to #edit' do
-      expect(get: "#{object_path}/1/edit").not_to be_routable
+      expect_to_be_bad_route(get: "#{object_path}/1/edit")
     end
 
     it 'routes to #create' do
@@ -29,11 +29,11 @@ RSpec.describe ItemFlagsController, type: :routing do
     end
 
     it 'routes to #update' do
-      expect(put: "#{object_path}/1").not_to be_routable
+      expect_to_be_bad_route(put: "#{object_path}/1")
     end
 
     it 'routes to #destroy' do
-      expect(delete: "#{object_path}/1").not_to be_routable
+      expect_to_be_bad_route(delete: "#{object_path}/1")
     end
   end
 end

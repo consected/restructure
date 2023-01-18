@@ -43,10 +43,12 @@ module Dynamic
       res = versioned_definition.option_type_config_for option_type,
                                                         result_if_empty: :first_config
       unless res || option_type.blank? || option_type == :blank || option_type == :blank_log
-        if Rails.env.test?
-          puts "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
+        unless option_type.start_with?('ignore_missing_')
+          if Rails.env.test?
+            puts "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
+          end
+          logger.warn "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
         end
-        logger.warn "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
         res = current_definition.option_type_config_for option_type,
                                                         result_if_empty: :first_config
       end
@@ -77,6 +79,10 @@ module Dynamic
     def versioned_definition
       return @versioned_definition unless @versioned_definition.nil? ||
                                           @versioned_definition.def_version.nil? && id
+
+      return @versioned_definition = current_definition if current_definition.use_current_version
+
+      return @versioned_definition = current_definition if respond_to?(:use_current_version) && use_current_version
 
       unless respond_to?(:use_def_version_time) || respond_to?(:created_at)
         return @versioned_definition = current_definition

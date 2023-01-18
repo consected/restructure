@@ -2,7 +2,7 @@
 @click_to_search = @report_page
 @btn_class = !@click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
 @view_options = @report.report_options.view_options
-@hidden_class = !@report_criteria && @report.auto && !@view_options.force_show_search_button ? 'hidden' : ''
+@hidden_class = !@report_criteria && @report.auto && !@view_options&.force_show_search_button ? 'hidden' : ''
 @auto_submitter_class = !@report_page ? 'auto-submitter' : ''
 @auto_run_class = !@report_page && @report.auto || @force_run ? 'auto-run' : nil
 %>
