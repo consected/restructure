@@ -109,12 +109,16 @@ table.table.report-table {
     border: 1px solid silver;
     background-color: white;
     line-height: normal;
-    font-size: 12px;
+    font-size: var(--table-font-size);
 
     &.report-el-edit-type-boolean {
       text-align: center;
       line-height: 100%;
       vertical-align: middle;
+    }
+
+    &.report-el-was-from-new {
+      display: none;
     }
 
     input.form-control,
@@ -142,14 +146,15 @@ table.table.report-table {
       margin: 0;
       border: 0;
       box-shadow: none;
-      font-size: 12px;
+      font-size: var(--table-font-size);
       padding: 2px 2px;
       min-width: 200px;
       width: 97%;
 
-      &:focus {
-        height: auto !important;
-      }
+      // This breaks auto-grow
+      // &:focus {
+      //   height: auto !important;
+      // }
     }
     input[type="checkbox"] {
       border: 1px solid silver;
@@ -209,7 +214,7 @@ table.table.report-table {
 
   td.row-num {
     background-color: #e6e6e6;
-    font-size: 12px;
+    font-size: var(--table-font-size);
     padding-right: 4px;
     text-align: center;
   }
@@ -219,7 +224,7 @@ table.table.report-table {
   }
 
   .report-item-edit {
-    .report-el {
+    .report-el-edit-cell {
       padding: 0px 4px;
     }
   }

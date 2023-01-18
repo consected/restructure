@@ -18,9 +18,9 @@ module Reports
     # Run the report
     # @param [Hash | String] search_attr_values - hash of search values, or '_use_defaults_' to force use of
     #                                             default values from the report options
-    # @param [Admin] current_admin - (optional) indicates that a full SQL error can be communicated if the report fails to run 
+    # @param [Admin] current_admin - (optional) indicates that a full SQL error can be communicated if the report fails to run
     # @return [Array] results array from ActiveRecord::Base.connection.execute
-    def run(initial_search_attr_values, current_admin=nil)
+    def run(initial_search_attr_values, current_admin = nil)
       raise FphsException, 'SQL is not set' if sql.blank?
 
       search_attrs_prep initial_search_attr_values
@@ -149,6 +149,20 @@ module Reports
       @search_attr_values || {}
     end
 
+    #
+    # Support substitutions
+    # @return [Hash{String:}]
+    def attributes
+      return @attributes if @attributes
+
+      @attributes = {}
+      %i[report count_only sql current_user results using_defaults].each do |k|
+        @attributes[k.to_s] = send(k)
+      end
+
+      @attributes
+    end
+
     protected
 
     #
@@ -185,7 +199,17 @@ module Reports
     # @param [String] sql
     # @return [String] SQL with substitutions
     def substitute_current_user(sql)
-      sql.gsub(':current_user', current_user&.id.to_s || 'NULL')
+      sql
+        .gsub(':current_user_preference', current_user&.user_preference&.id&.to_s || 'NULL')
+        .gsub(':current_user', current_user&.id&.to_s || 'NULL')
+    end
+
+    #
+    # Substitute with the equivalent of double-curly substitution variables
+    # @param [String] sql
+    # @return [String] SQL with substitutions
+    def substitute_substitutions(sql)
+      Formatter::Substitution.substitute(sql, data: self, ignore_missing: true)
     end
 
     #
@@ -212,6 +236,7 @@ module Reports
       self.sql = previous_filtering.substitute_filter_previous(sql) unless using_defaults
       self.sql = data_reference.sql_substitutions(sql)
       self.sql = substitute_current_user(sql)
+      self.sql = substitute_substitutions(sql)
       self.sql = substitute_file_filters(sql)
       self.sql = substitute_from_config_libraries(sql)
       self.sql = sql_substitute_all(true) unless run_once

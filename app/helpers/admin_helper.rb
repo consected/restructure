@@ -94,23 +94,33 @@ module AdminHelper
     res.html_safe
   end
 
-  def show_admin_heading
-    "<h1 class=\"admin-title\">#{title}" \
-      "#{ link_to(
-        '',
-        help_page_path(
-          library: :admin_reference,
-          section: help_section,
-          subsection: help_subsection,
-          display_as: :embedded
-        ),
-        class: 'glyphicon glyphicon-question-sign small admin-help-icon',
-        data: { remote: true,
-                toggle: 'collapse',
-                target: '#help-sidebar',
-                'working-target': '#help-sidebar-body' }
-      ) }" \
-    '</h1>'.html_safe
+  def show_admin_heading(alt_title = nil)
+    alt_title ||= title
+    res = <<~END_HTML
+      <div class="panel panel-default admin-action-page">
+        <div class="panel-heading">#{' '}
+          <h1 class="admin-title">#{alt_title}
+            #{ link_to(
+              '',
+              help_page_path(
+                library: :admin_reference,
+                section: help_section,
+                subsection: help_subsection,
+                display_as: :embedded
+              ),
+              class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+              data: { remote: true,
+                      toggle: 'collapse',
+                      target: '#help-sidebar',
+                      'working-target': '#help-sidebar-body' }
+            ) }
+            #{render partial: 'admin_handler/status_bar'}
+          </h1>
+        </div>
+      </div>
+    END_HTML
+
+    res.html_safe
   end
 
   def hidden_filter_fields

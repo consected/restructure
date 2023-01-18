@@ -6,7 +6,8 @@ To get started, you will need to login.
 
 From the home page a simple login form prompts you to login to the application. You will need to enter your username and password to continue{{#if mfa_disabled}}. {{else}}, then on the next page you will separately enter your two-factor authentication code **except for the [first time that you login](#first-login)**.{{/if}}
 
-If you are having issues logging in, [check what to do next](login_issues.md).
+If you are having issues logging in, [check what to do next](login_issues.md). {{#if allow_users_to_register}}If you have been invited to register for a new account, the [registration](registration.md) page provides additional information.{{/if}}
+
 
 ![Login Form](images/login-form.png) {{#if mfa_disabled}} {{else}}![Two-Factor Authentication Form](images/login-form-with-2fa-code.png){{/if}}
 

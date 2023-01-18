@@ -21,12 +21,17 @@ module Formatter
              end
       end
 
+      # If we are specifying a current_timezone and the data has a different UTC offset (in seconds)
+      # then go ahead and parse the data with the specified timezone.
+      # If the UTC offsets match then we'll just assume that they represent the same timezone
+      # and return the formatted time without forcing a timezone onto it
       if current_timezone && data
-
         use_tz = current_timezone
         tz = ActiveSupport::TimeZone.new(use_tz)
         raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
+      end
 
+      if use_tz && tz.utc_offset != data.utc_offset
         data = tz.parse(data.to_s)
         res = data.strftime(df).gsub('  ', ' ')
       else

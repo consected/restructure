@@ -5,6 +5,11 @@ class Admin::ExternalIdentifiersController < AdminController
   before_action :set_defaults
   after_action :routes_reload, only: %i[update create]
 
+  def details
+    @external_identifiers = ExternalIdentifier.active.order(label: :asc)
+    render 'admin/external_identifier_details/index_admin_external_identifiers'
+  end
+
   protected
 
   def routes_reload

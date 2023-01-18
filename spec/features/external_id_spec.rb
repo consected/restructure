@@ -9,7 +9,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   include BhsImportConfig # automatically imports the BHS app
 
   before(:all) do
-    Settings.const_set('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForUser', false)
     BhsImportConfig.import_config
     SetupHelper.feature_setup
 

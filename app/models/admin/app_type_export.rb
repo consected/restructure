@@ -31,26 +31,33 @@ module Admin::AppTypeExport
   end
 
   # Export the full application definition as JSON
+  # if options is set to main_components: true, only the main components
+  # are returned (to support the admin panel display)
   def as_json(options = {})
+    if options[:main_components]
+      main_components = true
+      options.delete :main_components
+    end
+
     options[:root] = true
     options[:methods] ||= []
     options[:include] ||= {}
 
     options[:methods] << :app_configurations
-    options[:methods] << :valid_user_access_controls
+    options[:methods] << :valid_user_access_controls unless main_components
     options[:methods] << :valid_associated_activity_logs
     options[:methods] << :associated_dynamic_models
     options[:methods] << :associated_external_identifiers
     options[:methods] << :associated_reports
-    options[:methods] << :associated_general_selections
+    options[:methods] << :associated_general_selections unless main_components
     options[:methods] << :page_layouts
-    options[:methods] << :user_roles
+    options[:methods] << :user_roles unless main_components
     options[:methods] << :role_descriptions
     options[:methods] << :associated_message_templates
     options[:methods] << :associated_config_libraries
     options[:methods] << :associated_protocols
-    options[:methods] << :associated_sub_processes
-    options[:methods] << :associated_protocol_events
+    options[:methods] << :associated_sub_processes unless main_components
+    options[:methods] << :associated_protocol_events unless main_components
     options[:methods] << :associated_item_flag_names
     options[:methods] << :nfs_store_filters
 

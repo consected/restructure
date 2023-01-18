@@ -156,6 +156,8 @@ _fpa.postprocessors_reports = {
         _fpa.form_utils.toggle_expandable($(this));
       }).addClass('attached-exp');
       $('prevent-scroll').removeClass('prevent-scroll');
+      // Allow special handling when reports load 
+      _fpa.reports.custom_results_handling(block, data);
     }, 50);
 
     window.setTimeout(function () {
@@ -201,7 +203,7 @@ _fpa.postprocessors_reports = {
   // Edit and New forms need some additional help, since we are attempting to push a form into a table row, which
   // is not valid HTML markup. Instead, we need to make use of the 'form' attribute on input, select and textarea elements,
   // which point the entry back to a form block that sits outside of the table.
-  report_edit_form: function (block, data) {
+  handle_report_edit_form: function (block, data) {
 
 
     var form = block.find('form');
@@ -242,10 +244,53 @@ _fpa.postprocessors_reports = {
     });
   },
 
+
+  report_edit_form: function (block, data) {
+
+    // Copy the cells that aren't in the edit fields set
+    window.setTimeout(function () {
+
+      const $edit_row = $('tr.report-item-edit');
+
+      // $edit_row.find('td').not('.report-edit-btn-cell').addClass('report-el-edit-cell');
+
+      $('tr.item-selected td').not('.report-edit-btn-cell, .report-el-object-id, .attached_report_search').each(function () {
+        const $this = $(this);
+        const dct = $this.attr('data-col-type').replaceAll(/[^a-zA-Z0-9\-_]/g, '_');
+        const $edit_cell = $(`td.report-el-edit-${dct}`);
+        if ($edit_cell.length) return;
+
+        const $newel = $this.clone();
+        $newel.appendTo($edit_row);
+
+        // If the field contains a canvas element, make sure it is set up
+        const $canvas = $newel.find('canvas');
+        if ($canvas.length === 0) return;
+
+        const origcanvas = $this.find('canvas')[0];
+        $canvas[0].getContext('2d').drawImage(origcanvas, 0, 0);
+      })
+
+      _fpa.postprocessors.handle_report_edit_form(block, data);
+    }, 10)
+  },
+
   edit_report_result: function (block, data) {
     $('#report-edit-').html("");
     var id = data.report_item.id;
     var row = $('#report-item-' + id);
+
+    const mapping = {
+      'div': 'div',
+      'fixed-pre': 'pre',
+      'checkbox': 'div',
+      'options': 'div',
+      'list': 'ul',
+      'tags': 'div',
+      'choice_label': 'div',
+      'iframe': 'div'
+    }
+
 
     // if we got a row, then we are simply replacing the data of an existing row based on an edit
     // otherwise we were adding a new item, and a row does not exist yet.
@@ -261,9 +306,46 @@ _fpa.postprocessors_reports = {
       id = '';
     }
 
+    var show_as = {};
+    $('.table-header[data-col-show-as]').not('[data-col-show-as=""]').each(function () {
+      const sa = $(this).attr('data-col-show-as');
+      const name = $(this).attr('data-col-name');
+      show_as[name] = sa;
+    })
+
     for (var i in data.report_item) {
-      if (data.report_item.hasOwnProperty(i))
-        row.find('[data-col-type="' + i + '"]').first().html(data.report_item[i]);
+      if (data.report_item.hasOwnProperty(i)) {
+        var cell_content = data.report_item[i];
+        var cell = row.find('[data-col-type="' + i + '"]').first();
+
+        // Show as a specific type
+        var ct = cell.attr('data-col-type');
+        var sa = show_as[ct];
+        if (sa) {
+          sa = mapping[sa] || sa
+          cell_content = `<${sa}>${cell_content}</${sa}>`
+        }
+
+        // Format the cell if it is an array or show_as specifies it is tags
+        var is_array = cell.attr('data-col-var-type') === 'Array';
+        var is_tags = show_as[i] == 'tags';
+        if (cell_content && (is_array || is_tags)) {
+          var ul_class = is_tags ? 'report-result-cell-tags' : 'report-list-items'
+          var $res = $(`<ul class="${ul_class}"></ul>`)
+          cell_content.forEach((item) => {
+            if (!item || item == '') return;
+
+            var li = document.createElement('li');
+            li.className = ul_class;
+            li.innerHTML = item;
+            $res.append(li)
+          })
+
+          cell_content = $res;
+        }
+
+        cell.html(cell_content);
+      }
     };
 
     row.show();

@@ -21,6 +21,7 @@ class Report < ActiveRecord::Base
   validate :valid_short_name?, unless: -> { disabled }
   validate :valid_item_type?, unless: -> { disabled }
   validate :valid_resource_name?, unless: -> { disabled }
+  validate :options_valid?, unless: -> { disabled }
 
   scope :counts, -> { where report_type: 'count' }
   scope :regular, -> { where report_type: 'regular_report' }
@@ -270,5 +271,11 @@ class Report < ActiveRecord::Base
 
   def invalidate_cache
     logger.info 'Not invalidating cache for report'
+  end
+
+  def options_valid?
+    OptionConfigs::ReportOptions.raise_bad_configs(report_options)
+  rescue FphsException => e
+    errors.add :options, e
   end
 end

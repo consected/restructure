@@ -246,18 +246,18 @@ module Formatter
       end
 
       iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
-      if iu
+      if iu.is_a? User
         data[:item_user] = iu.attributes.dup
         data[:user_email] = iu.email
         data[:user_preference] = iu.user_preference.attributes.dup
         data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
-
       end
 
       cu = item.current_user if item.respond_to?(:current_user)
       cu ||= master.current_user if master
       cu ||= item if item.is_a? User
-      if cu
+      cu ||= data[:current_user]
+      if cu.is_a? User
         data[:current_user_instance] ||= cu
         data[:current_user] ||= cu.attributes.dup
         data[:current_user_email] ||= cu.email
@@ -384,14 +384,10 @@ module Formatter
     #
     #
     # @param [Master] master the current master instance
-    # @param [String|Symbol] name the association to get
+    # @param [String|Symbol] ref_parts - array of parts specifying the association to get
     # @param [Hash] data passed from {substitute}, which will gain an entry [:<name>]
     # @return [Hash] just this particular association result (the first records attributes)
     def self.get_assoc(master, ref_parts, data)
-      return nil unless master
-
-      an = ref_parts.join('.').to_sym
-
       begin
         res_data = data
         item_reference = false
@@ -408,6 +404,7 @@ module Formatter
 
         return unless res_data
       rescue StandardError => e
+        an = ref_parts.join('.').to_sym
         Rails.logger.info "Get associations for #{an} failed: #{e}"
       end
 
@@ -436,8 +433,6 @@ module Formatter
       name = name.to_sym
       an = name.to_s
 
-      return nil unless master
-
       data = if an == 'first' && data.respond_to?(:first)
                data.first
              elsif an == 'last' && data.respond_to?(:last)
@@ -456,25 +451,47 @@ module Formatter
 
       return item if ['first', 'last'].include?(an)
 
-      if an == 'ids'
+      res = if data.is_a?(Hash) && data.keys.include?(name)
+              data[name]
+            elsif an == 'parent_item' && item.respond_to?(:container)
+              item.container&.parent_item
+            elsif an == 'current_user' && item.respond_to?(:current_user)
+              item.current_user
+            elsif an == 'referring_record' && item.respond_to?(:referring_record)
+              item.referring_record
+            elsif an == 'top_referring_record' && item.respond_to?(:top_referring_record)
+              item.top_referring_record
+            elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
+              item.latest_reference
+            elsif an == 'embedded_item' && item.respond_to?(:embedded_item)
+              item.embedded_item
+            elsif an == 'constants'
+              # Options constants
+              item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
+            elsif an.in?(allowable_associations(item.class))
+              item.send(an)
+            elsif item_reference
+              # Match model reference by underscored to record type, or if not matched by the resource name
+              # The latter allows activity logs to be matched on their extra log type too.
+              # Note - beware to ensure the activity log type is singular before the extra log type
+              #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
+              imr = item.model_references
+              imr.select { |mr| mr.to_record_type_us == an.singularize }
+                 .first&.to_record ||
+                imr.select { |mr| mr.to_record.resource_name.to_s == an }
+                   .first&.to_record
+            else
+              :no_value
+            end
+
+      # If we found a value already, return it. If not, the tests rely on this item having a master set.
+      # If it isn't set, just return nil. If it is set, continue through the master related tests.
+      if res != :no_value
+        res
+      elsif !master
+        nil
+      elsif an == 'ids'
         master.alternative_ids
-      elsif data.is_a?(Hash) && data.keys.include?(name)
-        data[name]
-      elsif an == 'parent_item' && item.respond_to?(:container)
-        item.container&.parent_item
-      elsif an == 'current_user' && item.respond_to?(:current_user)
-        item.current_user
-      elsif an == 'referring_record' && item.respond_to?(:referring_record)
-        item.referring_record
-      elsif an == 'top_referring_record' && item.respond_to?(:top_referring_record)
-        item.top_referring_record
-      elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
-        item.latest_reference
-      elsif an == 'embedded_item' && item.respond_to?(:embedded_item)
-        item.embedded_item
-      elsif an == 'constants'
-        # Options constants
-        item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
       elsif an == 'app_protocols' && master.current_user
         Classification::Protocol
           .enabled
@@ -483,20 +500,10 @@ module Formatter
           )
           .order(position: :asc)
           .first
-      elsif an.in?(allowable_associations(item.class))
-        item.send(an)
+      elsif an == 'app_configurations' && master.current_user
+        Admin::AppConfiguration.all_for(master.current_user)
       elsif an.in? allowable_master_associations
         master.send(an)
-      elsif item_reference
-        # Match model reference by underscored to record type, or if not matched by the resource name
-        # The latter allows activity logs to be matched on their extra log type too.
-        # Note - beware to ensure the activity log type is singular before the extra log type
-        #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
-        imr = item.model_references
-        imr.select { |mr| mr.to_record_type_us == an.singularize }
-           .first&.to_record ||
-          imr.select { |mr| mr.to_record.resource_name.to_s == an }
-             .first&.to_record
       end
     end
 

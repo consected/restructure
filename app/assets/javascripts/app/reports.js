@@ -1,13 +1,27 @@
 _fpa.loaded.reports = function () {
 
-  _fpa.report_criteria.reports_form($('.report-criteria'));
+  const $criteria_form = $('.report-criteria');
+  _fpa.report_criteria.reports_form($criteria_form);
   $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
-
-
 
   // If this an editable data form, automatically submit it if there are no criteria fields to enter
   if ($('#editable_data').length == 1 && $('.report-criteria-fields').length >= 1)
     $('input[type="submit"][value="table"]').click();
+
+
+  // Substitute list_id param into links in the report criteria containing :list_id
+  const $a_to_list = $criteria_form.find('a[href*=":list_id"]');
+  const param_list_match = location.href.match(/\[list_id\]=(\d+)/);
+  if ($a_to_list.length && param_list_match) {
+    const param_list_id = parseInt(param_list_match[1]);
+
+    $a_to_list.each(function () {
+      var url = $(this).attr('href');
+      url = url.replace(':list_id', param_list_id);
+      $(this).attr('href', url);
+    });
+  }
+
 };
 
 _fpa.reports = {
@@ -426,6 +440,10 @@ _fpa.reports = {
   get_results_block: function () {
     return $('#embed_results_block,#master_results_block').last();
   },
+
+  custom_results_handling: function (block, data) {
+    _fpa.reports_custom_handling.handle(block, data);
+  }
 
 
 };

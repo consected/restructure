@@ -26,6 +26,10 @@ if [ ! -z "${GITSTATUS}" ]; then
 fi
 
 git pull
+if [ $? != 0 ]; then
+  echo "Failed initial git pull on $(git branch --show-current)"
+  exit 2
+fi
 
 cl_ur=$(grep '## Unreleased' CHANGELOG.md)
 if [ -z "${cl_ur}" ]; then
@@ -38,6 +42,8 @@ if [ "${cl_not_ok}" ]; then
   echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."
   exit 2
 fi
+
+head -32 CHANGELOG.md | tail -13
 
 echo "Clean up assets before we start"
 FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
@@ -101,6 +107,8 @@ git push origin --tags
 git push origin --all
 
 git checkout ${FROM_BRANCH}
+
+head -32 CHANGELOG.md | tail -13
 
 echo "Starting build container"
 cd ../restructure-build

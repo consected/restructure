@@ -314,9 +314,12 @@
   });
 
   Handlebars.registerHelper('date_time', function (text) {
+    const dtf = UserPreferences.date_time_format();
+    if(!dtf) return text; 
+
     const d = (text) ? _fpa.utils.DateTime.fromISO(text) : _fpa.utils.DateTime.now();
     const formatted = (d.isValid) ?
-        d.toFormat(UserPreferences.date_time_format()) :
+        d.toFormat(dtf) :
         text;
     return new Handlebars.SafeString(formatted);
   });
