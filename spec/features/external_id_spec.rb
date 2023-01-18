@@ -55,6 +55,9 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   end
 
   it 'creates external IDs' do
+
+    @master = Master.last unless Master.find_by(id: @master.id)
+
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
 
     expect(page).to have_css("#master-#{@master.id}")
