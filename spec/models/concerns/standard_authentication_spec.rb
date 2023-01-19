@@ -8,7 +8,7 @@ RSpec.describe 'StandardAuthentication', type: :model do
 
   def unfreeze_config
     conf = Settings::PasswordConfig.deep_dup
-    Settings.const_set('PasswordConfig', conf)
+    change_setting('PasswordConfig', conf)
   end
 
   before :all do

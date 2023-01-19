@@ -1,0 +1,17 @@
+
+<div class="admin-result-index" data-admin-type="<%=controller_name.ns_underscore%>">
+  <div class="data-results" data-subscription="admin-list" >
+    <div data-result="admin-list">
+      <%= show_admin_heading 'External Identifier Details and Assigned IDs' %>
+      <div class="row">
+      <div class="well col-lg-18 col-lg-offset-3">
+      <%
+        @external_identifiers.each do |e|
+      %>
+      <li class="nav"><%= link_to e.label, admin_external_identifier_detail_path(e.id) %>  </li>
+      <% end%>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>

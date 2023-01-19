@@ -6,11 +6,10 @@
       <p>New token: <%= @user.new_token %> </p>
       <% end %>
       <p>Disabled:<%=!!@user.disabled%></p>
-      <p>
-       <%
-           html = render partial: 'credential_doc'
-        %>
-        <a href="data:text/html;base64,<%=Base64.encode64(html)%>" download="logging-in--<%=@user.email.split('@').first%>" title="click to download">Download Credentials Document</a>
-      </p>
+      
+      <p><a href="#creddocframe" data-toggle="collapse">show user information document</a></p>
+      <div id="creddocframe" class="creddocframe collapse">
+      <%= render partial: 'credential_doc'%>
+      </div>
 
-    </div>
+</div>

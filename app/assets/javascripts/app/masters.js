@@ -38,7 +38,7 @@ _fpa.masters = {
             // Clear all values in the form
             forms.find('input, select').not('[type="submit"], [type="hidden"]').val(null).removeClass('has-value');
             // Handle the "Chosen" tag fields
-            $('select[multiple]').trigger('chosen:updated');
+            $('select.attached-chosen').trigger('chosen:updated');
             // Clear any existing results
             $('#master_results_block').html('<h3 class="text-center"></h3>');
             // Clear the results count

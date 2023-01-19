@@ -274,7 +274,7 @@ module StandardAuthentication
 
     if i > 1
       Rails.logger.info "Took #{i} times to make password"
-      puts "Took #{i} times to make password"
+      # puts "Took #{i} times to make password"
     end
 
     @new_token = Devise.friendly_token(30)

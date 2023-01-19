@@ -8,7 +8,7 @@ module ReportResults
       orig_col_content = col_content
       col_name = report_column_name(field_num)
 
-      if @view_options.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
+      if @view_options&.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
         @show_as[col_name] ||= 'checkbox'
       end
 
@@ -35,8 +35,8 @@ module ReportResults
       end
 
       header_content = alt_column_header(field_num) || @results.fields[field_num]
-      header_content = @view_options.humanize_column_names ? header_content.humanize : header_content
-      if header_content.present? && !(@view_options.hide_list_labels_for_empty_content && !orig_col_content.present?)
+      header_content = @view_options&.humanize_column_names ? header_content.humanize : header_content
+      if header_content.present? && !(@view_options&.hide_list_labels_for_empty_content && !orig_col_content.present?)
         header_markup = <<~END_HTML
           <span class="report-list-header-item">#{header_content}</span>
         END_HTML

@@ -21,11 +21,13 @@ class Admin::ServerInfoController < AdminController
   def rails_log
     si = Admin::ServerInfo.new(current_admin)
     @search = params[:search]
-    @search = DateTime.now.iso8601[0..15].sub('T', ' ') if @search.blank?
+    @search = DateTime.now.iso8601[0..14].sub('T', ' ') if @search.blank?
+    @trailing_context = params[:trailing_context]
+    @trailing_context = 20 if params[:trailing_context].blank?
     # Make sure the regex is valid
     Regexp.new(@search)
 
-    @rails_log = si.rails_log(@search)
+    @rails_log = si.rails_log(@search, trailing_context: @trailing_context)
     render 'admin/server_info/rails_log'
   end
 end

@@ -7,7 +7,7 @@
 
   @col_tags['id'] ||= 'id'
 %>
-<div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
+<div class="report-results-table-block <%=@view_options&.add_classes&.join(' ')%>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 
   <table class="report-table table tree-table" data-tt-tree-cols="<%= @tree_view_options.column_levels.to_json %>" data-tt-tree-num-levels="<%= @tree_view_options.num_levels%>" data-tt-tree-expand-level="<%= @tree_view_options.expand_level%>">
     <thead>

@@ -22,9 +22,8 @@
   <%if @report %>
     <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>
   <%end%>
-  <%if @sage_assignment || @sage_assignments %>
-    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>
-    <% allow_create = false %>
+  <%if @external_identifier%>
+    <%= link_to "external ID details", admin_external_identifier_details_path, class: "btn btn-warning" %>
   <%end%>
   <%if allow_create %>
     <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: filter_params_permitted), remote: true, class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create'] rescue nil%>

@@ -306,7 +306,7 @@ module OptionConfigs
         config_text = include_libraries(config_text)
         begin
           res = YAML.safe_load(config_text, [], [], true)
-        rescue Psych::SyntaxError, Psych::DisallowedClass => e
+        rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
           errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
           Rails.logger.warn e
@@ -315,7 +315,9 @@ module OptionConfigs
             puts e
             puts errtext
           end
-          raise e
+
+          bt = e.backtrace + [errtext]
+          raise e, "#{e.message} -- see end of stacktrace for failed configuration YAML", bt
         end
       else
         res = {}

@@ -134,6 +134,9 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                                                                   extra_log_type: 'step_1')
 
     expect(al.class.definition).to eq al_def
+
+    expect(al_def.disabled).to be_falsey
+    al_def.option_configs force: false unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
     al.data

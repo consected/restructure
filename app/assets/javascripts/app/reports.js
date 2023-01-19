@@ -441,5 +441,9 @@ _fpa.reports = {
     return $('#embed_results_block,#master_results_block').last();
   },
 
+  custom_results_handling: function (block, data) {
+    _fpa.reports_custom_handling.handle(block, data);
+  }
+
 
 };

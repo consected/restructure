@@ -15,8 +15,19 @@ mkdir -p ${FS_TEST_BASE}/dev-file-source
 mkdir -p ${FS_TEST_BASE}/dev-filestore
 mkdir -p ${FS_TEST_BASE}/dev-bind-fs
 
+function is_mountpoint() {
+  if [ "$(which mountpoint)" ]; then
+    mountpoint -q $1
+  elif [ "$(which diskutil)" ]; then
+    diskutil info "$1" > /dev/null
+  else
+    echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
+    exit 7
+  fi
+}
+
 bindfs -n ${FS_TEST_BASE}/dev-file-source ${FS_TEST_BASE}/dev-filestore
-mountpoint -q ${FS_TEST_BASE}/dev-filestore
+is_mountpoint ${FS_TEST_BASE}/dev-filestore
 if [ $? != 0 ]; then
   echo "A mount was not successfully set up at: ${FS_TEST_BASE}/dev-filestore"
   exit 2

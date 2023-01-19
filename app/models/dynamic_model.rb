@@ -307,18 +307,6 @@ class DynamicModel < ActiveRecord::Base
     self.field_list = default_field_list_array.join(' ') if force || field_list.blank?
   end
 
-  #
-  # Returns :table or :view if the underlying database object is a table or a view.
-  # Returns nil if no underlying object is found
-  # @return [Symbol | nil]
-  def table_or_view
-    return unless Admin::MigrationGenerator.table_or_view_exists? table_name
-
-    return :table if Admin::MigrationGenerator.table_exists? table_name
-
-    :view
-  end
-
   def default_field_list_array
     return [] unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
@@ -423,7 +411,7 @@ class DynamicModel < ActiveRecord::Base
 
   #
   # Set up the data dictionary if _data_dictionary: {study: , domain:} options have been specified
-  # This is run after_create
+  # This is run after_save
   def setup_data_dictionary
     return unless data_dictionary && data_dictionary[:study] && data_dictionary[:domain]
 

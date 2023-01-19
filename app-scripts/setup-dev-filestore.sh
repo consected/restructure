@@ -27,7 +27,18 @@ fi
 
 WEBAPP_USER=${WEBAPP_USER:=$USER}
 
-mountpoint -q $MOUNT_ROOT/gid600
+function is_mountpoint() {
+  if [ "$(which mountpoint)" ]; then
+    mountpoint -q $1
+  elif [ "$(which diskutil)" ]; then
+    diskutil info "$1" > /dev/null
+  else
+    echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
+    exit 7
+  fi
+}
+
+is_mountpoint $MOUNT_ROOT/gid600
 if [ $? == 0 ] && [ "$(getent passwd 600)" ]; then
   # Already set up. No need to continue.
 
@@ -43,7 +54,7 @@ else
 fi
 
 if [ "${RAILS_ENV}" != 'test' ]; then
-  mountpoint -q "${MOUNTPOINT}"
+  is_mountpoint "${MOUNTPOINT}"
   if [ $? == 1 ]; then
     echo "${MOUNTPOINT} is not a real mount point. Check the file system is mounted correctly at this location"
     exit 1
@@ -61,10 +72,10 @@ if [ "${RAILS_ENV}" != 'test' ]; then
   sudo mkdir -p $MOUNT_ROOT/gid600
   sudo mkdir -p $MOUNT_ROOT/gid601
 fi
-sudo mountpoint -q $MOUNT_ROOT/gid600 || sudo bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid600
-sudo mountpoint -q $MOUNT_ROOT/gid601 || sudo bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid601
+is_mountpoint $MOUNT_ROOT/gid600 || sudo bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid600
+is_mountpoint $MOUNT_ROOT/gid601 || sudo bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid601
 
-mountpoint -q $MOUNT_ROOT/gid600
+is_mountpoint $MOUNT_ROOT/gid600
 if [ $? == 1 ]; then
   ls -als $MOUNT_ROOT
   echo "Failed to setup mountpoint"

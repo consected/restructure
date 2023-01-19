@@ -157,7 +157,7 @@
   embed:
     resource_name: resource name for the item to embed
     resource_id: |
-      (optional) literal or reference definition to use as an id of the embedded item
+      (optional) literal integer or a named attribute on the resource to use as an id of the embedded item
 
       When not specified, the embedded item is looked up based on the existence of a foreign key
       field in the target direct embed table pointing back to the parent record. The foreign key
@@ -171,7 +171,8 @@
     # To define an embedded item using fields alone, use one of the following field configurations:
     # <parent table>: embed_resource_name, embed_resource_id - directly reference the embedded item
     # <parent table>: embed_resource_name, <target embed table>: <singularized parent table name>_id - foreign key reference.
-    # `\{\{substitutions\}\}` may reference attributes in an embedded item using `\{\{embedded_item.<attribute name>\}\}`
+    # Whichever way an embedded item is specified,
+    # `\{\{substitutions\}\}` may reference attributes in it item using `\{\{embedded_item.<attribute name>\}\}`
 
   references:
     model_name:
