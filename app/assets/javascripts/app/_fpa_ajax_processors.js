@@ -123,7 +123,7 @@ _fpa.postprocessors = {
         var e = $(this);
         var obj_name = e.attr('data-object-name');
         var a_name = e.attr('data-attr-name');
-        if (a_name != 'e_signed_how') {
+        if (a_name != 'e_signed_how' && form_data[obj_name]) {
           if (e.attr('type') == 'checkbox') {
             form_data[obj_name][a_name] = e.is(':checked');
           } else {

@@ -31,6 +31,11 @@ module Reports
       !edit_model.blank?
     end
 
+    # Can add items to the results?
+    def creatable_data?
+      editable_data?
+    end
+
     # If the results can be edited, what class represents each result
     def edit_model_class
       return unless editable_data?

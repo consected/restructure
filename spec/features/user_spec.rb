@@ -7,14 +7,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
   context '2FA complete' do
     before(:all) do
-      Settings.const_set('AllowUsersToRegister', false)
+      change_setting('AllowUsersToRegister', false)
       Rails.application.reload_routes!
       Rails.application.routes_reloader.reload!
 
       SetupHelper.feature_setup
 
-      Settings.const_set('TwoFactorAuthDisabledForUser', false)
-      Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
+      change_setting('TwoFactorAuthDisabledForUser', false)
+      change_setting('TwoFactorAuthDisabledForAdmin', false)
 
       # create a user, then disable it
       @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
@@ -136,13 +136,13 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
   context '2FA setup required' do
     before(:all) do
-      Settings.const_set('AllowUsersToRegister', false)
+      change_setting('AllowUsersToRegister', false)
       Rails.application.reload_routes!
       Rails.application.routes_reloader.reload!
 
       SetupHelper.feature_setup
 
-      Settings.const_set('TwoFactorAuthDisabledForUser', false)
+      change_setting('TwoFactorAuthDisabledForUser', false)
 
       # create a user, then disable it
       @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))

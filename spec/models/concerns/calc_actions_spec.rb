@@ -2147,37 +2147,37 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       # create_master
 
-      @al = create_item
-      @al.current_user = @user
+      @alref = create_item
+      @alref.current_user = @user
 
-      @al1 = create_item
-      @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+      @alref1 = create_item
+      @alref1.update! select_who: 'someone new', current_user: @user, master_id: @alref.master_id
 
-      @al2 = create_item
-      @al2.update! select_who: 'someone else new', current_user: @user, master_id: @al.master_id
+      @alref2 = create_item
+      @alref2.update! select_who: 'someone else new', current_user: @user, master_id: @alref.master_id
 
-      @al1.reload
-      @al2.reload
-      @al1.current_user = @user
-      @al2.current_user = @user
+      @alref1.reload
+      @alref2.reload
+      @alref1.current_user = @user
+      @alref2.current_user = @user
 
-      expect(@al.master_id).to eq @al2.master_id
-      expect(@al.master_id).to eq @al1.master_id
+      expect(@alref.master_id).to eq @alref2.master_id
+      expect(@alref.master_id).to eq @alref1.master_id
 
-      @al.extra_log_type_config.references = {
+      @alref.extra_log_type_config.references = {
         activity_log__player_contact_phone: {
           from: 'this',
           add: 'many'
         }
       }
 
-      @al.extra_log_type_config.clean_references_def
-      @al.extra_log_type_config.editable_if = { always: true }
+      @alref.extra_log_type_config.clean_references_def
+      @alref.extra_log_type_config.editable_if = { always: true }
 
-      ModelReference.create_with @al, @al1, force_create: true
-      ModelReference.create_with @al, @al2, force_create: true
+      ModelReference.create_with @alref, @alref1, force_create: true
+      ModelReference.create_with @alref, @alref2, force_create: true
 
-      expect(@al.model_references.length).to eq 2
+      expect(@alref.model_references.length).to eq 2
     end
 
     it 'returns a referring record attribute' do
@@ -2187,10 +2187,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al.id
+      expect(res).to eq @alref.id
     end
 
     it 'checks a referring record exists' do
@@ -2202,10 +2202,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      res = ConditionalActions.new conf, @al2
+      res = ConditionalActions.new conf, @alref2
       expect(res.calc_action_if).to be true
 
-      res = ConditionalActions.new conf, @al
+      res = ConditionalActions.new conf, @alref
       expect(res.calc_action_if).to be false
     end
 
@@ -2219,10 +2219,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
     end
 
     it 'returns the first record referring to this one' do
@@ -2232,10 +2232,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
     end
 
     it 'returns the top record from the tree of referring records' do
@@ -2246,10 +2246,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
     end
   end
 
@@ -2269,7 +2269,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       new_al2 = create_item
       new_al2.master_id = @new_al0.master_id
-      new_al2.extra_log_type = 'secondary'
+      new_al2.extra_log_type = 'ignore_missing_elt'
       new_al2.force_save!
       new_al2.save!
 
@@ -2304,7 +2304,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(@new_al0.extra_log_type).to eq :blank_log
       ModelReference.create_with @new_al, new_al2, force_create: true
       expect(new_al2.referring_record).to eq @new_al
-      expect(new_al2.extra_log_type).to eq :secondary
+      expect(new_al2.extra_log_type).to eq :ignore_missing_elt
 
       mls = @new_al.model_references(force_reload: true).length
       expect(mls).to eq 2
@@ -2314,7 +2314,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       confy = <<~EOF_YAML
         all:
           activity_log__player_contact_phones:
-            extra_log_type: secondary
+            extra_log_type: ignore_missing_elt
             id:
               parent_references: id
 

@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :external_identifiers, except: %i[show destroy]
+    get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy]
     resources :config_libraries, except: %i[show destroy]
     resources :external_identifier_details, except: [:destroy]
@@ -126,6 +127,7 @@ Rails.application.routes.draw do
   end
 
   get 'pages/home' => 'pages#home'
+  get 'pages/app_home' => 'pages#app_home'
   resources :pages, only: %i[index show] do
     member do
       get :template
@@ -253,4 +255,6 @@ Rails.application.routes.draw do
   # Dynamic model goes at the end to avoid any issues with accidental clash of naming. The
   # dynamic model will only be applied if another item is not matched first
   DynamicModel.routes_load
+
+  match '*path', via: :all, to: 'bad_route#not_routed'
 end

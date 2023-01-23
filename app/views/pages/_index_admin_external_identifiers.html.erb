@@ -1,7 +1,0 @@
-<%
-  ExternalIdentifier.active.order(label: :asc).each do |e|
-%>
-
-<li class="nav"><%= link_to e.label, admin_external_identifier_detail_path(e.id) %>  </li>
-
-<% end %>

@@ -20,12 +20,13 @@
 // Distribution files referenced directly to allow asset pipeline to handle compilation and loading
 //= require handlebars/dist/handlebars
 //= require bootstrap-datepicker/dist/js/bootstrap-datepicker
-//= require chart.js/dist/Chart
+//= require chart.js/dist/chart
 //= require bootstrap-wysiwyg/src/bootstrap-wysiwyg
 //= require jquery.hotkeys/jquery.hotkeys
 // Note: moment is required with the min file to avoid the need to transcompile
 //= require moment/min/moment-with-locales.min
 //= require luxon/build/global/luxon
+//= require chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.js
 //= require typeahead.js/dist/typeahead.bundle.js
 //= require jquery-timepicker/jquery.timepicker
 //= require textarea-autogrow/textarea-autogrow

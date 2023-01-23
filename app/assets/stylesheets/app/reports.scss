@@ -324,3 +324,15 @@ table .report-cb-inner {
   border: 1px solid gray;
 
 }
+
+
+// Use this to rotate column labels by using the view_options: add_classes option
+.report-label-rotate {
+  th {
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+}

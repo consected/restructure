@@ -309,6 +309,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     expect(@user.has_access_to?(:read, :general, :create_master))
 
     visit '/masters/search'
+    finish_page_loading
 
     # create Master
 
@@ -319,6 +320,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     within '#new_master' do
       click_button 'Create'
     end
+    finish_page_loading
 
     # edit player info data
 

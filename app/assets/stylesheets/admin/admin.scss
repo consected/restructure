@@ -6,6 +6,12 @@
   }
 }
 
+.admin-panel-actions {
+  float: right;
+  margin-right: 20px;
+  margin-top: -7px;
+}
+
 .admin-edit-form .well {
   background: rgb(245, 245, 245);
 }
@@ -108,3 +114,17 @@ a.collapsed > .caret {
 .info-danger {
   color: red;
 }
+
+div#creddocframe {
+  border: 1px solid rgb(128, 128, 128);
+  padding: 10px;
+  margin: 10px;
+  background: rgb(255, 255, 255);
+}
+
+.admin-panel-components {
+  ul {
+    list-style: none;
+    padding-left: 0.3em;
+  }
+} 

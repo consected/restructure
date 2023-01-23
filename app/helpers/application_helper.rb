@@ -24,6 +24,8 @@ module ApplicationHelper
   #
   # An admin_page or user_page class to add to a body class attribute
   def admin_or_user_class
+    return 'admin_page' if @is_admin_index
+
     request.path.start_with?('/admin/') ? 'admin_page' : 'user_page'
   end
 
@@ -55,7 +57,7 @@ module ApplicationHelper
     class_extras ||= 'pull-right' unless link_text
 
     <<~END_HTML
-      <a class="show-entity show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
+      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
     END_HTML
       .html_safe
   end

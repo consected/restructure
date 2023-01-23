@@ -3,7 +3,7 @@
   block_id = "report-chart-#{SecureRandom.hex}"
   component_options = @report.report_options.component.options || {}
 %>
-<div id="<%=block_id%>" class="report-chart" >
+<div id="<%=block_id%>" class="report-chart <%=@view_options&.add_classes&.join(' ')%>"  data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 </div>
 <script>
   window.setTimeout(function() {

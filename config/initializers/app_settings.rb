@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Settings
+  LogLevel = DefaultSettings::LogLevel
   DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
   DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || DefaultSettings::DefaultSchemaOwner
 
