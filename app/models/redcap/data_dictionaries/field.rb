@@ -64,7 +64,7 @@ module Redcap
         self.is_identifier = field_metadata[:identifier] == 'y'
 
         self.storage_type = 'database'
-        self.db_or_fs = ActiveRecord::Base.connection_config[:database]
+        self.db_or_fs = ActiveRecord::Base.connection_db_config.database
         self.schema_or_path, self.table_or_file = schema_and_table_name
         self.position = position
         self.section = section
