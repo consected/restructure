@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class Application
-  def self.class_parent_name
-    name.split('::')[-2] || 'Object'
-  end
-
   # Maintains a global (per server instance, so no sharing of data) list of categories of apps that are
   # configured at runtime
   def self.add_to_app_list(list_type, item)
