@@ -21,6 +21,8 @@ module WorksWithItem
       puts e
       # puts e.backtrace.join("\n")
       Rails.logger.error msg
+      Rails.logger.info e
+      Rails.logger.info e.backtrace.join("\n")
       raise e
     end
 
@@ -101,9 +103,11 @@ module WorksWithItem
       # if there is already an item set and we have matched with an item with a different master we have a problem
       # otherwise if there is already a master set and the matched item belongs to a different master we have a problem
       if item_id && matched_item_id != item_id
-        raise FphsException, "Value for #{secondary_key} = \"#{value}\" belongs to a different #{parent_class.human_name} than the value already set"
+        raise FphsException,
+              "Value for #{secondary_key} = \"#{value}\" belongs to a different #{parent_class.human_name} than the value already set"
       elsif respond_to?(:master) && master_id && matched_item.master_id != master_id
-        raise FphsException, "Value for #{secondary_key} = \"#{value}\" belongs to a #{parent_class.human_name} within a different master record than the value already set"
+        raise FphsException,
+              "Value for #{secondary_key} = \"#{value}\" belongs to a #{parent_class.human_name} within a different master record than the value already set"
       end
 
       # We can match. So find the underlying item and set the real foreign key appropriately
@@ -117,7 +121,8 @@ module WorksWithItem
       raise FphsException, "Value for #{secondary_key} could not be found in #{parent_class.human_name}: #{value}"
     else
       logger.debug "#{secondary_key} for matching is not unique: #{value}"
-      raise FphsException, "Value for #{secondary_key} = \"#{value}\" has been found in more than one #{parent_class.human_name} record. Update one of these records before continuing."
+      raise FphsException,
+            "Value for #{secondary_key} = \"#{value}\" has been found in more than one #{parent_class.human_name} record. Update one of these records before continuing."
     end
   end
 end

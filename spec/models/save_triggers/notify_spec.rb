@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-AlNameGenTest2 = 'Gen Test ELT 2'
+AlNameGenTestN = 'Gen Test ELT 2'
 
 RSpec.describe SaveTriggers::Notify, type: :model do
   include ModelSupport
@@ -11,7 +11,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
   before :example do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTest2, 'elt2_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
     ud, = create_user
     ud.disable!
     u0, = create_user
@@ -390,9 +390,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     t = '<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
 
-    @activity_log = al = ActivityLog.active.where(name: AlNameGenTest2).first
+    @activity_log = al = ActivityLog.active.where(name: AlNameGenTestN).first
 
-    raise "Activity Log #{AlNameGenTest2} not set up" if al.nil?
+    raise "Activity Log #{AlNameGenTestN} not set up" if al.nil?
 
     al.extra_log_types = <<~END_DEF
       step_1:

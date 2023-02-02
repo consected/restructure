@@ -121,7 +121,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     return if disabled
 
-    remove_assoc_class('Master')
+    remove_assoc_class('Master', nil, '')
 
     # Define the association
 

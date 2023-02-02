@@ -17,8 +17,7 @@ class AdminController < ApplicationController
   protected
 
   def object_has_admin_parent?
-    # TODO search for class.parent. Look for  def self.parent def parent
-    object_instance.class.module_parent.name.in? Admin::AdminBase::ValidAdminModules
+    object_instance.class.name.split('::')[-2].in? Admin::AdminBase::ValidAdminModules
   end
 
   def editor_code_type

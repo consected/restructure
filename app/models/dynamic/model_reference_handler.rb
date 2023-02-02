@@ -274,7 +274,7 @@ module Dynamic
     # @return [UserBase]
     def target_object_creatable?(ref_type, ref_config)
       mrc = class_for_reference_type(ref_type)
-      if mrc.parent == ActivityLog
+      if mrc.class_parent_name == 'ActivityLog'
         elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
         ref_obj = mrc.new(extra_log_type: elt, master: master)
       else

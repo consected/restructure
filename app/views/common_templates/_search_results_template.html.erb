@@ -129,7 +129,7 @@
   unless defined? implementation_class
     implementation_class = nil
   else
-    is_activity_log_class = (implementation_class && implementation_class.module_parent == ActivityLog) ? 'is-activity-log' : ''
+    is_activity_log_class = (implementation_class&.class_parent_name == 'ActivityLog') ? 'is-activity-log' : ''
   end
 
   unless defined? implementation_class_name

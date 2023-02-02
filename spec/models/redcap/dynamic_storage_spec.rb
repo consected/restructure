@@ -117,7 +117,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       rc.data_options.add_multi_choice_summary_fields = true
       rc.current_admin = @admin
       rc.save
-      # `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_rc*.rb`
+
       ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model

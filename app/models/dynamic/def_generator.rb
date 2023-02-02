@@ -288,12 +288,17 @@ module Dynamic
     end
 
     # Dump the old association
-    def remove_assoc_class(in_class_name, alt_target_class = nil)
+    def remove_assoc_class(in_class_name, alt_target_class = nil, short_class_name = nil)
       cns = in_class_name.to_s.split('::')
-      klass = Object
-      klass = cns.first.constantize if cns.length == 2
-      short_class_name = cns.last
+      klass = if cns.first == 'DynamicModel'
+                cns[0..1].join('::').constantize
+              else
+                cns.first.constantize
+              end
+
+      short_class_name = cns.last unless alt_target_class || short_class_name
       alt_target_class ||= model_class_name.pluralize
+      alt_target_class = alt_target_class.gsub('::', '')
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
       return unless klass.constants.include?(assoc_ext_name.to_sym)
 
@@ -406,14 +411,14 @@ module Dynamic
       end
 
       # For some reason the underlying table exists but the class doesn't. Inform the admin
-      unless res
-        err = "The implementation of #{model_class_name} was not completed. " \
-              "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
-        logger.warn err
-        errors.add :name, err
-        # Force exit of callbacks
-        raise FphsException, err
-      end
+      return if res
+
+      err = "The implementation of #{model_class_name} was not completed. " \
+            "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
+      logger.warn err
+      errors.add :name, err
+      # Force exit of callbacks
+      raise FphsException, err
     end
 
     #

@@ -60,7 +60,7 @@ put_now 'Require spec_helper'
 require 'spec_helper'
 put_now 'Require environment'
 
-require File.expand_path('../../config/environment', __FILE__)
+require File.expand_path('../config/environment', __dir__)
 put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
@@ -120,6 +120,8 @@ end
 
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
+
+  `#{::Rails.root}/app-scripts/setup-init-mounts.sh`
   res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
   if res != "mountpoint OK\n"
     put_now res
