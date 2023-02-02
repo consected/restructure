@@ -25,8 +25,8 @@ function setup() {
   if [ "${USE_PG_HOST}" ]; then
     USE_PG_UNAME=${USE_PG_UNAME:=postgres}
     psql -c "create extension if not exists pgcrypto;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
-    psql -c "create database $DBNAME;"
-    psql -c "create user fphsetl password 'fphs'; create user fphs password 'fphs';"
+    psql -c "create database $DBNAME;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+    psql -c "create user fphsetl password 'fphs'; create user fphs password 'fphs';" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
     psql -d $DBNAME -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < "../db/structure.sql"
     psql -d $DBNAME -c "create schema if not exists bulk_msg;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
     psql -d $DBNAME -c "create schema if not exists ref_data;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"

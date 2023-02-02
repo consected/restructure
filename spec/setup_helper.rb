@@ -257,7 +257,7 @@ module SetupHelper
     sql_files.each do |fn|
       sqlfn = Rails.root.join(sql_source_dir, fn)
       puts "Running psql: #{sqlfn}"
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} < #{sqlfn}`
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < #{sqlfn}`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end

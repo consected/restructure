@@ -18,8 +18,10 @@ module Reports
       result_tables = runner.result_tables_by_index || []
       outer_block_id = "report-container-#{SecureRandom.hex}"
 
-      # ActionController::Base.new.render_to_string()
-      view = ActionView::Base.new(ActionController::Base.view_paths, {})
+      # Rails 5 or before, constructor was an argument with nil default value.
+      # Rails 6, controller is required
+      controller = nil
+      view = ActionView::Base.new(ActionController::Base.view_paths, {}, controller)
       view.class_eval do
         include ApplicationHelper
         include ReportsHelper

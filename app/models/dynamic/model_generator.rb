@@ -32,12 +32,13 @@ module Dynamic
     # @param [<Type>] qualified_table_name <description>
     # @return [<Type>] <description>
     def setup_generator(parent, qualified_table_name)
+      # TODO: Verify possible conflict
       self.parent = parent
       self.qualified_table_name = qualified_table_name
       self.category ||= self.class.default_category
     end
 
-    #
+    # TODO: comment is not consistent with the method signature
     # Create an active dynamic model instance for storage of data records.
     # The table name can be qualified with a schema name, as <schema name>.<table name>
     # @param [String] table_name
