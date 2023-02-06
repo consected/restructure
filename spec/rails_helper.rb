@@ -121,7 +121,6 @@ end
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
 
-  `#{::Rails.root}/app-scripts/setup-init-mounts.sh`
   res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
   if res != "mountpoint OK\n"
     put_now res
