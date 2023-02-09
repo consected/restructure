@@ -59,8 +59,8 @@ module SetupHelper
     # Bulk
     # Setup the triggers, functions, etc
     sql_files = %w[test/drop_schema.sql test/create_schema.sql
-                   bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
-                   bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
+                   bulk/create_zeus_bulk_messages_table.sql bulk/create_zeus_bulk_message_recipients_table.sql
+                   bulk/dup_check_recipients.sql bulk/create_al_bulk_messages.sql
                    bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
                    bulk/create_player_contact_phone_infos.sql
                    bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
@@ -111,6 +111,19 @@ module SetupHelper
     res = ActivityLog.conflicting_definitions('bhs_assignment', nil, nil)
     puts res.pluck(:id, :name, :item_type, :rec_type, :process_name)
     raise 'multiple bhs_assignment activity logs already exist' if res.length > 1
+  end
+
+  def self.clean_conflicting_activity_logs
+    sets = ActivityLog.active.select(:item_type, :rec_type, :process_name).distinct.reorder('').pluck(:item_type, :rec_type, :process_name)
+    sets.each do |s|
+      res = ActivityLog.conflicting_definitions(*s)
+      next if res.length <= 1
+
+      id = res.first.id
+      clean = res.where.not(id: id)
+      puts "cleaning conflicting activity logs: #{clean.pluck(:id, :name, :item_type, :rec_type, :process_name)}"
+      clean.update_all(disabled: true)
+    end
   end
 
   def self.feature_setup(_options = {})

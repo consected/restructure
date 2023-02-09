@@ -82,7 +82,7 @@ require 'setup_helper'
 include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
-SetupHelper.check_activity_logs
+SetupHelper.clean_conflicting_activity_logs
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
