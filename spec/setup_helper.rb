@@ -54,18 +54,18 @@ module SetupHelper
       SetupHelper.setup_app_db sql_source_dir, sql_files
     end
 
-    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
-      # Bulk
-      # Setup the triggers, functions, etc
-      sql_files = %w[test/drop_schema.sql test/create_schema.sql
-                     bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
-                     bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
-                     bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
-                     bulk/create_player_contact_phone_infos.sql
-                     bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
-      sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
-      SetupHelper.setup_app_db sql_source_dir, sql_files
-    end
+    return if ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
+
+    # Bulk
+    # Setup the triggers, functions, etc
+    sql_files = %w[test/drop_schema.sql test/create_schema.sql
+                   bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
+                   bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
+                   bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
+                   bulk/create_player_contact_phone_infos.sql
+                   bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
+    SetupHelper.setup_app_db sql_source_dir, sql_files
   end
 
   def self.validate_db_setup
@@ -257,7 +257,9 @@ module SetupHelper
     sql_files.each do |fn|
       sqlfn = Rails.root.join(sql_source_dir, fn)
       puts "Running psql: #{sqlfn}"
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < #{sqlfn}`
+      host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
+      user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < #{sqlfn}`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end
