@@ -9,6 +9,7 @@ class ActivityLog < ActiveRecord::Base
   include SelectorCache
 
   before_validation :prevent_item_type_change, on: :update
+  before_validation :clean_types
   before_validation :set_table_name
   validates :name, presence: { scope: :active, message: "can't be blank" }
   validates :item_type, presence: { scope: :active, message: "can't be blank" }
@@ -91,8 +92,8 @@ class ActivityLog < ActiveRecord::Base
   def self.works_with_all(item_type, rec_type = nil, process_name = nil)
     item_type = item_type.downcase
     cond = { item_type: item_type }
-    cond[:rec_type] = rec_type if rec_type
-    cond[:process_name] = process_name if process_name
+    cond[:rec_type] = rec_type if rec_type.present?
+    cond[:process_name] = process_name if process_name.present?
     enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first')
   end
 
@@ -499,18 +500,46 @@ class ActivityLog < ActiveRecord::Base
                  "(#{self.class.use_with_class_names.join(', ')})")
       return
     end
+
     unless rec_type_valid?
       errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
       return
     end
 
-    existing = self.class.works_with_all(item_type, rec_type, process_name).where.not(id: id)
-    return unless existing.first
+    existing = self.class.where.not(id: id).conflicting_definition?(item_type, rec_type, process_name)
+    return unless existing
 
     errors.add(:rec_type,
-               " item type and process name already exist as a definition (#{existing.first.id}) " \
-               "- #{item_type}, #{rec_type}, #{process_name} ")
+               " item type, rec type and process name already exist as a definition (#{existing.id}) " \
+               "- [#{item_type}, #{rec_type || '(nil)'}, #{process_name || '(nil)'}] ")
     nil
+  end
+
+  #
+  # Check to see if an existing activity log has been defined that has a definition that would
+  # conflict with the item type, rec type and process name combo specified. These three attributes
+  # form the eventual implementation class name, so multiple definition records can't have the same values.
+  # We have to take care, as nil and blank entries for rec_type and process_name mean the same thing and
+  # are used inconsistently.
+  def self.conflicting_definition?(item_type, rec_type, process_name)
+    conflicting_definitions(item_type, rec_type, process_name).first
+  end
+
+  #
+  # Find all existing activity logs defined that have a definition that would
+  # conflict with the item type, rec type and process name combo specified. These three attributes
+  # form the eventual implementation class name, so multiple definition records can't have the same values.
+  # We have to take care, as nil and blank entries for rec_type and process_name mean the same thing and
+  # are used inconsistently.
+  def self.conflicting_definitions(item_type, rec_type, process_name)
+    rec_type = [nil, ''] if rec_type.blank?
+    process_name = [nil, ''] if process_name.blank?
+
+    active.where(
+      item_type: item_type,
+      rec_type: rec_type,
+      process_name: process_name
+    )
   end
 
   # Ensure that other dynamic implementations have been loaded before we attempt to create
@@ -631,6 +660,11 @@ class ActivityLog < ActiveRecord::Base
 
   def set_table_name
     self.table_name = generate_table_name
+  end
+
+  def clean_types
+    self.rec_type = nil if rec_type.blank?
+    self.process_name = nil if process_name.blank?
   end
 
   def name_ok
