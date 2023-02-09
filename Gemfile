@@ -29,9 +29,6 @@ gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being
 gem 'nokogiri', '1.13.10'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
-gem 'webpacker'
-
-
 # puma has been moved to all environments and will be included in the production packaging
 # this allows EB to run with the latest version of puma, without breaking if the preinstalled version
 # is lower or has different dependencies.
@@ -75,10 +72,8 @@ group :development, :test do
 end
 
 group :test do
-  gem 'capybara', '~> 2.18'
-  # gem 'capybara', '~> 3.36'
+  gem 'capybara'
   gem 'database_cleaner'
-  # gem 'database_cleaner', '~> 2.0', '>= 2.0.1'
   gem 'rails-controller-testing'
   gem 'selenium-webdriver', '4.6.1'
   gem 'shoulda-matchers', '~> 5.1'
