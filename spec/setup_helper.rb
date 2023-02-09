@@ -107,6 +107,12 @@ module SetupHelper
     DynamicModel.routes_reload
   end
 
+  def self.check_activity_logs
+    res = ActivityLog.conflicting_definitions('bhs_assignment', nil, nil)
+    puts res.pluck(:id, :name, :item_type, :rec_type, :process_name)
+    raise 'multiple bhs_assignment activity logs already exist' if res.length > 1
+  end
+
   def self.feature_setup(_options = {})
     Rails.logger.info 'Feature setup'
     Seeds.setup
@@ -216,6 +222,7 @@ module SetupHelper
   end
 
   def self.setup_test_app
+    check_activity_logs
     app_name = "bhs_model_#{rand(100_000_000)}"
 
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')

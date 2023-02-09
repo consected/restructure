@@ -1,5 +1,5 @@
 module Seeds
-  module ActivityLogTableName
+  module ActivityLogTypeCleanup
     def self.setup
       log "In #{self}.setup"
 

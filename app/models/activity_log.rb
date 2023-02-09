@@ -510,8 +510,9 @@ class ActivityLog < ActiveRecord::Base
     return unless existing
 
     errors.add(:rec_type,
-               " item type, rec type and process name already exist as a definition (#{existing.id}) " \
-               "- [#{item_type}, #{rec_type || '(nil)'}, #{process_name || '(nil)'}] ")
+               "item type, rec type and process name already exist as a definition (#{existing.id}) " \
+               "new: [#{item_type}, #{rec_type || '(nil)'}, #{process_name || '(nil)'}] " \
+               "old: [#{existing.item_type}, #{existing.rec_type || '(nil)'}, #{existing.process_name || '(nil)'}] ")
     nil
   end
 

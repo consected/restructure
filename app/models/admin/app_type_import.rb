@@ -219,9 +219,12 @@ class Admin
 
         # Get the item if it has been set up automatically
         cond = ac.slice(*lookup_existing_with_fields)
+        cond.each { |k, v| cond[k] = nil if v.blank? }
+
         filter = ac.slice(*filter_on) if filter_on
         new_vals = ac.except('user_email', 'user_id', 'app_type_id', 'admin_id', 'id', 'created_at', 'updated_at')
         new_vals[:current_admin] = admin
+        new_vals.slice(*lookup_existing_with_fields).each { |k, v| new_vals[k] = nil if v.blank? }
 
         if parent
           has_user = parent.send(assoc_name).attribute_names.include?('user_id')
@@ -253,7 +256,6 @@ class Admin
           end
         else
           new_vals.merge! add_vals
-          cond.each { |k, v| cond[k] = nil if v.blank? }
           i = cname.where(cond).reorder('').order('disabled asc nulls first, id desc')
           i = filtered_results(i, filter) if filter
           i = i.first
