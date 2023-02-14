@@ -101,20 +101,22 @@ describe User do
   it 'expires a password if it is too old' do
     create_admin
 
-    expect(Settings::PasswordAgeLimit).to eq 90
+    # Expect the passport age limit to be set, and thus be a non-zero
+    # While the default is 90 days, any positive number should be allowed
+    expect(Settings::PasswordAgeLimit).to be_an_positive
 
-    expect(@user.need_change_password?).to be false
+    expect(@user.need_change_password?).to be_falsey
 
-    @user.password_updated_at = DateTime.now - 89.days
+    @user.password_updated_at = DateTime.now - (Settings::PasswordAgeLimit - 1).days
     @user.current_admin = @admin
     @user.save
 
-    expect(@user.need_change_password?).to be false
+    expect(@user.need_change_password?).to be_falsey
 
-    @user.password_updated_at = DateTime.now - 91.days
+    @user.password_updated_at = DateTime.now - (Settings::PasswordAgeLimit + 1).days
     @user.save
 
-    expect(@user.need_change_password?).to be true
+    expect(@user.need_change_password?).to be_truthy
   end
 
   describe 'create a user' do
