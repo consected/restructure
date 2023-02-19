@@ -279,7 +279,7 @@ module SetupHelper
       puts "Running psql: #{sqlfn}"
       host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
       user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < #{sqlfn}`
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end
