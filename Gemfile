@@ -26,6 +26,7 @@ gem 'kramdown-parser-gfm'
 gem 'mail', '2.7.1' # hold at this version in Rails 2.7 to avoid broken net / protocol gems
 gem 'mime-types'
 gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
+gem 'net-smtp'
 gem 'nokogiri', '1.13.10'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 

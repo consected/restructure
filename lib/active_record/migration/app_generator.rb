@@ -813,18 +813,27 @@ module ActiveRecord
       end
 
       def create_fields(tbl, history = nil)
+        curr_field = {}
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
+          curr_field = {
+            attr_name: attr_name,
+            config: f,
+            fopts: fopts
+          }
           if fopts && fopts[:index]
             fopts[:index][:name] += '_hist' if history
-            tbl.send(f, attr_name, fopts)
+            tbl.send(f, attr_name, **fopts)
           elsif fopts
-            tbl.send(f, attr_name, fopts)
+            tbl.send(f, attr_name, **fopts)
           else
             tbl.send(f, attr_name)
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
+        puts "Failed to create field in table #{tbl.name}: #{curr_field}"
+        puts "History table? #{!!history}"
+        puts "All requested fields: #{field_defs}"
         raise e unless force_rollback
       end
 
