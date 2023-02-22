@@ -256,6 +256,10 @@ to enable automatic authentication with your DB password, such as:
 
 To create a single test database for running rspec directly:
 
+    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    export USE_PG_HOST=localhost
+    export USE_PG_UNAME=postgres
+
     app-scripts/create-test-db.sh 1
 
 Make sure the Filestore mounts are in place:
@@ -273,6 +277,10 @@ Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
+
+    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    export USE_PG_HOST=localhost
+    export USE_PG_UNAME=postgres
 
     app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1
 
@@ -295,6 +303,10 @@ For faster testing, _parallel_tests_ provides parallelization of Rspec, although
 
 The following will create a set of test databases for the number of processor cores on your machine:
 
+    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    export USE_PG_HOST=localhost
+    export USE_PG_UNAME=postgres
+
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
 This will have created the database with the owner matching your current OS user. To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
@@ -314,6 +326,10 @@ To review failed results:
     less -r tmp/failing_specs.log
 
 The easiest way to deal with migrations is to drop the test database and recreate.
+
+    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    export USE_PG_HOST=localhost
+    export USE_PG_UNAME=postgres
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
