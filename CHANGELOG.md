@@ -16,6 +16,26 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @7.4.160 - 2023-02-22
+
+- [Added] batch_trigger handling for dynamic definitions
+- [Added] initialization of configurations current_version option for dynamic defs
+- [Added] improved logging in failed access to alternative id field
+- [Added] script to setup new NFS groups for filestore
+- [Added] env var configuration for filestore max group id (FILESTORE_MAX_GRP_ID)
+- [Changed] handling of dynamic definitions to handle changes better
+- [Changed] dynamic def handling of associations in readiness for Rails 6
+- [Changed] rails log search string default
+- [Changed] the admin panel to present the app components, consistent styling and better admin buttons flash
+- [Changed] admin bar to move admin panel and logout buttons to top nav bar
+- [Changed] naming to attempt to resolve delayed_job issues with recurring batch jobs
+- [Fixed] duplicate class attribute
+- [Fixed] anonymization issue breaking DICOM image viewing
+- [Fixed] reloading of dynamic definition in batch template processing
+- [Fixed] issues with batch_trigger scheduling and limits
+
 ## [8.1.11] - 2023-01-19
 
 ### Transferred from Harvard @7.4.152 - 2023-01-17
