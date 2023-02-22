@@ -27,7 +27,7 @@ module AdminHelper
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
     else
       path = edit_path(id, filter: filter_params_permitted)
-      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil simple-admin-edit'
     end
   end
 

@@ -82,7 +82,7 @@ class Report < ActiveRecord::Base
   def self.find_by_alt_resource_name(csn, nil_for_no_match = nil, ignore_bad_format = nil)
     csn = csn.gsub('___', ' - ')
     parts = csn.split('__')
-    raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2 || ignore_bad_format
+    raise FphsException, "Bad item_type__short_name identifier: #{csn}" unless parts.length == 2 || ignore_bad_format
 
     i = parts.first
     # Allow hyphenated categories to be matched with underscores

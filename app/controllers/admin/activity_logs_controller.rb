@@ -35,4 +35,16 @@ class Admin::ActivityLogsController < AdminController
     %i[name item_type rec_type process_name category schema_name action_when_attribute
        hide_item_list_panel]
   end
+
+  #
+  # Override to specify attributes to initialize a definition with
+  # @return [Hash]
+  def init_new_with_attrs
+    {
+      extra_log_types: <<~END_CONFIG
+        _configurations:
+          use_current_version: true
+      END_CONFIG
+    }
+  end
 end

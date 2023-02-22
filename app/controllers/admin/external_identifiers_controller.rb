@@ -58,4 +58,16 @@ class Admin::ExternalIdentifiersController < AdminController
       name: 'Table name'
     }
   end
+
+  #
+  # Override to specify attributes to initialize a definition with
+  # @return [Hash]
+  def init_new_with_attrs
+    {
+      options: <<~END_CONFIG
+        _configurations:
+          use_current_version: true
+      END_CONFIG
+    }
+  end
 end

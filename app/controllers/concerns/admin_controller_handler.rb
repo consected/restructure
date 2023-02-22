@@ -41,6 +41,12 @@ module AdminControllerHandler
       }
     end
 
+    unless @copy_with
+      # Add initialization of class specific attributes, if not set previously
+      init_attrs ||= {}
+      init_attrs = init_new_with_attrs.merge(init_attrs)
+    end
+
     set_object_instance primary_model.new(init_attrs) unless options[:use_current_object]
     render partial: view_path('form')
   end
@@ -332,5 +338,12 @@ module AdminControllerHandler
   # ending with "options" or "template" as a multiline code block
   def no_options_field
     false
+  end
+
+  #
+  # Override to specify attributes to initialize a definition with
+  # @return [Hash]
+  def init_new_with_attrs
+    {}
   end
 end

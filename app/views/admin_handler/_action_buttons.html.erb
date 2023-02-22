@@ -1,4 +1,3 @@
-<%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
 <%
    if defined? no_create
      allow_create = !no_create
@@ -9,7 +8,6 @@
 
 %>
 <% unless controller_name == 'pages' && action_name != 'reference_data' %>
-  <%= link_to "admin menu", "/", class: "btn btn-warning" %>
   <%if @sub_processes || @protocol_events%>
     <%= link_to "protocols", admin_protocols_path, class: "btn btn-warning" %>
   <%end%>

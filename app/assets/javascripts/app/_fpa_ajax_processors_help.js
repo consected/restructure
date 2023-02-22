@@ -4,35 +4,37 @@ _fpa.postprocessors_help = {
     var data_doc_path = block.find('[data-doc-path]').attr('data-doc-path');
     // Extend each anchor tag to be a remote request, to use the relative path
     // rather than the window path, and to request embedded pages.
-    block
-      .find('a')
+    block.find('a')
       .on('click', function () {
         const href = $(this).attr('href');
-        $('#help-sidebar').attr('data-to-url', href);
+        $('#help-sidebar').attr('data-to-url', href)
       })
       .each(function () {
-        var href = $(this).attr('href');
+        var href = $(this).attr('href')
         if (href[0] == '#') {
-          $(this).attr('data-toggle', 'scrollto-target');
+          $(this).attr('data-toggle', "scrollto-target");
           return;
         }
         if (href[0] != '/' && href.indexOf('http') != 0 && href.indexOf('mailto:') != 0) {
           href = data_doc_path + '/' + href;
         }
         if (href.indexOf('/help') == 0 && href.indexOf('#open-in-new-tab') < 0) {
-          $(this).attr('data-remote', 'true');
+          $(this).attr('data-remote', 'true')
           if (href.indexOf('display_as=embedded') < 0) {
             if (href.indexOf('?') > 0) {
               href = href.replace('?', '?display_as=embedded&');
-            } else if (href.indexOf('#') > 0) {
+            }
+            else if (href.indexOf('#') > 0) {
               href = href.replace('#', '?display_as=embedded#');
-            } else {
+            }
+            else {
               href = `${href}?display_as=embedded`;
             }
             $(this).attr('href', href);
           }
-          $(this).attr('data-working-target', '#help-sidebar-body');
-        } else {
+          $(this).attr('data-working-target', '#help-sidebar-body')
+        }
+        else {
           $(this).attr('target', '_blank');
         }
       });
@@ -89,8 +91,9 @@ _fpa.postprocessors_help = {
     }
     if (hash_pos && hash_pos > 0) {
       var c = $(to_url.substring(hash_pos));
-    } else {
-      var c = $('#help-doc-content');
+    }
+    else {
+      var c = $('#help-doc-content')
     }
     _fpa.utils.scrollTo(c, 0, -60, block);
 

@@ -14,6 +14,52 @@ module Dynamic
       attr_accessor :skip_save_trigger
     end
 
+    class_methods do
+      #
+      # Run batch processing as a job, triggering actions before on the existence of each record
+      # @param [Integer|nil] limit - optional limit to the number of records to process, overriding the configuration if set
+      # @param [User|nil] alt_user - alternative user to use, rather than the user defined by each record
+      # @param [Admin::AppType|nil] app_type - force user to use app type, rather than current app type set in the record
+      def trigger_batch(limit: nil, alt_user: nil, alt_app_type: nil)
+        Rails.logger.info "trigger batch job for #{self} - limit: #{limit}, alt_user: #{alt_user}"
+        HandleBatchJob.perform_later(to_s)
+      end
+
+      #
+      # Run batch processing, triggering actions before on the existence of each record
+      # @param [Integer|nil] limit - optional limit to the number of records to process, overriding the configuration if set
+      # @param [User|nil] alt_user - alternative user to use, rather than the user defined by each record
+      def trigger_batch_now(limit: nil, alt_user: nil)
+        definition.reload
+        definition.option_configs force: true
+        limit ||= definition.configurations&.dig(:batch_trigger, :limit)
+        cond = definition.configurations&.dig(:batch_trigger, :if)
+        Rails.logger.info "trigger batch now for #{self} - limit: #{limit}, alt_user: #{alt_user}, if: #{cond}"
+        batch = all
+
+        if cond
+          new_batch = []
+          batch.each do |obj|
+            ca = ConditionalActions.new cond, obj
+            new_batch << obj if ca.calc_action_if
+
+            # Within an if condition, we limit based on number of items meeting the condition
+            break if limit && new_batch.length >= limit
+          end
+
+          batch = new_batch
+        elsif limit
+          # When there is no if condition, purely limit the query directly
+          batch = batch.limit(limit)
+        end
+
+        batch.map do |obj|
+          obj.handle_record_batch_trigger alt_user: alt_user
+          obj.id
+        end
+      end
+    end
+
     #
     # List field names that explicitly state *no_downcase: true* or
     # edit_as: field_type: includes the string 'notes'
@@ -163,6 +209,16 @@ module Dynamic
     def handle_before_save_triggers
       option_type_config&.calc_save_trigger_if self, alt_on: :before_save unless skip_save_trigger
       true
+    end
+
+    #
+    # Handle batch_trigger action for this record
+    # @param [User] alt_user - use a specific user to run the action
+    def handle_record_batch_trigger(alt_user: nil)
+      as_user = alt_user || user
+      as_user = User.active.find(as_user) unless as_user.is_a? User
+      self.current_user = as_user
+      option_type_config&.calc_batch_trigger self
     end
 
     #

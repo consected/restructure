@@ -24,12 +24,10 @@ module OptionConfigs
         # @param [UserBase] obj - the item the action was triggered by (or for)
         # @param [Hash] configs - defining the trigger to be processed
         # @return [<Type>] <description>
-        def calc_save_triggers(obj, configs)
+        def calc_triggers(obj, configs)
           return if configs.nil?
 
           # Get a list of results from the triggers
-          results = []
-
           results = configs.map do |perform, config|
             o = trigger_class(perform).new(config, obj)
             # Add the trigger result to the list
@@ -90,9 +88,23 @@ module OptionConfigs
         save_options = ca.calc_save_option_if
 
         if save_options.is_a?(Hash) && save_options[action]
-          # Only run through configs that were returned in the saved_options for this action
+          # Only run through configs that were returned in the save_options for this action
           configs = save_trigger[action].slice(*save_options[action].keys)
-          return self.class.calc_save_triggers(obj, configs)
+          return self.class.calc_triggers(obj, configs)
+        end
+
+        # No results - return true
+        true
+      end
+
+      def calc_batch_trigger(obj)
+        ca = ConditionalActions.new batch_trigger, obj
+        save_options = ca.calc_save_option_if
+        action = :on_record
+        if save_options.is_a?(Hash) && save_options[action]
+          # Only run through configs that were returned in the save_options for this action
+          configs = batch_trigger[action].slice(*save_options[action].keys)
+          return self.class.calc_triggers(obj, configs)
         end
 
         # No results - return true

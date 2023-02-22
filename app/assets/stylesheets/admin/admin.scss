@@ -128,3 +128,16 @@ div#creddocframe {
     padding-left: 0.3em;
   }
 } 
+
+.tall-admin-editor {
+  width: 800px;
+  height: 73vh;
+  
+  .custom-editor-container {
+    height: 73vh;
+  
+    .custom-editor {
+      height: 73vh;
+    }
+}
+}

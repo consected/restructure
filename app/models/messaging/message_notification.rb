@@ -445,7 +445,7 @@ module Messaging
       return unless for_item && on_complete_config.present?
 
       for_item.current_user = for_item.user
-      OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
+      OptionConfigs::ActivityLogOptions.calc_triggers for_item, on_complete_config
     end
 
     def batch_user

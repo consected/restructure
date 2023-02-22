@@ -27,7 +27,7 @@
     "jquery.scrollto": "^2.1.2",
     "js-yaml": "^3.14.0",
     "jsTreeTable": "https://github.com/consected/jsTreeTable",
-    "luxon": "^3.2.1",
+    "luxon": "^3.0.1",
     "megamark": "^3.3.0",
     "moment": "^2.29.3",
     "sortablejs": "^1.13.0",
