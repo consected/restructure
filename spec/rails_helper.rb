@@ -180,6 +180,8 @@ RSpec.configure do |config|
     # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
 
+    require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: Settings::TemplateUserEmail)
+
     unless User.active.find_by(email: Settings::TemplateUserEmail)
       raise FphsException, "No template user available: #{Settings::TemplateUserEmail}"
     end
