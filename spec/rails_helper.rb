@@ -180,6 +180,10 @@ RSpec.configure do |config|
     # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
 
+    unless User.active.find_by(email: Settings::TemplateUserEmail)
+      raise FphsException, "No template user available: #{Settings::TemplateUserEmail}"
+    end
+
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
       put_now 'Setup apps'
@@ -193,6 +197,9 @@ RSpec.configure do |config|
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
+
+      raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
+
       put_now 'setup_ref_data_app'
       SetupHelper.setup_ref_data_app
 
