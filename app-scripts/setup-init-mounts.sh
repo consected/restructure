@@ -4,6 +4,8 @@
 # After running this script, run `.setup-dev-filestore.sh`
 
 which bindfs
+
+# shellcheck disable=SC2181
 if [ $? != 0 ]; then
   echo "bindfs is not installed. Please install it before continuing"
   exit 1
@@ -11,23 +13,31 @@ fi
 
 FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
 
-mkdir -p ${FS_TEST_BASE}/dev-file-source
-mkdir -p ${FS_TEST_BASE}/dev-filestore
-mkdir -p ${FS_TEST_BASE}/dev-bind-fs
+mkdir -p "${FS_TEST_BASE}"/dev-file-source
+mkdir -p "${FS_TEST_BASE}"/dev-filestore
+mkdir -p "${FS_TEST_BASE}"/dev-bind-fs
 
 function is_mountpoint() {
+  MOUNTED_VOLUME=$1
   if [ "$(which mountpoint)" ]; then
-    mountpoint -q $1
+    mountpoint -q "$MOUNTED_VOLUME"
   elif [ "$(which diskutil)" ]; then
-    diskutil info "$1" > /dev/null
+    echo "mounting... $MOUNTED_VOLUME"
+    if [[ $(mount | awk '$3 == "${MOUNTED_VOLUME}"  {print $3}') != "" ]]; then
+      echo "$MOUNTED_VOLUME is mounted"
+    else
+      echo "$MOUNTED_VOLUME is NOT mounted"
+    fi
   else
     echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
     exit 7
   fi
 }
 
-bindfs -n ${FS_TEST_BASE}/dev-file-source ${FS_TEST_BASE}/dev-filestore
-is_mountpoint ${FS_TEST_BASE}/dev-filestore
+bindfs -n "${FS_TEST_BASE}"/dev-file-source "${FS_TEST_BASE}"/dev-filestore
+is_mountpoint "${FS_TEST_BASE}"/dev-filestore
+
+# shellcheck disable=SC2181
 if [ $? != 0 ]; then
   echo "A mount was not successfully set up at: ${FS_TEST_BASE}/dev-filestore"
   exit 2

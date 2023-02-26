@@ -8,7 +8,7 @@
 FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
 
 if [ -z "$MOUNTPOINT" ]; then
-  if [ -d /media/$USER/Data ]; then
+  if [ -d /media/"$USER"/Data ]; then
     MOUNTPOINT=/media/$USER/Data
   else
     MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
@@ -28,17 +28,24 @@ fi
 WEBAPP_USER=${WEBAPP_USER:=$USER}
 
 function is_mountpoint() {
+  MOUNTED_VOLUME=$1
   if [ "$(which mountpoint)" ]; then
-    mountpoint -q $1
+    mountpoint -q "$MOUNTED_VOLUME"
   elif [ "$(which diskutil)" ]; then
-    diskutil info "$1" > /dev/null
+    echo "mounting... $MOUNTED_VOLUME"
+    if [[ $(mount | awk '$3 == "${MOUNTED_VOLUME}"  {print $3}') != "" ]]; then
+      echo "$MOUNTED_VOLUME is mounted"
+    else
+      echo "$MOUNTED_VOLUME is NOT mounted"
+    fi
   else
     echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
     exit 7
   fi
 }
 
-is_mountpoint $MOUNT_ROOT/gid600
+is_mountpoint "$MOUNT_ROOT"/gid600
+# shellcheck disable=SC2181
 if [ $? == 0 ] && [ "$(getent passwd 600)" ]; then
   # Already set up. No need to continue.
 
@@ -46,7 +53,7 @@ if [ $? == 0 ] && [ "$(getent passwd 600)" ]; then
   exit
 fi
 
-if [ "$(whoami)" == 'root' ] && [ -z ${FS_FORCE_ROOT} ]; then
+if [ "$(whoami)" == 'root' ] && [ -z "${FS_FORCE_ROOT}" ]; then
   echo Do not run as sudo
   exit
 else
@@ -62,22 +69,23 @@ if [ "${RAILS_ENV}" != 'test' ]; then
 fi
 
 if [ "${RAILS_ENV}" != 'test' ]; then
-  sudo mkdir -p $FS_ROOT
+  sudo mkdir -p "$FS_ROOT"
   sudo getent group 599 || sudo groupadd --gid 599 nfs_store_all_access
   sudo getent group 600 || sudo groupadd --gid 600 nfs_store_group_0
   sudo getent group 601 || sudo groupadd --gid 601 nfs_store_group_1
   sudo getent passwd 600 || sudo useradd --user-group --uid 600 nfsuser
-  sudo usermod -a --groups=599,600,601 $WEBAPP_USER
-  sudo mkdir -p $FS_ROOT/main
-  sudo mkdir -p $MOUNT_ROOT/gid600
-  sudo mkdir -p $MOUNT_ROOT/gid601
+  sudo usermod -a --groups=599,600,601 "$WEBAPP_USER"
+  sudo mkdir -p "$FS_ROOT"/main
+  sudo mkdir -p "$MOUNT_ROOT"/gid600
+  sudo mkdir -p "$MOUNT_ROOT"/gid601
 fi
+# shellcheck disable=SC2086
 is_mountpoint $MOUNT_ROOT/gid600 || sudo bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid600
-is_mountpoint $MOUNT_ROOT/gid601 || sudo bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid601
+is_mountpoint "$MOUNT_ROOT"/gid601 || sudo bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' "$FS_ROOT"/$FS_DIR "$MOUNT_ROOT"/gid601
 
-is_mountpoint $MOUNT_ROOT/gid600
+is_mountpoint "$MOUNT_ROOT"/gid600
 if [ $? == 1 ]; then
-  ls -als $MOUNT_ROOT
+  ls -als "$MOUNT_ROOT"
   echo "Failed to setup mountpoint"
   exit 1
 else
