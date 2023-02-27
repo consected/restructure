@@ -11,6 +11,11 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
+if ! [[ "$(which mountpoint)" || "$(which diskutil)" ]]; then
+  echo "Either mountpoint (Linux) or diskutil (macOS) must be installed."
+  exit 1;
+fi
+
 FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
 
 mkdir -p "${FS_TEST_BASE}"/dev-file-source
@@ -23,10 +28,11 @@ function is_mountpoint() {
     mountpoint -q "$MOUNTED_VOLUME"
   elif [ "$(which diskutil)" ]; then
     echo "mounting... $MOUNTED_VOLUME"
-    if [[ $(mount | awk '$3 == "${MOUNTED_VOLUME}"  {print $3}') != "" ]]; then
+    if [[ $(mount | awk -v MOUNTED_VOLUME="$MOUNTED_VOLUME" '$3 == MOUNTED_VOLUME  {print $3}') != "" ]]; then
       echo "$MOUNTED_VOLUME is mounted"
     else
       echo "$MOUNTED_VOLUME is NOT mounted"
+      exit 7
     fi
   else
     echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
