@@ -5,7 +5,7 @@
 # If `./setup-init-mounts.sh` has not been run previously (only required one time)
 # then run it first.
 
-FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
 
 if [ -z "$MOUNTPOINT" ]; then
   if [ -d /media/"$USER"/Data ]; then
@@ -31,16 +31,9 @@ function is_mountpoint() {
   MOUNTED_VOLUME=$1
   if [ "$(which mountpoint)" ]; then
     mountpoint -q "$MOUNTED_VOLUME"
-  elif [ "$(which diskutil)" ]; then
-    echo "mounting... $MOUNTED_VOLUME"
-    if [[ $(mount | awk '$3 == "${MOUNTED_VOLUME}"  {print $3}') != "" ]]; then
-      echo "$MOUNTED_VOLUME is mounted"
-    else
-      echo "$MOUNTED_VOLUME is NOT mounted"
-    fi
   else
-    echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
-    exit 7
+    echo "mounting... $MOUNTED_VOLUME"
+    [ "$(mount | awk -v MOUNTED_VOLUME="$MOUNTED_VOLUME" '$3 == MOUNTED_VOLUME  {print $3}')" != "" ]
   fi
 }
 
@@ -70,9 +63,11 @@ fi
 
 if [ "${RAILS_ENV}" != 'test' ]; then
   sudo mkdir -p "$FS_ROOT"
+  # TODO for osx: does a group with id 600 exists? if not, create it.
   sudo getent group 599 || sudo groupadd --gid 599 nfs_store_all_access
   sudo getent group 600 || sudo groupadd --gid 600 nfs_store_group_0
   sudo getent group 601 || sudo groupadd --gid 601 nfs_store_group_1
+  # TODO for osx: does a user exists with user id 600?
   sudo getent passwd 600 || sudo useradd --user-group --uid 600 nfsuser
   sudo usermod -a --groups=599,600,601 "$WEBAPP_USER"
   sudo mkdir -p "$FS_ROOT"/main
