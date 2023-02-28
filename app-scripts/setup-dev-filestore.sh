@@ -74,8 +74,7 @@ if [ "${RAILS_ENV}" != 'test' ]; then
   sudo mkdir -p "$MOUNT_ROOT"/gid600
   sudo mkdir -p "$MOUNT_ROOT"/gid601
 fi
-# shellcheck disable=SC2086
-is_mountpoint $MOUNT_ROOT/gid600 || sudo bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid600
+is_mountpoint "$MOUNT_ROOT"/gid600 || sudo bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' "$FS_ROOT"/$FS_DIR "$MOUNT_ROOT"/gid600
 is_mountpoint "$MOUNT_ROOT"/gid601 || sudo bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' "$FS_ROOT"/$FS_DIR "$MOUNT_ROOT"/gid601
 
 is_mountpoint "$MOUNT_ROOT"/gid600

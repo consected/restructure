@@ -20,7 +20,7 @@ function setup() {
 
   DBNAME=${DB_BASE_NAME}_test${DBNUM}
 
-  cd $(dirname ${BASEDIR})
+  cd "$(dirname "${BASEDIR}")" || return
 
   if [ "${USE_PG_HOST}" ]; then
     USE_PG_UNAME=${USE_PG_UNAME:=postgres}
@@ -29,18 +29,18 @@ function setup() {
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
       psql -c "create user ${user} password 'fphs';" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
     done
-    psql -d $DBNAME -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < "../db/structure.sql"
-    psql -d $DBNAME -c "create schema if not exists bulk_msg;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
-    psql -d $DBNAME -c "create schema if not exists ref_data;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+    psql -d "$DBNAME" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < "../db/structure.sql"
+    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+    psql -d "$DBNAME" -c "create schema if not exists ref_data;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
   else
     sudo -u postgres psql -c "create extension if not exists pgcrypto;"
     sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
       sudo -u postgres psql -c "create user ${user} password 'fphs';"
     done
-    psql -d $DBNAME < "../db/structure.sql"
-    psql -d $DBNAME -c "create schema if not exists bulk_msg;"
-    psql -d $DBNAME -c "create schema if not exists ref_data;"
+    psql -d "$DBNAME" < "../db/structure.sql"
+    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;"
+    psql -d "$DBNAME" -c "create schema if not exists ref_data;"
   fi
 
   RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rails db:seed
@@ -52,12 +52,12 @@ else
   PARALLEL=$1
 fi
 
-if [ -z ${PARALLEL} ]; then
+if [ -z "${PARALLEL}" ]; then
   echo "Single setup"
   setup
 else
   echo "Setup ${PARALLEL} databases"
-  for i in $(seq 1 ${PARALLEL}); do
+  for i in $(seq 1 "${PARALLEL}"); do
     if [ ${i} == 1 ]; then
       DBNUM=''
     else
