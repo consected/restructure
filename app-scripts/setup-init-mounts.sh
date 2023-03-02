@@ -19,7 +19,7 @@ mkdir -p "${FS_TEST_BASE}"/dev-bind-fs
 
 function is_mountpoint() {
   MOUNTED_VOLUME=$1
-  if [ "$(which mountpoint)" ]; then
+  if which mountpoint; then
     mountpoint -q "$MOUNTED_VOLUME"
   else
     echo "mounting... $MOUNTED_VOLUME"
