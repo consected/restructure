@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Settings
+  LogLevel = DefaultSettings::LogLevel
   DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
   DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || DefaultSettings::DefaultSchemaOwner
 
@@ -106,7 +107,7 @@ class Settings
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
-  # Notify the RegistraionAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
+  # Notify the RegistrationAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
   NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
 
   # URL to appear on home page for users with login issues to contact

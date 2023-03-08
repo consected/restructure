@@ -18,6 +18,11 @@
 
   .modal-footer {
     border-top: 0;
+    background: white;
+    box-shadow: 0 2px 3px 1px rbga(0,0,0,0.1);
+    border-radius: 4px;
+    border: 1px solid silver;
+    margin-bottom: 12px;
   }
 
   ul.list-group {
@@ -44,9 +49,13 @@
 
   .submit-action-container input[type="submit"] {
     position: fixed;
-    top: 4px;
-    right: 50px;
+    bottom: 15px;
+    right: 85px;
     z-index: 100;
+  }
+
+  .inline-cancel {
+    display: none;
   }
 }
 

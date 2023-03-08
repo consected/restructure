@@ -52,7 +52,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     dd = find('.tracker-event_date input')
 
     d = match_date || DateTime.now
-    if dd[:type == 'date']
+    if dd[:type] == 'date'
       dd.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
     else
       dd.value.match(%r{0?#{d.month}/0?#{d.day}/#{d.year}})
@@ -229,9 +229,11 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
 
       dd = find('.tracker-event_date input')
-      if dd[:type == 'date']
+      if dd[:type] == 'date'
         dd.send_keys '2030-02-02'
       else
+        dd.set ''
+        sleep 0.5
         dd.set '02/02/2030'
       end
       click_button 'Create Tracker'
@@ -255,7 +257,14 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
 
-      find('.tracker-event_date input').set '01/02/2010'
+      dd = find('.tracker-event_date input')
+      if dd[:type] == 'date'
+        dd.send_keys '2010-01-02'
+      else
+        dd.set ''
+        sleep 0.5
+        dd.set '01/02/2010'
+      end
       click_button 'Create Tracker'
     end
 
@@ -381,14 +390,17 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
       dd = find('.tracker-event_date input')
-      if dd[:type == 'date']
-        dd.set '2125-10-01'
+      if dd[:type] == 'date'
+        dd.send_keys '2125-10-01'
       else
+        dd.set ''
+        sleep 0.5
         dd.set '10/01/2125'
       end
       click_button 'Update Tracker'
     end
 
+    sleep 4
     have_css '.master-expander'
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] span.record-meta', text: @user.email.to_s
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] .tracker-event_date', text: %r{10/0?1/2125}

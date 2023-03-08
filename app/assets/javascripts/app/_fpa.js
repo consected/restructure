@@ -177,7 +177,6 @@ _fpa = {
 
       _fpa.prepare_template(block, template_name, data, options);
       _fpa.do_preprocessors(template_name, block, data, alt_preprocessor);
-      _fpa.form_utils.get_general_selections(data);
       _fpa.prepare_template_configs(data).then(function () {
         _fpa.render_template(block, template_name, data, options, alt_preprocessor);
         resolve();
@@ -489,6 +488,30 @@ _fpa = {
           block.data('button_clicked', bclicked);
         } else {
           block.data('button_clicked', null);
+        }
+
+        // If a form was submitted, clear any of the enclosed .field_was_changed flags
+        // If not a form submit or cancel and there is an outer form that holds fields with this flag
+        // show the user a notice and allow them to cancel or continue the save.
+        var bsubmitted = block.find('input[type="submit"]:focus');
+        if (bsubmitted.length) {
+          block.find('.field-was-changed').removeClass('field-was-changed');
+          block.parents('form').find('.field-was-changed').removeClass('field-was-changed');
+          if (block.parents('.prevent-reload-on-reference-save').length === 0 &&
+            block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').length) {
+            _fpa.flash_notice('Form fields have not been saved. Do you want to <a class="btn btn-default submit-cancel-change">cancel and keep the changes</a> so you can save the form, or <a class="btn btn-danger submit-continue-change">continue without saving</a>', 'warning');
+
+            $('.alert a.submit-continue-change').on('click', function () {
+              block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').removeClass('field-was-changed');
+              bsubmitted.click();
+              _fpa.clear_flash_notices();
+            })
+            $('.alert a.submit-cancel-change').on('click', function () {
+              _fpa.clear_flash_notices();
+            })
+            ev.preventDefault();
+            return false;
+          }
         }
 
         // Handle the special case where we don't want the request to continue if the

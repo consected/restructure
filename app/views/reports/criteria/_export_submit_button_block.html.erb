@@ -2,8 +2,8 @@
 # Don't show export csv / json  or count buttons on editable reports, embedded reports, or on the home search page tabs
 %>
 <% unless @report.editable_data? || embedded_report || @view_context==:search %>
-  <%= submit_tag :count, class: "#{@btn_class}" unless @report.report_type == 'count' || @view_context==:search || @view_options.hide_result_count %>
-  <% unless @view_options.hide_export_buttons %>
+  <%= submit_tag :count, class: "#{@btn_class}" unless @report.report_type == 'count' || @view_context==:search || @view_options&.hide_result_count %>
+  <% unless @view_options&.hide_export_buttons %>
     <%= submit_tag "csv", name: :format, value: "csv", class: "#{@btn_class}" if current_admin || current_user && current_user.can?(:export_csv) %>
     <%= submit_tag "json", id: "submit_query_to_json", name: :format, value: "json", class: "#{@btn_class} target_new_window" if current_admin || current_user && current_user.can?(:export_json) %>
   <% end %>

@@ -22,7 +22,7 @@
           <th>Expires in (days)</th>
           <th>Locked</th>
           <th>Capabilities</th>
-          <th>Disabled</th>
+          <th>Admin</th>
         </tr>
       </thead>
 
@@ -44,7 +44,9 @@
               <% end %>
               </ul>
             </td>
-            <td><%= list_item.disabled ? 'disabled' : ''%></td>
+            <td class="admin-item-admin-infos">
+              <%= admin_last_updated_by_icon(list_item) %>
+            </td>
 
           </tr>
         <% end %>

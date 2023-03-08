@@ -2,9 +2,18 @@
   <div class="row well">
     <h2>Rails Log</h2>
     <%= form_with url: admin_server_info_rails_log_path, method: :get, class: 'form' do |f| %>
+    <div>
     <%= f.label :search, 'search regex' %>
     <%= f.text_field :search, value: @search, class: 'form-control', style: 'min-width: 500px' %>
+    </div>
+    <div>
+    <%= f.label :trailing_context, 'trailing context lines' %>
+    <%= f.text_field :trailing_context, value: @trailing_context, class: 'form-control', style: 'min-width: 500px' %>
+    </div>
+    <div>
     <%= f.button 'search' %>
+    </div>
+    
     <% end %>
   </div>
 </div>

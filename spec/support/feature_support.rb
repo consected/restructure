@@ -12,8 +12,9 @@ module FeatureSupport
   def login
     just_signed_in = false
     already_signed_in = false
-    Settings.const_set('TwoFactorAuthDisabledForUser', false)
-    expect(@user.two_factor_setup_required?).to be_falsey
+    change_setting('TwoFactorAuthDisabledForUser', false)
+    # !two_factor_auth_disabled && !(otp_secret.present? && otp_required_for_login)
+    expect(@user.two_factor_setup_required?).to be_falsey, "#{@user.two_factor_auth_disabled}, #{@user.otp_secret.present?}, #{@user.otp_required_for_login}"
 
     3.times do
       return if user_logged_in?
@@ -58,7 +59,7 @@ module FeatureSupport
 
       fa = all('.flash .alert')[0]
       if fa
-        just_signed_in = (fa.text == '× Signed in successfully.')
+        just_signed_in = (fa.text == "×\nSigned in successfully.")
         puts fa.text unless just_signed_in
       end
 
@@ -70,6 +71,7 @@ module FeatureSupport
     end
 
     expect(just_signed_in || already_signed_in).to be true
+    finish_page_loading
   end
 
   def logout
@@ -92,17 +94,17 @@ module FeatureSupport
       return
     end
 
-    has_css?('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations')
+    has_css?('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations', wait: 10)
     sleep 1
   end
 
   def dismiss_modal
     finish_page_loading
     finish_form_formatting
-    if !all('.modal.fade.in').empty?
+    if !all('.modal.fade.in', wait: false).empty?
       finish_form_formatting
       have_css('button[data-dismiss="modal"]')
-      b = all('button[data-dismiss="modal"]')
+      b = all('button[data-dismiss="modal"]', wait: false)
       b.first.click if b && !b.empty?
       # wait for the modal to fade out before continuing
       has_no_css?('.modal.fade.in')

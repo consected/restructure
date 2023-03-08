@@ -4,23 +4,40 @@ _fpa.postprocessors_help = {
     var data_doc_path = block.find('[data-doc-path]').attr('data-doc-path');
     // Extend each anchor tag to be a remote request, to use the relative path
     // rather than the window path, and to request embedded pages.
-    block.find('a').each(function () {
-      var href = $(this).attr('href');
-      if (href[0] == '#') {
-        $(this).attr('data-toggle', 'scrollto-target');
-        return;
-      }
-      if (href[0] != '/' && href.indexOf('http') != 0 && href.indexOf('mailto:') != 0) {
-        href = data_doc_path + '/' + href;
-      }
-      if (href.indexOf('/help') == 0) {
-        $(this).attr('data-remote', 'true');
-        if (href.indexOf('display_as=embedded') < 0) $(this).attr('href', `${href}?display_as=embedded`);
-        $(this).attr('data-working-target', '#help-sidebar-body');
-      } else {
-        $(this).attr('target', '_blank');
-      }
-    });
+    block.find('a')
+      .on('click', function () {
+        const href = $(this).attr('href');
+        $('#help-sidebar').attr('data-to-url', href)
+      })
+      .each(function () {
+        var href = $(this).attr('href')
+        if (href[0] == '#') {
+          $(this).attr('data-toggle', "scrollto-target");
+          return;
+        }
+        if (href[0] != '/' && href.indexOf('http') != 0 && href.indexOf('mailto:') != 0) {
+          href = data_doc_path + '/' + href;
+        }
+        if (href.indexOf('/help') == 0 && href.indexOf('#open-in-new-tab') < 0) {
+          $(this).attr('data-remote', 'true')
+          if (href.indexOf('display_as=embedded') < 0) {
+            if (href.indexOf('?') > 0) {
+              href = href.replace('?', '?display_as=embedded&');
+            }
+            else if (href.indexOf('#') > 0) {
+              href = href.replace('#', '?display_as=embedded#');
+            }
+            else {
+              href = `${href}?display_as=embedded`;
+            }
+            $(this).attr('href', href);
+          }
+          $(this).attr('data-working-target', '#help-sidebar-body')
+        }
+        else {
+          $(this).attr('target', '_blank');
+        }
+      });
 
     // Ensure image tags with relative paths point to the correct location
     block.find('img').each(function () {
@@ -68,7 +85,16 @@ _fpa.postprocessors_help = {
         $(target).removeClass('expanded');
       });
 
-    var c = $('#help-doc-content');
+    const to_url = $('#help-sidebar').attr('data-to-url');
+    if (to_url) {
+      var hash_pos = to_url.indexOf('#');
+    }
+    if (hash_pos && hash_pos > 0) {
+      var c = $(to_url.substring(hash_pos));
+    }
+    else {
+      var c = $('#help-doc-content')
+    }
     _fpa.utils.scrollTo(c, 0, -60, block);
 
     // Special case when loading a standalone page into the sidebar

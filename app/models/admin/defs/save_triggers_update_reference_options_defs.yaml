@@ -2,7 +2,28 @@
 # Save Trigger: Update Reference options
         - model_name:
             if: if_extras
-            first: 'update the first matching reference with this configuration, specifying {update: return_result}'
+            first:
+              # Update the first matching reference with this configuration, specifying {update: return_result}
+              # Possible formats are:
+              # Simply update the latest record
+              player_contacts:
+                update: return_result
+
+              # Compare with a value in the referring (parent) record with a matching email address
+              dynamic_model__org_alt_usernames:
+                master_id: # This comparison is necessary to trigger the correct operation
+                  this: master_id
+                email: 
+                  referring_record: select_alt_username
+                update: return_result
+                
+              # Or a dynamic model has an id that matches the parent's associated dynamic model id
+              dynamic_model__zeus_bulk_messages:
+                id:
+                  parent_references:
+                    dynamic_model__zeus_bulk_messages: id
+                update: return_result
+
             force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable'
             force_not_valid: 'true to allow valid_if checks to be ignored'
             with: 
@@ -13,4 +34,10 @@
                   field_name: return_value
               field_name_4: 
                 reference_name:
+                  field_name: return_value
+              field_name_5:
+                # An association belonging tho the parent
+                association_name:
+                  id:
+                    parent_references: id
                   field_name: return_value

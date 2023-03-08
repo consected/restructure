@@ -1,0 +1,6 @@
+<% if current_admin %>
+<ul class="nav navbar-nav navbar-right logged-in-as-admin">
+  <li><a class="btn btn-warning" href="/">admin panel</a></li>
+  <li><%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %></li>
+</ul>
+<% end %>

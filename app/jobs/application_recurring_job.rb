@@ -41,6 +41,11 @@ class ApplicationRecurringJob
     unschedule(job_matching_param: JobMatchingParam, schedule_id: owner_identifier(owner))
   end
 
+  #
+  # Return the scheduling information for the next Delayed::Job set to run as a recurring job for the owner instance,
+  # or return empty array if there is no matching schedule
+  # @param [ActiveRecord] owner - the owner instance
+  # @return [Array{Delayed::Job}]
   def self.task_schedule(owner)
     jobs(job_matching_param: JobMatchingParam, schedule_id: owner_identifier(owner))
   end

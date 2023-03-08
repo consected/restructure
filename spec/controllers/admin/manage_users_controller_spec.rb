@@ -78,7 +78,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
     it 'to not be routable' do
       create_item
 
-      expect(get: "#{path_prefix}/#{object_symbol}/#{@manage_user.id}").not_to be_routable
+      expect_to_be_bad_route(get: "#{path_prefix}/#{object_symbol}/#{@manage_user.id}")
     end
   end
 
@@ -295,7 +295,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
     before_each_login_admin
     it 'never destroys the requested item' do
       create_item
-      expect(delete: "#{path_prefix}/#{object_symbol}/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(delete: "#{path_prefix}/#{object_symbol}/#{item_id}")
     end
   end
 end

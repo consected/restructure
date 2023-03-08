@@ -197,39 +197,39 @@ module Dynamic
     end
 
     def alt_order
-      if extra_log_type_config&.view_options
-        da = extra_log_type_config.view_options[:alt_order]
-        da = [da] unless da.is_a? Array
-        res = ''
-        # collect potential date / time pairs from adjacent fields
-        dtp = nil
-        da.each do |n|
-          v = attributes[n]
-          if v.is_a? Date
-            # Set the date portion of the date / time pair, but don't store it yet
-            dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, Time.current.send(:zone))
-          elsif v.is_a? Time
-            if dtp
-              # A date portion of a date / time pair is present, so add the time and store to the result
-              res = DateTime.new(dtp.year, dtp.month, dtp.day, v.hour, v.min, 0, v.send(:zone))
-              # Clear the date / time pair now we are done with it
-              dtp = nil
-            else
-              # Since no date portion was already available, just store the time (this is based on 2001-01-01 date)
-              res += v.to_i.to_s
-            end
-          else
-            # If a date / time pair is set, but was not yet stored, then a date portion was provided, but no time.
-            # Store that date to the result from the previous iteration, before storing the value for the current attribute.
-            # Remember to clear the date / time pair after storing
-            res += dtp.to_s if dtp
-            dtp = nil
-            res += v if v
-          end
-        end
+      return unless extra_log_type_config&.view_options
 
-        res
+      da = extra_log_type_config.view_options[:alt_order]
+      da = [da] unless da.is_a? Array
+      res = ''
+      # collect potential date / time pairs from adjacent fields
+      dtp = nil
+      da.each do |n|
+        v = attributes[n]
+        if v.is_a? Date
+          # Set the date portion of the date / time pair, but don't store it yet
+          dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, Time.current.send(:zone))
+        elsif v.is_a? Time
+          if dtp
+            # A date portion of a date / time pair is present, so add the time and store to the result
+            res = DateTime.new(dtp.year, dtp.month, dtp.day, v.hour, v.min, 0, v.send(:zone))
+            # Clear the date / time pair now we are done with it
+            dtp = nil
+          else
+            # Since no date portion was already available, just store the time (this is based on 2001-01-01 date)
+            res += v.to_i.to_s
+          end
+        else
+          # If a date / time pair is set, but was not yet stored, then a date portion was provided, but no time.
+          # Store that date to the result from the previous iteration, before storing the value for the current attribute.
+          # Remember to clear the date / time pair after storing
+          res += dtp.to_s if dtp
+          dtp = nil
+          res += v if v
+        end
       end
+
+      res
     end
 
     def no_master_association
@@ -361,6 +361,14 @@ module Dynamic
 
     def can_create?
       return @can_create unless @can_create.nil?
+
+      unless extra_log_type_config
+        msg = "can_create? does not have an extra_log_type_config for #{self}"
+        Rails.logger.warn msg
+        Rails.logger.warn "extra_log_type: #{extra_log_type}"
+        Rails.logger.warn "option_configs_names: #{self.class.definition.option_configs_names}"
+        raise FphsException, msg
+      end
 
       @can_create = false
       res = master.current_user.has_access_to? :create, :activity_log_type, extra_log_type_config.resource_name

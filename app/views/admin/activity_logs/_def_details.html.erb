@@ -5,7 +5,31 @@
   <%= object_instance.full_item_type_name %>
   </p>
 
-  <label>fields</label>
+  <label>resource name</label>
+  <p class="al-resource-name">
+  <%= object_instance.resource_name %>
+  </p>
+
+  <label>database <%= object_instance.table_or_view || '<span class="info-danger">not defined</span>'.html_safe %></label>
+  <p>
+    <code><%= [object_instance.schema_name, object_instance.table_name].compact.join('.') %></code>
+  </p>
+  <p>
+    <%= link_to link_label_open_in_new('search data'), 
+                "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+                target: '_blank' %>
+  </p>
+  <% unless object_instance.table_or_view_ready?%>
+  <div class="help-block">
+  <p>Typically the database table or view associated with an activity log is created when the definition is first created (or prior to this if handled manually.)</p>
+  <p>To create the table for this activity log definition, either run the defined migration, or disable (and save) then re-enable and save this definition to 
+     setup the database table based on options configuration.
+  </p>
+  </div>
+  <% end %>
+
+
+  <label>all fields</label>
   <p class="al-field-list">
   <ul class="activity-list">
     <li><%= object_instance.all_implementation_fields
@@ -15,11 +39,21 @@
   </ul>
   </p>
 </div>
+
 <div class="activity-list-section">
   <label>activities</label>
   <ul class="activity-list">
-  <% object_instance.option_configs_names&.each do |name| %>
-    <li><%=name%><%= object_instance.option_type_config_for(name) ? '' : "(invalid)" %></li>
+  <% object_instance.option_configs_names&.each do |name| 
+       conf = object_instance.option_type_config_for(name)
+
+       next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
+  %>
+    <li class="activity-list-name"><%=name%><% unless conf %>(invalid)<% end %></li>
+      <ul class="activity-list-fields">
+      <% if conf&.fields&.present?  %>
+        <li><%= conf.fields.join("</li> <li>").html_safe %></li>
+      <% end %>
+      </ul>
   <% end %>
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
@@ -78,6 +112,17 @@
     <%  end %>
   <% end %>
   </ul>
+</div>
+
+<div class="activity-list-file-filters">
+  <label>file filters</label>
+  <p>
+  <%= link_to(link_label_open_in_new("edit"),
+        admin_nfs_store_filter_filters_path(filter: {resource_name: "#{object_instance.full_item_type_name}__%"}),
+        target: '_blank'
+  )
+  %>
+  </p>
 </div>
 <% else %>
   <label>not yet saved</label>

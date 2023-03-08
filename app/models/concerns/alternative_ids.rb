@@ -240,7 +240,11 @@ module AlternativeIds
 
     # Start by attempting to match on a field in the master record
     unless self.class.alternative_id?(field_name, access_by: current_user)
-      raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
+      Rails.logger.warn "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
+      Rails.logger.warn "Failed user: #{current_user}"
+      Rails.logger.warn "Can access: #{self.class.alternative_id_fields(access_by: current_user)}"
+
+      raise FphsException, "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
     end
 
     @alternative_id_value[field_name] = attributes[field_name.to_s]

@@ -72,6 +72,17 @@ view_options:
   no_sorting: false (default) | true
   # Prevent dynamic sorting being added to the results table
   
+  result_handlers:
+    - fn1
+    - fn2
+  # A list of custom handler Javascript methods to call when results are shown
+
+  add_classes:
+    - css-class-1
+  # A list of CSS classes to add to the result block, to enable custom CSS to be applied consistently
+
+  prevent_adding_items: false (default) | true
+  # If the report is editable, prevent allowing a new item to be added
 
 list_options:
   hide_in_list: false (default) | true

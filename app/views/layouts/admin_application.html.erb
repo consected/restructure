@@ -21,7 +21,6 @@
   <body <%= body_classes %> id="body-top">
     <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>
     <%= render partial: 'layouts/flash_alerts' %>
-    <%= render partial: 'admin_handler/status_bar' %>
     <%= yield %>
     <%= render partial: 'layouts/help_sidebar' %>
     <script>

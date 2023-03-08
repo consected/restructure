@@ -5,7 +5,7 @@
   @result_tables = result_tables if local_assigns[:result_tables]
   setup_column_options
 %>
-<div class="report-results-table-block transposed-table" id="<%=@outer_block_id%>-table-block">
+<div class="report-results-table-block transposed-table <%=@view_options&.add_classes&.join(' ')%>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 
   <table class="report-table table">
     

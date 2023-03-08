@@ -12,7 +12,7 @@ class Admin::ReportsController < AdminController
   end
 
   def filters
-    { item_type: Report.categories.map { |g| [g, g.to_s.humanize] }.to_h }
+    { item_type: Report.categories.map { |g| [g, g.to_s] }.to_h }
   end
 
   def editor_code_type

@@ -10,7 +10,21 @@ _fpa.loaded.preload = function () {
     ev.preventDefault();
   });
 
+
   window.addEventListener('focus', function () {
+    // Check the session timeout
+    if (_fpa.status.session.is_counting) _fpa.status.session.count_down();
+
+    // Check if another tab has changed the app type
+    if (_fpa.state.current_user) {
+      var atid = _fpa.state.current_user.app_type_id;
+      var prev_atid = window.localStorage.getItem('session_app_type_id');
+      if (atid && prev_atid && prev_atid != atid) {
+        _fpa.clear_flash_notices();
+        _fpa.flash_notice(`The application being used has switched in another tab. To avoid issues you should <a class="btn btn-default" href="/pages/app_home">reopen this page<a>`, 'warning')
+      }
+    }
+
     // Force a reload of images when the window gains focus
     $('.image-to-load').each(function () {
       $(this)[0].src = `${$(this)[0].src}#`
@@ -177,11 +191,16 @@ _fpa.loaded.default = function () {
     }
   });
 
-  window.onbeforeunload = function () {
+  window.onbeforeunload = function (ev) {
 
     if ($('body').hasClass('prevent-page-transition')) {
       $('body').removeClass('prevent-page-transition');
       return
+    }
+
+    if ($('.common-template-item .field-was-changed, .new-block .field-was-changed').length) {
+      ev.preventDefault();
+      return ev.returnValue = 'You have unsaved data. Are you sure you want to navigate away?';
     }
 
     $('body').addClass('page-transition');

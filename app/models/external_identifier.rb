@@ -176,27 +176,31 @@ class ExternalIdentifier < ActiveRecord::Base
     if enabled? && !failed
       begin
         definition = self
+        definition_id = self.id
+        def_table_name = self.name
+        self.class.definition_cache[definition_id] = self
 
         if prevent_regenerate_model
           logger.info "Already defined class #{model_class_name}."
           # Refresh the definition in the implementation class
-          implementation_class.definition = definition
+          # implementation_class.definition = definition
           return
         end
 
         # Main implementation class
         a_new_class = Class.new(Dynamic::ExternalIdentifierBase) do
-          def self.definition=(d)
-            @definition = d
-            # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
-            self.table_name = d.name
-          end
-
+          
           class << self
-            attr_reader :definition
-          end
+            attr_accessor :definition_id, :def_table_name
+            def definition
+              ExternalIdentifier.definition_cache[definition_id]              
+            end
 
-          self.definition = definition
+          end
+          
+          self.definition_id = definition_id
+          # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
+          self.table_name = def_table_name
 
           # allow views to be used, where a primary key index is not defined, but the
           # integer id field is guaranteed to be unique in the source table.

@@ -1,10 +1,12 @@
 <div class="container">
   <div class="row">
-    <h1>Server Information</h1>
-    <p class="si-instance-id"><code><%= @instance_id%></code></p>
+    <%= show_admin_heading 'Server Information' %>
+  </div>
+  <div class="well">
+    <p class="si-instance-id"><span><%= @instance_id%></span></p>
     <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
   </div>
-  <div class="row">
+  <div class="well">
       <h3>Restart Server, DelayedJob and Clear Memcached</h3>
       <%= form_tag(admin_app_types_restart_server_url, remote: true) do %>
         <%= submit_tag "Restart server" %>
@@ -13,21 +15,24 @@
       <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true) do %>
         <%= submit_tag "Restart DelayedJob" %>
       <% end %>
+  </div>
+  <div class="well">
+
       <h3>View Exception Log</h3>
       <%= link_to link_label_open_in_new('open log'), "/reports/z_admin__exception_log", target: "exceptionlog" %>
       <h3>Search Rails Log</h3>
       <%= link_to link_label_open_in_new('search Rails log'), admin_server_info_rails_log_path, target: "railslog" %>
   </div>
 
-  <div class="row">  
+  <div class="well">  
     <h3>App Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @app_settings} %>
   </div>
-  <div class="row">  
+  <div class="well">  
     <h3>Database Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
   </div>
-  <div class="row">  
+  <div class="well">  
     <h3>NfsStore Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
 

@@ -42,8 +42,7 @@
 <body <%= body_classes %> id="body-top">
     <%= render partial: 'layouts/browser_check' %>
     <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>
-    <%= render partial: 'layouts/flash_alerts' %>
-    <%= render partial: 'admin_handler/status_bar' %>
+    <%= render partial: 'layouts/flash_alerts' %>    
 <%= yield %>
   <%= render partial: 'layouts/help_sidebar' %>
   <div class="print-preparing">

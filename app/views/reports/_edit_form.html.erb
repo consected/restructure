@@ -57,11 +57,11 @@
           end
         %>
             <% if @report.edit_fields.include?(field_name_sym) %>
-              <td class="report-el report-el-edit-<%=field_name_sym%> report-el-edit-type-<%=column_type%>">
+              <td class="report-el report-el-edit-cell report-el-edit-<%=field_name_sym%> report-el-edit-type-<%=column_type%>" data-col-type="<%=field_name_sym%>" data-col-var-type="<%=column_type%>">
                 <%= edit_form_field(**local_vars) %>
               </td>
             <% else%>
-              <td class="report-el report-el-disabled">
+              <td class="report-el report-el-edit-cell report-el-disabled">
                 &nbsp;
               </td>
             <% end %>

@@ -57,6 +57,8 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         @item.transaction do
           ca = ConditionalActions.new config[:first], @item
           res = ca.get_this_val
+          raise FphsException, "No reference found to update: #{config[:first]&.keys&.first}" unless res
+
           res.ignore_configurable_valid_if = true if config[:force_not_valid]
           res.force_save! if config[:force_not_editable_save]
           res.update! vals.merge(current_user: @item.current_user || @item.user)

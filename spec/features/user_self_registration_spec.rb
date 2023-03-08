@@ -6,14 +6,14 @@ describe 'user sign in process for users that can self register', js: true, driv
   include ModelSupport
 
   before(:all) do
-    Settings.const_set('AllowUsersToRegister', true)
+    change_setting('AllowUsersToRegister', true)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings.const_set('TwoFactorAuthDisabledForUser', false)
-    Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
 
     create_admin
 
@@ -25,7 +25,10 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     unless @template_user.app_type_id
+      grant_user_app_access @template_user
       @template_user.app_type_id = Admin::AppType.all_ids_available_to(@template_user).first
+      at1 = @template_user.app_type_id
+      expect(at1).not_to be nil
       @template_user.current_admin = @admin
       @template_user.save!
     end
@@ -87,7 +90,7 @@ describe 'user sign in process for users that can self register', js: true, driv
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× Signed in successfully'
+    expect(page).to have_css '.flash .alert', text: "×\nSigned in successfully."
   end
 
   it 'should prevent sign in if user disabled' do
@@ -110,7 +113,7 @@ describe 'user sign in process for users that can self register', js: true, driv
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× This account has been disabled.'
+    expect(page).to have_css '.flash .alert', text: "×\nThis account has been disabled."
   end
 
   it 'should prevent invalid sign in' do
@@ -128,7 +131,7 @@ describe 'user sign in process for users that can self register', js: true, driv
 
     expect(page).not_to have_selector('.login-2fa-block', visible: true)
 
-    fail_message = '× Invalid email, password or two-factor authentication code.'
+    fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css 'input:invalid'
 
@@ -172,6 +175,6 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   after(:all) do
-    Settings.const_set('AllowUsersToRegister', false)
+    change_setting('AllowUsersToRegister', false)
   end
 end

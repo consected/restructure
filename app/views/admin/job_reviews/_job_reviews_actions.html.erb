@@ -1,0 +1,12 @@
+<div class="col-sm-20 admin-head-block">
+  <h4>Restart Failed Jobs</h3>
+
+  <%= form_tag admin_job_reviews_restart_failed_jobs_path, action: :post do %>
+  
+  <div class="form-group">
+    <%= hidden_filter_fields %>
+    <%= submit_tag 'restart all', class: "btn btn-primary" %>
+  </div>
+
+  <% end %>
+</div>
