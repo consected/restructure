@@ -394,12 +394,14 @@ module Dynamic
     #
     # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
     def handle_batch_schedule
-      return unless option_configs && configurations
-
       def_unschedule = disabled || !persisted? || !active_model_configuration?
 
+      RecurringBatchTask.unschedule_task self if def_unschedule
+
+      return unless option_configs && configurations
+
       frequency = configurations.dig(:batch_trigger, :frequency)
-      if def_unschedule || frequency.blank?
+      if frequency.blank?
         RecurringBatchTask.unschedule_task self
       else
         RecurringBatchTask.schedule_task self,

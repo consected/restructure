@@ -84,7 +84,12 @@
           <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true } %>
       <% elsif p == :api_key %>
         <%= form_field_label(f, p) %>
+        <% begin %>
         <%= f.password_field p, value: object_instance.api_key %>
+        <% rescue ActiveSupport::MessageVerifier::InvalidSignature %>
+        <%= f.password_field p, value: nil %>
+        <div class="info-danger">password was invalid</div>
+        <% end %>
       <% else %>
         <%= form_field_label(f, p) %>
         <%= f.text_field p %>

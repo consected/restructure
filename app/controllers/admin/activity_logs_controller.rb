@@ -33,7 +33,7 @@ class Admin::ActivityLogsController < AdminController
 
   def index_params
     %i[name item_type rec_type process_name category schema_name action_when_attribute
-       hide_item_list_panel]
+       hide_item_list_panel admin_id]
   end
 
   #

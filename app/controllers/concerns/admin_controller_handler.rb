@@ -137,7 +137,7 @@ module AdminControllerHandler
   end
 
   def index_params
-    permitted_params + [:admin_id] - [:disabled]
+    permitted_params + [:admin_id] - %i[disabled options]
   end
 
   def admin_link_params

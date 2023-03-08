@@ -54,7 +54,7 @@ class Admin::DynamicModelsController < AdminController
   def index_params
     %i[id name schema_name table_name category
        table_key_name primary_key_name
-       foreign_key_name result_order position]
+       foreign_key_name result_order position admin_id]
   end
 
   #

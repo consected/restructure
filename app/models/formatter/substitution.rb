@@ -249,7 +249,7 @@ module Formatter
       if iu.is_a? User
         data[:item_user] = iu.attributes.dup
         data[:user_email] = iu.email
-        data[:user_preference] = iu.user_preference.attributes.dup
+        data[:user_preference] = iu.user_preference&.attributes&.dup
         data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
       end
 

@@ -16,5 +16,7 @@ module Redcap
     validates :action, presence: true
 
     attr_accessor :disabled
+
+    scope :limited_index, -> { limit 1000 }
   end
 end

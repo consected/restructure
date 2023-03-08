@@ -45,6 +45,10 @@ class Admin::MessageTemplatesController < AdminController
     'htmlmixed'
   end
 
+  def index_params
+    permitted_params + [:admin_id] - %i[disabled template]
+  end
+
   private
 
   def permitted_params

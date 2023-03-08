@@ -6,7 +6,7 @@
 %>  
   <div class="admin-view report-criteria">
     <div class="report-description">
-      <%= Formatter::Substitution.substitute(markdown_to_html(@report.description), data: current_user, ignore_missing: true).html_safe %>
+      <%= Formatter::Substitution.substitute(markdown_to_html(@report.description), data: current_user, ignore_missing: true)&.html_safe %>
     </div>  
     <div class="row report-criteria-fields">
       <%= render partial: 'reports/criteria/fields' %>

@@ -130,4 +130,15 @@ module AdminHelper
     end
     res.html_safe
   end
+
+  def admin_last_updated_by_icon(list_item)
+    return unless list_item.admin
+
+    res = <<~END_HTML
+      <span class="hidden">#{list_item.admin&.updated_at}</span>
+      <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip"  title="last updated by: #{list_item.admin&.email} at #{list_item.admin&.updated_at}"></span>
+    END_HTML
+
+    res.html_safe
+  end
 end

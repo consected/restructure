@@ -20,6 +20,8 @@
 <% end %>
     <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item.id, copy: list_item%>  </td>
     <% index_params.each do |p|
+        next if p.to_s == 'admin_id'
+
         test_assoc = p.to_s.gsub('_id','')
         test_assoc_ids = p.to_s.gsub('_ids','').pluralize
 
@@ -58,8 +60,14 @@
     <% end %>
 
     <% if admin_links.present? %>
-    <td>
-      <% admin_links(list_item.id).each do |al| %><%= link_to *al %> <% end %>
+    <td class="admin-item-admin-links">
+      <% admin_links(list_item).each do |al| %><%= link_to *al %> <% end %>
+    </td>
+    <% end %>
+
+    <% if @show_admin_col %>
+    <td class="admin-item-admin-infos">
+      <%= admin_last_updated_by_icon(list_item) %>
     </td>
     <% end %>
   </tr>
