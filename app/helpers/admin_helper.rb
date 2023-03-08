@@ -27,7 +27,7 @@ module AdminHelper
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
     else
       path = edit_path(id, filter: filter_params_permitted)
-      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil simple-admin-edit'
     end
   end
 
@@ -94,23 +94,33 @@ module AdminHelper
     res.html_safe
   end
 
-  def show_admin_heading
-    "<h1 class=\"admin-title\">#{title}" \
-      "#{ link_to(
-        '',
-        help_page_path(
-          library: :admin_reference,
-          section: help_section,
-          subsection: help_subsection,
-          display_as: :embedded
-        ),
-        class: 'glyphicon glyphicon-question-sign small admin-help-icon',
-        data: { remote: true,
-                toggle: 'collapse',
-                target: '#help-sidebar',
-                'working-target': '#help-sidebar-body' }
-      ) }" \
-    '</h1>'.html_safe
+  def show_admin_heading(alt_title = nil)
+    alt_title ||= title
+    res = <<~END_HTML
+      <div class="panel panel-default admin-action-page">
+        <div class="panel-heading">#{' '}
+          <h1 class="admin-title">#{alt_title}
+            #{ link_to(
+              '',
+              help_page_path(
+                library: :admin_reference,
+                section: help_section,
+                subsection: help_subsection,
+                display_as: :embedded
+              ),
+              class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+              data: { remote: true,
+                      toggle: 'collapse',
+                      target: '#help-sidebar',
+                      'working-target': '#help-sidebar-body' }
+            ) }
+            #{render partial: 'admin_handler/status_bar'}
+          </h1>
+        </div>
+      </div>
+    END_HTML
+
+    res.html_safe
   end
 
   def hidden_filter_fields
@@ -118,6 +128,17 @@ module AdminHelper
     filter_params_permitted&.each do |filter|
       res += hidden_field_tag "filter[#{filter.first}]", filter.last
     end
+    res.html_safe
+  end
+
+  def admin_last_updated_by_icon(list_item)
+    return unless list_item.admin
+
+    res = <<~END_HTML
+      <span class="hidden">#{list_item.admin&.updated_at}</span>
+      <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip"  title="last updated by: #{list_item.admin&.email} at #{list_item.admin&.updated_at}"></span>
+    END_HTML
+
     res.html_safe
   end
 end

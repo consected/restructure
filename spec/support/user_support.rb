@@ -27,14 +27,20 @@ module UserSupport
       user = User.find(user.id)
       user.current_admin = admin
       good_password = user.generate_password
-      unless Settings::TwoFactorAuthDisabledForUser
+      if Settings::TwoFactorAuthDisabledForUser
+        user.otp_required_for_login = false
+        user.new_two_factor_auth_code = false
+      else
         user.otp_required_for_login = true
         user.new_two_factor_auth_code = false
       end
       user.save!
     end
 
-    if user.two_factor_setup_required?
+    if Settings::TwoFactorAuthDisabledForUser
+      user.otp_required_for_login = false
+      user.new_two_factor_auth_code = false
+    else
       user.otp_required_for_login = true
       user.new_two_factor_auth_code = false
     end
@@ -71,6 +77,14 @@ module UserSupport
     puts "create_user took #{delay} seconds" if delay > 2.seconds
 
     [user, good_password]
+  end
+
+  def grant_user_app_access(user, app_type = nil)
+    app_type = app_type || user&.app_type || Admin::AppType.active.first
+    raise 'No app type set' unless app_type
+
+    Admin::UserAccessControl.create app_type: app_type, access: :read, resource_type: :general,
+                                    resource_name: :app_type, current_admin: @admin, user: user
   end
 
   def self.create_admin(part = nil)
@@ -219,11 +233,11 @@ module UserSupport
     user = alt_user || @user
     in_app_type ||= user.app_type
     res = user.has_access_to? :access, :table, resource_name, alt_app_type_id: in_app_type
-    if res && res.user_id == user.id
-      res.disabled = true
-      res.current_admin = @admin
-      res.save!
-    end
+    return unless res && res.user_id == user.id
+
+    res.disabled = true
+    res.current_admin = @admin
+    res.save!
   end
 
   def validate_setup

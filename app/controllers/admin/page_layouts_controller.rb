@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::PageLayoutsController < AdminController
-  helper_method :layout_options
+  helper_method :layout_options, :index_params
 
   protected
 
@@ -27,5 +27,9 @@ class Admin::PageLayoutsController < AdminController
 
   def permitted_params
     %i[app_type_id layout_name panel_name panel_label panel_position description options disabled]
+  end
+
+  def index_params
+    permitted_params + %i[admin_id] - %i[disabled options]
   end
 end

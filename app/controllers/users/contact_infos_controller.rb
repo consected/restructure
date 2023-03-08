@@ -17,15 +17,15 @@ class Users::ContactInfosController < AdminController
     'admin/common_templates'
   end
 
-  def filters
-    { user_id: Admin::UserRole.active.users.pluck(:id, :email).to_h }
-  end
-
-  def filters_on
-    [:user_id]
-  end
-
   def permitted_params
     @permitted_params = %i[user_id sms_number phone_number alt_email]
+  end
+
+  def admin_links(item = nil)
+    return [true] if item.nil?
+
+    [
+      ['user profile', admin_manage_users_path(filter: { id: item.user_id })]
+    ]
   end
 end

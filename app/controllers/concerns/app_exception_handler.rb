@@ -76,60 +76,62 @@ module AppExceptionHandler
     msg = error.message
     msg = msg.gsub('  ', ' ').split('DETAIL: Key ').last.gsub('(', ' ').gsub(')', ' ').gsub('_', ' ')
     code = 400
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def unhandled_exception_handler(error)
     msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def fphs_app_exception_handler(error)
     msg = error.message
     code = 400
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def user_error_handler(error)
     msg = error.message
     code = 400
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def runtime_error_handler(error)
     msg = "A server error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def routing_error_handler(error)
     msg = 'The request URL does not exist.'
     code = 404
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def bad_format_handler(error)
     msg = 'A bad page format was requested'
     code = 400
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def bad_auth_token(error)
-    msg = 'The information could not be submitted. Try returning to the home page to refresh the session.'
+    msg = 'The information could not be submitted. Copy any important text from the fields or text editors ' \
+          'of your form, then open this page in a new tab, edit the form and re-enter any missing information.'
     code = 422
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
   def runtime_record_not_found_handler(error)
     msg = "A database record was not found. Contact the administrator if this condition persists. #{error.message}"
     code = 404
-    return_and_log_error error, msg, code
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
 
-  def return_and_log_error(error, msg, code)
-    logger.error error.inspect
-    logger.error error.backtrace.join("\n") if error.backtrace
+  def return_and_log_error(error, msg, code, log_level: nil)
+    log_level ||= :error
+    logger.send(log_level, error.inspect)
+    logger.send(log_level, error.backtrace.join("\n")) if error.backtrace
 
     if code.in? [400, 500]
       user_id = current_user&.id

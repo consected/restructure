@@ -8,7 +8,7 @@ module ReportResults
       orig_col_content = col_content
       col_name = report_column_name(field_num)
 
-      if @view_options.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
+      if @view_options&.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
         @show_as[col_name] ||= 'checkbox'
       end
 

@@ -24,6 +24,7 @@
     address_country: <%= country_hash_lower_keys.to_json.html_safe %>,
     address_us_state: <%= state_hash_lower_keys.to_json.html_safe %>
   }
+  window.localStorage.setItem('session_app_type_id', _fpa.state.current_user.app_type_id);
   <% end %>
   _fpa.loaded.preload();
 

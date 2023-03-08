@@ -5,7 +5,7 @@
       <% 
         if @report.report_type == 'search' 
       %>
-        <%= button_tag (@view_options.search_button_label || 'search'), 
+        <%= button_tag (@view_options&.search_button_label || 'search'), 
               name: 'commit', 
               value: 'search', 
               type: 'submit', 

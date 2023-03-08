@@ -21,6 +21,7 @@ class Report < ActiveRecord::Base
   validate :valid_short_name?, unless: -> { disabled }
   validate :valid_item_type?, unless: -> { disabled }
   validate :valid_resource_name?, unless: -> { disabled }
+  validate :options_valid?, unless: -> { disabled }
 
   scope :counts, -> { where report_type: 'count' }
   scope :regular, -> { where report_type: 'regular_report' }
@@ -81,7 +82,7 @@ class Report < ActiveRecord::Base
   def self.find_by_alt_resource_name(csn, nil_for_no_match = nil, ignore_bad_format = nil)
     csn = csn.gsub('___', ' - ')
     parts = csn.split('__')
-    raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2 || ignore_bad_format
+    raise FphsException, "Bad item_type__short_name identifier: #{csn}" unless parts.length == 2 || ignore_bad_format
 
     i = parts.first
     # Allow hyphenated categories to be matched with underscores
@@ -270,5 +271,11 @@ class Report < ActiveRecord::Base
 
   def invalidate_cache
     logger.info 'Not invalidating cache for report'
+  end
+
+  def options_valid?
+    OptionConfigs::ReportOptions.raise_bad_configs(report_options)
+  rescue FphsException => e
+    errors.add :options, e
   end
 end

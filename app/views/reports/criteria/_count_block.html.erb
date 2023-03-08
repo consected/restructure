@@ -1,3 +1,3 @@
-<% if @report.report_type != 'count' && !@view_options.hide_result_count%>
+<% if @report.report_type != 'count' && !@view_options&.hide_result_count%>
   <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
 <%end%>

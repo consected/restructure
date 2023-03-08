@@ -74,8 +74,8 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
     before_each_login_admin
     it 'never destroys the requested item' do
       create_item
-      expect(delete: "activity_logs/#{item_id}").not_to be_routable
-      expect(delete: "masters/1/player_contacts/2/activity_logs/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(delete: "activity_logs/#{item_id}")
+      expect_to_be_bad_route(delete: "masters/1/player_contacts/2/activity_logs/#{item_id}")
       # delete :destroy, {:id => item_id, master_id: @master_id}
       # expect(response).to have_http_status(401)
     end

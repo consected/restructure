@@ -54,7 +54,11 @@ module SetupHelper
       SetupHelper.setup_app_db sql_source_dir, sql_files
     end
 
-    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
+    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses') && 
+           ActiveRecord::Base.connection.table_exists?('zeus_short_links') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_short_link_clicks') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_recipients') &&
+           ActiveRecord::Base.connection.table_exists?('player_contact_phone_infos')
       # Bulk
       # Setup the triggers, functions, etc
       sql_files = %w[test/drop_schema.sql test/create_schema.sql
@@ -72,7 +76,8 @@ module SetupHelper
     puts 'DB validation'
 
     # Ensure we are set up for this test
-    res = File.read("#{ENV['HOME']}/.pgpass").include? db_name
+    pgpass = File.read("#{ENV['HOME']}/.pgpass")
+    res = pgpass.include?(db_name) || pgpass.include?('localhost:5432:*')
     raise ".pgpass does not contain entry for database #{db_name}" unless res
 
     q = ActiveRecord::Base.connection.execute "select * from pg_catalog.pg_roles where rolname='fphsetl'"

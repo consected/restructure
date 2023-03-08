@@ -73,7 +73,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
                                        content_template_text: content_template_text,
                                        data: data,
                                        ignore_missing: ignore_missing,
-                                       no_substitutions: true)
+                                       no_substitutions: true,
+                                       markdown_to_html: force_markdown_to_html)
     all_content = template.sub('{{main_content}}', text)
     substitute all_content, data: data, ignore_missing: ignore_missing
   end
@@ -112,5 +113,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text = Formatter::Substitution.text_to_html(text) if markdown_to_html
 
     text
+  end
+
+  #
+  # For content templates that are email and were created after 1/1/2003,
+  # the template is defined as markdown rather than HTML.
+  # @return [true|false]
+  def force_markdown_to_html
+    template_type == 'content' && message_type&.in?(['email', 'dialog']) && (!persisted? || created_at >= '2023-01-01')
   end
 end

@@ -155,33 +155,35 @@ class DynamicModel < ActiveRecord::Base
     if enabled? && !failed
       begin
         definition = self
+        definition_id = id
+        def_table_name = table_name
+        self.class.definition_cache[definition_id] = self
 
         if prevent_regenerate_model
           logger.info "Already defined class #{model_class_name}."
           # Refresh the definition in the implementation class
-          implementation_class.definition = definition
+          # implementation_class.definition = definition
           return
         end
 
         # Main implementation class
         a_new_class = Class.new(Dynamic::DynamicModelBase) do
-          def self.definition=(d)
-            @definition = d
-            # Force the table_name, since it doesn't include dynamic_model_ as a prefix,
-            # which is the Rails convention for namespaced models
-            self.table_name = d.table_name
-          end
 
           class << self
-            attr_reader :definition
+            attr_accessor :definition_id, :def_table_name
+            def definition
+              DynamicModel.definition_cache[definition_id]
+            end
 
             # Add definition here, since UserHandler relies on it during include
             def no_master_association
               definition.foreign_key_name.blank?
-            end
+            end            
           end
-
-          self.definition = definition
+          
+          self.definition_id = definition_id
+          # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
+          self.table_name = def_table_name
         end
 
         a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
@@ -307,18 +309,6 @@ class DynamicModel < ActiveRecord::Base
     self.field_list = default_field_list_array.join(' ') if force || field_list.blank?
   end
 
-  #
-  # Returns :table or :view if the underlying database object is a table or a view.
-  # Returns nil if no underlying object is found
-  # @return [Symbol | nil]
-  def table_or_view
-    return unless Admin::MigrationGenerator.table_or_view_exists? table_name
-
-    return :table if Admin::MigrationGenerator.table_exists? table_name
-
-    :view
-  end
-
   def default_field_list_array
     return [] unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
@@ -423,7 +413,7 @@ class DynamicModel < ActiveRecord::Base
 
   #
   # Set up the data dictionary if _data_dictionary: {study: , domain:} options have been specified
-  # This is run after_create
+  # This is run after_save
   def setup_data_dictionary
     return unless data_dictionary && data_dictionary[:study] && data_dictionary[:domain]
 

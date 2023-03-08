@@ -198,7 +198,7 @@ describe User do
     expect(Messaging::MessageNotification.first.user).to eq @user
     expect(Messaging::MessageNotification.first.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
 
-    @user.password = 'some new password that needs notification'
+    @user.password = 'Some new password that needs notification 2'
     @user.save!
 
     expect(Messaging::MessageNotification.count).to eq(orig_count + 1)

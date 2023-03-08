@@ -278,7 +278,7 @@ class ActivityLog < ActiveRecord::Base
     return if disabled || !errors.empty?
 
     begin
-      remove_assoc_class 'Master'
+      remove_assoc_class 'Master', nil, ''
 
       # Add the association
       logger.debug "Associated master: has_many #{model_association_name} with class_name: #{full_implementation_class_name}"
@@ -321,8 +321,11 @@ class ActivityLog < ActiveRecord::Base
     # build method being called
     # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
     impl_parent_class = implementation_class.parent_class
-
-    remove_assoc_class "#{impl_parent_class}ActivityLog" if item_type_exists
+    if Rails::VERSION::MAJOR >= 6
+      remove_assoc_class "#{impl_parent_class}::ActivityLog" if item_type_exists
+    elsif item_type_exists
+      remove_assoc_class "#{impl_parent_class}ActivityLog"
+    end
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
@@ -351,8 +354,11 @@ class ActivityLog < ActiveRecord::Base
     rns.each do |rn|
       elt = rn.split('__').last
       elt = nil if elt == 'blank_log'
-
-      remove_assoc_class impl_parent_class, rn.ns_camelize.gsub('::', '') if item_type_exists
+      if Rails::VERSION::MAJOR >= 6
+        remove_assoc_class impl_parent_class, rn.ns_camelize if item_type_exists
+      elsif item_type_exists
+        remove_assoc_class impl_parent_class, rn.ns_camelize.gsub('::', '')
+      end
       impl_parent_class.has_many rn.to_sym,
                                  -> { where(extra_log_type: elt).order(awa => :desc, id: :desc) },
                                  class_name: full_implementation_class_name do
@@ -505,12 +511,12 @@ class ActivityLog < ActiveRecord::Base
     end
 
     existing = self.class.works_with_all(item_type, rec_type, process_name).where.not(id: id)
-    if existing.first
-      errors.add(:rec_type,
-                 " item type and process name already exist as a definition (#{existing.first.id}) " \
-                 "- #{item_type}, #{rec_type}, #{process_name} ")
-      nil
-    end
+    return unless existing.first
+
+    errors.add(:rec_type,
+               " item type and process name already exist as a definition (#{existing.first.id}) " \
+               "- #{item_type}, #{rec_type}, #{process_name} ")
+    nil
   end
 
   # Ensure that other dynamic implementations have been loaded before we attempt to create
@@ -535,11 +541,11 @@ class ActivityLog < ActiveRecord::Base
     if enabled? && !failed
       begin
         definition = self
+        definition_id = self.id
+        self.class.definition_cache[definition_id] = self
 
         if prevent_regenerate_model
           logger.info "Already defined class #{model_class_name}."
-          # Refresh the definition in the implementation class
-          implementation_class.definition = definition
           # Re-add the model to the list to pick up new extra log types
           add_model_to_list implementation_class
           return
@@ -548,10 +554,14 @@ class ActivityLog < ActiveRecord::Base
         # Main implementation class
         a_new_class = Class.new(Dynamic::ActivityLogBase) do
           class << self
-            attr_accessor :definition
-          end
+            attr_accessor :definition_id
+            def definition
+              ActivityLog.definition_cache[definition_id]
+            end
 
-          self.definition = definition
+          end
+          
+          self.definition_id = definition_id
         end
 
         a_new_controller = Class.new(ActivityLog::ActivityLogsController) do

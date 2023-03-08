@@ -9,12 +9,19 @@ big_select = {
 group_split_char = '/'
 form_object_item_type_us = form_object_item_type_us.ns_underscore
 
+group_num = 1
 reslist = form_object_instance.master.nfs_store__manage__containers.map do |c|
   c.parent_item ||= c.find_creator_parent_item
-  [c.name, c.stored_files.map {|sf| ["#{sf.file_name}", sf.direct_uri || sf.url] } ]
+  group_title = c.parent_item.title
+  group_title = c.name if group_title.blank?
+  group = "#{group_title} >>> #{group_num}"
+  group_num += 1
+  next if c.stored_files.empty?
+
+  [group, c.stored_files.map {|sf| ["#{sf.file_name}", sf.direct_uri || sf.url] } ]
 end
 
-reslist = reslist.to_h
+reslist = reslist.compact.to_h
 
 unless big_select
 reslist = options_for_select(reslist)

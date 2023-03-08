@@ -24,7 +24,7 @@
           <th>Signed in at</th>
           <th>Locked</th>
           <th>Disabled</th>
-          <th>Updated By</th>
+          <th>Admin</th>
         </tr>
       </thead>
       <tbody>
@@ -45,7 +45,9 @@
             <td><%= list_item.current_sign_in_at %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
-            <td><%= list_item.admin_name %></td>
+            <td class="admin-item-admin-infos">
+              <%= admin_last_updated_by_icon(list_item) %>
+            </td>
           </tr>
         <% end %>
       </tbody>

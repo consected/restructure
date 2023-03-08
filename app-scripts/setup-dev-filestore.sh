@@ -5,11 +5,13 @@
 # If `./setup-init-mounts.sh` has not been run previously (only required one time)
 # then run it first.
 
+FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+
 if [ -z "$MOUNTPOINT" ]; then
   if [ -d /media/$USER/Data ]; then
     MOUNTPOINT=/media/$USER/Data
   else
-    MOUNTPOINT=/home/$USER/dev-filestore
+    MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
   fi
 fi
 
@@ -19,21 +21,21 @@ if [ -z "$MOUNT_ROOT" ]; then
   if [ -d /mnt/fphsfs ]; then
     MOUNT_ROOT=/mnt/fphsfs
   else
-    MOUNT_ROOT=/home/$USER/dev-bind-fs
+    MOUNT_ROOT=${FS_TEST_BASE}/dev-bind-fs
   fi
 fi
 
-WEBAPP_USER=${USER}
+WEBAPP_USER=${WEBAPP_USER:=$USER}
 
 mountpoint -q $MOUNT_ROOT/gid600
-if [ $? == 0 ]; then
+if [ $? == 0 ] && [ "$(getent passwd 600)" ]; then
   # Already set up. No need to continue.
 
   echo "mountpoint OK"
   exit
 fi
 
-if [ "$(whoami)" == 'root' ]; then
+if [ "$(whoami)" == 'root' ] && [ -z ${FS_FORCE_ROOT} ]; then
   echo Do not run as sudo
   exit
 else
@@ -55,7 +57,7 @@ if [ "${RAILS_ENV}" != 'test' ]; then
   sudo getent group 601 || sudo groupadd --gid 601 nfs_store_group_1
   sudo getent passwd 600 || sudo useradd --user-group --uid 600 nfsuser
   sudo usermod -a --groups=599,600,601 $WEBAPP_USER
-  sudo mkdir -p $FS_ROOT
+  sudo mkdir -p $FS_ROOT/main
   sudo mkdir -p $MOUNT_ROOT/gid600
   sudo mkdir -p $MOUNT_ROOT/gid601
 fi
@@ -64,8 +66,9 @@ sudo mountpoint -q $MOUNT_ROOT/gid601 || sudo bindfs --map=@601/@599 --create-fo
 
 mountpoint -q $MOUNT_ROOT/gid600
 if [ $? == 1 ]; then
+  ls -als $MOUNT_ROOT
   echo "Failed to setup mountpoint"
-  exit
+  exit 1
 else
   echo "mountpoint OK"
   exit

@@ -17,10 +17,9 @@ RSpec.describe MfaController, type: :controller do
       post :step1, params: { resource_type: 'user' }
       expect(response).to have_http_status :not_found
 
-      expect(get: '/mfa').not_to be_routable
-      expect(get: '/mfa/1').not_to be_routable
-
-      expect(post: '/mfa').not_to be_routable
+      expect_to_be_bad_route(get: '/mfa')
+      expect_to_be_bad_route(get: '/mfa/1')
+      expect_to_be_bad_route(post: '/mfa')
       expect(post: '/mfa/step1', format: :json).to be_routable
     end
 
@@ -93,7 +92,7 @@ RSpec.describe MfaController, type: :controller do
 
     context '2FA disabled on server' do
       before :all do
-        Settings.const_set('TwoFactorAuthDisabledForUser', true)
+        change_setting('TwoFactorAuthDisabledForUser', true)
       end
 
       it 'says 2FA is not required if the user is not found, to avoid bad actors using the endpoint to find valid users' do
@@ -117,7 +116,7 @@ RSpec.describe MfaController, type: :controller do
 
     context '2FA enabled on server' do
       before :all do
-        Settings.const_set('TwoFactorAuthDisabledForUser', false)
+        change_setting('TwoFactorAuthDisabledForUser', false)
       end
 
       it 'says 2FA is required if the user is not found, to avoid bad actors using the endpoint to find valid users' do
@@ -162,7 +161,7 @@ RSpec.describe MfaController, type: :controller do
 
     context '2FA disabled on server' do
       before :all do
-        Settings.const_set('TwoFactorAuthDisabledForAdmin', true)
+        change_setting('TwoFactorAuthDisabledForAdmin', true)
       end
 
       it 'says 2FA is not required if the admin is not found, to avoid bad actors using the endpoint to find valid admins' do
@@ -186,7 +185,7 @@ RSpec.describe MfaController, type: :controller do
 
     context '2FA enabled on server' do
       before :all do
-        Settings.const_set('TwoFactorAuthDisabledForAdmin', false)
+        change_setting('TwoFactorAuthDisabledForAdmin', false)
       end
 
       it 'says 2FA is required if the admin is not found, to avoid bad actors using the endpoint to find valid admins' do

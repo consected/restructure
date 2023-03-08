@@ -26,6 +26,12 @@
     height: auto;
     overflow: auto;
   }
+
+  .page-template-main-prefix {
+    .btn-close-panel {
+      display: none;
+    }
+  }
 }
 
 .standalone-page-col.ajax-running {

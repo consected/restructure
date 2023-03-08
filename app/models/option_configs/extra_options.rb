@@ -15,7 +15,7 @@ module OptionConfigs
         name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings
+        show_if_condition_strings batch_trigger
       ]
     end
 
@@ -163,6 +163,7 @@ module OptionConfigs
 
       clean_references_def
       clean_save_triggers
+      clean_batch_triggers
     end
 
     def clean_references_def
@@ -285,12 +286,20 @@ module OptionConfigs
       self.save_trigger[:on_disable] ||= {}
     end
 
+    def clean_batch_triggers
+      self.batch_trigger ||= {}
+      self.batch_trigger = self.batch_trigger.symbolize_keys
+      self.batch_trigger[:on_record] ||= {}
+    end
+
     # Check if any of the configs were bad
     # This should be extended to provide additional checks when options are saved
     # @todo - work out why the "raise" was disabled and whether it needs changing
     def self.raise_bad_configs(option_configs)
       bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
+      Rails.logger.warn("bad_configs: #{bad_configs.map(&:bad_ref_items)}") if bad_configs.present?
       # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
+      bad_configs
     end
 
     #
@@ -306,7 +315,7 @@ module OptionConfigs
         config_text = include_libraries(config_text)
         begin
           res = YAML.safe_load(config_text, [], [], true)
-        rescue Psych::SyntaxError, Psych::DisallowedClass => e
+        rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
           errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
           Rails.logger.warn e
@@ -315,7 +324,9 @@ module OptionConfigs
             puts e
             puts errtext
           end
-          raise e
+
+          bt = e.backtrace + [errtext]
+          raise e, "#{e.message} -- see end of stacktrace for failed configuration YAML", bt
         end
       else
         res = {}

@@ -89,7 +89,7 @@ class Classification::SelectionOptionsHandler
   def edit_as_select_field(field_name, field_value)
     return unless field_value
 
-    @all_edit_as_select_field ||= self.class.all_edit_as_select_field(user_base_object)
+    @all_edit_as_select_field ||= self.class.all_edit_as_select_field(user_base_object, only: field_name.to_s)
     return unless @all_edit_as_select_field
 
     f = @all_edit_as_select_field[field_name.to_sym]
@@ -175,13 +175,17 @@ class Classification::SelectionOptionsHandler
   # The user_base_object does not need to be persisted for this to operate. If the master is set then
   # the master specific results will be retrieved for those datasets having a master association
   # @param [UserBase] user_base_object
+  # @param [String | nil] only - optionally return only a specified attribute in the result hash
   # @return [Hash{field_name: [name, value]} | nil] returns the selection results
   #      configurations per field, or nil if there are none
-  def self.all_edit_as_select_field(user_base_object)
+  def self.all_edit_as_select_field(user_base_object, only: nil)
     otc = user_base_object.option_type_config
     fndefs = {}
 
-    user_base_object.attribute_names.each do |fn|
+    ans = user_base_object.attribute_names
+    ans = [only] if only && ans.include?(only)
+
+    ans.each do |fn|
       fn = fn.to_sym
       opt = otc.field_options[fn] if otc
       edit_as = opt[:edit_as] if opt
@@ -201,8 +205,15 @@ class Classification::SelectionOptionsHandler
         fndefs[fn] = res if res
       elsif alt_fn.index(/^(tag_)?select_record_/)
         group_split_char = edit_as[:group_split_char]
-        value_attr = edit_as[:value_attr] || :data
         label_attr = edit_as[:label_attr] || :data
+        value_attr = if alt_fn.index(/^(tag_)?select_record_id_/)
+                       :id
+                     elsif alt_fn.index(/^(tag_)?select_user_with_role_/)
+                       label_attr = :email
+                       :email
+                     else
+                       edit_as[:value_attr] || :data
+                     end
 
         assoc_or_class_name = alt_fn.sub(/^(tag_)?select_record_(id_)?from_(table_)?/, '').singularize
 
