@@ -111,7 +111,6 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                 This is nine: nine
     END_DEF
 
-
     al_def.current_admin = @admin
     al_def.force_regenerate = true
     al_def.updated_at = DateTime.now # force a save

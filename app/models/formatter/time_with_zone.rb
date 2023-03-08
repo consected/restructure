@@ -30,7 +30,6 @@ module Formatter
         tz = ActiveSupport::TimeZone.new(use_tz)
         raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
       end
-
       if use_tz && tz.utc_offset != data.utc_offset
         data = tz.parse(data.to_s)
         res = data.strftime(df).gsub('  ', ' ')

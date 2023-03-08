@@ -12,7 +12,7 @@
     <% end %>
 <% else %>
   <% unless @view_context==:search %>
-    <%= button_tag (embedded_report ? :list :  (@view_options&.search_button_label || :table) ), 
+    <%= button_tag (@view_options.search_button_label || (embedded_report ? :list :  :table )),
           name: 'commit', 
           value: 'table', 
           type: 'submit', 
