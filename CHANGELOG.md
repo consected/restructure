@@ -18,6 +18,11 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Harvard @7.4.165 - 2023-03-08
+
+- [Changed] admin panels for better presentation and improved navigation between related items
+- [Fixed] batch_trigger not being removed when dynamic def is disabled
+
 ### Transferred from Harvard @7.4.160 - 2023-02-22
 
 - [Added] batch_trigger handling for dynamic definitions
