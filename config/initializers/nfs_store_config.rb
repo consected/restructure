@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 ActiveSupport.on_load(:nfs_store_config) do
-  self.group_id_range = 600..601
+  max_group_id = ENV['FILESTORE_MAX_GRP_ID']
+  max_group_id = max_group_id ? max_group_id.to_i : 601
+  self.group_id_range = 600..max_group_id
 
   if Rails.env.production? && !ENV['FILESTORE_CONFIG_SKIP']
     self.nfs_store_directory = ENV['FILESTORE_NFS_DIR']

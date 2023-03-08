@@ -15,12 +15,13 @@
     <tr>
       <th class="no-sort"></th>
       <th>Name</th>
+      <th>Item Type Name</th>
       <th>Category</th>
 
       <th>Report Type</th>
       <th>Auto</th>
       <th>Searchable</th>
-      <th>Description</th>
+      <th>Admin</th>
       <th class="no-sort"></th>
     </tr>
   </thead>
@@ -33,13 +34,17 @@
         <%= admin_edit_btn list_item.id, copy: list_item %> </td>
 
         <td><%= link_to  list_item.name, report_path(list_item.alt_resource_name), target: 'report', title: 'opens in a new window' %></td>
+        <td><%= list_item.alt_resource_name %></td>
         <td><%= list_item.item_type %></td>
 
         <td><%= list_item.report_type %></td>
         <td><%= list_item.auto %></td>
         <td><%= list_item.searchable %></td>
 
-        <td><pre class="shrinkable-block"><%= list_item.description %></pre></td>
+        <td class="admin-item-admin-infos">
+          <%= admin_last_updated_by_icon(list_item) %>
+        </td>
+
 
       </tr>
     <% end %>

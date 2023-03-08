@@ -83,7 +83,11 @@ container:
       footer: "Footer *details*..."    # footer markdown block (with `\{\{substitutions\}\}`)
       classes: class-1 class-2         # string of space separated class names to add to the column div
       id: special-dom-id               # optional DOM id (a prefix of 'sp-col-' is added),
-                                        # defaults to id underscored label value
+                                       # defaults to id underscored label value
+      template_prefix: main            # prefix to use for HTML templates - defaults to "page", but to 
+                                       # show activity logs in a dashboard, "main" will use the default
+                                       # activity log template, (rather than a page layout)
+      
       inner_rows:
         rows: {}
           # uses *cols for each row within this column
@@ -110,6 +114,7 @@ container:
         id: 123     # optional resource id to filter the results on
                     # if missing, the URL params
                     # *filters[resource_id]* will be used (if present)
+        master_id: 1056  # optional master_id to use if a secondary key is not specified  
         secondary_key: scantron_id      # optional secondary key to filter the results on
                                         # if missing, the URL params
                                         # *filters[secondary_key]* will be used (if present)

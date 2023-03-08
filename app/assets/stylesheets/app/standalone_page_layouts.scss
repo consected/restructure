@@ -81,6 +81,17 @@ div.reset-row,
   .standalone-page-col .result-target {
     margin: 0;
   }
+
+  .message-well {
+    background: rgb(245, 245, 245);
+    border-color: #dcdcdc;
+    -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1);  
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 14px;
+  }
 }
 
 div.reset-row,
@@ -125,6 +136,10 @@ div.reset-row,
       li[data-field-name="description"] {
         display: none;
       }
+    }
+
+    em {
+      padding-right: 0.15em;
     }
 
     .embedded-items-item {
@@ -285,6 +300,10 @@ div.reset-row,
   }
   .icon-files-center .container-icons-entry .browse-entry-classifications .bem-class-title {
     margin-right: 0;
+  }
+
+  .hide-file-browser {
+    display: none;
   }
 
   .notes-empty {
@@ -495,6 +514,16 @@ div.reset-row {
     }
   }
 
+  .image-screenshots { 
+    .custom-editor img.loaded-image,
+    .custom-editor-viewer img.loaded-image {
+      max-width: 800px;
+      box-shadow: 2px 2px 4px silver;
+      border: 1px solid rgb(192, 192, 192);
+      display: block;
+      margin: 17px auto;
+    }
+  }
 
   .table-header-hide thead {
     display: none;
@@ -569,5 +598,15 @@ div.reset-row {
     margin: 0;
     width: auto;
     float: none;
+  }
+}
+
+.standalone-page-design {
+  .model-reference-result.multi-model-reference-result.is-in-show-viewable.mrblock-activity-log--study-info-part.mrblock-extra-log-type-attachments.hidden {
+    display: block !important;
+  
+    .model-reference-result.use-secure-view-on-links-setup.sv-added-setup-links.hidden {
+      display: block !important;
+    }
   }
 }

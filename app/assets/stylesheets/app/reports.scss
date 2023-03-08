@@ -134,7 +134,7 @@ p.small.report-table-name {
 }
 
 .search_report {
-  input.form-control {
+  input.form-control, select.form-control {
     height: 29px;
     padding: 4px;
   }
@@ -323,4 +323,16 @@ table .report-cb-inner {
   background: white;
   border: 1px solid gray;
 
+}
+
+
+// Use this to rotate column labels by using the view_options: add_classes option
+.report-label-rotate {
+  th {
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
 }

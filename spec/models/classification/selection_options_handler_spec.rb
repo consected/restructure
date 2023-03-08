@@ -111,21 +111,32 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                 This is nine: nine
     END_DEF
 
+
     al_def.current_admin = @admin
+    al_def.force_regenerate = true
+    al_def.updated_at = DateTime.now # force a save
     al_def.save!
+    ::ActivityLog.refresh_outdated
+    al_def.reload
     al_def.force_option_config_parse
+
+    Application.refresh_dynamic_defs
 
     expect(al_def.resource_name).to eq 'activity_log__player_contact_phones'
 
     setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create, user: @user
+    ::ActivityLog.refresh_outdated
 
     sleep 2
     al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'one',
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
 
-    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.class.definition).to eq al_def
+
+    expect(al_def.disabled).to be_falsey
+    al_def.option_configs force: false unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
     al.data

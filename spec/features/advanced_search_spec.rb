@@ -93,7 +93,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # expect the player section to expand
     expect(page).to have_css "#master-#{@full_player_info.master_id}-main-container.collapse.in"
     expect(page).to have_css "#details-#{@full_player_info.master_id}"
-    expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
+    expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name\n#{@full_player_info.first_name.capitalize}"
 
     dismiss_modal
 

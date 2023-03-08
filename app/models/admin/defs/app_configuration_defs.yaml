@@ -19,6 +19,8 @@ header subject data type: |
   In the master header, the data model to get subject names from. A data model resource name
 header secondary data type: |
   In the master header, the data model to get secondary subject names from. A data model resource name
+help index path: |
+  Set an alternative URL for the help index, accessed through the help icon in the main nav bar
 hide app selector: |
   The navbar app selector appears by default if the user has more than one app available. Value "true" always hides it
 hide navbar search: |
@@ -50,7 +52,11 @@ logo filename: |
   Use an alternative logo. Path relative to the app root for a logo. 
   For example: /app_specific/sample_app/project-logo.png
 logo link: |
-  Link to go to when the logo is clicked. By default "/". Relative to the app root
+  Link to go to when the logo is clicked. By default "/". Relative to the app root. 
+  Add `?use_app_type=app-type-name` to force a switch to another app.
+app home url: |
+  URL for the app home. Defaults to *logo link* if set, or `/masters` otherwise.
+  May be different than the logo link, since that may force a switch to another app.
 hide master heading: |
   Hide the master heading, including id, prefix and title
 master header prefix: |

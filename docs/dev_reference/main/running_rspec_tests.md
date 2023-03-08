@@ -14,8 +14,14 @@ of the NFS storage.
 
     app-scripts/setup-dev-filestore.sh
 
+By default, real AWS API calls are not made, instead calling mock versions for predictable results. Occasionally it may be desirable
+to test against the real AWS API endpoints to ensure the integration remains operational. This can be done by setting the environment
+variable
+
+    export NO_AWS_MOCKS=true
+
 If your tests should include real AWS API calls, and your AWS profile requires MFA, ensure your CLI has access with the
-environment variables `AWS_ACCESS_key_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` appropriately set. If no MFA
+environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` appropriately set. If no MFA
 is required, just ensure `AWS_PROFILE` is set.
 
 To skip an AWS authorization check at the start of testing:

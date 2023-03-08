@@ -8,7 +8,7 @@ module ReportResults
       orig_col_content = col_content
       col_name = report_column_name(field_num)
 
-      if @view_options.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
+      if @view_options&.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
         @show_as[col_name] ||= 'checkbox'
       end
 
@@ -94,8 +94,10 @@ module ReportResults
       extra_data = "data-db-col-type=\"#{@column_types[field_num]}\""
       extra_data += ' data-sorter="sqlDate"' if @column_types[field_num]&.in?(['timestamp', 'date'])
 
+      show_as = @show_as[col_name]
+
       res = <<~END_HTML
-        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}" #{extra_data}>
+        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" data-col-show-as="#{show_as}" class="table-header #{extra_classes}" #{extra_data}>
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML

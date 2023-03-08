@@ -1,5 +1,7 @@
 .activity-list-section,
-.activity-list-references {
+.activity-list-references,
+.activity-list-libraries,
+.activity-list-file-filters {
   padding: 0 10px;
 }
 
@@ -20,7 +22,15 @@ ul.admin-tag-list {
     font-family: monospace;
     font-size: 12px;
   }
+
+  li.activity-list-name {
+    background-color: rgb(221, 221, 221);
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }
+
 
 .admin-tag-list.selectable li:hover {
   cursor: pointer;

@@ -8,12 +8,15 @@ class SaveTriggers::SaveTriggersBase
     self.config = config
     raise FphsException, 'save_trigger configuration must be a Hash' unless config.is_a?(Hash) || config.is_a?(Array)
 
-    self.item = item
-    self.master = item.master
     raise FphsException, 'save_trigger item must be set' unless item
 
-    self.user = master.current_user
-    raise FphsException, 'save_trigger item master user must be set' unless item&.master&.current_user
+    self.item = item
+    self.master = item.master if item.respond_to? :master
+
+    if item.respond_to? :current_user
+      self.user = item.current_user
+      raise FphsException, 'save_trigger item master user must be set' unless user
+    end
 
     self.model_defs = if config.is_a? Array
                         config

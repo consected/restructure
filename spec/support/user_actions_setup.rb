@@ -5,7 +5,7 @@ module UserActionsSetup
     # Given "the user has logged in" do
     login unless user_logged_in?
     dismiss_modal
-    all('[data-dismiss]').first&.click
+    all('[data-dismiss]', wait: false).first&.click
     expect(user_logged_in?).to be true
     logged_in_user = find('a[data-do-action="show-user-options"]')
     expect(logged_in_user[:title]).to eq @good_email

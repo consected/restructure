@@ -35,7 +35,6 @@
             <td><%= list_item.admin_name %></td>
             <td>
             <% if list_item.active_on_server? %>
-            <%= link_to 'export json', admin_app_type_path(list_item, export_format: :json), target: '_blank' %> | 
             <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml), target: '_blank' %> |
             <%= link_to 'export migrations', export_migrations_admin_app_type_path(list_item), target: '_blank' %> |
             <%= link_to 'components', admin_app_type_path(list_item, show_components: true), target: '_blank' %>

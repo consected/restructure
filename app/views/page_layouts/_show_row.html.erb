@@ -5,7 +5,7 @@
     cols = row['cols'] || []
     row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
 %>
-<div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>">
+<div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>" data-req-path="<%=request.path%>">
   <% cols.each do |col|
       col_label = col['label'] || ''
       col_header = col['header'] || ''
@@ -14,6 +14,9 @@
       col_id = col['id']
       col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
       col_url = col['url']
+
+      template_prefix = 'page-'
+      template_prefix = "#{col['template_prefix']}-"  if col['template_prefix']
 
       unless col_url
         inner_rows = col['rows']
@@ -40,7 +43,8 @@
             result_type = 'resource'
             resource = resource_def['name']
             resource = resource.pluralize
-
+            @master_id = resource_def['master_id'] || @master_id
+            template_prefix = "#{resource_def['template_prefix']}-" if resource_def['template_prefix']
 
             url_parts = [
               'masters',
@@ -98,9 +102,9 @@
       <div class="sp-col-inner">
         <%if col_label.present? %><h2 class="sp-col-label"><%=col_label%></h2><% end %>
         <% if col_header.present? %><div class="sp-col-header"><%= col_header%></div><% end %>
-        <div class="result-target result-target-<%=result_type%>">
+        <div class="result-target result-target-<%=result_type%> page-template-<%=template_prefix%>prefix">
           <% if resource %>
-            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-page-result-template">
+            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results <%= template_prefix != 'page-' ? 'activity-logs-generic-block' : '' %> standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-<%=template_prefix%>result-template">
               <div id="<%= resource.hyphenate %>-inner-<%=@master_id%>" class="standalone-panel-inner-block">
               </div>
             </div>

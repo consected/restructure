@@ -6,10 +6,14 @@ module ReportsHelper
   end
 
   def creatable?
-    @creatable = @report.editable_data? && (current_admin || current_user&.can?(:create_report_data))
+    @creatable = @report.creatable_data? &&
+                 (current_admin || current_user&.can?(:create_report_data)) &&
+                 !@view_options&.prevent_adding_items
   end
 
   def report_edit_btn(id)
+    return unless id
+
     rp = edit_report_path(id, report_id: @report.id, filter: filter_params_permitted)
     link_to '',
             rp,
@@ -185,7 +189,7 @@ module ReportsHelper
     use_dropdown = report_criteria_use_dropdown_options(config, value)
     return unless use_dropdown
 
-    options.merge!(include_blank: 'select')
+    options.merge!(include_blank: 'select', class: 'form-control')
     select_tag("search_attrs[#{name}]", use_dropdown, options)
   end
 

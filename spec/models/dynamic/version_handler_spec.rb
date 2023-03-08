@@ -226,10 +226,10 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(@activity_log.versioned(at_3)).to be all_versions[1]
     expect(@activity_log.versioned(at_4)).to be nil # since it is the current version and this is what is returned
 
-    # Instance should be using definition v2
+    # Instance should be using definition v4 - since use_current_version is set
     new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
     c1 = new_al.versioned_definition.option_configs[1]
-    expect(c1.label).to eq 'Step 2 v2'
+    expect(c1.label).to eq 'Step 2 v4'
 
     al_v4 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
                                                                       extra_log_type: 'step_2',

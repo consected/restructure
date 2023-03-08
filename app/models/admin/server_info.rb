@@ -4,7 +4,6 @@
 # Handle server actions such as restarts and showing
 # server settings to admins to assist with identifying issues
 class Admin::ServerInfo
-
   NfsStoreSettingsVars = %w[
     nfs_store_directory
     temp_directory
@@ -92,13 +91,15 @@ class Admin::ServerInfo
     'server identifier not available'
   end
 
-  def rails_log(regex, max_count: 2000, tail_length: 10_000)
+  def rails_log(regex, max_count: 2000, tail_length: 10_000, trailing_context: 20)
     logfilename = Rails.logger.instance_variable_get('@logdev')&.filename || 'none'
+    trailing_context = trailing_context.to_i
 
     cmds = [
       ['tail', '-n', tail_length.to_s, logfilename],
       ['tac'],
-      ['grep', '-m', max_count.to_s, '-E', regex]
+      ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
+      ['tac']
     ]
 
     pipe_chain = Utilities::ProcessPipes.new(cmds)

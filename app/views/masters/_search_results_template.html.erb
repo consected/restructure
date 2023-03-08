@@ -112,10 +112,6 @@
 <%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
-<script>
-  _fpa.cache.get_definitions(<%= all_cnames.to_json.html_safe %>);
-</script>
-
 
 <% # Display the set of search results in the "master search" format %>
 <script id="empty" type="text/x-handlebars-template" class="hidden handlebars-template"></script>

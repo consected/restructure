@@ -91,7 +91,7 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
     @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
     @trigger.perform
 
-    expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['viewer-has-agreement', 'viewer-has-agreement2'])
+    expect(@user.user_roles.active.reload.pluck(:role_name).sort).to eq(['viewer-has-agreement', 'viewer-has-agreement2'].sort)
 
     config = {
       remove_role_names: ['viewer-has-agreement']

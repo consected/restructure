@@ -4,10 +4,12 @@
   @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
   @result_tables = result_tables if local_assigns[:result_tables]
   setup_column_options
+  is_editable = editable?
+  is_editable_class = is_editable ? 'row-editable' : 'row-not-editable'
 %>
-<div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
+<div class="report-results-table-block <%=@view_options&.add_classes&.join(' ')%>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 
-  <table class="report-table table <%= @view_options.no_sorting ? 'no-tablesorter' : 'tablesorter' %>">
+  <table class="report-table table <%= @view_options&.no_sorting ? 'no-tablesorter' : 'tablesorter' %>">
     <thead>
       <tr>
         <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
@@ -34,8 +36,8 @@
       <% @results.each_row do |list_item| %>
 
 
-        <tr class="" id="report-item-<%=list_item[0]%>">
-         <% if editable? %>
+        <tr class="<%=is_editable_class%>" id="report-item-<%=list_item[0]%>">
+         <% if is_editable %>
          <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
          <% end %>
           <%

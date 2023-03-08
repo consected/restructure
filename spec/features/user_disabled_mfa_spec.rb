@@ -6,14 +6,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
-    Settings.const_set('AllowUsersToRegister', false)
+    change_setting('AllowUsersToRegister', false)
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
     SetupHelper.feature_setup
 
-    Settings.const_set('TwoFactorAuthDisabledForUser', true)
-    Settings.const_set('TwoFactorAuthDisabledForAdmin', true)
+    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', true)
 
     # create a user, then disable it
     @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
@@ -44,7 +44,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× Signed in successfully'
+    expect(page).to have_css '.flash .alert', text: "×\nSigned in successfully."
   end
 
   it 'should prevent sign in if user disabled' do
@@ -56,7 +56,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css '.flash .alert', text: '× This account has been disabled.'
+    expect(page).to have_css '.flash .alert', text: "×\nThis account has been disabled."
   end
 
   it 'should prevent invalid sign in' do
@@ -72,7 +72,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       click_button 'Log in'
     end
 
-    fail_message = '× Invalid email, password or two-factor authentication code.'
+    fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css 'input:invalid'
 

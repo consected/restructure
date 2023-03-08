@@ -454,16 +454,29 @@ class ReportsController < UserBaseController
 
     sa.each do |col_name, show_as|
       cell_content = @report_item[col_name]
-      next unless cell_content && show_as == 'choice_label'
+      next unless cell_content && show_as.in?(['choice_label', 'tags'])
 
-      selection_options = helpers.selection_options_handler_for(@report_item.class.table_name)
-      result = selection_options.label_for col_name, cell_content
-      if result.nil? && @report_item.respond_to?("#{col_name}_options")
-        result = @report_item.send("#{col_name}_options")
+      if cell_content.is_a? Array
+        @report_item[col_name] = []
+        cell_content.each do |cell_content_item|
+          @report_item[col_name] << result_for_content_item(col_name, cell_content_item)
+        end
+      else
+        @report_item[col_name] = result_for_content_item(col_name, cell_content)
       end
-
-      @report_item[col_name] = result
     end
+  end
+
+  #
+  # Get a value to appear in a call, find the appropriate label(s) for a select or tag select item
+  # @param [String] col_name
+  # @param [Object] cell_content
+  # @return [Object] - the value for the cell, or an individual item if an array element was passed in
+  def result_for_content_item(col_name, cell_content)
+    selection_options = helpers.selection_options_handler_for(@report_item.class.table_name)
+    result = selection_options.label_for col_name, cell_content
+    result = @report_item.send("#{col_name}_options") if result.nil? && @report_item.respond_to?("#{col_name}_options")
+    result
   end
 
   def send_csv
