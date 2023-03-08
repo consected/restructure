@@ -485,7 +485,6 @@ DEPENDENCIES
   simple_token_authentication (~> 1.0)!
   simplecov
   simplecov-console
-  solargraph
   solargraph-rails (~> 0.2.0)
   spring
   spring-commands-parallel-tests
