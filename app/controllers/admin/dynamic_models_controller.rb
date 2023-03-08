@@ -54,6 +54,18 @@ class Admin::DynamicModelsController < AdminController
   def index_params
     %i[id name schema_name table_name category
        table_key_name primary_key_name
-       foreign_key_name result_order position]
+       foreign_key_name result_order position admin_id]
+  end
+
+  #
+  # Override to specify attributes to initialize a definition with
+  # @return [Hash]
+  def init_new_with_attrs
+    {
+      options: <<~END_CONFIG
+        _configurations:
+          use_current_version: true
+      END_CONFIG
+    }
   end
 end

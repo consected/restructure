@@ -45,7 +45,10 @@ Rails.application.routes.draw do
     resources :app_configurations, except: %i[show destroy]
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
+
     resources :job_reviews, except: %i[show destroy]
+    post 'job_reviews/restart_failed_jobs', to: 'job_reviews#restart_failed_jobs'
+
     resources :server_info, only: [:index]
     get 'server_info/rails_log', to: 'server_info#rails_log'
 

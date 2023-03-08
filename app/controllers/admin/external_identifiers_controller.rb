@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::ExternalIdentifiersController < AdminController
-  helper_method :permitted_params, :objects_instance, :human_name, :admin_links
+  helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_defaults
   after_action :routes_reload, only: %i[update create]
 
@@ -37,6 +37,7 @@ class Admin::ExternalIdentifiersController < AdminController
   end
 
   def admin_links(id = nil)
+    id = id.id if id.respond_to? :id
     [
       ['details', "/admin/external_identifier_details/#{id}"]
     ]
@@ -56,6 +57,22 @@ class Admin::ExternalIdentifiersController < AdminController
   def admin_labels
     {
       name: 'Table name'
+    }
+  end
+
+  def index_params
+    permitted_params + %i[admin_id] - %i[disabled options]
+  end
+
+  #
+  # Override to specify attributes to initialize a definition with
+  # @return [Hash]
+  def init_new_with_attrs
+    {
+      options: <<~END_CONFIG
+        _configurations:
+          use_current_version: true
+      END_CONFIG
     }
   end
 end

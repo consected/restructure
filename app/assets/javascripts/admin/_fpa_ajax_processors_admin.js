@@ -36,6 +36,19 @@ _fpa.postprocessors_admin = {
     window.setTimeout(function () {
       $('prevent-scroll').removeClass('prevent-scroll');
     }, 1000);
+  },
+
+  admin_result_re_edit: function (block, data) {
+    // Clear the edit form
+    $('#admin-edit-').html('');
+    // Refresh the tablesorter to include the new / updated rows
+    var b = $('.attached-tablesorter').trigger("update");
+
+    window.setTimeout(function () {
+      block.find('a.simple-admin-edit').click();
+    }, 200);
+
+
   }
 
 };

@@ -1195,7 +1195,15 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     conf = setup_config(confy)
 
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be true
+    cai = res.calc_action_if
+    unless cai
+      puts 'calc_action_if is about to fail'
+      puts confy
+      puts "@al: #{@al}"
+      puts "@al1: #{@al1}"
+      puts "zip: #{a1.zip} for #{a1}"
+    end
+    expect(cai).to be true
 
     confy = <<~EOF_YAML
       all:
@@ -1430,6 +1438,12 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
+    if a
+      puts 'calc_action_if is about to fail'
+      puts confy
+      puts "city: #{@al.master.addresses.first.city}"
+      puts "data: #{@al.master.player_contacts.first.data}"
+    end
     expect(a).to be false
   end
 

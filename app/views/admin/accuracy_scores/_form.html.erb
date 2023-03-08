@@ -1,5 +1,7 @@
 <div class="data-results">
   <div data-result="admin-edit-form-" class="admin-edit-form">
+    <div class="admin-form-block-outer">
+
 <%= form_for(object_instance, url: admin_form_url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
@@ -21,6 +23,6 @@
   </div>
 
   <% end %>
-
+    </div>
   </div>
 </div>

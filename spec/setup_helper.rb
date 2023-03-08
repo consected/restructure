@@ -54,7 +54,11 @@ module SetupHelper
       SetupHelper.setup_app_db sql_source_dir, sql_files
     end
 
-    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
+    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses') && 
+           ActiveRecord::Base.connection.table_exists?('zeus_short_links') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_short_link_clicks') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_recipients') &&
+           ActiveRecord::Base.connection.table_exists?('player_contact_phone_infos')
       # Bulk
       # Setup the triggers, functions, etc
       sql_files = %w[test/drop_schema.sql test/create_schema.sql

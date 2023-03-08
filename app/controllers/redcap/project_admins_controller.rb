@@ -117,7 +117,7 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def index_params
-    %i[study name server_url dynamic_model_table transfer_mode frequency status]
+    %i[study name server_url dynamic_model_table transfer_mode frequency status admin_id]
   end
 
   def permitted_params

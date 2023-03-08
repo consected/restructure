@@ -3,6 +3,10 @@ _fpa.loaded.login = function () {
   let allow_submit = false;
   const el_mfa_form = $('#mfa-step1')[0];
 
+  // Setup help icon trigger
+  const $nav = $('body');
+  _fpa.form_utils.setup_data_toggles($nav);
+
   // Force email usernames to lowercase in the form
   $('#user_email, #admin_email').on('blur change', function () {
     const email = $(this).val();

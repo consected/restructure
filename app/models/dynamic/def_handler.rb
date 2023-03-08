@@ -6,6 +6,7 @@ module Dynamic
 
     included do
       after_save :force_option_config_parse
+      after_save :handle_batch_schedule
       attr_accessor :configurations, :data_dictionary, :options_constants
     end
 
@@ -388,6 +389,33 @@ module Dynamic
       @use_current_version = nil
 
       option_configs force: true, raise_bad_configs: true
+    end
+
+    #
+    # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
+    def handle_batch_schedule
+      def_unschedule = disabled || !persisted? || !active_model_configuration?
+
+      RecurringBatchTask.unschedule_task self if def_unschedule
+
+      return unless option_configs && configurations
+
+      frequency = configurations.dig(:batch_trigger, :frequency)
+      if frequency.blank?
+        RecurringBatchTask.unschedule_task self
+      else
+        RecurringBatchTask.schedule_task self,
+                                         { dynamic_def: to_global_id.to_s },
+                                         run_every: FieldDefaults.duration(frequency)
+
+      end
+    end
+
+    #
+    # Get the next Delayed::Job set to run fora recurring batch job schedule
+    # @return [Delayed::Job | nil]
+    def task_schedule
+      RecurringBatchTask.task_schedule(self).first
     end
 
     # This needs to be overridden in each provider to allow consistency of calculating model names for implementations

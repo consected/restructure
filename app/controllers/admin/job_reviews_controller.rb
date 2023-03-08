@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 class Admin::JobReviewsController < AdminController
+  helper_method :queue_options
+  #
+  # Restart all failed jobs
+  def restart_failed_jobs
+    res = Messaging::JobReview.restart_failed_jobs!
+
+    flash.now[:notice] = "Restarted #{res} #{'job'.pluralize(res)}"
+    index
+  end
+
   protected
 
   def view_folder
@@ -9,7 +19,7 @@ class Admin::JobReviewsController < AdminController
 
   def filters
     {
-      queue: %w[default nfs_store_process recurring-tasks redcap],
+      queue: Messaging::JobReview::ValidQueues,
       failed: %w[true false]
     }
   end
@@ -45,6 +55,10 @@ class Admin::JobReviewsController < AdminController
     false
   end
 
+  def queue_options
+    Messaging::JobReview::ValidQueues + ['delete']
+  end
+
   private
 
   def index_params
@@ -57,5 +71,9 @@ class Admin::JobReviewsController < AdminController
 
   def human_name
     'Background Jobs'
+  end
+
+  def show_head_info
+    true
   end
 end

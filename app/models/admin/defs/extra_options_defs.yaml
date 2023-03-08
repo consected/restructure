@@ -218,7 +218,7 @@
   
 
   save_trigger:
-    on_create:
+    on_create: &trigger_tasks
       add_tracker: 
 #!defs(save_triggers_add_tracker_options_defs.yaml)
 
@@ -260,5 +260,12 @@
       # Run a specified trigger before the current item has saved, allowing output to be reflected 
       # in the UI update, but before reference updates are available
       # Typically used for update_this, although can be applied to the other triggers if necessary
+  
+  batch_trigger:
+    on_record:
+      # On each record in the batch perform an appropriate trigger task, which is just the same as for save_trigger
+      # In order to schedule a batch_trigger, see **_configurations:**
+      <<: *trigger_tasks
+
 
  

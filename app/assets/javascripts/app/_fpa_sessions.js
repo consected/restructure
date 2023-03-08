@@ -57,6 +57,8 @@ _fpa.session.prototype = {
     //console.log("timeout in: "+ timeout_in +" :: default timeout: " + this.default_timeout);
     if (timeout_in > this.default_timeout) {
       console.log("timed out!");
+      // Prevent an unsaved form blocking the return to the home page
+      $('.field-was-changed').removeClass('field-was-changed');
       window.location.href = "/";
     } else {
       if (this.alarmed) {

@@ -140,20 +140,25 @@ body.page-loading {
     color: rgb(69, 69, 69);
   }
 
+  .logged-in-as-admin li {
+    margin-right: 0.3em;
+  }
   .logged-in-as-admin li a.btn {
     padding-top: 4px;
     padding-bottom: 4px;
     margin-top: 8px;
+    color: white;
 
-    &:hover {
-          background-color: rgb(235, 147, 22);
+    &.btn-warning:hover {
+      background-color: #eb9316;
+    }
+
+    &.btn-danger:hover {
+      background-color: #a83b2d;
     }
   }
 }
 
-.admin_page .logged-in-as-admin {
-  display: none;
-}
 
 h2.no-results-msg {
   text-align: center;
