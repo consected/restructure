@@ -1257,10 +1257,10 @@ _fpa.form_utils = {
       .find('[data-toggle-caret]')
       .not('.attached-toggle_caret')
       .on('click', function () {
-        if ($(this).hasClass('glyphicon-triangle-bottom')) {
+        if ($(this).hasClass('glyphicon-triangle-right')) {
           var el = $(this);
-          $(this).removeClass('glyphicon-triangle-bottom');
-          $(this).addClass('glyphicon-triangle-top');
+          $(this).removeClass('glyphicon-triangle-right');
+          $(this).addClass('glyphicon-triangle-bottom');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1271,8 +1271,8 @@ _fpa.form_utils = {
           }, 10);
         } else {
           var el = $(this);
-          $(this).addClass('glyphicon-triangle-bottom');
-          $(this).removeClass('glyphicon-triangle-top');
+          $(this).addClass('glyphicon-triangle-right');
+          $(this).removeClass('glyphicon-triangle-bottom');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
