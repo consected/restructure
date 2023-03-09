@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] select all checkbox in report file actions
+
 ## [8.0.121] - 2023-03-09
 
 - [Fixed] Viva logo
