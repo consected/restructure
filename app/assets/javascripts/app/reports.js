@@ -319,8 +319,12 @@ _fpa.reports = {
       });
 
     }
+    var $fsels = $('.report-file-selector');
+    var all_selected = ($fsels.length == $fsels.filter(':checked').length);
+    var checked_attr = all_selected ? 'checked' : '';
+    var init_label = all_selected ? 'unselect all' : 'select all'
 
-    var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="' + dct_action + '" class="btn btn-primary rep-sel-action-' + dct_action.replace(' ', '-') + '"/></span>'
+    var b = `<span class="report-files-actions"><input type="checkbox" id="report-select-all-files" ${checked_attr}><label for="report-select-all-files" id="label-report-select-all-files">${init_label}</label></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="${dct_action}" class="btn btn-primary rep-sel-action-${dct_action.replace(' ', '-')}"/></span>`;
     var $t = $('table.report-table, .report-list[data-results-count]');
     $f.insertBefore($t);
     $t.appendTo($('#itemselection-for-report'));
@@ -334,10 +338,14 @@ _fpa.reports = {
     $(document).on('change', '#report-select-all-files', function () {
       $f.addClass('report-select-prevent-auto-submit');
       var allels = $('.report-file-selector');
-      if ($(this).is(':checked'))
+      if ($(this).is(':checked')) {
         allels.attr('checked', true);
-      else
+        $("#label-report-select-all-files").html('unselect all');
+      }
+      else {
         allels.attr('checked', null);
+        $("#label-report-select-all-files").html('select all');
+      }
 
       window.setTimeout(function () {
         $f.removeClass('report-select-prevent-auto-submit');
@@ -372,6 +380,7 @@ _fpa.reports = {
     defval.init_value = true;
     $el.val(JSON.stringify(defval));
     $el.attr('checked', true)
+    $el.attr('class', 'report-file-selector-default')
     $el.hide();
     console.log($el);
     $('.report-files-actions').append($el);
