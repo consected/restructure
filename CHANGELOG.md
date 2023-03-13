@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] date fields with no timezone not being able to format
+- [Changed] select all / unselect all to links on reports
+- [Changed] tree view to always enforce no sorting
+- [Changed] expander carets for consistency
+
 ## [8.0.122] - 2023-03-09
 
 - [Fixed] select all checkbox in report file actions
