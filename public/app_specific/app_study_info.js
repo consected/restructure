@@ -134,22 +134,22 @@ _fpa.app_specific = class {
     // Add the icon
     block
       .find('.object-results-header .list-group-item-heading')
-      .before('<a class="dynamic-show-label glyphicon glyphicon-triangle-bottom"></a>');
+      .before('<a class="dynamic-show-label glyphicon glyphicon-triangle-right"></a>');
 
     // Add the click handler
     block.on('click', '.dynamic-show-label', function (e) {
-      if ($(this).hasClass('glyphicon-triangle-bottom')) {
+      if ($(this).hasClass('glyphicon-triangle-right')) {
         // Not expanded
 
         processor.block.addClass('page-was-expanded');
-        $(this).addClass('glyphicon-triangle-top');
-        $(this).removeClass('glyphicon-triangle-bottom');
+        $(this).addClass('glyphicon-triangle-bottom');
+        $(this).removeClass('glyphicon-triangle-right');
         processor.load_referenced_parts();
       } else {
         // Is expanded
         processor.block.removeClass('page-was-expanded');
-        $(this).addClass('glyphicon-triangle-bottom');
-        $(this).removeClass('glyphicon-triangle-top');
+        $(this).addClass('glyphicon-triangle-right');
+        $(this).removeClass('glyphicon-triangle-bottom');
       }
 
       e.preventDefault();
