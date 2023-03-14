@@ -32,17 +32,17 @@ describe 'csrf protection' do
   end
 
   def post_with_token(path, params, token = nil)
-    post path, params: params.merge('authenticity_token' => (token || retrieve_authenticity_token)), xhr: true
+    post path, params: params.merge(authenticity_token: (token || retrieve_authenticity_token)), xhr: true
   end
 
   def form_authenticity_token
-    regex = /name="authenticity_token" value="(?<token>.+)"/
+    regex = /name="authenticity_token" value="(?<token>.+?)"/
     parts = response.body.match(regex)
     parts['token'] if parts
   end
 
   def header_authenticity_token
-    regex = /meta name="csrf-token" content="(?<token>.+)"/
+    regex = /meta name="csrf-token" content="(?<token>.+?)"/
     parts = response.body.match(regex)
     parts['token'] if parts
   end
