@@ -16,10 +16,10 @@ app-scripts/setup-dev-filestore.sh
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
-if [ "$@" ]; then
-  specs=$@
-else
+if [ -z "$@" ]; then
   specs='spec/models spec/controllers spec/features spec/r.*'
+else
+  specs="$@"
 fi
 
 for spec in ${specs}; do
