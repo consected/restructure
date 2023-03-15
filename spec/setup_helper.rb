@@ -235,6 +235,10 @@ module SetupHelper
   end
 
   def self.setup_test_app
+    MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
+    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+    ExternalIdentifier.define_models
+
     check_activity_logs
     app_name = "bhs_model_#{rand(100_000_000)}"
 

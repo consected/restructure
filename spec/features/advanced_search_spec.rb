@@ -8,6 +8,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
   include FeatureSupport
 
   before(:all) do
+    change_setting('TwoFactorAuthDisabledForUser', false)
     SetupHelper.feature_setup
 
     seed_database

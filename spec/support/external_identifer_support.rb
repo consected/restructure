@@ -84,6 +84,8 @@ module ExternalIdentifierSupport
         al.save
       end
 
+      a.name += '_olds'
+      a.external_id_attribute += '_old_id'
       a.disabled = true
       a.current_admin = admin
       a.save!

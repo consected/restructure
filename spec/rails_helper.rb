@@ -183,9 +183,7 @@ RSpec.configure do |config|
     require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: Settings::TemplateUserEmail)
 
     tu = User.find_by(email: Settings::TemplateUserEmail)
-    if tu.nil?
-      Seeds::BUsers.setup
-    end
+    Seeds::BUsers.setup if tu.nil?
 
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
