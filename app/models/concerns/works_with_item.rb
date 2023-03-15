@@ -37,7 +37,9 @@ module WorksWithItem
         ExternalIdentifier.model_names +
         ActivityLog.model_names +
         Master::PrimaryAssociations
-      ).map { |m| m.to_s.singularize }
+      )
+        .map { |m| m.to_s.singularize }
+        .select { |m| m != 'master' }
     end
   end
 
