@@ -182,8 +182,9 @@ RSpec.configure do |config|
 
     require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: Settings::TemplateUserEmail)
 
-    unless User.active.find_by(email: Settings::TemplateUserEmail)
-      raise FphsException, "No template user available: #{Settings::TemplateUserEmail}"
+    tu = User.find_by(email: Settings::TemplateUserEmail)
+    if tu.nil?
+      Seeds::BUsers.setup
     end
 
     # Skip app setups with an env variable
