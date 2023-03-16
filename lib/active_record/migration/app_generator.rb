@@ -363,6 +363,7 @@ module ActiveRecord
       end
 
       def history_table_exists
+        ActiveRecord::Base.connection.schema_cache.clear!
         ActiveRecord::Base.connection.table_exists? "#{schema}.#{history_table_name}"
       end
 

@@ -204,6 +204,7 @@ class Admin::MigrationGenerator
   # @param [String] table_name
   # @return [Boolean]
   def self.table_exists?(table_name)
+    ActiveRecord::Base.connection.schema_cache.clear!
     connection.table_exists?(table_name)
   end
 
@@ -224,6 +225,7 @@ class Admin::MigrationGenerator
   # @param [String] table_name
   # @return [Boolean]
   def self.view_exists?(table_name)
+    ActiveRecord::Base.connection.schema_cache.clear!
     connection.view_exists?(table_name)
   end
 
@@ -289,6 +291,7 @@ class Admin::MigrationGenerator
   # Get the table or view comment for the current table_name
   # @return [String | nil]
   def table_or_view_comment
+    ActiveRecord::Base.connection.schema_cache.clear!
     if self.class.view_exists?(table_name)
       res = self.class.connection.execute "select obj_description('#{table_name}'::regclass) c"
       res[0]['c']

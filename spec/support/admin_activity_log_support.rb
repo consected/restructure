@@ -72,6 +72,7 @@ module AdminActivityLogSupport
 
     ActivityLogSupport.cleanup_matching_activity_logs(att[:item_type], att[:rec_type], nil, admin: att[:current_admin])
 
+    ActiveRecord::Base.connection.schema_cache.clear!
     unless ActivityLog.connection.table_exists? "activity_log_#{tn}"
       TableGenerators.activity_logs_table(tn, att[:item_type].pluralize, true, 'emailed_when')
     end

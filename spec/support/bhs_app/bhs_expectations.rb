@@ -1,12 +1,11 @@
 module BhsExpectations
-
-  def expect_bhs_tabs role, master_index: 0
+  def expect_bhs_tabs(role, master_index: 0)
     master_panel = all_master_record_panels[master_index]
     expect(master_panel).not_to be nil
     tabs = master_panel.all('ul.details-tabs li[role="presentation"]')
 
     if role == :ra
-      #puts tabs.map(&:text)
+      puts tabs.map(&:text)
       expect(tabs.length).to eq BhsUi::TabNames.length
 
       tabs.each do |tab|
@@ -24,5 +23,4 @@ module BhsExpectations
       expect(tabs.length).to eq 0
     end
   end
-
 end

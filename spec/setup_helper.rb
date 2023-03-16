@@ -26,6 +26,15 @@ module SetupHelper
     Delayed::Job.delete_all
   end
 
+  def self.check_bhs_assignments_table(fail = nil)
+    ActiveRecord::Base.connection.schema_cache.clear!
+    res = ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+    put_now "******* bhs_assignments table exists in #{db_name}? #{res}" unless res
+    raise 'bhs_assignments not present' if fail && !res
+
+    res
+  end
+
   def self.setup_full_test_db
     put_now 'Validate and setup app dbs'
     SetupHelper.validate_db_setup
@@ -34,6 +43,7 @@ module SetupHelper
     # The DB setup can be forced to skip with an env variable
     # It will automatically skip if a specific table is already in place
     SetupHelper.setup_app_dbs
+    check_bhs_assignments_table true
 
     # Seed the database before loading files, since things like Scantron model and
     # controller will not exist without the seed
@@ -42,6 +52,8 @@ module SetupHelper
     # Seeds.setup is automatically run when seeds.rb is required
     $dont_seed = true
     raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
+
+    check_bhs_assignments_table true
   end
 
   def self.setup_app_dbs
@@ -65,6 +77,8 @@ module SetupHelper
                      6-grant_roles_access_to_ml_app.sql]
       sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bhs_sql')
       SetupHelper.setup_app_db sql_source_dir, sql_files
+
+      SetupHelper.check_bhs_assignments_table true
     end
 
     unless ActiveRecord::Base.connection.table_exists?('adders')
@@ -158,6 +172,8 @@ module SetupHelper
 
   def self.setup_al_player_contact_emails
     Rails.logger.info 'Setting up al player contact emails'
+    ActiveRecord::Base.connection.schema_cache.clear!
+
     return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
 
     TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
@@ -193,6 +209,7 @@ module SetupHelper
     tname = 'activity_log_' + itn.pluralize
     cname = 'ActivityLog::' + itn.ns_camelize
 
+    ActiveRecord::Base.connection.schema_cache.clear!
     unless ActivityLog.connection.table_exists? tname
       TableGenerators.activity_logs_table(
         tname,
@@ -253,6 +270,7 @@ module SetupHelper
     Rails.logger.info "Setting up external identifier #{name}"
     @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
     @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
+    ActiveRecord::Base.connection.schema_cache.clear!
     return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
 
     TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
@@ -261,7 +279,7 @@ module SetupHelper
   def self.setup_test_app
     MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
     Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
-    ExternalIdentifier.define_models
+    reload_configs
 
     check_activity_logs
     app_name = "bhs_model_#{rand(100_000_000)}"
@@ -269,6 +287,20 @@ module SetupHelper
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_app_type_test_config.json'
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
+
+    sa = ExternalIdentifier.active.find_by(name: 'bhs_assignments')
+    if sa
+      unless defined? BhsAssignment
+        log 'Reloading external identifiers since BhsAssignment is not defined'
+        ExternalIdentifier.define_models
+        sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
+      end
+    else
+      s = ExternalIdentifier.find_by(name: 'bhs_assignments')
+      raise 'BhsAssignment not found' unless s
+
+      s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+    end
 
     new_app_type = Admin::AppType.where(name: app_name).active.first
     Admin::UserAccessControl.active.where(

@@ -29,7 +29,7 @@ module TableGenerators
       return
     end
 
-    if generate_table == :drop || generate_table == :drop_do
+    if %i[drop drop_do].include?(generate_table)
       sql = <<EOF
 
       DROP TABLE if exists #{singular_name}_history CASCADE;
@@ -160,12 +160,13 @@ EOF
       EOF1
     end
 
-    if generate_table == true || generate_table == :create_do || generate_table == :drop_do
+    if [true, :create_do, :drop_do].include?(generate_table)
       ActiveRecord::Base.connection.execute sql
+      ActiveRecord::Base.connection.schema_cache.clear!
     else
 
       puts sql
-      return sql
+      sql
     end
   end
 end
