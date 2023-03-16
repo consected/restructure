@@ -13,8 +13,8 @@ single_zip_path=$(mktemp /tmp/nfs-store-unzip-single-XXXXXXX)
 tmpres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
 archive_fn="$(basename "${archive_path}")"
 
-rm -f ${single_zip_path}
-cd "$(dirname "${archive_path}")"
+rm -f "${single_zip_path}"
+cd "$(dirname "${archive_path}")" || exit 1
 
 # Join split files to a single file in the temp directory
 # We send a 'q' to stdin just in case there is a prompt for a missing split file,
@@ -26,7 +26,7 @@ EOF
 if [ $? != 0 ]; then
   rm -f "${single_zip_path}"
   echo >&2 "Failed zip -q -s 0 '${archive_fn}' -O '${single_zip_path}' ---- in $(pwd)"
-  cd ${currdir}
+  cd "${currdir}" || exit 7
   exit 7
 fi
 
@@ -37,7 +37,7 @@ if [ $? != 0 ]; then
   rm -f "${single_zip_path}"
 
   echo >&2 "Failed unzip -n '${archive_path}' -d '${tmpzipdir}'"
-  cd ${currdir}
+  cd "${currdir}" || exit 1
   exit 1
 fi
 
@@ -48,9 +48,9 @@ rm -f "${single_zip_path}"
 
 if [ "${resnum}" != "${filecount}" ]; then
   echo >&2 "${resnum}" != "${filecount}"
-  cd ${currdir}
+  cd "${currdir}" || exit 2
   exit 2
 fi
 
-cd ${currdir}
+cd "${currdir}"
 exit 0
