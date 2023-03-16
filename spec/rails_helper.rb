@@ -101,23 +101,7 @@ Warden.test_mode!
 # end with _spec.rb. You can configure this pattern with the --pattern
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
-unless ENV['SKIP_DB_SETUP']
-  put_now 'Validate and setup app dbs'
-  SetupHelper.validate_db_setup
-  SetupHelper.migrate_if_needed
-
-  # The DB setup can be forced to skip with an env variable
-  # It will automatically skip if a specific table is already in place
-  SetupHelper.setup_app_dbs
-
-  # Seed the database before loading files, since things like Scantron model and
-  # controller will not exist without the seed
-  put_now 'Seed setup'
-  require "#{::Rails.root}/db/seeds.rb"
-  # Seeds.setup is automatically run when seeds.rb is required
-  $dont_seed = true
-  raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
-end
+SetupHelper.setup_full_test_db unless ENV['SKIP_DB_SETUP']
 
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
@@ -177,13 +161,15 @@ end
 
 RSpec.configure do |config|
   config.before(:suite) do
+    ActiveRecord::Base.connection.schema_cache.clear!
     # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
 
     require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: Settings::TemplateUserEmail)
-
     tu = User.find_by(email: Settings::TemplateUserEmail)
     Seeds::BUsers.setup if tu.nil?
+
+    Rails.cache.clear
 
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
@@ -191,7 +177,8 @@ RSpec.configure do |config|
       sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
       ActiveRecord::Base.connection.execute sql
       put_now 'Setup ActivityLogPlayerContactPhone'
-      Seeds::ActivityLogPlayerContactPhone.setup
+      SetupHelper.setup_al_player_contact_phones
+      # Seeds::ActivityLogPlayerContactPhone.setup
       put_now 'setup_al_player_contact_emails'
       SetupHelper.setup_al_player_contact_emails
       put_now 'Setup ext_identifier'

@@ -29,7 +29,7 @@ for spec in ${specs}; do
   echo "========================================================================" >> tmp/working_failing_specs.log
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
-  bundle exec rake parallel:spec["'"${spec}"'"] &
+  RAILS_ENV=test bundle exec rake parallel:spec["'"${spec}"'"] &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
     sleep 5
   done
