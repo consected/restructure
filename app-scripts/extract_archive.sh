@@ -10,7 +10,7 @@ if [ -z "${archive_path}" ] || [ -z "${tmpzipdir}" ]; then
 fi
 
 single_zip_path=$(mktemp /tmp/nfs-store-unzip-single-XXXXXXX)
-tmpres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
+tempres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
 archive_fn="$(basename "${archive_path}")"
 
 rm -f "${single_zip_path}"
@@ -30,7 +30,7 @@ if [ $? != 0 ]; then
   exit 7
 fi
 
-unzip -n "${single_zip_path}" -d "${tmpzipdir}" > "${tmpres}"
+unzip -n "${single_zip_path}" -d "${tmpzipdir}" > "${tempres}"
 
 if [ $? != 0 ]; then
   rm -f "${tempres}"
@@ -41,7 +41,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-resnum=$(grep -E '(inflating|extracting):' "${tmpres}" | wc -l)
+resnum=$(grep -E '(inflating|extracting):' "${tempres}" | wc -l)
 filecount=$(find "${tmpzipdir}" -type f | wc -l)
 rm -f "${tempres}"
 rm -f "${single_zip_path}"
