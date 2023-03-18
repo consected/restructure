@@ -30,7 +30,6 @@ function is_mountpoint() {
 bindfs -n "${FS_TEST_BASE}"/dev-file-source "${FS_TEST_BASE}"/dev-filestore
 is_mountpoint "${FS_TEST_BASE}"/dev-filestore
 
-# shellcheck disable=SC2181
 if [ $? != 0 ]; then
   echo "A mount was not successfully set up at: ${FS_TEST_BASE}/dev-filestore"
   exit 2
