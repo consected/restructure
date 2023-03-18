@@ -16,7 +16,7 @@
 # Example on a production server: `RAILS_ENV=production app-scripts/setup_filestore_app.sh 1`
 
 APP_TYPE_ID=$1
-FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
 
 if [ -z "$APP_TYPE_ID" ]; then
   echo "Call with argument <app_type_id>"
@@ -28,7 +28,7 @@ if [ -z "$MOUNTPOINT" ]; then
     MOUNTPOINT=/efs1
   else
 
-    if [ -d /media/$USER/Data ]; then
+    if [ -d /media/"$USER"/Data ]; then
       MOUNTPOINT=/media/$USER/Data
     else
       MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
@@ -62,10 +62,10 @@ if [ -d "${FS_ROOT}"/main ]; then
 fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
-# shellcheck disable=SC2164
-cd "$FS_ROOT"/$FS_DIR
-# shellcheck disable=SC2086
-mkdir -p $APPTYPE_DIR/containers
+
+cd "$FS_ROOT"/$FS_DIR || exit 1
+
+mkdir -p "$APPTYPE_DIR"/containers
 
 echo "become sudo to setup file ownership"
 sudo echo "in: $APPTYPE_DIR/containers"
