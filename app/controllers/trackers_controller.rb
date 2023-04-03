@@ -62,7 +62,8 @@ class TrackersController < UserBaseController
     else
       # Save the error from the failed update to the @tracker to return to the end user
       logger.info "Error from tracker: #{new_tracker.errors}"
-      object_instance.errors.add :tracker, new_tracker.errors.first.join(' ')
+      # TODO perhaps remove join? Intention is to get the first error.
+      object_instance.errors.add :tracker, new_tracker.errors.first
     end
 
     logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"

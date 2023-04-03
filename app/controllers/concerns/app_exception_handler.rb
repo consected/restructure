@@ -80,7 +80,6 @@ module AppExceptionHandler
   end
 
   def unhandled_exception_handler(error)
-    byebug
     puts error.backtrace
     msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500

@@ -338,7 +338,7 @@ module NfsStore
     # class that manages files
     # Cleans up the final temp file
     def finalize_upload
-      raise FsException::Upload, "Upload is invalid. Error: #{errors.first.join(' ')}" unless valid?
+      raise FsException::Upload, "Upload is invalid. Error: #{errors.first}" unless valid?
       raise FsException::Upload, 'Container user is not set.' unless container.current_user
 
       self.stored_file = Manage::StoredFile.finalize_upload self, final_temp_path
