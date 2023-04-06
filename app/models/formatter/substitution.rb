@@ -46,7 +46,7 @@ module Formatter
       if_blocks.each do |if_block|
         block_container = if_block[0]
         tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+        tag_value = value_for_tag(tag, sub_data, nil, ignore_missing)
         if tag_value.present?
           all_content.sub!(block_container, if_block[2] || '')
         else

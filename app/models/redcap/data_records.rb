@@ -273,6 +273,7 @@ module Redcap
       rec_ids = record_identifiers(record)
       existing_record = model.where(rec_ids).first
       if existing_record
+        existing_record.current_user = current_user if existing_record.respond_to? :current_user=
 
         # Check if there is an exact match for the record. If so, we are done
         if record_matches_retrieved(existing_record, record)
@@ -290,6 +291,7 @@ module Redcap
         end
       else
         new_record = model.new(record)
+        new_record.current_user = current_user if new_record.respond_to? :current_user=
         new_record.force_save!
         if new_record.save
           created_ids << rec_ids
@@ -324,7 +326,6 @@ module Redcap
           path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}"
           filename = field_name
           container = project_admin.file_store
-          current_user = project_admin.current_user
 
           res = NfsStore::Import.import_file(container.id,
                                              filename,
@@ -374,6 +375,13 @@ module Redcap
       end
 
       res.empty?
+    end
+
+    #
+    # The current user to use for storing records and files
+    # @return [User]
+    def current_user
+      @current_user ||= project_admin.current_user
     end
   end
 end
