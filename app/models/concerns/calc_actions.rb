@@ -926,11 +926,17 @@ module CalcActions
     # Make the list of tables to be joined valid (in case anything slipped through) and unique
     @join_tables = (@join_tables - NonJoinTableNames).uniq
 
+    if @condition_config.first.first == :masters
+      # Use the full masters table as the base, allowing the configuration to limit the masters records if needed
+      @base_query = Master.all
+      @current_scope = Master.all
+      @join_tables.delete_if { |a| a == :masters }
+    end
+
     if @join_tables.first == :users
       # Just get from the non masters tables without a join
       @base_query = User.all
       @current_scope = User.all
-      # @current_scope = @base_query
     elsif %i[all not_all].include? condition_type
       # Inner join, since our conditions require the existence of records in the joined tables
       @base_query = @current_scope.joins(@join_tables)

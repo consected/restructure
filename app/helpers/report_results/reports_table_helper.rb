@@ -96,10 +96,8 @@ module ReportResults
 
       show_as = @show_as[col_name]
 
-      title = 'Click to sort. Shift+Click for sub-sort(s). Click again for descending sort.' unless view_opt.no_sorting
-
       res = <<~END_HTML
-        <#{alt_html_tag} title="#{title}" data-col-type="#{header_content}" data-col-name="#{col_name}" data-col-show-as="#{show_as}" class="table-header #{extra_classes}" #{extra_data}>
+        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" data-col-show-as="#{show_as}" class="table-header #{extra_classes}" #{extra_data}>
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML

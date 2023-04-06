@@ -16,7 +16,7 @@
         <div class="form-group">
           <%= f.hidden_field :disabled, value: true %>
           <%= f.submit class: "btn btn-danger btn-sm model-ref-remove-btn", value: 'remove', title: "Remove the link to this record." %>&nbsp;&nbsp;
-          <a class="show-entity show-model-reference glyphicon glyphicon-remove-sign inline-cancel edit-form-inline-cancel" title="cancel" data-target="#<%= "model-reference-#{@master.id}-#{@from_item.item_type.hyphenate}-#{@from_item.id}-#{@id}-smrra" %>" data-toggle="clear"></a>
+          <a class="show-entity show-model-reference glyphicon glyphicon-remove-sign" title="cancel" data-target="#<%= "model-reference-#{@master.id}-#{@from_item.item_type.hyphenate}-#{@from_item.id}-#{@id}-smrra" %>" data-toggle="clear"></a>
         </div>
       </ul>
       <% end %>

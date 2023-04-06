@@ -42,7 +42,33 @@
           model_table_name:
             field_name: 'any conditional value must be false'
           
-        
+        all - users not related to master:
+          # if the first key is 'users' then the query will return against all users rather than current master record
+          users:
+            email: 'address to find user by'
+            disabled:
+              - null
+              - false
+            id: return_value
+
+        all - masters:
+          # if the first key is 'masters' and the value an empty hash then the query will return against all masters rather than current master record
+          masters: {}
+          player_contacts:
+            data: '(516)123-7612 22'
+            master_id: return_result
+
+        all - filtered to a set of masters:
+          # if the first key is 'masters' with conditions then the query will return against a set of masters rather than current master record
+          masters:
+            id:
+              - 1
+              - 2          
+          player_contacts:
+            data: (516)123-7612 22
+            master_id: return_result
+          
+
         'all_2|not_any_3...': 'allows for repeat of the condition type'
         'all|any|not_all|not_any':
             - repeated_model_table_name: {}
