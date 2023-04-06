@@ -16,7 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.1.11] - 2023-01-19
+## Unreleased
+
+### Transferred from Harvard @7.4.169 - 2023-04-06
+
+- [Added] {{#if}} conditional display in caption_before show mode
+- [Added] UI caption formatters for ::date ::time etc
+- [Added] condition evaluation outside of the current master record by specifying 'masters' as the first table.
+- [Fixed] default conversion of markdown to html for email and dialog templates
+- [Fixed] handling of current_user in add_tracker and improved conditional testing
+- [Fixed] failing save triggers on Redcap record storage by setting the current_user
+- [Fixed] user_preference can be missing
+
+## [8.1.13] - 2023-03-08
 
 ### Transferred from Harvard @7.4.165 - 2023-03-08
 

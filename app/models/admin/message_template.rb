@@ -69,12 +69,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def generate(content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false)
     raise FphsException, 'Must use a layout template to generate from' unless layout_template?
 
+    # Generate the content to be embedded, forcing the result to be converted from markdown to HTML
+    # if the content template indicates that this is required by calling #force_markdown_to_html on itself
     text = self.class.generate_content(content_template_name: content_template_name,
                                        content_template_text: content_template_text,
                                        data: data,
                                        ignore_missing: ignore_missing,
                                        no_substitutions: true,
-                                       markdown_to_html: force_markdown_to_html)
+                                       markdown_to_html: :force_markdown_to_html)
     all_content = template.sub('{{main_content}}', text)
     substitute all_content, data: data, ignore_missing: ignore_missing
   end
@@ -88,7 +90,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param [Boolean] ignore_missing defaults to false
   # @param [Boolean] no_substitutions defaults to false - set to true to prevent substitution of data
   # @param [Boolean] allow_missing_template - return nil if the named template is missing
-  # @param [Boolean] markdown_to_html - at the end of processing convert markdown text to HTML
+  # @param [Boolean | Symbol] markdown_to_html - at the end of processing convert markdown text to HTML.
+  #                                              If a method name has been provided (Symbol), call that method to check
+  #                                              if the content template should convert markdown to html.
+  #                                              Otherwise use the provided value (Truthy | Falsey)
   # @return [String] resulting text
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,
@@ -110,7 +115,16 @@ class Admin::MessageTemplate < ActiveRecord::Base
     return unless text
 
     text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
-    text = Formatter::Substitution.text_to_html(text) if markdown_to_html
+
+    # If a method name has been provided, call that method to check if the content template should convert markdown to html
+    # otherwise just use the value of the argument
+    res_md = if markdown_to_html.is_a?(Symbol) && content_template.respond_to?(markdown_to_html)
+               content_template.send markdown_to_html
+             else
+               markdown_to_html
+             end
+
+    text = Formatter::Substitution.text_to_html(text) if res_md
 
     text
   end
@@ -120,6 +134,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # the template is defined as markdown rather than HTML.
   # @return [true|false]
   def force_markdown_to_html
-    template_type == 'content' && message_type&.in?(['email', 'dialog']) && (!persisted? || created_at >= '2023-01-01')
+    template_type.to_s == 'content' &&
+      message_type&.to_s&.in?(['email', 'dialog']) &&
+      (!persisted? || created_at >= '2023-01-01')
   end
 end
