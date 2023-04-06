@@ -43,6 +43,8 @@ if [ "${cl_not_ok}" ]; then
   exit 2
 fi
 
+head -32 CHANGELOG.md | tail -13
+
 echo "Clean up assets before we start"
 FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
 git commit public/assets -m "Cleanup"
@@ -107,6 +109,8 @@ git push origin --tags
 git push origin --all
 
 git checkout ${FROM_BRANCH}
+
+head -32 CHANGELOG.md | tail -13
 
 echo "Starting build container"
 cd ../restructure-build

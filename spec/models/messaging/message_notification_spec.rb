@@ -7,6 +7,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include TestNoMasterDmRecSupport
 
   def mock_notification_mailer
     mailer = double('mailer', deliver_now: true)
@@ -118,6 +119,41 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     expect(mn.recipient_data).to be_a Array
     expect(mn.recipient_data.first).to be_a String
     expect(mn.recipient_data.first).to eq @rec_user.email
+    expect(mn.master_id).to eq master.id
+
+    expect(mn.data)
+    expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
+  end
+
+  it 'allows item models with no_master_association to work correctly' do
+    setup_test_no_master_dm_rec_dynamic_model
+    dm = create_test_no_master_dm_rec(sample_test_no_master_dm_rec_attrs)
+
+    t = '<p>This is some new content in a text template.</p><p>Related to a dynamic model {{data}}. This is the info: {{info}}.</p>'
+
+    layout = @layout
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, item_type: dm.class.name, item_id: dm.id, master: nil, message_type: :email
+
+    mn.handle_notification_now logger: Delayed::Worker.logger,
+                               for_item: dm,
+                               on_complete_config: nil
+
+    mn.reload
+    res = mn.generated_text
+    expected_name = @activity_log.select_who
+
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to a dynamic model #{dm.data}. This is the info: #{dm.info}.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+    expect(mn.generated_content).to eq res
+
+    expect(mn.recipient_data).not_to be_empty
+    expect(mn.recipient_data).to be_a Array
+    expect(mn.recipient_data.first).to be_a String
+    expect(mn.recipient_data.first).to eq @rec_user.email
+    expect(mn.master_id).to be nil
 
     expect(mn.data)
     expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email

@@ -36,6 +36,31 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     expect(res).to eq expected_text
   end
 
+  it 'generates a message with markdown content' do
+    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
+
+    t = <<~END_TEXT
+      This is some content.
+
+      Related to master_id {{master_id}}. This is a name: {{name}}.
+    END_TEXT
+
+    Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content,
+                                   template: t, current_admin: @admin
+
+    res = layout.generate content_template_name: 'test email content',
+                          data: { master_id: @master.id, 'name' => 'test name' }
+    expected_text = <<~END_TEXT
+      <html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p>
+
+      <p>Related to master_id #{@master.id}. This is a name: Test Name.</p></div></body></html>
+    END_TEXT
+
+    expect(res).to eq expected_text.strip
+  end
+
   it 'generates a message with master and associations data' do
     create_item
     let_user_create :player_contacts

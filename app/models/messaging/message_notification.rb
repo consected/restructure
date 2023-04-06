@@ -16,7 +16,7 @@ module Messaging
     belongs_to :master, optional: true
     # Even external systems that use a Rails based script to fire notifications must use a real user
     validates :user, presence: true, if: :app_type
-    validates :master, presence: true, if: :app_type
+    validates :master, presence: true, if: :requires_master?
     # No validation on app_type, since external systems may use Rails based script to fire notifications
     # validates :app_type, presence: true
     # No minimum on recipient_user_ids, since recipient_data may be used instead
@@ -471,6 +471,14 @@ module Messaging
       else
         logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
       end
+    end
+
+    #
+    # Should a new record require a master to be set?
+    def requires_master?
+      return app_type unless item_class.respond_to?(:no_master_association)
+
+      app_type && !item_class.no_master_association
     end
   end
 end

@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Calculate conditional actions', type: :model do
   include ModelSupport
   include ActivityLogSupport
+  include TestNoMasterDmRecSupport
 
   def setup_config(confy)
     config = YAML.safe_load(confy).deep_symbolize_keys
@@ -3042,6 +3043,278 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
       ca = ConditionalActions.new conf, @al
       expect(ca.get_this_val).to be nil
+    end
+  end
+
+  describe 'finding records system-wide, not restricted to the current master record' do
+    before :each do
+      setup_test_no_master_dm_rec_dynamic_model
+      expect(DynamicModel::TestNoMasterDmRec.no_master_association).to be true
+
+      create_user
+      @m1 = create_master
+      @m2 = create_master
+      @m3 = create_master
+      let_user_create_player_contacts
+      let_user_create :dynamic_model__test_no_master_dm_recs
+
+      @pc1_1 = @m1.player_contacts.create! data: '(516)123-7612 11', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc1_2 = @m1.player_contacts.create! data: '(516)123-7612 12', rec_type: 'phone', rank: 5, source: 'nflpa'
+      @pc2_1 = @m2.player_contacts.create! data: '(516)123-7612 21', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc2_2 = @m2.player_contacts.create! data: '(516)123-7612 22', rec_type: 'phone', rank: 5, source: 'nflpa'
+      @pc3_1 = @m3.player_contacts.create! data: '(516)123-7612 31', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc3_2 = @m3.player_contacts.create! data: '(516)123-7612 32', rec_type: 'phone', rank: 5, source: 'nflpa'
+    end
+
+    it 'finds a record related to a specified master record' do
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 22'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'finds record related to a multiple master records' do
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 32'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'finds record related to any master record' do
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 32'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: 'bad data'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'returns a master record based on joined results' do
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: '(516)123-7612 21',
+          master_id: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @m2.id
+    end
+
+    it 'returns a master record based on joined results where there is no association between current and joined models' do
+      dm11 = create_test_no_master_dm_rec(
+        alt_id: 11,
+        data: '(516)123-7612 11',
+        info: 'Info 11'
+      )
+      dm12 = create_test_no_master_dm_rec(
+        alt_id: 12,
+        data: '(516)123-7612 12',
+        info: 'Info 12'
+      )
+      dm21 = create_test_no_master_dm_rec(
+        alt_id: 21,
+        data: '(516)123-7612 21',
+        info: 'Info 21'
+      )
+
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: {
+            this: 'data'
+          },
+          master_id: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, dm11
+      res = ca.get_this_val
+      expect(res).to eq @m1.id
+
+      ca = ConditionalActions.new conf, dm12
+      res = ca.get_this_val
+      expect(res).to eq @m1.id
+
+      ca = ConditionalActions.new conf, dm21
+      res = ca.get_this_val
+      expect(res).to eq @m2.id
+    end
+
+    it 'returns a player record from another master record' do
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @pc2_2
+
+      conf = {
+        masters: {
+          id: [@m2.id]
+        },
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @pc2_2
+    end
+
+    it 'fails to return a player record from another master record if that is outside the set of master records specified' do
+      conf = {
+        masters: {
+          id: [@m1.id, @m3.id]
+        },
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to be nil
     end
   end
 end
