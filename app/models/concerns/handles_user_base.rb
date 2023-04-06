@@ -55,6 +55,12 @@ module HandlesUserBase
   end
 
   class_methods do
+    #
+    # Get the name of the previous level in the class namespace, or 'Object' if already at the top
+    def class_parent_name
+      name.split('::')[-2] || 'Object'
+    end
+
     def all_subclasses
       # Subsclasses may be subclassed further - go to the next level if needed.
       UserBase.subclasses.map { |s| s.subclasses || s }.flatten
@@ -768,15 +774,15 @@ module HandlesUserBase
       raise FphsException, msg
     end
 
-    if !persisted? && !can_create?
-      msg = if Rails.env.test?
-              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})" \
-              " - #{current_user.email} - #{current_user.app_type&.name}"
-            else
-              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
-            end
-      raise FphsException, msg
-    end
+    return unless !persisted? && !can_create?
+
+    msg = if Rails.env.test?
+            "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})" \
+            " - #{current_user.email} - #{current_user.app_type&.name}"
+          else
+            "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+          end
+    raise FphsException, msg
   end
 
   #

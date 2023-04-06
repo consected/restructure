@@ -80,6 +80,7 @@ module AppExceptionHandler
   end
 
   def unhandled_exception_handler(error)
+    puts error.backtrace
     msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]

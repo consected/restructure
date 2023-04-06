@@ -2,20 +2,20 @@
 
 require 'rails_helper'
 
-AlNameGenTest = 'Gen Test ELT'
+AlNameGenTestMr = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
 RSpec.describe 'Model references', type: :model do
   def al_name
-    AlNameGenTest
+    AlNameGenTestMr
   end
 
   include ModelSupport
   include PlayerContactSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestMr, 'elt', 'player_contact'
   end
 
   def setup_option_config(position, label, fields)

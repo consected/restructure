@@ -11,6 +11,7 @@
     "@fullcalendar/daygrid": "4.2.0",
     "@fullcalendar/interaction": "4.2.0",
     "@fullcalendar/timegrid": "4.2.0",
+    "@rails/webpacker": "5.4.3",
     "blueimp-file-upload": "9.27",
     "bootstrap-datepicker": "^1.9.0",
     "bootstrap-wysiwyg": "https://github.com/consected/bootstrap-wysiwyg",
@@ -34,10 +35,13 @@
     "spark-md5": "^3.0.1",
     "tablesorter": "^2.31.3",
     "textarea-autogrow": "^1.0.0",
-    "typeahead.js": "^0.11.1"
+    "typeahead.js": "^0.11.1",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12"
   },
   "devDependencies": {
     "jasmine-browser-runner": "^1.1.0",
-    "jasmine-core": "^4.3.0"
+    "jasmine-core": "^4.3.0",
+    "webpack-dev-server": "^3"
   }
 }

@@ -15,6 +15,7 @@ module DynamicModelControllerHandler
     # Possibly this is a Rails specific override, but the parent is set correctly
     # when a controller is created as a file in a namespaced folder, so rather
     # than fighting it, just force the known parent here.
+    # TODO: test by removing.
     def parent
       ::DynamicModel
     end

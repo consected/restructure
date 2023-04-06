@@ -17,6 +17,10 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  def class_parent_name
+    self.class.name.split('::')[-2] || 'Object'
+  end
+
   def current_email
     return nil unless current_user || current_admin
 

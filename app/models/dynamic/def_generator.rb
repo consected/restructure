@@ -307,23 +307,15 @@ module Dynamic
     # Dump the old association
     def remove_assoc_class(in_class_name, alt_target_class = nil, short_class_name = nil)
       cns = in_class_name.to_s.split('::')
-      if Rails::VERSION::MAJOR >= 6
-        klass = if cns.first == 'DynamicModel'
-                  cns[0..1].join('::').constantize
-                else
-                  cns.first.constantize
-                end
+      klass = if cns.first == 'DynamicModel'
+                cns[0..1].join('::').constantize
+              else
+                cns.first.constantize
+              end
 
-        short_class_name = cns.last unless alt_target_class || short_class_name
-        alt_target_class ||= model_class_name.pluralize
-        alt_target_class = alt_target_class.gsub('::', '')
-      else
-        klass = Object
-        klass = cns.first.constantize if cns.length == 2
-        short_class_name = cns.last
-        alt_target_class ||= model_class_name.pluralize
-      end
-
+      short_class_name = cns.last unless alt_target_class || short_class_name
+      alt_target_class ||= model_class_name.pluralize
+      alt_target_class = alt_target_class.gsub('::', '')
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
       return unless klass.constants.include?(assoc_ext_name.to_sym)
 

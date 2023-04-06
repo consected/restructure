@@ -5,7 +5,8 @@ module BhsExpectations
     tabs = master_panel.all('ul.details-tabs li[role="presentation"]')
 
     if role == :ra
-      expect(tabs.length).to eq(BhsUi::TabNames.length), tabs.map(&:text)
+      puts tabs.map(&:text)
+      expect(tabs.length).to eq BhsUi::TabNames.length
 
       tabs.each do |tab|
         expect(tab.text).to be_in BhsUi::TabNames

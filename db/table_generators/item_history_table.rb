@@ -29,7 +29,7 @@ module TableGenerators
       return
     end
 
-    if generate_table == :drop || generate_table == :drop_do
+    if %i[drop drop_do].include?(generate_table)
       sql = <<EOF
 
       DROP TABLE if exists #{singular_name}_history CASCADE;
@@ -48,7 +48,7 @@ EOF
         f = 'bigint' if a.end_with?('_id')
         if a == 'created_by_user_id'
           created_by = true
-          f = 'integer' 
+          f = 'integer'
         end
         f = 'date' if a.end_with?('_when')
         f = 'date' if a.end_with?('_date')
@@ -170,12 +170,13 @@ EOF
       EOF1
     end
 
-    if generate_table == true || generate_table == :create_do || generate_table == :drop_do
+    if [true, :create_do, :drop_do].include?(generate_table)
       ActiveRecord::Base.connection.execute sql
+      ActiveRecord::Base.connection.schema_cache.clear!
     else
 
       puts sql
-      return sql
+      sql
     end
   end
 end

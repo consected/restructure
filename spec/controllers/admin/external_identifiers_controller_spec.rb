@@ -25,10 +25,10 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
   before_each_login_admin
 
   before :each do
-    disable_existing_records :all, current_admin: @admin
     r = 'test7'
     @implementation_table_name = "test_external_#{r}_identifiers"
     @implementation_attr_name = "test_#{r}_id"
+    disable_existing_records nil, external_id_attribute: @implementation_attr_name, current_admin: @admin
   end
 
   it_behaves_like 'a standard admin controller'
