@@ -25,7 +25,7 @@ module Formatter
       # then go ahead and parse the data with the specified timezone.
       # If the UTC offsets match then we'll just assume that they represent the same timezone
       # and return the formatted time without forcing a timezone onto it
-      if current_timezone && data
+      if current_timezone && data.respond_to?(:utc_offset)
         use_tz = current_timezone
         tz = ActiveSupport::TimeZone.new(use_tz)
         raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
