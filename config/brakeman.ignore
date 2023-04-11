@@ -1,29 +1,6 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "00fa21071e5337e2085d2a12784f2f5edff6bc0819f71dcd7a7f7b30826e596f",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/concerns/calc_actions.rb",
-      "line": 410,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "(@condition_scope.order(:id => :desc).limit(1).reorder(\"#{(@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]) or [@condition_scope.order(:id => :desc).limit(1).first]).first.class.table_name}.id desc\") or @condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{(@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]) or [@condition_scope.order(:id => :desc).limit(1).first]).first.class.table_name}.#{(@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]) or [@condition_scope.order(:id => :desc).limit(1).first]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions",
-        "method": "calc_return_types"
-      },
-      "user_input": "(@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]) or [@condition_scope.order(:id => :desc).limit(1).first]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first",
-      "confidence": "Weak",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "112b4ae9ba92e195c2372be0ba3be3e831dd3fcb7ab9dceb45b64e2b901a9d49",
@@ -120,7 +97,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 644,
+      "line": 645,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -294,29 +271,6 @@
       "confidence": "High",
       "cwe_id": [
         77
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "4e620104bf32818bad9633273c4b28a3a002de5e735fc35ec1116cb1cf08c2bb",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/concerns/calc_actions.rb",
-      "line": 398,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "@condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions",
-        "method": "calc_return_types"
-      },
-      "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
       ],
       "note": ""
     },
@@ -513,6 +467,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "a471446d5c83e4f289e6c57062e3f7952ef8acf5fcaaeafd6896b42f49a0d2d0",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/admin/app_types_controller.rb",
+      "line": 83,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::AppTypesController",
+        "method": "export_migrations"
+      },
+      "user_input": "Admin::AppType.find(params[:id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
@@ -555,29 +532,6 @@
       "confidence": "Medium",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "c23788dfb502a2cd5958e20ed2c594f3c37257034edfbf7c9cc2e783311ace9e",
-      "check_name": "SendFile",
-      "message": "Model attribute used in file name",
-      "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 83,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::AppTypesController",
-        "method": "export_migrations"
-      },
-      "user_input": "Admin::AppType.find(params[:id]).zip_app_export_migrations.path",
-      "confidence": "Medium",
-      "cwe_id": [
-        22
       ],
       "note": ""
     },
@@ -683,25 +637,6 @@
       "note": ""
     },
     {
-      "warning_type": "Unmaintained Dependency",
-      "warning_code": 120,
-      "fingerprint": "d84924377155b41e094acae7404ec2e521629d86f97b0ff628e3d1b263f8101c",
-      "check_name": "EOLRails",
-      "message": "Support for Rails 5.2.8.1 ended on 2022-06-01",
-      "file": "Gemfile.lock",
-      "line": 250,
-      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
-      "code": null,
-      "render_path": null,
-      "location": null,
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        1104
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "e697af5171f6eeb2057e452921c8b32e8affa120bc6a21c95ea39e07c24548e5",
@@ -755,25 +690,6 @@
       "confidence": "Medium",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Unmaintained Dependency",
-      "warning_code": 121,
-      "fingerprint": "edf687f759ec9765bd5db185dbc615c80af77d6e7e19386fc42934e7a80307af",
-      "check_name": "EOLRuby",
-      "message": "Support for Ruby 2.7.7 ended on 2023-03-31",
-      "file": ".ruby-version",
-      "line": 1,
-      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
-      "code": null,
-      "render_path": null,
-      "location": null,
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        1104
       ],
       "note": ""
     },
@@ -832,6 +748,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-04-06 10:02:17 +0100",
+  "updated": "2023-04-11 19:11:16 +0100",
   "brakeman_version": "5.4.1"
 }
