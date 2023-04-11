@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] to Rails 6 and Ruby 3
+
 ## [8.1.14] - 2023-04-06
 
 ### Transferred from Harvard @7.4.169 - 2023-04-06
