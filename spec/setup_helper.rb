@@ -249,7 +249,7 @@ module SetupHelper
 
     unless res.active_model_configuration?
       # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
-      res.update!(current_admin: auto_admin) unless res.admin
+      res.update!(current_admin: auto_admin, updated_at: DateTime.now)
 
       app_type = Admin::AppType.active.first
       # Ensure there is at least one user access control, otherwise we won't re-enable the process on future loads
