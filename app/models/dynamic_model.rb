@@ -99,6 +99,9 @@ class DynamicModel < ActiveRecord::Base
     return if disabled || foreign_key_name.blank?
 
     man = model_association_name
+
+    remove_assoc_class('Master', nil, '')
+
     Master.has_many man, inverse_of: :master,
                          class_name: "DynamicModel::#{model_class_name}",
                          foreign_key: foreign_key_name,

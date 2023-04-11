@@ -8,6 +8,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
   include FeatureSupport
 
   before(:all) do
+    change_setting('TwoFactorAuthDisabledForUser', false)
     SetupHelper.feature_setup
 
     seed_database
@@ -171,7 +172,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     find '.master-expander', match: :first, wait: 20
 
     # give slow systems time to catch up with the large result set
-    sleep 2
+    sleep 5
     # expect(page).to have_css "#search_count", text: /[0-9]+.*/
 
     items = page.all(:css, '.master-expander.collapsed')

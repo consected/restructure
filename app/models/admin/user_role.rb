@@ -170,7 +170,6 @@ class Admin::UserRole < Admin::AdminBase
   # Automatically add a template@template record if needed
   def save_template
     return true if disabled?
-
     tu = User.template_user
     tu.app_type = app_type
     self.class.add_to_role tu, app_type, role_name, current_admin

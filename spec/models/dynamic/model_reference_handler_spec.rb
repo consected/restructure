@@ -3,13 +3,13 @@
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
-AlNameGenTest = 'Gen Test ELT'
+AlNameGenTestMrh = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
 RSpec.describe 'Model reference implementation', type: :model do
   def al_name
-    AlNameGenTest
+    AlNameGenTestMrh
   end
 
   include ModelSupport
@@ -18,7 +18,7 @@ RSpec.describe 'Model reference implementation', type: :model do
   include DynamicModelSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestMrh, 'elt', 'player_contact'
   end
 
   def setup_option_config(position, label, fields)

@@ -16,10 +16,10 @@ app-scripts/setup-dev-filestore.sh
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
-if [ "$@" ]; then
-  specs=$@
-else
+if [ -z "$@" ]; then
   specs='spec/models spec/controllers spec/features spec/r.*'
+else
+  specs="$@"
 fi
 
 for spec in ${specs}; do
@@ -29,7 +29,7 @@ for spec in ${specs}; do
   echo "========================================================================" >> tmp/working_failing_specs.log
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
-  bundle exec rake parallel:spec["'"${spec}"'"] &
+  RAILS_ENV=test bundle exec rake parallel:spec["'"${spec}"'"] &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
     sleep 5
   done

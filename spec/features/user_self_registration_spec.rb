@@ -130,7 +130,6 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     expect(page).not_to have_selector('.login-2fa-block', visible: true)
-
     fail_message = "×\nInvalid email, password or two-factor authentication code."
 
     expect(page).to have_css 'input:invalid'

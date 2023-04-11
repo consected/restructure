@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module TableGenerators
-  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by=nil)
+  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by = nil)
     if name.nil? || name == ''
       puts "Usage:
       db/table_generators/generate.sh external_identifiers_table <pluralized_table_name> create|drop 'identifier_field_id'
@@ -24,7 +24,7 @@ module TableGenerators
       return
     end
 
-    if generate_table == :drop || generate_table == :drop_do
+    if %i[drop drop_do].include?(generate_table)
       sql = <<EOF
 
       DROP TABLE if exists #{singular_name}_history CASCADE;
@@ -168,15 +168,16 @@ EOF
       EOF
     end
 
-    if generate_table == true || generate_table == :create_do || generate_table == :drop_do
+    if [true, :create_do, :drop_do].include?(generate_table)
       ActiveRecord::Base.connection.execute sql
+      ActiveRecord::Base.connection.schema_cache.clear!
     else
       sql = "
       BEGIN;
 #{sql}
       COMMIT;"
       puts sql
-      return sql
+      sql
     end
   end
 end
