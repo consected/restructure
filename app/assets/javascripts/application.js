@@ -26,7 +26,7 @@
 // Note: moment is required with the min file to avoid the need to transcompile
 //= require moment/min/moment-with-locales.min
 //= require luxon/build/global/luxon
-//= require chartjs-adapter-luxon/dist/chartjs-adapter-luxon.js
+//= require chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.js
 //= require typeahead.js/dist/typeahead.bundle.js
 //= require jquery-timepicker/jquery.timepicker
 //= require textarea-autogrow/textarea-autogrow
