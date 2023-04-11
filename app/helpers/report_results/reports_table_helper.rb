@@ -98,7 +98,6 @@ module ReportResults
 
       res = <<~END_HTML
         <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" data-col-show-as="#{show_as}" class="table-header #{extra_classes}" #{extra_data}>
-
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML

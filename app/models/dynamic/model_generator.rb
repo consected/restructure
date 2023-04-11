@@ -38,11 +38,8 @@ module Dynamic
       self.category ||= self.class.default_category
     end
 
-    # TODO: comment is not consistent with the method signature
     # Create an active dynamic model instance for storage of data records.
     # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String] table_name
-    # @param [String] category - optional category, defaults to import
     # @return [DynamicModel]
     def create_dynamic_model
       raise FphsException, 'no fields specified to create dynamic model' unless field_list.present?

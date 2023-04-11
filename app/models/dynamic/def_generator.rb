@@ -275,8 +275,6 @@ module Dynamic
         Rails.logger.info "Failed to clear general selections for #{model_class_name}"
       end
 
-      # self.class.definition_cache.delete id
-
       remove_model_from_list
       remove_assoc_class 'Master'
       remove_implementation_class
