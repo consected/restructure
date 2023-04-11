@@ -86,3 +86,6 @@ yarn-error.log
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+# Assets will be added to the repository for production deployment. We override this ignore with `git add --force public/assets`
+/public/assets
