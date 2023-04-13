@@ -43,6 +43,17 @@ A *dialog* only ever has the *content* template type - *layout* types are ignore
 Formatting of the *dialog* content is typically markdown, but will be treated as HTML if one of the following HTML tags
 (including appropriate attributes) is present in the text: `p br div ul hr`
 
+### Public Info Pages
+
+The *dialog* message type also provides a mechanism for defining content to be displayed as public information pages, to
+users whether they are logged in or not.
+
+A public info page is defined by selecting the message type *dialog*, template type *content* and category *public*
+
+The name should be underscored or hyphenated, and represents the page *slug* for URLs used to access the page content:
+
+`{{base_url}}/info_pages/<slug>`
+
 ### UI Templates
 
 The *plain* message type with template type *content* is used to configure UI specific messages to the end user. These UI template

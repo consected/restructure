@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PublicPagesController < ActionController::Base
+class InfoPagesController < ActionController::Base
   include AppConfigurationsHelper
   include NavHandler
   before_action :setup_navs
@@ -8,12 +8,12 @@ class PublicPagesController < ActionController::Base
 
   # public page
   def show
-    id = params[:id]
+    id = params[:id].gsub(/[^a-zA-Z0-9\-_]/, '')
     @content = Admin::MessageTemplate.generate_content content_template_name: id, category: :public,
                                                        allow_missing_template: true, markdown_to_html: true
     unless @content
       @content = '<h1>Page Not Found</h1>'.html_safe
-      render :show, code: 404, layout: 'public_application'
+      render :show, status: 404, layout: 'public_application'
       return
     end
 
