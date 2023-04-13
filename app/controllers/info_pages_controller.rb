@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PublicPagesController < ActionController::Base
+class InfoPagesController < ActionController::Base
   include AppConfigurationsHelper
   include NavHandler
   before_action :setup_navs
@@ -13,7 +13,7 @@ class PublicPagesController < ActionController::Base
                                                        allow_missing_template: true, markdown_to_html: true
     unless @content
       @content = '<h1>Page Not Found</h1>'.html_safe
-      render :show, code: 404, layout: 'public_application'
+      render :show, status: 404, layout: 'public_application'
       return
     end
 

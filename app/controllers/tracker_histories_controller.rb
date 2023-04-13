@@ -10,7 +10,7 @@ class TrackerHistoriesController < UserBaseController
       logger.info "Getting master tracker histories"
       @tracker_histories = @master.tracker_histories.order Master::TrackerHistoryEventOrderClause
     else
-      render code: 404
+      render status: 404
       return
     end
 
