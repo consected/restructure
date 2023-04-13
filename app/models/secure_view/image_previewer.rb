@@ -30,7 +30,7 @@ module SecureView
     #                             :icon - indicates an icon size preview of page 1 is required
     #                              anything else for a standard screen sized image preview
     def initialize(options = {})
-      super
+      super(**options)
       office_docs_to :pdf unless pdf? || viewable_image?
       dicom_to_jpg if viewable_dicom?
       self.view_type = options[:view_type]

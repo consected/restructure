@@ -10,7 +10,7 @@ describe 'no logging in production' do
     s = "This is a test of the logger at #{d}"
     Rails.logger.warn s
     log = Rails.root.join('log/test.log')
-    n = `grep '#{s}' #{log}`
+    n = `grep "#{s}" "#{log}"`
     n = n.gsub("\n", '')
     expect(n).to match(s)
   end
@@ -24,7 +24,7 @@ describe 'no logging in production' do
     s = "This is a test of the logger being disabled at #{d}"
     Rails.logger.warn s
     log = Rails.root.join('log/test.log')
-    n = `grep '#{s}' #{log}`
+    n = `grep "#{s}" "#{log}"`
     n = n.gsub("\n", '')
     Rails.logger = old_logger
     expect(n).not_to match(/#{s}/)

@@ -32,16 +32,14 @@ module Dynamic
     # @param [<Type>] qualified_table_name <description>
     # @return [<Type>] <description>
     def setup_generator(parent, qualified_table_name)
+      # TODO: Verify possible conflict
       self.parent = parent
       self.qualified_table_name = qualified_table_name
       self.category ||= self.class.default_category
     end
 
-    #
     # Create an active dynamic model instance for storage of data records.
     # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String] table_name
-    # @param [String] category - optional category, defaults to import
     # @return [DynamicModel]
     def create_dynamic_model
       raise FphsException, 'no fields specified to create dynamic model' unless field_list.present?

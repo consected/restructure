@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-AlNameGenTest = 'Gen Test ELT'
 
 RSpec.describe Classification::SelectionOptionsHandler, type: :model do
+  AlNameGenTestSo = 'Gen Test ELT'
   include ModelSupport
   include GeneralSelectionSupport
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestSo, 'elt', 'player_contact'
   end
 
   before :example do

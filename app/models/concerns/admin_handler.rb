@@ -161,9 +161,14 @@ module AdminHandler
     user.email if respond_to?(:user) && user
   end
 
+  def _class_name
+    self.class.name
+  end
+
   def as_json(options = {})
     options[:methods] ||= []
 
+    options[:methods] << :_class_name
     options[:methods] << :user_email
 
     super(options)
@@ -177,10 +182,10 @@ module AdminHandler
   end
 
   def prevent_item_type_change
-    if item_type_changed? && persisted?
-      errors.add(:item_type, 'change not allowed!')
-      # throw(:abort)
-    end
+    return unless item_type_changed? && persisted?
+
+    errors.add(:item_type, 'change not allowed!')
+    # throw(:abort)
   end
 
   # Check if a specific attribute value has already been used in an active definition

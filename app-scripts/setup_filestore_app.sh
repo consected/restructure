@@ -30,7 +30,7 @@ if [ -z "$MOUNTPOINT" ]; then
     if [ -d /media/$USER/Data ]; then
       MOUNTPOINT=/media/$USER/Data
     else
-      FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+      FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
       MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
     fi
 

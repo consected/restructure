@@ -26,9 +26,9 @@ module SecureView
       when 'icon'
         @secure_view_previewer = SecureView::ImagePreviewer.new path: path.to_s, view_type: :icon
       when 'html'
-        @secure_view_previewer = SecureView::HTMLPreviewer.new path: path.to_s
+        @secure_view_previewer = SecureView::HtmlPreviewer.new path: path.to_s
       when 'pdf'
-        @secure_view_previewer = SecureView::PDFPreviewer.new path: path.to_s
+        @secure_view_previewer = SecureView::PdfPreviewer.new path: path.to_s
       end
     end
 

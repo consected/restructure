@@ -204,6 +204,7 @@ class Admin::MigrationGenerator
   # @param [String] table_name
   # @return [Boolean]
   def self.table_exists?(table_name)
+    ActiveRecord::Base.connection.schema_cache.clear!
     connection.table_exists?(table_name)
   end
 
@@ -224,6 +225,7 @@ class Admin::MigrationGenerator
   # @param [String] table_name
   # @return [Boolean]
   def self.view_exists?(table_name)
+    ActiveRecord::Base.connection.schema_cache.clear!
     connection.view_exists?(table_name)
   end
 
@@ -250,6 +252,14 @@ class Admin::MigrationGenerator
   # @return [Array{String}]
   def self.table_column_names(table_name)
     connection.columns(table_name).map(&:name)
+  end
+
+  #
+  # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
+  # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
+  def self.migration_context(dirname)
+    schema_migration = ActiveRecord::Base.connection.schema_migration
+    ActiveRecord::MigrationContext.new(dirname, schema_migration)
   end
 
   #
@@ -281,6 +291,7 @@ class Admin::MigrationGenerator
   # Get the table or view comment for the current table_name
   # @return [String | nil]
   def table_or_view_comment
+    ActiveRecord::Base.connection.schema_cache.clear!
     if self.class.view_exists?(table_name)
       res = self.class.connection.execute "select obj_description('#{table_name}'::regclass) c"
       res[0]['c']
@@ -609,7 +620,7 @@ class Admin::MigrationGenerator
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
-          ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+          self.class.migration_context(db_migration_dirname).migrate
           # Don't dump until a build, otherwise differences in individual development environments
           # force unnecessary and confusing commits
           # pid = spawn('bin/rake db:structure:dump')

@@ -60,7 +60,6 @@ module BrowserHelper
       options.add_preference('browser.helperApps.neverAsk.saveToDisk', 'text/csv')
       options.add_preference('csvjs.disabled', true)
       Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
-      Capybara::Selenium::Driver.new(app, browser: :firefox)
     end
 
     cb.current_driver = :app_firefox_driver

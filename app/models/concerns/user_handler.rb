@@ -28,7 +28,7 @@ module UserHandler
     unless defined?(no_master_association) && no_master_association
       # Standard associations
       Rails.logger.debug "Associating master as inverse of #{assoc_inverse}"
-      belongs_to :master, assoc_rules
+      belongs_to :master, **assoc_rules
       has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
     end
 

@@ -26,7 +26,8 @@ gem 'kramdown-parser-gfm'
 gem 'mail', '2.7.1' # hold at this version in Rails 2.7 to avoid broken net / protocol gems
 gem 'mime-types'
 gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
-gem 'nokogiri', '1.13.10'
+gem 'net-smtp'
+gem 'nokogiri', '>= 1.14.3'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
 # puma has been moved to all environments and will be included in the production packaging
@@ -35,7 +36,8 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma', '~> 6.0'
 
-gem 'rails', '~> 5.2', '>= 5.2.8.1'
+gem 'rails', '~> 6.1', '>= 6.1.7'
+
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'
@@ -50,7 +52,6 @@ group :development do
   gem 'listen', '~> 3.7', '>= 3.7.1'
   # gem 'memory_profiler'
   # gem 'rack-mini-profiler'
-  gem 'solargraph'
   gem 'solargraph-rails', '~> 0.2.0'
   gem 'web-console'
 end
@@ -84,7 +85,5 @@ end
 group :development, :assets do
   gem 'execjs'
   gem 'sass-rails', '~> 5.1'
-  gem 'therubyracer'
-  # gem 'mini_racer', github: 'rubyjs/mini_racer', branch: 'refs/pull/186/head'
   gem 'terser'
 end
