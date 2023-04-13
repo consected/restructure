@@ -3,11 +3,14 @@
 NUM_WORKERS=${NUM_WORKERS:=1}
 
 if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
-  # echo "Didn't run restarter - not an AWS environment"
+  if [[ "$(cat /proc/$PPID/comm)" =~ 'rspec' ]]; then
+    echo "Didn't run restarter - not an AWS environment"
+  fi
   exit
 fi
 
-sleep 2
+# Sleep for a while to let an app server restart to make some progress before hogging all the CPU
+sleep 15
 # This relies on delayed_job being set up as a systemd service, which will be restarted automatically.
 # The AWS Elastic Beanstalk *Procfile* defines this service.
 # SIGINT is used, since this should allow the current job to

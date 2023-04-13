@@ -18,6 +18,15 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Fixed] bug in Zeitwork class loading
+- [Fixed] admin app type components panel and standalone page not loading
+
+## [8.2.1] - 2023-04-11
+
+- [Changed] to Rails 6 and Ruby 3
+
+## [8.1.14] - 2023-04-06
+
 ### Transferred from Harvard @7.4.169 - 2023-04-06
 
 - [Added] {{#if}} conditional display in caption_before show mode
