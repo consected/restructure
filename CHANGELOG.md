@@ -16,7 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.1.11] - 2023-01-19
+## Unreleased
+
+- [Fixed] bug in Zeitwork class loading
+- [Fixed] admin app type components panel and standalone page not loading
+
+## [8.2.1] - 2023-04-11
 
 - [Changed] to Rails 6 and Ruby 3
 

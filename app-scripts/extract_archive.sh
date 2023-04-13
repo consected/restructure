@@ -10,11 +10,11 @@ if [ -z "${archive_path}" ] || [ -z "${tmpzipdir}" ]; then
 fi
 
 single_zip_path=$(mktemp /tmp/nfs-store-unzip-single-XXXXXXX)
-tempres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
+tmpres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
 archive_fn="$(basename "${archive_path}")"
 
-rm -f "${single_zip_path}"
-cd "$(dirname "${archive_path}")" || exit 1
+rm -f ${single_zip_path}
+cd "$(dirname "${archive_path}")"
 
 # Join split files to a single file in the temp directory
 # We send a 'q' to stdin just in case there is a prompt for a missing split file,
@@ -26,31 +26,31 @@ EOF
 if [ $? != 0 ]; then
   rm -f "${single_zip_path}"
   echo >&2 "Failed zip -q -s 0 '${archive_fn}' -O '${single_zip_path}' ---- in $(pwd)"
-  cd "${currdir}" || exit 7
+  cd ${currdir}
   exit 7
 fi
 
-unzip -n "${single_zip_path}" -d "${tmpzipdir}" > "${tempres}"
+unzip -n "${single_zip_path}" -d "${tmpzipdir}" > "${tmpres}"
 
 if [ $? != 0 ]; then
   rm -f "${tempres}"
   rm -f "${single_zip_path}"
 
   echo >&2 "Failed unzip -n '${archive_path}' -d '${tmpzipdir}'"
-  cd "${currdir}" || exit 1
+  cd ${currdir}
   exit 1
 fi
 
-resnum=$(grep -E '(inflating|extracting):' "${tempres}" | wc -l)
+resnum=$(grep -E '(inflating|extracting):' "${tmpres}" | wc -l)
 filecount=$(find "${tmpzipdir}" -type f | wc -l)
 rm -f "${tempres}"
 rm -f "${single_zip_path}"
 
 if [ "${resnum}" != "${filecount}" ]; then
   echo >&2 "${resnum}" != "${filecount}"
-  cd "${currdir}" || exit 2
+  cd ${currdir}
   exit 2
 fi
 
-cd "${currdir}"
+cd ${currdir}
 exit 0

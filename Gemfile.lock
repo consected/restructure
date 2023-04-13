@@ -95,7 +95,7 @@ GEM
     attr_encrypted (3.1.0)
       encryptor (~> 3.0.0)
     aws-eventstream (1.2.0)
-    aws-partitions (1.744.0)
+    aws-partitions (1.746.0)
     aws-sdk-cloudwatchlogs (1.62.0)
       aws-sdk-core (~> 3, >= 3.165.0)
       aws-sigv4 (~> 1.1)
@@ -143,7 +143,7 @@ GEM
     childprocess (4.1.0)
     chunky_png (1.4.0)
     concurrent-ruby (1.2.2)
-    countries (5.3.2)
+    countries (5.4.0)
       unaccent (~> 0.3)
     country_select (8.0.1)
       countries (~> 5.0)
@@ -246,10 +246,7 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.5.9)
-    nokogiri (1.13.10)
-      mini_portile2 (~> 2.8.0)
-      racc (~> 1.4)
-    nokogiri (1.13.10-x86_64-linux)
+    nokogiri (1.14.3-x86_64-linux)
       racc (~> 1.4)
     orm_adapter (0.5.0)
     parallel (1.22.1)
@@ -339,7 +336,7 @@ GEM
       rspec-mocks (~> 3.11)
       rspec-support (~> 3.11)
     rspec-support (3.12.0)
-    rubocop (1.50.0)
+    rubocop (1.50.1)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.2.0.0)
@@ -449,11 +446,10 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    yard (0.9.32)
+    yard (0.9.34)
     zeitwerk (2.6.7)
 
 PLATFORMS
-  ruby
   x86_64-linux
 
 DEPENDENCIES
@@ -491,11 +487,11 @@ DEPENDENCIES
   mime-types
   mini_portile2 (= 2.8.0)
   net-smtp
-  nokogiri (= 1.13.10)
+  nokogiri (>= 1.14.3)
   parallel_tests (= 3.8.1)
   pg (~> 1.4, >= 1.4.3)
   puma (~> 6.0)
-  rails (~> 6.0, >= 6.0.6)
+  rails (~> 6.1, >= 6.1.7)
   rails-controller-testing
   readapt
   redcap!
@@ -509,7 +505,6 @@ DEPENDENCIES
   simple_token_authentication (~> 1.0)!
   simplecov
   simplecov-console
-  solargraph
   solargraph-rails (~> 0.2.0)
   spring
   spring-commands-parallel-tests
@@ -521,4 +516,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.4.8
+   2.4.11

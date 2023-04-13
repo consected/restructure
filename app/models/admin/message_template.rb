@@ -97,10 +97,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @return [String] resulting text
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,
-                            allow_missing_template: false, markdown_to_html: false)
+                            allow_missing_template: false, markdown_to_html: false,
+                            category: nil)
     if content_template_name
       # Lookup the template based on its name
-      content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
+      cond = { name: content_template_name }
+      cond[:category] = category if category
+      content_template = Admin::MessageTemplate.active.content_templates.find_by(cond)
       return nil if allow_missing_template && !content_template
 
       raise FphsException, "No content template found with name: #{content_template_name}" unless content_template

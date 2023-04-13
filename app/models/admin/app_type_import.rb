@@ -222,7 +222,8 @@ class Admin
         cond.each { |k, v| cond[k] = nil if v.blank? }
 
         filter = ac.slice(*filter_on) if filter_on
-        new_vals = ac.except('user_email', 'user_id', 'app_type_id', 'admin_id', 'id', 'created_at', 'updated_at')
+        new_vals = ac.except('user_email', 'user_id', 'app_type_id', 'admin_id', 'id', 'created_at', 'updated_at',
+                             '_class_name')
         new_vals[:current_admin] = admin
         new_vals.slice(*lookup_existing_with_fields).each { |k, v| new_vals[k] = nil if v.blank? }
 

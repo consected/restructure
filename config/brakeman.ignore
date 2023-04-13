@@ -183,6 +183,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "37fdc785ad37277a5f51142c6fd259385a4a026235bfcc49bef80510537e174a",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/public_pages/show.erb",
+      "line": 3,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Admin::MessageTemplate.generate_content(:content_template_name => params[:id], :category => :public, :allow_missing_template => true, :markdown_to_html => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PublicPagesController",
+          "method": "show",
+          "line": 25,
+          "file": "app/controllers/public_pages_controller.rb",
+          "rendered": {
+            "name": "public_pages/show",
+            "file": "app/views/public_pages/show.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "public_pages/show"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "3c5e6a5b7b311bb51b49c35ff669a55b2ac5f277738e7d6ab4db258ed43779f8",
@@ -748,6 +782,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-04-11 19:11:16 +0100",
+  "updated": "2023-04-12 10:27:23 +0100",
   "brakeman_version": "5.4.1"
 }

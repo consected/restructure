@@ -5,13 +5,13 @@
 module SecureView
   #
   # Handle generation of HTML to preview documents
-  class HTMLPreviewer < BasePreviewer
+  class HtmlPreviewer < BasePreviewer
     def self.file_type
       :html
     end
 
     def initialize(options = {})
-      super
+      super(**options)
       office_docs_to :html unless html?
     end
 

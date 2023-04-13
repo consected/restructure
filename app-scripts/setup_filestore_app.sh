@@ -28,15 +28,15 @@ if [ -z "$MOUNTPOINT" ]; then
     MOUNTPOINT=/efs1
   else
 
-    if [ -d /media/"$USER"/Data ]; then
+    if [ -d /media/$USER/Data ]; then
       MOUNTPOINT=/media/$USER/Data
     else
-      FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+      FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
       MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
     fi
 
   fi
-  if [ ! -d "${MOUNTPOINT}" ]; then
+  if [ ! -d ${MOUNTPOINT} ]; then
     echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
     read -pr 'MOUNTPOINT directory: ' MOUNTPOINT
   fi
@@ -58,7 +58,7 @@ OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
 
-if [ -d "${FS_ROOT}"/main ]; then
+if [ -d ${FS_ROOT}/main ]; then
   FS_DIR=main
 fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
