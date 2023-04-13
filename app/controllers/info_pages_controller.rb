@@ -8,7 +8,7 @@ class InfoPagesController < ActionController::Base
 
   # public page
   def show
-    id = params[:id]
+    id = params[:id].gsub(/[^a-zA-Z0-9\-_]/, '')
     @content = Admin::MessageTemplate.generate_content content_template_name: id, category: :public,
                                                        allow_missing_template: true, markdown_to_html: true
     unless @content
