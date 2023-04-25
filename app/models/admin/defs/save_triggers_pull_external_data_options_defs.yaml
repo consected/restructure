@@ -3,9 +3,49 @@
         - this_1:
             if: if_extras
             force_not_editable_save: true allows the update to succeed even if this item is set as not_editable
-            data_field: name of text or json field to update
+            local_data: |
+              (optional) name of attribute to store result to within the instance, for use in other triggers through substitutions, of format:
+                \{\{save_trigger_results.<local_data name>.<element>\}\}
+              
+              Additionally, the response code for the request will be stored in save_trigger_results.<local_data name>_http_response_code
+
+              For example, if local_data: 'identity', the request is stored to `save_trigger_results.identity` and an element of it can be
+              accessed such as:
+                  \{\{save_trigger_results.identity.access_token\}\}
+
+              The corresponding response code will be available as:
+                  \{\{save_trigger_results.identity_http_response_code\}\}
+
+              These values are also available in if conditions like:
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity.access_token
+                        value: abc-123
+                  
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity_http_response_code
+                        value: 200
+
+
+            data_field: (optional) name of text or json field to update
+            data_field_format: |
+              (optional) set to 'json' to store "data_field" in a text field with a real JSON representation.
+              If not set, the result will be stored as a Ruby Hash string representation like {a => 1, b => "abc"}
             response_code_field: name of integer or string field to receive HTTP response code
+            method: "(optional) default = 'get'. Other valid values: 'post'"
+
+            # For 'get' requests
             from:
+              url: url with substitutions
+              format: xml|json|text
+              allow_empty_result: true | false (default)
+              allow_response_codes: [array of allowable integer codes that are not 200]
+
+            # For 'post' requests
+            to:
               url: url with substitutions
               format: xml|json|text
               allow_empty_result: true | false (default)

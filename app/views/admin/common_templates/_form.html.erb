@@ -86,7 +86,7 @@
         <%= form_field_label(f, p) %>
         <% begin %>
         <%= f.password_field p, value: object_instance.api_key %>
-        <% rescue ActiveSupport::MessageVerifier::InvalidSignature %>
+        <% rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveSupport::MessageEncryptor::InvalidMessage %>
         <%= f.password_field p, value: nil %>
         <div class="info-danger">password was invalid</div>
         <% end %>

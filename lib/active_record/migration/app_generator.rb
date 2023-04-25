@@ -522,13 +522,13 @@ module ActiveRecord
           if fdef == :references
             begin
               alt_c = options[:attr_name]
-              add_reference "#{schema}.#{table_name}", alt_c, options
+              add_reference "#{schema}.#{table_name}", alt_c, **options
             rescue StandardError, ActiveRecord::StatementInvalid => e
               puts "******* Failed adding reference: #{schema}.#{table_name}, #{alt_c}, #{options}\n#{e}\n#{e.backtrace.join("\n")}"
               nil
             end
           else
-            add_column "#{schema}.#{table_name}", c, fdef, options
+            add_column "#{schema}.#{table_name}", c, fdef, **options
           end
         end
 
@@ -548,7 +548,7 @@ module ActiveRecord
 
           if fdef == :references
             alt_c = options[:attr_name]
-            remove_reference "#{schema}.#{table_name}", alt_c, options
+            remove_reference "#{schema}.#{table_name}", alt_c, **options
           else
             remove_column "#{schema}.#{table_name}", c, fdef
           end
@@ -568,12 +568,12 @@ module ActiveRecord
             if fdef == :references
               options[:index][:name] += '_hist'
               begin
-                add_reference "#{schema}.#{history_table_name}", c, options
+                add_reference "#{schema}.#{history_table_name}", c, **options
               rescue StandardError, ActiveRecord::StatementInvalid
                 nil
               end
             else
-              add_column "#{schema}.#{history_table_name}", c, fdef, options
+              add_column "#{schema}.#{history_table_name}", c, fdef, **options
             end
           end
 
@@ -590,7 +590,7 @@ module ActiveRecord
             if fdef == :references
               options[:index][:name] += '_hist'
               begin
-                remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+                remove_reference "#{schema}.#{history_table_name}", c, **options if c.in? history_col_names
               rescue StandardError, ActiveRecord::StatementInvalid
                 nil
               end
@@ -842,7 +842,7 @@ module ActiveRecord
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
           if fopts
-            add_column(tbl, attr_name, f, fopts)
+            add_column(tbl, attr_name, f, **fopts)
           else
             add_column(tbl, attr_name)
           end

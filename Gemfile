@@ -61,11 +61,11 @@ group :development, :test do
   gem 'brakeman', require: false
   gem 'bundler-audit'
   gem 'byebug', '~> 11.1', '>= 11.1.3'
-  gem 'debase'
+  # gem 'debase'
   gem 'parallel_tests', '3.8.1'
   gem 'readapt'
   gem 'rspec-rails'
-  gem 'ruby-debug-ide'
+  # gem 'ruby-debug-ide'
   gem 'spring'
   gem 'spring-commands-parallel-tests'
 end

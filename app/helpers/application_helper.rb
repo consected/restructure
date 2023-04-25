@@ -261,9 +261,11 @@ module ApplicationHelper
   def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil)
     data ||= {}
     data = data.attributes if data.respond_to? :attributes
-    Admin::MessageTemplate.generate_content content_template_name: name, data: data,
-                                            allow_missing_template: allow_missing_template,
-                                            markdown_to_html: markdown_to_html,
-                                            category: category
+    res = Admin::MessageTemplate.generate_content content_template_name: name, data: data,
+                                                  allow_missing_template: allow_missing_template,
+                                                  markdown_to_html: markdown_to_html,
+                                                  category: category
+
+    res&.html_safe
   end
 end

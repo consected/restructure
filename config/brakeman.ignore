@@ -183,40 +183,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "37fdc785ad37277a5f51142c6fd259385a4a026235bfcc49bef80510537e174a",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/public_pages/show.erb",
-      "line": 3,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Admin::MessageTemplate.generate_content(:content_template_name => params[:id], :category => :public, :allow_missing_template => true, :markdown_to_html => true)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "PublicPagesController",
-          "method": "show",
-          "line": 25,
-          "file": "app/controllers/public_pages_controller.rb",
-          "rendered": {
-            "name": "public_pages/show",
-            "file": "app/views/public_pages/show.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "public_pages/show"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "3c5e6a5b7b311bb51b49c35ff669a55b2ac5f277738e7d6ab4db258ed43779f8",
@@ -432,6 +398,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "8b64b6e069b824fbd46e9cbf341f84f6defa7a0f73e678aef2a198b0e657cba9",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/info_pages/show.erb",
+      "line": 3,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Admin::MessageTemplate.generate_content(:content_template_name => params[:id].gsub(/[^a-zA-Z0-9\\-_]/, \"\"), :category => :public, :allow_missing_template => true, :markdown_to_html => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "InfoPagesController",
+          "method": "show",
+          "line": 25,
+          "file": "app/controllers/info_pages_controller.rb",
+          "rendered": {
+            "name": "info_pages/show",
+            "file": "app/views/info_pages/show.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "info_pages/show"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "8d13efa20c2c351e4ec6a9a57d90b099bae4ce08cc246e1921c00095c0261dec",
@@ -520,6 +520,29 @@
       "confidence": "Weak",
       "cwe_id": [
         22
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 24,
+      "fingerprint": "a7acf18e900ca1791fbf365968692bc61a14fe4a6fc551b8dd4338bf200a2f9d",
+      "check_name": "UnsafeReflection",
+      "message": "Unsafe reflection method `constantize` called on model attribute",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 939,
+      "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
+      "code": "Resources::Models.find_by(:resource_name => ([c_table.to_sym] - [:this, :parent, :referring_record, :top_referring_record, :this_references, :parent_references, :parent_or_this_references, :user, :master, :condition, :value, :hide_error, :role_name, :reference]).uniq.first).class_name.constantize",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_base_query"
+      },
+      "user_input": "Resources::Models.find_by(:resource_name => ([c_table.to_sym] - [:this, :parent, :referring_record, :top_referring_record, :this_references, :parent_references, :parent_or_this_references, :user, :master, :condition, :value, :hide_error, :role_name, :reference]).uniq.first).class_name",
+      "confidence": "Medium",
+      "cwe_id": [
+        470
       ],
       "note": ""
     },
@@ -782,6 +805,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-04-12 10:27:23 +0100",
+  "updated": "2023-04-20 10:24:54 +0100",
   "brakeman_version": "5.4.1"
 }
