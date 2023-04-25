@@ -16,7 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.12] - 2023-04-13
+
+- [Fixed] public_pages by moving to info_pages to work around deployment issue on Elastic Beanstalk
+
+## [8.2.10] - 2023-04-13
 
 - [Fixed] bug in Zeitwork class loading
 - [Fixed] admin app type components panel and standalone page not loading
