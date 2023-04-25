@@ -78,6 +78,7 @@ used in the following forms / pages:
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form
 - `ui first login` - information for a new user on first login
+- `ui user credential text` - configurable text to appear in a user password change template document
 
 ### HTML Markup Snippets
 

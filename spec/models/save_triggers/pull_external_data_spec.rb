@@ -125,6 +125,29 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         }
       )
       .to_return(status: 200, body: '', headers: {})
+
+    stub_request(:post, 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials')
+      .with(
+        headers: {
+          'Accept' => /.*/,
+          'Accept-Encoding' => /.*/,
+          'Host' => /.*/,
+          'User-Agent' => /.*/,
+          'Content-Type' => 'application/x-www-form-urlencoded'
+        }
+      )
+      .to_return(status: 200, body: '{"access_token":"123123123-ad12-1234-99ce-893645:ab","token_type":"bearer","expires_in":3559,"scope":"rspecemail@test.tst"}', headers: {})
+
+    stub_request(:get, 'https://rspec.mktorest.com/rest/v1/campaigns/1081.json?access_token=123123123-ad12-1234-99ce-893645:ab')
+      .with(
+        headers: {
+          'Accept' => /.*/,
+          'Accept-Encoding' => /.*/,
+          'Host' => /.*/,
+          'User-Agent' => /.*/
+        }
+      )
+      .to_return(status: 200, body: '{"requestId":"6346#87d796ac7","result":[{"id":1081,"name":"Annual Revenue","description":"Run this Campaign at least once as a Batch Campaign, so it can score all the existing leads in your database. Then you can either schedule it to run every night, or you can add the following two triggers: \"Lead is Created\" AND \"Data Value Changes\" in the \"Annual Revenue\" Field.","type":"batch","programName":"OP-Scoring-Demographic","programId":1014,"workspaceName":"Default","createdAt":"2014-06-27T02:58:28Z","updatedAt":"2016-03-24T08:27:50Z","active":false}],"success":true}', headers: {})
   end
 
   before :example do
@@ -192,6 +215,64 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect(@al.notes).to start_with('{"header"=>{"type"=>')
   end
 
+  it 'posts query string to a url' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        data_field_format: 'json',
+        method: 'post',
+        to: {
+          url: 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.notes).to be_present
+    expect(@al.notes).to eq '{"access_token":"123123123-ad12-1234-99ce-893645:ab","token_type":"bearer","expires_in":3559,"scope":"rspecemail@test.tst"}'
+  end
+
+  it 'saves result to a local variable for use in another request' do
+    config = {
+      this1: {
+        local_data: 'identity',
+        method: 'post',
+        to: {
+          url: 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials',
+          format: 'json'
+        }
+      },
+      this2: {
+        data_field: 'notes',
+        data_field_format: 'json',
+        if: {
+          all: {
+            this: {
+              save_trigger_results: {
+                element: 'identity_http_response_code',
+                value: 200
+              }
+            }
+          }
+        },
+        from: {
+          url: 'https://rspec.mktorest.com/rest/v1/campaigns/1081.json?access_token={{save_trigger_results.identity.access_token}}',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.notes).to be_present
+    dnotes = JSON.parse(@al.notes)
+    expect(dnotes['result'].first['name']).to eq 'Annual Revenue'
+  end
+
   it 'pulls json from a url and saves to a JSON field' do
     config = {
       this1: {
@@ -225,7 +306,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
     expect do
       @trigger.perform
-    end.to raise_error(FphsException, "Pull external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+    end.to raise_error(FphsException, "get external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
   end
 
   it 'fails to pull from a bad url but the failure can be whitelisted, and the result is saved to a field' do
@@ -265,7 +346,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
     expect do
       @trigger.perform
-    end.to raise_error(FphsException, 'Pull external data: empty content received from https://eutils.ncbi.nlm.nih.gov/blank')
+    end.to raise_error(FphsException, 'get external data: empty content received from https://eutils.ncbi.nlm.nih.gov/blank')
   end
 
   it 'allows content to be blank if allow_empty_result option set' do

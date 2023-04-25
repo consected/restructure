@@ -24,11 +24,10 @@ class RecurringBatchTask < ApplicationRecurringJob
       raise FphsException, msg
     end
     limit = bt[:limit]
-    user = bt[:user]
-    app_type = bt[:app_type]
 
-    user ||= User.use_batch_user(app_type) if app_type
-    dynamic_def_class = dynamic_def.implementation_class
-    dynamic_def_class.trigger_batch_now(limit: limit, alt_user: user)
+    user = dynamic_def.class.user_for_conf_snippet(bt)
+
+    dynamic_def_imp_class = dynamic_def.implementation_class
+    dynamic_def_imp_class.trigger_batch_now(limit: limit, alt_user: user)
   end
 end

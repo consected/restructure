@@ -493,6 +493,8 @@ _fpa.utils.html_to_markdown = function (obj) {
     .wrap('');
 
   $html.find('*').each(function () {
+    if ($(this)[0].tagName === 'PRE' || $(this)[0].tagName === 'CODE') return;
+
     // Remove unnecessary newlines
     var newtxt = $(this).html().replace(/\n/g, ' ');
     $(this).html(newtxt);
