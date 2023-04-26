@@ -9,7 +9,7 @@
       </td>
       {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}
       <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../protocol_event_id}}"{{/is}}>
-      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
+      <div class="cell-holder">{{#if this}}{{#is @key 'notes'}}{{this}}{{else}}{{pretty_string this  return_string="true" capitalize="true"}}{{/is}}{{/if}}
       {{#is @key 'event_name'}}
       {{#if ../record_id}} <a href="#{{hyphenate ../record_type_us}}-{{../master_id}}-{{../record_id}}" data-record-type="{{../record_type_us}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize (replace ../record_type_us 'dynamic_model_' '')}}" data-master-id="{{../master_id}}" data-record-id="{{../record_id}}" data-call-if-needed="postprocessors_activity_logs.open_{{../record_type_us}}"></a>{{/if}}
       {{/is}}

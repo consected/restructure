@@ -1924,6 +1924,135 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res.calc_action_if).to be true
   end
 
+  describe 'hash elements' do
+    it 'compares a hash element' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: 'element result value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: 'bad value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.no_element',
+              value: 'element result value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'compares a hash element in any combination' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        any: [
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value2',
+                value: 'not element result value'
+              }
+            }
+          },
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value',
+                value: 'element result value'
+              }
+            }
+          },
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value3',
+                value: 'bad value'
+              }
+            }
+          }
+
+        ]
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+    end
+
+    it 'compares a hash element against a substituted value' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: '{{save_trigger_results.result1.res_value}}'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+    end
+  end
+
   describe 'returning values' do
     it 'returns the last value from a condition as this_val attribute' do
       conf = {
@@ -2171,13 +2300,20 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       @alref2 = create_item
       @alref2.update! select_who: 'someone else new', current_user: @user, master_id: @alref.master_id
 
+      @alref_no_master = create_item
+      @alref_no_master.update! select_who: 'someone else new', current_user: @user
+      # Force an update of master_id outside of the validations
+      @alref_no_master.class.where(id: @alref_no_master.id).update_all(master_id: nil)
+
       @alref1.reload
       @alref2.reload
+      @alref_no_master.reload
       @alref1.current_user = @user
       @alref2.current_user = @user
 
       expect(@alref.master_id).to eq @alref2.master_id
       expect(@alref.master_id).to eq @alref1.master_id
+      expect(@alref_no_master.master_id).to be nil
 
       @alref.extra_log_type_config.references = {
         activity_log__player_contact_phone: {
@@ -2232,6 +2368,40 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           },
           update: 'return_result'
         }
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq @alref
+    end
+
+    it 'returns a whole record as a result of finding a reference in any master' do
+      conf = {
+        activity_log__player_contact_phones: {
+          id: {
+            referring_record: 'id'
+          },
+          update: 'return_result'
+        },
+        masters: {}
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq @alref
+    end
+
+    it 'returns a whole record as a result of finding a table without masters' do
+      conf = {
+        activity_log__player_contact_phones: {
+          id: {
+            referring_record: 'id'
+          },
+          update: 'return_result'
+        },
+        no_masters: {}
       }
 
       ca = ConditionalActions.new conf, @alref2

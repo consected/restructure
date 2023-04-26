@@ -117,8 +117,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text = content_template_text.dup
     return unless text
 
-    text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
-
     # If a method name has been provided, call that method to check if the content template should convert markdown to html
     # otherwise just use the value of the argument
     res_md = if markdown_to_html.is_a?(Symbol) && content_template.respond_to?(markdown_to_html)
@@ -128,6 +126,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
              end
 
     text = Formatter::Substitution.text_to_html(text) if res_md
+    text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
 
     text
   end
