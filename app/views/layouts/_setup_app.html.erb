@@ -75,4 +75,10 @@
     _fpa.loaded.login();
   });
   <% end %>
+
+  <% if controller_name == 'registrations' %>
+  $('html').ready( () => {
+      _fpa.loaded.registrations();
+  });
+  <% end %>
 </script>

@@ -21,7 +21,7 @@ module Users
     end
 
     def devise_registration_params
-      devise_parameter_sanitizer.permit(:sign_up, keys: %i[first_name last_name])
+      devise_parameter_sanitizer.permit(:sign_up, keys: %i[first_name last_name country terms_of_use])
     end
 
     def authorize_resource

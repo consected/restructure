@@ -45,6 +45,17 @@ class User < ActiveRecord::Base
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
+  validates :country,
+            presence: {
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            }
+
+  validates :terms_of_use,
+            acceptance: {
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            }
+
+
   validate :prevent_disable_template_user
 
   #

@@ -9,7 +9,7 @@ gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
 gem 'aws-sdk-sns', '~> 1'
 gem 'bootsnap'
-gem 'country_select', '~> 8.0'
+gem 'country_select', '~> 8.0', '>= 8.0.1'
 gem 'crass', '~> 1.0.4'
 gem 'daemons'
 gem 'dalli'
@@ -61,7 +61,7 @@ group :development, :test do
   gem 'brakeman', require: false
   gem 'bundler-audit'
   gem 'byebug', '~> 11.1', '>= 11.1.3'
-  gem 'debase'
+  gem 'debase', {git: 'https://github.com/ruby-debug/debase.git', tag: 'v0.2.5.beta2'}
   gem 'parallel_tests', '3.8.1'
   gem 'readapt'
   gem 'rspec-rails'

@@ -56,6 +56,24 @@
       <%end%>
     </div>
 
+    <div class="form-group-non">
+      <%= f.label :country %><br />
+      <%= f.country_select :country, include_blank: true, class: "form-control"%>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.check_box :terms_of_use %>
+      <%= f.label :terms_of_use do %>
+      <span id="eula-default">
+        <%= template_block 'ui new user registration terms default' %>
+      </span>
+      <span id="eula-gdpr">
+        <%= template_block 'ui new user registration terms gdpr' %>
+      </span>
+      <% end %>
+
+    </div>
+
     <div class="actions">
       <%= f.submit "Sign up", class: "btn btn-primary" %>
     </div>
