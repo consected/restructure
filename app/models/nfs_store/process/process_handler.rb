@@ -152,7 +152,8 @@ module NfsStore
       def self.job_class(name)
         classname = "#{name}_job".camelize
 
-        parents.first.const_get classname
+        nparts = self.name.split('::')[0..-2]&.join('::') || 'Object'
+        nparts.constantize.const_get classname
       end
 
       #

@@ -45,11 +45,16 @@ class User < ActiveRecord::Base
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
+  validate :prevent_disable_template_user
+
   #
   # The template user is assigned to newly created roles to ensure they are exported
   # in an app type export, even if there are no other matching users on the target server
   def self.template_user
-    where(email: Settings::TemplateUserEmail).first
+    res = find_by(email: Settings::TemplateUserEmail)
+
+    Rails.logger.error "template_user #{Settings::TemplateUserEmail} does not exist" unless res
+    res
   end
 
   # Get the admin that corresponds to this user
@@ -243,5 +248,11 @@ class User < ActiveRecord::Base
 
   def build_user_preference_on_create
     build_user_preference({ current_user: self }) unless a_template_or_batch_user?
+  end
+
+  def prevent_disable_template_user
+    return unless email == Settings::TemplateUserEmail && disabled && disabled_changed?
+
+    raise FphsException, "Do not attempt to disable the template user: #{email}" 
   end
 end

@@ -89,7 +89,8 @@ RSpec.describe Tracker, type: :model do
     res = master.tracker_completions
     expect(res.length).to eq 1
 
-    res = master.as_json['tracker_completions'].first[:sub_process_name]
+    # TODO: why a string instead of a symbol
+    res = master.as_json['tracker_completions'].first['sub_process_name']
     expect(res).to eq @sp1_1.name
   end
 end

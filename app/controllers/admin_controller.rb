@@ -17,7 +17,7 @@ class AdminController < ApplicationController
   protected
 
   def object_has_admin_parent?
-    object_instance.class.parent.to_s.in? Admin::AdminBase::ValidAdminModules
+    object_instance.class.name.split('::')[-2].in? Admin::AdminBase::ValidAdminModules
   end
 
   def editor_code_type

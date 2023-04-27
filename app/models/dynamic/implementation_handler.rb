@@ -11,18 +11,22 @@ module Dynamic
       after_commit :reset_access_evaluations!
 
       # skip_save_trigger: Prevent save triggers from running
-      attr_accessor :skip_save_trigger
+      # save_trigger_results: Results from stored locally by save triggers
+      attr_accessor :skip_save_trigger, :save_trigger_results
     end
 
     class_methods do
       #
       # Run batch processing as a job, triggering actions before on the existence of each record
-      # @param [Integer|nil] limit - optional limit to the number of records to process, overriding the configuration if set
+      # @param [Integer|nil] limit - optional limit to the number of records to process,
+      #                              overriding the configuration if set
       # @param [User|nil] alt_user - alternative user to use, rather than the user defined by each record
-      # @param [Admin::AppType|nil] app_type - force user to use app type, rather than current app type set in the record
+      # @param [Admin::AppType|nil] alt_app_type - force user to use app type,
+      #                                            rather than current app type set in the record
       def trigger_batch(limit: nil, alt_user: nil, alt_app_type: nil)
-        Rails.logger.info "trigger batch job for #{self} - limit: #{limit}, alt_user: #{alt_user}"
-        HandleBatchJob.perform_later(to_s)
+        Rails.logger.info "trigger batch job for #{self} - " \
+                          "limit: #{limit}, alt_user: #{alt_user}, alt_app_type: #{alt_app_type}"
+        HandleBatchJob.perform_later(to_s, limit: limit, user: alt_user, app_type: alt_app_type)
       end
 
       #
@@ -40,6 +44,7 @@ module Dynamic
         if cond
           new_batch = []
           batch.each do |obj|
+            obj.current_user = alt_user if alt_user
             ca = ConditionalActions.new cond, obj
             new_batch << obj if ca.calc_action_if
 
@@ -200,6 +205,7 @@ module Dynamic
     #
     # Handle on save save triggers
     def handle_save_triggers
+      self.save_trigger_results ||= {}
       option_type_config&.calc_save_trigger_if self unless skip_save_trigger
       true
     end
@@ -207,6 +213,7 @@ module Dynamic
     #
     # Handle actions that must be performed before on save save triggers
     def handle_before_save_triggers
+      self.save_trigger_results ||= {}
       option_type_config&.calc_save_trigger_if self, alt_on: :before_save unless skip_save_trigger
       true
     end
@@ -216,7 +223,6 @@ module Dynamic
     # @param [User] alt_user - use a specific user to run the action
     def handle_record_batch_trigger(alt_user: nil)
       as_user = alt_user || user
-      as_user = User.active.find(as_user) unless as_user.is_a? User
       self.current_user = as_user
       option_type_config&.calc_batch_trigger self
     end

@@ -2,7 +2,7 @@
 
 module Formatter
   class Substitution
-    HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/.freeze
+    HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/
     TagnameRegExString = '[0-9a-zA-Z_.:\-]+'
 
     # Gets an array of 5 element arrays for each {(#if <tagname>}}true text{{else}}else text{{/if}}
@@ -11,9 +11,9 @@ module Formatter
     # - true text
     # - truthy if there is an {{else}}
     # - else text
-    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m.freeze
+    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m
 
-    OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/.freeze
+    OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
@@ -190,6 +190,7 @@ module Formatter
         data[:original_item] = item
         data[:alt_item] = alt_item
         data['data'] ||= item.data if item.respond_to? :data
+        data['save_trigger_results'] = item.save_trigger_results if item.respond_to? :save_trigger_results
 
         if item.respond_to?(:master)
           master = item.master
@@ -218,6 +219,7 @@ module Formatter
       data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
       data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
       data[:notifications_from_email] = Settings::NotificationsFromEmail
+      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)

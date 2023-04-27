@@ -460,7 +460,7 @@ module NfsStore
         enc_path_parts << file_name
         enc_path = enc_path_parts.join('/')
 
-        enc_path = URI.escape(enc_path)
+        enc_path = URI::Parser.new.escape(enc_path)
 
         "/nfs_store/downloads/in/#{container_parent.resource_item_name}/#{parent_id}/#{enc_path}"
       end

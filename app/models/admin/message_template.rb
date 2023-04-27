@@ -97,10 +97,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @return [String] resulting text
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,
-                            allow_missing_template: false, markdown_to_html: false)
+                            allow_missing_template: false, markdown_to_html: false,
+                            category: nil)
     if content_template_name
       # Lookup the template based on its name
-      content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
+      cond = { name: content_template_name }
+      cond[:category] = category if category
+      content_template = Admin::MessageTemplate.active.content_templates.find_by(cond)
       return nil if allow_missing_template && !content_template
 
       raise FphsException, "No content template found with name: #{content_template_name}" unless content_template
@@ -114,8 +117,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text = content_template_text.dup
     return unless text
 
-    text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
-
     # If a method name has been provided, call that method to check if the content template should convert markdown to html
     # otherwise just use the value of the argument
     res_md = if markdown_to_html.is_a?(Symbol) && content_template.respond_to?(markdown_to_html)
@@ -125,6 +126,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
              end
 
     text = Formatter::Substitution.text_to_html(text) if res_md
+    text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
 
     text
   end

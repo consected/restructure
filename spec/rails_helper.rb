@@ -59,6 +59,7 @@ end
 put_now 'Require spec_helper'
 require 'spec_helper'
 put_now 'Require environment'
+
 require File.expand_path('../config/environment', __dir__)
 put_now 'Require rspec/rails'
 require 'rspec/rails'
@@ -81,6 +82,7 @@ require 'setup_helper'
 include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
+SetupHelper.clean_conflicting_activity_logs
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
@@ -99,26 +101,12 @@ Warden.test_mode!
 # end with _spec.rb. You can configure this pattern with the --pattern
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
-unless ENV['SKIP_DB_SETUP']
-  put_now 'Validate and setup app dbs'
-  SetupHelper.validate_db_setup
-  SetupHelper.migrate_if_needed
-
-  # The DB setup can be forced to skip with an env variable
-  # It will automatically skip if a specific table is already in place
-  SetupHelper.setup_app_dbs
-
-  # Seed the database before loading files, since things like Scantron model and
-  # controller will not exist without the seed
-  put_now 'Seed setup'
-  require "#{::Rails.root}/db/seeds.rb"
-  # Seeds.setup is automatically run when seeds.rb is required
-  $dont_seed = true
-  raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
-end
+SetupHelper.check_bhs_assignments_table
+SetupHelper.setup_full_test_db unless ENV['SKIP_DB_SETUP']
 
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
+
   res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
   if res != "mountpoint OK\n"
     put_now res
@@ -126,6 +114,8 @@ unless ENV['SKIP_FS_SETUP']
     exit
   end
 end
+
+SetupHelper.check_bhs_assignments_table
 
 put_now 'Require more'
 # The following line is provided for convenience purposes. It has the downside
@@ -135,15 +125,17 @@ put_now 'Require more'
 #
 require "#{::Rails.root}/spec/support/master_support.rb"
 require "#{::Rails.root}/spec/support/model_support.rb"
-
+SetupHelper.check_bhs_assignments_table
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
-
+SetupHelper.check_bhs_assignments_table
 unless ENV['SKIP_DB_SETUP']
   # Checks for pending migrations before tests are run.
   # If you are not using ActiveRecord, you can remove this line.
   put_now 'Enforce migrations'
-  ActiveRecord::Migration.maintain_test_schema!
+  # ActiveRecord::Migration.maintain_test_schema!
+
+  SetupHelper.check_bhs_assignments_table
 
   sql = <<~END_SQL
     DROP SCHEMA IF EXISTS redcap_test CASCADE;
@@ -165,31 +157,49 @@ unless ENV['SKIP_DB_SETUP']
 
   ActiveRecord::Base.connection.execute sql
 
+  SetupHelper.check_bhs_assignments_table
   # We need to ensure that dynamic tables are in place before we setup dynamic models
   # in each example, otherwise the tests lock up.
   db_migration_dirname = Rails.root.join('spec/migrations')
-  ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+  Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
+  SetupHelper.check_bhs_assignments_table
   puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
 end
 
 RSpec.configure do |config|
   config.before(:suite) do
+    SetupHelper.check_bhs_assignments_table
+
     # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
 
+    require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: Settings::TemplateUserEmail)
+    tu = User.find_by(email: Settings::TemplateUserEmail)
+    Seeds::BUsers.setup if tu.nil?
+
+    Rails.cache.clear
+    SetupHelper.reload_configs
+
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
+      SetupHelper.check_bhs_assignments_table
+
       put_now 'Setup apps'
       sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
       ActiveRecord::Base.connection.execute sql
       put_now 'Setup ActivityLogPlayerContactPhone'
-      Seeds::ActivityLogPlayerContactPhone.setup
+      SetupHelper.setup_al_player_contact_phones
+      # Seeds::ActivityLogPlayerContactPhone.setup
       put_now 'setup_al_player_contact_emails'
       SetupHelper.setup_al_player_contact_emails
       put_now 'Setup ext_identifier'
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
+      SetupHelper.check_bhs_assignments_table true
+
+      raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
+
       put_now 'setup_ref_data_app'
       SetupHelper.setup_ref_data_app
 

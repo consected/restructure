@@ -3,69 +3,15 @@
   <div class="row">
     
     <div class="col-md-24">
-      <h1><%= @app_type.label %> <small>#<%= @app_type.id %> <code><%= @app_type.name %></code></small></h1>
-      <div class="text-right">
-        <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-primary' %>
+      <div>
+        <div class="pull-right">
+          <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-primary' %>
+        </div>
+        <h1><%= @app_type.label %> <small>#<%= @app_type.id %> <code><%= @app_type.name %></code></small></h1>
       </div>
       
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <% 
-        @app_type.as_json.first.last.each do |k, v|        
-          if v.respond_to?(:each) 
-            title = k.humanize.gsub(/^valid |associated /i, '').titleize
-            title_hyph = title.id_hyphenate
-            init_link_class = 'collapsed'
-            init_panel_class = ''
-          %>
-        <div class="panel panel-default">
-          <div class="panel-heading" role="tab" id="<%="app-type-component-heading--#{title_hyph}"%>">
-            <%
-            if v.first
-              class_rn = v.first.class.resource_name 
-              base_path = Resources::Models.find_by(resource_name: class_rn)&.dig(:base_route_name)&.pluralize
-              path = send("#{base_path}_path", filter: {ids: v.map(&:id)})
-            %>
-            <h3 class="panel-title">
-              <%= link_to title, "#app-type-components-#{title_hyph}", 
-                  target: 'adminres', 
-                  role: "button", 
-                  data: { toggle: "collapse", parent: "#accordion" }, 
-                  'aria-expanded' =>"true",
-                  'aria-controls'=>"#app-type-components-#{title_hyph}",
-                  class: init_link_class %> 
-              <%= link_to link_label_open_in_new(''), path, target: 'adminres' %>
-            </h3>
-            <% else %>
-              <h3 class="panel-title"><%= title %></h3>
-            <% end %>
-          </div>
-          <div id="<%="app-type-components-#{title_hyph}"%>" class="panel-collapse collapse <%=init_panel_class%>" role="tabpanel" aria-labelledby="<%="app-type-component-heading-#{title_hyph}"%>">
-            <div class="panel-body">
-              <ul>
-              <% all_vs = v.map do |k2| %>
-                <%
-                  rn = k2.respond_to?(:alt_resource_name) && k2.alt_resource_name
-                  rn ||= k2.resource_name
-                  path = send("#{base_path}_path", filter: {id: k2.id})
-                  name = k2.respond_to?(:name) ? k2.name : rn
-
-                  { rn: rn, path: path, name: name }
-                %>
-              <% end %>
-              <% all_vs.sort {|vi, vk| vi[:name] <=> vk[:name] }.each do |vs| %>
-                <li>
-                  
-                  <%= link_to link_label_open_in_new(vs[:name]), vs[:path], target: 'adminres' %>
-                </li>
-              <% end %>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <% 
-          end 
-        end 
-        %>
+        <%= render partial: 'admin/app_types/components', locals:{ main_components: false, open_in_new: true }%>
       
       </div>
     </div>

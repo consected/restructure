@@ -129,6 +129,8 @@ Rails.application.routes.draw do
     resources :contact_infos, except: %i[show destroy]
   end
 
+  resources :info_pages, only: %i[show]
+
   get 'pages/home' => 'pages#home'
   get 'pages/app_home' => 'pages#app_home'
   resources :pages, only: %i[index show] do

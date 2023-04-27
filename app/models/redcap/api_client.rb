@@ -180,7 +180,7 @@ module Redcap
     end
 
     def post_action(action, request_options)
-      res = redcap.send(action, { request_options: request_options })
+      res = redcap.send(action, request_options: request_options)
       self.class.symbolize_result res
     end
   end

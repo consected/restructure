@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-AlNameGenTest = 'Gen Test ELT'
+AlNameGenTestVh = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
@@ -11,11 +11,11 @@ RSpec.describe 'Definition versioning', type: :model do
   include PlayerContactSupport
 
   def al_name
-    AlNameGenTest
+    AlNameGenTestVh
   end
 
   before :context do
-    SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestVh, 'elt', 'player_contact'
   end
 
   before :each do

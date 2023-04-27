@@ -107,16 +107,13 @@ p.small.report-table-name {
   display: block;
   min-width: 100px;
   text-align: left;
-  font-weight: normal;
-  line-height: 1em;
 
   input[type="submit"] {
     margin-bottom: 4px;
   }
 
-  #report-select-all-files, #report-unselect-all-files {
-    font-weight: normal;
-    font-size: 87%;
+  #report-select-all-files {
+    vertical-align: text-bottom;
   }
 
   label {
