@@ -18,6 +18,55 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from ReStructure @8.2.20 - 2023-04-27
+
+#### [8.2.20] - 2023-04-25
+
+- [Release] built for release
+
+#### [8.2.19]
+
+- [Added] post requests to pull_external_data save trigger
+- [Added] temporary results storage in save_trigger_results, available to if conditions and other pull_external_data url substitutions
+- [Added] calc actions for ILIKE and ~*
+- [Added] this: field: element: comparisons in if
+- [Fixed] display of ui template blocks with substitutions showing with HTML tags
+- [Fixed] display of null in tracker notes field
+
+#### [8.2.17]
+
+- [Fixed] migration generator bugs based on options hash / attributes
+
+#### [8.2.15]
+
+- [Fixed] encryption of api keys for Redcap
+- [Removed] gem debase and ruby-debug-ide
+- [Fixed] exception handling on bad API key, allowing Redcap project form to be edited
+
+#### [8.2.14]
+
+- [Added] configuration to specify a user or app_type for notification configurations to ensure that background jobs run with a consistent user
+- [Changed] tracker record updates to ignore a missing item record being specified, since in certain dynamic model views the update triggering the tracker update may have hidden the actual record
+- [Added] no_masters option to calculation of conditions, to allow a specific table to be queried directly
+- [Added] configurable text for credential change text
+- [Fixed] handling of code blocks in markdown
+- [Fixed] unnecessary capitalization of tracker notes
+
+#### [8.2.12] - 2023-04-13
+
+- [Fixed] public_pages by moving to info_pages to work around deployment issue on Elastic Beanstalk
+
+#### [8.2.10] - 2023-04-13
+
+- [Fixed] bug in Zeitwork class loading
+- [Fixed] admin app type components panel and standalone page not loading
+
+#### [8.2.1] - 2023-04-11
+
+- [Changed] to Rails 6 and Ruby 3
+
+## [8.0.124] - 2023-04-06
+
 ### Transferred from ReStructure @8.1.14 - 2023-04-06
 
 - [Added] {{#if}} conditional display in caption_before show mode

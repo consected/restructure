@@ -10,6 +10,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: bulk_msg; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA bulk_msg;
+
+
+--
 -- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -13047,7 +13054,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ref_data;
+SET search_path TO ml_app,ipa_ops,testmybrain,persnet,bulk_msg,ref_data,test,redcap_test,dynamic_test;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -13515,6 +13522,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220301201512'),
 ('20220307154248'),
 ('20220505095408'),
-('20220531121546');
+('20220531121546'),
+('20230209153019');
 
 
