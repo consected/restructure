@@ -15,6 +15,9 @@ module ReportResults
       @tree_view_options = @report.report_options.tree_view_options
       @column_types = column_types
 
+      # Force no sorting for tree views
+      @view_options.no_sorting = true if @view_options.view_as == 'tree'
+
       column_options = @report.report_options.column_options
       return unless column_options
 

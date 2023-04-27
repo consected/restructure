@@ -319,25 +319,32 @@ _fpa.reports = {
       });
 
     }
+    var $fsels = $('.report-file-selector');
+    var all_selected = ($fsels.filter(':checked').length > 0);
+    var checked_attr = all_selected ? 'checked' : '';
+    var init_label = all_selected ? 'unselect all' : 'select all'
 
-    var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="' + dct_action + '" class="btn btn-primary rep-sel-action-' + dct_action.replace(' ', '-') + '"/></span>'
+    var b = `<span class="report-files-actions"><a id="report-select-all-files" data-select-all="select">select all</a> / <a id="report-unselect-all-files" data-select-all="unselect">unselect all</a></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="${dct_action}" class="btn btn-primary rep-sel-action-${dct_action.replace(' ', '-')}"/></span>`;
     var $t = $('table.report-table, .report-list[data-results-count]');
     $f.insertBefore($t);
     $t.appendTo($('#itemselection-for-report'));
 
-    // If the select all checkbox is changed
+    // On select all / unselect all
     // check or uncheck all the entries.
     // Briefly disable auto submit on the form, to avoid potentially
     // thousands of individual checkbox changes being submitted to the server.
     // Wait a moment then trigger the auto submit afterwards\
-    $(document).off('change', '#report-select-all-files');
-    $(document).on('change', '#report-select-all-files', function () {
+    $(document).off('click', '#report-select-all-files, #report-unselect-all-files');
+    $(document).on('click', '#report-select-all-files, #report-unselect-all-files', function () {
       $f.addClass('report-select-prevent-auto-submit');
-      var allels = $('.report-file-selector');
-      if ($(this).is(':checked'))
+      const allels = $('.report-file-selector');
+      const do_select = ($(this).attr('data-select-all') == 'select');
+      if (do_select) {
         allels.attr('checked', true);
-      else
+      }
+      else {
         allels.attr('checked', null);
+      }
 
       window.setTimeout(function () {
         $f.removeClass('report-select-prevent-auto-submit');
@@ -357,6 +364,7 @@ _fpa.reports = {
       if ($(this).find('p:first').html() == dct) {
         $(this).addClass('no-sort');
         $(this).append(b);
+        $(this).attr('title', null);
       }
     });
 
@@ -372,6 +380,7 @@ _fpa.reports = {
     defval.init_value = true;
     $el.val(JSON.stringify(defval));
     $el.attr('checked', true)
+    $el.attr('class', 'report-file-selector-default')
     $el.hide();
     console.log($el);
     $('.report-files-actions').append($el);
