@@ -143,7 +143,12 @@ body.page-loading {
   .logged-in-as-admin li {
     margin-right: 0.3em;
   }
-  .logged-in-as-admin li a.btn {
+  
+  .public-page-nav li {
+    margin-right: 1em;
+  }
+
+  .logged-in-as-admin li a.btn, .public-page-nav li a.btn {
     padding-top: 4px;
     padding-bottom: 4px;
     margin-top: 8px;

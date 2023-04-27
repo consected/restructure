@@ -214,7 +214,12 @@ class Tracker < UserBase
 
     t.item_id = record.id
     t.item_type = record.class.name
-    raise "Bad item for tracker (#{type} / #{record.class.name} / #{record.id})" unless t.item
+
+    # We no longer raise on a bad item, since in most cases this just can't happen,
+    # but for special cases, such as dynamic model views, the record may have disappeared before
+    # the tracker item for it can be added. Record the tracker for information, but don't
+    # force an unnecessary failure.
+    # raise "Bad item for tracker (#{type} / #{record.class.name} / #{record.id})" unless t.item
 
     t
   end
@@ -299,9 +304,9 @@ class Tracker < UserBase
   end
 
   def check_protocol_event
-    if protocol_event_id.nil? && sub_process && !sub_process.protocol_events.empty?
-      errors.add(:method, ' must be selected')
-    end
+    return unless protocol_event_id.nil? && sub_process && !sub_process.protocol_events.empty?
+
+    errors.add(:method, ' must be selected')
   end
 
   def check_sub_process

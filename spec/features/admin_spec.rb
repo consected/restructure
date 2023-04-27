@@ -22,6 +22,38 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     @good_password
   end
 
+  def admin_sign_in_with_2fa
+    admin = Admin.where(email: @good_email).first
+    expect(admin).to be_a Admin
+    expect(admin.id).to equal @admin.id
+
+    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+    visit url
+    expect(current_path).to eq '/admins/sign_in'
+
+    within '#new_admin' do
+      expect(@admin.email).to eq @good_email
+      expect(@admin.valid_password?(@good_password)).to be true
+      # Do not validate, since this consumes the one time code and prevents it from being used (causes a long delay in the process)
+      # expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
+
+      fill_in 'Email', with: @good_email
+      fill_in 'Password', with: @good_password
+      click_button 'Log in'
+    end
+
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
+    end
+
+    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
+  end
+
   before(:all) do
     SetupHelper.feature_setup
 
@@ -70,35 +102,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
   end
 
   it 'should sign in' do
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-
-    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    visit url
-    expect(current_path).to eq '/admins/sign_in'
-
-    within '#new_admin' do
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-      # Do not validate, since this consumes the one time code and prevents it from being used (causes a long delay in the process)
-      # expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
-
-      fill_in 'Email', with: @good_email
-      fill_in 'Password', with: @good_password
-      click_button 'Log in'
-    end
-
-    expect(page).to have_selector('.login-2fa-block', visible: true)
-    expect(page).to have_selector('#new_admin', visible: true)
-    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
-
-    within '#new_admin' do
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-      click_button 'Log in'
-    end
-
-    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
+    admin_sign_in_with_2fa
   end
 
   it 'should sign in with 2FA even if it is disabled for users' do
@@ -248,7 +252,30 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     expect(page).to have_css '.flash .alert'
   end
 
-  after(:all) do
-    # @admin.destroy!
+  it 'shows the current project in the left hand panel' do
+    admin_sign_in_with_2fa
+
+    expect(page).to have_css('.admin-panel-components')
+
+    within '.admin-panel-components' do
+      click_link 'Protocols'
+      expect(page).to have_css '#app-type-components-protocols'
+      click_link 'General'
+    end
+    expect(page).to have_css 'body.protocols'
+  end
+
+  it 'shows the selected project components page' do
+    admin_sign_in_with_2fa
+
+    click_link 'App Types'
+
+    expect(page).to have_css 'body.app_types'
+
+    id = Admin::AppType.active.first.id
+    f = find("a[href='/admin/app_types/#{id}?show_components=true']")
+    new_window = window_opened_by { f.click }
+    switch_to_window new_window
+    expect(page).to have_css('#app-type-component-heading--user-roles')
   end
 end

@@ -14,6 +14,9 @@ Rails.application.configure do
   # Do not eager load code on boot.
   config.eager_load = false
 
+  # Uncomment to show the Zeitwork autoloader log
+  # Rails.autoloaders.log!
+
   # Show full error reports.
   config.consider_all_requests_local = true
 

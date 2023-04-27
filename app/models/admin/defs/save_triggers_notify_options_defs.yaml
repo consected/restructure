@@ -47,4 +47,10 @@
 
             wait: 'n seconds|minutes|hours|days|weeks|months|years'
           
+          on_complete: |
+            triggers to run when send has completed, for example update_reference:...
+
           if: if_extras
+
+          app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
+          user: optionally specify a user id (or email) to force use of the specified user when perfoming actions
