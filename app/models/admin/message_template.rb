@@ -94,6 +94,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   #                                              If a method name has been provided (Symbol), call that method to check
   #                                              if the content template should convert markdown to html.
   #                                              Otherwise use the provided value (Truthy | Falsey)
+  # @param [String] category- optionally request content from the stated category
   # @return [String] resulting text
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,

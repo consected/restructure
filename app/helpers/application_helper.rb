@@ -256,7 +256,7 @@ module ApplicationHelper
   # @param [Hash|UserBase|nil] data - data for substitutions
   # @param [Boolean] allow_missing_template - return nil if no matching template found
   # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
-  # @param [String] - optionally request content from the stated category
+  # @param [String] category - optionally request content from the stated category
   # @return [String]
   def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil)
     data ||= {}
