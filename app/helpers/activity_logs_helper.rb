@@ -49,7 +49,7 @@ module ActivityLogsHelper
       extra_type = "-#{@option_type_name.hyphenate}"
     end
 
-    button_class = 'glyphicon glyphicon-remove-sign'
+    button_class = 'glyphicon glyphicon-remove-sign inline-cancel'
     class_extras ||= 'pull-right' unless link_text
 
     if @id
