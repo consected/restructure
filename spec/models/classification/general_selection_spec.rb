@@ -34,6 +34,6 @@ RSpec.describe Classification::GeneralSelection, type: :model do
     expect(g.already_taken(:item_type, :value)).to be true
 
     expect(g.save).to be false
-    expect(g.errors.keys).to include :duplicated
+    expect(g.errors.attribute_names).to include :duplicated
   end
 end
