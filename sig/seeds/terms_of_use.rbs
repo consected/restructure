@@ -1,0 +1,15 @@
+module Seeds
+  module TermsOfUse
+
+    DEFAULT_TEMPLATE_NAME: string
+    GDPR_TEMPLATE_NAME: string
+
+    def self.add_values: -> void
+
+    def self.create_templates: -> void
+
+    def self.do_last: -> bool
+
+    def self.setup: -> void
+  end
+end

@@ -62,16 +62,15 @@
     </div>
 
     <div class="form-group-non">
-      <%= f.check_box :terms_of_use %>
       <%= f.label :terms_of_use do %>
-      <span id="eula-default">
-        <%= template_block 'ui new user registration terms default' %>
-      </span>
-      <span id="eula-gdpr">
-        <%= template_block 'ui new user registration terms gdpr' %>
-      </span>
+        <%= f.check_box :terms_of_use %>
+        <span id="terms-of-use-default">
+          <%= template_block 'ui new user registration terms default' %>
+        </span>
+        <span id="terms-of-use-gdpr">
+          <%= template_block 'ui new user registration terms gdpr' %>
+        </span>
       <% end %>
-
     </div>
 
     <div class="actions">
