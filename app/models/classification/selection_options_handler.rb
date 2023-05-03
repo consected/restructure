@@ -176,9 +176,10 @@ class Classification::SelectionOptionsHandler
   # the master specific results will be retrieved for those datasets having a master association
   # @param [UserBase] user_base_object
   # @param [String | nil] only - optionally return only a specified attribute in the result hash
+  # @param [true | false] hash_res - return result for each field as a hash {value => name}
   # @return [Hash{field_name: [name, value]} | nil] returns the selection results
   #      configurations per field, or nil if there are none
-  def self.all_edit_as_select_field(user_base_object, only: nil)
+  def self.all_edit_as_select_field(user_base_object, only: nil, hash_res: false)
     otc = user_base_object.option_type_config
     fndefs = {}
 
@@ -223,7 +224,10 @@ class Classification::SelectionOptionsHandler
                                                                                   label_attr: label_attr,
                                                                                   group_split_char: group_split_char)
 
-        fndefs[fn] = res if got_res && res
+        if got_res && res
+          res = res.to_h if hash_res
+          fndefs[fn] = res
+        end
       end
     end
     return if fndefs.empty?
@@ -264,15 +268,16 @@ class Classification::SelectionOptionsHandler
   # @return [Array{Hash}] serializable array of general_selection and alt_options overrides
   def self.selector_with_config_overrides(conditions = nil)
     if conditions.is_a? Hash
-      extra_log_type = conditions.delete(:extra_log_type)
-      item_type = conditions.delete(:item_type)
-      single_field = conditions.delete(:field_name)
+      extra_log_type = conditions[:extra_log_type]
+      item_type = conditions[:item_type]
+      single_field = conditions[:field_name]
+      master_id = conditions[:master_id]
       only_field_names = [single_field] if single_field
     end
 
     # Get the all enabled general selection data as an array of results
-    res = Classification::GeneralSelection.selector_collection.map { |c| c.attributes.symbolize_keys }
-
+    where_cond = ['item_type LIKE :like_it', { like_it: "#{item_type.singularize}_%" }] if item_type
+    res = Classification::GeneralSelection.selector_collection(where_cond).map { |c| c.attributes.symbolize_keys }
     # Get a list of implementations that may have alt_options defined
     impl_classes = implementation_classes
     # If an item type has been specified, filter the possible classes
@@ -285,6 +290,7 @@ class Classification::SelectionOptionsHandler
 
       # If an extra log type was specified, use it, since the alt_options are specified at that level
       dyn_object.extra_log_type = extra_log_type if extra_log_type && dyn_object.respond_to?(:extra_log_type)
+      dyn_object.master_id = master_id if master_id && dyn_object.respond_to?(:master_id)
 
       prefix = general_selection_prefix_name(dyn_object)
 
@@ -299,12 +305,12 @@ class Classification::SelectionOptionsHandler
       res.each do |r|
         if r[:item_type].start_with?(prefix)
           r.merge!(base_item_type: prefix,
-                   field_name: r[:item_type].sub("#{prefix}_", ''))
+                   field_name: r[:item_type].sub("#{prefix}_", '').to_sym)
         end
       end
 
       # Get the select_... field options that add to or override the general selections
-      alt_options = all_edit_as_select_field(dyn_object) || {}
+      alt_options = all_edit_as_select_field(dyn_object, hash_res: true) || {}
 
       # Get the alt_options that add to or override the previous definitions
       alt_options.merge!(all_edit_as_alt_options(dyn_object) || {})

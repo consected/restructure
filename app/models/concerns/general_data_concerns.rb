@@ -185,22 +185,36 @@ module GeneralDataConcerns
 
     @add_show_attribs = {}
     otc = option_type_config
-    allselects = Classification::SelectionOptionsHandler.all_edit_as_select_field(self)
-    return unless allselects
+
+    elt = extra_log_type if respond_to? :extra_log_type
+    mid = master_id if respond_to? :master_id
+
+    rn = self.class.resource_name
+    allselects = Classification::SelectionOptionsHandler.selector_with_config_overrides(
+      item_type: rn,
+      extra_log_type: elt,
+      master_id: mid
+    )
+    return unless allselects&.present?
+
+    prefix = rn.singularize
 
     attribute_names.each do |an|
-      opt = otc.field_options[an.to_sym] if otc
+      ansym = an.to_sym
+      opt = otc.field_options[ansym] if otc
       edit_as = opt[:edit_as] if opt
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || an).to_s
       alt_gs = edit_as[:general_selection]
-      next unless alt_gs || alt_fn.start_with?('select_record_')
+      next unless alt_gs || alt_fn.index(/^(tag_)?select_/)
 
-      entries = allselects[an.to_sym]&.map do |e|
-        [e.last, { name: e.first }]
-      end
-
-      # @add_show_attribs[an_show] = entry&.first
+      vals = attributes[an]
+      vals = [vals] unless vals.is_a? Array
+      vals = vals.map(&:to_s)
+      entries =
+        allselects
+        .select { |f| f[:field_name] == ansym && f[:base_item_type].singularize == prefix && f[:value].to_s&.in?(vals) }
+        .map { |e| [e[:value], { name: e[:name] }] }
       @add_show_attribs[an] = entries.to_h
     end
 
@@ -208,7 +222,7 @@ module GeneralDataConcerns
   end
 
   def as_json(extras = {})
-    self.current_user ||= extras[:current_user] if extras[:current_user] # if self.class.no_master_association
+    self.current_user ||= extras[:current_user] if extras[:current_user]
     if allows_current_user_access_to?(:access)
 
       extras[:include] ||= {}

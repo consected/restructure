@@ -1713,7 +1713,7 @@ _fpa.form_utils = {
       .not('.formatted-date-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtoLocale(text);
         $(this).html(d);
       })
@@ -1724,7 +1724,7 @@ _fpa.form_utils = {
       .not('.formatted-datetime-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtimeToLocale(text);
         $(this).html(d);
       })
