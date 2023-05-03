@@ -270,6 +270,18 @@ Make sure the Filestore mounts are in place:
 
     app-scripts/setup-dev-filestore.sh
 
+Ensure you have Firefox and the most appropriate geckodriver installed:
+
+- On Ubuntu 22.04 and above, Firefox is a Snap package. After installing, run `sudo ln -s /snap/bin/geckodriver /usr/local/bin` to link to the snap geckodriver
+- On Flatpak installed Firefox, see: <https://firefox-source-docs.mozilla.org/testing/geckodriver/Usage.html#Running-Firefox-in-an-container-based-package>
+- On locally installed Firefox, install geckodriver from the standard releases: <https://github.com/mozilla/geckodriver/releases> - then run the script below
+
+    GECKODRIVER='https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz'
+    wget -O geckodriver.tar.gz ${GECKODRIVER}
+    tar -xvf geckodriver.tar.gz
+    mv geckodriver /usr/local/bin/
+    chmod 777 /usr/local/bin/geckodriver
+
 Run the test suite:
 
     bundle exec rspec
