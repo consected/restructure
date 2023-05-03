@@ -206,7 +206,7 @@ module GeneralDataConcerns
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || an).to_s
       alt_gs = edit_as[:general_selection]
-      next unless alt_gs || alt_fn.index(/^(tag_)?select_/)
+      next unless alt_gs || alt_fn.index(/^(redcap_)?(tag_)?select/) || alt_fn.index(/^redcap_radio/)
 
       vals = attributes[an]
       vals = [vals] unless vals.is_a? Array
