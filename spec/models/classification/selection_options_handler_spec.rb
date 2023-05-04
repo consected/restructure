@@ -206,4 +206,254 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     res = so.label_for(:select_result, 'voicemail')
     expect(res).to eq 'Left Voicemail'
   end
+
+  it 'gets labels for select_from field' do
+    ::ActivityLog.define_models
+
+    @master.current_user = @user
+    setup_access :player_contacts, user: @user
+
+    player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
+    player_contact2 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
+    player_contact3 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7892', rank: 5)
+
+    pc_data = "#{player_contact.data} [primary]"
+    pc_data2 = "#{player_contact2.data} [secondary]"
+    pc_data3 = "#{player_contact3.data} [secondary]"
+
+    create_item name: 'User',
+                value: 'user',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    create_item name: 'User 1',
+                value: 'user 1',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    al_def = ActivityLog::PlayerContactElt.definition
+    cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
+
+    al_def.extra_log_types = <<~END_DEF
+      step_3:
+        label: Step 3
+        fields:
+          - select_call_direction
+          - select_who
+          - select_result
+          - select_record_id_from_player_contacts
+          - tag_select_allowed
+          - tag_select_record_id_from_player_contacts
+
+
+        view_options:
+          data_attribute: '{{id}} - {{select_call_direction}}'
+
+        field_options:
+          tag_select_allowed:
+            edit_as:
+              alt_options:
+                This ABC: abc
+                This DEF: def
+                This GHI: ghi
+          select_call_direction:
+            edit_as:
+              alt_options:
+                This is one: one
+                This is two: two
+                This is nine: nine
+    END_DEF
+
+    al_def.current_admin = @admin
+    al_def.save!
+    al_def.force_option_config_parse
+
+    expect(al_def.resource_name).to eq 'activity_log__player_contact_elts'
+
+    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt__step_3, resource_type: :activity_log_type, user: @user
+
+    expect(player_contact.current_user).to eq @user
+    sleep 2
+    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
+                                                                  select_who: 'user',
+                                                                  extra_log_type: 'step_3',
+                                                                  select_record_id_from_player_contacts: player_contact.id,
+                                                                  tag_select_allowed: ['def', 'ghi'],
+                                                                  tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id])
+
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
+    al.save!
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :select_record_id_from_player_contacts, player_contact.id.to_s)
+    expect(res).to eq pc_data
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_allowed, 'def')
+    expect(res).to eq 'This DEF'
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_allowed, 'ghi')
+    expect(res).to eq 'This GHI'
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_record_id_from_player_contacts, player_contact.id)
+    expect(res).to eq pc_data
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_record_id_from_player_contacts, player_contact3.id)
+    expect(res).to eq pc_data3
+
+    algs = {
+      'select_call_direction' => {
+        'one' => { "name": 'This is one' }
+      },
+      'select_next_step' => {},
+      'select_who' => {
+        'user' => { name: 'User' }
+      },
+      'select_result' => {},
+      'select_record_id_from_player_contacts' => {
+        player_contact.id => { name: pc_data }
+      },
+      'tag_select_allowed' => {
+        'def' => { name: 'This DEF' },
+        'ghi' => { name: 'This GHI' }
+      },
+      'tag_select_record_id_from_player_contacts' => {
+        player_contact.id => { name: pc_data },
+        player_contact3.id => { name: pc_data3 }
+      }
+    }
+
+    al._general_selections
+    expect(al._general_selections).to eq algs
+  end
+
+  it 'gets labels for redcap select fields' do
+    ::ActivityLog.define_models
+
+    @master.current_user = @user
+    setup_access :player_contacts, user: @user
+
+    player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
+    player_contact2 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
+    player_contact3 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7892', rank: 5)
+
+    pc_data = "#{player_contact.data} [primary]"
+    pc_data2 = "#{player_contact2.data} [secondary]"
+    pc_data3 = "#{player_contact3.data} [secondary]"
+
+    create_item name: 'User',
+                value: 'user',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    create_item name: 'User 1',
+                value: 'user 1',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    al_def = ActivityLog::PlayerContactElt.definition
+    cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
+
+    al_def.extra_log_types = <<~END_DEF
+      step_3:
+        label: Step 3
+        fields:
+          - select_call_direction
+          - select_who
+          - select_result
+          - select_record_id_from_player_contacts
+          - tag_select_allowed
+          - tag_select_record_id_from_player_contacts
+
+
+        view_options:
+          data_attribute: '{{id}} - {{select_call_direction}}'
+
+        field_options:
+          tag_select_allowed:
+            edit_as:
+              field_type: redcap_tag_select
+              alt_options:
+                This rcABC: rcabc
+                This rcDEF: rcdef
+                This rcGHI: rcghi
+          select_call_direction:
+            edit_as:
+              field_type: redcap_select
+              alt_options:
+                This is rcone: rcone
+                This is rctwo: rctwo
+                This is rcnine: rcnine
+          select_result:
+            edit_as:
+              field_type: redcap_radio
+              alt_options:
+                Radio one: r-one
+                Radio two: r-two
+
+    END_DEF
+
+    al_def.current_admin = @admin
+    al_def.save!
+    al_def.force_option_config_parse
+
+    expect(al_def.resource_name).to eq 'activity_log__player_contact_elts'
+
+    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt__step_3, resource_type: :activity_log_type, user: @user
+
+    expect(player_contact.current_user).to eq @user
+    sleep 2
+    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'rcone',
+                                                                  select_who: 'user',
+                                                                  extra_log_type: 'step_3',
+                                                                  select_record_id_from_player_contacts: player_contact.id,
+                                                                  tag_select_allowed: ['rcdef', 'rcghi'],
+                                                                  tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id],
+                                                                  select_result: 'r-two')
+
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
+    al.save!
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :select_record_id_from_player_contacts, player_contact.id.to_s)
+    expect(res).to eq pc_data
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_allowed, 'rcdef')
+    expect(res).to eq 'This rcDEF'
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_allowed, 'rcghi')
+    expect(res).to eq 'This rcGHI'
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_record_id_from_player_contacts, player_contact.id)
+    expect(res).to eq pc_data
+
+    res = Classification::SelectionOptionsHandler.label_for(al, :tag_select_record_id_from_player_contacts, player_contact3.id)
+    expect(res).to eq pc_data3
+
+    algs = {
+      'select_call_direction' => {
+        'rcone' => { "name": 'This is rcone' }
+      },
+      'select_next_step' => {},
+      'select_who' => {
+        'user' => { name: 'User' }
+      },
+      'select_result' => {
+        'r-two' => { name: 'Radio two' }
+      },
+      'select_record_id_from_player_contacts' => {
+        player_contact.id => { name: pc_data }
+      },
+      'tag_select_allowed' => {
+        'rcdef' => { name: 'This rcDEF' },
+        'rcghi' => { name: 'This rcGHI' }
+      },
+      'tag_select_record_id_from_player_contacts' => {
+        player_contact.id => { name: pc_data },
+        player_contact3.id => { name: pc_data3 }
+      }
+    }
+
+    al._general_selections
+    expect(al._general_selections).to eq algs
+  end
 end

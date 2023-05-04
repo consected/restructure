@@ -1,4 +1,6 @@
-<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}}</script>
+<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase')}}fo-no-downcase{{/if}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')}}fo-view-original-case{{/if}}</script>
+
+<script id="field_capitalize" type="text/x-handlebars-template" class="hidden handlebars-partial">true</script>
 
 <script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
@@ -206,18 +208,18 @@
     </li>
 
   {{else is field_type 'includes' '^select_record_from_table_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_from_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_id_from_table_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_id_from_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
 
   {{else if (get result_data._general_selections key this_value 'name')}}
-    <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
 
 {{! #######  Field ends with ... }}
   {{else is field_type 'includes' "_notes$"}}
@@ -310,7 +312,7 @@
       {{else is this_value.[0] 'typeof' 'string'}}
       <ul class="array-results">
         {{#each this_value}}
-        <li class="array-result">{{pretty_string this return_string="true" capitalize="false"}}</li>
+        <li class="array-result">{{pretty_string this return_string="true" capitalize=false}}</li>
         {{/each}}
       </ul>
       {{else}}
@@ -394,6 +396,6 @@
 
 <script id="tag_select_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
    <option selected="true" class="tag-select" value="{{this_value_id}}">
-     {{#if (get result_data._general_selections field_key this_value_id 'name')}}{{get result_data._general_selections field_key this_value_id 'name'}}{{else}}{{pretty_string this_value_name return_string="true" capitalize="false"}}{{/if}}
+     {{#if (get result_data._general_selections field_key this_value_id 'name')}}{{get result_data._general_selections field_key this_value_id 'name'}}{{else}}{{pretty_string this_value_name return_string="true" capitalize=false}}{{/if}}
    </option>
 </script>

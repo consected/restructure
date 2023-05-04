@@ -230,6 +230,8 @@ module SetupHelper
         'protocol_id',
         'set_related_player_contact_rank',
         'tag_select_allowed',
+        'select_record_id_from_player_contacts',
+        'tag_select_record_id_from_player_contacts',
         'result_json',
         'created_by_user_id'
       )
