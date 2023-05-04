@@ -13,6 +13,7 @@ _fpa.app_specific = class {
     processor.reformat_page();
     processor.handle_part();
     processor.handle_embedded_links();
+    processor.handle_glyphicons();
 
     // Process any blocks it contains that have the class use-config-layout
     // which is typical when loading a list of pages
@@ -168,20 +169,21 @@ _fpa.app_specific = class {
       var url_split = url.split('/');
       var id = url_split[url_split.length - 1].split('?')[0];
       var hyph_name = url_split[url_split.length - 2].hyphenate().singularize();
-      var pre = 'common'
+      var pre = 'common';
       if (url_split[url_split.length - 3] == 'activity_log') {
         hyph_name = `activity-log-${hyph_name}`;
-        pre = 'activity_log'
+        pre = 'activity_log';
       }
 
-      var block_id = `${hyph_name}--${id}`
+      var block_id = `${hyph_name}--${id}`;
 
       $(this)
         .attr('data-remote', true)
         .attr('data-result-target-force', true)
         .attr(`data-${hyph_name}-id`, id)
         .attr('data-result-target', `#${block_id}`)
-        .attr('data-template', `${hyph_name}-result-template`);
+        .attr('data-template', `${hyph_name}-result-template`)
+        .attr('data-toggle', 'scrollto-target');
 
       var text = $(this).parents('.notes-text');
       var html = text.html();
@@ -197,5 +199,23 @@ _fpa.app_specific = class {
       var new_html = html.replace('{{page_embedded_block}}', new_div);
       text.html(new_html);
     });
+  }
+
+  handle_glyphicons() {
+    const processor = this;
+    const block = this.block;
+    if (block.find('.custom-editor-container').length) return;
+
+    var text = block.html();
+    var res = text.match(/{{glyphicon_[a-z_]+}}/g);
+
+    if (!res || res.length < 1) return;
+
+    res.forEach(function (el) {
+      const gi = el.replaceAll('_', '-').replaceAll('{{', '').replaceAll('}}', '');
+      text = text.replaceAll(el, `<i class="glyphicon ${gi}"></i>`);
+    });
+
+    block.html(text);
   }
 };

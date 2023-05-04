@@ -9,14 +9,25 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-FS_TEST_BASE=${FS_TEST_BASE:=/home/$USER}
+FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
 
 mkdir -p ${FS_TEST_BASE}/dev-file-source
 mkdir -p ${FS_TEST_BASE}/dev-filestore
 mkdir -p ${FS_TEST_BASE}/dev-bind-fs
 
-bindfs -n ${FS_TEST_BASE}/dev-file-source ${FS_TEST_BASE}/dev-filestore
-mountpoint -q ${FS_TEST_BASE}/dev-filestore
+function is_mountpoint() {
+  MOUNTED_VOLUME=$1
+  if which mountpoint; then
+    mountpoint -q "$MOUNTED_VOLUME"
+  else
+    echo "mounting... $MOUNTED_VOLUME"
+    [ "$(mount | awk -v MOUNTED_VOLUME="$MOUNTED_VOLUME" '$3 == MOUNTED_VOLUME  {print $3}')" != "" ]
+  fi
+}
+
+bindfs -n "${FS_TEST_BASE}"/dev-file-source "${FS_TEST_BASE}"/dev-filestore
+is_mountpoint "${FS_TEST_BASE}"/dev-filestore
+
 if [ $? != 0 ]; then
   echo "A mount was not successfully set up at: ${FS_TEST_BASE}/dev-filestore"
   exit 2

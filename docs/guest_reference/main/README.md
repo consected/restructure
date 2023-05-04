@@ -6,7 +6,8 @@ To get started, you will need to login.
 
 From the home page a simple login form prompts you to login to the application. You will need to enter all three fields to continue, **except for the [first time that you login](#first-login)**.
 
-If you are having issues logging in, [check what to do next](login_issues.md).
+If you are having issues logging in, [check what to do next](login_issues.md). {{#if allow_users_to_register}}If you have been invited to register for a new account, the [registration](registration.md) page provides additional information.{{/if}}
+
 
 ![Login Form](images/login-form.png)
 

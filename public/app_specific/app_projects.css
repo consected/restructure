@@ -504,7 +504,7 @@ table.table {
 }
 
 ul.list-group.is-activity-log
-  > li.list-group-item.caption-before.results-caption-before.activity-log--project-assignment-analysis-plan-all_fields.all-fields-caption,
+> li.list-group-item.caption-before.results-caption-before.activity-log--project-assignment-analysis-plan-all_fields.all-fields-caption,
 form ul.list-group > li.list-group-item.caption-before.activity-log--project-assignment-all_fields.all-fields-caption {
   background: none !important;
   color: rgb(102 102 102);
