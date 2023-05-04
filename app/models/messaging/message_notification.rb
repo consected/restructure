@@ -16,7 +16,7 @@ module Messaging
     belongs_to :master, optional: true
     # Even external systems that use a Rails based script to fire notifications must use a real user
     validates :user, presence: true, if: :app_type
-    validates :master, presence: true, if: :app_type
+    validates :master, presence: true, if: :requires_master?
     # No validation on app_type, since external systems may use Rails based script to fire notifications
     # validates :app_type, presence: true
     # No minimum on recipient_user_ids, since recipient_data may be used instead
@@ -40,7 +40,7 @@ module Messaging
     scope :limited_index, -> { limit 50 }
 
     attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
-    attr_writer :extra_substitutions_data
+    attr_writer :extra_substitutions_data, :batch_user
 
     #
     # Get a layout template by name and optionally message type
@@ -205,12 +205,13 @@ module Messaging
     # @param [Logger] logger - logger to use from the background job, or the default Rails logger
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
-    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {})
+    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil)
       logger.info "Handling item #{id}"
       update! status: StatusInProgress
 
       self.for_item ||= for_item
       self.on_complete_config ||= on_complete_config
+      self.batch_user ||= alt_batch_user
 
       # Check if recipient records have been set in the recipient_data (typically from SaveTriggers::Notify)
       # If not, we just have a list of emails or phones
@@ -444,8 +445,8 @@ module Messaging
     def fire_item_on_complete_triggers
       return unless for_item && on_complete_config.present?
 
-      for_item.current_user = for_item.user
-      OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
+      for_item.current_user = batch_user
+      OptionConfigs::ActivityLogOptions.calc_triggers for_item, on_complete_config
     end
 
     def batch_user
@@ -471,6 +472,14 @@ module Messaging
       else
         logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
       end
+    end
+
+    #
+    # Should a new record require a master to be set?
+    def requires_master?
+      return app_type unless item_class.respond_to?(:no_master_association)
+
+      app_type && !item_class.no_master_association
     end
   end
 end

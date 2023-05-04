@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-AlNameGenTestSave = 'Gen Test ELT Save'
+AlNameGenTestCur = 'Gen Test ELT Save'
 
 RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
   include ModelSupport
@@ -8,7 +8,7 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   before :example do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestSave, 'elt_save_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestCur, 'elt_save_test', 'player_contact'
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
@@ -91,7 +91,7 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
     @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
     @trigger.perform
 
-    expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['viewer-has-agreement', 'viewer-has-agreement2'])
+    expect(@user.user_roles.active.reload.pluck(:role_name).sort).to eq(['viewer-has-agreement', 'viewer-has-agreement2'].sort)
 
     config = {
       remove_role_names: ['viewer-has-agreement']

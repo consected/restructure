@@ -34,9 +34,38 @@ _configurations:
   use_current_version: force the use of the current definition version when defining a dynamic class
   secondary_key: field name to use as a secondary key to lookup items
   view_sql: define a view instead of a table to underpin this model
+  prevent_migrations: false (default) | true - prevent field / comment changes attempting to run DB migrations
+  batch_trigger: 
+    # Fire **batch_trigger:** task for each record, based on the batch_trigger in **default:** or activity log options
+    # All records (up to the limit) will be triggered on the specified frequency.
+    # In order to make the selection of the records in the batch conditional, consider using a dynamic_model with *view_sql*
+    frequency: n units - for example 1 hour, 15 minutes, or 30 days
+    limit: maximum number of records to process in a single batch
+    if: conditions on the records to select for processing
+    # By default, the user in the process record will be used to perform the batch action. If no user_id field is specified in
+    # the model, or you wish to use an alternative, specify one of the following instead
+    app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
+    user: optionally specify a user id (or email) to force use of the specified user when perfoming actions
 
 # To add a table or view to the data dictionary, add the _data_dictionary: with
 # the essential keys, study: and domain:, plus any others that are required.
+# On every save of the dynamic definition the data dictionary will be updated,
+# *unless* the `prevent_update: true` option is set.
+# For each field representation we check for an existing datadic_variables record,
+# matching on:
+# - source_name
+# - source_type
+# - form_name
+# - variable_name
+# - owner (optionally)
+# If a variable is found, we check if the bulk of the variable definition matches the 
+# the field as it is defined in the dynamic model. If it matches then nothing is changed.
+# If there has been a change then we update with the changes
+# from the dynamic model. 
+# If there was no variable found, we create one, with the dynamic model definition
+# and the additional overrides defined below. These overrides are either at the level of the
+# model, and used for every variable, or may be specified for each field.
+# Derived variables may capture their definitions from the variables they reference.
 _data_dictionary:
   # Required
   study: the study name (case sensitive)

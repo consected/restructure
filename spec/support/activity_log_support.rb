@@ -7,6 +7,15 @@ module ActivityLogSupport
     res
   end
 
+  #
+  # Add a model references definition to an existing activity log instance,
+  # to simplify the configuration required for certain tests
+  # e.g add_reference_def_to(activity_log, [player_contacts: { from: 'this', add: 'many' }])
+  def add_reference_def_to(activity_log, ref_def)
+    activity_log.option_type_config.references = ref_def
+    activity_log.option_type_config.clean_references_def
+  end
+
   def generate_test_activity_log
     unless Admin::MigrationGenerator.table_exists? 'activity_log_player_contact_emails'
       TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
@@ -157,9 +166,18 @@ module ActivityLogSupport
   end
 
   def self.cleanup_matching_activity_logs(item_type, rec_type, process_name, excluding_id: nil, admin: nil)
-    process_name = ['', nil] if process_name.blank?
-    others = ActivityLog.works_with_all(item_type, rec_type, process_name)
+    others = ActivityLog
     others = others.where.not(id: excluding_id) if excluding_id
+    others = others.conflicting_definitions(item_type, rec_type, process_name)
+    return if others.length == 0
+
+    all_defs = ActivityLog.conflicting_definitions(item_type, rec_type, process_name)
+    if excluding_id
+      msg = "***** Previous definition of ActivityLog could be a conflict to this (id: #{excluding_id}): #{all_defs.pluck(:id, :item_type, :rec_type, :process_name)}"
+      puts msg
+      raise msg
+    end
+
     others.each do |o|
       o.update!(disabled: true, current_admin: admin || o.admin)
     end

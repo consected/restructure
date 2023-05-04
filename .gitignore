@@ -79,3 +79,13 @@ yarn-error.log
 
 # Ignore IDE configs
 .idea/
+
+/public/packs
+/public/packs-test
+/node_modules
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Assets will be added to the repository for production deployment. We override this ignore with `git add --force public/assets`
+/public/assets

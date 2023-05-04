@@ -149,7 +149,7 @@ module EditFields
       reslist ||= []
 
       reslist = reslist.active if reslist.respond_to?(:active)
-      reslist = reslist.distinct if reslist.respond_to?(:distinct)
+      reslist = reslist.reorder('').distinct if reslist.respond_to?(:distinct)
 
       [cl, reslist]
     end
@@ -259,6 +259,10 @@ module EditFields
       reslist.all
              .map { |i| [i.send(label_attr), i.send(value_attr)] }
              .sort { |x, y| x.first <=> y.first }
+    rescue SystemStackError => e
+      msg = "list_for_complex_attributes fails with #{label_attr} and #{value_attr}: #{e}"
+      Rails.logger.error msg
+      raise FphsException, msg
     end
   end
 end

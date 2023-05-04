@@ -274,7 +274,9 @@ module Dynamic
     # @return [UserBase]
     def target_object_creatable?(ref_type, ref_config)
       mrc = class_for_reference_type(ref_type)
-      if mrc.parent == ActivityLog
+
+      if mrc&.class_parent_name == 'ActivityLog'
+
         elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
         ref_obj = mrc.new(extra_log_type: elt, master: master)
       else
@@ -693,7 +695,7 @@ module Dynamic
     # @param [Hash] cmrs - result of #creatable_model_references
     # @return [true| nil]
     def creatable_model_not_embeddable?(cmrs, item)
-      return true if item.class.parent == ActivityLog
+      return true if item.class.class_parent_name == 'ActivityLog'
 
       cmrs.first.last.first.last[:ref_config][:view_as][:new].in?(NotEmbeddedOptions)
     rescue StandardError

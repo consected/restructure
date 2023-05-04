@@ -14,7 +14,10 @@ module BhsImportConfig
   end
 
   def self.import_config
+    MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
+    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
     ExternalIdentifier.define_models
+
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_config.json'
     app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn

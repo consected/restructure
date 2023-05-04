@@ -107,13 +107,16 @@ p.small.report-table-name {
   display: block;
   min-width: 100px;
   text-align: left;
+  font-weight: normal;
+  line-height: 1em;
 
   input[type="submit"] {
     margin-bottom: 4px;
   }
 
-  #report-select-all-files {
-    vertical-align: text-bottom;
+  #report-select-all-files, #report-unselect-all-files {
+    font-weight: normal;
+    font-size: 87%;
   }
 
   label {
@@ -323,4 +326,16 @@ table .report-cb-inner {
   background: white;
   border: 1px solid gray;
 
+}
+
+
+// Use this to rotate column labels by using the view_options: add_classes option
+.report-label-rotate {
+  th {
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
 }

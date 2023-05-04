@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-AlNameGenTest2 = 'Gen Test ELT 2'
+AlNameGenTestAt = 'Gen Test ELT 2'
 
 RSpec.describe SaveTriggers::AddTracker, type: :model do
   include ModelSupport
@@ -8,7 +8,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
 
   before :example do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTest2, 'elt2_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestAt, 'elt2_test', 'player_contact'
     ud, = create_user
     ud.disable!
     u0, = create_user
@@ -235,9 +235,9 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
   it 'add tracker on save_trigger in an activity log' do
     # Setup a new activity log with add trackers on create
 
-    @activity_log = al = ActivityLog.active.where(name: AlNameGenTest2).first
+    @activity_log = al = ActivityLog.active.where(name: AlNameGenTestAt).first
 
-    raise "Activity Log #{AlNameGenTest2} not set up" if al.nil?
+    raise "Activity Log #{AlNameGenTestAt} not set up" if al.nil?
 
     sp1_name = 'Alerts'
     pe1_name = 'Level 1'

@@ -76,6 +76,16 @@ module ExternalIdentifierSupport
           ExternalIdentifier.active
         end
     r.each do |a|
+      # Also clean up any associated activity logs
+      als = ActivityLog.active.where(item_type: a.name.singularize)
+      als.each do |al|
+        al.disabled = true
+        al.current_admin = admin
+        al.save
+      end
+
+      a.name += '_olds'
+      a.external_id_attribute += '_old_id'
       a.disabled = true
       a.current_admin = admin
       a.save!

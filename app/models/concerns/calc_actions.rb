@@ -39,7 +39,7 @@ module CalcActions
   BoolTypeString = '__!BOOL__'
 
   UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
-  BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
+  BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', 'ILIKE', '~*', '~'].freeze
   ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
   ValidExtraConditionsArrays = [
     '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
@@ -358,60 +358,58 @@ module CalcActions
   def calc_return_types
     # Handle the return of requested values, lists or results (instances) if the definition
     # requested this
-    if @this_val_where
-      # The condition scope must be ordered in reverse, as always, and if we
-      # only are requesting a single result then limit 1, otherwise get all results for the list
-      cs = @condition_scope.order(id: :desc)
-      cs = cs.limit(1) if return_value_from_query? || return_result_from_query?
-      first_cond_res = cs.first
+    return unless @this_val_where
 
-      # If a result was found process the returns, otherwise continue
-      if first_cond_res
+    # The condition scope must be ordered in reverse, as always, and if we
+    # only are requesting a single result then limit 1, otherwise get all results for the list
+    cs = @condition_scope.order(id: :desc)
+    cs = cs.limit(1) if return_value_from_query? || return_result_from_query?
+    first_cond_res = cs.first
 
-        # The instance @condition_scope can reflect the successful query scope
-        @condition_scope = cs
+    # If a result was found process the returns, otherwise continue
+    return unless first_cond_res
 
-        # The result instance now gets the defined association
-        # TODO: check this against a list of valid associations
-        all_res = @this_val = if first_cond_res.respond_to?(@this_val_where[:assoc])
-                                first_cond_res.send(@this_val_where[:assoc])
-                              else
-                                [first_cond_res]
-                              end
-        first_res = all_res.first
+    # The instance @condition_scope can reflect the successful query scope
+    @condition_scope = cs
 
-        # If we got a result from the asssociation process it, otherwise continue
-        if first_res
+    # The result instance now gets the defined association
+    # TODO: check this against a list of valid associations
+    all_res = @this_val = if first_cond_res.respond_to?(@this_val_where[:assoc])
+                            first_cond_res.send(@this_val_where[:assoc])
+                          else
+                            [first_cond_res]
+                          end
+    first_res = all_res.first
 
-          # The table name for the result we need
-          tn = first_res.class.table_name
-          # The field to return, checked by matching the defined field name against the attributes of the class
-          fn = first_res.class.attribute_names.select { |s| s == @this_val_where[:field_name].to_s }.first
-          # For a return_result (instance), the table name of the item to return was specified
-          tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))
+    # If we got a result from the asssociation process it, otherwise continue
+    return unless first_res
 
-          # If we have a table name from the query result use it, otherwise use the return_result table name
-          if tn
-            rquery = @condition_scope.reorder("#{tn}.id desc")
-          elsif tv_tn.present?
-            rquery = @condition_scope.reorder("#{tv_tn}.id desc")
-          end
+    # The table name for the result we need
+    tn = first_res.class.table_name
+    # The field to return, checked by matching the defined field name against the attributes of the class
+    fn = first_res.class.attribute_names.select { |s| s == @this_val_where[:field_name].to_s }.first
+    # For a return_result (instance), the table name of the item to return was specified
+    tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))
 
-          if return_result_from_query?
-            raise "return_result clean table name is blank for (#{@this_val_where[:table_name]})" if tv_tn.blank?
+    # If we have a table name from the query result use it, otherwise use the return_result table name
+    if tn
+      rquery = @condition_scope.reorder("#{tn}.id desc")
+    elsif tv_tn.present?
+      rquery = @condition_scope.reorder("#{tv_tn}.id desc")
+    end
 
-            # Get the return_result instance by getting the first result from the query, then finding the instance
-            # by id to get a clean result
-            rquery = rquery.select("#{tv_tn}.*")
-            @this_val = first_res.class.find(rquery.first.id)
-          else
-            # Run the results query and get either a single result or a list
-            rvals = rquery.pluck("#{tn}.#{fn}")
-            @this_val = rvals.first if return_value_from_query?
-            @this_val = rvals if return_value_list_from_query?
-          end
-        end
-      end
+    if return_result_from_query?
+      raise "return_result clean table name is blank for (#{@this_val_where[:table_name]})" if tv_tn.blank?
+
+      # Get the return_result instance by getting the first result from the query, then finding the instance
+      # by id to get a clean result
+      rquery = rquery.select("#{tv_tn}.*")
+      @this_val = first_res.class.find(rquery.first.id)
+    else
+      # Run the results query and get either a single result or a list
+      rvals = rquery.pluck("#{tn}.#{fn}")
+      @this_val = rvals.first if return_value_from_query?
+      @this_val = rvals if return_value_list_from_query?
     end
   end
 
@@ -444,7 +442,7 @@ module CalcActions
         when :this
           in_instance = current_instance
         when :user
-          in_instance = @current_instance.master.current_user
+          in_instance = @current_instance.current_user
         when :parent
           in_instance = current_instance.parent_item
         when :referring_record
@@ -464,7 +462,7 @@ module CalcActions
         elsif !in_instance
           # We failed to find the instance we need to continue.
           raise FphsException, "Instance not found for #{table}"
-        elsif expected_val.is_a?(Hash)
+        elsif expected_val.is_a?(Hash) && !expected_val.key?(:element)
 
           if expected_val[:condition]
             assoc_name = ModelReference.record_type_to_assoc_sym(in_instance)
@@ -515,9 +513,13 @@ module CalcActions
           res &&= if expected_val.is_a? Array
                     # Since we have expected value as an array, simply see if it includes the value we found
                     expected_val.include?(this_val)
+                  elsif expected_val.is_a?(Hash) && expected_val[:element] && this_val.is_a?(Hash)
+                    element = expected_val[:element]
+                    el_parts = element.split('.')
+                    this_val.deep_stringify_keys.dig(*el_parts) == dynamic_value(expected_val[:value])
                   else
                     # Simply compare the expected value against the one we found
-                    this_val == expected_val
+                    this_val == dynamic_value(expected_val)
                   end
 
           # Handle return value or result
@@ -532,7 +534,9 @@ module CalcActions
       #### If we have a user as the table key and we are requesting the role_name
       # to match the expected value
       elsif table == :user && field_name == :role_name
-        user = @current_instance.master.current_user
+        user = @current_instance.current_user
+        raise FphsException, 'Current user not set when specifying evaluation if user.role_name' unless user
+
         expected_val = [expected_val] unless expected_val.is_a? Array
 
         role_names = user.role_names
@@ -563,6 +567,8 @@ module CalcActions
   # @return [Object] resulting value
   def attribute_from_instance(from_instance, attr_name)
     val = from_instance.attributes[attr_name.to_s]
+    val ||= from_instance.instance_variable_get("@#{attr_name}")
+
     if val.blank? && attr_name.to_s.start_with?('previous_value_of_') && from_instance.respond_to?(:previous_changes)
       real_attr_name = attr_name.to_s.sub(/^previous_value_of_/, '')
       val = from_instance.previous_changes[real_attr_name]&.first
@@ -744,8 +750,8 @@ module CalcActions
       #             user: role_name
 
       att = val_item_value
-      user = @current_instance.master.current_user
-      raise FphsException, 'No user found for condition' unless user
+      user = @current_instance.current_user
+      raise FphsException, "No user found for condition in #{@current_instance}" unless user
 
       val = if att == 'role_name'
               # The value to match against is an array of the user's role names
@@ -856,14 +862,14 @@ module CalcActions
     end
 
     # If a return mode was specified, set this up to be used in the query
-    if mode
-      @this_val_where = {
-        assoc: join_table_name,
-        field_name: field_name,
-        table_name: ModelReference.record_type_to_ns_table_name(join_table_name).to_sym,
-        mode: mode
-      }
-    end
+    return unless mode
+
+    @this_val_where = {
+      assoc: join_table_name,
+      field_name: field_name,
+      table_name: ModelReference.record_type_to_ns_table_name(join_table_name).to_sym,
+      mode: mode
+    }
   end
 
   # Generate query conditions to support the conditional configuration.
@@ -895,7 +901,7 @@ module CalcActions
           # inner joins on the master. They are handled as individual queries.
           non_query_condition = is_non_query_condition table_name, field_name, val
 
-          if val.is_a?(Hash)
+          if val.is_a?(Hash) && !val.key?(:element)
             # Since the conditional value is actually a hash, we need to
             # get the value to be matched from another referenced record (or this)
             # Generate the query condition to do this
@@ -926,11 +932,37 @@ module CalcActions
     # Make the list of tables to be joined valid (in case anything slipped through) and unique
     @join_tables = (@join_tables - NonJoinTableNames).uniq
 
+    # Specify `no_masters: {}` at the top level to directly query the record, rather than doing
+    # an inner join on the masters table
+    if @condition_config.respond_to?(:key?) && @condition_config.key?(:no_masters) ||
+       @condition_config.map(&:first).include?(:no_masters)
+      # Use the first specified table as the base, not joining on masters table
+      @join_tables.delete_if { |a| a == :no_masters }
+      rn = @join_tables.first
+      r = Resources::Models.find_by(resource_name: rn)
+      raise FphsException, "No resource found for #{rn} with no_masters specified in calc_actions" unless r
+
+      c = r.class_name.constantize
+      @base_query = c.all
+      @current_scope = c.all
+      return
+    end
+
+    # Specify `masters: {...}` to not tie the action to the item's current master, but instead use the
+    # set of masters specified. `{}` indicates any master, or use standard conditions to specify a list of ids,
+    # such as { id: [1,2,3] }
+    if @condition_config.respond_to?(:key?) && @condition_config.key?(:masters) ||
+       @condition_config.map(&:first).include?(:masters)
+      # Use the full masters table as the base, allowing the configuration to limit the masters records if needed
+      @base_query = Master.all
+      @current_scope = Master.all
+      @join_tables.delete_if { |a| a == :masters }
+    end
+
     if @join_tables.first == :users
-      # Just get from the non masters tables without a join
+      # Get the users records without a join to the masters table, which makes no sense
       @base_query = User.all
       @current_scope = User.all
-      # @current_scope = @base_query
     elsif %i[all not_all].include? condition_type
       # Inner join, since our conditions require the existence of records in the joined tables
       @base_query = @current_scope.joins(@join_tables)
@@ -1082,24 +1114,24 @@ module CalcActions
 
   # Logging of results to aid debugging
   def log_results(orig_cond_type, condition_type, loop_res, cond_res, orig_loop_res)
-    unless Rails.env.production?
-      begin
-        Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
-        Rails.logger.debug "this instance: #{@current_instance.id}"
-        Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
-        Rails.logger.debug @condition_config
-        Rails.logger.debug @non_query_conditions
-        Rails.logger.debug @base_query.to_sql if @base_query
-        Rails.logger.debug @condition_scope.to_sql if @condition_scope
-        Rails.logger.debug '*********************************************************************************************************'
-      rescue StandardError => e
-        Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
-        Rails.logger.warn @condition_config
-        Rails.logger.warn @join_tables
-        Rails.logger.warn JSON.pretty_generate(@action_conf)
-        Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
-        raise e
-      end
+    return if Rails.env.production?
+
+    begin
+      Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
+      Rails.logger.debug "this instance: #{@current_instance.id}"
+      Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+      Rails.logger.debug @condition_config
+      Rails.logger.debug @non_query_conditions
+      Rails.logger.debug @base_query.to_sql if @base_query
+      Rails.logger.debug @condition_scope.to_sql if @condition_scope
+      Rails.logger.debug '*********************************************************************************************************'
+    rescue StandardError => e
+      Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+      Rails.logger.warn @condition_config
+      Rails.logger.warn @join_tables
+      Rails.logger.warn JSON.pretty_generate(@action_conf)
+      Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+      raise e
     end
   end
 end

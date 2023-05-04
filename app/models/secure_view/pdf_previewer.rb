@@ -1,14 +1,14 @@
 module SecureView
   #
   # Handle generation of PDFs to allow search of PDF and office documents
-  class PDFPreviewer < BasePreviewer
+  class PdfPreviewer < BasePreviewer
     DefaultResolution = 150
     def self.file_type
       :pdf
     end
 
     def initialize(options = {})
-      super
+      super(**options)
       office_docs_to :pdf unless pdf?
       # || viewable_image?
       # dicom_to_jpg if viewable_dicom?
@@ -16,11 +16,11 @@ module SecureView
 
     # Return the page preview as a PDF format file
     def preview(_page)
-      if pdf?
-        output = File.open(path).read
-        res = { io: output, filename: "#{path}.pdf" }
-        yield res
-      end
+      return unless pdf?
+
+      output = File.open(path).read
+      res = { io: output, filename: "#{path}.pdf" }
+      yield res
     end
 
     # Get the (possibly cached) page count for the PDF

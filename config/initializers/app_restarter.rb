@@ -3,6 +3,7 @@ class AppControl
 
   def self.restart_server(not_delayed_job: nil, not_memcached: nil)
     Rails.logger.warn 'Restart Server requested'
+    restart_memcached unless not_memcached
     if Rails.env.production?
       pid = spawn('app-scripts/restart_app_server.sh')
       Process.detach(pid)
@@ -11,7 +12,6 @@ class AppControl
       Rails.reload! if Rails.respond_to? :reload!
     end
     restart_delayed_job unless not_delayed_job
-    restart_memcached unless not_memcached
   rescue StandardError => e
     Rails.logger.warn "Failed to restart server: #{e.inspect}"
   end

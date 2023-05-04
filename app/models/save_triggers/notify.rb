@@ -5,50 +5,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
                 :receiving_user_ids, :phones, :emails, :default_country_code, :job,
                 :from_user_email
 
-  def self.config_def(if_extras: {})
-    [
-      {
-        type: 'email|sms',
-        role: '(optional) role name(s) to notify - or reference like {this: {user_id: return_value} }',
-        users: '(optional) list of users to notify - or reference like {this: {phone_numbers: return_value} }',
-        phones: '(optional) list of phone numbers to notify - or reference like {this: {role_names: return_value} }',
-        phone_records: {
-          dynamic_model__zeus_bulk_message_recipients: {
-            zeus_bulk_message_id: {
-              parent_references: {
-                dynamic_model__zeus_bulk_messages: 'id'
-              }
-            },
-            disabled: false,
-            id: 'return_value_list'
-          }
-        },
-        list_type: 'association name to use to retrieve phone records. ' \
-                   'For example: dynamic_model__zeus_bulk_message_recipients',
-        default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified',
-        from_user_email: {
-          address: 'email address the message should appear to be from',
-          display_name: 'display name for email address'
-        },
-        "from_user_email(alternative)": 'string email address',
-        layout_template: 'name of layout template',
-        content_template: 'name of content template',
-        content_template_text: 'alternative content template text',
-        subject: 'subject text',
-        extra_substitutions: {
-          data1: 'fixed data item to be substituted into the message in {{extra_substitutions.data1}}'
-        },
-        importance: 'transactional (default) | promotional. ' \
-                    'May be dynamically retrieved from a conditional calculation if a hash is specified',
-        when: {
-          wait_until: '(optional) ISO date or {date:..., time..., zone:... } where zone is one specified in ' \
-                      'MAPPINGS @ https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html',
-          wait: 'n seconds|minutes|hours|days|weeks|months|years'
-        },
-        if: if_extras
-      }
-    ]
-  end
+  def self.config_def(if_extras: {}); end
 
   # If we are running in production the the queue adapter will not be :inline
   # We can use future processing
@@ -123,6 +80,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
     @message_type = config[:type]
     @run_if = config[:if]
+    @alt_batch_user = DynamicModel.user_for_conf_snippet(config)
   end
 
   #
@@ -337,7 +295,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     # Pass in the MessageNotification as the main object
     # for_item is the ActivityLog instance that was triggered on save
     # Also pass the on_complete configuration to follow up after the main job processing completes
-    job.perform_later(@message_notification, for_item: @item, on_complete_config: @on_complete)
+    job.perform_later(@message_notification, for_item: @item,
+                                             on_complete_config: @on_complete,
+                                             alt_batch_user: @alt_batch_user)
   end
 
   def calc_field_or_return(cond)

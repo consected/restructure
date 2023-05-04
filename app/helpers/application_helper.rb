@@ -24,6 +24,8 @@ module ApplicationHelper
   #
   # An admin_page or user_page class to add to a body class attribute
   def admin_or_user_class
+    return 'admin_page' if @is_admin_index
+
     request.path.start_with?('/admin/') ? 'admin_page' : 'user_page'
   end
 
@@ -51,11 +53,11 @@ module ApplicationHelper
                     "#{path_pref}/#{controller_name}/cancel"
                   end
 
-    button_class = 'glyphicon glyphicon-remove-sign'
+    button_class = 'glyphicon glyphicon-remove-sign inline-cancel'
     class_extras ||= 'pull-right' unless link_text
 
     <<~END_HTML
-      <a class="show-entity show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
+      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
     END_HTML
       .html_safe
   end
@@ -254,12 +256,16 @@ module ApplicationHelper
   # @param [Hash|UserBase|nil] data - data for substitutions
   # @param [Boolean] allow_missing_template - return nil if no matching template found
   # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
+  # @param [String] category - optionally request content from the stated category
   # @return [String]
-  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true)
+  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil)
     data ||= {}
     data = data.attributes if data.respond_to? :attributes
-    Admin::MessageTemplate.generate_content content_template_name: name, data: data,
-                                            allow_missing_template: allow_missing_template,
-                                            markdown_to_html: markdown_to_html
+    res = Admin::MessageTemplate.generate_content content_template_name: name, data: data,
+                                                  allow_missing_template: allow_missing_template,
+                                                  markdown_to_html: markdown_to_html,
+                                                  category: category
+
+    res&.html_safe
   end
 end

@@ -6,6 +6,7 @@ module Dynamic
 
     included do
       after_save :force_option_config_parse
+      after_save :handle_batch_schedule
       attr_accessor :configurations, :data_dictionary, :options_constants
     end
 
@@ -266,6 +267,19 @@ module Dynamic
         @prev_latest_update = updated_at
       end
 
+      # Look up user based on a snippet of the configuration
+      def user_for_conf_snippet(config)
+        user = config[:user]
+        if user.to_i > 0
+          user = User.active.find(user)
+        elsif user.is_a? String
+          user = User.active.find_by_email(user)
+        end
+
+        app_type = config[:app_type]
+        user = User.use_batch_user(app_type) if user.nil? && app_type
+        user
+      end
       # End of class_methods
     end
 
@@ -285,6 +299,15 @@ module Dynamic
       # Parse option configs if necessary
       option_configs
       @use_current_version = configurations && configurations[:use_current_version]
+    end
+
+    def prevent_migrations
+      return @prevent_migrations if @prevent_migrations_set
+
+      @prevent_migrations_set = true
+      # Parse option configs if necessary
+      option_configs
+      @prevent_migrations = configurations && configurations[:prevent_migrations]
     end
 
     # Return result based on the current
@@ -381,6 +404,33 @@ module Dynamic
       option_configs force: true, raise_bad_configs: true
     end
 
+    #
+    # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
+    def handle_batch_schedule
+      def_unschedule = disabled || !persisted? || !active_model_configuration?
+
+      RecurringBatchTask.unschedule_task self if def_unschedule
+
+      return unless option_configs && configurations
+
+      frequency = configurations.dig(:batch_trigger, :frequency)
+      if frequency.blank?
+        RecurringBatchTask.unschedule_task self
+      else
+        RecurringBatchTask.schedule_task self,
+                                         { dynamic_def: to_global_id.to_s },
+                                         run_every: FieldDefaults.duration(frequency)
+
+      end
+    end
+
+    #
+    # Get the next Delayed::Job set to run fora recurring batch job schedule
+    # @return [Delayed::Job | nil]
+    def task_schedule
+      RecurringBatchTask.task_schedule(self).first
+    end
+
     # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
     # Non-namespaced model definition name
     # @return [String]
@@ -453,6 +503,18 @@ module Dynamic
       klass = Object
       klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
       klass
+    end
+
+    #
+    # Returns :table or :view if the underlying database object is a table or a view.
+    # Returns nil if no underlying object is found
+    # @return [Symbol | nil]
+    def table_or_view
+      return unless Admin::MigrationGenerator.table_or_view_exists? table_name
+
+      return :table if Admin::MigrationGenerator.table_exists? table_name
+
+      :view
     end
   end
 end

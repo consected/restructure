@@ -36,39 +36,45 @@ module Seeds
         log "Did not run #{self}.setup"
       end
 
-      if Rails.env.test?
+      return unless Rails.env.test?
 
-        sa = ExternalIdentifier.active.find_by(name: 'scantrons')
-        if sa
-          unless defined? Scantron
-            log 'Reloading external identifiers since Scantron is not defined'
-            ExternalIdentifier.define_models
-          end
-        else
-          s = ExternalIdentifier.find_by(name: 'scantrons')
-          raise 'Scantron not found' unless s
-
-          s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+      sa = ExternalIdentifier.active.find_by(name: 'scantrons')
+      if sa
+        unless defined? Scantron
+          log 'Reloading external identifiers since Scantron is not defined'
+          ExternalIdentifier.define_models
+          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
         end
-        # ::ExternalIdentifier.refresh_outdated unless defined? Scantron
-        raise "Scantron not defined: #{sa}\n#{s}" unless defined? Scantron
+      else
+        s = ExternalIdentifier.find_by(name: 'scantrons')
+        raise 'Scantron not found' unless s
 
-        sa = ExternalIdentifier.active.find_by(name: 'sage_assignments')
-        unless sa
-          s = ExternalIdentifier.find_by(name: 'sage_assignments')
-          raise 'SageAssignment not found' unless s
+        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+      end
+      # ::ExternalIdentifier.refresh_outdated unless defined? Scantron
+      raise "Scantron not defined: #{sa}\n#{s}" unless defined? Scantron
 
-          s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+      sa = ExternalIdentifier.active.find_by(name: 'sage_assignments')
+      if sa
+        unless defined? SageAssignment
+          log 'Reloading external identifiers since SageAssignment is not defined'
+          ExternalIdentifier.define_models
+          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
         end
-        # ::ExternalIdentifier.refresh_outdated unless defined? SageAssignment
-        raise "SageAssignment not defined: #{sa}\n#{s}" unless defined? SageAssignment
+      else
+        s = ExternalIdentifier.find_by(name: 'sage_assignments')
+        raise 'SageAssignment not found' unless s
 
-        Master.reset_external_id_matching_fields!
+        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+      end
+      # ::ExternalIdentifier.refresh_outdated unless defined? SageAssignment
+      raise "SageAssignment not defined: #{sa}\n#{s}" unless defined? SageAssignment
 
-        Admin::AppType.active.each do |app_type|
-          Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: auto_admin)
-          Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: auto_admin)
-        end
+      Master.reset_external_id_matching_fields!
+
+      Admin::AppType.active.each do |app_type|
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: auto_admin)
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: auto_admin)
       end
     end
   end

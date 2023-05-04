@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe 'Calculate conditional actions', type: :model do
   include ModelSupport
   include ActivityLogSupport
+  include TestNoMasterDmRecSupport
 
   def setup_config(confy)
     config = YAML.safe_load(confy).deep_symbolize_keys
@@ -1195,7 +1196,15 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     conf = setup_config(confy)
 
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be true
+    cai = res.calc_action_if
+    unless cai
+      puts 'calc_action_if is about to fail'
+      puts confy
+      puts "@al: #{@al}"
+      puts "@al1: #{@al1}"
+      puts "zip: #{a1.zip} for #{a1}"
+    end
+    expect(cai).to be true
 
     confy = <<~EOF_YAML
       all:
@@ -1430,6 +1439,12 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
+    if a
+      puts 'calc_action_if is about to fail'
+      puts confy
+      puts "city: #{@al.master.addresses.first.city}"
+      puts "data: #{@al.master.player_contacts.first.data}"
+    end
     expect(a).to be false
   end
 
@@ -1909,6 +1924,135 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res.calc_action_if).to be true
   end
 
+  describe 'hash elements' do
+    it 'compares a hash element' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: 'element result value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: 'bad value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.no_element',
+              value: 'element result value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'compares a hash element in any combination' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        any: [
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value2',
+                value: 'not element result value'
+              }
+            }
+          },
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value',
+                value: 'element result value'
+              }
+            }
+          },
+          {
+            this: {
+              id: al.id,
+              save_trigger_results: {
+                element: 'result1.res_value3',
+                value: 'bad value'
+              }
+            }
+          }
+
+        ]
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+    end
+
+    it 'compares a hash element against a substituted value' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value'
+        }
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: '{{save_trigger_results.result1.res_value}}'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+    end
+  end
+
   describe 'returning values' do
     it 'returns the last value from a condition as this_val attribute' do
       conf = {
@@ -2147,37 +2291,44 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       # create_master
 
-      @al = create_item
-      @al.current_user = @user
+      @alref = create_item
+      @alref.current_user = @user
 
-      @al1 = create_item
-      @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+      @alref1 = create_item
+      @alref1.update! select_who: 'someone new', current_user: @user, master_id: @alref.master_id
 
-      @al2 = create_item
-      @al2.update! select_who: 'someone else new', current_user: @user, master_id: @al.master_id
+      @alref2 = create_item
+      @alref2.update! select_who: 'someone else new', current_user: @user, master_id: @alref.master_id
 
-      @al1.reload
-      @al2.reload
-      @al1.current_user = @user
-      @al2.current_user = @user
+      @alref_no_master = create_item
+      @alref_no_master.update! select_who: 'someone else new', current_user: @user
+      # Force an update of master_id outside of the validations
+      @alref_no_master.class.where(id: @alref_no_master.id).update_all(master_id: nil)
 
-      expect(@al.master_id).to eq @al2.master_id
-      expect(@al.master_id).to eq @al1.master_id
+      @alref1.reload
+      @alref2.reload
+      @alref_no_master.reload
+      @alref1.current_user = @user
+      @alref2.current_user = @user
 
-      @al.extra_log_type_config.references = {
+      expect(@alref.master_id).to eq @alref2.master_id
+      expect(@alref.master_id).to eq @alref1.master_id
+      expect(@alref_no_master.master_id).to be nil
+
+      @alref.extra_log_type_config.references = {
         activity_log__player_contact_phone: {
           from: 'this',
           add: 'many'
         }
       }
 
-      @al.extra_log_type_config.clean_references_def
-      @al.extra_log_type_config.editable_if = { always: true }
+      @alref.extra_log_type_config.clean_references_def
+      @alref.extra_log_type_config.editable_if = { always: true }
 
-      ModelReference.create_with @al, @al1, force_create: true
-      ModelReference.create_with @al, @al2, force_create: true
+      ModelReference.create_with @alref, @alref1, force_create: true
+      ModelReference.create_with @alref, @alref2, force_create: true
 
-      expect(@al.model_references.length).to eq 2
+      expect(@alref.model_references.length).to eq 2
     end
 
     it 'returns a referring record attribute' do
@@ -2187,10 +2338,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al.id
+      expect(res).to eq @alref.id
     end
 
     it 'checks a referring record exists' do
@@ -2202,10 +2353,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      res = ConditionalActions.new conf, @al2
+      res = ConditionalActions.new conf, @alref2
       expect(res.calc_action_if).to be true
 
-      res = ConditionalActions.new conf, @al
+      res = ConditionalActions.new conf, @alref
       expect(res.calc_action_if).to be false
     end
 
@@ -2219,10 +2370,44 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
+    end
+
+    it 'returns a whole record as a result of finding a reference in any master' do
+      conf = {
+        activity_log__player_contact_phones: {
+          id: {
+            referring_record: 'id'
+          },
+          update: 'return_result'
+        },
+        masters: {}
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq @alref
+    end
+
+    it 'returns a whole record as a result of finding a table without masters' do
+      conf = {
+        activity_log__player_contact_phones: {
+          id: {
+            referring_record: 'id'
+          },
+          update: 'return_result'
+        },
+        no_masters: {}
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq @alref
     end
 
     it 'returns the first record referring to this one' do
@@ -2232,10 +2417,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
     end
 
     it 'returns the top record from the tree of referring records' do
@@ -2246,10 +2431,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      ca = ConditionalActions.new conf, @al2
+      ca = ConditionalActions.new conf, @alref2
 
       res = ca.get_this_val
-      expect(res).to eq @al
+      expect(res).to eq @alref
     end
   end
 
@@ -2269,7 +2454,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       new_al2 = create_item
       new_al2.master_id = @new_al0.master_id
-      new_al2.extra_log_type = 'secondary'
+      new_al2.extra_log_type = 'ignore_missing_elt'
       new_al2.force_save!
       new_al2.save!
 
@@ -2304,7 +2489,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(@new_al0.extra_log_type).to eq :blank_log
       ModelReference.create_with @new_al, new_al2, force_create: true
       expect(new_al2.referring_record).to eq @new_al
-      expect(new_al2.extra_log_type).to eq :secondary
+      expect(new_al2.extra_log_type).to eq :ignore_missing_elt
 
       mls = @new_al.model_references(force_reload: true).length
       expect(mls).to eq 2
@@ -2314,7 +2499,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       confy = <<~EOF_YAML
         all:
           activity_log__player_contact_phones:
-            extra_log_type: secondary
+            extra_log_type: ignore_missing_elt
             id:
               parent_references: id
 
@@ -3028,6 +3213,278 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
       ca = ConditionalActions.new conf, @al
       expect(ca.get_this_val).to be nil
+    end
+  end
+
+  describe 'finding records system-wide, not restricted to the current master record' do
+    before :each do
+      setup_test_no_master_dm_rec_dynamic_model
+      expect(DynamicModel::TestNoMasterDmRec.no_master_association).to be true
+
+      create_user
+      @m1 = create_master
+      @m2 = create_master
+      @m3 = create_master
+      let_user_create_player_contacts
+      let_user_create :dynamic_model__test_no_master_dm_recs
+
+      @pc1_1 = @m1.player_contacts.create! data: '(516)123-7612 11', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc1_2 = @m1.player_contacts.create! data: '(516)123-7612 12', rec_type: 'phone', rank: 5, source: 'nflpa'
+      @pc2_1 = @m2.player_contacts.create! data: '(516)123-7612 21', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc2_2 = @m2.player_contacts.create! data: '(516)123-7612 22', rec_type: 'phone', rank: 5, source: 'nflpa'
+      @pc3_1 = @m3.player_contacts.create! data: '(516)123-7612 31', rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc3_2 = @m3.player_contacts.create! data: '(516)123-7612 32', rec_type: 'phone', rank: 5, source: 'nflpa'
+    end
+
+    it 'finds a record related to a specified master record' do
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 22'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: @m2.id
+          },
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'finds record related to a multiple master records' do
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 32'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {
+            id: [@m2.id, @m3.id]
+          },
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'finds record related to any master record' do
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 21'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 32'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: '(516)123-7612 11'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          masters: {},
+          player_contacts: {
+            data: 'bad data'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'returns a master record based on joined results' do
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: '(516)123-7612 21',
+          master_id: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @m2.id
+    end
+
+    it 'returns a master record based on joined results where there is no association between current and joined models' do
+      dm11 = create_test_no_master_dm_rec(
+        alt_id: 11,
+        data: '(516)123-7612 11',
+        info: 'Info 11'
+      )
+      dm12 = create_test_no_master_dm_rec(
+        alt_id: 12,
+        data: '(516)123-7612 12',
+        info: 'Info 12'
+      )
+      dm21 = create_test_no_master_dm_rec(
+        alt_id: 21,
+        data: '(516)123-7612 21',
+        info: 'Info 21'
+      )
+
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: {
+            this: 'data'
+          },
+          master_id: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, dm11
+      res = ca.get_this_val
+      expect(res).to eq @m1.id
+
+      ca = ConditionalActions.new conf, dm12
+      res = ca.get_this_val
+      expect(res).to eq @m1.id
+
+      ca = ConditionalActions.new conf, dm21
+      res = ca.get_this_val
+      expect(res).to eq @m2.id
+    end
+
+    it 'returns a player record from another master record' do
+      conf = {
+        masters: {},
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @pc2_2
+
+      conf = {
+        masters: {
+          id: [@m2.id]
+        },
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq @pc2_2
+    end
+
+    it 'fails to return a player record from another master record if that is outside the set of master records specified' do
+      conf = {
+        masters: {
+          id: [@m1.id, @m3.id]
+        },
+        player_contacts: {
+          data: '(516)123-7612 22',
+          master_id: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to be nil
     end
   end
 end

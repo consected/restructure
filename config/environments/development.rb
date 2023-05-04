@@ -2,6 +2,7 @@
 
 Rails.application.configure do
   config.log_level = :debug
+  config.log_formatter = ::Logger::Formatter.new
 
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -12,6 +13,9 @@ Rails.application.configure do
 
   # Do not eager load code on boot.
   config.eager_load = false
+
+  # Uncomment to show the Zeitwork autoloader log
+  # Rails.autoloaders.log!
 
   # Show full error reports.
   config.consider_all_requests_local = true
@@ -90,7 +94,7 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
-  config.assets.js_compressor = Uglifier.new(harmony: true)
+  config.assets.js_compressor = :terser
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 end

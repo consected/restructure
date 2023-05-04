@@ -52,7 +52,11 @@ logo filename: |
   Use an alternative logo. Path relative to the app root for a logo. 
   For example: /app_specific/sample_app/project-logo.png
 logo link: |
-  Link to go to when the logo is clicked. By default "/". Relative to the app root
+  Link to go to when the logo is clicked. By default "/". Relative to the app root. 
+  Add `?use_app_type=app-type-name` to force a switch to another app.
+app home url: |
+  URL for the app home. Defaults to *logo link* if set, or `/masters` otherwise.
+  May be different than the logo link, since that may force a switch to another app.
 hide master heading: |
   Hide the master heading, including id, prefix and title
 master header prefix: |

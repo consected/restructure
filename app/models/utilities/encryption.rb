@@ -43,6 +43,7 @@ module Utilities
     private
 
     def encryptor
+      ActiveSupport::MessageEncryptor.use_authenticated_message_encryption = false
       ActiveSupport::MessageEncryptor.new(KEY)
     end
   end

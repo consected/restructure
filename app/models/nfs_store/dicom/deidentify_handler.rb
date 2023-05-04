@@ -52,10 +52,10 @@ module NfsStore
           container_file.replace_file! new_tmp_image_path
         end
 
-        if container_file.file_metadata_present?
-          # There is existing metadata stored. Bring it up to date based on the updated file
-          NfsStore::Dicom::MetadataHandler.extract_metadata_from(container_file)
-        end
+        return unless container_file.file_metadata_present?
+
+        # There is existing metadata stored. Bring it up to date based on the updated file
+        NfsStore::Dicom::MetadataHandler.extract_metadata_from(container_file)
       end
 
       #
@@ -88,7 +88,9 @@ module NfsStore
         setup_file
         anonymizer ||= DICOM::Anonymizer.new(recursive: recursive)
 
+        tx_syntax_uid = dicom_object['0002,0010'].value
         dicom_object.anonymize(anonymizer)
+        dicom_object.add(DICOM::Element.new('0002,0010', tx_syntax_uid)) if tx_syntax_uid
 
         dicom_object.write(output_path)
         output_path

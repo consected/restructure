@@ -363,6 +363,7 @@ module ActiveRecord
       end
 
       def history_table_exists
+        ActiveRecord::Base.connection.schema_cache.clear!
         ActiveRecord::Base.connection.table_exists? "#{schema}.#{history_table_name}"
       end
 
@@ -521,13 +522,13 @@ module ActiveRecord
           if fdef == :references
             begin
               alt_c = options[:attr_name]
-              add_reference "#{schema}.#{table_name}", alt_c, options
+              add_reference "#{schema}.#{table_name}", alt_c, **options
             rescue StandardError, ActiveRecord::StatementInvalid => e
               puts "******* Failed adding reference: #{schema}.#{table_name}, #{alt_c}, #{options}\n#{e}\n#{e.backtrace.join("\n")}"
               nil
             end
           else
-            add_column "#{schema}.#{table_name}", c, fdef, options
+            add_column "#{schema}.#{table_name}", c, fdef, **options
           end
         end
 
@@ -547,7 +548,7 @@ module ActiveRecord
 
           if fdef == :references
             alt_c = options[:attr_name]
-            remove_reference "#{schema}.#{table_name}", alt_c, options
+            remove_reference "#{schema}.#{table_name}", alt_c, **options
           else
             remove_column "#{schema}.#{table_name}", c, fdef
           end
@@ -567,12 +568,12 @@ module ActiveRecord
             if fdef == :references
               options[:index][:name] += '_hist'
               begin
-                add_reference "#{schema}.#{history_table_name}", c, options
+                add_reference "#{schema}.#{history_table_name}", c, **options
               rescue StandardError, ActiveRecord::StatementInvalid
                 nil
               end
             else
-              add_column "#{schema}.#{history_table_name}", c, fdef, options
+              add_column "#{schema}.#{history_table_name}", c, fdef, **options
             end
           end
 
@@ -589,7 +590,7 @@ module ActiveRecord
             if fdef == :references
               options[:index][:name] += '_hist'
               begin
-                remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+                remove_reference "#{schema}.#{history_table_name}", c, **options if c.in? history_col_names
               rescue StandardError, ActiveRecord::StatementInvalid
                 nil
               end
@@ -813,18 +814,27 @@ module ActiveRecord
       end
 
       def create_fields(tbl, history = nil)
+        curr_field = {}
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
+          curr_field = {
+            attr_name: attr_name,
+            config: f,
+            fopts: fopts
+          }
           if fopts && fopts[:index]
             fopts[:index][:name] += '_hist' if history
-            tbl.send(f, attr_name, fopts)
+            tbl.send(f, attr_name, **fopts)
           elsif fopts
-            tbl.send(f, attr_name, fopts)
+            tbl.send(f, attr_name, **fopts)
           else
             tbl.send(f, attr_name)
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
+        puts "Failed to create field in table #{tbl.name}: #{curr_field}"
+        puts "History table? #{!!history}"
+        puts "All requested fields: #{field_defs}"
         raise e unless force_rollback
       end
 
@@ -832,7 +842,7 @@ module ActiveRecord
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
           if fopts
-            add_column(tbl, attr_name, f, fopts)
+            add_column(tbl, attr_name, f, **fopts)
           else
             add_column(tbl, attr_name)
           end

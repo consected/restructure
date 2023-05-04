@@ -16,6 +16,11 @@
           <th class="no-sort"></th>
           <%
           index_params.each do |p|
+            if p.to_s == 'admin_id'
+              @show_admin_col = true
+              next
+            end
+
             is_options_field = (p.to_s.end_with?('options') || p.to_s.end_with?('template')) && !respond_to?("#{p}_options")
           %>
           <% unless is_options_field %>
@@ -23,7 +28,10 @@
           <% end %>
         <% end %>
         <% if admin_links.present? %>
-          <th>admin links</th>
+          <th>Admin Links</th>
+        <% end %>
+        <% if @show_admin_col %>
+          <th>Admin</th>
         <% end %>
       </tr>
     </thead>

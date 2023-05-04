@@ -26,11 +26,43 @@ module SetupHelper
     Delayed::Job.delete_all
   end
 
+  def self.check_bhs_assignments_table(fail = nil)
+    ActiveRecord::Base.connection.schema_cache.clear!
+    res = ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+    put_now "******* bhs_assignments table exists in #{db_name}? #{res}" unless res
+    raise 'bhs_assignments not present' if fail && !res
+
+    res
+  end
+
+  def self.setup_full_test_db
+    put_now 'Validate and setup app dbs'
+    SetupHelper.validate_db_setup
+    SetupHelper.migrate_if_needed
+
+    # The DB setup can be forced to skip with an env variable
+    # It will automatically skip if a specific table is already in place
+    SetupHelper.setup_app_dbs
+    check_bhs_assignments_table true
+
+    # Seed the database before loading files, since things like Scantron model and
+    # controller will not exist without the seed
+    put_now 'Seed setup'
+    require "#{::Rails.root}/db/seeds.rb"
+    # Seeds.setup is automatically run when seeds.rb is required
+    $dont_seed = true
+    raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
+
+    check_bhs_assignments_table true
+  end
+
   def self.setup_app_dbs
     puts 'Setup app DBs'
 
+    ActiveRecord::Base.connection.schema_cache.clear!
+
     unless ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')
-      # ESign setup
+      puts 'ESign setup'
       # Setup the triggers, functions, etc
       sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
       sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'test_esign_sql')
@@ -38,15 +70,19 @@ module SetupHelper
     end
 
     unless ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+      puts 'BHS setup'
       # ExportApp
       sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
                      3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql
                      6-grant_roles_access_to_ml_app.sql]
       sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bhs_sql')
       SetupHelper.setup_app_db sql_source_dir, sql_files
+
+      SetupHelper.check_bhs_assignments_table true
     end
 
     unless ActiveRecord::Base.connection.table_exists?('adders')
+      puts 'Adders setup'
       # Export App
       sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
                      6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
@@ -54,18 +90,24 @@ module SetupHelper
       SetupHelper.setup_app_db sql_source_dir, sql_files
     end
 
-    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
+    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_short_links') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_short_link_clicks') &&
+           ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_recipients') &&
+           ActiveRecord::Base.connection.table_exists?('player_contact_phone_infos')
       # Bulk
       # Setup the triggers, functions, etc
       sql_files = %w[test/drop_schema.sql test/create_schema.sql
-                     bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
-                     bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
+                     bulk/create_zeus_bulk_messages_table.sql bulk/create_zeus_bulk_message_recipients_table.sql
+                     bulk/dup_check_recipients.sql bulk/create_al_bulk_messages.sql
                      bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
                      bulk/create_player_contact_phone_infos.sql
                      bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
       sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
       SetupHelper.setup_app_db sql_source_dir, sql_files
     end
+
+    ActiveRecord::Base.connection.schema_cache.clear!
   end
 
   def self.validate_db_setup
@@ -88,7 +130,7 @@ module SetupHelper
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         dirname = 'db/migrations'
-        mc = ActiveRecord::MigrationContext.new(dirname)
+        mc = Admin::MigrationGenerator.migration_context(dirname)
         if mc.needs_migration?
           puts 'Running migrations'
           mc.migrate
@@ -107,6 +149,25 @@ module SetupHelper
     DynamicModel.routes_reload
   end
 
+  def self.check_activity_logs
+    res = ActivityLog.conflicting_definitions('bhs_assignment', nil, nil)
+    # puts res.pluck(:id, :name, :item_type, :rec_type, :process_name)
+    raise 'multiple bhs_assignment activity logs already exist' if res.length > 1
+  end
+
+  def self.clean_conflicting_activity_logs
+    sets = ActivityLog.active.select(:item_type, :rec_type, :process_name).distinct.reorder('').pluck(:item_type, :rec_type, :process_name)
+    sets.each do |s|
+      res = ActivityLog.conflicting_definitions(*s)
+      next if res.length <= 1
+
+      id = res.first.id
+      clean = res.where.not(id: id)
+      puts "cleaning conflicting activity logs: #{clean.pluck(:id, :name, :item_type, :rec_type, :process_name)}"
+      clean.update_all(disabled: true)
+    end
+  end
+
   def self.feature_setup(_options = {})
     Rails.logger.info 'Feature setup'
     Seeds.setup
@@ -115,6 +176,8 @@ module SetupHelper
 
   def self.setup_al_player_contact_emails
     Rails.logger.info 'Setting up al player contact emails'
+    ActiveRecord::Base.connection.schema_cache.clear!
+
     return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
 
     TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
@@ -150,6 +213,7 @@ module SetupHelper
     tname = 'activity_log_' + itn.pluralize
     cname = 'ActivityLog::' + itn.ns_camelize
 
+    ActiveRecord::Base.connection.schema_cache.clear!
     unless ActivityLog.connection.table_exists? tname
       TableGenerators.activity_logs_table(
         tname,
@@ -166,6 +230,8 @@ module SetupHelper
         'protocol_id',
         'set_related_player_contact_rank',
         'tag_select_allowed',
+        'select_record_id_from_player_contacts',
+        'tag_select_record_id_from_player_contacts',
         'result_json',
         'created_by_user_id'
       )
@@ -185,7 +251,7 @@ module SetupHelper
 
     unless res.active_model_configuration?
       # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
-      res.update!(current_admin: auto_admin) unless res.admin
+      res.update!(current_admin: auto_admin, updated_at: DateTime.now)
 
       app_type = Admin::AppType.active.first
       # Ensure there is at least one user access control, otherwise we won't re-enable the process on future loads
@@ -210,24 +276,47 @@ module SetupHelper
     Rails.logger.info "Setting up external identifier #{name}"
     @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
     @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
+    ActiveRecord::Base.connection.schema_cache.clear!
     return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
 
     TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
   end
 
   def self.setup_test_app
+    MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
+    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+    reload_configs
+
+    check_activity_logs
     app_name = "bhs_model_#{rand(100_000_000)}"
 
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_app_type_test_config.json'
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
+    sa = ExternalIdentifier.active.find_by(name: 'bhs_assignments')
+    if sa
+      unless defined? BhsAssignment
+        log 'Reloading external identifiers since BhsAssignment is not defined'
+        ExternalIdentifier.define_models
+        sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
+      end
+    else
+      s = ExternalIdentifier.find_by(name: 'bhs_assignments')
+      raise 'BhsAssignment not found' unless s
+
+      s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+    end
+
     new_app_type = Admin::AppType.where(name: app_name).active.first
     Admin::UserAccessControl.active.where(
       app_type_id: new_app_type.id,
       resource_type: %i[external_id_assignments limited_access]
-    ).update_all(disabled: true)
+    ).each do |uac|
+      uac.update(disabled: true, current_admin: Admin.active.first)
+    end
 
+    ExternalIdentifier.define_models
     new_app_type
   end
 
@@ -257,7 +346,9 @@ module SetupHelper
     sql_files.each do |fn|
       sqlfn = Rails.root.join(sql_source_dir, fn)
       puts "Running psql: #{sqlfn}"
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} < #{sqlfn}`
+      host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
+      user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end

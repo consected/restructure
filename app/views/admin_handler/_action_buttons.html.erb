@@ -1,4 +1,3 @@
-<%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
 <%
    if defined? no_create
      allow_create = !no_create
@@ -9,7 +8,6 @@
 
 %>
 <% unless controller_name == 'pages' && action_name != 'reference_data' %>
-  <%= link_to "admin menu", "/", class: "btn btn-warning" %>
   <%if @sub_processes || @protocol_events%>
     <%= link_to "protocols", admin_protocols_path, class: "btn btn-warning" %>
   <%end%>
@@ -22,9 +20,8 @@
   <%if @report %>
     <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>
   <%end%>
-  <%if @sage_assignment || @sage_assignments %>
-    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>
-    <% allow_create = false %>
+  <%if @external_identifier%>
+    <%= link_to "external ID details", admin_external_identifier_details_path, class: "btn btn-warning" %>
   <%end%>
   <%if allow_create %>
     <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: filter_params_permitted), remote: true, class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create'] rescue nil%>

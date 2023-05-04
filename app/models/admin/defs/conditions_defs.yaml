@@ -8,6 +8,8 @@
               this: 'attribute in this record' 
             field_name_4: 
               this_references: 'attribute in any referenced record' 
+            field_name_5:
+              this: previous_value_of_<some attribute> - gets the previous value of a field before it was changed in this transaction
             return_constant: 'value to return if previous condition matches'
             field_to_return: 'return_value'
             field_to_return_if_also_a_condition:
@@ -21,15 +23,7 @@
         any:
           model_table_name:
             field_name: 'any conditional value must be true'
-            field_name_2:
-              condition: "one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}"
-              not: 'true|false (optional, default false) negate the result'
-              value: 'any value, with defaults or substitutions, or a hash reference to another table field'
             
-          
-          'all|any|not_all|not_any':
-            'nested conditions...': {}
-          
         
         not_any:
           model_table_name:
@@ -40,9 +34,90 @@
           model_table_name:
             field_name: 'any conditional value must be false'
           
-        
+        all - users not related to master:
+          # if the first key is 'users' then the query will return against all users rather than current master record
+          users:
+            email: 'address to find user by'
+            disabled:
+              - null
+              - false
+            id: return_value
+
+        all - no masters:
+          # if a key is specified as 'no_masters', then the first key in the list will be used as the base table
+          # for the query. Results will not be joined to the masters table, allowing for abitrary tables and views to be
+          # used to calculate conditions, even if they don't have a master_id or the master_id field can be null.
+          # Additional associations can be specified, but they must be defined within the new base table
+          no_masters: {}
+          dynamic_model__some_tables:
+            id: 123
+            return: return_result
+
+        all - masters:
+          # if the first key is 'masters' and the value an empty hash then the query will return against all masters rather than current master record
+          masters: {}
+          player_contacts:
+            data: '(516)123-7612 22'
+            master_id: return_result
+
+        all - filtered to a set of masters:
+          # if the first key is 'masters' with conditions then the query will return against a set of masters rather than current master record
+          masters:
+            id:
+              - 1
+              - 2          
+          player_contacts:
+            data: (516)123-7612 22
+            master_id: return_result
+          
+        all_with_nested_conditions:
+          model_table_name:
+            field_name: 'all conditional values must be true'                     
+          'all|any|not_all|not_any':
+            'nested conditions...': {}
+
+      
         'all_2|not_any_3...': 'allows for repeat of the condition type'
         'all|any|not_all|not_any':
             - repeated_model_table_name: {}
             - repeated_model_table_name: {}
           
+        all_special_conditions:
+          model_table_name:
+            field_special_condition:
+              condition: |
+                "one of:"
+                - 'IS NOT NULL', 'IS NULL'
+                - '=', '<', '>', '<>', '<=', '>=', 'LIKE', 'ILIKE', '~', '~*'
+                - '= ANY' -  The value of this field (must be scalar) matches any value from the retrieved array field
+                - '= ANY REV' -  Reverse the operator order
+                - '<> ANY' -  The value of this field (must be scalar) must not match any value from the retrieved array field
+                - '<> ANY REV' -  Reverse the operator order
+                - '= ARRAY_LENGTH' -  The value of this field (must be integer) equals the length of the retrieved array field
+                - '<> ARRAY_LENGTH' -  The value of this field (must be integer) must not equal length of the retrieved array field
+                - '= LENGTH' -  The value of this field (must be integer) equals the length of the string (varchar or text) field
+                - '<> LENGTH' -  The value of this field (must be integer) must not equal length of the string (varchar/text) field
+                - '&&' -  There is an overlap, so any value of this field (an array) must be in the retrieved array field
+                - '@>' -  This array field contains all of the elements of the retrieved array field
+                - '<@' - This array field's elements are all found in the retrieved array field
+
+              not: 'true|false (optional, default false) negate the result'
+              value: 'any value, with defaults or substitutions, or a hash reference to another table field'
+            
+            json_field_element:
+              element: 'key1.key2'
+              value: 'literal value'
+
+        any_save_trigger_results:
+          # save_trigger_results are held for just the life of the transaction, and are not stored to the DB
+          # They are set within specific save triggers (such as *pull_external_data*) when the
+          # configuration `local_data: <key-name>` is set. 
+          - this:
+              save_trigger_results:
+                element: '<local_data key-name>.<element_key>'
+                value: 'match value or substitution'
+          - this:
+              save_trigger_results:
+                element: '<local_data key-name>_http_response_code'
+                value: 'match integer value or substitution, for example *200* for success'  
+

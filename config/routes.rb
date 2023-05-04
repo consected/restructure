@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :external_identifiers, except: %i[show destroy]
+    get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy]
     resources :config_libraries, except: %i[show destroy]
     resources :external_identifier_details, except: [:destroy]
@@ -44,7 +45,10 @@ Rails.application.routes.draw do
     resources :app_configurations, except: %i[show destroy]
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
+
     resources :job_reviews, except: %i[show destroy]
+    post 'job_reviews/restart_failed_jobs', to: 'job_reviews#restart_failed_jobs'
+
     resources :server_info, only: [:index]
     get 'server_info/rails_log', to: 'server_info#rails_log'
 
@@ -125,7 +129,10 @@ Rails.application.routes.draw do
     resources :contact_infos, except: %i[show destroy]
   end
 
+  resources :info_pages, only: %i[show]
+
   get 'pages/home' => 'pages#home'
+  get 'pages/app_home' => 'pages#app_home'
   resources :pages, only: %i[index show] do
     member do
       get :template
@@ -253,4 +260,6 @@ Rails.application.routes.draw do
   # Dynamic model goes at the end to avoid any issues with accidental clash of naming. The
   # dynamic model will only be applied if another item is not matched first
   DynamicModel.routes_load
+
+  match '*path', via: :all, to: 'bad_route#not_routed'
 end

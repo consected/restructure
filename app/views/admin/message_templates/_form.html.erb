@@ -1,0 +1,76 @@
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">
+    <div class="admin-form-block-outer">
+      <%= form_for(object_instance, url: admin_form_url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result_re_edit"}) do |f| %>
+        <%= render partial: 'admin_handler/form_errors' %>
+        <div class="form-group">
+          <%= f.label :name %>
+          <%= f.text_field :name %>
+        </div>
+        <div class="form-group">
+          <%= f.label 'category' %>
+          <%= f.text_field :category %>
+        </div>
+        <div class="form-group">
+          <%= f.label :message_type, 'Is a' %>
+          <%
+          select_item_type = {}
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'message_type'
+          select_item_type[:include_blank] = true
+
+          options = message_type_options
+          %>
+          <%= f.select :message_type, options, select_item_type %>
+        </div>
+        <div class="form-group">
+          <%= f.label :template_type %>
+          <%
+          select_item_type = {}
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'template_type'
+          select_item_type[:include_blank] = true
+
+          options = template_type_options
+          %>
+          <%= f.select :template_type, options, select_item_type %>
+        </div>
+        <div class="form-group">
+          <%= f.label :disable %>
+          <%= f.check_box :disabled %>
+        </div>
+        
+        <% if object_instance.message_type.present? %>
+        <div class="admin-options-editor-block" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
+          <label>Template</label>
+          <div class="tall-admin-editor">
+
+            <% if editor_code_type == 'markdown' %>
+            <div class="common-admin-markdown-editor ">
+            <%= render partial: 'common_templates/markdown_editor/show_editor', 
+              locals: { 
+                editor_format: 'markdown', 
+                editor_id: "message-template-template--#{object_instance.id}",
+                form: f,
+                field_options: {
+                  config: { toolbar_type: 'advanced' }
+                },
+                form_object_instance: object_instance, 
+                field_name_sym: :template,
+                form_object_item_type_us: 'admin__message_template' 
+              } %>
+            </div>
+            <% else %>
+            <%= f.text_area :template, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type}%>
+            <% end %>
+          </div>
+        </div>
+        <% end %>
+
+        <div class="admin-buttons-block" >
+          <%= hidden_filter_fields %>
+          <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+        </div>
+      <% end %>
+      
+    </div>
+  </div>
+</div>

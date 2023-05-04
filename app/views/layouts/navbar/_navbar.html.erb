@@ -43,6 +43,7 @@
       </ul>
       <%= render partial: 'layouts/navbar/search' %>
       <ul class="nav navbar-nav navbar-right">
+        <% if @nav_right_plain %><ul class="nav navbar-nav navbar-right public-page-nav"><%= @nav_right_plain %></ul><% end %>
         <% @secondary_navs.each do |nav| %>
           <%
           drop = {}
@@ -66,6 +67,7 @@
           </li>
         <% end %>
       </ul>
+      <%= render partial: 'admin_handler/admin_status_bar' %>
     </div>
     <!-- /.navbar-collapse -->
   </div>

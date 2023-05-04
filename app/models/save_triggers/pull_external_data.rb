@@ -18,6 +18,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
       model_def.each do |_model_name, config|
         data_field = config[:data_field]
         response_code_field = config[:response_code_field]
+        data_field_format = config[:data_field_format]
+        local_data_name = config[:local_data]
         vals = {}
 
         # We calculate the conditional if inside each item, rather than relying
@@ -27,10 +29,18 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           next unless ca.calc_action_if
         end
 
-        data = pull_data config[:from]
+        data = run_request(config)
 
-        vals[data_field] = data
+        if data_field
+          data = data&.to_json if data_field_format == 'json'
+          vals[data_field] = data
+        end
+
         vals[response_code_field] = response_code if response_code_field
+        if local_data_name
+          @item.save_trigger_results[local_data_name] = data
+          @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
+        end
 
         # Retain the flags so that the #update! doesn't change
         # what we need to report through the API
@@ -50,22 +60,47 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     end
   end
 
+  def run_request(config)
+    from = config[:from]
+    to = config[:to]
+
+    case method_from_config(config)
+    when 'get'
+      pull_data(from)
+    when 'post'
+      post_data(to, config[:form])
+    else
+      raise FphsException, "pull_external_data method '#{http_method}' is not supported"
+    end
+  end
+
   def pull_data(config)
-    url = config[:url]
-    format = config[:format]
+    url = url_from_config(config)
+    response = Net::HTTP.get_response(URI.parse(url))
+    handle_response(config, response)
+  end
+
+  def post_data(config, form)
+    url = url_from_config(config)
+    form ||= {}
+    response = Net::HTTP.post_form(URI.parse(url), form)
+    handle_response(config, response)
+  end
+
+  def handle_response(config, response)
+    url = url_from_config(config)
+    http_method = method_from_config(config)
     allow_empty_result = config[:allow_empty_result]
     allow_response_codes = config[:allow_response_codes] || []
-
-    url = Formatter::Substitution.substitute(url, data: @item, ignore_missing: false)
-
-    response = Net::HTTP.get_response(URI.parse(url))
+    format = config[:format]
 
     self.response_code = response.code.to_i
 
     unless response_code == 200
       return if response_code&.in?(allow_response_codes)
 
-      raise FphsException, "Pull external data: failed request with code '#{response_code}' from url #{url}"
+      raise FphsException,
+            "#{http_method} external data: failed request with code '#{response_code}' from url #{url}"
     end
 
     content = response.body
@@ -73,7 +108,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     if content.blank?
       return if allow_empty_result
 
-      raise FphsException, "Pull external data: empty content received from #{url}"
+      raise FphsException, "#{http_method} external data: empty content received from #{url}"
     end
 
     case format
@@ -86,5 +121,14 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     end
 
     data
+  end
+
+  def url_from_config(config)
+    url = config[:url]
+    Formatter::Substitution.substitute(url, data: @item, ignore_missing: false)
+  end
+
+  def method_from_config(config)
+    config[:method] || 'get'
   end
 end

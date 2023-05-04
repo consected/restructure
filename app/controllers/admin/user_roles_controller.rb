@@ -4,6 +4,7 @@
 #
 # Provide definitions for User Roles
 class Admin::UserRolesController < AdminController
+  helper_method :admin_links
   #
   # Handle the request to copy user roles from one user to another
   def copy_user_roles
@@ -20,6 +21,8 @@ class Admin::UserRolesController < AdminController
     flash.now[:notice] = "#{to_user.email} now has #{res.length} roles for app #{app_type.name}"
     index
   end
+
+  protected
 
   def view_folder
     'admin/common_templates'
@@ -41,6 +44,20 @@ class Admin::UserRolesController < AdminController
 
   def filters_on
     %i[app_type_id role_name user_id]
+  end
+
+  def admin_links(item = nil)
+    return [true] if item.nil?
+
+    [
+      ['description', admin_role_descriptions_path(filter: { role_name: item.role_name })],
+      ['user profile', admin_manage_users_path(filter: { id: item.user_id })],
+      ['access controls', admin_user_access_controls_path(filter: { role_name: item.role_name })]
+    ]
+  end
+
+  def index_params
+    %i[app_type role_name user admin_id]
   end
 
   private

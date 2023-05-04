@@ -6,7 +6,6 @@ class Admin::AppTypesController < AdminController
 
   def restart_server
     AppControl.restart_server
-    Rails.cache.clear
     flash.now[:notice] = 'Restarting server, DelayedJob and clearing cache'
     render json: 'Restarting server, DelayedJob and clearing cache'
   end

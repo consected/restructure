@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "This will not work"
-ls '/root/'
+ls '/junkdirectory-does-not-exist/' 2> /dev/null

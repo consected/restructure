@@ -152,6 +152,16 @@
               {{/is}}
             <% end %>
             {{/if}}
+          {{else}}
+          <div class="message-well">
+            <h1>Not Found</h1>
+            <p class="">
+              The requested page was not found
+            </p>
+            <p class="text-center">
+              <a href="javascript:history.back()">Go Back</a> or visit the <a href="/">Home Page</a>
+            </p>
+          </div>
           {{/each}}
         </div>
       </div>

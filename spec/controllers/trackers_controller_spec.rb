@@ -192,16 +192,30 @@ RSpec.describe TrackersController, type: :controller do
     context 'with invalid params' do
       it 'assigns the item as @var' do
         create_item
-        put :update, params: { :id => item_id, object_symbol => invalid_attributes, master_id: @master_id }
+
+        params = {
+          id: item_id,
+          object_symbol: invalid_attributes,
+          master_id: @master_id
+        }
+        put :update, params: params
+
         expect(assigns(object_symbol)).to eq(item)
       end
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, params: { :id => item_id, object_symbol => { protocol_id: 1_000_000 }, master_id: @master_id }
+
+        params = {
+          id: item_id,
+          object_symbol: { protocol_id: 1_000_000 },
+          master_id: @master_id
+        }
+        put :update, params: params
 
         expect(resp.length).to be > 0
 
+        # TODO: should this be expect().to be_present
         expect(resp['tracker']).not_to be_nil, "Expected key: protocol error. Got #{resp}"
       end
     end
@@ -211,7 +225,7 @@ RSpec.describe TrackersController, type: :controller do
     before_each_login_user
     it 'never destroys the requested item' do
       create_item
-      expect(delete: "#{object_symbol}/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(delete: "#{object_symbol}/#{item_id}")
       # delete :destroy, {:id => item_id, master_id: @master_id}
       # expect(response).to have_http_status(401)
     end

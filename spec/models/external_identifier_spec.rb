@@ -51,6 +51,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     # No duplicate external_id_attribute
     new_vals = list_valid_attribs.last.dup
 
+    ActiveRecord::Base.connection.schema_cache.clear!
     unless ActiveRecord::Base.connection.table_exists? new_vals[:name]
       TableGenerators.external_identifiers_table(new_vals[:name], true, @implementation_attr_name)
     end

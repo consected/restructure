@@ -1,0 +1,81 @@
+<%
+  unless defined? main_components
+    main_components = true
+  end
+
+  unless defined? open_in_new
+    open_in_new = false
+  end
+%>
+<div class="admin-panel-components">
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <% 
+    @app_type.as_json(main_components: main_components).first.last.each do |k, v_hash|        
+      v_class = nil
+      if v_hash.respond_to?(:each) 
+        title = k.humanize.gsub(/^valid |associated /i, '').titleize
+        title_hyph = title.id_hyphenate
+        init_link_class = 'collapsed'
+        init_panel_class = ''
+      %>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="<%="app-type-component-heading--#{title_hyph}"%>">
+        <%
+        v_class = v_hash.first['_class_name'].constantize if v_hash.first
+        if v_class
+          class_rn = v_class.resource_name 
+          base_path = Resources::Models.find_by(resource_name: class_rn)&.dig(:base_route_name)&.pluralize
+          path = send("#{base_path}_path", filter: {ids: v_hash.map{|v| v['id'] }} )
+        else
+          begin
+            base_path = "admin_#{k.gsub(/^associated_/, '')}"
+            path = send("#{base_path}_path", filter: {ids: v_hash.map{|v| v['id'] }})
+          rescue StandardError => e
+            logger.warn "Failed to get path for admin component #{k}"
+          end 
+        end %>
+        <h3 class="panel-title">
+          <%= link_to title, "#app-type-components-#{title_hyph}", 
+              role: "button", 
+              data: { toggle: "collapse", parent: "#accordion" }, 
+              'aria-expanded' =>"true",
+              'aria-controls'=>"#app-type-components-#{title_hyph}",
+              class: init_link_class %> 
+          <%= link_to '', path, class: 'glyphicon glyphicon-expand' %>
+        </h3>
+      </div>
+      <div id="<%="app-type-components-#{title_hyph}"%>" class="panel-collapse collapse <%=init_panel_class%>" role="tabpanel" aria-labelledby="<%="app-type-component-heading-#{title_hyph}"%>">
+        <div class="panel-body">
+          <ul>
+          <% all_vs = v_hash.map do |k2_hash| %>
+            <%
+              k2 = k2_hash['_class_name'].constantize.find(k2_hash['id'])
+              rn = k2.respond_to?(:alt_resource_name) && k2.alt_resource_name
+              rn ||= k2.respond_to?(:resource_name) && k2.resource_name
+              path = send("#{base_path}_path", filter: {id: k2.id})
+              name = k2.respond_to?(:name) ? k2.name : rn
+
+              { rn: rn, path: path, name: name }
+            %>
+          <% end %>
+          <% all_vs.sort {|vi, vk| vi[:name] <=> vk[:name] }.each do |vs| %>
+            <li>
+              <% if open_in_new %>              
+              <%= link_to link_label_open_in_new(vs[:name]), vs[:path], target: "adminres-#{vs[:rn]}" %>
+              <% else %>
+              <%= link_to vs[:name], vs[:path] %>
+              <% end %>
+            </li>
+          <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <% 
+      end 
+    end 
+    %>
+  
+  </div>
+    
+</div>

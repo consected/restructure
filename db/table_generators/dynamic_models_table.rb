@@ -191,6 +191,7 @@ EOF
 
     if [true, :create_do, :drop_do].include?(generate_table)
       ActiveRecord::Base.connection.execute sql
+      ActiveRecord::Base.connection.schema_cache.clear!
     else
       sql = "
       BEGIN;

@@ -2,7 +2,6 @@
 # Save Trigger: Update This options
         - this_1: 
             if: if_extras
-            first: 'update the current object. Note that any reference updates may not be reflected, so take care using referenced data'
             force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable'
             force_not_valid: 'true to allow valid_if checks to be ignored'
             with:

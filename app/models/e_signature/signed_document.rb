@@ -166,17 +166,17 @@ module ESignature
       end
       atts = all_atts.select { |k, _v| sign_fields.include? k }
 
-      ActionController::Base.new.render_to_string(template: 'e_signature/document', layout: 'e_signature', locals: {
-                                                    e_sign_document: @e_sign_document,
-                                                    prepared_document: self,
-                                                    attributes: atts,
-                                                    caption_before: elt.caption_before,
-                                                    labels: elt.caption_before,
-                                                    show_if: elt.show_if,
-                                                    current_user: current_user,
-                                                    document_title: @document_title,
-                                                    document_intro: @document_intro
-                                                  }).html_safe
+      ApplicationController.render(template: 'e_signature/document', layout: 'e_signature', locals: {
+                                     e_sign_document: @e_sign_document,
+                                     prepared_document: self,
+                                     attributes: atts,
+                                     caption_before: elt.caption_before,
+                                     labels: elt.caption_before,
+                                     show_if: elt.show_if,
+                                     current_user: current_user,
+                                     document_title: @document_title,
+                                     document_intro: @document_intro
+                                   }).html_safe
     end
 
     # Set an esign tag in the document

@@ -97,7 +97,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
       create_item
 
       u = "/protocols/#{@protocol.id}/sub_processes/#{@sub_process.id}/protocol_events/#{@protocol_event.id}"
-      expect(get: u).not_to be_routable
+      expect_to_be_bad_route(get: u)
     end
   end
 
@@ -210,8 +210,8 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     before_each_login_admin
     it 'never destroys the requested item' do
       create_item
-      expect(delete: "/protocols/#{@protocol_id}/sub_processes/#{@sub_process_id}/#{object_symbol}/#{item_id}").not_to be_routable
-      expect(delete: "/protocol_events/#{item_id}").not_to be_routable
+      expect_to_be_bad_route(delete: "/protocols/#{@protocol_id}/sub_processes/#{@sub_process_id}/#{object_symbol}/#{item_id}")
+      expect_to_be_bad_route(delete: "/protocol_events/#{item_id}")
       #      delete :destroy, {:id => item_id}
       #      expect(response).to have_http_status(401)
     end

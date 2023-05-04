@@ -228,9 +228,13 @@ _fpa.form_utils = {
 
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
-    $(`${el} optgroup[label]`).hide();
+    $(`${el} optgroup[label]`).hide().attr('disabled', 'disabled');
     // Case insensitive filtering
-    $(`${el} optgroup[label="${val}" i]`).show();
+    $(`${el} optgroup[label="${val}" i]`).show().attr('disabled', null);
+    if ($(el).hasClass('attached-chosen')) {
+      // Refresh the associate chosen.js values if chosen is attached to this field
+      $(el).trigger('chosen:updated');
+    }
   },
 
   data_from_form: function (block) {
@@ -269,6 +273,12 @@ _fpa.form_utils = {
     return form_data;
   },
 
+  // Since the select_from_... fields
+  // may be tied through a master association to the current instance,
+  // it is not possible to cache the results directly based on a dynamic definition
+  // and it must be handled at the time of the request.
+  // Therefore this function does not actually provide data that is useful to the front end
+  /*
   get_general_selections: function (data) {
     if (!data) return;
 
@@ -329,6 +339,7 @@ _fpa.form_utils = {
       }
     });
   },
+  */
 
   handle_sub_list_filters: function ($control, init) {
     var $a = $control;
@@ -508,6 +519,32 @@ _fpa.form_utils = {
           res = res.toISOString();
         }
         res = res.split('T')[0].replace(/[\:\-T]/g, '');
+      } else if (op == 'time' || op == 'time_with_zone') {
+        console.log(res)
+        let dtf = UserPreferences.time_format();
+        if (dtf) {
+          let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+          res = (d.isValid) ? d.toFormat(dtf) : res;
+        }
+      } else if (op == 'time_sec') {
+        console.log(res)
+        let dtf = UserPreferences.time_format(true);
+        if (dtf) {
+          let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+          res = (d.isValid) ? d.toFormat(dtf) : res;
+        }
+      } else if (op == 'date') {
+        let dtf = UserPreferences.date_format();
+        if (dtf) {
+          let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
+          res = (d.isValid) ? d.toFormat(dtf) : res;
+        }
+      } else if (op == 'date_time' || op == 'date_time_with_zone') {
+        let dtf = UserPreferences.date_time_format();
+        if (dtf) {
+          let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
+          res = (d.isValid) ? d.toFormat(dtf) : res;
+        }
       } else if (op == 'join_with_space') {
         if (Array.isArray(res)) res = res.join(' ');
       } else if (op == 'join_with_comma') {
@@ -529,64 +566,112 @@ _fpa.form_utils = {
   // Make subtitutions in moustaches, when in view mode.
   // This function is called by a handlebars helper rather than in the postprocessor loop
   caption_before_substitutions: function (block, data) {
+
+    const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
+    const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
+    // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
+    const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gm');
+    const IfBlockRegEx = new RegExp(IfBlockRegExString, 'm');
+    const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
+
+    const get_data = (data) => {
+      var new_data = {};
+      if (data && (data.master_id || data.vdef_version)) {
+        var master_id = data.master_id;
+        new_data = Object.assign({}, data);
+        if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
+      } else {
+        var master_id = block.parents('.master-panel').first().attr('data-master-id');
+      }
+
+      var master = _fpa.state.masters && _fpa.state.masters[master_id];
+      if (master) {
+        var id = new_data.id;
+        new_data = Object.assign(new_data, master);
+        new_data.id = id;
+      }
+
+      return new_data;
+    };
+
+    const value_for_tag = (tag, new_data) => {
+      var elsplit = tag.split('.');
+      var iter_data = new_data;
+      for (const next_tag of Object.values(elsplit)) {
+        var got = null;
+        var tag_name = next_tag;
+
+        if (iter_data.hasOwnProperty(next_tag)) {
+          got = iter_data[next_tag];
+        } else if (iter_data.embedded_item) {
+          got = iter_data.embedded_item[next_tag];
+        } else if (next_tag.indexOf('glyphicon_') === 0) {
+          const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
+          got = `<span class="glyphicon glyphicon-${icon}"></span>`;
+        }
+
+        if (got) {
+          iter_data = got;
+        } else {
+          continue;
+        }
+      }
+
+      return [got, tag_name];
+    };
+
     block
       .find('.caption-before')
       .not('.cb_subs_done')
       .each(function () {
         var text = $(this).html();
         if (!text || text.length < 1) return;
-        var res = text.match(/{{[0-9a-zA-z_\.:]+}}/g);
-        if (!res || res.length < 1) return;
 
-        var new_data = {};
-        if (data && (data.master_id || data.vdef_version)) {
-          var master_id = data.master_id;
-          new_data = Object.assign({}, data);
-          if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
-        } else {
-          var master_id = block.parents('.master-panel').first().attr('data-master-id');
+        var ifres = text.match(IfBlocksRegEx);
+        console.log(ifres);
+
+        if (ifres && ifres.length) {
+          var new_data = get_data(data);
+
+          ifres.forEach(function (if_blocks) {
+            const if_block = if_blocks.match(IfBlockRegEx);
+            let block_container = if_block[0];
+            let tag = if_block[2]
+            let vpair = value_for_tag(tag, new_data)
+            let tag_value = vpair[0];
+            if (tag_value && tag_value.length) {
+              text = text.replace(block_container, if_block[3] || '');
+            }
+            else {
+              text = text.replace(block_container, if_block[5] || '');
+            }
+          });
         }
 
-        var master = _fpa.state.masters && _fpa.state.masters[master_id];
-        if (master) {
-          var id = new_data.id;
-          new_data = Object.assign(new_data, master);
-          new_data.id = id;
+        var res = text.match(TagRegEx);
+        if (!res || res.length < 1) return;
+
+        if (!new_data) {
+          var new_data = get_data(data);
         }
 
         res.forEach(function (el) {
-          var formatters = el.replace('{{', '').replace('}}', '').split('::');
-          var els = formatters.shift();
-          var elsplit = els.split('.');
+          let formatters = el.replace('{{', '').replace('}}', '').split('::');
+          let tag = formatters.shift();
+          let ignore_missing = null;
+          let no_html_tag = false;
 
           if (formatters[0] == 'ignore_missing') {
-            var ignore_missing = 'show_blank';
+            ignore_missing = 'show_blank';
           }
 
           if (formatters.indexOf('no_html_tag') >= 0) {
-            var no_html_tag = true;
+            no_html_tag = true;
           }
 
-          var iter_data = new_data;
-          for (const next_tag of Object.values(elsplit)) {
-            var got = null;
-            var tag_name = next_tag;
-
-            if (iter_data.hasOwnProperty(next_tag)) {
-              got = iter_data[next_tag];
-            } else if (iter_data.embedded_item) {
-              got = iter_data.embedded_item[next_tag];
-            } else if (next_tag.indexOf('glyphicon_') === 0) {
-              const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
-              got = `<span class="glyphicon glyphicon-${icon}"></span>`;
-            }
-
-            if (got) {
-              iter_data = got;
-            } else {
-              continue;
-            }
-          }
+          let vpair = value_for_tag(tag, new_data)
+          let got = vpair[0];
+          let tag_name = vpair[1];
 
           if (got == null) {
             if (ignore_missing == 'show_blank') {
@@ -598,9 +683,9 @@ _fpa.form_utils = {
             got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
           }
 
-          if (no_html_tag == false) {
-            got = '<em class="all_caps">' + got + '</em>';
-          }
+          // if (no_html_tag == false) {
+          //   got = '<em class="all_caps">' + got + '</em>';
+          // }
 
           text = text.replace(el, got);
         });
@@ -736,7 +821,7 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple], .report-criteria-fields-block select').not('.attached-chosen');
+    var sels = block.find('select[multiple], .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
@@ -746,7 +831,7 @@ _fpa.form_utils = {
           var no_sel_text = 'no tags selected';
           var alt_nst = sel.attr('data-nothing-selected-text');
           if (alt_nst) no_sel_text = alt_nst;
-          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false });
+          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false, display_disabled_options: false });
 
           sel.on('chosen:showing_dropdown', function (evt, params) {
             // Access the element
@@ -923,6 +1008,7 @@ _fpa.form_utils = {
   // to just show the name and retain the id in an attribute
   // The select item that drives the change must have an attribute data-filters-select
   // with css selector pointing to the select element to be filtered on change
+  // NOTE: disabled attribute is set to ensure chosen.js correctly hides options
   setup_form_filtered_select: function (block) {
     block
       .find('select[data-filters-select]')
@@ -932,12 +1018,16 @@ _fpa.form_utils = {
         var filter_sel = $el.attr('data-filters-select');
         $el.on('change', function () {
           var val = $el.val();
-          $(filter_sel + ' optgroup[data-group-num]').hide();
-          $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+          $(`${filter_sel} optgroup[data-group-num]`).hide().attr('disabled', 'disabled');
+          $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+          if ($(filter_sel).hasClass('attached-chosen')) {
+            // Refresh the associate chosen.js values if chosen is attached to this field
+            $(filter_sel).trigger('chosen:updated');
+          }
         });
 
         var val = $el.val();
-        $(filter_sel + ' optgroup[label]')
+        $(`${filter_sel} optgroup[label]`)
           .each(function () {
             if (!$(this).attr('data-group-num')) {
               var l = $(this).attr('label');
@@ -948,8 +1038,13 @@ _fpa.form_utils = {
               $(this).attr('data-group-num', ls[first]);
             }
           })
-          .hide();
-        $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+          .hide().attr('disabled', 'disabled');
+        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+        if ($(filter_sel).hasClass('attached-chosen')) {
+          // Refresh the associate chosen.js values if chosen is attached to this field
+          $(filter_sel).trigger('chosen:updated');
+        }
+
       })
       .addClass('filters-select-attached');
   },
@@ -1618,7 +1713,7 @@ _fpa.form_utils = {
       .not('.formatted-date-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtoLocale(text);
         $(this).html(d);
       })
@@ -1629,7 +1724,7 @@ _fpa.form_utils = {
       .not('.formatted-datetime-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtimeToLocale(text);
         $(this).html(d);
       })
@@ -1678,6 +1773,7 @@ _fpa.form_utils = {
         }
 
         $(this).click(function (ev) {
+          $('#help-sidebar').collapse('show');
           ev.preventDefault();
         });
       })
@@ -1926,13 +2022,23 @@ _fpa.form_utils = {
   setup_textarea_autogrow: function (block) {
     block.find('textarea').each(function () {
       var textarea = $(this)[0];
-      var growingTextarea = new Autogrow(textarea);
       textarea.style.resize = 'none';
       textarea.style.boxSizing = 'content-box';
-      $(this).click(function () {
+
+      const $td = $(this).parent('td');
+      if ($td.length) {
+        const h = $td.height();
+        $(this).css({ minHeight: `${h}px` });
+      }
+
+      $(this).on('click focus', function () {
         if ($(this).hasClass('done-auto-grow')) return;
+
         $(this).addClass('done-auto-grow');
+        var growingTextarea = new Autogrow(textarea);
         growingTextarea.autogrowFn();
+      }).on('blur', function () {
+        $(this).removeClass('done-auto-grow');
       });
     });
 
@@ -2158,6 +2264,13 @@ _fpa.form_utils = {
       .addClass('image-to-load');
   },
 
+  // Check for changes and handle prompt to save
+  setup_change_handling: function (block) {
+    block.find('input, select, textarea').not('.setup-change-handling').on('keypress change', function () {
+      $(this).addClass('field-was-changed');
+    }).addClass('setup-change-handling');
+  },
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
     if (!block) {
@@ -2205,6 +2318,7 @@ _fpa.form_utils = {
     _fpa.form_utils.set_image_classes(block);
     _fpa.form_utils.setup_big_select_fields(block);
     _fpa.form_utils.setup_select_filtering(block);
+    _fpa.form_utils.setup_change_handling(block);
 
     block.removeClass('formatting-block');
   },

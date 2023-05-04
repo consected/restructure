@@ -51,7 +51,7 @@ module Dynamic
     def allow_migrations
       return @allow_migrations unless @allow_migrations.nil?
 
-      @allow_migrations = Settings::AllowDynamicMigrations
+      @allow_migrations = Settings::AllowDynamicMigrations && !prevent_migrations
     end
 
     #

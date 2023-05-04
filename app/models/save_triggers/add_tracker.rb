@@ -96,7 +96,12 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
                     use_item&.master || @master
                   end
 
-    @use_master.current_user ||= @master.current_user
+    unless @use_master.current_user
+      cu = @item.current_user if @item.respond_to? :current_user
+      cu = @master.current_user if cu.nil? && @master
+      @use_master.current_user = cu
+    end
+
     @use_master
   end
 

@@ -317,7 +317,7 @@ td.report-el pre {
 
 #modal_results_block .report-results-inner,
 #modal_results_block_1 .report-results-inner {
-    overflow-y: hidden;
+  overflow-y: hidden;
 }
 
 .model-reference-disabled {
