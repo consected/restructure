@@ -5,12 +5,6 @@ module ActivityLogControllerHandler
   include GeneralDataConcerns
 
   class_methods do
-    # Annoyingly this needs to be forced, since const_set during controller generation does not
-    # appear to set the parent class correctly, unlike for models
-    # Possibly this is a Rails specific override, but the parent is set correctly
-    # when a controller is created as a file in a namespaced folder, so rather
-    # than fighting it, just force the known parent here.
-
     def item_controller
       @item_controller = parent_type.to_s.pluralize
     end
