@@ -36,7 +36,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma', '~> 6.0'
 
-gem 'rails', '~> 6.1', '>= 6.1.7'
+gem 'rails', '~> 6.1', '>= 6.1.7.3'
 
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
