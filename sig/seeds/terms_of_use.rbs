@@ -1,8 +1,10 @@
 module Seeds
   module TermsOfUse
 
-    DEFAULT_TEMPLATE_NAME: string
-    GDPR_TEMPLATE_NAME: string
+    NEW_USER_DEFAULT_TEMPLATE: string
+    NEW_USER_GDPR_TEMPLATE: string
+    UPDATE_USER_DEFAULT_TEMPLATE: string
+    UPDATE_USER_GDPR_TEMPLATE: string
 
     def self.add_values: -> void
 

@@ -45,13 +45,18 @@ class User < ActiveRecord::Base
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
-  validates :country,
+  validates :country_code,
             presence: {
+              unless: -> { registered_by_admin? },
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            },
+            length: {
+              is: 2
             }
 
   validates :terms_of_use,
             acceptance: {
+              unless: -> { registered_by_admin? },
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
@@ -265,5 +270,10 @@ class User < ActiveRecord::Base
     return unless email == Settings::TemplateUserEmail && disabled && disabled_changed?
 
     raise FphsException, "Do not attempt to disable the template user: #{email}" 
+  end
+
+  def registered_by_admin?
+    debugger
+    current_admin == RegistrationHandler.registration_admin
   end
 end

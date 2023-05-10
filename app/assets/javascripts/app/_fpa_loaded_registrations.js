@@ -41,20 +41,21 @@ _fpa.loaded.registrations = () => {
 
     const gdprTermsOfUse = $('#terms-of-use-gdpr');
     const defaultTermsOfUse = $('#terms-of-use-default');
-    const handleTermsOfUseContext = () => {
-        $('#user_country').on('change', (event) => {
-            const selectElement = $(event.currentTarget);
-            const countryCode = selectElement.val();
-            if (isGdprCountry(countryCode)) {
-                defaultTermsOfUse.hide();
-                gdprTermsOfUse.show();
-            } else {
-                gdprTermsOfUse.hide();
-                defaultTermsOfUse.show();
-            }
-        });
+    const handleTermsOfUseContext = (selectElement) => {
+        const countryCode = selectElement.val();
+        console.log(countryCode);
+        if (isGdprCountry(countryCode)) {
+            defaultTermsOfUse.hide();
+            gdprTermsOfUse.show();
+        } else {
+            gdprTermsOfUse.hide();
+            defaultTermsOfUse.show();
+        }
     };
 
-    handleTermsOfUseContext();
-    gdprTermsOfUse.hide();
+    const countryCodeSelect = $('#user_country_code');
+    countryCodeSelect.on('change', (event) => {
+        const selectElement = $(event.currentTarget);
+        handleTermsOfUseContext(selectElement);
+    }).trigger('change');
 };
