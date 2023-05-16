@@ -43,7 +43,6 @@ _fpa.loaded.registrations = () => {
     const defaultTermsOfUse = $('#terms-of-use-default');
     const handleTermsOfUseContext = (selectElement) => {
         const countryCode = selectElement.val();
-        console.log(countryCode);
         if (isGdprCountry(countryCode)) {
             defaultTermsOfUse.hide();
             gdprTermsOfUse.show();

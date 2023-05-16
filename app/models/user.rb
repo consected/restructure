@@ -38,11 +38,17 @@ class User < ActiveRecord::Base
   validates :first_name,
             presence: {
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            },
+            length: {
+              maximum: 50
             }
 
   validates :last_name,
             presence: {
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            },
+            length: {
+              maximum: 50
             }
 
   validates :country_code,
@@ -55,7 +61,7 @@ class User < ActiveRecord::Base
             }
 
   validates :terms_of_use,
-            acceptance: {
+            presence: {
               unless: -> { registered_by_admin? },
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }

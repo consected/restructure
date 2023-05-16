@@ -3,6 +3,8 @@ module Seeds
 
     NEW_USER_DEFAULT_TEMPLATE: string
     NEW_USER_GDPR_TEMPLATE: string
+    TERMS_OF_USE_GDPR: string
+    TERMS_OF_USE_NON_GDPR: string
     UPDATE_USER_DEFAULT_TEMPLATE: string
     UPDATE_USER_GDPR_TEMPLATE: string
 

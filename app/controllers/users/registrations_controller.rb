@@ -10,6 +10,11 @@ module Users
 
     private
 
+    # TODO: move to a concern
+    def gdpr_country?(country_code)
+      %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LU MT NL PL PT RO SK SI ES SW GB].include?(country_code)
+    end
+
     def sign_up(resource_name, resource)
       # must override with empty implementation,
       # so users do not sign-in automatically after sign-up (user registration)
@@ -18,6 +23,14 @@ module Users
     def build_resource(hash = {})
       super
       resource.current_admin = RegistrationHandler.registration_admin
+
+      return unless resource.is_a?(User)
+
+      resource.terms_of_use = if gdpr_country?(resource.country_code)
+                                GdprTermsOfUseTemplate
+                              else
+                                DefaultTermsOfUseTemplate
+                              end
     end
 
     def devise_registration_params
