@@ -102,7 +102,10 @@
                 - '<@' - This array field's elements are all found in the retrieved array field
 
               not: 'true|false (optional, default false) negate the result'
-              value: 'any value, with defaults or substitutions, or a hash reference to another table field'
+              value: |
+                Any value, with defaults or substitutions, or a hash reference to another table field.
+
+                [Substitutions](../general/substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
             
             json_field_element:
               element: 'key1.key2'
@@ -115,9 +118,10 @@
           - this:
               save_trigger_results:
                 element: '<local_data key-name>.<element_key>'
-                value: 'match value or substitution'
+                value: |
+                  match value or [substitutions](../general/substitutions.md)
           - this:
               save_trigger_results:
                 element: '<local_data key-name>_http_response_code'
-                value: 'match integer value or substitution, for example *200* for success'  
+                value: 'match integer value or [substitutions](../general/substitutions.md), for example *200* for success'  
 

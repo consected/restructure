@@ -775,6 +775,7 @@ RSpec.describe 'Model reference implementation', type: :model do
 
     it 'evaluates rules to show references' do
       # puts @dynamic_model.resource_name
+      setup_access :player_contacts
 
       @player_contact.current_user = @user
 

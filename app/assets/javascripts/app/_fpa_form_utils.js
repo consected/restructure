@@ -469,228 +469,17 @@ _fpa.form_utils = {
       });
   },
 
-  // Format a substitution string like {{player_infos.first_name::ignore_if_missing::capitalize}}
-  format_substitution: function (text, ops, tag_name) {
-    var res = text;
-
-    if (res == null && ops[0] != 'ignore_missing') {
-      return;
-    }
-
-    // Automatically titleize names
-    if (ops.length == 0 && (tag_name == 'name' || tag_name.match(/_name$/))) {
-      ops = ['titleize'];
-    }
-
-    for (var i = 0; i < ops.length; i++) {
-      var op = ops[i];
-
-      if (op == 'titleize') {
-        if (typeof res == 'string') {
-          res = res.titleize();
-        }
-      } else if (op == 'no_html_tag') res;
-      else if (op == 'capitalize') res = res.capitalize();
-      else if (op == 'uppercase') res = res.toUpperCase();
-      else if (op == 'lowercase') res = res.toLowerCase();
-      else if (op == 'underscore') res = res.underscore();
-      else if (op == 'hyphenate') res = res.hyphenate();
-      else if (op == 'initial') res = (res[0] || '').toUpperCase();
-      else if (op == 'first') res = res[0];
-      else if (op == 'age') {
-        res = new Date(res);
-
-        if (res.getFullYear) {
-          var today = new Date();
-          var age = today.getFullYear() - res.getFullYear();
-          var m = today.getMonth() - res.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < res.getDate())) {
-            age--;
-          }
-          res = age;
-        }
-      } else if (op == 'dicom_datetime') {
-        if (typeof res == 'date') {
-          res = res.toISOString();
-        }
-        res = res.split('.')[0].replace(/[\:\-T]/g, '');
-      } else if (op == 'dicom_date') {
-        if (typeof res == 'date') {
-          res = res.toISOString();
-        }
-        res = res.split('T')[0].replace(/[\:\-T]/g, '');
-      } else if (op == 'time' || op == 'time_with_zone') {
-        console.log(res)
-        let dtf = UserPreferences.time_format();
-        if (dtf) {
-          let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-          res = (d.isValid) ? d.toFormat(dtf) : res;
-        }
-      } else if (op == 'time_sec') {
-        console.log(res)
-        let dtf = UserPreferences.time_format(true);
-        if (dtf) {
-          let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-          res = (d.isValid) ? d.toFormat(dtf) : res;
-        }
-      } else if (op == 'date') {
-        let dtf = UserPreferences.date_format();
-        if (dtf) {
-          let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
-          res = (d.isValid) ? d.toFormat(dtf) : res;
-        }
-      } else if (op == 'date_time' || op == 'date_time_with_zone') {
-        let dtf = UserPreferences.date_time_format();
-        if (dtf) {
-          let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
-          res = (d.isValid) ? d.toFormat(dtf) : res;
-        }
-      } else if (op == 'join_with_space') {
-        if (Array.isArray(res)) res = res.join(' ');
-      } else if (op == 'join_with_comma') {
-        if (Array.isArray(res)) res = res.join(', ');
-      } else if (op == 'join_with_semicolon') {
-        if (Array.isArray(res)) res = res.join('; ');
-      } else if (op == 'join_with_newline') {
-        if (Array.isArray(res)) res = res.join('\n');
-      } else if (op == 'join_with_2newlines') {
-        if (Array.isArray(res)) res = res.join('\n\n');
-      } else if (op == 'markup') res = megamark(res);
-      else if (op == 'ignore_missing') res = res || '';
-      else if (Number(op) != 0) res = res.slice(0, Number(op));
-    }
-
-    return res;
-  },
-
   // Make subtitutions in moustaches, when in view mode.
   // This function is called by a handlebars helper rather than in the postprocessor loop
   caption_before_substitutions: function (block, data) {
-
-    const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
-    const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
-    // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
-    const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gm');
-    const IfBlockRegEx = new RegExp(IfBlockRegExString, 'm');
-    const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
-
-    const get_data = (data) => {
-      var new_data = {};
-      if (data && (data.master_id || data.vdef_version)) {
-        var master_id = data.master_id;
-        new_data = Object.assign({}, data);
-        if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
-      } else {
-        var master_id = block.parents('.master-panel').first().attr('data-master-id');
-      }
-
-      var master = _fpa.state.masters && _fpa.state.masters[master_id];
-      if (master) {
-        var id = new_data.id;
-        new_data = Object.assign(new_data, master);
-        new_data.id = id;
-      }
-
-      return new_data;
-    };
-
-    const value_for_tag = (tag, new_data) => {
-      var elsplit = tag.split('.');
-      var iter_data = new_data;
-      for (const next_tag of Object.values(elsplit)) {
-        var got = null;
-        var tag_name = next_tag;
-
-        if (iter_data.hasOwnProperty(next_tag)) {
-          got = iter_data[next_tag];
-        } else if (iter_data.embedded_item) {
-          got = iter_data.embedded_item[next_tag];
-        } else if (next_tag.indexOf('glyphicon_') === 0) {
-          const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
-          got = `<span class="glyphicon glyphicon-${icon}"></span>`;
-        }
-
-        if (got) {
-          iter_data = got;
-        } else {
-          continue;
-        }
-      }
-
-      return [got, tag_name];
-    };
 
     block
       .find('.caption-before')
       .not('.cb_subs_done')
       .each(function () {
-        var text = $(this).html();
-        if (!text || text.length < 1) return;
-
-        var ifres = text.match(IfBlocksRegEx);
-        console.log(ifres);
-
-        if (ifres && ifres.length) {
-          var new_data = get_data(data);
-
-          ifres.forEach(function (if_blocks) {
-            const if_block = if_blocks.match(IfBlockRegEx);
-            let block_container = if_block[0];
-            let tag = if_block[2]
-            let vpair = value_for_tag(tag, new_data)
-            let tag_value = vpair[0];
-            if (tag_value && tag_value.length) {
-              text = text.replace(block_container, if_block[3] || '');
-            }
-            else {
-              text = text.replace(block_container, if_block[5] || '');
-            }
-          });
-        }
-
-        var res = text.match(TagRegEx);
-        if (!res || res.length < 1) return;
-
-        if (!new_data) {
-          var new_data = get_data(data);
-        }
-
-        res.forEach(function (el) {
-          let formatters = el.replace('{{', '').replace('}}', '').split('::');
-          let tag = formatters.shift();
-          let ignore_missing = null;
-          let no_html_tag = false;
-
-          if (formatters[0] == 'ignore_missing') {
-            ignore_missing = 'show_blank';
-          }
-
-          if (formatters.indexOf('no_html_tag') >= 0) {
-            no_html_tag = true;
-          }
-
-          let vpair = value_for_tag(tag, new_data)
-          let got = vpair[0];
-          let tag_name = vpair[1];
-
-          if (got == null) {
-            if (ignore_missing == 'show_blank') {
-              got = '';
-            } else {
-              got = '(?)';
-            }
-          } else if (formatters) {
-            got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
-          }
-
-          // if (no_html_tag == false) {
-          //   got = '<em class="all_caps">' + got + '</em>';
-          // }
-
-          text = text.replace(el, got);
-        });
-
-        $(this).html(text);
+        const text = $(this).html();
+        const new_text = _fpa.substitution.substitute(text, data)
+        $(this).html(new_text);
       })
       .addClass('cb_subs_done');
   },
@@ -1713,7 +1502,7 @@ _fpa.form_utils = {
       .not('.formatted-date-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtoLocale(text);
         $(this).html(d);
       })
@@ -1724,7 +1513,7 @@ _fpa.form_utils = {
       .not('.formatted-datetime-local')
       .each(function () {
         var text = $(this).html();
-        text = text.replace(' UTC', 'Z').replace(' ', 'T');
+        // text = text.replace(' UTC', 'Z').replace(' ', 'T');
         var d = _fpa.utils.YMDtimeToLocale(text);
         $(this).html(d);
       })

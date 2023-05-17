@@ -326,6 +326,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     end
 
     have_css "##{h}.tracker-history.collapse.in"
+    have_css 'tbody.tracker-history .tracker-history-event_name'
 
     # The previous item is there still
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
