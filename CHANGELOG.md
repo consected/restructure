@@ -16,6 +16,28 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @8.2.34 - 2023-05-17
+
+#### [8.2.34] - 2023-05-16
+
+- [Added] json_parse and numeric index selection to substitutions
+- [Added] logging to pull
+- [Added] documentation of substitutions
+- [Added] full set of options to tag substitution and formatting on front end. Refactored to new class files.
+- [Added] API sample for Marketo webhook
+- [Changed] documentation for administration of admins
+- [Fixed] migration of view SQL when using @library definitions in the dynamic model
+
+#### [8.2.33] - 2023-05-08
+
+- [Fixed] pull_external_data with save_trigger_results
+
+#### [8.2.32] - 2023-05-08
+
+- [Added] pull_external_data to post data with substitutions
+
 ## [8.2.28] - 2023-05-04
 
 ### Transferred from Viva @8.2.27 - 2023-05-04
