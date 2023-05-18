@@ -277,11 +277,11 @@ class Settings
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     DefaultCountrySelect
   ].freeze
-  
+
   # GDPR and non-GDPR template references
-  template_id = MessageTemplate.find_by(name: 'ui new user registration terms gdpr').id
+  template_id = 10 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms gdpr').id
   GdprTermsOfUseTemplate = "message_templates|#{template_id}|gdpr".freeze
 
-  template_id = MessageTemplate.find_by(name: 'ui new user registration terms default').id
+  template_id = 9 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms default').id
   DefaultTermsOfUseTemplate = "message_templates|#{template_id}|default".freeze
 end

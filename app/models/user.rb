@@ -28,6 +28,8 @@ class User < ActiveRecord::Base
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
+  attr_accessor :terms_of_use_accept
+
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
 
@@ -62,6 +64,12 @@ class User < ActiveRecord::Base
 
   validates :terms_of_use,
             presence: {
+              unless: -> { registered_by_admin? },
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+            }
+
+  validates :terms_of_use_accept,
+            acceptance: {
               unless: -> { registered_by_admin? },
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
