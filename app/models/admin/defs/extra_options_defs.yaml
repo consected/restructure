@@ -5,7 +5,10 @@
   - field_name_1
   - field_name_2
   caption_before:
-    field_name: string caption to appear before field
+    field_name: |
+      String caption to appear before field. Use markdown formatting if needed.
+
+      [Substitutions](../general/substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
     all_fields: caption to appear before all fields
     submit: caption to appear before submit button
     field_to_retain_label:
@@ -40,10 +43,21 @@
     only_create_as_reference: |
       prevent creation as a standalone item, only embedded
       / referenced within another
+    sort_references: 
+      attribute: |
+        Sort model references in an alternative order, using the specified model_reference attribute.
+        Typically this will be "id" to sort by when the reference was created, as opposed to the
+        typical sorting which groups references in the order of their definition.
+      direction: |
+        Default is ascending sort. To reverse the sort order use
+        "desc" or "reverse" for descending results
+      keep_top: |
+        If the sorting moves the top item that you want to keep in place, set this to *true*
+
     view_handlers: |
       name of handler for UI and models (options include: address, contact,
       subject)
-    header_caption: header caption to use - can include `\{\{substitution\}\}`
+    header_caption: header caption to use - can include [substitutions](../general/substitutions.md)
     alt_width_classes: html classes (space separated) to replace standard col-* classes
       # For example:
       #   resized-width col-md-18 col-lg-18 col-md-offset-3 prevent_nfs_resize
@@ -189,7 +203,7 @@
           embedded_item:
             field_name: value
       filter_by:
-        field_name: value to filter the referenced items by (may include `\{\{substitution\}\}`
+        field_name: value to filter the referenced items by - may include [substitutions](../general/substitutions.md)
       order_by:
         field_name: asc | desc
       type_config:

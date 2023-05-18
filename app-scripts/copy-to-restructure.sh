@@ -57,7 +57,7 @@ for FROM in \
   public/.gitignore public/*.html public/robots.txt \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
-  Gemfile* Rakefile vendor/assets/config.json; do
+  Gemfile* Rakefile vendor/assets/config.json version.txt; do
   echo "${FROM}"
   cp -f "${FROM}" "${DEST}/${FROM}"
 done

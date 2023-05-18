@@ -117,7 +117,7 @@ module Formatter
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
       unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) || d&.key?(tag_name.to_sym)) ||
-             tag.index(OverrideTags)
+             tag.index(OverrideTags) || d.is_a?(Enumerable) && (tag_name.to_s == tag_name.to_s.to_i.to_s)
         unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}' " \
@@ -220,6 +220,7 @@ module Formatter
       data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
       data[:notifications_from_email] = Settings::NotificationsFromEmail
       data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
+      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
@@ -288,14 +289,19 @@ module Formatter
       tagp = tag_and_operator.split('::')
       tag = tagp.first
 
-      current_user = data[:current_user_instance] || data[:current_user]
+      if data.is_a?(Enumerable) && tag.to_i.to_s == tag
+        orig_val = data[tag.to_i]
+      else
+        current_user = data[:current_user_instance] || data[:current_user]
 
-      return template_block tag, data if tag.start_with? 'template_block_'
-      return glyphicon tag, data if tag.start_with? 'glyphicon_'
-      return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
-      return add_item_button tag, data if tag.start_with? 'add_item_button_'
+        return template_block tag, data if tag.start_with? 'template_block_'
+        return glyphicon tag, data if tag.start_with? 'glyphicon_'
+        return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
+        return add_item_button tag, data if tag.start_with? 'add_item_button_'
 
-      orig_val = data[tag] || data[tag.to_sym]
+        orig_val = data[tag] || data[tag.to_sym]
+      end
+
       res = orig_val || ''
 
       res = Formatter::Formatters.formatter_do(res.class, res, current_user: current_user)
@@ -305,8 +311,6 @@ module Formatter
       # Automatically titleize names
       tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
       tagp[1..].each do |op|
-        # NOTE: if additional formatters are added here, they also need matching javascript
-        # in _fpa_form_utils.format_subtitution
         res = TagFormatter.format_with(op, res, orig_val, current_user)
       end
 
@@ -434,11 +438,21 @@ module Formatter
     def self.get_associated_item(master, name, data, item_reference: false)
       name = name.to_sym
       an = name.to_s
+      anumber = an.to_i
+      is_index = false
 
       data = if an == 'first' && data.respond_to?(:first)
+               is_index = true
                data.first
              elsif an == 'last' && data.respond_to?(:last)
+               is_index = true
                data.last
+             elsif an == 'json_parse' && data.is_a?(String)
+               is_index = true
+               JSON.parse(data) if data.present?
+             elsif anumber.to_s == an && data.is_a?(Enumerable)
+               is_index = true
+               data[anumber]
              elsif data.respond_to? :where
                data.first
              else
@@ -449,9 +463,10 @@ module Formatter
 
       return unless data
 
-      item = data[:original_item] || data
+      item = data[:original_item] if data.is_a? Hash
+      item ||= data
 
-      return item if ['first', 'last'].include?(an)
+      return item if is_index
 
       res = if data.is_a?(Hash) && data.keys.include?(name)
               data[name]

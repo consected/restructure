@@ -143,10 +143,18 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     expect(res).to eq expected_text
 
-    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}.</p>'
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}. Split {{piped::split_pipe::1}}. Is data {{hash.key2}}. Is array {{array::2}} or {{array.1.key}} or {{array.3}}. JSON {{json.json_parse.jkey3.1}}</p>'
 
-    res = layout.generate content_template_text: t, data: { master_id: @master.id, 'name' => 'test name bob' }
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST.</p></div></body></html>"
+    use_data = {
+      master_id: @master.id,
+      'name' => 'test name bob',
+      'piped' => 'data 1|data 2|data 3',
+      'hash' => { key1: 123, key2: 456, key3: 789 },
+      'array' => ['55', { key: '66' }, '77', '88'],
+      'json' => '{"jkey1": 22, "jkey2": "abc", "jkey3": [1230,4560]}'
+    }
+    res = layout.generate content_template_text: t, data: use_data
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST. Split data 2. Is data 456. Is array 77 or 66 or 88. JSON 4560</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
