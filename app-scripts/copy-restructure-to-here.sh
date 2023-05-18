@@ -35,10 +35,10 @@ for FROM in \
   app-scripts/release_and_build.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
   app-scripts/upversion.rb app-scripts/validate_file_signature.sh \
-  app-scripts/create-demo-db.sh app-scripts/create-test-db.sh app-scripts/drop-test-db.sh \
+  app-scripts/create-demo-db.sh app-scripts/create-test-db.sh app-scripts/drop-test-db.sh app-scripts/setup-init-mounts.sh \
   public/.gitignore public/*.html public/robots.txt \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
-  Gemfile* Rakefile vendor/assets/config.json; do
+  Gemfile* Rakefile vendor/assets/config.json version.txt; do
   cp -u ${SRC}/${FROM} ${FROM}
 done
