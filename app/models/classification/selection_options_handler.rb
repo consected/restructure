@@ -87,15 +87,19 @@ class Classification::SelectionOptionsHandler
   # @param [Object] field_value
   # @return [Object| nil]
   def edit_as_select_field(field_name, field_value)
-    return unless field_value
+    return unless field_value.present?
 
-    @all_edit_as_select_field ||= self.class.all_edit_as_select_field(user_base_object, only: field_name.to_s)
-    return unless @all_edit_as_select_field
+    @all_edit_as_select_field ||= {}
 
-    f = @all_edit_as_select_field[field_name.to_sym]
-    return unless f
+    unless @all_edit_as_select_field.key? field_name.to_sym
+      res = self.class.all_edit_as_select_field(user_base_object, only: field_name.to_s)
+      return unless res
 
-    f.find { |v| v&.last&.to_s == field_value&.to_s }&.first
+      @all_edit_as_select_field.merge! res
+    end
+
+    aeasf = @all_edit_as_select_field[field_name.to_sym]
+    aeasf.find { |v| v&.last&.to_s == field_value&.to_s }&.first
   end
 
   #
