@@ -257,6 +257,10 @@ String.prototype.id_hyphenate = function () {
   return this.replace(/[^a-zA-Z0-9\-]/g, '-').toLowerCase();
 };
 
+String.prototype.id_underscore = function () {
+  return this.replace(/[^a-zA-Z0-9\-]/g, '_').toLowerCase();
+};
+
 String.prototype.pathify = function () {
   return this.replace(/__/g, '/');
 };
@@ -358,12 +362,21 @@ _fpa.utils.isoDateStringToLocale = function (stre) {
   return _fpa.utils.DateTime.fromISO(stre).toFormat(format);
 };
 
-// Take yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss or dd/mm/yyyy hh24:min:ss
+// Take yyyy-mm-ddThh24:min:ssZ or yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss or dd/mm/yyyy hh24:min:ss
 _fpa.utils.isoDateTimeStringToLocale = function (stre) {
   stre = stre.trim();
   if (_fpa.utils.is_blank(stre)) return stre;
+
   const format = UserPreferences.date_time_format();
-  return _fpa.utils.DateTime.fromSQL(stre, { zone: UserPreferences.timezone() }).toFormat(format);
+  let startTime;
+  if (stre.match(/^\d\d\d\d-\d\d-\d\d(?:t|T)\d\d:\d\d:\d\d(?:\.\d+)?(?:z|Z)/)) {
+    startTime = _fpa.utils.DateTime.fromISO(stre, { zone: UserPreferences.timezone() });
+  }
+  else if (stre.match(/^\d\d\d\d-\d\d-\d\d.*/)) {
+    startTime = _fpa.utils.DateTime.fromSQL(stre, { zone: UserPreferences.timezone() });
+  }
+
+  return startTime.toFormat(format);
 };
 
 // Translate an obj from a loc in the translation files, such as 'field_labels'

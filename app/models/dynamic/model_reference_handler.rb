@@ -126,8 +126,38 @@ module Dynamic
             res += got
           end
         end
+
+        res = sort_references(res)
         res
       end
+    end
+
+    #
+    # Sort the model references results array, using configuration or view_options.sort_references
+    #   attribute:
+    #   direction:
+    #   keep_top:
+    # param [Array] res - the result set to sort
+    # param [Hash | nil] config - configuration or if nil then
+    #                             use the option type configuration view_options.sort_references
+    # return [Array]
+    def sort_references(res, config = nil)
+      vo = config || option_type_config&.view_options&.dig(:sort_references)
+      return res unless vo
+
+      smr = vo[:attribute]
+      return res unless smr
+
+      smr = smr.to_sym
+      sdir = vo[:direction]
+      keep_top = vo[:keep_top]
+
+      top_item = res.delete_at(0) if keep_top
+      res = res.sort_by { |a| a[smr] }
+      res = res.reverse if sdir&.in?(['desc', 'reverse'])
+      res.insert(0, top_item) if top_item
+
+      res
     end
 
     def memoize_references(memokey, &block)

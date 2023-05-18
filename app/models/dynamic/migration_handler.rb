@@ -73,6 +73,8 @@ module Dynamic
       options_attr_name = self.class.option_configs_attr.to_s
       v1 = attribute_before_last_save(options_attr_name)
       v2 = attributes[options_attr_name]
+      v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
+      v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
       v1def = YAML.safe_load(v1, [], [], true)
       v2def = YAML.safe_load(v2, [], [], true)
       (v1def['_configurations'] && v1def['_configurations']['view_sql']) !=

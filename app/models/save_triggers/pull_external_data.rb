@@ -29,7 +29,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           next unless ca.calc_action_if
         end
 
-        data = run_request(config)
+        @this_config = config
+        data = run_request
 
         if data_field
           data = data&.to_json if data_field_format == 'json'
@@ -41,6 +42,9 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           @item.save_trigger_results[local_data_name] = data
           @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
         end
+
+        uri = url_from_config.split('?').first
+        Rails.logger.info "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code}"
 
         # Retain the flags so that the #update! doesn't change
         # what we need to report through the API
@@ -60,39 +64,55 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     end
   end
 
-  def run_request(config)
-    from = config[:from]
-    to = config[:to]
-
-    case method_from_config(config)
+  def run_request
+    case method_from_config
     when 'get'
-      pull_data(from)
+      pull_data
     when 'post'
-      post_data(to, config[:form])
+      if post_data_config
+        post_data
+      else
+        post_form
+      end
     else
       raise FphsException, "pull_external_data method '#{http_method}' is not supported"
     end
   end
 
-  def pull_data(config)
-    url = url_from_config(config)
+  def pull_data
+    url = url_from_config
     response = Net::HTTP.get_response(URI.parse(url))
-    handle_response(config, response)
+    handle_response(from_config, response)
   end
 
-  def post_data(config, form)
-    url = url_from_config(config)
-    form ||= {}
+  def post_form
+    url = url_from_config
+    form = @this_config[:form] || {}
+    form = form.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
     response = Net::HTTP.post_form(URI.parse(url), form)
-    handle_response(config, response)
+    handle_response(to_config, response)
   end
 
-  def handle_response(config, response)
-    url = url_from_config(config)
-    http_method = method_from_config(config)
-    allow_empty_result = config[:allow_empty_result]
-    allow_response_codes = config[:allow_response_codes] || []
-    format = config[:format]
+  def post_data
+    url = url_from_config
+    data = post_data_config || {}
+    if data.is_a? Hash
+      data = data.deep_stringify_keys
+      data = data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
+      data = data.to_json
+    else
+      data = FieldDefaults.calculate_default @item, data
+    end
+    response = Net::HTTP.post(URI.parse(url), data, header_config)
+    handle_response(to_config, response)
+  end
+
+  def handle_response(sub_config, response)
+    url = url_from_config
+    http_method = method_from_config
+    allow_empty_result = sub_config[:allow_empty_result]
+    allow_response_codes = sub_config[:allow_response_codes] || []
+    format = sub_config[:format]
 
     self.response_code = response.code.to_i
 
@@ -123,12 +143,30 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     data
   end
 
-  def url_from_config(config)
-    url = config[:url]
+  def url_from_config
+    sub_config = from_config || to_config
+    url = sub_config[:url]
     Formatter::Substitution.substitute(url, data: @item, ignore_missing: false)
   end
 
-  def method_from_config(config)
-    config[:method] || 'get'
+  def method_from_config
+    @this_config[:method] || 'get'
+  end
+
+  def from_config
+    @this_config[:from]
+  end
+
+  def to_config
+    @this_config[:to]
+  end
+
+  def post_data_config
+    @this_config[:post_data]
+  end
+
+  def header_config
+    sub_config = from_config || to_config
+    sub_config[:headers]&.stringify_keys
   end
 end

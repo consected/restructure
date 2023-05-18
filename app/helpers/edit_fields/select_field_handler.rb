@@ -149,7 +149,7 @@ module EditFields
       reslist ||= []
 
       reslist = reslist.active if reslist.respond_to?(:active)
-      reslist = reslist.distinct if reslist.respond_to?(:distinct)
+      reslist = reslist.reorder('').distinct if reslist.respond_to?(:distinct)
 
       [cl, reslist]
     end

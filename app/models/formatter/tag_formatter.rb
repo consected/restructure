@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Formatter
+  # NOTE: if additional formatters are added here, they also need matching javascript
+  # in _fpa_tag_formatter
   class TagFormatter
     attr_accessor :current_user
 
@@ -27,16 +29,27 @@ module Formatter
       join_with_space
       join_with_comma
       join_with_semicolon
+      join_with_pipe
+      join_with_dot
+      join_with_at
+      join_with_slash
       join_with_newline
       join_with_2newlines
       compact
       sort
+      sort_reverse
       uniq
       markdown_list
       html_list
       plaintext
       strip
       split_lines
+      split_comma
+      split_semicolon
+      split_pipe
+      split_dot
+      split_at
+      split_slash
       markup
       ignore_missing
       last
@@ -55,6 +68,8 @@ module Formatter
     def process(operation, res, orig_val)
       if operation.in?(ValidOps)
         send operation, res, orig_val
+      elsif res.is_a?(Array) && operation.to_i.to_s == operation
+        res[operation.to_i]
       elsif operation.to_i != 0
         res[0..operation.to_i]
       else
@@ -159,6 +174,22 @@ module Formatter
       res.join('; ') if res.is_a? Array
     end
 
+    def join_with_pipe(res, _orig_val)
+      res.join('|') if res.is_a? Array
+    end
+
+    def join_with_dot(res, _orig_val)
+      res.join('.') if res.is_a? Array
+    end
+
+    def join_with_at(res, _orig_val)
+      res.join('@') if res.is_a? Array
+    end
+
+    def join_with_slash(res, _orig_val)
+      res.join('/') if res.is_a? Array
+    end
+
     def join_with_newline(res, _orig_val)
       res.join("\n") if res.is_a? Array
     end
@@ -175,6 +206,10 @@ module Formatter
       res.sort if res.is_a? Array
     end
 
+    def sort_reverse(res, _orig_val)
+      res.sort.reverse if res.is_a? Array
+    end
+
     def uniq(res, _orig_val)
       res.uniq if res.is_a? Array
     end
@@ -184,7 +219,7 @@ module Formatter
     end
 
     def html_list(res, _orig_val)
-      "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>'" if res.is_a? Array
+      "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>" if res.is_a? Array
     end
 
     def plaintext(res, _orig_val)
@@ -198,6 +233,30 @@ module Formatter
 
     def split_lines(res, _orig_val)
       res.split("\n")
+    end
+
+    def split_comma(res, _orig_val)
+      res.split(',')
+    end
+
+    def split_semicolon(res, _orig_val)
+      res.split(';')
+    end
+
+    def split_pipe(res, _orig_val)
+      res.split('|')
+    end
+
+    def split_dot(res, _orig_val)
+      res.split('.')
+    end
+
+    def split_at(res, _orig_val)
+      res.split('@')
+    end
+
+    def split_slash(res, _orig_val)
+      res.split('/')
     end
 
     def markup(res, _orig_val)
