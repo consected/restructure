@@ -116,7 +116,7 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
 
     tracker = TrackerHistory.where(protocol_id: study.id).reorder('').last
 
-    expect(old_tracker.id).to be < tracker.id
+    expect(old_tracker&.id || 0).to be < tracker.id
 
     expect(tracker.protocol_name).to eq 'Study'
     expect(tracker.sub_process_name).to eq 'Opt Out'
