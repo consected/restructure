@@ -41,8 +41,19 @@ _fpa.loaded.registrations = () => {
 
     const gdprTermsOfUse = $('#terms-of-use-gdpr');
     const defaultTermsOfUse = $('#terms-of-use-default');
+    const termsOfUseCheckbox = $('user_terms_of_use_accept');
+
     const handleTermsOfUseContext = (selectElement) => {
         const countryCode = selectElement.val();
+
+        if (!countryCode) {
+            defaultTermsOfUse.hide();
+            gdprTermsOfUse.hide();
+            termsOfUseCheckbox.hide();
+            return;
+        }
+
+        termsOfUseCheckbox.show();
         if (isGdprCountry(countryCode)) {
             defaultTermsOfUse.hide();
             gdprTermsOfUse.show();
