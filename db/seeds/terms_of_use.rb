@@ -44,6 +44,7 @@ module Seeds
           template: 'Place holder for GDPR terms of use.',
           template_type: 'content',
           message_type: 'plain',
+          category: 'public',
           disabled: false
         },
         {
@@ -51,6 +52,7 @@ module Seeds
           template: 'Place holder for non GDPR terms of use.',
           template_type: 'content',
           message_type: 'plain',
+          category: 'public',
           disabled: false
         },
         {
