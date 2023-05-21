@@ -13,6 +13,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     seed_database
     create_data_set_outside_tx
+    create_data_set
 
     @user, @good_password = create_user
     @good_email = @user.email

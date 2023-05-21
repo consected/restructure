@@ -4,8 +4,17 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
+  def api_uri
+    'https://rspec.mktorest.com'
+  end
+
+  def client_auth_url
+    '/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials'
+  end
+
   before :example do
     # SetupHelper.get_webmock_responses
+    # WebMock.allow_net_connect!
 
     content = <<~END_CONTENT
       <?xml version="1.0" ?>
@@ -126,7 +135,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       )
       .to_return(status: 200, body: '', headers: {})
 
-    stub_request(:post, 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials')
+    stub_request(:post, "#{api_uri}#{client_auth_url}")
       .with(
         headers: {
           'Accept' => /.*/,
@@ -136,9 +145,13 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           'Content-Type' => 'application/x-www-form-urlencoded'
         }
       )
-      .to_return(status: 200, body: '{"access_token":"123123123-ad12-1234-99ce-893645:ab","token_type":"bearer","expires_in":3559,"scope":"rspecemail@test.tst"}', headers: {})
+      .to_return(
+        status: 200,
+        body: '{"access_token":"123123123-ad12-1234-99ce-893645:ab","token_type":"bearer","expires_in":3559,"scope":"rspecemail@test.tst"}',
+        headers: {}
+      )
 
-    stub_request(:get, 'https://rspec.mktorest.com/rest/v1/campaigns/1081.json?access_token=123123123-ad12-1234-99ce-893645:ab')
+    stub_request(:get, "#{api_uri}/rest/v1/campaigns/1081.json?access_token=123123123-ad12-1234-99ce-893645:ab")
       .with(
         headers: {
           'Accept' => /.*/,
@@ -148,6 +161,23 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         }
       )
       .to_return(status: 200, body: '{"requestId":"6346#87d796ac7","result":[{"id":1081,"name":"Annual Revenue","description":"Run this Campaign at least once as a Batch Campaign, so it can score all the existing leads in your database. Then you can either schedule it to run every night, or you can add the following two triggers: \"Lead is Created\" AND \"Data Value Changes\" in the \"Annual Revenue\" Field.","type":"batch","programName":"OP-Scoring-Demographic","programId":1014,"workspaceName":"Default","createdAt":"2014-06-27T02:58:28Z","updatedAt":"2016-03-24T08:27:50Z","active":false}],"success":true}', headers: {})
+
+    stub_request(:post, "#{api_uri}/rest/v1/leads/push.json?access_token=123123123-ad12-1234-99ce-893645:ab")
+      .with(
+        body: /\{"programName":"HCI Participant Import","lookupField":"email","source":"HCIQ Zeus","reason":"Changed status","input":\[\{"email":"phil-test12@consected.com","firstName":"Test FN","lastName":"Test LN","hCIStage":"Invitation Email","hCIStageUpdatedAt":".*","hCIQLink":".*"\}\]\}/,
+        headers: {
+          'Accept' => /.*/,
+          'Accept-Encoding' => /.*/,
+          'Host' => /.*/,
+          'User-Agent' => /.*/,
+          'Content-Type' => 'application/json'
+        }
+      )
+      .to_return(
+        status: 200,
+        headers: {},
+        body: '{"requestId": "71c5#187e7d99f13","result": [{"id": 30412, "status": "updated"}],"success": true}'
+      )
   end
 
   before :example do
@@ -222,7 +252,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         data_field_format: 'json',
         method: 'post',
         to: {
-          url: 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials',
+          url: "#{api_uri}#{client_auth_url}",
           format: 'json'
         }
       }
@@ -241,7 +271,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         local_data: 'identity',
         method: 'post',
         to: {
-          url: 'https://rspec.mktorest.com/identity/oauth/token?client_id=abcdef-1234-5678-gggggggg&client_secret=rspectestsecret&grant_type=client_credentials',
+          url: "#{api_uri}#{client_auth_url}",
           format: 'json'
         }
       },
@@ -259,7 +289,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           }
         },
         from: {
-          url: 'https://rspec.mktorest.com/rest/v1/campaigns/1081.json?access_token={{save_trigger_results.identity.access_token}}',
+          url: "#{api_uri}/rest/v1/campaigns/1081.json?access_token={{save_trigger_results.identity.access_token}}",
           format: 'json'
         }
       }
@@ -271,6 +301,66 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect(@al.notes).to be_present
     dnotes = JSON.parse(@al.notes)
     expect(dnotes['result'].first['name']).to eq 'Annual Revenue'
+  end
+
+  it 'posts data' do
+    lead_email = 'phil-test12@consected.com'
+
+    config = {
+      this1: {
+        local_data: 'identity',
+        method: 'post',
+        to: {
+          url: "#{api_uri}#{client_auth_url}",
+          format: 'json'
+        }
+      },
+      this2: {
+        data_field: 'notes',
+        data_field_format: 'json',
+        method: 'post',
+        if: {
+          all: {
+            this: {
+              save_trigger_results: {
+                element: 'identity_http_response_code',
+                value: 200
+              }
+            }
+          }
+        },
+        to: {
+          url: "#{api_uri}/rest/v1/leads/push.json?access_token={{save_trigger_results.identity.access_token}}",
+          format: 'json',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        },
+        post_data: {
+          programName: 'HCI Participant Import',
+          lookupField: 'email',
+          source: 'HCIQ Zeus',
+          reason: 'Changed status',
+          input: [
+            {
+              email: lead_email,
+              firstName: 'Test FN',
+              lastName: 'Test LN',
+              hCIStage: 'Invitation Email',
+              hCIStageUpdatedAt: 'now()',
+              hCIQLink: 'https://consected.com'
+            }
+          ]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.notes).to be_present
+    dnotes = JSON.parse(@al.notes)
+    expect(dnotes['result'].first['status']).to eq 'updated'
   end
 
   it 'pulls json from a url and saves to a JSON field' do

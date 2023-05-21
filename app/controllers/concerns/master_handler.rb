@@ -621,6 +621,11 @@ module MasterHandler
   def translate_params_to_persistable
     rname = object_instance.class.name.underscore.gsub('/', '_')
     obj_params = params[rname]
+    unless obj_params
+      raise FphsException, "No params sent for #{rname} when creating or updating." \
+                           "Expect posted data #{rname}[<field_name>]"
+    end
+
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable
     # We don't use #assign_attributes, since a Hash will be treated as an update of a nested object
     updated_params.each do |k, v|

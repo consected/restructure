@@ -6,11 +6,15 @@ Administrators are super-users within the application environment. An administra
 
 ## Administrator Users
 
-Administrators are a separate class of profile from regular app users. An administrator should also have a user account set up, with a username that matches the administrator account.
+Administrators are a separate class of profile from regular app users. An administrator should also have a user account set up, with a username that matches the administrator account. Typically an admin will log in with their user account first, then login to the administration console.
 
 ## Operating System Administrators
 
+{{#if allow_admins_to_manage_admins}}
+Administrators with appropriate capabilities can manage other administrator profiles. Details are found in [Manage Administrators](../admins/0_introduction.md).
+{{else}}
 Some administration tasks, such as creation of new administrators and re-enabling previously disabled admins, can only be performed by users with access to the app server operating system. Details are found in [Manage Administrators](../admins/0_introduction.md).
+{{/if}}
 
 ## Developers
 
@@ -48,3 +52,7 @@ A separate developer's reference, including API samples, is available in the [De
 ### Messaging
 
 - [Message Templates](../message_templates/0_introduction.md)
+
+### General Concepts
+
+- [Substitutions](../general/substitutions.md) provide insertion of data into calculated conditions, captions, message templates and dialogs
