@@ -28,7 +28,7 @@ class User < ActiveRecord::Base
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
-  attr_accessor :terms_of_use_accept
+  attr_accessor :terms_of_use
 
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
@@ -42,7 +42,8 @@ class User < ActiveRecord::Base
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             },
             length: {
-              maximum: 50
+              maximum: 50,
+              allow_nil: true
             }
 
   validates :last_name,
@@ -50,27 +51,26 @@ class User < ActiveRecord::Base
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             },
             length: {
-              maximum: 50
+              maximum: 50,
+              allow_nil: true
             }
 
   validates :country_code,
             presence: {
-              unless: -> { registered_by_admin? },
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             },
             length: {
-              is: 2
+              is: 2,
+              allow_nil: true
             }
 
   validates :terms_of_use,
-            presence: {
-              unless: -> { registered_by_admin? },
+            acceptance: {
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
-  validates :terms_of_use_accept,
-            acceptance: {
-              unless: -> { registered_by_admin? },
+  validates :terms_of_use_accepted,
+            presence: {
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
@@ -287,7 +287,6 @@ class User < ActiveRecord::Base
   end
 
   def registered_by_admin?
-    debugger
     current_admin == RegistrationHandler.registration_admin
   end
 end

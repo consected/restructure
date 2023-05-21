@@ -41,19 +41,19 @@ _fpa.loaded.registrations = () => {
 
     const gdprTermsOfUse = $('#terms-of-use-gdpr');
     const defaultTermsOfUse = $('#terms-of-use-default');
-    const termsOfUseCheckbox = $('user_terms_of_use_accept');
+    const termsOfUseCheckbox = $('#user_terms_of_use');
 
     const handleTermsOfUseContext = (selectElement) => {
         const countryCode = selectElement.val();
 
         if (!countryCode) {
+            // hide everything and uncheck the terms of use if the country is not selected.
             defaultTermsOfUse.hide();
             gdprTermsOfUse.hide();
-            termsOfUseCheckbox.hide();
+            termsOfUseCheckbox.hide().prop('checked', false);
             return;
         }
 
-        termsOfUseCheckbox.show();
         if (isGdprCountry(countryCode)) {
             defaultTermsOfUse.hide();
             gdprTermsOfUse.show();
@@ -61,6 +61,8 @@ _fpa.loaded.registrations = () => {
             gdprTermsOfUse.hide();
             defaultTermsOfUse.show();
         }
+        // after changing the country uncheck the terms of use
+        termsOfUseCheckbox.show().prop('checked', false);
     };
 
     const countryCodeSelect = $('#user_country_code');

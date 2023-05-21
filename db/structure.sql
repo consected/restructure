@@ -6410,7 +6410,7 @@ CREATE TABLE ml_app.users (
     confirmed_at timestamp without time zone,
     confirmation_sent_at timestamp without time zone,
     country_code character varying,
-    terms_of_use character varying
+    terms_of_use_accepted character varying
 );
 
 
@@ -13756,8 +13756,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220601180701'),
 ('20230209153019'),
 ('20230420125603'),
-('20230420125634'),
-('20230507133747'),
-('20230518115533');
+('20230420125634');
 
 

@@ -26,11 +26,11 @@ module Users
 
       return unless resource.is_a?(User)
 
-      resource.terms_of_use = if gdpr_country?(resource.country_code)
-                                GdprTermsOfUseTemplate
-                              else
-                                DefaultTermsOfUseTemplate
-                              end
+      resource.terms_of_use_accepted = if gdpr_country?(resource.country_code)
+                                         Settings::GdprTermsOfUseTemplate
+                                       else
+                                         Settings::DefaultTermsOfUseTemplate
+                                       end
     end
 
     def devise_registration_params
