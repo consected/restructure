@@ -27,7 +27,7 @@ module Seeds
 
         {
           name: NEW_USER_DEFAULT_TEMPLATE,
-          template: 'Your checking this box indicates that you have freely agreed to the use of your information as described in the <a href="/info_pages/terms_of_use_non_gdpr#open-in-new-tab">terms of use</a>."',
+          template: 'Your checking this box indicates that you have freely agreed to the use of your information as described in the <a href="/info_pages/terms_of_use_non_gdpr#open-in-new-tab">terms of use</a>.',
           template_type: 'content',
           message_type: 'dialog',
           disabled: false
