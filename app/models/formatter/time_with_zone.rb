@@ -1,5 +1,7 @@
 module Formatter
   module TimeWithZone
+    #
+    # With no options, format the *date_time* according to the current user's timezone and preferences
     def self.format(data, _options = nil, current_user: nil,
                     include_sec: nil,
                     time_only: nil, date_only: nil,
@@ -31,7 +33,7 @@ module Formatter
         raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
       end
 
-      if use_tz && tz.utc_offset != data.utc_offset
+      if use_tz && data.respond_to?(:utc_offset) && tz.utc_offset != data.utc_offset
         data = tz.parse(data.to_s)
         res = data.strftime(df).gsub('  ', ' ')
       else
