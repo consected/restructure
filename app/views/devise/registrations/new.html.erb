@@ -62,7 +62,7 @@
       <%= f.country_select :country_code, include_blank: true, class: "form-control"%>
     </div>
 
-    <div class='form-group-non'>
+    <div class='form-group-non checkbox-inline'>
         <%= f.check_box :terms_of_use, style: 'display: none;'%>
         <span id='terms-of-use-default'>
           <%= template_block 'ui new user registration terms default' %>
