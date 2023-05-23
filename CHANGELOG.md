@@ -18,6 +18,12 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Project Viva @8.2.37 - 2023-05-23
+
+- [Fixed] date and time formatters and provided consistent spec tests
+- [Fixed] issues showing and editing tag select fields
+- [Fixed] calculation that incorrectly showed an edit button even if the dynamic model user access controls did not allow editing
+
 ## [8.2.35] - 2023-05-17
 
 ### Transferred from Harvard @8.2.34 - 2023-05-17
