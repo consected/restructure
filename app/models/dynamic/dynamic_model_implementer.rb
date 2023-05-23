@@ -15,11 +15,10 @@ module Dynamic
       def final_setup
         Rails.logger.debug "Running final setup for #{name}"
         ro = result_order
-        if primary_key.present?
-          use_key = primary_key
-        else
-          return
-        end
+        return unless primary_key.present?
+
+        use_key = primary_key
+
         ro = { use_key => :desc } if result_order.blank?
         default_scope -> { order ro }
       end
@@ -126,9 +125,10 @@ module Dynamic
       @can_edit = false
 
       # This returns nil if there was no rule, true or false otherwise.
-      # Therefore, for no rule (nil) return true
+      # Therefore, for no rule (nil) return whatever the user access controls allow,
+      # since they are final arbiter.
       res = calc_can :edit
-      return @can_edit = true if res.nil?
+      return @can_edit = !!super() if res.nil?
       return unless res
 
       # Finally continue with the standard checks if none of the previous have failed

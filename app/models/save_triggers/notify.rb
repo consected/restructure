@@ -192,7 +192,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
           time: calc_field_or_return(wait_until[:time]),
           zone: calc_field_or_return(wait_until[:zone]) || :user
         }
-        wdate = Formatter::DateTime.format(w, utc: true, iso: true, current_user: @item.current_user || @item.user)
+        wdate = Formatter::DateTime.format(w, utc: true, iso: true, keep_date: true,
+                                              current_user: @item.current_user || @item.user)
       else
         wdate = wait_until
       end

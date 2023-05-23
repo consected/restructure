@@ -16,7 +16,17 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-#### [8.2.35] - 2023-05-17
+## Unreleased
+
+### [8.2.37] - 2023-05-23
+
+### Transferred from Project Viva @8.2.37 - 2023-05-23
+
+- [Fixed] date and time formatters and provided consistent spec tests
+- [Fixed] issues showing and editing tag select fields
+- [Fixed] calculation that incorrectly showed an edit button even if the dynamic model user access controls did not allow editing
+
+## [8.2.35] - 2023-05-17
 
 ### Transferred from Harvard @8.2.34 - 2023-05-17
 
@@ -39,152 +49,6 @@ release will be created for any release tested in production, and may be marked 
 - [Added] pull_external_data to post data with substitutions
 
 ## [8.2.28] - 2023-05-04
-
-### Transferred from Viva @8.2.27 - 2023-05-04
-
-#### [8.2.27] - 2023-05-03
-
-- [Fixed] correct display of redcap radio, select and tag select fields
-
-#### [8.2.26] - 2023-05-03
-
-- [Added] Firefox / geckodriver installation details to README
-- [Fixed] passing of _general_selections data back to form display
-- [Fixed] capitalization of certain fields
-
-#### [8.2.24] - 2023-04-27
-
-- [Fixed] regressions in UI
-
-## [8.2.20] - 2023-04-25
-
-### Transferred from Harvard @8.2.19 - 2023-04-25
-
-#### [8.2.19]
-
-- [Added] post requests to pull_external_data save trigger
-- [Added] temporary results storage in save_trigger_results, available to if conditions and other pull_external_data url substitutions
-- [Added] calc actions for ILIKE and ~*
-- [Added] this: field: element: comparisons in if
-- [Fixed] display of ui template blocks with substitutions showing with HTML tags
-- [Fixed] display of null in tracker notes field
-
-#### [8.2.17]
-
-- [Fixed] migration generator bugs based on options hash / attributes
-
-#### [8.2.15]
-
-- [Fixed] encryption of api keys for Redcap
-- [Removed] gem debase and ruby-debug-ide
-- [Fixed] exception handling on bad API key, allowing Redcap project form to be edited
-
-#### [8.2.14]
-
-- [Added] configuration to specify a user or app_type for notification configurations to ensure that background jobs run with a consistent user
-- [Changed] tracker record updates to ignore a missing item record being specified, since in certain dynamic model views the update triggering the tracker update may have hidden the actual record
-- [Added] no_masters option to calculation of conditions, to allow a specific table to be queried directly
-- [Added] configurable text for credential change text
-- [Fixed] handling of code blocks in markdown
-- [Fixed] unnecessary capitalization of tracker notes
-
-## [8.2.12] - 2023-04-13
-
-- [Fixed] public_pages by moving to info_pages to work around deployment issue on Elastic Beanstalk
-
-## [8.2.10] - 2023-04-13
-
-- [Fixed] bug in Zeitwork class loading
-- [Fixed] admin app type components panel and standalone page not loading
-
-## [8.2.1] - 2023-04-11
-
-- [Changed] to Rails 6 and Ruby 3
-
-## [8.1.14] - 2023-04-06
-
-### Transferred from Harvard @7.4.169 - 2023-04-06
-
-- [Added] {{#if}} conditional display in caption_before show mode
-- [Added] UI caption formatters for ::date ::time etc
-- [Added] condition evaluation outside of the current master record by specifying 'masters' as the first table.
-- [Fixed] default conversion of markdown to html for email and dialog templates
-- [Fixed] handling of current_user in add_tracker and improved conditional testing
-- [Fixed] failing save triggers on Redcap record storage by setting the current_user
-- [Fixed] user_preference can be missing
-
-## [8.1.13] - 2023-03-08
-
-### Transferred from Harvard @7.4.165 - 2023-03-08
-
-- [Changed] admin panels for better presentation and improved navigation between related items
-- [Fixed] batch_trigger not being removed when dynamic def is disabled
-
-### Transferred from Harvard @7.4.160 - 2023-02-22
-
-- [Added] batch_trigger handling for dynamic definitions
-- [Added] initialization of configurations current_version option for dynamic defs
-- [Added] improved logging in failed access to alternative id field
-- [Added] script to setup new NFS groups for filestore
-- [Added] env var configuration for filestore max group id (FILESTORE_MAX_GRP_ID)
-- [Changed] handling of dynamic definitions to handle changes better
-- [Changed] dynamic def handling of associations in readiness for Rails 6
-- [Changed] rails log search string default
-- [Changed] the admin panel to present the app components, consistent styling and better admin buttons flash
-- [Changed] admin bar to move admin panel and logout buttons to top nav bar
-- [Changed] naming to attempt to resolve delayed_job issues with recurring batch jobs
-- [Fixed] duplicate class attribute
-- [Fixed] anonymization issue breaking DICOM image viewing
-- [Fixed] reloading of dynamic definition in batch template processing
-- [Fixed] issues with batch_trigger scheduling and limits
-
-## [8.1.11] - 2023-01-19
-
-### Transferred from Harvard @7.4.152 - 2023-01-17
-
-- [Changed] the admin panel to present the app components, consistent styling and better admin buttons flash
-- [Fixed] duplicate class attribute
-- [Added] form change checking and warning if navigating or performing activity log action that would lose changes
-- [Added] useful error message for update_reference when no reference found
-- [Changed] session timeout counter to clear the flash if another tab has refreshed the session
-- [Fixed] constant autoloading error
-- [Fixed] error where id not available in editable report row
-- [Added] configuration of logging levels
-- [Fixed] Markdown editor add image, which only showed selectable images from first container in app
-- [Change] to ensure a portal page shows a Not Found error if a page with the matching slug is not found
-- [Changed] handling of requests that don't have a matching route, to avoid spamming of the logs
-- [Added] warning to user if there is an error that breaks the markdown editor saving changes
-- [Fixed] page layouts to ensure dashboards can show activity logs in a traditional view (rather than as a info page layout)
-- [Fixed] dashboard charts when view_options not set
-- [Added] the merging of editable table rows with static cells
-- [Fixed] report result viewing to show based on configurations
-- [Added] report view_options.prevent_adding_items to prevent create in editable reports even if user has access to create report entries
-- [Fixed] report edit breaks resizable textarea
-- [Added] activity log admin clickable activities
-- [Added] more information to activity log details panel
-- [Added] report results handler to add blocks based on specific array fields
-- [Added] report results_handler view option to add custom handlers
-- [Added] ability to add chosen.js to more fields and fixed filtering
-- [Added] rspec method to change app settings without spamming results
-- [Changed] general selections so that they are not cached on the front end, since this is incorrect, and may also expose data to users in the Javascript console
-- [Changed] login to force username to be lowercase
-- [Changed] print css to resize report results block to be full set of data
-- [Changed] styles to allow better handling of hidden file attachment blocks
-- [Fixed] handling of calc_if against uncommon cases, especially current user evaluations
-- [Fixed] issue returning incorrect values in selections for template configs
-- [Fixed] capitalization in multi\_ fields
-- [Fixed] admin report controller item type filter name display
-- [Added] information to the update_reference documentation
-- [Changed] handling of dynamic options parsing to provide more information, especially in app type imports
-- [Changed] grep of Rails log to include additional context after match
-- [Fixed] regression of use_current_version
-- [Fixed] sidebar not showing when link clicked in certain pages or blocks
-- [Fixed] infinite recursion on a tag*select*... field definition
-- [Changed] build script to handle removed gems
-- [Changed] grouping of production gems that really only should be used for asset build
-- [Changed] viewing of the the admin password change document intended for end users
-
-## [8.0.49] - 2022-11-10
 
 ### Transferred from Viva @8.2.27 - 2023-05-04
 
