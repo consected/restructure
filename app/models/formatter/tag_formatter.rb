@@ -21,13 +21,16 @@ module Formatter
       date
       date_time
       date_time_with_zone
+      date_time_show_zone
       time
+      time_show_zone
       time_with_zone
       time_sec
       dicom_datetime
       dicom_date
       join_with_space
       join_with_comma
+      join_with_csv
       join_with_semicolon
       join_with_pipe
       join_with_dot
@@ -45,6 +48,7 @@ module Formatter
       strip
       split_lines
       split_comma
+      split_csv
       split_semicolon
       split_pipe
       split_dot
@@ -127,31 +131,64 @@ module Formatter
     end
 
     def date(_res, orig_val)
-      Formatter::TimeWithZone.format(orig_val, current_user: current_user, date_only: true)
+      Formatter::Date.format(orig_val, current_user: current_user)
     end
 
+    #
+    # Show the date and time as it was set (as if no timezone was specified)
+    # without adjusting to the user's timezone.
     def date_time(_res, orig_val)
       Formatter::DateTime.format(orig_val, current_user: current_user)
     end
 
-    # Date and time only including hours:minutes and timezone of displayed time
+    #
+    # Adjusts the date/time to the user's timezone and displays the timezone to the end.
+    # Date and time only including hours:minutes and timezone of displayed time.
+    def date_time_show_zone(_res, orig_val)
+      Formatter::DateTime.format(orig_val, current_user: current_user,
+                                           show_timezone: true,
+                                           current_timezone: :user)
+    end
+
+    #
+    # Forces the stored timezone to the user's timezone preference, without changing the date.
+    # A stored date time intended to not have a timezone
+    # will be returned as a new date time based on the user's timezone.
     def date_time_with_zone(_res, orig_val)
-      Formatter::DateTime.format(orig_val, current_user: current_user, show_timezone: true)
+      Formatter::DateTime.format(orig_val, current_user: current_user,
+                                           show_timezone: true,
+                                           keep_date: true)
     end
 
     # Time only including hours:minutes
     def time(_res, orig_val)
-      Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
+      Formatter::TimeWithZone.format(orig_val, current_user: current_user,
+                                               time_only: true)
     end
 
+    # Adjusts the time to the user's timezone and displays the timezone on the end.
+    # Time only including hours:minutes and timezone of displayed time
+    def time_show_zone(_res, orig_val)
+      currdate = orig_val
+      currdate = Date.today if currdate.is_a? Time
+      Formatter::Time.format(orig_val, current_user: current_user,
+                                       show_timezone: true,
+                                       current_timezone: :user,
+                                       current_date: currdate)
+    end
+
+    # Forces the time to the user's preferred timezone
     # Time only including hours:minutes and timezone of displayed time
     def time_with_zone(_res, orig_val)
-      Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true, show_timezone: true)
+      Formatter::TimeWithZone.format(orig_val, current_user: current_user,
+                                               time_only: true)
     end
 
     # Time for hours:minutes:seconds
     def time_sec(_res, orig_val)
-      Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true, include_sec: true)
+      Formatter::TimeWithZone.format(orig_val, current_user: current_user,
+                                               time_only: true,
+                                               include_sec: true)
     end
 
     def dicom_datetime(_res, orig_val)
@@ -168,6 +205,16 @@ module Formatter
 
     def join_with_comma(res, _orig_val)
       res.join(', ') if res.is_a? Array
+    end
+
+    def join_with_csv(res, _orig_val)
+      return unless res.is_a? Array
+
+      res = CSV.generate do |csv|
+        csv << res
+      end
+
+      res.split("\n").first
     end
 
     def join_with_semicolon(res, _orig_val)
@@ -215,7 +262,7 @@ module Formatter
     end
 
     def markdown_list(res, _orig_val)
-      "  - #{res.join("\n  - ")}" if res.is_a? Array
+      "- #{res.join("\n- ")}" if res.is_a? Array
     end
 
     def html_list(res, _orig_val)
@@ -237,6 +284,10 @@ module Formatter
 
     def split_comma(res, _orig_val)
       res.split(',')
+    end
+
+    def split_csv(res, _orig_val)
+      CSV.parse_line(res)
     end
 
     def split_semicolon(res, _orig_val)

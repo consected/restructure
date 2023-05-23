@@ -321,6 +321,7 @@ _fpa.postprocessors_reports = {
         // Show as a specific type
         var ct = cell.attr('data-col-type');
         var sa = show_as[ct];
+        var orig_cell_content = cell_content;
         if (sa) {
           sa = mapping[sa] || sa
           cell_content = `<${sa}>${cell_content}</${sa}>`
@@ -329,10 +330,10 @@ _fpa.postprocessors_reports = {
         // Format the cell if it is an array or show_as specifies it is tags
         var is_array = cell.attr('data-col-var-type') === 'Array';
         var is_tags = show_as[i] == 'tags';
-        if (cell_content && (is_array || is_tags)) {
+        if (orig_cell_content && (is_array || is_tags)) {
           var ul_class = is_tags ? 'report-result-cell-tags' : 'report-list-items'
           var $res = $(`<ul class="${ul_class}"></ul>`)
-          cell_content.forEach((item) => {
+          orig_cell_content.forEach((item) => {
             if (!item || item == '') return;
 
             var li = document.createElement('li');
