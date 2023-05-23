@@ -186,6 +186,36 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.49] - 2022-11-10
 
+### Transferred from Project Viva @8.2.37 - 2023-05-23
+
+- [Fixed] date and time formatters and provided consistent spec tests
+- [Fixed] issues showing and editing tag select fields
+- [Fixed] calculation that incorrectly showed an edit button even if the dynamic model user access controls did not allow editing
+
+## [8.2.35] - 2023-05-17
+
+### Transferred from Harvard @8.2.34 - 2023-05-17
+
+#### [8.2.34] - 2023-05-16
+
+- [Added] json_parse and numeric index selection to substitutions
+- [Added] logging to pull
+- [Added] documentation of substitutions
+- [Added] full set of options to tag substitution and formatting on front end. Refactored to new class files.
+- [Added] API sample for Marketo webhook
+- [Changed] documentation for administration of admins
+- [Fixed] migration of view SQL when using @library definitions in the dynamic model
+
+#### [8.2.33] - 2023-05-08
+
+- [Fixed] pull_external_data with save_trigger_results
+
+#### [8.2.32] - 2023-05-08
+
+- [Added] pull_external_data to post data with substitutions
+
+## [8.2.28] - 2023-05-04
+
 ### Transferred from Viva @8.2.27 - 2023-05-04
 
 #### [8.2.27] - 2023-05-03
