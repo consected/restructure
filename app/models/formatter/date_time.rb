@@ -4,12 +4,21 @@ module Formatter
   module DateTime
     IsoFormat = '%Y-%m-%d %H:%M:%S'
     # If a current_user is set and no data zone, the current_user's timezone will be used to interpret the date / time
-    # @param data [Hash | Array] date and time as: {date: date, time: time, zone: timezone} | [date, time, zone]
-    # @param keep_date ensures the current date is kept, and just the time altered when forcing it to the new timezone.
+    # @param [Hash | Array] data - date and time as: {date: date, time: time, zone: timezone} | [date, time, zone]
+    # @param [nil] _options - unused
+    # @param [User] current_user
+    # @param [true] include_sec
+    # @param [true] iso
+    # @param [true] utc
+    # @param [true] show_timezone
+    # @param [true] keep_date - (optional) ensures the current date is kept, and just the time altered when forcing it to the new timezone.
+    # @param [String] current_timezone
+    # @return [String]
     def self.format(data, _options = nil,
                     current_user: nil,
                     include_sec: nil,
-                    iso: nil, utc: nil,
+                    iso: nil,
+                    utc: nil,
                     show_timezone: nil,
                     keep_date: nil,
                     current_timezone: nil)
@@ -27,7 +36,7 @@ module Formatter
 
         # Convert to iso format
         if keep_date
-          dstr = Formatter::Date.format w[:date], iso: true, utc: true
+          dstr = Formatter::Date.format w[:date], iso: true
           data = "#{dstr} #{Formatter::Time.format w[:time], iso: true, utc: true,
                                                              current_timezone: curr_zone,
                                                              current_date: dstr, current_user: current_user,

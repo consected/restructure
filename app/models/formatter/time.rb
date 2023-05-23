@@ -13,10 +13,24 @@ module Formatter
     # based on the current user's timezone (DST differences between timezones, etc)
     #
     # If utc is set, the date will be converted to UTC and the timezone will be displayed as UTC
-    def self.format(data, _options = nil, current_user: nil,
+    # @param [Date|DateTime|Time] data - the date to be used, preferably as a Date or as a Time in the server timezone
+    # @param [nil] _options - unused
+    # @param [User] current_user
+    # @param [true] include_sec
+    # @param [true] iso
+    # @param [true] utc
+    # @param [true] show_timezone
+    # @param [String] current_timezone
+    # @param [Date] current_date
+    # @return [String]
+    def self.format(data, _options = nil,
+                    current_user: nil,
                     include_sec: nil,
-                    iso: nil, utc: nil, show_timezone: nil,
-                    current_timezone: nil, current_date: nil)
+                    iso: nil,
+                    utc: nil,
+                    show_timezone: nil,
+                    current_timezone: nil,
+                    current_date: nil)
       return nil if data.blank?
 
       current_timezone = current_user.user_preference.timezone if current_user && current_timezone&.to_sym == :user

@@ -4,7 +4,7 @@ echo > tmp/failing_specs.log
 echo > tmp/working_failing_specs.log
 
 # Clear a variable that is often set in the session
-export QUICK=
+unset QUICK
 
 # First, run brakeman
 if [ "${NO_BRAKEMAN}" != 'true' ] && [ "${SKIP_BRAKEMAN}" != 'true' ]; then
