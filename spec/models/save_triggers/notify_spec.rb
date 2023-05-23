@@ -315,7 +315,12 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   end
 
   it 'sets the notification to send at a specific time in the future based on a date / time / zone definition' do
-    d = (DateTime.now + 1.day)
+    # We would like to send at a specific time (12:15 pm on August 1st, 2022)
+    # The date is nominally set to UTC, since this mirrors the way it will be stored in the database.
+    d = Time.new(2022, 8, 1, 14, 15, 0, 'UTC')
+    # The configuration states that it wants us to use Eastern timezone. So the actual target date
+    # we want to use for comparison will be 12:15 pm EDT.
+    d_in_edt = Time.new(2022, 8, 1, 14, 15, 0, '-04:00')
     config = {
       type: 'email',
       users: {
@@ -338,8 +343,11 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     @trigger.perform
 
+    # Calculated time to send was:
+    wait_until = @trigger.send(:run_when)[:wait_until]
+
     # The time should be close enough
-    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq(d.to_i / 10) || eq((d.to_i - 1) / 10)
+    expect(wait_until.to_i / 10).to eq(d_in_edt.to_i / 10) || eq((d_in_edt.to_i - 1) / 10)
   end
 
   it 'uses an if select the correct notification' do

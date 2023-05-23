@@ -6,6 +6,8 @@
 
 Administration is provided in [Admin: Message Templates](/admin/app_configurations)
 
+[Substitutions](substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
+
 ### Message Notifications
 
 Message notifications may be used by dynamic definition save triggers, causing a notification to be sent.
