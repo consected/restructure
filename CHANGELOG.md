@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] date and time formatters and provided consistent spec tests
+- [Fixed] issues showing and editing tag select fields
+- [Fixed] calculation that incorrectly showed an edit button even if the dynamic model user access controls did not allow editing
+
 ## [8.2.36] - 2023-05-18
 
 ### Transferred from ReStructure @8.2.35 - 2023-05-18
