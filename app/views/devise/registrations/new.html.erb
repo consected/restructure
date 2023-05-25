@@ -65,10 +65,10 @@
     <div class='form-group-non checkbox-inline'>
         <%= f.check_box :terms_of_use, style: 'display: none;'%>
         <%= f.label :terms_of_use do %>
-            <span id='terms-of-use-default'>
+            <span id='terms-of-use-default' style='display: none;'>
               <%= template_block 'ui new user registration terms default' %>
             </span>
-            <span id='terms-of-use-gdpr'>
+            <span id='terms-of-use-gdpr' style='display: none;'>
               <%= template_block 'ui new user registration terms gdpr' %>
             </span>
         <% end %>

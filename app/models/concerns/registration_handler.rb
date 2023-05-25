@@ -9,6 +9,18 @@ module RegistrationHandler
     @allow_users_to_register && is_a?(User)
   end
 
+  def self_registration_admin?
+    current_admin == registration_admin
+  end
+
+  def a_template_or_batch_user?
+    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
+  end
+
+  def required_for_self_registration?
+    allow_users_to_register? && !a_template_or_batch_user? && self_registration_admin?
+  end
+
   # The registration admin is assigned to newly created user through the user registration feature.
   # @return Admin
   def self.registration_admin

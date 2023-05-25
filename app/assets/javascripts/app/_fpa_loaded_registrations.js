@@ -70,4 +70,6 @@ _fpa.loaded.registrations = () => {
         const selectElement = $(event.currentTarget);
         handleTermsOfUseContext(selectElement);
     }).trigger('change');
+
+    _fpa.form_utils.setup_open_in_tab();
 };

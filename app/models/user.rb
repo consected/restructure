@@ -39,7 +39,7 @@ class User < ActiveRecord::Base
 
   validates :first_name,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
             },
             length: {
               maximum: 50,
@@ -48,7 +48,7 @@ class User < ActiveRecord::Base
 
   validates :last_name,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
             },
             length: {
               maximum: 50,
@@ -57,7 +57,7 @@ class User < ActiveRecord::Base
 
   validates :country_code,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
             },
             length: {
               is: 2,
@@ -66,14 +66,13 @@ class User < ActiveRecord::Base
 
   validates :terms_of_use,
             acceptance: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
             }
 
   validates :terms_of_use_accepted,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
             }
-
 
   validate :prevent_disable_template_user
 
@@ -266,10 +265,6 @@ class User < ActiveRecord::Base
     super
   end
 
-  def a_template_or_batch_user?
-    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
-  end
-
   private
 
   def set_current_user_on_user_preferences
@@ -283,10 +278,6 @@ class User < ActiveRecord::Base
   def prevent_disable_template_user
     return unless email == Settings::TemplateUserEmail && disabled && disabled_changed?
 
-    raise FphsException, "Do not attempt to disable the template user: #{email}" 
-  end
-
-  def registered_by_admin?
-    current_admin == RegistrationHandler.registration_admin
+    raise FphsException, "Do not attempt to disable the template user: #{email}"
   end
 end
