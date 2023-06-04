@@ -22,15 +22,22 @@ module Users
 
     def build_resource(hash = {})
       super
+
       resource.current_admin = RegistrationHandler.registration_admin
+      resource.terms_of_use_accepted = terms_of_use_accepted(resource)
+    end
 
+    # @param [Object] resource
+    # @return [String] terms of use
+    def terms_of_use_accepted(resource)
       return unless resource.is_a?(User)
+      return if resource.country_code.blank?
 
-      resource.terms_of_use_accepted = if gdpr_country?(resource.country_code)
-                                         Settings::GdprTermsOfUseTemplate
-                                       else
-                                         Settings::DefaultTermsOfUseTemplate
-                                       end
+      if gdpr_country?(resource.country_code)
+        Settings::GdprTermsOfUseTemplate
+      else
+        Settings::DefaultTermsOfUseTemplate
+      end
     end
 
     def devise_registration_params
