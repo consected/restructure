@@ -10,7 +10,7 @@ module RegistrationHandler
   end
 
   def self_registration_admin?
-    current_admin == registration_admin
+    current_admin == RegistrationHandler.registration_admin
   end
 
   def a_template_or_batch_user?
