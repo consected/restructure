@@ -31,7 +31,9 @@ module Users
     # @return [String] terms of use
     def terms_of_use_accepted(resource)
       return unless resource.is_a?(User)
+
       return if resource.country_code.blank?
+      return unless resource.terms_of_use.to_i == 1
 
       if gdpr_country?(resource.country_code)
         Settings::GdprTermsOfUseTemplate
