@@ -278,6 +278,8 @@ class Settings
     DefaultCountrySelect
   ].freeze
 
+  DoNotDisplayErrorMessage = 'DO NOT DISPLAY ERROR MESSAGE'.freeze
+
   # GDPR and non-GDPR template references
   template_id = 10 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms gdpr').id
   GdprTermsOfUseTemplate = "message_templates|#{template_id}|gdpr".freeze

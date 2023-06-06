@@ -55,6 +55,7 @@ class User < ActiveRecord::Base
               allow_nil: true
             }
 
+  # TODO comment
   validates :country_code,
             presence: {
               if: -> { required_for_self_registration? },
@@ -62,7 +63,8 @@ class User < ActiveRecord::Base
             },
             length: {
               is: 2,
-              allow_blank: true
+              allow_blank: true,
+              message: Settings::DoNotDisplayErrorMessage
             }
 
   validates :terms_of_use,
@@ -74,7 +76,8 @@ class User < ActiveRecord::Base
   # See notes app/views/devise/shared/_error_messages.html.erb
   validates :terms_of_use_accepted,
             presence: {
-              if: -> { required_for_self_registration? }
+              if: -> { required_for_self_registration? },
+              message: Settings::DoNotDisplayErrorMessage
             }
 
   validate :prevent_disable_template_user
