@@ -278,7 +278,7 @@ class Settings
     DefaultCountrySelect
   ].freeze
 
-  DoNotDisplayErrorMessage = 'DO NOT DISPLAY ERROR MESSAGE'.freeze
+  DoNotDisplayErrorMessage = ''.freeze # Indicate an empty error message whenever an error message should not be displayed to the user
 
   # GDPR and non-GDPR template references
   template_id = 10 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms gdpr').id
