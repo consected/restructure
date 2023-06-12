@@ -1,6 +1,8 @@
 _fpa.loaded.registrations = () => {
 
     /**
+     see also, config/initializers/app_settings.rb GdprCountryCodes
+
      https://www.gdpradvisor.co.uk/gdpr-countries
      Austria AT
      Belgium BE

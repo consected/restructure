@@ -280,10 +280,9 @@ class Settings
 
   DoNotDisplayErrorMessage = ''.freeze # Indicate an empty error message whenever an error message should not be displayed to the user
 
-  # GDPR and non-GDPR template references
-  template_id = 10 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms gdpr').id
-  GdprTermsOfUseTemplate = "message_templates|#{template_id}|gdpr".freeze
+  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
+  DefaultTermsOfUseTemplate = 'ui new user registration terms default'
 
-  template_id = 9 #Admin::MessageTemplate.find_by(name: 'ui new user registration terms default').id
-  DefaultTermsOfUseTemplate = "message_templates|#{template_id}|default".freeze
+  # see also, app/assets/javascripts/app/_fpa_loaded_registrations.js GDPR_COUNTRY_CODES
+  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LU MT NL PL PT RO SK SI ES SW GB].freeze
 end
