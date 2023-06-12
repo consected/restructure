@@ -5,9 +5,8 @@ module Seeds
 
     NEW_USER_DEFAULT_TEMPLATE = 'ui new user registration terms default'
     NEW_USER_GDPR_TEMPLATE = 'ui new user registration terms gdpr'
-    UPDATE_USER_DEFAULT_TEMPLATE = 'ui new user registration terms default'
-    UPDATE_USER_GDPR_TEMPLATE = 'ui new user registration terms gdpr'
-    NEW_USER_DEFAULT_TEMPLATE = 'ui new user registration terms default'
+    UPDATE_USER_DEFAULT_TEMPLATE = 'ui update user registration terms default'
+    UPDATE_USER_GDPR_TEMPLATE = 'ui update user registration terms gdpr'
     TERMS_OF_USE_GDPR = 'terms_of_use_gdpr'
     TERMS_OF_USE_NON_GDPR = 'terms_of_use_non_gdpr'
 
