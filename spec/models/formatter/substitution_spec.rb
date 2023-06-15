@@ -59,12 +59,14 @@ RSpec.describe Formatter::Substitution, type: :model do
     @al_def.extra_log_types = <<~END_DEF
       _constants:
         replace_me: super special
+        program_name: LC2Test
+        program_id: LC2Test
 
       new_step:
         label: New Step
         caption_before:
           all_fields: show before all fields
-          select_result: 'has a caption before select_result with a {{constants.replace_me}} substitution made'
+          select_result: 'has a caption before select_result with a {{constants.replace_me}} substitution made. Program {{constants.program_name}} - {{constants.program_id}}'
 
     END_DEF
 
@@ -84,7 +86,7 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(@activity_log.versioned_definition.options_constants[:replace_me]).to eq 'super special'
 
     caption = @activity_log.extra_log_type_config.caption_before[:select_result][:caption]
-    expected_text = '<p>has a caption before select_result with a super special substitution made</p>'
+    expected_text = '<p>has a caption before select_result with a super special substitution made. Program Lc2 Test - LC2Test</p>'
 
     res = Formatter::Substitution.substitute(caption, data: @activity_log, tag_subs: nil)
 

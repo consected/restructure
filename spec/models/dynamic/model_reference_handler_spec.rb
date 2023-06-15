@@ -775,16 +775,23 @@ RSpec.describe 'Model reference implementation', type: :model do
 
     it 'evaluates rules to show references' do
       # puts @dynamic_model.resource_name
-      setup_access :player_contacts
+      setup_access :player_contacts, user: @user
 
       @player_contact.current_user = @user
+
+      pc_count = @player_contact.master.player_contacts.count
+      expect(pc_count).to eq 3
 
       dm = @dynamic_model.implementation_class.new(master: @player_contact.master)
       dm.save!
 
       ModelReference.create_from_master_with(dm.master, @player_contact)
 
-      expect(dm.model_references.length).to be > 0
+      dm.reset_model_references
+      # The player_contacts associated with this master record do not all appear in model references.
+      # Only the last one that was explicitly added to the model references for this master record
+      # will be returned.
+      expect(dm.model_references.length).to eq 1
     end
   end
 

@@ -37,7 +37,7 @@
     re = Settings::PasswordConfig[:regex]
     %>
     <div class="form-group-non">
-      <%= f.label 'enter new password'  %><br />
+      <%= f.label :password, 'Enter new password' %><br />
       <% if re.present? %>
       <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: re, required: true, title: 'not complex enough' %>
       <span id="helpBlock2" class="help-block"><%=Settings::PasswordConfig[:regex_requirements]%></span>

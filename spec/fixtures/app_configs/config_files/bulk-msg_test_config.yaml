@@ -857,7 +857,7 @@ app_type:
                     all:
                       this:
                         opted_out_at:
-                          condition: NOT NULL
+                          condition: IS NOT NULL
                   with:
                     sub_process_name: Opt Out
                     protocol_event_name: Text

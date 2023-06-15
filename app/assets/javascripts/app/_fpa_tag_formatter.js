@@ -46,8 +46,10 @@ _fpa.tag_formatter = class {
       "date",
       "date_time",
       "date_time_with_zone",
+      "date_time_show_zone",
       "time",
       "time_with_zone",
+      "time_show_zone",
       "time_sec",
       "dicom_datetime",
       "dicom_date",
@@ -184,6 +186,18 @@ _fpa.tag_formatter = class {
     return orig_val;
   }
 
+  // Date and time only including hours:minutes and timezone of displayed time
+  // TODO: this does not return the timezone
+  date_time_show_zone(_res, orig_val) {
+    let dtf = UserPreferences.date_time_format();
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+
+    return orig_val;
+  }
+
   // Time only including hours: minutes
   time(_res, orig_val) {
     let dtf = UserPreferences.time_format();
@@ -197,6 +211,17 @@ _fpa.tag_formatter = class {
   // Time only including hours:minutes and timezone of displayed time
   // TODO: this does not return the timezone
   time_with_zone(_res, orig_val) {
+    let dtf = UserPreferences.time_format();
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+    return time;
+  }
+
+  // Time only including hours:minutes and timezone of displayed time
+  // TODO: this does not return the timezone
+  time_show_zone(_res, orig_val) {
     let dtf = UserPreferences.time_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
@@ -431,7 +456,7 @@ _fpa.tag_formatter = class {
             res = res.toISOString();
           }
           res = res.split('T')[0].replace(/[\:\-T]/g, '');
-        } else if (op == 'time' || op == 'time_with_zone') {
+        } else if (op == 'time' || op == 'time_show_zone') {
           console.log(res)
           let dtf = UserPreferences.time_format();
           if (dtf) {
@@ -451,7 +476,7 @@ _fpa.tag_formatter = class {
             let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
             res = (d.isValid) ? d.toFormat(dtf) : res;
           }
-        } else if (op == 'date_time' || op == 'date_time_with_zone') {
+        } else if (op == 'date_time' || op == 'date_time_show_zone') {
           let dtf = UserPreferences.date_time_format();
           if (dtf) {
             let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();

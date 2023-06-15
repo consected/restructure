@@ -414,12 +414,19 @@ module Dynamic
       return unless option_configs && configurations
 
       frequency = configurations.dig(:batch_trigger, :frequency)
-      if frequency.blank?
+      run_at = configurations.dig(:batch_trigger, :run_at)
+      if frequency.blank? && run_at.blank?
         RecurringBatchTask.unschedule_task self
+      elsif frequency == 'once'
+        RecurringBatchTask.schedule_task self,
+                                         { dynamic_def: to_global_id.to_s },
+                                         run_every: 10_000.years,
+                                         run_at: DateTime.now + 10.seconds
       else
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
-                                         run_every: FieldDefaults.duration(frequency)
+                                         run_every: FieldDefaults.duration(frequency),
+                                         run_at: run_at
 
       end
     end
@@ -486,7 +493,7 @@ module Dynamic
     def implementation_class
       full_implementation_class_name.ns_constantize
     rescue StandardError => e
-      msg = "Failed to get the implementation_class for #{full_implementation_class_name}: #{e}"
+      msg = "Failed to get the implementation_class for #{full_implementation_class_name} in #{self.class} #{self&.id} : #{e}"
       Rails.logger.warn msg
       Rails.logger.warn e.backtrace.join("\n")
       raise e, msg
