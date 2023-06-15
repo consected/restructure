@@ -20,7 +20,7 @@ If you find a bug, please add an issue with details of how to reproduce it. If y
 
 Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the _Football Players Health Study_.
 
-Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future development themes) for the themes we have in mind.
+Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future-development-themes) for the themes we have in mind.
 
 ## Features
 
