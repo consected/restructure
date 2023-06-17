@@ -12,6 +12,15 @@ describe User do
 
   subject { @user }
 
+  #
+  # Ensure the user instance is clean (including instance variables containing operational state)
+  # so that a series of tests can be run in a single example block
+  def reset_expiration_user
+    @user = User.find(@user.id)
+    @user.otp_required_for_login = false
+    @user
+  end
+
   describe 'associations' do
     it { is_expected.to have_one(:user_preference).inverse_of(:user).autosave(true) }
   end
@@ -171,6 +180,7 @@ describe User do
   end
 
   it 'sets a password expiration reminder if the password is reset or changed' do
+    Delayed::Worker.delay_jobs = false
     Messaging::MessageNotification.delete_all
     expect(Messaging::MessageNotification.layout_template(Users::Reminders.password_expiration_defaults[:layout])).to be_a Admin::MessageTemplate
 
@@ -191,29 +201,46 @@ describe User do
     end
 
     @user.save!
+    reset_expiration_user
 
     expect(User.expire_password_after).to eq Settings::PasswordAgeLimit
     expect(User.remind_days_before).to eq 15
     expect(User.remind_repeat_days).to eq 4
 
-    orig_count = Messaging::MessageNotification.count
+    message_count = Messaging::MessageNotification.count
     expect(Messaging::MessageNotification.first.user).to eq @user
     expect(Messaging::MessageNotification.first.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
+    # The content of the email should be generated to include the actual time remaining for this user's password
+    expect(Messaging::MessageNotification.first.generated_content).to include 'Your password will expire in the next 3 days.'
 
     @user.password = 'Some new password that needs notification 2'
     @user.save!
 
-    expect(Messaging::MessageNotification.count).to eq(orig_count + 1)
+    reset_expiration_user
+
+    # A new job was added and processed, leading to a new notification record being added
+    expect(Messaging::MessageNotification.count).to eq(message_count + 1)
     expect(Messaging::MessageNotification.last.user).to eq @user
+    expect(@user.expires_in).to eq 3
     expect(Messaging::MessageNotification.last.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
+    # The content of the email should be generated to include the actual time remaining for this user's password
+    expect(Messaging::MessageNotification.last.generated_content).to include 'Your password will expire in the next 3 days.'
 
+    # Now reset the method that we used to test the expiration back to the original setup. This means that
+    # the user will no longer have a password that is about to expire.
+    # When we save the new password a new job will still be set to send in the future, but the message will not be created
     @user.password = 'some new password that needs notification 2'
-
     @user.class.send :alias_method, :password_updated_at, :orig_password_updated_at
 
+    Delayed::Worker.delay_jobs = true
     @user.save!
-    # No new notification should have been set
-    expect(Messaging::MessageNotification.count).to eq(orig_count + 1)
+    Delayed::Worker.delay_jobs = false
+    # A new notification will have been set to send in the future (as a new job)
+    expect(Delayed::Job.count).to eq 1
+    # No new message has been created yet, since it is not created until the job is processed, which is way in the future
+    expect(Messaging::MessageNotification.count).to eq(message_count + 1)
+  ensure
+    Delayed::Worker.delay_jobs = false
   end
 
   after :all do

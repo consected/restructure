@@ -18,7 +18,7 @@ module Seeds
 
         {
           name: 'server password expiration reminder',
-          template: "<h2>Your password will expire in the next #{Settings::PasswordReminderDays} days.</h2><p>Login to <b>#{Settings::EnvironmentName}</b> to change your password and avoid being locked out of your account.</p>",
+          template: "<h2>Your password will expire in the next {{current_user_password_expires_in}} days.</h2><p>Login to <b>#{Settings::EnvironmentName}</b> to change your password and avoid being locked out of your account.</p>",
           template_type: 'content',
           message_type: 'email'
         },

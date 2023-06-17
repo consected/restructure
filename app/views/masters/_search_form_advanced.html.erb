@@ -23,7 +23,7 @@
         <%= f.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
+        <%= f.label :middle_name, 'Middle', 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
         <%= f.text_field :middle_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
@@ -74,7 +74,7 @@
         <%= f.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
+        <%= f.label :middle_name, 'Middle', 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
         <%= f.text_field :middle_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
@@ -113,7 +113,7 @@
   <div class="row">
     <%= f_main.fields_for :addresses, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
-        <%= f.label :street_address, 'data-add-icon' => 'info-sign', title: 'search for street address starting with this value' %>
+        <%= f.label :street, 'Street address', 'data-add-icon' => 'info-sign', title: 'search for street address starting with this value' %>
         <%= f.text_field :street, class: 'form-control' %>
       </div>
 
@@ -133,7 +133,7 @@
 
     <%= f_main.fields_for :player_contacts, child_index: 0 do |f| %>
       <div class="form-group col-sm-3">
-          <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
+          <%= f.label :data, 'Phone or Email', 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
           <%= f.text_field :data, class: 'form-control' %>
       </div>
     <% end %>
@@ -165,26 +165,26 @@
     <div class="row">
     <%= f_main.fields_for :trackers, child_index: 0 do |f| %>
       <div class="form-group col-sm-3  tracker-search-field">
-        <%= f.label "Protocol / Category" %>
+        <%= f.label :protocol_id, "Protocol / Category" %>
         <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label 'has current status + method', class: 'nowrap', 'data-add-icon' => 'info-sign', title: 'The status + method is the current tracker item in the selected protocol' %>
+          <%= f.label :sub_process_id, 'has current status + method', class: 'nowrap', 'data-add-icon' => 'info-sign', title: 'The status + method is the current tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field">
-          <%= f.label 'has method', style: "visibility: hidden;"%>
+          <%= f.label :protocol_event_id, 'has method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
 
     <% end %>
     <%= f_main.fields_for :tracker_histories, child_index: 0 do |f| %>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label 'current or previous status + method', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method appears at any time in the tracker item in the selected protocol' %>
+          <%= f.label :sub_process_id, 'current or previous status + method', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method appears at any time in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right">
-          <%= f.label 'had method', style: "visibility: hidden;"%>
+          <%= f.label :protocol_event_id, 'had method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
@@ -201,11 +201,11 @@
     <% end %>
     <%= f_main.fields_for :pro_infos, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
-        <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
+        <%= f.label :more_than_career_years, 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::AgePattern   %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
+        <%= f.label :less_than_career_years, 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :less_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::AgePattern   %>
       </div>
     <% end %>
@@ -216,28 +216,28 @@
         </div>
     <%= f_main.fields_for :not_trackers, child_index: 0 do |f| %>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label 'Not current status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method is not the current tracker item in the selected protocol' %>
+          <%= f.label :sub_process_id, 'Not current status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method is not the current tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tsf-current-event-not">
-          <%= f.label 'not method', style: "visibility: hidden;"%>
+          <%= f.label :protocol_event_id, 'not method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
       </div>
 
     <% end %>
     <%= f_main.fields_for :not_tracker_histories, child_index: 0 do |f| %>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label 'Never had status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method never appeared in the tracker item in the selected protocol' %>
+          <%= f.label :sub_process_id, 'Never had status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method never appeared in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right tsf-any-event-not">
-          <%= f.label 'never method', style: "visibility: hidden;"%>
+          <%= f.label :protocol_event_id, 'never method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
 
       <div class="form-group col-sm-2 col-sm-offset-1 text-right">
-        <%= label :player_info, "Player Tags" %>
+        <%= label 'master_player_infos_item_flags_attributes_0', 'item_flag_name_id', "Player Tags" %>
       </div>
 
       <div class="form-group col-sm-3">

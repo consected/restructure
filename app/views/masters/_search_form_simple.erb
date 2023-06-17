@@ -34,7 +34,7 @@
         <%= pif.text_field :college, class: 'form-control simple-college-input typeahead', 'data-next-field' => '#master_general_infos_attributes_0_contact_data'  %>
       </div>
       <div class="form-group col-sm-3">
-        <%= pif.label "email / phone", 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
+        <%= pif.label :contact_data, "Email / Phone", 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
         <%= pif.text_field :contact_data, class: 'form-control'  %>
       </div>
       <div class="col-sm-1 text-right">

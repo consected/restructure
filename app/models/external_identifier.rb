@@ -7,8 +7,9 @@ class ExternalIdentifier < ActiveRecord::Base
   include Dynamic::DefGenerator
   include AdminHandler
 
-  DefaultRange = (1..9_999_999_999).freeze
+  DefaultRange = (1..9_999_999_999)
   ReportItemType = 'External ID Usage'
+  ReportItemSearchType = 'External ID Search'
 
   validates :name, presence: { scope: :active, message: "can't be blank" }
   validates :label, presence: { scope: :active, message: "can't be blank" }
@@ -102,10 +103,10 @@ class ExternalIdentifier < ActiveRecord::Base
   #
   # Lookup the external identifier report based on its type
   # @param [String] rep_type - one of the possible external ID report types
+  # @param [String] item_type - optional item_type to find
   # @return [Report | nil]
-  def usage_report(rep_type)
+  def usage_report(rep_type, item_type = ReportItemType)
     rep_name = usage_report_name(rep_type)
-    item_type = ReportItemType
     short_name = Report.gen_short_name(rep_name)
     arn = Report.alt_resource_name(item_type, short_name)
     Report.active.find_by_alt_resource_name(arn, true)
@@ -176,28 +177,28 @@ class ExternalIdentifier < ActiveRecord::Base
     if enabled? && !failed
       begin
         definition = self
-        definition_id = self.id
-        def_table_name = self.name
+        definition_id = id
+        def_table_name = name
         self.class.definition_cache[definition_id] = self
 
-        if prevent_regenerate_model
+        got_model = prevent_regenerate_model
+        if got_model
           logger.info "Already defined class #{model_class_name}."
-          # Refresh the definition in the implementation class
-          # implementation_class.definition = definition
+          # Re-add the model to the list to pick up new extra log types
+          add_model_to_list got_model
           return
         end
 
         # Main implementation class
         a_new_class = Class.new(Dynamic::ExternalIdentifierBase) do
-          
           class << self
             attr_accessor :definition_id, :def_table_name
-            def definition
-              ExternalIdentifier.definition_cache[definition_id]              
-            end
 
+            def definition
+              ExternalIdentifier.definition_cache[definition_id]
+            end
           end
-          
+
           self.definition_id = definition_id
           # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
           self.table_name = def_table_name
@@ -336,7 +337,7 @@ class ExternalIdentifier < ActiveRecord::Base
                      sql: sql
     end
 
-    r = usage_report('Search')
+    r = usage_report('Search', ReportItemSearchType)
     unless r
       sql = <<~END_SQL
         select * from #{name} where #{external_id_attribute} = :#{external_id_attribute}
@@ -345,12 +346,13 @@ class ExternalIdentifier < ActiveRecord::Base
       sa = <<~END_SA
         #{external_id_attribute}:
           number:
+            label: ID
             all: true
             multiple: single
       END_SA
 
       Report.create! name: usage_report_name('Search'),
-                     item_type: ReportItemType,
+                     item_type: ReportItemSearchType,
                      report_type: 'search',
                      auto: false,
                      searchable: true,

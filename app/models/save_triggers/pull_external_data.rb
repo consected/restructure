@@ -20,6 +20,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
         response_code_field = config[:response_code_field]
         data_field_format = config[:data_field_format]
         local_data_name = config[:local_data]
+        success_if = config[:success_if]
         vals = {}
 
         # We calculate the conditional if inside each item, rather than relying
@@ -31,6 +32,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
         @this_config = config
         data = run_request
+        orig_data = data
 
         if data_field
           data = data&.to_json if data_field_format == 'json'
@@ -39,12 +41,29 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
         vals[response_code_field] = response_code if response_code_field
         if local_data_name
-          @item.save_trigger_results[local_data_name] = data
+          @item.save_trigger_results[local_data_name] = orig_data
           @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
         end
 
+        # We calculate the conditional if inside each item, rather than relying
+        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
+        success_if_res = nil
+        if success_if
+          ca = ConditionalActions.new success_if, @item
+          success_if_res = !!ca.calc_action_if
+          @item.save_trigger_results["#{local_data_name}_success_if_res"] = success_if_res if local_data_name
+        end
+
         uri = url_from_config.split('?').first
-        Rails.logger.info "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code}"
+        logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
+                 "&& success_if_res #{success_if_res}"
+        if response_code == 200 && success_if_res != false
+          Rails.logger.info logmsg
+        else
+          Rails.logger.warn logmsg
+        end
+
+        next unless vals.present?
 
         # Retain the flags so that the #update! doesn't change
         # what we need to report through the API

@@ -36,16 +36,20 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
                                      resource_name: :create_master, current_admin: @admin, user: @user
 
-    ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+    ac = Admin::AppConfiguration.active.where(app_type: @user.app_type, name: 'create master with').first
 
     if ac
       ac.value = 'player_info'
       ac.current_admin = @admin
+      ac.updated_at = DateTime.now
       ac.save!
     else
       Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info',
                                       current_admin: @admin
     end
+
+    bp = player_list.find { |p| p[:college].blank? }
+    raise "Player List college is blank: #{bp}" if bp
 
     setup_access :addresses
     setup_access :addresses, user: @user
@@ -211,8 +215,9 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
       f.send_keys(keyed)
       sleep 1
 
+      have_css('.tt-suggestion')
       h = '.tt-suggestion .tt-highlight'
-      expect(page).to have_css(h)
+      expect(page).to have_css(h), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
       expect(page.all(h).first.text.downcase).to eq(keyed)
       page.all(h).first.click
 
@@ -284,15 +289,15 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     end
 
     dd = player[:death_date]
-    if dd
-      b = all ".player-info-item a[title='edit']"
-      b.first.click
-      edit_date('#player_info_death_date', 'form.edit_player_info', dd.month, dd.day, dd.year)
+    return unless dd
 
-      expect(page).to have_css('li.list-group-item.player-info-death_date')
-      t = find('li.list-group-item.player-info-death_date strong').text
-      expect(t).to match(%r{0?#{dd.month}/0?#{dd.day}/#{dd.year}})
-    end
+    b = all ".player-info-item a[title='edit']"
+    b.first.click
+    edit_date('#player_info_death_date', 'form.edit_player_info', dd.month, dd.day, dd.year)
+
+    expect(page).to have_css('li.list-group-item.player-info-death_date')
+    t = find('li.list-group-item.player-info-death_date strong').text
+    expect(t).to match(%r{0?#{dd.month}/0?#{dd.day}/#{dd.year}})
   end
 
   before :each do

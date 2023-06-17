@@ -6,12 +6,12 @@
       <div id="report-admin-search-attr-add-block" class="collapse well">
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">name</div>
-          <div class="report-admin-sb-field-block"><input id="search_attrs_name" data-attr-el="name" /></div>
+          <div class="report-admin-sb-field-block"><input id="search_attrs_name" data-attr-el="name" required/></div>
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">type</div>
           <div class="report-admin-sb-field-block">
-            <select id="search_attrs_type" data-attr-el="type">
+            <select id="search_attrs_type" data-attr-el="type" required>
               <option value="number">number</option>
               <option value="text">text</option>
               <option value="date">date</option>
@@ -74,7 +74,7 @@
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">single or multiple values</div>
           <div class="report-admin-sb-field-block">
-            <select id="search_attrs_multi" data-attr-el="multiple">
+            <select id="search_attrs_multi" data-attr-el="multiple" required>
               <option value="single">single</option>
               <option value="multiple">multiple (in)</option>
               <option value="multiple-regex">multiple (regex)</option>
