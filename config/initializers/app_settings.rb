@@ -280,8 +280,8 @@ class Settings
 
   DoNotDisplayErrorMessage = ''.freeze # Indicate an empty error message whenever an error message should not be displayed to the user
 
-  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
-  DefaultTermsOfUseTemplate = 'ui new user registration terms default'
+  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'.freeze
+  DefaultTermsOfUseTemplate = 'ui new user registration terms default'.freeze
 
   # see also, app/assets/javascripts/app/_fpa_loaded_registrations.js GDPR_COUNTRY_CODES
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
