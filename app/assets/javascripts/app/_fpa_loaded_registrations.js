@@ -23,19 +23,19 @@ _fpa.loaded.registrations = () => {
      Lithuania LT
      Luxembourg LU
      Malta MT
-     The Netherlands NL
+     Netherlands NL
      Poland PL
      Portugal PT
      Romania RO
      Slovakia SK
      Slovenia SI
      Spain ES
-     Sweden SW
+     Sweden SE
      United Kingdom GR
      */
 
     const GDPR_COUNTRY_CODES = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
-        'IE', 'IT', 'LV', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SW', 'GB'];
+        'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB'];
 
     const isGdprCountry = (countryCode) => {
         return GDPR_COUNTRY_CODES.includes(countryCode);

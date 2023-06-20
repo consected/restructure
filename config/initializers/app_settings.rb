@@ -284,5 +284,5 @@ class Settings
   DefaultTermsOfUseTemplate = 'ui new user registration terms default'
 
   # see also, app/assets/javascripts/app/_fpa_loaded_registrations.js GDPR_COUNTRY_CODES
-  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LU MT NL PL PT RO SK SI ES SW GB].freeze
+  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 end
