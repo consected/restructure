@@ -55,6 +55,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     expect(@d_user.active_for_authentication?).to be false
 
     @user, @good_password = create_user(rand(100_000_000..1_099_999_999))
+
     @good_email = @user.email
 
     @user.current_admin = @admin
@@ -171,6 +172,70 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     expect(page).to have_css '.flash .alert', text: fail_message
+  end
+
+  it 'should be able to see non-gdpr terms of use' do
+    change_setting('AllowUsersToRegister', true)
+    Rails.application.reload_routes!
+    Rails.application.routes_reloader.reload!
+
+    visit '/users/sign_up'
+    within '#new_user' do
+      select 'United Kingdom', from: 'Country'
+    end
+    expect(page).to have_selector('#terms-of-use-gdpr', visible: true)
+  end
+
+  describe 'user should be allowed to self-register' do
+    describe 'terms of use' do
+      gdpr_countries = %w[Austria
+                          Belgium
+                          Bulgaria
+                          Croatia
+                          Cyprus
+                          Czechia
+                          Denmark
+                          Estonia
+                          Finland
+                          France
+                          Germany
+                          Greece
+                          Hungary
+                          Ireland
+                          Italy
+                          Latvia
+                          Lithuania
+                          Luxembourg
+                          Malta
+                          Netherlands
+                          Poland
+                          Portugal
+                          Romania
+                          Slovakia
+                          Slovenia
+                          Spain
+                          Sweden
+                          United\ Kingdom].each do |country|
+        context "when user is from the grdp country: #{country}" do
+          it 'should be able to see gdpr terms of use' do
+            visit '/users/sign_up'
+            within '#new_user' do
+              select country, from: 'Country'
+            end
+            expect(page).to have_selector('#terms-of-use-gdpr', visible: true)
+          end
+        end
+      end
+      context 'when user is from a no gdpr country' do
+        it 'should be able to see non-gdpr terms of use: United States' do
+          visit '/users/sign_up'
+          within '#new_user' do
+            select 'United States', from: 'Country'
+          end
+          expect(page).to have_selector('#terms-of-use-default', visible: true)
+        end
+      end
+    end
   end
 
   after(:all) do
