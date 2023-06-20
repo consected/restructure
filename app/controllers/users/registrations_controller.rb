@@ -42,13 +42,17 @@ module Users
     end
 
     def terms_of_use_accepted_gdpr
-      @gdpr_template_id ||= Admin::MessageTemplate.find_by(name: Settings::GdprTermsOfUseTemplate).id
-      "message_templates|#{@gdpr_template_id}|gdpr"
+      return @terms_of_use_gdpr if @terms_of_use_gdpr
+
+      gdpr_template_id = Admin::MessageTemplate.find_by(name: Settings::GdprTermsOfUseTemplate).id
+      @terms_of_use_gdpr = "message_templates|#{gdpr_template_id}|gdpr"
     end
 
     def terms_of_use_accepted_default
-      @default_template_id ||= Admin::MessageTemplate.find_by(name: Settings::DefaultTermsOfUseTemplate).id
-      "message_templates|#{@default_template_id}|default"
+      return @terms_of_use_default if @terms_of_use_default
+
+      default_template_id = Admin::MessageTemplate.find_by(name: Settings::DefaultTermsOfUseTemplate).id
+      @terms_of_use_default = "message_templates|#{default_template_id}|default"
     end
 
     # @param [Object] resource
@@ -56,8 +60,8 @@ module Users
     def terms_of_use_accepted(resource)
       return unless resource.is_a?(User)
 
-      return if resource.country_code.blank?
-      return unless resource.terms_of_use.to_i == 1 # terms of use was checked
+      return if resource.country_code.blank? # don't continue to set the value unless the country is selected
+      return unless resource.terms_of_use.to_i == 1 # unless terms of use was checked
 
       if gdpr_country?(resource.country_code)
         terms_of_use_accepted_gdpr
