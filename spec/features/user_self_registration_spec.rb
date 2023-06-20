@@ -174,18 +174,6 @@ describe 'user sign in process for users that can self register', js: true, driv
     expect(page).to have_css '.flash .alert', text: fail_message
   end
 
-  it 'should be able to see non-gdpr terms of use' do
-    change_setting('AllowUsersToRegister', true)
-    Rails.application.reload_routes!
-    Rails.application.routes_reloader.reload!
-
-    visit '/users/sign_up'
-    within '#new_user' do
-      select 'United Kingdom', from: 'Country'
-    end
-    expect(page).to have_selector('#terms-of-use-gdpr', visible: true)
-  end
-
   describe 'user should be allowed to self-register' do
     describe 'terms of use' do
       gdpr_countries = %w[Austria
@@ -226,7 +214,7 @@ describe 'user sign in process for users that can self register', js: true, driv
           end
         end
       end
-      context 'when user is from a no gdpr country' do
+      context 'when user is from a non-gdpr country' do
         it 'should be able to see non-gdpr terms of use: United States' do
           visit '/users/sign_up'
           within '#new_user' do
