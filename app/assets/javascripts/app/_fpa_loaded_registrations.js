@@ -34,8 +34,7 @@ _fpa.loaded.registrations = () => {
      United Kingdom GR
      */
 
-    const GDPR_COUNTRY_CODES = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
-        'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB'];
+    const GDPR_COUNTRY_CODES = _fpa.gdpr_county_codes;
 
     const isGdprCountry = (countryCode) => {
         return GDPR_COUNTRY_CODES.includes(countryCode);
