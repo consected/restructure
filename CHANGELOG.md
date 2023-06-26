@@ -18,6 +18,8 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] user self-registration checkbox to agree to GDPR and non-GDPR terms of use
+
 ### Transferred from Harvard @8.2.43 - 2023-06-15
 
 #### [8.2.43] - 2023-06-15
