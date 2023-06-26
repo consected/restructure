@@ -568,10 +568,11 @@ class ActivityLog < ActiveRecord::Base
         definition_id = id
         self.class.definition_cache[definition_id] = self
 
-        if prevent_regenerate_model
+        got_model = prevent_regenerate_model
+        if got_model
           logger.info "Already defined class #{model_class_name}."
           # Re-add the model to the list to pick up new extra log types
-          add_model_to_list implementation_class
+          add_model_to_list got_model
           return
         end
 

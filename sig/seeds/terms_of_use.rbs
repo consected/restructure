@@ -1,0 +1,19 @@
+module Seeds
+  module TermsOfUse
+
+    NEW_USER_DEFAULT_TEMPLATE: string
+    NEW_USER_GDPR_TEMPLATE: string
+    TERMS_OF_USE_GDPR: string
+    TERMS_OF_USE_NON_GDPR: string
+    UPDATE_USER_DEFAULT_TEMPLATE: string
+    UPDATE_USER_GDPR_TEMPLATE: string
+
+    def self.add_values: -> void
+
+    def self.create_templates: -> void
+
+    def self.do_last: -> bool
+
+    def self.setup: -> void
+  end
+end

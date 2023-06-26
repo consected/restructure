@@ -162,10 +162,11 @@ class DynamicModel < ActiveRecord::Base
         def_table_name = table_name
         self.class.definition_cache[definition_id] = self
 
-        if prevent_regenerate_model
+        got_model = prevent_regenerate_model
+        if got_model
           logger.info "Already defined class #{model_class_name}."
-          # Refresh the definition in the implementation class
-          # implementation_class.definition = definition
+          # Re-add the model to the list to pick up new extra log types
+          add_model_to_list got_model
           return
         end
 

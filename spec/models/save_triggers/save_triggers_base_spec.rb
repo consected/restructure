@@ -681,4 +681,158 @@ RSpec.describe SaveTriggers::SaveTriggersBase, type: :model do
       expect(al_def.task_schedule).to be_nil
     end
   end
+
+  describe 'batch_trigger run once' do
+    before :each do
+      create_user
+      setup_access :player_contacts
+      let_user_create_player_contacts
+      create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @player_contact.master.current_user = @user
+      @master = @player_contact.master
+      expect(@master).not_to be nil
+
+      # Set up additional steps in the activity log definition
+      # Find the actual current version of the definition
+      al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+
+      ActivityLog.active.where(item_type: al_def.item_type).where.not(id: al_def.id).each do |oal|
+        oal.current_admin = @admin
+        oal.disable!
+      end
+
+      config = <<~ENDDEF
+        _configurations:
+          batch_trigger:
+            frequency: 'once'
+
+        batch_trigger_test_1:
+          label: Batch Trigger Test 1
+          fields:
+            - select_call_direction
+            - select_who
+
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  force_not_editable_save: true
+                  with:
+                    select_who: 'batch updated value'
+
+      ENDDEF
+
+      al_def.extra_log_types = config
+
+      al_def.current_admin = @admin
+      al_def.force_regenerate = true
+      al_def.updated_at = DateTime.now # force a save
+      Delayed::Worker.delay_jobs = true
+      al_def.save!
+      Delayed::Worker.delay_jobs = false
+      ::ActivityLog.refresh_outdated
+      al_def.reload
+      al_def.force_option_config_parse
+
+      unless al_def.option_configs_names == %i[batch_trigger_test_1 batch_trigger_test_2 batch_trigger_scheduled primary blank_log]
+        Application.refresh_dynamic_defs
+      end
+
+      setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__batch_trigger_test_1, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
+      expect(@user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_phone__batch_trigger_test_1)).to be_truthy
+      al_def.add_master_association
+
+      @al_def = al_def
+    end
+
+    it 'sets a frequency to run batch one time' do
+      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
+                                                                       select_who: 'user',
+                                                                       extra_log_type: 'batch_trigger_test_1')
+
+      expect(al.class.definition.configurations[:batch_trigger][:frequency]).to eq 'once'
+    end
+  end
+
+  describe 'batch_trigger run at' do
+    before :each do
+      create_user
+      setup_access :player_contacts
+      let_user_create_player_contacts
+      create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @player_contact.master.current_user = @user
+      @master = @player_contact.master
+      expect(@master).not_to be nil
+
+      # Set up additional steps in the activity log definition
+      # Find the actual current version of the definition
+      al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+
+      ActivityLog.active.where(item_type: al_def.item_type).where.not(id: al_def.id).each do |oal|
+        oal.current_admin = @admin
+        oal.disable!
+      end
+
+      config = <<~ENDDEF
+        _configurations:
+          batch_trigger:
+            frequency: '1 day'
+            run_at: '13:00'
+
+        batch_trigger_test_1:
+          label: Batch Trigger Test 1
+          fields:
+            - select_call_direction
+            - select_who
+
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  force_not_editable_save: true
+                  with:
+                    select_who: 'batch updated value'
+
+      ENDDEF
+
+      al_def.extra_log_types = config
+
+      al_def.current_admin = @admin
+      al_def.force_regenerate = true
+      al_def.updated_at = DateTime.now # force a save
+      Delayed::Worker.delay_jobs = true
+      al_def.save!
+      Delayed::Worker.delay_jobs = false
+      ::ActivityLog.refresh_outdated
+      al_def.reload
+      al_def.force_option_config_parse
+
+      unless al_def.option_configs_names == %i[batch_trigger_test_1 batch_trigger_test_2 batch_trigger_scheduled primary blank_log]
+        Application.refresh_dynamic_defs
+      end
+
+      setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__batch_trigger_test_1, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
+      expect(@user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_phone__batch_trigger_test_1)).to be_truthy
+      al_def.add_master_association
+
+      @al_def = al_def
+    end
+
+    it 'sets a frequency to run batch at a specific time' do
+      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
+                                                                       select_who: 'user',
+                                                                       extra_log_type: 'batch_trigger_test_1')
+
+      expect(al.class.definition.configurations[:batch_trigger][:frequency]).to eq '1 day'
+      expect(al.class.definition.configurations[:batch_trigger][:run_at]).to eq '13:00'
+    end
+  end
 end

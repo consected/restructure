@@ -1525,18 +1525,7 @@ _fpa.form_utils = {
       _fpa.form_utils.resize_labels(uc);
     }, 200);
 
-    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
-      .not('.added-open-nt')
-      .each(function () {
-        if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
-        // Protect against being in an editor
-        if ($(this).parents('.edit-as-custom').length) return;
-
-        $(this).attr('target', '_blank');
-        if ($(this).find('.glyphicon-new-window').length) return;
-        $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
-      })
-      .addClass('added-open-nt');
+    _fpa.form_utils.setup_open_in_tab();
 
     $('a[href$="#open-in-sidebar"]')
       .not('.added-open')
@@ -1593,6 +1582,21 @@ _fpa.form_utils = {
           .attr('data-target-force', 'true');
       })
       .addClass('added-open-er');
+  },
+
+  setup_open_in_tab: () => {
+    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
+        .not('.added-open-nt')
+        .each(function () {
+          if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+          // Protect against being in an editor
+          if ($(this).parents('.edit-as-custom').length) return;
+
+          $(this).attr('target', '_blank');
+          if ($(this).find('.glyphicon-new-window').length) return;
+          $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
+        })
+        .addClass('added-open-nt');
   },
 
   setup_open_tab_before_requests: function (block) {
@@ -2036,9 +2040,14 @@ _fpa.form_utils = {
     });
   },
 
+  // Set the Rails authenticity token from the meta element. If no block is specified
+  // set any hidden field item with class "set-auth-token" on the page. Alternatively,
+  // specify a Jquery block, for example to allow a form that is being dynamically generated
+  // but has not yet been attached to the DOM to be set up.
   set_auth_tokens: function (block) {
+    block = block || $('body');
     var csrf_token = $('head meta[name="csrf-token"]').attr('content');
-    $('input.set-auth-token[type="hidden"]').val(csrf_token);
+    block.find('input.set-auth-token[type="hidden"]').val(csrf_token);
   },
 
   set_image_classes: function (block) {
@@ -2103,7 +2112,10 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_sub_lists(block);
     _fpa.form_utils.apply_view_handlers(block);
     _fpa.form_utils.setup_secure_view_links(block);
-    _fpa.form_utils.set_auth_tokens(block);
+
+    // Set up all the form authenticity tokens on the page, even those outside the specified block.
+    _fpa.form_utils.set_auth_tokens();
+
     _fpa.form_utils.set_image_classes(block);
     _fpa.form_utils.setup_big_select_fields(block);
     _fpa.form_utils.setup_select_filtering(block);

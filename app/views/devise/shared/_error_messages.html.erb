@@ -1,3 +1,10 @@
+<%
+  # When the user forgets to check the terms of use, we should display an error indicating terms of use must be accepted;
+  # however, the terms_of_use_accepted validation messages should not be shown to the user.
+  # We need to keep validations in the model. Since the user sees the terms_of_use acceptance error,
+  # showing the terms_of_use_accepted errors is redundant and might be confusing to the user.
+  remove_empty_error(resource.errors)
+%>
 <% if resource.errors.any? %>
   <div id="error_explanation">
     <h2>

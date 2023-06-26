@@ -55,6 +55,8 @@ module CalcActions
     '<@' # This array field's elements are all found in the retrieved array field
   ].freeze
 
+  SimpleConditions = ['==', '=', '<', '>', '<>', '!=', '<=', '>=', '~*', '~'].freeze
+
   ReturnTypes = %w[return_value return_value_list return_result].freeze
 
   included do
@@ -462,7 +464,10 @@ module CalcActions
         elsif !in_instance
           # We failed to find the instance we need to continue.
           raise FphsException, "Instance not found for #{table}"
-        elsif expected_val.is_a?(Hash) && !expected_val.key?(:element)
+        elsif expected_val.is_a?(Hash) && !(
+          expected_val.key?(:element) ||
+          expected_val.key?(:condition) && table == :this
+        )
 
           if expected_val[:condition]
             assoc_name = ModelReference.record_type_to_assoc_sym(in_instance)
@@ -510,16 +515,14 @@ module CalcActions
           # Get the value
           this_val = attribute_from_instance(in_instance, field_name)
 
-          res &&= if expected_val.is_a? Array
-                    # Since we have expected value as an array, simply see if it includes the value we found
-                    expected_val.include?(this_val)
-                  elsif expected_val.is_a?(Hash) && expected_val[:element] && this_val.is_a?(Hash)
+          res &&= if expected_val.is_a?(Hash) && expected_val[:element] && this_val.is_a?(Hash)
                     element = expected_val[:element]
-                    el_parts = element.split('.')
-                    this_val.deep_stringify_keys.dig(*el_parts) == dynamic_value(expected_val[:value])
+                    test_value = traverse_element(this_val, element)
+                    eval_simple_condition(test_value, expected_val)
                   else
                     # Simply compare the expected value against the one we found
-                    this_val == dynamic_value(expected_val)
+                    eval_simple_condition(this_val, expected_val)
+                    # this_val == dynamic_value(expected_val)
                   end
 
           # Handle return value or result
@@ -836,6 +839,8 @@ module CalcActions
 
         @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{rightop}))"
         @extra_conditions << vv
+      elsif condition_type
+        raise FphsException, "calc_action condition '#{condition_type}' for #{table_name} and #{field_name} is not recognized"
       end
 
     end
@@ -1110,6 +1115,92 @@ module CalcActions
   def expected_value_requests_return?(type, condition)
     ret_type = "return_#{type}"
     condition == ret_type || condition.is_a?(Array) && condition.include?(ret_type)
+  end
+
+  #
+  # Traverse the value according to the *path*.
+  # @param [Hash|Array] value
+  # @param [String] element
+  # @return [String] <description>
+  def traverse_element(value, path)
+    return unless value
+
+    value_here = value
+    el_parts = path.split('.')
+    el_parts.each do |seg|
+      if value_here.is_a?(Hash)
+        value_here = value_here.stringify_keys[seg]
+      elsif value_here.is_a?(Array)
+        seg = 0 if seg == 'first'
+        seg = seg.to_i
+        value_here = value_here[seg]
+      end
+    end
+    value_here
+  end
+
+  # Evaluated simple conditions
+  def eval_simple_condition(test_val, expected_val)
+    if expected_val.is_a? Array
+      # Since we have expected value as an array, simply see if it includes the value we found
+      return expected_val.include?(test_val)
+    end
+
+    if expected_val.is_a?(Hash) || expected_val.is_a?(Array)
+      condition = expected_val[:condition] || '=='
+      exp_val = dynamic_value(expected_val[:value])
+      if condition.in?(SimpleConditions)
+        case condition
+        when '=', '=='
+          test_val == exp_val
+        when '<>'
+          test_val != exp_val
+        when '~'
+          test_val&.match(Regexp.new(exp_val))
+        when '~*'
+          test_val&.match(Regexp.new(exp_val, 'i'))
+        else
+          test_val&.send(condition, exp_val)
+        end
+
+      elsif condition.in?(UnaryConditions)
+        case condition
+        when 'IS NULL'
+          test_val.nil?
+        when 'IS NOT NULL'
+          !test_val.nil?
+        end
+      elsif condition.in?(ValidExtraConditionsArrays)
+        case condition
+        when '= ANY' # The value of this field (must be scalar) matches any value from the retrieved array field
+          exp_val&.in?(test_val || [])
+        when '= ANY REV' # Reverse the operator order
+          test_val&.in?(exp_val || [])
+        when '<> ANY' # The value of this field (must be scalar) must not match any value from the retrieved array field
+          !exp_val&.in?(test_val || [])
+        when '<> ANY REV' # Reverse the operator order
+          !test_val&.in?(exp_val || [])
+        when '= ARRAY_LENGTH' # The value of this field (must be integer) equals the length of the retrieved array field
+          test_val&.length == exp_val.to_i
+        when '<> ARRAY_LENGTH' # The value of this field (must be integer) must not equal length of the retrieved array field
+          test_val&.length != exp_val.to_i
+        when '= LENGTH' # The value of this field (must be integer) equals the length of the string (varchar or text) field
+          test_val&.length == exp_val.to_i
+        when '<> LENGTH' # The value of this field (must be integer) must not equal length of the string (varchar/text) field
+          test_val&.length != exp_val.to_i
+        when '&&' # There is an overlap, so any value of this field (an array) must be in the retrieved array field
+          ((test_val || []) & (exp_val || []))&.present?
+        when '@>' # This array field contains all of the elements of the retrieved array field
+          raise FphsException, '@> not implemented for this'
+        when '<@' # This array field's elements are all found in the retrieved array field
+          raise FphsException, '<@ not implemented for this'
+        end
+      else
+        raise FphsException, "calc_action this condition is not recognized: #{condition}"
+      end
+    else
+      test_val == dynamic_value(expected_val)
+    end
   end
 
   # Logging of results to aid debugging

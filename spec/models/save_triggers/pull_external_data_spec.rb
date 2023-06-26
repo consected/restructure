@@ -318,6 +318,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       this2: {
         data_field: 'notes',
         data_field_format: 'json',
+        local_data: 'post_response',
         method: 'post',
         if: {
           all: {
@@ -351,6 +352,17 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
               hCIQLink: 'https://consected.com'
             }
           ]
+        },
+        success_if: {
+          all: {
+            this: {
+              save_trigger_results: {
+                element: 'post_response.result.first.status',
+                condition: '= ANY REV',
+                value: ['updated', 'added']
+              }
+            }
+          }
         }
       }
     }
@@ -361,6 +373,9 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect(@al.notes).to be_present
     dnotes = JSON.parse(@al.notes)
     expect(dnotes['result'].first['status']).to eq 'updated'
+
+    expect(@al.save_trigger_results['post_response_http_response_code']).to eq 200
+    expect(@al.save_trigger_results['post_response_success_if_res']).to be true
   end
 
   it 'pulls json from a url and saves to a JSON field' do

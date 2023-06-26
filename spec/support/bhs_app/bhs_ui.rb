@@ -8,6 +8,8 @@ module BhsUi
   NewSubjectCreateButton = 'Create'
   SearchPlayer = 'Search BHS Player'
   SearchButton = 'search'
-  TabNames = ['details', 'external ids', 'records', 'bhs tracker'].freeze
-  DefaultTabs = ['details', 'records', 'bhs tracker'].freeze
+  # All tabs to be shown in a master record, based on there being no master Page Layout defined for the app
+  TabNames = ['details', 'external ids', 'extended info', 'bhs tracker'].freeze
+  # The tabs to be shown as expanded by default
+  DefaultTabs = ['details', 'bhs tracker'].freeze
 end

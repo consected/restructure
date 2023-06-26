@@ -55,6 +55,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     expect(@d_user.active_for_authentication?).to be false
 
     @user, @good_password = create_user(rand(100_000_000..1_099_999_999))
+
     @good_email = @user.email
 
     @user.current_admin = @admin
@@ -171,6 +172,115 @@ describe 'user sign in process for users that can self register', js: true, driv
     end
 
     expect(page).to have_css '.flash .alert', text: fail_message
+  end
+
+  describe 'user should be allowed to self-register' do
+    before { visit '/users/sign_up' }
+    subject { page }
+
+    it { is_expected.to have_select('Country') }
+
+    describe 'terms of use' do
+      gdpr_countries = %w[Austria
+                          Belgium
+                          Bulgaria
+                          Croatia
+                          Cyprus
+                          Czechia
+                          Denmark
+                          Estonia
+                          Finland
+                          France
+                          Germany
+                          Greece
+                          Hungary
+                          Ireland
+                          Italy
+                          Latvia
+                          Lithuania
+                          Luxembourg
+                          Malta
+                          Netherlands
+                          Poland
+                          Portugal
+                          Romania
+                          Slovakia
+                          Slovenia
+                          Spain
+                          Sweden
+                          United\ Kingdom].each do |country|
+        context "when the user selects a grdp country such as #{country}" do
+          before do
+            within '#new_user' do
+              select country, from: 'Country'
+            end
+          end
+          it { is_expected.to have_select('Country', selected: country) }
+          it { is_expected.to have_selector('#terms-of-use-gdpr', visible: true) }
+          it { is_expected.to have_selector('#terms-of-use-default', visible: false) }
+        end
+      end
+
+      context 'when the user selects a non-gdpr country such as United States' do
+        before do
+          within '#new_user' do
+            select 'United States', from: 'Country'
+          end
+        end
+        it { is_expected.to have_select('Country', selected: 'United States') }
+        it { is_expected.to have_selector('#terms-of-use-default', visible: true) }
+        it { is_expected.to have_selector('#terms-of-use-gdpr', visible: false) }
+      end
+
+      describe 'checking terms of use' do
+        context 'when the country is not selected' do
+          # country select should be unselected
+          it { is_expected.to have_select('Country', selected: '') }
+          # terms of use text
+          it { is_expected.to have_selector('#terms-of-use-default', visible: false) }
+          it { is_expected.to have_selector('#terms-of-use-gdpr', visible: false) }
+          # checkbox
+          it { is_expected.to have_selector('#user_terms_of_use', visible: false) }
+        end
+
+        context 'when the country is selected' do
+          before do
+            within '#new_user' do
+              select 'United States', from: 'Country'
+              check('user[terms_of_use]', allow_label_click: true)
+            end
+          end
+          # country select
+          it { is_expected.to have_select('Country', selected: 'United States') }
+          # checkbox
+          it { is_expected.to have_selector('#user_terms_of_use', visible: true) }
+          # checkbox should be checked
+          it { is_expected.to have_checked_field('user[terms_of_use]') }
+        end
+
+        context 'when the user changes the selected country from United States to United Kingdom' do
+          it 'is expected to have visible field "user[terms_of_use]" that is not disabled that is unchecked' do
+            within '#new_user' do
+              select 'United States', from: 'Country'
+              check('user[terms_of_use]', allow_label_click: true)
+            end
+
+            is_expected.to have_select('Country', selected: 'United States')
+            is_expected.to have_selector('#user_terms_of_use', visible: true)
+            is_expected.to have_checked_field('user[terms_of_use]')
+
+            within '#new_user' do
+              # the user changes the country
+              select 'United Kingdom', from: 'Country'
+            end
+            # country select
+            is_expected.to have_select('Country', selected: 'United Kingdom')
+            is_expected.to have_selector('#user_terms_of_use', visible: true)
+            is_expected.to have_unchecked_field('user[terms_of_use]')
+          end
+        end
+      end
+    end
   end
 
   after(:all) do

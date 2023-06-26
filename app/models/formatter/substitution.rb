@@ -270,6 +270,7 @@ module Formatter
         data[:current_user_app_type_id] = cu.app_type_id
         data[:current_user_app_type_name] = cu.app_type&.name
         data[:current_user_app_type_label] = cu.app_type&.label
+        data[:current_user_password_expires_in] = cu.expires_in
       end
 
       data
