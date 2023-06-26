@@ -8,10 +8,10 @@ class Settings
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = DefaultSettings::GlobalIdPrefix
 
-  StartYearRange = (1900..(Date.current.year)).freeze
-  EndYearRange = (1900..(Date.current.year)).freeze
-  AgeRange = (1..150).freeze
-  CareerYearsRange = (0..50).freeze
+  StartYearRange = (1900..(Date.current.year))
+  EndYearRange = (1900..(Date.current.year))
+  AgeRange = (1..150)
+  CareerYearsRange = (0..50)
 
   PositiveIntPattern = '\\d+'
   AgePattern = '\\d{1,3}'
@@ -279,10 +279,10 @@ class Settings
     DefaultCountrySelect
   ].freeze
 
-  DoNotDisplayErrorMessage = ''.freeze # Indicate an empty error message whenever an error message should not be displayed to the user
+  DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
 
-  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'.freeze
-  DefaultTermsOfUseTemplate = 'ui new user registration terms default'.freeze
+  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
+  DefaultTermsOfUseTemplate = 'ui new user registration terms default'
 
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 end

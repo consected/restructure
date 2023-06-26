@@ -21,6 +21,8 @@ module ControllerMacros
 
     # Set a default app_type to use to allow non-interactive tests to continue
     user.app_type = app_type
+    # Set as confirmed, to emulate the email confirmation required for self-registration of users
+    user.confirmed_at ||= Time.now
     user.save!
 
     # Save a new password, as required to handle temp passwords

@@ -233,7 +233,6 @@ describe 'user sign in process for users that can self register', js: true, driv
       end
 
       describe 'checking terms of use' do
-
         context 'when the country is not selected' do
           # country select should be unselected
           it { is_expected.to have_select('Country', selected: '') }
