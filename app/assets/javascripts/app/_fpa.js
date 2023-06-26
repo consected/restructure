@@ -860,7 +860,9 @@ _fpa = {
                 }
               }
             }
-            $('.view-template-created').removeClass('view-template-created');
+            window.setTimeout(function () {
+              $('.view-template-created').removeClass('view-template-created');
+            }, 1)
           });
         } else {
           var put_in_position = function (t, d) {
@@ -948,7 +950,9 @@ _fpa = {
             }
           }
         }
-        $('.view-template-created').removeClass('view-template-created');
+        window.setTimeout(function () {
+          $('.view-template-created').removeClass('view-template-created');
+        }, 1)
       })
       .on('ajax:error', function (e, xhr, status, error) {
         var block = $(this);
