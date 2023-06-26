@@ -10,8 +10,19 @@ module StandardAuthentication
 
   included do
     before_validation :setup_new_password, on: :create
-    validates_uniqueness_of :email, case_sensitive: false, allow_blank: false, if: :email_changed?
-    validates_format_of :email, with: Devise.email_regexp, allow_blank: false, if: :email_changed?
+    validates :email,
+              presence: true,
+              uniqueness: {
+                case_sensitive: false,
+                if: :email_changed?
+              },
+              format: {
+                with: Devise.email_regexp,
+                if: :email_changed?
+              },
+              length: {
+                maximum: 100
+              }
 
     validate :new_password_changed?, if: :password
     validate :no_matching_prev_passwords, if: :password

@@ -165,7 +165,9 @@ describe User do
                        password: 'AwDuHxX3LwhrfQyF',
                        current_admin: @registration_admin,
                        first_name: 'First',
-                       last_name: 'Last')
+                       last_name: 'Last',
+                       country_code: 'UK',
+                       terms_of_use_accepted: 'message_templates|99999|gdpr')
         end.to_not raise_error
       end
       it 'is expected to be created by an admin' do

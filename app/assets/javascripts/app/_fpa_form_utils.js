@@ -1525,18 +1525,7 @@ _fpa.form_utils = {
       _fpa.form_utils.resize_labels(uc);
     }, 200);
 
-    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
-      .not('.added-open-nt')
-      .each(function () {
-        if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
-        // Protect against being in an editor
-        if ($(this).parents('.edit-as-custom').length) return;
-
-        $(this).attr('target', '_blank');
-        if ($(this).find('.glyphicon-new-window').length) return;
-        $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
-      })
-      .addClass('added-open-nt');
+    _fpa.form_utils.setup_open_in_tab();
 
     $('a[href$="#open-in-sidebar"]')
       .not('.added-open')
@@ -1593,6 +1582,21 @@ _fpa.form_utils = {
           .attr('data-target-force', 'true');
       })
       .addClass('added-open-er');
+  },
+
+  setup_open_in_tab: () => {
+    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
+        .not('.added-open-nt')
+        .each(function () {
+          if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+          // Protect against being in an editor
+          if ($(this).parents('.edit-as-custom').length) return;
+
+          $(this).attr('target', '_blank');
+          if ($(this).find('.glyphicon-new-window').length) return;
+          $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
+        })
+        .addClass('added-open-nt');
   },
 
   setup_open_tab_before_requests: function (block) {
