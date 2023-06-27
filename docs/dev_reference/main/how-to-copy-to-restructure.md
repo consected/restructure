@@ -66,4 +66,4 @@ less -r tmp/failing_specs.log
 - Commit the changes: `git commit -a -m 'Updated CHANGELOG'`
 - Push the branch
 - Checkout **develop** branch: `git checkout develop ; git pull`
-- Merge the transfer branch back into **develop**: `git merge tx-restructure-rolling -m "Transferred from ${OTHER_REPO} @${RESTR_VERSION}"`
+- Merge the transfer branch back into **develop**: `git merge tx-restructure-rolling -m "Transferred from ReStructure @${RESTR_VERSION}"`
