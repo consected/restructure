@@ -329,7 +329,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     have_css 'tbody.tracker-history .tracker-history-event_name'
 
     # The previous item is there still
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
+    expect(page).to have_css('tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i), "Tracker history event name not found '#{pe_orig.name}'. #{page.all("##{h}.tracker-history").first&.text}"
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: @user.email.to_s
 
     # Search for the player by current Classification::Protocol, subprocess and event, but not the historical event

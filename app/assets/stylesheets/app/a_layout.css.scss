@@ -293,6 +293,7 @@ a.add-icon[data-show-modal] {
   color: red;
 }
 
+.glyphicon-edit,
 a.glyphicon.show-entity,
 a.glyphicon.edit-entity,
 a.close-entity {
@@ -348,6 +349,13 @@ a.glyphicon.glyphicon-remove-sign {
   &:hover {
     background-color: #ff0000;
   }
+}
+
+.close {
+  color: #900;
+  filter: none;
+  opacity: 1;
+  font-size: 28px;
 }
 
 .caret {

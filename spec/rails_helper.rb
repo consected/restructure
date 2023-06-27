@@ -33,7 +33,7 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SESSION_TOKEN
 #
 
-if ENV['QUICK']
+if ENV['QUICK'] == 'true'
   ENV['SKIP_BROWSER_SETUP'] = 'true'
   ENV['SKIP_DB_SETUP'] = 'true'
   ENV['SKIP_APP_SETUP'] = 'true'
@@ -76,6 +76,12 @@ require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 put_now 'Browser setups'
+
+# The setting for AllowUsersToRegister is forced to *true* for the test environment, to allow features tests to work.
+# We set this back to false here, which does not affect those tests, but allows controllers, models, etc specs to
+# run without AllowUsersToRegister being set.
+change_setting('AllowUsersToRegister', false)
+
 require 'capybara/rspec'
 require 'browser_helper'
 require 'setup_helper'

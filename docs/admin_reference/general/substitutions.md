@@ -213,8 +213,10 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - date
 - date_time
 - date_time_with_zone
+- date_time_show_zone
 - time
 - time_with_zone
+- time_show_zone
 - time_sec
 - dicom_datetime
 - dicom_date

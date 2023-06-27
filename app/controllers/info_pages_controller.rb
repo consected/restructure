@@ -13,7 +13,7 @@ class InfoPagesController < ActionController::Base
                                                        allow_missing_template: true, markdown_to_html: true
     unless @content
       @content = '<h1>Page Not Found</h1>'.html_safe
-      render :show, status: 404, layout: 'public_application'
+      render :show, status: :not_found, layout: 'public_application'
       return
     end
 

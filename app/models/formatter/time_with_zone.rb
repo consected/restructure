@@ -1,9 +1,28 @@
+# frozen_string_literal: true
+
 module Formatter
   module TimeWithZone
-    def self.format(data, _options = nil, current_user: nil,
+    #
+    # With no options, format the *date_time* according to the current user's timezone and preferences.
+    # Forces the time to the user's preferred timezone, keeping the numeric the time the same.
+    # @param [Date|DateTime|Time] data - the date to be used, preferably as a Date or as a Time in the server timezone
+    # @param [nil] _options - unused
+    # @param [User] current_user
+    # @param [true] time_only
+    # @param [true] date_only
+    # @param [true] include_sec
+    # @param [true] iso - unused
+    # @param [true] utc - unused
+    # @param [true] show_timezone - unused
+    # @return [String]
+    def self.format(data, _options = nil,
+                    current_user: nil,
                     include_sec: nil,
-                    time_only: nil, date_only: nil,
-                    iso: nil, utc: nil, show_timezone: nil)
+                    time_only: nil,
+                    date_only: nil,
+                    iso: nil,
+                    utc: nil,
+                    show_timezone: nil)
       return if data.blank?
 
       if current_user
@@ -31,7 +50,7 @@ module Formatter
         raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
       end
 
-      if use_tz && tz.utc_offset != data.utc_offset
+      if use_tz && data.respond_to?(:utc_offset) && tz.utc_offset != data.utc_offset
         data = tz.parse(data.to_s)
         res = data.strftime(df).gsub('  ', ' ')
       else

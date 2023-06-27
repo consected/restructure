@@ -268,4 +268,16 @@ module ApplicationHelper
 
     res&.html_safe
   end
+
+  def remove_empty_error(errors)
+    errors.messages.each do |key, messages|
+      if messages.include?(Settings::DoNotDisplayErrorMessage)
+        if messages.one?
+          errors.delete(key)
+        else
+          messages.delete(Settings::DoNotDisplayErrorMessage)
+        end
+      end
+    end
+  end
 end
