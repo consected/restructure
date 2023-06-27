@@ -18,7 +18,7 @@
     <%= f.text_area :value %>
   </div>
   <div class="form-group">
-    <%= f.label 'role name override' %>
+    <%= f.label :role_name, 'Role name override' %>
     <%
       select_item_type = {}
       select_item_type[:selected] = filter_params_hash.first.last if filter_params_permitted && filter_params_hash&.first&.first == 'role_name'
@@ -29,7 +29,7 @@
     <%= f.select :role_name, options, select_item_type %>
   </div>
   <div class="form-group">
-    <%= f.label 'user override' %>
+    <%= f.label :user_id, 'User override' %>
     <%= f.select :user_id, active_user_options, include_blank: true %>
   </div>
   <div class="form-group">

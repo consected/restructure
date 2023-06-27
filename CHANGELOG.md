@@ -16,6 +16,45 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from ReStructure @8.2.44 - 2023-06-27
+
+#### [8.2.44] - 2023-06-26
+
+- [Added] user self-registration checkbox to agree to GDPR and non-GDPR terms of use
+
+#### [8.2.43] - 2023-06-15
+
+- [Added] tracker notes display line breaks
+- [Added] batch_trigger run_at and run once
+- [Added] bad configuration protection for calc_action condition
+- [Changed] rspec tests for reliability
+- [Changed] creation of external id search reports to provide a better UI and correct category
+- [Fixed] notification of password expiration to include the correct time in the email
+- [Fixed] and documented password expiration notifications tests
+- [Fixed] bugs in app import and model generation
+- [Fixed] handling of failures in background and batch jobs
+- [Fixed] bugs in report admin criteria definer UI
+- [Fixed] issue showing generated reports (null description was not handled)
+- [Fixed] report criteria labels to avoid incorrect capitalization and HTML markup
+
+#### [8.2.42] - 2023-06-12
+
+- [Fixed] file report failing to download multiple files
+- [Fixed] label markup issues
+- [Fixed] incorrect message telling user they are not authorized to download files
+
+#### [8.2.41] - 2023-06-01
+
+- [Added] ability to traverse element through arrays in calc actions
+
+#### [8.2.40] - 2023-04-24
+
+- [Fixed] issue attempting to save results of pull_external_data if there is nothing to save
+- [Added] set of conditions for this and element comparison
+- [Added] success_if option to pull_external_data trigger
+
 ## [8.2.37] - 2023-05-23
 
 - [Fixed] date and time formatters and provided consistent spec tests

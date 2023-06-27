@@ -75,4 +75,12 @@
     _fpa.loaded.login();
   });
   <% end %>
+
+  <% if controller_name == 'registrations' %>
+  $('html').ready( () => {
+      _fpa.loaded.registrations();
+  });
+  <% end %>
+
+  _fpa.gdpr_county_codes = <%== Settings::GdprCountryCodes %>;
 </script>

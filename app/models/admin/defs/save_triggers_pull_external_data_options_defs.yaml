@@ -16,6 +16,9 @@
               The corresponding response code will be available as:
                   \{\{save_trigger_results.identity_http_response_code\}\}
 
+              If *success_if:* condition is set, the following will also be set
+                  \{\{save_trigger_results.identity_success_if_res\}\}
+
               These values are also available in if conditions like:
                   if:
                     this:
@@ -29,6 +32,11 @@
                         element: identity_http_response_code
                         value: 200
 
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity_success_if_res
+                        value: true
 
             data_field: (optional) name of text or json field to update
             data_field_format: |
@@ -50,3 +58,15 @@
               format: xml|json|text
               allow_empty_result: true | false (default)
               allow_response_codes: [array of allowable integer codes that are not 200]
+
+            post_data: |
+              For 'post' requests, the string or hash of data to post
+
+            success_if: |
+              Additional condition to check for success. For example:
+
+                  all:
+                    this:
+                      save_trigger_results:
+                        element: 'post_response.success'
+                        value: true              

@@ -19,6 +19,8 @@ class Admin
         app_type_config = config['app_type']
         raise FphsException, "Incorrect format for configuration format #{format}" unless app_type_config
 
+        AppControl.define_models
+
         new_id = nil
         results = { 'app_type' => {} }
         id_list = []

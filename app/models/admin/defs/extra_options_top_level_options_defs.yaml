@@ -39,7 +39,8 @@ _configurations:
     # Fire **batch_trigger:** task for each record, based on the batch_trigger in **default:** or activity log options
     # All records (up to the limit) will be triggered on the specified frequency.
     # In order to make the selection of the records in the batch conditional, consider using a dynamic_model with *view_sql*
-    frequency: n units - for example 1 hour, 15 minutes, or 30 days
+    frequency: n units OR 'once' - for example 1 hour, 15 minutes, or 30 days. If set to 'once' then it will run once in ten seconds after saving
+    run_at: time (or list of times) to run at on the frequency specified, for example '12:00', '6:00pm', 'sunday 8:00am' (with frequency '1 week')
     limit: maximum number of records to process in a single batch
     if: conditions on the records to select for processing
     # By default, the user in the process record will be used to perform the batch action. If no user_id field is specified in

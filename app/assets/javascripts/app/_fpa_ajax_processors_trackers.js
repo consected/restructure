@@ -70,8 +70,15 @@ _fpa.postprocessors_trackers = {
     },
 
     tracker_notes_handler: function (block) {
-        var b = $('td.tracker-notes .cell-holder, td.tracker-history-notes .cell-holder');
-        _fpa.utils.make_readable_notes_expandable(b);
+        const $notes = $('td.tracker-notes .cell-holder, td.tracker-history-notes .cell-holder');
+
+        $notes.not('.done-notes-to-html').each(function () {
+            const orig = ($(this).text() + '').trim();
+            const text = String(_fpa.utils.nl2br(orig));
+            $(this).html(text);
+        }).addClass('done-notes-to-html');
+
+        _fpa.utils.make_readable_notes_expandable($notes);
     },
 
 

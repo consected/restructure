@@ -16,7 +16,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   end
 
   before :all do
-    BhsImportConfig.import_config
+    app = BhsImportConfig.import_config
     SetupHelper.feature_setup
     change_setting('TwoFactorAuthDisabledForUser', false)
     seed_database
@@ -25,6 +25,15 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     create_admin
 
     @app_type = bhs_app_type
+    expect(@app_type.id).to eq app.id
+
+    # By default, an app with no page layouts should show everything. Clear everything before the import
+    Admin::PageLayout.active.where(app_type_id: app.id).each do |p|
+      p.disable! @admin
+    end
+
+    expect(DynamicModel::Adder.definition.category).to eq 'extended-info'
+
     # By default the app limits access to only those masters that have a BHS assignment
     # already made in another app.
     # To avoid this, just disable this restriction for now.
@@ -56,11 +65,6 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
 
     b = m.bhs_assignments.build(bhs_id: bmax + 1)
     b.save!
-  end
-
-  before :each do
-    @app_type = bhs_app_type
-    ActivityLog.define_models
   end
 
   def as_user(role)
@@ -120,10 +124,14 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     create_master_as_ra
     as_user @ra
 
+    expect(DynamicModel::Adder.definition.category).to eq 'extended-info'
+
     search_player ''
 
     expand_master 0
     expect_master_record
+    # Wait for tab to uncollapse
+    sleep 2
     expect_bhs_tabs :ra
     expand_master_record_tab 'external ids'
   end

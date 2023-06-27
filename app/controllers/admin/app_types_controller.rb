@@ -38,7 +38,7 @@ class Admin::AppTypesController < AdminController
     @message = 'SUCCESS'
     @primary = case f
                when 'json'
-                 @JSON.pretty_generate results
+                 JSON.pretty_generate results
                when 'yaml'
                  YAML.dump results
                end

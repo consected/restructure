@@ -110,6 +110,7 @@
             json_field_element:
               element: 'key1.key2'
               value: 'literal value'
+              condition: '(optional) - one of those listed above'
 
         any_save_trigger_results:
           # save_trigger_results are held for just the life of the transaction, and are not stored to the DB

@@ -42,12 +42,12 @@ class HandlePasswordExpirationReminderJob < ApplicationJob
     puts "Performing job on #{user.inspect}" unless Rails.env.test?
 
     unless defaults && defaults[:layout]
-      Delayed::Worker.logger.info 'No layout template name has been set for password expiration reminder'
+      Delayed::Worker.logger.warn 'No layout template name has been set for password expiration reminder'
       return
     end
 
     unless Messaging::MessageNotification.layout_template defaults[:layout]
-      Delayed::Worker.logger.info 'No layout template defined for the password expiration reminder, ' \
+      Delayed::Worker.logger.warn 'No layout template defined for the password expiration reminder, ' \
                                   "with name #{defaults[:layout]}"
       return
     end

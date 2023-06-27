@@ -215,8 +215,7 @@ class ReportSearchAttr {
   set default(val) {
     if (!val) return;
 
-    if (this.def_block.multiple === 'single') this.def_block.default = val[0];
-    else this.def_block.default = val;
+    this.def_block.default = val;
   }
 
   get default() {

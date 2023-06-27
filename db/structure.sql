@@ -6408,7 +6408,9 @@ CREATE TABLE ml_app.users (
     do_not_email boolean DEFAULT false,
     confirmation_token character varying,
     confirmed_at timestamp without time zone,
-    confirmation_sent_at timestamp without time zone
+    confirmation_sent_at timestamp without time zone,
+    country_code character varying,
+    terms_of_use_accepted character varying
 );
 
 
@@ -13516,6 +13518,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220307154248'),
 ('20220505095408'),
 ('20220531121546'),
-('20230209153019');
+('20230209153019'),
+('20230420125603'),
+('20230420125634');
 
 

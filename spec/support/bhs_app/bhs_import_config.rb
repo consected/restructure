@@ -22,6 +22,11 @@ module BhsImportConfig
     config_fn = 'bhs_config.json'
     app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
     # app = SetupHelper.setup_test_app
+
+    # If we don't enable existing activity log definition it will remain disabled after the import
+    al = ActivityLog.all.find { |a| a.resource_name == 'activity_log__bhs_assignments' }
+    al.update!(disabled: false, current_admin: al.admin) if al.disabled?
+
     @bhs_app_name = app.name
     app
   end
