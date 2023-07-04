@@ -37,7 +37,7 @@ class ApplicationJob < ActiveJob::Base
       options = {
         to: Settings::AdminEmail,
         from: Settings::NotificationsFromEmail || Settings::AdminEmail,
-        body: "A failure occurred running a delayed_job on server #{EnvironmentName}.\n#{job}",
+        body: "A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\n#{job}",
         content_type: 'text/plain',
         subject: 'delayed_job failure'
       }
