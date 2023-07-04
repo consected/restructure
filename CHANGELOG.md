@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] email address used to notify of user registration events
+
 ## [8.2.47] - 2023-07-04
 
 - [Fixed] notify_failure bug in ApplicationJob
