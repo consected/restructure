@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>The page you were looking for doesn't exist (404)</title>
+  <title>Server is unavailable (502)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="error-page.css">
   <style>
@@ -54,14 +54,19 @@
       box-shadow: 0 3px 8px rgba(50, 50, 50, 0.17);
     }
   </style>
+  <script>
+    window.setTimeout(function () { window.location.href = '/' }, 15000)
+  </script>
 </head>
 
 <body>
-  <!-- This file lives in public/404.html -->
+  <!-- This file lives in public/502.html -->
   <div class="dialog">
     <div>
-      <h1>The page you were looking for doesn't exist.</h1>
-      <p>You may have mistyped the address or the page may have moved.</p>
+      <h1>The server is unavailable.</h1>
+      <p>This page will refresh automatically in 15 seconds.</p>
+      <p>Usually it takes under a minute for the server to reload. If you continue to receive this message, please
+        contact an administrator so we can fix the issue.</p>
     </div>
     <p class="error-page-contact-block"><span class="error-page-contact-info"></span></p>
   </div>
