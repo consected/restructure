@@ -239,14 +239,24 @@ div.reset-row .common-template-item div .page-embedded-block > .data-results {
 .notes-text {
   font-size: 17px;
 }
-div.reset-row .custom-editor h1,
+/* div.reset-row .custom-editor h1,
 div.reset-row .custom-editor-viewer h1 {
   font-size: 2.5em;
 }
 div.reset-row .custom-editor h2,
 div.reset-row .custom-editor-viewer h2 {
   font-size: 1.4em;
+} */
+
+div.reset-row li.list-group-item.result-notes-container {
+  padding: 0.4em 3vw 1.5em; 
+} 
+
+div.reset-row .block-border-top li.list-group-item.result-notes-container {
+  border-top: 3px solid silver;
+  padding-top: 15px;
 }
+
 .footer,
 .footer p {
   font-size: 15px;
@@ -299,6 +309,9 @@ div.reset-row .custom-editor-viewer h2 {
   bottom: 0px;
   border-top: 3px solid gray;
   margin-top: 2.4em;
+}
+#standalone-page>.standalone-page-container .footer.text-center {
+  text-align: center;
 }
 #standalone-page > .standalone-page-container .footer a {
   color: rgb(60, 60, 60);
