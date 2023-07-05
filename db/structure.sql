@@ -3054,42 +3054,6 @@ $$;
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
-
-
---
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -4710,6 +4674,25 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4840,6 +4823,23 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -7230,7 +7230,7 @@ CREATE MATERIALIZED VIEW ref_data.datadic_stats AS
     stats.total_recs
    FROM (vars var
      JOIN LATERAL ref_data.calc_var_stats_for_numeric(var.id) stats(variable_id, variable, results, labels, min, med, max, mean, stddev, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY ((ARRAY['numeric'::character varying, 'calculated'::character varying])::text[])))
+  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY (ARRAY[('numeric'::character varying)::text, ('calculated'::character varying)::text])))
 UNION
  SELECT var.id AS variable_id,
     stats.variable AS variable_name,
@@ -7678,7 +7678,7 @@ CREATE MATERIALIZED VIEW ref_data.mv_datadic_stats AS
     stats.total_recs
    FROM (vars var
      JOIN LATERAL ref_data.calc_var_stats_for_numeric(var.id) stats(variable_id, variable, results, labels, min, med, max, mean, stddev, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY ((ARRAY['numeric'::character varying, 'calculated'::character varying])::text[])))
+  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY (ARRAY[('numeric'::character varying)::text, ('calculated'::character varying)::text])))
 UNION
  SELECT var.id AS variable_id,
     stats.variable AS variable_name,
