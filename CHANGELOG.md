@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] cleanup issues converting html to markdown
+- [Fixed] issue preventing navigate away from page if files were uploaded to a container
+- [Changed] handling of 404 errors to show nice custom page
+
 ## [8.2.49] - 2023-07-04
 
 - [Added] contact information to static error pages

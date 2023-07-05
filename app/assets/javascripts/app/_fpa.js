@@ -490,7 +490,7 @@ _fpa = {
           block.data('button_clicked', null);
         }
 
-        // If a form was submitted, clear any of the enclosed .field_was_changed flags
+        // If a form was submitted, clear any of the enclosed .field-was-changed flags
         // If not a form submit or cancel and there is an outer form that holds fields with this flag
         // show the user a notice and allow them to cancel or continue the save.
         var bsubmitted = block.find('input[type="submit"]:focus');

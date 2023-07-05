@@ -497,6 +497,14 @@ _fpa.utils.html_to_markdown = function (obj) {
   $html.find('style').remove();
 
   $html
+    .find('div')
+    .contents().unwrap().wrap('<p/>');
+
+  $html
+    .find('p p')
+    .contents().unwrap();
+
+  $html
     .find('*')
     .not(
       'div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub'
@@ -530,10 +538,47 @@ _fpa.utils.html_to_markdown = function (obj) {
     });
   });
 
+  $html.find('p br').remove();
+  $html.find('p').each(function () {
+    const $a = $(this);
+    let res = inner = $a.html();
+    let changed = null;
+    if (inner.indexOf("\n") >= 0) {
+      res = inner.replaceAll("\n", ' ');
+      changed = true;
+    }
+    if (res.indexOf("&nbsp;") >= 0) {
+      res = res.replaceAll("&nbsp;", ' ');
+      changed = true;
+    }
+
+    res = res.trim();
+    if (res === '') {
+      $a.remove()
+    }
+    else if (changed) {
+      $a.html(res);
+    }
+  });
+
   $html.find('i,b,em,strong').each(function () {
     const $a = $(this);
+    let inner = $a.html().replaceAll('&nbsp;', ' ');
+    let trimmed = inner.trim();
 
-    $a.html($a.html().trim()).after($('<span> </span>'));
+    $a.html(trimmed);
+    if (inner[0] === ' ') {
+      $a.before($('<span> </span>'))
+    }
+
+    if (inner[inner.length - 1] === ' ') {
+      $a.after($('<span> </span>'))
+    }
+
+    if (trimmed === '') {
+      $a.remove();
+    }
+
   });
 
   $html.find('a').each(function () {
