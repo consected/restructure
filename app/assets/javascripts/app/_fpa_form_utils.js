@@ -1586,17 +1586,17 @@ _fpa.form_utils = {
 
   setup_open_in_tab: () => {
     $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
-        .not('.added-open-nt')
-        .each(function () {
-          if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
-          // Protect against being in an editor
-          if ($(this).parents('.edit-as-custom').length) return;
+      .not('.added-open-nt')
+      .each(function () {
+        if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+        // Protect against being in an editor
+        if ($(this).parents('.edit-as-custom').length) return;
 
-          $(this).attr('target', '_blank');
-          if ($(this).find('.glyphicon-new-window').length) return;
-          $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
-        })
-        .addClass('added-open-nt');
+        $(this).attr('target', '_blank');
+        if ($(this).find('.glyphicon-new-window').length) return;
+        $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
+      })
+      .addClass('added-open-nt');
   },
 
   setup_open_tab_before_requests: function (block) {
@@ -2064,7 +2064,7 @@ _fpa.form_utils = {
 
   // Check for changes and handle prompt to save
   setup_change_handling: function (block) {
-    block.find('input, select, textarea').not('.setup-change-handling').on('keypress change', function () {
+    block.find('input, select, textarea').not('.setup-change-handling, [type="file"]').on('keypress change', function () {
       $(this).addClass('field-was-changed');
     }).addClass('setup-change-handling');
   },

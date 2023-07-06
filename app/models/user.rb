@@ -55,7 +55,7 @@ class User < ActiveRecord::Base
               allow_nil: true
             }
 
-  # TODO comment
+  # country_code and terms_of_use are enforced if user self registration is enabled
   validates :country_code,
             presence: {
               if: -> { required_for_self_registration? },
@@ -103,7 +103,7 @@ class User < ActiveRecord::Base
   def self.batch_user
     e = Settings::BatchUserEmail
     # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
-    where(email: e).first
+    find_by(email: e)
   end
 
   #
