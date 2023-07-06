@@ -453,6 +453,11 @@ module Messaging
       return @batch_user if @batch_user
 
       @batch_user = User.batch_user
+      unless @batch_user
+        raise FphsException,
+              "User is not found for BatchUserEmail '#{Settings::BatchUserEmail}' for message notifications"
+      end
+
       @batch_user.app_type = Settings.bulk_msg_app
       @batch_user
     end

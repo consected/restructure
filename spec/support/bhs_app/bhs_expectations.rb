@@ -8,7 +8,7 @@ module BhsExpectations
       expect(tabs.length).to eq(BhsUi::TabNames.length), tabs.map(&:text).to_s
 
       tabs.each do |tab|
-        expect(tab.text).to be_in BhsUi::TabNames
+        expect(tab.text).to be_in(BhsUi::TabNames), "expected tab '#{tab.text}' to be in '#{BhsUi::TabNames}'."
         tab_a = tab.find('a')
         if tab.text.in? BhsUi::DefaultTabs
           expect(tab_a[:class]).not_to include('collapsed'), "#{tab_a.text} should not be collapsed"

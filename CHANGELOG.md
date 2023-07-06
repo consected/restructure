@@ -16,7 +16,31 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.12] - 2023-04-13
+## Unreleased
+
+### Transferred from ReStructure @8.2.44 - 2023-06-27
+
+#### [8.2.50] - 2023-07-05
+
+- [Fixed] cleanup issues converting html to markdown
+- [Fixed] issue preventing navigate away from page if files were uploaded to a container
+- [Changed] handling of 404 errors to show nice custom page
+
+#### [8.2.49] - 2023-07-04
+
+- [Added] contact information to static error pages
+- [Added] 502 specific error page
+
+#### [8.2.48] - 2023-07-04
+
+- [Changed] email address used to notify of user registration events
+
+#### [8.2.47] - 2023-07-04
+
+- [Fixed] notify_failure bug in ApplicationJob
+- [Changed] handling of missing batch user in message notifications
+
+## [8.2.44] - 2023-06-26
 
 - [Added] user self-registration checkbox to agree to GDPR and non-GDPR terms of use
 
