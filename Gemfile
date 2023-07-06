@@ -9,7 +9,7 @@ gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
 gem 'aws-sdk-sns', '~> 1'
 gem 'bootsnap'
-gem 'country_select', '~> 8.0'
+gem 'country_select', '~> 8.0', '>= 8.0.1'
 gem 'crass', '~> 1.0.4'
 gem 'daemons'
 gem 'dalli'
@@ -25,9 +25,9 @@ gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mail', '2.7.1' # hold at this version in Rails 2.7 to avoid broken net / protocol gems
 gem 'mime-types'
-gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
+gem 'mini_portile2', '~> 2.8', '>= 2.8.2' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
 gem 'net-smtp'
-gem 'nokogiri', '>= 1.14.3'
+gem 'nokogiri', '~> 1.15', '>= 1.15.2'
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
 # puma has been moved to all environments and will be included in the production packaging
@@ -36,7 +36,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma', '~> 6.0'
 
-gem 'rails', '~> 6.1', '>= 6.1.7'
+gem 'rails', '~> 6.1', '>= 6.1.7.3'
 
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
