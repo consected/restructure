@@ -41,8 +41,9 @@ en:
                     attributes:
                         sub_process:
                             blank: "status must be selected"
-
-
+        attributes:
+            user:
+                country_code: 'Country'
 
     field_names:
           rec_type: record type

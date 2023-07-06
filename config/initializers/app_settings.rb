@@ -8,10 +8,10 @@ class Settings
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = DefaultSettings::GlobalIdPrefix
 
-  StartYearRange = (1900..(Date.current.year)).freeze
-  EndYearRange = (1900..(Date.current.year)).freeze
-  AgeRange = (1..150).freeze
-  CareerYearsRange = (0..50).freeze
+  StartYearRange = (1900..(Date.current.year))
+  EndYearRange = (1900..(Date.current.year))
+  AgeRange = (1..150)
+  CareerYearsRange = (0..50)
 
   PositiveIntPattern = '\\d+'
   AgePattern = '\\d{1,3}'
@@ -96,7 +96,8 @@ class Settings
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
-  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  # For feature tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
+  AllowUsersToRegister = Rails.env.test? || (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
   # Admin assigned to newly created user through the user registration feature
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
   # Template user for creating new users. The roles from this user are copied to the new user.
@@ -107,8 +108,9 @@ class Settings
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
-  # Notify the RegistrationAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
+  # Notify the NotifyEmailOnRegistration when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
   NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
+  NotifyEmailOnRegistration = ENV['NOTIFY_EMAIL_ON_REGISTRATION'] || RegistrationAdminEmail
 
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
@@ -277,4 +279,11 @@ class Settings
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     DefaultCountrySelect
   ].freeze
+
+  DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
+
+  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
+  DefaultTermsOfUseTemplate = 'ui new user registration terms default'
+
+  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 end

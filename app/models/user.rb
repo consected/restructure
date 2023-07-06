@@ -28,6 +28,8 @@ class User < ActiveRecord::Base
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
+  attr_accessor :terms_of_use
+
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
 
@@ -37,12 +39,45 @@ class User < ActiveRecord::Base
 
   validates :first_name,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
+            },
+            length: {
+              maximum: 50,
+              allow_nil: true
             }
 
   validates :last_name,
             presence: {
-              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
+              if: -> { required_for_self_registration? }
+            },
+            length: {
+              maximum: 50,
+              allow_nil: true
+            }
+
+  # country_code and terms_of_use are enforced if user self registration is enabled
+  validates :country_code,
+            presence: {
+              if: -> { required_for_self_registration? },
+              message: 'must be selected'
+            },
+            length: {
+              is: 2,
+              allow_blank: true,
+              message: Settings::DoNotDisplayErrorMessage
+            }
+
+  validates :terms_of_use,
+            acceptance: {
+              if: -> { required_for_self_registration? }
+            }
+
+  # The validations error is not shown to the user since the terms_of_use acceptance error is sufficient.
+  # See notes app/views/devise/shared/_error_messages.html.erb
+  validates :terms_of_use_accepted,
+            presence: {
+              if: -> { required_for_self_registration? },
+              message: Settings::DoNotDisplayErrorMessage
             }
 
   validate :prevent_disable_template_user
@@ -68,7 +103,7 @@ class User < ActiveRecord::Base
   def self.batch_user
     e = Settings::BatchUserEmail
     # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
-    where(email: e).first
+    find_by(email: e)
   end
 
   #
@@ -236,10 +271,6 @@ class User < ActiveRecord::Base
     super
   end
 
-  def a_template_or_batch_user?
-    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
-  end
-
   private
 
   def set_current_user_on_user_preferences
@@ -253,6 +284,6 @@ class User < ActiveRecord::Base
   def prevent_disable_template_user
     return unless email == Settings::TemplateUserEmail && disabled && disabled_changed?
 
-    raise FphsException, "Do not attempt to disable the template user: #{email}" 
+    raise FphsException, "Do not attempt to disable the template user: #{email}"
   end
 end

@@ -11,9 +11,9 @@ module BhsExpectations
         expect(tab.text).to be_in BhsUi::TabNames
         tab_a = tab.find('a')
         if tab.text.in? BhsUi::DefaultTabs
-          expect(tab_a[:class]).not_to include 'collapsed'
+          expect(tab_a[:class]).not_to include('collapsed'), "#{tab_a.text} should not be collapsed"
         else
-          expect(tab_a[:class]).to include 'collapsed'
+          expect(tab_a[:class]).to include('collapsed'), "#{tab_a.text} should be collapsed"
         end
       end
     elsif role == :pi

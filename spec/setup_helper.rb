@@ -247,11 +247,12 @@ module SetupHelper
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
-    ActivityLogSupport.cleanup_matching_activity_logs(item_type, rec_type, process_name, admin: auto_admin, excluding_id: res&.id)
+    cleaned = ActivityLogSupport.cleanup_matching_activity_logs(item_type, rec_type, process_name, admin: auto_admin, excluding_id: res&.id)
 
-    unless res.active_model_configuration?
+    was_active = res.active_model_configuration?
+    unless was_active
       # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
-      res.update!(current_admin: auto_admin, updated_at: DateTime.now)
+      res.update!(current_admin: auto_admin, updated_at: DateTime.now, disabled: false)
 
       app_type = Admin::AppType.active.first
       # Ensure there is at least one user access control, otherwise we won't re-enable the process on future loads
@@ -263,13 +264,18 @@ module SetupHelper
 
     # Check implementation
     test = ActivityLog.active.where(name: name).count == 1
-
     raise "Failed setup of activity log #{name}" unless test
 
-    res.implementation_class
+    begin
+      res.implementation_class
+    rescue StandardError
+      res.generate_model
+      res.implementation_class
+    end
     cname.constantize
-
-    res
+  rescue StandardError, FphsException => e
+    raise "Failed to setup gen test (#{name}, #{process_name}, #{item_type}, #{rec_type}) " \
+      "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
   end
 
   def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil)

@@ -38,7 +38,7 @@ module ReportsHelper
     end
 
     value ||= report_field_default config
-    main_field = label_tag(config.label || name)
+    main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize)
     main_field += report_criteria_multiple_field(name, config, value, options) ||
                   report_criteria_dropdown_field(name, config, value, options) ||
                   report_criteria_text_field(name, config, value, options)
@@ -162,7 +162,8 @@ module ReportsHelper
         type: config.type,
         class: 'form-control no-auto-submit multivalue-field-single',
         data: { attribute: name },
-        placeholder: '(single value)'
+        placeholder: '(single value)',
+        id: "multiple_attrs_#{name}"
       )
 
       main_field = text_field_tag("multiple_attrs[#{name}]", '', options)

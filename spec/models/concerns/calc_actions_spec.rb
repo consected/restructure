@@ -1197,14 +1197,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     res = ConditionalActions.new conf, @al
     cai = res.calc_action_if
-    unless cai
-      puts 'calc_action_if is about to fail'
-      puts confy
-      puts "@al: #{@al}"
-      puts "@al1: #{@al1}"
-      puts "zip: #{a1.zip} for #{a1}"
-    end
-    expect(cai).to be true
+    expect(cai).to be(true), "calc_action_if failed #{ { confy: confy,
+                                                         al: @al,
+                                                         al1: @al1,
+                                                         zip: "#{a1.zip} for #{a1}" } }"
 
     confy = <<~EOF_YAML
       all:
@@ -1439,13 +1435,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
-    if a
-      puts 'calc_action_if is about to fail'
-      puts confy
-      puts "city: #{@al.master.addresses.first.city}"
-      puts "data: #{@al.master.player_contacts.first.data}"
-    end
-    expect(a).to be false
+    expect(a).to be(false),
+                 "calc_action_if failed - #{{ confy: confy, city: @al.master.addresses.first.city, data: @al.master.player_contacts.first.data }}"
   end
 
   it 'handles deep references' do
@@ -1922,6 +1913,96 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '<>',
+            value: @al.select_who
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '==',
+            value: @al.select_who
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '= ANY',
+            value: @al.select_who
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '= ANY',
+            value: 'none'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '<> ANY',
+            value: @al.select_who
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    # Conditions for simple this evaluation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: '<> ANY',
+            value: 'none'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
   end
 
   describe 'hash elements' do
@@ -1971,6 +2052,74 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             save_trigger_results: {
               element: 'result1.no_element',
               value: 'element result value'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'compares an array element' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': ['abc', 'def', 4, nil, [{ 'status': 'updated', 'data': 'abcdefg' }, 2, 3, 4]]
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.2',
+              value: 4
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.2',
+              value: '4'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.4.first.status',
+              value: 'updated'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.4.first.status',
+              value: 4
             }
           }
         }
@@ -2042,6 +2191,33 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             save_trigger_results: {
               element: 'result1.res_value',
               value: '{{save_trigger_results.result1.res_value}}'
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+    end
+
+    it 'compares a hash element using a condition' do
+      al = create_item
+      al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
+      al.save_trigger_results = {
+        'result1': {
+          'res_value': 'element result value|pipe value 2|3|abc'
+        }
+      }
+
+      conf = {
+        all: {
+          this: {
+            id: al.id,
+            save_trigger_results: {
+              element: 'result1.res_value',
+              value: '.+|pipe value .+|.+?|.*',
+              condition: '~'
             }
           }
         }

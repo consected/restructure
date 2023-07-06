@@ -181,5 +181,7 @@ module ActivityLogSupport
     others.each do |o|
       o.update!(disabled: true, current_admin: admin || o.admin)
     end
+
+    others
   end
 end

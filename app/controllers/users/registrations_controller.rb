@@ -17,11 +17,13 @@ module Users
 
     def build_resource(hash = {})
       super
+
       resource.current_admin = RegistrationHandler.registration_admin
+      resource.terms_of_use_accepted = terms_of_use_accepted(resource)
     end
 
     def devise_registration_params
-      devise_parameter_sanitizer.permit(:sign_up, keys: %i[first_name last_name])
+      devise_parameter_sanitizer.permit(:sign_up, keys: %i[country_code first_name last_name terms_of_use])
     end
 
     def authorize_resource
@@ -33,6 +35,39 @@ module Users
       return unless inv
 
       raise FphsGeneralError, 'Incorrect invitation code' unless params[:invitation_code] == inv
+    end
+
+    def gdpr_country?(country_code)
+      Settings::GdprCountryCodes.include?(country_code)
+    end
+
+    def terms_of_use_accepted_gdpr
+      return @terms_of_use_gdpr if @terms_of_use_gdpr
+
+      gdpr_template_id = Admin::MessageTemplate.find_by(name: Settings::GdprTermsOfUseTemplate).id
+      @terms_of_use_gdpr = "message_templates|#{gdpr_template_id}|gdpr"
+    end
+
+    def terms_of_use_accepted_default
+      return @terms_of_use_default if @terms_of_use_default
+
+      default_template_id = Admin::MessageTemplate.find_by(name: Settings::DefaultTermsOfUseTemplate).id
+      @terms_of_use_default = "message_templates|#{default_template_id}|default"
+    end
+
+    # @param [Object] resource
+    # @return [String] terms of use
+    def terms_of_use_accepted(resource)
+      return unless resource.is_a?(User)
+
+      return if resource.country_code.blank? # don't continue to set the value unless the country is selected
+      return unless resource.terms_of_use.to_i == 1 # unless terms of use was checked
+
+      if gdpr_country?(resource.country_code)
+        terms_of_use_accepted_gdpr
+      else
+        terms_of_use_accepted_default
+      end
     end
   end
 end

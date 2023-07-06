@@ -3,8 +3,13 @@
 module NfsStore
   module Process
     # Superclass for jobs to inherit from
-    class NfsStoreJob < ApplicationJob
+    class NfsStoreJob < ActiveJob::Base
+      attr_accessor :provider_job
       attr_writer :job
+
+      def log(txt)
+        puts txt unless Rails.env.test?
+      end
 
       def job
         @job || self
@@ -94,10 +99,12 @@ module NfsStore
             Rails.logger.warn msg
             NfsStore::Process::ProcessHandler.set_container_file_statuses "failed: #{name}", job_container_file
             job_process_handler.clear_processing_flags
+            ApplicationJob.notify_failure job
           rescue Exception, StandardError, FsException, FphsException => e2
             msg = "Job #{name} failed in rescue: #{e2} : #{job}"
             puts msg
             Rails.logger.warn msg
+            ApplicationJob.notify_failure job
           end
           raise
         end

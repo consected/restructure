@@ -8,6 +8,9 @@ describe 'csrf protection' do
 
   def login_user(user = nil)
     user ||= @user || create_user.first
+    user.confirmed_at ||= Time.now
+    user.current_admin ||= @admin
+    user.save
     get '/users/sign_in'
     expect(response.status).to eq 200
     sign_in user

@@ -44,6 +44,11 @@
 }
 
 .report-admin-search-attr-block {
+
+  input:invalid, select:invalid {
+    border-color: red;
+  }
+
   #report-admin-search-attr-add-block {
     margin-top: 10px;
   }
