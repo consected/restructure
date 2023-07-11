@@ -23,10 +23,14 @@ module CommonTemplatesHelper
 
     fopt ||= {}
 
-    if fopt[:value]
+    if fopt[:value] || fopt[:blank_value]
       fres = form_object_instance.attributes[field_name_sym.to_s]
-      if !form_object_instance.persisted? && fres.blank?
-        fres = fopt[:value]
+      if fres.blank?
+        fres = if form_object_instance.persisted?
+                 fopt[:blank_value]
+               else
+                 fopt[:value]
+               end
         fres = FieldDefaults.calculate_default form_object_instance, fres
       end
 
