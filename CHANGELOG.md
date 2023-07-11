@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] field_options blank_value dynamic definition option to allow persisted blank field values to be set
+- [Fixed] report admin not allowing configurations to be submitted
+- [Fixed] padding in help sidebar using study info content
+
 ## [8.2.50] - 2023-07-05
 
 - [Fixed] cleanup issues converting html to markdown
