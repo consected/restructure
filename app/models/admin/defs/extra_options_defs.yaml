@@ -104,7 +104,13 @@
       value: |
         default value | now() | today() 
         
-        NOTE this is set in the form fields, not before building the instances
+        NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
+        It is not set before building the instances, so will not be available for data conditions.
+      blank_value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
+        It is not set before building the instances, so will not be available for data conditions.
       preset_value: |
         default value | now() | today() 
         
