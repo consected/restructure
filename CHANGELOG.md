@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] result_label option to references config, documented also_disable_record, and added id to markup for reference result caret
+- [Changed] handling of errors in notifications during sign-up
+- [Added] master_id handling to embedded_report_ substitution
+- [Added] link hash handling of toggle-target- and click-target- for smart links
+- [Changed] default handling of BASE_URL
+
 ## [8.2.51] - 2023-07-11
 
 - [Added] field_options blank_value dynamic definition option to allow persisted blank field values to be set
