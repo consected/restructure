@@ -880,6 +880,38 @@ _fpa.form_utils = {
 
   setup_data_toggles: function (block) {
     if (!block) block = $(document);
+
+    block
+      .find('a[href*="toggle-target-"]')
+      .not('.attached-hash-toggle-target')
+      .each(function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('toggle-target-(.+)@([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        const toggle = matches[1].replaceAll('+', ' ');
+        let target = matches[2];
+        if (target[0] !== '.') target = `#${target}`;
+        $(this).attr('data-toggle', toggle).attr('data-target', target);
+
+      }).addClass('attached-hash-toggle-target');
+
+    block
+      .find('a[href*="click-target-"]')
+      .not('.attached-hash-click-target')
+      .on('click', function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('click-target-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let target = matches[1];
+        if (target[0] !== '.') target = `#${target}`;
+        $(target).click();
+
+      }).addClass('attached-hash-click-target');
+
     block
       .find('[data-toggle~="clear"]')
       .not('.attached-datatoggle-clear')

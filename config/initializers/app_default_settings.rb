@@ -6,6 +6,11 @@
 # This class is not shared between upstream and downstream code, making it easier
 # for transfers to be performed (see: docs/dev_reference/main/how-to-copy-to-restructure.md)
 class DefaultSettings
+  BaseUrl = if Rails.env.development? || Rails.env.test?
+              'http://localhost:3000'
+            else
+              '(not set)'
+            end
   AdminEmail = 'admin@restructure'
   DefaultLogo = 'project-viva-logo.png'
   DefaultSchemaOwner = 'vivadba'
