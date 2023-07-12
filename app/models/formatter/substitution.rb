@@ -346,10 +346,10 @@ module Formatter
 
     def self.run_embedded_report(tag, data)
       report_name = tag.sub('embedded_report_', '')
-      list_item, list_id, = source_for(data)
+      list_item, list_id, list_master_id = source_for(data)
       list_type = list_item.class.name
 
-      Reports::Template.embedded_report report_name, list_id, list_type
+      Reports::Template.embedded_report report_name, list_id, list_type, list_master_id
     end
 
     def self.add_item_button(tag, data)
