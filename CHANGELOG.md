@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Updated] gems and javascript modules
+- [Fixed] loading of sample form in activity log admin when using a temporary master id
+- [Fixed] issue with record labels if no config available
+
 ## [8.2.52] - 2023-07-12
 
 - [Added] result_label option to references config, documented also_disable_record, and added id to markup for reference result caret
