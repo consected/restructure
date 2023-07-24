@@ -46,7 +46,7 @@ module Formatter
       if_blocks.each do |if_block|
         block_container = if_block[0]
         tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, nil, ignore_missing)
+        tag_value = value_for_tag(tag, sub_data, nil, true)
         if tag_value.present?
           all_content.sub!(block_container, if_block[2] || '')
         else
@@ -272,6 +272,12 @@ module Formatter
         data[:current_user_app_type_name] = cu.app_type&.name
         data[:current_user_app_type_label] = cu.app_type&.label
         data[:current_user_password_expires_in] = cu.expires_in
+
+        cur = data[:current_user_roles] = {}
+        cu.role_names.each do |rn|
+          sym = rn.id_underscore.to_sym
+          cur[sym] = rn
+        end
       end
 
       data
