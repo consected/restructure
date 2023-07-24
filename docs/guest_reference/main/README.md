@@ -8,7 +8,6 @@ From the home page a simple login form prompts you to login to the application. 
 
 If you are having issues logging in, [check what to do next](login_issues.md). {{#if allow_users_to_register}}If you have been invited to register for a new account, the [registration](registration.md) page provides additional information.{{/if}}
 
-
 ![Login Form](images/login-form.png) {{#if mfa_disabled}} {{else}}![Two-Factor Authentication Form](images/login-form-with-2fa-code.png){{/if}}
 
 **IMPORTANT:** if you see any other page than a study app page with your organizations's logo and a login form (for example, you see a browser warning) or anything else that you don’t expect, do not continue. Close your browser tab and report it to your app administrator ({{admin_email}}).
@@ -54,12 +53,14 @@ After this step you will be taken to the home page. Future logins will not requi
 ## Future logins
 
 To login to the app for all future logins, go to the login page as before. The page will prompt you for your email and password. Enter these fields then click **Log in**.
-{{#if mfa_disabled}} {{else}}On the next page you will be prompted for your two-factor authentication code.
+{{#if mfa_disabled}}
+
+If all of the entered details are correct, you will be logged in successfully and can continue using the app. If any one of the details is incorrect, you will need to try again.
+{{else}}On the next page you will be prompted for your two-factor authentication code.
 
 Open the authenticator app on your smartphone and find the appropriate login in the list. View the 6-digit code that is displayed. Enter the code into the Two-Factor Authentication Code field and click Log in.
 
 ![Login Form filled](images/login-form-with-2fa-code.png)
-{{/if}}
 
 If all of the entered details are correct, you will be logged in successfully and can continue using the app. If any one of the details is incorrect, you will need to try again.
 
@@ -74,6 +75,7 @@ If all of the entered details are correct, you will be logged in successfully an
 *Only attempt to enter a two-factor authentication code once. The app prevents reuse of codes (even if a login failed), to avoid somebody looking over your shoulder from using a code you have used.*
 
 ---
+{{/if}}
 
 ## Logging in from bookmarks or notification emails
 
@@ -83,6 +85,9 @@ If you click a bookmarked search or report, or a link in an app notification ema
 
 You have **{{password_max_attempts}} attempts** to login successfully, after which point your account will be locked for one hour *(dependent on server configuration)*. If you have forgotten your password, or need your account unlocked faster, contact the app administrator for a password reset.
 
+{{#if mfa_disabled}} {{else}}
+
 ## Lost two-factor authentication
 
 If you uninstall the authenticator app on your smartphone or change your phone you will need to set up the authenticator app again (unless you have backed up the configuration). The app administrator can reset your code and you will need to go through the first time login process again.
+{{/if}}
