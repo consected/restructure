@@ -221,6 +221,7 @@ module Formatter
       data[:notifications_from_email] = Settings::NotificationsFromEmail
       data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
       data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
+      data[:invitation_code] = Settings::InvitationCode
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
