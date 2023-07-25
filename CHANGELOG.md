@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] scrolling issue
+- [Added] simple mr-expander link hash toggle
+- [Added] styling for static model reference captions and new form blocks
+
 ## [8.2.54] - 2023-07-25
 
 - [Added] substitution for user roles to allow #if evaluations

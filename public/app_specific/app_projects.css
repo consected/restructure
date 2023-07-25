@@ -385,10 +385,21 @@ a.btn.embedded-add-item-button {
   font-size: 16px;
 }
 
-/* .model-reference-list > .model-reference-new-block {
+#master_results_block[data-report-res-name='projects__my_analysis_plans'] .results-panel .model-reference-list > .model-reference-new-block {
   border-left: 3px solid rgb(192, 192, 192);
+  border-bottom: 1px solid rgb(228, 228, 228);
   margin-left: 21px;
-} */
+  width: auto;
+}
+
+#master_results_block[data-report-res-name='projects__my_analysis_plans'] .results-panel .model-reference-list>.model-reference-new-block .list-group-item.edit-form-header {
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: visible;
+  min-height: 0;
+  opacity: 0;
+}
 
 .chosen-container-multi .chosen-choices {
   border: 1px solid rgb(204, 204, 204);
@@ -539,4 +550,32 @@ form ul.list-group > li.list-group-item.caption-before.activity-log--project-ass
 ul.nav.navbar-nav li a .glyphicon {
   vertical-align: top;
   padding-right: 0.2em;
+}
+
+ul.list-group.is-activity-log>li.list-group-item.caption-before.results-cb-action {
+  margin-top: 24px;
+  /* background: transparent; */
+  padding-left: 21px;
+  color: rgb(88, 88, 88);
+}
+
+ul.list-group.is-activity-log>li.list-group-item.caption-before.results-cb-action h1 {
+  font-weight: normal;
+}
+
+ul.list-group.is-activity-log>li.list-group-item.caption-before.results-cb-action h1:before {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: "Glyphicons Halflings";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  content: "\e029";
+  margin-left: -6px;
+  margin-right: 4px;
+  color: silver;
 }
