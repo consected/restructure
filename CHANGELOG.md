@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] substitution for user roles to allow #if evaluations
+- [Added] invitation code to substitutions
+- [Fixed] specs for xhr 404 results
+- [Fixed] user login instructions for no MFA
+
 ## [8.2.53] - 2023-07-24
 
 - [Updated] gems and javascript modules
