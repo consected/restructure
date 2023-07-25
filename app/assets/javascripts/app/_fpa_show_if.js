@@ -10,7 +10,7 @@ _fpa.show_if.methods = {
     data.current_user_roles = _fpa.state.current_user_roles;
 
     if (data.embedded_item) {
-      data.embedded_item.current_user_roles = _fpa.state.current_user_roles;
+      data.embedded_item.current_user_roles = _fpa.state.current_user_roles.map(function (v) { return v.id_underscore() });
       _fpa.show_if.methods.show_items(block, data.embedded_item);
     }
 

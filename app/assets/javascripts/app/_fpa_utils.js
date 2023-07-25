@@ -266,7 +266,7 @@ String.prototype.id_hyphenate = function () {
 };
 
 String.prototype.id_underscore = function () {
-  return this.replace(/[^a-zA-Z0-9\-]/g, '_').toLowerCase();
+  return this.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 };
 
 String.prototype.pathify = function () {
