@@ -882,6 +882,21 @@ _fpa.form_utils = {
     if (!block) block = $(document);
 
     block
+      .find('a[href^="#mr-expander-"]')
+      .not('.attached-hash-mr-expander')
+      .each(function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('mr-expander-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let new_href = `#click-target-mr-expander-${matches[1]}:toggle-target-scrollto-target@mr-expander-${matches[1]}`;
+        $(this).attr('href', new_href);
+
+      }).addClass('attached-hash-mr-expander');
+
+
+    block
       .find('a[href*="toggle-target-"]')
       .not('.attached-hash-toggle-target')
       .each(function () {
