@@ -154,7 +154,7 @@ module AppExceptionHandler
 
     respond_to do |type|
       type.html do
-        raise ActiveRecord::RecordNotFound if code == 404
+        raise ActiveRecord::RecordNotFound if code == 404 && !request.xhr?
 
         render 'layouts/error_page', locals: { text: msg, status: code }, status: code
       end
