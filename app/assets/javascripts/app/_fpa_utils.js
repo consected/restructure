@@ -16,7 +16,12 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   // Ensure the target is valid
   if (!isj && (!target || target.length < 2)) return;
 
-  var h = $(target);
+  try {
+    var h = $(target);
+  }
+  catch (e) {
+    var h = null;
+  }
   if (!h || h.length == 0) {
     var tparts = target.split('-');
     var l = tparts.length;
