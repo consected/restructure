@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] create_reference trigger to write user_id correctly if force_create is set
+- [Fixed] user profile to check against created_by_user_id if it exists in a resource
+- [Added] more information to debug user not able to access a container
+- [Added] information to manage users page with links to user self-registration and invite code
+- [Fixed] jump to bad CSS link
+
 ## [8.2.57] - 2023-07-25
 
 - [Fixed] UI current_user_roles
