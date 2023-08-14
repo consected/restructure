@@ -1,0 +1,33 @@
+<div class="container-fluid admin-head-blocks panel panel-default">
+  <div class="row">
+    <div class="col-sm-20 admin-head-block">
+      <% if Settings::AllowUsersToRegister 
+            begin
+            user_sign_up_path = "#{Settings::BaseUrl}/users/sign_up"
+            user_sign_up_path_with_code = "#{user_sign_up_path}?invitation_code=#{Settings::InvitationCode}"
+            reg_user = RegistrationHandler.registration_template_user
+            rescue => e
+              %>
+              <h4>Failed to set up info</h4>
+              <pre><%=e%></pre>
+              <pre><%=e.backtrace.join("\n")%></pre>
+              <%
+            end
+      %>
+      <h4>User Registration</h4>
+      <p>Users are allowed to register themselves, at: <%= link_to user_sign_up_path, user_sign_up_path, target:"_blank" %>
+       with the invitation code: <strong><%= Settings::InvitationCode %></strong></p>
+      <p>Alternatively use the following link that contains the invitation code: <%= link_to user_sign_up_path_with_code, user_sign_up_path_with_code, target:"_blank" %></p>
+      <p>A user that registers will automatically be granted the roles using the template user: 
+      <%= link_to link_label_open_in_new(Settings::DefaultUserTemplateEmail), admin_user_roles_path(filter: {app_type_id: nil, user_id: reg_user&.id}), target: '_blank' %></p>
+      
+      <% else %>
+      <h4>Adding Users</h4>
+      <p>Users are not allowed to register themselves. Add a new user by clicking the <b>+ Manage User</b> button.</p>
+      <p>After adding the user, be sure to grant them 
+      <%= link_to link_label_open_in_new("roles"), admin_user_roles_path, target: '_blank' %> so they have access to one or more app. 
+      Some apps have pre-configured template users that roles can be copied from.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

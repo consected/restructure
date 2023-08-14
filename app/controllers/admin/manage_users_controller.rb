@@ -107,6 +107,10 @@ class Admin::ManageUsersController < AdminController
     res
   end
 
+  def show_head_info
+    true
+  end
+
   private
 
   def permitted_params
