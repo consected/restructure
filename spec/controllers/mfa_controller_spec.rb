@@ -11,10 +11,10 @@ RSpec.describe MfaController, type: :controller do
 
   describe 'MFA requests must be valid' do
     it 'fails for anything other than a post to step1 requesting a JSON format' do
-      get :step1, params: { resource_type: 'user', user: { email: 'abc', password: 'def' } }
+      get :step1, params: { resource_type: 'user', user: { email: 'abc', password: 'def' } }, xhr: true
       expect(response).to have_http_status :not_found
       # Regular HTML request
-      post :step1, params: { resource_type: 'user' }
+      post :step1, params: { resource_type: 'user' }, xhr: true
       expect(response).to have_http_status :not_found
 
       expect_to_be_bad_route(get: '/mfa')

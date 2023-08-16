@@ -46,8 +46,7 @@ RSpec.describe ReportsController, type: :controller do
     expect(response).to have_http_status 200
     expect(assigns(:report)).to eq(@test_report)
 
-    get :show, params:  { id: "#{@test_report.item_type}__#{@test_report.short_name}1" }
-    expect(response).to have_http_status 404
+    expect { get :show, params: { id: "#{@test_report.item_type}__#{@test_report.short_name}1" } }.to raise_error(ActiveRecord::RecordNotFound)
 
     get :show, params:  { id: @test_report.item_type.to_s }
     expect(response).to have_http_status 400

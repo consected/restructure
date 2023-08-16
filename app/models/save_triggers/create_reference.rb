@@ -46,7 +46,10 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
           else
             new_item = new_type.new vals
             new_item.ignore_configurable_valid_if = force_not_valid
-            new_item.force_save! if force_create
+            if force_create
+              new_item.send(:force_write_user)
+              new_item.force_save!
+            end
             new_item.save!
           end
 

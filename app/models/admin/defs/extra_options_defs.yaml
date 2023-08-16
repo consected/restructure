@@ -104,7 +104,13 @@
       value: |
         default value | now() | today() 
         
-        NOTE this is set in the form fields, not before building the instances
+        NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
+        It is not set before building the instances, so will not be available for data conditions.
+      blank_value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
+        It is not set before building the instances, so will not be available for data conditions.
       preset_value: |
         default value | now() | today() 
         
@@ -191,6 +197,7 @@
   references:
     model_name:
       label: button label
+      result_label: alternative label rather than the to-record label in result caption
       from: this | master | any | user_is_creator (item in any master that was created by current user)
       without_reference: |
         true | outside_master - 
@@ -225,6 +232,9 @@
       creatable_if: # exclude to always allow creation
       prevent_disable: true | condition Hash 
         # always prevent the reference from being disabled, even if the containing record is editable
+      also_disable_record: false (default) | true
+        # if not prevented from disabling the model reference, also disable the referenced record if the
+        # reference is disabled
       allow_disable_if_not_editable: true | condition Hash 
         # always allow the references to be disabled, even if the containing record is not editable
       prevent_reload_on_save: true | false (default)

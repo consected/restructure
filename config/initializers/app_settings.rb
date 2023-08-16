@@ -49,6 +49,7 @@ class Settings
   # If not set (nil), then the current user email address will be used,
   # which may fail on some email servers if the domain name does not match
   # a verified domain name.
+  # This must be set if user self registration is enabled.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || ENV['FROM_EMAIL']
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || DefaultSettings::AdminEmail
@@ -89,7 +90,7 @@ class Settings
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'App'
   # Allow text substitutions for messages, etc to provide a base URL for the app, accessible
   # using the curly substitution {{base_url}}
-  BaseUrl = ENV['BASE_URL'] || '(not set)'
+  BaseUrl = ENV['BASE_URL'] || DefaultSettings::BaseUrl
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'] || DefaultSettings::PageTitle
 

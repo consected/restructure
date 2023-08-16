@@ -400,7 +400,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_label
-    to_record.human_name
+    to_record_options_config && to_record_options_config[:result_label] || to_record.human_name
   end
 
   def to_record_type_us

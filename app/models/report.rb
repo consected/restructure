@@ -89,7 +89,10 @@ class Report < ActiveRecord::Base
     its = [i, i.gsub('_', '-'), i.gsub('_', ' ')].uniq
     its << nil if i == '_default'
     res = where(item_type: its, short_name: parts.last).first
-    raise ActiveRecord::RecordNotFound unless res || nil_for_no_match
+    unless res || nil_for_no_match
+      raise ActiveRecord::RecordNotFound,
+            "report not found for #{csn} => #{its}, #{parts.last}"
+    end
 
     res
   end

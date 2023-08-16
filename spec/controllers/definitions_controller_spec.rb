@@ -8,7 +8,7 @@ describe DefinitionsController, type: :controller do
 
   describe 'when not authenticated' do
     it 'should require user login' do
-      get :show, params:  { id: 'protocol_events' }
+      get :show, params:  { id: 'protocol_events' }, xhr: true
       expect(response).to have_http_status(302)
       expect(response).to redirect_to '/users/sign_in'
     end
@@ -21,7 +21,7 @@ describe DefinitionsController, type: :controller do
     end
 
     it 'should get latest protocol_events' do
-      get :show, params:  { id: 'protocol_events' }
+      get :show, params:  { id: 'protocol_events' }, xhr: true
 
       expect(response).to have_http_status(:success)
       j = JSON.parse(response.body)
@@ -30,7 +30,7 @@ describe DefinitionsController, type: :controller do
     end
 
     it 'should not get an unexpected item' do
-      get :show, params:  { id: 'new' }
+      get :show, params:  { id: 'new' }, xhr: true
       expect(response).to have_http_status(404)
     end
   end
@@ -38,11 +38,11 @@ describe DefinitionsController, type: :controller do
   describe 'show that Brakeman security warning is not an issue' do
     before_each_login_user
     it 'attempts to force use of an invalid definition type' do
-      get :show, params:  { id: 'addresses' }
+      get :show, params:  { id: 'addresses' }, xhr: true
       expect(response).to have_http_status(404)
-      get :show, params:  { id: '&something' }
+      get :show, params:  { id: '&something' }, xhr: true
       expect(response).to have_http_status(404)
-      get :show, params:  { id: '123654' }
+      get :show, params:  { id: '123654' }, xhr: true
       expect(response).to have_http_status(404)
     end
   end
