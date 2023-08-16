@@ -16,9 +16,57 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.12] - 2023-04-13
+## Unreleased
 
-### Transferred from ReStructure @8.2.44 - 2023-06-27
+### Transferred from Project Viva @8.2.58 - 2023-08-16
+
+#### [8.2.58] - 2023-08-14
+
+- [Fixed] create_reference trigger to write user_id correctly if force_create is set
+- [Fixed] user profile to check against created_by_user_id if it exists in a resource
+- [Added] more information to debug user not able to access a container
+- [Added] information to manage users page with links to user self-registration and invite code
+- [Fixed] jump to bad CSS link
+
+#### [8.2.57] - 2023-07-25
+
+- [Fixed] UI current_user_roles
+- [Fixed] id_hyphenate in UI
+
+#### [8.2.55] - 2023-07-25
+
+- [Fixed] scrolling issue
+- [Added] simple mr-expander link hash toggle
+- [Added] styling for static model reference captions and new form blocks
+
+#### [8.2.54] - 2023-07-25
+
+- [Added] substitution for user roles to allow #if evaluations
+- [Added] invitation code to substitutions
+- [Fixed] specs for xhr 404 results
+- [Fixed] user login instructions for no MFA
+
+#### [8.2.53] - 2023-07-24
+
+- [Updated] gems and javascript modules
+- [Fixed] loading of sample form in activity log admin when using a temporary master id
+- [Fixed] issue with record labels if no config available
+
+#### [8.2.52] - 2023-07-12
+
+- [Added] result_label option to references config, documented also_disable_record, and added id to markup for reference result caret
+- [Changed] handling of errors in notifications during sign-up
+- [Added] master_id handling to embedded_report_ substitution
+- [Added] link hash handling of toggle-target- and click-target- for smart links
+- [Changed] default handling of BASE_URL
+
+#### [8.2.51] - 2023-07-11
+
+- [Added] field_options blank_value dynamic definition option to allow persisted blank field values to be set
+- [Fixed] report admin not allowing configurations to be submitted
+- [Fixed] padding in help sidebar using study info content
+
+### Transferred from Project Viva @8.2.50 - 2023-07-06
 
 #### [8.2.50] - 2023-07-05
 

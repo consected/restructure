@@ -141,7 +141,7 @@ RSpec.describe ItemFlagsController, type: :controller do
           }
         }
         # expect { post :create, attr}.to raise_error ActionController::RoutingError
-        post :create, params: attr
+        post :create, params: attr, xhr: true
         expect(response).to have_http_status(404), "Didn't get a 404 response (got #{response.status}) with attr #{attr.inspect}"
       end
 
@@ -153,7 +153,7 @@ RSpec.describe ItemFlagsController, type: :controller do
 
       it "re-renders the 'new' template" do
         list_invalid_attributes.each do |inv|
-          post :create, params: inv
+          post :create, params: inv, xhr: true
           expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
           expect(flash[:danger]).to match('The request failed to validate')
         end
@@ -197,16 +197,16 @@ RSpec.describe ItemFlagsController, type: :controller do
     it 'attempts to force use of an invalid definition type' do
       create_item
 
-      expect { get :index, params: { master_id: @player_info.master_id, item_controller: 'player_infos', item_id: 'item_id' } }
+      expect { get :index, params: { master_id: @player_info.master_id, item_controller: 'player_infos', item_id: 'item_id' }, xhr: true }
       expect(response).to be_successful
-      get :index, params: { master_id: @player_info.master_id, item_controller: 'masters', item_id: 'item_id' }
+      get :index, params: { master_id: @player_info.master_id, item_controller: 'masters', item_id: 'item_id' }, xhr: true
       expect(response).to have_http_status 404
 
-      get :index, params: { master_id: @player_info.master_id, item_controller: '&addresses', item_id: 'item_id' }
+      get :index, params: { master_id: @player_info.master_id, item_controller: '&addresses', item_id: 'item_id' }, xhr: true
       expect(response).to have_http_status 404
-      get :index, params: { master_id: @player_info.master_id, item_controller: '12312', item_id: 'item_id' }
+      get :index, params: { master_id: @player_info.master_id, item_controller: '12312', item_id: 'item_id' }, xhr: true
       expect(response).to have_http_status 404
-      get :index, params: { master_id: @player_info.master_id, item_controller: 'nil_class', item_id: 'item_id' }
+      get :index, params: { master_id: @player_info.master_id, item_controller: 'nil_class', item_id: 'item_id' }, xhr: true
       expect(response).to have_http_status 404
     end
   end

@@ -6,7 +6,7 @@ class Master < ActiveRecord::Base
   # Temporary master records can be used with limited(_if_one) user access controls
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table
-  TemporaryMasterIds = [-1]
+  TemporaryMasterIds = [-1, -2]
   Resources::Models.add(Master, resource_name: :temporary_master)
   has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'
 

@@ -244,5 +244,14 @@ class ReportSearchAttrsUi {
           $(this)[0].CodeMirror && $(this)[0].CodeMirror.refresh();
         });
     });
+
+    $('#report-admin-search-attr-add-block [required]').attr('disabled', true);
+
+    $('#report-admin-search-attr-add-block').on('hidden.bs.collapse', function () {
+      $(this).find('[required]').attr('disabled', true)
+    }).on('shown.bs.collapse', function () {
+      $(this).find('[required]').attr('disabled', null)
+    })
+      ;
   }
 }

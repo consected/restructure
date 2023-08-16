@@ -122,10 +122,15 @@ class UserProfile
     resclass = resource_info[:model]
 
     ot = resource_info[:option_type]
-    if ot
-      resclass.find_by(user_id: current_user.id, extra_log_type: ot)
+    cond = {}
+    cond[:extra_log_type] = ot if ot
+
+    if resclass.attribute_names.include?('created_by_user_id')
+      cond[:created_by_user_id] = current_user.id
     else
-      resclass.find_by(user_id: current_user.id)
+      cond[:user_id] = current_user.id
     end
+
+    resclass.find_by(**cond)
   end
 end
