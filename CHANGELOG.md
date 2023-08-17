@@ -16,6 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] "if" substitution conditions not recognizing integers as existing
+- [Added] javascript spec tests for conditional substitutions and current_user_roles
+
 ## [8.2.58] - 2023-08-14
 
 - [Fixed] create_reference trigger to write user_id correctly if force_create is set
