@@ -19,6 +19,7 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 - [Fixed] "if" substitution conditions not recognizing integers as existing
+- [Added] javascript spec tests for conditional substitutions and current_user_roles
 
 ## [8.2.58] - 2023-08-14
 
