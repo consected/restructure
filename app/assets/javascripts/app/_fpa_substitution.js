@@ -100,7 +100,7 @@ _fpa.substitution = class {
         let tag = if_block[2]
         let vpair = _this.value_for_tag(tag, new_data)
         let tag_value = vpair[0];
-        if (tag_value && tag_value.length) {
+        if (tag_value && tag_value.toString().length) {
           text = text.replace(block_container, if_block[3] || '');
         }
         else {
