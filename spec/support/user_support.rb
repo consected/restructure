@@ -44,6 +44,10 @@ module UserSupport
       user.otp_required_for_login = true
       user.new_two_factor_auth_code = false
     end
+
+    # Set confirmed for features tests
+    user.confirmed_at ||= Time.now if respond_to?(:page) && !(opt[:not_confirmed])
+
     user.save!
     expect(user.two_factor_setup_required?).to be_falsey
 

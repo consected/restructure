@@ -12,7 +12,7 @@ class HandleUserConfirmationNotificationJob < ApplicationJob
                                                 message_type: :email,
                                                 subject: defaults[:subject],
                                                 item: user,
-                                                from_user_email: Settings::RegistrationAdminEmail
+                                                from_user_email: Settings::NotificationsFromEmail
 
     mn.handle_notification_now logger: Delayed::Worker.logger
   end

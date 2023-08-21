@@ -154,13 +154,15 @@ module AppExceptionHandler
 
     respond_to do |type|
       type.html do
+        raise ActiveRecord::RecordNotFound if code == 404 && !request.xhr?
+
         render 'layouts/error_page', locals: { text: msg, status: code }, status: code
       end
       type.json do
         render json: { message: msg }, status: code
       end
       # For some errors the request suddenly gets interpreted as Javascript and breaks the errors on the front end
-      type.js  do
+      type.js do
         render plain: msg, status: code, content_type: 'text/plain'
       end
       # special handling for CSV failures as they open new windows

@@ -16,7 +16,12 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   // Ensure the target is valid
   if (!isj && (!target || target.length < 2)) return;
 
-  var h = $(target);
+  try {
+    var h = $(target);
+  }
+  catch (e) {
+    var h = null;
+  }
   if (!h || h.length == 0) {
     var tparts = target.split('-');
     var l = tparts.length;
@@ -55,11 +60,19 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   var jump_scroll = function () {
     // Scroll if necessary
     if (!_fpa.utils.inViewport(h, true)) {
-      // If prevent_jump is set, and it is an id hash, and it doesn't match this target then just quit
-      var prevent_jump_loc = $(_fpa.state.prevent_jump);
+      // If prevent_jump is set, and it is an id hash, and it doesn't match this target then just quit.
+      // We put this in a try / catch block to avoid failing if an invalid CSS location is specified
+      // in _fpa.state.prevent_jump
+      try {
+        var prevent_jump_loc = $(_fpa.state.prevent_jump);
+      }
+      catch (e) {
+        var prevent_jump_loc = null;
+      }
       if (
         _fpa.state.prevent_jump &&
         _fpa.state.prevent_jump[0] == '#' &&
+        prevent_jump_loc &&
         prevent_jump_loc.length > 0 &&
         prevent_jump_loc.attr('id') != h.attr('id')
       ) {
@@ -258,7 +271,7 @@ String.prototype.id_hyphenate = function () {
 };
 
 String.prototype.id_underscore = function () {
-  return this.replace(/[^a-zA-Z0-9\-]/g, '_').toLowerCase();
+  return this.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 };
 
 String.prototype.pathify = function () {
@@ -497,6 +510,14 @@ _fpa.utils.html_to_markdown = function (obj) {
   $html.find('style').remove();
 
   $html
+    .find('div')
+    .contents().unwrap().wrap('<p/>');
+
+  $html
+    .find('p p')
+    .contents().unwrap();
+
+  $html
     .find('*')
     .not(
       'div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub'
@@ -530,10 +551,47 @@ _fpa.utils.html_to_markdown = function (obj) {
     });
   });
 
+  $html.find('p br').remove();
+  $html.find('p').each(function () {
+    const $a = $(this);
+    let res = inner = $a.html();
+    let changed = null;
+    if (inner.indexOf("\n") >= 0) {
+      res = inner.replaceAll("\n", ' ');
+      changed = true;
+    }
+    if (res.indexOf("&nbsp;") >= 0) {
+      res = res.replaceAll("&nbsp;", ' ');
+      changed = true;
+    }
+
+    res = res.trim();
+    if (res === '') {
+      $a.remove()
+    }
+    else if (changed) {
+      $a.html(res);
+    }
+  });
+
   $html.find('i,b,em,strong').each(function () {
     const $a = $(this);
+    let inner = $a.html().replaceAll('&nbsp;', ' ');
+    let trimmed = inner.trim();
 
-    $a.html($a.html().trim()).after($('<span> </span>'));
+    $a.html(trimmed);
+    if (inner[0] === ' ') {
+      $a.before($('<span> </span>'))
+    }
+
+    if (inner[inner.length - 1] === ' ') {
+      $a.after($('<span> </span>'))
+    }
+
+    if (trimmed === '') {
+      $a.remove();
+    }
+
   });
 
   $html.find('a').each(function () {

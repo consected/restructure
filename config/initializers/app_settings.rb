@@ -8,10 +8,10 @@ class Settings
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = DefaultSettings::GlobalIdPrefix
 
-  StartYearRange = (1900..(Date.current.year)).freeze
-  EndYearRange = (1900..(Date.current.year)).freeze
-  AgeRange = (1..150).freeze
-  CareerYearsRange = (0..50).freeze
+  StartYearRange = (1900..(Date.current.year))
+  EndYearRange = (1900..(Date.current.year))
+  AgeRange = (1..150)
+  CareerYearsRange = (0..50)
 
   PositiveIntPattern = '\\d+'
   AgePattern = '\\d{1,3}'
@@ -49,6 +49,7 @@ class Settings
   # If not set (nil), then the current user email address will be used,
   # which may fail on some email servers if the domain name does not match
   # a verified domain name.
+  # This must be set if user self registration is enabled.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || ENV['FROM_EMAIL']
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || DefaultSettings::AdminEmail
@@ -89,14 +90,15 @@ class Settings
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'App'
   # Allow text substitutions for messages, etc to provide a base URL for the app, accessible
   # using the curly substitution {{base_url}}
-  BaseUrl = ENV['BASE_URL'] || '(not set)'
+  BaseUrl = ENV['BASE_URL'] || DefaultSettings::BaseUrl
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'] || DefaultSettings::PageTitle
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
-  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  # For feature tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
+  AllowUsersToRegister = Rails.env.test? || (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
   # Admin assigned to newly created user through the user registration feature
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
   # Template user for creating new users. The roles from this user are copied to the new user.
@@ -107,8 +109,9 @@ class Settings
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
-  # Notify the RegistrationAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
+  # Notify the NotifyEmailOnRegistration when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
   NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
+  NotifyEmailOnRegistration = ENV['NOTIFY_EMAIL_ON_REGISTRATION'] || RegistrationAdminEmail
 
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
@@ -254,6 +257,9 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
 
+  # Countries for which GDPR specific terms of use should be shown
+  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
+
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
   # so it can be displayed in the server info admin view.
@@ -275,6 +281,6 @@ class Settings
     InvitationCode
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
-    DefaultCountrySelect
+    DefaultCountrySelect GdprCountryCodes
   ].freeze
 end

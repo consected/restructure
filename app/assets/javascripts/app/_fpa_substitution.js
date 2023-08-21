@@ -17,6 +17,12 @@ _fpa.substitution = class {
       var master_id = data.master_id;
       new_data = Object.assign({}, data);
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
+      if (!new_data.current_user_roles) {
+        new_data.current_user_roles = {}
+        _fpa.state.current_user_roles.forEach(function (v) {
+          new_data.current_user_roles[v.id_underscore()] = v;
+        });
+      }
     } else {
       var master_id = block.parents('.master-panel').first().attr('data-master-id');
     }
@@ -104,7 +110,7 @@ _fpa.substitution = class {
     }
 
     var res = text.match(TagRegEx);
-    if (!res || res.length < 1) return;
+    if (!res || res.length < 1) return text;
 
     if (!new_data) {
       var new_data = _this.get_data();

@@ -32,6 +32,11 @@
   overflow-x: scroll;
 }
 
+.embedded-report-block .report-results-table-block {
+  height: auto;
+  overflow: auto;
+}
+
 #embed_results_block {
   .import-edit-form,
   .report-results-inner {

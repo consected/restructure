@@ -880,6 +880,53 @@ _fpa.form_utils = {
 
   setup_data_toggles: function (block) {
     if (!block) block = $(document);
+
+    block
+      .find('a[href^="#mr-expander-"]')
+      .not('.attached-hash-mr-expander')
+      .each(function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('mr-expander-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let new_href = `#click-target-mr-expander-${matches[1]}:toggle-target-scrollto-target@mr-expander-${matches[1]}`;
+        $(this).attr('href', new_href);
+
+      }).addClass('attached-hash-mr-expander');
+
+
+    block
+      .find('a[href*="toggle-target-"]')
+      .not('.attached-hash-toggle-target')
+      .each(function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('toggle-target-(.+)@([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        const toggle = matches[1].replaceAll('+', ' ');
+        let target = matches[2];
+        if (target[0] !== '.') target = `#${target}`;
+        $(this).attr('data-toggle', toggle).attr('data-target', target);
+
+      }).addClass('attached-hash-toggle-target');
+
+    block
+      .find('a[href*="click-target-"]')
+      .not('.attached-hash-click-target')
+      .on('click', function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('click-target-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let target = matches[1];
+        if (target[0] !== '.') target = `#${target}`;
+        $(target).click();
+
+      }).addClass('attached-hash-click-target');
+
     block
       .find('[data-toggle~="clear"]')
       .not('.attached-datatoggle-clear')
@@ -1525,18 +1572,7 @@ _fpa.form_utils = {
       _fpa.form_utils.resize_labels(uc);
     }, 200);
 
-    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
-      .not('.added-open-nt')
-      .each(function () {
-        if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
-        // Protect against being in an editor
-        if ($(this).parents('.edit-as-custom').length) return;
-
-        $(this).attr('target', '_blank');
-        if ($(this).find('.glyphicon-new-window').length) return;
-        $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
-      })
-      .addClass('added-open-nt');
+    _fpa.form_utils.setup_open_in_tab();
 
     $('a[href$="#open-in-sidebar"]')
       .not('.added-open')
@@ -1593,6 +1629,21 @@ _fpa.form_utils = {
           .attr('data-target-force', 'true');
       })
       .addClass('added-open-er');
+  },
+
+  setup_open_in_tab: () => {
+    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]')
+      .not('.added-open-nt')
+      .each(function () {
+        if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+        // Protect against being in an editor
+        if ($(this).parents('.edit-as-custom').length) return;
+
+        $(this).attr('target', '_blank');
+        if ($(this).find('.glyphicon-new-window').length) return;
+        $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
+      })
+      .addClass('added-open-nt');
   },
 
   setup_open_tab_before_requests: function (block) {
@@ -2060,7 +2111,7 @@ _fpa.form_utils = {
 
   // Check for changes and handle prompt to save
   setup_change_handling: function (block) {
-    block.find('input, select, textarea').not('.setup-change-handling').on('keypress change', function () {
+    block.find('input, select, textarea').not('.setup-change-handling, [type="file"]').on('keypress change', function () {
       $(this).addClass('field-was-changed');
     }).addClass('setup-change-handling');
   },
