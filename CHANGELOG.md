@@ -18,6 +18,13 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Project Viva @8.2.61 - 2023-08-21
+
+### [8.2.61] - 2023-08-17
+
+- [Fixed] "if" substitution conditions not recognizing integers as existing
+- [Added] javascript spec tests for conditional substitutions and current_user_roles
+
 ### Transferred from Project Viva @8.2.58 - 2023-08-16
 
 #### [8.2.58] - 2023-08-14
