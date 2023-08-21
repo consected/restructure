@@ -18,6 +18,94 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Harvard @8.2.60 - 2023-08-21
+
+#### [8.2.59] - 2023-06-12
+
+- [Added] templates for US terms of use to seeds
+- [Changed] Refactored constants for registrations
+
+### Transferred from Project Viva @8.2.61 - 2023-08-21
+
+### [8.2.61] - 2023-08-17
+
+- [Fixed] "if" substitution conditions not recognizing integers as existing
+- [Added] javascript spec tests for conditional substitutions and current_user_roles
+
+### Transferred from Project Viva @8.2.58 - 2023-08-16
+
+#### [8.2.58] - 2023-08-14
+
+- [Fixed] create_reference trigger to write user_id correctly if force_create is set
+- [Fixed] user profile to check against created_by_user_id if it exists in a resource
+- [Added] more information to debug user not able to access a container
+- [Added] information to manage users page with links to user self-registration and invite code
+- [Fixed] jump to bad CSS link
+
+#### [8.2.57] - 2023-07-25
+
+- [Fixed] UI current_user_roles
+- [Fixed] id_hyphenate in UI
+
+#### [8.2.55] - 2023-07-25
+
+- [Fixed] scrolling issue
+- [Added] simple mr-expander link hash toggle
+- [Added] styling for static model reference captions and new form blocks
+
+#### [8.2.54] - 2023-07-25
+
+- [Added] substitution for user roles to allow #if evaluations
+- [Added] invitation code to substitutions
+- [Fixed] specs for xhr 404 results
+- [Fixed] user login instructions for no MFA
+
+#### [8.2.53] - 2023-07-24
+
+- [Updated] gems and javascript modules
+- [Fixed] loading of sample form in activity log admin when using a temporary master id
+- [Fixed] issue with record labels if no config available
+
+#### [8.2.52] - 2023-07-12
+
+- [Added] result_label option to references config, documented also_disable_record, and added id to markup for reference result caret
+- [Changed] handling of errors in notifications during sign-up
+- [Added] master_id handling to embedded_report_ substitution
+- [Added] link hash handling of toggle-target- and click-target- for smart links
+- [Changed] default handling of BASE_URL
+
+#### [8.2.51] - 2023-07-11
+
+- [Added] field_options blank_value dynamic definition option to allow persisted blank field values to be set
+- [Fixed] report admin not allowing configurations to be submitted
+- [Fixed] padding in help sidebar using study info content
+
+### Transferred from Project Viva @8.2.50 - 2023-07-06
+
+#### [8.2.50] - 2023-07-05
+
+- [Fixed] cleanup issues converting html to markdown
+- [Fixed] issue preventing navigate away from page if files were uploaded to a container
+- [Changed] handling of 404 errors to show nice custom page
+
+#### [8.2.49] - 2023-07-04
+
+- [Added] contact information to static error pages
+- [Added] 502 specific error page
+
+#### [8.2.48] - 2023-07-04
+
+- [Changed] email address used to notify of user registration events
+
+#### [8.2.47] - 2023-07-04
+
+- [Fixed] notify_failure bug in ApplicationJob
+- [Changed] handling of missing batch user in message notifications
+
+## [8.2.44] - 2023-06-26
+
+- [Added] user self-registration checkbox to agree to GDPR and non-GDPR terms of use
+
 ### Transferred from Harvard @8.2.43 - 2023-06-15
 
 #### [8.2.43] - 2023-06-15

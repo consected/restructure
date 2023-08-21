@@ -6408,7 +6408,9 @@ CREATE TABLE ml_app.users (
     do_not_email boolean DEFAULT false,
     confirmation_token character varying,
     confirmed_at timestamp without time zone,
-    confirmation_sent_at timestamp without time zone
+    confirmation_sent_at timestamp without time zone,
+    country_code character varying,
+    terms_of_use_accepted character varying
 );
 
 
@@ -6865,6 +6867,27 @@ COMMENT ON COLUMN ref_data.datadic_variable_history.storage_varname IS 'Database
 
 
 --
+-- Name: COLUMN datadic_variable_history.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variable_history.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variable_history.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.notes IS 'Notes';
+
+
+--
 -- Name: datadic_variable_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
 --
 
@@ -6940,7 +6963,7 @@ CREATE TABLE ref_data.datadic_variables (
 -- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: Full Data Dictionary';
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
 
 
 --
@@ -7193,6 +7216,27 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
 
 
 --
@@ -13264,8 +13308,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200727122117'),
 ('20200731121100'),
 ('20200731121144'),
-('20200731122147'),
-('20200731124515'),
 ('20201109114833'),
 ('20201111160935'),
 ('20201111161035'),
@@ -13712,169 +13754,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220526182143'),
 ('20220531121546'),
 ('20220601180701'),
-('20220621090729'),
-('20220621090731'),
-('20220621090732'),
-('20220621090734'),
-('20220621090737'),
-('20220621090739'),
-('20220621091859'),
-('20220621091900'),
-('20220621091902'),
-('20220621205650'),
-('20220621205651'),
-('20220621210030'),
-('20220621210031'),
-('20220621210654'),
-('20220621210656'),
-('20220621210923'),
-('20220621210924'),
-('20220621212005'),
-('20220621212007'),
-('20220621212454'),
-('20220621212456'),
-('20220621212457'),
-('20220621212459'),
-('20220621212500'),
-('20220621212502'),
-('20220621212503'),
-('20220621212504'),
-('20220621212506'),
-('20220621212507'),
-('20220621212509'),
-('20220621212510'),
-('20220621212626'),
-('20220621212628'),
-('20220621212630'),
-('20220621212631'),
-('20220621212632'),
-('20220621212634'),
-('20220621212635'),
-('20220621212636'),
-('20220621212638'),
-('20220621212639'),
-('20220621212641'),
-('20220621212642'),
-('20220621212644'),
-('20220621212645'),
-('20220621212646'),
-('20220621212648'),
-('20220621212650'),
-('20220621212747'),
-('20220621212749'),
-('20220621212751'),
-('20220621212752'),
-('20220621212753'),
-('20220621212755'),
-('20220621212756'),
-('20220621212757'),
-('20220621212759'),
-('20220621212800'),
-('20220621212802'),
-('20220621212803'),
-('20220621212805'),
-('20220621212806'),
-('20220621212807'),
-('20220621212810'),
-('20220621212811'),
-('20220621212812'),
-('20220621212814'),
-('20220622095513'),
-('20220622095644'),
-('20220624132515'),
-('20220624150128'),
-('20220624150155'),
-('20220627154143'),
-('20220627154145'),
-('20220627154146'),
-('20220627154148'),
-('20220627154149'),
-('20220627154150'),
-('20220627154152'),
-('20220627154153'),
-('20220627154155'),
-('20220627154156'),
-('20220627154158'),
-('20220627154159'),
-('20220627154200'),
-('20220627154202'),
-('20220627154203'),
-('20220627154206'),
-('20220627154207'),
-('20220627154327'),
-('20220627154329'),
-('20220627154330'),
-('20220627154331'),
-('20220627154333'),
-('20220627154334'),
-('20220627154335'),
-('20220627154337'),
-('20220627154338'),
-('20220627154340'),
-('20220627154341'),
-('20220627154343'),
-('20220627154344'),
-('20220627154345'),
-('20220627154347'),
-('20220627154349'),
-('20220627154350'),
-('20220630082801'),
-('20220704183420'),
-('20220704183422'),
-('20220704183424'),
-('20220704183425'),
-('20220704183426'),
-('20220704183428'),
-('20220704183429'),
-('20220704183430'),
-('20220704183432'),
-('20220704183433'),
-('20220704183435'),
-('20220704183436'),
-('20220704183437'),
-('20220704183439'),
-('20220704183440'),
-('20220704183443'),
-('20220704183444'),
-('20220824102025'),
-('20220824190346'),
-('20220915144411'),
-('20220915144413'),
-('20220915144414'),
-('20220915144415'),
-('20220915144417'),
-('20220915144418'),
-('20220915144419'),
-('20220915144421'),
-('20220915144422'),
-('20220915144424'),
-('20220915144426'),
-('20220915144428'),
-('20220915144429'),
-('20220915144430'),
-('20220915144432'),
-('20220915144434'),
-('20220915144436'),
-('20220915144444'),
-('20220915144445'),
-('20220916105116'),
-('20220916105118'),
-('20220916105119'),
-('20220916105121'),
-('20220916105122'),
-('20220916105123'),
-('20220916105125'),
-('20220916105126'),
-('20220916105128'),
-('20220916105129'),
-('20220916105131'),
-('20220916105132'),
-('20220916105133'),
-('20220916105135'),
-('20220916105137'),
-('20220916105143'),
-('20220916105149'),
-('20220916105150'),
-('20230209153019');
+('20230209153019'),
+('20230420125603'),
+('20230420125634');
 
 

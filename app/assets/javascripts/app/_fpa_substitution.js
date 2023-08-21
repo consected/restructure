@@ -19,9 +19,11 @@ _fpa.substitution = class {
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
       if (!new_data.current_user_roles) {
         new_data.current_user_roles = {}
-        _fpa.state.current_user_roles.forEach(function (v) {
-          new_data.current_user_roles[v.id_underscore()] = v;
-        });
+        if (_fpa.state.current_user_roles && _fpa.state.current_user_roles.forEach) {
+          _fpa.state.current_user_roles.forEach(function (v) {
+            new_data.current_user_roles[v.id_underscore()] = v;
+          });
+        }
       }
     } else {
       var master_id = block.parents('.master-panel').first().attr('data-master-id');
@@ -100,7 +102,7 @@ _fpa.substitution = class {
         let tag = if_block[2]
         let vpair = _this.value_for_tag(tag, new_data)
         let tag_value = vpair[0];
-        if (tag_value && tag_value.length) {
+        if (tag_value && tag_value.toString().length) {
           text = text.replace(block_container, if_block[3] || '');
         }
         else {
