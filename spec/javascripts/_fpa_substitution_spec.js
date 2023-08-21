@@ -31,4 +31,56 @@ describe('substitutions', function () {
     expect(res).toEqual(expected_text)
 
   });
+
+  it("substitutes conditionally", function () {
+
+    var t = '<html><body><div><div class="caption-before"><p>{{#if id}}This is some content.{{else}}no id{{/if}}</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p></div><div>--</div><div class="caption-before">Done!</div></div></body></html>'
+    var expected_text = '<div><div class="caption-before cb_subs_done"><p>This is some content.</p><p>Related to master_id 1234. This is a name: TEST NAME BOB.</p></div><div>--</div><div class="caption-before cb_subs_done">Done!</div></div>'
+    var use_data = { id: 1, master_id: 1234, name: 'test name bob' };
+    var $t = $(t);
+
+    _fpa.form_utils.caption_before_substitutions($t, use_data)
+    var res = $t[0].outerHTML;
+    expect(res).toEqual(expected_text)
+  });
+
+  it("substitutes conditionally with else", function () {
+
+    var t = '<html><body><div><div class="caption-before"><p>{{#if id}}This is some content.{{else}}no id{{/if}}</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p></div><div>--</div><div class="caption-before">Done!</div></div></body></html>'
+    var expected_text = '<div><div class="caption-before cb_subs_done"><p>no id</p><p>Related to master_id 1234. This is a name: TEST NAME BOB.</p></div><div>--</div><div class="caption-before cb_subs_done">Done!</div></div>'
+    var use_data = { id: null, master_id: 1234, name: 'test name bob' };
+    var $t = $(t);
+
+    _fpa.form_utils.caption_before_substitutions($t, use_data)
+    var res = $t[0].outerHTML;
+    expect(res).toEqual(expected_text)
+  });
+
+  it("substitutes conditionally with current user roles", function () {
+
+    var t = '<html><body><div><div class="caption-before"><p>{{#if current_user_roles.role_1}}has role 1{{else}}no role{{/if}}</p></div></div></body></html>'
+    var expected_text = '<div><div class="caption-before cb_subs_done"><p>has role 1</p></div></div>'
+    var use_data = { id: null, master_id: 1234, name: 'test name bob' };
+    var $t = $(t);
+    _fpa.state.current_user_roles = ['role 2', 'role 1']
+
+    _fpa.form_utils.caption_before_substitutions($t, use_data)
+    var res = $t[0].outerHTML;
+    expect(res).toEqual(expected_text)
+
+  });
+
+  it("substitutes conditionally with current user roles", function () {
+
+    var t = '<html><body><div><div class="caption-before"><p>{{#if current_user_roles.role_1}}has role 1{{else}}no role{{/if}}</p></div></div></body></html>'
+    var expected_text = '<div><div class="caption-before cb_subs_done"><p>no role</p></div></div>'
+    var use_data = { id: null, master_id: 1234, name: 'test name bob' };
+    var $t = $(t);
+
+    _fpa.state.current_user_roles = ['role 2', 'role 3']
+
+    _fpa.form_utils.caption_before_substitutions($t, use_data)
+    var res = $t[0].outerHTML;
+    expect(res).toEqual(expected_text)
+  });
 });
