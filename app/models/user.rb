@@ -64,7 +64,7 @@ class User < ActiveRecord::Base
             length: {
               is: 2,
               allow_blank: true,
-              message: Settings::DoNotDisplayErrorMessage
+              message: ApplicationHelper::DoNotDisplayErrorMessage
             }
 
   validates :terms_of_use,
@@ -77,7 +77,7 @@ class User < ActiveRecord::Base
   validates :terms_of_use_accepted,
             presence: {
               if: -> { required_for_self_registration? },
-              message: Settings::DoNotDisplayErrorMessage
+              message: ApplicationHelper::DoNotDisplayErrorMessage
             }
 
   validate :prevent_disable_template_user

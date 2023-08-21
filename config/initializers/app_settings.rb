@@ -257,6 +257,9 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
 
+  # Countries for which GDPR specific terms of use should be shown
+  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
+
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
   # so it can be displayed in the server info admin view.
@@ -278,13 +281,6 @@ class Settings
     InvitationCode
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
-    DefaultCountrySelect
+    DefaultCountrySelect GdprCountryCodes
   ].freeze
-
-  DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
-
-  GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
-  DefaultTermsOfUseTemplate = 'ui new user registration terms default'
-
-  GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
+
   #
   # Hyphenated name (singular) of the current controller
   def hyphenated_name
@@ -271,11 +273,11 @@ module ApplicationHelper
 
   def remove_empty_error(errors)
     errors.messages.each do |key, messages|
-      if messages.include?(Settings::DoNotDisplayErrorMessage)
+      if messages.include?(DoNotDisplayErrorMessage)
         if messages.one?
           errors.delete(key)
         else
-          messages.delete(Settings::DoNotDisplayErrorMessage)
+          messages.delete(DoNotDisplayErrorMessage)
         end
       end
     end
