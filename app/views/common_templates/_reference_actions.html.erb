@@ -43,7 +43,7 @@
   {{#unless prevent_add_reference}}
     <% if cb %>
     <li class="list-group-item caption-before results-caption-before results-cb-action <%=caption_before_ref_type.to_s.hyphenate%> <%=elt_class%> <%=caption_before_ref_type.to_s.hyphenate%>-caption"
-    ><%= show_caption_before cb_key, caption_before, :show %></li>
+    ><%= show_caption_before cb_key, caption_before, :show, true %></li>
     <% end %>
     <%
     view_as_new = ref_config.dig(:view_as, :new)
