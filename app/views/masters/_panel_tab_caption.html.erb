@@ -1,9 +1,9 @@
-<% # Pass a symbol representing the caption key - either a category or resource name 
-# For example  %= render partial: 'masters/panel_tab_caption', locals: {panel: panel, cap_sym: resource} 
-  tab_caption = panel&.view_options&.tab_captions[cap_sym.to_s] if cap_sym && panel&.view_options&.tab_captions    
+<% # Pass a current_definition for an activity log
+# For example  %= render partial: 'masters/panel_tab_caption', locals: {current_definition: current_definition} 
+  tab_caption = current_definition&.configurations[:tab_caption] if current_definition&.configurations
   if tab_caption
   %>
-  <div class="well master-panel-tab-caption">
+  <div class="master-panel-tab-caption">
     <%= markdown_to_html Formatter::Substitution.substitute(tab_caption, tag_subs: nil) %>
   </div>
   <%
