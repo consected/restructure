@@ -1081,21 +1081,20 @@ _fpa.form_utils = {
 
         if (!a || a == '') return;
 
-        // If this target is pointed to by a tab bar that only allows a single item to be open
-        // run through the other tabs to make sure their targets get collapsed
-        $('.tabs-close-others').each(function () {
-          let link = $(this).find(`[data-target="${a}"]`);
-          $(this).find('a[data-target]').not('.collapsed').each(function () {
-            $($(this).attr('data-target')).collapse('hide');
-          })
-        })
-
         // Now show each of the collapsed parents
         $(a)
           .parents('.collapse')
           .each(function () {
             $(this).collapse('show');
+            const id = $(this).attr('id');
+            const links = $(`a[data-target="#${id}"]`).parents('.nav').find('.tabs-close-others a[data-target]').not(`.collapsed`).not(`[data-target="#${id}"]`)
+            // If this target is pointed to by a tab bar that only allows a single item to be open
+            // run through the other tabs to make sure their targets get collapsed
+            links.each(function () {
+              $($(this).attr('data-target')).collapse('hide');
+            });
           });
+
       })
       .addClass('attached-uncparents');
 
