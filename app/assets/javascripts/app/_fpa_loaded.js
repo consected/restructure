@@ -123,7 +123,9 @@ _fpa.loaded.default = function () {
     _fpa.cache.store('login-redirect-hash', {})
   }
 
-  // Ensure a sensible target is passed
+  // Ensure a sensible target is passed: 
+  // if a hash is too short or has an @ symbol
+  // the hash should be ignored
   if (target && target.length > 5 && target.indexOf('@') < 0) {
     // If we are on a login page, we need to store the hash, since it isn't passed to the server
     if ($('body.sessions').length) {
