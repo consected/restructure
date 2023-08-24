@@ -890,7 +890,7 @@ _fpa.form_utils = {
         const matches = href.match(re);
         if (!matches) return;
 
-        let new_href = `#click-target-mr-expander-${matches[1]}:toggle-target-scrollto-target@mr-expander-${matches[1]}`;
+        let new_href = `#caret-target-mr-expander-${matches[1]}:toggle-target-scrollto-target@mr-expander-${matches[1]}`;
         $(this).attr('href', new_href);
 
       }).addClass('attached-hash-mr-expander');
@@ -926,6 +926,31 @@ _fpa.form_utils = {
         $(target).click();
 
       }).addClass('attached-hash-click-target');
+
+    block
+      .find('a[href*="caret-target-"]')
+      .not('.attached-hash-caret-target')
+      .on('click', function () {
+        const href = $(this).attr('href');
+        const re = new RegExp('caret-target-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let target = matches[1];
+        if (target[0] !== '.') target = `#${target}`;
+        // If there is the target within this common-template-item block (if we are in one)
+        // use that as the target. Otherwise, just use the target exactly as specified.
+        var $target = $(target);
+        const $pos = $(this).parents('.common-template-item').find(target);
+        if ($pos.length) {
+          $target = $pos;
+        }
+
+        // Only click the target if the caret is marked as collapsed currently
+        if ($target.filter('.caret-target-collapsed').length) {
+          $target.click();
+        }
+      }).addClass('attached-hash-caret-target');
 
     block
       .find('[data-toggle~="clear"]')
@@ -977,8 +1002,16 @@ _fpa.form_utils = {
       .not('.attached-datatoggle-stt')
       .on('click', function () {
         if ($(this).attr('disabled')) return;
-        var a = $(this).attr('data-target');
-        _fpa.utils.jump_to_linked_item(a);
+        var target = $(this).attr('data-target');
+
+        // If there is the target within this common-template-item block (if we are in one)
+        // use that as the target. Otherwise, just use the target exactly as specified.
+        const $pos = $(this).parents('.common-template-item').find(target);
+        if ($pos.length) {
+          target = $pos;
+        }
+
+        _fpa.utils.jump_to_linked_item(target);
       })
       .addClass('attached-datatoggle-stt');
 
@@ -1021,6 +1054,16 @@ _fpa.form_utils = {
 
         if (!a || a == '') return;
 
+        // If this target is pointed to by a tab bar that only allows a single item to be open
+        // run through the other tabs to make sure their targets get collapsed
+        $('.tabs-close-others').each(function () {
+          let link = $(this).find(`[data-target="${a}"]`);
+          $(this).find('a[data-target]').not('.collapsed').each(function () {
+            $($(this).attr('data-target')).collapse('hide');
+          })
+        })
+
+        // Now show each of the collapsed parents
         $(a)
           .parents('.collapse')
           .each(function () {
@@ -1090,7 +1133,7 @@ _fpa.form_utils = {
 
             var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
             if (not_visible) {
-              _fpa.utils.jump_to_linked_item(a, -100, { no_highlight: true });
+              _fpa.utils.jump_to_linked_item(a, -150, { no_highlight: true });
             }
           };
 
@@ -1171,6 +1214,8 @@ _fpa.form_utils = {
           var el = $(this);
           $(this).removeClass('glyphicon-triangle-bottom');
           $(this).addClass('glyphicon-triangle-top');
+          $(this).removeClass('caret-target-collapsed');
+          $(this).addClass('caret-target-expanded');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1183,6 +1228,8 @@ _fpa.form_utils = {
           var el = $(this);
           $(this).addClass('glyphicon-triangle-bottom');
           $(this).removeClass('glyphicon-triangle-top');
+          $(this).removeClass('caret-target-expanded');
+          $(this).addClass('caret-target-collapsed');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
@@ -1652,25 +1699,42 @@ _fpa.form_utils = {
       .not('.setup-open-tab-br')
       .each(function () {
         $(this).on('click', function (ev) {
+          const done_class = 'opened-tab-before-request';
           var elid = $(this).attr('data-open-tab-before-request');
-          var tab_el = $(elid);
+          var tab_el = $(this).parents(`.panel-collapse`).find(elid)
+          if (tab_el.length === 0)
+            tab_el = $(elid);
           if (tab_el.length === 0 || !tab_el.hasClass('collapsed')) return;
 
           ev.preventDefault();
           $(this).addClass('prevent-first-ajax');
 
-          // Trigger a click on this tab
-          tab_el.click();
-          // Save the current link
-          var click_a = $(this);
-
           // Attach a post callback to the tab's target panel
           var panel_el = $(tab_el.attr('data-target'));
+          // Save the current link
+          var click_a = $(this);
+          click_a.removeClass(done_class);
+
+          // In the future click the original link again, which will run through the ajax call
+          // and then quit because the panel is not collapsed.
+          // Provide an option to drive this from the original callback, or
+          // if the panel has been opened manually in the past, just a delay.
           panel_el[0].app_post_callback = function () {
-            // Now click the original link again, which will run through the ajax call
-            // and then quit because the panel is not collapsed
+            if (click_a.hasClass(done_class)) return;
+
             click_a.click();
+            click_a.addClass(done_class);
           };
+          window.setTimeout(function () {
+            if (click_a.hasClass(done_class)) return;
+
+            click_a.click();
+            click_a.addClass(done_class);
+          }, 1000)
+
+          // Trigger a click on this tab
+          tab_el.click();
+
         });
       })
       .addClass('setup-open-tab-br');

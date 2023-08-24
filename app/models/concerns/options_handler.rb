@@ -44,6 +44,8 @@ module OptionsHandler
       params = params.symbolize_keys
 
       unrecognized = params.keys - self.class.configure_with_items
+      # Allow a nil entry, to enable cleanup of previously allowed items
+      unrecognized.delete_if { |u| params[u].nil? }
       if unrecognized.present?
         raise FphsException,
               "Unrecognized configuration params in #{self.class.name}: #{unrecognized.join(', ')}"

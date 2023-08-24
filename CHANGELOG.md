@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Updated] gems to address CVEs: Puma - CVE-2023-40175; Rails - CVE-2023-38037
+- [Fixed] css double border on certain blocks in activity logs
+- [Added] tab caption to activity log definitions
+- [Fixed] issue with data-open-tab-before-request if the panel had already opened
+- [Changed] mr-expander link hashes to use the context of the current activity log outer block, and to only expand if not already expanded
+
 ## [8.2.61] - 2023-08-17
 
 - [Fixed] "if" substitution conditions not recognizing integers as existing

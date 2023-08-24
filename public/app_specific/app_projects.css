@@ -392,6 +392,11 @@ a.btn.embedded-add-item-button {
   width: auto;
 }
 
+.results-panel .model-reference-list > .model-reference-new-block .model-reference-list > .model-reference-new-block {
+  border-left: 0;
+  margin-left: 0;
+}
+
 .results-panel .model-reference-list>.model-reference-new-block .list-group-item.edit-form-header {
   height: 0;
   padding-top: 0;
