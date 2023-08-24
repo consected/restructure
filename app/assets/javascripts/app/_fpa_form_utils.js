@@ -923,7 +923,16 @@ _fpa.form_utils = {
 
         let target = matches[1];
         if (target[0] !== '.') target = `#${target}`;
-        $(target).click();
+        if (target.indexOf('!last') > 0) {
+          target = target.replaceAll('!last', '')
+          var last = true;
+          // Search on id attribute, since jQuery will only return a single
+          // result if directly calling with #element-id 
+          if (target[0] === '#') target = `[id="${target.replace('#', '')}"]`;
+        }
+        let $target = $(target);
+        if (last) $target = $target.last();
+        $target.click();
 
       }).addClass('attached-hash-click-target');
 
@@ -938,6 +947,13 @@ _fpa.form_utils = {
 
         let target = matches[1];
         if (target[0] !== '.') target = `#${target}`;
+        if (target.indexOf('!last') > 0) {
+          target = target.replaceAll('!last', '')
+          var last = true;
+          // Search on id attribute, since jQuery will only return a single
+          // result if directly calling with #element-id 
+          if (target[0] === '#') target = `[id="${target.replace('#', '')}"]`;
+        }
         // If there is the target within this common-template-item block (if we are in one)
         // use that as the target. Otherwise, just use the target exactly as specified.
         var $target = $(target);
@@ -945,6 +961,7 @@ _fpa.form_utils = {
         if ($pos.length) {
           $target = $pos;
         }
+        if (last) $target = $target.last();
 
         // Only click the target if the caret is marked as collapsed currently
         if ($target.filter('.caret-target-collapsed').length) {
@@ -1003,6 +1020,13 @@ _fpa.form_utils = {
       .on('click', function () {
         if ($(this).attr('disabled')) return;
         var target = $(this).attr('data-target');
+        if (target.indexOf('!last') > 0) {
+          target = target.replaceAll('!last', '')
+          var last = true;
+          // Search on id attribute, since jQuery will only return a single
+          // result if directly calling with #element-id 
+          if (target[0] === '#') target = `[id="${target.replace('#', '')}"]`;
+        }
 
         // If there is the target within this common-template-item block (if we are in one)
         // use that as the target. Otherwise, just use the target exactly as specified.
@@ -1011,7 +1035,10 @@ _fpa.form_utils = {
           target = $pos;
         }
 
-        _fpa.utils.jump_to_linked_item(target);
+        let $target = $(target);
+        if (last) $target = $target.last();
+
+        _fpa.utils.jump_to_linked_item($target);
       })
       .addClass('attached-datatoggle-stt');
 
@@ -1101,6 +1128,14 @@ _fpa.form_utils = {
         }
 
         if (a) {
+          if (a.indexOf('!last') > 0) {
+            a = a.replaceAll('!last', '')
+            var last = true;
+            // Search on id attribute, since jQuery will only return a single
+            // result if directly calling with #element-id 
+            if (a[0] === '#') a = `[id="${a.replace('#', '')}"]`;
+          }
+
           // Only jump to the target if the current top and bottom of the block are off screen. Usually we
           // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
           // some data.
@@ -1110,7 +1145,9 @@ _fpa.form_utils = {
 
           var attempt_count = 0;
           var doscroll = function () {
-            var rect = $(a).get(0);
+            var $a = $(a);
+            if (last) $a = $a.last();
+            var rect = $a.get(0);
             if (!rect) {
               if (attempt_count > 10) {
                 return;
