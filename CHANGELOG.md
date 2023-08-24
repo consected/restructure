@@ -16,6 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] ability to address !last element when using hash toggles
+- [Fixed] UI error when reloading a page
+
 ## [8.2.63] - 2023-08-24
 
 - [Updated] gems to address CVEs: Puma - CVE-2023-40175; Rails - CVE-2023-38037
