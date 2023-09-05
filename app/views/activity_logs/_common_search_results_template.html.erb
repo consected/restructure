@@ -175,7 +175,7 @@
       <a data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign no-scroll-on-collapse btn-close-panel" title="close panel"></a>
     <% end %>
       <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name%></h4>
-  
+      <%= render partial: 'masters/panel_tab_caption', locals: {current_definition: current_definition} %>
       <% if hide_item_list_panel && !prevent_create%>
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}

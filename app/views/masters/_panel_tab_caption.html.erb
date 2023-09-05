@@ -1,0 +1,11 @@
+<% # Pass a current_definition for an activity log
+# For example  %= render partial: 'masters/panel_tab_caption', locals: {current_definition: current_definition} 
+  tab_caption = current_definition&.configurations[:tab_caption] if current_definition&.configurations
+  if tab_caption
+  %>
+  <div class="master-panel-tab-caption">
+    <%= markdown_to_html Formatter::Substitution.substitute(tab_caption, tag_subs: nil) %>
+  </div>
+  <%
+  end    
+%>
