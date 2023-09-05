@@ -374,6 +374,11 @@ a.btn.embedded-add-item-button {
   margin-left: 21px;
 } */
 
+.results-panel .model-reference-list > .model-reference-new-block .model-reference-list > .model-reference-new-block {
+  border-left: 0;
+  margin-left: 0;
+}
+
 .chosen-container-multi .chosen-choices {
   border: 1px solid rgb(204, 204, 204);
   background-color: rgb(248, 248, 248);
