@@ -10,7 +10,9 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   if (offset == null) offset = -50;
   if (options == null) options = {};
 
-  $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
+  if (!options.no_highlight) {
+    $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
+  }
 
   var isj = target instanceof jQuery;
   // Ensure the target is valid

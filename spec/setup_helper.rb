@@ -346,7 +346,7 @@ module SetupHelper
   # @param [String] sql_files list of SQL files to be run through PSQL
   # @param [String] config_dir location of the configuration file
   # @param [String] config_fn filename of the configuration file (must have file extension .json or .yaml)
-  # @return [Array(Admin::AppType, Hash)] returns the results from Admin::AppType.import_config
+  # @return [Array(Admin::AppType, Hash)] returns the results from Admin::AppTypeImport.import_config
   #
   def self.setup_app_db(sql_source_dir, sql_files)
     sql_files.each do |fn|
@@ -368,8 +368,10 @@ module SetupHelper
 
     format = config_fn.split('.').last.to_sym
 
-    res = Admin::AppType.import_config File.read(Rails.root.join(config_dir, config_fn)), admin, name: name,
-                                                                                                 format: format
+    res = Admin::AppTypeImport.import_config File.read(Rails.root.join(config_dir, config_fn)),
+                                             admin,
+                                             name: name,
+                                             format: format
 
     reload_configs
 

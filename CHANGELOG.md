@@ -16,6 +16,90 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] location of app and organization specific directories and files to move them to restructure-apps repo, so we can move to real forking model for repositories
+
+### Transferred from Harvard @8.2.76 - 2023-09-19
+
+#### [8.2.76] - 2023-09-19
+
+- [Fixed] version ordering to ensure that versions with very close timestamps are ordered correctly
+- [Changed] handling of dialog substitutions where the tag is missing, to prevent exceptions that are hard to diagnose
+- [Changed] loading of dynamic definitions to avoid loading items where the available schemas prevent access to the underlying table
+- [Added] singular association for dynamic defs with a subject view handler
+- [Fixed] valid record type options to allow selection of any valid key name
+
+#### [8.2.75] - 2023-09-18
+
+- [Fixed] issue adding new views
+
+#### [8.2.74] - 2023-09-18
+
+- [Changed] handling of dynamic model view updates to only update SQL if definition changed. Comment changes now don't trigger the update. And dependent objects are listed if the view can't update because of them
+- [Fixed] error reporting and startup failures on import and when config libraries don't contain YAML references
+- [Fixed] error page css path
+
+#### [8.2.73] - 2023-09-14
+
+- [Added] app type import "skip fail" option and provide partial success and improved failure messages
+- [Fixed] admin panel raising exception if a model loaded but there was no underlying table/view
+- [Fixed] incorrect migration being generated if the model exists but underlying table/view doesn't
+
+#### [8.2.72] - 2023-09-12
+
+- [Fixed] issue generating unnecessary migrations during app import
+- [Changed] presentation of app type import
+- [Fixed] registration of user from template having role not assigned to an app type
+- [Added] dry-run and update with changes (regardless of updated_at timestamp) options to app type import
+- [Changed] implementation of app type importing for simplicity and to avoid errors
+- [Fixed] issue disabling dynamic definitions in admin panel
+
+#### [8.2.71] - 2023-09-11
+
+- [Fixed] tracker_history_id as an override in subject view handler for edge cases
+
+#### [8.2.70] - 2023-09-07
+
+- [Added] tracker_history_id as an override in subject view handler
+- [Added] override ability for data attribute in external ids
+- [Added] positioning of details panel components, by making dynamic models with negative position values appear before standard subject, contact and info blocks
+- [Added] auto refresh after restarting server through server info
+- [Added] instructions for adding dialog template when none are in the current dynamic def
+
+#### [8.2.69] - 2023-09-07
+
+- [Added] dialog_before list in dynamic def admin panel (and cleaned up styling)
+- [Added] info to help with adding config libraries to dynamic definitions in the admin panel
+- [Added] message template export for "ui page css/js" templates
+- [Changed] template retrieval through Ajax to cache
+- [Changed] "show caption before" to ignore missing tag by default
+- [Changed] app type import to apply models in order of update and only update new items (unless force is set)
+- [Changed] listing of libraries included in dynamic definitions admin
+- [Changed] export of app type configurations to avoid generating migrations every time
+- [Fixed] flash issues when session ended or for AJAX requests
+- [Fixed] regression of export of dialogs related to dynamic models
+
+#### [8.2.68] - 2023-09-05
+
+- [Bumped] version
+
+#### [8.2.67] - 2023-09-05
+
+- [Added] improved UI for app types and upload
+- [Added] server configuration checks with quick indicator on admin and server info pages
+- [Added] admin app type documentation
+- [Added] the option to import an app type forcing update of all components, rather than relying on the updated_at timestamp
+- [Added] status information and additional setup details to admin app type list
+- [Added] status information about the app and its configuration to app type import results
+- [Changed] viewing of components related to the current app type, by adding a category if one is available
+- [Changed] the error telling a user they don't have access to an app to make it clearer what the possible issue is
+- [Changed] handling of UI template load failure to improve information to end user
+- [Fixed] highlight resetting of hash linked items
+- [Fixed] disabling of app types incorrectly on import
+- [Fixed] generation of migrations that have index names that are too long for Postgres
+- [Fixed] script error reading options from command line for filestore setups
+
 ## [8.2.66] - 2023-09-05
 
 ### Transferred from Viva @8.2.65 - 2023-09-05

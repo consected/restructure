@@ -4,7 +4,7 @@
 # and ensuring correct deployment
 class Admin::ServerInfoController < AdminController
   def index
-    si = Admin::ServerInfo.new(current_admin)
+    @server_info = si = Admin::ServerInfo.new(current_admin)
 
     @app_settings = si.app_settings
     @nfs_store_settings = si.nfs_store_settings
@@ -15,6 +15,8 @@ class Admin::ServerInfoController < AdminController
     @disk_usage = si.disk_usage
     @instance_id = si.instance_id
     @nfs_store_mount_dirs = si.nfs_store_mount_dirs
+    @configuration_successful = si.configuration_successful
+    @configuration_failed_reason = si.configuration_failed_reason
     render 'admin/server_info/index'
   end
 

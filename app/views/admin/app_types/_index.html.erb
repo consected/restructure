@@ -5,7 +5,10 @@
       <%= show_filters %>
     </p>
     <%= render partial: 'head_info' %>
-    
+    <% 
+      current_search_paths = Admin::MigrationGenerator.current_search_paths || [] 
+      active_ids = Admin::AppType.active_app_types.pluck(:id)
+    %>
     <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
     <table class="table tablesorter admin-list">
       <thead>
@@ -14,33 +17,66 @@
           <th>ID</th>
           <th>Name</th>
           <th>Label</th>
-          <th>Default Schema Name</th>
+          <th>Default Schema</th>
           <th>Active on Server?</th>
-          <th>Disabled</th>
-          <th>Last Admin Update</th>
-          <th>Export</th>
-          <th>Filestore setup</th>
+          <th>Admin has Access?</th>
+          <th>Admin Links</th>
+          <th>Additional Setup</th>
+          <th>Admin</th>
         </tr>
       </thead>
       <tbody>
-        <% objects_instance.each do |list_item| %>
+        <% objects_instance.each do |list_item| 
+        
+            user_has_access = Admin::AppType.all_available_to(current_user)&.find { |app| app.id == list_item.id }
+        %>
           <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
             <td><%= admin_edit_btn list_item.id%> </td>
-            <td><%= list_item.id %></td>
-            <td><%= list_item.name %></td>
+            <td><%= link_to list_item.id, authenticated_user_root_path(use_app_type: list_item.name), title: 'switch current user to this app' %></td>
+            <td><%= link_to list_item.name, admin_app_type_path(list_item, show_components: true), target: '_blank', title: 'show components' %></td>
             <td><%= list_item.label %></td>
-            <td><%= list_item.default_schema_name %></td>
-            <td><%= list_item.active_on_server? ? 'yes' : '<b>no</b>'.html_safe %></td>
-            <td><%= list_item.disabled ? 'disabled' : ''%></td>
-            <td><%= list_item.admin_name %></td>
+            <td><%= list_item.default_schema_name %>
+              <% unless current_search_paths.include?(list_item.default_schema_name) %>
+                <span class="glyphicon glyphicon-exclamation-sign error-mark" title="schema not in search path"></span>
+              <% end %>
+            </td>
+            <td>
+                <%= if list_item.active_on_server?
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                elsif active_ids&.include?(list_item.id) || !active_ids || active_ids.empty?
+                  '<span class="glyphicon glyphicon-exclamation-sign error-mark-in-circle" title="app active but schema not in search path"></span>'.html_safe
+                else
+                  "<span class=\"val-unchecked\"></span>".html_safe  
+                end
+                %>            
+            </td>
+            <td>
+                <%= if user_has_access
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                else
+                  '<span class="val-unchecked" title="user has not been granted user access control for this app_type"></span>'.html_safe  
+                end
+                %>            
+            </td>            
             <td>
             <% if list_item.active_on_server? %>
-            <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml), target: '_blank' %> |
-            <%= link_to 'export migrations', export_migrations_admin_app_type_path(list_item), target: '_blank' %> |
-            <%= link_to 'components', admin_app_type_path(list_item, show_components: true), target: '_blank' %>
+            <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml), target: '_blank' %> 
+            <%= link_to 'export migrations', export_migrations_admin_app_type_path(list_item), target: '_blank' %> 
             <% end %>
             </td>
-            <td><code><% Rails.env.production? ? 'RAILS_ENV=production ' : ''%>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
+            <td>
+            <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(list_item.id) %>
+            <p>Configure the filestore app filesystem</p>
+            <pre class="full-width"><code><%= Rails.env.production? ? 'RAILS_ENV=production' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=list_item.id%></code></pre>
+            <% end %>
+            <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(list_item.id)  %>
+            <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
+            <pre class="full-width"><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=list_item.id%></code></pre>
+            <% end %>
+            </td>
+            <td class="admin-item-admin-infos">
+              <%= admin_last_updated_by_icon(list_item) %>
+            </td>
           </tr>
         <% end %>
       </tbody>

@@ -131,7 +131,10 @@ module AppTypeChange
                                    .find { |app| app.name == app_type_requested }&.id
                                end
 
-    raise FphsException, "App type requested was not found: #{app_type_requested}" unless @app_type_requested_id
+    unless @app_type_requested_id
+      raise FphsException,
+            "App type requested was not found, or you may not have access to it: #{app_type_requested}"
+    end
 
     @app_type_requested_id
   end

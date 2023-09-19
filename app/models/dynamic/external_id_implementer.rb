@@ -337,6 +337,9 @@ module Dynamic
     end
 
     def data
+      res = super
+      return res unless res.blank?
+
       external_id
     end
 

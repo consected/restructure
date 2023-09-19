@@ -214,11 +214,14 @@ class Imports::Import < ActiveRecord::Base
 
   #
   # Called to set up the models that accept import
+  # Only logs an exception, to avoid
   def self.setup_accepted_models
     accepts_models.each do |m|
       define_method :"#{m}_attributes=" do |attrs|
       end
     end
+  rescue StandardError => e
+    Rails.logger.error "Failed to setup_accepted_models: #{e}\n#{e.backtrace.join("\n")}"
   end
 
   private

@@ -11,13 +11,14 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name, :dynamic_def, :app_type_name
+                :class_name, :dynamic_def, :app_type_name, :view_sql_changed
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
                  no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
                  resource_type: nil,
                  view_sql: nil,
+                 view_sql_changed: nil,
                  allow_migrations: nil,
                  all_referenced_tables: nil,
                  dynamic_def: nil)
@@ -32,6 +33,7 @@ class Admin::MigrationGenerator
     self.belongs_to_model = belongs_to_model
     self.db_configs = db_configs
     self.view_sql = view_sql
+    self.view_sql_changed = view_sql_changed
     self.all_referenced_tables = all_referenced_tables
     self.dynamic_def = dynamic_def
 
@@ -420,8 +422,9 @@ class Admin::MigrationGenerator
       next unless v[:type] && current_type
 
       expected_type = v[:type]&.to_sym
-      current_type = :timestamp if current_type == :datetime
-      changed[k.to_s] = expected_type if current_type != expected_type
+      alt_current_type = nil
+      alt_current_type = :timestamp if current_type == :datetime
+      changed[k.to_s] = expected_type if current_type != expected_type && alt_current_type != expected_type
     end
 
     if belongs_to_model
@@ -477,7 +480,7 @@ class Admin::MigrationGenerator
       self.no_master_association = #{!!no_master_association}
       #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
-      #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields.join(' ')}]"}
+      #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields&.join(' ')}]"}
           \# added: #{added}
           \# removed: #{removed}
           \# changed type: #{changed}
@@ -503,7 +506,7 @@ class Admin::MigrationGenerator
     <<~ARCONTENT
       #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
-          self.prev_fields = %i[#{prev_fields.join(' ')}]
+          self.prev_fields = %i[#{prev_fields&.join(' ')}]
       #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
       #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
           create_or_update_dynamic_model_view
@@ -529,6 +532,8 @@ class Admin::MigrationGenerator
         self.view_sql = <<~VIEWSQL
           #{view_sql}
         VIEWSQL
+
+        self.view_sql_changed = #{!!view_sql_changed}
       VSTEXT
     end
 
@@ -632,14 +637,13 @@ class Admin::MigrationGenerator
     self.class.tables_and_views_reset!
 
     true
-  rescue StandardError => e
+  rescue FphsException, StandardError => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
-  rescue FphsException => e
-    FileUtils.mkdir_p db_migration_failed_dirname
-    FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
+    bt = e.backtrace
+          .reject { |m| m.include?('/vendor/bundle/ruby/') }
+          .join("\n")
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{bt}"
   end
 
   #

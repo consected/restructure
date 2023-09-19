@@ -69,18 +69,7 @@
   <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
 </div>
 <% end %>
-<% if object_instance.persisted? && object_instance.options_text %>
-<div class="activity-list-libraries">
-  <label>libraries</label>
-  <ul class="al-reference-list">
-  <% OptionConfigs::ExtraOptions.requested_libraries(object_instance.options_text).each do |l| %>
-  <li>
-    <%= link_to link_label_open_in_new("#{l[:category]} - #{l[:name]}"), admin_config_libraries_path(filter: l), target: 'configlibs' %>
-    <br/>
-    <code># @library <%= "#{l[:category]}  #{l[:name]}" %></code>
-  </li>
-  <% end %>
-  </ul>
-</div>
-<% end %>
+<%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
+<%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
+
 

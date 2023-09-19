@@ -152,7 +152,7 @@ RSpec.describe 'Export an app configuration', type: :model do
     @activity_log.disabled = false
     @activity_log.save!
 
-    res, results = Admin::AppType.import_config(config, @admin, name: 'new_name')
+    res, results = Admin::AppTypeImport.import_config(config, @admin, name: 'new_name')
 
     expect(results).to be_a Hash
 
