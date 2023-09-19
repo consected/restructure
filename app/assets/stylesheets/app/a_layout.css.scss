@@ -55,6 +55,7 @@ body#body-top {
   // .sessions represents the Devise sessions controller (sign in)
   // .registrations represents the Devise registrations controller (self registration)
   &.status-compiled,
+  &.status-failed-compilation,
   &.sessions,
   &.confirmations,
   &.passwords,

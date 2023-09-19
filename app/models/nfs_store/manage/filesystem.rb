@@ -11,7 +11,9 @@ module NfsStore
         attr_accessor :nfs_store_directory,
                       :group_id_range,
                       :containers_dirname,
-                      :use_parent_sub_dir
+                      :use_parent_sub_dir,
+                      :configuration_successful,
+                      :configuration_failed_reason
       end
 
       # Set the temp directory (and create it if necessary)
@@ -50,6 +52,18 @@ module NfsStore
         parts << app_dir
         parts << containers_dirname unless containers_dirname.blank?
         File.join parts
+      end
+
+      #
+      # Check if the supplied app type has a mounted filesystem path, for the specified role
+      # If the *role_name* is not specified, the first valid
+      # NFS store role name for the server will be used
+      # @param [Integer] app_type_id
+      # @param [String] role_name - optional
+      # @return [true|false]
+      def self.app_type_containers_path_exists?(app_type_id, role_name = nil)
+        role_name ||= NfsStore::Manage::Group.valid_role_names.first
+        Dir.exist?(app_type_containers_path(app_type_id, role_name))
       end
 
       # Get the group ID gid based on the directory ownership of the 'containers' directory

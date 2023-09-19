@@ -85,7 +85,11 @@ module UserHandler
     def valid_rec_types
       return nil unless attribute_names.include?('rec_type')
 
-      Classification::GeneralSelection.selector_attributes([:value], item_type: "#{assoc_inverse}_type").map(&:first)
+      Classification::GeneralSelection.selector_attributes(
+        [:value],
+        item_type: ["#{assoc_inverse}_type",
+                    "#{assoc_inverse}_rec_type"]
+      ).map(&:first).uniq
     end
 
     # A secondary key is a field that can be used to uniquely identify a record. It is not a formal key,

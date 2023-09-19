@@ -5,7 +5,6 @@ class Admin
     self.table_name = 'app_types'
     include AdminHandler
     include SelectorCache
-    include AppTypeImport
     include AppTypeExport
 
     has_many :user_access_controls, -> { order id: :asc }, autosave: true, class_name: 'Admin::UserAccessControl'
@@ -22,6 +21,7 @@ class Admin
 
     after_create :add_template_access
     after_create :setup_migrations
+    after_create :add_admin_user_access
 
     attr_accessor :associated_external_identifier_names,
                   :associated_activity_log_names,
@@ -47,19 +47,23 @@ class Admin
     end
 
     def self.all_ids_available_to(user)
+      return unless user
+
       Rails.cache.fetch("all_app_type_ids_available_to::#{user.id}") do
         all_available_to(user).map(&:id)
       end
     end
 
     def self.all_available_to(user)
+      return unless user
+
       atavail = []
       olat = Settings::OnlyLoadAppTypes
       active.each do |a|
         hat = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: a.id)
         atavail << hat.app_type if hat && (!olat || hat.app_type_id.in?(olat))
       end
-      atavail
+      atavail.compact
     end
 
     def self.all_by_name
@@ -225,13 +229,12 @@ class Admin
           c.dialog_before.each do |_d, v|
             res = Admin::MessageTemplate
                   .active
-                  .where(
+                  .find_by(
                     name: v[:name],
                     message_type: 'dialog',
                     template_type: 'content'
                   )
-                  .first
-            ms << res
+            ms << res if res
           end
           c.save_trigger.each do |_d, st|
             ns = st[:notify] || []
@@ -242,9 +245,9 @@ class Admin
               ct = v[:content_template]
               mt = v[:type]
 
-              res = Admin::MessageTemplate.active.where(name: lt, message_type: mt, template_type: 'layout').first
+              res = Admin::MessageTemplate.active.find_by(name: lt, message_type: mt, template_type: 'layout')
               ms << res if res
-              res = Admin::MessageTemplate.active.where(name: ct, message_type: mt, template_type: 'content').first
+              res = Admin::MessageTemplate.active.find_by(name: ct, message_type: mt, template_type: 'content')
               ms << res if res
             end
           end
@@ -255,16 +258,28 @@ class Admin
           c.dialog_before.each do |_d, v|
             res = Admin::MessageTemplate
                   .active
-                  .where(
+                  .find_by(
                     name: v[:name],
                     message_type: 'dialog',
                     template_type: 'content'
                   )
-                  .first
-            ms << res
+            ms << res if res
           end
         end
       end
+
+      Admin::MessageTemplate
+        .active
+        .where(
+          name: ["ui page css - #{name}", "ui page js - #{name}"],
+          message_type: 'plain',
+          template_type: 'content'
+        )
+        .each do |res|
+        ms << res if res
+      end
+
+      ms.compact!
       ms.sort { |a, b| a.id <=> b.id }.uniq
     end
 
@@ -313,6 +328,21 @@ class Admin
 
       migration_generator = Admin::MigrationGenerator.new(default_schema_name)
       migration_generator.add_schema
+    end
+
+    #
+    # Immediately after creating an app type, add an explicit user access control
+    # for the  admin's matching user
+    def add_admin_user_access
+      user = current_admin.matching_user
+      return true unless user
+
+      Admin::UserAccessControl.create app_type: self,
+                                      access: :read,
+                                      resource_type: :general,
+                                      resource_name: :app_type,
+                                      user: user,
+                                      current_admin: current_admin
     end
   end
 end

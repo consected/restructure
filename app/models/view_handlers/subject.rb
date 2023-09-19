@@ -9,6 +9,18 @@ module ViewHandlers
     included do
       validate :dates_sensible
       validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?
+
+      # If the class is a dynamic definition, add a singular association, allowing a single
+      # subject info to be requested for a Master. Substitutions for example use this to get
+      # subject_info.last_name as opposed to subject_infos.last_name
+      if respond_to? :definition
+        Master.has_one definition.model_association_name.to_s.singularize.to_sym,
+                       -> { order(Master.subject_info_rank_order_clause) },
+                       class_name: "DynamicModel::#{definition.model_class_name}",
+                       foreign_key: definition.foreign_key_name,
+                       primary_key: definition.primary_key_name,
+                       inverse_of: :master
+      end
     end
 
     class_methods do
@@ -22,6 +34,10 @@ module ViewHandlers
       def category
         :subjects
       end
+    end
+
+    def tracker_history_id
+      super if defined? super
     end
 
     def accuracy_rank

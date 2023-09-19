@@ -519,6 +519,8 @@ module OptionConfigs
     # @param [String] content_to_update (will not be updated)
     # @return [String] updated content
     def self.include_libraries(content_to_update)
+      return unless content_to_update
+
       content_to_update = content_to_update.dup
       reg = LibraryMatchRegex
       res = content_to_update.match reg

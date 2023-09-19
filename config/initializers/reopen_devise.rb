@@ -75,6 +75,8 @@ Rails.application.config.to_prepare do
   Devise::SessionsController.send(:after_action) do
     record = resource
 
+    flash.discard if action_name == 'destroy'
+
     if record&.id && record&.password_expiring_soon?
       pe = record.password_expiring_soon?
       if pe > 0

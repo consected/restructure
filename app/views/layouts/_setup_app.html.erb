@@ -40,8 +40,8 @@
     _fpa.loaded.default();
   }
 
-  <% if current_user&.app_type_id %>
-  $.get('/pages/<%= template_version %>/template').done(function(data) {
+  <% if current_user&.app_type_id && !(controller_name == 'app_types' && action_name == 'upload') %>
+  $.get({ url: '/pages/<%= template_version %>/template', cache: true }).done(function(data) {
     $('body').append(data);
 
     window.setTimeout(function() {
@@ -52,6 +52,7 @@
     console.log(jqXHR, textStatus, errorThrown);
     <% unless Rails.env.test? %>
     _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
+    $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
     <% end %>
     _fpa.cache.clean();
   });

@@ -1,0 +1,21 @@
+<% if object_instance.persisted? && object_instance.options_text 
+     libs = OptionConfigs::ExtraOptions.requested_libraries(object_instance.options_text) %>
+<div class="activity-list-libraries">
+  <label>libraries</label>
+  <% if libs.present? %>
+  <ul class="al-reference-list">  
+  <% libs.each do |l| %>
+  <li>
+    <%= link_to link_label_open_in_new("#{l[:category]} - #{l[:name]}"), admin_config_libraries_path(filter: l), target: "_blank" %>
+    <br/>
+    <code># @library <%= "#{l[:category]}  #{l[:name]}" %></code>
+  </li>
+  <% end %>
+  </ul>
+  <% else %>
+    <p>Add a library with <code># @library [category] [name]</code> after adding a
+    <%= link_to link_label_open_in_new("config library"), admin_config_libraries_path, target: "_blank" %>
+    </p>
+  <% end %>
+</div>
+<% end %>

@@ -11,11 +11,26 @@ table.admin-list tbody {
   td pre {
     max-width: 70%;
   }
+
+  td pre.full-width {
+    max-width: 100%;
+  }
 }
 
 .field_with_errors {
   display: inline;
   background-color: #fff6bf;
+}
+
+.error-mark, .error-mark-in-circle {
+  color: #aa0000;
+}
+
+.error-mark-in-circle {
+  border-radius: 100%;
+  border: 1px solid #b4b4b4;
+  padding: 0.05em;
+  font-size: 110%;
 }
 
 .admin-edit-form {
