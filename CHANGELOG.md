@@ -18,6 +18,8 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Changed] location of app and organization specific directories and files to move them to restructure-apps repo, so we can move to real forking model for repositories
+
 ### Transferred from Harvard @8.2.76 - 2023-09-19
 
 #### [8.2.76] - 2023-09-19
