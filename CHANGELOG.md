@@ -16,7 +16,28 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.66] - 2023-09-05
+
+### Transferred from Viva @8.2.65 - 2023-09-05
+
+#### [8.2.65] - 2023-08-24
+
+- [Fixed] uncollapse-target-parents UI option
+
+#### [8.2.64] - 2023-08-24
+
+- [Added] ability to address !last element when using hash toggles
+- [Fixed] UI error when reloading a page
+
+#### [8.2.63] - 2023-08-24
+
+- [Updated] gems to address CVEs: Puma - CVE-2023-40175; Rails - CVE-2023-38037
+- [Fixed] css double border on certain blocks in activity logs
+- [Added] tab caption to activity log definitions
+- [Fixed] issue with data-open-tab-before-request if the panel had already opened
+- [Changed] mr-expander link hashes to use the context of the current activity log outer block, and to only expand if not already expanded
+
+## [8.2.62] - 2023-08-21
 
 ### Transferred from Harvard @8.2.60 - 2023-08-21
 
