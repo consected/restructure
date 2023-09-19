@@ -1,14 +1,14 @@
 <div class="container-fluid admin-head-blocks panel panel-default">
   <div class="row">
     <div class="col-md-6 admin-head-block">
-      <p class="h4">Active in Settings</p>
+      <p class="h4">Active Apps</p>
       <ul class="admin-tag-list">
         <% Admin::AppType.active_app_types.pluck(:name).each do |t|%>
           <li><%=t%></li>
         <% end %>
       </ul>
     </div>
-    <div class="col-md-12 admin-head-block">
+    <div class="col-md-6 admin-head-block">
       <p class="h4">Database Search Path</p>
       <ul class="admin-tag-list">
         <% Admin::MigrationGenerator.current_search_paths.each do |t|%>
@@ -16,7 +16,7 @@
         <% end %>
       </ul>
     </div>
-    <div class="col-md-6 admin-head-block">
+    <div class="col-md-12 admin-head-block">
       <%= render partial: 'upload_form' %>
     </div>
   </div>

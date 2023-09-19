@@ -84,7 +84,7 @@
       
         <div class="row">
           <div class="col-sm-6">
-            <h3>Status</h3>
+            <h3>Status <%= render partial: 'pages/admin_status_indicators' %></h3>
             <ul class="nav">
               <% if current_admin.can_admin?(:message_notifications)%><li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li><%end%>
               <% if current_admin.can_admin?(:job_reviews)%><li class="nav"><%= link_to "External ID Details", admin_external_identifier_details_path %> </li><%end%>

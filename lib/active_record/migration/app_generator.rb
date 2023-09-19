@@ -17,7 +17,7 @@ module ActiveRecord
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
                       :requested_action, :resource_type, :prev_table_name, :view_sql, :all_referenced_tables,
-                      :class_name
+                      :class_name, :view_sql_changed
       end
 
       def force_rollback
@@ -204,7 +204,7 @@ module ActiveRecord
               }, foreign_key: true
             end
             create_fields t
-            t.references :user, index: true, foreign_key: true
+            t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
             t.timestamps null: false
           end
 
@@ -215,7 +215,7 @@ module ActiveRecord
               t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
             end
             create_fields t, true
-            t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
+            t.references :user, index: { name: "#{rand_id}_hist_user_idx" }, foreign_key: true
             t.timestamps null: false
 
             t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" },
@@ -254,6 +254,13 @@ module ActiveRecord
       end
 
       def create_dynamic_model_view
+        return unless view_sql_changed
+
+        if model_is_view
+          deps = get_dependent_objects(schema, table_name)
+          extra = "\ndependent objects:\n#{deps.to_yaml}\n\n"
+        end
+
         reversible do |dir|
           dir.up do
             puts "-- create or replace view #{schema}.#{table_name}"
@@ -265,7 +272,7 @@ module ActiveRecord
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
-        raise e unless force_rollback
+        raise "#{e}\n#{extra}" unless force_rollback
       end
 
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -964,7 +971,7 @@ module ActiveRecord
       end
 
       def dynamic_model_view_sql
-        return unless view_sql&.strip&.present?
+        return unless view_sql&.strip&.present? && view_sql_changed
 
         <<~DO_TEXT
           DROP VIEW if exists #{schema}.#{table_name};
@@ -1083,6 +1090,26 @@ module ActiveRecord
         else
           "DROP FUNCTION #{trigger_fn_name}() CASCADE"
         end
+      end
+
+      def get_dependent_objects(schema, table_name)
+        res = ActiveRecord::Base.connection.execute <<~END_SQL
+          SELECT DISTINCT v.oid::regclass AS view
+          FROM pg_depend AS d      -- objects that depend on the table
+            JOIN pg_rewrite AS r  -- rules depending on the table
+                ON r.oid = d.objid
+            JOIN pg_class AS v    -- views for the rules
+                ON v.oid = r.ev_class
+          WHERE#{' '}
+          --v.relkind = 'v'    -- only interested in views
+            --AND#{' '}
+            d.classid = 'pg_rewrite'::regclass
+            AND d.refclassid = 'pg_class'::regclass
+            AND d.deptype = 'n'    -- normal dependency
+            AND d.refobjid = '#{schema}.#{table_name}'::regclass;
+        END_SQL
+
+        res.to_a
       end
     end
   end

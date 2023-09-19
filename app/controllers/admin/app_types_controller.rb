@@ -19,6 +19,15 @@ class Admin::AppTypesController < AdminController
   def upload
     uploaded_io = params[:config]
 
+    case params[:force_update]
+    when 'yes'
+      force_update = :force
+    when 'changed'
+      force_update = :changed
+    end
+
+    dry_run = (params[:dry_run] == 'yes')
+    skip_fail = (params[:skip_fail] == 'yes')
     f = params[:upload_format]
     if f.present?
       raise FphsException, "Invalid upload format. Allowed formats: #{ValidFormats}" unless f.in? ValidFormats
@@ -26,27 +35,17 @@ class Admin::AppTypesController < AdminController
       f = 'json'
     end
 
-    begin
-      @app_type, results = Admin::AppType.import_config(uploaded_io.read, current_admin, format: f.to_sym)
-    rescue StandardError, FphsException => e
-      @message = 'FAILED'
-      @primary = "#{e}\n#{e.backtrace.join("\n")}"
-      render 'upload_results'
-      return
-    end
+    @res_obj, @results = Admin::AppTypeImport.import_config(uploaded_io.read,
+                                                            current_admin,
+                                                            format: f.to_sym,
+                                                            force_update: force_update,
+                                                            dry_run: dry_run,
+                                                            skip_fail: skip_fail)
 
-    @message = 'SUCCESS'
-    @primary = case f
-               when 'json'
-                 JSON.pretty_generate results
-               when 'yaml'
-                 YAML.dump results
-               end
+    render 'upload_results', locals: { dry_run: dry_run }
 
     Rails.cache.clear
     AppControl.restart_server
-
-    render 'upload_results'
   end
 
   def show
@@ -88,6 +87,15 @@ class Admin::AppTypesController < AdminController
 
   def routes_reload
     DynamicModel.routes_reload
+  end
+
+  def default_index_order
+    { id: :desc }
+  end
+
+  def set_objects_instance(list)
+    list = list.to_a.sort_by { |a| a.active_on_server? ? 0 : 1 }
+    instance_variable_set("@#{objects_name}", list)
   end
 
   private

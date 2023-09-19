@@ -10,6 +10,7 @@ class Admin::ServerInfo
     containers_dirname
     use_parent_sub_dir
     group_id_range
+    configuration_successful
   ].freeze
 
   attr_accessor :current_admin
@@ -116,6 +117,22 @@ class Admin::ServerInfo
     IO.popen("ls #{dir}/gid#{group_id_range.first}").read
   rescue StandardError
     'mount dirs not available'
+  end
+
+  def configuration_successful
+    configuration_failed_reason.blank?
+  end
+
+  def configuration_failed_reason
+    return @configuration_failed_reason unless @configuration_failed_reason.nil?
+
+    @configuration_failed_reason = []
+
+    unless NfsStore::Manage::Filesystem.configuration_successful
+      @configuration_failed_reason += NfsStore::Manage::Filesystem.configuration_failed_reason
+    end
+
+    @configuration_failed_reason
   end
 
   #

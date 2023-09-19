@@ -27,6 +27,14 @@
 
    <div class="panel-body panel-with-sublists master-details-panel">
     <div class="row">
+      <%
+        dm = DynamicModel.active_model_configurations.where(category: 'details')
+        dm = dm.select {|m| m.model_association_name.in? true_master_viewables}.sort {|a,b| (a.position.to_i) <=> (b.position.to_i)}
+        earlier_dms = dm.select {|d| d.position.to_i < 0}
+        later_dms = dm.select {|d| d.position.to_i >= 0}
+      %>        
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: earlier_dms, viewable: master_viewables, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
+
       <% if master_viewables[:player_infos] || master_viewables[:pro_infos] %>
       <div class="<%= hide_pro_info_tabs? || 
                       !current_user.has_access_to?(:access, :table, :player_infos) || 
@@ -111,12 +119,7 @@
 
       </div>
       <% end %>
-
-      <%
-        dm = DynamicModel.active_model_configurations.where(category: 'details')
-        dm = dm.select {|m| m.model_association_name.in? true_master_viewables}
-      %>
-      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: master_viewables, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: later_dms, viewable: master_viewables, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
     </div>
    </div>
 

@@ -160,15 +160,19 @@ module ApplicationHelper
   # @param [String] key - field key
   # @param [Hash] captions - defined captions
   # @param [Symbol] mode - one of :new, :edit, :show
+  # @param [true|false] no_sub - don't do double-curly substitutions
+  #                              (it may happen in the UI instead if this is a template)
+  # @param [true|false] ignore_missing - don't raise exception on missing tag by default
   # @return [String] HTML result
-  def show_caption_before(key, captions, mode = nil)
+  def show_caption_before(key, captions, mode: nil, no_sub: nil, ignore_missing: true)
     return unless captions && captions[key]
 
     mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
     caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
-    if @form_object_instance
-      caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil)
+    if @form_object_instance && !no_sub
+      caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
+                                                            ignore_missing: ignore_missing)
     end
     caption.html_safe
   end

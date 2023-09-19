@@ -109,6 +109,11 @@ module Dynamic
           u = d.updated_at
           m = Resources::Models.find_by(resource_name: rn)&.model&.definition
 
+          unless d.table_or_view_ready?
+            Rails.logger.warn "refresh_outdated dynamic def #{d.class.name} table or view is not ready"
+            next
+          end
+
           klass = if d.is_a? ExternalIdentifier
                     Object
                   else
@@ -177,6 +182,10 @@ module Dynamic
       return false unless res
 
       begin
+        unless table_or_view_ready?
+          raise FphsException, "Won't try to get class #{icn} - table or view not ready #{table_name}"
+        end
+
         # Check if it can be instantiated correctly - if it can't, allow it to raise an exception
         # since this is seriously unexpected
         klass.new

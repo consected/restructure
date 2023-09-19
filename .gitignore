@@ -30,6 +30,7 @@ config/initializers/secret_token.rb
 /.bundle
 /vendor/bundle
 /vendor/dev-cache
+/vendor/cache
 /node_modules
 
 # these should all be checked in to normalize the environment:
@@ -56,6 +57,7 @@ docs/junk
 
 db/app_specific/**/*.zip
 db/dumps/aws-elaine-dev.sql
+db/app_migrations
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
@@ -79,7 +81,7 @@ yarn-error.log
 
 # Ignore IDE configs
 .idea/
-
+/build
 /public/packs
 /public/packs-test
 /node_modules
