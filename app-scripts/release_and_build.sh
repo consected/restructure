@@ -53,9 +53,18 @@ git push
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
-CURRVER=$(cat ${CURRVERFILE})
+LASTTAG=$(echo "$ALLTAGS" | head -n1)
+CURRVERINFILE=$(cat ${CURRVERFILE})
+CURRVER=${CURRVERINFILE}
+if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
+  CURRVER=${LASTTAG}
+  echo "Updating current version from tags ${LASTTAG} > ${CURRVER}"
+  echo ${CURRVER} > ${CURRVERFILE}
+  git commit version.txt -m 'Bumped version'
+  git push
+fi
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
-RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
+RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
@@ -66,7 +75,7 @@ if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
   exit 7
 fi
 
-if [ "$(git tag | grep ${NEWVER})" ]; then
+if [ "${RELEASESTARTED}" ]; then
   echo "Tag ${NEWVER} already exists. Try:"
   echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'; git push"
   exit 55
