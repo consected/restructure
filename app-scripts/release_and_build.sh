@@ -66,6 +66,12 @@ if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
   exit 7
 fi
 
+if [ "$(git tag | grep ${NEWVER})" ]; then
+  echo "Tag ${NEWVER} already exists. Try:"
+  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'; git push"
+  exit 55
+fi
+
 if [ -z "${SKIP_BRAKEMAN}" ]; then
   echo "Checking brakeman and bundle-audit before we go through the whole process"
   bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
@@ -93,12 +99,6 @@ RELNUM=$(git flow release)
 if [ "${RELNUM}" ]; then
   echo "Release already started. Checking out and continuing"
   git flow release delete -f ${RELNUM}
-fi
-
-if [ "$(git tag | grep ${NEWVER})" ]; then
-  echo "Tag ${NEWVER} already exists. Try:"
-  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'"
-  exit 55
 fi
 
 echo "Starting git-flow release"
