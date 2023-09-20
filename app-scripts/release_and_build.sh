@@ -68,7 +68,7 @@ fi
 
 if [ "$(git tag | grep ${NEWVER})" ]; then
   echo "Tag ${NEWVER} already exists. Try:"
-  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'"
+  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'; git push"
   exit 55
 fi
 
