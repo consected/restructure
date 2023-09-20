@@ -94,6 +94,13 @@ if [ "${RELNUM}" ]; then
   echo "Release already started. Checking out and continuing"
   git flow release delete -f ${RELNUM}
 fi
+
+if [ "$(git tag | grep ${NEWVER})" ]; then
+  echo "Tag ${NEWVER} already exists. Try:"
+  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'"
+  exit 55
+fi
+
 echo "Starting git-flow release"
 git checkout new-master && git pull
 git checkout ${FROM_BRANCH}
