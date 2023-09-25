@@ -379,7 +379,7 @@ CREATE FUNCTION ml_app.datadic_choice_history_upd() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  INSERT INTO ref_data.datadic_choice_history (
+  INSERT INTO datadic_choice_history (
     source_name, source_type, form_name, field_name, value, label, redcap_data_dictionary_id,
     disabled,
     admin_id,
@@ -388,6 +388,33 @@ BEGIN
     datadic_choice_id)
   SELECT
     NEW.source_name, NEW.source_type, NEW.form_name, NEW.field_name, NEW.value, NEW.label, NEW.redcap_data_dictionary_id,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: datadic_variable_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.datadic_variable_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_variable_history (
+    study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, storage_varname, redcap_data_dictionary_id, position, section_id, sub_section_id, title,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_variable_id)
+  SELECT
+    NEW.study, NEW.source_name, NEW.source_type, NEW.domain, NEW.form_name, NEW.variable_name, NEW.variable_type, NEW.presentation_type, NEW.label, NEW.label_note, NEW.annotation, NEW.is_required, NEW.valid_type, NEW.valid_min, NEW.valid_max, NEW.multi_valid_choices, NEW.is_identifier, NEW.is_derived_var, NEW.multi_derived_from_id, NEW.doc_url, NEW.target_type, NEW.owner_email, NEW.classification, NEW.other_classification, NEW.multi_timepoints, NEW.equivalent_to_id, NEW.storage_type, NEW.db_or_fs, NEW.schema_or_path, NEW.table_or_file, NEW.storage_varname, NEW.redcap_data_dictionary_id, NEW.position, NEW.section_id, NEW.sub_section_id, NEW.title,
     NEW.disabled,
     NEW.admin_id,
     NEW.created_at,
@@ -2663,297 +2690,6 @@ $$;
 
 
 --
--- Name: calc_var_stats_for_boolean(bigint); Type: FUNCTION; Schema: ref_data; Owner: -
---
-
-CREATE FUNCTION ref_data.calc_var_stats_for_boolean(var_id bigint) RETURNS TABLE(variable_id bigint, variable text, results bigint[], labels character varying[], cat_counts jsonb, distincts bigint, completed bigint, total_recs bigint, "chart:" text)
-    LANGUAGE plpgsql
-    AS $_$
-declare
-sql text;
-varrec record;
-varname varchar;
-BEGIN 
-	
-select * from ref_data.datadic_variables dv where id = var_id
-into varrec;
-
-varname := varrec.storage_varname;
-
-raise notice '%1', varrec;
-if varname is null then
-  raise notice 'No matching storage variable name for variable %', (var_id);
-  
-  return;
-end if;
-
-sql := format($$
-with n as (
-    select %1$s
-    from %3$s.%4$s
-), 
-c as (
-	select %1$s::varchar cat, count(*) num
-	from n
-	group by %1$s
-),
-m as (
-    select 
-      (
-        select array_to_json(array_agg(json_build_object(c.cat, c.num))) from c
-        where c.cat is not null
-      ) cat_counts_m,
-      count(distinct %1$s)  distincts_m,
-      count(%1$s) count_m,
-      count(coalesce(%1$s, false)) recs_m
-    from n
-)
-select
-%5$s::bigint variable_id,
-'%1$s' "variable",
-array_agg(num) "results", 
-array_agg(cat) "labels", 
-cat_counts_m::jsonb "cat_counts",
-distincts_m "distincts", -- distinct values
-count_m  "completed",
-recs_m "total_recs",
-null "chart"
-from 
-c, m
-where c.cat is not null
-group by "variable",
- "cat_counts",
- "distincts",
- "completed",
- "total_recs"
- ;
-$$
-,
-varname, varrec.variable_type, varrec.schema_or_path, varrec.table_or_file, var_id
-);
-
-return query execute sql;
-
-return query execute sql;
-exception when others then
-raise notice '%', varrec;
-raise notice '%', sqlerrm;
-null;
-
-
-end
-$_$;
-
-
---
--- Name: calc_var_stats_for_categorical(bigint); Type: FUNCTION; Schema: ref_data; Owner: -
---
-
-CREATE FUNCTION ref_data.calc_var_stats_for_categorical(var_id bigint) RETURNS TABLE(variable_id bigint, variable text, results bigint[], labels character varying[], cat_counts jsonb, distincts bigint, completed bigint, total_recs bigint, "chart:" text)
-    LANGUAGE plpgsql
-    AS $_$
-declare
-sql text;
-varrec record;
-varname varchar;
-BEGIN 
-	
-select * from ref_data.datadic_variables dv where id = var_id
-into varrec;
-
-varname := varrec.storage_varname;
-
-raise notice '%1', varrec;
-if varname is null then
-  raise notice 'No matching storage variable name for variable %', (var_id);
-  
-  return;
-end if;
-
-sql := format($$
-with n as (
-    select nullif(%1$s, '')::numeric  %1$s
-    from %3$s.%4$s
-), 
-c as (
-	select %1$s::varchar cat, count(*) num
-	from n
-	group by %1$s
-	order by "cat"
-),
-m as (
-    select 
-      (
-        select array_to_json(array_agg(json_build_object(c.cat, c.num))) from c
-        where c.cat is not null
-      ) cat_counts_m,
-      count(distinct %1$s)  distincts_m,
-      count(%1$s) count_m,
-      count(coalesce(%1$s, 0)) recs_m
-    from n
-)
-select
-%5$s::bigint variable_id,
-'%1$s' "variable",
-array_agg(num) "results", 
-array_agg(cat) "labels", 
-cat_counts_m::jsonb "cat_counts",
-distincts_m "distincts", -- distinct values
-count_m  "completed",
-recs_m "total_recs",
-null "chart"
-from 
-c, m
-where c.cat is not null
-group by "variable",
- "cat_counts",
- "distincts",
- "completed",
- "total_recs"
- ;
-$$
-,
-varname, varrec.variable_type, varrec.schema_or_path, varrec.table_or_file, var_id
-);
-
-return query execute sql;
-
-return query execute sql;
-exception when others then
-raise notice '%', varrec;
-raise notice '%', sqlerrm;
-null;
-
-
-end
-$_$;
-
-
---
--- Name: calc_var_stats_for_numeric(bigint); Type: FUNCTION; Schema: ref_data; Owner: -
---
-
-CREATE FUNCTION ref_data.calc_var_stats_for_numeric(var_id bigint) RETURNS TABLE(variable_id bigint, variable text, results bigint[], labels character varying[], min numeric, med numeric, max numeric, mean numeric, stddev numeric, distincts bigint, completed bigint, total_recs bigint, "chart:" text)
-    LANGUAGE plpgsql
-    AS $_$
-declare
-sql text;
-varrec record;
-varname varchar;
-vardt varchar;
-BEGIN 
-	
-select * 
-from ref_data.datadic_variables dv 
-inner join
-information_schema."columns"
-on dv.table_or_file = table_name and dv.schema_or_path = table_schema
-and dv.storage_varname = column_name
-where id = var_id
-into varrec;
-
-varname := varrec.storage_varname;
-vardt := varrec.data_type;
-
-if varname is null then
-  raise notice 'No matching storage variable name for variable %', (var_id);
-  
-  return;
-end if;
-
---raise notice 'ID: %', varrec.id;
-
-sql := format($$
-with n as (
-    select 
-$$ ||    
-  case when vardt in ('varchar','character varying', 'text')
-  then 
-  $$ nullif(%1$s, '')::numeric $$
-  else $$ %1$s::numeric $$
-  end
-|| $$ 
-%1$s
-    from %3$s.%4$s
-), 
-m as (
-    select 
-      min(%1$s) min_m, 
-      max(%1$s) max_m,
-      round((PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY %1$s))::numeric, 1) med_m,
-      round(avg(%1$s)::numeric, 1) mean_m, 
-      round(stddev_pop(%1$s)::numeric, 1) stddev_m,
-      count(distinct %1$s)  distincts_m,
-      count(%1$s) count_m,
-      count(coalesce(%1$s, 0)) recs_m,
-      12 buckets_m,
-      (max(%1$s)-min(%1$s))/12 bin_width_m
-    from n
-)
-select
-%5$s::bigint variable_id,
-'%1$s' "variable",
-array_agg(num) "results", 
-array_agg(bucket)::varchar[] "labels", 
-min_m "min", 
-med_m "med",
-max_m "max", 
-mean_m "mean", 
-stddev_m "stddev",
-distincts_m "distincts", -- distinct values
-count_m  "completed",
-recs_m "total_recs",
-null "chart"
-from 
-(
-
-  select 
-  count(val) num, 
-  --t.val val, 
-  (round(min_m + ((bin-1) * bin_width_m),2))::varchar || ' - ' || (round(min_m + ((bin) * bin_width_m),2))::varchar "bucket"
-  from
-  (
-    select generate_series(1,buckets_m+1) bin from m
-  ) bins
-  left join (
-    select 
-      width_bucket(%1$s, min_m, max_m+0.0000001, buckets_m) bucket, 
-      %1$s val
-    from n, m
-    where %1$s is not null
-  ) t on bins.bin = t.bucket
-  cross join  m
-  group by bin, min_m, bin_width_m
-  order by bin
-  
-) vals, m
-group by "variable",
- "min", 
- "med",
- "max", 
- "mean", 
- "stddev",
- "distincts",
- "completed",
- "total_recs"
- ;
-$$
-,
-varname, varrec.variable_type, varrec.schema_or_path, varrec.table_or_file, var_id, vardt
-);
---raise notice '%', sql;
-
-return query execute sql;
-exception when others then
-raise notice '%', varrec;
-raise notice '%', sqlerrm;
-null;
-
-end
-$_$;
-
-
---
 -- Name: log_datadic_variables_update(); Type: FUNCTION; Schema: ref_data; Owner: -
 --
 
@@ -2961,7 +2697,7 @@ CREATE FUNCTION ref_data.log_datadic_variables_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  INSERT INTO ref_data.datadic_variable_history (
+  INSERT INTO datadic_variable_history (
     
     study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, disabled, admin_id, redcap_data_dictionary_id, position, section_id, sub_section_id, title, storage_varname, contributor_type, n_for_timepoints, notes,
     user_id,
@@ -6833,446 +6569,6 @@ ALTER SEQUENCE ref_data.datadic_choices_id_seq OWNED BY ref_data.datadic_choices
 
 
 --
--- Name: datadic_variables; Type: TABLE; Schema: ref_data; Owner: -
---
-
-CREATE TABLE ref_data.datadic_variables (
-    id bigint NOT NULL,
-    study character varying,
-    source_name character varying,
-    source_type character varying,
-    domain character varying,
-    form_name character varying,
-    variable_name character varying,
-    variable_type character varying,
-    presentation_type character varying,
-    label character varying,
-    label_note character varying,
-    annotation character varying,
-    is_required boolean,
-    valid_type character varying,
-    valid_min character varying,
-    valid_max character varying,
-    multi_valid_choices character varying[],
-    is_identifier boolean,
-    is_derived_var boolean,
-    multi_derived_from_id bigint[],
-    doc_url character varying,
-    target_type character varying,
-    owner_email character varying,
-    classification character varying,
-    other_classification character varying,
-    multi_timepoints character varying[],
-    equivalent_to_id bigint,
-    storage_type character varying,
-    db_or_fs character varying,
-    schema_or_path character varying,
-    table_or_file character varying,
-    disabled boolean,
-    admin_id bigint,
-    redcap_data_dictionary_id bigint,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    "position" integer,
-    section_id integer,
-    sub_section_id integer,
-    title character varying,
-    storage_varname character varying,
-    contributor_type character varying,
-    n_for_timepoints jsonb,
-    notes character varying,
-    user_id bigint
-);
-
-
---
--- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
-
-
---
--- Name: COLUMN datadic_variables.study; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.study IS 'Study name';
-
-
---
--- Name: COLUMN datadic_variables.source_name; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.source_name IS 'Source of variable';
-
-
---
--- Name: COLUMN datadic_variables.source_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.source_type IS 'Source type';
-
-
---
--- Name: COLUMN datadic_variables.domain; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.domain IS 'Domain';
-
-
---
--- Name: COLUMN datadic_variables.form_name; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.form_name IS 'Form name (if the source was a type of form)';
-
-
---
--- Name: COLUMN datadic_variables.variable_name; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.variable_name IS 'Variable name';
-
-
---
--- Name: COLUMN datadic_variables.variable_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.variable_type IS 'Variable type';
-
-
---
--- Name: COLUMN datadic_variables.presentation_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.presentation_type IS 'Data type for presentation purposes';
-
-
---
--- Name: COLUMN datadic_variables.label; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.label IS 'Primary label or title (if source was a form, the label presented for the field)';
-
-
---
--- Name: COLUMN datadic_variables.label_note; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.label_note IS 'Description (if source was a form, a note presented for the field)';
-
-
---
--- Name: COLUMN datadic_variables.annotation; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.annotation IS 'Annotations (if source was a form, annotations not presented to the user)';
-
-
---
--- Name: COLUMN datadic_variables.is_required; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.is_required IS 'Was required in source';
-
-
---
--- Name: COLUMN datadic_variables.valid_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.valid_type IS 'Source data type';
-
-
---
--- Name: COLUMN datadic_variables.valid_min; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.valid_min IS 'Minimum value';
-
-
---
--- Name: COLUMN datadic_variables.valid_max; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.valid_max IS 'Maximum value';
-
-
---
--- Name: COLUMN datadic_variables.multi_valid_choices; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.multi_valid_choices IS 'List of valid choices for categorical variables';
-
-
---
--- Name: COLUMN datadic_variables.is_identifier; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.is_identifier IS 'Represents identifiable information';
-
-
---
--- Name: COLUMN datadic_variables.is_derived_var; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.is_derived_var IS 'Is a derived variable';
-
-
---
--- Name: COLUMN datadic_variables.multi_derived_from_id; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.multi_derived_from_id IS 'If a derived variable, ids of variables used to calculate it';
-
-
---
--- Name: COLUMN datadic_variables.doc_url; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.doc_url IS 'URL to additional documentation';
-
-
---
--- Name: COLUMN datadic_variables.target_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.target_type IS 'Type of participant this variable relates to';
-
-
---
--- Name: COLUMN datadic_variables.owner_email; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.owner_email IS 'Owner, especially for derived variables';
-
-
---
--- Name: COLUMN datadic_variables.classification; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.classification IS 'Category of sensitivity from a privacy perspective';
-
-
---
--- Name: COLUMN datadic_variables.other_classification; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.other_classification IS 'Additional information regarding classification';
-
-
---
--- Name: COLUMN datadic_variables.multi_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.multi_timepoints IS 'Timepoints this data is collected (in longitudinal studies)';
-
-
---
--- Name: COLUMN datadic_variables.equivalent_to_id; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.equivalent_to_id IS 'Primary variable id this is equivalent to';
-
-
---
--- Name: COLUMN datadic_variables.storage_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.storage_type IS 'Type of storage for dataset';
-
-
---
--- Name: COLUMN datadic_variables.db_or_fs; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.db_or_fs IS 'Database or Filesystem name';
-
-
---
--- Name: COLUMN datadic_variables.schema_or_path; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.schema_or_path IS 'Database schema or Filesystem directory path';
-
-
---
--- Name: COLUMN datadic_variables.table_or_file; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.table_or_file IS 'Database table (or view, if derived or equivalent to another variable), or filename in directory';
-
-
---
--- Name: COLUMN datadic_variables.redcap_data_dictionary_id; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.redcap_data_dictionary_id IS 'Reference to REDCap data dictionary representation';
-
-
---
--- Name: COLUMN datadic_variables."position"; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables."position" IS 'Relative position (for source forms or other variables where order of collection matters)';
-
-
---
--- Name: COLUMN datadic_variables.section_id; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.section_id IS 'Section this belongs to';
-
-
---
--- Name: COLUMN datadic_variables.sub_section_id; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.sub_section_id IS 'Sub-section this belongs to';
-
-
---
--- Name: COLUMN datadic_variables.title; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
-
-
---
--- Name: COLUMN datadic_variables.storage_varname; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
-
-
---
--- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
-
-
---
--- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
-
-
---
--- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
-
-
---
--- Name: datadic_stats; Type: MATERIALIZED VIEW; Schema: ref_data; Owner: -
---
-
-CREATE MATERIALIZED VIEW ref_data.datadic_stats AS
- WITH vars AS (
-         SELECT var.id,
-            var.study,
-            var.source_name,
-            var.source_type,
-            var.domain,
-            var.form_name,
-            var.variable_name,
-            var.variable_type,
-            var.presentation_type,
-            var.label,
-            var.label_note,
-            var.annotation,
-            var.is_required,
-            var.valid_type,
-            var.valid_min,
-            var.valid_max,
-            var.multi_valid_choices,
-            var.is_identifier,
-            var.is_derived_var,
-            var.multi_derived_from_id,
-            var.doc_url,
-            var.target_type,
-            var.owner_email,
-            var.classification,
-            var.other_classification,
-            var.multi_timepoints,
-            var.equivalent_to_id,
-            var.storage_type,
-            var.db_or_fs,
-            var.schema_or_path,
-            var.table_or_file,
-            var.disabled,
-            var.admin_id,
-            var.redcap_data_dictionary_id,
-            var.created_at,
-            var.updated_at,
-            var."position",
-            var.section_id,
-            var.sub_section_id,
-            var.title,
-            var.storage_varname,
-            var.user_id
-           FROM ref_data.datadic_variables var
-          WHERE ((NOT COALESCE(var.disabled, false)) AND ((var.variable_name)::text <> 'participant_id'::text) AND (NULLIF((var.storage_varname)::text, ''::text) IS NOT NULL))
-        )
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    stats.mean,
-    stats.stddev,
-    stats.min,
-    stats.med,
-    stats.max,
-    NULL::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_numeric(var.id) stats(variable_id, variable, results, labels, min, med, max, mean, stddev, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY (ARRAY[('numeric'::character varying)::text, ('calculated'::character varying)::text])))
-UNION
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    NULL::numeric AS mean,
-    NULL::numeric AS stddev,
-    NULL::numeric AS min,
-    NULL::numeric AS med,
-    NULL::numeric AS max,
-    (to_json(var.multi_valid_choices))::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_categorical(var.id) stats(variable_id, variable, results, labels, cat_counts, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = 'categorical'::text))
-UNION
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    NULL::numeric AS mean,
-    NULL::numeric AS stddev,
-    NULL::numeric AS min,
-    NULL::numeric AS med,
-    NULL::numeric AS max,
-    NULL::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_boolean(var.id) stats(variable_id, variable, results, labels, cat_counts, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = 'dichotomous'::text))
-  WITH NO DATA;
-
-
---
 -- Name: datadic_variable_history; Type: TABLE; Schema: ref_data; Owner: -
 --
 
@@ -7579,6 +6875,27 @@ COMMENT ON COLUMN ref_data.datadic_variable_history.storage_varname IS 'Database
 
 
 --
+-- Name: COLUMN datadic_variable_history.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variable_history.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variable_history.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.notes IS 'Notes';
+
+
+--
 -- Name: datadic_variable_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
 --
 
@@ -7598,6 +6915,339 @@ ALTER SEQUENCE ref_data.datadic_variable_history_id_seq OWNED BY ref_data.datadi
 
 
 --
+-- Name: datadic_variables; Type: TABLE; Schema: ref_data; Owner: -
+--
+
+CREATE TABLE ref_data.datadic_variables (
+    id bigint NOT NULL,
+    study character varying,
+    source_name character varying,
+    source_type character varying,
+    domain character varying,
+    form_name character varying,
+    variable_name character varying,
+    variable_type character varying,
+    presentation_type character varying,
+    label character varying,
+    label_note character varying,
+    annotation character varying,
+    is_required boolean,
+    valid_type character varying,
+    valid_min character varying,
+    valid_max character varying,
+    multi_valid_choices character varying[],
+    is_identifier boolean,
+    is_derived_var boolean,
+    multi_derived_from_id bigint[],
+    doc_url character varying,
+    target_type character varying,
+    owner_email character varying,
+    classification character varying,
+    other_classification character varying,
+    multi_timepoints character varying[],
+    equivalent_to_id bigint,
+    storage_type character varying,
+    db_or_fs character varying,
+    schema_or_path character varying,
+    table_or_file character varying,
+    disabled boolean,
+    admin_id bigint,
+    redcap_data_dictionary_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    "position" integer,
+    section_id integer,
+    sub_section_id integer,
+    title character varying,
+    storage_varname character varying,
+    user_id bigint,
+    contributor_type character varying,
+    n_for_timepoints jsonb,
+    notes character varying
+);
+
+
+--
+-- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
+
+
+--
+-- Name: COLUMN datadic_variables.study; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.study IS 'Study name';
+
+
+--
+-- Name: COLUMN datadic_variables.source_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.source_name IS 'Source of variable';
+
+
+--
+-- Name: COLUMN datadic_variables.source_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.source_type IS 'Source type';
+
+
+--
+-- Name: COLUMN datadic_variables.domain; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.domain IS 'Domain';
+
+
+--
+-- Name: COLUMN datadic_variables.form_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.form_name IS 'Form name (if the source was a type of form)';
+
+
+--
+-- Name: COLUMN datadic_variables.variable_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.variable_name IS 'Variable name';
+
+
+--
+-- Name: COLUMN datadic_variables.variable_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.variable_type IS 'Variable type';
+
+
+--
+-- Name: COLUMN datadic_variables.presentation_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.presentation_type IS 'Data type for presentation purposes';
+
+
+--
+-- Name: COLUMN datadic_variables.label; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.label IS 'Primary label or title (if source was a form, the label presented for the field)';
+
+
+--
+-- Name: COLUMN datadic_variables.label_note; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.label_note IS 'Description (if source was a form, a note presented for the field)';
+
+
+--
+-- Name: COLUMN datadic_variables.annotation; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.annotation IS 'Annotations (if source was a form, annotations not presented to the user)';
+
+
+--
+-- Name: COLUMN datadic_variables.is_required; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_required IS 'Was required in source';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_type IS 'Source data type';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_min; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_min IS 'Minimum value';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_max; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_max IS 'Maximum value';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_valid_choices; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_valid_choices IS 'List of valid choices for categorical variables';
+
+
+--
+-- Name: COLUMN datadic_variables.is_identifier; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_identifier IS 'Represents identifiable information';
+
+
+--
+-- Name: COLUMN datadic_variables.is_derived_var; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_derived_var IS 'Is a derived variable';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_derived_from_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_derived_from_id IS 'If a derived variable, ids of variables used to calculate it';
+
+
+--
+-- Name: COLUMN datadic_variables.doc_url; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.doc_url IS 'URL to additional documentation';
+
+
+--
+-- Name: COLUMN datadic_variables.target_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.target_type IS 'Type of participant this variable relates to';
+
+
+--
+-- Name: COLUMN datadic_variables.owner_email; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.owner_email IS 'Owner, especially for derived variables';
+
+
+--
+-- Name: COLUMN datadic_variables.classification; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.classification IS 'Category of sensitivity from a privacy perspective';
+
+
+--
+-- Name: COLUMN datadic_variables.other_classification; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.other_classification IS 'Additional information regarding classification';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_timepoints IS 'Timepoints this data is collected (in longitudinal studies)';
+
+
+--
+-- Name: COLUMN datadic_variables.equivalent_to_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.equivalent_to_id IS 'Primary variable id this is equivalent to';
+
+
+--
+-- Name: COLUMN datadic_variables.storage_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.storage_type IS 'Type of storage for dataset';
+
+
+--
+-- Name: COLUMN datadic_variables.db_or_fs; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.db_or_fs IS 'Database or Filesystem name';
+
+
+--
+-- Name: COLUMN datadic_variables.schema_or_path; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.schema_or_path IS 'Database schema or Filesystem directory path';
+
+
+--
+-- Name: COLUMN datadic_variables.table_or_file; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.table_or_file IS 'Database table (or view, if derived or equivalent to another variable), or filename in directory';
+
+
+--
+-- Name: COLUMN datadic_variables.redcap_data_dictionary_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.redcap_data_dictionary_id IS 'Reference to REDCap data dictionary representation';
+
+
+--
+-- Name: COLUMN datadic_variables."position"; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables."position" IS 'Relative position (for source forms or other variables where order of collection matters)';
+
+
+--
+-- Name: COLUMN datadic_variables.section_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.section_id IS 'Section this belongs to';
+
+
+--
+-- Name: COLUMN datadic_variables.sub_section_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.sub_section_id IS 'Sub-section this belongs to';
+
+
+--
+-- Name: COLUMN datadic_variables.title; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
+
+
+--
+-- Name: COLUMN datadic_variables.storage_varname; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
+
+
+--
 -- Name: datadic_variables_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
 --
 
@@ -7614,113 +7264,6 @@ CREATE SEQUENCE ref_data.datadic_variables_id_seq
 --
 
 ALTER SEQUENCE ref_data.datadic_variables_id_seq OWNED BY ref_data.datadic_variables.id;
-
-
---
--- Name: mv_datadic_stats; Type: MATERIALIZED VIEW; Schema: ref_data; Owner: -
---
-
-CREATE MATERIALIZED VIEW ref_data.mv_datadic_stats AS
- WITH vars AS (
-         SELECT var.id,
-            var.study,
-            var.source_name,
-            var.source_type,
-            var.domain,
-            var.form_name,
-            var.variable_name,
-            var.variable_type,
-            var.presentation_type,
-            var.label,
-            var.label_note,
-            var.annotation,
-            var.is_required,
-            var.valid_type,
-            var.valid_min,
-            var.valid_max,
-            var.multi_valid_choices,
-            var.is_identifier,
-            var.is_derived_var,
-            var.multi_derived_from_id,
-            var.doc_url,
-            var.target_type,
-            var.owner_email,
-            var.classification,
-            var.other_classification,
-            var.multi_timepoints,
-            var.equivalent_to_id,
-            var.storage_type,
-            var.db_or_fs,
-            var.schema_or_path,
-            var.table_or_file,
-            var.disabled,
-            var.admin_id,
-            var.redcap_data_dictionary_id,
-            var.created_at,
-            var.updated_at,
-            var."position",
-            var.section_id,
-            var.sub_section_id,
-            var.title,
-            var.storage_varname,
-            var.user_id
-           FROM ref_data.datadic_variables var
-          WHERE ((NOT COALESCE(var.disabled, false)) AND ((var.variable_name)::text <> 'participant_id'::text) AND (NULLIF((var.storage_varname)::text, ''::text) IS NOT NULL))
-        )
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    stats.mean,
-    stats.stddev,
-    stats.min,
-    stats.med,
-    stats.max,
-    NULL::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_numeric(var.id) stats(variable_id, variable, results, labels, min, med, max, mean, stddev, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = ANY (ARRAY[('numeric'::character varying)::text, ('calculated'::character varying)::text])))
-UNION
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    NULL::numeric AS mean,
-    NULL::numeric AS stddev,
-    NULL::numeric AS min,
-    NULL::numeric AS med,
-    NULL::numeric AS max,
-    (to_json(var.multi_valid_choices))::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_categorical(var.id) stats(variable_id, variable, results, labels, cat_counts, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = 'categorical'::text))
-UNION
- SELECT var.id AS variable_id,
-    stats.variable AS variable_name,
-    var.label AS variable_label,
-    stats.results,
-    stats.labels,
-    NULL::numeric AS mean,
-    NULL::numeric AS stddev,
-    NULL::numeric AS min,
-    NULL::numeric AS med,
-    NULL::numeric AS max,
-    NULL::character varying AS choices,
-    stats.distincts,
-    stats.completed,
-    stats.total_recs
-   FROM (vars var
-     JOIN LATERAL ref_data.calc_var_stats_for_boolean(var.id) stats(variable_id, variable, results, labels, cat_counts, distincts, completed, total_recs, "chart:") ON ((stats.variable IS NOT NULL)))
-  WHERE ((var.table_or_file IS NOT NULL) AND ((var.variable_type)::text = 'dichotomous'::text))
-  WITH NO DATA;
 
 
 --

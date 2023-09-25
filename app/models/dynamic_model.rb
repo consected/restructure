@@ -182,7 +182,7 @@ class DynamicModel < ActiveRecord::Base
             # Add definition here, since UserHandler relies on it during include
             def no_master_association
               definition.foreign_key_name.blank?
-            end            
+            end
           end
 
           self.definition_id = definition_id
