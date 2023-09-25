@@ -16,6 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] build script
+- [Fixed] devise error message interpolations
+
 ## [8.2.90] - 2023-09-25
 
 - [Changed] release script to attempt to avoid dependence on "git flow"
