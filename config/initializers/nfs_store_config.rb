@@ -54,7 +54,7 @@ ActiveSupport.on_load(:nfs_store_config) do
     ares = Kernel.system 'which unzip'
     configuration_failed_reason << 'unzip not in the path' unless ares
 
-    app_type = Admin::AppType.active.first
+    app_type = Admin::AppType.active_app_types.first
     if app_type
       unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
         configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
