@@ -56,7 +56,7 @@ module AppExceptionHandler
   end
 
   def not_found
-    flash[:danger] = 'Requested information not found'
+    flash.now[:danger] = 'Requested information not found'
     routing_error_handler ActionController::RoutingError.new('Not Found')
   end
 
@@ -146,7 +146,7 @@ module AppExceptionHandler
     end
 
     if performed?
-      flash[:danger] = msg[0..2000]
+      flash.now[:danger] = msg[0..2000]
       return true
     end
     errors = { error: [msg] }
