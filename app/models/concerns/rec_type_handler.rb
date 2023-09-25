@@ -13,7 +13,7 @@ module RecTypeHandler
       end
       validates :rec_type, presence: true
 
-      Master.has_many "#{name.underscore}_#{rt}".pluralize.to_sym,
+      Master.has_many "#{name.ns_underscore}_#{rt}".pluralize.to_sym,
                       lambda {
                         where(rec_type: rt).order(Master::RankNotNullClause)
                       },

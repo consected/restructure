@@ -70,15 +70,28 @@ module Dynamic
     # Check if the _configurations: view_sql: value has changed
     # in the last save
     def view_sql_changed?
+      return unless config_view_sql
+      return true if saved_change_to_disabled? && !disabled
+
       options_attr_name = self.class.option_configs_attr.to_s
       v1 = attribute_before_last_save(options_attr_name)
       v2 = attributes[options_attr_name]
       v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
       v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
-      v1def = YAML.safe_load(v1, [], [], true)
-      v2def = YAML.safe_load(v2, [], [], true)
-      (v1def['_configurations'] && v1def['_configurations']['view_sql']) !=
-        (v2def['_configurations'] && v2def['_configurations']['view_sql'])
+      if v1
+        v1def = YAML.safe_load(v1, [], [], true)
+        v1_sql = v1def.dig('_configurations', 'view_sql')
+      end
+      if v2
+        v2def = YAML.safe_load(v2, [], [], true)
+        v2_sql = v2def.dig('_configurations', 'view_sql')
+      end
+      changed = (v1_sql != v2_sql)
+      if changed
+        Rails.logger.info "In migration, the view_sql for #{table_name} is going to change (from/to):\n" \
+        "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
+      end
+      !!changed
     end
 
     #
@@ -93,7 +106,7 @@ module Dynamic
     # Generate a migration triggered after_save.
     def generate_migration
       # Re-enabling an item requires it to be created
-      if saved_change_to_disabled?
+      if saved_change_to_disabled? || !table_or_view_ready?
         generate_create_migration
         return
       end
@@ -204,6 +217,7 @@ module Dynamic
           belongs_to_model: btm,
           db_configs: db_columns,
           view_sql: config_view_sql,
+          view_sql_changed: view_sql_changed?,
           all_referenced_tables: art,
           resource_type: self.class.name.underscore.to_sym,
           allow_migrations: allow_migrations

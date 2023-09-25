@@ -174,7 +174,7 @@ class ExternalIdentifier < ActiveRecord::Base
     failed = false
     @regenerate = nil
 
-    if enabled? && !failed
+    if ready_to_generate? && !failed
       begin
         definition = self
         definition_id = id
@@ -237,7 +237,7 @@ class ExternalIdentifier < ActiveRecord::Base
         puts "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
       end
     end
-    if failed || !enabled?
+    if failed || !ready_to_generate?
       remove_model_from_list
       reset_master_fields
     elsif res

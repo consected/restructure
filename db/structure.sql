@@ -7290,10 +7290,10 @@ CREATE TABLE ref_data.datadic_variable_history (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
+    user_id bigint,
     contributor_type character varying,
     n_for_timepoints jsonb,
-    notes character varying,
-    user_id bigint
+    notes character varying
 );
 
 
@@ -7566,6 +7566,339 @@ CREATE SEQUENCE ref_data.datadic_variable_history_id_seq
 --
 
 ALTER SEQUENCE ref_data.datadic_variable_history_id_seq OWNED BY ref_data.datadic_variable_history.id;
+
+
+--
+-- Name: datadic_variables; Type: TABLE; Schema: ref_data; Owner: -
+--
+
+CREATE TABLE ref_data.datadic_variables (
+    id bigint NOT NULL,
+    study character varying,
+    source_name character varying,
+    source_type character varying,
+    domain character varying,
+    form_name character varying,
+    variable_name character varying,
+    variable_type character varying,
+    presentation_type character varying,
+    label character varying,
+    label_note character varying,
+    annotation character varying,
+    is_required boolean,
+    valid_type character varying,
+    valid_min character varying,
+    valid_max character varying,
+    multi_valid_choices character varying[],
+    is_identifier boolean,
+    is_derived_var boolean,
+    multi_derived_from_id bigint[],
+    doc_url character varying,
+    target_type character varying,
+    owner_email character varying,
+    classification character varying,
+    other_classification character varying,
+    multi_timepoints character varying[],
+    equivalent_to_id bigint,
+    storage_type character varying,
+    db_or_fs character varying,
+    schema_or_path character varying,
+    table_or_file character varying,
+    disabled boolean,
+    admin_id bigint,
+    redcap_data_dictionary_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    "position" integer,
+    section_id integer,
+    sub_section_id integer,
+    title character varying,
+    storage_varname character varying,
+    user_id bigint,
+    contributor_type character varying,
+    n_for_timepoints jsonb,
+    notes character varying
+);
+
+
+--
+-- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
+
+
+--
+-- Name: COLUMN datadic_variables.study; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.study IS 'Study name';
+
+
+--
+-- Name: COLUMN datadic_variables.source_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.source_name IS 'Source of variable';
+
+
+--
+-- Name: COLUMN datadic_variables.source_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.source_type IS 'Source type';
+
+
+--
+-- Name: COLUMN datadic_variables.domain; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.domain IS 'Domain';
+
+
+--
+-- Name: COLUMN datadic_variables.form_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.form_name IS 'Form name (if the source was a type of form)';
+
+
+--
+-- Name: COLUMN datadic_variables.variable_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.variable_name IS 'Variable name';
+
+
+--
+-- Name: COLUMN datadic_variables.variable_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.variable_type IS 'Variable type';
+
+
+--
+-- Name: COLUMN datadic_variables.presentation_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.presentation_type IS 'Data type for presentation purposes';
+
+
+--
+-- Name: COLUMN datadic_variables.label; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.label IS 'Primary label or title (if source was a form, the label presented for the field)';
+
+
+--
+-- Name: COLUMN datadic_variables.label_note; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.label_note IS 'Description (if source was a form, a note presented for the field)';
+
+
+--
+-- Name: COLUMN datadic_variables.annotation; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.annotation IS 'Annotations (if source was a form, annotations not presented to the user)';
+
+
+--
+-- Name: COLUMN datadic_variables.is_required; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_required IS 'Was required in source';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_type IS 'Source data type';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_min; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_min IS 'Minimum value';
+
+
+--
+-- Name: COLUMN datadic_variables.valid_max; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.valid_max IS 'Maximum value';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_valid_choices; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_valid_choices IS 'List of valid choices for categorical variables';
+
+
+--
+-- Name: COLUMN datadic_variables.is_identifier; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_identifier IS 'Represents identifiable information';
+
+
+--
+-- Name: COLUMN datadic_variables.is_derived_var; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.is_derived_var IS 'Is a derived variable';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_derived_from_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_derived_from_id IS 'If a derived variable, ids of variables used to calculate it';
+
+
+--
+-- Name: COLUMN datadic_variables.doc_url; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.doc_url IS 'URL to additional documentation';
+
+
+--
+-- Name: COLUMN datadic_variables.target_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.target_type IS 'Type of participant this variable relates to';
+
+
+--
+-- Name: COLUMN datadic_variables.owner_email; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.owner_email IS 'Owner, especially for derived variables';
+
+
+--
+-- Name: COLUMN datadic_variables.classification; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.classification IS 'Category of sensitivity from a privacy perspective';
+
+
+--
+-- Name: COLUMN datadic_variables.other_classification; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.other_classification IS 'Additional information regarding classification';
+
+
+--
+-- Name: COLUMN datadic_variables.multi_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.multi_timepoints IS 'Timepoints this data is collected (in longitudinal studies)';
+
+
+--
+-- Name: COLUMN datadic_variables.equivalent_to_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.equivalent_to_id IS 'Primary variable id this is equivalent to';
+
+
+--
+-- Name: COLUMN datadic_variables.storage_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.storage_type IS 'Type of storage for dataset';
+
+
+--
+-- Name: COLUMN datadic_variables.db_or_fs; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.db_or_fs IS 'Database or Filesystem name';
+
+
+--
+-- Name: COLUMN datadic_variables.schema_or_path; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.schema_or_path IS 'Database schema or Filesystem directory path';
+
+
+--
+-- Name: COLUMN datadic_variables.table_or_file; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.table_or_file IS 'Database table (or view, if derived or equivalent to another variable), or filename in directory';
+
+
+--
+-- Name: COLUMN datadic_variables.redcap_data_dictionary_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.redcap_data_dictionary_id IS 'Reference to REDCap data dictionary representation';
+
+
+--
+-- Name: COLUMN datadic_variables."position"; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables."position" IS 'Relative position (for source forms or other variables where order of collection matters)';
+
+
+--
+-- Name: COLUMN datadic_variables.section_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.section_id IS 'Section this belongs to';
+
+
+--
+-- Name: COLUMN datadic_variables.sub_section_id; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.sub_section_id IS 'Sub-section this belongs to';
+
+
+--
+-- Name: COLUMN datadic_variables.title; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
+
+
+--
+-- Name: COLUMN datadic_variables.storage_varname; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
 
 
 --
@@ -13956,15 +14289,244 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220301120734'),
 ('20220301120755'),
 ('20220301201512'),
+('20220303112202'),
+('20220304115603'),
+('20220304115824'),
+('20220304115826'),
+('20220304115827'),
+('20220304115830'),
+('20220304115836'),
+('20220304115838'),
+('20220304115839'),
+('20220304115841'),
+('20220304120359'),
+('20220304120401'),
+('20220304120404'),
+('20220304120557'),
+('20220304120558'),
+('20220304120600'),
+('20220304120602'),
+('20220304120604'),
+('20220304120605'),
+('20220307144639'),
+('20220307153310'),
 ('20220307154248'),
+('20220307162856'),
+('20220307162929'),
+('20220307163124'),
+('20220307164817'),
+('20220307164959'),
+('20220324133938'),
+('20220324133940'),
+('20220324133941'),
+('20220324133943'),
+('20220324133945'),
+('20220324133946'),
+('20220324133948'),
+('20220324133949'),
+('20220324133951'),
+('20220324133952'),
+('20220324133953'),
+('20220328115603'),
+('20220329113632'),
+('20220329113634'),
+('20220329113635'),
+('20220329113637'),
+('20220329113640'),
+('20220329113641'),
+('20220329113642'),
+('20220329130557'),
+('20220329181503'),
+('20220330105313'),
+('20220330105858'),
+('20220331110656'),
+('20220331110717'),
+('20220331110820'),
+('20220421190539'),
+('20220421190541'),
+('20220421190542'),
+('20220421190544'),
+('20220421190545'),
+('20220421190547'),
+('20220421190549'),
+('20220421190550'),
+('20220421190552'),
+('20220421190553'),
+('20220421190555'),
+('20220421190556'),
+('20220421190557'),
+('20220421203328'),
+('20220422170048'),
+('20220422170050'),
+('20220422170051'),
+('20220422170418'),
+('20220422170420'),
+('20220422170421'),
+('20220422170446'),
+('20220422170448'),
+('20220422170449'),
+('20220422170830'),
+('20220422170832'),
+('20220422170833'),
+('20220422170919'),
+('20220422170920'),
+('20220422170922'),
+('20220422171039'),
+('20220422171041'),
+('20220422171042'),
+('20220422172000'),
+('20220422172002'),
+('20220422172003'),
+('20220422172155'),
+('20220422172157'),
+('20220422172158'),
+('20220422172305'),
+('20220422172307'),
+('20220422172308'),
+('20220422172839'),
+('20220422172841'),
+('20220422172842'),
+('20220422173038'),
+('20220422173040'),
+('20220422173041'),
+('20220422173147'),
+('20220422173149'),
+('20220422173150'),
+('20220422173153'),
+('20220422173710'),
+('20220422173712'),
+('20220422173713'),
+('20220422173857'),
+('20220422173859'),
+('20220422173900'),
+('20220422173902'),
+('20220422173904'),
+('20220422173905'),
+('20220422173907'),
+('20220422173908'),
+('20220422180358'),
+('20220422180430'),
+('20220422180453'),
+('20220422180936'),
+('20220422181037'),
+('20220426181659'),
+('20220427144604'),
+('20220427144732'),
+('20220429142550'),
+('20220429142651'),
+('20220503171647'),
+('20220503172002'),
+('20220503172112'),
+('20220503172331'),
+('20220503172418'),
+('20220503172607'),
+('20220503172620'),
+('20220503172651'),
+('20220503172714'),
 ('20220505095408'),
+('20220509163510'),
+('20220510103824'),
+('20220510104245'),
+('20220510104418'),
+('20220510104623'),
+('20220510104958'),
+('20220510105005'),
+('20220510105350'),
+('20220510105624'),
+('20220510105625'),
+('20220510111800'),
+('20220510111823'),
+('20220510115936'),
+('20220510120159'),
+('20220510120548'),
+('20220510134118'),
+('20220510134159'),
+('20220511181927'),
+('20220511182044'),
+('20220512131102'),
+('20220512143846'),
+('20220512143859'),
+('20220512144040'),
+('20220512144126'),
+('20220512144303'),
+('20220512144337'),
+('20220512145418'),
+('20220512145552'),
+('20220512145818'),
+('20220512145831'),
+('20220512150022'),
+('20220512150119'),
+('20220512150230'),
+('20220512184859'),
+('20220512185002'),
+('20220512191330'),
+('20220512191711'),
+('20220512192613'),
+('20220512192730'),
+('20220512192833'),
+('20220512193005'),
+('20220512193108'),
+('20220512193213'),
+('20220512193318'),
+('20220512194008'),
+('20220512194228'),
+('20220512194359'),
+('20220512194457'),
+('20220512194611'),
+('20220512194744'),
+('20220512194926'),
+('20220516092942'),
+('20220516100849'),
+('20220516113651'),
+('20220516113940'),
+('20220516122435'),
+('20220516122623'),
+('20220516122849'),
+('20220516123101'),
+('20220516123415'),
+('20220516123459'),
+('20220516123628'),
+('20220517122146'),
+('20220517122239'),
+('20220517142648'),
+('20220517142650'),
+('20220517142651'),
+('20220517142654'),
+('20220517142655'),
+('20220517142657'),
+('20220517142851'),
+('20220517142853'),
+('20220517142854'),
+('20220517142857'),
+('20220517142858'),
+('20220517142900'),
+('20220517142902'),
+('20220517142903'),
+('20220517142904'),
+('20220517143044'),
+('20220517143124'),
+('20220517144705'),
+('20220517150044'),
+('20220519170301'),
+('20220524105006'),
+('20220524105008'),
+('20220524105009'),
+('20220524105012'),
+('20220524105013'),
+('20220524105015'),
+('20220524105017'),
+('20220524105018'),
+('20220526172521'),
+('20220526172550'),
+('20220526173106'),
+('20220526173112'),
+('20220526173244'),
+('20220526181804'),
+('20220526182143'),
 ('20220531121546'),
+('20220601180701'),
 ('20230209153019'),
 ('20230420125603'),
-('20230420125634'),
-('20230502172849'),
-('20230502180019'),
-('20230502180248'),
-('20230502180810');
+('20230420125634');
 
 

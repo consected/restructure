@@ -2,11 +2,30 @@
   <h4>Upload Configuration</h4>
   <%= form_tag({action: :upload}, multipart: true, class: 'form-inline') do %>
     <%= file_field_tag 'config' %>
-    <div>
-      <input name="upload_format" type="radio" value="json" id="upload_format_json" checked="checked"/> <label for="upload_format_json">JSON</label>
-      &nbsp;&nbsp;
-      <input name="upload_format" type="radio" value="yaml" id="upload_format_yaml" /> <label for="upload_format_yaml">YAML</label>
-    </div>
+    <div id="import-settings-block" class="collapse">
+      <div>
+        <input name="upload_format" type="radio" value="json" id="upload_format_json" checked="checked"/> <label for="upload_format_json">JSON</label>
+        &nbsp;&nbsp;
+        <input name="upload_format" type="radio" value="yaml" id="upload_format_yaml" /> <label for="upload_format_yaml">YAML</label>
+      </div>
+      <div>
+        <input name="force_update" type="radio" value="no" id="upload_force_update_no" checked="checked"/> <label for="upload_force_update_no">keep newer configurations</label>
+        &nbsp;&nbsp;
+        <input name="force_update" type="radio" value="changed" id="upload_force_update_changed"/> <label for="upload_force_update_changed">update all changes</label>
+        &nbsp;&nbsp;
+        <input name="force_update" type="radio" value="yes" id="upload_force_update_yes"/> <label for="upload_force_update_yes">overwrite all configurations</label>
+      </div>
+      <div>
+        <input name="dry_run" type="radio" value="no" id="upload_dry_run_no" checked="checked"/> <label for="upload_dry_run_no">apply changes</label>
+        &nbsp;&nbsp;
+        <input name="dry_run" type="radio" value="yes" id="upload_dry_run_yes"/> <label for="upload_dry_run_yes">dry run import and rollback changes</label>
+      </div>
+      <div>
+        <input name="skip_fail" type="radio" value="no" id="upload_skip_fail_no" checked="checked"/> <label for="upload_skip_fail_no">rollback on failures</label>
+        &nbsp;&nbsp;
+        <input name="skip_fail" type="radio" value="yes" id="upload_skip_fail_yes"/> <label for="upload_skip_fail_yes">skip failures</label>
+      </div>      
     <%= submit_tag 'submit', class: 'btn btn-primary btn-sm' %>
+    </div>   
   <% end %>
 </div>

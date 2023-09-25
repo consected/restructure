@@ -155,7 +155,7 @@ class DynamicModel < ActiveRecord::Base
     failed = false
     @regenerate = nil
 
-    if enabled? && !failed
+    if ready_to_generate? && !failed
       begin
         definition = self
         definition_id = id
@@ -172,9 +172,9 @@ class DynamicModel < ActiveRecord::Base
 
         # Main implementation class
         a_new_class = Class.new(Dynamic::DynamicModelBase) do
-
           class << self
             attr_accessor :definition_id, :def_table_name
+
             def definition
               DynamicModel.definition_cache[definition_id]
             end
@@ -184,7 +184,7 @@ class DynamicModel < ActiveRecord::Base
               definition.foreign_key_name.blank?
             end            
           end
-          
+
           self.definition_id = definition_id
           # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
           self.table_name = def_table_name
@@ -234,7 +234,7 @@ class DynamicModel < ActiveRecord::Base
       end
     end
 
-    if failed || !enabled?
+    if failed || !ready_to_generate?
       remove_model_from_list
     elsif res
       add_model_to_list res

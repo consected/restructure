@@ -2,6 +2,9 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    GdprTermsOfUseTemplate = 'ui new user registration terms gdpr'
+    DefaultTermsOfUseTemplate = 'ui new user registration terms default'
+
     before_action :authorize_resource, only: %i[new create]
 
     before_action :devise_registration_params
@@ -44,14 +47,14 @@ module Users
     def terms_of_use_accepted_gdpr
       return @terms_of_use_gdpr if @terms_of_use_gdpr
 
-      gdpr_template_id = Admin::MessageTemplate.find_by(name: Settings::GdprTermsOfUseTemplate).id
+      gdpr_template_id = Admin::MessageTemplate.find_by(name: GdprTermsOfUseTemplate).id
       @terms_of_use_gdpr = "message_templates|#{gdpr_template_id}|gdpr"
     end
 
     def terms_of_use_accepted_default
       return @terms_of_use_default if @terms_of_use_default
 
-      default_template_id = Admin::MessageTemplate.find_by(name: Settings::DefaultTermsOfUseTemplate).id
+      default_template_id = Admin::MessageTemplate.find_by(name: DefaultTermsOfUseTemplate).id
       @terms_of_use_default = "message_templates|#{default_template_id}|default"
     end
 

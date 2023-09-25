@@ -87,7 +87,9 @@ module Dynamic
       qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
         select * from #{self.class.history_table_name}
         where #{history_id_attr} = #{id}
-        order by coalesce(updated_at, created_at) desc NULLS LAST
+        order by
+          EXTRACT(EPOCH FROM coalesce(updated_at, created_at)) desc nulls last,
+          id desc
       END_SQL
       all_res = qres.map(&:to_h)
 

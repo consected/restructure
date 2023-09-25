@@ -5,6 +5,7 @@
     "label": "Brain Health Study",
     "disabled": null,
     "admin_id": 4,
+    "default_schema_name": "ml_app",
     "app_configurations": [
       {
         "id": 1,

@@ -91,6 +91,12 @@ a.collapsed > .caret {
   align-items: stretch;
 }
 
+@media only screen and (max-width: 600px) {
+  .admin-flex-block {
+    display: block;
+  }
+}
+
 .label-help-icon {
   color: gray;
 }

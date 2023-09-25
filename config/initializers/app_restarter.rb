@@ -44,6 +44,9 @@ class AppControl
     ::ActivityLog.define_models
 
     @@currently_defining_models = false
+  rescue StandardError => e
+    Rails.logger.error "Failed to define_models: #{e}\n#{e.backtrace.join("\n")}"
+    @@currently_defining_models = false
   end
 end
 

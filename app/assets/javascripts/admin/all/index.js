@@ -19,7 +19,8 @@ _fpa_admin.all.index_page = class {
       var blocks = $('.shrinkable-block')
       _fpa.utils.make_readable_notes_expandable(blocks, 100);
 
-      $(document).on('change', '#config', function () {
+      $(document).on('change click', '#config', function () {
+        $('#import-settings-block').collapse('show');
         var ext = $('#config').val().split('.').pop();
         $('input[name="upload_format"]').prop('checked', false);
         $('input[name="upload_format"][value="' + ext + '"]').prop('checked', true);

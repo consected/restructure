@@ -17,6 +17,10 @@
   }
 }
 
+.dynamic-details-section, .dynamic-list-section {
+  padding: 0 10px;
+}
+
 .admin-main-options-block {
   display: flex;
   flex-direction: row;
@@ -24,12 +28,14 @@
 
 .admin-options-editor-block {
   height: 80vh;
+  min-width: 300px;
   width: auto;
   margin: 6px;
 }
 
 .admin-options-ref-block {
   height: 80vh;
+  min-width: 300px;
   width: 40vw;
   margin: 6px;
 
@@ -95,6 +101,17 @@ ul.admin-options-tag-list {
 
 .admin-form-block-outer {
   display: flex;
+}
+
+@media only screen and (max-width: 600px ) {
+  .admin-form-block-outer {
+    display: block;
+  }
+}
+
+.admin-form-fields-block {
+  width: 800px;
+  height: 80vh;
 }
 
 .admin-how-to {

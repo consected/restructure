@@ -42,18 +42,27 @@ ActiveSupport.on_load(:nfs_store_config) do
     end
   end
 
+  self.configuration_failed_reason = []
+
   if nfs_store_directory.blank?
     Rails.logger.info 'NFS Store directory not set. Ignoring the rest of the configuration'
   else
-
-    raise FsException::Config, 'temp_directory not set' if temp_directory.blank?
-    raise FsException::Config, 'group_id_range not set' if group_id_range.blank?
-    raise FsException::Config, 'containers_dirname not set' if containers_dirname.nil?
+    configuration_failed_reason << 'temp_directory not set' if temp_directory.blank?
+    configuration_failed_reason << 'group_id_range not set' if group_id_range.blank?
+    configuration_failed_reason << 'containers_dirname not set' if containers_dirname.nil?
 
     ares = Kernel.system 'which unzip'
-    raise FsException::Config, 'unzip not in the path' unless ares
+    configuration_failed_reason << 'unzip not in the path' unless ares
 
-    raise FsException::Config, 'No App Type available' unless Admin::AppType.first
-
+    app_type = Admin::AppType.active.first
+    if app_type
+      unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
+        configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
+      end
+    else
+      configuration_failed_reason << 'No App Type available'
+    end
   end
+
+  self.configuration_successful = configuration_failed_reason.blank?
 end
