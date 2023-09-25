@@ -118,16 +118,17 @@ fi
 
 echo "Starting git-flow release"
 git checkout new-master && git pull
-git checkout ${FROM_BRANCH}
-git flow release start ${NEWVER}
-RES=$?
-if [ "$RES" != "0" ]; then
-  echo $RES
-  exit
-fi
-git push --set-upstream origin release/${NEWVER}
-git flow release finish -m 'Release' ${NEWVER}
-git push origin --tags
+# git checkout ${FROM_BRANCH}
+# git flow release start ${NEWVER}
+# RES=$?
+# if [ "$RES" != "0" ]; then
+#   echo $RES
+#   exit
+# fi
+# git push --set-upstream origin release/${NEWVER}
+# git flow release finish -m 'Release' ${NEWVER}
+# git push origin --tags
+git merge --no-ff ${FROM_BRANCH}
 git push origin --all
 
 git checkout ${FROM_BRANCH}
