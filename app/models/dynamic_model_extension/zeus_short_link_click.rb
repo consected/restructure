@@ -43,7 +43,7 @@ module DynamicModelExtension
     end
 
     # A valid log entry looks like this:
-    # 8e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [25/Sep/2019:16:28:46 +0000] 2.101.87.48 - AFA99DF2F2A45D3F WEBSITE.GET.OBJECT 3TWTNGJW "GET /3TWTNGJW HTTP/1.1" 200 - 512 512 33 32 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36" - +ryACrzswwMga0Y9AAtj6hYEzzuctfJ0PZtCRKcDrDBwbIw09YncHBeVoGnDszx86ZmGPERsX7U= - - - test-shortlink.fphs.link -
+    # 8e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [25/Sep/2019:16:28:46 +0000] 2.101.87.48 - AFA99DF2F2A45D3F WEBSITE.GET.OBJECT 3TWTNGJW "GET /3TWTNGJW HTTP/1.1" 200 - 512 512 33 32 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36" - +ryACrzswwMga0Y9AAtj6hYEzzuctfJ0PZtCRKcDrDBwbIw09YncHBeVoGnDszx86ZmGPERsX7U= - - - test-shortlink.link -
 
     #
     # Get the click logs from S3
