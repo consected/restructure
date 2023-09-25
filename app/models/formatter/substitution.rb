@@ -202,26 +202,7 @@ module Formatter
         data = {}
       end
 
-      # Common constants tags
-      data[:base_url] = Settings::BaseUrl
-      data[:admin_email] = Settings::AdminEmail
-      data[:environment_name] = Settings::EnvironmentName
-      data[:password_age_limit] = Settings::PasswordAgeLimit
-      data[:password_reminder_days] = Settings::PasswordReminderDays
-      data[:password_max_attempts] = Settings::PasswordMaxAttempts
-      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
-      data[:password_min_length] = Settings::PasswordConfig[:min_length]
-      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
-      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
-      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
-      data[:mfa_disabled] = User.two_factor_auth_disabled
-      data[:login_issues_url] = Settings::LoginIssuesUrl
-      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
-      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
-      data[:notifications_from_email] = Settings::NotificationsFromEmail
-      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
-      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
-      data[:invitation_code] = Settings::InvitationCode
+      setup_common_constants_tags(data)
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
@@ -550,6 +531,32 @@ module Formatter
                            for_item: sub_data[:alt_item] || sub_data[:original_item])
 
       res[:short_link_instance]&.short_url
+    end
+
+    #
+    # Common constants tags
+    # @param [Hash] data - hash to set up with common constants
+    def self.setup_common_constants_tags(data)
+      data[:base_url] = Settings::BaseUrl
+      data[:admin_email] = Settings::AdminEmail
+      data[:environment_name] = Settings::EnvironmentName
+      data[:password_age_limit] = Settings::PasswordAgeLimit
+      data[:password_reminder_days] = Settings::PasswordReminderDays
+      data[:password_max_attempts] = Settings::PasswordMaxAttempts
+      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
+      data[:password_min_length] = Settings::PasswordConfig[:min_length]
+      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
+      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
+      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
+      data[:mfa_disabled] = User.two_factor_auth_disabled
+      data[:login_issues_url] = Settings::LoginIssuesUrl
+      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
+      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
+      data[:notifications_from_email] = Settings::NotificationsFromEmail
+      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
+      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
+      data[:invitation_code] = Settings::InvitationCode
+      data[:default_logo] = Settings::DefaultLogo
     end
   end
 end
