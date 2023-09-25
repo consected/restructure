@@ -16,6 +16,20 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.2.89] - 2023-09-25
+
+- [Bumped] version
+
+## [BAD VERSION] - 2023-09-25
+
+- [Changed] multiple items for org specific assets and defaults
+- [Moved] app/assets/images directory to restructure-app repo for org specific assets
+- [Remove] outdated favicon
+- [Changed] short links defaults
+- [Added] default_logo substitution for message templates
+- [Fixed] out of date flash when the next page is opened
+- [Fixed] re-enabling of views
+
 ## [8.2.82] - 2023-09-20
 
 - Rebuild
