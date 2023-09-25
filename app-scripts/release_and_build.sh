@@ -58,10 +58,16 @@ CURRVERINFILE=$(cat ${CURRVERFILE})
 CURRVER=${CURRVERINFILE}
 if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
   CURRVER=${LASTTAG}
-  echo "Updating current version from tags ${LASTTAG} > ${CURRVER}"
-  echo ${CURRVER} > ${CURRVERFILE}
-  git commit version.txt -m 'Bumped version'
-  git push
+  echo "Latest version file version ${CURRVER} and latest tag ${LASTTAG} do not match"
+  read -p 'Use latest file version (1) or latest tag version (2)? ' USEVER
+
+  if [ "$USEVER" == '1' ]; then
+    LASTTAG=${CURRVER}
+  else
+    echo ${CURRVER} > ${CURRVERFILE}
+    git commit version.txt -m 'Bumped version'
+    git push
+  fi
 fi
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
