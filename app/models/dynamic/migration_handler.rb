@@ -71,6 +71,7 @@ module Dynamic
     # in the last save
     def view_sql_changed?
       return unless config_view_sql
+      return true if saved_change_to_disabled? && !disabled
 
       options_attr_name = self.class.option_configs_attr.to_s
       v1 = attribute_before_last_save(options_attr_name)
