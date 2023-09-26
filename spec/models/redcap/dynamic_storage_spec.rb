@@ -132,6 +132,8 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     it 'allows a configuration to include an array column for each checkbox field group, in addition to individual boolean choice fields' do
       rc = Redcap::ProjectAdmin.active.first
       rc.current_admin = @admin
+      rc.data_options.add_multi_choice_summary_fields = true
+      rc.save
 
       ds = Redcap::DynamicStorage.new(rc, 'redcap_test.temp_mcf')
 

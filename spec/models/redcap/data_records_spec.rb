@@ -159,37 +159,6 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
   end
 
-  it 'complains if records are missing' do
-    dm = create_dynamic_model_for_sample_response
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-
-    stub_request_records @project[:server_url], @project[:api_key]
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
-
-    dr.store
-
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
-    expect(dr.updated_ids).to be_empty
-
-    WebMock.reset!
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
-
-    stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect do
-      dr.validate
-    end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
-  end
-
   it 'raises an error if the retrieved fields are different from the expect fields' do
   end
 
@@ -451,6 +420,163 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(files.count).to eq 4
     expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
       .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
+  end
+
+  describe 'handling of deleted records prevents transfer' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+
+      # Create the first DM not allowing records to be deleted
+      rc = Redcap::ProjectAdmin.active.first
+      rc.data_options.handle_deleted_records = nil
+      rc.current_admin = @admin
+      rc.save!
+
+      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      ds.category = 'redcap-test-env'
+      @dm = ds.create_dynamic_model
+      expect(ds.dynamic_model_ready?).to be_truthy
+    end
+
+    it 'complains if records are missing and handle_deleted_records = nil' do
+      dm = create_dynamic_model_for_sample_response
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect do
+        dr.validate
+      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+    end
+  end
+
+  describe 'handling of deleted records allows transfer' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+
+      # Create the first DM not allowing records to be deleted
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.save!
+
+      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      ds.category = 'redcap-test-env'
+      @dm = ds.create_dynamic_model
+      expect(ds.dynamic_model_ready?).to be_truthy
+    end
+
+    it 'ignores records if records are missing and handle_deleted_records = ignore' do
+      dm = create_dynamic_model_for_sample_response
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.data_options.handle_deleted_records = 'ignore'
+      rc.save!
+      expect(rc.data_options.handle_deleted_records).to eq 'ignore'
+      expect(rc.ignore_deleted_records?).to be true
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect do
+        dr.validate
+      end.not_to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+
+      dr.store
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[222224].sort
+      expect(dr.updated_ids).to be_empty
+    end
+
+    it 'disables records if records are missing and handle_deleted_records = disable' do
+      dm = create_dynamic_model_for_sample_response(disable: true)
+
+      expect(dm.implementation_class.attribute_names).to include 'disabled'
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.data_options.handle_deleted_records = 'disable'
+      rc.save!
+      expect(rc.data_options.handle_deleted_records).to eq 'disable'
+      expect(rc.disable_deleted_records?).to be true
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      expect do
+        dr.validate
+      end.not_to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[222224]
+      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[4]
+
+      expect(dm.implementation_class.find_by(record_id: 4)&.disabled).to be true
+    end
   end
 
   describe 'project with summary choice array fields' do

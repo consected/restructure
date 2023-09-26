@@ -136,22 +136,18 @@ module Redcap
               "additional: #{(actual_fields_minus_timestamps - expected_minus_form_timestamps).sort.join(' ')}"
       end
 
-      if records.length < existing_records_length
+      if project_admin.fail_on_deleted_records? && records.length < existing_records_length
         raise FphsException,
               "Redcap::DataRecords retrieved fewer records (#{records.length}) " \
               "than expected (#{existing_records_length})"
       end
 
-      retrieved_rec_ids = records.map { |r| r[record_id_field] }
-
       if retrieved_rec_ids.find(&:blank?)
         raise FphsException, 'Redcap::DataRecords retrieved data that has a nil record id'
       end
 
-      existing_rec_ids = existing_records.pluck(record_id_field).map(&:to_i)
-      retrieved_rec_int_ids = retrieved_rec_ids.map(&:to_i)
-      existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_int_ids
-      return unless existing_not_in_retrieved_ids.present?
+      return if existing_not_in_retrieved_ids.empty? ||
+                project_admin.ignore_deleted_records? || project_admin.disable_deleted_records?
 
       raise FphsException,
             'Redcap::DataRecords existing records were not in the retrieved records: ' \
@@ -168,6 +164,8 @@ module Redcap
     # associated file store
     def store
       upserts = []
+
+      disable_deleted_records if project_admin.disable_deleted_records?
 
       records.each do |record|
         res = create_or_update record
@@ -202,6 +200,26 @@ module Redcap
     # @return [Integer]
     def existing_records_length
       existing_records.count
+    end
+
+    #
+    # Array of Redcap record ids, based on the record_id_field
+    # @return [Array{Integer}]
+    def retrieved_rec_ids
+      return @retrieved_rec_ids if @retrieved_rec_ids
+
+      @retrieved_rec_ids = records.map { |r| r[record_id_field] }
+    end
+
+    #
+    # Array of database record ids that were not retrieved in the Redcap records
+    # @return [Array{Integer}]
+    def existing_not_in_retrieved_ids
+      return @existing_not_in_retrieved_ids if @existing_not_in_retrieved_ids
+
+      existing_rec_ids = existing_records.pluck(record_id_field).map(&:to_i)
+      retrieved_rec_int_ids = retrieved_rec_ids.map(&:to_i)
+      @existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_int_ids
     end
 
     private
@@ -256,6 +274,24 @@ module Redcap
       end
 
       rec_ids
+    end
+
+    def disable_deleted_records
+      disables = []
+      existing_not_in_retrieved_ids.each do |dbrec|
+        dbrecid = { record_id_field => dbrec }
+        record = existing_records.find_by(dbrecid)
+        next if record.disabled?
+
+        record.disabled = true
+        attrs = record.attributes
+                      .reject { |k, _v| k.in?(%w[id created_at updated_at user_id]) }
+                      .symbolize_keys
+
+        res = create_or_update(attrs)
+        disables << res if res
+      end
+      disables
     end
 
     #
@@ -371,7 +407,9 @@ module Redcap
       existing_attrs.slice!(*all_data_dictionary_fields.keys)
 
       res = new_attrs.reject do |field_name, new_value|
-        all_data_dictionary_fields[field_name].field_type.values_match?(new_value, existing_attrs[field_name])
+        # We allow the field_name to return nothing from the fields, since attributes like
+        # *disabled* can be updated in this way
+        all_data_dictionary_fields[field_name]&.field_type&.values_match?(new_value, existing_attrs[field_name])
       end
 
       res.empty?
