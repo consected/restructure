@@ -7,7 +7,7 @@ class CreateRcSampleResponsesQoezsq < ActiveRecord::Migration[5.2]
     self.table_name = 'rc_sample_responses'
     self.fields = %i[record_id dob current_weight smoketime___pnfl smoketime___dnfl smoketime___anfl smoke_start
                      smoke_stop smoke_curr demog_date ncmedrec_add ladder_wealth ladder_comm born_address twelveyrs_address othealth___complete othealth_date q2_survey_complete
-                     sdfsdaf___0 sdfsdaf___1 sdfsdaf___2 rtyrtyrt___0 rtyrtyrt___1 rtyrtyrt___2 test_field test_phone i57 f57 dd yes_or_no test_complete]
+                     sdfsdaf___0 sdfsdaf___1 sdfsdaf___2 rtyrtyrt___0 rtyrtyrt___1 rtyrtyrt___2 test_field test_phone i57 f57 dd yes_or_no test_complete disabled]
     self.table_comment = 'Dynamicmodel: Rc Sample Response'
     self.fields_comments = {}
     self.db_configs = {
