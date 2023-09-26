@@ -142,7 +142,7 @@ module Redcap
               "than expected (#{existing_records_length})"
       end
 
-      if retrieved_rec_ids.find(&:blank?)
+      if retrieved_rec_ids.find { |r| r[record_id_field].blank? }
         raise FphsException, 'Redcap::DataRecords retrieved data that has a nil record id'
       end
 
@@ -204,22 +204,27 @@ module Redcap
 
     #
     # Array of Redcap record ids, based on the record_id_field
-    # @return [Array{Integer}]
+    # These are full hashes of identifying attributes, to handle repeated records.
+    # The values are cast to strings, to allow easier comparison later
+    # @return [Array{Hash}]
     def retrieved_rec_ids
       return @retrieved_rec_ids if @retrieved_rec_ids
 
-      @retrieved_rec_ids = records.map { |r| r[record_id_field] }
+      @retrieved_rec_ids = records.map do |r|
+        record_identifier_fields.map { |f| [f, r[f].to_s] }.to_h
+      end
     end
 
     #
-    # Array of database record ids that were not retrieved in the Redcap records
-    # @return [Array{Integer}]
+    # Array of database record ids that were not retrieved in the Redcap records.
+    # These are full hashes of identifying attributes, to handle repeated records
+    # @return [Array{Hash}]
     def existing_not_in_retrieved_ids
       return @existing_not_in_retrieved_ids if @existing_not_in_retrieved_ids
 
-      existing_rec_ids = existing_records.pluck(record_id_field).map(&:to_i)
-      retrieved_rec_int_ids = retrieved_rec_ids.map(&:to_i)
-      @existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_int_ids
+      existing_rec_ids = existing_records.select(record_identifier_fields).to_a
+      existing_rec_ids = existing_rec_ids.map { |r| r.attributes.symbolize_keys.slice(*record_identifier_fields) }
+      @existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_ids
     end
 
     private
@@ -240,6 +245,15 @@ module Redcap
     # @return [Array{Symbol} | nil]
     def record_id_extra_fields
       data_dictionary.record_id_extra_fields
+    end
+
+    #
+    # Full list of fields used to identify a record
+    # @return [Array]
+    def record_identifier_fields
+      getfields = [record_id_field]
+      getfields += record_id_extra_fields if record_id_extra_fields
+      getfields
     end
 
     #
@@ -276,11 +290,14 @@ module Redcap
       rec_ids
     end
 
+    #
+    # If Redcap records were previously transferred to the local database then
+    # subsequently deleted, set them as disabled
+    # @return [Array] of record identifier hashes, false or nil results
     def disable_deleted_records
       disables = []
       existing_not_in_retrieved_ids.each do |dbrec|
-        dbrecid = { record_id_field => dbrec }
-        record = existing_records.find_by(dbrecid)
+        record = existing_records.find_by(dbrec)
         next if record.disabled?
 
         record.disabled = true

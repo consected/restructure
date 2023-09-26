@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] the ability to ignore or disable deleted Redcap records
+- [Added] documentation for Redcap project admin
+- [Changed] handling of data_options.add_multi_choice_summary_fields
+- [Changed] presentation of Redcap project admin details block
+- [Changed] "force reconfiguration" action to warn users that it is destructive and provide a confirmation to continue
+- [Fixed] handling of Redcap record identification for repeating instruments
+
 ## [8.2.91] - 2023-09-25
 
 - [Fixed] build script

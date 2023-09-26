@@ -470,7 +470,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr.summarize_fields
       expect do
         dr.validate
-      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: {:record_id=>"4"}')
     end
   end
 
@@ -525,7 +525,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr.summarize_fields
       expect do
         dr.validate
-      end.not_to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+      end.not_to raise_error
 
       dr.store
       expect(dr.errors).to be_empty
@@ -567,7 +567,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr.summarize_fields
       expect do
         dr.validate
-      end.not_to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
+      end.not_to raise_error
 
       dr.store
 
