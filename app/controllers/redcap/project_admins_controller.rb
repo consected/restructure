@@ -124,6 +124,10 @@ class Redcap::ProjectAdminsController < AdminController
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency disabled options notes]
   end
 
+  def title
+    'REDCap: Project Transfer'
+  end
+
   def filters
     pas = Redcap::ProjectAdmin.pluck(:study).uniq
     {
