@@ -240,6 +240,13 @@ module Redcap
         name.to_s.split('___').last
       end
 
+      def multiple_choice?
+        return unless field_type.name == :checkbox
+
+        ccf = field_choices&.choices_plain_text
+        ccf.present? && ccf.length > 1
+      end
+
       #
       # Generate the field name for a summary array field to hold all the
       # individual checkbox choices in a single place
