@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] filter_params when there is no disabled field
+- [Added] the ability to hide "disabled" filter in admin pages if it is not needed
+- [Added] ability to filter client requests, and linked this from the redcap project requests summary panel
+- [Added] redcap project admin option to prefix a config library to the dynamic model, so it always appears after an update
+- [Fixed] Redcap extra fields (chosen array fields) so correct calculation of missing fields in dynamic model can be made
+
 ## [8.2.92] - 2023-09-26
 
 - [Added] the ability to ignore or disable deleted Redcap records
