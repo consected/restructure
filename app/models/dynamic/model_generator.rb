@@ -116,7 +116,17 @@ module Dynamic
       schema_name, table_name = schema_and_table_name
       name = table_name.singularize
 
-      @dynamic_model = DynamicModel.active.where(name: name, category: category, schema_name: schema_name).first
+      schema_name = [nil, ''] if schema_name.blank?
+
+      attrs = { name: name, category: category, schema_name: schema_name }
+      dms = DynamicModel.active.where(attrs)
+
+      if dms.length > 1
+        Rails.logger.warn "Multiple dynamic models were found for #{attrs}\n" \
+                          "The item with id #{dms.first.id} will be used"
+      end
+
+      @dynamic_model = dms.first
       return if !no_check && !dynamic_model_ready?
 
       @dynamic_model

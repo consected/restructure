@@ -39,7 +39,7 @@ end
     dm = object_instance.dynamic_storage&.dynamic_model
     dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled } )
 %>
-  <span><%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
+  <span>(id: <%=dm.id%>) <%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
 <% else %>
   <span>not available</span>
 <% end %>
