@@ -245,7 +245,7 @@ module Redcap
         # to capture all of the multiple choice values in one place
         # But only do this if the number of choices is greater than 1, since we don't want this
         # for standalone checkboxes
-        @extra_fields << field.chosen_array_field_name
+        @extra_fields << field.chosen_array_field_name.to_s
       end
 
       @extra_fields
