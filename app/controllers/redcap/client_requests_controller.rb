@@ -2,6 +2,24 @@
 
 # View Redcap API client request log
 class Redcap::ClientRequestsController < AdminController
+  protected
+
+  def filters
+    {
+      action: Redcap::ClientRequest.pluck(:action).uniq.compact.reject(&:blank?),
+      name: Redcap::ClientRequest.pluck(:name).uniq.compact.reject(&:blank?),
+      server_url: Redcap::ClientRequest.pluck(:server_url).uniq.reject(&:blank?)
+    }
+  end
+
+  def filters_on
+    %i[action name server_url]
+  end
+
+  def filters_prevent_disabled
+    true
+  end
+
   private
 
   def no_edit
