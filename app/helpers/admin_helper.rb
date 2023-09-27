@@ -69,9 +69,7 @@ module AdminHelper
     return if view_embedded?
     return unless respond_to?(:filters) && filters
 
-    hdf = respond_to?(:has_disabled_field) && has_disabled_field
-
-    show_disabled_filter = hdf && (!respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled)
+    show_disabled_filter = (!respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled)
 
     these_filters = filters.dup
 
