@@ -69,6 +69,10 @@ module AdminHelper
     return if view_embedded?
     return unless respond_to?(:filters) && filters
 
+    hdf = respond_to?(:has_disabled_field) && has_disabled_field
+
+    show_disabled_filter = hdf && (!respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled)
+
     these_filters = filters.dup
 
     filters_on_multiple = false
@@ -83,7 +87,7 @@ module AdminHelper
 
     these_filters = { filters_on => these_filters } if these_filters.is_a? Array
 
-    if current_admin
+    if current_admin && show_disabled_filter
       these_filters[:disabled] = %w[disabled enabled]
       fo << :disabled
     end

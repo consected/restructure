@@ -1,5 +1,5 @@
 <h4>Latest Requests</h4>
-
+<p><%= link_to 'view all', redcap_client_requests_path(filter: {name: object_instance.name, server_url: object_instance.server_url}), target: '_blank' %>
 <table class="table"><thead><tr><th>action</th><th>admin</th><th>created</th><th>result</th></tr></thead>
 <tbody>
 <% object_instance.redcap_client_requests.order(id: :desc).limit(10).each do |cr| %>
@@ -13,4 +13,5 @@
 <% end %>
 </tbody>
 </table>
+
 
