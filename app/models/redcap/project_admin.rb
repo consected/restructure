@@ -213,8 +213,14 @@ module Redcap
     #                         - ignore: skip any deleted records
     #                         NOTE: with the *disabled* option, if a record subsequently "reappears" in Redcap
     #                         then the existing DB record will be set to disabled = false and updated appropriately
+    # prefix_dynamic_model_config_library: category name
+    #                      The "<category> <name>" string identifier for a
+    #                      config library to be prefixed to the dynamic
+    #                      model definition whenever it is updated.
+    #                      For example: "redcap test_library"
     configure :data_options, with: %i[add_multi_choice_summary_fields
-                                      handle_deleted_records]
+                                      handle_deleted_records
+                                      prefix_dynamic_model_config_library]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
@@ -432,6 +438,14 @@ module Redcap
 
     def fail_on_deleted_records?
       !data_options.handle_deleted_records
+    end
+
+    #
+    # Returns true if the data_options.prefix_dynamic_model_config_library setting is blank
+    # or if the dynamic model has the specified library in its options
+    # @return [true|false]
+    def dynamic_model_config_library_valid?
+      data_options.prefix_dynamic_model_config_library.blank? || dynamic_storage&.dynamic_model_config_library_added?
     end
 
     private
