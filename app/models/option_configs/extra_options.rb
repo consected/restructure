@@ -529,7 +529,7 @@ module OptionConfigs
         category = res[1].strip
         name = res[2].strip
         lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
-        lib = lib.dup
+        lib = (lib || '').dup
         lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
         content_to_update.gsub!(res[0], lib)
         res = content_to_update.match reg

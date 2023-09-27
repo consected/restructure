@@ -308,6 +308,14 @@ module Redcap
     end
 
     #
+    # Specifies the "<category> <name>" part of the @library string to add automatically when
+    # generating the dynamic model
+    # @return [String]
+    def prefix_config_library
+      project_admin.data_options.prefix_dynamic_model_config_library
+    end
+
+    #
     # Add default user access control for the current admin
     # matching user
     def add_user_access_control
