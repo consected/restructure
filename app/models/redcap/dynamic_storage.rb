@@ -53,12 +53,13 @@ module Redcap
       end
 
       extra_fields&.each do |ef|
-        ft = if ef == 'disabled'
+        ef = ef.to_sym
+        ft = if ef == :disabled
                'boolean'
              else
                'string'
              end
-        @field_types[ef] = ft
+        @field_types[ef] = ft.to_s
       end
 
       @field_types
@@ -78,7 +79,8 @@ module Redcap
       end
 
       extra_fields&.each do |ef|
-        ft = (ef != 'disabled')
+        ef = ef.to_sym
+        ft = (ef != :disabled)
         @array_fields[ef] = ft
       end
 
