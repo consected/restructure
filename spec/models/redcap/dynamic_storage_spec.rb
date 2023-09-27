@@ -18,8 +18,8 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       # Create the first DM without multiple choice summary fields
       rc = Redcap::ProjectAdmin.active.first
       rc.current_admin = @admin
-
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @ds = ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
@@ -101,6 +101,40 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
           }
         }
       )
+    end
+
+    it 'adds a config library to the dynamic model' do
+      rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name])
+      rc.current_admin = @admin
+      dm = @ds.dynamic_model
+
+      # Create a config library (fail quietly if it exists)
+      Admin::ConfigLibrary.create(name: 'test_library', category: 'redcap', format: 'yaml', current_admin: @admin)
+
+      prefix_config_library_string = '# @library redcap test_library'
+
+      hasit = dm.options.include?(prefix_config_library_string)
+      expect(hasit).to be false
+      # Since no config library has been set it is valid not to find one
+      expect(rc.dynamic_model_config_library_valid?).to be true
+
+      rc.data_options.prefix_dynamic_model_config_library = 'redcap test_library'
+      # rc.save!
+
+      hasit = dm.options.include?(prefix_config_library_string)
+      expect(hasit).to be false
+      # The dynamic model has not been set up yet, so is invalid
+      expect(rc.dynamic_model_config_library_valid?).to be_falsey
+
+      rc.api_key = @project[:api_key]
+      rc.dynamic_model_table = @table_name
+      rc.save!
+
+      rc.update_dynamic_model
+      dm = rc.dynamic_storage.dynamic_model
+      hasit = dm.options.include?(prefix_config_library_string)
+      expect(hasit).to be true
+      expect(rc.dynamic_model_config_library_valid?).to be true
     end
   end
 
