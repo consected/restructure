@@ -46,7 +46,7 @@ module Formatter
       if_blocks.each do |if_block|
         block_container = if_block[0]
         tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, nil, true)
+        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
         if tag_value.present?
           all_content.sub!(block_container, if_block[2] || '')
         else
@@ -58,7 +58,7 @@ module Formatter
       tags = all_content.scan(/{{#{TagnameRegExString}}}/).uniq
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-        tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+        tag_value = value_for_tag(tag, sub_data, tag_subs: tag_subs, ignore_missing: ignore_missing)
 
         # Finally, substitute the results into the original text
         all_content.gsub!(tag_container, tag_value)
@@ -90,7 +90,25 @@ module Formatter
       all_content
     end
 
-    def self.value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+    #
+    # Perform a plain substitution of a triple-curly tag, returning the original type,
+    # without casting to a string. This allows object / hash data to be retrieved
+    # For example: specifying content as '{{{db_object.inner_structure}}}'
+    # for data {a:1, inner_structure: {b:2, c:3}, d: 'nothing'}
+    # would return the Hash {b:2, c:3}
+    # @param [String] content
+    # @param [Hash] data
+    # @return [Object|nil]
+    def self.substitute_plain(content, data: {})
+      tagnames = content.match(/{{{(.+)}}}/)
+      tagname = tagnames[1]
+      return unless tagname
+
+      sub_data = Formatter::Substitution.setup_data(data)
+      Formatter::Substitution.value_for_tag(tagname, sub_data, ignore_missing: true, original_type: true)
+    end
+
+    def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
 
       tagpair = tag.split('.')
@@ -142,6 +160,8 @@ module Formatter
       if tag_subs
         tag_subs_type = tag_subs.split(' ').first
         tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      elsif original_type
+        # tag_value should be returned without casting
       else
         tag_value = tag_value.to_s
       end
