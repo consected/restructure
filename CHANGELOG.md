@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] migration rule so field names ending with _json are automatically typed as jsonb in database
+- [Added] triple curly substitution notation to return a data object for storing into a JSON DB field
+- [Added] ::json and ::yaml formatters for substitutions
+- [Fixed] URL hash opening a tab, but not closing automatically opened tabs
+- [Fixed] issue trying to cast a True value with true_if_1 - check if the cast function exists and if not just return the original
+- [Added] admin panel filtering of client requests
+
 ## [8.2.93] - 2023-09-27
 
 - [Fixed] filter_params when there is no disabled field
