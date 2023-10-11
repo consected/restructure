@@ -72,12 +72,15 @@ _fpa.tag_formatter = class {
       "strip",
       "split_lines",
       "split_comma",
+      "split_csv",
       "split_semicolon",
       "split_pipe",
       "split_dot",
       "split_at",
       "split_slash",
       "markup",
+      "yaml",
+      "json",
       "ignore_missing",
       "last"
     ]
@@ -368,6 +371,11 @@ _fpa.tag_formatter = class {
     return res.split(',')
   }
 
+  split_csv(res, _orig_val) {
+    // Imperfect implementation. Really should properly parse CSV files
+    return res.split(',')
+  }
+
   split_semicolon(res, _orig_val) {
     return res.split(';')
   }
@@ -390,6 +398,15 @@ _fpa.tag_formatter = class {
 
   markup(res, _orig_val) {
     return megamark(res);
+  }
+
+  yaml(res, _orig_val) {
+    // Imperfect implementation - should use a real YAML parser
+    return JSON.stringify(res, null, 2).replaceAll('{', '').replaceAll('}', '')
+  }
+
+  json(res, _orig_val) {
+    return JSON.stringify(res, null, 2)
   }
 
   ignore_missing(res, _orig_val) {
