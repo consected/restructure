@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.94] - 2023-10-11
 
 - [Added] migration rule so field names ending with _json are automatically typed as jsonb in database
 - [Added] triple curly substitution notation to return a data object for storing into a JSON DB field
