@@ -55,8 +55,8 @@
         If the sorting moves the top item that you want to keep in place, set this to *true*
 
     view_handlers: |
-      name of handler for UI and models (options include: address, contact,
-      subject)
+      name of handler for UI, and models if they exist 
+      (prebuilt UI and model options include: address, contact, subject, secondary_info)
     header_caption: header caption to use - can include [substitutions](../general/substitutions.md)
     alt_width_classes: html classes (space separated) to replace standard col-* classes
       # For example:
