@@ -243,12 +243,15 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - strip
 - split_lines
 - split_comma
+- split_csv
 - split_semicolon
 - split_pipe
 - split_dot
 - split_at
 - split_slash
 - markup
+- yaml
+- json
 - ignore_missing
 - last
 
