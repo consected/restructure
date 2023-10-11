@@ -55,6 +55,8 @@ module Formatter
       split_at
       split_slash
       markup
+      yaml
+      json
       ignore_missing
       last
     ].freeze
@@ -312,6 +314,14 @@ module Formatter
 
     def markup(res, _orig_val)
       Kramdown::Document.new(res).to_html.html_safe
+    end
+
+    def yaml(res, _orig_val)
+      res.to_yaml.sub("---\n", '') if res.respond_to?(:to_yaml)
+    end
+
+    def json(res, _orig_val)
+      JSON.pretty_generate(res) if res.respond_to?(:to_json)
     end
 
     def ignore_missing(res, _orig_val)
