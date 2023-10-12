@@ -58,13 +58,11 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
           console.log('close-others')
           var $nav = $got_tab.parents('ul.nav').first();
           $nav.find('.on-open-click').removeClass('on-open-click');
-          window.setTimeout(function () {
-            // Wait a moment then get the item to collapse again
-            $nav.find('.was-autoclicked, .auto-clicked').click();
-          }, 100)
         }
         // Now open the required tab if we found one
-        $got_tab.click();
+        window.setTimeout(function () {
+          $got_tab.click();
+        }, 1000)
       }, 50)
     } else {
       _fpa.form_utils.format_block(h);

@@ -26,7 +26,7 @@
     "jquery-timepicker": "^1.3.3",
     "jquery.hotkeys": "https://github.com/consected/jquery.hotkeys",
     "jquery.scrollto": "^2.1.2",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.1.0",
     "jsTreeTable": "https://github.com/consected/jsTreeTable",
     "luxon": "^3.0.1",
     "megamark": "^3.3.0",

@@ -320,7 +320,7 @@ module Formatter
       # Automatically titleize names
       tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
       tagp[1..].each do |op|
-        res = TagFormatter.format_with(op, res, orig_val, current_user)
+        res = TagFormatter.format_with(op, res, orig_val, current_user, tag, data)
       end
 
       res

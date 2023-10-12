@@ -415,6 +415,10 @@ class ModelReference < ActiveRecord::Base
     to_record_type.split('::').last.ns_underscore
   end
 
+  def to_record_resource_name
+    to_record.resource_name
+  end
+
   #
   # Check if the to-record is viewable, based on table user access controls only.
   # @todo - Consider whether this should be extended to include option config showable_if rules
@@ -578,6 +582,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :to_record_id
     extras[:methods] << :to_record_master_id
     extras[:methods] << :to_record_type
+    extras[:methods] << :to_record_resource_name
     extras[:methods] << :to_record_type_us
     extras[:methods] << :to_record_type_us_plural
     extras[:methods] << :to_record_short_type_us

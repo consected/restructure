@@ -262,6 +262,7 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - json
 - ignore_missing
 - last
+- general_selection_label
 
 Additionally, if the formatter is an integer number the following rules apply:
 
