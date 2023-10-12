@@ -253,11 +253,23 @@ class DynamicModel < ActiveRecord::Base
     return unless vh.present?
 
     vh.each do |v|
-      h = "ViewHandlers::#{v.camelize}".constantize
-      res.include h
+      h = view_handler_def(v)
+      # Skip if the ViewHandlers class doesn't exist. We allow UI-only view_handlers to be used
+      next unless h
 
+      res.include h
       res.handle_include_extras if res.respond_to? :handle_include_extras
     end
+  end
+
+  #
+  # Return the ViewHandlers class, if it exists, else return nil
+  # @param [String] vh_name
+  # @return [Module]
+  def view_handler_def(vh_name)
+    ViewHandlers.const_get(vh_name.camelize)
+  rescue NameError
+    nil
   end
 
   def base_route_segments
