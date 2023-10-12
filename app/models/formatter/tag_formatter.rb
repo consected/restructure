@@ -4,7 +4,7 @@ module Formatter
   # NOTE: if additional formatters are added here, they also need matching javascript
   # in _fpa_tag_formatter
   class TagFormatter
-    attr_accessor :current_user
+    attr_accessor :current_user, :tag_name, :data
 
     ValidOps = %w[
       capitalize
@@ -59,27 +59,39 @@ module Formatter
       json
       ignore_missing
       last
+      general_selection_label
     ].freeze
 
-    def self.format_with(operation, res, orig_val, current_user = nil)
-      processor = new(current_user: current_user)
+    #
+    # Format a tag value with the named formatter operation
+    # @param [String] operation - formatter name
+    # @param [String] curr_val - tag value
+    # @param [Object] orig_val - tag value in its original form (may not be a string)
+    # @param [User] current_user - current user associated with the data
+    # @param [String] tag_name - tag name returning value being formatted
+    # @param [Object] data - the original dataset the tag was retrieved from
+    # @return [String|nil] result
+    def self.format_with(operation, curr_val, orig_val, current_user = nil, tag_name = nil, data = nil)
+      processor = new(current_user: current_user, tag_name: tag_name, data: data)
 
-      processor.process(operation, res, orig_val)
+      processor.process(operation, curr_val, orig_val)
     end
 
-    def initialize(current_user: nil)
+    def initialize(current_user: nil, tag_name: nil, data: nil)
       self.current_user = current_user
+      self.tag_name = tag_name
+      self.data = data
     end
 
-    def process(operation, res, orig_val)
+    def process(operation, curr_val, orig_val)
       if operation.in?(ValidOps)
-        send operation, res, orig_val
-      elsif res.is_a?(Array) && operation.to_i.to_s == operation
-        res[operation.to_i]
+        send operation, curr_val, orig_val
+      elsif curr_val.is_a?(Array) && operation.to_i.to_s == operation
+        curr_val[operation.to_i]
       elsif operation.to_i != 0
-        res[0..operation.to_i]
+        curr_val[0..operation.to_i]
       else
-        res
+        curr_val
       end
     end
 
@@ -330,6 +342,19 @@ module Formatter
 
     def last(res, _orig_val)
       res.last
+    end
+
+    #
+    # Return the general selection label in place of the field value, if one exists.
+    # If not, return the original value
+    # @return [String]
+    def general_selection_label(res, orig_val)
+      data = self.data
+      data = data[:original_item] if !data.respond_to?(:_general_selections) && data.is_a?(Hash)
+      return res unless data.respond_to?(:_general_selections)
+
+      # Use the original value cast to a string, since this handles date fields better
+      data._general_selections&.dig(tag_name, orig_val.to_s, :name) || res
     end
   end
 end

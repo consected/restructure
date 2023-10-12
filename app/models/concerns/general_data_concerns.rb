@@ -206,7 +206,10 @@ module GeneralDataConcerns
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || an).to_s
       alt_gs = edit_as[:general_selection]
-      next unless alt_gs || alt_fn.index(/^(redcap_)?(tag_)?select/) || alt_fn.index(/^redcap_radio/)
+      next unless alt_gs ||
+                  alt_fn.index(/^(redcap_)?(tag_)?select/) ||
+                  alt_fn.index(/^redcap_radio/) ||
+                  alt_fn.in?(['rank', 'source', 'rec_type'])
 
       vals = attributes[an]
       vals = [vals] unless vals.is_a? Array
@@ -214,7 +217,7 @@ module GeneralDataConcerns
       entries =
         allselects
         .select { |f| f[:field_name] == ansym && f[:base_item_type].singularize == prefix && f[:value].to_s&.in?(vals) }
-        .map { |e| [e[:value], { name: e[:name] }] }
+        .map { |e| [e[:value].to_s, { name: e[:name] }] }
       @add_show_attribs[an] = entries.to_h
     end
 

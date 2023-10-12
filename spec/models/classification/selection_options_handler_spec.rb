@@ -310,15 +310,15 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
       },
       'select_result' => {},
       'select_record_id_from_player_contacts' => {
-        player_contact.id => { name: pc_data }
+        player_contact.id.to_s => { name: pc_data }
       },
       'tag_select_allowed' => {
         'def' => { name: 'This DEF' },
         'ghi' => { name: 'This GHI' }
       },
       'tag_select_record_id_from_player_contacts' => {
-        player_contact.id => { name: pc_data },
-        player_contact3.id => { name: pc_data3 }
+        player_contact.id.to_s => { name: pc_data },
+        player_contact3.id.to_s => { name: pc_data3 }
       }
     }
 
@@ -441,15 +441,15 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
         'r-two' => { name: 'Radio two' }
       },
       'select_record_id_from_player_contacts' => {
-        player_contact.id => { name: pc_data }
+        player_contact.id.to_s => { name: pc_data }
       },
       'tag_select_allowed' => {
         'rcdef' => { name: 'This rcDEF' },
         'rcghi' => { name: 'This rcGHI' }
       },
       'tag_select_record_id_from_player_contacts' => {
-        player_contact.id => { name: pc_data },
-        player_contact3.id => { name: pc_data3 }
+        player_contact.id.to_s => { name: pc_data },
+        player_contact3.id.to_s => { name: pc_data3 }
       }
     }
 
