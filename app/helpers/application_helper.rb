@@ -270,7 +270,8 @@ module ApplicationHelper
     res = Admin::MessageTemplate.generate_content content_template_name: name, data: data,
                                                   allow_missing_template: allow_missing_template,
                                                   markdown_to_html: markdown_to_html,
-                                                  category: category
+                                                  category: category,
+                                                  ignore_missing: true
 
     res&.html_safe
   end
