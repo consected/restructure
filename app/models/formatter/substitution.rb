@@ -32,6 +32,10 @@ module Formatter
     # @param all_content [String] the text containing possible {{something.else}} to be substituted
     # @param in_data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
     # @param tag_subs [String] for example 'span class="someclass"'
+    # @param ignore_missing [true|false|nil|Symbol] - one of:
+    #    :show_tag - show the tag if missing
+    #    true - quietly ignore the missing tag
+    #    false, nil - raise exception if tag is missing
     # @return [String] resulting text after substitution
     def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
       return unless all_content
@@ -66,7 +70,7 @@ module Formatter
 
       # Unless we have requested to show missing tags, check for {{tag}} left in the text,
       # indicating something was not replaced
-      if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).present?
+      if ignore_missing != :show_tag && ignore_missing != true && all_content.scan(/{{.*}}/).present?
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
