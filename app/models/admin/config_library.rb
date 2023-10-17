@@ -105,6 +105,8 @@ class Admin::ConfigLibrary < Admin::AdminBase
   end
 
   def valid_options
+    return if options.blank?
+
     YAML.safe_load(options, aliases: true)
   end
 end
