@@ -96,6 +96,37 @@ _fpa = {
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
   },
+  // Preprocess handlebars source to make special ReStructure curly substitutions
+  // work correctly. For each of them we make them into Handlebars helpers.
+  setup_template_source: function (source) {
+    const do_list = ['embedded_report', 'glyphicon']
+    do_list.forEach(function (pre) {
+      const re = new RegExp(`{{${pre}_[a-zA-Z0-9_]+}}`, 'g');
+      var re_res = source.match(re)
+      if (re_res) {
+        re_res.forEach(function (got) {
+          const name = got.replace(`{{${pre}_`, '').replace('}}', '')
+          source = source.replace(got, `{{${pre} true '${name}'}}`)
+        })
+      }
+    })
+
+    const re = new RegExp(`{{[a-zA-Z0-9_]+::[0-9a-z:_.]+}}`, 'g');
+    var re_res = source.match(re)
+    if (re_res) {
+      re_res.forEach(function (got) {
+        console.log('tag_format')
+        const tagform = got.replace(`{{`, '').replace('}}', '')
+        var parts = tagform.split('::')
+        var tag = parts.shift()
+
+        parts = parts.map((p) => { return `'${p}'` })
+
+        source = source.replace(got, `{{tag_format ${tag} ${parts.join(' ')}}}`)
+      })
+    }
+    return source;
+  },
   compile_templates: function () {
     $('body').addClass('status-compiling');
     $('script.handlebars-partial')
@@ -103,10 +134,11 @@ _fpa = {
       .each(function () {
         $(this).addClass('compiled');
         var id = $(this).attr('id');
-
+        var source = $(this).html();
+        source = _fpa.setup_template_source(source);
         id = id.replace('-partial', '');
 
-        var fnTemplate = Handlebars.compile($(this).html(), _fpa.HandlebarsCompileOptions);
+        var fnTemplate = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
         Handlebars.registerPartial(id, fnTemplate);
         _fpa.partials[id] = fnTemplate;
       });
@@ -117,6 +149,7 @@ _fpa = {
         $(this).addClass('compiled');
         var id = $(this).attr('id');
         var source = $(this).html();
+        source = _fpa.setup_template_source(source);
         _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
       });
     $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');

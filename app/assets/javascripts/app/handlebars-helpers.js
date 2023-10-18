@@ -576,6 +576,38 @@
     return obj.replace(/_/g, ' ');
   });
 
+  // Call with {{embedded_report true '<report resource name>'}}
+  // Includes a block for an embedded_report, and a link that will be run automatically when a postprocessor containing this block is run
+  Handlebars.registerHelper('embedded_report', function (t, obj) {
+    if (!obj) return;
+    if (typeof obj !== 'string') return obj;
+    var htags = `data-remote="true" data-result-target="#tag_embedded_report_results-${obj}" data-target="#tag_embedded_report_results-${obj}" data-target-force="true"`;
+    var res = `<div class="tag-embedded-report" id="tag_embedded_report_results-${obj}"><a ${htags} href="/reports/${obj}?embed=true&part=results&search_attrs=_use_defaults_&commit=table" class="on-postprocess-click">loading...</a></div>`
+    return new Handlebars.SafeString(res);
+  });
+
+  // Call with {{glyphicon true '<icon name>'}}
+  Handlebars.registerHelper('glyphicon', function (t, obj) {
+    if (!obj) return;
+    if (typeof obj !== 'string') return obj;
+    obj = obj.replaceAll('_', '-')
+    var res = `<span class="glyphicon glyphicon-${obj}"></span>`
+    return new Handlebars.SafeString(res);
+  });
+
+  // Format a value using the _fpa.tag_formatter.
+  // For example: {{tag_format status 'humanize' 'capitalize'}}
+  // This is equivalent to the ReStructure {{status::humanize::capitalize}} formatting
+  // NOTE: Currently this won't process general_selection_labels correctly
+  Handlebars.registerHelper('tag_format', function (val) {
+    var res = val;
+    for (let index = 1; index < arguments.length - 1; index++) {
+      var op = arguments[index];
+      res = _fpa.tag_formatter.format_with(op, res, res);
+    }
+    return res;
+  });
+
   Handlebars.registerHelper('in', function (context, key, items, options) {
 
     var ins = items.split(',');
