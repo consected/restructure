@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.99] - 2023-10-18
 
 - [Added] the ability for reference action captions to incorporate more extensive substitutions
 - [Added] preprocessing of templates to convert ReStructure specific tag formatters {{embedded_report_...}} {{glyphicon_...}} and {{tag::formatter...}} to new handlebars helpers
