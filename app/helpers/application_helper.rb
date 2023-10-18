@@ -160,8 +160,12 @@ module ApplicationHelper
   # @param [String] key - field key
   # @param [Hash] captions - defined captions
   # @param [Symbol] mode - one of :new, :edit, :show
-  # @param [true|false] no_sub - don't do double-curly substitutions
-  #                              (it may happen in the UI instead if this is a template)
+  # @param [true|:escape|false] no_sub - don't do double-curly substitutions, and
+  #                              allow Handlebars to do it in the UI, or escape the
+  #                              curly braces so that _fpa.substitution can handle it
+  #                              true - no substitution
+  #                              false - perform substitutions
+  #                              :escape - escapes to {^{tag}^}
   # @param [true|false] ignore_missing - don't raise exception on missing tag by default
   # @return [String] HTML result
   def show_caption_before(key, captions, mode: nil, no_sub: nil, ignore_missing: true)
@@ -174,6 +178,8 @@ module ApplicationHelper
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing: ignore_missing)
     end
+
+    caption = caption.gsub('{{', '{^{').gsub('}}', '}^}') if no_sub == :escape
     caption.html_safe
   end
 
