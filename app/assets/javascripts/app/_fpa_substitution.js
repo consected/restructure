@@ -86,6 +86,11 @@ _fpa.substitution = class {
     const _this = this;
     if (!text || text.length < 1) return;
 
+    // Special escaping of double curly braces allows Handlebars substitutions
+    // to be skipped if these can't provide what is needed, reverting to handling
+    // by this function.
+    text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
+
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
     const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
