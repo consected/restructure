@@ -576,22 +576,53 @@
     return obj.replace(/_/g, ' ');
   });
 
-  // Call with {{embedded_report true '<report resource name>'}}
+  // Call with {{embedded_report '<report resource name>' true}}
   // Includes a block for an embedded_report, and a link that will be run automatically when a postprocessor containing this block is run
-  Handlebars.registerHelper('embedded_report', function (t, obj) {
-    if (!obj) return;
-    if (typeof obj !== 'string') return obj;
-    var htags = `data-remote="true" data-result-target="#tag_embedded_report_results-${obj}" data-target="#tag_embedded_report_results-${obj}" data-target-force="true"`;
-    var res = `<div class="tag-embedded-report" id="tag_embedded_report_results-${obj}"><a ${htags} href="/reports/${obj}?embed=true&part=results&search_attrs=_use_defaults_&commit=table" class="on-postprocess-click">loading...</a></div>`
+  // It is important that the report enforces filtering of the results based on what the user should be able to see,
+  // since the params passed to the report are open to manipulation by the client (unlike the same substitution performed server side)
+
+  // if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
+  //   list_item = data[:original_item].referring_record
+  //   list_id = list_item.id
+  //   list_master_id = list_item.master_id if list_item.respond_to?(:master_id)
+  // else
+  //   list_item = data[:original_item]
+  //   list_id = list_item[:id]
+  //   list_master_id = list_item[:master_id]
+  // end
+  // [list_item, list_id, list_master_id]
+
+  Handlebars.registerHelper('embedded_report', function (resname, t, opt) {
+    if (!resname) return;
+    if (typeof resname !== 'string') return resname;
+    const referring_record = this.referenced_from && this.referenced_from[0];
+
+    // Get the appropriate id, master_id and type for the report call params
+    if (referring_record) {
+      var list_id = referring_record.from_record_id;
+      var list_master_id = referring_record.from_record_master_id;
+      var list_type = referring_record.from_record_type_us;
+    }
+    else {
+      var list_id = this.id;
+      var list_master_id = this.master_id;
+      var list_type = this.item_type;
+    }
+
+    console.log('rhembedded');
+    const search_attrs = `search_attrs[master_id]=${list_master_id}&search_attrs[list_id]=${list_id}&search_attrs[list_type]=${list_type}`
+    const divid = `tag_embedded_report_results-${resname}-${list_master_id}-${list_id}-${list_type}`
+    const htags = `data-remote="true" data-result-target="#${divid}" data-target="#${divid}" data-target-force="true"`;
+    var res = `<div class="tag-embedded-report" id="${divid}"><a ${htags} href="/reports/${resname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
     return new Handlebars.SafeString(res);
   });
 
-  // Call with {{glyphicon true '<icon name>'}}
-  Handlebars.registerHelper('glyphicon', function (t, obj) {
-    if (!obj) return;
-    if (typeof obj !== 'string') return obj;
-    obj = obj.replaceAll('_', '-')
-    var res = `<span class="glyphicon glyphicon-${obj}"></span>`
+  // Call with {{glyphicon '<icon name>' true}}
+  Handlebars.registerHelper('glyphicon', (icon, t) => {
+    if (!icon) return;
+    if (typeof icon !== 'string') return icon;
+    icon = icon.replaceAll('_', '-');
+    var res = `<span class="glyphicon glyphicon-${icon}"></span>`;
     return new Handlebars.SafeString(res);
   });
 
