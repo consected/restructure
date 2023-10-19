@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Reports
   #
   # Handle the running of a report, including substitutions of search attribute values
@@ -6,7 +8,7 @@ module Reports
     attr_accessor :report, :count_only, :sql, :current_user, :results, :using_defaults
     attr_writer :search_attr_values
 
-    ReportIdAttribName = '_report_id_'.freeze
+    ReportIdAttribName = '_report_id_'
 
     def initialize(report)
       self.report = report
@@ -18,7 +20,8 @@ module Reports
     # Run the report
     # @param [Hash | String] search_attr_values - hash of search values, or '_use_defaults_' to force use of
     #                                             default values from the report options
-    # @param [Admin] current_admin - (optional) indicates that a full SQL error can be communicated if the report fails to run
+    # @param [Admin] current_admin - (optional) indicates that a full SQL error can be communicated if
+    #                                the report fails to run
     # @return [Array] results array from ActiveRecord::Base.connection.execute
     def run(initial_search_attr_values, current_admin = nil)
       raise FphsException, 'SQL is not set' if sql.blank?
@@ -194,13 +197,23 @@ module Reports
     end
 
     #
-    # Substitute the flag :current_user in SQL with the current user's ID
-    # or NULL if not set
+    # Substitute the flag :current_user in SQL with the current user's:
+    # - current_user: id
+    # - current_user_preference: user_preference.id
+    # - current_user_roles: array of active role names in this app (array['role1',...])
+    # Each will return NULL if not set
     # @param [String] sql
     # @return [String] SQL with substitutions
     def substitute_current_user(sql)
+      cur = current_user&.user_roles&.active&.pluck(:role_name)
+      if cur
+        curtxt = cur.map { |r| "'#{r}'" }.join(',')
+        curtxt = "array[#{curtxt}]"
+      end
+
       sql
         .gsub(':current_user_preference', current_user&.user_preference&.id&.to_s || 'NULL')
+        .gsub(':current_user_roles', curtxt || 'NULL')
         .gsub(':current_user', current_user&.id&.to_s || 'NULL')
     end
 
@@ -308,10 +321,10 @@ module Reports
 
       search_attr_values[:ids_filter_previous] = nil
 
-      if previous_filtering.sql_requests_filtering
-        previous_filtering.requested = (search_attr_values[:_filter_previous_] == 'true')
-        search_attr_values[:ids_filter_previous] = previous_filtering.filtering_ids
-      end
+      return unless previous_filtering.sql_requests_filtering
+
+      previous_filtering.requested = (search_attr_values[:_filter_previous_] == 'true')
+      search_attr_values[:ids_filter_previous] = previous_filtering.filtering_ids
     end
 
     #

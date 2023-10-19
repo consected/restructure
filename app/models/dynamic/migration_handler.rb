@@ -79,11 +79,15 @@ module Dynamic
       v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
       v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
       if v1
-        v1def = YAML.safe_load(v1, [], [], true)
+        v1def = YAML.safe_load(v1, permitted_classes: [],
+                                   permitted_symbols: [],
+                                   aliases: true)
         v1_sql = v1def.dig('_configurations', 'view_sql')
       end
       if v2
-        v2def = YAML.safe_load(v2, [], [], true)
+        v2def = YAML.safe_load(v2, permitted_classes: [],
+                                   permitted_symbols: [],
+                                   aliases: true)
         v2_sql = v2def.dig('_configurations', 'view_sql')
       end
       changed = (v1_sql != v2_sql)

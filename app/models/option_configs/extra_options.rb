@@ -314,7 +314,9 @@ module OptionConfigs
       if config_text.present?
         config_text = include_libraries(config_text)
         begin
-          res = YAML.safe_load(config_text, [], [], true)
+          res = YAML.safe_load(config_text, permitted_classes: [],
+                                            permitted_symbols: [],
+                                            aliases: true)
         rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
           errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
@@ -531,6 +533,7 @@ module OptionConfigs
         lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
         lib = (lib || '').dup
         lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+        lib = "# @sourced_library_start #{category} #{name}\n#{lib}\n# @sourced_library_end #{category} #{name}\n"
         content_to_update.gsub!(res[0], lib)
         res = content_to_update.match reg
       end

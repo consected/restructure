@@ -277,7 +277,9 @@ module OptionsHandler
 
     self.hash_configuration = JSON.parse config_text
   rescue StandardError
-    self.hash_configuration = YAML.safe_load(config_text, [Date, Time], [], true)
+    self.hash_configuration = YAML.safe_load(config_text, permitted_classes: [Date, Time],
+                                                          permitted_symbols: [],
+                                                          aliases: true)
   end
 
   #
