@@ -61,6 +61,7 @@ group :development, :test do
   gem 'brakeman', require: false
   gem 'bundler-audit'
   gem 'byebug', '~> 11.1', '>= 11.1.3'
+  gem 'debug'
   # gem 'debase'
   gem 'parallel_tests', '3.8.1'
   gem 'readapt'

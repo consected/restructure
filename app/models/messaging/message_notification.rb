@@ -421,7 +421,7 @@ module Messaging
       return @extra_substitutions_data if @extra_substitutions_data
       return unless extra_substitutions
 
-      @extra_substitutions_data = YAML.safe_load(extra_substitutions, [Symbol])
+      @extra_substitutions_data = YAML.safe_load(extra_substitutions, permitted_classes: [Symbol])
     end
 
     #
