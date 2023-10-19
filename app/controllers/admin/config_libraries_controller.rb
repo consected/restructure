@@ -22,12 +22,13 @@ class Admin::ConfigLibrariesController < AdminController
   def filters
     {
       category: Admin::ConfigLibrary.active.pluck(:category).uniq.compact,
-      format: format_options
+      format: format_options,
+      name: Admin::ConfigLibrary.active.pluck(:name).uniq.compact
     }
   end
 
   def filters_on
-    %i[category format]
+    %i[category format name]
   end
 
   def format_options
