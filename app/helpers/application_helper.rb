@@ -263,14 +263,17 @@ module ApplicationHelper
   # @param [Boolean] allow_missing_template - return nil if no matching template found
   # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
   # @param [String] category - optionally request content from the stated category
+  # @param [true|nil] no_substitutions - don't perform curly substitutions if true (default: nil)
   # @return [String]
-  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil)
+  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil,
+                     no_substitutions: nil)
     data ||= {}
     data = data.attributes if data.respond_to? :attributes
     res = Admin::MessageTemplate.generate_content content_template_name: name, data: data,
                                                   allow_missing_template: allow_missing_template,
                                                   markdown_to_html: markdown_to_html,
-                                                  category: category
+                                                  category: category,
+                                                  ignore_missing: true
 
     res&.html_safe
   end
