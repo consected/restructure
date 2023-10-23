@@ -750,3 +750,7 @@ i.glyphicon.glyphicon-new-window {
     display: none;
   }
 }
+
+body.registrations.new a[data-target="#help-sidebar"] {
+  display: none;
+}
