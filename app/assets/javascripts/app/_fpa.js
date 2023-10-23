@@ -106,7 +106,7 @@ _fpa = {
       if (re_res) {
         re_res.forEach(function (got) {
           const name = got.replace(`{{${pre}_`, '').replace('}}', '')
-          source = source.replace(got, `{{${pre} true '${name}'}}`)
+          source = source.replace(got, `{{${pre} '${name}' true}}`)
         })
       }
     })
