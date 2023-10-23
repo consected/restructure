@@ -16,6 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.2.104] - 2023-10-23
+
+- [Fixed] release builds to include linked source directories correctly
+
+## [8.2.103] - 2023-10-23
+
+- [Bumped] version
+- [Fixed] CHANGELOG
+
+## [8.2.102] - 2023-10-23
+
+- [Bumped] version
+
 ## [8.2.100] - 2023-10-19
 
 - [Added] :current_user_roles SQL substitution to provide an array[] of current user active role names
