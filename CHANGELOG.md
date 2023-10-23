@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.2.95] - 2023-10-12
+
+- [Added] ::general_selection_label formatter
+- [Added] limited UI tag substitution lookup of associations, based on model_references in data
+- [Fixed] front end formatter for YAML
+- [Fixed] failed hash jumps and avoid JS errors
+
 ## [8.2.94] - 2023-10-11
 
 - [Added] migration rule so field names ending with _json are automatically typed as jsonb in database
