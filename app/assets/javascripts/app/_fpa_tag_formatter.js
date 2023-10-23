@@ -401,8 +401,7 @@ _fpa.tag_formatter = class {
   }
 
   yaml(res, _orig_val) {
-    // Imperfect implementation - should use a real YAML parser
-    return JSON.stringify(res, null, 2).replaceAll('{', '').replaceAll('}', '')
+    return jsyaml.dump(res);
   }
 
   json(res, _orig_val) {
