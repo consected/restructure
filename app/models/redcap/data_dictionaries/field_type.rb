@@ -223,7 +223,11 @@ module Redcap
           return Time.utc(2000, 1, 1, vtime.hour, vtime.min, vtime.sec)
         end
 
-        value.send(real_type)
+        if value.respond_to?(real_type)
+          value.send(real_type)
+        else
+          value
+        end
       end
 
       #

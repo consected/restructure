@@ -8,8 +8,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
   # @param [Array] tests - [[operation, value, expected result, (optional alternative user)],...]
   def run(tests)
     tests.each do |test|
-      res = Formatter::TagFormatter.format_with test[0].to_s, test[1], test[1], test[3] || @user
-
+      res = Formatter::TagFormatter.format_with test[0].to_s, test[1], test[1], test[3] || @user, test[4], test[5]
       expect(res).to eq(test[2]), "Test: #{test[0]} '#{res}' expected to be '#{test[2]}'"
     end
   end
@@ -137,6 +136,89 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:split_at, 'phil.ayres@test.tst', ['phil.ayres', 'test.tst']],
       [:split_slash, 'abc/def', ['abc', 'def']],
       [:markup, "# Hello!\n\nHere is some text", "<h1 id=\"hello\">Hello!</h1>\n\n<p>Here is some text</p>\n"]
+    ]
+
+    run tests
+  end
+
+  it 'handles hash data' do
+    data = { 'completeyn' => 'y',
+             'grant' => [
+               { 'grantid' => 'r01 hl060133', 'acronym' => 'hl', 'agency' => 'nhlbi nih hhs', 'country' => 'united states' },
+               { 'grantid' => 'r01 hl105239', 'acronym' => 'hl', 'agency' => 'nhlbi nih hhs', 'country' => 'united states' },
+               { 'grantid' => 'r01-hl-60133-01', 'acronym' => 'hl', 'agency' => 'nhlbi nih hhs', 'country' => 'united states' }
+             ] }
+    tests = [
+      [:json, data, <<~END_JSON
+        {
+          "completeyn": "y",
+          "grant": [
+            {
+              "grantid": "r01 hl060133",
+              "acronym": "hl",
+              "agency": "nhlbi nih hhs",
+              "country": "united states"
+            },
+            {
+              "grantid": "r01 hl105239",
+              "acronym": "hl",
+              "agency": "nhlbi nih hhs",
+              "country": "united states"
+            },
+            {
+              "grantid": "r01-hl-60133-01",
+              "acronym": "hl",
+              "agency": "nhlbi nih hhs",
+              "country": "united states"
+            }
+          ]
+        }
+      END_JSON
+        .strip],
+      [:yaml, data, <<~END_YAML
+        completeyn: "y"
+        grant:
+        - grantid: r01 hl060133
+          acronym: hl
+          agency: nhlbi nih hhs
+          country: united states
+        - grantid: r01 hl105239
+          acronym: hl
+          agency: nhlbi nih hhs
+          country: united states
+        - grantid: r01-hl-60133-01
+          acronym: hl
+          agency: nhlbi nih hhs
+          country: united states
+      END_YAML
+      ]
+    ]
+
+    run tests
+  end
+
+  it 'handles gets general selection labels' do
+    pi = PlayerContact.new(
+      data: 'sakdjfhkj@askjdhkdjh.tst',
+      rec_type: 'email',
+      rank: 10,
+      source: 'nflpa2'
+    )
+
+    tests = [
+      [:general_selection_label, '10', 'primary', nil, 'rank', pi],
+      [:general_selection_label, 'nflpa2', 'NFLPA2', nil, 'source', pi],
+      [:general_selection_label, 'email', 'Email', nil, 'rec_type', pi]
+    ]
+
+    pi = PlayerInfo.new(
+      last_name: 'test',
+      rank: 10,
+      source: 'nflpa2'
+    )
+
+    tests = [
+      [:general_selection_label, 'nflpa2', 'NFLPA 2', nil, 'source', pi]
     ]
 
     run tests

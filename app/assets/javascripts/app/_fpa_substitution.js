@@ -66,12 +66,14 @@ _fpa.substitution = class {
       } else if (next_tag.indexOf('glyphicon_') === 0) {
         const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
         got = `<span class="glyphicon glyphicon-${icon}"></span>`;
+      } else if (iter_data.model_references) {
+        console.log('get model ref')
+        got = iter_data.model_references.find((el) => el.to_record_resource_name == next_tag);
       }
 
-      if (got) {
-        iter_data = got;
-      } else {
-        continue;
+      iter_data = got;
+      if (!got) {
+        break;
       }
     }
 
@@ -83,6 +85,11 @@ _fpa.substitution = class {
     var data = this.data;
     const _this = this;
     if (!text || text.length < 1) return;
+
+    // Special escaping of double curly braces allows Handlebars substitutions
+    // to be skipped if these can't provide what is needed, reverting to handling
+    // by this function.
+    text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
     const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
@@ -143,7 +150,7 @@ _fpa.substitution = class {
           got = '(?)';
         }
       } else if (formatters) {
-        got = _fpa.tag_formatter.format_all(got, formatters, tag_name);
+        got = _fpa.tag_formatter.format_all(got, formatters, tag_name, data);
       }
 
       text = text.replace(el, got);

@@ -12,7 +12,7 @@ module AdminControllerHandler
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
                   :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder,
-                  :no_options_field, :admin_labels
+                  :no_options_field, :admin_labels, :filters_prevent_disabled
   end
 
   def index
@@ -128,6 +128,12 @@ module AdminControllerHandler
 
   def filters_on
     []
+  end
+
+  #
+  # Override to prevent filters showing "disabled" option
+  def filters_prevent_disabled
+    false
   end
 
   #

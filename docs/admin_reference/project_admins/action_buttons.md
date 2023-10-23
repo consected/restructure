@@ -35,4 +35,4 @@ Typically running the **update dynamic model** action is sufficient to rectify t
 
 ## force reconfiguration
 
-This action will perform an extensive reconfiguration of the definitions set locally. This may be destructive to configurations and should not be used unless an admin can validate the results. Typically this actions should not be required.
+This action will perform an extensive reconfiguration of the definitions set locally, including completely clearing metadata and options downloaded from Redcap previously. This is destructive to configurations and should not be used unless an admin can validate the results. Typically this actions should not be required.

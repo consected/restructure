@@ -50,9 +50,20 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
     // Open up the block containing this item
     h.parents('.collapse').collapse('show');
     if (h.hasClass('collapse')) {
-      $('[data-toggle="collapse"][data-target="' + target + '"]:visible')
-        .first()
-        .click();
+      window.setTimeout(function () {
+        // Find the related tab, if there is one
+        var $got_tab = $('[data-toggle="collapse"][data-target="' + target + '"]:visible').first();
+
+        if ($got_tab.parent().hasClass('tabs-close-others')) {
+          console.log('close-others')
+          var $nav = $got_tab.parents('ul.nav').first();
+          $nav.find('.on-open-click').removeClass('on-open-click');
+        }
+        // Now open the required tab if we found one
+        window.setTimeout(function () {
+          $got_tab.click();
+        }, 1000)
+      }, 50)
     } else {
       _fpa.form_utils.format_block(h);
     }

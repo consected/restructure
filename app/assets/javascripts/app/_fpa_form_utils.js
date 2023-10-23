@@ -922,6 +922,8 @@ _fpa.form_utils = {
         if (!matches) return;
 
         let target = matches[1];
+        if (!target) return;
+
         if (target[0] !== '.') target = `#${target}`;
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
@@ -946,6 +948,8 @@ _fpa.form_utils = {
         if (!matches) return;
 
         let target = matches[1];
+        if (!target) return;
+
         if (target[0] !== '.') target = `#${target}`;
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
@@ -1020,6 +1024,8 @@ _fpa.form_utils = {
       .on('click', function () {
         if ($(this).attr('disabled')) return;
         var target = $(this).attr('data-target');
+        if (!target) return;
+
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
           var last = true;
@@ -1126,57 +1132,57 @@ _fpa.form_utils = {
           a = $(this).attr('data-result-target');
         }
 
-        if (a) {
-          if (a.indexOf('!last') > 0) {
-            a = a.replaceAll('!last', '')
-            var last = true;
-            // Search on id attribute, since jQuery will only return a single
-            // result if directly calling with #element-id 
-            if (a[0] === '#') a = `[id="${a.replace('#', '')}"]`;
+        if (!a) return;
+
+        if (a.indexOf('!last') > 0) {
+          a = a.replaceAll('!last', '')
+          var last = true;
+          // Search on id attribute, since jQuery will only return a single
+          // result if directly calling with #element-id 
+          if (a[0] === '#') a = `[id="${a.replace('#', '')}"]`;
+        }
+
+        // Only jump to the target if the current top and bottom of the block are off screen. Usually we
+        // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
+        // some data.
+        // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
+        // scrolling, to keep the page from jumping around for the user where possible.
+        // Note that the timeout is set to ensure collapse sections have had time to grow to full height
+
+        var attempt_count = 0;
+        var doscroll = function () {
+          var $a = $(a);
+          if (last) $a = $a.last();
+          var rect = $a.get(0);
+          if (!rect) {
+            if (attempt_count > 10) {
+              return;
+            }
+            attempt_count++;
+            window.setTimeout(function () {
+              doscroll();
+            }, 250);
+            return;
+          }
+          rect = rect.getBoundingClientRect();
+
+          if (rect.height < 6) {
+            attempt_count++;
+            window.setTimeout(function () {
+              doscroll();
+            }, 250);
+            return;
           }
 
-          // Only jump to the target if the current top and bottom of the block are off screen. Usually we
-          // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
-          // some data.
-          // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
-          // scrolling, to keep the page from jumping around for the user where possible.
-          // Note that the timeout is set to ensure collapse sections have had time to grow to full height
+          var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
+          if (not_visible) {
+            _fpa.utils.jump_to_linked_item(a, -150, { no_highlight: true });
+          }
+        };
 
-          var attempt_count = 0;
-          var doscroll = function () {
-            var $a = $(a);
-            if (last) $a = $a.last();
-            var rect = $a.get(0);
-            if (!rect) {
-              if (attempt_count > 10) {
-                return;
-              }
-              attempt_count++;
-              window.setTimeout(function () {
-                doscroll();
-              }, 250);
-              return;
-            }
-            rect = rect.getBoundingClientRect();
-
-            if (rect.height < 6) {
-              attempt_count++;
-              window.setTimeout(function () {
-                doscroll();
-              }, 250);
-              return;
-            }
-
-            var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
-            if (not_visible) {
-              _fpa.utils.jump_to_linked_item(a, -150, { no_highlight: true });
-            }
-          };
-
-          window.setTimeout(function () {
-            doscroll();
-          }, 250);
-        }
+        window.setTimeout(function () {
+          doscroll();
+        }, 250);
       })
       .addClass('attached-datatoggle-str');
 

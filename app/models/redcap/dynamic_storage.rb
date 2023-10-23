@@ -53,12 +53,13 @@ module Redcap
       end
 
       extra_fields&.each do |ef|
-        ft = if ef == 'disabled'
+        ef = ef.to_sym
+        ft = if ef == :disabled
                'boolean'
              else
                'string'
              end
-        @field_types[ef] = ft
+        @field_types[ef] = ft.to_s
       end
 
       @field_types
@@ -78,7 +79,8 @@ module Redcap
       end
 
       extra_fields&.each do |ef|
-        ft = (ef != 'disabled')
+        ef = ef.to_sym
+        ft = (ef != :disabled)
         @array_fields[ef] = ft
       end
 
@@ -245,7 +247,7 @@ module Redcap
         # to capture all of the multiple choice values in one place
         # But only do this if the number of choices is greater than 1, since we don't want this
         # for standalone checkboxes
-        @extra_fields << field.chosen_array_field_name
+        @extra_fields << field.chosen_array_field_name.to_s
       end
 
       @extra_fields
@@ -303,6 +305,14 @@ module Redcap
     # @return [Boolean]
     def no_downcase_field(_field_name)
       true
+    end
+
+    #
+    # Specifies the "<category> <name>" part of the @library string to add automatically when
+    # generating the dynamic model
+    # @return [String]
+    def prefix_config_library
+      project_admin.data_options.prefix_dynamic_model_config_library
     end
 
     #

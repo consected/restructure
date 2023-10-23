@@ -782,6 +782,8 @@ module ActiveRecord
             attr_name = :created_by_user
           elsif a.index(/(?:_when|_date)$/)
             f = :date
+          elsif a.index(/(?:_json)$/)
+            f = :jsonb
           elsif a.index(/(?:_time)$/)
             f = :time
           elsif a.index(/(?:_at)$/)

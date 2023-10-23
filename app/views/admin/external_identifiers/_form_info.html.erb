@@ -15,7 +15,11 @@
     </div>
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
+    <% if current_admin.can_admin?(:user_access_controls)%>
     <%= render partial: 'admin/external_identifiers/uac_panel', locals: {object_instance: object_instance} %>
+    <% else %>
+    <p>Not authorized to administer user access controls</p>
+    <% end %>
     </div>
   </div>
 </div>
