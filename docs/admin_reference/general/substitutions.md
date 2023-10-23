@@ -43,6 +43,14 @@ Simply name the keys in turn:
 
 - `\{\{save_trigger_results.identity.access_token\}\}`
 
+If you want to return a value that is actually a Hash / Object, a special substitution format
+using 3 curly braces is used to avoid the result being cast to a String.
+
+- `\{\{\{save_trigger_results.identity.data_structure\}\}\}`
+
+This returns a Hash or Object, which may be stored as raw data in a database JSON field for example.
+Parts of the full data tree may be extracted and stored in this way.
+
 ## Specifying item in an array
 
 When working with object or array fields, or the result of `json_parse`, the following
@@ -243,12 +251,15 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - strip
 - split_lines
 - split_comma
+- split_csv
 - split_semicolon
 - split_pipe
 - split_dot
 - split_at
 - split_slash
 - markup
+- yaml
+- json
 - ignore_missing
 - last
 
