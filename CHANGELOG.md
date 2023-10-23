@@ -16,6 +16,34 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.2.100] - 2023-10-19
+
+- [Added] :current_user_roles SQL substitution to provide an array[] of current user active role names
+- [Added] documentation for report SQL substitutions
+- [Fixed] filtering of config libraries to include name, so we can directly link to them from dynamic def admin pages
+
+## [8.2.99] - 2023-10-18
+
+- [Added] the ability for reference action captions to incorporate more extensive substitutions
+- [Added] preprocessing of templates to convert ReStructure specific tag formatters {{embedded_report_...}} {{glyphicon_...}} and {{tag::formatter...}} to new handlebars helpers
+
+## [8.2.98] - 2023-10-17
+
+- [App-Specific] [Added] study info app specific functionality
+
+## [8.2.97] - 2023-10-17
+
+- [Fixed] incorrect save making a syntax error when editing a config library attached to an activity log breaks the app
+- [Changed] ui page ... templates to prevent them from making curly substitutions
+- [Fixed] presentation issues with forms embedded in study info pages
+- [Fixed] admin capability to allow user access control administration
+- [Added] better admin index UI if no capabilities for a section
+- [Fixed] error in admin panels that have user access control tabs when an admin does not have that capability
+
+## [8.2.96] - 2023-10-16
+
+- [Fixed] missing tag in UI templates breaks UI
+
 ## [8.2.95] - 2023-10-12
 
 - [Added] ::general_selection_label formatter

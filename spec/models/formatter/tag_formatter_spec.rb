@@ -176,7 +176,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       END_JSON
         .strip],
       [:yaml, data, <<~END_YAML
-        completeyn: y
+        completeyn: "y"
         grant:
         - grantid: r01 hl060133
           acronym: hl
