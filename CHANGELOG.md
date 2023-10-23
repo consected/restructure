@@ -16,7 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.82] - 2023-09-20
+## Unreleased
+
+- [Bumped] version
+
+## [8.2.100] - 2023-09-20
 
 - [Bumped] version
 
