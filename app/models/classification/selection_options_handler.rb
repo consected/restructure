@@ -284,10 +284,12 @@ class Classification::SelectionOptionsHandler
     res = Classification::GeneralSelection.selector_collection(where_cond).map { |c| c.attributes.symbolize_keys }
     # Get a list of implementations that may have alt_options defined
     impl_classes = implementation_classes
+    # Include the non-dynamic items
+    impl_classes += Master.fixed_subject_classes
     # If an item type has been specified, filter the possible classes
     impl_classes = impl_classes.select { |ic| ic.item_type.singularize == item_type.singularize } if item_type
     # Check each definition is ready to use and prepare it for use
-    impl_classes.select! { |ic| ic.definition.ready_to_generate? }
+    impl_classes.select! { |ic| !ic.respond_to?(:definition) || ic.definition.ready_to_generate? }
 
     impl_classes.each do |impl_class|
       dyn_object = impl_class.new

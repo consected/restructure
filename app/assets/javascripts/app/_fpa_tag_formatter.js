@@ -1,11 +1,11 @@
 _fpa.tag_formatter = class {
 
-  constructor(text, data) {
-    this.text = text;
+  constructor(tag_name, data) {
+    this.tag_name = tag_name;
     this.data = data;
   }
 
-  static format_all(got, formatters, tag_name) {
+  static format_all(got, formatters, tag_name, data) {
     var res = got;
 
     if (res == null && formatters[0] != 'ignore_missing') {
@@ -18,15 +18,15 @@ _fpa.tag_formatter = class {
     }
 
     for (const [key, op] of Object.entries(formatters)) {
-      res = this.format_with(op, res, got)
+      res = this.format_with(op, res, got, tag_name, data)
     }
 
     return res;
 
   }
 
-  static format_with(operation, res, orig_val) {
-    this.tag_formatter = new _fpa.tag_formatter();
+  static format_with(operation, res, orig_val, tag_name, data) {
+    this.tag_formatter = new _fpa.tag_formatter(tag_name, data);
     return this.tag_formatter.process(operation, res, orig_val);
   }
 
@@ -82,7 +82,8 @@ _fpa.tag_formatter = class {
       "yaml",
       "json",
       "ignore_missing",
-      "last"
+      "last",
+      "general_selection_label"
     ]
   }
 
@@ -420,100 +421,13 @@ _fpa.tag_formatter = class {
     return res;
   }
 
+  general_selection_label(res, _orig_val) {
+    console.log('data._general_selections')
+    let data = this.data, tag_name = this.tag_name;
 
+    if (!data || !data._general_selections) return res;
 
-  /*  // Format a substitution string like {{player_infos.first_name::ignore_if_missing::capitalize}}
-    format_substitution(text, ops, tag_name) {
-      var res = text;
-  
-      if (res == null && ops[0] != 'ignore_missing') {
-        return;
-      }
-  
-      // Automatically titleize names
-      if (ops.length == 0 && (tag_name == 'name' || tag_name.match(/_name$/))) {
-        ops = ['titleize'];
-      }
-  
-      for (var i = 0; i < ops.length; i++) {
-        var op = ops[i];
-  
-        if (op == 'titleize') {
-          if (typeof res == 'string') {
-            res = res.titleize();
-          }
-        } else if (op == 'no_html_tag') res;
-        else if (op == 'capitalize') res = res.capitalize();
-        else if (op == 'uppercase') res = res.toUpperCase();
-        else if (op == 'lowercase') res = res.toLowerCase();
-        else if (op == 'underscore') res = res.underscore();
-        else if (op == 'hyphenate') res = res.hyphenate();
-        else if (op == 'initial') res = (res[0] || '').toUpperCase();
-        else if (op == 'first') res = res[0];
-        else if (op == 'age') {
-          res = new Date(res);
-  
-          if (res.getFullYear) {
-            var today = new Date();
-            var age = today.getFullYear() - res.getFullYear();
-            var m = today.getMonth() - res.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < res.getDate())) {
-              age--;
-            }
-            res = age;
-          }
-        } else if (op == 'dicom_datetime') {
-          if (typeof res == 'date') {
-            res = res.toISOString();
-          }
-          res = res.split('.')[0].replace(/[\:\-T]/g, '');
-        } else if (op == 'dicom_date') {
-          if (typeof res == 'date') {
-            res = res.toISOString();
-          }
-          res = res.split('T')[0].replace(/[\:\-T]/g, '');
-        } else if (op == 'time' || op == 'time_show_zone') {
-          console.log(res)
-          let dtf = UserPreferences.time_format();
-          if (dtf) {
-            let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-            res = (d.isValid) ? d.toFormat(dtf) : res;
-          }
-        } else if (op == 'time_sec') {
-          console.log(res)
-          let dtf = UserPreferences.time_format(true);
-          if (dtf) {
-            let d = (res) ? _fpa.utils.DateTime.fromISO(res, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-            res = (d.isValid) ? d.toFormat(dtf) : res;
-          }
-        } else if (op == 'date') {
-          let dtf = UserPreferences.date_format();
-          if (dtf) {
-            let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
-            res = (d.isValid) ? d.toFormat(dtf) : res;
-          }
-        } else if (op == 'date_time' || op == 'date_time_show_zone') {
-          let dtf = UserPreferences.date_time_format();
-          if (dtf) {
-            let d = (res) ? _fpa.utils.DateTime.fromISO(res) : _fpa.utils.DateTime.now();
-            res = (d.isValid) ? d.toFormat(dtf) : res;
-          }
-        } else if (op == 'join_with_space') {
-          if (Array.isArray(res)) res = res.join(' ');
-        } else if (op == 'join_with_comma') {
-          if (Array.isArray(res)) res = res.join(', ');
-        } else if (op == 'join_with_semicolon') {
-          if (Array.isArray(res)) res = res.join('; ');
-        } else if (op == 'join_with_newline') {
-          if (Array.isArray(res)) res = res.join('\n');
-        } else if (op == 'join_with_2newlines') {
-          if (Array.isArray(res)) res = res.join('\n\n');
-        } else if (op == 'markup') res = megamark(res);
-        else if (op == 'ignore_missing') res = res || '';
-        else if (Number(op) != 0) res = res.slice(0, Number(op));
-      }
-  
-      return res;
-    };
-  */
+    return data._general_selections[tag_name] && data._general_selections[tag_name][res] && data._general_selections[tag_name][res].name || res
+  }
+
 }
