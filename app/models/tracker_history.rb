@@ -28,7 +28,7 @@ class TrackerHistory < UserBase
   # Override for latest_tracker_history, where we have no way of getting at the master_user
   # Master is responsible for excluding these items
   def allows_current_user_access_to?(_perform, _with_options = nil)
-    return true unless master_user
+    true unless master_user
   end
 
   # Get completions for a specific master (which must have current_user set)
@@ -36,10 +36,14 @@ class TrackerHistory < UserBase
     completion_sub_processes = Admin::AppConfiguration.values_for :completion_sub_processes,
                                                                   master.current_user,
                                                                   to: :to_i
+    # TODO verify change reorder. What orders in the first place?
     res = master.tracker_histories
                 .joins(:protocol, :sub_process)
                 .where(sub_process_id: completion_sub_processes)
-                .reorder('protocols.name asc')
+                .reorder('protocols.name ASC')
+
+    # TODO: remove
+    # puts 'TEST SORT', res.to_sql
 
     res = res.all.map do |r|
       {

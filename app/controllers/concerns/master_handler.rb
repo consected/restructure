@@ -141,12 +141,12 @@ module MasterHandler
   # Retrieve the index action JSON from master objects and extended data
   # @return [String] JSON
   def retrieve_index
-    set_objects_instance @master_objects
+    set_objects_instance @master_objects # re add_trackers collection
     s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
     s.merge!(extend_result)
     if object_instance
       s[:original_item] = object_instance
-      s[objects_name] <<  object_instance
+      s[objects_name] << object_instance
     end
     s[:master_id] = @master.id unless primary_model.no_master_association
     s.to_json
@@ -306,7 +306,9 @@ module MasterHandler
   end
 
   # Allow overrides
-  def set_additional_attributes(obj); end
+  def set_additional_attributes(obj)
+    ;
+  end
 
   # Errors for logging
   def object_instance_errors
@@ -329,8 +331,9 @@ module MasterHandler
   # This allows for us to retrieve the @master consistently, so that the master association
   # is not used repetitively (potentially breaking the current_user functionality and poor performance)
   def set_me_and_master
+    # debugger
     if UseMasterParam.include?(action_name)
-      @master = Master.find(params[:master_id]) unless primary_model.no_master_association
+      @master = Master.find(params[:master_id]) unless primary_model.no_master_association # attrs in dynamic models
     else
       object = primary_model.find(params[:id])
       set_object_instance object
@@ -341,7 +344,7 @@ module MasterHandler
     if @master&.respond_to? objects_name
       # Get the list of objects related to the master, in other words triggering the association
       # off of the master object
-      @master_objects = @master.send(objects_name)
+      @master_objects = @master.send(objects_name) # i.e., master.trackers
     else
       klass = primary_model
       @master_objects = klass.all if klass.no_master_association
@@ -361,10 +364,10 @@ module MasterHandler
   # Edit form fields can be preset based on permitted parameter values
   def set_fields_from_params
     p = begin
-      secure_params
-    rescue StandardError
-      nil
-    end
+          secure_params
+        rescue StandardError
+          nil
+        end
     p&.each do |k, v|
       object_instance.send("#{k}=", v)
     end
@@ -541,6 +544,7 @@ module MasterHandler
   def filter_records
     filter_requested_ids
     limit_results
+    order_results
   end
 
   #
@@ -568,13 +572,27 @@ module MasterHandler
   #
   # Limit the results to a specified limit if the limit param is set
   def limit_results
-    if @master_objects.is_a? Array
-      @master_objects
-    elsif requested_limit
-      @master_objects = @master_objects.limit(requested_limit)
-    else
-      @master_objects
-    end
+    return unless requested_limit
+
+    @master_objects = @master_objects.limit(requested_limit)
+  end
+
+  def requested_order
+    sorters = {
+      'protocol position' => { position: :asc },
+      'latest entry date' => { event_date: :desc, updated_at: :desc },
+      'protocol name' => { name: :asc }
+    }
+
+    @requested_order ||= sorters[app_config_text(:tracker_order, 'protocol position')]
+  end
+
+  #
+  # Limit the results to a specified limit if the limit param is set
+  def order_results
+    return unless requested_order
+
+    @master_objects = @master_objects.unscope(:order).order(requested_order)
   end
 
   #
@@ -623,7 +641,7 @@ module MasterHandler
     obj_params = params[rname]
     unless obj_params
       raise FphsException, "No params sent for #{rname} when creating or updating." \
-                           "Expect posted data #{rname}[<field_name>]"
+        "Expect posted data #{rname}[<field_name>]"
     end
 
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable
