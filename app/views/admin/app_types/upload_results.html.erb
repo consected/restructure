@@ -1,10 +1,82 @@
+<%
+  if @results.is_a?(Exception) && !@results.is_a?(ActiveRecord::Rollback)
+    @message = 'FAILED'
+    importer = @res_obj
+    cleaned = Admin::AppTypeImport.clean_exception(@results)
+    if importer.respond_to?(:current_key)
+      current_key = importer.current_key
+      head = YAML.dump(JSON.parse(importer.config_item.to_json)) if importer&.config_item
+    end
+
+    @primary = <<~END_TEXT
+      #{current_key}
+      #{head}
+      ---------------
+      #{cleaned['message']}
+      ---------------
+      #{cleaned['backtrace']}"
+    END_TEXT
+  else
+  
+    @app_type = @res_obj
+
+    @message = if @results['failures']&.present?
+                  'PARTIAL SUCCESS'
+                else
+                  'SUCCESS'
+                end
+    @primary = YAML.dump(JSON.parse(@results.to_json))
+  end
+
+  @message = "DRY RUN #{@message} (changes rolled back)" if dry_run
+
+  current_search_paths = Admin::MigrationGenerator.current_search_paths || [] 
+  active_ids = Admin::AppType.active_app_types.pluck(:id)
+  user_has_access = Admin::AppType.all_available_to(current_user).find { |app| app.id == @app_type.id } if @app_type
+%>
 <div class="container-fluid">
   <h1><%=@message%></h1>
   <div class="row">
+    <div class="col-md-24">
+      <p>back to <%= link_to 'app types', admin_app_types_path %></p>
+    </div>
     <% if @app_type&.id %>
-    <div class="col-md-24 text-center"><code><% Rails.env.production? ? 'RAILS_ENV=production ' : ''%>app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></div>
+    <div class="col-md-24">
+      <h2>Additional setup information</h2>
+      <p>App type active on server? 
+                <%= if @app_type.active_on_server?
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
+                  '<span class="glyphicon glyphicon-exclamation-sign" title="app active but schema not in search path"></span>'.html_safe
+                else
+                  "<span class=\"val-unchecked\"></span>".html_safe  
+                end
+                %>       
+    </p>
+    <p>Current user has access to app?
+                <%= if user_has_access
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                else
+                  "<span class=\"val-unchecked\"></span>".html_safe  
+                end
+                %>           
+    </p>
+    <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
+      <p>Configure the filestore app filesystem</p>
+      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %>app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
+    <% end %>
+    <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
+      <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
+      <pre><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=@app_type.id%></code></pre>
+    <% end %>   
+    <% unless current_search_paths.include?(@app_type.default_schema_name) %>
+      <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
+      <pre><code>FPHS_POSTGRESQL_SCHEMA=<%=ENV['FPHS_POSTGRESQL_SCHEMA']%>,<%=@app_type.default_schema_name%></code></pre>
+    <% end %>
+    </div>
     <% end %>
     <div class="col-md-24">
+      <h2>Detailed Updates</h2>
       <pre><%=@primary%></pre>
     </div>
   </div>

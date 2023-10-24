@@ -8,7 +8,7 @@ module OptionConfigs
     include OptionConfigs::ExtraOptionImplementers::SaveTriggers
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
-    LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/.freeze
+    LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
 
     def self.base_key_attributes
       %i[
@@ -224,7 +224,7 @@ module OptionConfigs
             elt = conf[:add_with] && conf[:add_with][:extra_log_type]
             add_with_elt = nil
             add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
-            refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class.human_name
+            refitem[mn][:to_record_label] = conf[:result_label] || conf[:label] || add_with_elt || to_class.human_name
 
             if to_class.respond_to?(:no_master_association)
               refitem[mn][:no_master_association] = to_class.no_master_association
@@ -519,6 +519,8 @@ module OptionConfigs
     # @param [String] content_to_update (will not be updated)
     # @return [String] updated content
     def self.include_libraries(content_to_update)
+      return unless content_to_update
+
       content_to_update = content_to_update.dup
       reg = LibraryMatchRegex
       res = content_to_update.match reg

@@ -17,10 +17,10 @@ module Admin::AppTypeExport
   # Only export if option configs are valid
   # If in the development environment, also export migrations
   # to allow a complete build of an environment to be completed
-  def export_config(format: :json)
+  def export_config(format: :json, export_migrations: nil)
     force_validations!
 
-    export_migrations if Settings::AllowDynamicMigrations
+    export_migrations if Settings::AllowDynamicMigrations && export_migrations
 
     case format
     when :json

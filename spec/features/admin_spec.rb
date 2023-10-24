@@ -269,6 +269,7 @@ describe 'admin sign in process', driver: :app_firefox_driver do
     admin_sign_in_with_2fa
 
     click_link 'App Types'
+    has_css? '#body-top:not(.initial-compiling)'
 
     expect(page).to have_css 'body.app_types'
 

@@ -16,9 +16,188 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.12] - 2023-04-13
+## [8.2.82] - 2023-09-20
 
-### Transferred from ReStructure @8.2.44 - 2023-06-27
+- Rebuild
+
+## [8.2.81] - 2023-09-20
+
+- [Changed] handling of versions in build
+
+## [8.2.80] - 2023-09-20
+
+First attempt at building with app and organization specific files in restructure-apps repo
+
+## [8.2.77] - 2023-09-19
+
+- [Changed] location of app and organization specific directories and files to move them to restructure-apps repo, so we can move to real forking model for repositories
+
+### Transferred from Harvard @8.2.76 - 2023-09-19
+
+#### [8.2.76] - 2023-09-19
+
+- [Fixed] version ordering to ensure that versions with very close timestamps are ordered correctly
+- [Changed] handling of dialog substitutions where the tag is missing, to prevent exceptions that are hard to diagnose
+- [Changed] loading of dynamic definitions to avoid loading items where the available schemas prevent access to the underlying table
+- [Added] singular association for dynamic defs with a subject view handler
+- [Fixed] valid record type options to allow selection of any valid key name
+
+#### [8.2.75] - 2023-09-18
+
+- [Fixed] issue adding new views
+
+#### [8.2.74] - 2023-09-18
+
+- [Changed] handling of dynamic model view updates to only update SQL if definition changed. Comment changes now don't trigger the update. And dependent objects are listed if the view can't update because of them
+- [Fixed] error reporting and startup failures on import and when config libraries don't contain YAML references
+- [Fixed] error page css path
+
+#### [8.2.73] - 2023-09-14
+
+- [Added] app type import "skip fail" option and provide partial success and improved failure messages
+- [Fixed] admin panel raising exception if a model loaded but there was no underlying table/view
+- [Fixed] incorrect migration being generated if the model exists but underlying table/view doesn't
+
+#### [8.2.72] - 2023-09-12
+
+- [Fixed] issue generating unnecessary migrations during app import
+- [Changed] presentation of app type import
+- [Fixed] registration of user from template having role not assigned to an app type
+- [Added] dry-run and update with changes (regardless of updated_at timestamp) options to app type import
+- [Changed] implementation of app type importing for simplicity and to avoid errors
+- [Fixed] issue disabling dynamic definitions in admin panel
+
+#### [8.2.71] - 2023-09-11
+
+- [Fixed] tracker_history_id as an override in subject view handler for edge cases
+
+#### [8.2.70] - 2023-09-07
+
+- [Added] tracker_history_id as an override in subject view handler
+- [Added] override ability for data attribute in external ids
+- [Added] positioning of details panel components, by making dynamic models with negative position values appear before standard subject, contact and info blocks
+- [Added] auto refresh after restarting server through server info
+- [Added] instructions for adding dialog template when none are in the current dynamic def
+
+#### [8.2.69] - 2023-09-07
+
+- [Added] dialog_before list in dynamic def admin panel (and cleaned up styling)
+- [Added] info to help with adding config libraries to dynamic definitions in the admin panel
+- [Added] message template export for "ui page css/js" templates
+- [Changed] template retrieval through Ajax to cache
+- [Changed] "show caption before" to ignore missing tag by default
+- [Changed] app type import to apply models in order of update and only update new items (unless force is set)
+- [Changed] listing of libraries included in dynamic definitions admin
+- [Changed] export of app type configurations to avoid generating migrations every time
+- [Fixed] flash issues when session ended or for AJAX requests
+- [Fixed] regression of export of dialogs related to dynamic models
+
+#### [8.2.68] - 2023-09-05
+
+- [Bumped] version
+
+#### [8.2.67] - 2023-09-05
+
+- [Added] improved UI for app types and upload
+- [Added] server configuration checks with quick indicator on admin and server info pages
+- [Added] admin app type documentation
+- [Added] the option to import an app type forcing update of all components, rather than relying on the updated_at timestamp
+- [Added] status information and additional setup details to admin app type list
+- [Added] status information about the app and its configuration to app type import results
+- [Changed] viewing of components related to the current app type, by adding a category if one is available
+- [Changed] the error telling a user they don't have access to an app to make it clearer what the possible issue is
+- [Changed] handling of UI template load failure to improve information to end user
+- [Fixed] highlight resetting of hash linked items
+- [Fixed] disabling of app types incorrectly on import
+- [Fixed] generation of migrations that have index names that are too long for Postgres
+- [Fixed] script error reading options from command line for filestore setups
+
+## [8.2.66] - 2023-09-05
+
+### Transferred from Viva @8.2.65 - 2023-09-05
+
+#### [8.2.65] - 2023-08-24
+
+- [Fixed] uncollapse-target-parents UI option
+
+#### [8.2.64] - 2023-08-24
+
+- [Added] ability to address !last element when using hash toggles
+- [Fixed] UI error when reloading a page
+
+#### [8.2.63] - 2023-08-24
+
+- [Updated] gems to address CVEs: Puma - CVE-2023-40175; Rails - CVE-2023-38037
+- [Fixed] css double border on certain blocks in activity logs
+- [Added] tab caption to activity log definitions
+- [Fixed] issue with data-open-tab-before-request if the panel had already opened
+- [Changed] mr-expander link hashes to use the context of the current activity log outer block, and to only expand if not already expanded
+
+## [8.2.62] - 2023-08-21
+
+### Transferred from Harvard @8.2.60 - 2023-08-21
+
+#### [8.2.59] - 2023-06-12
+
+- [Added] templates for US terms of use to seeds
+- [Changed] Refactored constants for registrations
+
+### Transferred from Project Viva @8.2.61 - 2023-08-21
+
+### [8.2.61] - 2023-08-17
+
+- [Fixed] "if" substitution conditions not recognizing integers as existing
+- [Added] javascript spec tests for conditional substitutions and current_user_roles
+
+### Transferred from Project Viva @8.2.58 - 2023-08-16
+
+#### [8.2.58] - 2023-08-14
+
+- [Fixed] create_reference trigger to write user_id correctly if force_create is set
+- [Fixed] user profile to check against created_by_user_id if it exists in a resource
+- [Added] more information to debug user not able to access a container
+- [Added] information to manage users page with links to user self-registration and invite code
+- [Fixed] jump to bad CSS link
+
+#### [8.2.57] - 2023-07-25
+
+- [Fixed] UI current_user_roles
+- [Fixed] id_hyphenate in UI
+
+#### [8.2.55] - 2023-07-25
+
+- [Fixed] scrolling issue
+- [Added] simple mr-expander link hash toggle
+- [Added] styling for static model reference captions and new form blocks
+
+#### [8.2.54] - 2023-07-25
+
+- [Added] substitution for user roles to allow #if evaluations
+- [Added] invitation code to substitutions
+- [Fixed] specs for xhr 404 results
+- [Fixed] user login instructions for no MFA
+
+#### [8.2.53] - 2023-07-24
+
+- [Updated] gems and javascript modules
+- [Fixed] loading of sample form in activity log admin when using a temporary master id
+- [Fixed] issue with record labels if no config available
+
+#### [8.2.52] - 2023-07-12
+
+- [Added] result_label option to references config, documented also_disable_record, and added id to markup for reference result caret
+- [Changed] handling of errors in notifications during sign-up
+- [Added] master_id handling to embedded_report_ substitution
+- [Added] link hash handling of toggle-target- and click-target- for smart links
+- [Changed] default handling of BASE_URL
+
+#### [8.2.51] - 2023-07-11
+
+- [Added] field_options blank_value dynamic definition option to allow persisted blank field values to be set
+- [Fixed] report admin not allowing configurations to be submitted
+- [Fixed] padding in help sidebar using study info content
+
+### Transferred from Project Viva @8.2.50 - 2023-07-06
 
 #### [8.2.50] - 2023-07-05
 

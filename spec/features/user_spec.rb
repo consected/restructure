@@ -175,7 +175,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Log in'
       end
 
-      expect(page).to have_css('body.show_otp'), "body doesn't have show_otp class. Classes it does have are: #{find('body')['class']}"
+      expect(page).to have_css('body.show_otp')
       expect(current_path).to have_content('/users/show_otp')
 
       within '#form-validate-otp' do

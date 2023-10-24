@@ -10,13 +10,20 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   if (offset == null) offset = -50;
   if (options == null) options = {};
 
-  $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
+  if (!options.no_highlight) {
+    $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
+  }
 
   var isj = target instanceof jQuery;
   // Ensure the target is valid
   if (!isj && (!target || target.length < 2)) return;
 
-  var h = $(target);
+  try {
+    var h = $(target);
+  }
+  catch (e) {
+    var h = null;
+  }
   if (!h || h.length == 0) {
     var tparts = target.split('-');
     var l = tparts.length;
@@ -55,11 +62,19 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   var jump_scroll = function () {
     // Scroll if necessary
     if (!_fpa.utils.inViewport(h, true)) {
-      // If prevent_jump is set, and it is an id hash, and it doesn't match this target then just quit
-      var prevent_jump_loc = $(_fpa.state.prevent_jump);
+      // If prevent_jump is set, and it is an id hash, and it doesn't match this target then just quit.
+      // We put this in a try / catch block to avoid failing if an invalid CSS location is specified
+      // in _fpa.state.prevent_jump
+      try {
+        var prevent_jump_loc = $(_fpa.state.prevent_jump);
+      }
+      catch (e) {
+        var prevent_jump_loc = null;
+      }
       if (
         _fpa.state.prevent_jump &&
         _fpa.state.prevent_jump[0] == '#' &&
+        prevent_jump_loc &&
         prevent_jump_loc.length > 0 &&
         prevent_jump_loc.attr('id') != h.attr('id')
       ) {
@@ -258,7 +273,7 @@ String.prototype.id_hyphenate = function () {
 };
 
 String.prototype.id_underscore = function () {
-  return this.replace(/[^a-zA-Z0-9\-]/g, '_').toLowerCase();
+  return this.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 };
 
 String.prototype.pathify = function () {

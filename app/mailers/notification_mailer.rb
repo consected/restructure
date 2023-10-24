@@ -14,6 +14,7 @@ class NotificationMailer < ActionMailer::Base
   # @return [Mail::Message]
   def send_message_notification(notify, logger: Rails.logger)
     logger.info "Sending email for #{notify.id}"
+    messages = []
 
     emails = notify.recipient_emails.select do |email|
       email ||= ''
@@ -21,11 +22,25 @@ class NotificationMailer < ActionMailer::Base
 
       if res
         # Lookup the user email
-        user = User.where(email: email).first
+        user = User.find_by(email: email)
 
         # We can email if the email address is not a user, or
         # the user is not disabled and is not flagged "do not email"
         res = !user || (!user.disabled && !user.do_not_email)
+
+        unless res
+          msg = "send_message_notification email #{email} - " \
+            "can not send disabled: #{user&.disabled} or do not email: #{user&.do_not_email}"
+          Rails.logger.info msg
+          messages << msg
+        end
+
+        res
+      else
+        msg = "send_message_notification email #{email} - " \
+          'can not send due to no FQDN'
+        Rails.logger.info msg
+        messages << msg
       end
       res
     end
@@ -33,6 +48,11 @@ class NotificationMailer < ActionMailer::Base
     if notify.from_user_email.blank?
       raise FphsException,
             'No FROM user set in notification. Check NotificationsFromEmail setting'
+    end
+
+    if emails.empty?
+      raise FphsException,
+            "No TO emails set in notification for #{notify.recipient_emails}.\n#{messages.join("\n")}"
     end
 
     options = {

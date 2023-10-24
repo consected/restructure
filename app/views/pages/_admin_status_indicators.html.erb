@@ -1,0 +1,14 @@
+<span>
+<% 
+
+  unless @server_info.configuration_successful
+    content = @server_info.configuration_failed_reason
+    content_html = "<ul><li>#{ content.join('<li>') }</ul>".html_safe
+%>
+<i class="glyphicon glyphicon-alert error-mark"
+    data-toggle="popover"
+    data-trigger="click hover"
+    data-content="<%=content_html%>"
+    data-html="true"></i>
+<% end %>
+</span>

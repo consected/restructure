@@ -106,7 +106,12 @@ module NfsStore
       activity_log ||= self.activity_log
 
       unless container.allows_current_user_access_to? :access
-        raise FsException::NoAccess, 'user does not have access to this container'
+        cp = container.parent_item || container.find_creator_parent_item
+        cpm = cp&.master&.id if cp.respond_to?(:master)
+
+        raise FsException::NoAccess,
+              'User does not have access to this container ' \
+              "(master #{container.master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
       end
 
       unless force || container.send("can_#{for_action}?")

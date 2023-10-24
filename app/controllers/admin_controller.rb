@@ -13,6 +13,7 @@ class AdminController < ApplicationController
   before_action -> { redirect_to '/admins/show_otp' if current_admin.two_factor_setup_required? }
 
   before_action :check_capabilities!
+  after_action -> { flash.discard }, if: -> { request.xhr? }
 
   protected
 

@@ -107,6 +107,14 @@ module Dynamic
         else
           dma = active
         end
+
+        has_schema_name = dma.attribute_names.include?('schema_name')
+        if has_schema_name
+          schemas = Admin::MigrationGenerator.current_search_paths
+          schemas += [nil, '']
+          dma = dma.where(schema_name: schemas) if has_schema_name
+        end
+
         @active_model_configurations = dma
       end
 

@@ -47,6 +47,7 @@ _configurations:
     # the model, or you wish to use an alternative, specify one of the following instead
     app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
     user: optionally specify a user id (or email) to force use of the specified user when perfoming actions
+  tab_caption: a markdown string to be shown at the top of activity log panels (between header title and action buttons)
 
 # To add a table or view to the data dictionary, add the _data_dictionary: with
 # the essential keys, study: and domain:, plus any others that are required.

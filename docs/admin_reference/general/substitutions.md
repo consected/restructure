@@ -128,6 +128,10 @@ In addition to the attributes within the current record, the following are avail
   - current_user_app_type_name
   - current_user_app_type_label
 
+- Additionally, for the current user, a tag will be added to allow conditional substitutions based on roles the user has:
+  - current_user_roles.[each role name underscored]
+    for example: current_user_roles.reviewer___special_task for "reviewer - special task" role name
+
 - Master record related to item:
   - master (full instance)
   - master_id

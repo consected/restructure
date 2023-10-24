@@ -160,6 +160,21 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(res).to eq 'This is a simple test: 12345 03/07/2015 2:56 pm - 2:56:04 pm'
   end
 
+  it 'substitutes current user role names' do
+    create_user_role 'test - role substitution', user: @user
+    txt = 'This is a role name test: {{current_user_email}} has role {{current_user_roles.test___role_substitution}}'
+    data = {
+      current_user: @user
+    }
+
+    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    expect(res).to eq "This is a role name test: #{@user.email} has role #{@user.role_names.first}"
+
+    txt = 'This is a role name test: {{current_user_email}} has role {{current_user_roles.test___role_substitution}} - {{#if current_user_roles.test___role_substitution}}has role{{else}}no{{/if}} - {{#if current_user_role_no_test___role_substitution}}yes{{else}}no role{{/if}}'
+    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    expect(res).to eq "This is a role name test: #{@user.email} has role #{@user.role_names.first} - has role - no role"
+  end
+
   it 'provides conditional display using an if block' do
     txt = <<~END_TEXT
       This is a simple test: {{int_val}}

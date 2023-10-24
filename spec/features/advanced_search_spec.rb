@@ -141,6 +141,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
   it 'searches tracker for items not in the tracker' do
     visit '/masters/search'
+    has_css? '#body-top:not(.initial-compiling)'
+
     within '#simple_search_master' do
       find('#master_general_infos_attributes_0_first_name').click
     end

@@ -3,16 +3,17 @@
     <%= show_admin_heading 'Server Information' %>
   </div>
   <div class="well">
+    <p class="si-general-status"><%= render partial: 'pages/admin_status_indicators' %></p>
     <p class="si-instance-id"><span><%= @instance_id%></span></p>
     <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
   </div>
   <div class="well">
       <h3>Restart Server, DelayedJob and Clear Memcached</h3>
-      <%= form_tag(admin_app_types_restart_server_url, remote: true) do %>
+      <%= form_tag(admin_app_types_restart_server_url, remote: true, id: 'form-restart-server') do %>
         <%= submit_tag "Restart server" %>
       <% end %>
       <h3>Restart DelayedJob</h3>
-      <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true) do %>
+      <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true, id: 'form-restart-dj') do %>
         <%= submit_tag "Restart DelayedJob" %>
       <% end %>
   </div>
@@ -60,3 +61,11 @@
     <pre><%=@processes%></pre>
   </div>
 </div>
+
+<script>
+$('#form-restart-server').on('click', function(){
+  window.setTimeout(function(){
+    window.location.reload()
+  }, 5000)
+})
+</script>

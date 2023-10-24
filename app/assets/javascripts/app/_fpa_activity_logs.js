@@ -98,7 +98,7 @@ _fpa.activity_logs = {
       if (!data.item_type) {
         for (var p in data) {
           if (data.hasOwnProperty(p)) {
-            var r = data[p].item_type;
+            var r = data[p] && data[p].item_type;
             if (r) {
               data = data[p];
               break;

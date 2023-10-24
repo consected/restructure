@@ -46,7 +46,7 @@ module Formatter
       if_blocks.each do |if_block|
         block_container = if_block[0]
         tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, nil, ignore_missing)
+        tag_value = value_for_tag(tag, sub_data, nil, true)
         if tag_value.present?
           all_content.sub!(block_container, if_block[2] || '')
         else
@@ -221,6 +221,7 @@ module Formatter
       data[:notifications_from_email] = Settings::NotificationsFromEmail
       data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
       data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
+      data[:invitation_code] = Settings::InvitationCode
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
@@ -271,6 +272,12 @@ module Formatter
         data[:current_user_app_type_name] = cu.app_type&.name
         data[:current_user_app_type_label] = cu.app_type&.label
         data[:current_user_password_expires_in] = cu.expires_in
+
+        cur = data[:current_user_roles] = {}
+        cu.role_names.each do |rn|
+          sym = rn.id_underscore.to_sym
+          cur[sym] = rn
+        end
       end
 
       data
@@ -346,10 +353,10 @@ module Formatter
 
     def self.run_embedded_report(tag, data)
       report_name = tag.sub('embedded_report_', '')
-      list_item, list_id, = source_for(data)
+      list_item, list_id, list_master_id = source_for(data)
       list_type = list_item.class.name
 
-      Reports::Template.embedded_report report_name, list_id, list_type
+      Reports::Template.embedded_report report_name, list_id, list_type, list_master_id
     end
 
     def self.add_item_button(tag, data)

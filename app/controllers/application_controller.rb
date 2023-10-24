@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
   before_action :check_temp_passwords
   before_action :prevent_cache
   before_action :setup_navs
+  after_action -> { flash.discard }, if: -> { request.xhr? }
 
   protected
 

@@ -20,7 +20,7 @@ FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
 
 if [ -z "$APP_TYPE_ID" ]; then
   echo "Call with argument <app_type_id>"
-  read -pr 'Enter app type ID: ' APP_TYPE_ID
+  read -r -p 'Enter app type ID: ' APP_TYPE_ID
 fi
 
 if [ -z "$MOUNTPOINT" ]; then
@@ -38,7 +38,7 @@ if [ -z "$MOUNTPOINT" ]; then
   fi
   if [ ! -d ${MOUNTPOINT} ]; then
     echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
-    read -pr 'MOUNTPOINT directory: ' MOUNTPOINT
+    read -r -p 'MOUNTPOINT directory: ' MOUNTPOINT
   fi
 fi
 
@@ -51,7 +51,7 @@ echo "Mountpoint is: $MOUNTPOINT"
 
 if [ -z "${SUBDIR}" ]; then
   ls "${MOUNTPOINT}"
-  read -pr 'Enter the selected directory: ' SUBDIR
+  read -r -p 'Enter the selected directory: ' SUBDIR
 fi
 
 OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
