@@ -86,199 +86,48 @@ module CalcActions
       # If the condition definition is not an array, make it one
       condition_config_array = [condition_config_array] unless condition_config_array.is_a? Array
 
-      # Provide the option of configuring as a list of conditions, such as:
-      # not_any:
-      # - addresses: ...
-      # - addresses: ...
-      #
-      # ...or...
-      #
-      # not_any:
-      #   addresses: ...
-      #   player_contacts: ....
-      #
-      # all of which must meet the condition type
-      #
-      # Nesting is allowed, which is handled appropriately
-
       # Save the original key, representing the condition type, such as :not_all_fields_must_match
-      orig_cond_type = condition_type
+      @orig_cond_type = @condition_type = condition_type
 
-      # If the condition_type key is not a selection type, use the original condition_type
+      # If the @condition_type key is not a selection type, use the original @condition_type
       # value since it represents a table name or other reference item
-      condition_type = is_selection_type(condition_type) || condition_type
+      @condition_type = is_selection_type(@condition_type) || @condition_type
 
       # Initialize the loop result, as true for all, not_any, since they AND results,
       # not_all and any OR results, so must be initialized to false
-      loop_res = condition_type.in?(%i[all not_any])
-      orig_loop_res = loop_res
+      @loop_res = @condition_type.in?(%i[all not_any])
+      @orig_loop_res = @loop_res
 
       # For each condition config definition, run the main tests
       condition_config_array.each do |condition_config|
         setup_condition_config(condition_config)
-        calc_base_query condition_type
+        calc_base_query
         set_condition_error_message
 
         #### :all ####
-        if condition_type == :all
-          cond_res = true
-          res_q = true
-          # equivalent of (cond1 AND cond2 AND cond3 ...)
-          # These conditions are easy to handle as a standard query
-          # @this_val_where check allows a return_value definition to be used alone without other conditions
-          unless @condition_values.empty? && @extra_conditions.empty? && !@this_val_where
-            gen_condition_scope @condition_values, @extra_conditions
-            calc_return_types
-            res_q = calc_nested_query_conditions
-            merge_failures(condition_type => @condition_config) unless res_q
-          end
-
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              res_q &&= calc_non_query_condition(table, field_name, expected_val)
-              merge_failures(condition_type => { table => { field_name => expected_val } }) unless res_q
-            end
-          end
-
-          cond_res &&= !!res_q
-          loop_res &&= cond_res
-
+        case @condition_type
+        when :all
+          condition_type_all
         #### :not_all ####
-        elsif condition_type == :not_all
-          cond_res = true
-          res_q = true
-          # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
-          unless @condition_values.empty? && @extra_conditions.empty?
-            gen_condition_scope @condition_values, @extra_conditions
-            calc_return_types
-            res_q = calc_nested_query_conditions
-          end
-
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              res_q &&= calc_non_query_condition(table, field_name, expected_val)
-            end
-          end
-
-          cond_res &&= !res_q
-
-          # Not all matches - return all possible items that failed
-          merge_failures(condition_type => @condition_values) unless cond_res
-          merge_failures(condition_type => @non_query_conditions) unless cond_res
-
-          loop_res ||= cond_res
-
+        when :not_all
+          condition_type_not_all
         #### :any ####
-        elsif condition_type == :any
-
-          unless @extra_conditions.empty?
-            raise FphsException, '@extra_conditions not supported with any / not_any conditions'
-          end
-
-          cond_res = false
-          res_q = false
-          # equivalent of (cond1 OR cond2 OR cond3 ...)
-
-          if @condition_values.empty?
-            # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
-            @condition_scope = nil
-            reset_scope = nil
-          else
-
-            @condition_values.each do |table, fields|
-              fields.each do |field_name, expected_val|
-                gen_condition_scope({ table => { field_name => expected_val } }, @extra_conditions, 'OR')
-                calc_return_types
-                res_q = !@condition_scope.empty?
-
-                break if res_q
-              end
-              break if res_q
-            end
-
-            reset_scope = @base_query.order(id: :desc).limit(1)
-          end
-
-          # Reset the condition scope, since gen_condition_scope will have messed with it
-          @condition_scope = reset_scope
-          res_q ||= calc_nested_query_conditions return_first_false: false unless res_q || @condition_scope.nil?
-
-          # If no matches - return all possible items that failed
-          merge_failures(condition_type => @condition_values) unless res_q
-
-          unless res_q
-            @non_query_conditions.each do |table, fields|
-              fields.each do |field_name, expected_val|
-                res_q ||= calc_non_query_condition(table, field_name, expected_val)
-                break if res_q
-              end
-            end
-          end
-
-          merge_failures(condition_type => @non_query_conditions) unless res_q
-
-          cond_res = res_q
-          loop_res ||= cond_res
-
+        when :any
+          condition_type_any
         #### :not_any ####
-        elsif condition_type == :not_any
-
-          unless @extra_conditions.empty?
-            raise FphsException, '@extra_conditions not supported with any / not_any conditions'
-          end
-
-          cond_res = true
-          # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
-          # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
-
-          if @condition_values.empty?
-            # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
-            @condition_scope = nil
-            reset_scope = nil
-          else
-
-            @condition_values.each do |table, fields|
-              fields.each do |field_name, expected_val|
-                gen_condition_scope({ table => { field_name => expected_val } }, @extra_conditions, 'OR')
-                calc_return_types
-                res_q = !@condition_scope.empty?
-                merge_failures(condition_type => { table => { field_name => expected_val } }) if res_q
-                cond_res &&= !res_q
-                break unless cond_res && !return_failures
-              end
-              break unless cond_res && !return_failures
-            end
-
-            reset_scope = @base_query.order(id: :desc).limit(1)
-          end
-
-          # Reset the condition scope, since gen_condition_scope will have messed with it
-          @condition_scope = reset_scope
-          if cond_res && !@condition_scope.nil?
-            res_q = calc_nested_query_conditions return_first_false: false
-            cond_res &&= !res_q
-          end
-
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              res_q = !calc_non_query_condition(table, field_name, expected_val)
-              merge_failures(condition_type => { table => { field_name => expected_val } }) unless res_q
-              cond_res &&= res_q
-            end
-          end
-
-          loop_res &&= cond_res
+        when :not_any
+          condition_type_not_any
         else
-          raise FphsException, "Incorrect condition type specified when calculating action if: #{condition_type}"
+          raise FphsException, "Incorrect condition type specified when calculating action if: #{@condition_type}"
         end
 
-        log_results orig_cond_type, condition_type, loop_res, cond_res, orig_loop_res
+        log_results
 
         # We can end the loop, unless the last result was a success
-        break unless loop_res
+        break unless @loop_res
       end
 
-      final_res &&= loop_res
+      final_res &&= @loop_res
       break unless final_res
     end
 
@@ -289,7 +138,7 @@ module CalcActions
   # For validation, we need to know what failed. Merge the failures from multiple different tests
   # @param results [Hash] The results to be merged follow this format:
   #   {
-  #     condition_type => {
+  #     @condition_type => {
   #       table => {
   #         field_name => expected_val
   #       }
@@ -412,12 +261,14 @@ module CalcActions
     end
   end
 
-  # Calculate non query condition results and nested conditions, comparing against expected values
-  # Multiple expected values may be specified, typically where a nested condition is defined
   #
+  # Calculate non query condition results and nested conditions, comparing against expected values
+  # Multiple expected values may be specified, typically where a nested condition is defined.
+  #
+  # @this_val attribute is set to return the last value from a definition. Used for simple lookups
+  # @return [true | false]
   def calc_non_query_condition(table, field_name, expected_vals)
     @skip_merge = false
-    # this_val attribute is used to return the last value from a definition. Used for simple lookups
 
     res = true
     # Allow a list of possible conditions to be used
@@ -432,26 +283,13 @@ module CalcActions
         return true
       end
 
-      #### If we have a non-query table specified
-      if table.in?(%i[this parent referring_record top_referring_record reference]) ||
-         (table == :user && field_name != :role_name)
-
-        # Pick the instance we are referring to
-        case table
-        when :this
-          in_instance = current_instance
-        when :user
-          in_instance = @current_instance.current_user
-        when :parent
-          in_instance = current_instance.parent_item
-        when :referring_record
-          in_instance = current_instance.referring_record
-        when :top_referring_record
-          in_instance = current_instance.top_referring_record
-        when :reference
-          in_instance = current_instance.reference
-        end
-
+      if table == :user && field_name == :role_name
+        #### If we have a user as the table key and we are requesting the role_name
+        # to match the expected value
+        res &&= non_query_user_role_name(expected_val)
+      elsif table.in?(NonQueryTableNames)
+        #### If we have a non-query table specified
+        in_instance = non_query_instance(table)
         if field_name == :exists
           # Simply get a true result if instance found and {exists: true} or
           # instance not found and {exists: false}
@@ -465,95 +303,126 @@ module CalcActions
           expected_val.key?(:element) ||
           expected_val.key?(:condition) && table == :this
         )
-
-          if expected_val[:condition]
-            assoc_name = ModelReference.record_type_to_assoc_sym(in_instance)
-            expected_val = { assoc_name => { field_name => expected_val, id: in_instance.id } }
-            field_name = :all
-          end
-
-          if is_selection_type field_name
-            #### Handle a Nested Condition
-            # If we have the field name key being all, any, etc, then run the nested conditions
-            # with the current condition scope
-            ca = ConditionalActions.new({ field_name => expected_val }, in_instance,
-                                        current_scope: @condition_scope, return_failures: return_failures)
-            res &&= ca.calc_action_if
-
-            # Handle a return value if one was not already set
-            @this_val ||= ca.this_val
-            @skip_merge = true
-
-          elsif expected_val.keys.first == :validate
-            #### Handle validate
-            # take the validate definition and calculate the result
-            res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
-
-          else
-            #### Something was wrong in the definition
-            raise FphsException, <<~ERROR_MSG
-              calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
-
-              #{@condition_config.to_yaml}
-            ERROR_MSG
-          end
-        ## An expected value hash may mean several things, including
-        # field (not just equals) conditions, validations and nested conditions
-
-        # If this is a field condition (something other than equals), set it up to be calculated
-        # Generate a query that references the in_instance object through its association,
-        # specifying the id as an expected value, plus the condition to be calculated within the query
-        # This forces us to run this as a nested condition.
-
+          res &&= non_query_expected_val_hash(in_instance, expected_val, field_name)
         else
-          ## The expected value was not a hash.
-          # Simply handle the comparison, and return a value or result instance if requested
-
-          # Get the value
-          this_val = attribute_from_instance(in_instance, field_name)
-
-          res &&= if expected_val.is_a?(Hash) && expected_val[:element] && this_val.is_a?(Hash)
-                    element = expected_val[:element]
-                    test_value = traverse_element(this_val, element)
-                    eval_simple_condition(test_value, expected_val)
-                  else
-                    # Simply compare the expected value against the one we found
-                    eval_simple_condition(this_val, expected_val)
-                    # this_val == dynamic_value(expected_val)
-                  end
-
-          # Handle return value or result
-          if expected_value_requests_return? :value, expected_val
-            @this_val = this_val
-          elsif expected_value_requests_return? :result, expected_val
-            @this_val = in_instance
-          end
-
+          res &&= non_query_expected_val_not_a_hash(in_instance, expected_val, field_name)
         end
-
-      #### If we have a user as the table key and we are requesting the role_name
-      # to match the expected value
-      elsif table == :user && field_name == :role_name
-        user = @current_instance.current_user
-        raise FphsException, 'Current user not set when specifying evaluation if user.role_name' unless user
-
-        expected_val = [expected_val] unless expected_val.is_a? Array
-
-        role_names = user.role_names
-        @this_val = role_names if expected_value_requests_return? :value, expected_val
-        role_res = false
-        expected_val.each do |e|
-          role_res ||= role_names.include? e
-        end
-        res &&= role_res
-
       end
-
       #### Any other table keys are just ignored
     end
 
     # Return the result
     res
+  end
+
+  #
+  # An expected value hash may mean several things, including
+  # field (not just equals) conditions, validations and nested conditions
+  #
+  # If this is a field condition (something other than equals), set it up to be calculated
+  # Generate a query that references the in_instance object through its association,
+  # specifying the id as an expected value, plus the condition to be calculated within the query
+  # This forces us to run this as a nested condition.
+  def non_query_expected_val_hash(in_instance, expected_val, field_name)
+    if expected_val[:condition]
+      assoc_name = ModelReference.record_type_to_assoc_sym(in_instance)
+      expected_val = { assoc_name => { field_name => expected_val, id: in_instance.id } }
+      field_name = :all
+    end
+
+    if is_selection_type field_name
+      #### Handle a Nested Condition
+      # If we have the field name key being all, any, etc, then run the nested conditions
+      # with the current condition scope
+      ca = ConditionalActions.new({ field_name => expected_val },
+                                  in_instance,
+                                  current_scope: @condition_scope,
+                                  return_failures: return_failures)
+      res = ca.calc_action_if
+
+      # Handle a return value if one was not already set
+      @this_val ||= ca.this_val
+      @skip_merge = true
+
+    elsif expected_val.keys.first == :validate
+      #### Handle validate
+      # take the validate definition and calculate the result
+      res = calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
+
+    else
+      #### Something was wrong in the definition
+      raise FphsException, <<~ERROR_MSG
+        calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
+
+        #{@condition_config.to_yaml}
+      ERROR_MSG
+    end
+    res
+  end
+
+  #
+  # The expected value was not a hash.
+  # Simply handle the comparison and return the result
+  # Also set a value or result instance if requested
+  def non_query_expected_val_not_a_hash(in_instance, expected_val, field_name)
+    # Get the value
+    this_val = attribute_from_instance(in_instance, field_name)
+
+    res = if expected_val.is_a?(Hash) && expected_val[:element] && this_val.is_a?(Hash)
+            element = expected_val[:element]
+            test_value = traverse_element(this_val, element)
+            eval_simple_condition(test_value, expected_val)
+          else
+            # Simply compare the expected value against the one we found
+            eval_simple_condition(this_val, expected_val)
+            # this_val == dynamic_value(expected_val)
+          end
+
+    # Handle return value or result
+    if expected_value_requests_return? :value, expected_val
+      @this_val = this_val
+    elsif expected_value_requests_return? :result, expected_val
+      @this_val = in_instance
+    end
+    res
+  end
+
+  #
+  # Check if current user role names in one of the specified { user: { role_name: <string | array> }}
+  def non_query_user_role_name(expected_val)
+    user = @current_instance.current_user
+    raise FphsException, 'Current user not set when specifying evaluation if user.role_name' unless user
+
+    expected_val = [expected_val] unless expected_val.is_a? Array
+
+    role_names = user.role_names
+    @this_val = role_names if expected_value_requests_return? :value, expected_val
+    role_res = false
+    expected_val.each do |e|
+      role_res ||= role_names.include? e
+    end
+    role_res
+  end
+
+  #
+  # Pick the instance we are referring to by *table* or nil if none match
+  # @return [Object | nil]
+  def non_query_instance(table)
+    case table
+    when :this
+      in_instance = current_instance
+    when :user
+      in_instance = @current_instance.current_user
+    when :parent
+      in_instance = current_instance.parent_item
+    when :referring_record
+      in_instance = current_instance.referring_record
+    when :top_referring_record
+      in_instance = current_instance.top_referring_record
+    when :reference
+      in_instance = current_instance.reference
+    end
+    in_instance
   end
 
   #
@@ -647,91 +516,7 @@ module CalcActions
       val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
     elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
-      # Get possible values from records referenced by this instance, or this instance's referring record (parent)
-
-      case val_item_key
-      when :this_references
-        # Identify all records this instance references
-        from_instance = @current_instance
-      when :parent_references
-        # Identify all records this instance's referring record (parent) references
-        from_instance = @current_instance.referring_record
-      when :parent_or_this_references
-        # Identify all records this instance's referring record (parent) references,
-        # or if there is no parent, this record references
-        from_instance = @current_instance.referring_record || @current_instance
-      end
-
-      if val_item_value.is_a?(Hash)
-        # If the expected value is a hash, this indicates that a specific type of referenced record is required,
-        # and a field is to be returned from any matching records of this type
-        # For example, the following definition will match addresses where
-        # city and zip match
-        # and the current instance (an activity log) references a activity_log__player_contact_phone record where the
-        # set_related_player_contact_rank field of the referenced record equals the rank of the address
-        #
-        #  addresses:
-        #    city: 'portland'
-        #    zip: '12345'
-        #    rank:
-        #      this_references:
-        #        activity_log__player_contact_phone: set_related_player_contact_rank
-
-        att = val_item_value.first.last
-        to_table_name = val_item_value.first.first
-
-      else
-        # If the expected value is not a hash, we are probably performing a simple match to find a
-        # record of a specific type referenced by the instance, rather than any record of that type
-        # that is associated with the master.
-        # For example, to just find addresses referenced by an activity log (rather than all of them the master has),
-        # the definition looks like:
-        #  addresses:
-        #    city: 'portland'
-        #    zip: '12345'
-        #    id:
-        #      this_references: id
-        #
-        # In this case we will be matching addresses where
-        # city and zip match
-        # and the instance (an activity log) references an address record where the
-        # the address id is one of those referenced.
-        # In other words, it will only pick an address that is referenced by this activity_log,
-        # not other addresses that belong to this master.
-
-        att = val_item_value
-        # We will filter on the main table name if it is actually a table, not something like 'parent_references'
-        to_table_name = nil if non_join_table_name?(ref_table_name)
-
-      end
-
-      if val_item_key == :exists
-        # Simply get a true result if instance found and {exists: true} or
-        # instance not found and {exists: false}
-        val = (!!expected_val == !!from_instance)
-      elsif !from_instance
-        raise FphsException, "No referring record specified when using #{val_item_key} in " \
-                             "#{@current_instance.class.name} #{@current_instance.id}"
-      else
-        # Now go ahead and get the possible values to use in the condition
-        val = []
-        # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
-        # showable filter since this might recurse infinitely
-        model_refs = from_instance.model_references(active_only: true, showable_only: false)
-        Rails.logger.info '*** No model_refs found' if model_refs.empty?
-        # filter it to return only those matching the required to_record_type (if necessary)
-        if to_table_name
-          model_refs = model_refs.select { |r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize }
-          Rails.logger.info "*** No model_refs found for table name: #{to_table_name}" if model_refs.empty?
-        end
-
-        # Get the specified attribute's value from each of the model references
-        # Generate an array, allowing the conditions to be IN any of these
-        model_refs.each do |mr|
-          val << mr.to_record.attributes[att]
-        end
-      end
-
+      val = references_values(val_item_key, val_item_value, ref_table_name)
     elsif val_item_key == :user
       # Get an attribute or role names for the current user (as set on the current instance master)
       #
@@ -766,88 +551,184 @@ module CalcActions
     val
   end
 
-  # Based on match query conditions being generated, now setup the value comparisons.
-  # This may produce extra conditions to be pushed into the query at runtime, or
-  # basic joined conditions.
-  def generate_query_condition_values(val, table_name, field_name, _join_table_name)
-    if val.is_a?(Hash)
+  #
+  # Get possible values from records referenced by this instance, or this instance's referring record (parent)
+  # @return [true | Array] - returns true (for :exists tag) or array of values corresponding to the required reference
+  def references_values(val_item_key, val_item_value, ref_table_name)
+    case val_item_key
+    when :this_references
+      # Identify all records this instance references
+      from_instance = @current_instance
+    when :parent_references
+      # Identify all records this instance's referring record (parent) references
+      from_instance = @current_instance.referring_record
+    when :parent_or_this_references
+      # Identify all records this instance's referring record (parent) references,
+      # or if there is no parent, this record references
+      from_instance = @current_instance.referring_record || @current_instance
+    end
 
-      condition_type = val[:condition]
+    if val_item_value.is_a?(Hash)
+      # If the expected value is a hash, this indicates that a specific type of referenced record is required,
+      # and a field is to be returned from any matching records of this type
+      # For example, the following definition will match addresses where
+      # city and zip match
+      # and the current instance (an activity log) references a activity_log__player_contact_phone record where the
+      # set_related_player_contact_rank field of the referenced record equals the rank of the address
+      #
+      #  addresses:
+      #    city: 'portland'
+      #    zip: '12345'
+      #    rank:
+      #      this_references:
+      #        activity_log__player_contact_phone: set_related_player_contact_rank
 
-      # If we have a non-equals condition specified, generate the extra conditions
-      if condition_type.in?(ValidExtraConditions)
-        # A simple unary or binary condition
+      att = val_item_value.first.last
+      to_table_name = val_item_value.first.first
 
-        # Setup the query conditions array ["sql", cond1, cond2, ...]
-        if @extra_conditions[0].blank?
-          @extra_conditions[0] = ''
-        else
-          @extra_conditions[0] += " #{BoolTypeString} "
-        end
+    else
+      # If the expected value is not a hash, we are probably performing a simple match to find a
+      # record of a specific type referenced by the instance, rather than any record of that type
+      # that is associated with the master.
+      # For example, to just find addresses referenced by an activity log (rather than all of them the master has),
+      # the definition looks like:
+      #  addresses:
+      #    city: 'portland'
+      #    zip: '12345'
+      #    id:
+      #      this_references: id
+      #
+      # In this case we will be matching addresses where
+      # city and zip match
+      # and the instance (an activity log) references an address record where the
+      # the address id is one of those referenced.
+      # In other words, it will only pick an address that is referenced by this activity_log,
+      # not other addresses that belong to this master.
 
-        if condition_type.in? UnaryConditions
-          # It is a unary condition, extend the SQL
-          @extra_conditions[0] += "#{table_name}.#{field_name} #{condition_type}"
-        else
-          # It is a binary condition, extend the SQL and conditions
-          vc = ValidExtraConditions.find { |c| c == condition_type }
-          vv = dynamic_value(val[:value])
-          @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
-          @extra_conditions << vv
-        end
-
-      elsif condition_type.in?(ValidExtraConditionsArrays)
-        # It is an array condition
-
-        veca_extra_args = ''
-
-        # Setup the query conditions array ["sql", cond1, cond2, ...]
-        if @extra_conditions[0].blank?
-          @extra_conditions[0] = ''
-        else
-          @extra_conditions[0] += " #{BoolTypeString} "
-        end
-
-        # Extend the SQL and conditions
-        vc = ValidExtraConditionsArrays.find { |c| c == condition_type }
-
-        raise FphsException, 'Use a value: key with a condition:' unless val.key?(:value)
-
-        vv = dynamic_value(val[:value])
-
-        negate = (val[:not] ? 'NOT' : '')
-
-        leftop = '?'
-
-        if vc == '&&' || vc.end_with?(' REV') || vv.is_a?(Array)
-          leftop = 'ARRAY[?]'
-          leftop += '::varchar[]' if vv.first.is_a? String
-        end
-
-        veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
-
-        rightop = "#{table_name}.#{field_name}#{veca_extra_args}"
-        if vc.end_with?(' REV')
-          ro = rightop
-          rightop = leftop
-          leftop = ro
-          vc = vc.sub(' REV', '')
-        end
-
-        @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{rightop}))"
-        @extra_conditions << vv
-      elsif condition_type
-        raise FphsException,
-              "calc_action condition '#{condition_type}' for #{table_name} and #{field_name} is not recognized"
-      end
+      att = val_item_value
+      # We will filter on the main table name if it is actually a table, not something like 'parent_references'
+      to_table_name = nil if non_join_table_name?(ref_table_name)
 
     end
 
-    return unless !condition_type && !val.in?(ReturnTypes)
+    if val_item_key == :exists
+      # Simply get a true result if instance found and {exists: true} or
+      # instance not found and {exists: false}
+      val = (!!expected_val == !!from_instance)
+    elsif !from_instance
+      raise FphsException, "No referring record specified when using #{val_item_key} in " \
+                           "#{@current_instance.class.name} #{@current_instance.id}"
+    else
+      # Now go ahead and get the possible values to use in the condition
+      val = []
+      # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
+      # showable filter since this might recurse infinitely
+      model_refs = from_instance.model_references(active_only: true, showable_only: false)
+      Rails.logger.info '*** No model_refs found' if model_refs.empty?
+      # filter it to return only those matching the required to_record_type (if necessary)
+      if to_table_name
+        model_refs = model_refs.select { |r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize }
+        Rails.logger.info "*** No model_refs found for table name: #{to_table_name}" if model_refs.empty?
+      end
+
+      # Get the specified attribute's value from each of the model references
+      # Generate an array, allowing the conditions to be IN any of these
+      model_refs.each do |mr|
+        val << mr.to_record.attributes[att]
+      end
+    end
+    val
+  end
+
+  #
+  # Based on match query conditions being generated, now setup the value comparisons.
+  # This may produce extra conditions to be pushed into the query at runtime, or
+  # basic joined conditions.
+  def generate_query_condition_values(val, table_name, field_name)
+    return if val.in?(ReturnTypes)
+    return if handle_condition_tag(val, table_name, field_name)
 
     @condition_values[table_name] ||= {}
     val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
     @condition_values[table_name][field_name] = dynamic_value(val)
+  end
+
+  #
+  # When a condition: {} is specified, handle and return it. If not specified, return nil
+  def handle_condition_tag(val, table_name, field_name)
+    return unless val.is_a?(Hash)
+
+    condition = val[:condition]
+    return unless condition
+
+    # If we have a non-equals condition specified, generate the extra conditions
+    if condition.in?(ValidExtraConditions)
+      # A simple unary or binary condition
+
+      # Setup the query conditions array ["sql", cond1, cond2, ...]
+      if @extra_conditions[0].blank?
+        @extra_conditions[0] = ''
+      else
+        @extra_conditions[0] += " #{BoolTypeString} "
+      end
+
+      if condition.in? UnaryConditions
+        # It is a unary condition, extend the SQL
+        @extra_conditions[0] += "#{table_name}.#{field_name} #{condition}"
+      else
+        # It is a binary condition, extend the SQL and conditions
+        vc = ValidExtraConditions.find { |c| c == condition }
+        vv = dynamic_value(val[:value])
+        @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
+        @extra_conditions << vv
+      end
+
+    elsif condition.in?(ValidExtraConditionsArrays)
+      # It is an array condition
+
+      veca_extra_args = ''
+
+      # Setup the query conditions array ["sql", cond1, cond2, ...]
+      if @extra_conditions[0].blank?
+        @extra_conditions[0] = ''
+      else
+        @extra_conditions[0] += " #{BoolTypeString} "
+      end
+
+      # Extend the SQL and conditions
+      vc = ValidExtraConditionsArrays.find { |c| c == condition }
+
+      raise FphsException, 'Use a value: key with a condition:' unless val.key?(:value)
+
+      vv = dynamic_value(val[:value])
+
+      negate = (val[:not] ? 'NOT' : '')
+
+      leftop = '?'
+
+      if vc == '&&' || vc.end_with?(' REV') || vv.is_a?(Array)
+        leftop = 'ARRAY[?]'
+        leftop += '::varchar[]' if vv.first.is_a? String
+      end
+
+      veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
+
+      rightop = "#{table_name}.#{field_name}#{veca_extra_args}"
+      if vc.end_with?(' REV')
+        ro = rightop
+        rightop = leftop
+        leftop = ro
+        vc = vc.sub(' REV', '')
+      end
+
+      @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{rightop}))"
+      @extra_conditions << vv
+    elsif condition
+      raise FphsException,
+            "calc_action condition '#{condition}' for #{table_name} and #{field_name} is not recognized"
+    end
+
+    condition
   end
 
   # If we are expecting values or results to be returned, handle the setup for this here
@@ -917,7 +798,7 @@ module CalcActions
   # as well as formulating the ActiveRecord queries to support this.
   # Non-query conditions build on the base query when evaluated, and this method just
   # sets up some structures to support this.
-  def calc_base_query(condition_type)
+  def calc_base_query
     @join_tables = []
     @condition_values = {}
     @extra_conditions = []
@@ -955,7 +836,7 @@ module CalcActions
           else
             # We have finally decided that this is a regular query condition
             # Handle setting up the condition values
-            generate_query_condition_values(val, table_name, field_name, join_table_name)
+            generate_query_condition_values(val, table_name, field_name)
 
             # And handle any returns value / results config
             generate_returns_config(val, join_table_name, field_name)
@@ -973,28 +854,8 @@ module CalcActions
 
     return if setup_no_masters
 
-    # Specify `masters: {...}` to not tie the action to the item's current master, but instead use the
-    # set of masters specified. `{}` indicates any master, or use standard conditions to specify a list of ids,
-    # such as { id: [1,2,3] }
-    if @condition_config.respond_to?(:key?) && @condition_config.key?(:masters) ||
-       @condition_config.map(&:first).include?(:masters)
-      # Use the full masters table as the base, allowing the configuration to limit the masters records if needed
-      @base_query = Master.all
-      @current_scope = Master.all
-      @join_tables.delete_if { |a| a == :masters }
-    end
-
-    if @join_tables.first == :users
-      # Get the users records without a join to the masters table, which makes no sense
-      @base_query = User.all
-      @current_scope = User.all
-    elsif %i[all not_all].include? condition_type
-      # Inner join, since our conditions require the existence of records in the joined tables
-      @base_query = @current_scope.joins(@join_tables)
-    else
-      # Left join, since our conditions do not absolutely require the existence of records in the joined tables
-      @base_query = @current_scope.includes(@join_tables)
-    end
+    limit_to_masters
+    setup_base_query
   end
 
   def setup_no_masters
@@ -1017,10 +878,182 @@ module CalcActions
   end
 
   #
+  # Specify `masters: {...}` to not tie the action to the item's current master, but instead use the
+  # set of masters specified. `{}` indicates any master, or use standard conditions to specify a list of ids,
+  # such as { id: [1,2,3] }
+  def limit_to_masters
+    if @condition_config.respond_to?(:key?) && @condition_config.key?(:masters) ||
+       @condition_config.map(&:first).include?(:masters)
+      # Use the full masters table as the base, allowing the configuration to limit the masters records if needed
+      @base_query = Master.all
+      @current_scope = Master.all
+      @join_tables.delete_if { |a| a == :masters }
+    end
+  end
+
+  def setup_base_query
+    @base_query = if @join_tables.first == :users
+                    # Get the users records without a join to the masters table, which makes no sense
+                    @current_scope = User.all
+                    User.all
+                  elsif %i[all not_all].include? @condition_type
+                    # Inner join, since our conditions require the existence of records in the joined tables
+                    @current_scope.joins(@join_tables)
+                  else
+                    # Left join, since our conditions do not absolutely require the existence of records in the joined tables
+                    @current_scope.includes(@join_tables)
+                  end
+  end
+
+  #
   # Set a non-query condition for this table and field
   def set_non_query_condition(table_name, field_name, val)
     @non_query_conditions[table_name] ||= {}
     @non_query_conditions[table_name][field_name] = val
+  end
+
+  def condition_type_all
+    @cond_res = true
+    @res_q = true
+    # equivalent of (cond1 AND cond2 AND cond3 ...)
+    # These conditions are easy to handle as a standard query
+    # @this_val_where check allows a return_value definition to be used alone without other conditions
+    unless @condition_values.empty? && @extra_conditions.empty? && !@this_val_where
+      gen_condition_scope @condition_values, @extra_conditions
+      calc_return_types
+      @res_q = calc_nested_query_conditions
+      merge_failures(@condition_type => @condition_config) unless @res_q
+    end
+
+    @non_query_conditions.each do |table, fields|
+      fields.each do |field_name, expected_val|
+        @res_q &&= calc_non_query_condition(table, field_name, expected_val)
+        merge_failures(@condition_type => { table => { field_name => expected_val } }) unless @res_q
+      end
+    end
+
+    @cond_res &&= !!@res_q
+    @loop_res &&= @cond_res
+  end
+
+  def condition_type_not_all
+    @cond_res = true
+    @res_q = true
+    # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
+    unless @condition_values.empty? && @extra_conditions.empty?
+      gen_condition_scope @condition_values, @extra_conditions
+      calc_return_types
+      @res_q = calc_nested_query_conditions
+    end
+
+    @non_query_conditions.each do |table, fields|
+      fields.each do |field_name, expected_val|
+        @res_q &&= calc_non_query_condition(table, field_name, expected_val)
+      end
+    end
+
+    @cond_res &&= !@res_q
+
+    # Not all matches - return all possible items that failed
+    merge_failures(@condition_type => @condition_values) unless @cond_res
+    merge_failures(@condition_type => @non_query_conditions) unless @cond_res
+
+    @loop_res ||= @cond_res
+  end
+
+  def condition_type_any
+    raise FphsException, '@extra_conditions not supported with any / not_any conditions' unless @extra_conditions.empty?
+
+    @cond_res = false
+    @res_q = false
+    # equivalent of (cond1 OR cond2 OR cond3 ...)
+
+    if @condition_values.empty?
+      # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
+      @condition_scope = nil
+      reset_scope = nil
+    else
+
+      @condition_values.each do |table, fields|
+        fields.each do |field_name, expected_val|
+          gen_condition_scope({ table => { field_name => expected_val } }, @extra_conditions, 'OR')
+          calc_return_types
+          @res_q = !@condition_scope.empty?
+
+          break if @res_q
+        end
+        break if @res_q
+      end
+
+      reset_scope = @base_query.order(id: :desc).limit(1)
+    end
+
+    # Reset the condition scope, since gen_condition_scope will have messed with it
+    @condition_scope = reset_scope
+    @res_q ||= calc_nested_query_conditions return_first_false: false unless @res_q || @condition_scope.nil?
+
+    # If no matches - return all possible items that failed
+    merge_failures(@condition_type => @condition_values) unless @res_q
+
+    unless @res_q
+      @non_query_conditions.each do |table, fields|
+        fields.each do |field_name, expected_val|
+          @res_q ||= calc_non_query_condition(table, field_name, expected_val)
+          break if @res_q
+        end
+      end
+    end
+
+    merge_failures(@condition_type => @non_query_conditions) unless @res_q
+
+    @cond_res = @res_q
+    @loop_res ||= @cond_res
+  end
+
+  def condition_type_not_any
+    raise FphsException, '@extra_conditions not supported with any / not_any conditions' unless @extra_conditions.empty?
+
+    @cond_res = true
+    # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
+    # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
+
+    if @condition_values.empty?
+      # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
+      @condition_scope = nil
+      reset_scope = nil
+    else
+
+      @condition_values.each do |table, fields|
+        fields.each do |field_name, expected_val|
+          gen_condition_scope({ table => { field_name => expected_val } }, @extra_conditions, 'OR')
+          calc_return_types
+          @res_q = !@condition_scope.empty?
+          merge_failures(@condition_type => { table => { field_name => expected_val } }) if @res_q
+          @cond_res &&= !@res_q
+          break unless @cond_res && !return_failures
+        end
+        break unless @cond_res && !return_failures
+      end
+
+      reset_scope = @base_query.order(id: :desc).limit(1)
+    end
+
+    # Reset the condition scope, since gen_condition_scope will have messed with it
+    @condition_scope = reset_scope
+    if @cond_res && !@condition_scope.nil?
+      @res_q = calc_nested_query_conditions return_first_false: false
+      @cond_res &&= !@res_q
+    end
+
+    @non_query_conditions.each do |table, fields|
+      fields.each do |field_name, expected_val|
+        @res_q = !calc_non_query_condition(table, field_name, expected_val)
+        merge_failures(@condition_type => { table => { field_name => expected_val } }) unless @res_q
+        @cond_res &&= @res_q
+      end
+    end
+
+    @loop_res &&= @cond_res
   end
 
   # Create a dynamic value if the condition's value matches certain strings
@@ -1250,20 +1283,20 @@ module CalcActions
   end
 
   # Logging of results to aid debugging
-  def log_results(orig_cond_type, condition_type, loop_res, cond_res, orig_loop_res)
+  def log_results
     return if Rails.env.production?
 
     begin
-      Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
+      Rails.logger.debug "**#{@orig_cond_type}*******************************************************************************************************"
       Rails.logger.debug "this instance: #{@current_instance.id}"
-      Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+      Rails.logger.debug "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res} - @orig_loop_res: #{@orig_loop_res}"
       Rails.logger.debug @condition_config
       Rails.logger.debug @non_query_conditions
       Rails.logger.debug @base_query.to_sql if @base_query
       Rails.logger.debug @condition_scope.to_sql if @condition_scope
       Rails.logger.debug '*********************************************************************************************************'
     rescue StandardError => e
-      Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+      Rails.logger.warn "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res} - @orig_loop_res: #{@orig_loop_res}"
       Rails.logger.warn @condition_config
       Rails.logger.warn @join_tables
       Rails.logger.warn JSON.pretty_generate(@action_conf)

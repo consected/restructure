@@ -317,7 +317,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
     }
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be false
+
+    b = res.calc_action_if
+    expect(b).to be false
   end
 
   it 'checks if all attributes match multiple condition types' do
@@ -3702,7 +3704,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             }
           }
         }
@@ -3717,9 +3719,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             },
-            error_message: 'Something was invalid',
+            invalid_error_message: 'Something was invalid',
             id: @al.id
           }
         }
@@ -3736,7 +3738,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'BAD id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             }
           }
         }
@@ -3753,9 +3755,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             },
-            error_message: 'Something was bad',
+            invalid_error_message: 'Something was bad',
             id: -44
           }
         }
@@ -3773,9 +3775,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'BAD id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             },
-            error_message: 'Something was bad',
+            invalid_error_message: 'Something was bad',
             id: -44
           }
         }
@@ -3794,7 +3796,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           this: {
             user_id: {
               user: 'id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             }
           }
         }
@@ -3811,9 +3813,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             id: -44,
             user_id: {
               user: 'id',
-              error_message: 'The user had a bad ID'
+              invalid_error_message: 'The user had a bad ID'
             },
-            error_message: 'All bad'
+            invalid_error_message: 'All bad'
           }
         }
       }
@@ -3832,7 +3834,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             user_id: {
               user: 'bad id'
             },
-            error_message: 'All were bad'
+            invalid_error_message: 'All were bad'
           }
         }
       }
@@ -3842,17 +3844,17 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ all: { this: { id: 'All were bad' } } })
+      expect(return_failures).to eq({ any: { this: { id: 'All were bad' } } })
 
       conf = {
         any_creator: {
           this: {
             user_id: {
-              user: 'id',
-              error_message: 'The user had a bad ID'
+              user: 'bad id',
+              invalid_error_message: 'The user had a bad ID'
             },
             id: -44,
-            error_message: 'All were bad'
+            invalid_error_message: 'All were bad'
           }
         }
       }
@@ -3862,7 +3864,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ all: { this: { user_id: 'All were bad' } } })
+      expect(return_failures).to eq({ any: { this: { user_id: 'The user had a bad ID' } } })
     end
   end
 end
