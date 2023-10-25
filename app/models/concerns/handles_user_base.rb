@@ -802,8 +802,38 @@ module HandlesUserBase
   end
 
   #
+  # Check if the supplied object is an array, is empty or only contains empty elements
+  # @param [Object] arr - object to test
+  # @return [true|false]
+  def array_of_empty_elements(arr)
+    return false unless arr.is_a?(Array)
+
+    arr.each do |el|
+      next if el.nil?
+      return false if !el.is_a?(String) && !el.is_a?(Array)
+      return false if el.is_a?(String) && el.present?
+      return false if el.is_a?(Array) && el.find(&:present?)
+    end
+
+    true
+  end
+
+  #
   # Validation method that checks if a valid_if configuration shows all the fields being valid,
   # or produces the appropriate errors if not
+  #
+  # This relies on @return_failures, which has the format
+  #   {
+  #     condition_type: {
+  #       table_name: {
+  #         field_name: expected_val,
+  #         field_name2: {
+  #           condition: {}
+  #         }
+  #       }
+  #     },
+  #     ...
+  #   }
   def configurable_valid_if
     return true if evaluate_valid_if_config
 
@@ -812,19 +842,24 @@ module HandlesUserBase
       return
     end
 
-    @return_failures.each do |c_var, c_vals|
+    @return_failures.each do |cond_type, c_vals|
       c_vals.each do |table, cond|
         cond.each do |k, v|
           v = v.present? ? v : '(blank)'
           if v.is_a? Hash
             next if v[:hide_error]
 
+            if v[:invalid_error_message]
+              errors.add :'', v[:invalid_error_message]
+              next
+            end
+
             v = if v[:condition]
                   "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
                 else
                   "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
-          elsif v.is_a?(Array) && [['', nil], [nil, '']].include?(v)
+          elsif array_of_empty_elements(v)
             v = '(blank)'
           else
             v = ": #{v}"
@@ -832,7 +867,7 @@ module HandlesUserBase
           k = table == :this ? k : "#{table}.#{k}"
 
           msg = nil
-          case c_var
+          case cond_type
           when :all
             msg = "is invalid. Expected value to be #{v}"
           when :any

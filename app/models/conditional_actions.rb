@@ -5,6 +5,7 @@ class ConditionalActions
   attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config, :this_val
 
   def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil)
+    action_conf = action_conf.symbolize_keys if action_conf.is_a?(Hash)
     @action_conf = action_conf
     @current_instance = current_instance
     @return_failures = return_failures

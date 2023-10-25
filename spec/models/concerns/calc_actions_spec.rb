@@ -954,7 +954,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
   describe 'checks against the current user' do
     it 'checks if a certain the current user has a specific id' do
-      # user_id for the activity log matches the current user's id
       conf = {
         all_creator: {
           this: {
@@ -3661,6 +3660,209 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       res = ca.get_this_val
       expect(res).to be nil
+    end
+  end
+
+  describe 'valid if' do
+    it 'returns no error if valid' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+      expect(return_failures).to be_empty
+    end
+
+    it 'returns an error if not valid (all must match)' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: -999
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be false
+      expect(return_failures).to eq({ all: { this: { user_id: -999 } } })
+    end
+
+    it 'returns no custom error if all valid' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            },
+            error_message: 'Something was invalid',
+            id: @al.id
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+    end
+
+    it 'returns custom error if invalid (all must match)' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'BAD id',
+              error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures.dig(:all, :this, :user_id)).to eq 'The user had a bad ID'
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            },
+            error_message: 'Something was bad',
+            id: -44
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { id: 'Something was bad' } } })
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'BAD id',
+              error_message: 'The user had a bad ID'
+            },
+            error_message: 'Something was bad',
+            id: -44
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { id: 'Something was bad', user_id: 'The user had a bad ID' } } })
+    end
+
+    it 'returns no custom error if valid (any must match)' do
+      conf = {
+        any_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be true
+
+      conf = {
+        any_creator: {
+          this: {
+            id: -44,
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            },
+            error_message: 'All bad'
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be true
+    end
+
+    it 'returns custom error if invalid (any must match)' do
+      conf = {
+        any_creator: {
+          this: {
+            id: -44,
+            user_id: {
+              user: 'bad id'
+            },
+            error_message: 'All were bad'
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { id: 'All were bad' } } })
+
+      conf = {
+        any_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              error_message: 'The user had a bad ID'
+            },
+            id: -44,
+            error_message: 'All were bad'
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { user_id: 'All were bad' } } })
     end
   end
 end

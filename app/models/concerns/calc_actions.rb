@@ -29,7 +29,8 @@ module CalcActions
 
   # We won't use a query join when referring to tables based on these keys
   NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
-                         parent_or_this_references user master condition value hide_error role_name reference].freeze
+                         parent_or_this_references user master condition value hide_error invalid_error_message
+                         role_name reference].freeze
   NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name reference].freeze
   NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
                               parent_or_this_references reference validate].freeze
@@ -67,19 +68,10 @@ module CalcActions
 
   # Primary method to calculate conditions
   def do_calc_action_if
-    # A quick return if this is not a hash or it is empty
-    return true unless action_conf.is_a?(Hash) && action_conf.first
+    return @early_return if early_return?
 
     # Final result for all selections
     final_res = true
-
-    self.action_conf = action_conf.symbolize_keys
-
-    # Simple conditions to always return
-    #   never: true
-    #   always: true
-    return false if action_conf[:never]
-    return true if action_conf[:always]
 
     # calculate that all the following sets of conditions are true:
     # (:all conditions) AND (:not_all conditions) AND (:any conditions) AND (:not_any conditions)
@@ -123,14 +115,9 @@ module CalcActions
 
       # For each condition config definition, run the main tests
       condition_config_array.each do |condition_config|
-        @condition_config = condition_config
-
-        # Check if the first key is a selection type. If it is, wrap it in a
-        # {this: original hash} to make it easier to process consistently
-        @condition_config = { this: @condition_config } if is_selection_type(@condition_config.first.first)
-
-        # Calculate the base query and conditions to use later
+        setup_condition_config(condition_config)
         calc_base_query condition_type
+        set_condition_error_message
 
         #### :all ####
         if condition_type == :all
@@ -312,11 +299,21 @@ module CalcActions
     return unless return_failures && !@skip_merge
 
     results.first.last.each do |t, res|
-      next unless res.is_a?(Hash) && res.first&.last&.first&.first == :validate
-
       field = res.first.first
+      msg = @condition_config.first.last
+      msg = msg[field]
+      msg = msg.is_a?(Hash) && msg[:invalid_error_message]
+      msg ||= @condition_error_message
+      if msg
+        res = results.first.last[t] = { field => msg }
+        next
+      end
+
+      next unless res.is_a?(Hash) && res.first&.last.is_a?(Hash) && res.first&.last&.first&.first == :validate
+
       results.first.last[t] =
         { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
+      next
     end
     return_failures.deep_merge!(results)
   end
@@ -840,7 +837,8 @@ module CalcActions
         @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{rightop}))"
         @extra_conditions << vv
       elsif condition_type
-        raise FphsException, "calc_action condition '#{condition_type}' for #{table_name} and #{field_name} is not recognized"
+        raise FphsException,
+              "calc_action condition '#{condition_type}' for #{table_name} and #{field_name} is not recognized"
       end
 
     end
@@ -877,6 +875,41 @@ module CalcActions
     }
   end
 
+  #
+  # Decide if an early return is needed:
+  # - action_conf is not a hash or it is empty (conditional result = true)
+  # - simple conditions to always return
+  #     never: true (conditional result = false)
+  #     always: true (conditional result = true)
+  # Sets the instance attribute @early_return with the value to actually
+  # return if an early return is needed
+  # @return [true|false] - returns true if an early return is required
+  def early_return?
+    @early_return = nil
+    return @early_return = true unless action_conf.is_a?(Hash) && action_conf.first
+    return @early_return = true if action_conf[:always]
+
+    @early_return = false if action_conf[:never]
+    # An early return is needed if the value is not nil from matching one of the conditions above
+    !@early_return.nil?
+  end
+
+  #
+  # Setup the condition config for this loop's condition
+  # @param [Hash] condition_config
+  def setup_condition_config(condition_config)
+    @condition_config = condition_config
+    # Check if the first key is a selection type. If it is, wrap it in a
+    # {this: original hash} to make it easier to process consistently
+    @condition_config = { this: @condition_config } if is_selection_type(@condition_config.first.first)
+  end
+
+  #
+  # Setup the error message for the current condition loop if there is an :invalid_error_message key
+  def set_condition_error_message
+    @condition_error_message = @condition_config.respond_to?(:key?) && @condition_config.first.last.delete(:invalid_error_message)
+  end
+
   # Generate query conditions to support the conditional configuration.
   # Each condition definition decides if it is a query or non-query condition and
   # sets up conditions to support this.
@@ -902,6 +935,8 @@ module CalcActions
       else
 
         t_conds.each do |field_name, val|
+          next if field_name == :invalid_error_message
+
           # non query conditions are those aren't formulated with a series of
           # inner joins on the master. They are handled as individual queries.
           non_query_condition = is_non_query_condition table_name, field_name, val
@@ -916,8 +951,7 @@ module CalcActions
           if non_query_condition
             # We have decided this is a non query condition, and will not be joined on the master
             # Set this so they can be evaluated at runtime.
-            @non_query_conditions[table_name] ||= {}
-            @non_query_conditions[table_name][field_name] = val
+            set_non_query_condition(table_name, field_name, val)
           else
             # We have finally decided that this is a regular query condition
             # Handle setting up the condition values
@@ -937,21 +971,7 @@ module CalcActions
     # Make the list of tables to be joined valid (in case anything slipped through) and unique
     @join_tables = (@join_tables - NonJoinTableNames).uniq
 
-    # Specify `no_masters: {}` at the top level to directly query the record, rather than doing
-    # an inner join on the masters table
-    if @condition_config.respond_to?(:key?) && @condition_config.key?(:no_masters) ||
-       @condition_config.map(&:first).include?(:no_masters)
-      # Use the first specified table as the base, not joining on masters table
-      @join_tables.delete_if { |a| a == :no_masters }
-      rn = @join_tables.first
-      r = Resources::Models.find_by(resource_name: rn)
-      raise FphsException, "No resource found for #{rn} with no_masters specified in calc_actions" unless r
-
-      c = r.class_name.constantize
-      @base_query = c.all
-      @current_scope = c.all
-      return
-    end
+    return if setup_no_masters
 
     # Specify `masters: {...}` to not tie the action to the item's current master, but instead use the
     # set of masters specified. `{}` indicates any master, or use standard conditions to specify a list of ids,
@@ -975,6 +995,32 @@ module CalcActions
       # Left join, since our conditions do not absolutely require the existence of records in the joined tables
       @base_query = @current_scope.includes(@join_tables)
     end
+  end
+
+  def setup_no_masters
+    # Specify `no_masters: {}` at the top level to directly query the record, rather than doing
+    # an inner join on the masters table
+    return unless @condition_config.respond_to?(:key?) &&
+                  @condition_config.key?(:no_masters) ||
+                  @condition_config.map(&:first).include?(:no_masters)
+
+    # Use the first specified table as the base, not joining on masters table
+    @join_tables.delete_if { |a| a == :no_masters }
+    rn = @join_tables.first
+    r = Resources::Models.find_by(resource_name: rn)
+    raise FphsException, "No resource found for #{rn} with no_masters specified in calc_actions" unless r
+
+    c = r.class_name.constantize
+    @base_query = c.all
+    @current_scope = c.all
+    true
+  end
+
+  #
+  # Set a non-query condition for this table and field
+  def set_non_query_condition(table_name, field_name, val)
+    @non_query_conditions[table_name] ||= {}
+    @non_query_conditions[table_name][field_name] = val
   end
 
   # Create a dynamic value if the condition's value matches certain strings
