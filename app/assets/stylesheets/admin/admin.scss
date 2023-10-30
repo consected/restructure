@@ -118,7 +118,7 @@ a.collapsed > .caret {
 }
 
 .info-danger {
-  color: red;
+  color: #cc0000;
 }
 
 div#creddocframe {
@@ -155,4 +155,10 @@ div#creddocframe {
 
 .admin-item-admin-infos span {
   color: gray;
+}
+
+.nothing-admin-authed {
+  color: gray;
+  font-style: italic;
+
 }

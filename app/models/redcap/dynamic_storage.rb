@@ -52,6 +52,16 @@ module Redcap
         @field_types[field_name] = field.field_type.database_type.to_s
       end
 
+      extra_fields&.each do |ef|
+        ef = ef.to_sym
+        ft = if ef == :disabled
+               'boolean'
+             else
+               'string'
+             end
+        @field_types[ef] = ft.to_s
+      end
+
       @field_types
     end
 
@@ -66,6 +76,12 @@ module Redcap
       @array_fields = {}
       data_dictionary&.all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
         @array_fields[field_name] = field.field_type.database_array?
+      end
+
+      extra_fields&.each do |ef|
+        ef = ef.to_sym
+        ft = (ef != :disabled)
+        @array_fields[ef] = ft
       end
 
       @array_fields
@@ -120,10 +136,7 @@ module Redcap
 
         next unless field.field_type.name == :checkbox
 
-        ccf = field.field_choices&.choices_plain_text
-        next unless ccf.present?
-
-        if project_admin.data_options.add_multi_choice_summary_fields && ccf.length > 1
+        if project_admin.data_options.add_multi_choice_summary_fields && field.multiple_choice?
           # Create a "chosen array" if the project configuration requires a summary field
           # to capture all of the multiple choice values in one place
           # But only do this if the number of choices is greater than 1, since we don't want this
@@ -141,6 +154,9 @@ module Redcap
           # on the redcap_tag_select field type.
         end
 
+        ccf = field.field_choices&.choices_plain_text
+        next unless ccf.present?
+
         # Create a field for each multiple choice value
         ccf.each do |arr|
           fname = arr.first
@@ -152,6 +168,9 @@ module Redcap
           @show_if_condition_strings[ccffn.to_sym] = bl_condition_string if bl_condition_string.present?
         end
       end
+
+      # Add a disabled field if one is not present and we need to disable deleted records
+      @fields['disabled'] ||= { label: 'disabled' } if project_admin.data_options.handle_deleted_records == 'disabled'
 
       @fields
     end
@@ -213,6 +232,27 @@ module Redcap
       @placeholder_fields
     end
 
+    def extra_fields
+      return @extra_fields if @extra_fields
+
+      @extra_fields = []
+      @extra_fields << 'disabled' if project_admin.disable_deleted_records?
+
+      return @extra_fields unless project_admin.data_options.add_multi_choice_summary_fields
+
+      data_dictionary.all_fields.each do |_field_name, field|
+        next unless field.multiple_choice?
+
+        # Create a "chosen array" if the project configuration requires a summary field
+        # to capture all of the multiple choice values in one place
+        # But only do this if the number of choices is greater than 1, since we don't want this
+        # for standalone checkboxes
+        @extra_fields << field.chosen_array_field_name.to_s
+      end
+
+      @extra_fields
+    end
+
     #
     # Override default field options creation method, to include field_type and alt_options
     # @return [Hash]
@@ -265,6 +305,14 @@ module Redcap
     # @return [Boolean]
     def no_downcase_field(_field_name)
       true
+    end
+
+    #
+    # Specifies the "<category> <name>" part of the @library string to add automatically when
+    # generating the dynamic model
+    # @return [String]
+    def prefix_config_library
+      project_admin.data_options.prefix_dynamic_model_config_library
     end
 
     #

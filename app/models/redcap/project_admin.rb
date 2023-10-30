@@ -50,6 +50,8 @@ module Redcap
 
     JobQueue = 'redcap'
 
+    ValidHandleDeletedRecordsValues = [nil, false, 'disable', 'ignore']
+
     has_one :redcap_data_dictionary,
             class_name: 'Redcap::DataDictionary',
             foreign_key: :redcap_project_admin_id,
@@ -201,10 +203,30 @@ module Redcap
     #
     # Specify options for the project.
     # add_multi_choice_summary_fields: automatically capture summary fields from checkbox fields with multiple responses
-    #                                  providing a single array result field that can more easily be used within SQL without
-    #                                  having to know each of the individual checkbox field columns in the database.
-    configure :data_options, with: %i[add_multi_choice_summary_fields]
+    #                                  providing a single array result field that can more easily be used within SQL
+    #                                  without having to know each of the individual checkbox field columns in
+    #                                  the database.
+    # handle_deleted_records: specify how to handle records deleted on Redcap that have already been transferred
+    #                         to the database. By default, the request fails. The options are:
+    #                         - false/null: (default) to prevent a request with deleted records
+    #                         - disable: set the disabled attribute for deleted records
+    #                         - ignore: skip any deleted records
+    #                         NOTE: with the *disabled* option, if a record subsequently "reappears" in Redcap
+    #                         then the existing DB record will be set to disabled = false and updated appropriately
+    # prefix_dynamic_model_config_library: category name
+    #                      The "<category> <name>" string identifier for a
+    #                      config library to be prefixed to the dynamic
+    #                      model definition whenever it is updated.
+    #                      For example: "redcap test_library"
+    configure :data_options, with: %i[add_multi_choice_summary_fields
+                                      handle_deleted_records
+                                      prefix_dynamic_model_config_library]
 
+    validate :data_options, lambda {
+      return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
+
+      errors.add(:data_options, "handle_deleted_records must be one of: #{ValidHandleDeletedRecordsValues}")
+    }
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
     configure_attributes :data_dictionary_version
@@ -312,12 +334,15 @@ module Redcap
 
     #
     # Compare the field lists for that required by storage against
-    # the actual dynamic model configuration
-    # @return [Array{storage fields, dynamic model fields}]
+    # the actual dynamic model configuration.
+    # Extra fields are those dependent on data_options, and will also appear in the storage fields list
+    # if present
+    # @return [Array{storage fields, dynamic model fields, extra fields}]
     def compare_storage_and_model_field_lists
-      fl = dynamic_storage.field_list # (no_placeholder_fields: true)
-      dmfl = dynamic_storage.dynamic_model.field_list
-      [fl, dmfl]
+      fl = dynamic_storage.field_list.split(' ')
+      extras = dynamic_storage.extra_fields
+      dmfl = dynamic_storage.dynamic_model.field_list.split(' ')
+      [fl, dmfl, extras]
     end
 
     #
@@ -326,11 +351,8 @@ module Redcap
     # Additional fields in the dynamic model are acceptable
     # @return [Boolean]
     def model_has_all_fields_for_storage?
-      storage, dm_fields = compare_storage_and_model_field_lists
-      storage_fields_a = storage&.split(' ')
-      dm_fields_a = dm_fields&.split(' ')
-
-      (storage_fields_a - dm_fields_a).empty?
+      storage_fields_a, dm_fields_a, extra_fields_a = compare_storage_and_model_field_lists
+      (storage_fields_a + extra_fields_a - dm_fields_a).empty?
     end
 
     def valid_metadata?
@@ -404,6 +426,26 @@ module Redcap
       dynamic_storage.create_dynamic_model
       record_job_request 'update_dynamic_model', result: { dynamic_model: dynamic_storage.dynamic_model.id }
       # dynamic_storage.add_user_access_control
+    end
+
+    def disable_deleted_records?
+      data_options.handle_deleted_records == 'disable'
+    end
+
+    def ignore_deleted_records?
+      data_options.handle_deleted_records == 'ignore'
+    end
+
+    def fail_on_deleted_records?
+      !data_options.handle_deleted_records
+    end
+
+    #
+    # Returns true if the data_options.prefix_dynamic_model_config_library setting is blank
+    # or if the dynamic model has the specified library in its options
+    # @return [true|false]
+    def dynamic_model_config_library_valid?
+      data_options.prefix_dynamic_model_config_library.blank? || dynamic_storage&.dynamic_model_config_library_added?
     end
 
     private

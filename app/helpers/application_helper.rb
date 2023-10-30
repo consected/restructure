@@ -160,8 +160,12 @@ module ApplicationHelper
   # @param [String] key - field key
   # @param [Hash] captions - defined captions
   # @param [Symbol] mode - one of :new, :edit, :show
-  # @param [true|false] no_sub - don't do double-curly substitutions
-  #                              (it may happen in the UI instead if this is a template)
+  # @param [true|:escape|false] no_sub - don't do double-curly substitutions, and
+  #                              allow Handlebars to do it in the UI, or escape the
+  #                              curly braces so that _fpa.substitution can handle it
+  #                              true - no substitution
+  #                              false - perform substitutions
+  #                              :escape - escapes to {^{tag}^}
   # @param [true|false] ignore_missing - don't raise exception on missing tag by default
   # @return [String] HTML result
   def show_caption_before(key, captions, mode: nil, no_sub: nil, ignore_missing: true)
@@ -174,6 +178,8 @@ module ApplicationHelper
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing: ignore_missing)
     end
+
+    caption = caption.gsub('{{', '{^{').gsub('}}', '}^}') if no_sub == :escape
     caption.html_safe
   end
 
@@ -263,14 +269,17 @@ module ApplicationHelper
   # @param [Boolean] allow_missing_template - return nil if no matching template found
   # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
   # @param [String] category - optionally request content from the stated category
+  # @param [true|nil] no_substitutions - don't perform curly substitutions if true (default: nil)
   # @return [String]
-  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil)
+  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true, category: nil,
+                     no_substitutions: nil)
     data ||= {}
     data = data.attributes if data.respond_to? :attributes
     res = Admin::MessageTemplate.generate_content content_template_name: name, data: data,
                                                   allow_missing_template: allow_missing_template,
                                                   markdown_to_html: markdown_to_html,
-                                                  category: category
+                                                  category: category,
+                                                  ignore_missing: true
 
     res&.html_safe
   end

@@ -39,33 +39,45 @@ end
     dm = object_instance.dynamic_storage&.dynamic_model
     dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled } )
 %>
-  <span><%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
+  <span>(id: <%=dm.id%>) <%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
 <% else %>
   <span>not available</span>
 <% end %>
 </p>
+<% if object_instance.persisted? && object_instance.enabled? %>
+  <% if object_instance.dynamic_model_ready?%>
+    <p><label>database table</label>
+    <%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{dm.table_name}", 
+      target: '_blank' %></p>
+  <% end %>
+<% end %>  
+
+
 <%
-  if dm
-  
-    fl, dmfl = object_instance.compare_storage_and_model_field_lists
-
-    dmfla = dmfl&.split(' ')
-    fla = fl.split(' ')          
-
+  if dm  
+    fla, dmfla, exa = object_instance.compare_storage_and_model_field_lists    
 %>
-<p><label>metadata and table fields</label> <span>
-
-  <% if !dmfl.present? || !fl.present? %>
-  <p>REDCap or table fields not set up</p>
-  <% elsif dmfl == fl %>
-  <p>REDCap fields match table</p>
+<p><label>metadata and table fields</label></p>
+<span>
+  <% if !dmfla&.present? || !fla&.present? %>
+  <p class="info-danger">REDCap or table fields not set up</p>
+  <% elsif object_instance.model_has_all_fields_for_storage? %>
+  <p>REDCap fields match dynamic model table</p>
   <% else %>
   <p>REDCap fields don't match table</p>
-  <% if (fla - dmfla).present? %><p>- REDCap has additional fields (pull will fail): <%= "[#{(fla - dmfla).join(" ")}]" %><p><% end %>
-  <% if (dmfla - fla).present? %><p>- table has additional fields (pull will ignore them): <%= "[#{(dmfla - fla).join(" ")}]" %><p><% end %>
+  <ul>
+  <% rfs = (fla - exa - dmfla)
+     if rfs.present? %><li class="info-danger"><b>REDCap</b> has additional fields <b>(pull will fail)</b>: <%= "[#{rfs.join(" ")}]" %></li><% end %>
+  <% efs = (exa - dmfla)
+     if efs.present? %><li class="info-danger"><b>Options</b> specifies <code>data_options:</code> requiring extra fields <b>(pull will fail)</b>: <%= "[#{efs.join(" ")}]" %></li><% end %>
+  <% fs = (dmfla - fla)
+     if fs.present? %><li><b>Dynamic model</b> table has additional fields <b>(pull will ignore them)</b>: <%= "[#{fs.join(" ")}]" %></li><% end %>
   <% end %>  
-
-    </span></p>
+  </ul>
+</span>
+<% unless object_instance.dynamic_model_config_library_valid? %>
+<p class="info-danger">Dynamic model config library has not been added</p>
+<% end %>
 <p><label>pull schedule</label>
   <span>
     <% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>
@@ -84,12 +96,6 @@ end
 <% end %>
 <p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
 <% if object_instance.persisted? && object_instance.enabled? %>
-  <hr/>
-  <% if object_instance.dynamic_model_ready?%>
-    <p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{dm.table_name}", 
-      target: '_blank' %></p>
-  <% end %>
-  <hr/>
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
@@ -122,10 +128,20 @@ end
         method: :post %>
       </p>  
       <p>
-        <%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
-        remote: true,
-        class: 'btn btn-danger btn-sm',
-        method: :post %>
+
+      <a class="btn btn-danger btn-sm show-in-modal" 
+         data-content-el="#dmdef-update-config-from-table-<%=object_instance.id%>" 
+         data-title="Force full reconfiguration">force reconfiguration</a>
+      <div id="dmdef-update-config-from-table-<%=object_instance.id%>" class="hidden">
+        <h2>This action may be destructive</h2>
+        <p>Click to continue if you are sure</p>
+        <p>
+          <%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
+          remote: true,
+          class: 'btn btn-danger btn-sm',
+          method: :post %>
+        </p>
+      </div>      
       </p>
     </div>
   </div>

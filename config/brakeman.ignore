@@ -34,40 +34,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "13461696d535c988627af1a66521217926b205060f69fdc7513045f5d5feb124",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/layouts/application.html.erb",
-      "line": 39,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "AddressesController",
-          "method": "edit_form",
-          "line": 10,
-          "file": "app/controllers/addresses_controller.rb",
-          "rendered": {
-            "name": "layouts/application",
-            "file": "app/views/layouts/application.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "layouts/application"
-      },
-      "user_input": "current_user.app_type.name",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "134966653bbe5f39c59464fae1691bb1f1c3fa41b2016a50f3e8a4f46099bba9",
@@ -97,7 +63,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 649,
+      "line": 652,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -189,7 +155,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 354,
+      "line": 357,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -335,7 +301,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 1106,
+      "line": 1111,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"SELECT DISTINCT v.oid::regclass AS view\\nFROM pg_depend AS d      -- objects that depend on the table\\n  JOIN pg_rewrite AS r  -- rules depending on the table\\n      ON r.oid = d.objid\\n  JOIN pg_class AS v    -- views for the rules\\n      ON v.oid = r.ev_class\\nWHERE \\n--v.relkind = 'v'    -- only interested in views\\n  --AND \\n  d.classid = 'pg_rewrite'::regclass\\n  AND d.refclassid = 'pg_class'::regclass\\n  AND d.deptype = 'n'    -- normal dependency\\n  AND d.refobjid = '#{schema}.#{table_name}'::regclass;\\n\")",
       "render_path": null,
@@ -478,6 +444,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "8ed27130efd43a9fd39b280606c105c7d54358f9c088d10e34c136a626370645",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "AddressesController",
+          "method": "edit_form",
+          "line": 10,
+          "file": "app/controllers/addresses_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -616,6 +616,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "b779d1294b9d1acdcc65ff65de569078b876a155913d1fea1d8c68c04c6891e2",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "AddressesController",
+          "method": "edit_form",
+          "line": 10,
+          "file": "app/controllers/addresses_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "c4849bbd5ad704cab1a06825b331b0bb903881abf1a54590aab0ed6af1d03276",
@@ -729,40 +763,6 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "d1dc095a085c2a1a14639530eafabf6b28a4525a7b77c7e25a2a4b417989e01a",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/layouts/application.html.erb",
-      "line": 40,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "AddressesController",
-          "method": "edit_form",
-          "line": 10,
-          "file": "app/controllers/addresses_controller.rb",
-          "rendered": {
-            "name": "layouts/application",
-            "file": "app/views/layouts/application.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "layouts/application"
-      },
-      "user_input": "current_user.app_type.name",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
       "fingerprint": "e697af5171f6eeb2057e452921c8b32e8affa120bc6a21c95ea39e07c24548e5",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
@@ -801,7 +801,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 350,
+      "line": 353,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -872,6 +872,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-09-18 18:27:11 +0100",
+  "updated": "2023-10-17 10:59:37 +0100",
   "brakeman_version": "6.0.1"
 }

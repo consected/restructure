@@ -437,6 +437,16 @@ class Master < ActiveRecord::Base
     r
   end
 
+  def self.fixed_subject_classes
+    @fixed_subject_classes ||=
+      [
+        Settings::DefaultSubjectInfoTableName.singularize.ns_camelize.ns_constantize,
+        Settings::DefaultSecondaryInfoTableName.singularize.ns_camelize.ns_constantize,
+        Settings::DefaultContactInfoTableName.singularize.ns_camelize.ns_constantize,
+        Settings::DefaultAddressInfoTableName.singularize.ns_camelize.ns_constantize
+      ]
+  end
+
   #
   # Memoized count of associated tracker records
   # NOTE: we selectively use #length rather than #count

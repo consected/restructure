@@ -32,6 +32,10 @@ module Formatter
     # @param all_content [String] the text containing possible {{something.else}} to be substituted
     # @param in_data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
     # @param tag_subs [String] for example 'span class="someclass"'
+    # @param ignore_missing [true|false|nil|Symbol] - one of:
+    #    :show_tag - show the tag if missing
+    #    true - quietly ignore the missing tag
+    #    false, nil - raise exception if tag is missing
     # @return [String] resulting text after substitution
     def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
       return unless all_content
@@ -46,7 +50,7 @@ module Formatter
       if_blocks.each do |if_block|
         block_container = if_block[0]
         tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, nil, true)
+        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
         if tag_value.present?
           all_content.sub!(block_container, if_block[2] || '')
         else
@@ -58,7 +62,7 @@ module Formatter
       tags = all_content.scan(/{{#{TagnameRegExString}}}/).uniq
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-        tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+        tag_value = value_for_tag(tag, sub_data, tag_subs: tag_subs, ignore_missing: ignore_missing)
 
         # Finally, substitute the results into the original text
         all_content.gsub!(tag_container, tag_value)
@@ -66,7 +70,7 @@ module Formatter
 
       # Unless we have requested to show missing tags, check for {{tag}} left in the text,
       # indicating something was not replaced
-      if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).present?
+      if ignore_missing != :show_tag && ignore_missing != true && all_content.scan(/{{.*}}/).present?
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
@@ -90,7 +94,25 @@ module Formatter
       all_content
     end
 
-    def self.value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+    #
+    # Perform a plain substitution of a triple-curly tag, returning the original type,
+    # without casting to a string. This allows object / hash data to be retrieved
+    # For example: specifying content as '{{{db_object.inner_structure}}}'
+    # for data {a:1, inner_structure: {b:2, c:3}, d: 'nothing'}
+    # would return the Hash {b:2, c:3}
+    # @param [String] content
+    # @param [Hash] data
+    # @return [Object|nil]
+    def self.substitute_plain(content, data: {})
+      tagnames = content.match(/{{{(.+)}}}/)
+      tagname = tagnames[1]
+      return unless tagname
+
+      sub_data = Formatter::Substitution.setup_data(data)
+      Formatter::Substitution.value_for_tag(tagname, sub_data, ignore_missing: true, original_type: true)
+    end
+
+    def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
 
       tagpair = tag.split('.')
@@ -142,6 +164,8 @@ module Formatter
       if tag_subs
         tag_subs_type = tag_subs.split(' ').first
         tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      elsif original_type
+        # tag_value should be returned without casting
       else
         tag_value = tag_value.to_s
       end
@@ -202,26 +226,7 @@ module Formatter
         data = {}
       end
 
-      # Common constants tags
-      data[:base_url] = Settings::BaseUrl
-      data[:admin_email] = Settings::AdminEmail
-      data[:environment_name] = Settings::EnvironmentName
-      data[:password_age_limit] = Settings::PasswordAgeLimit
-      data[:password_reminder_days] = Settings::PasswordReminderDays
-      data[:password_max_attempts] = Settings::PasswordMaxAttempts
-      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
-      data[:password_min_length] = Settings::PasswordConfig[:min_length]
-      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
-      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
-      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
-      data[:mfa_disabled] = User.two_factor_auth_disabled
-      data[:login_issues_url] = Settings::LoginIssuesUrl
-      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
-      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
-      data[:notifications_from_email] = Settings::NotificationsFromEmail
-      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
-      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
-      data[:invitation_code] = Settings::InvitationCode
+      setup_common_constants_tags(data)
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
@@ -319,7 +324,7 @@ module Formatter
       # Automatically titleize names
       tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
       tagp[1..].each do |op|
-        res = TagFormatter.format_with(op, res, orig_val, current_user)
+        res = TagFormatter.format_with(op, res, orig_val, current_user, tag, data)
       end
 
       res
@@ -550,6 +555,32 @@ module Formatter
                            for_item: sub_data[:alt_item] || sub_data[:original_item])
 
       res[:short_link_instance]&.short_url
+    end
+
+    #
+    # Common constants tags
+    # @param [Hash] data - hash to set up with common constants
+    def self.setup_common_constants_tags(data)
+      data[:base_url] = Settings::BaseUrl
+      data[:admin_email] = Settings::AdminEmail
+      data[:environment_name] = Settings::EnvironmentName
+      data[:password_age_limit] = Settings::PasswordAgeLimit
+      data[:password_reminder_days] = Settings::PasswordReminderDays
+      data[:password_max_attempts] = Settings::PasswordMaxAttempts
+      data[:password_min_entropy] = Settings::PasswordConfig[:min_entropy]
+      data[:password_min_length] = Settings::PasswordConfig[:min_length]
+      data[:password_regex_requirements] = Settings::PasswordConfig[:regex_requirements]
+      data[:password_unlock_time_mins] = Settings::PasswordUnlockTimeMins
+      data[:user_session_timeout] = (Settings::UserTimeout.to_i / 60)
+      data[:mfa_disabled] = User.two_factor_auth_disabled
+      data[:login_issues_url] = Settings::LoginIssuesUrl
+      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
+      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
+      data[:notifications_from_email] = Settings::NotificationsFromEmail
+      data[:two_factor_auth_issuer] = Settings::TwoFactorAuthIssuer
+      data[:allow_admins_to_manage_admins] = Settings::AllowAdminsToManageAdmins
+      data[:invitation_code] = Settings::InvitationCode
+      data[:default_logo] = Settings::DefaultLogo
     end
   end
 end
