@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] valid_if invalid_error_message option
+- [Refactored] calc actions and fixed specs
+- [Fixed] viewing of tag select fields with edit_as alt_options definition
+- [Fixed] error adding title to a file warning of field changes
+
 ## [8.2.100] - 2023-10-19
 
 - [Added] :current_user_roles SQL substitution to provide an array[] of current user active role names
