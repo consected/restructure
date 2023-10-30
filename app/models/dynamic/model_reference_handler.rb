@@ -39,6 +39,8 @@ module Dynamic
       end
     end
 
+    #
+    # Clean up the cached values for model_references
     def reset_model_references
       @model_references = nil
       @embedded_items = nil
@@ -594,7 +596,7 @@ module Dynamic
           res = mrs.first.to_record
         end
 
-        set_embedded_item_current_user(res)
+        apply_embedded_item_current_user(res)
         res
       end
     end
@@ -705,7 +707,7 @@ module Dynamic
 
     #
     # Set the current user for the embedded item
-    def set_embedded_item_current_user(res)
+    def apply_embedded_item_current_user(res)
       return unless res
 
       if res.class.no_master_association
