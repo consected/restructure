@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Dig into the internals of the NfsStore::InNfsStoreContainer concern to
