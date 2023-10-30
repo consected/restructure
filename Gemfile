@@ -57,10 +57,9 @@ group :development do
 end
 
 group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'brakeman', require: false
   gem 'bundler-audit'
-  gem 'byebug', '~> 11.1', '>= 11.1.3'
+  # gem 'byebug', '~> 11.1', '>= 11.1.3'
   gem 'debug', '>= 1.0.0'
   gem 'parallel_tests', '3.8.1'
   gem 'readapt'
