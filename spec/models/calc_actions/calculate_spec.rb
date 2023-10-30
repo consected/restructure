@@ -1196,9 +1196,11 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     conf = setup_config(confy)
 
-    res = ConditionalActions.new conf, @al
+    return_failures = {}
+    res = ConditionalActions.new conf, @al, return_failures: return_failures
     cai = res.calc_action_if
-    expect(cai).to be(true), "calc_action_if failed #{ { confy: confy,
+    expect(cai).to be(true), "calc_action_if failed #{ { return_failures: return_failures,
+                                                         confy: confy,
                                                          al: @al,
                                                          al1: @al1,
                                                          zip: "#{a1.zip} for #{a1}" } }"
@@ -3749,7 +3751,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures.dig(:all, :this, :user_id)).to eq 'The user had a bad ID'
+      expect(return_failures.dig(:all, :this, :user_id)).to eq(invalid_error_message: 'The user had a bad ID')
 
       conf = {
         all_creator: {
@@ -3769,7 +3771,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ all: { this: { id: 'Something was bad' } } })
+      expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' } } } })
 
       conf = {
         all_creator: {
@@ -3788,7 +3790,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ all: { this: { id: 'Something was bad', user_id: 'The user had a bad ID' } } })
+      expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' }, user_id: { invalid_error_message: 'The user had a bad ID' } } } })
     end
 
     it 'returns no custom error if valid (any must match)' do
@@ -3845,7 +3847,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ any: { this: { id: 'All were bad' } } })
+      expect(return_failures).to eq({ any: { this: { id: { invalid_error_message: 'All were bad' } } } })
 
       conf = {
         any_creator: {
@@ -3865,7 +3867,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @al, return_failures: return_failures
       b = res.calc_action_if
       expect(b).to be false
-      expect(return_failures).to eq({ any: { this: { user_id: 'The user had a bad ID' } } })
+      expect(return_failures).to eq({ any: { this: { user_id: { invalid_error_message: 'The user had a bad ID' } } } })
     end
   end
 end

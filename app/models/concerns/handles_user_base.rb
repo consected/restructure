@@ -54,7 +54,10 @@ module HandlesUserBase
     add_model_to_list
   end
 
+  # rubocop:disable Metrics/BlockLength
   class_methods do
+    # rubocop:enable Metrics/BlockLength
+
     #
     # Get the name of the previous level in the class namespace, or 'Object' if already at the top
     def class_parent_name
@@ -79,7 +82,7 @@ module HandlesUserBase
       class_from_table_name(table_name)&.table_name
     end
 
-    def is_external_identifier?
+    def external_identifier?
       false
     end
 
@@ -577,7 +580,7 @@ module HandlesUserBase
   # Set the background_job_ref attribute, either using a job, or directly with a string.
   # The stored format is "namespace__class_name%id"
   # @param [Job | String] job
-  def set_background_job_ref(job)
+  def set_background_job_ref(job) # rubocop:disable RuboCopNaming/AccessorMethodName
     return unless respond_to?(:background_job_ref=)
 
     job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
@@ -850,21 +853,20 @@ module HandlesUserBase
             next if v[:hide_error]
 
             if v[:invalid_error_message]
-              errors.add :'', v[:invalid_error_message]
+              errors.add k.to_sym, "invalid_error_message: #{v[:invalid_error_message]}"
               next
             end
 
             vcondition = v[:condition]
             v = if vcondition
-                  vcondition = case vcondition
-                               when 'IS NOT NULL'
-                                 'not blank'
-                               when 'IS NULL'
-                                 'blank'
-                               end
-                  "#{vcondition} #{v[:value].present? ? v[:value] : '(blank)'}"
+                  case vcondition
+                  when 'IS NOT NULL'
+                    'not blank'
+                  when 'IS NULL'
+                    'blank'
+                  end
                 else
-                  "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
+                  v.first.first.to_s.humanize.downcase.to_s
                 end
           elsif array_of_empty_elements(v)
             v = '(blank)'

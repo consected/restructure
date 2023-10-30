@@ -100,6 +100,7 @@ module CalcActions
         msg = val_msg[:invalid_error_message] if val_msg.is_a?(Hash)
         msg ||= condition_error_message
         if msg
+          msg = { invalid_error_message: msg }
           res = results.first.last[t] = { field => msg }
           next
         end
@@ -120,7 +121,7 @@ module CalcActions
 
       @got_condition_error_message = true
       @condition_error_message = @condition_config.respond_to?(:key?) &&
-                                 @condition_config.first.last.delete(:invalid_error_message)
+                                 @condition_config.first.last[:invalid_error_message]
     end
 
     #
