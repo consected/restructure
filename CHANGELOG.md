@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.101] - 2023-10-30
 
 - [Added] valid_if invalid_error_message option
 - [Refactored] calc actions and fixed specs
