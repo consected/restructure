@@ -854,8 +854,15 @@ module HandlesUserBase
               next
             end
 
-            v = if v[:condition]
-                  "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
+            vcondition = v[:condition]
+            v = if vcondition
+                  vcondition = case vcondition
+                               when 'IS NOT NULL'
+                                 'not blank'
+                               when 'IS NULL'
+                                 'blank'
+                               end
+                  "#{vcondition} #{v[:value].present? ? v[:value] : '(blank)'}"
                 else
                   "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end

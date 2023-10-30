@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 class ConditionalActions
-  include CalcActions
-  attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config, :this_val
+  include CalcActions::Calculate
+  attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config
 
-  def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil)
+  def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil, return_this: nil)
     action_conf = action_conf.symbolize_keys if action_conf.is_a?(Hash)
     @action_conf = action_conf
     @current_instance = current_instance
     @return_failures = return_failures
+    @return_this ||= return_this || { value: nil }
 
     # For the lowest level, setup the query with the master record
     # If current_scope is specified, then we are at a sub condition level, and the
@@ -32,7 +33,7 @@ class ConditionalActions
   def get_this_val
     @action_conf = { all: @action_conf }
     do_calc_action_if
-    @this_val
+    this_val
   end
 
   # If the condition supplied is a Hash, attempt to calculate the result_value

@@ -785,6 +785,10 @@ RSpec.describe 'Model reference implementation', type: :model do
       dm = @dynamic_model.implementation_class.new(master: @player_contact.master)
       dm.save!
 
+      expect(dm.master).to eq @master
+      expect(dm.user_id).to eq @user&.id
+      expect(dm.current_user).to eq @master.current_user
+
       ModelReference.create_from_master_with(dm.master, @player_contact)
 
       dm.reset_model_references

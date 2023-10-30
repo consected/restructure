@@ -2443,7 +2443,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             this: {
 
               select_who: @al.select_who,
-              user_id: -1
+              user_id: -1,
+              return_constant: 'random constant1'
             }
           },
           all_3: {
@@ -2455,7 +2456,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
       ca = ConditionalActions.new conf, @al
       res = ca.get_this_val
-      expect(res).to eq nil
+      expect(res).to eq 'random constant2'
     end
   end
 
