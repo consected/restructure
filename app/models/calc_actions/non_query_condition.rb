@@ -100,7 +100,7 @@ module CalcActions
       conditions.each do |table, fields|
         fields.each do |field_name, expected_val|
           res_q = !calc_non_query_condition(table, field_name, expected_val)
-          merge_failures(@condition_type => { table => { field_name => expected_val } }) unless res_q
+          merge_failures(not_any: { table => { field_name => expected_val } }) unless res_q
           res &&= res_q
         end
       end
