@@ -530,17 +530,20 @@ _fpa = {
         if (bsubmitted.length) {
           block.find('.field-was-changed').removeClass('field-was-changed');
           block.parents('form').find('.field-was-changed').removeClass('field-was-changed');
-          if (block.parents('.prevent-reload-on-reference-save').length === 0 &&
-            block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').length) {
+          var cfs = block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').not('.ignore-field-change');
+          if (block.parents('.prevent-reload-on-reference-save').length === 0 && cfs.length) {
+            cfs.addClass('changed-field-danger');
             _fpa.flash_notice('Form fields have not been saved. Do you want to <a class="btn btn-default submit-cancel-change">cancel and keep the changes</a> so you can save the form, or <a class="btn btn-danger submit-continue-change">continue without saving</a>', 'warning');
 
             $('.alert a.submit-continue-change').on('click', function () {
               block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').removeClass('field-was-changed');
               bsubmitted.click();
               _fpa.clear_flash_notices();
+              cfs.removeClass('changed-field-danger');
             })
             $('.alert a.submit-cancel-change').on('click', function () {
               _fpa.clear_flash_notices();
+              cfs.removeClass('changed-field-danger');
             })
             ev.preventDefault();
             return false;

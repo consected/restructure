@@ -200,8 +200,11 @@ _fpa.loaded.default = function () {
       return
     }
 
-    if ($('.common-template-item .field-was-changed, .new-block .field-was-changed').length) {
+    var cfs = $('.common-template-item .field-was-changed, .new-block .field-was-changed');
+    if (cfs.length) {
       ev.preventDefault();
+      cfs.addClass('changed-field-danger');
+
       return ev.returnValue = 'You have unsaved data. Are you sure you want to navigate away?';
     }
 
