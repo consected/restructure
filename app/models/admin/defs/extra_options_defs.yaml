@@ -53,6 +53,9 @@
         "desc" or "reverse" for descending results
       keep_top: |
         If the sorting moves the top item that you want to keep in place, set this to *true*
+      null_value: |
+        If sorting items that may have a null value in the specified attribute, this specifies the value
+        to use for the comparison of that item
 
     view_handlers: |
       name of handler for UI, and models if they exist 
