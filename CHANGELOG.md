@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.102] - 2023-11-01
 
 - [Fixed] scroll-to-target jumping back up to a link outside the current block
 - [Changed] handling of panel tab caption to ignore blank entries that include carriage returns
