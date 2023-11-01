@@ -317,7 +317,9 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
     }
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be false
+
+    b = res.calc_action_if
+    expect(b).to be false
   end
 
   it 'checks if all attributes match multiple condition types' do
@@ -954,7 +956,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
   describe 'checks against the current user' do
     it 'checks if a certain the current user has a specific id' do
-      # user_id for the activity log matches the current user's id
       conf = {
         all_creator: {
           this: {
@@ -1195,9 +1196,11 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     conf = setup_config(confy)
 
-    res = ConditionalActions.new conf, @al
+    return_failures = {}
+    res = ConditionalActions.new conf, @al, return_failures: return_failures
     cai = res.calc_action_if
-    expect(cai).to be(true), "calc_action_if failed #{ { confy: confy,
+    expect(cai).to be(true), "calc_action_if failed #{ { return_failures: return_failures,
+                                                         confy: confy,
                                                          al: @al,
                                                          al1: @al1,
                                                          zip: "#{a1.zip} for #{a1}" } }"
@@ -2442,7 +2445,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             this: {
 
               select_who: @al.select_who,
-              user_id: -1
+              user_id: -1,
+              return_constant: 'random constant1'
             }
           },
           all_3: {
@@ -2454,7 +2458,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
       ca = ConditionalActions.new conf, @al
       res = ca.get_this_val
-      expect(res).to eq nil
+      expect(res).to eq 'random constant2'
     end
   end
 
@@ -3661,6 +3665,209 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       res = ca.get_this_val
       expect(res).to be nil
+    end
+  end
+
+  describe 'valid if' do
+    it 'returns no error if valid' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+      expect(return_failures).to be_empty
+    end
+
+    it 'returns an error if not valid (all must match)' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: -999
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be false
+      expect(return_failures).to eq({ all: { this: { user_id: -999 } } })
+    end
+
+    it 'returns no custom error if all valid' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              invalid_error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              invalid_error_message: 'The user had a bad ID'
+            },
+            invalid_error_message: 'Something was invalid',
+            id: @al.id
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      expect(res.calc_action_if).to be true
+    end
+
+    it 'returns custom error if invalid (all must match)' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'BAD id',
+              invalid_error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures.dig(:all, :this, :user_id)).to eq(invalid_error_message: 'The user had a bad ID')
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              invalid_error_message: 'The user had a bad ID'
+            },
+            invalid_error_message: 'Something was bad',
+            id: -44
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' } } } })
+
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'BAD id',
+              invalid_error_message: 'The user had a bad ID'
+            },
+            invalid_error_message: 'Something was bad',
+            id: -44
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' }, user_id: { invalid_error_message: 'The user had a bad ID' } } } })
+    end
+
+    it 'returns no custom error if valid (any must match)' do
+      conf = {
+        any_creator: {
+          this: {
+            user_id: {
+              user: 'id',
+              invalid_error_message: 'The user had a bad ID'
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be true
+
+      conf = {
+        any_creator: {
+          this: {
+            id: -44,
+            user_id: {
+              user: 'id',
+              invalid_error_message: 'The user had a bad ID'
+            },
+            invalid_error_message: 'All bad'
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be true
+    end
+
+    it 'returns custom error if invalid (any must match)' do
+      conf = {
+        any_creator: {
+          this: {
+            id: -44,
+            user_id: {
+              user: 'bad id'
+            },
+            invalid_error_message: 'All were bad'
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ any: { this: { id: { invalid_error_message: 'All were bad' } } } })
+
+      conf = {
+        any_creator: {
+          this: {
+            user_id: {
+              user: 'bad id',
+              invalid_error_message: 'The user had a bad ID'
+            },
+            id: -44,
+            invalid_error_message: 'All were bad'
+          }
+        }
+      }
+
+      return_failures = {}
+
+      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({ any: { this: { user_id: { invalid_error_message: 'The user had a bad ID' } } } })
     end
   end
 end
