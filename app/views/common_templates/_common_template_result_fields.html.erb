@@ -91,13 +91,6 @@
     {{/if}}
     </li>
 
-{{! #######  Field has alt_options defined, overriding other potential "select" fields below }}
-  {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
-    <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
-    {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
-      {{#is ../this_value '==' this }}{{@key}}{{/is}}
-    {{/each}}
-    </strong></li>
 
 {{! #######  Field name matches ...}}
   {{else is field_type "notes"}}
@@ -332,6 +325,14 @@
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-date-local="true">{{this_value}}</strong></li>
   {{else is (lookup field_types @key) '===' 'datetime'}}    
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-datetime-local="true">{{this_value}}</strong></li>
+
+  {{! #######  Field has alt_options defined, but should have been caught by a previous select field above }}
+    {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
+      <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
+      {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
+        {{#is ../this_value '==' this }}{{@key}}{{/is}}
+      {{/each}}
+      </strong></li>
 
 {{! #######  NULL }}
   {{else is this_value '===' null}}
