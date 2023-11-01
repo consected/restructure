@@ -1048,7 +1048,7 @@ _fpa.form_utils = {
 
     block
       .find(
-        '[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
+        '[data-toggle~="scrollto-result"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
       )
       .not('.attached-datatoggle-str')
       .on('click', function () {
