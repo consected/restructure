@@ -32,8 +32,8 @@ module HandlesUserBase
     # Check the embedded item is valid, and if not pull its error into this object
     validate :valid_embedded_item
 
-    # Create a referring record, if it has been set up
-    after_save :create_referring_record
+    # Create a reference from the referring record, if it has been set up
+    after_save :create_referring_record_reference
 
     # If records have the `disabled` column (or a method that wants to pretend this),
     # trigger a handler if the record was disabled
@@ -448,7 +448,9 @@ module HandlesUserBase
     @referenced_from = ModelReference.find_where_referenced_from self
   end
 
-  # A referring record is either set based on the the specific record that the controller say is being viewed
+  #
+  # A referring record is either set based on the the specific record that
+  # the controller tells us is being viewed
   # when an action is performed, or
   # if there is only one model reference we use that instead.
   def referring_record
@@ -464,7 +466,11 @@ module HandlesUserBase
     nil
   end
 
-  # Top referring record is the top record in the reference hierarchy
+  #
+  # Top referring record is the top record in the reference hierarchy.
+  # We iterate through the referring records until we reach the top one and return it.
+  # If there are no referring records from the current activity log, return nil
+  # @return [UserBase | nil] <description>
   def top_referring_record
     return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
 
@@ -551,10 +557,10 @@ module HandlesUserBase
   end
 
   #
-  # Create a record for the referring record object that has been set up, if
+  # Create a reference for the referring record object that has been set up, if
   # a referring record type has been specified
   # @return [ModelReference]
-  def create_referring_record
+  def create_referring_record_reference
     return unless @ref_record_type
 
     @referring_record = find_referring_record
