@@ -15,6 +15,9 @@ module Formatter
 
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
+    FunctionalDirectives = %w[shortlink]
+    FunctionalDirectiveRegEx = /\[\[[^\]]+\]\]/
+
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
@@ -41,6 +44,11 @@ module Formatter
       return unless all_content
 
       all_content = all_content.dup
+
+      # Do an initial check for functional directives, just to see if they exist
+      # This is to avoid the situation where a tag results in text like [[some value]]
+      # which would then be treated as a functional directive.
+      has_functional_directives = all_content.scan(FunctionalDirectiveRegEx).present?
 
       # Only setup data if there are double curly brackets
       sub_data = setup_data(data) if all_content.index('{{')
@@ -74,18 +82,20 @@ module Formatter
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
-      tags = all_content.scan(/\[\[[^\]]+\]\]/).uniq
+      if has_functional_directives
+        tags = all_content.scan(FunctionalDirectiveRegEx).uniq
 
-      # Setup the data if it wasn't previously setup and there are tags to replace
-      sub_data ||= setup_data(data) unless tags.empty?
+        # Setup the data if it wasn't previously setup and there are tags to replace
+        sub_data ||= setup_data(data) unless tags.empty?
 
-      # Replace each tag [[tag]], representing functional directives, such as shortlink production
-      tags.each do |tag_container|
-        tag = tag_container[2..-3]
-        tag_value = functional_directive(tag, sub_data)
+        # Replace each tag [[tag]], representing functional directives, such as shortlink production
+        tags.each do |tag_container|
+          tag = tag_container[2..-3]
+          tag_value = functional_directive(tag, sub_data, ignore_missing: ignore_missing)
 
-        # Make the replacement
-        all_content.gsub!(tag_container, tag_value) if tag_value
+          # Make the replacement
+          all_content.gsub!(tag_container, tag_value) if tag_value
+        end
       end
 
       all_content&.gsub!('\{\{', '{{')&.gsub!('\}\}', '}}')
@@ -173,11 +183,11 @@ module Formatter
       tag_value
     end
 
-    def self.functional_directive(tag, sub_data)
+    def self.functional_directive(tag, sub_data, ignore_missing: nil)
       tag_parts = tag.split(' ', 2)
       tag_action = tag_parts.first
 
-      unless tag_action == 'shortlink'
+      unless ignore_missing || tag_action.in?(FunctionalDirectives)
         raise FphsException,
               "Bad message template tag action [[#{tag_action}]] specified"
       end

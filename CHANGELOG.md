@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] scroll-to-target jumping back up to a link outside the current block
+- [Changed] handling of panel tab caption to ignore blank entries that include carriage returns
+- [Fixed] view_options.sort_references failing with an exception if a value being sorted is null - fixes #164
+- [Refactored] to remove duplicated model reference related methods
+- [Fixed] tag substitutions create [[functional directive]] output, to prevent raising an exception, or being manipulated by user data
+
 ## [8.2.101] - 2023-10-30
 
 - [Added] valid_if invalid_error_message option
