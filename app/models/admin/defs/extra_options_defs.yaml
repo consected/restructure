@@ -44,10 +44,13 @@
       prevent creation as a standalone item, only embedded
       / referenced within another
     sort_references: 
+      # Sort model references in an alternative order, using the specified model_reference attribute      
+      # Typically this will be "id" to sort by when the reference was created, as opposed to the
+      # typical sorting which groups references in the order of their definition.
+      # NOTE: this setting may override *order_by:* specified for a specific *references:* configuration 
       attribute: |
-        Sort model references in an alternative order, using the specified model_reference attribute.
-        Typically this will be "id" to sort by when the reference was created, as opposed to the
-        typical sorting which groups references in the order of their definition.
+        one of: id, from_record_type, from_record_id, from_record_master_id, to_record_type, to_record_id, 
+        to_record_master_id, user_id, created_at, updated_at, disabled      
       direction: |
         Default is ascending sort. To reverse the sort order use
         "desc" or "reverse" for descending results
@@ -228,8 +231,11 @@
             field_name: value
       filter_by:
         field_name: value to filter the referenced items by - may include [substitutions](../general/substitutions.md)
-      order_by:
+      order_by: # Order results within model references matching this model and filter
+                # Note that this can be overridden by view_options.sort_references, sorting the
+                # results across all references
         field_name: asc | desc
+        field_name2: asc | desc
       type_config:
         activity_selector:
           # use an activity selector to show the creatable extra log types

@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] _fpa_substitution.js get_data() merges master data over the original instance data, breaking id, created_at, etc - fixes #175
+- [Fixed] scrolling after saving a new model reference embedded in am activity log jumps to top of list - fixes #176
+- [Added] documentation to clarify reference sorting in extra options view_options.sort_references
+
 ## [8.2.102] - 2023-11-01
 
 - [Fixed] scroll-to-target jumping back up to a link outside the current block - fixes #173
@@ -24,12 +30,18 @@ release will be created for any release tested in production, and may be marked 
 - [Refactored] to remove duplicated model reference related methods
 - [Fixed] tag substitutions create [[functional directive]] output, to prevent raising an exception, or being manipulated by user data
 
-## [8.2.101] - 2023-10-30
+## [8.2.104] - 2023-10-23
 
-- [Added] valid_if invalid_error_message option
-- [Refactored] calc actions and fixed specs
-- [Fixed] viewing of tag select fields with edit_as alt_options definition
-- [Fixed] error adding title to a file warning of field changes
+- [Fixed] release builds to include linked source directories correctly
+
+## [8.2.103] - 2023-10-23
+
+- [Bumped] version
+- [Fixed] CHANGELOG
+
+## [8.2.102] - 2023-10-23
+
+- [Bumped] version
 
 ## [8.2.100] - 2023-10-19
 

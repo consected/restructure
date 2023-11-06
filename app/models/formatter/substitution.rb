@@ -15,7 +15,7 @@ module Formatter
 
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
-    FunctionalDirectives = %w[shortlink]
+    FunctionalDirectives = %w[shortlink].freeze
     FunctionalDirectiveRegEx = /\[\[[^\]]+\]\]/
 
     #
@@ -237,68 +237,87 @@ module Formatter
       end
 
       setup_common_constants_tags(data)
-
-      # if the referenced item has its own referenced item (much like an activity log might), then get it
-      data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
-
-      data[:created_by_user] = nil
-      data[:created_by_user_email] = nil
-
-      if item.respond_to?(:created_by_user)
-        data[:created_by_user] = item.created_by_user
-        data[:created_by_user_email] = item.created_by_user_email
-      end
-
-      if master
-        data[:master] = master
-        data[:master_id] ||= master.id
-
-        # Check if the master responds to the underlying attribute, since there are times when a query
-        # on the masters table returns a very limited set of fields
-        if master.respond_to? :created_by_user_id
-          data[:master_created_by_user] = master.master_created_by_user
-          data[:master_created_by_user_email] = master.master_created_by_user&.email
-        end
-
-        # Alternative ids are evaluated as needed
-        # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
-      end
-
-      iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
-      if iu.is_a? User
-        data[:item_user] = iu.attributes.dup
-        data[:user_email] = iu.email
-        data[:user_preference] = iu.user_preference&.attributes&.dup
-        data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
-      end
-
-      cu = item.current_user if item.respond_to?(:current_user)
-      cu ||= master.current_user if master
-      cu ||= item if item.is_a? User
-      cu ||= data[:current_user]
-      if cu.is_a? User
-        data[:current_user_instance] ||= cu
-        data[:current_user] ||= cu.attributes.dup
-        data[:current_user_email] ||= cu.email
-        data[:user_email] ||= cu.email
-        data[:current_user_preference] ||= cu.user_preference&.attributes&.dup
-        data[:current_user_contact_info] = cu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
-        data[:current_user_app_type_id] = cu.app_type_id
-        data[:current_user_app_type_name] = cu.app_type&.name
-        data[:current_user_app_type_label] = cu.app_type&.label
-        data[:current_user_password_expires_in] = cu.expires_in
-
-        cur = data[:current_user_roles] = {}
-        cu.role_names.each do |rn|
-          sym = rn.id_underscore.to_sym
-          cur[sym] = rn
-        end
-      end
+      setup_data_for_referenced_item(data, item)
+      setup_data_created_by(data, item)
+      setup_data_for_master(data, master)
+      setup_data_for_item_user(data, item)
+      setup_data_for_current_user(data, master, item)
 
       data
     end
 
     ##### The following methods are not intended for use outside this class ######
+
+    # if the item has its own referenced item (much like an activity log might), then get it
+    def self.setup_data_for_referenced_item(data, item)
+      data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
+    end
+
+    # setup data from created_by_user on item
+    def self.setup_data_created_by(data, item)
+      data[:created_by_user] = nil
+      data[:created_by_user_email] = nil
+
+      return unless item.respond_to?(:created_by_user)
+
+      data[:created_by_user] = item.created_by_user
+      data[:created_by_user_email] = item.created_by_user_email
+    end
+
+    # setup data for master
+    def self.setup_data_for_master(data, master)
+      return unless master
+
+      data[:master] = master
+      data[:master_id] ||= master.id
+
+      # Check if the master responds to the underlying attribute, since there are times when a query
+      # on the masters table returns a very limited set of fields
+      return unless master.respond_to? :created_by_user_id
+
+      data[:master_created_by_user] = master.master_created_by_user
+      data[:master_created_by_user_email] = master.master_created_by_user&.email
+
+      # Alternative ids are evaluated as needed
+      # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
+    end
+
+    # setup data for item user_id
+    def self.setup_data_for_item_user(data, item)
+      iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
+      return unless iu.is_a? User
+
+      data[:item_user] = iu.attributes.dup
+      data[:user_email] = iu.email
+      data[:user_preference] = iu.user_preference&.attributes&.dup
+      data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
+    end
+
+    # setup data for current user from item or master
+    def self.setup_data_for_current_user(data, master, item)
+      cu = item.current_user if item.respond_to?(:current_user)
+      cu ||= master.current_user if master
+      cu ||= item if item.is_a? User
+      cu ||= data[:current_user]
+      return unless cu.is_a? User
+
+      data[:current_user_instance] ||= cu
+      data[:current_user] ||= cu.attributes.dup
+      data[:current_user_email] ||= cu.email
+      data[:user_email] ||= cu.email
+      data[:current_user_preference] ||= cu.user_preference&.attributes&.dup
+      data[:current_user_contact_info] = cu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
+      data[:current_user_app_type_id] = cu.app_type_id
+      data[:current_user_app_type_name] = cu.app_type&.name
+      data[:current_user_app_type_label] = cu.app_type&.label
+      data[:current_user_password_expires_in] = cu.expires_in
+
+      cur = data[:current_user_roles] = {}
+      cu.role_names.each do |rn|
+        sym = rn.id_underscore.to_sym
+        cur[sym] = rn
+      end
+    end
 
     #
     # Get the current tag value from the data, and format it
@@ -459,21 +478,73 @@ module Formatter
     # @return [ActiveRecord::Model] the first item from an association or reference
     #
     def self.get_associated_item(master, name, data, item_reference: false)
-      name = name.to_sym
-      an = name.to_s
-      anumber = an.to_i
-      is_index = false
+      data, is_index = init_associated_data(name, data)
+      data = setup_data data if data
+      return unless data
 
-      data = if an == 'first' && data.respond_to?(:first)
+      item = data[:original_item] if data.is_a? Hash
+      item ||= data
+      return item if is_index
+
+      res = associated_reference(name, data, item, item_reference)
+      # If we found a value already, return it.
+      return res unless res == :no_value
+
+      associated_master_and_configs(master, name)
+    end
+
+    def self.associated_reference(name, data, item, item_reference)
+      symname = name.to_sym
+      name = name.to_s
+
+      if data.is_a?(Hash) && data.keys.include?(symname)
+        data[symname]
+      elsif name == 'parent_item' && item.respond_to?(:container)
+        item.container&.parent_item
+      elsif name == 'current_user' && item.respond_to?(:current_user)
+        item.current_user
+      elsif name == 'referring_record' && item.respond_to?(:referring_record)
+        item.referring_record
+      elsif name == 'top_referring_record' && item.respond_to?(:top_referring_record)
+        item.top_referring_record
+      elsif name == 'latest_reference' && item.respond_to?(:latest_reference)
+        item.latest_reference
+      elsif name == 'embedded_item' && item.respond_to?(:embedded_item)
+        item.embedded_item
+      elsif name == 'constants'
+        # Options constants
+        item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
+      elsif name.in?(allowable_associations(item.class))
+        item.send(name)
+      elsif item_reference
+        # Match model reference by underscored to record type, or if not matched by the resource name
+        # The latter allows activity logs to be matched on their extra log type too.
+        # Note - beware to ensure the activity log type is singular before the extra log type
+        #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
+        imr = item.model_references
+        imr.select { |mr| mr.to_record_type_us == name.singularize }
+           .first&.to_record ||
+          imr.select { |mr| mr.to_record.resource_name.to_s == name }
+             .first&.to_record
+      else
+        :no_value
+      end
+    end
+
+    def self.init_associated_data(name, data)
+      name = name.to_s
+      anumber = name.to_i
+      is_index = false
+      data = if name == 'first' && data.respond_to?(:first)
                is_index = true
                data.first
-             elsif an == 'last' && data.respond_to?(:last)
+             elsif name == 'last' && data.respond_to?(:last)
                is_index = true
                data.last
-             elsif an == 'json_parse' && data.is_a?(String)
+             elsif name == 'json_parse' && data.is_a?(String)
                is_index = true
                JSON.parse(data) if data.present?
-             elsif anumber.to_s == an && data.is_a?(Enumerable)
+             elsif anumber.to_s == name && data.is_a?(Enumerable)
                is_index = true
                data[anumber]
              elsif data.respond_to? :where
@@ -482,57 +553,18 @@ module Formatter
                data
              end
 
-      data = setup_data data if data
+      [data, is_index]
+    end
 
-      return unless data
-
-      item = data[:original_item] if data.is_a? Hash
-      item ||= data
-
-      return item if is_index
-
-      res = if data.is_a?(Hash) && data.keys.include?(name)
-              data[name]
-            elsif an == 'parent_item' && item.respond_to?(:container)
-              item.container&.parent_item
-            elsif an == 'current_user' && item.respond_to?(:current_user)
-              item.current_user
-            elsif an == 'referring_record' && item.respond_to?(:referring_record)
-              item.referring_record
-            elsif an == 'top_referring_record' && item.respond_to?(:top_referring_record)
-              item.top_referring_record
-            elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
-              item.latest_reference
-            elsif an == 'embedded_item' && item.respond_to?(:embedded_item)
-              item.embedded_item
-            elsif an == 'constants'
-              # Options constants
-              item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
-            elsif an.in?(allowable_associations(item.class))
-              item.send(an)
-            elsif item_reference
-              # Match model reference by underscored to record type, or if not matched by the resource name
-              # The latter allows activity logs to be matched on their extra log type too.
-              # Note - beware to ensure the activity log type is singular before the extra log type
-              #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
-              imr = item.model_references
-              imr.select { |mr| mr.to_record_type_us == an.singularize }
-                 .first&.to_record ||
-                imr.select { |mr| mr.to_record.resource_name.to_s == an }
-                   .first&.to_record
-            else
-              :no_value
-            end
-
-      # If we found a value already, return it. If not, the tests rely on this item having a master set.
-      # If it isn't set, just return nil. If it is set, continue through the master related tests.
-      if res != :no_value
-        res
-      elsif !master
+    # These tests rely on this item having a master set.
+    # If it isn't set, just return nil. If it is set, continue through the master related tests.
+    def self.associated_master_and_configs(master, name)
+      name = name.to_s
+      if !master
         nil
-      elsif an == 'ids'
+      elsif name == 'ids'
         master.alternative_ids
-      elsif an == 'app_protocols' && master.current_user
+      elsif name == 'app_protocols' && master.current_user
         Classification::Protocol
           .enabled
           .where(
@@ -540,10 +572,10 @@ module Formatter
           )
           .order(position: :asc)
           .first
-      elsif an == 'app_configurations' && master.current_user
+      elsif name == 'app_configurations' && master.current_user
         Admin::AppConfiguration.all_for(master.current_user)
-      elsif an.in? allowable_master_associations
-        master.send(an)
+      elsif name.in? allowable_master_associations
+        master.send(name)
       end
     end
 

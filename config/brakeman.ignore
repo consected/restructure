@@ -126,29 +126,6 @@
       "note": ""
     },
     {
-      "warning_type": "Remote Code Execution",
-      "warning_code": 24,
-      "fingerprint": "22417eb6c875cd9eadf0eb1a64141f0a9f82a6314a77fa90d9faca986f30aaf8",
-      "check_name": "UnsafeReflection",
-      "message": "Unsafe reflection method `constantize` called on model attribute",
-      "file": "app/models/calc_actions/calculate.rb",
-      "line": 623,
-      "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
-      "code": "Resources::Models.find_by(:resource_name => @join_tables.first).class_name.constantize",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions::Calculate",
-        "method": "setup_no_masters"
-      },
-      "user_input": "Resources::Models.find_by(:resource_name => @join_tables.first).class_name",
-      "confidence": "Medium",
-      "cwe_id": [
-        470
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "2784ca78e0e2edce2a830bf31905df4ea527922a540481ffa3440208782b5cdf",
@@ -570,6 +547,29 @@
       "note": ""
     },
     {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 24,
+      "fingerprint": "a7acf18e900ca1791fbf365968692bc61a14fe4a6fc551b8dd4338bf200a2f9d",
+      "check_name": "UnsafeReflection",
+      "message": "Unsafe reflection method `constantize` called on model attribute",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 950,
+      "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
+      "code": "Resources::Models.find_by(:resource_name => ([c_table.to_sym] - [:this, :parent, :referring_record, :top_referring_record, :this_references, :parent_references, :parent_or_this_references, :user, :master, :condition, :value, :hide_error, :role_name, :reference]).uniq.first).class_name.constantize",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_base_query"
+      },
+      "user_input": "Resources::Models.find_by(:resource_name => ([c_table.to_sym] - [:this, :parent, :referring_record, :top_referring_record, :this_references, :parent_references, :parent_or_this_references, :user, :master, :condition, :value, :hide_error, :role_name, :reference]).uniq.first).class_name",
+      "confidence": "Medium",
+      "cwe_id": [
+        470
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
@@ -872,6 +872,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-10-30 21:07:16 +0000",
+  "updated": "2023-10-17 10:59:37 +0100",
   "brakeman_version": "6.0.1"
 }
