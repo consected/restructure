@@ -13,11 +13,8 @@
 | Scanned/Reported  | Total |
 |-------------------|-------|
 | Controllers       | 69    |
-| Models            | 180   |
+| Models            | 179   |
 | Templates         | 378   |
 | Errors            | 0     |
 | Security Warnings | 0 (0) |
 | Ignored Warnings  | 31    |
-
-
-
