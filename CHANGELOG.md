@@ -18,10 +18,13 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Fixed] _fpa_substitution.js get_data() merges master data over the original instance data, breaking id, created_at, etc - fixes #175
+- [Fixed] scrolling after saving a new model reference embedded in am activity log jumps to top of list - fixes #176
+- [Added] documentation to clarify reference sorting in extra options view_options.sort_references
 - [Fixed] scroll-to-target jumping back up to a link outside the current block - fixes #173
 - [Changed] handling of panel tab caption to ignore blank entries that include carriage returns - fixes #172
 - [Fixed] view_options.sort_references failing with an exception if a value being sorted is null - fixes #164
-- [Refactored] to remove duplicated model reference related methods
+- [Refactored] to remove duplicated model reference related methods and perform other cleanups
 - [Fixed] tag substitutions create [[functional directive]] output, to prevent raising an exception, or being manipulated by user data
 
 ## [8.2.104] - 2023-10-23
