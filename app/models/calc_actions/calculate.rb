@@ -838,29 +838,6 @@ module CalcActions
       (key.in?(NonJoinTableNames) || selection_type?(key))
     end
 
-    # Calculate a validation based on a :validate key
-    # @param condition [Hash] defined validation condition
-    # @param value [Object] actual value of the expected result
-    # @return [Type] description_of_returned_object
-    def calc_complex_validation(condition, value)
-      res = true
-      condition.each do |k, opts|
-        v = new_validator k, value, options: { k => opts }
-        test_res = v.value_is_valid? value, current_instance
-        res &&= test_res
-      end
-
-      res
-    end
-
-    def new_validator(val_name, value, options: {})
-      validator_class(val_name).new options.merge(attributes: { _attr: value })
-    end
-
-    def validator_class(val_name)
-      Validates.const_get("#{val_name.to_s.classify}Validator")
-    end
-
     # Does the query condition request the return of a single value?
     def return_value_from_query?
       @this_val_where[:mode] == 'return_value'
