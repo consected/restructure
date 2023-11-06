@@ -133,5 +133,17 @@ module CalcActions
     def this_val
       return_this[:value]
     end
+
+    #
+    # Set up the validator, typically based on the value from a validate: key
+    def new_validator(val_name, value, options: {})
+      validator_class(val_name).new options.merge(attributes: { _attr: value })
+    end
+
+    #
+    # Handle consistent naming for validator classes
+    def validator_class(val_name)
+      Validates.const_get("#{val_name.to_s.classify}Validator")
+    end
   end
 end

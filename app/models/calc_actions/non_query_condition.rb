@@ -352,6 +352,21 @@ module CalcActions
       end
     end
 
+    # Calculate a validation based on a :validate key
+    # @param condition [Hash] defined validation condition
+    # @param value [Object] actual value of the expected result
+    # @return [Type] description_of_returned_object
+    def calc_complex_validation(condition, value)
+      res = true
+      condition.each do |k, opts|
+        v = new_validator k, value, options: { k => opts }
+        test_res = v.value_is_valid? value, current_instance
+        res &&= test_res
+      end
+
+      res
+    end
+
     #
     # Traverse the value according to the *path*.
     # @param [Hash|Array] value
