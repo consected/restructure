@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.105] - 2023-11-06
 
 - [Fixed] _fpa_substitution.js get_data() merges master data over the original instance data, breaking id, created_at, etc - fixes #175
 - [Fixed] scrolling after saving a new model reference embedded in am activity log jumps to top of list - fixes #176
