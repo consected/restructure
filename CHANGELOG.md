@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.106] - 2023-11-06
 
 - [Fixed] error when a field has a validate: key and the validation fails - fixes #179
 - [Fixed] Import CSV in admin panel fails to import UTF-8 data - fixes #178
