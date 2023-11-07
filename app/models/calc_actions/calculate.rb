@@ -436,7 +436,9 @@ module CalcActions
           # It is a binary condition, extend the SQL and conditions
           vc = ValidExtraConditions.find { |c| c == condition }
           vv = dynamic_value(val[:value])
-          @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
+          # Allow simplified "<>" not equals check. Return true if value is NULL.
+          added_check = "#{table_name}.#{field_name} IS NULL or" if vc == '<>'
+          @extra_conditions[0] += "(#{added_check} #{table_name}.#{field_name} #{vc} (?))"
           @extra_conditions << vv
         end
 
