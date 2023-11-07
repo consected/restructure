@@ -41,7 +41,7 @@ module Dynamic
         definition.secondary_key
       end
 
-      def is_external_identifier?
+      def external_identifier?
         true
       end
 

@@ -312,7 +312,7 @@ module MasterHandler
 
   # Errors for logging
   def object_instance_errors
-    object_instance.errors.map { |k, av| "#{k}: #{av}" }.join(' | ')
+    object_instance.errors.map { |err| "#{err.attribute}: #{err.message}" }.join(' | ')
   end
 
   # In order to clear up a multitude of Ruby warnings

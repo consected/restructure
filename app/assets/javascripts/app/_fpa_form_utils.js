@@ -4,6 +4,7 @@ _fpa.form_utils = {
   // not make this a good choice.
 
   set_field_errors: function (block, obj) {
+    const invalid_error_prefix = 'invalid_error_message: ';
     if (!obj) {
       // clear previous results
       $('.has-error')
@@ -31,7 +32,15 @@ _fpa.form_utils = {
           var fn = p.replace(/_/g, ' ');
           if (f.hasClass('showed-caption-before')) fn = 'Entry';
 
-          v = fn + ' ' + v;
+          if (v.join) v = v.join('; ')
+
+          if (v.indexOf(invalid_error_prefix) >= 0) {
+            v = v.replaceAll(invalid_error_prefix, '');
+          }
+          else {
+            fn = fn || '';
+            v = fn + ' ' + v;
+          }
           var el = $('<p class="help-block error-help">' + v + '</p>');
           f.append(el);
           delete obj[p];
@@ -273,73 +282,6 @@ _fpa.form_utils = {
     return form_data;
   },
 
-  // Since the select_from_... fields
-  // may be tied through a master association to the current instance,
-  // it is not possible to cache the results directly based on a dynamic definition
-  // and it must be handled at the time of the request.
-  // Therefore this function does not actually provide data that is useful to the front end
-  /*
-  get_general_selections: function (data) {
-    if (!data) return;
-
-    if (data.multiple_results) {
-      _fpa.form_utils.get_general_selections(data[data.multiple_results]);
-      return;
-    }
-
-    if (data.length) {
-      for (var n = 0; n < data.length; n++) {
-        _fpa.form_utils.get_general_selections(data[n]);
-      }
-      return;
-    }
-
-    if (!data.item_type) {
-      var item_key;
-      for (item_key in data) {
-        if (data.hasOwnProperty(item_key) && item_key != '_control') break;
-      }
-
-      var di = data[item_key];
-      if (!di) return;
-      data = di;
-    }
-
-    if (data.embedded_item) {
-      _fpa.form_utils.get_general_selections(data.embedded_item);
-    }
-
-    var post = data.item_type ? '-item_type+' + data.item_type : '';
-    post += data.extra_log_type ? '-extra_log_type+' + data.extra_log_type : '';
-    var cname = 'general_selections' + post;
-
-    _fpa.cache.get_definition(cname, function () {
-      var pe = _fpa.cache.fetch(cname);
-      // _general_selections may be passed as an attribute in the response data
-      if (!data._general_selections) data._general_selections = {};
-      for (var k in data) {
-        if (data.hasOwnProperty(k)) {
-          if (data.model_data_type == 'activity_log') {
-            var it = data.item_type + '_' + k;
-          } else {
-            var it = data.item_type + 's_' + k;
-          }
-
-          var ibh = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
-
-          var ibhi = null;
-          for (ibhi in ibh) {
-            break;
-          }
-
-          if (ibhi && !data._general_selections[k]) {
-            data._general_selections[k] = ibh;
-          }
-        }
-      }
-    });
-  },
-  */
 
   handle_sub_list_filters: function ($control, init) {
     var $a = $control;
@@ -1106,7 +1048,7 @@ _fpa.form_utils = {
 
     block
       .find(
-        '[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
+        '[data-toggle~="scrollto-result"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
       )
       .not('.attached-datatoggle-str')
       .on('click', function () {

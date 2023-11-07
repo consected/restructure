@@ -11,18 +11,18 @@ module Formatter
     # @param [true] time_only
     # @param [true] date_only
     # @param [true] include_sec
-    # @param [true] iso - unused
-    # @param [true] utc - unused
-    # @param [true] show_timezone - unused
+    # @param [true] _iso - unused
+    # @param [true] _utc - unused
+    # @param [true] _show_timezone - unused
     # @return [String]
     def self.format(data, _options = nil,
                     current_user: nil,
                     include_sec: nil,
                     time_only: nil,
                     date_only: nil,
-                    iso: nil,
-                    utc: nil,
-                    show_timezone: nil)
+                    _iso: nil,
+                    _utc: nil,
+                    _show_timezone: nil)
       return if data.blank?
 
       if current_user
