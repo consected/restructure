@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.108] - 2023-11-08
 
 - [Fixed] user access controls for *limited_if_none* to work correctly in all combinations, especially with assign_access_to_user_id - fixes #184
 - [Added] headless browser testing option without relying on Xvfb - fixes #182
