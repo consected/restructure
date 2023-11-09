@@ -65,3 +65,17 @@ a.add-item-button > span:after {
   vertical-align: middle;
   font-size: 15px;
 }
+
+#standalone-page>.standalone-page-container span.temp-new-embedded-block a.add-item-button {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+
+  &:link,
+  &:visited,
+  &:active {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
