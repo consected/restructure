@@ -52,6 +52,15 @@ RSpec.describe TrackersController, type: :controller do
       get :index, params: { master_id: @master_id }
       expect(assigns(objects_symbol)).to eq([item])
     end
+
+    it 'expects tracker items to be sorted by event date in descending order' do
+      master = create_master
+      create_items(:list_valid_attribs_on_create, master) # creates a new master for each item
+
+      get :index, params: { master_id: master.id }
+      trackers = assigns(objects_symbol)
+      expect(trackers.each_cons(2).all? { |i, j| i.event_date >= j.event_date }).to be_truthy
+    end
   end
 
   describe 'GET #show' do
