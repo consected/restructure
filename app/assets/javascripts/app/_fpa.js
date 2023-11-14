@@ -200,7 +200,12 @@ _fpa = {
       if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
 
       // Potentially don't reload, especially if a sidebar request has been made
-      if (block.parents('[data-no-load]').length) return;
+      // Allow this to be overridden in specific cases by specifying data-ignore-no-load="true"
+      // which can allow this to operate with activity logs embedded in portal pages 
+      if (block.parents('[data-no-load]').length &&
+        !block.parents('[data-ignore-no-load]').length &&
+        !block.attr('data-ignore-no-load')
+      ) return;
 
       _fpa.ajax_working(block);
       if (!options) options = {};
@@ -453,7 +458,12 @@ _fpa = {
       }
     }
 
-    if (!procfound && alt_preprocessor) {
+    // Don't use the alt processor if we managed to process the
+    // primary one. We can force the use of it in certain situations
+    // if needed by adding data-add-preprocessor="true" to the block
+    const add_pp = block.attr('data-add-preprocessor');
+
+    if ((!procfound || add_pp) && alt_preprocessor) {
       alt_preprocessor = alt_preprocessor.replace(/-/g, '_');
       if (_fpa.preprocessors[alt_preprocessor]) {
         _fpa.preprocessors[alt_preprocessor](block, data);
@@ -478,7 +488,12 @@ _fpa = {
       }
     }
 
-    if (!procfound && alt_processor) {
+    // Don't use the alt processor if we managed to process the
+    // primary one. We can force the use of it in certain situations
+    // if needed by adding data-add-postprocessor="true" to the block
+    const add_pp = block.attr('data-add-postprocessor');
+
+    if ((!procfound || add_pp) && alt_processor) {
       alt_processor = alt_processor.replace(/-/g, '_');
       if (_fpa.postprocessors[alt_processor]) {
         _fpa.postprocessors[alt_processor](block, data);
