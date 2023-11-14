@@ -45,6 +45,7 @@
             resource = resource.pluralize
             @master_id = resource_def['master_id'] || @master_id
             template_prefix = "#{resource_def['template_prefix']}-" if resource_def['template_prefix']
+            option_classes = resource_def['option_classes']
 
             url_parts = [
               'masters',
@@ -102,7 +103,7 @@
       <div class="sp-col-inner">
         <%if col_label.present? %><h2 class="sp-col-label"><%=col_label%></h2><% end %>
         <% if col_header.present? %><div class="sp-col-header"><%= col_header%></div><% end %>
-        <div class="result-target result-target-<%=result_type%> page-template-<%=template_prefix%>prefix">
+        <div class="result-target result-target-<%=result_type%> page-template-<%=template_prefix%>prefix <%= option_classes %>">
           <% if resource %>
             <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results <%= template_prefix != 'page-' ? 'activity-logs-generic-block' : '' %> standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-<%=template_prefix%>result-template">
               <div id="<%= resource.hyphenate %>-inner-<%=@master_id%>" class="standalone-panel-inner-block">
