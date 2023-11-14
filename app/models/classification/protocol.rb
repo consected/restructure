@@ -14,7 +14,6 @@ class Classification::Protocol < ActiveRecord::Base
 
   has_many :sub_processes
 
-  # TODO: remove comment. Controls the ordering of records
   default_scope -> { order position: :asc }
   scope :updates, -> { where 'name = ? AND (disabled IS NULL OR disabled = FALSE)', RecordUpdatesProtocolName }
   scope :selectable, -> { enabled.where('name <> ?', RecordUpdatesProtocolName) }

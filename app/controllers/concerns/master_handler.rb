@@ -331,7 +331,6 @@ module MasterHandler
   # This allows for us to retrieve the @master consistently, so that the master association
   # is not used repetitively (potentially breaking the current_user functionality and poor performance)
   def set_me_and_master
-    # debugger
     if UseMasterParam.include?(action_name)
       @master = Master.find(params[:master_id]) unless primary_model.no_master_association # attrs in dynamic models
     else

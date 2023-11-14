@@ -36,14 +36,11 @@ class TrackerHistory < UserBase
     completion_sub_processes = Admin::AppConfiguration.values_for :completion_sub_processes,
                                                                   master.current_user,
                                                                   to: :to_i
-    # TODO verify change reorder. What orders in the first place?
+
     res = master.tracker_histories
                 .joins(:protocol, :sub_process)
                 .where(sub_process_id: completion_sub_processes)
                 .reorder('protocols.name ASC')
-
-    # TODO: remove
-    # puts 'TEST SORT', res.to_sql
 
     res = res.all.map do |r|
       {
