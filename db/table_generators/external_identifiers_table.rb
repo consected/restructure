@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module TableGenerators
-  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by = nil)
+  def self.external_identifiers_table(name = nil, generate_table = false, attrib = nil, created_by = nil, assign_access = nil, add_disabled = nil)
     if name.nil? || name == ''
       puts "Usage:
       db/table_generators/generate.sh external_identifiers_table <pluralized_table_name> create|drop 'identifier_field_id'
@@ -52,8 +52,10 @@ EOF
                               master_id,
                               #{attrib},
                               #{created_by ? 'created_by_user_id,' : ''}
+                              #{assign_access ? 'assign_access_to_user_id,' : ''}
                               user_id,
                               admin_id,
+                              #{add_disabled ? 'disabled,' : ''}
                               created_at,
                               updated_at,
                               #{singular_name}_table_id
@@ -62,8 +64,10 @@ EOF
                               NEW.master_id,
                               NEW.#{attrib},
                               #{created_by ? 'NEW.created_by_user_id,' : ''}
+                              #{assign_access ? 'NEW.assign_access_to_user_id,' : ''}
                               NEW.user_id,
                               NEW.admin_id,
+                              #{add_disabled ? 'NEW.disabled,' : ''}
                               NEW.created_at,
                               NEW.updated_at,
                               NEW.id
@@ -76,8 +80,10 @@ EOF
                   master_id integer,
                   #{attrib} bigint,
                   #{created_by ? 'created_by_user_id integer,' : ''}
+                  #{assign_access ? 'assign_access_to_user_id integer,' : ''}
                   user_id integer,
                   admin_id integer,
+                  #{add_disabled ? 'disabled boolean,' : ''}
                   created_at timestamp without time zone NOT NULL,
                   updated_at timestamp without time zone NOT NULL,
                   #{singular_name}_table_id integer
@@ -97,8 +103,10 @@ EOF
                   master_id integer,
                   #{attrib} bigint,
                   #{created_by ? 'created_by_user_id integer,' : ''}
+                  #{assign_access ? 'assign_access_to_user_id integer,' : ''}
                   user_id integer,
                   admin_id integer,
+                  #{add_disabled ? 'disabled boolean,' : ''}
                   created_at timestamp without time zone NOT NULL,
                   updated_at timestamp without time zone NOT NULL
               );
