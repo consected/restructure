@@ -17,7 +17,7 @@
        data-result-target="#{{ns_hyphenate name}}-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}" 
        data-remote="true" 
        data-toggle-caret="true"       
-       class="glyphicon glyphicon-triangle-bottom caret-target-collapsed view-item  mr-expander {{#is (fpa_state_item 'template_config' (underscore name) vdef_version 'item_list') 'includes' ',' }}{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}{{/is}} {{#if to_record_options_config.view_options.always_open}}on-postprocess-click{{/if}}" 
+       class="glyphicon glyphicon-triangle-right caret-target-collapsed view-item  mr-expander {{#is (fpa_state_item 'template_config' (underscore name) vdef_version 'item_list') 'includes' ',' }}{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}{{/is}} {{#if to_record_options_config.view_options.always_open}}on-postprocess-click{{/if}}" 
        data-use-alt-result-key="{{to_record_result_key}}"
        id="mr-expander-{{ns_hyphenate to_record_label}}"></a>
     {{/is}}
