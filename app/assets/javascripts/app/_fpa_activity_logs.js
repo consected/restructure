@@ -38,7 +38,7 @@ _fpa.activity_logs = {
 
     _fpa.activity_logs.handle_creatables(block, data);
 
-
+    _fpa.activity_logs.show_only_one(block, data);
   },
 
   show_log_block: function (block, data) {
@@ -111,6 +111,10 @@ _fpa.activity_logs = {
     return data;
   },
 
+  // Handle enabling / disabling the create action buttons at the top of the panel.
+  // Optionally allow the class 'auto-show-first-creatable' to be specified on the
+  // current block or one of its parents, to automatically fire the first creatable
+  // button and show the appropriate form.
   handle_creatables: function (block, data) {
     if (data._control) {
       var control = data._control;
@@ -121,6 +125,8 @@ _fpa.activity_logs = {
     obj_data = _fpa.activity_logs.get_object_data(data);
 
     if (control && control.creatables) {
+      var $first;
+      const auto_show = block.hasClass('auto-show-first-creatable') || block.parents('.auto-show-first-creatable').length
       for (var i in control.creatables) {
         if (control.creatables.hasOwnProperty(i)) {
           var c = control.creatables[i];
@@ -137,15 +143,39 @@ _fpa.activity_logs = {
             if (huc)
               ael.show();
 
+            if (!$first) $first = ael;
             ael.attr('disabled', false);
           }
         }
+      }
+
+      if (auto_show && $first) {
+        window.setTimeout(function () {
+          $first.click()
+        }, 250)
       }
     }
   },
 
   handle_save_action: function (block, data) {
     _fpa.activity_logs.save_action.handle(block, data)
+  },
+
+  // Show only a single new, edit or show block within this activity logs main panel. This is used
+  // for example to present a series of forms in turn, much like showing a single page at a time.
+  // Specify the class "show-only-single-item" on a block preferrably up at the main panel level or above
+  // to make this work consistently.
+  show_only_one: function (block, data) {
+    const show_single = block.hasClass('show-only-single-item') || block.parents('.show-only-single-item').length
+    if (!show_single) return;
+
+    var first = true;
+    if (!block.hasClass('activity-logs-generic-block')) block = block.parents('.activity-logs-generic-block').first()
+
+    block.find('.activity-log-list > .new-blocks-container > .new-block:not(.hidden), .activity-log-list > .is-activity-log:not(.hidden)').each(function () {
+      if (!first) $(this).hide();
+      first = false
+    });
   }
 
 };
