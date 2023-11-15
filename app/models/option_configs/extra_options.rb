@@ -9,6 +9,7 @@ module OptionConfigs
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
     ValidValidIfTriggers = %i[on_create on_save on_update].freeze
+    ValidSaveTriggerTriggers = %i[on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
 
     def self.base_key_attributes
@@ -319,6 +320,12 @@ module OptionConfigs
     def clean_save_triggers
       self.save_trigger ||= {}
       self.save_trigger = self.save_trigger.symbolize_keys
+
+      unless self.save_trigger.keys.empty? || self.save_trigger.keys <= ValidSaveTriggerTriggers
+        raise FphsException,
+              "save_trigger contains invalid keys #{save_trigger.keys} - expected only #{ValidSaveTriggerTriggers}"
+      end
+
       # Make save_trigger.on_save the default for on_create and on_update
       os = self.save_trigger[:on_save]
       if os
