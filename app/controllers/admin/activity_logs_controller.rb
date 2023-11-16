@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::ActivityLogsController < AdminController
+  before_action :set_defaults
   after_action :routes_reload, only: %i[update create]
 
   protected
@@ -22,6 +23,10 @@ class Admin::ActivityLogsController < AdminController
 
   def filters_on
     %i[category table_name]
+  end
+
+  def set_defaults
+    @show_again_on_save = true
   end
 
   private

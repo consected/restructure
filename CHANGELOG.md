@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] link with #click-target-tab-activity-log-data-request to limit its possible container to the master panel, so tabs in the current master can be targeted - fixes #185
+- [Added] dynamic definition config error feedback during editing - fixes #186 and #192
+- [Changed] exception reporting often during startup for bad activity log configurations being loaded
+- [Fixed] message formatting for invalid_error_message - fixes #191
+- [Added] exception extensions to help with reporting error messages and backtraces
+- [Fixed] expander carets are wrong direction - regression - fixes #190
+
 ## [8.2.109] - 2023-11-14
 
 - [Added] embedding of page layouts within standalone (Study Info) pages, allowing a full set of forms to be presented in order using an activity log

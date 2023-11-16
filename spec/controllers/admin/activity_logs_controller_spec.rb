@@ -13,10 +13,6 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
     @activity_log
   end
 
-  def saved_item_template
-    'admin/activity_logs/_item'
-  end
-
   before(:context) do
     @path_prefix = '/admin'
   end
