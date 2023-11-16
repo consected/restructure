@@ -13,6 +13,30 @@
   <label>assigned identifiers</label>
   <p><%=link_to link_label_open_in_new('details'), "/admin/external_identifier_details/#{object_instance.id}", target: '_blank' %>
 
+  <% unless object_instance.table_or_view_ready?%>
+  <div class="help-block">
+  <p>Typically the database table or view associated with an activity log is created when the definition is first created (or prior to this if handled manually.)</p>
+  <p>To create the table for this activity log definition, either run the defined migration, or disable (and save) then re-enable and save this definition to 
+     setup the database table based on options configuration.
+  </p>
+  </div>
+  <% end %>
+
+  <% 
+  ces = OptionConfigs::ExtraOptions.all_option_configs_errors(object_instance.option_configs)
+  if ces %>
+  <label>configuration errors</label>
+    <div class="config-error-block">
+
+      <% ces.each do |ce| %>
+          <div>
+            <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
+            <p><%= ce[:message] %></p>
+            <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+          </div>
+      <% end %>
+    </div>
+  <% end %>
 
 </div>
 <div class="dynamic-list-section">

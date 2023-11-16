@@ -9,7 +9,7 @@ module OptionConfigs
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
     ValidValidIfTriggers = %i[on_create on_save on_update].freeze
-    ValidSaveTriggerTriggers = %i[on_create on_save on_update on_upload on_disable].freeze
+    ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
 
     def self.base_key_attributes
@@ -41,6 +41,7 @@ module OptionConfigs
     # @param [Hash] config - the parsed options text for this individual configuration
     # @param [ActiveRecord::Base] config_obj - the definition record storing this dynamic definition & options
     def initialize(name, config, config_obj)
+      super()
       @name = name
       @orig_config = config
 
@@ -200,8 +201,9 @@ module OptionConfigs
       self.valid_if ||= {}
       self.valid_if = self.valid_if.symbolize_keys
 
-      unless self.valid_if.keys.empty? || self.valid_if.keys <= ValidValidIfTriggers
-        raise FphsException, "valid_if contains invalid keys #{valid_if.keys} - expected only #{ValidValidIfTriggers}"
+      unless self.valid_if.keys.empty? || (self.valid_if.keys - ValidValidIfTriggers).empty?
+        failed_config :valid_if,
+                      "valid_if contains invalid keys #{valid_if.keys} - expected only #{ValidValidIfTriggers}"
       end
 
       os = self.valid_if[:on_save]
@@ -293,6 +295,7 @@ module OptionConfigs
             bad_ref_items << mn
             Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
             Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
+            failed_config :references, "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
           end
         end
 
@@ -321,9 +324,9 @@ module OptionConfigs
       self.save_trigger ||= {}
       self.save_trigger = self.save_trigger.symbolize_keys
 
-      unless self.save_trigger.keys.empty? || self.save_trigger.keys <= ValidSaveTriggerTriggers
-        raise FphsException,
-              "save_trigger contains invalid keys #{save_trigger.keys} - expected only #{ValidSaveTriggerTriggers}"
+      unless self.save_trigger.keys.empty? || (self.save_trigger.keys - ValidSaveTriggerTriggers).empty?
+        failed_config :save_trigger,
+                      "save_trigger contains invalid keys #{save_trigger.keys} - expected only #{ValidSaveTriggerTriggers}"
       end
 
       # Make save_trigger.on_save the default for on_create and on_update
@@ -349,10 +352,12 @@ module OptionConfigs
     # This should be extended to provide additional checks when options are saved
     # @todo - work out why the "raise" was disabled and whether it needs changing
     def self.raise_bad_configs(option_configs)
-      bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
-      Rails.logger.warn("bad_configs: #{bad_configs.map(&:bad_ref_items)}") if bad_configs.present?
-      # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
-      bad_configs
+      ces = all_option_configs_errors(option_configs)
+      return unless ces
+
+      Rails.logger.warn("Bad #{name} configurations: #{ces}")
+      raise FphsException, "Bad configurations in #{name}"
+      ces
     end
 
     #
@@ -420,7 +425,6 @@ module OptionConfigs
 
       configs
     rescue FphsException => e
-      puts config_text if Rails.env.test? || Rails.env.development?
       raise FphsException, e
     end
 

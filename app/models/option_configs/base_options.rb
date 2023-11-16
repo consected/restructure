@@ -1,11 +1,9 @@
+# frozen_string_literal: true
+
 module OptionConfigs
   class BaseOptions
     include ActiveModel::Validations
-
-    def self.raise_bad_configs(option_configs)
-      # None defined - override with real checks
-      # @todo
-    end
+    include OptionConfigs::ConfigErrors
 
     # Get an array of ConfigLibrary objects from the options text
     def self.config_libraries(config_obj)
