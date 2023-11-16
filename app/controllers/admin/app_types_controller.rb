@@ -57,6 +57,7 @@ class Admin::AppTypesController < AdminController
       raise FphsException, "Invalid export format. Allowed formats: #{ValidFormats}" unless exp_format.in? ValidFormats
     elsif show_components
       @app_type = app_type
+      @config_notices = @app_type.check_option_configs
       render 'admin/app_types/components'
       return
     else

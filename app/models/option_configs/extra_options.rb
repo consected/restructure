@@ -295,7 +295,11 @@ module OptionConfigs
             bad_ref_items << mn
             Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
             Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
-            failed_config :references, "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
+            # Log this as a warning, not an error, since we are not able to control the order of items being created
+            # in an app import, and many references to underlying definitions will not yet have been created
+            failed_config :references,
+                          "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}",
+                          level: :warn
           end
         end
 

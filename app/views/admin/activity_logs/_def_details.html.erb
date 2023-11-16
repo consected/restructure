@@ -29,7 +29,7 @@
   <% end %>
 
   <% 
-  ces = OptionConfigs::ExtraOptions.all_option_configs_errors(object_instance.option_configs)
+  ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
   if ces %>
   <label>configuration errors</label>
     <div class="config-error-block">
