@@ -6,8 +6,10 @@
     </p>
     <%= render partial: 'head_info' if show_head_info %>
     <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
-      <% if @show_again_on_save && @updated_with %>
-        <%= render partial: "#{view_folder}/form"%>
+      <% if @show_again_on_save && @updated_with 
+        p_pre = view_folder ? '#{view_folder}/' : ''
+      %>
+        <%= render partial: "form"%>
       <% end %>
     </div>
     <table class="table tablesorter admin-list">

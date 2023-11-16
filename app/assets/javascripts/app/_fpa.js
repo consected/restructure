@@ -1012,25 +1012,13 @@ _fpa = {
 
         $('.ajax-clicked-running').removeClass('ajax-clicked-running').blur();
 
-        var format_message = function (j) {
-          var msg = '';
-          var msgar = [];
-          for (var i in j) {
-            if (j.hasOwnProperty(i)) {
-              msgar.push(i.replace(/_/g, ' ') + ' ' + j[i]);
-            }
-          }
-          msg = msgar.join(' \n');
-          return msg;
-        };
-
         if (status != 'abort') {
           var j = xhr.responseJSON;
           if (xhr.status === 422) {
             _fpa.form_utils.set_field_errors($('.ajax-running'), j);
             if (j) {
               var msg = '<p>Could not complete action:</p>';
-              msg += format_message(j);
+              msg += _fpa.format_message(j);
             } else {
               j = xhr.responseText;
               if (j) var msg = '<div>' + j + '</div>';
@@ -1042,7 +1030,7 @@ _fpa = {
             _fpa.flash_notice(msg, 'warning');
           } else {
             if (j) {
-              msg = format_message(j);
+              msg = _fpa.format_message(j);
               _fpa.flash_notice(msg, 'danger');
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
               _fpa.flash_notice(xhr.responseText, 'danger');
@@ -1197,6 +1185,28 @@ _fpa = {
       $('.modal.was-in').removeClass('was-in').addClass('in');
     }, 300)
   },
+
+  format_message: function (j) {
+    var msg = '';
+    var msgar = [];
+    for (var i in j) {
+      if (j.hasOwnProperty(i)) {
+        var partmsg = j[i];
+        if (partmsg.join) partmsg = partmsg.join("\n")
+        var show_msg;
+        if (partmsg.indexOf('invalid_error_message') < 0) {
+          show_msg = `${i.replace(/_/g, ' ')} ${partmsg}`
+        }
+        else {
+          show_msg = partmsg.replaceAll('invalid_error_message:', '')
+        }
+        msgar.push(show_msg);
+      }
+    }
+    msg = msgar.join(' \n');
+    return msg;
+  },
+
 
   get_item_by: function (attr, obj, evid) {
     for (var pi in obj) {

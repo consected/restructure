@@ -93,7 +93,13 @@ module CalcActions
     def merge_failures(results)
       return unless return_failures && !@skip_merge
 
-      results.first.last.each do |t, res|
+      # Make sure we don't overwrite the actual results passed in, since these
+      # can be the actual @condition_config or other objects that shouldn't be changed
+      res_changes = {}
+      res_key = results.first.first
+      res_conds = results.first.last.dup
+
+      res_conds.each do |t, res|
         field = res.first.first
         conf = @condition_config.first.last
         val_msg = conf[field] if conf.is_a?(Hash)
@@ -101,17 +107,17 @@ module CalcActions
         msg ||= condition_error_message
         if msg
           msg = { invalid_error_message: msg }
-          res = results.first.last[t] = { field => msg }
+          res = res_changes[t] = { field => msg }
           next
         end
 
         next unless res.is_a?(Hash) && res.first&.last.is_a?(Hash) && res.first&.last&.first&.first == :validate
 
-        results.first.last[t] =
-          { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
+        res_changes[t] =
+          { field => new_validator(res_changes[:validate].first.first, nil, options: {}).message }
         next
       end
-      return_failures.deep_merge!(results)
+      return_failures.deep_merge!(res_key => res_conds.merge(res_changes))
     end
 
     #

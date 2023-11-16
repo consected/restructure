@@ -15,7 +15,7 @@ _fpa_admin.activity_logs.admin_edit_form = class {
 
   setup_find_activity() {
     const $block = this.block;
-    $block.find('li.activity-list-name').on('click', function () {
+    $block.find('li.activity-list-name, span.activity-list-name').on('click', function () {
       let val = $(this).text()
 
       let el = $block.find('.code-editor')

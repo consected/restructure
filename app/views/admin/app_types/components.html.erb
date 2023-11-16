@@ -8,6 +8,18 @@
           <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-primary' %>
         </div>
         <h1><%= @app_type.label %> <small>#<%= @app_type.id %> <code><%= @app_type.name %></code></small></h1>
+        <% if @config_notices.present? %>
+        <h2>Configuration Notices</h2>
+            <div class="config-error-block">
+            <% @config_notices.each do |ce| %>
+                <div>
+                  <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
+                  <p><%= ce[:message] %></p>
+                  <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+                </div>
+            <% end %>
+          </div>
+        <% end %>
       </div>
       
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">

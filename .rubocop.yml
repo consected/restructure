@@ -5,9 +5,10 @@ Metrics/LineLength:
     - 'app/**/*'
     # - 'spec/**/*'
 
+# This includes concerns like class_methods blocks
 Metrics/BlockLength:
   Enabled: true
-  Max: 50
+  Max: 200
   Include:
     - 'app/**/*'
     # - 'spec/**/*'
