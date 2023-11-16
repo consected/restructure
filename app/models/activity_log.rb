@@ -619,10 +619,10 @@ class ActivityLog < ActiveRecord::Base
         add_model_to_list res
       rescue StandardError => e
         failed = true
-        puts "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        puts "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
         logger.info <<~END_TEXT
           *************************************************************************************
-          Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}
+          Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}
           *************************************************************************************
         END_TEXT
       end
