@@ -692,7 +692,7 @@ module Dynamic
     def creatable_model_not_embeddable?(cmrs, item)
       return true if item.class.class_parent_name == 'ActivityLog'
 
-      cmrs.first.last.first.last[:ref_config][:view_as][:new].in?(NotEmbeddedOptions)
+      cmrs.first.last.first.last.dig(:ref_config, :view_as, :new)&.in?(NotEmbeddedOptions)
     rescue StandardError
       nil
     end

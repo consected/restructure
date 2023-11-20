@@ -41,6 +41,7 @@
             <h3>App Configs</h3>
             <ul class="nav">
               <% got_one = false %>
+              <% if current_admin.can_admin?(:app_types)  && @app_type%><% got_one ||= true %><li class="nav"><%= link_to "App: #{@app_type&.label}", admin_app_type_path(@app_type, show_components: true) %> </li><%end%>
               <% if current_admin.can_admin?(:app_types)%><% got_one ||= true %><li class="nav"><%= link_to "App Types", admin_app_types_path %> </li><%end%>
               <% if current_admin.can_admin?(:page_layouts)%><% got_one ||= true %><li class="nav"><%= link_to "Page Layouts", admin_page_layouts_path %> </li><%end%>
               <% if current_admin.can_admin?(:app_configurations)%><% got_one ||= true %><li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li><%end%>
