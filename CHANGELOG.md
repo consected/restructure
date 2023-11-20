@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] Error after saving dynamic model definition changes - fixes #193
+- [Added] configuration notices to a more easily access app type components page - fixes #195
+- [Cleanup] unnecessary reliance on rescue
+
 ## [8.2.110] - 2023-11-16
 
 - [Changed] link with #click-target-tab-activity-log-data-request to limit its possible container to the master panel, so tabs in the current master can be targeted - fixes #185
