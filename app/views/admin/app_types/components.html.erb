@@ -4,28 +4,70 @@
     
     <div class="col-md-24">
       <div>
-        <div class="pull-right">
-          <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-primary' %>
-        </div>
         <h1><%= @app_type.label %> <small>#<%= @app_type.id %> <code><%= @app_type.name %></code></small></h1>
+        <div>
+
+              <% 
+                current_search_paths = Admin::MigrationGenerator.current_search_paths || [] 
+                active_ids = Admin::AppType.active_app_types.pluck(:id)
+                user_has_access = Admin::AppType.all_available_to(current_user)&.find { |app| app.id == @app_type.id } if current_user
+              %>
+            <p>
+              <% if @config_notices.present? %>
+              <span class="glyphicon glyphicon-exclamation-sign error-mark" title="configuration errors"></span>
+              <% else %>
+              <span class="glyphicon glyphicon-check val-checked"></span>
+              <% end %>
+              Configurations
+            </p>
+            <p>
+              <% if current_search_paths.include?(@app_type.default_schema_name) %>
+              <span class="glyphicon glyphicon-check val-checked"></span>
+              <% else %>
+                <span class="glyphicon glyphicon-exclamation-sign error-mark" title="schema not in search path"></span>
+              <% end %>
+              Schema in search path? <code><%=@app_type.default_schema_name%></code>
+            </p>
+            <p>
+                <%= if @app_type.active_on_server?
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
+                  '<span class="glyphicon glyphicon-exclamation-sign error-mark-in-circle" title="app active but schema not in search path"></span>'.html_safe
+                else
+                  "<span class=\"val-unchecked\"></span>".html_safe  
+                end
+                %>
+                Active on server?
+            </p>
+            <p>
+                <%= if user_has_access
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                else
+                  '<span class="val-unchecked" title="user has not been granted user access control for this app_type"></span>'.html_safe  
+                end
+                %>
+                User has access? 
+            </p>            
+          <% if @app_type.active_on_server? %>
+          <p>
+            <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-default' %> 
+            <%= link_to 'export migrations', export_migrations_admin_app_type_path(@app_type), target: '_blank', class: 'btn btn-default' %> 
+          </p>
+          <% end %>
+        </div>
         <% if @config_notices.present? %>
-        <h2>Configuration Notices</h2>
-            <div class="config-error-block">
-            <% @config_notices.each do |ce| %>
-                <div>
-                  <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
-                  <p><%= ce[:message] %></p>
-                  <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
-                </div>
-            <% end %>
-          </div>
+        <h3>Configuration Notices</h3>
+        <%= render partial: 'admin/app_types/config_notices' %>
         <% end %>
       </div>
       
+      <% unless @config_notices_only %>
+      <h3>Components</h3>
+
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <%= render partial: 'admin/app_types/components', locals:{ main_components: false, open_in_new: true }%>
-      
+        <%= render partial: 'admin/app_types/components', locals:{ main_components: false, open_in_new: true }%>      
       </div>
+      <% end %>
     </div>
     <div class="col-md-24">
       <pre><%=@primary%></pre>
