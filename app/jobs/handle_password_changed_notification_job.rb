@@ -4,6 +4,8 @@ class HandlePasswordChangedNotificationJob < ApplicationJob
   queue_as :default
 
   def perform(user)
+    return if user.do_not_email
+
     mn = Messaging::MessageNotification.create! user: user,
                                                 recipient_user_ids: [user.id],
                                                 layout_template_name: defaults[:layout],
@@ -14,7 +16,6 @@ class HandlePasswordChangedNotificationJob < ApplicationJob
                                                 from_user_email: Settings::NotificationsFromEmail
 
     mn.handle_notification_now logger: Delayed::Worker.logger
-
   end
 
   private
