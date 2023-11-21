@@ -1,12 +1,7 @@
 module PhoneSetup
-
-
-
-  def player_contact_phone_block_css with_rank=nil
+  def player_contact_phone_block_css(with_rank = nil)
     check_rank = ''
-    if with_rank
-      check_rank = "='#{with_rank}'"
-    end
+    check_rank = "='#{with_rank}'" if with_rank
     ".player-contact-item.phone-type .list-group[data-item-rank#{check_rank}]"
   end
 
@@ -19,31 +14,30 @@ module PhoneSetup
     ['10', '5', '1', '0', '-1']
   end
 
-
   def phone_attribs
     [
       {
-        data: "(761)897-8144",
+        data: '(761)897-8144',
         source: 'nflpa',
-        rank: (get_a_phone_rank),
+        rank: get_a_phone_rank,
         rec_type: 'phone'
       },
       {
-        data: "(516)262-1289",
+        data: '(516)262-1290',
         source: 'nfl',
-        rank: (get_a_phone_rank),
+        rank: get_a_phone_rank,
         rec_type: 'phone'
       },
       {
-        data: "(516)262-1289 ext 2342",
+        data: '(516)262-1289 ext 2342',
         source: 'nfl',
-        rank: (get_a_phone_rank),
+        rank: get_a_phone_rank,
         rec_type: 'phone'
       }
     ]
   end
 
-  def create_player_phone master, num=1
+  def create_player_phone(master, num = 1)
     master.current_user = @user
     let_user_create :player_contacts
 
@@ -60,12 +54,8 @@ module PhoneSetup
       end
     end
 
-    raise "phone does not have a rank!" unless phone_ranks.include?(res.last.rank.to_s)
+    raise 'phone does not have a rank!' unless phone_ranks.include?(res.last.rank.to_s)
 
     res
   end
-
-
-
-
 end

@@ -173,7 +173,8 @@ class Admin::UserAccessControl < Admin::AdminBase
 
     app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
     app_type_id ||= user&.app_type_id
-    cache_key = "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
+    cache_key =
+      "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
     res = Rails.cache.fetch(cache_key) do
       evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
                           alt_role_name: alt_role_name,
@@ -247,7 +248,8 @@ class Admin::UserAccessControl < Admin::AdminBase
                  resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
     else
       Admin::UserAccessControl.create(role_name: Settings::AppTemplateRole, app_type: app_type,
-                                      resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
+                                      resource_type: resource_type, resource_name: resource_name,
+                                      access: default_access, disabled: disabled, current_admin: admin)
     end
   end
 
@@ -263,7 +265,7 @@ class Admin::UserAccessControl < Admin::AdminBase
   end
 
   #
-  # Get list of controls for the external_id_assignments / limited_access type in the user's current app.
+  # Get list of controls for the limited_access type in the user's current app.
   # Get both the user's override, if it exists, and the default for each resource,
   # which we then filter down to the actual access control
   # If there are no restrictions for this user in this app, just return nil
@@ -351,12 +353,16 @@ class Admin::UserAccessControl < Admin::AdminBase
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
                                                                             alt_app_type_id: app_type_id
       if res && res.id != id # If we have a result and it is not this record
+        show_at_name = app_type ? app_type.name : ''
         if user_id && user_id == res.user_id # If the user has the authorization set
           errors.add :user,
-                     "already has the access control #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
-        elsif !user_id && res.user_id.nil? && role_name == res.role_name # If the new record has no user set and has a matching role _name
+                     "already has the access control #{access} on #{resource_type} #{resource_name} " \
+                     "#{show_at_name} #{options}"
+        elsif !user_id && res.user_id.nil? && role_name == res.role_name
+          # If the new record has no user set and has a matching role_name
           errors.add :user_access_control,
-                     "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
+                     "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} " \
+                     "#{show_at_name} #{options}"
         end
       end
     end

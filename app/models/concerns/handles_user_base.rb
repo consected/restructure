@@ -32,8 +32,8 @@ module HandlesUserBase
     # Check the embedded item is valid, and if not pull its error into this object
     validate :valid_embedded_item
 
-    # Create a referring record, if it has been set up
-    after_save :create_referring_record
+    # Create a reference from the referring record, if it has been set up
+    after_save :create_referring_record_reference
 
     # If records have the `disabled` column (or a method that wants to pretend this),
     # trigger a handler if the record was disabled
@@ -54,7 +54,10 @@ module HandlesUserBase
     add_model_to_list
   end
 
+  # rubocop:disable Metrics/BlockLength
   class_methods do
+    # rubocop:enable Metrics/BlockLength
+
     #
     # Get the name of the previous level in the class namespace, or 'Object' if already at the top
     def class_parent_name
@@ -79,7 +82,7 @@ module HandlesUserBase
       class_from_table_name(table_name)&.table_name
     end
 
-    def is_external_identifier?
+    def external_identifier?
       false
     end
 
@@ -445,7 +448,9 @@ module HandlesUserBase
     @referenced_from = ModelReference.find_where_referenced_from self
   end
 
-  # A referring record is either set based on the the specific record that the controller say is being viewed
+  #
+  # A referring record is either set based on the the specific record that
+  # the controller tells us is being viewed
   # when an action is performed, or
   # if there is only one model reference we use that instead.
   def referring_record
@@ -461,7 +466,11 @@ module HandlesUserBase
     nil
   end
 
-  # Top referring record is the top record in the reference hierarchy
+  #
+  # Top referring record is the top record in the reference hierarchy.
+  # We iterate through the referring records until we reach the top one and return it.
+  # If there are no referring records from the current activity log, return nil
+  # @return [UserBase | nil] <description>
   def top_referring_record
     return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
 
@@ -548,10 +557,10 @@ module HandlesUserBase
   end
 
   #
-  # Create a record for the referring record object that has been set up, if
+  # Create a reference for the referring record object that has been set up, if
   # a referring record type has been specified
   # @return [ModelReference]
-  def create_referring_record
+  def create_referring_record_reference
     return unless @ref_record_type
 
     @referring_record = find_referring_record
@@ -577,7 +586,7 @@ module HandlesUserBase
   # Set the background_job_ref attribute, either using a job, or directly with a string.
   # The stored format is "namespace__class_name%id"
   # @param [Job | String] job
-  def set_background_job_ref(job)
+  def set_background_job_ref(job) # rubocop:disable RuboCopNaming/AccessorMethodName
     return unless respond_to?(:background_job_ref=)
 
     job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
@@ -802,8 +811,38 @@ module HandlesUserBase
   end
 
   #
+  # Check if the supplied object is an array, is empty or only contains empty elements
+  # @param [Object] arr - object to test
+  # @return [true|false]
+  def array_of_empty_elements(arr)
+    return false unless arr.is_a?(Array)
+
+    arr.each do |el|
+      next if el.nil?
+      return false if !el.is_a?(String) && !el.is_a?(Array)
+      return false if el.is_a?(String) && el.present?
+      return false if el.is_a?(Array) && el.find(&:present?)
+    end
+
+    true
+  end
+
+  #
   # Validation method that checks if a valid_if configuration shows all the fields being valid,
   # or produces the appropriate errors if not
+  #
+  # This relies on @return_failures, which has the format
+  #   {
+  #     condition_type: {
+  #       table_name: {
+  #         field_name: expected_val,
+  #         field_name2: {
+  #           condition: {}
+  #         }
+  #       }
+  #     },
+  #     ...
+  #   }
   def configurable_valid_if
     return true if evaluate_valid_if_config
 
@@ -812,19 +851,30 @@ module HandlesUserBase
       return
     end
 
-    @return_failures.each do |c_var, c_vals|
+    @return_failures.each do |cond_type, c_vals|
       c_vals.each do |table, cond|
         cond.each do |k, v|
           v = v.present? ? v : '(blank)'
           if v.is_a? Hash
             next if v[:hide_error]
 
-            v = if v[:condition]
-                  "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
+            if v[:invalid_error_message]
+              errors.add k.to_sym, "invalid_error_message: #{v[:invalid_error_message]}"
+              next
+            end
+
+            vcondition = v[:condition]
+            v = if vcondition
+                  case vcondition
+                  when 'IS NOT NULL'
+                    'not blank'
+                  when 'IS NULL'
+                    'blank'
+                  end
                 else
-                  "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
+                  v.first.first.to_s.humanize.downcase.to_s
                 end
-          elsif v.is_a?(Array) && [['', nil], [nil, '']].include?(v)
+          elsif array_of_empty_elements(v)
             v = '(blank)'
           else
             v = ": #{v}"
@@ -832,7 +882,7 @@ module HandlesUserBase
           k = table == :this ? k : "#{table}.#{k}"
 
           msg = nil
-          case c_var
+          case cond_type
           when :all
             msg = "is invalid. Expected value to be #{v}"
           when :any

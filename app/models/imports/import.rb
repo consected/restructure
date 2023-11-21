@@ -43,7 +43,7 @@ class Imports::Import < ActiveRecord::Base
   # @param [String] csv - full CSV text
   # @return [Import] self
   def import_csv(csv)
-    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol)
+    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol, encoding: 'UTF-8')
     # The user attribute is allowed to be set on Import
     # This has the required side-effect that the models being created form the CSV data
     # will get their user at creation time  based on this

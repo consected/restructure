@@ -77,6 +77,11 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, option_ty
 
 }
 
+_fpa.postprocessors.activity_log_edit_form = function (block, data) {
+  _fpa.activity_logs.show_only_one(block, data)
+}
+
+
 _fpa.preprocessors.activity_log_edit_form = function (block, data) {
   $('.activity-log-list .new-block').each(function () {
     $(this).hide().html('');

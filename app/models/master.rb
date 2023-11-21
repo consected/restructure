@@ -6,7 +6,7 @@ class Master < ActiveRecord::Base
   # Temporary master records can be used with limited(_if_one) user access controls
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table
-  TemporaryMasterIds = [-1, -2]
+  TemporaryMasterIds = [-1, -2].freeze
   Resources::Models.add(Master, resource_name: :temporary_master)
   has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'
 
@@ -18,7 +18,8 @@ class Master < ActiveRecord::Base
   ] + %i[general_infos trackers tracker_histories
          not_trackers not_tracker_histories].freeze
 
-  TrackerEventOrderClause = Arel.sql 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
+  TrackerEventOrderClause =
+    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
   TrackerHistoryEventOrderClause = Arel.sql 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
   SubjectInfoRankOrderClause = Arel.sql 'rank desc nulls last '
 
@@ -144,8 +145,10 @@ class Master < ActiveRecord::Base
            class_name: 'NfsStore::Manage::ArchivedFile'
 
   # Note that additional has_many associations are added dynamically by the external_id handlers,
-  # such as Scantron, SageAssignment, etc. This is handled through the external_id_yyy_settings.rb call to Class.add_to_app_list
-  # In doing so, we enable these models to be self contained and manage the configuration of the two-way associations with masters themselves,
+  # such as Scantron, SageAssignment, etc. This is handled through the external_id_yyy_settings.rb call
+  # to Class.add_to_app_list
+  # In doing so, we enable these models to be self contained and manage the configuration of the two-way
+  # associations with masters themselves,
   # without having to update the Master model directly. This is important to allow the command:
   # `rails generate rails g external_id_handler test_thing` to function without having to hack this master.rb file
 
@@ -234,35 +237,43 @@ class Master < ActiveRecord::Base
   # if they are in the user access control conditions
   def self.limited_access_scope(user)
     # Check if the resource is has a limited_access restriction
-    er = Admin::UserAccessControl.limited_access_restrictions(user)
+    uacs = Admin::UserAccessControl.limited_access_restrictions(user)
 
     res = all
-    return res unless er
+    # If no user access controls are set for limited access, just return the 'all' scope
+    return res unless uacs
 
     # For each required limited_access model with access :limited, inner join it.
     # For each required limited_access model with access :limited_if_none, left join it
-    # If it also requires
-    # an assign_access_to_user_id field ensure this matches the current user too
+    # and check if one of the results matched
+
+    # First, set the scope for each user access control
     all_limited_once = []
-
-    er.each do |e|
-      res = res.join_limit_to_assigned(e, user)
-      all_limited_once << e.resource_name.to_sym if e.access == 'limited_if_none'
+    uacs.each do |uac|
+      # Set up the scope based on the user access control
+      res = res.join_limit_to_assigned(uac, user)
+      all_limited_once << uac.resource_name.to_sym if uac.access == 'limited_if_none'
     end
-
+    # None of the user access controls where *limited_if_none* then we can just return the scope result
     return res if all_limited_once.empty?
 
-    # Make sure at least on of the limited_if_none models was present
-    w = all_limited_once.map do |rn|
-      m = Resources::Models.find_by(resource_name: rn)
-      raise FphsException, "No model resource found for resource name #{rn} when limiting access scope" unless m
+    # Make sure at least one of the limited_if_none models was present
+    where_parts = all_limited_once.map do |rn|
+      mresource = Resources::Models.find_by(resource_name: rn)
+      raise FphsException, "No model resource found for resource name #{rn} when limiting access scope" unless mresource
 
-      t = m[:table_name]
-      "#{t}.id is not null"
+      table_name = if rn == :temporary_master
+                     # Ensure we reference the temporary_master alias rather than *masters* table directly
+                     'temporary_master'
+                   else
+                     mresource[:table_name]
+                   end
+      "#{table_name}.id is not null"
     end
-    w = w.join(' or ')
 
-    res.where(w)
+    # Join the parts together and return the new scope as the joins and where clause
+    where_clause = where_parts.join(' or ')
+    res.where(where_clause)
   end
 
   #
@@ -274,15 +285,15 @@ class Master < ActiveRecord::Base
   end
 
   #
-  # Check if a current admin has been set for certain administrative tasks
-  # @return [Boolean]
   # Current admin is not stored, but may be used in validations for administrative level changes
-  def current_admin=(ca)
-    @current_admin = ca.is_a?(Admin)
+  # @param [Admin] admin
+  def current_admin=(admin)
+    @current_admin = admin.is_a?(Admin)
   end
 
   #
   # Check if current_admin has been set to a valid admin
+  # @return [Boolean]
   def current_admin?
     @current_admin.is_a?(Admin)
   end
@@ -295,24 +306,25 @@ class Master < ActiveRecord::Base
   # while allowing models to enforce security on instances being returned.
   # @param [User] cu - current user
   # @return [User]
-  def current_user=(cu)
-    if cu.is_a?(User)
-      @current_user = cu
-    elsif cu.is_a?(Integer)
-      @current_user = User.find cu
+  def current_user=(user)
+    if user.is_a?(User)
+      @current_user = user
+    elsif user.is_a?(Integer)
+      @current_user = User.find(user)
     else
-      raise "Attempting to set current_user with non user: #{cu} #{cu.class.name} #{cu.class.__id__} #{User.__id__}"
+      raise 'Attempting to set current_user with non user: ' \
+             "#{user} #{user.class.name} #{user.class.__id__} #{User.__id__}"
     end
   end
 
   #
   # Prevent user from being set directly, to avoid accidental or malicious changes to the recorded user in records.
   # Users will be set during create and update automatically, based on the #current_user
-  def user=(_u)
+  def user=(_)
     raise 'can not set user='
   end
 
-  def user_id=(_u)
+  def user_id=(_)
     raise 'can not set user_id='
   end
 
@@ -537,7 +549,9 @@ class Master < ActiveRecord::Base
   # @option extras [Symbol] :style - :index for index style results, or anything else for instance style
   # @option extras [Boolean] :filtered_search_results - true if it is safe to show results without extra filtering
   # @option extras [User] :current_user - provides the user context for filtering and additional access if needed
+  # rubocop:disable Metrics/MethodLength
   def as_json(extras = {})
+    # rubocop:enable Metrics/MethodLength
     included_tables = {}
 
     self.current_user ||= extras[:current_user]
@@ -701,43 +715,56 @@ class Master < ActiveRecord::Base
     header_substitutions template
   end
 
+  #
   # Validate that the limited access restrictions do not prevent access to this item
+  # Since this is an individual item, we
   def allows_user_access
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
-    er = Admin::UserAccessControl.limited_access_restrictions(current_user) unless creating_master
+    uacs = Admin::UserAccessControl.limited_access_restrictions(current_user) unless creating_master
 
     # If no restrictions were specified, skip the iteration and, allow access
-    return true unless er.present?
+    return true unless uacs
 
-    # If restrictions were returned - go through each and validate an external ID
+    # If restrictions were returned - go through each and validate the required dynamic model or external ID
     # has been assigned to this master by calling its association
     # If all required instances (and their assign_access_to_user_id fields if needed) exist, allow access
     limited_once_res = nil
-    er&.each do |e|
-      assoc_name = e.resource_name.to_sym
+    uacs&.each do |uac|
+      assoc_name = uac.resource_name.to_sym
       assoc = send(assoc_name) if respond_to? assoc_name
 
       # The assoc may by nil if this is a belongs_to association and there is no target instance
       this_res = if assoc_name == :master_created_by_user
+                   # Check the current user ID matches the master's created_by_user_id
                    current_user.id == created_by_user_id
                  elsif assoc_name == :temporary_master
+                   # Check this master ID is one of the temporary master IDs
                    TemporaryMasterIds.include? id
                  elsif !assoc
+                   # No association matched, so it was false
                    false
                  else
-                   assoc.limit_to_assigned(current_user).length > 0
+                   # For the association, limit the scope if the associated items
+                   # must match on assigned user and whether they are disabled.
+                   # The result is based on any results being present.
+                   assoc.limit_to_assigned(current_user).present?
                  end
 
-      return false if e.access == 'limited' && this_res == false
+      # If not granted by this UAC and the access is a string "limited", then we can return false immediately
+      return false if uac.access == 'limited' && this_res == false
 
-      if e.access == 'limited_if_none'
+      # If limited_if_none we can break on the first success
+      if uac.access == 'limited_if_none'
         limited_once_res ||= this_res
         break if limited_once_res
       end
     end
 
+    # If a limited_if_none result was evaluated, return the result from it. If none were
+    # evaluated *limited_once_res* is nil. Don't return based on this.
     return limited_once_res unless limited_once_res.nil?
 
+    # Otherwise return true, since the 'limited' results were matched
     true
   end
 

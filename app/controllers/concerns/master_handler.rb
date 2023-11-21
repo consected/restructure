@@ -86,6 +86,7 @@ module MasterHandler
         # a related object failed to save
         object_instance.save! unless object_instance.errors.present?
         render json: object_instance.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
@@ -114,7 +115,10 @@ module MasterHandler
 
       else
         logger.warn "Error updating #{human_name}: #{object_instance_errors}"
+        # Force an exception to show if no errors reported for the object instance because
+        # a related object failed to save        object_instance.save! unless object_instance.errors.present?
         render json: object_instance.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
@@ -310,7 +314,7 @@ module MasterHandler
 
   # Errors for logging
   def object_instance_errors
-    object_instance.errors.map { |k, av| "#{k}: #{av}" }.join(' | ')
+    object_instance.errors.map { |err| "#{err.attribute}: #{err.message}" }.join(' | ')
   end
 
   # In order to clear up a multitude of Ruby warnings
