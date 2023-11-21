@@ -53,18 +53,24 @@ class Admin::AppTypesController < AdminController
 
     exp_format = params[:export_format]
     show_components = params[:show_components].present?
+    only_config_notices = params[:only_config_notices].present?
     if exp_format.present?
       raise FphsException, "Invalid export format. Allowed formats: #{ValidFormats}" unless exp_format.in? ValidFormats
     elsif show_components
-      @app_type = app_type
-      render 'admin/app_types/components'
-      return
+      return render_show_components(app_type)
+    elsif only_config_notices
+      return render_show_config_notices(app_type)
     else
       exp_format = 'json'
     end
 
     app_type.current_admin = current_admin
-    send_data app_type.export_config(format: exp_format.to_sym), filename: "#{app_type.name}_config.#{exp_format}"
+    data = app_type.export_config(format: exp_format.to_sym)
+    send_data data, filename: "#{app_type.name}_config.#{exp_format}"
+  rescue FphsException => e
+    return render_show_config_notices(app_type) if e.message.start_with? 'Bad configurations'
+
+    raise
   end
 
   #
@@ -102,5 +108,18 @@ class Admin::AppTypesController < AdminController
 
   def permitted_params
     %i[name label default_schema_name disabled]
+  end
+
+  def render_show_components(app_type)
+    @app_type = app_type
+    @config_notices = @app_type.check_option_configs
+    render 'admin/app_types/components'
+  end
+
+  def render_show_config_notices(app_type)
+    @app_type = app_type
+    @config_notices = @app_type.check_option_configs
+    @config_notices_only = true
+    render 'admin/app_types/components'
   end
 end

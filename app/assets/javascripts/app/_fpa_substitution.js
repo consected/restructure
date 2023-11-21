@@ -15,7 +15,10 @@ _fpa.substitution = class {
     var new_data = {};
     if (data && (data.master_id || data.vdef_version)) {
       var master_id = data.master_id;
+      // Clone the data
       new_data = Object.assign({}, data);
+
+      //  Set user_preference and current_user_roles in the data for possible substitution
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
       if (!new_data.current_user_roles) {
         new_data.current_user_roles = {}
@@ -29,11 +32,11 @@ _fpa.substitution = class {
       var master_id = block.parents('.master-panel').first().attr('data-master-id');
     }
 
+    // Get the master data saved in state for this instance.
     var master = _fpa.state.masters && _fpa.state.masters[master_id];
     if (master) {
-      var id = new_data.id;
-      new_data = Object.assign(new_data, master);
-      new_data.id = id;
+      // Add a clone of the master data into the master: attribute
+      new_data.master = Object.assign({}, master);
     }
 
     return new_data;
@@ -66,12 +69,14 @@ _fpa.substitution = class {
       } else if (next_tag.indexOf('glyphicon_') === 0) {
         const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
         got = `<span class="glyphicon glyphicon-${icon}"></span>`;
+      } else if (iter_data.model_references) {
+        console.log('get model ref')
+        got = iter_data.model_references.find((el) => el.to_record_resource_name == next_tag);
       }
 
-      if (got) {
-        iter_data = got;
-      } else {
-        continue;
+      iter_data = got;
+      if (!got) {
+        break;
       }
     }
 
@@ -83,6 +88,11 @@ _fpa.substitution = class {
     var data = this.data;
     const _this = this;
     if (!text || text.length < 1) return;
+
+    // Special escaping of double curly braces allows Handlebars substitutions
+    // to be skipped if these can't provide what is needed, reverting to handling
+    // by this function.
+    text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
     const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
@@ -143,7 +153,7 @@ _fpa.substitution = class {
           got = '(?)';
         }
       } else if (formatters) {
-        got = _fpa.tag_formatter.format_all(got, formatters, tag_name);
+        got = _fpa.tag_formatter.format_all(got, formatters, tag_name, data);
       }
 
       text = text.replace(el, got);

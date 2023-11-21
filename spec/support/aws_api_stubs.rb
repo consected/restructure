@@ -3,7 +3,7 @@
 #
 # Setup WebMock stubs for AWS API calls, allowing them to act
 # provide consistent results and work without an AWS_PROFILE being set.
-# By default, stubs are used. 
+# By default, stubs are used.
 # To test against the live AWS API, ensure the environment variable `NO_AWS_MOCKS=true`
 # is set
 module AwsApiStubs
@@ -65,9 +65,9 @@ module AwsApiStubs
       'X-Amz-Content-Sha256' => /.+/,
       'X-Amz-Date' => /.+/
     }.merge(extras)
-    
+
     # puts url
-    # puts headers    
+    # puts headers
 
     stub_request(method, url)
       .with(
@@ -758,7 +758,7 @@ module AwsApiStubs
         END_RES
       },
       s3_shortlink: {
-        url: %r{https://s3.amazonaws.com/test-shortlink.fphs.link/.+},
+        url: %r{https://s3.amazonaws.com/test-shortlink.link/.+},
         result: '',
         method: :put,
         body: /.*/,
@@ -776,7 +776,7 @@ module AwsApiStubs
         }
       },
       s3_head_shortlink: {
-        url: %r{https://s3.amazonaws.com/test-shortlink.fphs.link/.+},
+        url: %r{https://s3.amazonaws.com/test-shortlink.link/.+},
         result: '',
         method: :head,
         return_headers: {
@@ -789,23 +789,23 @@ module AwsApiStubs
         }
       },
       s3_get_access_list: {
-        url: %r{https://test-fphs-url-shortener-logs.s3.amazonaws.com/\?list-type=2&prefix=access/&start-after=access/.+},
+        url: %r{https://test-restr-url-shortener-logs.s3.amazonaws.com/\?list-type=2&prefix=access/&start-after=access/.+},
         method: :get,
         result: <<~END_RES
           <?xml version="1.0" encoding="UTF-8"?>
-          <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>test-fphs-url-shortener-logs</Name><Prefix>access/</Prefix><StartAfter>access/2022-03-23</StartAfter><KeyCount>1</KeyCount><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>access/2022-03-23-07-43-19-1A1919044CEA2BF1</Key><LastModified>2022-03-23T07:43:20.000Z</LastModified><ETag>&quot;b6171500b515d53ab0cb879bc046f176&quot;</ETag><Size>3495</Size><StorageClass>STANDARD</StorageClass></Contents></ListBucketResult>#{'        '}
+          <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>test-restr-url-shortener-logs</Name><Prefix>access/</Prefix><StartAfter>access/2022-03-23</StartAfter><KeyCount>1</KeyCount><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>access/2022-03-23-07-43-19-1A1919044CEA2BF1</Key><LastModified>2022-03-23T07:43:20.000Z</LastModified><ETag>&quot;b6171500b515d53ab0cb879bc046f176&quot;</ETag><Size>3495</Size><StorageClass>STANDARD</StorageClass></Contents></ListBucketResult>#{'        '}
         END_RES
       },
       s3_get_access_item: {
-        url: %r{https://test-fphs-url-shortener-logs.s3.amazonaws.com/access/.+},
+        url: %r{https://test-restr-url-shortener-logs.s3.amazonaws.com/access/.+},
         method: :get,
 
         result: <<~END_RES
-          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCW1ZG6PEJ685NRK REST.GET.POLICY_STATUS - "GET /test-shortlink.fphs.link?policyStatus HTTP/1.1" 200 - 141 - 5 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - lNT2bcaGer4lstGJ1/sya8p+fEnQF+OUojcuu5GchWCW37ZHBc3CcQ9TRWTtOTPJ7RaYivkCLc4= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
-          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWAJSV203FH1HRY REST.GET.BUCKETPOLICY - "GET /test-shortlink.fphs.link?policy HTTP/1.1" 200 - 178 - 10 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - qF7yZKUOLc6AdLDAUnm8USeODptFpLdjxUSLrV3Exw1KFgNMwEyDZ3LRKy/FubF0frLTj/q3Bio= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
-          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWCCQ54YEB2V19T REST.GET.LOCATION - "GET /test-shortlink.fphs.link?location HTTP/1.1" 200 - 108 - 14 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - CmmOE0FvFel99t8TvW7A2/G6jhnlRf94vVGIlTSd/eX9LKWQ8XYxEOw5F/E9t/PzLQmNjHpSDYM= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
-          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWDG2TTT0YBW4BZ REST.GET.ACL - "GET /test-shortlink.fphs.link?acl HTTP/1.1" 200 - 1449 - 11 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - aPxTOk/Gopafb7HgsQbzPWsb/TUsivyWiRgzOeAWUnBSOpzgcC+8r8BXG5QfPpkVKNaQ4HO77mQ= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
-          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.fphs.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWF726WAKAAXB1Q REST.GET.PUBLIC_ACCESS_BLOCK - "GET /test-shortlink.fphs.link?publicAccessBlock HTTP/1.1" 200 - 328 - 7 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - QwZMHQZy1WHJPLJBHeSLd9LXkWLWGtalj23hV2Q5REXl57tV1i6Qu7jR75tFBP2iWAO4pm3NLpw= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -#{'      '}
+          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCW1ZG6PEJ685NRK REST.GET.POLICY_STATUS - "GET /test-shortlink.link?policyStatus HTTP/1.1" 200 - 141 - 5 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - lNT2bcaGer4lstGJ1/sya8p+fEnQF+OUojcuu5GchWCW37ZHBc3CcQ9TRWTtOTPJ7RaYivkCLc4= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
+          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWAJSV203FH1HRY REST.GET.BUCKETPOLICY - "GET /test-shortlink.link?policy HTTP/1.1" 200 - 178 - 10 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - qF7yZKUOLc6AdLDAUnm8USeODptFpLdjxUSLrV3Exw1KFgNMwEyDZ3LRKy/FubF0frLTj/q3Bio= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
+          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWCCQ54YEB2V19T REST.GET.LOCATION - "GET /test-shortlink.link?location HTTP/1.1" 200 - 108 - 14 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - CmmOE0FvFel99t8TvW7A2/G6jhnlRf94vVGIlTSd/eX9LKWQ8XYxEOw5F/E9t/PzLQmNjHpSDYM= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
+          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWDG2TTT0YBW4BZ REST.GET.ACL - "GET /test-shortlink.link?acl HTTP/1.1" 200 - 1449 - 11 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - aPxTOk/Gopafb7HgsQbzPWsb/TUsivyWiRgzOeAWUnBSOpzgcC+8r8BXG5QfPpkVKNaQ4HO77mQ= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -
+          9e134f3964d1864709f668f9d3e8db57ca701a10a74bb930fb6f6c31d0ebf450 test-shortlink.link [23/Mar/2022:06:18:49 +0000] 3.83.64.224 arn:aws:sts::756598248234:assumed-role/AWSServiceRoleForAccessAnalyzer/access-analyzer BCWF726WAKAAXB1Q REST.GET.PUBLIC_ACCESS_BLOCK - "GET /test-shortlink.link?publicAccessBlock HTTP/1.1" 200 - 328 - 7 - "-" "aws-sdk-java/2.17.124 Linux/4.14.252-207.481.amzn2.x86_64 OpenJDK_64-Bit_Server_VM/25.322-b06 Java/1.8.0_322 vendor/Amazon.com_Inc. md/internal exec-env/AWS_Lambda_java8.al2 io/sync http/Apache cfg/retry-mode/legacy" - QwZMHQZy1WHJPLJBHeSLd9LXkWLWGtalj23hV2Q5REXl57tV1i6Qu7jR75tFBP2iWAO4pm3NLpw= SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader s3.amazonaws.com TLSv1.2 -#{'      '}
         END_RES
       }
     }

@@ -13,4 +13,5 @@
               field_name_4: 
                 reference_name:
                   field_name: return_value
-       
+              field_name_5: '\{\{curly_tag\}\} - \{\{curly_tag2\}\}'
+              field_name_6: '\{\{\{data.data_structure\}\}\}' # Get a data structure as original object, for JSON fields etc

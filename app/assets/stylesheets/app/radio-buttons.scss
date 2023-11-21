@@ -2,15 +2,16 @@ $color1: #f4f4f4;
 $color2: rgb(0, 97, 140);
 
 .button-radio {
-  display: inline-block;
-  position: relative;
-  margin: 0 0.5rem;
-  background-color: transparent;
-  border-radius: 50px;
-  line-height: 14px;
-  padding: 8px 12px 4px 8px;
-  color: white;
-  font-weight: bold;
+  display: inline-block !important;
+  position: relative !important;
+  margin: 0 0.5rem !important;
+  background-color: transparent !important;
+  border-radius: 50px !important;
+  line-height: 14px !important;
+  padding: 8px 12px 4px 8px !important;
+  overflow: visible !important;
+  color: white !important;
+  font-weight: bold !important;
   input[type="radio"] {
     position: absolute;
     opacity: 0;

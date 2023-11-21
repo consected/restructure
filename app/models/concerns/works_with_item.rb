@@ -65,7 +65,7 @@ module WorksWithItem
   end
 
   def matching_secondary_key_field
-    return parent_secondary_key.to_s if has_matching_secondary_key_field?
+    parent_secondary_key.to_s if has_matching_secondary_key_field?
   end
 
   def matching_secondary_key_value

@@ -8,6 +8,8 @@ module OptionConfigs
     include OptionConfigs::ExtraOptionImplementers::SaveTriggers
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
+    ValidValidIfTriggers = %i[on_create on_save on_update].freeze
+    ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
 
     def self.base_key_attributes
@@ -39,6 +41,7 @@ module OptionConfigs
     # @param [Hash] config - the parsed options text for this individual configuration
     # @param [ActiveRecord::Base] config_obj - the definition record storing this dynamic definition & options
     def initialize(name, config, config_obj)
+      super()
       @name = name
       @orig_config = config
 
@@ -54,9 +57,33 @@ module OptionConfigs
               "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
 
-      self.label ||= name.to_s.humanize
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
       self.resource_item_name = resource_name
+
+      clean_label_def
+      clean_caption_before_def
+      clean_dialog_before_def
+      clean_labels_def
+      clean_show_if_def
+      clean_save_action_def
+      clean_view_options_def
+      clean_db_configs_def
+      clean_access_if_def
+      clean_valid_if_def
+      clean_filestore_def
+      clean_fields_def
+      clean_field_options_def
+      clean_references_def
+      clean_save_triggers
+      clean_batch_triggers
+    end
+
+    # Defintion label
+    def clean_label_def
+      self.label ||= @name.to_s.humanize
+    end
+
+    def clean_caption_before_def
       self.caption_before ||= {}
       self.caption_before = self.caption_before.symbolize_keys
 
@@ -79,49 +106,66 @@ module OptionConfigs
           v[:new_caption] = v[:edit_caption] unless v.key?(:new_caption)
         end
       end
+    end
 
+    def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
+    end
 
+    # Field labels definitions
+    def clean_labels_def
       self.labels ||= {}
       self.labels = self.labels.symbolize_keys
+    end
 
+    def clean_show_if_def
       self.show_if ||= {}
 
-      if show_if_condition_strings.present?
-        show_if_condition_strings.each do |fn, val|
-          # Generate a real show_if hash fs a condition string was provided
-          # and show if is not already set
-          next if val.nil? || val.empty? || self.show_if[fn]
+      show_if_condition_strings&.each do |fn, val|
+        # Generate a real show_if hash fs a condition string was provided
+        # and show if is not already set
+        next if val.nil? || val.empty? || self.show_if[fn]
 
-          bl = Redcap::DataDictionaries::BranchingLogic.new(val)
-          sis = bl&.generate_show_if
-          self.show_if[fn] = sis if sis.present?
-        end
+        bl = Redcap::DataDictionaries::BranchingLogic.new(val)
+        sis = bl&.generate_show_if
+        self.show_if[fn] = sis if sis.present?
       end
 
       self.show_if = self.show_if.symbolize_keys
+    end
 
+    def clean_save_action_def
       self.save_action ||= {}
       self.save_action = self.save_action.symbolize_keys
 
       # Make save_action.on_save the default for on_create and on_update
       os = self.save_action[:on_save]
-      if os
-        ou = self.save_action[:on_update] || {}
-        oc = self.save_action[:on_create] || {}
-        self.save_action[:on_update] = os.merge(ou)
-        self.save_action[:on_create] = os.merge(oc)
-      end
+      return unless os
 
+      ou = self.save_action[:on_update] || {}
+      oc = self.save_action[:on_create] || {}
+      self.save_action[:on_update] = os.merge(ou)
+      self.save_action[:on_create] = os.merge(oc)
+    end
+
+    def clean_view_options_def
       self.view_options ||= {}
       self.view_options = self.view_options.symbolize_keys
+    end
 
+    def clean_db_configs_def
+      self.db_configs ||= {}
+      @config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
+    end
+
+    def clean_fields_def
+      self.fields ||= []
+    end
+
+    def clean_field_options_def
       self.field_options ||= {}
       self.field_options = self.field_options.symbolize_keys
-
-      self.db_configs ||= {}
-      config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if config_obj.respond_to? :db_columns
 
       # Allow field_options.edit_as.alt_options to be an array
       self.field_options.each do |k, v|
@@ -135,7 +179,14 @@ module OptionConfigs
         end
         self.field_options[k][:edit_as][:alt_options] = new_ao
       end
+    end
 
+    def clean_filestore_def
+      self.filestore ||= {}
+      self.filestore = self.filestore.symbolize_keys
+    end
+
+    def clean_access_if_def
       self.creatable_if ||= {}
       self.creatable_if = self.creatable_if.symbolize_keys
 
@@ -144,26 +195,24 @@ module OptionConfigs
 
       self.showable_if ||= {}
       self.showable_if = self.showable_if.symbolize_keys
+    end
 
+    def clean_valid_if_def
       self.valid_if ||= {}
       self.valid_if = self.valid_if.symbolize_keys
 
-      os = self.valid_if[:on_save]
-      if os
-        ou = self.valid_if[:on_update] || {}
-        oc = self.valid_if[:on_create] || {}
-        self.valid_if[:on_update] = os.merge(ou)
-        self.valid_if[:on_create] = os.merge(oc)
+      unless self.valid_if.keys.empty? || (self.valid_if.keys - ValidValidIfTriggers).empty?
+        failed_config :valid_if,
+                      "valid_if contains invalid keys #{valid_if.keys} - expected only #{ValidValidIfTriggers}"
       end
 
-      self.filestore ||= {}
-      self.filestore = self.filestore.symbolize_keys
+      os = self.valid_if[:on_save]
+      return unless os
 
-      self.fields ||= []
-
-      clean_references_def
-      clean_save_triggers
-      clean_batch_triggers
+      ou = self.valid_if[:on_update] || {}
+      oc = self.valid_if[:on_create] || {}
+      self.valid_if[:on_update] = os.merge(ou)
+      self.valid_if[:on_create] = os.merge(oc)
     end
 
     def clean_references_def
@@ -246,6 +295,11 @@ module OptionConfigs
             bad_ref_items << mn
             Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
             Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
+            # Log this as a warning, not an error, since we are not able to control the order of items being created
+            # in an app import, and many references to underlying definitions will not yet have been created
+            failed_config :references,
+                          "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}",
+                          level: :warn
           end
         end
 
@@ -273,6 +327,12 @@ module OptionConfigs
     def clean_save_triggers
       self.save_trigger ||= {}
       self.save_trigger = self.save_trigger.symbolize_keys
+
+      unless self.save_trigger.keys.empty? || (self.save_trigger.keys - ValidSaveTriggerTriggers).empty?
+        failed_config :save_trigger,
+                      "save_trigger contains invalid keys #{save_trigger.keys} - expected only #{ValidSaveTriggerTriggers}"
+      end
+
       # Make save_trigger.on_save the default for on_create and on_update
       os = self.save_trigger[:on_save]
       if os
@@ -296,10 +356,12 @@ module OptionConfigs
     # This should be extended to provide additional checks when options are saved
     # @todo - work out why the "raise" was disabled and whether it needs changing
     def self.raise_bad_configs(option_configs)
-      bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
-      Rails.logger.warn("bad_configs: #{bad_configs.map(&:bad_ref_items)}") if bad_configs.present?
-      # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
-      bad_configs
+      ces = all_option_configs_errors(option_configs)
+      return unless ces
+
+      Rails.logger.warn("Bad #{name} configurations: #{ces}")
+      raise FphsException, "Bad configurations in #{name}"
+      ces
     end
 
     #
@@ -314,7 +376,9 @@ module OptionConfigs
       if config_text.present?
         config_text = include_libraries(config_text)
         begin
-          res = YAML.safe_load(config_text, [], [], true)
+          res = YAML.safe_load(config_text, permitted_classes: [],
+                                            permitted_symbols: [],
+                                            aliases: true)
         rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
           errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
@@ -365,7 +429,6 @@ module OptionConfigs
 
       configs
     rescue FphsException => e
-      puts config_text if Rails.env.test? || Rails.env.development?
       raise FphsException, e
     end
 
@@ -529,8 +592,9 @@ module OptionConfigs
         category = res[1].strip
         name = res[2].strip
         lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
-        lib = lib.dup
+        lib = (lib || '').dup
         lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+        lib = "# @sourced_library_start #{category} #{name}\n#{lib}\n# @sourced_library_end #{category} #{name}\n"
         content_to_update.gsub!(res[0], lib)
         res = content_to_update.match reg
       end

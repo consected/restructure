@@ -18,15 +18,23 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="data-dicts">
       <h4>Data Dictionaries</h4>
+      <% if current_admin.can_admin?(:reference_data)%>
       <div id="data-dic-block-container" data-subscription="data-dic-block">
         <%= link_to "loading...", data_dic_admin_reference_data_url, remote: true, class: 'on-show-auto-click' %>
       </div>
+      <% else %>
+        <p>Not authorized to view reference data</p>
+      <% end %>
     </div>
     <div role="tabpanel" class="tab-pane" id="tables">
       <h4>Tables</h4>
+      <% if current_admin.can_admin?(:reference_data)%>
       <div id="table-list-block-container" data-subscription="table-list-block" data-preprocessor="ref_data_table_list_block">
         <%= link_to "loading...", table_list_admin_reference_data_url, remote: true, class: 'on-show-auto-click' %>
       </div>
+      <% else %>
+        <p>Not authorized to view reference data</p>
+      <% end %>
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
       <h4>Protocol / status / method </h4>
@@ -45,7 +53,11 @@
       <%= render partial: 'admin/reference_data/accuracy_score_block'%>
     </div>
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
+    <% if current_admin.can_admin?(:user_access_controls)%>
       <%= render partial: 'admin/reports/form/uac_panel' %>
+    <% else %>
+      <p>Not authorized to administer user access controls</p>
+    <% end %>
     </div>
   </div>
 </div>

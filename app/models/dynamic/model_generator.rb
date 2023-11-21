@@ -11,7 +11,7 @@ module Dynamic
     included do
       # :field_types is a Hash of field_name => field_type values, where the field_name
       # is a symbol and field_type is a valid DB migration data type (also a symbol)
-      attr_accessor :field_types, :array_fields
+      attr_accessor :field_types, :array_fields, :prefix_config_library
       attr_accessor :parent, :qualified_table_name, :category
     end
 
@@ -66,6 +66,13 @@ module Dynamic
 
       options = YAML.dump default_options
 
+      if prefix_config_library.present?
+        options = options.sub(
+          /^---/,
+          "---\n#{prefix_config_library_string}\n"
+        )
+      end
+
       fla = field_list.split
       if fla.include?('master_id')
         foreign_key_name = 'master_id'
@@ -109,7 +116,17 @@ module Dynamic
       schema_name, table_name = schema_and_table_name
       name = table_name.singularize
 
-      @dynamic_model = DynamicModel.active.where(name: name, category: category, schema_name: schema_name).first
+      schema_name = [nil, ''] if schema_name.blank?
+
+      attrs = { name: name, category: category, schema_name: schema_name }
+      dms = DynamicModel.active.where(attrs)
+
+      if dms.length > 1
+        Rails.logger.warn "Multiple dynamic models were found for #{attrs}\n" \
+                          "The item with id #{dms.first.id} will be used"
+      end
+
+      @dynamic_model = dms.first
       return if !no_check && !dynamic_model_ready?
 
       @dynamic_model
@@ -147,6 +164,20 @@ module Dynamic
 
       dynamic_model.generate_model if dynamic_model&.ready_to_generate?
       dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
+    end
+
+    #
+    # String to form the library to prefix the options
+    # @return [String]
+    def prefix_config_library_string
+      "# @library #{prefix_config_library}"
+    end
+
+    #
+    # Check if the prefix config library has been added to the options
+    # @return [true|false]
+    def dynamic_model_config_library_added?
+      !!dynamic_model&.options&.index(/^#{prefix_config_library_string}$/)
     end
 
     #

@@ -8,8 +8,19 @@ _fpa.preprocessors = {
 
     // Mark the block a form was within, to make scrolling more reliable
     if (block.is('form')) {
-      var b = block.parents('.common-template-item, .new-block').not('.no-processed-scroll');
-      if (b.hasClass('new-block')) b = b.parent();
+      var b = block.parents('.common-template-item, .new-block').not('.no-processed-scroll').first();
+      if (b.hasClass('new-block')) {
+        var cti = b.parents('.common-template-item').first();
+        if (cti.length) {
+          // There is a surrounding common-template-item block, so it is possible this was
+          // an embedded or add model reference form.
+          b = cti;
+        }
+        else {
+          // No surrounding, so just head back to the parent.
+          b = b.parent();
+        }
+      }
       $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here');
       b.addClass('postprocessed-scroll-here');
     }

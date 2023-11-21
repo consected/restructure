@@ -344,5 +344,28 @@ class Admin
                                       user: user,
                                       current_admin: current_admin
     end
+
+    #
+    # Check the option configs in those that have them and return a list of any notices
+    # @return [Array]
+    def check_option_configs
+      res = []
+      valid_associated_activity_logs.each do |object_instance|
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        res += ces if ces
+      end
+
+      associated_dynamic_models.each do |object_instance|
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        res += ces if ces
+      end
+
+      associated_external_identifiers.each do |object_instance|
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        res += ces if ces
+      end
+
+      res
+    end
   end
 end

@@ -40,7 +40,7 @@ class Admin::ManageAdminsController < AdminController
     role_descriptions
     server_info
     sub_processes
-    user_access
+    user_access_controls
     user_roles
   ].freeze
 

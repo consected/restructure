@@ -9,13 +9,13 @@
   <%= link_to "", "/nfs_store/container_list/#{container_id}/content#{activity_log_id ? "?activity_log_id=#{activity_log_id}&activity_log_type=#{activity_log_type}" : ""}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id, activity_log_id: activity_log_id, activity_log_type: activity_log_type } %>
   <div class="container-meta-controls">
     <div class="button-radio no-details">
-      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-none" value="" class="ff" <% if app_config_text(:file_browser_default_view, 'no details') == 'no details' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-none">no details</label>
+      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-none" value="" class="ff ignore-field-change" <% if app_config_text(:file_browser_default_view, 'no details') == 'no details' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-none">no details</label>
     </div>
     <div class="button-radio file-info">
-      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-meta" value="meta" class="ff" <% if app_config_text(:file_browser_default_view) == 'file info' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-meta">file info</label>
+      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-meta" value="meta" class="ff ignore-field-change" <% if app_config_text(:file_browser_default_view) == 'file info' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-meta">file info</label>
     </div>
     <div class="button-radio classifications">
-      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-classifications" value="classifications" class="ff" <% if app_config_text(:file_browser_default_view) == 'classifications' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-classifications">classifications</label>
+      <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-classifications" value="classifications" class="ff ignore-field-change" <% if app_config_text(:file_browser_default_view) == 'classifications' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-classifications">classifications</label>
     </div>
   </div>
 </div>
