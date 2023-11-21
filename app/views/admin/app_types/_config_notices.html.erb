@@ -1,0 +1,11 @@
+<% if @config_notices.present? %>
+<div class="config-error-block">
+  <% @config_notices.each do |ce| %>
+      <div>
+        <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
+        <p><%= ce[:message] %></p>
+        <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+      </div>
+  <% end %>
+</div>
+<% end %>

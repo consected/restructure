@@ -19,18 +19,19 @@ _fpa.form_utils = {
     for (var p in obj) {
       if (obj.hasOwnProperty(p)) {
         var v = obj[p];
-        var f = block.find("[data-attr-name='" + p.underscore() + "']").parent();
+        var $field = block.find("[data-attr-name='" + p.underscore() + "']").parent().filter(':visible');
 
         // In certain cases there may be more than one matching item (such as for radio buttons)
         // If so, try to jump to the main .list-group-item container
-        if (f.length > 1) {
-          f = f.parents('.list-group-item').first();
+        if ($field.length > 1) {
+          $field = $field.parents('.list-group-item').first();
+          if (!first_field) first_field = $field;
         }
-        if (f.length == 1) {
-          if (!first_field) first_field = f;
-          f.addClass('has-error');
+        if ($field.length == 1) {
+          if (!first_field) first_field = $field;
+          $field.addClass('has-error');
           var fn = p.replace(/_/g, ' ');
-          if (f.hasClass('showed-caption-before')) fn = 'Entry';
+          if ($field.hasClass('showed-caption-before')) fn = 'Entry';
 
           if (v.join) v = v.join('; ')
 
@@ -42,9 +43,9 @@ _fpa.form_utils = {
             v = fn + ' ' + v;
           }
           var el = $('<p class="help-block error-help">' + v + '</p>');
-          f.append(el);
+          $field.append(el);
           delete obj[p];
-          obj.form = 'has errors. Check the highlighted fields.';
+          obj.Form = 'has errors. Check the highlighted fields.';
         }
       }
     }
@@ -874,8 +875,21 @@ _fpa.form_utils = {
           // result if directly calling with #element-id 
           if (target[0] === '#') target = `[id="${target.replace('#', '')}"]`;
         }
+
         let $target = $(target);
+        // If there is the target within this common-template-item block (if we are in one)
+        // use that as the target. Otherwise, just use the target exactly as specified.
+        var $pos = $(this).parents('.common-template-item').find(target);
+        if ($pos.length) {
+          $target = $pos;
+        }
+        else {
+          $pos = $(this).parents('.master-panel').find(target);
+          if ($pos.length) $target = $pos;
+        }
+
         if (last) $target = $target.last();
+
         $target.click();
 
       }).addClass('attached-hash-click-target');
@@ -907,6 +921,11 @@ _fpa.form_utils = {
         if ($pos.length) {
           $target = $pos;
         }
+        else {
+          $pos = $(this).parents('.master-panel').find(target);
+          if ($pos.length) $target = $pos;
+        }
+
         if (last) $target = $target.last();
 
         // Only click the target if the caret is marked as collapsed currently
@@ -1194,12 +1213,10 @@ _fpa.form_utils = {
       .find('[data-toggle-caret]')
       .not('.attached-toggle_caret')
       .on('click', function () {
-        if ($(this).hasClass('glyphicon-triangle-bottom')) {
+        if ($(this).hasClass('glyphicon-triangle-right')) {
           var el = $(this);
-          $(this).removeClass('glyphicon-triangle-bottom');
-          $(this).addClass('glyphicon-triangle-top');
-          $(this).removeClass('caret-target-collapsed');
-          $(this).addClass('caret-target-expanded');
+          $(this).removeClass('glyphicon-triangle-right');
+          $(this).addClass('glyphicon-triangle-bottom');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1210,10 +1227,8 @@ _fpa.form_utils = {
           }, 10);
         } else {
           var el = $(this);
-          $(this).addClass('glyphicon-triangle-bottom');
-          $(this).removeClass('glyphicon-triangle-top');
-          $(this).removeClass('caret-target-expanded');
-          $(this).addClass('caret-target-collapsed');
+          $(this).addClass('glyphicon-triangle-right');
+          $(this).removeClass('glyphicon-triangle-bottom');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
