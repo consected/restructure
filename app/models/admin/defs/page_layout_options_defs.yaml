@@ -87,7 +87,16 @@ container:
       template_prefix: main            # prefix to use for HTML templates - defaults to "page", but to 
                                        # show activity logs in a dashboard, "main" will use the default
                                        # activity log template, (rather than a page layout)
-      
+      option_classes: "class1 class2" # List class names to add to the .result-target block of the column
+                                      # where the resource results are targeted.
+                                      # These can be useful for app specific styling, and can control
+                                      # embedded activity log display, for example.
+                                      # Specific classes are:
+                                      # - keep-activity-log-header
+                                      # - keep-activity-log-action-buttons
+                                      # - keep-activity-log-action-controls
+                                      # - keep-activity-log-section-panel-header
+                                      # - keep-activity-log-sublist-controls
       inner_rows:
         rows: {}
           # uses *cols for each row within this column

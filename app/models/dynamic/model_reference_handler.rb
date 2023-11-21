@@ -39,6 +39,8 @@ module Dynamic
       end
     end
 
+    #
+    # Clean up the cached values for model_references
     def reset_model_references
       @model_references = nil
       @embedded_items = nil
@@ -151,9 +153,10 @@ module Dynamic
       smr = smr.to_sym
       sdir = vo[:direction]
       keep_top = vo[:keep_top]
+      null_value = vo[:null_value]
 
       top_item = res.delete_at(0) if keep_top
-      res = res.sort_by { |a| a[smr] }
+      res = res.sort_by { |a| a[smr] || null_value }
       res = res.reverse if sdir&.in?(['desc', 'reverse'])
       res.insert(0, top_item) if top_item
 
@@ -481,44 +484,6 @@ module Dynamic
     end
 
     #
-    # A referring record is either set based on the the specific record that
-    # the controller tells us is being viewed
-    # when an action is performed, or
-    # if there is only one model reference we use that instead.
-    def referring_record
-      return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
-
-      res = referenced_from
-      if res.length == 1
-        @referring_record = res.first&.from_record
-        return @referring_record if @referring_record
-      end
-
-      @referring_record = :nil
-      nil
-    end
-
-    #
-    # Top referring record is the top record in the reference hierarchy.
-    # We iterate through the referring records until we reach the top one and return it.
-    # If there are no referring records from the current activity log, return nil
-    # @return [UserBase | nil] <description>
-    def top_referring_record
-      return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
-
-      @top_referring_record = next_up = referring_record
-      while next_up
-        next_up = next_up.referring_record
-        @top_referring_record = next_up if next_up
-      end
-
-      return @top_referring_record if @top_referring_record
-
-      @top_referring_record = :nil
-      nil
-    end
-
-    #
     # Item targeted by the most recent model reference, if there is one.
     # @return [UserBase | nil] <description>
     def latest_reference
@@ -594,7 +559,7 @@ module Dynamic
           res = mrs.first.to_record
         end
 
-        set_embedded_item_current_user(res)
+        apply_embedded_item_current_user(res)
         res
       end
     end
@@ -705,7 +670,7 @@ module Dynamic
 
     #
     # Set the current user for the embedded item
-    def set_embedded_item_current_user(res)
+    def apply_embedded_item_current_user(res)
       return unless res
 
       if res.class.no_master_association
@@ -727,7 +692,7 @@ module Dynamic
     def creatable_model_not_embeddable?(cmrs, item)
       return true if item.class.class_parent_name == 'ActivityLog'
 
-      cmrs.first.last.first.last[:ref_config][:view_as][:new].in?(NotEmbeddedOptions)
+      cmrs.first.last.first.last.dig(:ref_config, :view_as, :new)&.in?(NotEmbeddedOptions)
     rescue StandardError
       nil
     end

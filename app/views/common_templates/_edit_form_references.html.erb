@@ -93,7 +93,7 @@
                   unless action_name.in? ['new', 'edit']
                     # Do we ever get here?
                %>
-                  <a id="" href="/masters/<%= model_reference.to_record_master_id %>/<%= model_reference.to_record_type_us.ns_pathify.pluralize %>/<%= model_reference.to_record_id %>" data-template="<%= model_reference.to_record_short_type_us.hyphenate %>-result-template" data-result-target-force="true" data-result-target="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id %>" data-remote="true" class="glyphicon glyphicon-triangle-bottom caret-target-collapsed view-item mr-expander"></a>
+                  <a id="" href="/masters/<%= model_reference.to_record_master_id %>/<%= model_reference.to_record_type_us.ns_pathify.pluralize %>/<%= model_reference.to_record_id %>" data-template="<%= model_reference.to_record_short_type_us.hyphenate %>-result-template" data-result-target-force="true" data-result-target="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id %>" data-remote="true" class="glyphicon glyphicon-triangle-right caret-target-collapsed view-item mr-expander"></a>
                 <% end %>
                 <i><%= model_reference.to_record_label %></i>
                 <% unless action_name.in?(['new', 'edit']) %><%= model_reference.to_record_data %><% end %>

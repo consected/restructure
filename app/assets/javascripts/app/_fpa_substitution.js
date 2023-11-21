@@ -15,7 +15,10 @@ _fpa.substitution = class {
     var new_data = {};
     if (data && (data.master_id || data.vdef_version)) {
       var master_id = data.master_id;
+      // Clone the data
       new_data = Object.assign({}, data);
+
+      //  Set user_preference and current_user_roles in the data for possible substitution
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
       if (!new_data.current_user_roles) {
         new_data.current_user_roles = {}
@@ -29,11 +32,11 @@ _fpa.substitution = class {
       var master_id = block.parents('.master-panel').first().attr('data-master-id');
     }
 
+    // Get the master data saved in state for this instance.
     var master = _fpa.state.masters && _fpa.state.masters[master_id];
     if (master) {
-      var id = new_data.id;
-      new_data = Object.assign(new_data, master);
-      new_data.id = id;
+      // Add a clone of the master data into the master: attribute
+      new_data.master = Object.assign({}, master);
     }
 
     return new_data;

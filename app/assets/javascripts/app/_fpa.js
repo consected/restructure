@@ -200,7 +200,12 @@ _fpa = {
       if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
 
       // Potentially don't reload, especially if a sidebar request has been made
-      if (block.parents('[data-no-load]').length) return;
+      // Allow this to be overridden in specific cases by specifying data-ignore-no-load="true"
+      // which can allow this to operate with activity logs embedded in portal pages 
+      if (block.parents('[data-no-load]').length &&
+        !block.parents('[data-ignore-no-load]').length &&
+        !block.attr('data-ignore-no-load')
+      ) return;
 
       _fpa.ajax_working(block);
       if (!options) options = {};
@@ -453,7 +458,12 @@ _fpa = {
       }
     }
 
-    if (!procfound && alt_preprocessor) {
+    // Don't use the alt processor if we managed to process the
+    // primary one. We can force the use of it in certain situations
+    // if needed by adding data-add-preprocessor="true" to the block
+    const add_pp = block.attr('data-add-preprocessor');
+
+    if ((!procfound || add_pp) && alt_preprocessor) {
       alt_preprocessor = alt_preprocessor.replace(/-/g, '_');
       if (_fpa.preprocessors[alt_preprocessor]) {
         _fpa.preprocessors[alt_preprocessor](block, data);
@@ -478,7 +488,12 @@ _fpa = {
       }
     }
 
-    if (!procfound && alt_processor) {
+    // Don't use the alt processor if we managed to process the
+    // primary one. We can force the use of it in certain situations
+    // if needed by adding data-add-postprocessor="true" to the block
+    const add_pp = block.attr('data-add-postprocessor');
+
+    if ((!procfound || add_pp) && alt_processor) {
       alt_processor = alt_processor.replace(/-/g, '_');
       if (_fpa.postprocessors[alt_processor]) {
         _fpa.postprocessors[alt_processor](block, data);
@@ -530,17 +545,20 @@ _fpa = {
         if (bsubmitted.length) {
           block.find('.field-was-changed').removeClass('field-was-changed');
           block.parents('form').find('.field-was-changed').removeClass('field-was-changed');
-          if (block.parents('.prevent-reload-on-reference-save').length === 0 &&
-            block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').length) {
+          var cfs = block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').not('.ignore-field-change');
+          if (block.parents('.prevent-reload-on-reference-save').length === 0 && cfs.length) {
+            cfs.addClass('changed-field-danger');
             _fpa.flash_notice('Form fields have not been saved. Do you want to <a class="btn btn-default submit-cancel-change">cancel and keep the changes</a> so you can save the form, or <a class="btn btn-danger submit-continue-change">continue without saving</a>', 'warning');
 
             $('.alert a.submit-continue-change').on('click', function () {
               block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').removeClass('field-was-changed');
               bsubmitted.click();
               _fpa.clear_flash_notices();
+              cfs.removeClass('changed-field-danger');
             })
             $('.alert a.submit-cancel-change').on('click', function () {
               _fpa.clear_flash_notices();
+              cfs.removeClass('changed-field-danger');
             })
             ev.preventDefault();
             return false;
@@ -994,25 +1012,13 @@ _fpa = {
 
         $('.ajax-clicked-running').removeClass('ajax-clicked-running').blur();
 
-        var format_message = function (j) {
-          var msg = '';
-          var msgar = [];
-          for (var i in j) {
-            if (j.hasOwnProperty(i)) {
-              msgar.push(i.replace(/_/g, ' ') + ' ' + j[i]);
-            }
-          }
-          msg = msgar.join(' \n');
-          return msg;
-        };
-
         if (status != 'abort') {
           var j = xhr.responseJSON;
           if (xhr.status === 422) {
             _fpa.form_utils.set_field_errors($('.ajax-running'), j);
             if (j) {
               var msg = '<p>Could not complete action:</p>';
-              msg += format_message(j);
+              msg += _fpa.format_message(j);
             } else {
               j = xhr.responseText;
               if (j) var msg = '<div>' + j + '</div>';
@@ -1024,7 +1030,7 @@ _fpa = {
             _fpa.flash_notice(msg, 'warning');
           } else {
             if (j) {
-              msg = format_message(j);
+              msg = _fpa.format_message(j);
               _fpa.flash_notice(msg, 'danger');
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
               _fpa.flash_notice(xhr.responseText, 'danger');
@@ -1179,6 +1185,28 @@ _fpa = {
       $('.modal.was-in').removeClass('was-in').addClass('in');
     }, 300)
   },
+
+  format_message: function (j) {
+    var msg = '';
+    var msgar = [];
+    for (var i in j) {
+      if (j.hasOwnProperty(i)) {
+        var partmsg = j[i];
+        if (partmsg.join) partmsg = partmsg.join("\n")
+        var show_msg;
+        if (partmsg.indexOf('invalid_error_message') < 0) {
+          show_msg = `${i.replace(/_/g, ' ')} ${partmsg}`
+        }
+        else {
+          show_msg = partmsg.replaceAll('invalid_error_message:', '')
+        }
+        msgar.push(show_msg);
+      }
+    }
+    msg = msgar.join(' \n');
+    return msg;
+  },
+
 
   get_item_by: function (attr, obj, evid) {
     for (var pi in obj) {

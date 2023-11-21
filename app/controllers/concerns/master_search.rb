@@ -20,11 +20,12 @@ module MasterSearch
     @search_type = search_type
 
     begin
-      if @search_type == 'MSID'
+      case @search_type
+      when 'MSID'
         run_for_master_attribute
-      elsif @search_type == 'SIMPLE'
+      when 'SIMPLE'
         run_general
-      elsif @search_type == 'REPORT'
+      when 'REPORT'
         res = run_report
 
         unless res
@@ -179,12 +180,12 @@ module MasterSearch
     }
   end
 
-  def send_csv_response(m)
+  def send_csv_response(results)
     return not_authorized unless current_user.can? :export_csv
 
-    ma = m[:masters].first
+    ma = results[:masters].first
 
-    # return bad_request unless ma
+    # No masters results where provided
     unless ma
       flash[:warning] = 'no results to export'
       redirect_to(child_error_reporter_path)
@@ -198,7 +199,7 @@ module MasterSearch
             (ma['pro_infos'].first || {}).map { |k, _v| "pro.#{k}" }
           ).to_csv]
 
-    m[:masters].each do |mae|
+    results[:masters].each do |mae|
       res << (mae.map { |_k, v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v } +
           (mae['player_infos'].first || {}).map { |_k, v| v } +
           (mae['pro_infos'].first || {}).map { |_k, v| v }).to_csv

@@ -27,6 +27,22 @@
   </div>
   <% end %>
 
+  <% 
+  ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+  if ces %>
+  <label>configuration errors</label>
+    <div class="config-error-block">
+
+      <% ces.each do |ce| %>
+          <div>
+            <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
+            <p><%= ce[:message] %></p>
+            <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+          </div>
+      <% end %>
+    </div>
+  <% end %>
+
 <% else %>
   <p>
   <label>not yet saved</label>

@@ -48,7 +48,7 @@ module BigSelectFieldHelper
       class: "use-big-select #{extra_class}",
       readonly: 'readonly',
       id: field_id,
-      data: { 'big-select-subtype': subtype }
+      data: { 'big-select-subtype': subtype, attr_name: field }
     }
 
     field_html = if options[:no_instance]

@@ -23,7 +23,11 @@ class PageLayoutsController < ApplicationController
   def show
     return not_authorized unless @page_layout.can_access?(current_user) || current_admin
 
-    render :show unless performed?
+    if request.format == :html
+      render :show unless performed?
+    else
+      render partial: 'page_layouts/show', content_type: 'text/html' unless performed?
+    end
   end
 
   def show_content
@@ -108,6 +112,6 @@ class PageLayoutsController < ApplicationController
     return @resource_id = rid if rid > 0
 
     secondary_key = @filters[:secondary_key]
-    return @secondary_key = secondary_key if secondary_key.present?
+    @secondary_key = secondary_key if secondary_key.present?
   end
 end
