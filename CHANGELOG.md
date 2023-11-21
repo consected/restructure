@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.102] - 2023-10-23
 
 - [Fixed] Error after saving dynamic model definition changes - fixes #193
 - [Added] configuration notices to a more easily access app type components page - fixes #195
