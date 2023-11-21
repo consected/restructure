@@ -30,8 +30,16 @@ ul.admin-tag-list {
       cursor: pointer;
     }
   }
+
 }
 
+span.activity-list-name {
+  color: black;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
 
 .admin-tag-list.selectable li:hover {
   cursor: pointer;
