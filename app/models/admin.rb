@@ -83,18 +83,25 @@ class Admin < ActiveRecord::Base
     # do not notify the admins for now
   end
 
-  def can_admin?(controller_name)
+  #
+  # Can an admin administer this "capability"
+  # Typically the capability_name is an admin controller name, but
+  # this is sometimes overridden to group controllers into specific capabilities.
+  # such as 'redcap'
+  # @param [String] capability_name
+  # @return [true | false]
+  def can_admin?(capability_name)
     cap = capabilities&.reject(&:blank?)
-    cap.nil? || cap.empty? || controller_name.to_s.in?(cap)
+    cap.nil? || cap.empty? || capability_name.to_s.in?(cap)
   end
 
   protected
 
   def unlock_account
-    if access_locked? && saved_change_to_encrypted_password?
-      self.locked_at = nil
-      self.failed_attempts = nil
-    end
+    return unless access_locked? && saved_change_to_encrypted_password?
+
+    self.locked_at = nil
+    self.failed_attempts = nil
   end
 
   def prevent_email_change
@@ -102,9 +109,9 @@ class Admin < ActiveRecord::Base
   end
 
   def prevent_re_enabling_admin
-    if disabled_changed? && persisted? && disabled != true && disabled_was == true && !can_manage_admins?
-      errors.add(:disabled, 'change not allowed!')
-    end
+    return unless disabled_changed? && persisted? && disabled != true && disabled_was == true && !can_manage_admins?
+
+    errors.add(:disabled, 'change not allowed!')
   end
 
   def prevent_creating_admin
