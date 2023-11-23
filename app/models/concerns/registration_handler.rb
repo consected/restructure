@@ -3,6 +3,10 @@
 module RegistrationHandler
   extend ActiveSupport::Concern
 
+  included do
+    before_create :auto_confirm_if_not_self_registration
+  end
+
   # @return [TrueClass, FalseClass]
   def allow_users_to_register?
     @allow_users_to_register ||= Settings::AllowUsersToRegister
@@ -17,6 +21,12 @@ module RegistrationHandler
     email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
   end
 
+  #
+  # Certain validations and notifications are required for self registering users.
+  # To determine if a user is self registering, check if:
+  #  - users are allowed to register (based on Settings)
+  #  - the user is not a batch or template user (based on the email address pattern or matching the batch admin email)
+  #  - the current admin setting up this user is the self registration admin (based on Settings)
   def required_for_self_registration?
     allow_users_to_register? && !a_template_or_batch_user? && self_registration_admin?
   end
@@ -33,5 +43,13 @@ module RegistrationHandler
   # @return User
   def self.registration_template_user
     User.find_by(email: Settings::DefaultUserTemplateEmail)
+  end
+
+  private
+
+  def auto_confirm_if_not_self_registration
+    return if required_for_self_registration?
+
+    self.confirmed_at = Time.now if respond_to? :confirmed_at
   end
 end
