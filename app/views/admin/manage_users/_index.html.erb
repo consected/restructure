@@ -23,6 +23,7 @@
           <th>Do Not Email</th>
           <th>Expires in (days)</th>
           <th>Signed in at</th>
+          <th>Confirmed</th>
           <th>Locked</th>
           <th>Disabled</th>
           <th>Admin</th>
@@ -44,6 +45,7 @@
             <td><%= list_item.do_not_email ? 'do not email' : ''%></td>
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.current_sign_in_at %></td>
+            <td><%= list_item.confirmed_at ? 'confirmed' : ''%></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
             <td class="admin-item-admin-infos">
