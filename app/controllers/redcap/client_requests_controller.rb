@@ -4,6 +4,10 @@
 class Redcap::ClientRequestsController < AdminController
   protected
 
+  def capability_name
+    'redcap'
+  end
+
   def filters
     {
       action: Redcap::ClientRequest.pluck(:action).uniq.compact.reject(&:blank?),

@@ -73,6 +73,12 @@ class Redcap::ProjectAdminsController < AdminController
     render json: { message: msg }, status: 200
   end
 
+  protected
+
+  def capability_name
+    'redcap'
+  end
+
   private
 
   def set_defaults

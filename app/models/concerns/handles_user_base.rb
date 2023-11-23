@@ -54,10 +54,7 @@ module HandlesUserBase
     add_model_to_list
   end
 
-  # rubocop:disable Metrics/BlockLength
   class_methods do
-    # rubocop:enable Metrics/BlockLength
-
     #
     # Get the name of the previous level in the class namespace, or 'Object' if already at the top
     def class_parent_name
