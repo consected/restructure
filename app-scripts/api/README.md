@@ -46,6 +46,10 @@ export external_id_attribute='study_id'
 # Resource name for the report used to match IDs to containers
 export report_name='study_files_api__study_find_container'
 
+# Optionally set curl command additional arguments and flags
+# This defaults to '-s' for silent requests
+# export curl_args='-s -v'
+
 # Now run the script
 ./upload-to-external-id-container.sh ${upload_dir}
 ```
