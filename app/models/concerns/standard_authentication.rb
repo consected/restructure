@@ -387,6 +387,10 @@ module StandardAuthentication
       self.reset_password_sent_at = nil
       self.password_updated_at = DateTime.now
       @set_reminder = true
+      # This duplicates Devise Lockable#unlock_access! without forcing an unnecessary save
+      self.locked_at = nil
+      self.failed_attempts = 0 if respond_to?(:failed_attempts=)
+      self.unlock_token = nil  if respond_to?(:unlock_token=)
     end
   end
 
