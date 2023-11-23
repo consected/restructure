@@ -50,6 +50,6 @@ module RegistrationHandler
   def auto_confirm_if_not_self_registration
     return if required_for_self_registration?
 
-    self.confirmed_at = Time.now
+    self.confirmed_at = Time.now if respond_to? :confirmed_at
   end
 end
