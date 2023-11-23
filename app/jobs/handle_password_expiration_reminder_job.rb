@@ -33,6 +33,8 @@ class HandlePasswordExpirationReminderJob < ApplicationJob
   private
 
   def allow_send_to(user)
+    return if user.do_not_email
+
     unless user.password_expiring_soon?
       Delayed::Worker.logger.info "User password is not expiring soon. Don't bother to remind yet, " \
                                   'since there is another job coming up in the future to do it.'

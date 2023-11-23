@@ -14,133 +14,165 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
   def do_dicom_test_uploads; end
 
-  before :each do
-    seed_database && ::ActivityLog.define_models
+  describe 'zip file handling' do
+    before :each do
+      seed_database && ::ActivityLog.define_models
 
-    @other_users = []
-    @other_users << create_user.first
-    @other_users << create_user.first
-    @other_users << create_user.first
+      @other_users = []
+      @other_users << create_user.first
+      @other_users << create_user.first
+      @other_users << create_user.first
 
-    setup_nfs_store
-    @activity_log = @container.parent_item
+      setup_nfs_store
+      @activity_log = @container.parent_item
 
-    upload_test_dicom_files
+      upload_test_dicom_files
 
-    f = 'dicoms.zip'
-    zip_content = File.read(dicom_file_path(f))
-    @zip_file = upload_file(f, zip_content)
+      f = 'dicoms.zip'
+      zip_content = File.read(dicom_file_path(f))
+      @zip_file = upload_file(f, zip_content)
 
-    expect(@uploaded_files.length).to be > 2
-  end
-
-  it 'uploads a file that is not an archive format and ignores it' do
-    sf = @uploaded_files.first.stored_file
-    expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be false
-    expect(NfsStore::Archive::Mounter.mount(sf)).to eq :not_archive
-  end
-
-  it 'uploads a file that is archive format and extracts it' do
-    sf = @zip_file.stored_file
-    mounter = NfsStore::Archive::Mounter.new
-    mounter.stored_file = sf
-
-    expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.zip.__mounted-archive__'
-    expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
-    expect(mounter.mount).to be_truthy
-    expect(mounter.archive_file_count).to eq 11
-  end
-
-  it 'indicates a failure if the incorrect number of files are extracted' do
-    tmpzipdir = Dir.mktmpdir
-    f = 'dicoms.zip'
-    archive_path = dicom_file_path(f)
-
-    # Start by successfully extracting the file using the bash script
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_truthy
-
-    FileUtils.rm_f File.join(tmpzipdir, '000005.dcm')
-
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_falsey
-
-    # Now remove all files but leave the directory
-    10.times do |i|
-      FileUtils.rm_f File.join(tmpzipdir, "00000#{i}.dcm")
+      expect(@uploaded_files.length).to be > 2
     end
-    FileUtils.rm_f File.join(tmpzipdir, '000010.dcm')
 
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_truthy
-  end
-
-  it 'handles split zip files' do
-    tmpzipdir = Dir.mktmpdir
-    f = 'split.zip'
-    archive_path = dicom_file_path(f)
-
-    # Start by successfully extracting the file using the bash script
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_truthy
-  end
-
-  it 'indicates a failure if a zip is broken' do
-    # Start by testing a file that has a changed byte
-    tmpzipdir = Dir.mktmpdir
-    f = 'broken.zip'
-    archive_path = dicom_file_path(f)
-
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_falsey
-
-    # If a split zip file is missing a part, fail
-    tmpzipdir = Dir.mktmpdir
-    f = 'broken-split.zip'
-    archive_path = dicom_file_path(f)
-
-    # Start by successfully extracting the file using the bash script
-    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
-    res = Kernel.system(*cmd)
-    expect(res).to be_falsey
-
-    
-  end
-
-
-  it 'uploads a file that is archive format but does nothing if it is marked with status "in process"' do
-    sf = @zip_file.stored_file
-    mounter = NfsStore::Archive::Mounter.new
-    mounter.stored_file = sf
-    mounter.extract_in_progress!
-    expect(mounter.extract_in_progress?).to be true
-    expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
-    expect(mounter.mount).to be_nil
-    expect(mounter.extract_in_progress?).to be true
-  end
-
-  it 'processes an archive marked with status "in process", because it is outside the timeout period' do
-    sf = @zip_file.stored_file
-    mounter = NfsStore::Archive::Mounter.new
-    mounter.stored_file = sf
-    # Simulate a broken extract
-    mounter.extract_in_progress!
-    expect(mounter.extract_in_progress?).to be true
-    Dir.glob('*', base: mounter.mounted_path).each do |f|
-      FileUtils.rm_f(File.join(mounter.mounted_path, f))
+    it 'uploads a file that is not an archive format and ignores it' do
+      sf = @uploaded_files.first.stored_file
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be false
+      expect(NfsStore::Archive::Mounter.mount(sf)).to eq :not_archive
     end
-    expect(mounter.archive_file_count).to eq 0
-    expect(NfsStore::Archive::Mounter::ProcessingRetryTime).to eq 34.minutes
-    FileUtils.touch mounter.processing_archive_flag_path, mtime: Time.now - NfsStore::Archive::Mounter::ProcessingRetryTime - 10.seconds
-    expect(mounter.extract_in_progress?).to be false
-    expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
-    expect(mounter.mount).to be_truthy
-    expect(mounter.archive_file_count).to eq 11
-    expect(mounter.extract_in_progress?).to be false
+
+    it 'uploads a file that is .zip format and extracts it' do
+      sf = @zip_file.stored_file
+      mounter = NfsStore::Archive::Mounter.new
+      mounter.stored_file = sf
+
+      expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.zip.__mounted-archive__'
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      expect(mounter.mount).to be_truthy
+      expect(mounter.archive_file_count).to eq 11
+    end
+
+    it 'indicates a failure if the incorrect number of files are extracted' do
+      tmpzipdir = Dir.mktmpdir
+      f = 'dicoms.zip'
+      archive_path = dicom_file_path(f)
+
+      # Start by successfully extracting the file using the bash script
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_truthy
+
+      FileUtils.rm_f File.join(tmpzipdir, '000005.dcm')
+
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_falsey
+
+      # Now remove all files but leave the directory
+      10.times do |i|
+        FileUtils.rm_f File.join(tmpzipdir, "00000#{i}.dcm")
+      end
+      FileUtils.rm_f File.join(tmpzipdir, '000010.dcm')
+
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_truthy
+    end
+
+    it 'handles split zip files' do
+      tmpzipdir = Dir.mktmpdir
+      f = 'split.zip'
+      archive_path = dicom_file_path(f)
+
+      # Start by successfully extracting the file using the bash script
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_truthy
+    end
+
+    it 'indicates a failure if a zip is broken' do
+      # Start by testing a file that has a changed byte
+      tmpzipdir = Dir.mktmpdir
+      f = 'broken.zip'
+      archive_path = dicom_file_path(f)
+
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_falsey
+
+      # If a split zip file is missing a part, fail
+      tmpzipdir = Dir.mktmpdir
+      f = 'broken-split.zip'
+      archive_path = dicom_file_path(f)
+
+      # Start by successfully extracting the file using the bash script
+      cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+      res = Kernel.system(*cmd)
+      expect(res).to be_falsey
+    end
+
+    it 'uploads a file that is archive format but does nothing if it is marked with status "in process"' do
+      sf = @zip_file.stored_file
+      mounter = NfsStore::Archive::Mounter.new
+      mounter.stored_file = sf
+      mounter.extract_in_progress!
+      expect(mounter.extract_in_progress?).to be true
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      expect(mounter.mount).to be_nil
+      expect(mounter.extract_in_progress?).to be true
+    end
+
+    it 'processes an archive marked with status "in process", because it is outside the timeout period' do
+      sf = @zip_file.stored_file
+      mounter = NfsStore::Archive::Mounter.new
+      mounter.stored_file = sf
+      # Simulate a broken extract
+      mounter.extract_in_progress!
+      expect(mounter.extract_in_progress?).to be true
+      Dir.glob('*', base: mounter.mounted_path).each do |f|
+        FileUtils.rm_f(File.join(mounter.mounted_path, f))
+      end
+      expect(mounter.archive_file_count).to eq 0
+      expect(NfsStore::Archive::Mounter::ProcessingRetryTime).to eq 34.minutes
+      FileUtils.touch mounter.processing_archive_flag_path, mtime: Time.now - NfsStore::Archive::Mounter::ProcessingRetryTime - 10.seconds
+      expect(mounter.extract_in_progress?).to be false
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      expect(mounter.mount).to be_truthy
+      expect(mounter.archive_file_count).to eq 11
+      expect(mounter.extract_in_progress?).to be false
+    end
+  end
+
+  describe '.tar.gz file handling' do
+    before :each do
+      seed_database && ::ActivityLog.define_models
+
+      @other_users = []
+      @other_users << create_user.first
+      @other_users << create_user.first
+      @other_users << create_user.first
+
+      setup_nfs_store
+      @activity_log = @container.parent_item
+
+      upload_test_dicom_files
+
+      f = 'dicoms.tar.gz'
+      tar_gz_content = File.read(dicom_file_path(f))
+      @tar_gz_file = upload_file(f, tar_gz_content)
+
+      expect(@uploaded_files.length).to be > 2
+    end
+
+    it 'uploads a file that is .tar.gz format and extracts it' do
+      sf = @tar_gz_file.stored_file
+      mounter = NfsStore::Archive::Mounter.new
+      mounter.stored_file = sf
+
+      expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.tar.gz.__mounted-archive__'
+      expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      expect(mounter.mount).to be_truthy
+      expect(mounter.archive_file_count).to eq 10
+    end
   end
 end
