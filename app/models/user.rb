@@ -203,9 +203,10 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  # Send user confirmation email if self registering
   # method provided by devise confirmable module; Override so job notifications can be executed
   def send_on_create_confirmation_instructions
-    return if a_template_or_batch_user? || !allow_users_to_register?
+    return unless required_for_self_registration?
 
     generate_confirmation_token! unless @raw_confirmation_token
     Users::Confirmations.notify self
@@ -214,6 +215,11 @@ class User < ActiveRecord::Base
   # method provided by devise recoverable module; Override so job notifications can be executed
   def send_reset_password_instructions
     return if a_template_or_batch_user? || !allow_users_to_register?
+
+    if do_not_email
+      raise FphsGeneralError,
+            "User profile set to 'no email' - contact an administrator to reset the password"
+    end
 
     token = set_reset_password_token
     options = { reset_password_hash: token }
@@ -230,7 +236,7 @@ class User < ActiveRecord::Base
 
   # method provided by devise database_authenticable module; Override so job notifications can be executed
   def send_password_change_notification
-    return if a_template_or_batch_user? || !allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register? || do_not_email
 
     Users::PasswordChanged.notify self
   end
