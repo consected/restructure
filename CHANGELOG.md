@@ -16,7 +16,23 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.102] - 2023-10-23
+## Unreleased
+
+- [Cleanup] exception display
+- [Changed] scripts for better error reporting
+- [Cleanup] specs
+- [Added] confirmed at column to user display
+- [Fixed] user resets a password themselves but their account is locked - now we unlock the account - fixes #116
+- [Fixed] user has not been assigned any accessible app types, they receive no message on logging in and just return to the login page - fixes #204
+- [Changed] self registration of users allowed and an admin creates a user, auto confirmation automatically set to avoid unnecessary confirmation email - fixes  #205
+- [Fixed] Admin resets password for a user with "do not email" set causes an exception - fixes #202
+- [Fixed] admin with capability "redcap" can see Redcap projects on the admin panel, but is not authorized to click into it - fixes #203
+- [Added] more information to make the upload scripts more usable
+- [Added] full API script to upload files from a directory to different containers - fixes #197
+- [Changed] 'trouble logging in?' help page
+- [Cleanup] to provide clearer exceptions
+
+## [8.2.112] - 2023-10-23
 
 - [Fixed] Error after saving dynamic model definition changes - fixes #193
 - [Added] configuration notices to a more easily access app type components page - fixes #195
