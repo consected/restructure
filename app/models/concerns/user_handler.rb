@@ -172,14 +172,14 @@ module UserHandler
     if self.class.no_master_association
       @current_user
     else
-      master.current_user
+      master&.current_user
     end
   end
 
   def current_user=(cu)
     if self.class.no_master_association
       @current_user = cu
-    else
+    elsif master
       master.current_user = cu
     end
   end
