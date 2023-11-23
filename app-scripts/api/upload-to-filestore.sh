@@ -35,7 +35,7 @@ upload_test="$(curl ${curl_args} "${upload_server}/nfs_store/chunk/${container_i
 
 res=$?
 if [ ${res} != 0 ]; then
-  echo -e "\e[31mError ${res}:\e[0m Failed to check file" >&2
+  echo -e "\e[31mcURL Error ${res}:\e[0m Failed to check file" >&2
   echo -e "\e[31mResponse:\e[0m ${upload_test}" >&2
   exit 111
 fi
@@ -64,7 +64,7 @@ if [ "$(echo ${upload_test} | grep '"result":"not found"')" ]; then
     echo -e "\e[32mUploaded file successfully:\e[0m ${upload_file}"
     exit 0
   else
-    echo -e "\e[31mError ${res}:\e[0m Failed to upload file" >&2
+    echo -e "\e[31mcURL Error ${res}:\e[0m Failed to upload file" >&2
     exit 110
   fi
 
