@@ -16,7 +16,48 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.111] - 2023-11-20
+
+- [Fixed] Error after saving dynamic model definition changes - fixes #193
+- [Added] configuration notices to a more easily access app type components page - fixes #195
+- [Cleanup] unnecessary reliance on rescue
+
+## [8.2.110] - 2023-11-16
+
+- [Changed] link with #click-target-tab-activity-log-data-request to limit its possible container to the master panel, so tabs in the current master can be targeted - fixes #185
+- [Added] dynamic definition config error feedback during editing - fixes #186 and #192
+- [Changed] exception reporting often during startup for bad activity log configurations being loaded
+- [Fixed] message formatting for invalid_error_message - fixes #191
+- [Added] exception extensions to help with reporting error messages and backtraces
+- [Fixed] expander carets are wrong direction - regression - fixes #190
+
+## [8.2.109] - 2023-11-14
+
+- [Added] embedding of page layouts within standalone (Study Info) pages, allowing a full set of forms to be presented in order using an activity log
+- [Changed] form fields changed but not saved warning to make it clearer
+- [Added] CSS for inline buttons
+
+## [8.2.108] - 2023-11-08
+
+- [Fixed] user access controls for *limited_if_none* to work correctly in all combinations, especially with assign_access_to_user_id - fixes #184
+- [Added] headless browser testing option without relying on Xvfb - fixes #182
+
+## [8.2.107] - 2023-11-07
+
+    [Fixed] calculate "all" conditions fails with condition: '<>' when the value is NULL - fixes #180
+
+## [8.2.106] - 2023-11-06
+
+- [Fixed] error when a field has a validate: key and the validation fails - fixes #179
+- [Fixed] Import CSV in admin panel fails to import UTF-8 data - fixes #178
+
+## [8.2.105] - 2023-11-06
+
+- [Fixed] _fpa_substitution.js get_data() merges master data over the original instance data, breaking id, created_at, etc - fixes #175
+- [Fixed] scrolling after saving a new model reference embedded in am activity log jumps to top of list - fixes #176
+- [Added] documentation to clarify reference sorting in extra options view_options.sort_references
+
+## [8.2.102] - 2023-11-01
 
 - [Fixed] scroll-to-target jumping back up to a link outside the current block - fixes #173
 - [Changed] handling of panel tab caption to ignore blank entries that include carriage returns - fixes #172
