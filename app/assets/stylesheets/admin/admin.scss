@@ -6,6 +6,15 @@
   }
 }
 
+.admin-index-page {
+  .panel-heading .config-status-block {
+    p {
+      display: inline-block;
+      margin-right: 2em;
+    }
+  }
+}
+
 .admin-panel-actions {
   float: right;
   margin-right: 20px;

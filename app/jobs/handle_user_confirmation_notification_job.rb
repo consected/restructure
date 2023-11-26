@@ -5,6 +5,8 @@ class HandleUserConfirmationNotificationJob < ApplicationJob
   queue_as :default
 
   def perform(user)
+    return if user.do_not_email
+
     mn = Messaging::MessageNotification.create! user: user,
                                                 recipient_user_ids: [user.id],
                                                 layout_template_name: defaults[:layout],

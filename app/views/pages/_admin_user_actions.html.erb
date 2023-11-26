@@ -1,0 +1,15 @@
+<% if current_user
+
+    l = app_config_text(:menu_research_label, "Research")
+    l = 'Research' if l == 'none'
+  %>
+
+<li class="nav"><%= link_to l, masters_path %> </li>
+<li class="nav"><%= link_to "Reports", reports_path %> </li>
+<li class="nav"><%= link_to "Import CSV", imports_imports_path %> </li>
+<li class="nav"><%= link_to app_config_text(:menu_create_master_record_label, "Create MSID"), new_master_path %> </li>
+<li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
+<% else %>
+<li class="nav"><%= link_to "User Login", '/users/sign_in'%> </li>
+<% end %>
+

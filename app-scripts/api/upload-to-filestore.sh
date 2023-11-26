@@ -35,14 +35,14 @@ upload_test="$(curl ${curl_args} "${upload_server}/nfs_store/chunk/${container_i
 
 res=$?
 if [ ${res} != 0 ]; then
-  echo -e "\e[31mError ${res}:\e[0m Failed to check file" >&2
-  echo "${upload_test}" >&2
+  echo -e "\e[31mcURL Error ${res}:\e[0m Failed to check file" >&2
+  echo -e "\e[31mResponse:\e[0m ${upload_test}" >&2
   exit 111
 fi
 
 if [ "$(echo ${upload_test} | grep '"message":"The filters do not allow upload of this file')" ]; then
   echo -e "\e[31mError:\e[0m The filters do not allow upload of this file"
-  echo "${upload_test}" >&2
+  echo -e "\e[31mResponse:\e[0m ${upload_test}" >&2
   exit 113
 fi
 
@@ -50,7 +50,7 @@ if [ "$(echo ${upload_test} | grep '"result":"not found"')" ]; then
   echo "Uploading file ${upload_file}"
 
   upload_res=$(curl ${curl_args} "${upload_server}/nfs_store/chunk.json?user_email=${upload_user_email}&user_token=${upload_user_token}" \
-    -F "upload_set=${upload_md5}" \
+    -F "upload_set=${upload_md5}-$(date -Ins)" \
     -F "file_hash=${upload_md5}" \
     -F "container_id=${container_id}" \
     -F "activity_log_id=${activity_log_id}" \
@@ -61,15 +61,15 @@ if [ "$(echo ${upload_test} | grep '"result":"not found"')" ]; then
 
   res=$?
   if [ ${res} == 0 ]; then
-    echo "Uploaded file successfully ${upload_file}"
+    echo -e "\e[32mUploaded file successfully:\e[0m ${upload_file}"
     exit 0
   else
-    echo -e "\e[31mError ${res}:\e[0m Failed to upload file" >&2
+    echo -e "\e[31mcURL Error ${res}:\e[0m Failed to upload file" >&2
     exit 110
   fi
 
 else
   echo -e "\e[31mError:\e[0m This file already exist in container ${container_id}: ${upload_file}" >&2
-  echo "${upload_test}" >&2
+  echo -e "\e[31mResponse:\e[0m ${upload_test}" >&2
   exit 102
 fi
