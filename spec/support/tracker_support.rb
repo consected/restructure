@@ -8,23 +8,25 @@ module TrackerSupport
   # TODO: consider creating an list_valid_attribs to be used in master_support.create_items(...)
   def list_valid_attribs_on_create
     res = []
-    day = 0
+    days = [3, 5, 1, 2, 6, 4]
+    positions = [3, 1, nil, 4, 2]
     total_protocols = 5
     total_sub_processes = 3
     total_events = 3
 
-    total_protocols.times do
+    total_protocols.times do |p|
       protocol = Classification::Protocol.create!(name: "Prot #{rand 100_000}",
-                                                  current_admin: @admin)
+                                                  current_admin: @admin,
+                                                  position: positions[p])
       total_sub_processes.times do
         sub_process = protocol.sub_processes.create!(name: "Sub Process #{rand 100_000}",
                                                      disabled: false,
                                                      current_admin: @admin)
-        total_events.times do
+        total_events.times do |i|
           event = sub_process.protocol_events.create!(name: "EV #{rand 100_000}",
                                                       current_admin: @admin)
-          day -= 1
-          event_date = DateTime.now + day.days
+          day = days[i]
+          event_date = DateTime.now - (day.days * rand(100))
           res << {
             protocol_id: protocol.id,
             sub_process_id: sub_process.id,

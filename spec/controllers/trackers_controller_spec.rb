@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe TrackersController, type: :controller do
   include UserSupport
   include TrackerSupport
+  include ModelSupport
 
   def item
     @tracker
@@ -53,13 +54,63 @@ RSpec.describe TrackersController, type: :controller do
       expect(assigns(objects_symbol)).to eq([item])
     end
 
-    it 'expects tracker items to be sorted by event date in descending order' do
-      master = create_master
-      create_items(:list_valid_attribs_on_create, master) # creates a new master for each item
+    describe 'tracker order' do
+      context 'when the tracker order has been implemented' do
+        context 'order by protocol position' do
+          it 'expects tracker items to be sorted by protocol position in descending order' do
+            add_app_config(@user.app_type, 'tracker order', 'protocol position')
+            master = create_master
+            create_items(:list_valid_attribs_on_create, master)
 
-      get :index, params: { master_id: master.id }
-      trackers = assigns(objects_symbol)
-      expect(trackers.each_cons(2).all? { |i, j| i.event_date >= j.event_date }).to be_truthy
+            get :index, params: { master_id: master.id }
+            trackers = assigns(objects_symbol)
+
+            expect(trackers.reject { |tracker| tracker.protocol.position.nil? }.each_cons(2).all? do |i, j|
+              i.protocol.position < j.protocol.position ||
+                (i.protocol.position == j.protocol.position && (i.event_date > j.event_date ||
+                  (i.event_date = j.event_date && i.updated_at >= j.updated_at)))
+            end).to be_truthy
+          end
+        end
+        context 'order by event date' do
+          it 'expects tracker items to be sorted by event date in descending order' do
+            add_app_config(@user.app_type, 'tracker order', 'latest entry date')
+            master = create_master
+            create_items(:list_valid_attribs_on_create, master)
+
+            get :index, params: { master_id: master.id }
+            trackers = assigns(objects_symbol)
+
+            expect(trackers.each_cons(2).all? do |i, j|
+              i.event_date > j.event_date || (i.event_date == j.event_date && i.updated_at >= j.updated_at)
+            end).to be_truthy
+          end
+        end
+        context 'order by protocol name' do
+          it 'expects tracker items to be sorted by protocol name' do
+            add_app_config(@user.app_type, 'tracker order', 'protocol name')
+            master = create_master
+            create_items(:list_valid_attribs_on_create, master)
+
+            get :index, params: { master_id: master.id }
+            trackers = assigns(objects_symbol)
+
+            expect(trackers.each_cons(2).all? { |i, j| i.protocol.name <= j.protocol.name }).to be_truthy
+          end
+        end
+      end
+      context 'when the tracker order has not been implemented' do
+        it 'expects tracker items to be sorted by protocol name' do
+          add_app_config(@user.app_type, 'tracker order', 'bogus')
+          master = create_master
+          create_items(:list_valid_attribs_on_create, master)
+
+          get :index, params: { master_id: master.id }
+
+          expect(response).to have_http_status(:bad_request)
+          # expect { response }.to raise_exception(FphsException, 'requested tracker order has not been implemented')
+        end
+      end
     end
   end
 
@@ -89,6 +140,7 @@ RSpec.describe TrackersController, type: :controller do
     it 'assigns the requested item as @var' do
       create_item
       get :edit, params: { id: item_id, master_id: @master_id }
+
       expect(assigns(object_symbol)).to eq(item)
       expect(response).to render_template(edit_form_user)
     end
