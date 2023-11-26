@@ -147,12 +147,16 @@ module MasterHandler
   def retrieve_index
     set_objects_instance @master_objects # re add_trackers collection
     s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
+
+    set_objects_instance(@master_objects) # re add_trackers collection
     s.merge!(extend_result)
+
     if object_instance
       s[:original_item] = object_instance
       s[objects_name] << object_instance
     end
     s[:master_id] = @master.id unless primary_model.no_master_association
+
     s.to_json
   end
 
@@ -580,14 +584,18 @@ module MasterHandler
     @master_objects = @master_objects.limit(requested_limit)
   end
 
-  def requested_order
-    sorters = {
-      'protocol position' => { position: :asc },
-      'latest entry date' => { event_date: :desc, updated_at: :desc },
-      'protocol name' => { name: :asc }
-    }
+  MASTER_SORTERS = {
+    'protocol position' => { 'protocols.position': :asc, event_date: :desc, updated_at: :desc },
+    'latest entry date' => { event_date: :desc, updated_at: :desc },
+    'protocol name' => { 'protocols.name': :asc }
+  }.freeze
 
-    @requested_order ||= sorters[app_config_text(:tracker_order, 'protocol position')]
+  def requested_order
+    order_by_criteria = MASTER_SORTERS[app_config_text(:tracker_order, 'protocol position')]
+
+    raise FphsException, 'requested tracker order has not been implemented' if order_by_criteria.nil?
+
+    @requested_order ||= order_by_criteria
   end
 
   #
