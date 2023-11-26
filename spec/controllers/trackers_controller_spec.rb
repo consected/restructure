@@ -57,9 +57,11 @@ RSpec.describe TrackersController, type: :controller do
     describe 'tracker order' do
       context 'when the tracker order has been implemented' do
         context 'order by protocol position' do
+          before { add_app_config(@user.app_type, 'tracker order', 'protocol position') }
+
           it 'expects tracker items to be sorted by protocol position in descending order' do
-            add_app_config(@user.app_type, 'tracker order', 'protocol position')
             master = create_master
+
             create_items(:list_valid_attribs_on_create, master)
 
             get :index, params: { master_id: master.id }
@@ -73,9 +75,11 @@ RSpec.describe TrackersController, type: :controller do
           end
         end
         context 'order by event date' do
+          before { add_app_config(@user.app_type, 'tracker order', 'latest entry date') }
+
           it 'expects tracker items to be sorted by event date in descending order' do
-            add_app_config(@user.app_type, 'tracker order', 'latest entry date')
             master = create_master
+
             create_items(:list_valid_attribs_on_create, master)
 
             get :index, params: { master_id: master.id }
@@ -87,9 +91,11 @@ RSpec.describe TrackersController, type: :controller do
           end
         end
         context 'order by protocol name' do
+          before { add_app_config(@user.app_type, 'tracker order', 'protocol name') }
+
           it 'expects tracker items to be sorted by protocol name' do
-            add_app_config(@user.app_type, 'tracker order', 'protocol name')
             master = create_master
+
             create_items(:list_valid_attribs_on_create, master)
 
             get :index, params: { master_id: master.id }
@@ -100,9 +106,11 @@ RSpec.describe TrackersController, type: :controller do
         end
       end
       context 'when the tracker order has not been implemented' do
-        it 'expects tracker items to be sorted by protocol name' do
-          add_app_config(@user.app_type, 'tracker order', 'bogus')
+        before { add_app_config(@user.app_type, 'tracker order', 'bogus') }
+
+        it 'expects the response to be a bad request' do
           master = create_master
+
           create_items(:list_valid_attribs_on_create, master)
 
           get :index, params: { master_id: master.id }
