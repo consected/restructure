@@ -10,6 +10,7 @@ module AppExceptionHandler
     rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
     rescue_from ActionController::UnknownFormat, with: :bad_format_handler
     rescue_from FphsException, with: :fphs_app_exception_handler
+    rescue_from ActiveRecord::RecordInvalid, with: :validation_failed
     rescue_from FphsNotAuthorized, with: :not_authorized
     rescue_from FphsGeneralError, with: :general_error
     rescue_from ESignature::ESignatureException, with: :fphs_app_exception_handler
@@ -87,6 +88,12 @@ module AppExceptionHandler
 
   def fphs_app_exception_handler(error)
     msg = error.message
+    code = 400
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
+  end
+
+  def validation_failed(error)
+    msg = error.message.sub('invalid_error_message:', '- ')
     code = 400
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
