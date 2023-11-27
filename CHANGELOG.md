@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] handling of scrolling if the target item was removed from the page
+- [Fixed] report new / edited records not showing
+- [Changed] error message when a RecordInvalid exception is thrown
+
 ## [8.2.116] - 2023-11-23
 
 - Bumped version
