@@ -23,7 +23,7 @@
           <th>Do Not Email</th>
           <th>Expires in (days)</th>
           <th>Signed in at</th>
-          <% if list_item.respond_to? :confirmed_at %><th>Confirmed</th><% end %>
+          <% if @users.first.respond_to? :confirmed_at %><th>Confirmed</th><% end %>
           <th>Locked</th>
           <th>Disabled</th>
           <th>Admin</th>
