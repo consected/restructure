@@ -82,6 +82,7 @@ table.table.report-table {
 
     .input-sm {
       font-size: var(--table-font-size);
+      padding-top: 8px;
     }
   }
 
@@ -235,7 +236,7 @@ table.table.report-table {
   }
 
   .report-el.report-el-object-id {
-    padding: 8px 8px;
+    padding: 8px 6px;
   }
 
   .report-edit-btn-cell {

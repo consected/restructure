@@ -18,6 +18,7 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   // Ensure the target is valid
   if (!isj && (!target || target.length < 2)) return;
 
+  console.log(`jump_to_linked_item: ${target}`)
   try {
     var h = $(target);
   }
@@ -124,6 +125,9 @@ _fpa.utils.inViewport = function (el, topHalf) {
 // container: the element to scroll
 _fpa.utils.scrollTo = function (pos_or_el, settings, offset, container) {
   container = container || $;
+  if (pos_or_el.parents && pos_or_el.parents('body') === 0) return;
+
+  console.log(`scrollTo: ${pos_or_el}`)
   container.scrollTo(pos_or_el, settings, { offset: offset });
 };
 
