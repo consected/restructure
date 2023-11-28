@@ -116,7 +116,7 @@ RSpec.describe TrackersController, type: :controller do
           get :index, params: { master_id: master.id }
 
           expect(response).to have_http_status(:bad_request)
-          expect(JSON.parse(response.headers['X-Upload-Errors'])['error']).to be_include('requested tracker order has not been implemented')
+          expect(JSON.parse(response.headers['X-Upload-Errors'])['error']).to be_include('requested order has not been implemented')
         end
       end
     end

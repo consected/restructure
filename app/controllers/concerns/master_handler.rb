@@ -145,7 +145,6 @@ module MasterHandler
   # Retrieve the index action JSON from master objects and extended data
   # @return [String] JSON
   def retrieve_index
-    set_objects_instance @master_objects # re add_trackers collection
     s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
 
     set_objects_instance(@master_objects) # re add_trackers collection
@@ -593,7 +592,7 @@ module MasterHandler
   def requested_order
     order_by_criteria = MASTER_SORTERS[app_config_text(:tracker_order, 'protocol position')]
 
-    raise FphsException, 'requested tracker order has not been implemented' if order_by_criteria.nil?
+    raise FphsException, 'requested order has not been implemented' if order_by_criteria.nil?
 
     @requested_order ||= order_by_criteria
   end
