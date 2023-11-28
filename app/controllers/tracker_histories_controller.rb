@@ -8,7 +8,6 @@ class TrackerHistoriesController < UserBaseController
       @tracker_histories = @tracker.tracker_histories.order Master::TrackerHistoryEventOrderClause
     elsif @master
       logger.info "Getting master tracker histories"
-      # TODO: remove if not need. @tracker_histories = @master.tracker_histories.inner_join(protocols: {id: 'tracker_histories.protocol_id'}).order('protocols.name ASC').order(Master::TrackerHistoryEventOrderClause)
       @tracker_histories = @master.tracker_histories.order Master::TrackerHistoryEventOrderClause
     else
       render status: 404
