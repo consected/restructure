@@ -313,9 +313,7 @@ module MasterHandler
   end
 
   # Allow overrides
-  def set_additional_attributes(obj)
-    ;
-  end
+  def set_additional_attributes(obj); end
 
   # Errors for logging
   def object_instance_errors
@@ -339,7 +337,7 @@ module MasterHandler
   # is not used repetitively (potentially breaking the current_user functionality and poor performance)
   def set_me_and_master
     if UseMasterParam.include?(action_name)
-      @master = Master.find(params[:master_id]) unless primary_model.no_master_association # attrs in dynamic models
+      @master = Master.find(params[:master_id]) unless primary_model.no_master_association
     else
       object = primary_model.find(params[:id])
       set_object_instance object
@@ -350,7 +348,7 @@ module MasterHandler
     if @master&.respond_to? objects_name
       # Get the list of objects related to the master, in other words triggering the association
       # off of the master object
-      @master_objects = @master.send(objects_name) # i.e., master.trackers
+      @master_objects = @master.send(objects_name)
     else
       klass = primary_model
       @master_objects = klass.all if klass.no_master_association

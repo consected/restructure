@@ -79,7 +79,6 @@ RSpec.describe TrackersController, type: :controller do
 
           it 'expects tracker items to be sorted by event date in descending order' do
             master = create_master
-
             create_items(:list_valid_attribs_on_create, master)
 
             get :index, params: { master_id: master.id }
