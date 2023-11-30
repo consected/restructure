@@ -582,8 +582,8 @@ module MasterHandler
   end
 
   MASTER_SORTERS = {
-    'protocol position' => { 'protocols.position': :asc, event_date: :desc, updated_at: :desc },
-    'latest entry date' => { event_date: :desc, updated_at: :desc },
+    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'latest entry date' => 'event_date DESC NULLS LAST, trackers.updated_at DESC',
     'protocol name' => { 'protocols.name': :asc }
   }.freeze
 
