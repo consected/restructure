@@ -917,7 +917,7 @@ _fpa.form_utils = {
         // If there is the target within this common-template-item block (if we are in one)
         // use that as the target. Otherwise, just use the target exactly as specified.
         var $target = $(target);
-        const $pos = $(this).parents('.common-template-item').find(target);
+        var $pos = $(this).parents('.common-template-item').find(target);
         if ($pos.length) {
           $target = $pos;
         }
