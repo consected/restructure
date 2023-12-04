@@ -125,9 +125,41 @@ _fpa.utils.inViewport = function (el, topHalf) {
 // container: the element to scroll
 _fpa.utils.scrollTo = function (pos_or_el, settings, offset, container) {
   container = container || $;
-  if (pos_or_el.parents && pos_or_el.parents('body') === 0) return;
+  if (pos_or_el.parents) var $pos = pos_or_el;
+  if ($pos && $pos.parents('body').length === 0) {
+    console.log('Jump position is not in the document')
+    console.log($pos)
+    return;
+  }
 
-  console.log(`scrollTo: ${pos_or_el}`)
+  const new_time = (new Date().getTime());
+  const new_pos = $pos && $pos[0];
+  if (
+    // Block is marked to avoid scrolling on clicking edit
+    $pos && $pos.hasClass('no-scroll-on-click-edit')
+    // ||
+    // // If we have a new position element within 2 seconds
+    // new_pos &&
+    // _fpa.state.last_scroll_time &&
+    // new_time - _fpa.state.last_scroll_time < 2000 &&
+    // (
+    //   // And the scroll position is outside the previous scroll position
+    //   $.contains(new_pos, _fpa.state.last_scroll_pos) ||
+    //   // Or the previous scrolled position was a tab expander
+    //   $(_fpa.state.last_scroll_pos).hasClass('scroll-to-expanded')
+    // )
+  ) {
+    console.log('Jump position has been requested to avoid jumping')
+    console.log(new_pos)
+    console.log(_fpa.state.last_scroll_pos)
+
+    return;
+  }
+  _fpa.state.last_scroll_time = new_time;
+  if (new_pos) _fpa.state.last_scroll_pos = new_pos;
+
+  console.log(`scrollTo:`)
+  console.log(pos_or_el)
   container.scrollTo(pos_or_el, settings, { offset: offset });
 };
 

@@ -138,7 +138,7 @@ _fpa.activity_logs.save_action = class {
         _fpa.utils.scrollTo(ev_link, 100, -100)
       }, 500)
 
-    }, 500)
+    }, 1000)
   }
 
 }
