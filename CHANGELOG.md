@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] improved control over scrolling, especially in activity logs
+- [Fixed] validation error message formatting with nested conditions
+- [Fixed] jobs are supposed to send an admin email if they fail - fixes #210
+
 ## [8.2.117] - 2023-11-27
 
 - [Changed] handling of scrolling if the target item was removed from the page
