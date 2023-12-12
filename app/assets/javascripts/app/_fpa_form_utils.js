@@ -1249,7 +1249,7 @@ _fpa.form_utils = {
 
     block
       .find('[pattern]')
-      .not('.attached-datatoggle-pattern, [type="password"]')
+      .not('.attached-datatoggle-pattern, [type="password"], .no-mask')
       .each(function () {
         var p = $(this).attr('pattern');
         var t = $(this).attr('type');
