@@ -70,7 +70,12 @@ module StandardAuthentication
     #
     # Key used to encrypt OTP keys
     def otp_enc_key
-      (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+      res = (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+      if !res || res.length < 32
+        raise FphsException, "otp_enc_key is either nil or less than 32 characters (#{res&.length})" \
+          'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
+      end
+      res
     end
 
     #
