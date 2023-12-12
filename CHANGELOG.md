@@ -16,6 +16,17 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] API sample for study info transfer to another server
+- [Fixed] CSV import form bug
+- [Added] configuration check for OTC encoding key
+- [Added] make-labels-placeholders to documentation
+- [Fixed] integer field to allow negative numbers - fixes CSV import of master id does not allow negative numbers #218
+- [Fixed] CSV import not recognizing uploaded file correctly
+- [Fixed] duplicate tables appearing in CSV import drop down table list
+- [Fixed] mr-expander closing an already expanded item
+
 ## [8.2.118] - 2023-12-04
 
 - [Added] improved control over scrolling, especially in activity logs
