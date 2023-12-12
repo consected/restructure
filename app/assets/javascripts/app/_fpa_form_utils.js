@@ -1215,8 +1215,8 @@ _fpa.form_utils = {
       .on('click', function () {
         if ($(this).hasClass('glyphicon-triangle-right')) {
           var el = $(this);
-          $(this).removeClass('glyphicon-triangle-right');
-          $(this).addClass('glyphicon-triangle-bottom');
+          $(this).removeClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).addClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1227,8 +1227,8 @@ _fpa.form_utils = {
           }, 10);
         } else {
           var el = $(this);
-          $(this).addClass('glyphicon-triangle-right');
-          $(this).removeClass('glyphicon-triangle-bottom');
+          $(this).addClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).removeClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
@@ -1249,7 +1249,7 @@ _fpa.form_utils = {
 
     block
       .find('[pattern]')
-      .not('.attached-datatoggle-pattern, [type="password"]')
+      .not('.attached-datatoggle-pattern, [type="password"], .no-mask')
       .each(function () {
         var p = $(this).attr('pattern');
         var t = $(this).attr('type');
