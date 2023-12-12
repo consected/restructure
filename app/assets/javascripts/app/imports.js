@@ -14,7 +14,15 @@ _fpa.loaded.model_generators = function () {
     $('#import_file').hide();
 
     $('#analyze_csv_form_res').on('load', function () {
-      var res = $('#analyze_csv_form_res').contents().text();
+      var res = $('#analyze_csv_form_res').contents()
+      if (res) {
+        if (res[0] && res[0].body && res[0].body.innerText) {
+          res = res[0].body.innerText;
+        }
+        else {
+          res = res.text();
+        }
+      }
       if (res == 'ok') {
         $('#analyze_csv_refresh').trigger('click');
       }
