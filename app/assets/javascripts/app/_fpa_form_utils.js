@@ -425,6 +425,17 @@ _fpa.form_utils = {
         $(this).html(new_text);
       })
       .addClass('cb_subs_done');
+
+
+    // Remove empty placeholder captions, even if they have just a blank paragraph
+    block
+      .find('.placeholder-caption-before')
+      .not('.phcb_subs_done')
+      .each(function () {
+        var text = $(this).text();
+        if (!text) $(this).hide().html(null);
+      })
+      .addClass('phcb_subs_done');
   },
 
   // Resize all labels in a block for nice formatting without tables or fixed widths
