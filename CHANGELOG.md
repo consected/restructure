@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.120] - 2023-12-13
 
 - [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
 - [Fixed] handling of model references in curly substitutions in the front end
