@@ -44,6 +44,7 @@ CompareDates = false
 Debug = false
 
 SkipSlugs = ['example-layouts']
+LimitToSections = ENV['SECTIONS']&.split(',')
 
 # continue rather than exiting on an error
 ErrorContinue = true
@@ -485,11 +486,15 @@ end
 results_res = JSON.parse(response.body)
 results = results_res['results']
 puts_success "==== Got source results (#{results.length}) ===="
+puts_plain "Limited to sections: #{LimitToSections}" if LimitToSections
 
 results.each do |result|
   @puts_indent = 0
   src_master_id = result['master_id']
   study_info_id = result['study_info_id']
+
+  next if LimitToSections && !LimitToSections.include?(study_info_id)
+
   puts_info "Section: #{study_info_id}"
   @puts_indent = 2
   # Get the study info pages for this study info master
@@ -545,7 +550,7 @@ results.each do |result|
   end
 
   dest_master_id = study_info['id']
-
+  all_dest_parts = []
   # Add new or find pages for the new (or found) library
   parts.each do |source_part|
     @puts_indent = 4
@@ -639,11 +644,10 @@ results.each do |result|
       end
       dest_part_res = JSON.parse(response.body)
       dest_part = dest_part_res['activity_log__study_info_part']
-      dest_parts << dest_part
-
       puts_success "success #{done} of dest part: #{dest_part['slug'] || dest_part['title'] || dest_part['extra_log_type']} - #{dest_part['master_id']} - #{dest_part['id']}"
-
     end
+
+    all_dest_parts << dest_part
 
     # We don't do anything with the model references for file containers
     if ['supporting_files', 'supporting-files'].include?(part_elt)
@@ -655,9 +659,17 @@ results.each do |result|
     mrs = source_part['model_references']
     dest_mrs = dest_part['model_references']
 
-    puts_debug "mrs = #{mrs.map { |v| v['to_record_data'] }}"
-    puts_debug "dest_mrs = #{dest_mrs.map { |v| v['to_record_data'] }}"
+    excess_mrs = dest_mrs.reject { |mr| mr['disabled'] }.map { |mr| mr['to_record_data'] } - mrs.reject { |mr| mr['disabled'] }.map { |mr| mr['to_record_data'] }
+    unless excess_mrs.empty?
+      puts_warning "Destination has more subsections than the source: #{excess_mrs}"
+      puts_debug "mrs = #{mrs.map { |v| v['to_record_data'] }}"
+      puts_debug "dest_mrs = #{dest_mrs.map { |v| v['to_record_data'] }}"
+    end
+
+    idx = -1
+
     mrs.each do |mr|
+      idx += 1
       @puts_indent = 8
       to_type_pl = mr['to_record_type_us_plural']
       to_type = mr['to_record_type_us']
@@ -667,8 +679,13 @@ results.each do |result|
       to_data = mr['to_record_data']
       from_record_type = mr['from_record_type_us']
 
-      puts_info "Matching: #{to_data}"
-      matched_dest_mr = dest_mrs.find { |r| r['to_record_data'] == to_data }
+      if to_data.nil? || to_data.empty?
+        puts_warning "The referenced model has no data - using the index instead #{idx}"
+        matched_dest_mr = dest_mrs[idx]
+      else
+        puts_info "Matching: #{to_data}"
+        matched_dest_mr = dest_mrs.find { |r| r['to_record_data'] == to_data }
+      end
       @puts_indent = 10
 
       if to_type_pl == 'nfs_store__manage__containers'
@@ -767,5 +784,11 @@ results.each do |result|
     end
     @puts_indent = 6
     ##################
+    excess_parts = all_dest_parts.reject { |p| p['disabled'] }.map { |p| p['slug'] } - parts.reject { |p| p['disabled'] }.map { |p| p['slug'] }
+    next if excess_parts.empty?
+
+    puts_warning "Destination has more parts than the source: #{excess_parts}"
+    puts_debug "parts = #{parts.map { |v| v['slug'] }}"
+    puts_debug "all_dest_parts = #{all_dest_parts.map { |v| v['slug'] }}"
   end
 end
