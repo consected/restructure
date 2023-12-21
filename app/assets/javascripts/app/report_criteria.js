@@ -132,12 +132,14 @@ _fpa.report_criteria = class {
         }, 1);
       }).addClass('attached-change');
 
-
-
-      f.find('[data-filter-selector]').on('change', function () {
+      var $dfs = f.find('[data-filter-selector]');
+      $dfs.on('change', function () {
         var fts = $(this).attr('data-filter-selector')
         _fpa.form_utils.select_filtering_changed($(this).val(), `[name="search_attrs[${fts}]"]`)
-      })
+      });
+
+      _fpa.form_utils.setup_chosen_groups($dfs);
+
 
       f.find('[type="submit"]').click(function () {
         var v = $(this).val();

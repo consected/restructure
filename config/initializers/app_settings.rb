@@ -56,7 +56,7 @@ class Settings
   # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
   BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
   # Provide an email address for a technical admin to receive failure notifications
-  FailureNotificationsToEmail = ENV['FAIL_FROM_EMAIL'] || DefaultSettings::FailureNotificationsToEmail || Settings::AdminEmail
+  FailureNotificationsToEmail = ENV['FAIL_TO_EMAIL'] || ENV['FAIL_FROM_EMAIL'] || DefaultSettings::FailureNotificationsToEmail || Settings::AdminEmail
 
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200

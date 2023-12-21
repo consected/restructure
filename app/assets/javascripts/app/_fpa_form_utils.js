@@ -31,7 +31,10 @@ _fpa.form_utils = {
           if (!first_field) first_field = $field;
           $field.addClass('has-error');
           var fn = p.replace(/_/g, ' ');
-          if ($field.hasClass('showed-caption-before')) fn = 'Entry';
+          //if ($field.hasClass('showed-caption-before')) 
+          // Simplify error messages, since field names are often meaningless
+          // even if not using captions
+          fn = 'Entry';
 
           if (v.join) v = v.join('; ')
 
@@ -564,7 +567,7 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple], .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
+    var sels = block.find('select[multiple], select.use-chosen, .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
@@ -620,6 +623,32 @@ _fpa.form_utils = {
         }, 1);
       })
       .addClass('attached-chosen');
+
+    var $dfs = sels.filter('[data-filter-selector]');
+    _fpa.form_utils.setup_chosen_groups($dfs);
+  },
+
+  setup_chosen_groups: function ($data_filter_selectors) {
+    $data_filter_selectors.each(function () {
+      var fts = $(this).attr('data-filter-selector')
+      const $sel = $(`.attached-chosen[name="search_attrs[${fts}]"]`)
+      $sel.on('chosen:showing_dropdown', function (evt, params) {
+        // Access the element
+        var $chosen = params.chosen.container;
+        // Ensure groups are hidden in chosen dropdowns
+        console.log('chosen updated');
+        var $orig = $(this);
+        // Access the element
+        // Hide any disabled groups
+        var disoptgroups = $orig.find('optgroup[disabled]');
+        var $grs = $chosen.find('.group-result')
+        $grs.removeClass('group-result-disabled');
+        disoptgroups.each(function () {
+          const label = $(this).attr('label');
+          $grs.filter(`:contains('${label}')`).addClass('group-result-disabled');
+        });
+      })
+    })
   },
 
   organize_common_templates: function (block) {
