@@ -19,6 +19,7 @@ class Admin::AppConfiguration < Admin::AdminBase
 
   belongs_to :user, optional: true
   before_validation :humanize_name
+  before_validation :clean_attrs
   validates :name, presence: true
   validate :valid_entry
   after_save :clear_memo!
@@ -184,13 +185,17 @@ class Admin::AppConfiguration < Admin::AdminBase
     self.name = self.class.sym_to_name(name) if name.present?
   end
 
+  def clean_attrs
+    self.role_name = nil if role_name.blank?
+  end
+
   #
   # Validation of the name, role and user to check for existence
   def valid_entry
     return if disabled
 
     cond = { name: name, user: user, role_name: role_name, app_type: app_type }
-    res = self.class.active.where(cond).first
+    res = self.class.active.find_by(cond)
     raise FphsException, "Invalid configuration name: #{name}" unless name.in? self.class.configurations
 
     return unless res && ((persisted? && res.id != id) || !persisted?)
