@@ -230,14 +230,20 @@ module SecureView
                        out: File::NULL, err: File::NULL)
 
           Rails.cache.delete :libreoffice_parsing
-          raise GeneralException, "Failed to convert file to #{type} - error code #{res}" unless res
+          unless res
+            raise GeneralException,
+                  "Failed to convert file to #{type} - error code #{res} - #{orig_path}"
+          end
 
           conv_attempts += 1
           self.path = file_cache_path type
         end
 
         unless path && File.exist?(path)
-          raise GeneralException, "Failed to convert file to #{type} - too many attempts" if conv_attempts > 2
+          if conv_attempts > 2
+            raise GeneralException,
+                  "Failed to convert file to #{type} - too many attempts - #{orig_path}"
+          end
 
           # Try again if the path was returned but the file does not exist
           Rails.cache.delete(cache_key('renderedpath'))
