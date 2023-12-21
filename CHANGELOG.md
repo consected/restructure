@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.2.121] - 2023-12-21
 
 - [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
 - [Added] current user id as state in the application page script
