@@ -16,6 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
+- [Added] current user id as state in the application page script
+- [Added] ability to rerun DB seeds from server info
+- [Changed] field validation messages to always show as "Entry" rather than a meaningless field name
+- [Added] handling of disabled groups in "chosen" drop-downs to hide correctly, especially when using the data-filter-selector option
+- [Added] extra checking and logging around Libreoffice, plus kill stuck processes
+- [Added] a data-user-roles attribute to body, allowing body[data-user-roles~='underscored_role_name'] to be used in CSS
+- [Fixed] issues with model reference data being blank and used for record matching in transfer script
+- [Changed] nav links page layout to avoid showing app types not available to the user
+- [Fixed] email notifications from and failure notification to email address settings
+
 ## [8.2.120] - 2023-12-13
 
 - [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
