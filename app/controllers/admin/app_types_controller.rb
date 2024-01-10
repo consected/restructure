@@ -16,6 +16,20 @@ class Admin::AppTypesController < AdminController
     render json: 'Restarting DelayedJob'
   end
 
+  def run_db_seeds
+    require "#{::Rails.root}/db/seeds.rb"
+
+    res = Seeds.setup
+    errors = res.select { |m| m.include? 'ERROR:' }
+    if errors.empty?
+      render json: 'DB Seeds run'
+      return
+    end
+
+    flash.now[:notice] = "DB Seeds run - errors #{errors}"
+    render json: { message: 'DB Seeds run - errors #{errors} - results in response', lines: res }
+  end
+
   def upload
     uploaded_io = params[:config]
 

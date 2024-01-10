@@ -60,6 +60,7 @@ Rails.application.routes.draw do
     post 'app_types/upload', to: 'app_types#upload'
     post 'app_types/restart_server', to: 'app_types#restart_server'
     post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'
+    post 'app_types/run_db_seeds', to: 'app_types#run_db_seeds'
 
     resources :role_descriptions, except: %i[show destroy]
     resources :user_roles, except: %i[show destroy]

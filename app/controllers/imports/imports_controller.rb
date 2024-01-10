@@ -208,7 +208,7 @@ class Imports::ImportsController < ApplicationController
   protected
 
   def accepts_models
-    Imports::Import.accepts_models current_user
+    Imports::Import.accepts_models(current_user)
   end
 
   def item_parameters

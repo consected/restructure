@@ -16,6 +16,10 @@
       <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true, id: 'form-restart-dj') do %>
         <%= submit_tag "Restart DelayedJob" %>
       <% end %>
+      <h3>Run DB Seeds</h3>
+      <%= form_tag(admin_app_types_run_db_seeds_url, remote: true, id: 'form-run-db-seeds') do %>
+        <%= submit_tag "Run DB Seeds" %>
+      <% end %>
   </div>
   <div class="well">
 

@@ -58,6 +58,8 @@ nav:
       url: /reports/test__report      # URL for the nav item
       resource_type: report           # the resource type to use to assess user access to this nav item
       resource_name: test__report     # the resource name to use to assess user access to this nav item
+      resource_app_type: app-name     # optionally test resource access against this app rather than the current one
+                                      # allowing general / app_type / app-name to test if a user can access another app
 #
 # Add a master record tab for a Panel Name "master-tabs"
     - label: Print Summary
