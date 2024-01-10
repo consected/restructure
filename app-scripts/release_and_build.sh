@@ -71,13 +71,13 @@ if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
   elif [ "$USEVER" == '2' ]; then
     CURRVER=${LASTTAG}
     echo ${CURRVER} > ${CURRVERFILE}
-    git commit version.txt -m 'Bumped version'
+    git commit version.txt -m '[Bumped] patch version to latest tag'
     git push
   elif [ "$USEVER" == '3' ]; then
     read -p 'Enter version to use (this will be upversioned to the next version): ' SETVER
     CURRVER=${SETVER}
     echo ${CURRVER} > ${CURRVERFILE}
-    git commit version.txt -m 'Bumped version'
+    git commit version.txt -m '[Bumped] patch version manually'
     git push
   else
     echo 'Bad selection'
@@ -88,7 +88,7 @@ fi
 if [ "${UPVLEVEL}" == 'minor' ]; then
   CURRVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p minor)"
   echo ${CURRVER} > ${CURRVERFILE}
-  git commit version.txt -m 'Bumped minor version'
+  git commit version.txt -m '[Bumped] minor version'
   git push
 fi
 
