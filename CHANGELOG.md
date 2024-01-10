@@ -16,7 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.66] - 2023-09-05
+## Unreleased
+
+- [Bumped] minor version
+
+## [8.2.123] - 2024-01-10
 
 - [Added] upversioning minor version in release process
 - [Updated] yarn modules
