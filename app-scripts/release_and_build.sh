@@ -8,6 +8,11 @@ if [ "$1" == 'clean' ]; then
   echo 'Cleaning up old container and rebuilding it from scratch'
 fi
 
+if [ "$1" == 'minor' ] || [ "$2" == 'minor' ]; then
+  echo 'Minor version'
+  UPVLEVEL=minor
+fi
+
 export GIT_MERGE_AUTOEDIT=no
 
 FROM_BRANCH=${FROM_BRANCH:=develop}
@@ -56,19 +61,37 @@ ALLTAGS="$(git tag --sort=-taggerdate)"
 LASTTAG=$(echo "$ALLTAGS" | head -n1)
 CURRVERINFILE=$(cat ${CURRVERFILE})
 CURRVER=${CURRVERINFILE}
+
 if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
   echo "Latest version file version ${CURRVER} and latest tag ${LASTTAG} do not match"
-  read -p 'Use latest file version (1) or latest tag version (2)? ' USEVER
+  read -p 'Use latest file version (1), latest tag version (2) or manual entry for latest version (3)? ' USEVER
 
   if [ "$USEVER" == '1' ]; then
     LASTTAG=${CURRVER}
-  else
+  elif [ "$USEVER" == '2' ]; then
     CURRVER=${LASTTAG}
     echo ${CURRVER} > ${CURRVERFILE}
-    git commit version.txt -m 'Bumped version'
+    git commit version.txt -m '[Bumped] patch version to latest tag'
     git push
+  elif [ "$USEVER" == '3' ]; then
+    read -p 'Enter version to use (this will be upversioned to the next version): ' SETVER
+    CURRVER=${SETVER}
+    echo ${CURRVER} > ${CURRVERFILE}
+    git commit version.txt -m '[Bumped] patch version manually'
+    git push
+  else
+    echo 'Bad selection'
+    exit 9
   fi
 fi
+
+if [ "${UPVLEVEL}" == 'minor' ]; then
+  CURRVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p minor)"
+  echo ${CURRVER} > ${CURRVERFILE}
+  git commit version.txt -m '[Bumped] minor version'
+  git push
+fi
+
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 
