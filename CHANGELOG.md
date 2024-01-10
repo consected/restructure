@@ -16,8 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.121] - 2023-12-21
+## Unreleased
 
+- [Added] feature to allow tracker to sort protocols by latest event date as an alternative to the default, which is to order by configured protocol position - resolves #72
+- [Fixed] (hopefully) restarting of delayed_job from the server
+- [Added] more information to document conversion error
+- [Added] FailureNotificationsToEmail to server settings variable viewer
 - [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
 - [Added] current user id as state in the application page script
 - [Added] ability to rerun DB seeds from server info
@@ -28,14 +32,8 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] issues with model reference data being blank and used for record matching in transfer script
 - [Changed] nav links page layout to avoid showing app types not available to the user
 - [Fixed] email notifications from and failure notification to email address settings
-
-## [8.2.120] - 2023-12-13
-
 - [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
 - [Fixed] handling of model references in curly substitutions in the front end
-
-## [8.2.119] - 2023-12-12
-
 - [Changed] API sample for study info transfer to another server
 - [Fixed] CSV import form bug
 - [Added] configuration check for OTC encoding key
@@ -44,15 +42,9 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] CSV import not recognizing uploaded file correctly
 - [Fixed] duplicate tables appearing in CSV import drop down table list
 - [Fixed] mr-expander closing an already expanded item
-
-## [8.2.118] - 2023-12-04
-
 - [Added] improved control over scrolling, especially in activity logs
 - [Fixed] validation error message formatting with nested conditions
 - [Fixed] jobs are supposed to send an admin email if they fail - fixes #210
-
-## [8.2.117] - 2023-11-27
-
 - [Changed] handling of scrolling if the target item was removed from the page
 - [Fixed] report new / edited records not showing
 - [Changed] error message when a RecordInvalid exception is thrown
