@@ -254,7 +254,12 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.5.9)
-    nokogiri (1.15.4-x86_64-linux)
+    nokogiri (1.14.5)
+      mini_portile2 (~> 2.8.0)
+      racc (~> 1.4)
+    nokogiri (1.14.5-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.14.5-x86_64-linux)
       racc (~> 1.4)
     orm_adapter (0.5.0)
     parallel (1.23.0)
@@ -468,6 +473,8 @@ GEM
     zeitwerk (2.6.12)
 
 PLATFORMS
+  arm64-darwin-21
+  ruby
   x86_64-linux
 
 DEPENDENCIES
@@ -533,4 +540,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.4.13
+   2.4.21

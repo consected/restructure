@@ -1,73 +1,94 @@
 module TrackerSupport
   include MasterSupport
-  
+
   def put_valid_attribs
-    
-    {notes: nil}
+    { notes: nil }
   end
-  
-  
+
+  # TODO: consider creating an list_valid_attribs to be used in master_support.create_items(...)
+  def list_valid_attribs_on_create
+    res = []
+    days = [3, 5, 1, 2, 6, 4]
+    positions = [3, 1, nil, 4, 2]
+    total_protocols = 5
+    total_sub_processes = 3
+    total_events = 3
+
+    total_protocols.times do |p|
+      protocol = Classification::Protocol.create!(name: "Prot #{rand 100_000}",
+                                                  current_admin: @admin,
+                                                  position: positions[p])
+      total_sub_processes.times do
+        sub_process = protocol.sub_processes.create!(name: "Sub Process #{rand 100_000}",
+                                                     disabled: false,
+                                                     current_admin: @admin)
+        total_events.times do |i|
+          event = sub_process.protocol_events.create!(name: "EV #{rand 100_000}",
+                                                      current_admin: @admin)
+          day = days[i]
+          event_date = DateTime.now - (day.days * rand(100))
+          res << {
+            protocol_id: protocol.id,
+            sub_process_id: sub_process.id,
+            protocol_event_id: event.id,
+            event_date: event_date,
+            notes: 'some text ' * rand(100)
+          }
+        end
+      end
+    end
+
+    res
+  end
+
+  def list_valid_attribs_in_progress; end
+
   def list_valid_attribs
     res = []
-    
+
     day = 0
-    
-    (1..5).each do |l|
-      protocol = Classification::Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
-      (1..3).each do |s|
-        sp = protocol.sub_processes.create! name: "SP #{rand 100000}", disabled: false, current_admin: @admin      
-        
-        (1..3).each do |e|
+
+    5.times do
+      protocol = Classification::Protocol.create! name: "Prot #{rand 100_000}", current_admin: @admin
+      3.times do
+        sp = protocol.sub_processes.create! name: "SP #{rand 100_000}", disabled: false, current_admin: @admin
+        3.times do
           day += 1
-          ev = sp.protocol_events.create! name: "EV #{rand 100000}", current_admin: @admin      
+          ev = sp.protocol_events.create! name: "EV #{rand 100_000}", current_admin: @admin
           event_date = DateTime.now + day.days
-          #ev.name
+          # ev.name
           evid = ev.id
           sp1 = sp.id
-           
-          # remove some events and sub_processes
-#          if e.even?
-#            ev = nil
-#            evn = nil
-#            evid = nil
-#            event_date = nil
-#            if s.even?
-#              sp1 = nil
-#                                         
-#            end
-#          end
-          
+
           res << {
             protocol_id: protocol.id,
             sub_process_id: sp1,
             protocol_event_id: evid,
             event_date: event_date,
-            notes: "some text " * rand(100) 
+            notes: 'some text ' * rand(100)
           }
-                    
         end
       end
     end
-    
+
     res
   end
-  
+
   def list_invalid_attribs
-    
-    protocol = Classification::Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
-    sp = protocol.sub_processes.create! name: "SP #{rand 100000}", disabled: false, current_admin: @admin   
-    ev = sp.protocol_events.create! name: "EV #{rand 100000}", current_admin: @admin      
-    
+
+    protocol = Classification::Protocol.create! name: "Prot #{rand 100_000}", current_admin: @admin
+    sp = protocol.sub_processes.create! name: "SP #{rand 100_000}", disabled: false, current_admin: @admin
+    ev = sp.protocol_events.create! name: "EV #{rand 100_000}", current_admin: @admin
     [
       {
-        protocol_id: 1000000
+        protocol_id: 1_000_000
       },
       {
         protocol_id: nil
       },
       {
         sub_process_id: nil,
-        protocol_id: protocol.id,        
+        protocol_id: protocol.id,
         protocol_event_id: ev.id
       },
       {
@@ -75,28 +96,24 @@ module TrackerSupport
         protocol_id: protocol.id,
         sub_process_id: sp.id,
         protocol_event_id: ev.id
-        
       }
     ]
   end
-  
+
   def new_attribs
     @new_attribs = {
       notes: nil
     }
   end
-  
-  
-  
-  def create_item att=nil, master=nil
+
+  def create_item(att = nil, master = nil)
     att ||= valid_attribs
     master ||= create_master
     begin
       @tracker = master.trackers.create! att
-    rescue => e
+    rescue StandardError => e
       puts "attr for failure: #{att}"
       raise e
     end
   end
-  
 end
