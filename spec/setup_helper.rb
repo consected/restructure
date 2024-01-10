@@ -278,14 +278,14 @@ module SetupHelper
       "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
   end
 
-  def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil)
+  def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil, created_by: nil, assign_access: nil, add_disabled: nil)
     Rails.logger.info "Setting up external identifier #{name}"
     @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
     @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
     ActiveRecord::Base.connection.schema_cache.clear!
     return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
 
-    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
+    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, created_by, assign_access, add_disabled)
   end
 
   def self.setup_test_app

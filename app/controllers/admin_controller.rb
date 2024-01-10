@@ -25,16 +25,25 @@ class AdminController < ApplicationController
     'yaml'
   end
 
+  # The capability used to determine if an admin can administer a particular admin controller
+  # Typically this is just the controller name, but it can be overridden,
+  # for example to group controllers into specific capabilities (such as "redcap")
+  def capability_name
+    controller_name
+  end
+
   private
 
   def secure_params
     params.require(object_name.gsub('__', '_').to_sym).permit(*permitted_params)
   end
 
+  #
+  # Check the admin can administer this controller
   def check_capabilities!
-    return if current_admin.can_admin? controller_name
+    return if current_admin.can_admin? capability_name
 
     raise FphsNotAuthorized,
-          "Admin not authorized for #{controller_name}"
+          "Admin not authorized for #{capability_name}"
   end
 end

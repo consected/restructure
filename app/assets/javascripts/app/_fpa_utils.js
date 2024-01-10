@@ -18,6 +18,7 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   // Ensure the target is valid
   if (!isj && (!target || target.length < 2)) return;
 
+  console.log(`jump_to_linked_item: ${target}`)
   try {
     var h = $(target);
   }
@@ -50,9 +51,20 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
     // Open up the block containing this item
     h.parents('.collapse').collapse('show');
     if (h.hasClass('collapse')) {
-      $('[data-toggle="collapse"][data-target="' + target + '"]:visible')
-        .first()
-        .click();
+      window.setTimeout(function () {
+        // Find the related tab, if there is one
+        var $got_tab = $('[data-toggle="collapse"][data-target="' + target + '"]:visible').first();
+
+        if ($got_tab.parent().hasClass('tabs-close-others')) {
+          console.log('close-others')
+          var $nav = $got_tab.parents('ul.nav').first();
+          $nav.find('.on-open-click').removeClass('on-open-click');
+        }
+        // Now open the required tab if we found one
+        window.setTimeout(function () {
+          $got_tab.click();
+        }, 1000)
+      }, 50)
     } else {
       _fpa.form_utils.format_block(h);
     }
@@ -113,6 +125,29 @@ _fpa.utils.inViewport = function (el, topHalf) {
 // container: the element to scroll
 _fpa.utils.scrollTo = function (pos_or_el, settings, offset, container) {
   container = container || $;
+  if (pos_or_el.parents) var $pos = pos_or_el;
+  if ($pos && $pos.parents('body').length === 0) {
+    // console.log('Jump position is not in the document')
+    // console.log($pos)
+    return;
+  }
+
+  const new_time = (new Date().getTime());
+  const new_pos = $pos && $pos[0];
+  if (
+    // Block is marked to avoid scrolling on clicking edit
+    $pos && $pos.hasClass('no-scroll-on-click-edit')
+  ) {
+    // console.log('Jump position has been requested to avoid jumping')
+    // console.log(new_pos)
+    // console.log(_fpa.state.last_scroll_pos)
+    return;
+  }
+  _fpa.state.last_scroll_time = new_time;
+  if (new_pos) _fpa.state.last_scroll_pos = new_pos;
+
+  // console.log(`scrollTo:`)
+  // console.log(pos_or_el)
   container.scrollTo(pos_or_el, settings, { offset: offset });
 };
 

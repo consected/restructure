@@ -120,22 +120,25 @@ module FilterUtils
   # NOTE: Intentionally not memoized - this breaks things
   # @return [Hash] a hash that can safely be used in redirects and link_to
   def filter_params
+    # Set up filter_params_permitted
+    fpp = filter_params_permitted
+
     if has_disabled_field && (
         filter_params_permitted.blank? ||
         (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
       )
 
-      @filter_params_permitted = { disabled: 'enabled' }
+      fpp = { disabled: 'enabled' }
     end
 
-    unless @filter_params_permitted
+    unless fpp
       @filter_params = {}
       return @filter_params
     end
 
-    @filter_params_permitted[:disabled] ||= 'enabled' if has_disabled_field
+    fpp[:disabled] ||= 'enabled' if has_disabled_field
 
-    res = @filter_params_permitted || {}
+    res = fpp || {}
     res = filter_defaults.merge(res)
 
     num_to_clear_ids = 1

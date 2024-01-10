@@ -70,7 +70,12 @@ module StandardAuthentication
     #
     # Key used to encrypt OTP keys
     def otp_enc_key
-      (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+      res = (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+      if !res || res.length < 32
+        raise FphsException, "otp_enc_key is either nil or less than 32 characters (#{res&.length})" \
+          'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
+      end
+      res
     end
 
     #
@@ -387,6 +392,10 @@ module StandardAuthentication
       self.reset_password_sent_at = nil
       self.password_updated_at = DateTime.now
       @set_reminder = true
+      # This duplicates Devise Lockable#unlock_access! without forcing an unnecessary save
+      self.locked_at = nil
+      self.failed_attempts = 0 if respond_to?(:failed_attempts=)
+      self.unlock_token = nil  if respond_to?(:unlock_token=)
     end
   end
 

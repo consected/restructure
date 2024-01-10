@@ -464,7 +464,7 @@ module Redcap
     # Set up the appropriate dynamic model for the narrow record data.
     # The spec/migrations/20210212065538_create_rc_sample_responses_qoezsq.rb migration
     # handles the creation of the table
-    def create_dynamic_model_for_sample_response(survey_fields: nil)
+    def create_dynamic_model_for_sample_response(survey_fields: nil, disable: nil)
       j = {
         default: {
           db_configs: {
@@ -514,6 +514,9 @@ module Redcap
         tn = 'rc_sample_sf_responses'
       end
 
+      field_list = data_sample_response_fields(type).dup
+      field_list << 'disabled' if disable
+
       options = YAML.dump j.deep_stringify_keys
 
       @dynamic_model = DynamicModel.create! current_admin: @admin,
@@ -522,7 +525,7 @@ module Redcap
                                             primary_key_name: :id,
                                             foreign_key_name: nil,
                                             category: :test,
-                                            field_list: data_sample_response_fields(type).join(' '),
+                                            field_list: field_list.join(' '),
                                             options: options
     end
 

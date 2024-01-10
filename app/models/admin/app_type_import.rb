@@ -43,13 +43,8 @@ class Admin
     # @return [Hash]
     def self.clean_exception(exception)
       {
-        'message' => exception.to_s
-                              .split("\n")
-                              .reject { |m| m.include?('/vendor/bundle/ruby/') }
-                              .join("\n"),
-        'backtrace' => exception.backtrace
-                                .reject { |m| m.include?('/vendor/bundle/ruby/') }
-                                .join("\n")
+        'message' => exception.short_string_message,
+        'backtrace' => exception.short_string_backtrace
       }
     end
 

@@ -785,9 +785,17 @@ RSpec.describe 'Model reference implementation', type: :model do
       dm = @dynamic_model.implementation_class.new(master: @player_contact.master)
       dm.save!
 
+      expect(dm.master).to eq @master
+      expect(dm.master).to eq @player_contact.master
+      expect(dm.user_id).to eq @user&.id
+      expect(dm.current_user).to eq @master.current_user
+
       ModelReference.create_from_master_with(dm.master, @player_contact)
 
       dm.reset_model_references
+
+      puts dm.definition.option_configs if dm.model_references.empty?
+
       # The player_contacts associated with this master record do not all appear in model references.
       # Only the last one that was explicitly added to the model references for this master record
       # will be returned.

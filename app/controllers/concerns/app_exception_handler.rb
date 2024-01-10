@@ -10,6 +10,7 @@ module AppExceptionHandler
     rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
     rescue_from ActionController::UnknownFormat, with: :bad_format_handler
     rescue_from FphsException, with: :fphs_app_exception_handler
+    rescue_from ActiveRecord::RecordInvalid, with: :validation_failed
     rescue_from FphsNotAuthorized, with: :not_authorized
     rescue_from FphsGeneralError, with: :general_error
     rescue_from ESignature::ESignatureException, with: :fphs_app_exception_handler
@@ -32,11 +33,11 @@ module AppExceptionHandler
     text = text.to_s[0..2000] if text
 
     flash_level ||= :danger
-    flash[flash_level] = title
     if request.format == :html
       @error_title = title
       render 'layouts/error_page', status: status, locals: { text: text }
     else
+      flash.now[flash_level] = title
       msg = title
       msg = "#{title} - #{text}" if text
       render plain: msg, status: status
@@ -56,7 +57,7 @@ module AppExceptionHandler
   end
 
   def not_found
-    flash[:danger] = 'Requested information not found'
+    flash.now[:danger] = 'Requested information not found'
     routing_error_handler ActionController::RoutingError.new('Not Found')
   end
 
@@ -87,6 +88,12 @@ module AppExceptionHandler
 
   def fphs_app_exception_handler(error)
     msg = error.message
+    code = 400
+    return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
+  end
+
+  def validation_failed(error)
+    msg = error.message.sub('invalid_error_message:', '- ')
     code = 400
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
@@ -146,7 +153,7 @@ module AppExceptionHandler
     end
 
     if performed?
-      flash[:danger] = msg[0..2000]
+      flash.now[:danger] = msg[0..2000]
       return true
     end
     errors = { error: [msg] }

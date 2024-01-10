@@ -6,6 +6,15 @@
   }
 }
 
+.admin-index-page {
+  .panel-heading .config-status-block {
+    p {
+      display: inline-block;
+      margin-right: 2em;
+    }
+  }
+}
+
 .admin-panel-actions {
   float: right;
   margin-right: 20px;
@@ -118,7 +127,7 @@ a.collapsed > .caret {
 }
 
 .info-danger {
-  color: red;
+  color: #cc0000;
 }
 
 div#creddocframe {
@@ -155,4 +164,10 @@ div#creddocframe {
 
 .admin-item-admin-infos span {
   color: gray;
+}
+
+.nothing-admin-authed {
+  color: gray;
+  font-style: italic;
+
 }

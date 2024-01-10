@@ -86,6 +86,7 @@ module MasterHandler
         # a related object failed to save
         object_instance.save! unless object_instance.errors.present?
         render json: object_instance.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
@@ -114,7 +115,10 @@ module MasterHandler
 
       else
         logger.warn "Error updating #{human_name}: #{object_instance_errors}"
+        # Force an exception to show if no errors reported for the object instance because
+        # a related object failed to save        object_instance.save! unless object_instance.errors.present?
         render json: object_instance.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
@@ -141,14 +145,17 @@ module MasterHandler
   # Retrieve the index action JSON from master objects and extended data
   # @return [String] JSON
   def retrieve_index
-    set_objects_instance @master_objects
     s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
+
+    set_objects_instance(@master_objects) # re add_trackers collection
     s.merge!(extend_result)
+
     if object_instance
       s[:original_item] = object_instance
-      s[objects_name] <<  object_instance
+      s[objects_name] << object_instance
     end
     s[:master_id] = @master.id unless primary_model.no_master_association
+
     s.to_json
   end
 
@@ -310,7 +317,7 @@ module MasterHandler
 
   # Errors for logging
   def object_instance_errors
-    object_instance.errors.map { |k, av| "#{k}: #{av}" }.join(' | ')
+    object_instance.errors.map { |err| "#{err.attribute}: #{err.message}" }.join(' | ')
   end
 
   # In order to clear up a multitude of Ruby warnings
@@ -361,10 +368,10 @@ module MasterHandler
   # Edit form fields can be preset based on permitted parameter values
   def set_fields_from_params
     p = begin
-      secure_params
-    rescue StandardError
-      nil
-    end
+          secure_params
+        rescue StandardError
+          nil
+        end
     p&.each do |k, v|
       object_instance.send("#{k}=", v)
     end
@@ -541,6 +548,7 @@ module MasterHandler
   def filter_records
     filter_requested_ids
     limit_results
+    order_results
   end
 
   #
@@ -568,13 +576,31 @@ module MasterHandler
   #
   # Limit the results to a specified limit if the limit param is set
   def limit_results
-    if @master_objects.is_a? Array
-      @master_objects
-    elsif requested_limit
-      @master_objects = @master_objects.limit(requested_limit)
-    else
-      @master_objects
-    end
+    return unless requested_limit
+
+    @master_objects = @master_objects.limit(requested_limit)
+  end
+
+  MASTER_SORTERS = {
+    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'latest entry date' => 'event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'protocol name' => { 'protocols.name': :asc }
+  }.freeze
+
+  def requested_order
+    order_by_criteria = MASTER_SORTERS[app_config_text(:tracker_order, 'protocol position')]
+
+    raise FphsException, 'requested order has not been implemented' if order_by_criteria.nil?
+
+    @requested_order ||= order_by_criteria
+  end
+
+  #
+  # Limit the results to a specified limit if the limit param is set
+  def order_results
+    return unless requested_order
+
+    @master_objects = @master_objects.unscope(:order).order(requested_order)
   end
 
   #
@@ -623,7 +649,7 @@ module MasterHandler
     obj_params = params[rname]
     unless obj_params
       raise FphsException, "No params sent for #{rname} when creating or updating." \
-                           "Expect posted data #{rname}[<field_name>]"
+        "Expect posted data #{rname}[<field_name>]"
     end
 
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable

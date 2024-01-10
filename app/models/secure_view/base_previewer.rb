@@ -205,31 +205,45 @@ module SecureView
           # Avoid multiple threads and worker processes attempting to convert simultaneously
           # We should make this a backend tasks, with reloading in the UI, but for now...
           i = 0
-          if Rails.cache.read(:libreoffice_parsing)
+          while Rails.cache.read(:libreoffice_parsing)
             # try anyway after 5 times
+            Rails.logger.warn "Waiting for libreoffice_parsing -  #{i}"
             sleep 2
             i += 1
-            break if i >= 5
+            next unless i >= 5
+
+            kres = `ps aux | grep libreoffice`
+            Rails.logger.warn "Libreoffice processes after 5 attempts:\n#{kres}"
+            kres = `pkill oosplash`
+            Rails.logger.warn "Killed oosplash: #{kres}"
+            break
           end
 
           Rails.cache.write :libreoffice_parsing, 'lock', expires_in: 10.seconds
 
           res = system(SecureView::Config.libreoffice_path,
                        '--headless',
+                       '--norestore',
                        '--convert-to', type,
                        '--outdir', temp_dir,
                        orig_path,
                        out: File::NULL, err: File::NULL)
 
           Rails.cache.delete :libreoffice_parsing
-          raise GeneralException, "Failed to convert file to #{type}" unless res
+          unless res
+            raise GeneralException,
+                  "Failed to convert file to #{type} - error code #{res} - #{orig_path}"
+          end
 
           conv_attempts += 1
           self.path = file_cache_path type
         end
 
         unless path && File.exist?(path)
-          raise GeneralException, "Failed to convert file to #{type} - too many attempts" if conv_attempts > 2
+          if conv_attempts > 2
+            raise GeneralException,
+                  "Failed to convert file to #{type} - too many attempts - #{orig_path}"
+          end
 
           # Try again if the path was returned but the file does not exist
           Rails.cache.delete(cache_key('renderedpath'))

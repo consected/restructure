@@ -41,6 +41,8 @@ module FieldDefaults
         res = obj.current_user.user_roles.active.pluck(:id)
       elsif value == 'current_user_role_names'
         res = obj.current_user.user_roles.active.pluck(:role_name)
+      elsif value.include? '{{{'
+        res = Formatter::Substitution.substitute_plain(value, data: obj)
       elsif value.include? '{{'
         res = Formatter::Substitution.substitute(value, data: obj, tag_subs: nil)
       end

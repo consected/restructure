@@ -53,9 +53,24 @@ git push
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
-CURRVER=$(cat ${CURRVERFILE})
+LASTTAG=$(echo "$ALLTAGS" | head -n1)
+CURRVERINFILE=$(cat ${CURRVERFILE})
+CURRVER=${CURRVERINFILE}
+if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
+  echo "Latest version file version ${CURRVER} and latest tag ${LASTTAG} do not match"
+  read -p 'Use latest file version (1) or latest tag version (2)? ' USEVER
+
+  if [ "$USEVER" == '1' ]; then
+    LASTTAG=${CURRVER}
+  else
+    CURRVER=${LASTTAG}
+    echo ${CURRVER} > ${CURRVERFILE}
+    git commit version.txt -m 'Bumped version'
+    git push
+  fi
+fi
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
-RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
+RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
@@ -64,6 +79,12 @@ source ../restructure-build/shared/build-vars.sh
 if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
   echo "Ruby versions don't match: $(cat .ruby-version) != ${RUBY_V}"
   exit 7
+fi
+
+if [ "${RELEASESTARTED}" ]; then
+  echo "Tag ${NEWVER} already exists. Try:"
+  echo "app-scripts/upversion.rb; git commit version.txt -m 'Bumped version'; git push"
+  exit 55
 fi
 
 if [ -z "${SKIP_BRAKEMAN}" ]; then
@@ -94,18 +115,20 @@ if [ "${RELNUM}" ]; then
   echo "Release already started. Checking out and continuing"
   git flow release delete -f ${RELNUM}
 fi
+
 echo "Starting git-flow release"
 git checkout new-master && git pull
-git checkout ${FROM_BRANCH}
-git flow release start ${NEWVER}
-RES=$?
-if [ "$RES" != "0" ]; then
-  echo $RES
-  exit
-fi
-git push --set-upstream origin release/${NEWVER}
-git flow release finish -m 'Release' ${NEWVER}
-git push origin --tags
+# git checkout ${FROM_BRANCH}
+# git flow release start ${NEWVER}
+# RES=$?
+# if [ "$RES" != "0" ]; then
+#   echo $RES
+#   exit
+# fi
+# git push --set-upstream origin release/${NEWVER}
+# git flow release finish -m 'Release' ${NEWVER}
+# git push origin --tags
+git merge --no-ff ${FROM_BRANCH}
 git push origin --all
 
 git checkout ${FROM_BRANCH}

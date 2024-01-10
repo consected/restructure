@@ -12,6 +12,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
   validates :format, presence: true
   validates :format, inclusion: { in: valid_formats }
   validate :unique_library
+  validate :valid_options
 
   after_commit :refresh_dependencies
 
@@ -75,9 +76,9 @@ class Admin::ConfigLibrary < Admin::AdminBase
 
   def unique_library
     l = self.class.active.where(name: name, category: category, format: self.format).first
-    if l && l.id != id
-      errors.add :name, "and format must be unique. Name: #{name}, category: #{category}, format: #{self.format}"
-    end
+    return unless l && l.id != id
+
+    errors.add :name, "and format must be unique. Name: #{name}, category: #{category}, format: #{self.format}"
   end
 
   def refresh_dependencies
@@ -101,5 +102,11 @@ class Admin::ConfigLibrary < Admin::AdminBase
     end
 
     ms.each(&:force_option_config_parse)
+  end
+
+  def valid_options
+    return if options.blank?
+
+    YAML.safe_load(options, aliases: true)
   end
 end

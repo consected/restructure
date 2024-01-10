@@ -4,16 +4,32 @@
     
     <div class="col-md-24">
       <div>
-        <div class="pull-right">
-          <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-primary' %>
+        <h1><%= @app_type.label %> <small><strong><%= @app_type.name %></strong> #<%= @app_type.id %></small></h1>
+        <div class="components-info">
+          <p><span>schema:</span> <code><%=@app_type.default_schema_name%></code></p>
         </div>
-        <h1><%= @app_type.label %> <small>#<%= @app_type.id %> <code><%= @app_type.name %></code></small></h1>
+        <div class="config-status-and-actions">          
+          <%= render partial: 'config_status' %>            
+          <% if @app_type.active_on_server? %>
+          <p>
+            <%= link_to 'export yaml', admin_app_type_path(@app_type, export_format: :yaml), target: '_blank', class: 'btn btn-default' %> 
+            <%= link_to 'export migrations', export_migrations_admin_app_type_path(@app_type), target: '_blank', class: 'btn btn-default' %> 
+          </p>
+          <% end %>
+        </div>
+        <% if @config_notices.present? %>
+        <h3>Configuration Notices</h3>
+        <%= render partial: 'admin/app_types/config_notices' %>
+        <% end %>
       </div>
       
+      <% unless @config_notices_only %>
+      <h3>Components</h3>
+
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <%= render partial: 'admin/app_types/components', locals:{ main_components: false, open_in_new: true }%>
-      
+        <%= render partial: 'admin/app_types/components', locals:{ main_components: false, open_in_new: true }%>      
       </div>
+      <% end %>
     </div>
     <div class="col-md-24">
       <pre><%=@primary%></pre>

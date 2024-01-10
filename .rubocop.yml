@@ -5,16 +5,17 @@ Metrics/LineLength:
     - 'app/**/*'
     # - 'spec/**/*'
 
+# This includes concerns like class_methods blocks
 Metrics/BlockLength:
   Enabled: true
-  Max: 50
+  Max: 200
   Include:
     - 'app/**/*'
     # - 'spec/**/*'
 
 Metrics/ModuleLength:
   Enabled: true
-  Max: 250
+  Max: 800
   Include:
     - 'app/**/*'
 
@@ -27,19 +28,19 @@ Metrics/MethodLength:
 
 Metrics/ClassLength:
   Enabled: true
-  Max: 400
+  Max: 800
   Include:
     - 'app/**/*'
 
 Metrics/CyclomaticComplexity:
   Enabled: true
-  Max: 20
+  Max: 30
   Include:
     - 'app/**/*'
 
 Metrics/PerceivedComplexity:
   Enabled: true
-  Max: 20
+  Max: 30
   Include:
     - 'app/**/*'
 

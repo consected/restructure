@@ -4,6 +4,7 @@ _fpa.form_utils = {
   // not make this a good choice.
 
   set_field_errors: function (block, obj) {
+    const invalid_error_prefix = 'invalid_error_message: ';
     if (!obj) {
       // clear previous results
       $('.has-error')
@@ -18,24 +19,36 @@ _fpa.form_utils = {
     for (var p in obj) {
       if (obj.hasOwnProperty(p)) {
         var v = obj[p];
-        var f = block.find("[data-attr-name='" + p.underscore() + "']").parent();
+        var $field = block.find("[data-attr-name='" + p.underscore() + "']").parent().filter(':visible');
 
         // In certain cases there may be more than one matching item (such as for radio buttons)
         // If so, try to jump to the main .list-group-item container
-        if (f.length > 1) {
-          f = f.parents('.list-group-item').first();
+        if ($field.length > 1) {
+          $field = $field.parents('.list-group-item').first();
+          if (!first_field) first_field = $field;
         }
-        if (f.length == 1) {
-          if (!first_field) first_field = f;
-          f.addClass('has-error');
+        if ($field.length == 1) {
+          if (!first_field) first_field = $field;
+          $field.addClass('has-error');
           var fn = p.replace(/_/g, ' ');
-          if (f.hasClass('showed-caption-before')) fn = 'Entry';
+          //if ($field.hasClass('showed-caption-before')) 
+          // Simplify error messages, since field names are often meaningless
+          // even if not using captions
+          fn = 'Entry';
 
-          v = fn + ' ' + v;
+          if (v.join) v = v.join('; ')
+
+          if (v.indexOf(invalid_error_prefix) >= 0) {
+            v = v.replaceAll(invalid_error_prefix, '');
+          }
+          else {
+            fn = fn || '';
+            v = fn + ' ' + v;
+          }
           var el = $('<p class="help-block error-help">' + v + '</p>');
-          f.append(el);
+          $field.append(el);
           delete obj[p];
-          obj.form = 'has errors. Check the highlighted fields.';
+          obj.Form = 'has errors. Check the highlighted fields.';
         }
       }
     }
@@ -273,73 +286,6 @@ _fpa.form_utils = {
     return form_data;
   },
 
-  // Since the select_from_... fields
-  // may be tied through a master association to the current instance,
-  // it is not possible to cache the results directly based on a dynamic definition
-  // and it must be handled at the time of the request.
-  // Therefore this function does not actually provide data that is useful to the front end
-  /*
-  get_general_selections: function (data) {
-    if (!data) return;
-
-    if (data.multiple_results) {
-      _fpa.form_utils.get_general_selections(data[data.multiple_results]);
-      return;
-    }
-
-    if (data.length) {
-      for (var n = 0; n < data.length; n++) {
-        _fpa.form_utils.get_general_selections(data[n]);
-      }
-      return;
-    }
-
-    if (!data.item_type) {
-      var item_key;
-      for (item_key in data) {
-        if (data.hasOwnProperty(item_key) && item_key != '_control') break;
-      }
-
-      var di = data[item_key];
-      if (!di) return;
-      data = di;
-    }
-
-    if (data.embedded_item) {
-      _fpa.form_utils.get_general_selections(data.embedded_item);
-    }
-
-    var post = data.item_type ? '-item_type+' + data.item_type : '';
-    post += data.extra_log_type ? '-extra_log_type+' + data.extra_log_type : '';
-    var cname = 'general_selections' + post;
-
-    _fpa.cache.get_definition(cname, function () {
-      var pe = _fpa.cache.fetch(cname);
-      // _general_selections may be passed as an attribute in the response data
-      if (!data._general_selections) data._general_selections = {};
-      for (var k in data) {
-        if (data.hasOwnProperty(k)) {
-          if (data.model_data_type == 'activity_log') {
-            var it = data.item_type + '_' + k;
-          } else {
-            var it = data.item_type + 's_' + k;
-          }
-
-          var ibh = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
-
-          var ibhi = null;
-          for (ibhi in ibh) {
-            break;
-          }
-
-          if (ibhi && !data._general_selections[k]) {
-            data._general_selections[k] = ibh;
-          }
-        }
-      }
-    });
-  },
-  */
 
   handle_sub_list_filters: function ($control, init) {
     var $a = $control;
@@ -482,6 +428,17 @@ _fpa.form_utils = {
         $(this).html(new_text);
       })
       .addClass('cb_subs_done');
+
+
+    // Remove empty placeholder captions, even if they have just a blank paragraph
+    block
+      .find('.placeholder-caption-before')
+      .not('.phcb_subs_done')
+      .each(function () {
+        var text = $(this).text();
+        if (!text) $(this).hide().html(null);
+      })
+      .addClass('phcb_subs_done');
   },
 
   // Resize all labels in a block for nice formatting without tables or fixed widths
@@ -610,7 +567,7 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple], .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
+    var sels = block.find('select[multiple], select.use-chosen, .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
@@ -666,6 +623,32 @@ _fpa.form_utils = {
         }, 1);
       })
       .addClass('attached-chosen');
+
+    var $dfs = sels.filter('[data-filter-selector]');
+    _fpa.form_utils.setup_chosen_groups($dfs);
+  },
+
+  setup_chosen_groups: function ($data_filter_selectors) {
+    $data_filter_selectors.each(function () {
+      var fts = $(this).attr('data-filter-selector')
+      const $sel = $(`.attached-chosen[name="search_attrs[${fts}]"]`)
+      $sel.on('chosen:showing_dropdown', function (evt, params) {
+        // Access the element
+        var $chosen = params.chosen.container;
+        // Ensure groups are hidden in chosen dropdowns
+        console.log('chosen updated');
+        var $orig = $(this);
+        // Access the element
+        // Hide any disabled groups
+        var disoptgroups = $orig.find('optgroup[disabled]');
+        var $grs = $chosen.find('.group-result')
+        $grs.removeClass('group-result-disabled');
+        disoptgroups.each(function () {
+          const label = $(this).attr('label');
+          $grs.filter(`:contains('${label}')`).addClass('group-result-disabled');
+        });
+      })
+    })
   },
 
   organize_common_templates: function (block) {
@@ -922,6 +905,8 @@ _fpa.form_utils = {
         if (!matches) return;
 
         let target = matches[1];
+        if (!target) return;
+
         if (target[0] !== '.') target = `#${target}`;
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
@@ -930,8 +915,21 @@ _fpa.form_utils = {
           // result if directly calling with #element-id 
           if (target[0] === '#') target = `[id="${target.replace('#', '')}"]`;
         }
+
         let $target = $(target);
+        // If there is the target within this common-template-item block (if we are in one)
+        // use that as the target. Otherwise, just use the target exactly as specified.
+        var $pos = $(this).parents('.common-template-item').find(target);
+        if ($pos.length) {
+          $target = $pos;
+        }
+        else {
+          $pos = $(this).parents('.master-panel').find(target);
+          if ($pos.length) $target = $pos;
+        }
+
         if (last) $target = $target.last();
+
         $target.click();
 
       }).addClass('attached-hash-click-target');
@@ -946,6 +944,8 @@ _fpa.form_utils = {
         if (!matches) return;
 
         let target = matches[1];
+        if (!target) return;
+
         if (target[0] !== '.') target = `#${target}`;
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
@@ -957,10 +957,15 @@ _fpa.form_utils = {
         // If there is the target within this common-template-item block (if we are in one)
         // use that as the target. Otherwise, just use the target exactly as specified.
         var $target = $(target);
-        const $pos = $(this).parents('.common-template-item').find(target);
+        var $pos = $(this).parents('.common-template-item').find(target);
         if ($pos.length) {
           $target = $pos;
         }
+        else {
+          $pos = $(this).parents('.master-panel').find(target);
+          if ($pos.length) $target = $pos;
+        }
+
         if (last) $target = $target.last();
 
         // Only click the target if the caret is marked as collapsed currently
@@ -1020,6 +1025,8 @@ _fpa.form_utils = {
       .on('click', function () {
         if ($(this).attr('disabled')) return;
         var target = $(this).attr('data-target');
+        if (!target) return;
+
         if (target.indexOf('!last') > 0) {
           target = target.replaceAll('!last', '')
           var last = true;
@@ -1100,7 +1107,7 @@ _fpa.form_utils = {
 
     block
       .find(
-        '[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
+        '[data-toggle~="scrollto-result"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded '
       )
       .not('.attached-datatoggle-str')
       .on('click', function () {
@@ -1126,57 +1133,57 @@ _fpa.form_utils = {
           a = $(this).attr('data-result-target');
         }
 
-        if (a) {
-          if (a.indexOf('!last') > 0) {
-            a = a.replaceAll('!last', '')
-            var last = true;
-            // Search on id attribute, since jQuery will only return a single
-            // result if directly calling with #element-id 
-            if (a[0] === '#') a = `[id="${a.replace('#', '')}"]`;
+        if (!a) return;
+
+        if (a.indexOf('!last') > 0) {
+          a = a.replaceAll('!last', '')
+          var last = true;
+          // Search on id attribute, since jQuery will only return a single
+          // result if directly calling with #element-id 
+          if (a[0] === '#') a = `[id="${a.replace('#', '')}"]`;
+        }
+
+        // Only jump to the target if the current top and bottom of the block are off screen. Usually we
+        // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
+        // some data.
+        // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
+        // scrolling, to keep the page from jumping around for the user where possible.
+        // Note that the timeout is set to ensure collapse sections have had time to grow to full height
+
+        var attempt_count = 0;
+        var doscroll = function () {
+          var $a = $(a);
+          if (last) $a = $a.last();
+          var rect = $a.get(0);
+          if (!rect) {
+            if (attempt_count > 10) {
+              return;
+            }
+            attempt_count++;
+            window.setTimeout(function () {
+              doscroll();
+            }, 250);
+            return;
+          }
+          rect = rect.getBoundingClientRect();
+
+          if (rect.height < 6) {
+            attempt_count++;
+            window.setTimeout(function () {
+              doscroll();
+            }, 250);
+            return;
           }
 
-          // Only jump to the target if the current top and bottom of the block are off screen. Usually we
-          // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
-          // some data.
-          // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
-          // scrolling, to keep the page from jumping around for the user where possible.
-          // Note that the timeout is set to ensure collapse sections have had time to grow to full height
+          var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
+          if (not_visible) {
+            _fpa.utils.jump_to_linked_item(a, -150, { no_highlight: true });
+          }
+        };
 
-          var attempt_count = 0;
-          var doscroll = function () {
-            var $a = $(a);
-            if (last) $a = $a.last();
-            var rect = $a.get(0);
-            if (!rect) {
-              if (attempt_count > 10) {
-                return;
-              }
-              attempt_count++;
-              window.setTimeout(function () {
-                doscroll();
-              }, 250);
-              return;
-            }
-            rect = rect.getBoundingClientRect();
-
-            if (rect.height < 6) {
-              attempt_count++;
-              window.setTimeout(function () {
-                doscroll();
-              }, 250);
-              return;
-            }
-
-            var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
-            if (not_visible) {
-              _fpa.utils.jump_to_linked_item(a, -150, { no_highlight: true });
-            }
-          };
-
-          window.setTimeout(function () {
-            doscroll();
-          }, 250);
-        }
+        window.setTimeout(function () {
+          doscroll();
+        }, 250);
       })
       .addClass('attached-datatoggle-str');
 
@@ -1246,12 +1253,10 @@ _fpa.form_utils = {
       .find('[data-toggle-caret]')
       .not('.attached-toggle_caret')
       .on('click', function () {
-        if ($(this).hasClass('glyphicon-triangle-bottom')) {
+        if ($(this).hasClass('glyphicon-triangle-right')) {
           var el = $(this);
-          $(this).removeClass('glyphicon-triangle-bottom');
-          $(this).addClass('glyphicon-triangle-top');
-          $(this).removeClass('caret-target-collapsed');
-          $(this).addClass('caret-target-expanded');
+          $(this).removeClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).addClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1262,10 +1267,8 @@ _fpa.form_utils = {
           }, 10);
         } else {
           var el = $(this);
-          $(this).addClass('glyphicon-triangle-bottom');
-          $(this).removeClass('glyphicon-triangle-top');
-          $(this).removeClass('caret-target-expanded');
-          $(this).addClass('caret-target-collapsed');
+          $(this).addClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).removeClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
@@ -1286,7 +1289,7 @@ _fpa.form_utils = {
 
     block
       .find('[pattern]')
-      .not('.attached-datatoggle-pattern, [type="password"]')
+      .not('.attached-datatoggle-pattern, [type="password"], .no-mask')
       .each(function () {
         var p = $(this).attr('pattern');
         var t = $(this).attr('type');

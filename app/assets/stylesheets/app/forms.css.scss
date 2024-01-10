@@ -212,6 +212,14 @@ div.chosen-container.chosen-disabled {
   }
 }
 
+
+div.chosen-container .chosen-results{
+  li.group-result.group-result-disabled,
+  li.group-option.disabled-result {
+    display: none;
+  }
+}
+
 form .tracker-notes textarea.form-control {
   width: 90%;
 }
@@ -573,9 +581,10 @@ fieldset.readonly-edit-fieldset {
   }
 }
 
-.custom-editor {
+.custom-editor,
+.custom-editor[contenteditable="true"] {
   border: 1px solid rgb(192, 192, 192);
-  padding: 5px 5px 10px 5px;
+  padding: 5px 5px 10px 5px !important;
   min-height: 40px;
   max-height: 80vh;
   overflow-y: auto;
@@ -589,6 +598,10 @@ fieldset.readonly-edit-fieldset {
   .custom-editor {
     border: none;
   }
+}
+
+.changed-field-danger {  
+  border-color: #cc0000;
 }
 
 #master_results_block form select.no-child-items {

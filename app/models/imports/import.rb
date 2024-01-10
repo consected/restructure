@@ -20,7 +20,7 @@ class Imports::Import < ActiveRecord::Base
     tables = uac.where(resource_type: 'table').valid_resources.pluck(:resource_name).sort
     tables -= %w[item_flags]
     # mtables = Master.get_all_associations
-    (tables + ['masters']).sort
+    (tables + ['masters']).uniq.sort
   end
 
   #
@@ -43,7 +43,7 @@ class Imports::Import < ActiveRecord::Base
   # @param [String] csv - full CSV text
   # @return [Import] self
   def import_csv(csv)
-    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol)
+    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol, encoding: 'UTF-8')
     # The user attribute is allowed to be set on Import
     # This has the required side-effect that the models being created form the CSV data
     # will get their user at creation time  based on this

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActivityLogSupport
   include MasterSupport
 
@@ -67,7 +69,7 @@ module ActivityLogSupport
 
       @player_contact = @master.player_contacts.create!(
         {
-          data: '(516)262-1289',
+          data: '(516)262-1291',
           source: 'nfl',
           rank: 10,
           rec_type: 'phone'
@@ -169,7 +171,7 @@ module ActivityLogSupport
     others = ActivityLog
     others = others.where.not(id: excluding_id) if excluding_id
     others = others.conflicting_definitions(item_type, rec_type, process_name)
-    return if others.length == 0
+    return if others.empty?
 
     all_defs = ActivityLog.conflicting_definitions(item_type, rec_type, process_name)
     if excluding_id

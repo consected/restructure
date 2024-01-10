@@ -27,8 +27,13 @@ filled_items = 0
                 <% row_num = 1 %>
                 <%= form.fields_for @primary_table.to_sym, @import.items do |f| %>
                 <%
+                  f_index = f.index
+                  unless f_index
+                    raise FphsException, "The field #{f} was not matched. Check the model is up to date and server configuration has been refreshed"
+                  end
+
                   final_blank_row = row_num == @import.item_count+1
-                  item = @import.items[f.index]
+                  item = @import.items[f_index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
                   filled_row = row_num <= @import.item_count

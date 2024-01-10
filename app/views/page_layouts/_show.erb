@@ -1,0 +1,15 @@
+<%
+container = @page_layout.container
+rows = container.rows || []
+
+# Set a unique id for the container block
+@outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
+%>
+
+<div id="standalone-page">
+  <div class="standalone-page-container container-fluid" id="<%=@outer_block_id%>" data-page-layout-id="<%=@page_layout.id%>">
+    <div class="sp-main">
+      <%= render partial: 'show_row', locals: {rows: rows, container: container} %>
+    </div>
+  </div>
+</div>

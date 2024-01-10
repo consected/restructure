@@ -87,6 +87,17 @@ RSpec.describe 'DynamicModelExtension::ZeusShortLink', type: :model do
     expect(o.data).to eq '(123)123-1234 alt'
   end
 
+  it 'avoids functional directive if created by a tag result' do
+    txt = "A short message with a generated URL {{data}}\nThanks!"
+    last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
+    @master = Master.create! current_user: @user, msid: last_msid
+    @player_contact = @master.player_contacts.create! data: '(123)123-1234 [[shortlink http://test.test]]', rec_type: :phone, rank: 10
+
+    data = Formatter::Substitution.setup_data(@player_contact)
+    res = Formatter::Substitution.substitute txt, data: data, tag_subs: nil
+    expect(res).to eq txt = "A short message with a generated URL (123)123-1234 [[shortlink http://test.test]]\nThanks!"
+  end
+
   it 'stress tests creating many' do
     test_times = 10
 

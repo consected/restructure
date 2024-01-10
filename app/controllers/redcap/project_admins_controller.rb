@@ -73,6 +73,12 @@ class Redcap::ProjectAdminsController < AdminController
     render json: { message: msg }, status: 200
   end
 
+  protected
+
+  def capability_name
+    'redcap'
+  end
+
   private
 
   def set_defaults
@@ -122,6 +128,10 @@ class Redcap::ProjectAdminsController < AdminController
 
   def permitted_params
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency disabled options notes]
+  end
+
+  def title
+    'REDCap: Project Transfer'
   end
 
   def filters

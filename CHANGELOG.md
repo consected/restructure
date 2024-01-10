@@ -16,7 +16,195 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.2.66] - 2023-09-05
+## Unreleased
+
+- [Added] feature to allow tracker to sort protocols by latest event date as an alternative to the default, which is to order by configured protocol position - resolves #72
+- [Fixed] (hopefully) restarting of delayed_job from the server
+- [Added] more information to document conversion error
+- [Added] FailureNotificationsToEmail to server settings variable viewer
+- [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
+- [Added] current user id as state in the application page script
+- [Added] ability to rerun DB seeds from server info
+- [Changed] field validation messages to always show as "Entry" rather than a meaningless field name
+- [Added] handling of disabled groups in "chosen" drop-downs to hide correctly, especially when using the data-filter-selector option
+- [Added] extra checking and logging around Libreoffice, plus kill stuck processes
+- [Added] a data-user-roles attribute to body, allowing body[data-user-roles~='underscored_role_name'] to be used in CSS
+- [Fixed] issues with model reference data being blank and used for record matching in transfer script
+- [Changed] nav links page layout to avoid showing app types not available to the user
+- [Fixed] email notifications from and failure notification to email address settings
+- [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
+- [Fixed] handling of model references in curly substitutions in the front end
+- [Changed] API sample for study info transfer to another server
+- [Fixed] CSV import form bug
+- [Added] configuration check for OTC encoding key
+- [Added] make-labels-placeholders to documentation
+- [Fixed] integer field to allow negative numbers - fixes CSV import of master id does not allow negative numbers #218
+- [Fixed] CSV import not recognizing uploaded file correctly
+- [Fixed] duplicate tables appearing in CSV import drop down table list
+- [Fixed] mr-expander closing an already expanded item
+- [Added] improved control over scrolling, especially in activity logs
+- [Fixed] validation error message formatting with nested conditions
+- [Fixed] jobs are supposed to send an admin email if they fail - fixes #210
+- [Changed] handling of scrolling if the target item was removed from the page
+- [Fixed] report new / edited records not showing
+- [Changed] error message when a RecordInvalid exception is thrown
+
+## [8.2.114] - 2023-11-23
+
+- [Changed] admin panel to add more visible config status and moved admin user actions to main panel
+- [Cleanup] exception display
+- [Changed] scripts for better error reporting
+- [Cleanup] specs
+- [Added] confirmed at column to user display
+- [Fixed] user resets a password themselves but their account is locked - now we unlock the account - fixes #116
+- [Fixed] user has not been assigned any accessible app types, they receive no message on logging in and just return to the login page - fixes #204
+- [Changed] self registration of users allowed and an admin creates a user, auto confirmation automatically set to avoid unnecessary confirmation email - fixes  #205
+- [Fixed] Admin resets password for a user with "do not email" set causes an exception - fixes #202
+- [Fixed] admin with capability "redcap" can see Redcap projects on the admin panel, but is not authorized to click into it - fixes #203
+- [Added] more information to make the upload scripts more usable
+- [Added] full API script to upload files from a directory to different containers - fixes #197
+- [Changed] 'trouble logging in?' help page
+- [Cleanup] to provide clearer exceptions
+
+## [8.2.112] - 2023-10-23
+
+- [Fixed] Error after saving dynamic model definition changes - fixes #193
+- [Added] configuration notices to a more easily access app type components page - fixes #195
+- [Cleanup] unnecessary reliance on rescue
+- [Changed] link with #click-target-tab-activity-log-data-request to limit its possible container to the master panel, so tabs in the current master can be targeted - fixes #185
+- [Added] dynamic definition config error feedback during editing - fixes #186 and #192
+- [Changed] exception reporting often during startup for bad activity log configurations being loaded
+- [Fixed] message formatting for invalid_error_message - fixes #191
+- [Added] exception extensions to help with reporting error messages and backtraces
+- [Fixed] expander carets are wrong direction - regression - fixes #190
+- [Added] embedding of page layouts within standalone (Study Info) pages, allowing a full set of forms to be presented in order using an activity log
+- [Changed] form fields changed but not saved warning to make it clearer
+- [Added] CSS for inline buttons
+- [Fixed] user access controls for *limited_if_none* to work correctly in all combinations, especially with assign_access_to_user_id - fixes #184
+- [Added] headless browser testing option without relying on Xvfb - fixes #182
+- [Fixed] calculate "all" conditions fails with condition: '<>' when the value is NULL - fixes #180
+- [Fixed] error when a field has a validate: key and the validation fails - fixes #179
+- [Fixed] Import CSV in admin panel fails to import UTF-8 data - fixes #178
+- [Fixed] _fpa_substitution.js get_data() merges master data over the original instance data, breaking id, created_at, etc - fixes #175
+- [Fixed] scrolling after saving a new model reference embedded in am activity log jumps to top of list - fixes #176
+- [Added] documentation to clarify reference sorting in extra options view_options.sort_references
+- [Fixed] scroll-to-target jumping back up to a link outside the current block - fixes #173
+- [Changed] handling of panel tab caption to ignore blank entries that include carriage returns - fixes #172
+- [Fixed] view_options.sort_references failing with an exception if a value being sorted is null - fixes #164
+- [Refactored] to remove duplicated model reference related methods
+- [Fixed] tag substitutions create [[functional directive]] output, to prevent raising an exception, or being manipulated by user data
+
+## [8.2.104] - 2023-10-23
+
+- [Fixed] release builds to include linked source directories correctly
+
+## [8.2.103] - 2023-10-23
+
+- [Bumped] version
+- [Fixed] CHANGELOG
+
+## [8.2.102] - 2023-10-23
+
+- [Bumped] version
+
+## [8.2.100] - 2023-10-19
+
+- [Added] :current_user_roles SQL substitution to provide an array[] of current user active role names
+- [Added] documentation for report SQL substitutions
+- [Fixed] filtering of config libraries to include name, so we can directly link to them from dynamic def admin pages
+
+## [8.2.99] - 2023-10-18
+
+- [Added] the ability for reference action captions to incorporate more extensive substitutions
+- [Added] preprocessing of templates to convert ReStructure specific tag formatters {{embedded_report_...}} {{glyphicon_...}} and {{tag::formatter...}} to new handlebars helpers
+
+## [8.2.98] - 2023-10-17
+
+- [App-Specific] [Added] study info app specific functionality
+
+## [8.2.97] - 2023-10-17
+
+- [Fixed] incorrect save making a syntax error when editing a config library attached to an activity log breaks the app
+- [Changed] ui page ... templates to prevent them from making curly substitutions
+- [Fixed] presentation issues with forms embedded in study info pages
+- [Fixed] admin capability to allow user access control administration
+- [Added] better admin index UI if no capabilities for a section
+- [Fixed] error in admin panels that have user access control tabs when an admin does not have that capability
+
+## [8.2.96] - 2023-10-16
+
+- [Fixed] missing tag in UI templates breaks UI
+
+## [8.2.95] - 2023-10-12
+
+- [Added] ::general_selection_label formatter
+- [Added] limited UI tag substitution lookup of associations, based on model_references in data
+- [Fixed] front end formatter for YAML
+- [Fixed] failed hash jumps and avoid JS errors
+
+## [8.2.94] - 2023-10-11
+
+- [Added] migration rule so field names ending with _json are automatically typed as jsonb in database
+- [Added] triple curly substitution notation to return a data object for storing into a JSON DB field
+- [Added] ::json and ::yaml formatters for substitutions
+- [Fixed] URL hash opening a tab, but not closing automatically opened tabs
+- [Fixed] issue trying to cast a True value with true_if_1 - check if the cast function exists and if not just return the original
+- [Added] admin panel filtering of client requests
+
+## [8.2.93] - 2023-09-27
+
+- [Fixed] filter_params when there is no disabled field
+- [Added] the ability to hide "disabled" filter in admin pages if it is not needed
+- [Added] ability to filter client requests, and linked this from the redcap project requests summary panel
+- [Added] redcap project admin option to prefix a config library to the dynamic model, so it always appears after an update
+- [Fixed] Redcap extra fields (chosen array fields) so correct calculation of missing fields in dynamic model can be made
+
+## [8.2.92] - 2023-09-26
+
+- [Added] the ability to ignore or disable deleted Redcap records
+- [Added] documentation for Redcap project admin
+- [Changed] handling of data_options.add_multi_choice_summary_fields
+- [Changed] presentation of Redcap project admin details block
+- [Changed] "force reconfiguration" action to warn users that it is destructive and provide a confirmation to continue
+- [Fixed] handling of Redcap record identification for repeating instruments
+
+## [8.2.91] - 2023-09-25
+
+- [Fixed] build script
+- [Fixed] devise error message interpolations
+
+## [8.2.90] - 2023-09-25
+
+- [Changed] release script to attempt to avoid dependence on "git flow"
+- [Changed] Changed login messages to confirm if an issue is with admin or user account
+
+## [8.2.89] - 2023-09-25
+
+- [Bumped] version
+
+## [BAD VERSION] - 2023-09-25
+
+- [Changed] multiple items for org specific assets and defaults
+- [Moved] app/assets/images directory to restructure-app repo for org specific assets
+- [Remove] outdated favicon
+- [Changed] short links defaults
+- [Added] default_logo substitution for message templates
+- [Fixed] out of date flash when the next page is opened
+- [Fixed] re-enabling of views
+
+## [8.2.82] - 2023-09-20
+
+- Rebuild
+
+## [8.2.81] - 2023-09-20
+
+- [Changed] handling of versions in build
+
+## [8.2.80] - 2023-09-20
+
+First attempt at building with app and organization specific files in restructure-apps repo
+
+## [8.2.77] - 2023-09-19
 
 - [Changed] location of app and organization specific directories and files to move them to restructure-apps repo, so we can move to real forking model for repositories
 
