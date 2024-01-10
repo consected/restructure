@@ -34,14 +34,7 @@ class ApplicationJob < ActiveJob::Base
   # @param [ActiveJob::Base] job
   def self.notify_failure(job)
     Rails.cache.fetch('delayed_job-failure-notification', expires_in: 1.hour) do
-      options = {
-        to: Settings::AdminEmail,
-        from: Settings::NotificationsFromEmail || Settings::AdminEmail,
-        body: "A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\n#{job}",
-        content_type: 'text/plain',
-        subject: 'delayed_job failure'
-      }
-      mail(options)
+      FailureMailer.notify_job_failure(job).deliver_later
       DateTime.now
     end
   rescue StandardError => e

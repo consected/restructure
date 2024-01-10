@@ -37,10 +37,18 @@ module ApplicationHelper
     "app-type-id-#{current_user.app_type_id}" if current_user
   end
 
+  def user_roles_for_attr
+    return unless current_user
+
+    current_user.role_names.map(&:id_underscore).join(' ')
+  end
+
   #
   # 'class=""' attribute to add to the main body tag
   def body_classes
-    class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} #{Rails.env.test? ? 'rails-env-test' : ''}"
+    class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} " \
+    "#{Rails.env.test? ? 'rails-env-test' : ''}"
+
     " class=\"#{class_list} initial-compiling \"".html_safe
   end
 

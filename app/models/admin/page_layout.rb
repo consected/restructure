@@ -79,6 +79,8 @@ class Admin::PageLayout < Admin::AdminBase
   #      url: URL for the nav item
   #      resource_type: the resource type to use to assess user access to this nav item
   #      resource_name: the resource name to use to assess user access to this nav item
+  #      resource_app_type: optionally test resource access against this app rather than the current one
+  #                         allowing general / app_type / app type name to test if a user can access another app
   # resources: (unknown)
   # label: (unknown)
   configure :nav, with: %i[links resources label]

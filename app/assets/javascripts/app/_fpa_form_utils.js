@@ -31,7 +31,10 @@ _fpa.form_utils = {
           if (!first_field) first_field = $field;
           $field.addClass('has-error');
           var fn = p.replace(/_/g, ' ');
-          if ($field.hasClass('showed-caption-before')) fn = 'Entry';
+          //if ($field.hasClass('showed-caption-before')) 
+          // Simplify error messages, since field names are often meaningless
+          // even if not using captions
+          fn = 'Entry';
 
           if (v.join) v = v.join('; ')
 
@@ -425,6 +428,17 @@ _fpa.form_utils = {
         $(this).html(new_text);
       })
       .addClass('cb_subs_done');
+
+
+    // Remove empty placeholder captions, even if they have just a blank paragraph
+    block
+      .find('.placeholder-caption-before')
+      .not('.phcb_subs_done')
+      .each(function () {
+        var text = $(this).text();
+        if (!text) $(this).hide().html(null);
+      })
+      .addClass('phcb_subs_done');
   },
 
   // Resize all labels in a block for nice formatting without tables or fixed widths
@@ -553,7 +567,7 @@ _fpa.form_utils = {
   setup_chosen: function (block) {
     if (!block) block = $(document);
 
-    var sels = block.find('select[multiple], .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
+    var sels = block.find('select[multiple], select.use-chosen, .report-criteria-fields-block select, .use-chosen select').not('.attached-chosen');
     // Place the chosen setup into a timeout, since it is time-consuming for a large number
     // of "tag" fields, and blocks the main thread otherwise.
     sels
@@ -609,6 +623,32 @@ _fpa.form_utils = {
         }, 1);
       })
       .addClass('attached-chosen');
+
+    var $dfs = sels.filter('[data-filter-selector]');
+    _fpa.form_utils.setup_chosen_groups($dfs);
+  },
+
+  setup_chosen_groups: function ($data_filter_selectors) {
+    $data_filter_selectors.each(function () {
+      var fts = $(this).attr('data-filter-selector')
+      const $sel = $(`.attached-chosen[name="search_attrs[${fts}]"]`)
+      $sel.on('chosen:showing_dropdown', function (evt, params) {
+        // Access the element
+        var $chosen = params.chosen.container;
+        // Ensure groups are hidden in chosen dropdowns
+        console.log('chosen updated');
+        var $orig = $(this);
+        // Access the element
+        // Hide any disabled groups
+        var disoptgroups = $orig.find('optgroup[disabled]');
+        var $grs = $chosen.find('.group-result')
+        $grs.removeClass('group-result-disabled');
+        disoptgroups.each(function () {
+          const label = $(this).attr('label');
+          $grs.filter(`:contains('${label}')`).addClass('group-result-disabled');
+        });
+      })
+    })
   },
 
   organize_common_templates: function (block) {
@@ -917,7 +957,7 @@ _fpa.form_utils = {
         // If there is the target within this common-template-item block (if we are in one)
         // use that as the target. Otherwise, just use the target exactly as specified.
         var $target = $(target);
-        const $pos = $(this).parents('.common-template-item').find(target);
+        var $pos = $(this).parents('.common-template-item').find(target);
         if ($pos.length) {
           $target = $pos;
         }
@@ -1215,8 +1255,8 @@ _fpa.form_utils = {
       .on('click', function () {
         if ($(this).hasClass('glyphicon-triangle-right')) {
           var el = $(this);
-          $(this).removeClass('glyphicon-triangle-right');
-          $(this).addClass('glyphicon-triangle-bottom');
+          $(this).removeClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).addClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-target');
           var tel = t && $(t);
           window.setTimeout(function () {
@@ -1227,8 +1267,8 @@ _fpa.form_utils = {
           }, 10);
         } else {
           var el = $(this);
-          $(this).addClass('glyphicon-triangle-right');
-          $(this).removeClass('glyphicon-triangle-bottom');
+          $(this).addClass('glyphicon-triangle-right caret-target-collapsed');
+          $(this).removeClass('glyphicon-triangle-bottom caret-target-expanded');
           var t = $(this).attr('data-result-target');
           if (t) $(t).html('');
           window.setTimeout(function () {
@@ -1249,7 +1289,7 @@ _fpa.form_utils = {
 
     block
       .find('[pattern]')
-      .not('.attached-datatoggle-pattern, [type="password"]')
+      .not('.attached-datatoggle-pattern, [type="password"], .no-mask')
       .each(function () {
         var p = $(this).attr('pattern');
         var t = $(this).attr('type');
