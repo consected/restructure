@@ -1,0 +1,27 @@
+.bundle/
+log/*.log
+pkg/
+test/dummy/db/*.sqlite3
+test/dummy/db/*.sqlite3-journal
+test/dummy/log/*.log
+test/dummy/tmp/
+test/dummy/.sass-cache
+
+# Rubygems
+*.gem
+*.lock
+
+# RVM
+.ruby-version
+.ruby-gemset
+
+# rbenv
+vendor/bundle
+
+# Appraisal
+gemfiles/*
+!gemfiles/*.gemfile
+
+# Editors
+*.sublime-project
+*.sublime-workspace
