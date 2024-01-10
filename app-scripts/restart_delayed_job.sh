@@ -15,6 +15,6 @@ sleep 15
 # The AWS Elastic Beanstalk *Procfile* defines this service.
 # SIGINT is used, since this should allow the current job to
 # finish before the process closes itself.
-pkill --signal 2 -f bin/delayed_job
+pkill --signal 2 -f '^bin/delayed_job'
 
 echo 'Done'
