@@ -1,1 +1,36 @@
-../../../../restructure-apps/source/app/assets/stylesheets/app_vars.scss
+$card_border: 1px solid rgb(192, 192, 192);
+$card_shadow: 0 2px 3px 1px rgba(0, 0, 0, 0.1);
+$switch_bg_off: rgb(146, 146, 146);
+$master_header_bg: rgb(233, 230, 223);
+
+$project_color: #2e6da4;
+
+:root {
+  --body-text-color: #333333;
+  --template-block-text-color: #555;
+  --project-color: #2e6da4;
+    --link-color: #337ab7;
+    --link-darker-color: #2b669a;
+    --link-hover-darker-color: #770000;
+    --link-focus-color: #23527c;
+    --link-focus-color: #25527c;
+    --bottom-grad-color: #2e6da4;
+    --bottom-grad-darker-color: #265a88;
+    --input-has-value-color: rgb(255, 246, 226);
+
+  --content-font-family: "Assistant", sans-serif;
+  --content-font-size: 18px;
+
+  --button-font-family: "Assistant", sans-serif;
+  --label-font-family: "Assistant", sans-serif;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 12px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
+}
+
+@font-face {
+  font-family: "Assistant";
+  src: url("/fonts/assistant/Assistant-VariableFont_wght.ttf");
+}
