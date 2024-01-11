@@ -5,6 +5,12 @@
 # Tracker instance if there is one, alternatively a new Tracker record is created.
 # Underlying database triggers supporting the model handle this 'upsert'.
 class TrackersController < UserBaseController
+  TRACKER_SORTERS = {
+    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'latest entry date' => 'event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'protocol name' => { 'protocols.name': :asc }
+  }.freeze
+
   include MasterHandler
 
   before_action :merge_entry_if_exists, only: [:create]
@@ -76,7 +82,7 @@ class TrackersController < UserBaseController
   # Specifically we set up @item instance based on the record_type and record_id params.
   # @param [Tracker] obj - the current tracker instance
   # @return [true]
-  def set_additional_attributes obj
+  def set_additional_attributes(obj)
     return true if params[:record_type].blank? || params[:record_id].blank?
 
     item_class_name = params[:record_type].singularize.camelize
@@ -114,8 +120,20 @@ class TrackersController < UserBaseController
   end
 
   def secure_params
-    params.require(:tracker).
-      permit(:master_id, :protocol_id, :sub_process_id, :protocol_event_id, :event_date,
-             :user_id, :notes, :item_id, :item_type)
+    params.require(:tracker)
+          .permit(:master_id, :protocol_id, :sub_process_id, :protocol_event_id, :event_date,
+                  :user_id, :notes, :item_id, :item_type)
+  end
+
+  #
+  # Override MasterHandler#requested_order
+  # Provide sorting options for trackers. By default, use the configuration 'protocol position'
+  # if the 'tracker order' app configuration is not set.
+  # @return [String|Hash] representing the appropriate scope order definition
+  def requested_order
+    order_by_criteria = TRACKER_SORTERS[app_config_text(:tracker_order, 'protocol position')]
+    raise FphsException, 'requested order has not been implemented' if order_by_criteria.nil?
+
+    order_by_criteria
   end
 end

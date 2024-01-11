@@ -133,13 +133,13 @@ if [ -z "${SKIP_BRAKEMAN}" ]; then
   fi
 fi
 
-RELNUM=$(git flow release)
-if [ "${RELNUM}" ]; then
-  echo "Release already started. Checking out and continuing"
-  git flow release delete -f ${RELNUM}
-fi
+# RELNUM=$(git flow release)
+# if [ "${RELNUM}" ]; then
+#   echo "Release already started. Checking out and continuing"
+#   git flow release delete -f ${RELNUM}
+# fi
 
-echo "Starting git-flow release"
+echo "Starting release to new-master"
 git checkout new-master && git pull
 # git checkout ${FROM_BRANCH}
 # git flow release start ${NEWVER}
