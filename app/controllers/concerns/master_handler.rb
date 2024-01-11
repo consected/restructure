@@ -368,10 +368,10 @@ module MasterHandler
   # Edit form fields can be preset based on permitted parameter values
   def set_fields_from_params
     p = begin
-          secure_params
-        rescue StandardError
-          nil
-        end
+      secure_params
+    rescue StandardError
+      nil
+    end
     p&.each do |k, v|
       object_instance.send("#{k}=", v)
     end
@@ -581,18 +581,11 @@ module MasterHandler
     @master_objects = @master_objects.limit(requested_limit)
   end
 
-  MASTER_SORTERS = {
-    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.updated_at DESC',
-    'latest entry date' => 'event_date DESC NULLS LAST, trackers.updated_at DESC',
-    'protocol name' => { 'protocols.name': :asc }
-  }.freeze
-
+  #
+  # Override this method to provide ordering
+  # @return [String | Hash] scope order definition
   def requested_order
-    order_by_criteria = MASTER_SORTERS[app_config_text(:tracker_order, 'protocol position')]
-
-    raise FphsException, 'requested order has not been implemented' if order_by_criteria.nil?
-
-    @requested_order ||= order_by_criteria
+    nil
   end
 
   #
