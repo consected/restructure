@@ -18,8 +18,8 @@ class DefaultSettings
   DefaultSchemaOwner = 'restrdba'
   TwoFactorAuthIssuer = 'ReStructure'
   PageTitle = 'ReStructure'
-  DefaultShortLinkS3Bucket = (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
-  DefaultShortLinkLogS3Bucket = (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
+  DefaultShortLinkS3Bucket = (Rails.env.production? ? 'restr.link' : 'test-shortlink.link')
+  DefaultShortLinkLogS3Bucket = (Rails.env.production? ? 'url-shortener-logs.restr' : 'test-restr-url-shortener-logs')
   DefaultMigrationSchema = 'ml_app'
   DbPrefix = 'restr'
   GlobalIdPrefix = 'fpa1'
