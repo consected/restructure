@@ -227,7 +227,7 @@ module Messaging
       logger.info "Handled item #{id}"
     rescue StandardError => e
       update! status: StatusFailed
-      raise FphsException, "Exception captured in handle_notification_now: #{e}\n#{e.backtrace[0..20].join("\n")}"
+      raise FphsException, "Exception captured in handle_notification_now: #{e}"
     end
 
     #

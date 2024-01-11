@@ -198,6 +198,15 @@ _fpa.postprocessors_reports = {
       $(this).html(d);
     }).addClass('td-time-formatted');
 
+    $('td[data-col-var-type="TrueClass"],td[data-col-var-type="FalseClass"]').each(function () {
+      var res = $(this).html();
+      if (res == 'true')
+        $(this).html('<div><div class="report-cb-inner"><span class="glyphicon glyphicon-check report-val-checked"></span></div></div>')
+      else if (res == 'false' || !res)
+        $(this).html('<div><div class="report-cb-inner"><span class="glyphicon glyphicon-unchecked report-val-unchecked"></span></div></div>')
+    })
+
+
   },
 
   // Edit and New forms need some additional help, since we are attempting to push a form into a table row, which
@@ -358,6 +367,7 @@ _fpa.postprocessors_reports = {
       row.find('.td-time-formatted').removeClass('td-time-formatted');
       row.find('.td-date-formatted').removeClass('td-date-formatted');
       _fpa.postprocessors_reports.report_format_result_cells(row, data);
+      row.find('td').removeClass('report-el-was-from-new');
     }, 50)
 
   },

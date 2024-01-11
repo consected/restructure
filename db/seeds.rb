@@ -5,8 +5,13 @@ Dir[Rails.root.join('db/seeds/*.rb')].sort.each do |f|
   Rails.logger.info "requiring: #{f}"
   require f
 end
+
+$seed_results = []
+
 module Seeds
   def self.setup
+    $seed_results = []
+
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
     # puts "#{Time.now} Starting seed setup"
 
@@ -31,6 +36,7 @@ module Seeds
 
     Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
     # puts "#{Time.now} Completed seed setup"
+    $seed_results
   end
 end
 
@@ -45,7 +51,9 @@ def auto_admin
 end
 
 def log(txt)
-  puts "#{Time.now} #{txt}" unless Rails.env.test?
+  msg = "#{Time.now} #{txt}"
+  $seed_results << msg
+  puts msg unless Rails.env.test?
   Rails.logger.info txt
 end
 

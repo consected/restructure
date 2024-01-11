@@ -50,28 +50,37 @@ _fpa.substitution = class {
       var tag_name = next_tag;
       var is_array = Array.isArray(iter_data);
 
-      if (is_array && next_tag === 'first') {
-        got = iter_data[0];
-      }
-      else if (is_array && next_tag === 'last') {
-        got = iter_data[iter_data.length - 1];
+      if (is_array) {
+        if (next_tag === 'first') {
+          got = iter_data[0];
+        }
+        else if (next_tag === 'last') {
+          got = iter_data[iter_data.length - 1];
+        }
+        else if (Number(next_tag) == next_tag) {
+          got = iter_data[Number(next_tag)]
+        }
+        else {
+          // If nothing specified, just use the first item
+          got = iter_data[0];
+        }
       }
       else if (typeof iter_data == 'string' && next_tag === 'json_parse') {
         got = JSON.parse(iter_data)
       }
-      else if (is_array && Number(next_tag) == next_tag) {
-        got = iter_data[Number(next_tag)]
-      }
       else if (iter_data.hasOwnProperty(next_tag)) {
         got = iter_data[next_tag];
-      } else if (iter_data.embedded_item) {
+      }
+      else if (iter_data.embedded_item && iter_data.embedded_item.hasOwnProperty(next_tag)) {
         got = iter_data.embedded_item[next_tag];
-      } else if (next_tag.indexOf('glyphicon_') === 0) {
+      }
+      else if (next_tag.indexOf('glyphicon_') === 0) {
         const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
         got = `<span class="glyphicon glyphicon-${icon}"></span>`;
-      } else if (iter_data.model_references) {
-        console.log('get model ref')
-        got = iter_data.model_references.find((el) => el.to_record_resource_name == next_tag);
+      }
+      else if (iter_data.model_references) {
+        // Get array of matching references with this resource name
+        got = iter_data.model_references.filter((el) => el.to_record_resource_name == next_tag);
       }
 
       iter_data = got;

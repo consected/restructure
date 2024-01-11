@@ -16,9 +16,9 @@ The platform has been generously open-sourced by Harvard in the hope that other 
 
 The **ReStructure** open-source project is maintained by [Consected](https://www.consected.com), incorporating new features from the Harvard codebase into the project and vice versa.
 
-If you find a bug, please add an issue with details of how to reproduce it. If you find a security issue, please add an issue indicating that there is a security issue (but don't share the full details) and also email admin@consected.com with a clear subject line that this is a security issue related to the ReStructure project, and full details of the issue.
+If you find a bug, please add an issue with details of how to reproduce it. If you find a **security issue**, please add an issue indicating that there is a security issue (but don't share the full details) and also email <admin@consected.com> with a clear subject line that this is a security issue related to the ReStructure project, and full details of the issue.
 
-Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the _Football Players Health Study_.
+Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the _Football Players Health Study_, although they are typically intended to be generally useful.
 
 Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future-development-themes) for the themes we have in mind.
 
@@ -56,7 +56,7 @@ Upload an application configuration into a development environment, refine it, d
 
 ### Relational database
 
-All data, including change history, is captured in a relational database that can be accessed and manipulated by standard database tools, analytics scripting languages (R, Python) and applications that have database connectivity built in (SAS, Stata, etc)
+All data, including change history, is captured in a relational database that can be accessed and manipulated by standard database tools, analytics scripting languages (R, Python) and applications that have database connectivity built in (SAS, SPSS, Stata, etc)
 
 ### Structured, secured data
 
@@ -87,7 +87,7 @@ The design provides a clear separation between external or static data captured 
 
 ## Technology
 
-The **ReStructure** application is a complete _Ruby on Rails_ 5 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
+The **ReStructure** application is a complete _Ruby on Rails_ 6 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
 
 The database design follows common Rails conventions, with an easily understandable relational database model. As new configurations are made, new database table migrations are generated automatically, allowing rapid development, and clean deployment to production. PostgreSQL is the only supported database.
 
@@ -95,7 +95,7 @@ The default application server is _Passenger_, although _Puma_ is used in develo
 
 _Memcached_ provides caching of performance and to relieve the load on the application server and database. Central or individual app-server caches may be used.
 
-Authentication is provided by [Devise](https://github.com/heartcombo/devise), with optional two-factor authentication [devise-two-factor](https://github.com/tinfoil/devise-two-factor). End-user and admin profiles are managed separately. API tokens are optionally available for user profiles, to allow integration or disparate systems, provided by [Simple Token Athentication](https://github.com/philayres/simple_token_authentication.git).
+Authentication is provided by [Devise](https://github.com/heartcombo/devise), with optional two-factor authentication [devise-two-factor](https://github.com/tinfoil/devise-two-factor). End-user and admin profiles are managed separately. API tokens are optionally available for user profiles, to allow integration or disparate systems, provided by [Simple Token Authentication](https://github.com/philayres/simple_token_authentication.git).
 
 File management for document and image files is handled through a layer on top of NFS, allowing unlimited storage through elastic storage such as AWS EFS. Linux groups provide a course level of security, enabling direct filesystem access to files to be controlled. This functionality started as a separate gem, but it was easier to keep it more integrated with the overall project. It could be separated again if a developer had the desire to do so.
 
@@ -115,7 +115,7 @@ Then set up the database.
     git clone https://github.com/consected/restructure-apps.git
     git clone https://github.com/consected/restructure-docs.git
 
-### Setup the databsae
+### Setup the database
 
 It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
 To ensure `psql` and all `rake db:structure:dump` works as expected, set the path to Postgres 12 binaries explicitly.
@@ -207,39 +207,29 @@ To clean all data, including admins and user, run:
     bundle exec rake db:seed
     RAILS_ENV=development app-scripts/add_admin.sh <email address>
 
-### Branches and git-flow
+### Branches for development and release
 
-The project uses [git-flow](https://skoch.github.io/Git-Workflow/) to organize releases, but there is no requirement to use it
-during regular development.
+The project previously used [git-flow](https://skoch.github.io/Git-Workflow/) to organize releases. This is no longer the case, and the [Build for deployment](#build-for-deployment) process handles branching and tagging of releases. Where possible, github Pull Requests should be used to contribute features and fixes back to the primary repo.
 
-Just know that active development should be within its own branch, which will be merged back into the _develop_ for integration.
-
-The _new-master_ branch contains tagged versions that represent viable production releases.
-
-For release and builds, the _git-flow_ CLI is used by the release tools, so it is worth getting it set up.
-
-`git flow init` answers the following questions:
-
-- Branch name for production releases: [new-master]
-- Branch name for "next release" development: [develop]
-- How to name your supporting branch prefixes?
-  - Feature branches? [feature/]
-  - Release branches? [release/]
-  - Hotfix branches? [hotfix/]
-  - Support branches? [support/]
-  - Version tag prefix? []
+Active development should be within its own branch, which should be merged back into the _develop_ for integration. The _new-master_ branch contains tagged versions that represent viable production releases.
 
 ## Build for deployment
 
 Deployment to any environment that supports Rails should be reasonably easy. To build a self-contained package of gems and Javascript components, a separate repo is provided: [restructure-build](https://github.com/consected/restructure-build). This provides a Docker container, based on CentOS, that sets up a full Rails and PostgreSQL environment. It builds production packages for gems and Yarn Javascript packages.
 
-To build, simple clone _restructure-build_ to the same parent directory as the **ReStructure** project.
-
-Ensure that you have [git-flow](https://skoch.github.io/Git-Workflow/) installed and initialized - [see Branches and git-flow](#branches-and-git-flow)
-
-Then from `ReStructure` run
+To build, simply clone _restructure-build_ to the same parent directory as the **ReStructure** project. Then from `ReStructure` run
 
      app-scripts/release_and_build.sh
+
+This will automatically create a release with the patch number up-versioned - see [CHANGELOG.md](CHANGELOG.md)
+
+When changes are integrated back into the primary repo, a release with a new minor version should be created. This can be done with:
+
+     app-scripts/release_and_build.sh minor
+
+If changes are ever made to any of the _restructure-build_ scripts, the Docker containers can be cleaned and rebuilt with:
+
+     app-scripts/release_and_build.sh clean <optional: minor>
 
 ## Testing
 
@@ -272,7 +262,7 @@ Ensure you have Firefox and the most appropriate geckodriver installed:
 - On Flatpak installed Firefox, see: <https://firefox-source-docs.mozilla.org/testing/geckodriver/Usage.html#Running-Firefox-in-an-container-based-package>
 - On locally installed Firefox, install geckodriver from the standard releases: <https://github.com/mozilla/geckodriver/releases> - then run the script below
 
-    GECKODRIVER='https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz'
+    GECKODRIVER='<https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz>'
     wget -O geckodriver.tar.gz ${GECKODRIVER}
     tar -xvf geckodriver.tar.gz
     mv geckodriver /usr/local/bin/
@@ -347,7 +337,7 @@ The easiest way to deal with migrations is to drop the test database and recreat
 
 ## Future development themes
 
-Upgrade to Rails 6.
+Upgrade to Rails 7.
 
 The Javascript UI is a custom reactive front end. Near the beginning of development a simple platform was developed, which is tightly bound to the operation of the backend. Although completely functional without changes (except obviously for addition of new features), a long term vision is to replace the UI with Vue.js or React running against the existing API.
 

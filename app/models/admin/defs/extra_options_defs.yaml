@@ -74,6 +74,10 @@
       #   - to ensure an embedded_report_* field refreshes the block when the modal is closed
       # - prevent-reload-on-reference-save
       #   - by default the container will reload when a reference is created or updated. This prevents it
+      # - no-scroll-on-click-edit
+      #   - prevent scrolling to this item if edit is clicked (manually or automatically)
+      # - make-labels-placeholders
+      #   - show fields with in field placeholders rather than labels
 
   filestore:
     container: {}

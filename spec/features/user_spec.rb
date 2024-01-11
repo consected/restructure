@@ -175,6 +175,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Log in'
       end
 
+      puts "------------> #{page.find('body')[:class]}" unless has_css?('body.show_otp')
       expect(page).to have_css('body.show_otp')
       expect(current_path).to have_content('/users/show_otp')
 
@@ -204,6 +205,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Log in'
       end
 
+      puts "------------> #{page.find('body')[:class]}" unless has_css?('body.show_otp')
       expect(page).to have_css('body.show_otp')
       expect(current_path).to have_content('/users/show_otp')
 

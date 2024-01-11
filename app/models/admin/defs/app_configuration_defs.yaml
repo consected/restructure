@@ -99,6 +99,8 @@ report library button label: |
 show ids in master result: |
   Master record results headers show one or more IDs. Provide a comma separated list of IDs to show using 
   alternative ID names, "master_id", or "none" to hide all IDs
+tracker order: |
+  Tracker records are ordered by "protocol position", "protocol name", or "latest entry date"
 user session timeout: |
   The timeout a user session in this app, in minutes. Default is set by app server settings.
 show search form on single result: |

@@ -20,7 +20,7 @@ class Imports::Import < ActiveRecord::Base
     tables = uac.where(resource_type: 'table').valid_resources.pluck(:resource_name).sort
     tables -= %w[item_flags]
     # mtables = Master.get_all_associations
-    (tables + ['masters']).sort
+    (tables + ['masters']).uniq.sort
   end
 
   #

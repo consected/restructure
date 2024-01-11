@@ -258,6 +258,8 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     end
 
     expect(page).to have_css('.search-status-done')
+    expect(page).to have_css('.report-results-block')
+    expect(page).to have_css('.report-results-block table')
     expect(page).to have_css('.report-results-block table.tablesorter')
     results = all('.report-results-block table.tablesorter tr')
     expect(results.length).to be > 1

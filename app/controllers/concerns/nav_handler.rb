@@ -113,8 +113,15 @@ module NavHandler
       if l[:resource_type]
         rt = l[:resource_type].to_sym
         rn = l[:resource_name]
+        app_type_name = l[:resource_app_type]
+        app_type = nil
+        if app_type_name.present?
+          app_type = Admin::AppType.active.find_by(name: app_type_name.to_s)
+          Rails.logger.warn "resource_app_type #{app_type_name} not active on this server"
+          next unless app_type
+        end
         begin
-          next unless current_user.has_access_to? :access, rt, rn
+          next unless current_user.has_access_to? :access, rt, rn, alt_app_type_id: app_type
         rescue StandardError => e
           logger.warn "Bad resource name or type specified: #{e}"
           next

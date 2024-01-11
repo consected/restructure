@@ -1,0 +1,44 @@
+
+<% 
+  current_search_paths = Admin::MigrationGenerator.current_search_paths || [] 
+  active_ids = Admin::AppType.active_app_types.pluck(:id)
+  user_has_access = Admin::AppType.all_available_to(current_user)&.find { |app| app.id == @app_type.id } if current_user
+%>
+<div class="config-status-block">
+<p>
+  <% if @config_notices.present? %>
+  <span class="glyphicon glyphicon-exclamation-sign error-mark" title="configuration errors"></span>
+  <% else %>
+  <span class="glyphicon glyphicon-check val-checked"></span>
+  <% end %>
+  Configurations
+</p>
+<p>
+  <% if current_search_paths.include?(@app_type.default_schema_name) %>
+  <span class="glyphicon glyphicon-check val-checked"></span>
+  <% else %>
+    <span class="glyphicon glyphicon-exclamation-sign error-mark" title="schema not in search path"></span>
+  <% end %>
+  Schema in search path?
+</p>
+<p>
+    <%= if @app_type.active_on_server?
+      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+    elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
+      '<span class="glyphicon glyphicon-exclamation-sign error-mark-in-circle" title="app active but schema not in search path"></span>'.html_safe
+    else
+      "<span class=\"val-unchecked\"></span>".html_safe  
+    end
+    %>
+    Active on server?
+</p>
+<p>
+    <%= if user_has_access
+      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+    else
+      '<span class="val-unchecked" title="user has not been granted user access control for this app_type"></span>'.html_safe  
+    end
+    %>
+    Admin user has access? 
+</p>
+</div>

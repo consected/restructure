@@ -212,6 +212,14 @@ div.chosen-container.chosen-disabled {
   }
 }
 
+
+div.chosen-container .chosen-results{
+  li.group-result.group-result-disabled,
+  li.group-option.disabled-result {
+    display: none;
+  }
+}
+
 form .tracker-notes textarea.form-control {
   width: 90%;
 }

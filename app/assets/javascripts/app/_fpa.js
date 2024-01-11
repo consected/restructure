@@ -548,7 +548,7 @@ _fpa = {
           var cfs = block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').not('.ignore-field-change');
           if (block.parents('.prevent-reload-on-reference-save').length === 0 && cfs.length) {
             cfs.addClass('changed-field-danger');
-            _fpa.flash_notice('Form fields have not been saved. Do you want to <a class="btn btn-default submit-cancel-change">cancel and keep the changes</a> so you can save the form, or <a class="btn btn-danger submit-continue-change">continue without saving</a>', 'warning');
+            _fpa.flash_notice('Form fields have not been saved. Do you want to <a class="btn btn-default submit-cancel-change">cancel and keep editing</a> so you can save your changes, or <a class="btn btn-danger submit-continue-change">delete your changes and continue</a>', 'warning');
 
             $('.alert a.submit-continue-change').on('click', function () {
               block.parents('[data-model-data-type="activity_log"]').find('.field-was-changed').removeClass('field-was-changed');
@@ -1191,6 +1191,8 @@ _fpa = {
     var msgar = [];
     for (var i in j) {
       if (j.hasOwnProperty(i)) {
+        if (i.match && i.match(/^(all|any|not_all|not_any)/)) continue;
+
         var partmsg = j[i];
         if (partmsg.join) partmsg = partmsg.join("\n")
         var show_msg;

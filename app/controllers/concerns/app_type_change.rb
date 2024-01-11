@@ -94,8 +94,8 @@ module AppTypeChange
     respond_to do |type|
       type.html do
         sign_out current_user
+        flash[:warning] = msg
         redirect_to '/'
-        raise FphsException, msg
       end
       type.json do
         render json: { message: msg }, status: 401
