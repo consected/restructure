@@ -2,19 +2,67 @@
 
 This file documents notable changes to the ReStructure project.
 
-The format of this file is based on
-[Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to
-[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format of this file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-In short this means that version numbers, visible here and on the login page of the
-app match, and have a predictable format indicating how much change from the previous
-version has occurred.
+In short this means that version numbers, visible here and on the login page of the app match, and have a predictable format indicating how much change from the previous version has occurred.
 
 The [Unreleased](#unreleased) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-Note that not every tagged version may be suitable for production use. A Github
-release will be created for any release tested in production, and may be marked below with the tag [Release]
+Note that not every tagged version may be suitable for production use. A Github release will be created for any release tested in production, and may be marked below with the tag [Release].
+
+Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
+
+## Unreleased
+
+- [Build] Viva version
+
+## [8.4.1] - 2024-01-11
+
+- [Fixed] bug introduced by configuration of tracker ordering - fixes #232
+- [Changed] release to remove all dependence on git-flow
+- [Added] new versioning convention details and other README updates
+
+## [8.4.0] - 2024-01-10
+
+- [Bumped] minor version
+
+## [8.2.123] - 2024-01-10
+
+- [Added] upversioning minor version in release process
+- [Updated] yarn modules
+
+## [8.2.122] - 2024-01-10
+
+- [Added] feature to allow tracker to sort protocols by latest event date as an alternative to the default, which is to order by configured protocol position - resolves #72
+- [Fixed] (hopefully) restarting of delayed_job from the server
+- [Added] more information to document conversion error
+- [Added] FailureNotificationsToEmail to server settings variable viewer
+- [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
+- [Added] current user id as state in the application page script
+- [Added] ability to rerun DB seeds from server info
+- [Changed] field validation messages to always show as "Entry" rather than a meaningless field name
+- [Added] handling of disabled groups in "chosen" drop-downs to hide correctly, especially when using the data-filter-selector option
+- [Added] extra checking and logging around Libreoffice, plus kill stuck processes
+- [Added] a data-user-roles attribute to body, allowing body[data-user-roles~='underscored_role_name'] to be used in CSS
+- [Fixed] issues with model reference data being blank and used for record matching in transfer script
+- [Changed] nav links page layout to avoid showing app types not available to the user
+- [Fixed] email notifications from and failure notification to email address settings
+- [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
+- [Fixed] handling of model references in curly substitutions in the front end
+- [Changed] API sample for study info transfer to another server
+- [Fixed] CSV import form bug
+- [Added] configuration check for OTC encoding key
+- [Added] make-labels-placeholders to documentation
+- [Fixed] integer field to allow negative numbers - fixes CSV import of master id does not allow negative numbers #218
+- [Fixed] CSV import not recognizing uploaded file correctly
+- [Fixed] duplicate tables appearing in CSV import drop down table list
+- [Fixed] mr-expander closing an already expanded item
+- [Added] improved control over scrolling, especially in activity logs
+- [Fixed] validation error message formatting with nested conditions
+- [Fixed] jobs are supposed to send an admin email if they fail - fixes #210
+- [Changed] handling of scrolling if the target item was removed from the page
+- [Fixed] report new / edited records not showing
+- [Changed] error message when a RecordInvalid exception is thrown
 
 ## [8.2.121] - 2023-12-21
 

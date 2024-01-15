@@ -270,7 +270,7 @@ class Settings
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
-    NotificationsFromEmail AdminEmail BatchUserEmail
+    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail
     TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage
