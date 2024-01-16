@@ -51,6 +51,10 @@ module OptionConfigs
 
     protected
 
+    def valid_config_keys?(config, valid_keys)
+      config.keys.empty? || (config.keys - valid_keys).empty?
+    end
+
     def failed_config(type, message, level: :error)
       target = if level == :error
                  config_errors

@@ -61,4 +61,99 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
     ac = als[1].option_type_config.nfs_store&.dig(:always_use_this_for_access_control)
     expect(ac).to be true
   end
+
+  it 'evaluates if specific actions can be performed for the container' do
+    create_user
+    finalize_al_setup activity: :evaluate_can_perform_if
+    setup_access :send_files_to_trash, resource_type: :general, access: :read, user: @user
+    setup_access :move_files, resource_type: :general, access: :read, user: @user
+    setup_access :user_file_actions, resource_type: :general, access: nil, user: @user
+
+    al_orig = @activity_log
+    expect(al_orig.current_user).to eq @user
+
+    cs = NfsStore::Manage::Container.last.reload
+    cs.current_user = al_orig.current_user
+    cs.parent_item = al_orig
+
+    expect(cs.parent_item).to eq al_orig
+    ac = al_orig.option_type_config.nfs_store&.dig(:can, :send_files_to_trash_if)
+    expect(ac).to be_a Hash
+
+    ac = al_orig.option_type_config.nfs_store&.dig(:can, :move_files_if)
+    expect(ac).to be_a Hash
+
+    ac = al_orig.option_type_config.nfs_store&.dig(:can, :download_files_if)
+    expect(ac).to be nil
+
+    # Initial checks to ensure the test setup is correct
+    expect(@user.can?(:send_files_to_trash)).to be_truthy
+    expect(@user.can?(:download_files)).to be_truthy
+    expect(@user.can?(:move_files)).to be_truthy
+    expect(@user.can?(:user_file_actions)).to be_falsey
+
+    # Conditional evaluations will be false for the first two since the logic doesn't match,
+    expect(cs.can_perform_if?(:send_files_to_trash)).to be false
+    expect(cs.can_perform_if?(:move_files)).to be false
+    # :no_config since there is no configuration for it
+    expect(cs.can_perform_if?(:download_files)).to be :no_config
+    # true since it is set to always: true
+    expect(cs.can_perform_if?(:user_file_actions)).to be true
+
+    al_orig.select_call_direction = nil
+    expect(cs.can_edit?).to be true
+    # Based on the conditional conditions...
+    expect(cs.can_send_to_trash?).to be false
+    expect(cs.can_move_files?).to be false
+    # :no_config so evaluating can_edit?, which returns true
+    expect(cs.can_download?).to be true
+    # false since the UAC does not allow this action
+    expect(cs.can_user_file_actions?).to be false
+
+    # Reload, to clear the memoized results
+    cs = NfsStore::Manage::Container.last.reload
+    cs.current_user = al_orig.current_user
+    cs.parent_item = al_orig
+
+    al_orig.select_call_direction = 'to staff'
+    expect(cs.can_edit?).to be true
+
+    expect(cs.can_perform_if?(:send_files_to_trash)).to be true
+    expect(cs.can_perform_if?(:move_files)).to be false
+    # :no_config since there is no configuration for it
+    expect(cs.can_perform_if?(:download_files)).to be :no_config
+    # true since it is set to always: true
+    expect(cs.can_perform_if?(:user_file_actions)).to be true
+
+    # Based on the conditional conditions...
+    expect(cs.can_send_to_trash?).to be true
+    expect(cs.can_move_files?).to be false
+    # :no_config so evaluating can_edit?, which returns true
+    expect(cs.can_download?).to be true
+    # false since the UAC does not allow this action
+    expect(cs.can_user_file_actions?).to be false
+
+    # Reload, to clear the memoized results
+    cs = NfsStore::Manage::Container.last.reload
+    cs.current_user = al_orig.current_user
+    cs.parent_item = al_orig
+
+    al_orig.select_call_direction = 'to player'
+    expect(cs.can_edit?).to be true
+
+    expect(cs.can_perform_if?(:send_files_to_trash)).to be false
+    expect(cs.can_perform_if?(:move_files)).to be true
+    # :no_config since there is no configuration for it
+    expect(cs.can_perform_if?(:download_files)).to be :no_config
+    # true since it is set to always: true
+    expect(cs.can_perform_if?(:user_file_actions)).to be true
+
+    # Based on the conditional conditions...
+    expect(cs.can_send_to_trash?).to be false
+    expect(cs.can_move_files?).to be true
+    # :no_config so evaluating can_edit?, which returns true
+    expect(cs.can_download?).to be true
+    # false since the UAC does not allow this action
+    expect(cs.can_user_file_actions?).to be false
+  end
 end
