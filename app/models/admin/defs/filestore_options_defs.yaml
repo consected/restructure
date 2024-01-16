@@ -94,4 +94,38 @@
     view_options:
       show_file_links_as: basic|path - basic (default) is an id based link, whereas "path" follows the format
                             "/nfs_store/downloads/in/:activity_log_type/:activity_log_id/:download_path"
-        
+
+
+    # Configure conditional logic for specific actions to be performed against the container.
+    # If the action <perform>_if: configuration is not set, then the default for the user based on user access controls
+    # will be used. If the configuration is set, then it will supplement the default.
+    can:
+      # user access control allows and this condition evaluates to true
+      download_if:
+        # for example
+        all:
+          this:
+            select_call_direction: to staff
+      
+      # user access control allows and this condition evaluates to true
+      view_files_as_image_if:
+        never: true # to override a user access control default for this container to always prevent viewing as an image
+
+      # user access control allows and this condition evaluates to true  
+      view_files_as_html_if:
+        always: true # does not override the user access control default for this container
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      send_files_to_trash_if:
+        'ref: ** conditions reference **'
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      move_files_if:
+        'ref: ** conditions reference **'
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      user_file_actions_if:
+        'ref: ** conditions reference **'

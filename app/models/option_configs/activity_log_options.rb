@@ -5,6 +5,11 @@ module OptionConfigs
   # They provide the ability to present different record types in meaningful forms, for recording keeping or
   # driving workflows.
   class ActivityLogOptions < ExtraOptions
+    ValidNfsStoreKeys = %i[always_use_this_for_access_control container_files pipeline user_file_actions view_options
+                           can].freeze
+    ValidNfsStoreCanPerformKeys = %i[download_if view_files_as_image_if view_files_as_html_if send_files_to_trash_if
+                                     move_files_if user_file_actions_if].freeze
+
     def self.add_key_attributes
       %i[e_sign nfs_store]
     end
@@ -32,7 +37,23 @@ module OptionConfigs
     end
 
     def clean_nfs_store_def
-      NfsStore::Config::ExtraOptions.clean_def nfs_store if nfs_store
+      return unless nfs_store
+
+      can_perform = nfs_store[:can]
+
+      unless valid_config_keys?(nfs_store, ValidNfsStoreKeys)
+        failed_config :nfs_store,
+                      "nfs_store contains invalid keys #{nfs_store.keys} - " \
+                      "expected only #{ValidNfsStoreKeys}"
+      end
+
+      unless can_perform.nil? || valid_config_keys?(can_perform, ValidNfsStoreCanPerformKeys)
+        failed_config :nfs_store__can,
+                      "nfs_store.can contains invalid keys #{can_perform.keys} - " \
+                      "expected only #{ValidNfsStoreCanPerformKeys}"
+      end
+
+      NfsStore::Config::ExtraOptions.clean_def nfs_store
     end
 
     def clean_e_sign_def
@@ -40,9 +61,9 @@ module OptionConfigs
 
       # Set up the structure so that we can use the standard reference methods to parse the configuration
       e_sign[:document_reference] = { item: e_sign[:document_reference] } unless e_sign[:document_reference][:item]
-      e_sign[:document_reference].each do |_k, refitem|
+      e_sign[:document_reference].each_value do |refitem|
         # Make all keys singular, to simplify configurations
-        refitem.each do |k, _v|
+        refitem.each_key do |k|
           if k.to_s != k.to_s.singularize
             new_k = k.to_s.singularize.to_sym
             refitem[new_k] = refitem.delete(k)
@@ -68,7 +89,8 @@ module OptionConfigs
     rescue StandardError => e
       raise FphsException, <<~END_TEXT
         Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the activities
-        (not primary or blank) is missing or not formatted as expected, or a @library inclusion has an error. #{e}
+        (not primary or blank) is missing or not formatted as expected, or a @library inclusion has an error.
+        #{e}
       END_TEXT
     end
 

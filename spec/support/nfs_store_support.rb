@@ -256,6 +256,45 @@ module NfsStoreSupport
 
         nfs_store:
           always_use_this_for_access_control: true
+
+      evaluate_can_perform_if:
+        label: Can Perform If
+        fields:
+          - select_call_direction
+          - select_who
+
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+              label: Session Files
+              create_with_role: nfs_store group 600
+
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
+
+        nfs_store:
+          can:
+            send_files_to_trash_if:
+              all:
+                this:
+                  select_call_direction: to staff
+            move_files_if:
+              all:
+                this:
+                  select_call_direction: to player
+            user_file_actions_if:
+              always: true
+
     ENDDEF
 
     @aldef.current_admin = @admin

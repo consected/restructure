@@ -252,35 +252,56 @@ module NfsStore
         return @can_download_or_view unless @can_download_or_view.nil?
 
         cu = current_user
-        @can_download_or_view = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
+        @can_download_or_view = can_download? || can_view?
       end
 
       def can_download?
         return @can_download unless @can_download.nil?
 
-        cu = current_user
-        @can_download = !!cu.can?(:download_files)
+        @can_download = eval_uac_and_perform_if?(:download_files)
+      end
+
+      def can_view?
+        return @can_view unless @can_view.nil?
+
+        @can_view = can_view_files_as_html? || can_view_files_as_image?
+      end
+
+      def can_view_files_as_html?
+        return @can_view_files_as_html unless @can_view_files_as_html.nil?
+
+        @can_view_files_as_html = eval_uac_and_perform_if?(:view_files_as_html)
+      end
+
+      def can_view_files_as_image?
+        return @can_view_files_as_image unless @can_view_files_as_image.nil?
+
+        @can_view_files_as_image = eval_uac_and_perform_if?(:view_files_as_image)
       end
 
       def can_send_to_trash?
         return @can_send_to_trash unless @can_send_to_trash.nil?
 
-        cu = current_user
-        @can_send_to_trash = !!(can_edit? && cu.can?(:send_files_to_trash))
+        @can_send_to_trash = eval_uac_edit_or_perform_if?(:send_files_to_trash)
       end
 
       def can_move_files?
         return @can_move_files unless @can_move_files.nil?
 
-        cu = current_user
-        @can_move_files = !!(can_edit? && cu.can?(:move_files))
+        @can_move_files = eval_uac_edit_or_perform_if?(:move_files)
       end
 
+      #
+      # Can perform user_file_actions if:
+      # current user has user access control for user_file_actions
+      # and
+      #   nfs_store: can: user_file_actions_if: is not defined AND user can edit this container
+      #   OR nfs_store: can: user_file_actions_if: evaluates to true
+      # @return [true|false]
       def can_user_file_actions?
         return @can_user_file_actions unless @can_user_file_actions.nil?
 
-        cu = current_user
-        @can_user_file_actions = !!(can_edit? && cu.can?(:user_file_actions))
+        @can_user_file_actions = eval_uac_edit_or_perform_if?(:user_file_actions)
       end
 
       # Method to provide checking of access controls. Can the user access the container
@@ -314,18 +335,102 @@ module NfsStore
       end
 
       def user_file_actions_config
-        extra_options_config.nfs_store[:user_file_actions] if extra_options_config&.nfs_store
+        nfs_store_config_for(:user_file_actions)
       end
 
       def view_options
-        extra_options_config.nfs_store[:view_options] if extra_options_config&.nfs_store
+        nfs_store_config_for(:view_options)
       end
 
       def show_file_links_as_path
         view_options&.dig(:show_file_links_as) == 'path'
       end
 
+      #
+      # Evaluate if a user can perform an action against the current container,
+      # based on the nfs_store: can: <perform>_if: configuration
+      # If there is no configuration, then return :no_config, since a lack of configuration
+      # indicates that the default should be used for the action
+      # @param [String|Symbol] perform - the action to test
+      # @return [Object]
+      def can_perform_if?(perform)
+        return unless parent_item
+
+        perform = perform.to_sym
+        @can_perform_if ||= {}
+        return @can_perform_if[perform] if @can_perform_if.key?(perform)
+
+        config = can_perform_if_config(perform)
+        return @can_perform_if[perform] = :no_config unless config
+
+        Rails.logger.debug "Checking nfs_store can_perform_if? with #{perform} on #{parent_item} with #{config}"
+        ca = ConditionalActions.new config, parent_item
+        @can_perform_if[perform] = ca.calc_action_if
+      end
+
+      def raise_if_no_access!
+        return if allows_current_user_access_to? :access
+
+        cp = parent_item
+        cpm = cp&.master&.id if cp.respond_to?(:master)
+
+        raise FsException::NoAccess,
+              'User does not have access to this container ' \
+              "(master #{master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
+      end
+
+      def raise_if_action_not_authorized!(for_action)
+        return if send("can_#{for_action}?")
+
+        raise FsException::NoAccess, "user is not authorized to #{for_action.to_s.humanize}"
+      end
+
+      def raise_if_no_activity_log_specified!(activity_log)
+        return if activity_log
+
+        res = ModelReference.find_where_referenced_from(self).first
+        return unless res
+
+        raise FsException::NoAccess,
+              'Attempting to browse a container that is referenced by activity logs, without specifying which one'
+      end
+
       private
+
+      def eval_uac_and_perform_if?(perform)
+        perform = perform.to_sym
+        cu = current_user
+        !!(cu.can?(perform) && can_perform_if?(perform))
+      end
+
+      def eval_uac_edit_or_perform_if?(perform)
+        perform = perform.to_sym
+        cu = current_user
+        !!(cu.can?(perform) && (
+            can_perform_if?(perform) == :no_config && can_edit? ||
+            can_perform_if?(perform)
+          ))
+      end
+
+      #
+      # Get a nfs_store: can: <perform>_if: configuration.
+      # Returns nil if not defined.
+      # @param [String|Symbol] perform - the action to test
+      # @return [Object]
+      def can_perform_if_config(perform)
+        perform = "#{perform}_if".to_sym
+        nfs_store_config_for(:can)&.dig(perform)
+      end
+
+      #
+      # Get the nfs_store configuration for a specific setting,
+      # from activity log extra options if the nfs_store section is set.
+      # Returns nil if there is no nfs_store section, or the setting is not present
+      # @param [Symbol] setting
+      # @return [Object]
+      def nfs_store_config_for(setting)
+        extra_options_config.nfs_store[setting] if extra_options_config&.nfs_store
+      end
 
       # Create the container directory on the filesystem, using the first available role that provides this access if
       # a specific role is not specified
