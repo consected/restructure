@@ -92,6 +92,7 @@ RSpec.describe 'Delete stored files', type: :model do
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
 
+    expect(@container.parent_item).not_to be nil
     download.retrieve_files_from all_sf_dl
 
     # Upload the generated zip
