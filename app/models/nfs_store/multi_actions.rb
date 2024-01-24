@@ -75,8 +75,10 @@ module NfsStore
       # multi container download, otherwise it will be ignored
       selected_items.each do |s|
         container = self.container || Browse.open_container(id: s[:container_id], user: current_user)
-        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id],
-                                                                          current_user)
+        activity_log = self.activity_log ||
+                       ActivityLog.open_activity_log(s[:activity_log_type],
+                                                     s[:activity_log_id],
+                                                     current_user)
         retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log,
                                                        for_action: for_action)
       end
@@ -104,27 +106,11 @@ module NfsStore
     def retrieve_file_from(id, retrieval_type, for_action:, container: nil, activity_log: nil, force: nil)
       container ||= self.container
       activity_log ||= self.activity_log
+      container.parent_item ||= activity_log || container.find_creator_parent_item
 
-      unless container.allows_current_user_access_to? :access
-        cp = container.parent_item || container.find_creator_parent_item
-        cpm = cp&.master&.id if cp.respond_to?(:master)
-
-        raise FsException::NoAccess,
-              'User does not have access to this container ' \
-              "(master #{container.master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
-      end
-
-      unless force || container.send("can_#{for_action}?")
-        raise FsException::NoAccess, "user is not authorized to #{for_action.to_s.humanize}"
-      end
-
-      unless activity_log
-        res = ModelReference.find_where_referenced_from(container).first
-        if res
-          raise FsException::NoAccess,
-                'Attempting to browse a container that is referenced by activity logs, without specifying which one'
-        end
-      end
+      container.raise_if_no_access!
+      container.raise_if_action_not_authorized!(for_action) unless force
+      container.raise_if_no_activity_log_specified!(activity_log)
 
       item_for_filter = activity_log || container
       filtered_files = filtered_files_as_scopes(item_for_filter)

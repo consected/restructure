@@ -295,7 +295,9 @@ module CalcActions
         user = @current_instance.current_user
         raise FphsException, "No user found for condition in #{@current_instance}" unless user
 
-        val = if att == 'role_name'
+        val = if att.is_a?(Hash)
+                val
+              elsif att == 'role_name'
                 # The value to match against is an array of the user's role names
                 user.role_names
               else
@@ -837,7 +839,7 @@ module CalcActions
     # @param key [Symbol]
     # @return [True | False]
     def non_join_table_name?(key)
-      (key.in?(NonJoinTableNames) || selection_type?(key))
+      key.in?(NonJoinTableNames) || selection_type?(key)
     end
 
     # Does the query condition request the return of a single value?

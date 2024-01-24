@@ -191,7 +191,8 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
         click_button 'Submit Code'
       end
 
-      expect(page).to have_css('body.masters.search')
+      classes = all('body')[0]['class'] unless has_css?('body.masters.search')
+      expect(page).to have_css('body.masters.search'), "page body has classes #{classes&.join('.')} - should be masters.search"
     end
 
     it 'should require 2FA to be set up' do
