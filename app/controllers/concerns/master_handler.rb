@@ -576,22 +576,23 @@ module MasterHandler
   #
   # Limit the results to a specified limit if the limit param is set
   def limit_results
-    return unless requested_limit
+    return @master_objects unless requested_limit
 
     @master_objects = @master_objects.limit(requested_limit)
   end
 
   #
   # Override this method to provide ordering
-  # @return [String | Hash] scope order definition
+  # Return nil if no reordering is required
+  # @return [nil |String | Hash] scope order definition
   def requested_order
     nil
   end
 
   #
-  # Limit the results to a specified limit if the limit param is set
+  # Reorder the results if a requested_order is set
   def order_results
-    return unless requested_order
+    return @master_objects unless requested_order
 
     @master_objects = @master_objects.unscope(:order).order(requested_order)
   end
