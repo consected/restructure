@@ -12,6 +12,13 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Fixed] send file to trash not visible if the container was not originally editable - fixes #245
+- [Fixed] selecting a file in the filestore browser with a checkbox prevents navigation away from the page - fixes #242
+- [Fixed] error not showing external identifiers in standard master record view
+- [Added] better reporting of error in spec
+
 ## [8.4.4] - 2024-01-16
 
 - [Fixed] conditions not working correctly for nested user: role_name: 'name' - fixes #240
