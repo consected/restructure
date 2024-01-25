@@ -38,7 +38,7 @@
     {{#is folder '!==' './.'}}
     <li class="container-folder container-icons-folder container-icons-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive">
       <span class="cif-inner">
-        <input type="checkbox" class="container-folder-selector ff" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>      
+        <input type="checkbox" class="container-folder-selector ff ignore-field-change" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>      
       <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is level '===' 0}}glyphicon-folder-close{{/is}}"
             title="expand folder"
             data-toggle="collapse"
@@ -62,7 +62,7 @@
              id="nfs_store_download-selected_items-{{id}}-{{retrieval_type}}"
              name="nfs_store_download[selected_items][]"
              title="select item for download"
-             class="ff"
+             class="ff ignore-field-change"
              value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
       >        
     {{else}}

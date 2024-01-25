@@ -200,7 +200,7 @@ _fpa.loaded.default = function () {
       return
     }
 
-    var cfs = $('.common-template-item .field-was-changed, .new-block .field-was-changed');
+    var cfs = $('.common-template-item .field-was-changed, .new-block .field-was-changed').not('.ignore-field-change');
     if (cfs.length) {
       ev.preventDefault();
       cfs.addClass('changed-field-danger');
