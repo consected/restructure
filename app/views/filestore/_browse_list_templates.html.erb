@@ -9,7 +9,7 @@
 
   <ul class="container-list-items">
     <li class="container-folder root-folder">
-      <input type="checkbox" class="container-folder-selector ff" data-folder-path="." title="select all items in container"/>
+      <input type="checkbox" class="container-folder-selector ff ignore-field-change" data-folder-path="." title="select all items in container"/>
       <span class="folder-icon glyphicon glyphicon-folder-open"></span>&nbsp;
       <span class="folder-container-name">{{nfs_store_container.name}}</span>
       <span class="container-list-file-count">{{downloads.length}} file{{#is downloads.length '!==' 1}}s{{/is}}</span>  
@@ -43,7 +43,7 @@
   
     <li class="container-folder container-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive">
       {{#is folder '!==' './.'}}
-      <input type="checkbox" class="container-folder-selector ff" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>
+      <input type="checkbox" class="container-folder-selector ff ignore-field-change" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>
       {{/is}}
       <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is folder '===' './.'}}glyphicon-info-sign{{else}}glyphicon-folder-close{{/is}}"
             title="expand folder"
@@ -67,7 +67,7 @@
              id="nfs_store_download-selected_items-{{id}}-{{retrieval_type}}"
              name="nfs_store_download[selected_items][]"
              title="select item for download"
-             class="ff"
+             class="ff ignore-field-change"
              value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
       >        
     {{else}}
