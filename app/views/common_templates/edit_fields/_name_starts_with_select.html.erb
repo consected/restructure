@@ -31,6 +31,9 @@ else
 end
 options = field_options_for(form_object_instance, field_name_sym)
 options[:include_blank] = true unless options.has_key?(:include_blank)
+# Ensure that Time columns can be correctly matched to the options
+value = form_object_instance[field_name_sym.to_s]
+options[:selected] = value.to_s if value.is_a?(Time)
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
 <%= form.select field_name_sym, gs, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
