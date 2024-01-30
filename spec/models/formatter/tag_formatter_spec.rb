@@ -20,7 +20,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
 
     @ldn_user24, = create_user
     @ldn_user24.current_admin = @admin
-    @ldn_user24.user_preference.update!(date_format: 'dd/mm/yyyy', date_time_format: 'dd/mm/yyyy 24h:mm', timezone: 'London')
+    @ldn_user24.user_preference.update!(date_format: 'dd/mm/yyyy', date_time_format: 'dd/mm/yyyy 24h:mm', time_format: '24h:mm', timezone: 'London')
 
     create_user
   end
@@ -52,6 +52,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
     date_time_early = DateTime.parse('1989-12-10T02:43:01Z')
     date_time_est = DateTime.parse('1989-12-10 13:43:01-04:00')
     date_time_est_summer = DateTime.parse('1989-06-10 13:43:01-04:00')
+    time_without_zone = Time.parse('2000-01-01T10:35Z')
 
     tests = [
       [:age, Date.today - 10.years, 10],
@@ -83,6 +84,9 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:time_sec, date_time, '8:43:01 am'],
       [:time_sec, date_time, '1:43:01 pm', @ldn_user],
       [:time_sec, date_time, '13:43:01', @ldn_user24],
+      [:time_ignore_zone, time_without_zone, '10:35 am'],
+      [:time_ignore_zone, time_without_zone, '10:35 am', @ldn_user],
+      [:time_ignore_zone, time_without_zone, '10:35', @ldn_user24],
       [:dicom_datetime, date_time, '19891210134301+0000'],
       [:dicom_date, date, '20011009'],
       [:date_time_with_zone, date_time, '12/10/1989 1:43 pm'],
