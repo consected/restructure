@@ -23,6 +23,7 @@ module Formatter
       date_time_with_zone
       date_time_show_zone
       time
+      time_ignore_zone
       time_show_zone
       time_with_zone
       time_sec
@@ -178,6 +179,13 @@ module Formatter
     def time(_res, orig_val)
       Formatter::TimeWithZone.format(orig_val, current_user: current_user,
                                                time_only: true)
+    end
+
+    # Time only including hours:minutes
+    def time_ignore_zone(_res, orig_val)
+      currdate = orig_val
+      Formatter::Time.format(orig_val, current_user: current_user,
+                                       show_timezone: false)
     end
 
     # Adjusts the time to the user's timezone and displays the timezone on the end.
