@@ -48,7 +48,7 @@ if [ ! -f "${upload_script}" ]; then
   exit 2
 fi
 
-for p in md5sum curl awk; do
+for p in md5sum curl awk split; do
   which ${p} > /dev/null
   res=$?
   if [ ${res} != 0 ]; then
