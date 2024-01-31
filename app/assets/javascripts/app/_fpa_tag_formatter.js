@@ -212,6 +212,16 @@ _fpa.tag_formatter = class {
     return time;
   }
 
+  // Time only including hours: minutes
+  time_ignore_zone(_res, orig_val) {
+    let dtf = UserPreferences.time_format();
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+    return time;
+  }
+
   // Time only including hours:minutes and timezone of displayed time
   // TODO: this does not return the timezone
   time_with_zone(_res, orig_val) {
