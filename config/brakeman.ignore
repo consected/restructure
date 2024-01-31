@@ -132,7 +132,7 @@
       "check_name": "UnsafeReflection",
       "message": "Unsafe reflection method `constantize` called on model attribute",
       "file": "app/models/calc_actions/calculate.rb",
-      "line": 625,
+      "line": 627,
       "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
       "code": "Resources::Models.find_by(:resource_name => @join_tables.first).class_name.constantize",
       "render_path": null,
@@ -155,7 +155,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/concerns/master_handler.rb",
-      "line": 191,
+      "line": 198,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -270,7 +270,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 113,
+      "line": 114,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
       "render_path": [
@@ -278,7 +278,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 26,
+          "line": 27,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -298,7 +298,7 @@
         {
           "type": "template",
           "name": "page_layouts/_show_row",
-          "line": 96,
+          "line": 97,
           "file": "app/views/page_layouts/_show_row.html.erb",
           "rendered": {
             "name": "page_layouts/_show_row",
@@ -383,6 +383,25 @@
       "confidence": "High",
       "cwe_id": [
         89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Unmaintained Dependency",
+      "warning_code": 123,
+      "fingerprint": "715ee6d743a8af33c7b930d728708ce19c765fb40e2ad9d2b974db04d92dc7d1",
+      "check_name": "EOLRuby",
+      "message": "Support for Ruby 3.0.6 ends on 2024-03-31",
+      "file": ".ruby-version",
+      "line": 1,
+      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
+      "code": null,
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        1104
       ],
       "note": ""
     },
@@ -576,7 +595,7 @@
       "check_name": "SendFile",
       "message": "Model attribute used in file name",
       "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 82,
+      "line": 102,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
       "render_path": null,
@@ -710,7 +729,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 26,
+          "line": 27,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -847,7 +866,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 104,
+      "line": 105,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
       "render_path": [
@@ -855,7 +874,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 26,
+          "line": 27,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -875,7 +894,7 @@
         {
           "type": "template",
           "name": "page_layouts/_show_row",
-          "line": 96,
+          "line": 97,
           "file": "app/views/page_layouts/_show_row.html.erb",
           "rendered": {
             "name": "page_layouts/_show_row",
@@ -895,6 +914,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-10-17 10:59:37 +0100",
-  "brakeman_version": "6.0.1"
+  "updated": "2024-01-31 16:17:39 +0000",
+  "brakeman_version": "6.1.1"
 }
