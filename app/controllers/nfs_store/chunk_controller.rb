@@ -80,7 +80,7 @@ module NfsStore
       @upload.consume_chunk upload: chunk, headers: request.headers, chunk_hash: params[:chunk_hash]
 
       respond_to do |format|
-        if @upload&.save
+        if @upload&.errors&.empty? && @upload&.save
           format.html do
             render json: [@upload.to_jq_upload].to_json,
                    content_type: 'text/html',
