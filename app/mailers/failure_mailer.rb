@@ -7,6 +7,10 @@ class FailureMailer < ActionMailer::Base
           from: Settings::NotificationsFromEmail || Settings::AdminEmail,
           content_type: 'text/plain'
 
+  #
+  # Defines the mail to be sent as a notification of a background job failure
+  # @param [String] job - typically do something like job.inspect to avoid calling with types that
+  #                       a background job can't handle
   def notify_job_failure(job)
     options = {
       body: "A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\n#{job}",

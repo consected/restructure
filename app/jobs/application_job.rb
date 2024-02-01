@@ -34,7 +34,12 @@ class ApplicationJob < ActiveJob::Base
   # @param [ActiveJob::Base] job
   def self.notify_failure(job)
     Rails.cache.fetch('delayed_job-failure-notification', expires_in: 1.hour) do
-      FailureMailer.notify_job_failure(job).deliver_later
+      nj = FailureMailer.notify_job_failure(job.inspect)
+      if Rails.env.test?
+        nj.deliver_now
+      else
+        nj.deliver_later
+      end
       DateTime.now
     end
   rescue StandardError => e
