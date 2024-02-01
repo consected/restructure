@@ -303,4 +303,31 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     expect(tracker.item).to eq alstep2
     expect(tracker.master_id).to eq alstep2.master.id
   end
+
+  it 'raises a sensible error if attempting to add a tracker entry to a record with no master' do
+    sp_name = 'REDCap'
+    pe_name = 'bounced email'
+    text = "This is a test.\nIt works!"
+
+    sp1_name = 'Alerts'
+    pe1_name = 'Level 1'
+    text1 = 'Another test with {{master_id}}'
+
+    config = {
+      Q1: {
+        with: {
+          master_id: nil,
+          sub_process_name: sp_name,
+          protocol_event_name: pe_name,
+          notes: text
+          # item_type: model_name,
+          # item_id: model_id
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::AddTracker.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(FphsException, 'no master record set to add the tracker to')
+  end
 end
