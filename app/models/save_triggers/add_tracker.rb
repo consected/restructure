@@ -34,8 +34,10 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
         end
 
         setup_with_config
-        # be sure about the user being set, to avoid hidden errors
-        raise 'no user set when adding tracker' unless use_master.current_user
+
+        # be sure about the master and the current_user being set, to avoid hidden errors
+        raise FphsException, 'no master record set to add the tracker to' unless use_master
+        raise FphsException, 'no user set when adding tracker' unless use_master.current_user
 
         t = use_master.trackers.create!(
           protocol_id: protocol.id,
@@ -91,10 +93,12 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
 
     master_id = config_values[:master_id]
     @use_master = if master_id
-                    Master.find(master_id)
+                    Master.find_by(id: master_id)
                   else
-                    use_item&.master || @master
+                    (use_item.respond_to?(:master) && use_item.master) || @master
                   end
+
+    return unless @use_master
 
     unless @use_master.current_user
       cu = @item.current_user if @item.respond_to? :current_user
