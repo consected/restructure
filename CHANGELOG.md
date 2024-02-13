@@ -12,6 +12,20 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Fixed] incorrect updated_at date being used in admin panel index lists
+- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
+
+### From upstream
+
+- [Fixed] incorrect updated_at date being used in admin panel index lists
+- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
+- [Fixed] background Job failures still not notifying the admin via email - fixes #258
+- [Added] splitting to chunks for large files uploaded through API
+- [Added] improved handling of chunk uploads to check for and handle failures
+- [Fixed] Filestore reporting of chunk upload failures
+
 ## [8.4.8] - 2024-01-30
 
 - [Changed] (again) handling of JSON and string output for time fields
