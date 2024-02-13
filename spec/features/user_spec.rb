@@ -192,7 +192,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       end
 
       classes = all('body')[0]['class'] unless has_css?('body.masters.search')
-      expect(page).to have_css('body.masters.search'), "page body has classes #{classes&.join('.')} - should be masters.search"
+      expect(page).to have_css('body.masters.search'), "page body has classes #{classes} - should be masters.search"
     end
 
     it 'should require 2FA to be set up' do
