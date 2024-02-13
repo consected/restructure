@@ -177,7 +177,7 @@ module Dynamic
     # Check if the prefix config library has been added to the options
     # @return [true|false]
     def dynamic_model_config_library_added?
-      !!dynamic_model&.options&.index(/^#{prefix_config_library_string}$/)
+      !!dynamic_model&.options&.index(/^#{prefix_config_library_string}\w*\r?$/)
     end
 
     #
