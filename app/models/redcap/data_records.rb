@@ -5,22 +5,30 @@ module Redcap
   # Handle and validate retrieved records
   # Works with the dynamic models created by Redcap::DynamicStorage, although this is not strictly required
   class DataRecords
-    attr_accessor :project_admin, :records, :class_name, :errors, :created_ids, :updated_ids, :unchanged_ids,
-                  :current_admin, :retrieved_files, :upserted_records, :imported_files
+    # The job request record will be updated every *n* records to provide feedback to the admin
+    UpdateJobRequestEvery = 20
+
+    attr_accessor :project_admin, :records, :class_name, :errors,
+                  :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
+                  :current_admin, :retrieved_files, :upserted_records, :imported_files,
+                  :step_count, :job
 
     def initialize(project_admin, class_name)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
+      self.storage_stage = ''
       self.updated_ids = []
       self.created_ids = []
       self.unchanged_ids = []
+      self.disabled_ids = []
       self.errors = []
       self.current_admin = project_admin.admin
       self.project_admin.current_admin = current_admin
       self.retrieved_files = {}
       self.upserted_records = []
       self.imported_files = []
+      self.step_count = UpdateJobRequestEvery
     end
 
     #
@@ -33,14 +41,18 @@ module Redcap
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
-      project_admin.record_job_request('setup job: store records')
+      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
+      return if Rails.application.config.active_job.queue_adapter == :inline
+
+      project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
     end
 
     #
     # Immediately retrieve, validate and store the records from REDCap.
     # This is only intended to be called from a background job.
     def retrieve_validate_store
+      self.storage_stage = 'retrieve_validate_store'
+      update_job_request(create: true)
       retrieve
       summarize_fields
       validate
@@ -54,6 +66,9 @@ module Redcap
     # @return [Array{Hash}]
     def retrieve
       self.records = project_admin.api_client.records
+      self.storage_stage = 'retrieve'
+      update_job_request
+      records
     end
 
     #
@@ -70,8 +85,11 @@ module Redcap
     def summarize_fields
       return unless project_admin.data_options.add_multi_choice_summary_fields
 
+      self.storage_stage = 'summarize_fields'
+      update_job_request
+
       all_rc_fields = data_dictionary.all_fields
-      all_rc_fields.each do |_name, field|
+      all_rc_fields.each_value do |field|
         next unless field.field_type.name == :checkbox
 
         next unless field.has_checkbox_summary_array?
@@ -103,6 +121,9 @@ module Redcap
     # represent bad data retrieved from Redcap, which could indicate corruption
     # of the data, which should not make it to the local database
     def validate
+      self.storage_stage = 'validate'
+      update_job_request
+
       unless records.is_a? Array
         raise FphsException, "Redcap::DataRecords did not return an array: #{records.class.name}"
       end
@@ -110,7 +131,8 @@ module Redcap
       return unless records.first
 
       unless records.first.is_a? Hash
-        raise FphsException, "Redcap::DataRecords did not return a hash as first item: #{records.first.class.name}"
+        raise FphsException,
+              "Redcap::DataRecords did not return a hash as first item: #{records.first.class.name}"
       end
 
       overlapping_fields = records.first.keys & model.attribute_names.map(&:to_sym)
@@ -162,30 +184,42 @@ module Redcap
     # IDs of updated items will appear in #updated_ids
     # For each updated or created record, also download the file fields to the
     # associated file store
+    # The actual processing is paged, limiting the number of records processed
+    # to the value set in #step_count. This is intended to limit the memory consumption
+    # from holding record instances in #upserted_records
     def store
       upserts = []
+      self.storage_stage = 'store'
+      update_job_request
 
       disable_deleted_records if project_admin.disable_deleted_records?
 
-      records.each do |record|
-        res = create_or_update record
-        upserts << res if res
+      done = 0
+      from = 0
+      step = step_count
+
+      (records.length / step + 1).times do
+        subset = records[from, step]
+        self.upserted_records = []
+        subset.each do |record|
+          done += 1
+          update_job_request if done % step_count == 0
+
+          res = create_or_update record
+          upserts << res if res
+        end
+
+        upserted_records.each do |record|
+          done += 1
+          update_job_request if done % step_count == 0
+
+          capture_files record
+        end
+        from += step
       end
 
-      upserted_records.each do |record|
-        capture_files record
-      end
-
-      result = {
-        count_created_ids: created_ids&.length,
-        count_updated_ids: updated_ids&.length,
-        count_unchanged_ids: unchanged_ids&.length,
-        table: project_admin.dynamic_model_table,
-        errors: errors,
-        imported_files: imported_files.map { |i| "#{i.path}/#{i.file_name}" }
-      }
-
-      project_admin.record_job_request('store records', result: result)
+      self.storage_stage = 'store complete'
+      update_job_request
     end
 
     #
@@ -295,9 +329,15 @@ module Redcap
     # subsequently deleted, set them as disabled
     # @return [Array] of record identifier hashes, false or nil results
     def disable_deleted_records
-      disables = []
+      self.storage_stage = 'disable_deleted_records'
+      update_job_request
+
+      done = 0
       existing_not_in_retrieved_ids.each do |dbrec|
         record = existing_records.find_by(dbrec)
+        done += 1
+        update_job_request if done % step_count == 0
+
         next if record.disabled?
 
         record.disabled = true
@@ -305,10 +345,12 @@ module Redcap
                       .reject { |k, _v| k.in?(%w[id created_at updated_at user_id]) }
                       .symbolize_keys
 
-        res = create_or_update(attrs)
-        disables << res if res
+        res = create_or_update(attrs, keep_results: false)
+        disabled_ids << res[record_id_field] if res
       end
-      disables
+
+      self.storage_stage = 'disable_deleted_records complete'
+      update_job_request
     end
 
     #
@@ -321,8 +363,9 @@ module Redcap
     # if there is no change return false
     # and if there is any other result (an error) return nil.
     # @param [Hash] record
+    # @param [true | false] keep_results - save each existing or new record to @upserted_records
     # @return [Integer | false | nil]
-    def create_or_update(record)
+    def create_or_update(record, keep_results: true)
       rec_ids = record_identifiers(record)
       existing_record = model.where(rec_ids).first
       if existing_record
@@ -337,7 +380,7 @@ module Redcap
         existing_record.force_save!
         if existing_record.update(record)
           updated_ids << rec_ids
-          upserted_records << existing_record
+          upserted_records << existing_record if keep_results
           return rec_ids
         else
           errors << { id: rec_ids, errors: existing_record.errors, action: :update }
@@ -348,7 +391,7 @@ module Redcap
         new_record.force_save!
         if new_record.save
           created_ids << rec_ids
-          upserted_records << new_record
+          upserted_records << new_record if keep_results
           return rec_ids
         else
           errors << { id: rec_ids, errors: new_record.errors, action: :create }
@@ -368,8 +411,12 @@ module Redcap
     # and file name: <field name>
     # @param [UserBase] record - the record to capture the file fields from
     def capture_files(record)
+      done = 0
       file_fields.each do |field_name|
         next if record[field_name].blank?
+
+        done += 1
+        update_job_request if done % step_count == 0
 
         record_id = record[record_id_field]
         begin
@@ -437,6 +484,30 @@ module Redcap
     # @return [User]
     def current_user
       @current_user ||= project_admin.current_user
+    end
+
+    #
+    # Create or update job request record
+    # @param [true | nil] create - optional - create a new record for this request
+    def update_job_request(create: nil)
+      result = {
+        storage_stage: storage_stage,
+        count_retrieved: records&.length,
+        count_created_ids: created_ids&.length,
+        count_updated_ids: updated_ids&.length,
+        count_unchanged_ids: unchanged_ids&.length,
+        count_disabled_ids: disabled_ids&.length,
+        table: project_admin.dynamic_model_table,
+        errors: errors,
+        imported_files_count: imported_files&.length,
+        job: job&.id
+      }
+
+      if create
+        project_admin.record_job_request('store records', result: result)
+      else
+        project_admin.update_job_request('store records', result: result)
+      end
     end
   end
 end
