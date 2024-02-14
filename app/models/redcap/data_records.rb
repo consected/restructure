@@ -11,7 +11,7 @@ module Redcap
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files,
-                  :step_count, :job
+                  :step_count, :job, :done
 
     def initialize(project_admin, class_name)
       super()
@@ -188,13 +188,13 @@ module Redcap
     # to the value set in #step_count. This is intended to limit the memory consumption
     # from holding record instances in #upserted_records
     def store
+      disable_deleted_records if project_admin.disable_deleted_records?
+
       upserts = []
       self.storage_stage = 'store'
       update_job_request
 
-      disable_deleted_records if project_admin.disable_deleted_records?
-
-      done = 0
+      self.done = 0
       from = 0
       step = step_count
 
@@ -202,22 +202,19 @@ module Redcap
         subset = records[from, step]
         self.upserted_records = []
         subset.each do |record|
-          done += 1
-          update_job_request if done % step_count == 0
-
           res = create_or_update record
           upserts << res if res
         end
 
         upserted_records.each do |record|
-          done += 1
-          update_job_request if done % step_count == 0
-
           capture_files record
         end
         from += step
+        self.done = from
+        update_job_request
       end
 
+      self.done = records.length
       self.storage_stage = 'store complete'
       update_job_request
     end
@@ -332,10 +329,10 @@ module Redcap
       self.storage_stage = 'disable_deleted_records'
       update_job_request
 
-      done = 0
+      self.done = 0
       existing_not_in_retrieved_ids.each do |dbrec|
         record = existing_records.find_by(dbrec)
-        done += 1
+        self.done += 1
         update_job_request if done % step_count == 0
 
         next if record.disabled?
@@ -379,8 +376,10 @@ module Redcap
 
         existing_record.force_save!
         if existing_record.update(record)
-          updated_ids << rec_ids
-          upserted_records << existing_record if keep_results
+          if keep_results
+            updated_ids << rec_ids
+            upserted_records << existing_record
+          end
           return rec_ids
         else
           errors << { id: rec_ids, errors: existing_record.errors, action: :update }
@@ -390,8 +389,10 @@ module Redcap
         new_record.current_user = current_user if new_record.respond_to? :current_user=
         new_record.force_save!
         if new_record.save
-          created_ids << rec_ids
-          upserted_records << new_record if keep_results
+          if keep_results
+            created_ids << rec_ids
+            upserted_records << new_record
+          end
           return rec_ids
         else
           errors << { id: rec_ids, errors: new_record.errors, action: :create }
@@ -411,11 +412,11 @@ module Redcap
     # and file name: <field name>
     # @param [UserBase] record - the record to capture the file fields from
     def capture_files(record)
-      done = 0
+      self.done = 0
       file_fields.each do |field_name|
         next if record[field_name].blank?
 
-        done += 1
+        self.done += 1
         update_job_request if done % step_count == 0
 
         record_id = record[record_id_field]
@@ -497,6 +498,7 @@ module Redcap
         count_updated_ids: updated_ids&.length,
         count_unchanged_ids: unchanged_ids&.length,
         count_disabled_ids: disabled_ids&.length,
+        count_processed: done,
         table: project_admin.dynamic_model_table,
         errors: errors,
         imported_files_count: imported_files&.length,
