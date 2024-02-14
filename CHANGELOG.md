@@ -16,40 +16,28 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Bumped] version
 
-### [8.4.9] - from Viva
+### From Harvard
 
-- [Fixed] incorrect updated_at date being used in admin panel index lists
-- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
+- [Fixed] add_tracker trigger failing in confusing way if there is no master record to add the tracker to - fixes #260
+- [Updated] gems to address CVE-2024-25062
 - [Fixed] background Job failures still not notifying the admin via email - fixes #258
 - [Added] splitting to chunks for large files uploaded through API
 - [Added] improved handling of chunk uploads to check for and handle failures
 - [Fixed] Filestore reporting of chunk upload failures
+- [Fixed] error not showing external identifiers in standard master record view
 
-### [8.4.8] - from Viva
+### From Viva
 
+- [Fixed] incorrect updated_at date being used in admin panel index lists
+- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
 - [Changed] (again) handling of JSON and string output for time fields
-
-### [8.4.7] - from Viva
-
 - [Changed] handling of JSON and string output for time fields
-
-### [8.4.6] - from Viva
-
 - [Added] time_ignore_zone substitution formatter
-
-### [8.4.5] - from Viva
-
 - [Fixed] send file to trash not visible if the container was not originally editable - fixes #245
 - [Fixed] selecting a file in the filestore browser with a checkbox prevents navigation away from the page - fixes #242
 - [Fixed] error not showing external identifiers in standard master record view
 - [Added] better reporting of error in spec
-
-### [8.4.4] - from Viva
-
 - [Fixed] conditions not working correctly for nested user: role_name: 'name' - fixes #240
-
-### [8.4.3] - from Viva
-
 - [Added] nfs_store configuration to conditionally enable actions like "send file to trash" - resolves #236
 - [Fixed] script to ensure exit if early git actions fail
 - [Added] bundle-audit ignore file and entry for devise-two-factor gem
