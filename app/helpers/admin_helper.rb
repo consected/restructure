@@ -69,7 +69,7 @@ module AdminHelper
     return if view_embedded?
     return unless respond_to?(:filters) && filters
 
-    show_disabled_filter = (!respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled)
+    show_disabled_filter = !respond_to?(:filters_prevent_disabled) || !filters_prevent_disabled
 
     these_filters = filters.dup
 
@@ -137,8 +137,8 @@ module AdminHelper
     return unless list_item.admin
 
     res = <<~END_HTML
-      <span class="hidden">#{list_item.admin&.updated_at}</span>
-      <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip"  title="last updated by: #{list_item.admin&.email} at #{list_item.admin&.updated_at}"></span>
+      <span class="hidden">#{list_item.updated_at}</span>
+      <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip"  title="last updated by: #{list_item.admin&.email} at #{list_item.updated_at}"></span>
     END_HTML
 
     res.html_safe
