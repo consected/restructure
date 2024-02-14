@@ -1,14 +1,29 @@
 <h4>Latest Requests</h4>
 <p><%= link_to 'view all', redcap_client_requests_path(filter: {name: object_instance.name, server_url: object_instance.server_url}), target: '_blank' %>
-<table class="table"><thead><tr><th>action</th><th>admin</th><th>created</th><th>result</th></tr></thead>
+<table class="table"><thead><tr><th>action</th><th>created</th><th>result</th><th>job</th><th>admin</th></tr></thead>
 <tbody>
-<% object_instance.redcap_client_requests.order(id: :desc).limit(10).each do |cr| %>
+<% object_instance.redcap_client_requests.order(updated_at: :desc, id: :desc).limit(10).each do |cr| %>
   <tr>
   <td><%= cr.action %></td>
-  
-  <td><%= cr.admin&.email %></td>
   <td><%= current_user_date_time cr.created_at %></td>
   <td><pre class="scrollable-block"><%= cr.result&.to_yaml %></pre></td>
+  <td>
+    <% job_id = cr.result&.dig('job') 
+       if job_id
+        got_job = Delayed::Job.handler_includes("job_id: #{job_id}", queue: Redcap::ProjectAdmin::JobQueue).first
+        if got_job
+          text = []
+          text << "created" if got_job.created_at
+          text << "locked" if got_job.locked_at
+          text << "failed" if got_job.failed_at
+    %>
+      <%= link_to text.join(", "), admin_job_reviews_path(filter: {id: got_job.id}), target: '_blank'  %>
+    <%  end
+       end %>    
+  </td>
+  <td class="admin-item-admin-infos">
+    <%= admin_last_updated_by_icon(cr) %>
+  </td>
   </tr>
 <% end %>
 </tbody>
