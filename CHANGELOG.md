@@ -18,6 +18,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ### From Harvard
 
+- [Added] notes about contributing pull requests
 - [Fixed] add_tracker trigger failing in confusing way if there is no master record to add the tracker to - fixes #260
 - [Updated] gems to address CVE-2024-25062
 - [Fixed] background Job failures still not notifying the admin via email - fixes #258
