@@ -32,7 +32,9 @@ module Formatter
 
       if w
         curr_zone = w[:zone] || current_timezone
-        curr_zone = current_user.user_preference.timezone if current_user && !curr_zone || curr_zone == :user
+        if current_user&.user_preference && !curr_zone || curr_zone == :user
+          curr_zone = current_user.user_preference.timezone
+        end
 
         # Convert to iso format
         if keep_date
@@ -85,7 +87,7 @@ module Formatter
     def self.pattern_for(current_user, current_timezone, iso, include_sec, show_timezone)
       pattern = if iso
                   IsoFormat
-                elsif current_user
+                elsif current_user&.user_preference
                   if include_sec
                     current_user.user_preference.pattern_for_date_time_sec_format
                   else

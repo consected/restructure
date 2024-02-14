@@ -25,7 +25,7 @@ module Formatter
 
       df = if iso
              '%Y-%m-%d'
-           elsif current_user
+           elsif current_user&.user_preference
              current_user.user_preference.pattern_for_date_format
            else
              UserPreference.default_pattern_for_date_format
