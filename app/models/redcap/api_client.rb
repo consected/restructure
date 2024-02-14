@@ -166,7 +166,7 @@ module Redcap
           post_action action, request_options
         end
 
-        project_admin.record_job_request action, result: { retrieved_from: retrieved_from }
+        project_admin.record_job_request action, result: { retrieved_from: retrieved_from, count: res&.length }
       end
       res
     end

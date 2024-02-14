@@ -37,7 +37,7 @@ class Admin::JobReviewsController < AdminController
       return nil
     end
 
-    res = params.require(:filter).permit(filters_on)
+    res = super
 
     if res[:failed].blank?
       res.delete(:failed)
