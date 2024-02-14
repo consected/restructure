@@ -58,7 +58,7 @@ git push
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
-LASTTAG=$(echo "$ALLTAGS" | head -n1)
+LASTTAG=$(echo "${ALLTAGS/-dev/}" | head -n1)
 CURRVERINFILE=$(cat ${CURRVERFILE})
 CURRVER=${CURRVERINFILE}
 
