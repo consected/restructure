@@ -12,6 +12,45 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Bumped] version
+- [Fixed] incorrect updated_at date being used in admin panel index lists
+- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
+- [Fixed] background Job failures still not notifying the admin via email - fixes #258
+- [Added] splitting to chunks for large files uploaded through API
+- [Added] improved handling of chunk uploads to check for and handle failures
+- [Fixed] Filestore reporting of chunk upload failures
+
+### [8.4.8] - from Viva
+
+- [Changed] (again) handling of JSON and string output for time fields
+
+### [8.4.7] - from Viva
+
+- [Changed] handling of JSON and string output for time fields
+
+### [8.4.6] - from Viva
+
+- [Added] time_ignore_zone substitution formatter
+
+### [8.4.5] - from Viva
+
+- [Fixed] send file to trash not visible if the container was not originally editable - fixes #245
+- [Fixed] selecting a file in the filestore browser with a checkbox prevents navigation away from the page - fixes #242
+- [Fixed] error not showing external identifiers in standard master record view
+- [Added] better reporting of error in spec
+
+### [8.4.4] - from Viva
+
+- [Fixed] conditions not working correctly for nested user: role_name: 'name' - fixes #240
+
+### [8.4.3] - from Viva
+
+- [Added] nfs_store configuration to conditionally enable actions like "send file to trash" - resolves #236
+- [Fixed] script to ensure exit if early git actions fail
+- [Added] bundle-audit ignore file and entry for devise-two-factor gem
+
 ## [8.4.2] - 2024-01-15
 
 - [Build] Viva version
