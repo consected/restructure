@@ -13,7 +13,7 @@ class FailureMailer < ActionMailer::Base
   #                       a background job can't handle
   def notify_job_failure(job)
     options = {
-      body: "A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\n#{job}",
+      body: "A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\n#{job&.to_yaml}",
       subject: 'delayed_job failure'
     }
     mail(options)

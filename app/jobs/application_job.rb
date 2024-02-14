@@ -40,7 +40,7 @@ class ApplicationJob < ActiveJob::Base
       else
         nj.deliver_later
       end
-      DateTime.now
+      DateTime.now.to_s
     end
   rescue StandardError => e
     Rails.logger.error "Failed to send notify_failure: #{e}"

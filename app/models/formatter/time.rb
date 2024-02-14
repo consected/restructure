@@ -33,7 +33,9 @@ module Formatter
                     current_date: nil)
       return nil if data.blank?
 
-      current_timezone = current_user.user_preference.timezone if current_user && current_timezone&.to_sym == :user
+      if current_user&.user_preference && current_timezone&.to_sym == :user
+        current_timezone = current_user.user_preference.timezone
+      end
 
       if current_timezone && current_date
         data = data.strftime(IsoFormat) if data.respond_to?(:strftime)
@@ -56,7 +58,7 @@ module Formatter
     def self.pattern_for(current_user, current_timezone, iso, include_sec, show_timezone)
       pattern = if iso
                   IsoFormat
-                elsif current_user
+                elsif current_user&.user_preference
                   if include_sec
                     current_user.user_preference.pattern_for_time_sec_format
                   else
