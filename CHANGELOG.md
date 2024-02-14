@@ -15,6 +15,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 ## Unreleased
 
 - [Bumped] version
+
+### [8.4.9] - from Viva
+
 - [Fixed] incorrect updated_at date being used in admin panel index lists
 - [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
 - [Fixed] background Job failures still not notifying the admin via email - fixes #258
