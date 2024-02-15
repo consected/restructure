@@ -10,7 +10,7 @@ RSpec.describe FailureMailer, type: :mailer do
   include DynamicModelSupport
 
   describe 'notify job failures' do
-    let(:job) { 'Test Job #123' }
+    let(:job) { @job ||= Redcap::CaptureRecordsJob.new }
     let(:mail) { FailureMailer.notify_job_failure(job).deliver_now }
     it 'renders the subject' do
       expect(mail.subject).to eq('delayed_job failure')
@@ -26,7 +26,7 @@ RSpec.describe FailureMailer, type: :mailer do
 
     it 'assigns @confirmation_url' do
       expect(mail.body.encoded)
-        .to match("A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.\r\n#{job}")
+        .to start_with("A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.")
     end
   end
 

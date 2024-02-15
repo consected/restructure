@@ -1,12 +1,33 @@
-<div class="col-sm-20 admin-head-block">
-  <h4>Restart Failed Jobs</h3>
+<div class="row">
+  <div class="col-md-6 admin-head-block">
+    <h4>Find Job</h3>
 
-  <%= form_tag admin_job_reviews_restart_failed_jobs_path, action: :post do %>
-  
-  <div class="form-group">
-    <%= hidden_filter_fields %>
-    <%= submit_tag 'restart all', class: "btn btn-primary" %>
+    <%= form_tag admin_job_reviews_path, method: :get do %>  
+    <div class="form-group">
+      <%= text_field_tag 'filter[job_id]', params.dig(:filter, :job_id), placeholder: 'Job UUID' %>
+      <%= text_field_tag 'filter[id]', params.dig(:filter, :id), placeholder: 'Record ID' %>
+      <%= submit_tag 'search', class: "btn btn-primary" %>
+    </div>
+    <% end %>
+  </div>  
+  <div class="col-md-6 admin-head-block">
+    <h4>Restart Failed Jobs</h3>
+
+    <%= form_tag admin_job_reviews_restart_failed_jobs_path, method: :post do %>  
+    <div class="form-group">
+      <%= hidden_filter_fields %>
+      <%= submit_tag 'restart all', class: "btn btn-primary" %>
+    </div>
+    <% end %>
   </div>
+  <div class="col-md-6 admin-head-block">
+    <h4>Delete Failed Jobs</h3>
 
-  <% end %>
+    <%= form_tag admin_job_reviews_delete_failed_jobs_path, method: :post do %>  
+    <div class="form-group">
+      <%= hidden_filter_fields %>
+      <%= submit_tag 'delete all', class: "btn btn-primary" %>
+    </div>
+    <% end %>
+  </div>
 </div>
