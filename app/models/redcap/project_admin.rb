@@ -373,18 +373,14 @@ module Redcap
     # Lookup existing jobs, based on the jobclass being run, and the global id record
     # referenced in the arguments. Returns a scoped query, typically checked with something
     # like result.count > 0
-    # @param [Class | String] jobclass
+    # @param [Class | String] job_class
     # @param [Admin::AdminBase] ref_record
     # @return [ActiveRecord::Relation]
-    def self.existing_jobs(jobclass, ref_record)
-      jobtext = <<~END_TEXT
-        %
-          job_class: #{jobclass}
-        %
-          - _aj_globalid: gid://#{Settings::GlobalIdPrefix}/#{ref_record.class}/#{ref_record.id}
-        %
-      END_TEXT
-      Delayed::Job.handler_includes jobtext, queue: ProjectAdmin::JobQueue, failed: false
+    def self.existing_jobs(job_class, ref_record)
+      Delayed::Job.lookup_jobs_by job_class: job_class,
+                                  ref_record: ref_record,
+                                  queue: ProjectAdmin::JobQueue,
+                                  failed: false
     end
 
     #
