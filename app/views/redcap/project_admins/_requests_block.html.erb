@@ -10,7 +10,7 @@
   <td>
     <% job_id = cr.result&.dig('job') 
        if job_id
-        got_job = Delayed::Job.handler_includes("job_id: #{job_id}", queue: Redcap::ProjectAdmin::JobQueue).first
+        got_job = Delayed::Job.find_by_job_id(job_id, queue: Redcap::ProjectAdmin::JobQueue)
         if got_job
           text = []
           text << "created" if got_job.created_at
