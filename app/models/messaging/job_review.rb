@@ -27,6 +27,22 @@ module Messaging
       res
     end
 
+    #
+    # Delete all the failed jobs in the current scope
+    # @return [Integer] - number of jobs deleted
+    def self.delete_failed_jobs!
+      jobs = all_failed
+      res = 0
+      jobs.each do |job|
+        next unless job.failed?
+
+        job.delete
+        res += 1
+      end
+
+      res
+    end
+
     def current_admin=(admin)
       # Accept anything
     end

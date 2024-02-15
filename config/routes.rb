@@ -48,6 +48,7 @@ Rails.application.routes.draw do
 
     resources :job_reviews, except: %i[show destroy]
     post 'job_reviews/restart_failed_jobs', to: 'job_reviews#restart_failed_jobs'
+    post 'job_reviews/delete_failed_jobs', to: 'job_reviews#delete_failed_jobs'
 
     resources :server_info, only: [:index]
     get 'server_info/rails_log', to: 'server_info#rails_log'
