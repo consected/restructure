@@ -12,8 +12,8 @@ class NotificationMailer < ActionMailer::Base
   # @param [Messaging::MessageNotification] notify
   # @param [Logger] logger - Rails logger
   # @return [Mail::Message]
-  def send_message_notification(notify, logger: Rails.logger)
-    logger.info "Sending email for #{notify.id}"
+  def send_message_notification(notify)
+    Rails.logger.info "Sending email for #{notify.id}"
     messages = []
 
     emails = notify.recipient_emails.select do |email|
