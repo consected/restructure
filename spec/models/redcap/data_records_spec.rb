@@ -144,7 +144,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -278,7 +278,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
@@ -329,7 +329,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
@@ -593,7 +593,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.errors).to be_empty
       expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[222224]
-      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[4]
+      expect(dr.disabled_ids).to eq %w[4]
 
       expect(dm.implementation_class.find_by(record_id: 4)&.disabled).to be true
     end
