@@ -18,6 +18,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Changed] email notification of job failure to link to the job
 - [Added] delete failed jobs and find job in admin form
 - [Refactored] implementation of job searches and Delayed::Job initialization
+- [Bumped] version
 
 ## [8.4.5] - 2024-02-01
 
