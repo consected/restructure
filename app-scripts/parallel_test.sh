@@ -5,6 +5,10 @@ echo > tmp/working_failing_specs.log
 
 # Clear a variable that is often set in the session
 unset QUICK
+unset RUBY_DEBUG_OPEN
+
+# Ensure the tests run cleanly
+export DISABLE_SPRING=1
 
 # First, run brakeman
 if [ "${NO_BRAKEMAN}" != 'true' ] && [ "${SKIP_BRAKEMAN}" != 'true' ]; then
@@ -30,6 +34,10 @@ fi
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
+# Clean up the temporary nfs_store directories
+rm -rf /var/tmp/nfs_store_tmp*
+rm -rf /var/tmp/nfs_store_test*
+
 if [ -z "$@" ]; then
   specs='spec/models spec/controllers spec/features spec/r.*'
 else
@@ -42,6 +50,7 @@ for spec in ${specs}; do
   echo "========================================================================"
   echo "========================================================================" >> tmp/working_failing_specs.log
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
+  echo "==>>>> $(date)" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
   RAILS_ENV=test bundle exec rake parallel:spec["'"${spec}"'"] &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
@@ -66,5 +75,6 @@ done
 echo "========================================================================" >> tmp/working_failing_specs.log
 echo "All Done" >> tmp/working_failing_specs.log
 echo "Runs with Failures: $(grep 'Failures: ' tmp/failing_specs.log | wc -l)" >> tmp/working_failing_specs.log
+echo "==>>>> $(date)" >> tmp/working_failing_specs.log
 echo "========================================================================" >> tmp/working_failing_specs.log
 mv tmp/working_failing_specs.log tmp/failing_specs.log

@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 date_formats = {
-  concise: '%Y-%m-%d' 
+  concise: '%Y-%m-%d'
 }
 
 Time::DATE_FORMATS.merge! date_formats

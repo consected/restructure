@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# NOTE: also see `config/initializers/time_formats.rb`
 class ActiveSupport::TimeWithZone
   # Override string formmatting when the special date 2000:01:01 is in the date
   # portion of the time, and the time is UTC. This is Rails making a TimeWithZone from

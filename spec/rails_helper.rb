@@ -15,7 +15,7 @@ def expect_to_be_bad_route(for_request)
   method = for_request.first.first
   path = for_request.first.last
   path = path.split('/').select(&:present?).join('/')
-  expect(for_request).to route_to(controller: 'bad_route', action: 'not_routed', path: path)
+  expect(for_request).to route_to(controller: 'bad_route', action: 'not_routed', path:)
 end
 
 put_now 'Starting rspec'
@@ -89,6 +89,11 @@ include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
+
+FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
+FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
+FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
+FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`

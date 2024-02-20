@@ -1,24 +1,29 @@
+# frozen_string_literal: true
+
 class DoNothingLogger < ::Logger
-  
-  def initialize(*args)
+  def initialize(*_args)
     # super
     @formatter = NoneFormatter.new
     # after_initialize if respond_to? :after_initialize
   end
 
-  def add(severity, message = nil, progname = nil, &block)
+  def add(_severity, _message = nil, _progname = nil)
     true
   end
 
-  def none?                # def debug?
-    ::Logger::NONE >= 'fatal'           #   DEBUG >= level
-  end                                      # end
+  def none?
+    ::Logger::NONE >= 'fatal'
+  end
+
+  def silence(&block)
+    block.call
+  end
 
   # Simple formatter which only displays the message.
   class NoneFormatter < ::Logger::Formatter
     # This method is invoked when a log event occurs
-    def call(severity, timestamp, progname, msg)
-      ""
+    def call(_severity, _timestamp, _progname, _msg)
+      ''
     end
   end
 end
