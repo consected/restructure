@@ -12,6 +12,13 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Upgrade] to Ruby 3.2.2
+- [Changed] email notification of job failure to link to the job
+- [Added] delete failed jobs and find job in admin form
+- [Refactored] implementation of job searches and Delayed::Job initialization
+
 ## [8.4.5] - 2024-02-01
 
 - [Bumped] version
