@@ -220,7 +220,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     expect(dr.errors).to be_empty
     expect(dr.created_ids.sort).to be_empty
-    expect(dr.disabled_ids).to eq ['birthwt']
+    expect(dr.updated_ids).to eq []
+    expect(dr.disabled_ids).to eq [newrec.varname]
   end
 
   after :all do

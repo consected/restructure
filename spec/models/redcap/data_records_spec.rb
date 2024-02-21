@@ -593,7 +593,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.errors).to be_empty
       expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[222224]
-      expect(dr.disabled_ids).to eq %w[4]
+      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[]
+      expect(dr.disabled_ids.map { |r| r }.sort).to eq %w[4]
 
       expect(dm.implementation_class.find_by(record_id: 4)&.disabled).to be true
     end
