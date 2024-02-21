@@ -9,6 +9,7 @@ unset RUBY_DEBUG_OPEN
 
 # Ensure the tests run cleanly
 export DISABLE_SPRING=1
+spring stop
 
 # First, run brakeman
 if [ "${NO_BRAKEMAN}" != 'true' ] && [ "${SKIP_BRAKEMAN}" != 'true' ]; then

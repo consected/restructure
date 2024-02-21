@@ -66,7 +66,7 @@ group :development, :test do
   gem 'rspec-rails'
   # gem 'ruby-debug-ide'
   gem 'spring'
-  gem 'spring-commands-parallel-tests'
+  # gem 'spring-commands-parallel-tests'
 end
 
 group :test do
