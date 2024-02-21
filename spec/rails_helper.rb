@@ -19,7 +19,6 @@ def expect_to_be_bad_route(for_request)
 end
 
 put_now 'Starting rspec'
-require 'setup_helper'
 
 ENV['RAILS_ENV'] ||= 'test'
 ENV['FPHS_ADMIN_SETUP'] = 'yes'
@@ -33,18 +32,6 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SECRET_ACCESS_KEY
 # AWS_SESSION_TOKEN
 #
-
-if ENV['QUICK'] == 'true'
-  ENV['SKIP_BROWSER_SETUP'] = 'true'
-  ENV['SKIP_DB_SETUP'] = 'true'
-  ENV['SKIP_APP_SETUP'] = 'true'
-else
-  # Use a database table to track creations in the test db
-  res = SetupHelper.check_spec_db
-  names = res.map { |r| r['name'] }
-  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
-end
 
 # By default, AWS APIs are mocked. Real AWS APIs can be exercised
 # by setting environment variable `NO_AWS_MOCKS=true`
@@ -72,6 +59,22 @@ put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+put_now 'Require setup_helper'
+require 'setup_helper'
+
+if ENV['QUICK'] == 'true'
+  ENV['SKIP_BROWSER_SETUP'] = 'true'
+  ENV['SKIP_DB_SETUP'] = 'true'
+  ENV['SKIP_APP_SETUP'] = 'true'
+else
+  put_now 'check_spec_db for skips'
+  # Use a database table to track creations in the test db
+  res = SetupHelper.check_spec_db
+  names = res.map { |r| r['name'] }
+  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
+end
+
 put_now 'Require webmock'
 require 'webmock/rspec'
 # Enable or disable WebMock allowing requests to external resources.
@@ -91,7 +94,6 @@ change_setting('AllowUsersToRegister', false)
 
 require 'capybara/rspec'
 require 'browser_helper'
-
 include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
