@@ -6,6 +6,8 @@ require './db/table_generators/external_identifiers_table'
 $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
+  SpecTallyTable = 'rails_spec_db_tally'
+
   def self.auto_admin
     admin, = ::UserSupport.create_admin
     admin
@@ -54,6 +56,8 @@ module SetupHelper
     raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
 
     check_bhs_assignments_table true
+
+    add_to_spec_db('db_setup')
   end
 
   def self.setup_app_dbs
@@ -358,6 +362,23 @@ module SetupHelper
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end
+  end
+
+  def self.check_spec_db
+    tn = SpecTallyTable
+    unless Admin::MigrationGenerator.table_or_view_exists_in_schema?(tn, 'ml_app')
+      sqlfn = "create table ml_app.#{tn} (name varchar, updated_at timestamp);"
+      host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
+      user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} -c "#{sqlfn}"`
+    end
+
+    res = ActiveRecord::Base.connection.execute("select * from ml_app.#{tn};")
+    res = res.to_a
+  end
+
+  def self.add_to_spec_db(name, updated_at: Time.now)
+    res = ActiveRecord::Base.connection.execute("insert into #{SpecTallyTable} (name, updated_at) values ('#{name}', '#{updated_at}');")
   end
 
   def self.setup_app_from_import(name, config_dir, config_fn)
