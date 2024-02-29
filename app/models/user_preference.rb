@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class UserPreference < UserBase
+  attr_accessor :localized
   # Essential method to indicate this does not have an association with a master record
   def self.no_master_association
     true
@@ -120,10 +121,34 @@ class UserPreference < UserBase
 
   private
 
+  def localized
+    @localized ||= JSON.parse(self.user.client_localized)
+  end
+
+  def localized_date_formatter
+    localized['date_formatter']&.downcase || UserPreference.default_date_format
+  end
+
+  def localized_time_formatter
+    return UserPreference.default_time_format unless (formatter = localized['time_formatter'])
+
+    return 'hh:mm am/pm' if formatter == 'h:mm A'
+
+    '24h:mm'
+  end
+
+  def localized_date_time_formatter
+    "#{localized_date_formatter} #{localized_time_formatter}" || UserPreference.default_date_time_format
+  end
+
+  def localized_timezone
+    ActiveSupport::TimeZone::MAPPING.key(localized['timezone']) || UserPreference.default_user_timezone
+  end
+
   def set_defaults
-    self.date_format ||= UserPreference.default_date_format
-    self.date_time_format ||= UserPreference.default_date_time_format
-    self.time_format ||= UserPreference.default_time_format
-    self.timezone ||= UserPreference.default_user_timezone
+    self.date_format ||= localized_date_formatter
+    self.date_time_format ||= localized_date_time_formatter
+    self.time_format ||= localized_time_formatter
+    self.timezone ||= localized_timezone
   end
 end

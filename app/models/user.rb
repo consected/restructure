@@ -29,6 +29,7 @@ class User < ActiveRecord::Base
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
   attr_accessor :terms_of_use
+  attr_accessor :client_localized
 
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
