@@ -122,7 +122,7 @@ class UserPreference < UserBase
   private
 
   def localized
-    @localized ||= JSON.parse(self.user.client_localized)
+    @localized ||= JSON.parse(user.client_localized || '{}')
   end
 
   def localized_date_formatter
