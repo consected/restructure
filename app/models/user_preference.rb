@@ -122,23 +122,36 @@ class UserPreference < UserBase
   private
 
   def localized
-    @localized ||= JSON.parse(user.client_localized || '{}')
+    return @localized if @localized
+
+    @localized = {}
+    client_localized = user.client_localized
+    return @localized unless client_localized.present?
+
+    @localized = JSON.parse(client_localized)
+  rescue StandardError
+    @localized
   end
 
   def localized_date_formatter
-    localized['date_formatter']&.downcase || UserPreference.default_date_format
+    formatter = localized['date_formatter']&.downcase
+
+    return UserPreference.default_date_format unless UserPreferencesHelper.date_time_format_options.include?(formatter)
+
+    formatter
   end
 
   def localized_time_formatter
-    return UserPreference.default_time_format unless (formatter = localized['time_formatter'])
+    formatter = localized['time_formatter']
 
+    return UserPreference.default_time_format unless formatter.present?
     return 'hh:mm am/pm' if formatter == 'h:mm A'
 
     '24h:mm'
   end
 
   def localized_date_time_formatter
-    "#{localized_date_formatter} #{localized_time_formatter}" || UserPreference.default_date_time_format
+    "#{localized_date_formatter} #{localized_time_formatter}"
   end
 
   def localized_timezone
