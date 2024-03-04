@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## [8.5.2] - 2024-02-21
 
+### From Viva
+
 - [Added] cleanup of test dynamic models
 - [Fixed] parallel test cleanups
 - [Fixed] spec setup regression
