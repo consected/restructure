@@ -16,6 +16,12 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Bumped] version
 - [Build] with latest changes from contributors
+- [Updated] gems to address CVEs
+  - CVE-2024-26144
+  - CVE-2024-25126
+  - CVE-2024-26141
+  - CVE-2024-26146
+  - CVE-2024-27285
 
 ## [8.5.2] - 2024-02-21
 
