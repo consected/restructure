@@ -27,7 +27,7 @@ gem 'mail', '>= 2.8.0'
 gem 'mime-types'
 gem 'mini_portile2', '>= 2.8.2'
 gem 'net-smtp'
-gem 'nokogiri', '>= 1.16.2' # add
+gem 'nokogiri', '>= 1.16.2' # address CVE-2024-25062
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
 # puma has been moved to all environments and will be included in the production packaging

@@ -81,6 +81,12 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @message_type = config[:type]
     @run_if = config[:if]
     @alt_batch_user = DynamicModel.user_for_conf_snippet(config)
+
+    # Clear memos for the following
+    @extra_substitutions = nil
+    @subject = nil
+    @content_template_text = nil
+    @importance = nil
   end
 
   #
@@ -94,6 +100,10 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
     ca = ConditionalActions.new @run_if, @item
     ca.calc_action_if
+  end
+
+  def email?
+    @message_type.to_s == 'email'
   end
 
   #
@@ -118,6 +128,12 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     end
 
     @receiving_user_ids.uniq!
+
+    # Clean up user list to remove users that are set to no-send emails (if an email is being sent)
+    # or are template users
+    rusers = User.active.where(id: @receiving_user_ids)
+    rusers = rusers.reject { |u| u.a_template_or_batch_user? || (email? && u.do_not_email) }
+    @receiving_user_ids = rusers.map(&:id)
   end
 
   def setup_phones
@@ -287,8 +303,6 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   end
 
   def queue_job
-    return job if job
-
     # Queue the job.
     self.job = HandleMessageNotificationJob
     # For testing and debugging mostly, allow this to run immediately inline
