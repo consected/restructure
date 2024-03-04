@@ -49,14 +49,21 @@ module NfsStore
       # Test the container is accessible
       Browse.open_container(id: container, user: user)
 
-      upload = Upload.where(conditions).order(id: :desc).first
+      uploads = Upload.where(conditions).order(id: :desc)
+      upload = uploads.first
       if upload
         # Validate if the file has already been finalized or would otherwise be invalid
         raise FsException::Action, 'A matching stored file already exists' if upload.already_stored?
 
         unless upload.check_chunk_files
-          Rails.logger.warn 'Chunk files for an incomplete upload were not present'
-          raise FsException::Upload, 'Chunk files for an incomplete upload were not present'
+          upload.cleanup_chunk_files
+          uploads.update_all(path: ".failed-upload/#{upload.path}")
+          upload.chunk_count = 0
+          upload.file_size = 0
+          unless upload.check_chunk_files
+            Rails.logger.warn 'Chunk files for an incomplete upload were not present'
+            raise FsException::Upload, 'Chunk files for an incomplete upload were not present'
+          end
         end
 
       else
@@ -182,6 +189,9 @@ module NfsStore
 
         @ready_to_finalize = true
 
+      elsif cr[:to] + 1 > cr[:total]
+        raise FsException::Upload,
+              "The chunk range uploaded exceeded the size of the original file : #{cr[:to] + 1} > #{cr[:total]}"
       else
         # We still have other chunks to receive. Keep a running total of the file size we have received so far
         self.file_size = ChunkSize * chunk_count
@@ -235,6 +245,16 @@ module NfsStore
 
     def self.valid_filters(item_or_container)
       NfsStore::Filter::Filter.filters_for(item_or_container)
+    end
+
+    # Cleanup all chunk files.
+    # @param not_final [Boolean] sets whether the 'final' temp file should also
+    #                            be cleaned up, or just the intermediate chunks.
+    #   Default: false, cleans up the final file too
+    def cleanup_chunk_files(not_final: false)
+      each_chunk_file_path do |path|
+        FileUtils.rm path if File.file?(path) && (!not_final || !path.end_with?("-#{FinalFilenameSuffix}"))
+      end
     end
 
     private
@@ -350,16 +370,6 @@ module NfsStore
     def cleanup_chunk(num)
       path = chunk_filename(num)
       FileUtils.rm path if File.exist? path
-    end
-
-    # Cleanup all chunk files.
-    # @param not_final [Boolean] sets whether the 'final' temp file should also
-    #                            be cleaned up, or just the intermediate chunks.
-    #   Default: false, cleans up the final file too
-    def cleanup_chunk_files(not_final: false)
-      each_chunk_file_path do |path|
-        FileUtils.rm path if File.file?(path) && (!not_final || !path.end_with?("-#{FinalFilenameSuffix}"))
-      end
     end
 
     # Iterate through the chunk files, yielding to the block with the file path for each

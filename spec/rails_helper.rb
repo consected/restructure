@@ -19,7 +19,7 @@ def expect_to_be_bad_route(for_request)
 end
 
 put_now 'Starting rspec'
-# This file is copied to spec/ when you run 'rails generate rspec:install'
+
 ENV['RAILS_ENV'] ||= 'test'
 ENV['FPHS_ADMIN_SETUP'] = 'yes'
 ENV['FPHS_USE_LOGGER'] = 'TRUE'
@@ -32,12 +32,6 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SECRET_ACCESS_KEY
 # AWS_SESSION_TOKEN
 #
-
-if ENV['QUICK'] == 'true'
-  ENV['SKIP_BROWSER_SETUP'] = 'true'
-  ENV['SKIP_DB_SETUP'] = 'true'
-  ENV['SKIP_APP_SETUP'] = 'true'
-end
 
 # By default, AWS APIs are mocked. Real AWS APIs can be exercised
 # by setting environment variable `NO_AWS_MOCKS=true`
@@ -65,6 +59,22 @@ put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+put_now 'Require setup_helper'
+require 'setup_helper'
+
+if ENV['QUICK'] == 'true'
+  ENV['SKIP_BROWSER_SETUP'] = 'true'
+  ENV['SKIP_DB_SETUP'] = 'true'
+  ENV['SKIP_APP_SETUP'] = 'true'
+else
+  put_now 'check_spec_db for skips'
+  # Use a database table to track creations in the test db
+  res = SetupHelper.check_spec_db
+  names = res.map { |r| r['name'] }
+  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
+end
+
 put_now 'Require webmock'
 require 'webmock/rspec'
 # Enable or disable WebMock allowing requests to external resources.
@@ -84,11 +94,17 @@ change_setting('AllowUsersToRegister', false)
 
 require 'capybara/rspec'
 require 'browser_helper'
-require 'setup_helper'
 include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
+SetupHelper.clean_nfs_store_directories
+
+FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
+FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
+FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
+FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
+
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
@@ -214,6 +230,8 @@ RSpec.configure do |config|
       als.each do |a|
         a.update! current_admin: a.admin, disabled: true if a.enabled?
       end
+
+      SetupHelper.add_to_spec_db('app_setup')
     end
     put_now 'load_tasks'
     Rails.application.load_tasks

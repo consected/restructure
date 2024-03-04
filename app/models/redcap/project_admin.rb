@@ -87,11 +87,9 @@ module Redcap
     before_save :empty_disabled_api_key
 
     before_save :set_schedule_status, if: lambda {
-                                            (
-                                              frequency_changed? ||
+                                            frequency_changed? ||
                                               transfer_mode_changed? ||
                                               disabled_changed?
-                                            )
                                           }
 
     after_save :create_file_store, unless: :file_store
@@ -99,10 +97,8 @@ module Redcap
     after_save :reset_field_metadata, if: lambda {
                                             return false if disabled
 
-                                            (
-                                              saved_change_to_captured_project_info? &&
+                                            saved_change_to_captured_project_info? &&
                                               captured_project_info.nil?
-                                            )
                                           }
 
     # After save, capture the project info from REDCap
@@ -176,12 +172,10 @@ module Redcap
                                          }
 
     after_save :setup_schedule, if: lambda {
-                                      (
-                                        saved_change_to_frequency? ||
+                                      saved_change_to_frequency? ||
                                         saved_change_to_transfer_mode? ||
                                         saved_change_to_disabled? ||
                                         force_refresh
-                                      )
                                     }
 
     after_save :reset_force_refresh
@@ -379,28 +373,47 @@ module Redcap
     # Lookup existing jobs, based on the jobclass being run, and the global id record
     # referenced in the arguments. Returns a scoped query, typically checked with something
     # like result.count > 0
-    # @param [Class | String] jobclass
+    # @param [Class | String] job_class
     # @param [Admin::AdminBase] ref_record
     # @return [ActiveRecord::Relation]
-    def self.existing_jobs(jobclass, ref_record)
-      jobtext = <<~END_TEXT
-        %
-          job_class: #{jobclass}
-        %
-          - _aj_globalid: gid://#{Settings::GlobalIdPrefix}/#{ref_record.class}/#{ref_record.id}
-        %
-      END_TEXT
-      Delayed::Job.handler_includes jobtext, queue: ProjectAdmin::JobQueue, failed: false
+    def self.existing_jobs(job_class, ref_record)
+      Delayed::Job.lookup_jobs_by job_class: job_class,
+                                  ref_record: ref_record,
+                                  queue: ProjectAdmin::JobQueue,
+                                  failed: false
     end
 
+    #
+    # Create a job request record for the *action*
+    # If no result is specified, default to { requested: true }
+    # @param [String] action
+    # @param [Hash | nil] result - the information to store for the action
+    # @return [Redcap::ClientRequest] the created job request instance
     def record_job_request(action, result: nil)
       result ||= { requested: true }
-      Redcap::ClientRequest.create current_admin: current_admin || admin,
-                                   action: action,
-                                   server_url: server_url,
-                                   name: name,
-                                   redcap_project_admin: self,
-                                   result: result
+
+      curr_job_requests[action] =
+        Redcap::ClientRequest.create current_admin: current_admin || admin,
+                                     action: action,
+                                     server_url: server_url,
+                                     name: name,
+                                     redcap_project_admin: self,
+                                     result: result
+    end
+
+    #
+    # Update the job request record for the *action*
+    # If no result is specified, default to { requested: true }
+    # @param [String] action
+    # @param [Hash | nil] result - the information to store for the action
+    def update_job_request(action, result: nil)
+      result ||= { requested: true }
+
+      res = curr_job_request_for(action)
+      return unless res
+
+      res.update current_admin: current_admin || admin,
+                 result: result
     end
 
     #
@@ -549,6 +562,34 @@ module Redcap
       self.data_dictionary_version = redcap_data_dictionary.captured_metadata_digest
       save_options
       update_columns(options: options)
+    end
+
+    #
+    # Memo of current job request records, to allow them to be updated in the future
+    # Is a Hash or Redcap::ClientRequest instances, keyed by the action for the item
+    # @return [Hash]
+    def curr_job_requests
+      @curr_job_requests ||= {}
+    end
+
+    #
+    # Get the latest job request record for the action. This come from the memos or
+    # will be retrieved from the database
+    # @param [String] action
+    # @return [Redcap::ClientRequest | nil]
+    def curr_job_request_for(action)
+      curr_job_requests[action] ||=
+        Redcap::ClientRequest
+        .where(
+          action: action,
+          server_url: server_url,
+          name: name,
+          redcap_project_admin_id: id
+        )
+        .order(
+          id: :desc
+        )
+        .first
     end
   end
 end

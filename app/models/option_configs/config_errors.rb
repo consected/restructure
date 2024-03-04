@@ -19,6 +19,8 @@ module OptionConfigs
       # @param [option_configs] option_configs
       # @return [true | nil]
       def all_option_configs_errors(option_configs)
+        return unless option_configs
+
         res = []
         option_configs.select do |oc|
           res += oc.config_errors
@@ -32,6 +34,8 @@ module OptionConfigs
       # @param [option_configs] option_configs
       # @return [true | nil]
       def all_option_configs_notices(option_configs)
+        return unless option_configs
+
         res = []
         option_configs.select do |oc|
           val = oc.config_errors
@@ -50,6 +54,10 @@ module OptionConfigs
     end
 
     protected
+
+    def valid_config_keys?(config, valid_keys)
+      config.keys.empty? || (config.keys - valid_keys).empty?
+    end
 
     def failed_config(type, message, level: :error)
       target = if level == :error

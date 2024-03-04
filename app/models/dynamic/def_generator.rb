@@ -66,7 +66,9 @@ module Dynamic
       # check for the existence of the appropriate admin table
       # before attempting to do anything. Otherwise Rake tasks fail and
       # the admin table can't be generated, preventing setup of the app.
-      def enable_active_configurations
+      # @param [true|nil] disable_on_failure - default nil - disables definition on failure
+      #                                      - Since this is destructive, use is most likely only in test
+      def enable_active_configurations(disable_on_failure: nil)
         if Admin::MigrationGenerator.table_or_view_exists? table_name
           active_model_configurations.each do |dm|
             klass = if dm.is_a? ExternalIdentifier
@@ -78,9 +80,10 @@ module Dynamic
             if dm.ready_to_generate? && dm.implementation_class_defined?(klass, fail_without_exception: true)
               dm.add_master_association
             else
-              msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}"
+              msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. #{disable_on_failure && 'Disabling!'}"
               puts msg
               Rails.logger.warn msg
+              dm.class.where(id: dm.id).update_all(disabled: true) if disable_on_failure
             end
           end
         else
@@ -308,7 +311,7 @@ module Dynamic
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)
-      Resources::Models.remove(resource_name: resource_name)
+      Resources::Models.remove(resource_name:)
     end
 
     # Dump the old association
@@ -390,7 +393,7 @@ module Dynamic
                                                            app_type,
                                                            :table,
                                                            model_association_name,
-                                                           disabled: disabled
+                                                           disabled:
         end
       rescue StandardError => e
         raise FphsException,

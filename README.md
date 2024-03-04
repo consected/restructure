@@ -335,6 +335,24 @@ The easiest way to deal with migrations is to drop the test database and recreat
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
+## Pull Requests
+
+Contributions back to upstream ReStructure are much appreciated. Assuming you have forked from <https://github.com/consected/restructure>
+then this is one way to produce clean pull requests.
+
+For each feature / fix ensure you only have the relevant commits in a branch. If there is other activity on your remote fork,
+such as commits produced building the platform for a specific environment, or local changes specific to your environment, creating a
+PR will a feature branch might lead to junk that the upstream repo doesn't want. Do avoid this, you'll need to rebase your branch on
+the state of the upstream/develop branch that will be receiving the PR commits.
+
+```sh
+git checkout -b up-develop upstream/develop
+git branch --set-upstream-to=origin
+git checkout ${feature-branch}
+git rebase --interactive up-develop
+git push # --force may be required if your feature branch is already published
+```
+
 ## Future development themes
 
 Upgrade to Rails 7.

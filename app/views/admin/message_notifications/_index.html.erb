@@ -23,8 +23,8 @@
             <%=  list_item.recipient_sms_numbers&.join('; ') if list_item.message_type == 'sms'%>
             </td></tr>
             <tr><td>role:</td><td><%= list_item.role_name %></td></tr>
-            <tr><td>sent:</td><td data-format-date-local="false"><%= list_item.updated_at %></td></tr>
-            <tr><td>status:</td><td><%= list_item.status %></td></tr>
+            <tr><td>sent:</td><td data-orig-datetime="<%= list_item.updated_at %>" ><%= Formatter::DateTime.format(list_item.updated_at, current_user: current_user, current_timezone: :user) %></td></tr>
+            <tr><td>status:</td><td class="mn-table-status mn-table-status-<%= list_item.status %>"><%= list_item.status.blank? ? 'not sent' : list_item.status %></td></tr>
           </table>
           <p><button class="btn btn-small" data-toggle="unhide" data-target="#extra-attributes-<%=list_item.id%>">additional fields</button></p>
           <table class="extra-attributes hidden" id="extra-attributes-<%=list_item.id%>">
@@ -32,7 +32,7 @@
             <tr><td><%= i.humanize %>:</td><td><%= list_item.send(i) %></td></tr>
             <% end %>
           </table>
-          <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%>" sandbox="allow-popups allow-popups-to-escape-sandbox">
+          <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%> if-mn-status-<%= list_item.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox">
           </iframe>
 
           <script id="message-content-<%= list_item.id %>" class="hidden" type="x-html">

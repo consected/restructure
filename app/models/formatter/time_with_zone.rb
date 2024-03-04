@@ -25,7 +25,7 @@ module Formatter
                     _show_timezone: nil)
       return if data.blank?
 
-      if current_user
+      if current_user&.user_preference
         current_timezone = current_user.user_preference.timezone
         df = if include_sec
                current_user.user_preference.pattern_for_date_time_sec_format

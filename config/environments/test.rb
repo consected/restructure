@@ -71,12 +71,16 @@ Rails.application.configure do
     env.cache = Sprockets::Cache::FileStore.new(assets_cache_path)
   end
 
-  fs_cache_path = Rails.root.join('tmp', 'cache', 'cache-fs', "paralleltests#{ENV['TEST_ENV_NUMBER']}")
-  FileUtils.mkdir_p fs_cache_path
-  config.cache_store = :file_store, fs_cache_path
+  # fs_cache_path = Rails.root.join('tmp', 'cache', 'cache-fs', "paralleltests#{ENV['TEST_ENV_NUMBER']}")
+  # FileUtils.mkdir_p fs_cache_path
+  # config.cache_store = :file_store, fs_cache_path
+  config.cache_store = :memory_store, { namespace: "paralleltests#{ENV['TEST_ENV_NUMBER']}" }
 
   config.active_record.dump_schema_after_migration = false
 
   # config.time_zone = 'Eastern Time (US & Canada)'
   # config.active_record.default_timezone = :local
+
+  config.enable_reloading = true
+  config.cache_classes = false
 end

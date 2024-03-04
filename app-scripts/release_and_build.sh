@@ -58,7 +58,7 @@ git push
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
-LASTTAG=$(echo "$ALLTAGS" | head -n1)
+LASTTAG=$(echo "${ALLTAGS/-dev/}" | head -n1)
 CURRVERINFILE=$(cat ${CURRVERFILE})
 CURRVER=${CURRVERINFILE}
 
@@ -141,6 +141,10 @@ fi
 
 echo "Starting release to new-master"
 git checkout new-master && git pull
+if [ $? != 0 ]; then
+  echo "Failed to checkout new-master. Will not continue."
+  exit 105
+fi
 # git checkout ${FROM_BRANCH}
 # git flow release start ${NEWVER}
 # RES=$?
@@ -152,11 +156,22 @@ git checkout new-master && git pull
 # git flow release finish -m 'Release' ${NEWVER}
 # git push origin --tags
 git merge --no-ff ${FROM_BRANCH}
+if [ $? != 0 ]; then
+  echo "Failed to merge ${FROM_BRANCH}. Will not continue."
+  exit 102
+fi
+
 git push origin --all
+if [ $? != 0 ]; then
+  echo "Failed to push orign. Will not continue."
+  exit 103
+fi
 
 git checkout ${FROM_BRANCH}
-
-head -32 CHANGELOG.md | tail -13
+if [ $? != 0 ]; then
+  echo "Failed to checkout ${FROM_BRANCH}. Will not continue."
+  exit 104
+fi
 
 echo "Starting build container"
 cd ../restructure-build

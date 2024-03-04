@@ -12,7 +12,106 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.2.66] - 2023-09-05
+## Unreleased
+
+- [Bumped] version
+- [Build] with latest changes from contributors
+- [Updated] gems to address CVEs
+  - CVE-2024-26144
+  - CVE-2024-25126
+  - CVE-2024-26141
+  - CVE-2024-26146
+  - CVE-2024-27285
+
+## [8.5.2] - 2024-02-21
+
+### From Viva
+
+- [Added] cleanup of test dynamic models
+- [Fixed] parallel test cleanups
+- [Fixed] spec setup regression
+- [Added] tally of rspec test setups completed in the database for faster testing
+- [Fixed] checking of deleted records in tests
+- [Fixed] Message notifications sending to a role shows users that have been disabled or are templates or are set to no email - fixes #234
+- [Changed] message notifications to show date/time sent using user preference and to make it clear when a message has not been sent yet - fixes #239
+- [Added] simpler date time formatting within the user's timezone
+- [Fixed] notify save trigger with a list of notifications incorrectly sends the first one to all roles and users - fixes #281
+
+### From Harvard
+
+- [Fixed] add_tracker trigger failing in confusing way if there is no master record to add the tracker to - fixes #260
+- [Changed] code to support Ruby 3.2.2
+- [Changed] email notification of job failure to link to the job
+- [Added] delete failed jobs and find job in admin form
+- [Refactored] implementation of job searches and Delayed::Job initialization
+- [Bumped] version
+
+## [8.4.9] - 2024-02-13
+
+### From Harvard
+
+- [Fixed] specs with Spring
+- [Added] notes about contributing pull requests
+- [Fixed] add_tracker trigger failing in confusing way if there is no master record to add the tracker to - fixes #260
+- [Updated] gems to address CVE-2024-25062
+- [Fixed] background Job failures still not notifying the admin via email - fixes #258
+- [Added] splitting to chunks for large files uploaded through API
+- [Added] improved handling of chunk uploads to check for and handle failures
+- [Fixed] Filestore reporting of chunk upload failures
+- [Fixed] error not showing external identifiers in standard master record view
+
+## [8.4.8] - 2024-01-30
+
+- [Fixed] incorrect updated_at date being used in admin panel index lists
+- [Added] paging to redcap record storage, improved job logging and link back to job from Redcap admin panel, - fixes #269 #268 #267
+- [Changed] (again) handling of JSON and string output for time fields
+
+## [8.4.7] - 2024-01-30
+
+- [Changed] handling of JSON and string output for time fields
+
+## [8.4.6] - 2024-01-29
+
+- [Added] time_ignore_zone substitution formatter
+
+## [8.4.5] - 2024-01-25
+
+- [Fixed] send file to trash not visible if the container was not originally editable - fixes #245
+- [Fixed] selecting a file in the filestore browser with a checkbox prevents navigation away from the page - fixes #242
+- [Fixed] error not showing external identifiers in standard master record view
+- [Added] better reporting of error in spec
+
+## [8.4.4] - 2024-01-16
+
+- [Fixed] conditions not working correctly for nested user: role_name: 'name' - fixes #240
+
+## [8.4.3] - 2024-01-16
+
+- [Added] nfs_store configuration to conditionally enable actions like "send file to trash" - resolves #236
+- [Fixed] script to ensure exit if early git actions fail
+- [Added] bundle-audit ignore file and entry for devise-two-factor gem
+- [Fixed] add_tracker trigger failing in confusing way if there is no master record to add the tracker to - fixes #260
+- [Updated] gems to address CVE-2024-25062
+
+## [8.4.5] - 2024-02-01
+
+- [Fixed] background Job failures still not notifying the admin via email - fixes #258
+
+## [8.4.4] - 2024-01-31
+
+- [Added] splitting to chunks for large files uploaded through API
+- [Added] improved handling of chunk uploads to check for and handle failures
+- [Fixed] Filestore reporting of chunk upload failures
+
+## [8.4.3] - 2024-01-24
+
+- [Fixed] error not showing external identifiers in standard master record view
+
+## [8.4.2] - 2024-01-11
+
+- [Build] FPHS version
+
+## [8.4.1] - 2024-01-11
 
 - [Fixed] bug introduced by configuration of tracker ordering - fixes #232
 - [Changed] release to remove all dependence on git-flow
@@ -59,6 +158,51 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Changed] handling of scrolling if the target item was removed from the page
 - [Fixed] report new / edited records not showing
 - [Changed] error message when a RecordInvalid exception is thrown
+
+## [8.2.121] - 2023-12-21
+
+- [Added] cleanup of app configurations to avoid spaces and nulls leading to duplicate entries
+- [Added] current user id as state in the application page script
+- [Added] ability to rerun DB seeds from server info
+- [Changed] field validation messages to always show as "Entry" rather than a meaningless field name
+- [Added] handling of disabled groups in "chosen" drop-downs to hide correctly, especially when using the data-filter-selector option
+- [Added] extra checking and logging around Libreoffice, plus kill stuck processes
+- [Added] a data-user-roles attribute to body, allowing body[data-user-roles~='underscored_role_name'] to be used in CSS
+- [Fixed] issues with model reference data being blank and used for record matching in transfer script
+- [Changed] nav links page layout to avoid showing app types not available to the user
+- [Fixed] email notifications from and failure notification to email address settings
+
+## [8.2.120] - 2023-12-13
+
+- [Changed] to remove empty placeholder captions, even if they have just a blank paragraph
+- [Fixed] handling of model references in curly substitutions in the front end
+
+## [8.2.119] - 2023-12-12
+
+- [Changed] API sample for study info transfer to another server
+- [Fixed] CSV import form bug
+- [Added] configuration check for OTC encoding key
+- [Added] make-labels-placeholders to documentation
+- [Fixed] integer field to allow negative numbers - fixes CSV import of master id does not allow negative numbers #218
+- [Fixed] CSV import not recognizing uploaded file correctly
+- [Fixed] duplicate tables appearing in CSV import drop down table list
+- [Fixed] mr-expander closing an already expanded item
+
+## [8.2.118] - 2023-12-04
+
+- [Added] improved control over scrolling, especially in activity logs
+- [Fixed] validation error message formatting with nested conditions
+- [Fixed] jobs are supposed to send an admin email if they fail - fixes #210
+
+## [8.2.117] - 2023-11-27
+
+- [Changed] handling of scrolling if the target item was removed from the page
+- [Fixed] report new / edited records not showing
+- [Changed] error message when a RecordInvalid exception is thrown
+
+## [8.2.116] - 2023-11-23
+
+- Bumped version
 
 ## [8.2.114] - 2023-11-23
 

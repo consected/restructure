@@ -7,4 +7,20 @@
   &.if-mn-type-sms {
     height: 100px;
   }
+
+  opacity: 30%;
+
+  &.if-mn-status-complete {
+    opacity: 100%;
+  }
+}
+
+.mn-table-status {
+  font-weight: bold;
+  font-style: italic;
+
+  &.mn-table-status-complete {
+    font-weight: normal;
+    font-style: normal;
+  }
 }

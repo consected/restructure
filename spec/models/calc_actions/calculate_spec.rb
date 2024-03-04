@@ -1033,6 +1033,74 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, al
       expect(res.calc_action_if).to be false
 
+      conf = {
+        any: {
+          all: {
+            user: {
+              role_name: %w[y x]
+            }
+          },
+          any: {
+            this: {
+              id: -999
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+
+      conf = {
+        any: {
+          user: {
+            role_name: %w[y x]
+          },
+          any: {
+            this: {
+              id: -999
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be false
+
+      conf = {
+        any: {
+          all: {
+            user: {
+              role_name: %w[y test-role]
+            }
+          },
+          any: {
+            this: {
+              id: -999
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        any: {
+          user: {
+            role_name: %w[y test-role]
+          },
+          any: {
+            this: {
+              id: -999
+            }
+          }
+        }
+      }
+
+      res = ConditionalActions.new conf, al
+      expect(res.calc_action_if).to be true
+
       # Check the user has a role matching the current instance attribute value
 
       expect(@user.role_names.first).not_to be nil

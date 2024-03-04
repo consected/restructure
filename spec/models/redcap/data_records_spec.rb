@@ -144,7 +144,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -278,7 +278,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
@@ -329,14 +329,21 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       study: 'Q2',
                                       name: 'q2_demo',
-                                      api_key: api_key,
+                                      api_key:,
                                       server_url: rc.server_url
 
     rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
 
+    cr = Redcap::ClientRequest.where(admin: @admin,
+                                     action: 'store records',
+                                     server_url: rc.server_url,
+                                     name: rc.name,
+                                     redcap_project_admin: rc)
+                              .last
+
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
-    start_time = DateTime.now
+    start_time = Time.now
     expect(dm.implementation_class_defined?)
 
     expect(dr.existing_records_length).to eq 0
@@ -353,7 +360,16 @@ RSpec.describe Redcap::DataRecords, type: :model do
                               .where('created_at > :created_at', created_at: start_time)
                               .last
 
-    expect(cr).to be nil
+    expect(cr.result['storage_stage']).to eq 'validate'
+
+    cr = Redcap::ClientRequest.where(admin: @admin,
+                                     action: 'capture records job',
+                                     server_url: rc.server_url,
+                                     name: rc.name,
+                                     redcap_project_admin: rc)
+                              .where('created_at > :created_at', created_at: start_time)
+                              .last
+    expect(cr.result['error']).to include "Redcap::DataRecords retrieved record fields don't match the data dictionary"
   end
 
   it 'downloads files' do
@@ -450,6 +466,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       stub_request_records @project[:server_url], @project[:api_key]
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      # Check we can retrieve and store in small steps
+      dr.step_count = 3
+
       dr.retrieve
       dr.summarize_fields
       expect { dr.validate }.not_to raise_error
@@ -573,7 +593,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.errors).to be_empty
       expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[222224]
-      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[4]
+      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[]
+      expect(dr.disabled_ids.map { |r| r }.sort).to eq %w[4]
 
       expect(dm.implementation_class.find_by(record_id: 4)&.disabled).to be true
     end

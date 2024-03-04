@@ -227,6 +227,7 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - date_time_with_zone
 - date_time_show_zone
 - time
+- time_utc
 - time_with_zone
 - time_show_zone
 - time_sec

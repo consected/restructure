@@ -23,11 +23,11 @@ gem 'jquery-fileupload-rails', '0.4.7'
 gem 'jquery-rails'
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
-gem 'mail', '2.7.1' # hold at this version in Rails 2.7 to avoid broken net / protocol gems
+gem 'mail', '>= 2.8.0'
 gem 'mime-types'
-gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
+gem 'mini_portile2', '>= 2.8.2'
 gem 'net-smtp'
-gem 'nokogiri', '>= 1.14.3'
+gem 'nokogiri', '>= 1.16.2' # address CVE-2024-25062
 gem 'pg', '~> 1.4', '>= 1.4.3'
 
 # puma has been moved to all environments and will be included in the production packaging
@@ -62,12 +62,11 @@ group :development, :test do
   gem 'bundler-audit'
   gem 'byebug', '~> 11.1', '>= 11.1.3'
   gem 'debug', '>= 1.0.0'
-  gem 'parallel_tests', '3.8.1'
-  gem 'readapt'
+  gem 'parallel_tests' # , '3.8.1'
   gem 'rspec-rails'
   # gem 'ruby-debug-ide'
   gem 'spring'
-  gem 'spring-commands-parallel-tests'
+  # gem 'spring-commands-parallel-tests'
 end
 
 group :test do

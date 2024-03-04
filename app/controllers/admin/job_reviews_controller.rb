@@ -7,8 +7,17 @@ class Admin::JobReviewsController < AdminController
   def restart_failed_jobs
     res = Messaging::JobReview.restart_failed_jobs!
 
-    flash.now[:notice] = "Restarted #{res} #{'job'.pluralize(res)}"
-    index
+    flash[:notice] = "Restarted #{res} #{'job'.pluralize(res)}"
+    redirect_to admin_job_reviews_path(filter: filter_params)
+  end
+
+  #
+  # Delete all failed jobs
+  def delete_failed_jobs
+    res = Messaging::JobReview.delete_failed_jobs!
+
+    flash[:notice] = "Deleted #{res} #{'job'.pluralize(res)}"
+    redirect_to admin_job_reviews_path(filter: filter_params)
   end
 
   protected
@@ -37,7 +46,7 @@ class Admin::JobReviewsController < AdminController
       return nil
     end
 
-    res = params.require(:filter).permit(filters_on)
+    res = super
 
     if res[:failed].blank?
       res.delete(:failed)
@@ -75,5 +84,23 @@ class Admin::JobReviewsController < AdminController
 
   def show_head_info
     true
+  end
+
+  #
+  # Extend the filtering of the index to cope with the Find Job form
+  # @param [ActiveRecord::Relation] pm - optional
+  # @return [ActiveRecord::Relation]
+  def filtered_primary_model(pm = nil)
+    job_id = params.dig(:filter, :job_id)
+    id = params.dig(:filter, :id)
+    if job_id.present?
+      job = Delayed::Job.find_by_job_id(job_id)
+      pm = primary_model.where(id: job&.id)
+    elsif id.present?
+      pm = primary_model.where(id: id)
+    else
+      pm ||= primary_model
+    end
+    super(pm)
   end
 end

@@ -14,27 +14,16 @@ module NfsStore
         raise FsException::NotFound, "Container nfs_store storage is not found: #{container.name}"
       end
 
-      unless container.allows_current_user_access_to? :access
-        cp = container.parent_item || container.find_creator_parent_item
-        cpm = cp&.master&.id if cp.respond_to?(:master)
+      container.parent_item ||= activity_log || container.find_creator_parent_item
 
-        raise FsException::NoAccess,
-              'User does not have access to this container ' \
-              "(master #{container.master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
-      end
+      container.raise_if_no_access!
 
       orig_user = container.current_user
       # Make sure the archive files are mounted (this is idempotent), but not immediate
       Archive::Mounter.mount_all container.stored_files
       container.current_user = orig_user
 
-      unless activity_log
-        res = ModelReference.find_where_referenced_from(container).first
-        if res
-          raise FsException::NoAccess,
-                'Attempting to browse a container that is referenced by activity logs, without specifying which one'
-        end
-      end
+      container.raise_if_no_activity_log_specified!(activity_log)
 
       item_for_filter = activity_log || container
 

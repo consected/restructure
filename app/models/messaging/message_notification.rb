@@ -239,7 +239,7 @@ module Messaging
       generate
 
       if email?
-        NotificationMailer.send_message_notification(self, logger: logger).deliver_now
+        NotificationMailer.send_message_notification(self).deliver_now
       elsif sms?
         sms = Messaging::NotificationSms.new
         sms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text,
