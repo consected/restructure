@@ -117,6 +117,15 @@ RSpec.describe Formatter::DateTime, type: :model do
     res = Formatter::DateTime.format({ date: date, time: time, zone: zone }, iso: true, utc: true, current_user: @user, keep_date: true)
 
     expect(res).to eq '2015-03-08 17:56:04 UTC'
+
+    # alternatively to simple show a Date Time as it should appear in the user's preferred timezone
+
+    datetime = Time.parse('2015-03-08 13:56:04 UTC')
+    zone = :user
+
+    res = Formatter::DateTime.format(datetime, current_user: @user, current_timezone: zone)
+
+    expect(res).to eq '03/08/2015 9:56 am'
   end
 
   it 'uses database dates and times correctly' do

@@ -30,6 +30,10 @@ module Formatter
         w = data
       end
 
+      if current_user&.user_preference && current_timezone&.to_sym == :user
+        current_timezone = current_user.user_preference.timezone
+      end
+
       if w
         curr_zone = w[:zone] || current_timezone
         if current_user&.user_preference && !curr_zone || curr_zone == :user

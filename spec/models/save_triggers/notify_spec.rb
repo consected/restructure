@@ -50,7 +50,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     # The number of roles is one more than we added due to automatic setup of a template@template item
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
 
-    @role_user_ids = [u1.id, @user.id, ud.id] + [User.template_user.id]
+    @non_template_user_ids = [u1.id, @user.id, ud.id]
+    @role_user_ids = @non_template_user_ids + [User.template_user.id]
 
     setup_stub(:sns_send_sms)
   end
@@ -75,7 +76,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     @trigger.perform
 
-    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+    expect(@trigger.receiving_user_ids.sort).to eq @non_template_user_ids.sort
 
     new_mn = MessageNotification.order(id: :desc).first
     # new_dj = Delayed::Job.order(id: :desc).first
@@ -151,7 +152,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     @trigger.perform
 
-    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+    expect(@trigger.receiving_user_ids.sort).to eq @non_template_user_ids.sort
 
     new_mn = MessageNotification.order(id: :desc).first
     # new_dj = Delayed::Job.order(id: :desc).first
@@ -192,7 +193,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     @trigger.perform
 
-    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+    expect(@trigger.receiving_user_ids.sort).to eq @non_template_user_ids.sort
 
     new_mn = MessageNotification.order(id: :desc).first
     # new_dj = Delayed::Job.order(id: :desc).first
@@ -396,7 +397,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   it 'sends notifications on a save_trigger in an activity log' do
     # Setup a new activity log with multiple notifications on create
 
-    t = '<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+    t = '<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}} in {{id}}.</p>'
 
     @activity_log = al = ActivityLog.active.where(name: AlNameGenTestN).first
 
@@ -415,14 +416,14 @@ RSpec.describe SaveTriggers::Notify, type: :model do
                 role: test
                 layout_template: #{@layout.name}
                 content_template_text: |
-                  #{t}
-                subject: subject text
+                  #{t} 1
+                subject: subject text 1
               - type: email
                 role: test_2
                 layout_template: #{@layout.name}
                 content_template_text: |
-                  #{t}
-                subject: subject text
+                  #{t} 2
+                subject: subject text 2
 
       step_2:
         label: Step 2
@@ -448,15 +449,58 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     alstep1.save!
     expect(alstep1).to be_persisted
 
-    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1')
+    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'staff', extra_log_type: 'step_1')
     alstep2.save!
 
     lastid = Messaging::MessageNotification.last.id
-    mns = Messaging::MessageNotification.where(id: [lastid, lastid - 1]).order(id: :desc)
-    expect(mns.first.item_type).to eq al.implementation_class.name
-    expect(mns.first.item_id).to eq alstep2.id
+    # Two messages are sent for each alstep
+    mns = Messaging::MessageNotification.where(id: [lastid, lastid - 1, lastid - 2, lastid - 3]).order(id: :asc)
 
-    expect(mns.last.item_type).to eq al.implementation_class.name
-    expect(mns.last.item_id - 1).to eq alstep1.id
+    alstep1_first_sent_msg = mns[0]
+    alstep1_last_sent_msg = mns[1]
+    alstep2_first_sent_msg = mns[2]
+    alstep2_last_sent_msg = mns[3]
+
+    expect(alstep1_first_sent_msg.item_type).to eq al.implementation_class.name
+    expect(alstep1_first_sent_msg.item_id).to eq alstep1.id
+    expect(alstep1_last_sent_msg.item_type).to eq al.implementation_class.name
+    expect(alstep1_last_sent_msg.item_id).to eq alstep1.id
+
+    expect(alstep2_first_sent_msg.item_type).to eq al.implementation_class.name
+    expect(alstep2_first_sent_msg.item_id).to eq alstep2.id
+    expect(alstep2_last_sent_msg.item_type).to eq al.implementation_class.name
+    expect(alstep2_last_sent_msg.item_id).to eq alstep2.id
+
+    tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 1\n</div></body></html>"
+    expect(alstep1_first_sent_msg.item_id).to eq alstep1.id
+    expect(alstep1_first_sent_msg.status).to eq 'complete'
+    expect(alstep1_first_sent_msg.role_name).to eq 'test'
+    expect(alstep1_first_sent_msg.subject).to eq 'subject text 1'
+    expect(alstep1_first_sent_msg.content_template_text).to eq "#{t} 1\n"
+    expect(alstep1_first_sent_msg.generated_content).to eq tsub
+
+    tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 2\n</div></body></html>"
+    expect(alstep1_last_sent_msg.item_id).to eq alstep1.id
+    expect(alstep1_last_sent_msg.status).to eq 'complete'
+    expect(alstep1_last_sent_msg.role_name).to eq 'test_2'
+    expect(alstep1_last_sent_msg.subject).to eq 'subject text 2'
+    expect(alstep1_last_sent_msg.content_template_text).to eq "#{t} 2\n"
+    expect(alstep1_last_sent_msg.generated_content).to eq tsub
+
+    tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 1\n</div></body></html>"
+    expect(alstep2_first_sent_msg.item_id).to eq alstep2.id
+    expect(alstep2_first_sent_msg.status).to eq 'complete'
+    expect(alstep2_first_sent_msg.role_name).to eq 'test'
+    expect(alstep2_first_sent_msg.subject).to eq 'subject text 1'
+    expect(alstep2_first_sent_msg.content_template_text).to eq "#{t} 1\n"
+    expect(alstep2_first_sent_msg.generated_content).to eq tsub
+
+    tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 2\n</div></body></html>"
+    expect(alstep2_last_sent_msg.item_id).to eq alstep2.id
+    expect(alstep2_last_sent_msg.status).to eq 'complete'
+    expect(alstep2_last_sent_msg.role_name).to eq 'test_2'
+    expect(alstep2_last_sent_msg.subject).to eq 'subject text 2'
+    expect(alstep2_last_sent_msg.content_template_text).to eq "#{t} 2\n"
+    expect(alstep2_last_sent_msg.generated_content).to eq tsub
   end
 end
