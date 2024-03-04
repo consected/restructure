@@ -127,9 +127,14 @@ module OptionConfigs
         # and show if is not already set
         next if val.nil? || val.empty? || self.show_if[fn]
 
-        bl = Redcap::DataDictionaries::BranchingLogic.new(val)
-        sis = bl&.generate_show_if
-        self.show_if[fn] = sis if sis.present?
+        begin
+          bl = Redcap::DataDictionaries::BranchingLogic.new(val)
+          sis = bl&.generate_show_if
+          self.show_if[fn] = sis if sis.present?
+        rescue StandardError => e
+          Rails.logger.warn "Failed to generate real show_if for #{fn}: #{val}\n#{e}"
+          self.show_if[fn] = { generate_show_if: "failed - #{e}" }
+        end
       end
 
       self.show_if = self.show_if.symbolize_keys
@@ -571,7 +576,7 @@ module OptionConfigs
 
       ci = self.valid_if["on_#{action_type}".to_sym]
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
-      ca = ConditionalActions.new ci, obj, return_failures: return_failures
+      ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if
     end
 
@@ -615,7 +620,7 @@ module OptionConfigs
       while res
         category = res[1].strip
         name = res[2].strip
-        reshashes << { category: category, name: name }
+        reshashes << { category:, name: }
         content.gsub!(res[0], '')
         res = content.match reg
       end
