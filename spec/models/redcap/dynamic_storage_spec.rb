@@ -103,6 +103,14 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       )
     end
 
+    it 'creates the model with a human name' do
+      project_name = @project[:name]
+      rc = Redcap::ProjectAdmin.active.find_by(name: project_name)
+      rc.current_admin = @admin
+      dm = @ds.dynamic_model
+      expect(dm.name).to eq project_name
+    end
+
     it 'adds a config library to the dynamic model' do
       rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name])
       rc.current_admin = @admin
