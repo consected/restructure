@@ -216,7 +216,7 @@ module Redcap
       # @return [Object]
       def cast_value_to_real(value)
         real_type = VariableTypesToRealTypes[default_variable_type] || :to_s
-        return nil if value.blank? && real_type != :to_s
+        return nil if value.blank? && real_type != :to_s && real_type != :to_a
 
         if real_type == :to_time
           vtime = value.to_time(:utc)
