@@ -794,7 +794,7 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       dm.reset_model_references
 
-      puts dm.definition.option_configs if dm.model_references.empty?
+      puts dm.class.definition.option_configs if dm.model_references.empty?
 
       # The player_contacts associated with this master record do not all appear in model references.
       # Only the last one that was explicitly added to the model references for this master record
