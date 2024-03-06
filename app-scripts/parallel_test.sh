@@ -21,6 +21,11 @@ fi
 echo "Setup filestore"
 app-scripts/setup-dev-filestore.sh
 
+echo "Clean database"
+app-scripts/drop-test-db.sh
+app-scripts/create-test-db.sh
+reset
+
 if [ "${SKIP_ZEITWERK}" != 'true' ]; then
   # Check zeitwerk before continuing
   bundle exec rails zeitwerk:check

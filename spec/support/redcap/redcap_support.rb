@@ -33,8 +33,12 @@ module Redcap
 
     def setup_file_store
       # Create a matching user for the admin
-      @app_type ||= Admin::AppType.active.where(name: 'ref-data').first
+      @app_type = Admin::AppType.active.find_by(name: 'ref-data')
       @user, = create_user nil, '', email: @admin.email, app_type: @app_type
+      setup_access 'trackers', user: @user
+      setup_access 'nfs_store__manage__containers', user: @user
+      setup_access 'nfs_store__manage__stored_files', user: @user
+      setup_access 'nfs_store__manage__archived_files', user: @user
       add_user_to_role Settings.admin_nfs_role, for_user: @user
       add_user_to_role 'admin', for_user: @user
     end

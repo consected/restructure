@@ -20,6 +20,8 @@ module DynamicModelSupport
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
+    DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
+
     dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
     dm.current_admin = @admin
     dm.update_tracker_events
@@ -100,12 +102,12 @@ module DynamicModelSupport
           resource_name: dynamic_model__test_embedded_recs
     END_DEF
 
-    dm = DynamicModel.create! current_admin: @admin,
+    dm = DynamicModel.create!(current_admin: @admin,
                               name: 'test embed options',
                               table_name: 'test_embed_options',
                               schema_name: 'dynamic',
                               category: :test,
-                              options: options
+                              options:)
 
     dm.update_tracker_events
 

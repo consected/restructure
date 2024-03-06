@@ -98,11 +98,11 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
       within '#new_admin' do
         fill_in 'Email', with: @good_email
-        fill_in 'Password', with: @good_password + ' '
+        fill_in 'Password', with: "#{@good_password} "
         click_button 'Log in'
       end
 
-      puts '------------>' + page.find('body')[:class] unless has_selector?('.login-2fa-block', visible: true)
+      puts "------------>#{page.find('body')[:class]}" unless has_selector?('.login-2fa-block', visible: true)
       expect(page).to have_selector('.login-2fa-block', visible: true)
       expect(page).to have_selector('#new_admin', visible: true)
       expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
@@ -117,7 +117,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
       within '#new_admin' do
         fill_in 'Email', with: @good_email
-        fill_in 'Password', with: ' ' + @good_password
+        fill_in 'Password', with: " #{@good_password}"
         click_button 'Log in'
       end
 
@@ -179,6 +179,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
       expect(page).to have_css('body.show_otp')
       expect(current_path).to have_content('/users/show_otp')
 
+      sleep 2
       within '#form-validate-otp' do
         fill_in 'Two-Factor Authentication Code', with: '000000'
         click_button 'Submit Code'
