@@ -98,7 +98,7 @@ include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
-SetupHelper.clean_nfs_store_directories
+SetupHelper.setup_nfs_directories
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
