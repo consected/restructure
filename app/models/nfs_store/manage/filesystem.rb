@@ -72,7 +72,7 @@ module NfsStore
       # @return [Integer] gid or nil
       def self.app_type_containers_gid(app_type_id)
         Group.valid_role_names.each do |role_name|
-          path = nfs_store_path role_name, app_type_id: app_type_id
+          path = nfs_store_path(role_name, app_type_id:)
           Rails.logger.debug "Trying path for app_type_containers_gid: #{path}"
           return File.stat(path).gid if Pathname.new(path).readable?
         end
@@ -176,10 +176,10 @@ module NfsStore
           # to see if it is creatable
           # This may be actually higher than the container_path, since container.parent_sub_dir may
           # be a directory that doesn't exist yet
-          container_parent = container.path_to_parent_dir_for role_name: role_name
+          container_parent = container.path_to_parent_dir_for(role_name:)
 
           # Check the path to create is actually part of the container
-          container_path = container.path_for role_name: role_name
+          container_path = container.path_for(role_name:)
           unless fs_test_path.start_with? container_path
             Rails.logger.info 'Container path is not part of the path to be tested for mkdir'
             return false
@@ -272,11 +272,11 @@ module NfsStore
       def self.create_container(container, role_name)
         fs_dir = nfs_store_path(role_name, container)
         if File.exist? fs_dir
-          FsException::Filesystem.new "Directory already existed when trying to create a new container: #{fs_dir}"
-        else
-          FileUtils.mkdir_p fs_dir
-          Rails.logger.info "Created container: #{fs_dir}"
+          raise FsException::Filesystem, "Directory already existed when trying to create a new container: #{fs_dir}"
         end
+
+        FileUtils.mkdir_p fs_dir
+        Rails.logger.info "Created container: #{fs_dir}"
 
         !!File.exist?(fs_dir)
       end

@@ -47,8 +47,6 @@ module Dynamic
       schema_name, table_name = schema_and_table_name
       category = self.category || self.class.default_category
 
-      name = table_name.singularize
-
       default_options = {
         _comments: {
           table: table_comment_config,
@@ -57,10 +55,10 @@ module Dynamic
         _data_dictionary: data_dictionary_config,
         _db_columns: db_columns,
         default: {
-          field_options: field_options,
-          caption_before: caption_before,
-          labels: labels,
-          show_if_condition_strings: show_if_condition_strings
+          field_options:,
+          caption_before:,
+          labels:,
+          show_if_condition_strings:
         }
       }.deep_stringify_keys!
 
@@ -81,22 +79,25 @@ module Dynamic
 
       if dynamic_model
         @dynamic_model = dynamic_model
-        dynamic_model.update! current_admin: current_admin,
-                              field_list: field_list,
-                              options: options,
+        puts "Updating dynamic model: #{table_name}"
+        dynamic_model.update!(current_admin:,
+                              field_list:,
+                              options:,
                               allow_migrations: true,
-                              foreign_key_name: foreign_key_name
+                              foreign_key_name:)
+        puts "Updated dynamic model: #{table_name}"
       else
-        @dynamic_model = DynamicModel.create! current_admin: current_admin,
-                                              name: name,
-                                              table_name: table_name,
+        puts "Creating dynamic model: #{table_name}"
+        @dynamic_model = DynamicModel.create!(current_admin:,
+                                              name: dm_name,
+                                              table_name:,
                                               primary_key_name: :id,
-                                              foreign_key_name: foreign_key_name,
-                                              category: category,
-                                              field_list: field_list,
-                                              options: options,
-                                              schema_name: schema_name,
-                                              allow_migrations: true
+                                              foreign_key_name:,
+                                              category:,
+                                              field_list:,
+                                              options:,
+                                              schema_name:,
+                                              allow_migrations: true)
       end
 
       # Force delayed job to update with the new definition
@@ -118,7 +119,7 @@ module Dynamic
 
       schema_name = [nil, ''] if schema_name.blank?
 
-      attrs = { name: name, category: category, schema_name: schema_name }
+      attrs = { name: dm_name, category:, schema_name: }
       dms = DynamicModel.active.where(attrs)
 
       if dms.length > 1
@@ -306,6 +307,14 @@ module Dynamic
 
     def table_comment_config
       super if defined?(super)
+    end
+
+    def dm_name
+      res = super if defined?(super)
+      return res if res
+
+      schema_name, table_name = schema_and_table_name
+      table_name.singularize.humanize.titleize
     end
 
     def config_value(config, key)
