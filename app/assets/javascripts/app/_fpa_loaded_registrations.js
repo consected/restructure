@@ -42,7 +42,8 @@ _fpa.loaded.registrations = () => {
 
     const getLocalizedData = () => {
         const localizedData = {};
-        const localeData = moment.localeData();
+        const language = navigator.language
+        const localeData = moment.localeData(language);
         localizedData.timezone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
         localizedData.date_formatter = localeData.longDateFormat('L');
         localizedData.time_formatter = localeData.longDateFormat('LT').replace(':', "\:");
