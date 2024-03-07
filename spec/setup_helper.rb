@@ -342,17 +342,19 @@ module SetupHelper
   def self.setup_ref_data_app_nfs
     app_name = 'ref-data'
     a = Admin::AppType.active.find_by(name: app_name)
-    raise 'No ref-data app to create nfs store directories for' unless a
+    unless a
+      puts 'No ref-data app to create nfs store directories for'
+      return
+    end
 
-    FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}"
+    # FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}"
     FileUtils.mkdir_p "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}/containers"
     a
   end
 
-  def self.clean_nfs_store_directories
-    FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
-    FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
+  def self.setup_nfs_directories
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
+    FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
     setup_ref_data_app_nfs
   end

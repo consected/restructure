@@ -3,7 +3,7 @@ module Redcap
     def setup_redcap_project_admin_configs(mocks: true)
       setup_file_store
 
-      projects = redcap_project_configs mocks: mocks
+      projects = redcap_project_configs(mocks:)
 
       Redcap::ProjectAdmin.update_all(disabled: true)
       projects.each do |p|
@@ -33,8 +33,12 @@ module Redcap
 
     def setup_file_store
       # Create a matching user for the admin
-      @app_type ||= Admin::AppType.active.where(name: 'ref-data').first
+      @app_type = Admin::AppType.active.find_by(name: 'ref-data')
       @user, = create_user nil, '', email: @admin.email, app_type: @app_type
+      setup_access 'trackers', user: @user
+      setup_access 'nfs_store__manage__containers', user: @user
+      setup_access 'nfs_store__manage__stored_files', user: @user
+      setup_access 'nfs_store__manage__archived_files', user: @user
       add_user_to_role Settings.admin_nfs_role, for_user: @user
       add_user_to_role 'admin', for_user: @user
     end
@@ -337,7 +341,7 @@ module Redcap
             'token' => api_key
           }
         )
-        .to_return(status: 200, body: body, headers: {})
+        .to_return(status: 200, body:, headers: {})
     end
 
     def stub_request_project_xml(server_url, api_key, body: nil)
@@ -355,7 +359,7 @@ module Redcap
             'token' => api_key
           }
         )
-        .to_return(status: 200, body: body, headers: {})
+        .to_return(status: 200, body:, headers: {})
     end
 
     def stub_request_repeat_instrument_field_project(server_url, api_key)
@@ -520,13 +524,13 @@ module Redcap
       options = YAML.dump j.deep_stringify_keys
 
       @dynamic_model = DynamicModel.create! current_admin: @admin,
-                                            name: tn.singularize,
+                                            name: @project[:name],
                                             table_name: tn,
                                             primary_key_name: :id,
                                             foreign_key_name: nil,
                                             category: :test,
                                             field_list: field_list.join(' '),
-                                            options: options
+                                            options:
     end
 
     def setup_file_fields(alt_name = nil)
@@ -547,10 +551,10 @@ module Redcap
       tn = alt_name || 'test.test_repinst_field_recs'
       name = @metadata_project[:name]
 
-      @project_admin_metadata = Redcap::ProjectAdmin.where(name: name, study: 'Repeat', dynamic_model_table: tn).first
+      @project_admin_metadata = Redcap::ProjectAdmin.where(name:, study: 'Repeat', dynamic_model_table: tn).first
       return @project_admin_metadata if @project_admin_metadata
 
-      @project_admin_metadata = Redcap::ProjectAdmin.create! name: name, server_url: server_url_2('repeat_instrument'),
+      @project_admin_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url_2('repeat_instrument'),
                                                              api_key: @metadata_project[:api_key], study: 'Repeat',
                                                              current_admin: @admin, dynamic_model_table: tn
     end

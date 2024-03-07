@@ -21,6 +21,11 @@ fi
 echo "Setup filestore"
 app-scripts/setup-dev-filestore.sh
 
+echo "Clean database"
+app-scripts/drop-test-db.sh
+app-scripts/create-test-db.sh
+reset
+
 if [ "${SKIP_ZEITWERK}" != 'true' ]; then
   # Check zeitwerk before continuing
   bundle exec rails zeitwerk:check
@@ -45,6 +50,12 @@ else
   specs="$@"
 fi
 
+echo "========================================================================"
+echo "Number of processes: ${PARALLEL_TEST_PROCESSORS}"
+echo "Requested specs: ${specs}"
+pwd
+echo "========================================================================"
+
 for spec in ${specs}; do
   echo "========================================================================"
   echo "==>>>> Running parallel specs for '${spec}'"
@@ -53,7 +64,7 @@ for spec in ${specs}; do
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
   echo "==>>>> $(date)" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
-  RAILS_ENV=test bundle exec rake parallel:spec["'"${spec}"'"] &
+  RAILS_ENV=test bundle exec rake parallel:spec["${spec}"] &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
     sleep 5
   done

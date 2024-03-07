@@ -33,9 +33,9 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     name = @projects.first[:name]
     expect(name).to be_present
 
-    expect(Redcap::ProjectAdmin.active.where(name: name, study: 'Q2').first).not_to be_nil
+    expect(Redcap::ProjectAdmin.active.where(name:, study: 'Q2').first).not_to be_nil
 
-    res = Redcap::ProjectAdmin.new current_admin: @admin, name: name, api_key: 'abc', server_url: @project[:server_url],
+    res = Redcap::ProjectAdmin.new current_admin: @admin, name:, api_key: 'abc', server_url: @project[:server_url],
                                    study: 'Q2'
     expect(res.save).to eq false
     expect(res.errors).to include :name
@@ -107,6 +107,7 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc.dynamic_model_table = 'test.test_file_field_sf_recs'
     rc.server_url = server_url('file_field')
     rc.records_request_options.exportSurveyFields = true
+    puts "Project Name: #{rc.name}"
     rc.save
 
     rc.dump_archive

@@ -72,6 +72,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     sleep 2 # ensure there are no timing issues
     @dyn_instances[1] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
     expect(@dyn_instances[1].class.to_s).to eq dynamic_type
+    expect(@dyn_instances[1].class.definition).to eq dynamic_type.constantize.definition
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.options.strip).to eq @option_texts[1].strip
@@ -150,7 +151,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     name = 'test created by 2'
     dm = DynamicModel.create! current_admin: @admin,
-                              name: name,
+                              name:,
                               table_name: 'test_created_by_recs',
                               schema_name: 'ml_app',
                               category: :test,

@@ -7,6 +7,20 @@ RSpec.describe Redcap::DataRecords, type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
+  def clean_file_fields_filesystem(container)
+    FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{container.app_type_id}/containers/#{container.id} -- q2_demo/redcap_test.test_file_field_recs/file-fields/"
+  end
+
+  before :all do
+    @bad_admin, = create_admin
+    @bad_admin.update! disabled: true
+    create_admin
+    @projects = setup_redcap_project_admin_configs
+    @project = @projects.first
+    @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
+    setup_file_fields
+  end
+
   before :example do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
@@ -378,6 +392,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc.current_admin = @admin
 
     dd = rc.redcap_data_dictionary
+    clean_file_fields_filesystem rc.file_store
 
     dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
 
@@ -385,6 +400,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr.retrieve
     expect(dr.records.length).to be > 0
+    puts dr.errors if dr.errors.present?
+    expect(dr.errors).not_to be_present
 
     dr.send(:capture_files, dr.records[1])
     puts dr.errors if dr.errors.present?
@@ -417,11 +434,20 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc = @project_admin
     rc.current_admin = @admin
 
+    expect(rc.dynamic_model_ready?).to be true
+
+    files = rc.file_store.stored_files
+    expect(files.count).to eq 0
+    clean_file_fields_filesystem rc.file_store
+
     dd = rc.redcap_data_dictionary
 
     dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
 
-    dm = DynamicModel.active.where(name: 'test_file_field_rec').first
+    dm = DynamicModel.active.find_by(table_name: 'test_file_field_recs')
+    puts rc.dynamic_storage.dynamic_model.implementation_class.table_name
+    puts DynamicModel.find_by(table_name: 'test_file_field_recs')&.attributes || 'no test_file_field_recs' unless dm
+    puts DynamicModel.active.to_a unless dm
     expect(dm).to be_a DynamicModel
 
     expect(dr.existing_records_length).to eq 0
@@ -431,7 +457,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     puts dr.errors if dr.errors.present?
     expect(dr.errors).not_to be_present
 
-    files = rc.file_store.stored_files
+    files = rc.file_store.stored_files.reload
 
     expect(files.count).to eq 4
     expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)

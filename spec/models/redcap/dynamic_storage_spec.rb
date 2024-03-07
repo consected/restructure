@@ -107,6 +107,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       rc = Redcap::ProjectAdmin.active.find_by(name: @project[:name])
       rc.current_admin = @admin
       dm = @ds.dynamic_model
+      table_name = dm.implementation_class.table_name
 
       # Create a config library (fail quietly if it exists)
       Admin::ConfigLibrary.create(name: 'test_library', category: 'redcap', format: 'yaml', current_admin: @admin)
@@ -127,7 +128,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       expect(rc.dynamic_model_config_library_valid?).to be_falsey
 
       rc.api_key = @project[:api_key]
-      rc.dynamic_model_table = @table_name
+      rc.dynamic_model_table = table_name
       rc.save!
 
       rc.update_dynamic_model
@@ -135,6 +136,14 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       hasit = dm.options.include?(prefix_config_library_string)
       expect(hasit).to be true
       expect(rc.dynamic_model_config_library_valid?).to be true
+    end
+
+    it 'creates the model with a human name' do
+      project_name = @project[:name]
+      rc = Redcap::ProjectAdmin.active.find_by(name: project_name)
+      rc.current_admin = @admin
+      dm = @ds.dynamic_model
+      expect(dm.name).to eq project_name
     end
   end
 

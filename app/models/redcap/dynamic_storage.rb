@@ -163,7 +163,7 @@ module Redcap
           label = arr.last
           ccffn = field.choice_field_name(fname)
           @fields[ccffn] = {
-            label: label
+            label:
           }
           @show_if_condition_strings[ccffn.to_sym] = bl_condition_string if bl_condition_string.present?
         end
@@ -330,6 +330,10 @@ module Redcap
                                        disabled: false,
                                        current_admin: admin,
                                        user_id: admin.matching_user.id)
+    end
+
+    def dm_name
+      project_admin.name
     end
   end
 end
