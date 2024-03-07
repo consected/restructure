@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class UserPreference < UserBase
-  attr_accessor :localized
   # Essential method to indicate this does not have an association with a master record
   def self.no_master_association
     true
