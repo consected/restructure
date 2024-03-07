@@ -119,7 +119,7 @@ module Dynamic
 
       schema_name = [nil, ''] if schema_name.blank?
 
-      attrs = { name: dm_name, category:, schema_name: }
+      attrs = { table_name:, category:, schema_name: }
       dms = DynamicModel.active.where(attrs)
 
       if dms.length > 1
