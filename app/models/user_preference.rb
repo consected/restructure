@@ -7,6 +7,7 @@ class UserPreference < UserBase
   end
 
   include UserHandler
+  include UserPreferencesHelper
 
   belongs_to :user, inverse_of: :user_preference, autosave: true
 
@@ -135,7 +136,7 @@ class UserPreference < UserBase
   def localized_date_formatter
     formatter = localized['date_formatter']&.downcase
 
-    return UserPreference.default_date_format unless UserPreferencesHelper.date_time_format_options.include?(formatter)
+    return UserPreference.default_date_format unless date_format_options.include?(formatter)
 
     formatter
   end
