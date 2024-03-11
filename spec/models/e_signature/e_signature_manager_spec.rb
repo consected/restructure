@@ -47,6 +47,27 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
   end
 
+  describe 'auto creation of a document to sign' do
+    before :each do
+      @al = create_item(no_model_to_sign: true)
+      expect(@model_to_sign).to be nil
+      @al.prepare_activity_for_signature
+      @al.save!
+      expect(@al.class.column_names).to include 'e_signed_document'
+      expect(@al.e_signed_document).not_to be nil
+    end
+
+    it 'generates a reference document for signature' do
+      expect(@al.e_signed_document).to start_with('<!doctype html>')
+    end
+
+    # it 'removes the fields that are hidden based on conditional rules'
+
+    it 'adds the user email address to the end of the document' do
+      expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.first_name} #{@user.last_name} - #{@user.email} (id: #{@user.id})</esignuser>")
+    end
+  end
+
   describe 'validations performed to check integrity of the document and signer' do
     before :example do
       raise 'Password can not be blank for successful tests' if @good_password.blank?
