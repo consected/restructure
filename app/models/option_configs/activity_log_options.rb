@@ -63,11 +63,8 @@ module OptionConfigs
       e_sign[:document_reference] = { item: e_sign[:document_reference] } unless e_sign[:document_reference][:item]
       e_sign[:document_reference].each_value do |refitem|
         # Make all keys singular, to simplify configurations
-        refitem.each_key do |k|
-          if k.to_s != k.to_s.singularize
-            new_k = k.to_s.singularize.to_sym
-            refitem[new_k] = refitem.delete(k)
-          end
+        refitem.transform_keys! do |k|
+          new_k = k.to_s.singularize.to_sym
         end
 
         refitem.each do |mn, conf|
