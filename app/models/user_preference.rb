@@ -7,6 +7,7 @@ class UserPreference < UserBase
   end
 
   include UserHandler
+  include UserPreferencesHelper
 
   belongs_to :user, inverse_of: :user_preference, autosave: true
 
@@ -120,10 +121,47 @@ class UserPreference < UserBase
 
   private
 
+  def localized
+    return @localized if @localized
+
+    @localized = {}
+    client_localized = user.client_localized
+    return @localized unless client_localized.present?
+
+    @localized = JSON.parse(client_localized)
+  rescue StandardError
+    @localized
+  end
+
+  def localized_date_formatter
+    formatter = localized['date_formatter']&.downcase
+
+    return UserPreference.default_date_format unless date_format_options.include?(formatter)
+
+    formatter
+  end
+
+  def localized_time_formatter
+    formatter = localized['time_formatter']
+
+    return UserPreference.default_time_format unless formatter.present?
+    return 'hh:mm am/pm' if formatter == 'h:mm A'
+
+    '24h:mm'
+  end
+
+  def localized_date_time_formatter
+    "#{localized_date_formatter} #{localized_time_formatter}"
+  end
+
+  def localized_timezone
+    ActiveSupport::TimeZone::MAPPING.key(localized['timezone']) || UserPreference.default_user_timezone
+  end
+
   def set_defaults
-    self.date_format ||= UserPreference.default_date_format
-    self.date_time_format ||= UserPreference.default_date_time_format
-    self.time_format ||= UserPreference.default_time_format
-    self.timezone ||= UserPreference.default_user_timezone
+    self.date_format ||= localized_date_formatter
+    self.date_time_format ||= localized_date_time_formatter
+    self.time_format ||= localized_time_formatter
+    self.timezone ||= localized_timezone
   end
 end

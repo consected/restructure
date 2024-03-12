@@ -40,6 +40,18 @@ _fpa.loaded.registrations = () => {
         return GDPR_COUNTRY_CODES.includes(countryCode);
     }
 
+    const getLocalizedData = () => {
+        const localizedData = {};
+        const language = navigator.language
+        const localeData = moment.localeData(language);
+        localizedData.timezone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+        localizedData.date_formatter = localeData.longDateFormat('L');
+        localizedData.time_formatter = localeData.longDateFormat('LT').replace(':', "\:");
+        return JSON.stringify(localizedData);
+    }
+
+    $('#user_client_localized').val(getLocalizedData());
+
     const gdprTermsOfUse = $('#terms-of-use-gdpr');
     const defaultTermsOfUse = $('#terms-of-use-default');
     const termsOfUseCheckbox = $('#user_terms_of_use');
