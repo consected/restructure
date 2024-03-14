@@ -401,6 +401,10 @@ li.list-group-item.compact-heading small {
   position: relative;
 }
 
+.hide-form-metadata .list-group-item.record-meta {
+  display: none;
+}
+
 td .record-meta {
   color: #aaa;
   font-size: 95%;

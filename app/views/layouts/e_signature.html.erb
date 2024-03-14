@@ -3,7 +3,7 @@
   <head>
     <style>
       body {font-family: sans-serif; font-size: 14px;}
-      li.e-sign-group-item, li.e-sign-signature-item {list-style: none; padding: 0.7em; border-bottom: 1px solid rgb(221, 221, 221);}
+      li.e-sign-group-item, li.e-sign-signature-item {list-style: none; padding: 6px; border-bottom: 1px solid rgb(221, 221, 221);}
       li.e-sign-group-item p {margin: 0 0 10px;}
       li.e-sign-group-item p:last-child {margin: 0 0 0 0;}
       li.caption-before {background-color: rgb(243, 243, 243);}
@@ -12,8 +12,10 @@
       ul.e-sign-group {padding-left: 0;}
       small.e-sign-small-label, li.e-sign-group-item small, li.e-sign-signature-item small { width: 200px; display: inline-block; white-space: normal;}
       .notes-block.notes-empty > .notes-text:before {content: 'no notes entered'; color: rgb(153, 153, 153);}
-      .e-sign-record-meta, .e-sign-signature-info {background-color: rgb(246, 246, 246); margin-top: 1em;}
-      .e-sign-record-meta:before, .e-sign-signature-info:before {padding: 0.8em; width: auto; display: block; height: 1em; content: 'Record metadata'; background-color: rgb(222, 222, 222);}
+      .e-sign-record-meta, .e-sign-signature-info {background-color: rgb(246, 246, 246); margin-top: 1em; opacity: 50%;}
+      .e-sign-record-meta li, .e-sign-signature-info li {font-size: 12px;}
+      .e-sign-record-meta li small, .e-sign-signature-info li small {font-size: 12px;}
+      .e-sign-record-meta:before, .e-sign-signature-info:before {padding: 6px; width: auto; display: block; height: 1em; content: 'Record metadata'; background-color: rgb(222, 222, 222); font-size: 12px;}
       .e-sign-signature-info:before {content: 'Signature metadata';}
     </style>
   </head>
