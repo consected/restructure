@@ -5,7 +5,14 @@
   # e-signed documents require a filestore setup too.
   #
   e_sign:
-    create_document: false (default) | true # by default an existing referenced document is signed. When "true" create the document reference to sign instead
+    # By default an existing referenced document is signed.
+    # When "true" create the document to sign when creating the signature activity as a user.
+    create_document: false (default) | true 
+    
+    # By default, a document to sign will not be created if the signature activity is created by a save trigger calling `create_reference`.
+    # Set to "true" to automatically create when creating the activity with `create_reference`.
+    auto_create_document: false (default) | true 
+    
     document_reference: !defs(save_triggers_create_reference_options_defs.yaml)
     title: 'title to appear at top of prepared document'
     intro: 'text to appear at top of prepared document'

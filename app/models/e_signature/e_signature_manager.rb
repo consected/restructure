@@ -24,6 +24,7 @@ module ESignature
     included do
       validate :e_signature_password_correct
       validate :prevent_change
+      before_create :auto_create_document
       before_create :set_status
       before_save :set_new_status
 
@@ -153,6 +154,14 @@ module ESignature
     def validate_configuration
       res = (ExpectedFields - attribute_names).empty?
       raise ESignatureException, "Missing the expected fields for e-signature (#{ExpectedFields.join(', ')})" unless res
+    end
+
+    # If e_sign.auto_create_document is set, create it
+    def auto_create_document
+      return unless extra_log_type_config.e_sign&.dig(:auto_create_document)
+
+      extra_log_type_config.e_sign[:create_document] = true
+      prepare_activity_for_signature
     end
 
     # Create the document to sign or find an existing document to sign
