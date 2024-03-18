@@ -7,7 +7,7 @@ module ESignatureSupport
     res
   end
 
-  def create_item(att = nil, item = nil, no_model_to_sign: nil)
+  def create_item(att = nil, item = nil, no_model_to_sign: nil, alt_elt: nil)
     @model_to_sign = nil
     unless @player_info
       setup_access :player_infos
@@ -26,6 +26,8 @@ module ESignatureSupport
 
     elt = 'sign'
     elt = 'create_and_sign' if no_model_to_sign
+    elt = alt_elt if alt_elt
+
     att = {
       player_info: item,
       master:,

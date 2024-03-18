@@ -47,7 +47,32 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
   end
 
-  describe 'auto creation of a document to sign' do
+  describe 'creation of a document to sign when a user creates the signature activity' do
+    before :each do
+      @al = create_item(no_model_to_sign: true, alt_elt: 'auto_create')
+
+      @auto_al = @al.class.find_by(extra_log_type: 'auto_create_and_sign', master_id: @al.master_id)
+      expect(@auto_al).not_to be nil
+
+      expect(@auto_al.class.column_names).to include 'e_signed_document'
+      expect(@auto_al.e_signed_document).not_to be nil
+
+      sign_doc = DynamicModel::IpaInexChecklist.find_by(master_id: @al.master_id)
+      expect(sign_doc).not_to be nil
+    end
+
+    it 'generates a reference document for signature' do
+      expect(@auto_al.e_signed_document).to start_with('<!doctype html>')
+    end
+
+    # it 'removes the fields that are hidden based on conditional rules'
+
+    it 'adds the user email address to the end of the document' do
+      expect(@auto_al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.first_name} #{@user.last_name} - #{@user.email} (id: #{@user.id})</esignuser>")
+    end
+  end
+
+  describe 'auto creation of a document to sign when a save trigger creates the signature activity' do
     before :each do
       @al = create_item(no_model_to_sign: true)
       expect(@model_to_sign).to be nil
@@ -280,7 +305,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it 'prevents the signed record being edited' do
-      @al.e_signed_document = @al.e_signed_document + ' '
+      @al.e_signed_document = "#{@al.e_signed_document} "
       expect do
         @al.save!
       end.to raise_error ESignature::ESignatureUserError
