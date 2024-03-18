@@ -18,7 +18,7 @@ class Classification::SelectionOptionsHandler
   # @param [Object] field_value
   # @return [String | nil]
   def self.label_for(user_base_object, field_name, field_value)
-    new(user_base_object: user_base_object).label_for(field_name, field_value)
+    new(user_base_object:).label_for(field_name, field_value)
   end
 
   #
@@ -99,6 +99,8 @@ class Classification::SelectionOptionsHandler
     end
 
     aeasf = @all_edit_as_select_field[field_name.to_sym]
+    return unless aeasf
+
     aeasf.find { |v| v&.last&.to_s == field_value&.to_s }&.first
   end
 
@@ -224,9 +226,9 @@ class Classification::SelectionOptionsHandler
 
         got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
                                                                                   assoc_or_class_name,
-                                                                                  value_attr: value_attr,
-                                                                                  label_attr: label_attr,
-                                                                                  group_split_char: group_split_char)
+                                                                                  value_attr:,
+                                                                                  label_attr:,
+                                                                                  group_split_char:)
 
         if got_res && res
           res = res.to_h if hash_res
@@ -350,7 +352,7 @@ class Classification::SelectionOptionsHandler
             edit_always: true,
             lock: nil,
             base_item_type: prefix,
-            field_name: field_name
+            field_name:
           }
         end
       end
