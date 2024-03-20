@@ -544,7 +544,7 @@ _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
 _fpa.utils.html_to_markdown = function (obj) {
   var $html = $('<div>' + obj.html + '</div>');
 
-  $html.find('style').remove();
+  $html.find('*').removeAttr('style').removeAttr('class');
 
   $html
     .find('div')
@@ -634,14 +634,14 @@ _fpa.utils.html_to_markdown = function (obj) {
   $html.find('a').each(function () {
     const $a = $(this);
 
-    const href = $a.attr('href');
+    const href = $a.attr('href') || '';
     $a.attr('href', href.replace(window.location.origin, ''));
   });
 
   $html.find('img').each(function () {
     const $img = $(this);
 
-    const src = $img.attr('src');
+    const src = $img.attr('src') || '';
     $img.attr('src', src.replace(window.location.origin, ''));
   });
 
@@ -670,9 +670,25 @@ _fpa.utils.html_to_markdown = function (obj) {
     $(this).find('p, h1, h2, h3, h4').contents().unwrap().append('<br/>');
   });
 
+  $html.find('p, h1, h2, h3, h4, span').has(':empty').remove();
+  $html.find('p, h1, h2, h3, h4, span').has(':empty').remove();
+
   obj.html = $html.html();
 
-  var txt = domador(obj.html, { inline: true, pad_ol_li: 3 });
+  const dtrans = function (el) {
+    if (el.tagName === 'SUB' && el.innerHTML[0] !== '') {
+      return `<SUB>${el.innerHTML}</SUB>`;
+    }
+    else if (el.tagName === 'SUP' && el.innerHTML[0] !== '') {
+      return `<SUP>${el.innerHTML}</SUP>`;
+    }
+    else if (el.tagName === 'STRIKE' && el.innerHTML[0] !== '') {
+      return `<STRIKE>${el.innerHTML}</STRIKE>`;
+    }
+
+  }
+
+  var txt = domador(obj.html, { inline: true, pad_ol_li: 3, transform: dtrans });
 
   // Clean the text to remove
   // any number of hash or asterisk symbols followed by
