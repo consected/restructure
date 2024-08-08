@@ -1,0 +1,27 @@
+{
+  "name": "highlight.js-tokens",
+  "version": "1.0.0",
+  "description": "An array of tokens used by the highlight.js syntax highlighter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo nope"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zeke/highlight.js-tokens.git"
+  },
+  "keywords": [
+    "highlight.js",
+    "hljs",
+    "syntax",
+    "highlighting",
+    "code",
+    "tokens"
+  ],
+  "author": "Zeke Sikelianos <zeke@sikelianos.com> (http://zeke.sikelianos.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zeke/highlight.js-tokens/issues"
+  },
+  "homepage": "https://github.com/zeke/highlight.js-tokens"
+}
