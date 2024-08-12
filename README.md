@@ -349,8 +349,8 @@ the state of the upstream/develop branch that will be receiving the PR commits.
 git checkout -b up-develop upstream/develop
 git branch --set-upstream-to=origin
 git checkout ${feature-branch}
-git rebase --interactive up-develop
-git push # --force may be required if your feature branch is already published
+git rebase --onto up-develop ${commit-prior-to-first-in-feature-branch}
+git push --force
 ```
 
 ## Future development themes
