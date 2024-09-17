@@ -6,7 +6,14 @@
   <ul class="al-reference-list">  
   <% dialogs.each do |l| 
        mt = Admin::MessageTemplate.active.find_by(name: l[:name])
-       next unless mt
+       unless mt 
+  %>
+    <li>Add a <%= link_to link_label_open_in_new("new dialog for '#{l[:name]}'"), admin_message_templates_path(filter: {message_type: 'dialog', template_type: 'content', category: object_instance.category}), target: "_blank" %>
+    with <i>message type:</i> <b>dialog</b>, <i>template type:</i> <b>content</b> &amp;  <i>name:</i> <b><%= l[:name] %></b>
+    </li>
+  <%
+          next
+        end
   %>
   <li>
     <%= link_to link_label_open_in_new("#{mt.category} - #{mt.name}"), admin_message_templates_path(filter: {id: mt.id}), target: "_blank" %>

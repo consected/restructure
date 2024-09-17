@@ -17,7 +17,7 @@ module Formatter
     IsExpectedResult = '["\']?.+["\']?'
     StartQuote = '["\'‘]'
     EndQuote = '["\'’]'
-    IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}(===|!===|==|!==|<|>|<=|>=)#{EndQuote} (#{StartQuote}?.+#{EndQuote}?)}}(.+?)({{else}}(.+?))?{{/is}})}m
+    IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}(===|!===|==|!==|<|>|<=|>=)#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?)({{else}}(.+?))?{{/is}})}m
 
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
@@ -112,7 +112,7 @@ module Formatter
         if comp
           all_content.sub!(block_container, is_block[4] || '')
         else
-          all_content.sub!(block_container, is_block[5] || '')
+          all_content.sub!(block_container, is_block[6] || '')
         end
       end
 
