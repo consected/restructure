@@ -160,7 +160,10 @@ _fpa.show_if.methods = {
             var exp_field_value = data[cond_field];
             if (typeof exp_field_value == 'number') exp_field_value = exp_field_value.toString();
             if (typeof exp_field_value == 'undefined') exp_field_value = null;
-            if (exp_field_value === true || exp_field_value === false) exp_value = (exp_value === '1' ? [true, 'yes', 1, '1'] : [false, 'no', 0, '0']);
+            if (exp_field_value === true || exp_field_value === false) {
+              if (exp_value === '1') exp_value = [true, 'yes', 1, '1'];
+              else if (exp_value === '0') exp_value = [false, 'no', 0, '0'];
+            }
 
             // to have value
 
