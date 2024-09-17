@@ -4,6 +4,10 @@
         user_access_control:
         # Create default user controls (and role for this admin user) to allow this resource
         # and any embed to be created
+          role_name: optional role name
+          # If excluded the default role name will be `user - <category>`
+          access: create|update|read
+          # Default is create
         embed:
         # Create a default embed dynamic model. No fields need to be specified.
           fields:
