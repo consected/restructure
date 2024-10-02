@@ -3,6 +3,7 @@ _fpa.substitution = class {
   constructor(text, data) {
     this.text = text;
     this.data = data;
+    this.block = null;
   }
 
   static substitute(text, data) {
@@ -15,11 +16,19 @@ _fpa.substitution = class {
     var new_data = {};
     if (data && (data.master_id || data.vdef_version)) {
       var master_id = data.master_id;
+    } else if (this.block) {
+      var master_id = this.block.parents('.master-panel').first().attr('data-master-id');
+    }
+
+    if (data) {
       // Clone the data
       new_data = Object.assign({}, data);
 
       //  Set user_preference and current_user_roles in the data for possible substitution
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
+      if (!new_data.current_user) new_data.current_user = _fpa.state.current_user;
+      if (!new_data.current_user_id) new_data.current_user_id = _fpa.state.current_user.id;
+      if (!new_data.current_user_email) new_data.current_user_email = _fpa.state.current_user.email;
       if (!new_data.current_user_roles) {
         new_data.current_user_roles = {}
         if (_fpa.state.current_user_roles && _fpa.state.current_user_roles.forEach) {
@@ -28,8 +37,6 @@ _fpa.substitution = class {
           });
         }
       }
-    } else {
-      var master_id = block.parents('.master-panel').first().attr('data-master-id');
     }
 
     // Get the master data saved in state for this instance.
@@ -115,7 +122,7 @@ _fpa.substitution = class {
     const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gm');
     const IsBlockRegEx = new RegExp(IsBlockRegExString, 'm');
     const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
-    const PossQuotedRegEx = new RegExp(`(${StartQuote})(.+)(${EndQuote})`, 'g');
+    const PossQuotedRegEx = new RegExp(`(${StartQuote})(.+)(${EndQuote})`);
 
     var ifres = text.match(IfBlocksRegEx);
     var isres = text.match(IsBlocksRegEx);
@@ -153,7 +160,16 @@ _fpa.substitution = class {
         let exp = is_block[4]
 
         let exp_parts = exp.match(PossQuotedRegEx)
-        exp = (exp_parts[2] && exp_parts[4]) ? exp_parts[3] : parseInt(exp_parts[3])
+        if (exp_parts[2] && exp_parts[4]) {
+          exp = exp_parts[3]
+        }
+        else if (isNaN(parseInt(exp_parts[3]))) {
+          exp = _this.value_for_tag(exp_parts[3], new_data)
+        }
+        else {
+          exp = parseInt(exp_parts[3])
+        }
+
 
         let comp;
         switch (op) {

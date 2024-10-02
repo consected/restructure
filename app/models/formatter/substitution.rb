@@ -74,7 +74,7 @@ module Formatter
         end
       end
 
-      # Replace each if block {{#if ...}}...(optional {{else}}...){{/if}}
+      # Replace each if block {{#is ...}}...(optional {{else}}...){{/is}}
       is_blocks = all_content.scan(IsBlockRegEx)
       is_blocks.each do |is_block|
         block_container = is_block[0]
@@ -86,8 +86,10 @@ module Formatter
         exp_parts = exp.match(/(#{StartQuote})(.+)(#{EndQuote})/)
         exp = if exp_parts[1] && exp_parts[3]
                 exp_parts[2]
-              else
+              elsif exp_parts[2].to_i.to_s == exp_parts[2]
                 exp_parts[2].to_i
+              else
+                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true)
               end
 
         comp = case op
