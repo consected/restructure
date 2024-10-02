@@ -105,12 +105,20 @@ _fpa.substitution = class {
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
     const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
+    const StartQuote = `["'‘]`
+    const EndQuote = `["'’]`
+    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}(===|!===|==|!==|<|>|<=|>=)${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else}}(.+?))?{{/is}})`;
+
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
     const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gm');
     const IfBlockRegEx = new RegExp(IfBlockRegExString, 'm');
+    const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gm');
+    const IsBlockRegEx = new RegExp(IsBlockRegExString, 'm');
     const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
+    const PossQuotedRegEx = new RegExp(`(${StartQuote})(.+)(${EndQuote})`, 'g');
 
     var ifres = text.match(IfBlocksRegEx);
+    var isres = text.match(IsBlocksRegEx);
 
     if (ifres && ifres.length) {
       var new_data = _this.get_data();
@@ -126,6 +134,63 @@ _fpa.substitution = class {
         }
         else {
           text = text.replace(block_container, if_block[5] || '');
+        }
+      });
+    }
+
+    if (isres && isres.length) {
+      if (!new_data) {
+        var new_data = _this.get_data();
+      }
+
+      isres.forEach(function (is_blocks) {
+        const is_block = is_blocks.match(IsBlockRegEx);
+        let block_container = is_block[0];
+        let tag = is_block[2]
+        let vpair = _this.value_for_tag(tag, new_data)
+        let tag_value = vpair[0];
+        let op = is_block[3]
+        let exp = is_block[4]
+
+        let exp_parts = exp.match(PossQuotedRegEx)
+        exp = (exp_parts[2] && exp_parts[4]) ? exp_parts[3] : parseInt(exp_parts[3])
+
+        let comp;
+        switch (op) {
+          case '===':
+            comp = tag_value == exp;
+            break;
+          case '!==':
+            comp = tag_value != exp;
+            break;
+          case '==':
+            comp = tag_value == exp;
+            break;
+          case '!=':
+            comp = tag_value != exp;
+            break;
+          case '>=':
+            comp = tag_value >= exp;
+            break;
+          case '<=':
+            comp = tag_value <= exp;
+            break;
+          case '>':
+            comp = tag_value > exp;
+            break;
+          case '<':
+            comp = tag_value < exp;
+            break;
+          default:
+            console.log(`The specified #is condition '${op}' is not valid.`)
+            break;
+        }
+
+        if (comp) {
+          text = text.replace(block_container, is_block[5] || '');
+        }
+        else {
+          text = text.replace(block_container, is_block[7] || '');
         }
       });
     }
