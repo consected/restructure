@@ -471,7 +471,18 @@ module Dynamic
 
       optional_params.merge!(tot)
 
-      cmrdef[:ref_type].ns_camelize.constantize.new optional_params
+      new_c = cmrdef[:ref_type].ns_camelize.constantize
+
+      # If there is a master for the current item, and the new ref item will accept a master
+      # and no master is already set through the filters, then add it.
+      # This ensures that preset values and anything else that relies on associations with the master
+      # can operate correctly.
+      if respond_to?(:master) && new_c.instance_methods.include?(:master)
+        m_set = optional_params[:master] || optional_params[:master_id]
+        optional_params[:master] = master unless m_set
+      end
+
+      new_c.new optional_params
     end
 
     #
