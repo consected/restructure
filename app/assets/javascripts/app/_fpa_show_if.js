@@ -173,8 +173,11 @@ _fpa.show_if.methods = {
 
             if (exp_value == null)
               exp_value = [exp_value];
-            else if (typeof exp_value == 'string')
+            else if (typeof exp_value == 'string') {
+              if (exp_value.indexOf('{{') >= 0)
+                exp_value = _fpa.substitution.substitute(exp_value, data)
               exp_value = [exp_value];
+            }
             else if (typeof exp_value == 'boolean') {
               // Allow boolean fields to match on true/false, yes/no, '1'/'0' values
               exp_value = [exp_value, (exp_value ? 'yes' : 'no'), (exp_value ? '1' : '0')];
@@ -190,6 +193,9 @@ _fpa.show_if.methods = {
                 if (exp_value[i] === true && exp_value.indexOf('1') == -1) exp_value.push('1');
                 if (exp_value[i] === false && exp_value.indexOf('0') == -1) exp_value.push('0');
                 if (typeof exp_value[i] == 'number') exp_value[i] = exp_value[i].toString();
+                if (typeof exp_value[i] == 'string' && exp_value[i].indexOf('{{') >= 0) {
+                  exp_value[i] = _fpa.substitution.substitute(exp_value, data)
+                }
               }
             }
 
