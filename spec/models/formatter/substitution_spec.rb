@@ -212,14 +212,18 @@ RSpec.describe Formatter::Substitution, type: :model do
       {{#if true_val}}{{int_val}}{{/if}}
       {{#if false_val}}{{int_val}}{{/if}}
 
+      {{#if false_val}}Not shown{{else if true_val}}Else If shown{{else}}Not else{{/if}}
+      {{#if true_val}}This shown{{else if true_val}}Else If shown{{else}}Not else{{/if}}
+      {{#if false_val}}Not shown{{else if false_val}}Else If shown{{else}}Show else{{/if}}
+
       All done!
     END_TEXT
 
     if_blocks = txt.scan Formatter::Substitution::IfBlockRegEx
 
-    # 10 blocks each of 5 elements
-    expect(if_blocks.length).to eq 10
-    expect(if_blocks[0].length).to eq 5
+    # 13 blocks each of 7 elements
+    expect(if_blocks.length).to eq 13
+    expect(if_blocks[0].length).to eq 8
     expect(if_blocks[0][0]).to eq '{{#if some_text}}shows {{some_text}}{{/if}}'
     expect(if_blocks[0][1]).to eq 'some_text'
     expect(if_blocks[0][2]).to eq 'shows {{some_text}}'
@@ -235,8 +239,8 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(if_blocks[3][0]).to eq '{{#if false_val}}does not show false{{else}}but does show {{int_val}} else{{/if}}'
     expect(if_blocks[3][1]).to eq 'false_val'
     expect(if_blocks[3][2]).to eq 'does not show false'
-    expect(if_blocks[3][3]).to be_truthy
-    expect(if_blocks[3][4]).to eq 'but does show {{int_val}} else'
+    expect(if_blocks[3][6]).to be_truthy
+    expect(if_blocks[3][7]).to eq 'but does show {{int_val}} else'
 
     expect(if_blocks[6][0]).to eq %({{#if true_val}}
 It can also handle multiple
@@ -259,11 +263,33 @@ lines in the else results.
 Good?{{/if}})
     expect(if_blocks[7][1]).to eq 'false_val'
     expect(if_blocks[7][2]).to eq 'Not shown'
-    expect(if_blocks[7][3]).to be_truthy
+    expect(if_blocks[7][6]).to be_truthy
 
-    expect(if_blocks[7][4]).to eq %(It can also handle multiple
+    expect(if_blocks[7][7]).to eq %(It can also handle multiple
 lines in the else results.
 Good?)
+
+    # Now test else if
+    expect(if_blocks[10].length).to eq 8
+    expect(if_blocks[10][0]).to eq '{{#if false_val}}Not shown{{else if true_val}}Else If shown{{else}}Not else{{/if}}'
+    expect(if_blocks[10][1]).to eq 'false_val'
+    expect(if_blocks[10][2]).to eq 'Not shown'
+    expect(if_blocks[10][3]).to eq '{{else if true_val}}Else If shown'
+    expect(if_blocks[10][4]).to eq 'true_val'
+    expect(if_blocks[10][5]).to eq 'Else If shown'
+    expect(if_blocks[10][6]).to be_truthy
+    expect(if_blocks[10][7]).to eq 'Not else'
+
+    # Now test else if
+    expect(if_blocks[12].length).to eq 8
+    expect(if_blocks[12][0]).to eq '{{#if false_val}}Not shown{{else if false_val}}Else If shown{{else}}Show else{{/if}}'
+    expect(if_blocks[12][1]).to eq 'false_val'
+    expect(if_blocks[12][2]).to eq 'Not shown'
+    expect(if_blocks[12][3]).to eq '{{else if false_val}}Else If shown'
+    expect(if_blocks[12][4]).to eq 'false_val'
+    expect(if_blocks[12][5]).to eq 'Else If shown'
+    expect(if_blocks[12][6]).to be_truthy
+    expect(if_blocks[12][7]).to eq 'Show else'
 
     data = {
       int_val: 12_345,
@@ -299,6 +325,10 @@ Good?)
 
       12345
 
+
+      Else If shown
+      This shown
+      Show else
 
       All done!
     END_TEXT

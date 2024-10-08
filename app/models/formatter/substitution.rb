@@ -11,7 +11,7 @@ module Formatter
     # - true text
     # - truthy if there is an {{else}}
     # - else text
-    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m
+    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else if (#{TagnameRegExString})}}(.+?))?({{else}}(.+?))?{{/if}})}m
 
     IsOperator = '["\']===|!===|==|!==|<|>|<=|>=["\']'
     IsExpectedResult = '["\']?.+["\']?'
@@ -71,11 +71,21 @@ module Formatter
         block_container = if_block[0]
         tag = if_block[1]
         tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
-        if tag_value.present?
-          all_content.sub!(block_container, if_block[2] || '')
-        else
-          all_content.sub!(block_container, if_block[4] || '')
+        else_if_block = if_block[3]
+        else_if_tag = if_block[4]
+
+        # Handle {{if}}
+        sub_text = if_block[2] || '' if tag_value.present?
+
+        if !sub_text && else_if_block
+          elsif_tag_value = value_for_tag(else_if_tag, sub_data, tag_subs: nil, ignore_missing: true)
+          sub_text = if_block[5] || '' if elsif_tag_value.present?
         end
+
+        # Handle {{else}}
+        sub_text ||= if_block[7] || ''
+
+        all_content.sub!(block_container, sub_text)
       end
 
       # Replace each if block {{#is ...}}...(optional {{else}}...){{/is}}
