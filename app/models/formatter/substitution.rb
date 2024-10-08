@@ -24,6 +24,10 @@ module Formatter
     FunctionalDirectives = %w[shortlink].freeze
     FunctionalDirectiveRegEx = /\[\[[^\]]+\]\]/
 
+    # Set the methods from certain resources that should be accessible for substitution
+    # as if they were real attributes
+    ValidMethodsAsAttributes = { player_infos: %i[subject_age rank_name] }
+
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
                             definition_resource_name definition_item_type_name].freeze
     #
@@ -192,13 +196,16 @@ module Formatter
       end
 
       d = d.first if d.respond_to? :where
+      orig_item = d
       d = d.attributes if d.respond_to? :attributes
+      d[:original_item] ||= orig_item if d.is_a?(Hash)
 
       # Handle formatting directives, following the ::
       tag_split = tag.split('::')
       tag_name = tag_split.first
       first_format_directive = tag_split[1]
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
+      setup_methods_as_attributes(d)
 
       unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) ||
               d&.key?(tag_name.to_sym)) ||
@@ -297,7 +304,7 @@ module Formatter
       setup_data_for_master(data, master)
       setup_data_for_item_user(data, item)
       setup_data_for_current_user(data, master, item)
-
+      setup_methods_as_attributes(data)
       data
     end
 
@@ -371,6 +378,23 @@ module Formatter
       cu.role_names.each do |rn|
         sym = rn.id_underscore.to_sym
         cur[sym] = rn
+      end
+    end
+
+    #
+    # Certain methods in resources should be accessible as attributes for substitution
+    # Set these up
+    def self.setup_methods_as_attributes(data)
+      return unless data
+
+      orig_obj = data[:original_item]
+      rn = data[:resource_name]
+      rn ||= orig_obj.resource_name if orig_obj.respond_to?(:resource_name)
+      rn = rn&.to_sym
+      return unless rn && ValidMethodsAsAttributes[rn]
+
+      ValidMethodsAsAttributes[rn].each do |tag_name|
+        data[tag_name] = orig_obj.send(tag_name) if orig_obj.respond_to?(tag_name)
       end
     end
 

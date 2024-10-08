@@ -255,6 +255,7 @@ module GeneralDataConcerns
         extras[:methods] << :tracker_histories if respond_to? :tracker_histories
       end
       extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score_name
+      extras[:methods] << :subject_age if respond_to? :subject_age
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
       extras[:methods] << :created_by_user if respond_to? :created_by_user

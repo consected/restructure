@@ -72,5 +72,13 @@ module ViewHandlers
       end
       errors.add('birth date', 'is after today') if birth_date && birth_date > DateTime.now
     end
+
+    def subject_age
+      return unless respond_to?(:birth_date) && birth_date
+
+      @subject_age = Date.today.year - birth_date.year
+      @subject_age -= 1 if Date.today < birth_date + @subject_age.years
+      @subject_age
+    end
   end
 end

@@ -19,6 +19,11 @@ RSpec.describe Formatter::Substitution, type: :model do
     create_admin
     create_user
     create_master
+    setup_access :player_infos, user: @user
+
+    @player_info = @master.build_player_info(first_name: 'testfn', last_name: 'testln', birth_date: (Time.now - 30.years + 1.day))
+    @player_info.force_save!
+    @player_info.save!
     create_items
   end
 
@@ -30,9 +35,17 @@ RSpec.describe Formatter::Substitution, type: :model do
       symbol_key: 'ghijkl',
       blank_val: nil
     }
-    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
 
     expect(res).to eq 'This is a simple test: 12345 abcdef ghijkl "" !!!'
+  end
+
+  it 'handles special cases' do
+    txt = 'This is a simple test: {{player_info.first_name}} {{player_info.last_name}} {{player_info.subject_age}}'
+    data = @player_info
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+
+    expect(res).to eq 'This is a simple test: Testfn Testln 29'
   end
 
   it 'fails if a key is missing from the data' do
@@ -44,7 +57,7 @@ RSpec.describe Formatter::Substitution, type: :model do
     }
 
     expect do
-      Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+      Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     end.to raise_error FphsException
   end
 
@@ -80,7 +93,7 @@ RSpec.describe Formatter::Substitution, type: :model do
 
     @activity_log = @player_contact.activity_log__player_contact_new_elts.create!(select_call_direction: 'from player',
                                                                                   select_who: 'user',
-                                                                                  master: master,
+                                                                                  master:,
                                                                                   extra_log_type: 'new_step')
 
     expect(@activity_log.versioned_definition.options_constants[:replace_me]).to eq 'super special'
@@ -128,7 +141,7 @@ RSpec.describe Formatter::Substitution, type: :model do
 
     @activity_log = @player_contact.activity_log__player_contact_new_elts.create!(select_call_direction: 'from player',
                                                                                   select_who: 'user',
-                                                                                  master: master,
+                                                                                  master:,
                                                                                   extra_log_type: 'new_step2')
 
     caption = @activity_log.extra_log_type_config.caption_before[:select_result][:caption]
@@ -143,7 +156,7 @@ RSpec.describe Formatter::Substitution, type: :model do
     # Day before daylight savings time starts. Standard time is UTC -5 hours
     date = Date.parse('2015-03-07')
     time = Time.parse('14:56:04 EST')
-    res = Formatter::DateTime.format({ date: date, time: time, zone: nil }, show_timezone: nil, current_user: @user)
+    res = Formatter::DateTime.format({ date:, time:, zone: nil }, show_timezone: nil, current_user: @user)
 
     # expect(res).to eq '03/07/2022 2:56 pm EST'
 
@@ -155,7 +168,7 @@ RSpec.describe Formatter::Substitution, type: :model do
       current_user: @user
     }
 
-    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
 
     expect(res).to eq 'This is a simple test: 12345 03/07/2015 2:56 pm - 2:56:04 pm'
   end
@@ -167,11 +180,11 @@ RSpec.describe Formatter::Substitution, type: :model do
       current_user: @user
     }
 
-    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     expect(res).to eq "This is a role name test: #{@user.email} has role #{@user.role_names.first}"
 
     txt = 'This is a role name test: {{current_user_email}} has role {{current_user_roles.test___role_substitution}} - {{#if current_user_roles.test___role_substitution}}has role{{else}}no{{/if}} - {{#if current_user_role_no_test___role_substitution}}yes{{else}}no role{{/if}}'
-    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     expect(res).to eq "This is a role name test: #{@user.email} has role #{@user.role_names.first} - has role - no role"
   end
 
@@ -262,7 +275,7 @@ Good?)
       blank_val: ''
     }
 
-    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
 
     expect(res).to eq <<~END_TEXT
       This is a simple test: 12345
