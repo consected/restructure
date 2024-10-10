@@ -135,13 +135,16 @@
       unless shown_refs.include?(got)
         shown_refs << got
         to_table_name = ref[:to_table_name]
-        view_name = object_instance.reference_view_name(to_table_name)
-        type = ref[:to_class_type]
-        link = case type  
-                when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
-                end
+        link = nil
+        if to_table_name
+          view_name = object_instance.reference_view_name(to_table_name)
+          type = ref[:to_class_type]
+          link = case type  
+                  when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
+                  when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
+                  when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
+                  end
+        end
         if link
   %>
     <li>
@@ -157,7 +160,7 @@
                                       
       </ul>
   <%    else %>
-    <%= got %>
+    <li><%= got %></li>
   <%    end %>
     </li>
     <%  end %>

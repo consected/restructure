@@ -720,7 +720,7 @@ class ActivityLog < ActiveRecord::Base
   # @return [Array]
   def all_reference_views
     all_referenced_tables
-      .map { |t| reference_view_name(t[:to_table_name]) unless t[:without_reference] }
+      .map { |t| reference_view_name(t[:to_table_name]) unless t[:without_reference] || t[:to_table_name].nil? }
       .compact
       .uniq
       .map { |v| v[0..(MaxLengthViewName - 1)] }

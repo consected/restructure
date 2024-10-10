@@ -22,6 +22,15 @@
   Schema in search path?
 </p>
 <p>
+    <%= if !@app_type.disabled
+      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+    else
+      '<span class="glyphicon glyphicon-exclamation-sign" title="app type has been marked as disabled"></span>'.html_safe
+    end
+    %>   
+    Enabled?
+</p>
+<p>
     <%= if @app_type.active_on_server?
       "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
     elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
@@ -41,4 +50,14 @@
     %>
     Admin user has access? 
 </p>
+<p>
+    <%= if NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id)
+      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+    else
+      '<span class="val-unchecked" title="configure the filestore app filesystem"></span>'.html_safe  
+    end
+    %>
+    Filestore filsystem ready? 
+</p>
+
 </div>
