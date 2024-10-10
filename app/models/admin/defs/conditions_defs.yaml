@@ -51,7 +51,7 @@
         # or the dynamic model / external identifier association otherwise
         not_any_completed:
           definition_resources:
-            extra_log_type: '{{extra_log_type}}''
+            extra_log_type: '{{extra_log_type}}'
 
         any_return_an_embedded_item:
           embedded_item:

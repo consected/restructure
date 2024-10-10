@@ -204,3 +204,23 @@ a.link-disabled {
   box-shadow: 0 4px 6px 4px rgba(0, 0, 0, 0.15);
 }
 
+.admin-sample-field-info, .admin-sample-form-info{
+  color: gray;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: right;
+}
+
+.admin-sample-form-info {
+  padding-left: 8px;
+  padding-top: 3px;
+  text-align: left;
+  background-color: #f1f1f1;
+}
+
+.caption-before .admin-sample-field-info{
+  font-size: 96%;
+}
+
+.dialog-before .admin-sample-field-info {
+  font-size: 90%;
+}
