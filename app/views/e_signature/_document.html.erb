@@ -3,6 +3,11 @@
   extend CommonTemplatesHelper
   extend GeneralSelectionsHelper
 
+  # The Warden/Devise current_user is not available in this context, and has
+  # instead been passed to this partial as a local variable.
+  # Save it for use more easily in other partials
+  @current_user = current_user
+
   unless defined? caption_before
     caption_before = {}
   end
