@@ -9,7 +9,9 @@ module Messaging
     # @param mnobj [Messaging::MessageNotification] object describing the list of numbers and message
     # @param recipient_sms_numbers [Array | nil] optional list of SMS numbers to override message notification
     # @param generated_text [String | nil] optional message text to override message notification
-    def send_now(mnobj = nil, recipient_sms_numbers: nil, generated_text: nil, importance: nil, logger: nil)
+    # @param ignore_no_recipients [true | nil] don't raise an error if no recipients are specified or found in the item
+    def send_now(mnobj = nil, recipient_sms_numbers: nil, generated_text: nil, ignore_no_recipients: nil,
+                 importance: nil, logger: nil)
       logger ||= Rails.logger
 
       importance ||= self.class.importance
@@ -26,7 +28,11 @@ module Messaging
       recipient_sms_numbers ||= mnobj.recipient_sms_numbers
       generated_text ||= mnobj.generated_text
 
-      raise FphsException, 'No recipients to SMS' unless recipient_sms_numbers&.present?
+      unless recipient_sms_numbers&.present?
+        return if ignore_no_recipients
+
+        raise FphsException, 'No recipients to SMS'
+      end
 
       recipient_sms_numbers.each do |sms_number|
         val = PhoneValidation.validate_sms_number_format sms_number, no_exception: true

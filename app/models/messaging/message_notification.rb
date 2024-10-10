@@ -39,7 +39,7 @@ module Messaging
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 50 }
 
-    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients
     attr_writer :extra_substitutions_data, :batch_user
 
     #
@@ -213,10 +213,12 @@ module Messaging
     # @param [Logger] logger - logger to use from the background job, or the default Rails logger
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
-    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil)
+    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
+                                ignore_no_recipients: nil)
       logger.info "Handling item #{id}"
       update! status: StatusInProgress
 
+      self.ignore_no_recipients ||= ignore_no_recipients
       self.for_item ||= for_item
       self.on_complete_config ||= on_complete_config
       self.batch_user ||= alt_batch_user
@@ -250,7 +252,7 @@ module Messaging
         NotificationMailer.send_message_notification(self).deliver_now
       elsif sms?
         sms = Messaging::NotificationSms.new
-        sms.send_now(self, recipient_sms_numbers:, generated_text:,
+        sms.send_now(self, recipient_sms_numbers:, generated_text:, ignore_no_recipients:,
                            importance:, logger:)
       else
         raise FphsException, "No recognized message type for message notification: #{message_type}"

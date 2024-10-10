@@ -77,6 +77,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @layout_template = config[:layout_template]
     @on_complete = config[:on_complete]
     @from_user_email = config[:from_user_email]
+    @ignore_no_recipients = config[:ignore_no_recipients]
 
     @message_type = config[:type]
     @run_if = config[:if]
@@ -282,14 +283,14 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       user: @user,
       layout_template_name: @layout_template,
       content_template_name: content_template,
-      content_template_text: content_template_text,
+      content_template_text:,
       item_type: @item.class.name,
       item_id: @item.id,
       master_id: @item.master_id,
       message_type: @message_type,
-      subject: subject,
+      subject:,
       role_name: @role_name,
-      extra_substitutions: extra_substitutions
+      extra_substitutions:
     }
 
     setup_data[:recipient_user_ids] = @receiving_user_ids if @receiving_user_ids
@@ -298,6 +299,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     setup_data[:recipient_data] = @force_recip_recs if @force_recip_recs
     setup_data[:importance] = importance if importance
     setup_data[:from_user_email] = from_user_email if from_user_email
+    setup_data[:ignore_no_recipients] = @ignore_no_recipients if @ignore_no_recipients
 
     @message_notification = Messaging::MessageNotification.create! setup_data
   end
@@ -312,7 +314,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     # Also pass the on_complete configuration to follow up after the main job processing completes
     job.perform_later(@message_notification, for_item: @item,
                                              on_complete_config: @on_complete,
-                                             alt_batch_user: @alt_batch_user)
+                                             alt_batch_user: @alt_batch_user,
+                                             ignore_no_recipients: @ignore_no_recipients)
   end
 
   def calc_field_or_return(cond)
