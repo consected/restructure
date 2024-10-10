@@ -55,8 +55,6 @@ module Dynamic
 
       # Reload routes when a definition is regenerated
       def routes_reload
-        return unless @regenerate
-
         Rails.application.reload_routes!
         Rails.application.routes_reloader.reload!
       end
