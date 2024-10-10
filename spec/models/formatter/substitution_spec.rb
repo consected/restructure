@@ -333,4 +333,90 @@ Good?)
       All done!
     END_TEXT
   end
+
+  it 'provides conditional display using an is block' do
+    txt = <<~END_TEXT
+      This is a simple test: {{int_val}}
+
+      {{#is some_text "==" 'this is optional'}}shows {{some_text}}{{/is}}
+      {{#is some_text '!=' "this is optional"}}shows {{some_text}}{{else}}no show {{some_text}}{{/is}}
+      {{#is int_val '<' 50}}too large {{int_val}}{{else}}so show {{int_val}} >= 50{{/is}}
+      {{#is int_val '<' 50}}too large {{int_val}}{{else is int_val '>' 50000}}{{int_val}} < 50000{{else}}so show {{int_val}}{{/is}}
+      {{#is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
+      {{#is int_val '==' null}}is null{{else is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}not null and 50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
+      {{#is int_val '!=' null}}is null{{else is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
+
+      All done!
+    END_TEXT
+
+    if_blocks = txt.scan Formatter::Substitution::IsBlockRegEx
+
+    # 5 blocks each of 10 elements
+    expect(if_blocks.length).to eq 7
+    expect(if_blocks[0].length).to eq 17
+    expect(if_blocks[0][0]).to eq '{{#is some_text "==" \'this is optional\'}}shows {{some_text}}{{/is}}'
+    expect(if_blocks[0][1]).to eq 'some_text'
+    expect(if_blocks[0][2]).to eq '=='
+    expect(if_blocks[0][3]).to eq "'this is optional'"
+    expect(if_blocks[0][4]).to eq 'shows {{some_text}}'
+    expect(if_blocks[0][5]).to be nil
+    expect(if_blocks[0][6]).to be nil
+    expect(if_blocks[0][7]).to be nil
+    expect(if_blocks[0][8]).to be nil
+    expect(if_blocks[0][9]).to be nil
+    expect(if_blocks[0][15]).to be nil
+    expect(if_blocks[0][16]).to be nil
+
+    expect(if_blocks[1][0]).to eq '{{#is some_text \'!=\' "this is optional"}}shows {{some_text}}{{else}}no show {{some_text}}{{/is}}'
+    expect(if_blocks[1][1]).to eq 'some_text'
+    expect(if_blocks[1][2]).to eq '!='
+    expect(if_blocks[1][3]).to eq '"this is optional"'
+    expect(if_blocks[1][4]).to eq 'shows {{some_text}}'
+    expect(if_blocks[1][5]).to be nil
+    expect(if_blocks[1][6]).to be nil
+    expect(if_blocks[1][7]).to be nil
+    expect(if_blocks[1][8]).to be nil
+    expect(if_blocks[1][9]).to be nil
+    expect(if_blocks[1][15]).to eq '{{else}}no show {{some_text}}'
+    expect(if_blocks[1][16]).to eq 'no show {{some_text}}'
+
+    expect(if_blocks[2][0]).to eq "{{#is int_val '<' 50}}too large {{int_val}}{{else}}so show {{int_val}} >= 50{{/is}}"
+    expect(if_blocks[2][1]).to eq 'int_val'
+    expect(if_blocks[2][2]).to eq '<'
+    expect(if_blocks[2][3]).to eq '50'
+    expect(if_blocks[2][4]).to eq 'too large {{int_val}}'
+    expect(if_blocks[2][5]).to be nil
+    expect(if_blocks[2][6]).to be nil
+    expect(if_blocks[2][7]).to be nil
+    expect(if_blocks[2][8]).to be nil
+    expect(if_blocks[2][9]).to be nil
+    expect(if_blocks[2][15]).to eq '{{else}}so show {{int_val}} >= 50'
+    expect(if_blocks[2][16]).to eq 'so show {{int_val}} >= 50'
+
+    data = {
+      int_val: 12_345,
+      some_text: 'this is optional',
+      truthy_val: 0,
+      true_val: true,
+      false_val: false,
+      nil_val: nil,
+      blank_val: ''
+    }
+
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+
+    expect(res).to eq <<~END_TEXT
+      This is a simple test: 12345
+
+      shows this is optional
+      no show this is optional
+      so show 12345 >= 50
+      so show 12345
+      50 < 12345 < 50000
+      not null and 50 < 12345 < 50000
+      is null
+
+      All done!
+    END_TEXT
+  end
 end

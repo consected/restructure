@@ -13,12 +13,12 @@ module Formatter
     # - else text
     IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else if (#{TagnameRegExString})}}(.+?))?({{else}}(.+?))?{{/if}})}m
 
-    IsOperator = '["\']===|!===|==|!==|<|>|<=|>=["\']'
-    IsExpectedResult = '["\']?.+["\']?'
-    StartQuote = '["\'‘]'
-    EndQuote = '["\'’]'
-    IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}(===|!===|==|!==|<|>|<=|>=)#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?)({{else}}(.+?))?{{/is}})}m
-
+    StartQuote = '["\'‘“]'
+    EndQuote = '["\'’”]'
+    NotEndQuote = '[^"\'’”]'
+    IsOperator = '(===|!==|==|!=|<|>|<=|>=|&lt;|&gt;|&lt;=|&gt;=)'
+    MaxElseIfs = 2
+    IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?)?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})}m
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
     FunctionalDirectives = %w[shortlink].freeze
@@ -78,8 +78,8 @@ module Formatter
         sub_text = if_block[2] || '' if tag_value.present?
 
         if !sub_text && else_if_block
-          elsif_tag_value = value_for_tag(else_if_tag, sub_data, tag_subs: nil, ignore_missing: true)
-          sub_text = if_block[5] || '' if elsif_tag_value.present?
+          else_if_tag_value = value_for_tag(else_if_tag, sub_data, tag_subs: nil, ignore_missing: true)
+          sub_text = if_block[5] || '' if else_if_tag_value.present?
         end
 
         # Handle {{else}}
@@ -96,40 +96,37 @@ module Formatter
         tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
         op = is_block[2]
         exp = is_block[3]
+        comp = eval_is_comp(op, tag_value, exp, sub_data)
+        start_pos = 0
+        # Handle {{is}}
+        sub_text = is_block[4] || '' if comp
 
-        exp_parts = exp.match(/(#{StartQuote})(.+)(#{EndQuote})/)
-        exp = if exp_parts[1] && exp_parts[3]
-                exp_parts[2]
-              elsif exp_parts[2].to_i.to_s == exp_parts[2]
-                exp_parts[2].to_i
-              else
-                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true)
-              end
+        iters = 1
+        start_pos = iters * 5
+        else_is_block = is_block[start_pos]
+        while !sub_text && else_is_block
+          else_is_tag = is_block[start_pos + 1]
+          else_is_op = is_block[start_pos + 2]
+          else_is_exp = is_block[start_pos + 3]
+          else_is_tag_value = value_for_tag(else_is_tag, sub_data, tag_subs: nil, ignore_missing: true)
+          comp = eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, sub_data)
 
-        comp = case op
-               when '==='
-                 tag_value == exp
-               when '!=='
-                 tag_value != exp
-               when '=='
-                 tag_value == exp
-               when '!='
-                 tag_value != exp
-               when '>='
-                 tag_value >= exp
-               when '<='
-                 tag_value <= exp
-               when '>'
-                 tag_value > exp
-               when '<'
-                 tag_value < exp
-               end
+          if comp
+            sub_text = is_block[start_pos + 4] || ''
+            break
+          end
 
-        if comp
-          all_content.sub!(block_container, is_block[4] || '')
-        else
-          all_content.sub!(block_container, is_block[6] || '')
+          iters += 1
+          break if iters > MaxElseIfs
+
+          start_pos = iters * 5
+          else_is_block = is_block[start_pos]
         end
+
+        # Handle {{else}}
+        sub_text ||= is_block[16] || ''
+
+        all_content.sub!(block_container, sub_text)
       end
 
       # Replace each tag {{tag}}
@@ -145,6 +142,7 @@ module Formatter
       # Unless we have requested to show missing tags, check for {{tag}} left in the text,
       # indicating something was not replaced
       if ignore_missing != :show_tag && ignore_missing != true && all_content.scan(/{{.*}}/).present?
+        Rails.logger.warn "Not all the tags were replaced. This suggests there was an error in the markup. #{all_content.scan(/{{.*}}/)}"
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
@@ -741,6 +739,78 @@ module Formatter
       end
 
       nil
+    end
+
+    def self.eval_is_comp(op, tag_value, exp, sub_data)
+      if exp
+        exp_parts = exp.match(/(#{StartQuote})?(.+#{NotEndQuote})?(#{EndQuote})?/)
+        exp = if exp_parts[1] && exp_parts[3]
+                exp_parts[2]
+              elsif exp_parts[2].to_i.to_s == exp_parts[2]
+                exp_parts[2].to_i
+              elsif exp_parts[2]&.downcase == 'null'
+                nil
+              else
+                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true)
+              end
+      end
+
+      if exp.is_a?(Integer)
+        if tag_value.blank?
+          tag_value = nil
+        elsif tag_value.to_i.to_s == tag_value
+          tag_value = tag_value.to_i
+        end
+      end
+
+      no_operator = nil
+
+      res = case op
+            when '==='
+              tag_value.blank? && exp.blank? || tag_value == exp
+            when '!=='
+              !(tag_value.blank? && exp.blank? || tag_value == exp)
+            when '=='
+              tag_value.blank? && exp.blank? || tag_value == exp
+            when '!='
+              !(tag_value.blank? && exp.blank? || tag_value == exp)
+            else
+              no_operator = true unless tag_value.blank? || exp.nil?
+              nil
+            end
+
+      unless tag_value.is_a?(Integer)
+        raise FphsException, "Unknown comparison operator for {{\#is}}: #{op}" if no_operator
+
+        return res
+      end
+
+      no_operator = nil
+
+      res = case op
+            when '>='
+              tag_value >= exp
+            when '<='
+              tag_value <= exp
+            when '>'
+              tag_value > exp
+            when '<'
+              tag_value < exp
+            when '&gt;='
+              tag_value >= exp
+            when '&lt;='
+              tag_value <= exp
+            when '&gt;'
+              tag_value > exp
+            when '&lt;'
+              tag_value < exp
+            else
+              no_operator = true
+              nil
+            end
+      raise FphsException, "Unknown comparison operator for integer {{\#is}}: #{op}" if no_operator
+
+      res
     end
   end
 end

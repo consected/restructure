@@ -111,18 +111,18 @@ _fpa.substitution = class {
     text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
-    const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else}}([^]+?))?{{/if}})`;
-    const StartQuote = `["'‘]`
-    const EndQuote = `["'’]`
-    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}(===|!===|==|!==|<|>|<=|>=)${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else}}(.+?))?{{/is}})`;
+    const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else if (${TagnameRegExString})}}(.+?))?({{else}}([^]+?))?{{/if}})`;
+    const StartQuote = `["'‘“]`
+    const EndQuote = `["'’”]`
+    const IsOperator = '(===|!==|==|!=|<|>|<=|>=|&lt;|&gt;|&lt;=|&gt;=)'
+    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})`;
 
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
-    const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gm');
-    const IfBlockRegEx = new RegExp(IfBlockRegExString, 'm');
-    const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gm');
-    const IsBlockRegEx = new RegExp(IsBlockRegExString, 'm');
+    const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gms');
+    const IfBlockRegEx = new RegExp(IfBlockRegExString, 'ms');
+    const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gms');
+    const IsBlockRegEx = new RegExp(IsBlockRegExString, 'ms');
     const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
-    const PossQuotedRegEx = new RegExp(`(${StartQuote})(.+)(${EndQuote})`);
 
     var ifres = text.match(IfBlocksRegEx);
     var isres = text.match(IsBlocksRegEx);
@@ -136,12 +136,20 @@ _fpa.substitution = class {
         let tag = if_block[2]
         let vpair = _this.value_for_tag(tag, new_data)
         let tag_value = vpair[0];
+        let else_if_block = if_block[4];
+        let else_if_tag = if_block[5];
+        let sub_text = null;
+
         if (tag_value && tag_value.toString().length) {
-          text = text.replace(block_container, if_block[3] || '');
+          sub_text = if_block[3] || ''
         }
-        else {
-          text = text.replace(block_container, if_block[5] || '');
+
+        if (sub_text == null && else_if_block) {
+          vpair = _this.value_for_tag(else_if_tag, new_data)
+          tag_value = vpair[0];
+          if (tag_value && tag_value.toString().length) sub_text = if_block[6] || '';
         }
+        text = text.replace(block_container, sub_text || '');
       });
     }
 
@@ -158,56 +166,28 @@ _fpa.substitution = class {
         let tag_value = vpair[0];
         let op = is_block[3]
         let exp = is_block[4]
-
-        let exp_parts = exp.match(PossQuotedRegEx)
-        if (exp_parts[2] && exp_parts[4]) {
-          exp = exp_parts[3]
-        }
-        else if (isNaN(parseInt(exp_parts[3]))) {
-          exp = _this.value_for_tag(exp_parts[3], new_data)
-        }
-        else {
-          exp = parseInt(exp_parts[3])
-        }
-
-
-        let comp;
-        switch (op) {
-          case '===':
-            comp = tag_value == exp;
-            break;
-          case '!==':
-            comp = tag_value != exp;
-            break;
-          case '==':
-            comp = tag_value == exp;
-            break;
-          case '!=':
-            comp = tag_value != exp;
-            break;
-          case '>=':
-            comp = tag_value >= exp;
-            break;
-          case '<=':
-            comp = tag_value <= exp;
-            break;
-          case '>':
-            comp = tag_value > exp;
-            break;
-          case '<':
-            comp = tag_value < exp;
-            break;
-          default:
-            console.log(`The specified #is condition '${op}' is not valid.`)
-            break;
-        }
+        let comp = _this.eval_is_comp(op, tag_value, exp, new_data)
+        let else_is_block = is_block[6]
+        let else_is_tag = is_block[7]
+        let else_is_op = is_block[8]
+        let else_is_exp = is_block[9]
+        let sub_text = null;
 
         if (comp) {
-          text = text.replace(block_container, is_block[5] || '');
+          sub_text = is_block[5] || '';
         }
-        else {
-          text = text.replace(block_container, is_block[7] || '');
+
+        if (sub_text == null && else_is_block) {
+          vpair = _this.value_for_tag(else_is_tag, new_data)
+          let else_is_tag_value = vpair[0];
+          comp = _this.eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, new_data)
+          if (comp) sub_text = is_block[10] || ''
         }
+        // Handle {{else}}
+        if (sub_text == null) sub_text = is_block[12] || ''
+
+        text = text.replace(block_container, sub_text || '');
+
       });
     }
 
@@ -252,6 +232,80 @@ _fpa.substitution = class {
     return text;
   };
 
+  eval_is_comp(op, tag_value, exp, new_data) {
+    const _this = this;
+    const StartQuote = `["'‘“]`
+    const EndQuote = `["'’”]`
+    const NotEndQuote = '[^"\'’”]'
+    const PossQuotedRegEx = new RegExp(`(${StartQuote})?(.+${NotEndQuote})?(${EndQuote})?`);
 
+    if (exp) {
+      let exp_parts = exp.match(PossQuotedRegEx)
+      if (exp_parts[1] && exp_parts[3]) {
+        exp = exp_parts[2]
+      }
+      else if (exp_parts[2] && exp_parts[2].toLowerCase() == 'null') {
+        exp = null
+      }
+      else if (isNaN(parseInt(exp_parts[2]))) {
+        exp = _this.value_for_tag(exp_parts[2], new_data)
+      }
+      else {
+        exp = parseInt(exp_parts[3])
+      }
+    }
+
+    if (!isNaN(parseInt(exp)) && !isNaN(parseInt(tag_value))) tag_value = parseInt(tag_value)
+
+    let no_operator = null;
+
+    let comp;
+    switch (op) {
+      case '===':
+        comp = tag_value == exp;
+        break;
+      case '!==':
+        comp = tag_value != exp;
+        break;
+      case '==':
+        comp = tag_value == exp;
+        break;
+      case '!=':
+        comp = tag_value != exp;
+        break;
+      default:
+        no_operator = true
+        break;
+    }
+
+    if (isNaN(parseInt(tag_value))) {
+      if (no_operator) console.log(`The specified #is condition '${op}' is not valid.`)
+
+      return comp
+    }
+
+    no_operator = nil
+
+    switch (op) {
+
+      case '>=':
+        comp = tag_value >= exp;
+        break;
+      case '<=':
+        comp = tag_value <= exp;
+        break;
+      case '>':
+        comp = tag_value > exp;
+        break;
+      case '<':
+        comp = tag_value < exp;
+        break;
+      default:
+        console.log(`The specified for integer #is condition '${op}' is not valid.`)
+        no_operator = true
+        break;
+    }
+    return comp;
+  }
 
 }
