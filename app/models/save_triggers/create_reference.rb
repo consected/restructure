@@ -51,8 +51,9 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
             to_existing_record_id = FieldDefaults.calculate_default @item, to_record_id
             new_item = new_type.find(to_existing_record_id)
           else
+            vals[:ignore_configurable_valid_if] = force_not_valid
             new_item = new_type.new vals
-            new_item.ignore_configurable_valid_if = force_not_valid
+            # new_item.ignore_configurable_valid_if = force_not_valid
             if force_create
               new_item.send(:force_write_user)
               new_item.force_save!
