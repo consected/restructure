@@ -412,7 +412,7 @@ module Dynamic
     end
 
     def current_user
-      master.current_user
+      master&.current_user
     end
 
     def current_user=(cu)
