@@ -66,7 +66,8 @@ _fpa.show_if.methods = {
       '.list-group-item.result-notes-container' + show_field_class,
       '.list-group-item.edit-field-container' + show_edit_field_class,
       '.list-group-item.caption-before' + show_edit_field_class,
-      '.list-group-item.submit-action-container' + show_edit_field_class
+      '.list-group-item.submit-action-container' + show_edit_field_class,
+      '.list-group-item.dialog-before' + show_edit_field_class
       ];
       var sel = sels.join(', ');
       var els = block.find(sel);
