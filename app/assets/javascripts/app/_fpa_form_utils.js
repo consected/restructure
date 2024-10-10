@@ -1329,7 +1329,8 @@ _fpa.form_utils = {
       .find('input.time-entry')
       .not('is-time-masked')
       .each(function () {
-        $(this).timepicker({
+        const $field = $(this);
+        $field.timepicker({
           timeFormat: 'h:mm p',
           interval: 15,
           minTime: '12:00am',
@@ -1338,6 +1339,7 @@ _fpa.form_utils = {
           dynamic: true,
           dropdown: true,
           scrollbar: true,
+          change: function (time) { $field.change() }
         });
       });
   },
