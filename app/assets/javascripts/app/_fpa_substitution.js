@@ -114,7 +114,7 @@ _fpa.substitution = class {
     const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else if (${TagnameRegExString})}}(.+?))?({{else}}([^]+?))?{{/if}})`;
     const StartQuote = `["'‘“]`
     const EndQuote = `["'’”]`
-    const IsOperator = '(===|!==|==|!=|<|>|<=|>=|&lt;|&gt;|&lt;=|&gt;=)'
+    const IsOperator = '(.+?)'
     const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})`;
 
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
@@ -272,6 +272,18 @@ _fpa.substitution = class {
         break;
       case '!=':
         comp = tag_value != exp;
+        break;
+      case 'in':
+        comp = exp.indexOf(tag_value) >= 0;
+        break;
+      case '!in':
+        comp = exp.indexOf(tag_value) < 0;
+        break;
+      case 'includes':
+        comp = tag_value.indexOf(exp) >= 0;
+        break;
+      case '!includes':
+        comp = tag_value.indexOf(exp) < 0;
         break;
       default:
         no_operator = true

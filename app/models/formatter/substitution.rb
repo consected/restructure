@@ -16,7 +16,7 @@ module Formatter
     StartQuote = '["\'‘“]'
     EndQuote = '["\'’”]'
     NotEndQuote = '[^"\'’”]'
-    IsOperator = '(===|!==|==|!=|<|>|<=|>=|&lt;|&gt;|&lt;=|&gt;=)'
+    IsOperator = '(.+?)'
     MaxElseIfs = 2
     IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?)?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})}m
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
@@ -133,7 +133,13 @@ module Formatter
       tags = all_content.scan(/{{#{TagnameRegExString}}}/).uniq
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-        tag_value = value_for_tag(tag, sub_data, tag_subs:, ignore_missing:)
+        begin
+          tag_value = value_for_tag(tag, sub_data, tag_subs:, ignore_missing:)
+        rescue FphsException => e
+          all_content.gsub!(tag_container, "{{FAILED: #{tag}}}")
+          Rails.logger.warn "Failed to get tag for simple substitution: #{tag}\n#{all_content}"
+          raise
+        end
 
         # Finally, substitute the results into the original text
         all_content.gsub!(tag_container, tag_value)
@@ -751,7 +757,7 @@ module Formatter
               elsif exp_parts[2]&.downcase == 'null'
                 nil
               else
-                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true)
+                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
               end
       end
 
@@ -770,10 +776,18 @@ module Formatter
               tag_value.blank? && exp.blank? || tag_value == exp
             when '!=='
               !(tag_value.blank? && exp.blank? || tag_value == exp)
-            when '=='
-              tag_value.blank? && exp.blank? || tag_value == exp
             when '!='
               !(tag_value.blank? && exp.blank? || tag_value == exp)
+            when '=='
+              tag_value.blank? && exp.blank? || tag_value == exp
+            when 'in'
+              tag_value.in?(exp)
+            when '!in'
+              !tag_value.in?(exp)
+            when 'includes'
+              tag_value.include?(exp)
+            when '!includes'
+              !tag_value.include?(exp)
             else
               no_operator = true unless tag_value.blank? || exp.nil?
               nil
