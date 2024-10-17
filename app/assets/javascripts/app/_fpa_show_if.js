@@ -11,6 +11,7 @@ _fpa.show_if.methods = {
 
     if (data.embedded_item) {
       data.embedded_item.current_user_roles = _fpa.state.current_user_roles;
+      data.embedded_item.current_mode = data.current_mode;
       _fpa.show_if.methods.show_items(block, data.embedded_item);
     }
 
