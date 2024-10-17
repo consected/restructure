@@ -648,8 +648,9 @@ _fpa.form_utils = {
       })
       .addClass('attached-chosen');
 
-    var $dfs = sels.filter('[data-filter-selector]');
+    var $dfs = sels.filter('[data-filter-selector], [data-filters-select]');
     _fpa.form_utils.setup_chosen_groups($dfs);
+    _fpa.form_utils.setup_form_filtered_select(block);
   },
 
   setup_chosen_groups: function ($data_filter_selectors) {

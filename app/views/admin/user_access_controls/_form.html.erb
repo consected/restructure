@@ -4,11 +4,15 @@
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :app_type %>
-    <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {include_blank: '(all)'}, extra_field_attributes[:app_type_id]||{} %>
+    <%
+            add_opts = extra_field_attributes[:app_type_id].dup || {}
+            add_opts[:class] = 'use-chosen'
+    %>
+    <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {include_blank: '(all)'}, add_opts %>
   </div>
   <div class="form-group">
     <%= f.label :user_id, 'User override' %>
-    <%= f.select :user_id, active_user_options, include_blank: true %>
+    <%= f.select :user_id, active_user_options, {include_blank: true}, class: 'use-chosen' %>
   </div>
   <div class="form-group">
     <%= f.label :role_name, 'Role name override' %>
@@ -19,11 +23,15 @@
 
       options = role_name_options
     %>
-    <%= f.select :role_name, options, select_item_type %>
+    <%= f.select :role_name, options, select_item_type, class: 'use-chosen' %>
   </div>
   <div class="form-group">
     <%= f.label :resource_type %>
-    <%= f.select :resource_type, Admin::UserAccessControl.resource_types, include_blank: true %>
+    <%
+            add_opts = extra_field_attributes[:resource_type].dup || {}
+            add_opts[:class] = 'use-chosen'
+    %>    
+    <%= f.select :resource_type, Admin::UserAccessControl.resource_types, { include_blank: true }, add_opts %>
   </div>
   <div class="form-group">
     <%= f.label :resource_name %>
@@ -42,7 +50,7 @@
     <%
     accesses = Admin::UserAccessControl.access_levels
     %>
-    <%= f.select :access, accesses%>
+    <%= f.select :access, accesses, {}, class: 'use-chosen'%>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>

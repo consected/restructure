@@ -9,7 +9,7 @@
   </div>
   <div class="form-group">
     <%= f.label :protocol_id %>
-    <%= f.select :protocol_id, protocol_array(admin_view: true) %>
+    <%= f.select :protocol_id, protocol_array(admin_view: true), {}, class: 'use-chosen' %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>
