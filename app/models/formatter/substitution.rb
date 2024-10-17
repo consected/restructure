@@ -96,7 +96,7 @@ module Formatter
         tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
         op = is_block[2]
         exp = is_block[3]
-        comp = eval_is_comp(op, tag_value, exp, sub_data)
+        comp = eval_is_comp(op, tag_value, exp, sub_data, is_block:)
         start_pos = 0
         # Handle {{is}}
         sub_text = is_block[4] || '' if comp
@@ -109,7 +109,7 @@ module Formatter
           else_is_op = is_block[start_pos + 2]
           else_is_exp = is_block[start_pos + 3]
           else_is_tag_value = value_for_tag(else_is_tag, sub_data, tag_subs: nil, ignore_missing: true)
-          comp = eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, sub_data)
+          comp = eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, sub_data, is_block:)
 
           if comp
             sub_text = is_block[start_pos + 4] || ''
@@ -747,17 +747,19 @@ module Formatter
       nil
     end
 
-    def self.eval_is_comp(op, tag_value, exp, sub_data)
+    def self.eval_is_comp(op, tag_value, exp, sub_data, is_block: nil)
       if exp
-        exp_parts = exp.match(/(#{StartQuote})?(.+#{NotEndQuote})?(#{EndQuote})?/)
-        exp = if exp_parts[1] && exp_parts[3]
-                exp_parts[2]
-              elsif exp_parts[2].to_i.to_s == exp_parts[2]
-                exp_parts[2].to_i
-              elsif exp_parts[2]&.downcase == 'null'
+        exp = if exp.length > 1 && exp.first.match(/#{StartQuote}/) && exp.first.match(/#{EndQuote}/)
+                exp[1..-2]
+              elsif exp.to_i.to_s == exp
+                exp.to_i
+              elsif exp.downcase == 'null'
                 nil
+              elsif exp.blank?
+                raise FphsException,
+                      "Can't eval expected value when it is blank (with no surrounding quotes): #{is_block && is_block[0]}"
               else
-                value_for_tag(exp_parts[2], sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
+                value_for_tag(exp, sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
               end
       end
 

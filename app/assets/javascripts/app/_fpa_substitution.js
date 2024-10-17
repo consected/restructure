@@ -115,13 +115,14 @@ _fpa.substitution = class {
     const StartQuote = `["'‘“]`
     const EndQuote = `["'’”]`
     const IsOperator = '(.+?)'
-    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})`;
+    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})`;
 
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
     const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gms');
     const IfBlockRegEx = new RegExp(IfBlockRegExString, 'ms');
     const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gms');
     const IsBlockRegEx = new RegExp(IsBlockRegExString, 'ms');
+    const MaxElseIfs = 2;
     const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
 
     var ifres = text.match(IfBlocksRegEx);
@@ -167,21 +168,32 @@ _fpa.substitution = class {
         let op = is_block[3]
         let exp = is_block[4]
         let comp = _this.eval_is_comp(op, tag_value, exp, new_data)
-        let else_is_block = is_block[6]
-        let else_is_tag = is_block[7]
-        let else_is_op = is_block[8]
-        let else_is_exp = is_block[9]
         let sub_text = null;
 
         if (comp) {
           sub_text = is_block[5] || '';
         }
 
-        if (sub_text == null && else_is_block) {
+        let iters = 1
+        let start_pos = iters * 5 + 1
+        let else_is_block = is_block[start_pos]
+        while (!sub_text && else_is_block) {
+          let else_is_tag = is_block[start_pos + 1]
+          let else_is_op = is_block[start_pos + 2]
+          let else_is_exp = is_block[start_pos + 3]
+
           vpair = _this.value_for_tag(else_is_tag, new_data)
           let else_is_tag_value = vpair[0];
           comp = _this.eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, new_data)
-          if (comp) sub_text = is_block[10] || ''
+          if (comp) {
+            sub_text = is_block[start_pos + 4] || ''
+            break;
+          }
+          iters++;
+          if (iters > MaxElseIfs) break;
+
+          start_pos = iters * 5 + 1;
+          else_is_block = is_block[start_pos];
         }
         // Handle {{else}}
         if (sub_text == null) sub_text = is_block[12] || ''
@@ -240,18 +252,18 @@ _fpa.substitution = class {
     const PossQuotedRegEx = new RegExp(`(${StartQuote})?(.+${NotEndQuote})?(${EndQuote})?`);
 
     if (exp) {
-      let exp_parts = exp.match(PossQuotedRegEx)
-      if (exp_parts[1] && exp_parts[3]) {
-        exp = exp_parts[2]
+      const exp_length = exp.length;
+      if (exp_length > 1 && exp[0].match(/#{StartQuote}/) && exp[exp_length - 1].match(/#{EndQuote}/)) {
+        exp = exp.slice(1, exp_length - 1);
       }
-      else if (exp_parts[2] && exp_parts[2].toLowerCase() == 'null') {
+      else if (exp.toLowerCase() == 'null') {
         exp = null
       }
-      else if (isNaN(parseInt(exp_parts[2]))) {
-        exp = _this.value_for_tag(exp_parts[2], new_data)
+      else if (isNaN(parseInt(exp))) {
+        exp = _this.value_for_tag(exp, new_data)
       }
       else {
-        exp = parseInt(exp_parts[3])
+        exp = parseInt(exp)
       }
     }
 
@@ -296,20 +308,32 @@ _fpa.substitution = class {
       return comp
     }
 
-    no_operator = nil
+    no_operator = null;
 
     switch (op) {
 
       case '>=':
         comp = tag_value >= exp;
         break;
+      case '&gt;=':
+        comp = tag_value >= exp;
+        break;
       case '<=':
+        comp = tag_value <= exp;
+        break;
+      case '&lt;=':
         comp = tag_value <= exp;
         break;
       case '>':
         comp = tag_value > exp;
         break;
+      case '&gt;':
+        comp = tag_value > exp;
+        break;
       case '<':
+        comp = tag_value < exp;
+        break;
+      case '&lt;':
         comp = tag_value < exp;
         break;
       default:
