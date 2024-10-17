@@ -1,11 +1,9 @@
 <%
   options = field_options_for(form_object_instance, field_name_sym)
   options.merge! data: {attr_name: field_name_sym, object_name: form_object_item_type_us}
-  # options[:disabled] = 'disabled'
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels, /^fixed_/) %>
 <span class="fixed-field">
-  <%= form.text_field field_name_sym, options %>
-  <%#= form_object_instance.attributes[field_name] %>
-  <div class="fixed-field-cover"></div>
+  <%= form.hidden_field field_name_sym, options %>
+  <%= form_object_instance.attributes[field_name_sym.to_s] %>
 </span>
