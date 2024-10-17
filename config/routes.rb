@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     resources :dynamic_models, except: %i[show destroy] do
       member do
         post :update_config_from_table
+        get :versions
       end
     end
     resources :user_access_controls, except: %i[show destroy]

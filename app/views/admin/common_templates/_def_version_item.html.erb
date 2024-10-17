@@ -1,0 +1,47 @@
+
+  <tr class="admin-list-item" id="admin-item-<%=list_item['id']%>" data-preprocessor="admin_result">
+
+    <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item['id']%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item['id'], copy: list_item%>  </td>
+    <% index_params.each do |p|
+        next if p.to_s == 'admin_id'
+
+        p_type = object_instance.class.columns_hash[p.to_s]&.type
+        list_val = list_item[p]
+    %>
+
+    <% if respond_to?("#{p}_options") %>
+      <td class="admin-field-<%=p%>"><%= list_val %></td>
+    <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
+      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_val %></pre></td>
+    <% elsif p.to_s.end_with?('_error') || list_val.is_a?(String) && list_val.include?("\n") %>
+      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_val %></pre></td>
+    <% elsif p == :result && list_val.is_a?(Hash) %>
+      <td class="admin-field-<%=p%>"><pre><%= list_val.to_yaml %></pre></td>  
+    <% elsif p == :api_key %>
+      <td class="admin-field-<%=p%>"><%= list_val.present? ? '********' : ''  %></td>
+    <% elsif p_type == :boolean %>
+      <td class="admin-field-<%=p%>">
+        <%= if list_val
+          "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+        else
+          "<span class=\"val-unchecked\"></span>".html_safe  
+        end
+        %>
+      </td>
+    <% else %>
+      <td class="admin-field-<%=p%>"><%= list_val %></td>
+    <% end %>
+    <% end %>
+
+    <% if admin_links.present? %>
+    <td class="admin-item-admin-links">
+      <% admin_links(list_item).each do |al| %><%= link_to *al %> <% end %>
+    </td>
+    <% end %>
+
+    <% if @show_admin_col %>
+    <td class="admin-item-admin-infos">
+      <%#= admin_last_updated_by_icon(list_item) %>
+    </td>
+    <% end %>
+  </tr>

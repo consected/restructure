@@ -84,14 +84,7 @@ module Dynamic
 
       vs = []
 
-      qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
-        select * from #{self.class.history_table_name}
-        where #{history_id_attr} = #{id}
-        order by
-          EXTRACT(EPOCH FROM coalesce(updated_at, created_at)) desc nulls last,
-          id desc
-      END_SQL
-      all_res = qres.map(&:to_h)
+      all_res = all_versions_query
 
       all_res.each do |res|
         res.delete 'admin_id'
@@ -105,6 +98,17 @@ module Dynamic
       end
 
       self.class.all_versions_memo[versions_memo_key] = vs
+    end
+
+    def all_versions_query
+      qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
+        select * from #{self.class.history_table_name}
+        where #{history_id_attr} = #{id}
+        order by
+          EXTRACT(EPOCH FROM coalesce(updated_at, created_at)) desc nulls last,
+          id desc
+      END_SQL
+      qres.map(&:to_h)
     end
 
     private

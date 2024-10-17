@@ -14,6 +14,13 @@ class Admin::DynamicModelsController < AdminController
     edit
   end
 
+  def versions
+    set_instance_from_id
+    object_instance.current_admin = current_admin
+    @all_versions = object_instance.all_versions_query
+    render partial: 'admin/common_templates/def_versions'
+  end
+
   protected
 
   def routes_reload
