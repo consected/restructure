@@ -195,12 +195,12 @@ a.link-disabled {
 }
 
 .components-menu {
-  max-width: 450px;
+  max-width: 90vw;
   background: white;
   padding: 4px;
   position: absolute;
   z-index: 2000;
-  min-width: 300px;
+  width: 600px;
   box-shadow: 0 4px 6px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -223,4 +223,15 @@ a.link-disabled {
 
 .dialog-before .admin-sample-field-info {
   font-size: 90%;
+}
+
+.form-group .chosen-container {
+  min-width: 200px;
+}
+.chosen-container.chosen-container-single .chosen-drop {
+  width: auto;
+}
+
+[data-out-attr-name="user_id"] .chosen-container {
+  min-width: 300px;
 }
