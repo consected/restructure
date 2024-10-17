@@ -309,19 +309,17 @@ module Dynamic
     def target_object_creatable?(ref_type, ref_config)
       mrc = class_for_reference_type(ref_type)
 
+      attrs = {}
       if mrc&.class_parent_name == 'ActivityLog'
-
         elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
-        ref_obj = mrc.new(extra_log_type: elt, master:)
+        attrs = { extra_log_type: elt, master: }
+      elsif mrc.no_master_association
+        attrs[:current_user] = master_user
       else
-        attrs = {}
-        if mrc.no_master_association
-          attrs[:current_user] = master_user
-        else
-          attrs[:master] = master
-        end
-        ref_obj = mrc.new attrs
+        attrs[:master] = master
       end
+      attrs[:skip_presets] = true
+      ref_obj = mrc.new attrs
 
       ref_obj&.allows_current_user_access_to?(:create)
     end
@@ -543,8 +541,8 @@ module Dynamic
           # The current action is to display a new form or to create an item from a submitted form.
           # If always_embed_creatable_reference: true has been specified, use this,
           # unless the embeddable item is an activity log or is configured to not be viewable as embedded.
-          res = build_model_reference([always_embed_creatable.to_sym,
-                                       always_embed_creatable_model_reference(cmrs)])
+          res = build_model_reference([always_embed_creatable.to_sym, always_embed_creatable_model_reference(cmrs)],
+                                      optional_params: { current_admin_sample: })
           res = nil if creatable_model_not_embeddable?(cmrs, res)
         elsif (res = always_embed_item(mrs))
           # Do nothing, we've found an embedded item that matches the configured type and set it in the condition above
@@ -553,7 +551,7 @@ module Dynamic
           # and exactly one item is creatable.
           # Build this creatable item, unless the target item is an activity log or is configured not to
           # be viewable as embedded.
-          res = build_model_reference(cmrs.first)
+          res = build_model_reference(cmrs.first, optional_params: { current_admin_sample: })
           res = nil if creatable_model_not_embeddable?(cmrs, res)
         elsif embed_action_type == :creating && cmrs.length > 1
           # If more than one item is creatable, don't use it
