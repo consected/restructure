@@ -140,7 +140,11 @@ module ApplicationHelper
     dlabel = dialogs[key][:label]
     dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
     id = "dialog-#{dname}-#{dlabel}".id_hyphenate
-    if strip_tags(dmsg).length <= 100 || dlabel.blank?
+
+    admin_sample_markup = "<div class=\"admin-sample-field-info\"><span>#{key}</span></div>" if is_current_admin_sample?
+
+    stripped = strip_tags(dmsg)
+    if stripped.length <= 100 || dlabel.blank?
       <<~END_HTML
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div><div class="dialog-btn-container"><p>#{dmsg}</p></div>
       END_HTML
@@ -149,7 +153,7 @@ module ApplicationHelper
       <<~END_HTML
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div>
         <div class="dialog-btn-container">
-          <p>#{strip_tags dmsg[0..100]}...</p>
+          <p>#{stripped[0..100]}...</p>
           <a class="btn btn-default in-form-dialog-btn"
              onclick="$('.in-form-dialog').collapse('hide'); $('.dialog-btn-container').show(); $('##{id}').collapse('show'); $(this).parents('.dialog-btn-container').hide();"
           >#{dlabel}</a></div>
