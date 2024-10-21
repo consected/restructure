@@ -749,7 +749,7 @@ module Formatter
 
     def self.eval_is_comp(op, tag_value, exp, sub_data, is_block: nil)
       if exp
-        exp = if exp.length > 1 && exp.first.match(/#{StartQuote}/) && exp.first.match(/#{EndQuote}/)
+        exp = if exp.length > 1 && exp.first.match(/#{StartQuote}/) && exp.last.match(/#{EndQuote}/)
                 exp[1..-2]
               elsif exp.to_i.to_s == exp
                 exp.to_i
