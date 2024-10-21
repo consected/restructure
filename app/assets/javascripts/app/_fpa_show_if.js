@@ -35,6 +35,10 @@ _fpa.show_if.methods = {
     }
 
     window.setTimeout(function () {
+      _fpa.form_utils.resize_labels(block, null, true);
+    })
+
+    window.setTimeout(function () {
       _fpa.form_utils.setup_e_signature(block, true);
 
       var els = $('.dialog-made-visible');

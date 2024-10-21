@@ -481,7 +481,7 @@ _fpa.form_utils = {
         var all = lgi.find('small, label').not('.radio-label');
         all
           .addClass('label-resizer')
-          .css({ whiteSpace: 'nowrap', width: 'auto', minWidth: 'none', marginLeft: 'inherit' });
+          .css({ whiteSpace: 'nowrap', width: 'auto', minWidth: 'inherit', marginLeft: 'inherit' });
 
         var block_width = lgi.first().parent().width();
 
