@@ -22,6 +22,10 @@
     protocol_events: ['protocol_name']
   }
 
+  split_ns = {
+    general_selections: '__'
+  }
+
   alt_links = alt_names.dup
 %>
 <div class="admin-panel-components" id="admin-panel-components">
@@ -68,8 +72,8 @@
           <%
             constants = {}
             results = {}
-            all_vs = v_hash.map do |k2_hash| %>
-            <%              
+            all_vs = {}
+            v_hash.map do |k2_hash|
               k2_cn = k2_hash['_class_name']
               k2_const = constants[k2_cn] ||= k2_cn.constantize
               k2_all = results["#{k2_cn}--all"] ||= k2_const.send(active_or_all)
@@ -87,26 +91,45 @@
                      else
                        send("#{base_path}_path", filter: {id: k2.id})
                      end
-              name = if alt_names[kclean]
-                       alt_names[kclean].map {|ka| k2[ka] || k2.send(ka) }.join(" / ")
-                     elsif k2.respond_to?(:name)
-                       k2.respond_to?(:category) ? "#{k2.category.present? ? k2.category : '(no category)'} / #{k2.name}" : k2.name
+              
+              pair = if alt_names[kclean]
+                       alt_names[kclean].map {|ka| k2[ka] || k2.send(ka) }
+                     elsif k2.respond_to?(:name) && k2.respond_to?(:category)
+                       [k2.category.presence || '(no category)', k2.name]
+                      elsif k2.respond_to?(:name)
+                       [nil, k2.name]
                      else
-                       rn
-                     end              
+                       [nil, rn]
+                     end
+              loc = pair.first.to_s
+              name = pair.last.to_s.presence || '(not specified)'
+              loc = '' if alt_names[kclean] && loc == name
+              sns = split_ns[kclean]            
+              loc, name = name.split(sns) if sns
+                
 
-              { rn: kclean, path: path, name: name, disabled: k2.disabled }
-            %>
+              slashloc = pair.join(' / ')
+              all_vs[loc] ||= []
+              all_vs[loc] << { rn: kclean, path: path, loc: loc, name: name, slashloc: slashloc, disabled: k2.disabled }
+            end 
+          %>
+          <% all_vs.keys.sort.each do |loc| %>          
+
+          <% unless loc == '' %><li class="app-component-loc"><%= loc %></li><ul class="app-components-for-loc"><% end %>          
+          <%
+            all_vs[loc].each.sort {|a, b| a[:name] <=> b[:name]}.uniq.each do |vs|
+              next if vs[:disabled]
+          %>
+              <li class="app-component-name">
+                <% if open_in_new %>              
+                <%= link_to link_label_open_in_new(vs[:name]), vs[:path], target: "adminres-#{vs[:rn]}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <% else %>
+                <%= link_to vs[:name], vs[:path], class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <%= link_to link_label_open_in_new(''), vs[:path], target: "adminres-#{vs[:rn]}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <% end %>
+              </li>
           <% end %>
-          <% all_vs.compact.uniq.sort {|vi, vk| vi[:name] <=> vk[:name] }.each do |vs| %>
-            <li>
-              <% if open_in_new %>              
-              <%= link_to link_label_open_in_new(vs[:name]), vs[:path], target: "adminres-#{vs[:rn]}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
-              <% else %>
-              <%= link_to vs[:name], vs[:path], class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
-              <%= link_to link_label_open_in_new(''), vs[:path], target: "adminres-#{vs[:rn]}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
-              <% end %>
-            </li>
+          <% unless loc == '' %></ul><% end %>
           <% end %>
           </ul>
         </div>
