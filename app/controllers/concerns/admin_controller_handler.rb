@@ -93,6 +93,12 @@ module AdminControllerHandler
 
   def update
     object_instance.current_admin = current_admin
+
+    # Check if the user is attempting to update with an older record
+    sent_ua = params[:updated_at]
+    prev_ua = object_instance.updated_at&.to_s
+    return update_out_of_date(prev_ua, sent_ua) if sent_ua.present? && prev_ua && prev_ua != sent_ua
+
     if object_instance.update(secure_params)
       flash.now[:notice] = "#{human_name} updated successfully"
       @updated_with = object_instance
