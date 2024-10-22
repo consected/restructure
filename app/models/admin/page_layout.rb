@@ -67,7 +67,7 @@ class Admin::PageLayout < Admin::AdminBase
   #   initial_show: initially open up a panel
   #   find_with: the alternative id (crosswalk or external id) to search for the master record with for standalone pages
   configure :view_options,
-            with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls
+            with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls default_expander
                      hide_activity_logs_header close_others
                      show_for_single_master_only show_for_multi_master_only filter_items]
 

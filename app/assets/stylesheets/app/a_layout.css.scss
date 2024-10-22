@@ -642,7 +642,11 @@ div.popover {
     max-height: 174px;
     // padding-bottom: 20px;
     margin-bottom: 0px;
-    border-bottom: 2px dotted gray;
+    
+    &:not(.expanded) {
+      border-bottom: 2px dotted gray;
+    }
+    
     display: block;
     overflow: hidden;
 
@@ -665,7 +669,8 @@ div.popover {
   }
   .expanded {
     max-height: none;
-    border-bottom: 0;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
 
     &.expandable-target:hover,
     .expandable-target:hover {

@@ -872,11 +872,11 @@ li.list-group-item.is_external_id_item {
     }
   }
 
-  .sublist-order-selector {
+  .sublist-order-selector, .sublist-expander-selector {
     display: inline-block;
     float: none;
-
-    .order-switch {
+    margin-left: 2px;
+    .order-switch, .expander-switch {
       border-radius: 50%;
       background: $switch_bg_off;
       box-shadow: none;
@@ -887,7 +887,7 @@ li.list-group-item.is_external_id_item {
       font-size: normal;
     }
 
-    .order-switch.active {
+    .order-switch.active, .expander-switch.active {
       background-color: rgb(230, 213, 176);
       box-shadow: none;
       color: rgb(127, 90, 9);
@@ -899,9 +899,9 @@ li.list-group-item.is_external_id_item {
   .sublist-layout-selectors {
     display: none;
     position: relative;
-    margin-left: -66px;
+    margin-left: -96px;
     float: right;
-    right: 50px;
+    right: 80px;
 
     .layout-switch {
       box-shadow: none;
@@ -935,9 +935,9 @@ li.list-group-item.is_external_id_item {
 
 .activity-log-list {
   .sublist-controls {
-    .sublist-order-selector {
+    .sublist-order-selector, .sublist-expander-selector {
       float: right;
-      .order-switch {
+      .order-switch, .expander-switch {
         font-size: 12px;
         padding: 5px 10px;
       }
@@ -1087,16 +1087,16 @@ li.list-group-item.is_external_id_item {
   }
 
   .sublist-controls {
-    .sublist-order-selector {
+    .sublist-order-selector, .sublist-expander-selector {
       float: right;
     }
   }
 
   .activity-log-list {
     .sublist-controls {
-      .sublist-order-selector {
+      .sublist-order-selector, .sublist-expander-selector {
         float: right;
-        .order-switch {
+        .order-switch, .expander-switch {
           font-size: 12px;
           padding: 5px 10px;
         }
@@ -1117,9 +1117,9 @@ li.list-group-item.is_external_id_item {
         padding: 5px 10px;
       }
     }
-    .sublist-order-selector {
+    .sublist-order-selector, .sublist-expander-selector {
       float: right;
-      .order-switch {
+      .order-switch, .expander-switch {
         font-size: 12px;
         padding: 5px 10px;
       }
