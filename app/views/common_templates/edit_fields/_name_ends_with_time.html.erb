@@ -1,8 +1,22 @@
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
 <%
   val = form_object_instance.attributes[field_name]
-  if val.present? && val.is_a?(Time)
+  if val.is_a?(Time)
     val = val.strftime('%l:%M%P')
   end
+  
+  options = field_options_for(form_object_instance, field_name_sym)
+  default = options[:value]
+  if val.present?
+    options[:value] = val
+  elsif default.is_a?(String) && default.present?
+    # Adjust this so it formats commonly misued defaults correctly
+    default = DateTime.parse(default)
+  end
+
+  if default
+    options[:value] = Formatter::TagFormatter.new.time_ignore_zone(nil, default)
+  end
+  
 %>
-<%= form.text_field field_name_sym, value: val, data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, class: "time-entry" %>
+<%= form.text_field field_name_sym, options.merge(data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, class: "time-entry") %>

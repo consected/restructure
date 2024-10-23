@@ -31,6 +31,8 @@ module FieldDefaults
         res = from_when.iso8601.split('T').first
       elsif value == 'time()'
         res = from_when.iso8601.split('T').last.split('+').first
+      elsif value == 'current_user_time'
+        res = Formatter::TagFormatter.new.time_ignore_zone(nil, from_when)
       elsif value == 'user_email'
         res = obj.user&.email
       elsif value == 'current_user'
