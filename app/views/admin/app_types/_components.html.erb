@@ -105,27 +105,39 @@
               name = pair.last.to_s.presence || '(not specified)'
               loc = '' if alt_names[kclean] && loc == name
               sns = split_ns[kclean]            
-              loc, name = name.split(sns) if sns
+              if sns
+                loc, name = name.split(sns) 
+                if name.blank?
+                  name = loc
+                  loc = ''
+                end
+              end
                 
               all_vs[loc] ||= []
-              all_vs[loc] << { rn: kclean, path: path, loc: loc, name: name, pair: pair, disabled: k2.disabled }
+              all_vs[loc] << { path: path, loc: loc, name: name, pair: pair, disabled: k2.disabled }
             end 
           %>
           <% all_vs.keys.sort.each do |loc| %>          
 
           <% unless loc == '' %><li class="app-component-loc"><%= loc %></li><ul class="app-components-for-loc"><% end %>          
           <%
+            got_path = {}
             all_vs[loc].each.sort {|a, b| a[:name] <=> b[:name]}.uniq.each do |vs|
               next if vs[:disabled]
+
+              path = vs[:path]
+              next if got_path[path]
+
+              got_path[path] = true
 
               tabid = vs[:pair]&.join('--').ns_underscore
           %>
               <li class="app-component-name">
                 <% if open_in_new %>              
-                <%= link_to link_label_open_in_new(vs[:name]), vs[:path], target: "adminres-#{tabid}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <%= link_to link_label_open_in_new(vs[:name]), path, target: "adminres-#{tabid}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
                 <% else %>
-                <%= link_to vs[:name], vs[:path], class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
-                <%= link_to link_label_open_in_new(''), vs[:path], target: "adminres-#{tabid}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <%= link_to vs[:name], path, class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
+                <%= link_to link_label_open_in_new(''), path, target: "adminres-#{tabid}", class: "link-#{vs[:disabled] ? 'disabled' : 'active'}" %>
                 <% end %>
               </li>
           <% end %>
