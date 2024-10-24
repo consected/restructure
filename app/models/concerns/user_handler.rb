@@ -5,7 +5,7 @@ module UserHandler
   include GeneralDataConcerns
 
   included do
-    attr_accessor :no_track
+    attr_accessor :no_track, :current_admin_sample
 
     scope :active, lambda {
       if attribute_names.include?('disabled')
