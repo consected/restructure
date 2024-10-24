@@ -111,11 +111,12 @@ _fpa.substitution = class {
     text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
-    const IfBlockRegExString = `({{#if (${TagnameRegExString})}}([^]+?)({{else if (${TagnameRegExString})}}(.+?))?({{else}}([^]+?))?{{/if}})`;
+    const IfBlockRegExString = `({{#if +(${TagnameRegExString})}}([^]+?)({{else if +(${TagnameRegExString})}}(.+?))?({{else}}([^]+?))?{{/if}})`;
     const StartQuote = `["'‘“]`
     const EndQuote = `["'’”]`
     const IsOperator = '(.+?)'
-    const IsBlockRegExString = `({{#is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?)({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else is ([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})`;
+    const IsConditions = `([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)`
+    const IsBlockRegExString = `({{#is ${IsConditions}}}(.+?)({{else is ${IsConditions}}}(.+?))?({{else is ${IsConditions}}}(.+?))?({{else}}(.+?))?{{/is}})`;
 
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
     const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gms');
@@ -196,7 +197,7 @@ _fpa.substitution = class {
           else_is_block = is_block[start_pos];
         }
         // Handle {{else}}
-        if (sub_text == null) sub_text = is_block[12] || ''
+        if (sub_text == null) sub_text = is_block[17] || ''
 
         text = text.replace(block_container, sub_text || '');
 

@@ -11,14 +11,15 @@ module Formatter
     # - true text
     # - truthy if there is an {{else}}
     # - else text
-    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else if (#{TagnameRegExString})}}(.+?))?({{else}}(.+?))?{{/if}})}m
+    IfBlockRegEx = %r{({{#if +(#{TagnameRegExString})}}(.+?)({{else if +(#{TagnameRegExString})}}(.+?))?({{else}}(.+?))?{{/if}})}m
 
     StartQuote = '["\'‘“]'
     EndQuote = '["\'’”]'
     NotEndQuote = '[^"\'’”]'
     IsOperator = '(.+?)'
     MaxElseIfs = 2
-    IsBlockRegEx = %r{({{#is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?)?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else is ([0-9a-zA-Z_.:-]+) #{StartQuote}#{IsOperator}#{EndQuote} (#{StartQuote}?.+?#{EndQuote}?)}}(.+?))?({{else}}(.+?))?{{/is}})}m
+    IsConditions = "([0-9a-zA-Z_.:-]+) +#{StartQuote}#{IsOperator}#{EndQuote} +(#{StartQuote}?.+?#{EndQuote}?)"
+    IsBlockRegEx = %r{({{#is +#{IsConditions}}}(.+?)?({{else is +#{IsConditions}}}(.+?))?({{else is +#{IsConditions}}}(.+?))?({{else}}(.+?))?{{/is}})}m
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
     FunctionalDirectives = %w[shortlink].freeze
