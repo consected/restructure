@@ -1,7 +1,7 @@
 # Conditions Definitions
 
         all:
-          'model_table_name | this | embedded_item| this_references | parent_references | parent_or_this_references | referring_record (the record referring to this one)':
+          'model_table_name | this | embedded_item | this_references | parent_references | parent_or_this_references | referring_record (the record referring to this one)':
             field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)'
             field_name_2: 'literal value | null'
             field_name_3: 
@@ -10,6 +10,22 @@
               this_references: 'attribute in any referenced record' 
             field_name_5:
               this: previous_value_of_<some attribute> - gets the previous value of a field before it was changed in this transaction
+            field_name_6: # Match the element if it is IN this list
+              - item1
+              - item2
+              - item3
+            
+            # Check if the latest record matched on the previous conditions also matches the `and_latest_matches` conditions
+            # This is useful for checking a list of possible extra_log_type and only matching if the latest one
+            # is a specific activity. This can't be achieved through other mechanisms, such as nested conditions,
+            # since they limit the results.
+            # 
+            extra_log_type:
+              - lock
+              - unlock
+            and_latest_matches: 
+              field_name_6: unlock              
+
             return_constant: 'value to return if previous condition matches'
             field_to_return: 'return_value'
             field_to_return_if_also_a_condition:
