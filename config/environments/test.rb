@@ -53,9 +53,9 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  if ENV['FPHS_USE_LOGGER'] == 'TRUE'
+  if ENV['FPHS_USE_LOGGER'] == 'TRUE' || ENV['FPHS_USE_LOGGER'] == 'true'
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!'
-    config.log_level = :warn
+    config.log_level = ENV['FPHS_LOG_LEVEL']&.to_sym || :warn
     config.log_formatter = ::Logger::Formatter.new
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'

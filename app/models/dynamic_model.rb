@@ -362,11 +362,16 @@ class DynamicModel < ActiveRecord::Base
   # Load dynamic model routes for all active implementations
   def self.routes_load
     m = active_model_configurations
-    Rails.application.routes.draw do
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw do
       m.each do |dm|
         pg_name = dm.base_route_segments
         short_pg_name = dm.base_route_short_name
         if dm.foreign_key_name.present?
+          next if routes.url_helpers.respond_to?("master_#{pg_name.gsub('/', '_')}_path")
+
+          Rails.logger.info "Setting up routes for dynamic model: #{short_pg_name}"
 
           resources :masters do
             resources short_pg_name, except: [:destroy], controller: pg_name
@@ -383,6 +388,9 @@ class DynamicModel < ActiveRecord::Base
           end
 
         else
+          next if routes.url_helpers.respond_to?("#{short_pg_name}_path")
+
+          Rails.logger.info "Setting up routes for #{dm}"
 
           resources short_pg_name, except: [:destroy], controller: pg_name
           namespace :dynamic_model do
@@ -392,6 +400,9 @@ class DynamicModel < ActiveRecord::Base
         end
       end
     end
+  ensure
+    routes ||= Rails.application.routes
+    routes.disable_clear_and_finalize = false
   end
 
   def table_name_ok

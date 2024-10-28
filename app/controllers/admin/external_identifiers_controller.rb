@@ -3,7 +3,7 @@
 class Admin::ExternalIdentifiersController < AdminController
   helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_defaults
-  after_action :routes_reload, only: %i[update create]
+  # after_action :routes_reload, only: %i[update create]
 
   def details
     @external_identifiers = ExternalIdentifier.active.order(label: :asc)
