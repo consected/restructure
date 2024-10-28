@@ -780,141 +780,14 @@ _fpa = {
             });
           }
 
+
           // Wait on all previous templates being viewed, to ensure items aren't overwritten incorrectly
-          Promise.all(prep_template_promises).then(function () {
-            if (!t_abs_force) {
-              if (block.hasClass('new-block')) {
-                block.html('');
-              }
-              // Run through the top level of data to pick the keys to look for in element subscriptions
-              for (var di in data) {
-                if (di == 'multiple_results') continue;
+          Promise.all(prep_template_promises)
+            .then(_fpa.display_result(block, data, t_abs_force, alt_data_key))
+            .catch((error) => {
+              console.error(error.message);
+            });
 
-                if (data.hasOwnProperty(di)) {
-                  var res = {};
-                  var d = data[di];
-
-                  // DOM attribute targeting
-                  // will only use the following targets
-                  // Certain refinements to each of these are identified through additional markup, specified below
-                  var targets = $(
-                    '[data-sub-item="' +
-                    di +
-                    '"], [data-sub-list="' +
-                    di +
-                    '"] [data-sub-item], [data-item-class="' +
-                    di +
-                    '"]'
-                  );
-
-                  res[di] = d;
-                  targets.each(function () {
-                    var $this = $(this);
-                    var use_data = res;
-                    var dsid = $this.attr('data-sub-id');
-                    var dst = $this.attr('data-sub-item');
-                    // data-item-class is used for activity logs that gain the step type in the data-sub-item, breaking the matching
-                    // data-item-class is the plain class name
-                    var dsc = $this.attr('data-item-class');
-                    if (dsid && (dst || dsc)) {
-                      use_data = null;
-                      // Optionally use a different ID attribute (such as master_id) for the following listeners
-                      var dsfor = $this.attr('data-sub-for');
-                      if (!dsfor) dsfor = 'id';
-
-                      // Check if we should be looking in the root of the data, rather than in the items
-                      // This special case only kicks in when the triggered block has the attribute data-sub-for-root
-                      // It allows for processing of groups of items with a 'master key' specified by the combo sub-for-root (naming the key) and
-                      // sub-id (specifying the value of that key), rather than just responding to individual items in the data.
-                      // Typical markup is:
-                      // <span data-sub-for-root="master_id" data-sub-id="234" data-sub-item="trackers" ...>{{trackers.length}}</span>
-                      // which responds to a data response like:
-                      // {master_id: 234, trackers: [{},{},{}]}
-                      // Since this will only respond to master_id == 234 and a root element 'trackers', we can be quite specific in the data
-                      // we respond to, while general enough that we can broadly listen to meaningful results.
-                      // As this sends the full set of data, it is especially for counters and handlers of arrays of elements
-                      var dsforroot = $this.attr('data-sub-for-root');
-                      if (dsforroot) {
-                        if (data[dsforroot]) {
-                          item_data = data;
-                          // if the returned data has the specified attribute in its root
-                          // and also has the specified data-sub-item attribute
-                          if (item_data[dsforroot] === +dsid && item_data[dst]) {
-                            use_data = {};
-                            use_data = item_data;
-                          }
-                        }
-                      } else if (d && d[dsfor]) {
-                        // Another special case when we are looking just for elements that match the item type
-                        // (forced back into the data at the start of response handling) and either the
-                        // id or the attribute specified by data-sub-for
-                        // For example:
-                        // <div data-sub-for="master_id" data-sub-id="789" data-sub-item="player_info">
-                        // which would respond to the data
-                        // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
-                        // This listener is looking for individual player_info records with a specific 'master key', and passing just
-                        // the content of that data to the template.
-                        // Note that we underscore the item_type, since this handles the compounded parent/item_type
-                        // results for 'works_with_item' classes
-                        item_data = d;
-                        var matching_data_sub_item = alt_data_key;
-                        if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
-                        if (item_data[dsfor] === +dsid) {
-                          if (matching_data_sub_item == null) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          } else if (matching_data_sub_item === dst) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          } else if (matching_data_sub_item === dsc) {
-                            use_data = {};
-                            use_data[dsc] = item_data;
-                            use_data[dst] = item_data;
-                          }
-                        }
-                      } else if (d) {
-                        // The least specific case is to run through the array of data elements, having
-                        // id or the attribute specified by data-sub-for, and seeing whether any
-                        // match the specified value
-                        // This is a simple case:
-                        // <div data-sub-item="player_contact" data-sub-id="456" ...>
-                        // which will match data like this:
-                        // {player_contact: {id: 456, <this data>}, player_info: {id: 888, <not this data>} }
-                        // and will pass just the matched item to the template
-                        for (var g in d) {
-                          var item_data = d[g];
-                          if (
-                            item_data &&
-                            typeof item_data != 'string' &&
-                            item_data[dsfor] === +dsid &&
-                            item_data.item_type === dst
-                          ) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          }
-                        }
-                      }
-                    }
-
-                    // We got a usable result, so display it (according to the rule that
-                    // we can't overwrite a block previously processed in this request)
-                    if (use_data) {
-                      var dt = $this.attr('data-template');
-                      var pre = $(this).attr('data-preprocessor');
-                      if (!dt) console.log('WARN: no data-template template name found');
-                      var prom = _fpa.view_template($this, dt, use_data, null, pre);
-                      prom.then(function () {
-                        _fpa.try_app_post_callback($this);
-                      });
-                    }
-                  });
-                }
-              }
-            }
-            window.setTimeout(function () {
-              $('.view-template-created').removeClass('view-template-created');
-            }, 1)
-          });
         } else {
           var put_in_position = function (t, d) {
             var pos = t.attr('data-result-position');
@@ -1047,6 +920,141 @@ _fpa = {
       .addClass('attached');
 
     _fpa.state.remotes_setup = true;
+  },
+
+  display_result: function (block, data, t_abs_force, alt_data_key) {
+    if (!t_abs_force) {
+      if (block.hasClass('new-block')) {
+        block.html('');
+      }
+      // Run through the top level of data to pick the keys to look for in element subscriptions
+      for (var di in data) {
+        if (di == 'multiple_results') continue;
+
+        if (data.hasOwnProperty(di)) {
+          var res = {};
+          var d = data[di];
+
+          // DOM attribute targeting
+          // will only use the following targets
+          // Certain refinements to each of these are identified through additional markup, specified below
+          var targets = $(
+            '[data-sub-item="' +
+            di +
+            '"], [data-sub-list="' +
+            di +
+            '"] [data-sub-item], [data-item-class="' +
+            di +
+            '"]'
+          );
+
+          res[di] = d;
+          targets.each(function () {
+            var $this = $(this);
+            var use_data = res;
+            var dsid = $this.attr('data-sub-id');
+            var dst = $this.attr('data-sub-item');
+            // data-item-class is used for activity logs that gain the step type in the data-sub-item, breaking the matching
+            // data-item-class is the plain class name
+            var dsc = $this.attr('data-item-class');
+            if (dsid && (dst || dsc)) {
+              use_data = null;
+              // Optionally use a different ID attribute (such as master_id) for the following listeners
+              var dsfor = $this.attr('data-sub-for');
+              if (!dsfor) dsfor = 'id';
+
+              // Check if we should be looking in the root of the data, rather than in the items
+              // This special case only kicks in when the triggered block has the attribute data-sub-for-root
+              // It allows for processing of groups of items with a 'master key' specified by the combo sub-for-root (naming the key) and
+              // sub-id (specifying the value of that key), rather than just responding to individual items in the data.
+              // Typical markup is:
+              // <span data-sub-for-root="master_id" data-sub-id="234" data-sub-item="trackers" ...>{{trackers.length}}</span>
+              // which responds to a data response like:
+              // {master_id: 234, trackers: [{},{},{}]}
+              // Since this will only respond to master_id == 234 and a root element 'trackers', we can be quite specific in the data
+              // we respond to, while general enough that we can broadly listen to meaningful results.
+              // As this sends the full set of data, it is especially for counters and handlers of arrays of elements
+              var dsforroot = $this.attr('data-sub-for-root');
+              if (dsforroot) {
+                if (data[dsforroot]) {
+                  item_data = data;
+                  // if the returned data has the specified attribute in its root
+                  // and also has the specified data-sub-item attribute
+                  if (item_data[dsforroot] === +dsid && item_data[dst]) {
+                    use_data = {};
+                    use_data = item_data;
+                  }
+                }
+              } else if (d && d[dsfor]) {
+                // Another special case when we are looking just for elements that match the item type
+                // (forced back into the data at the start of response handling) and either the
+                // id or the attribute specified by data-sub-for
+                // For example:
+                // <div data-sub-for="master_id" data-sub-id="789" data-sub-item="player_info">
+                // which would respond to the data
+                // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
+                // This listener is looking for individual player_info records with a specific 'master key', and passing just
+                // the content of that data to the template.
+                // Note that we underscore the item_type, since this handles the compounded parent/item_type
+                // results for 'works_with_item' classes
+                item_data = d;
+                var matching_data_sub_item = alt_data_key;
+                if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
+                if (item_data[dsfor] === +dsid) {
+                  if (matching_data_sub_item == null) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  } else if (matching_data_sub_item === dst) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  } else if (matching_data_sub_item === dsc) {
+                    use_data = {};
+                    use_data[dsc] = item_data;
+                    use_data[dst] = item_data;
+                  }
+                }
+              } else if (d) {
+                // The least specific case is to run through the array of data elements, having
+                // id or the attribute specified by data-sub-for, and seeing whether any
+                // match the specified value
+                // This is a simple case:
+                // <div data-sub-item="player_contact" data-sub-id="456" ...>
+                // which will match data like this:
+                // {player_contact: {id: 456, <this data>}, player_info: {id: 888, <not this data>} }
+                // and will pass just the matched item to the template
+                for (var g in d) {
+                  var item_data = d[g];
+                  if (
+                    item_data &&
+                    typeof item_data != 'string' &&
+                    item_data[dsfor] === +dsid &&
+                    item_data.item_type === dst
+                  ) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  }
+                }
+              }
+            }
+
+            // We got a usable result, so display it (according to the rule that
+            // we can't overwrite a block previously processed in this request)
+            if (use_data) {
+              var dt = $this.attr('data-template');
+              var pre = $(this).attr('data-preprocessor');
+              if (!dt) console.log('WARN: no data-template template name found');
+              var prom = _fpa.view_template($this, dt, use_data, null, pre);
+              prom.then(function () {
+                _fpa.try_app_post_callback($this);
+              });
+            }
+          });
+        }
+      }
+    }
+    window.setTimeout(function () {
+      $('.view-template-created').removeClass('view-template-created');
+    }, 1)
   },
 
   // Enable a long running ajax request to be canceled
