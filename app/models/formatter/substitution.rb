@@ -400,7 +400,7 @@ module Formatter
     # Certain methods in resources should be accessible as attributes for substitution
     # Set these up
     def self.setup_methods_as_attributes(data)
-      return unless data
+      return unless data.is_a?(Hash)
 
       orig_obj = data[:original_item]
       rn = data[:resource_name]
