@@ -197,7 +197,11 @@ _fpa = {
   view_template: function (block, template_name, data, options, alt_preprocessor) {
     return new Promise(function (resolve, reject) {
       // Prevent an attempt to render the template in a block that has already been rendered in this request
-      if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
+      if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) {
+        console.debug(`block already rendered`)
+        resolve();
+        return
+      };
 
       // Potentially don't reload, especially if a sidebar request has been made
       // Allow this to be overridden in specific cases by specifying data-ignore-no-load="true"
@@ -205,7 +209,11 @@ _fpa = {
       if (block.parents('[data-no-load]').length &&
         !block.parents('[data-ignore-no-load]').length &&
         !block.attr('data-ignore-no-load')
-      ) return;
+      ) {
+        console.debug(`prevented reload for no-load`)
+        resolve();
+        return
+      };
 
       _fpa.ajax_working(block);
       if (!options) options = {};
@@ -271,6 +279,7 @@ _fpa = {
       var list_data_item_state_ids = [];
 
       if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
+        console.debug(`nothing: ${!url_data_type} or no non versioned template types`)
         resolve();
         return;
       }
@@ -315,6 +324,7 @@ _fpa = {
           // doesn't already exist. This prevents accidental bloating of the DOM with duplicates
           $(data).each(function () {
             var templateid = $(this).attr('id');
+            console.debug(`got template ${templateid}`)
             if (!$('#' + templateid).length) {
               temploc.after($(this));
             }
@@ -323,7 +333,8 @@ _fpa = {
           resolve();
         },
         error: function (data) {
-          for (var k in list_data_item_state_ids) {
+          for (var did in list_data_item_state_ids) {
+            console.error(`Failed to get template ${did}`)
             _fpa.state.template_config_versions[did] = false;
           }
           resolve();
@@ -453,6 +464,7 @@ _fpa = {
     if (pre) {
       pre = pre.replace(/-/g, '_');
       if (_fpa.preprocessors[pre]) {
+        console.debug(`preprocessor ${pre}()`)
         _fpa.preprocessors[pre](block, data);
         procfound = true;
       }
@@ -524,7 +536,10 @@ _fpa = {
       })
       .on('ajax:before', sel, function (ev) {
         // Prevent this being handled in a parent, such as happens if we have a link in a form
-        if (ev.target != ev.currentTarget) return;
+        if (ev.target != ev.currentTarget) {
+          console.log('target doesn\'t match')
+          return;
+        }
 
         var block = $(this);
         _fpa.remote_request = null;
@@ -561,6 +576,7 @@ _fpa = {
               cfs.removeClass('changed-field-danger');
             })
             ev.preventDefault();
+            console.debug('prevented cancelled request')
             return false;
           }
         }
@@ -571,6 +587,7 @@ _fpa = {
         // when expanding rather than collapsing
         if ($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')) {
           ev.preventDefault();
+          console.debug('prevented collapsed request')
           return false;
         }
 
@@ -579,12 +596,14 @@ _fpa = {
         if ($(this).hasClass('prevent-first-ajax')) {
           ev.preventDefault();
           $(this).removeClass('prevent-first-ajax');
+          console.debug('prevented first ajax')
           return false;
         }
 
         if ($(this).hasClass('one-time-only-ajax')) {
           if ($(this).hasClass('one-time-only-fired')) {
             ev.preventDefault();
+            console.debug('prevented one time only')
             return false;
           } else {
             $(this).addClass('one-time-only-fired');
@@ -719,6 +738,7 @@ _fpa = {
           ) {
             use_target = true;
           }
+          console.debug(`use target (${use_target}) for ${t}`)
 
           var options = {};
           if (use_target) {
@@ -755,7 +775,7 @@ _fpa = {
             // Since we may have specified multiple items to match the target, run through each in turn
             // making sure to use any specific templates they specify
             var default_tname = $(this).attr('data-template');
-
+            console.debug(`template name: ${default_tname} - ${b.length}`)
             b.each(function () {
               var $this = $(this);
 
@@ -773,6 +793,7 @@ _fpa = {
 
               var pre = $(this).attr('data-preprocessor');
               var prom = _fpa.view_template($this, tname, target_data, options, pre);
+              console.debug(`Added a promise ${prom}`)
               prep_template_promises.push(prom);
               prom.then(function () {
                 _fpa.try_app_post_callback($this);
@@ -780,10 +801,13 @@ _fpa = {
             });
           }
 
-
+          console.debug(`prep template promises: ${prep_template_promises}`)
           // Wait on all previous templates being viewed, to ensure items aren't overwritten incorrectly
           Promise.all(prep_template_promises)
-            .then(_fpa.display_result(block, data, t_abs_force, alt_data_key))
+            .then(function () {
+              console.debug(`all promises resolved for ${block}`)
+              _fpa.display_result(block, data, t_abs_force, alt_data_key)
+            })
             .catch((error) => {
               console.error(error.message);
             });
@@ -811,8 +835,9 @@ _fpa = {
           if (!data) data = {};
 
           var trigger = $(this);
-
-          html.find('[data-result]').each(function () {
+          var h_res = html.find('[data-result]')
+          console.debug(`html result count: ${h_res.length}`)
+          h_res.each(function () {
             var d = $(this);
             var di = d.attr('data-result');
             var isform = d.find('form');
@@ -821,7 +846,7 @@ _fpa = {
             if (trigger.attr('data-target-force') === 'true') {
               var t = trigger.attr('data-target');
               if (!t || t === '')
-                console.log(
+                console.error(
                   'Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block'
                 );
               var targets = $(t);
@@ -882,6 +907,7 @@ _fpa = {
         var block = $(this);
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);
+        console.error(`ajax:error - ${status}`)
 
         $('.ajax-clicked-running').removeClass('ajax-clicked-running').blur();
 
@@ -899,17 +925,20 @@ _fpa = {
                 var msg =
                   '<p>Could not complete action. Please <a href="#" onclick="window.location.reload(); return false;">refresh the page</a> and try again.</p>';
             }
+            console.error(`xhr status - ${xhr.status} - ${msg}`)
 
             _fpa.flash_notice(msg, 'warning');
           } else {
             if (j) {
               msg = _fpa.format_message(j);
-              _fpa.flash_notice(msg, 'danger');
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
-              _fpa.flash_notice(xhr.responseText, 'danger');
+              msg = xhr.responseText;
             } else {
-              _fpa.flash_notice('An error occurred.', 'danger');
+              msg = 'An error occurred.';
             }
+            console.error(`message - ${msg}`)
+
+            _fpa.flash_notice(msg, 'danger');
           }
         }
 
@@ -927,9 +956,14 @@ _fpa = {
       if (block.hasClass('new-block')) {
         block.html('');
       }
+
+      if (data.length === 0) console.debug('No data to display')
       // Run through the top level of data to pick the keys to look for in element subscriptions
       for (var di in data) {
-        if (di == 'multiple_results') continue;
+        if (di == 'multiple_results') {
+          console.debug('multiple results specified')
+          continue;
+        }
 
         if (data.hasOwnProperty(di)) {
           var res = {};
@@ -949,6 +983,8 @@ _fpa = {
           );
 
           res[di] = d;
+
+          if (targets.length === 0) console.log(`no targets found for ${di}`)
           targets.each(function () {
             var $this = $(this);
             var use_data = res;
@@ -1036,6 +1072,9 @@ _fpa = {
                 }
               }
             }
+            else {
+              console.debug('not using the data sub id matcher')
+            }
 
             // We got a usable result, so display it (according to the rule that
             // we can't overwrite a block previously processed in this request)
@@ -1044,13 +1083,21 @@ _fpa = {
               var pre = $(this).attr('data-preprocessor');
               if (!dt) console.log('WARN: no data-template template name found');
               var prom = _fpa.view_template($this, dt, use_data, null, pre);
+              console.debug('promising to view template')
               prom.then(function () {
+                console.debug('promise of view template resolved')
                 _fpa.try_app_post_callback($this);
               });
+            }
+            else {
+              console.debug('no usable data')
             }
           });
         }
       }
+    }
+    else {
+      console.log('t_abs_force was set')
     }
     window.setTimeout(function () {
       $('.view-template-created').removeClass('view-template-created');
