@@ -73,7 +73,7 @@ group :test do
   gem 'capybara'
   gem 'database_cleaner'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '4.6.1'
+  gem 'selenium-webdriver', '~> 4.8'
   gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'

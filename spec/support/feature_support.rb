@@ -9,6 +9,12 @@ module FeatureSupport
   ResultsMasterPanel = '.results-panel .master-panel'
   ResultsMasterExpander = '.master-expander'
 
+  def js_console_log
+    nil unless ENV['DEBUG_JS'] == 'true'
+
+    # puts page.driver.browser.logs.get(:browser).select { |l| l.start_with?('console.') }.join("\n")
+  end
+
   def login
     just_signed_in = false
     already_signed_in = false
