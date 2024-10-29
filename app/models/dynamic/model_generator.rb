@@ -93,15 +93,15 @@ module Dynamic
 
       if dynamic_model
         @dynamic_model = dynamic_model
-        puts "Updating dynamic model: #{table_name}"
+        puts "Updating dynamic model: #{table_name} in schema #{dynamic_model.schema_name}"
         dynamic_model.update!(current_admin:,
                               field_list:,
                               options:,
                               allow_migrations: true,
                               foreign_key_name:)
-        puts "Updated dynamic model: #{table_name}"
+        puts "Updated dynamic model: #{table_name} in schema #{dynamic_model.schema_name}"
       else
-        puts "Creating dynamic model: #{table_name}"
+        puts "Creating dynamic model: #{table_name} in #{schema_name}"
         @dynamic_model = DynamicModel.create!(current_admin:,
                                               name: dm_name,
                                               table_name:,
