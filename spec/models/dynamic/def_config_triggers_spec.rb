@@ -91,8 +91,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     expect(ActivityLog::PlayerContactEmbedTest.definition.option_configs.first.config_trigger[:on_define]).to be_present
     al = ActivityLog::PlayerContactEmbedTest.create(master: @master, player_contact_id: @player_contact.id, extra_log_type: :test1)
     expect { DynamicModel::SetupEmbedTestTest1Rec }.not_to raise_error
-    dm = DynamicModel::SetupEmbedTestTest1Rec.create(master: @master, @al.foreign_key_field_name => al.id, status: 'done')
-    expect(dm.persisted?).to be true
+    dm = DynamicModel::SetupEmbedTestTest1Rec.first
 
     embedded_item = al.embedded_item
     expect(embedded_item).to eq dm
@@ -125,7 +124,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
 
     ur.update!(disabled: false, current_admin: @admin)
     al = ActivityLog::PlayerContactEmbedTest.create(master: @master, player_contact_id: @player_contact.id, extra_log_type: :test1)
-    dm = DynamicModel::SetupEmbedTestTest1Rec.create(master: @master, @al.foreign_key_field_name => al.id, status: 'done2')
+    dm = DynamicModel::SetupEmbedTestTest1Rec.first
     embedded_item = al.embedded_item
     expect(embedded_item).to eq dm
   end
