@@ -17,9 +17,21 @@ class ClientLogsController < ApplicationController
   def log_message(msg, error, details)
     user_id = current_user&.id
     admin_id = current_admin&.id
-    if Rails.env.production? && user_id
-      Admin::ExceptionLog.create message: (msg || 'error'), main: error, backtrace: details, user_id: user_id, admin_id: admin_id
+    msg ||= 'error'
+    info = {
+      message: msg,
+      main: error,
+      backtrace: details,
+      user_id: user_id,
+      admin_id: admin_id
+    }
+    if user_id
+      if Rails.env.production?
+        Admin::ExceptionLog.create info
+      else
+        puts "CLIENT ERROR\n#{info.to_yaml}"
       end
+    end
     render plain: 'OK', status: 200
   end
 
