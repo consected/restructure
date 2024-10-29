@@ -24,7 +24,7 @@
               - lock
               - unlock
             and_latest_matches: 
-              field_name_6: unlock              
+              extra_log_type: unlock              
 
             return_constant: 'value to return if previous condition matches'
             field_to_return: 'return_value'
