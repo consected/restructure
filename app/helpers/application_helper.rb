@@ -3,6 +3,16 @@
 module ApplicationHelper
   DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
 
+  def is_current_admin_sample?
+    return @is_current_admin_sample unless @is_current_admin_sample.nil?
+
+    if defined? current_admin_sample
+      res = current_admin_sample
+    end
+
+    @is_current_admin_sample = !!res
+  end
+
   #
   # Hyphenated name (singular) of the current controller
   def hyphenated_name
@@ -140,13 +150,18 @@ module ApplicationHelper
     dlabel = dialogs[key][:label]
     dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
     id = "dialog-#{dname}-#{dlabel}".id_hyphenate
+
+    admin_sample_markup = "<div class=\"admin-sample-field-info\"><span>#{key}</span></div>" if is_current_admin_sample?
+
     if strip_tags(dmsg).length <= 100 || dlabel.blank?
       <<~END_HTML
+        #{admin_sample_markup}#{'      '}
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div><div class="dialog-btn-container"><p>#{dmsg}</p></div>
       END_HTML
         .html_safe
     else
       <<~END_HTML
+        #{admin_sample_markup}
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div>
         <div class="dialog-btn-container">
           <p>#{strip_tags dmsg[0..100]}...</p>
@@ -188,6 +203,11 @@ module ApplicationHelper
     end
 
     caption = caption.gsub('{{', '{^{').gsub('}}', '}^}') if no_sub == :escape
+    if is_current_admin_sample?
+      admin_sample_markup = "<div class=\"admin-sample-field-info\"><span>#{key}</span></div>"
+      caption = "#{admin_sample_markup}\n#{caption}"
+    end
+
     caption.html_safe
   end
 

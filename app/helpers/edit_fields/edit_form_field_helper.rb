@@ -140,6 +140,10 @@ module EditFields
 
       got ||= render partial: 'common_templates/edit_fields/default', locals: local_vars[:locals]
 
+      if is_current_admin_sample?
+        got = "<div class=\"admin-sample-field-info\"><span>#{field_name}</span></div>#{got}".html_safe
+      end
+
       if opt[:calculate_with]
         cw = opt[:calculate_with]
         if cw

@@ -204,3 +204,15 @@ a.link-disabled {
   box-shadow: 0 4px 6px 4px rgba(0, 0, 0, 0.15);
 }
 
+.admin-sample-field-info {
+  color: gray;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.caption-before .admin-sample-field-info{
+  font-size: 96%;
+}
+
+.dialog-before .admin-sample-field-info {
+  font-size: 90%;
+}
