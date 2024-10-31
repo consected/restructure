@@ -2701,6 +2701,97 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     end
   end
 
+  describe 'result based on an attribute used to form the query resulting in it matching a value' do
+    before :example do
+      @al_elt = []
+      4.times do |i|
+        @al_elt << create_item(select_who: "who_#{i}", select_call_direction: "dir_#{i}")
+      end
+    end
+
+    it 'is matched in a simple reference and the last record matched has a specified attribute value' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be true
+    end
+
+    it 'is fails match on a simple reference and the last record matched has a specified attribute value' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_2
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be false
+    end
+
+    it 'is matched in a simple reference and the last record matched has specified attribute values' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+              select_call_direction: dir_3
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be true
+    end
+
+    it 'is fails to match a simple reference and the last record matched has specified attribute values' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+              select_call_direction: dir_2
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be false
+    end
+  end
+
   describe 'getting referring record attributes and checking existence' do
     before :each do
       create_user
