@@ -4,6 +4,7 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
 
       before_save :handle_before_save_triggers
@@ -12,7 +13,7 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results, :skip_presets
+      attr_accessor :skip_save_trigger, :save_trigger_results
     end
 
     class_methods do
@@ -228,6 +229,22 @@ module Dynamic
       option_type_config&.calc_batch_trigger self
     end
 
+    def skip_presets_for(method_name)
+      return skip_presets unless skip_presets.is_a?(String)
+
+      skip_presets.split(',').include?(method_name.to_s)
+    end
+
+    def preset_fields
+      return if skip_presets_for(:preset_fields) || !current_user
+
+      config = option_type_config&.preset_fields
+      return unless config&.present?
+
+      st = SaveTriggers::PresetFields.new(config, self)
+      st.perform
+    end
+
     #
     # Force fields to be preset before initialization has been completed.
     # This uses the option config {field_options: <field_name>: preset_value:}
@@ -236,7 +253,7 @@ module Dynamic
     # blank_preset_value: only sets the value if it was previously blank, so won't override values in #create! methods
     # By setting ahead of time, things like embed_resource_name can operate.
     def force_preset_values
-      return if skip_presets
+      return if skip_presets_for(:force_preset_values)
 
       fo = option_type_config&.field_options
       return unless fo

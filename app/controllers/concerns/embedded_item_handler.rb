@@ -32,7 +32,7 @@ module EmbeddedItemHandler
 
     return unless @embedded_item
 
-    @embedded_item.force_preset_values
+    @embedded_item.force_preset_values if @embedded_item.respond_to?(:force_preset_values)
     case action_name
     when 'new'
       set_embedded_item_optional_params

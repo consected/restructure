@@ -171,6 +171,45 @@
       use_app_type: |
         use the specified app type id or name instead of the user's current app type
         to filter protocol (and in the future other) selections
+  
+  # Add preset values to a mass of fields on initialization of new items, or before
+  # creating a reference.
+  # `field_options.<field_name>.preset_value` and `field_options.<field_name>.blank_preset_value` are
+  # evalutated after this, and may override any settings here.
+  preset_fields:
+    with_result: 
+    # Map attributes from a related item to the target item.
+    # NOTE: with: fields override any specified here
+      from:
+        embedded_item:
+          return: return_result
+      attributes:
+        receipt_date: event_date
+        receipt_time: event_time
+        received_by: received_by
+        select_facility: 'Lab: {{select_lab}}'
+        # Substitutions use data only from the "from:" item                
+        embedded_item:
+          rank: rank
+          rec_type: rec_type
+          data: '{{select_lab}}'
+    with: 
+      field_name: 'now()'
+      field_name_2: 'literal value'
+      field_name_3: 
+        this: 
+          field_name: return_value
+      field_name_4: 
+        reference_name:
+          field_name: return_value
+      field_name_5: '\{\{curly_tag\}\} - \{\{curly_tag2\}\}'
+      field_name_6: '\{\{\{data.data_structure\}\}\}' # Get a data structure as original object, for JSON fields etc                  
+      embedded_item:
+        field_name: 'literal value'
+        field_name_2: 
+          reference_name:
+            field_name: return_value
+  
   dialog_before:
     field_name:
       name: message template name

@@ -294,7 +294,7 @@ class Classification::SelectionOptionsHandler
     impl_classes.select! { |ic| !ic.respond_to?(:definition) || ic.definition.ready_to_generate? }
 
     impl_classes.each do |impl_class|
-      dyn_object = impl_class.new
+      dyn_object = impl_class.new(skip_presets: true)
 
       # If an extra log type was specified, use it, since the alt_options are specified at that level
       dyn_object.extra_log_type = extra_log_type if extra_log_type && dyn_object.respond_to?(:extra_log_type)
