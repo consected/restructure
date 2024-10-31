@@ -132,7 +132,7 @@
       "check_name": "UnsafeReflection",
       "message": "Unsafe reflection method `constantize` called on model attribute",
       "file": "app/models/calc_actions/calculate.rb",
-      "line": 702,
+      "line": 719,
       "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
       "code": "Resources::Models.find_by(:resource_name => @join_tables.first).class_name.constantize",
       "render_path": null,
@@ -155,7 +155,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/concerns/master_handler.rb",
-      "line": 202,
+      "line": 203,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -381,7 +381,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 1114,
+      "line": 1116,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"SELECT DISTINCT v.oid::regclass AS view\\nFROM pg_depend AS d      -- objects that depend on the table\\n  JOIN pg_rewrite AS r  -- rules depending on the table\\n      ON r.oid = d.objid\\n  JOIN pg_class AS v    -- views for the rules\\n      ON v.oid = r.ev_class\\nWHERE \\n--v.relkind = 'v'    -- only interested in views\\n  --AND \\n  d.classid = 'pg_rewrite'::regclass\\n  AND d.refclassid = 'pg_class'::regclass\\n  AND d.deptype = 'n'    -- normal dependency\\n  AND d.refobjid = '#{schema}.#{table_name}'::regclass;\\n\")",
       "render_path": null,
@@ -841,6 +841,25 @@
       "note": ""
     },
     {
+      "warning_type": "Unmaintained Dependency",
+      "warning_code": 120,
+      "fingerprint": "d84924377155b41e094acae7404ec2e521629d86f97b0ff628e3d1b263f8101c",
+      "check_name": "EOLRails",
+      "message": "Support for Rails 6.1.7.10 ended on 2024-10-01",
+      "file": "Gemfile.lock",
+      "line": 299,
+      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
+      "code": null,
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "High",
+      "cwe_id": [
+        1104
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "e697af5171f6eeb2057e452921c8b32e8affa120bc6a21c95ea39e07c24548e5",
@@ -952,6 +971,6 @@
       "note": ""
     }
   ],
-  "updated": "2024-09-11 11:22:37 +0100",
-  "brakeman_version": "6.1.2"
+  "updated": "2024-10-31 20:39:27 +0000",
+  "brakeman_version": "6.2.2"
 }
