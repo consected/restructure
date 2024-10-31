@@ -222,8 +222,16 @@ module Dynamic
                                          format: :raw)
     end
 
+    #
+    # Create a missing user access control, ignoring the access type
+    # so that we don't attempt to create duplicates that will fail validation.
+    # If the access on an existing UAC needs to change, get the result from
+    # this method then update access manually.
+    # @param [Hash] uac_cond
+    # @return [Admin::UserAccessControl]
     def create_missing_user_access_control(uac_cond)
-      exists = Admin::UserAccessControl.active.find_by(uac_cond)
+      find_cond = uac_cond.except(:access, 'access')
+      exists = Admin::UserAccessControl.active.find_by(find_cond)
       return if exists
 
       uac_cond[:current_admin] = current_admin

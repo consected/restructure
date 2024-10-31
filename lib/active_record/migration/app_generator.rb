@@ -136,7 +136,7 @@ module ActiveRecord
           dir.up do
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
-              next if to_table_name.in? done
+              next if to_table_name.nil? || to_table_name.in?(done)
 
               done << to_table_name
               puts "-- create or replace reference view #{ref_view_name(to_table_name)}"
@@ -1021,13 +1021,15 @@ module ActiveRecord
 
           DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
           DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_history_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_history_update ON #{schema}.#{table_name};
 
-          CREATE TRIGGER log_#{history_table_name}_insert
+          CREATE TRIGGER log_history_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-          CREATE TRIGGER log_#{history_table_name}_update
+          CREATE TRIGGER log_history_update
             AFTER UPDATE ON #{schema}.#{table_name}
             FOR EACH ROW
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))

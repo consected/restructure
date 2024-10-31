@@ -19,7 +19,9 @@ module Redcap
     end
 
     def self.default_schema_name
-      'redcap'
+      return 'redcap' if Rails.env.production?
+
+      'redcap_test'
     end
 
     def initialize(project_admin, qualified_table_name)

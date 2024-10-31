@@ -23,7 +23,7 @@ module AdminHelper
     return if no_edit
 
     if options[:copy]
-      path = new_path(copy_with_id: options[:copy]&.id)
+      path = new_path(copy_with_id: options[:copy]&.id, filter: filter_params_permitted)
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
     else
       path = edit_path(id, filter: filter_params_permitted)

@@ -43,7 +43,15 @@
     <% if @app_type&.id %>
     <div class="col-md-24">
       <h2>Additional setup information</h2>
-      <p>App type active on server? 
+    <p>App type enabled? 
+                <%= if !@app_type.disabled
+                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                else
+                  '<span class="glyphicon glyphicon-exclamation-sign" title="app type has been marked as disabled"></span>'.html_safe
+                end
+                %>       
+    </p>
+    <p>App type active on server? 
                 <%= if @app_type.active_on_server?
                   "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
                 elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
@@ -51,7 +59,7 @@
                 else
                   "<span class=\"val-unchecked\"></span>".html_safe  
                 end
-                %>       
+                %>                 
     </p>
     <p>Current user has access to app?
                 <%= if user_has_access
@@ -63,7 +71,7 @@
     </p>
     <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
       <p>Configure the filestore app filesystem</p>
-      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %>app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
+      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
     <% end %>
     <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
       <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>

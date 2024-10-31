@@ -467,7 +467,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       ei.clear_model_reference_memo
       expect(ei.extra_log_type).to eq :mr_ref_pc
 
-      pc2 = PlayerContact.find_by(pc_hash_1)
+      pc2 = PlayerContact.where(pc_hash_1).last
       expect(pc2).not_to be nil
       eiei = ei.embedded_item(embed_action_type: :viewing, force_reload: true)
       expect(eiei).to eq pc2

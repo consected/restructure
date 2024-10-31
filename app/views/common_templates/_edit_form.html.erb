@@ -294,6 +294,9 @@
           </li>
           <% end %>
         <% end %>
+<% unless embedded %>
+    <%= render partial: 'common_templates/edit_form_filestore', locals: {} %>
+<% end %>
       </ul>
       <% if disabled_form %></fieldset><% end %>
       <% end %>
@@ -308,7 +311,6 @@
       <% end %>
 
 <% unless embedded %>
-    <%= render partial: 'common_templates/edit_form_filestore', locals: {} %>
   </div>
 </div>
 <% end %>
