@@ -37,7 +37,7 @@ module Dynamic
       attr_writer :allow_migrations
 
       before_validation :init_schema_name
-
+      validate :schema_name_ok
       after_create :generate_create_migration, if: -> { !disabled }
 
       after_save :generate_migration, if: -> { !disabled }
@@ -169,7 +169,7 @@ module Dynamic
 
       current_user_app_type = current_admin.matching_user_app_type
       dsn = current_user_app_type&.default_schema_name
-      return dsn if dsn
+      return dsn if dsn.present?
 
       res = category.split('-').first if category.present?
       res ||= Settings::DefaultMigrationSchema
@@ -240,6 +240,13 @@ module Dynamic
                          else
                            db_migration_schema
                          end
+    end
+
+    def schema_name_ok
+      return true if disabled? || Admin::MigrationGenerator.current_search_paths.include?(schema_name)
+
+      errors.add :schema_name, "not in current search_path (#{schema_name}) - " \
+                           "#{Admin::MigrationGenerator.current_search_paths}"
     end
   end
 end
