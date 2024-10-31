@@ -148,4 +148,14 @@ module AdminHelper
 
     res.html_safe
   end
+
+  def admin_submit_and_cancel(form)
+    res = <<~END_HTML
+      #{hidden_field_tag :updated_at, object_instance.updated_at}
+      #{form.submit class: 'btn btn-primary'}
+      #{admin_edit_cancel}
+    END_HTML
+
+    res.html_safe
+  end
 end
