@@ -453,7 +453,10 @@ module MasterHandler
       build_with = secure_params
     rescue StandardError => e
       logger.warn("set_instance_from_build: #{e}")
+      build_with = {}
     end
+    build_with[:skip_presets] = 'preset_fields' if action_name != 'new'
+    build_with[:current_admin_sample] = true if current_admin_sample
     set_object_instance @master_objects.build(build_with)
 
     if set_master_on_build
