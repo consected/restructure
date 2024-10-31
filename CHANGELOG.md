@@ -12,7 +12,84 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.8.3] - 2024-08-22
+## Unreleased
+
+- [Fixed] spec based on schema name validation
+- [Fixed] error setting redcap schema name intermittently
+- [Added] logging of other potential issues
+- [Added] environment variable to control test log level
+- [Fixed] issue with presets and current admin sample
+- [Fixed] specs for browser testing
+- [Fixed] specs for redcap model generation
+- [Fixed] UI issues related to templates loading
+- [Fixed] spec to use correct item
+- [Fixed] test if embedded item in config setup
+- [Fixed] documentation of and_latest_matches
+- [Added] feedback of client errors in dev/test
+- [Fixed] styling of tracker new and edit forms
+- [Added] use of "chosen" drop down for admin forms to aid faster configurations
+- [Updated] Ruby to 3.2.5 and updated gems
+- [Added] ignore_no_recipients as an option to notify sms
+- [Changed] presentation of fixed_... fields to avoid them being accidentally selected
+- [Added] admin filter on server url for Redcap projects
+- [Added] information to help with debugging common create_reference configuration error
+- [Added] config_trigger.on_define.embed options to allow_reconfiguration (default no) and prefix_config_libraries
+- [Added] format check for dialog_before configurations and check message template exists
+- [Added] a page layout view option for default_expander to present activity log blocks as "shrunk" by default
+- [Fixed] display of filestore block in edit forms
+- [Fixed] handling of UI template loading to ensure blocks load correctly or report an error if not
+- [Fixed] failing specs due to missing attribute on standard models
+- [Fixed] overflowing display of filter selectors in activity log panels
+- [Fixed] time fields don't accept default - fixes #391
+- [Fixed] broken markup in dialogs
+- [Changed] small admin presentation issues
+- [Changed] css and typo
+- [Fixed] issue with app_type import failing where underlying tables don't exist or aren't created because the app or models are disabled
+- [Fixed] handling of force_not_valid feeding through to embedded_item
+- [Fixed] unnecessary exception
+- [Fixed] markdown notes fields in esignatures
+- [Fixed] bad setup of dev filestore
+- [Fixed] handling of create_default.user_access_control to avoid breaking setup if the control already exists with a different access
+- [Fixed] showing new index when copying an admin item
+- [Changed] handling of admin sample form to show dialog names, field names, form names of embedded forms
+- [Added] versions list to dynamic model admin panel
+- [Added] a check on saving a new version of an admin configuration, to ensure saved changes in another tab aren't overwritten - closes #387
+- [Changed] display of components to avoid duplication
+- [Changed] presentation of admin panel component selection panel to group by category
+- [Changed] formatting of admin panel component list
+- [Added] new "calculate" options for count_not_null and mean
+- [Added] and_latest_matches to if conditions to check if one value is the latest of a possible set
+- [Fixed] occasional error due to presets being loaded unnecessarily
+- [Added] ability for create/update reference and preset_fields to use with_results multiple times (array) to pull from different sources
+- [Added] preset_fields option to preset values to a mass of fields on initialization of new items, or before creating a reference.
+- [Fixed] issue with preset_value being set within a referenced item
+- [Fixed] label resizing for show_if changes
+- [Fixed] current_mode not being passed to embedded_item for show_if
+- [Fixed] issue with show_if checking time field conditions. Changes are now triggered.
+- [Fixed] issue with conditionally showing dialog placeholders in admin view
+- [Added] substitution comparisons in show_if rules
+- [Fixed] broken show_if
+- [Changed] handling of #is and #if substitutions to make it less sensitive to extra spaces
+- [Fixed] matching of {{#is...}} operators
+- [Fixed] substitutions in {{#is}} to handle integers correctly
+- [Added] comparison operators to {{#is}} substitutions
+- [Added] {{else if}} and {{else is}} to substitutions
+- [Added] `{{else if}}` to substitutions
+- [Added] age to subject handler and allow it to be substituted with `{{player_info.subject_age}}` or through generated JSON
+- [Added] tag value retrieval on right hand side of {{#is...}} comparisons
+- [Added] {{#is ...}} handling to dialogs and captions in show mode
+- [Fixed] #is #else handling
+- [Changed] loading of routes to load only a single time after regenerating a model
+- [Fixed] issue preventing routes being regenerated
+- [Updated] gems
+- [Fixed] issues appearing during spec tests
+- [Fixed] current admin sample form showing embedded items named incorrectly
+- [Fixed] broken current admin sample view
+- [Added] viewing of embedded references in admin sample view
+- [Added] form info to admin sample when there are embedded references
+- [Changed] handling of admin sample form to show dialogs and field names
+
+## [8.8.11] - 2024-08-22
 
 - [Changed] sorting of external identifier columns in master panel
 - [Added] logger info when an item is not creatable
@@ -21,7 +98,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] content type for create shortlink in substitutions
 - [Fixed] dynamic definition option `embed: <string>` doesn't work - fixes #388
 
-## [8.8.3] - 2024-08-22
+## [8.8.10] - 2024-08-22
 
 - [Fixed] message notifications sending SMS messages with HTML markup
 - [Added] {{#is ...}} to substitutions - closes #222
@@ -35,7 +112,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] extra information to help debug iterator issues in save trigger
 - [Fixed] formatting issue in dynamic model details panel
 
-## [8.8.3] - 2024-08-22
+## [8.8.9] - 2024-08-22
 
 - [Changed] handling of create_reference with embedded_item to ensure save triggers can reference the new embedded item
 - [Fixed] error message
