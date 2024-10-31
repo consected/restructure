@@ -28,7 +28,7 @@ module EmbeddedItemHandler
 
     oi.current_user = current_user
     oi.action_name = action_name
-    @embedded_item = oi.embedded_item
+    @embedded_item = oi.embedded_item(current_admin_sample:)
 
     return unless @embedded_item
 

@@ -45,6 +45,7 @@
           refitem.each do |ref_type, ref_config|
           shown_embedded = true
           %>
+          <% if is_current_admin_sample? %><div class="admin-sample-form-info"><label>referenced item:</label> <span><%=ref_type%></span></div><% end %>
           <%= render partial: 'common_templates/reference_actions',  locals: {
                 name: "#{object_instance.class.name.ns_underscore}", 
                 ref_type: ref_type, 

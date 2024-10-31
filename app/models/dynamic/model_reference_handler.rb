@@ -255,7 +255,7 @@ module Dynamic
     #
     # @param [Boolean] only_creatables - will return only the creatable model references if true
     # @return [Hash] <description>
-    def creatable_model_references(only_creatables: false, force_reload: nil)
+    def creatable_model_references(only_creatables: false, force_reload: nil, current_admin_sample: nil)
       clear_creatable_model_reference_memo if force_reload
 
       memoize_creatable_model_references(only_creatables) do
@@ -285,7 +285,7 @@ module Dynamic
                 next
               end
 
-              user_can_create = target_object_creatable?(ref_type, ref_config)
+              user_can_create = current_admin_sample || target_object_creatable?(ref_type, ref_config)
               res = { ref_type:, many: creatable_add_config, ref_config: } if user_can_create
             end
 
@@ -516,7 +516,7 @@ module Dynamic
     # is likely due to the UI, but for now retain it here.
     #
     # @return [UserBase]
-    def embedded_item(embed_action_type: nil, only_creatables: true, force_reload: nil)
+    def embedded_item(embed_action_type: nil, only_creatables: true, force_reload: nil, current_admin_sample: nil)
       embed_action_type ||= self.embed_action_type
 
       clear_embedded_item_memo if force_reload
@@ -524,7 +524,7 @@ module Dynamic
       memoize_embedded_item do
         res = nil
         mrs = model_references(force_reload:)
-        cmrs = creatable_model_references(only_creatables:, force_reload:)
+        cmrs = creatable_model_references(only_creatables:, force_reload:, current_admin_sample:)
 
         if never_embed_item || embed_action_type == :creating && never_embed_creatable_item
           # Do nothing - we have been told to never embed
