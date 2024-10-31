@@ -30,6 +30,8 @@ _fpa_admin.user_access_controls.admin_edit_form = class {
     $(rn_fname).attr('data-big-select-subtype', val)
     $(`${a_fname} optgroup[label]`).hide()
     $(`${a_fname} optgroup[label="${val}"]`).show()
+    $(a_fname).trigger('chosen:updated');
+
   }
 
 }

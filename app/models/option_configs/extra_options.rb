@@ -114,6 +114,23 @@ module OptionConfigs
     def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
+
+      dialog_before.each do |k, v|
+        unless v.is_a? Hash
+          failed_config :dialog_before,
+                        "dialog_before must be a Hash: #{k}",
+                        level: :error
+          next
+        end
+
+        name = v[:name]
+        mt = Admin::MessageTemplate.active.find_by(name:)
+        next if mt
+
+        failed_config :dialog_before,
+                      "dialog_before specifies a named message template that doesn't exist: #{name}",
+                      level: :warn
+      end
     end
 
     # Field labels definitions

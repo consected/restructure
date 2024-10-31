@@ -177,13 +177,17 @@
 
     {{#if layout}}
     <div class="sublist-layout-selectors">
-      <button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-th active" data-layout-sub-list="{{sub_list}}" data-force-layout="card-block"></button><button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-align-justify" data-layout-sub-list="{{sub_list}}" data-force-layout="wide-block"></button>
+      <button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-th active" data-layout-sub-list="{{sub_list}}" data-force-layout="card-block" title="grid view"></button><button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-align-justify" data-layout-sub-list="{{sub_list}}" data-force-layout="wide-block" title="list view"></button>
+    </div>
+
+    <div class="sublist-expander-selector">
+      <button class="btn btn-default btn-sm expander-switch glyphicon glyphicon-resize-vertical active" data-expander-sub-list="{{sub_list}}" title="shrink/expand items"></button>
     </div>
     {{/if}}
 
     {{#if order}}
     <div class="sublist-order-selector">
-      <button class="btn btn-default btn-sm order-switch glyphicon glyphicon-sort-by-attributes" data-order-sub-list="{{sub_list}}" data-order-val="{{order}}"></button>
+      <button class="btn btn-default btn-sm order-switch glyphicon glyphicon-sort-by-attributes" data-order-sub-list="{{sub_list}}" data-order-val="{{order}}" title="reverse sorting"></button>
     </div>
     {{/if}}
   </div>

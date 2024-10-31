@@ -339,6 +339,30 @@ _fpa.form_utils = {
     _fpa.form_utils.sort_blocks($targets, order_alt);
   },
 
+  handle_sub_list_expander: function ($control, init) {
+    var $a = $control;
+    var sl = $a.attr('data-expander-sub-list');
+    var $targets = $('[data-sub-list="' + sl + '"]');
+
+    if (!init) {
+      var expander_alt = $a.hasClass('active');
+      if (expander_alt) {
+        $a.removeClass('active');
+        // Shrink and make expandable
+        $targets.find('.list-group').addClass('expandable expandable-target').attr('data-toggle', 'expandable');
+
+      } else {
+        // Expand and remove expandable
+        $a.addClass('active');
+        $targets.find('.list-group').removeClass('expandable expandable-target').attr('data-toggle', null);
+      }
+    }
+
+    expander_alt = $a.hasClass('active');
+    _fpa.form_utils.setup_data_toggles($targets.parent())
+    _fpa.form_utils.format_block($targets.parent());
+  },
+
   handle_sub_list_layout: function ($control, init) {
     var $a = $control;
     var sl = $a.attr('data-layout-sub-list');
@@ -358,12 +382,11 @@ _fpa.form_utils = {
     if (val == 'wide-block') {
       $targets.removeClass('card-block').addClass('wide-block');
       $targets.find('.list-group').addClass('expandable').attr('data-toggle', 'expandable');
-      _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
     } else {
       $targets.addClass('card-block').removeClass('wide-block');
       $targets.find('.list-group').removeClass('expandable').attr('data-toggle', null);
-      _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
     }
+    _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
   },
 
   // Setup the typeahead prediction for a specific text input element
@@ -625,8 +648,9 @@ _fpa.form_utils = {
       })
       .addClass('attached-chosen');
 
-    var $dfs = sels.filter('[data-filter-selector]');
+    var $dfs = sels.filter('[data-filter-selector], [data-filters-select]');
     _fpa.form_utils.setup_chosen_groups($dfs);
+    _fpa.form_utils.setup_form_filtered_select(block);
   },
 
   setup_chosen_groups: function ($data_filter_selectors) {
@@ -1906,6 +1930,24 @@ _fpa.form_utils = {
         $(this).on('click', '.order-switch', function (ev) {
           ev.preventDefault();
           _fpa.form_utils.handle_sub_list_order($(this));
+          var sl = $(this).attr('data-order-sub-list');
+          var $targets = $('[data-sub-list="' + sl + '"] .common-template-item, [data-sub-list="' + sl + '"] .new-block');
+          _fpa.form_utils.resize_children($targets.parents('[data-sub-list="' + sl + '"]').parent());
+        });
+      })
+      .addClass('formatted-slfs');
+
+
+    block
+      .find('.sublist-expander-selector')
+      .not('.formatted-slfs')
+      .each(function () {
+        $(this).on('click', '.expander-switch', function (ev) {
+          ev.preventDefault();
+          _fpa.form_utils.handle_sub_list_expander($(this));
+          var sl = $(this).attr('data-order-sub-list');
+          var $targets = $('[data-sub-list="' + sl + '"] .common-template-item, [data-sub-list="' + sl + '"] .new-block');
+          _fpa.form_utils.resize_children($targets.parents('[data-sub-list="' + sl + '"]').parent());
         });
       })
       .addClass('formatted-slfs');

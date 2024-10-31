@@ -49,11 +49,11 @@
         <%
           select_item_type = {}
           select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == p.to_s
-          select_item_type[:include_blank] = true
+          select_item_type[:include_blank] = true          
 
           options = send("#{p}_options")
         %>
-        <%= f.select p, options, select_item_type %>
+        <%= f.select p, options, select_item_type, {class: 'use-chosen'} %>
       <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template')
           has_options = p
       %>
@@ -65,7 +65,7 @@
         <%= form_field_label(f, p) %>
       <% elsif p == :item_type %>
         <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
-        <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
+        <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id, class: 'use-chosen'  %>
       <% elsif p == :app_type_id %>
           <%= form_field_label(f, p) %>
           <%
@@ -74,14 +74,17 @@
             if oc.respond_to?(:app_type_not_required) && oc.app_type_not_required
               ib = {include_blank: '(all)'}
             end
+
+            add_opts = extra_field_attributes[p.to_sym].dup || {}
+            add_opts[:class] = 'use-chosen'
           %>
-          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), ib, extra_field_attributes[p.to_sym]||{} %>
+          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), ib, add_opts %>
       <% elsif p == :user_id %>
           <%
             default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id'
           %>
           <%= form_field_label(f, p) %>
-          <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true } %>
+          <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true }, class: 'use-chosen' %>
       <% elsif p == :api_key %>
         <%= form_field_label(f, p) %>
         <% begin %>

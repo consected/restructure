@@ -13,7 +13,7 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results
+      attr_accessor :skip_save_trigger, :save_trigger_results, :current_admin_sample
     end
 
     class_methods do
@@ -265,13 +265,13 @@ module Dynamic
 
         init_value = config[:preset_value]
         if init_value
-          res = FieldDefaults.calculate_default self, init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end
 
         init_value = config[:blank_preset_value]
         if init_value
-          res = FieldDefaults.calculate_default self, init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res if attributes[name.to_s].blank?
         end
       end

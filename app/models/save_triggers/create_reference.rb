@@ -86,7 +86,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
 
               unless create_in.is_a?(Hash) && create_in[:specific_record]
                 raise FphsException,
-                      "Unknown 'in' value in create_reference"
+                      "Unknown 'in' value in create_reference for config #{config}"
               end
 
               # A specific instance is the target for the reference from_record

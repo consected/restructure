@@ -9,10 +9,17 @@
           access: create|update|read
           # Default is create
         embed:
-        # Create a default embed dynamic model. No fields need to be specified.
+        # Create a default embed dynamic model. No fields need to be specified, and leaving the configuration without
+        # a `fields` key will prevent future updates the configuration
           fields:
             - status
             - notes
+          allow_reconfiguration: nil (default) | true
+            # Allow reconfiguration with the specified fields  
+          prefix_config_libraries: string | array
+            # Either a `<category> <name>` pair for a library
+            # or a list of libraries in this format
+            # This will be added to the options, unless the embed already exists with non-blank options
         page_layout:
         # Create a master page layout for this definition resource.
       create_configs:

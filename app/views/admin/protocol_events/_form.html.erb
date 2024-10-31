@@ -4,7 +4,7 @@
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :sub_process_id %>
-    <%= f.select :sub_process_id, sub_processes_array %>
+    <%= f.select :sub_process_id, sub_processes_array, {}, class: 'use-chosen' %>
   </div>
   <div class="form-group">
     <%= f.label :name %>

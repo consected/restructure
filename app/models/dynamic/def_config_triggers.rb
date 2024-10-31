@@ -111,7 +111,19 @@ module Dynamic
       return unless config.has_key?(:embed) && dynamic_def_type == :activity_log
 
       # Create the corresponding dynamic model for embedding in the activity log
-      embed = config[:embed] || {}
+      embed = config[:embed].dup || {}
+      allow_reconfiguration = embed.delete(:allow_reconfiguration)
+      prefix_config_libraries = embed.delete(:prefix_config_libraries)
+      prefix_config_libraries = [prefix_config_libraries] if prefix_config_libraries.is_a?(String)
+
+      pl_text = ''
+      prefix_config_libraries&.each do |pl|
+        pl_text = "#{pl_text}\n# @library #{pl}"
+      end
+
+      options = <<~END_TEXT
+        #{pl_text}
+      END_TEXT
 
       return if option_config.name.in?(%w[primary blank_log])
 
@@ -140,7 +152,10 @@ module Dynamic
       )
 
       if exists
-        # Update if anything is specified in the embed config, otherwise skip
+        return unless allow_reconfiguration
+
+        # Update if reconfiguration is allowed and anything is specified in the embed config, otherwise skip
+        emb_cond[:options] = options unless exists.options.present?
         exists.update!(emb_cond) unless embed.empty? || attributes_equal(exists, emb_cond)
       else
         exists = DynamicModel.create!(emb_cond)
