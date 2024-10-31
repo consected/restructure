@@ -316,15 +316,29 @@ a.glyphicon.edit-entity.edit-tracker {
   }
 }
 
-form.edit_tracker,
-form.new_tracker {
-  .form-group {
-    text-align: right;
+form[id^='edit_tracker'],
+form#new_tracker {
+  &.form-inline .row > div {
+    text-align: left;
+  }
+
+  .form-group {  
 
     input[type="submit"] {
       margin-right: 1.67em;
     }
+
+    label {
+     display: block;
+     text-align: left;
+    }
   }
+
+  .tracker-notes label {
+    display: block;
+    text-align: left;
+  }
+
 }
 
 table.table tbody.tracker-history {

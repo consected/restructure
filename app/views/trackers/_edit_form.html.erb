@@ -11,41 +11,44 @@
       <%=form_for([@master, object_instance], edit_form_hash(html: {class: 'form-inline'}) ) do |f|%>
         <%= hidden_field_tag :record_type, object_instance.record_type.to_s.underscore %><%= hidden_field_tag :record_id, object_instance.record_id %>
         <div class="row">
-          <div class="col-md-8 col-lg-6">
+          <div class="col-md-6 col-lg-5">
             <div class="form-group tracker-protocol">
                 <%= f.label :protocol, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'Classification::Protocol for existing records can not be changed.' : 'Set protocol for tracker record. This can not be changed after creation.'}"  %>
                 <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "#tracker_sub_process_id, #tracker_outcome", class: "form-control", disabled: (!!@tracker.id)}%>
             </div>
 
           </div>
-          <div class="col-md-8 col-lg-6">
+          <div class="col-md-6 col-lg-5">
             <div class="form-group tracker-sub_process">
               <%= f.label :sub_process_id, 'status' %>
               <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#tracker_protocol_event_id", class: "form-control"} %>
             </div>
 
           </div>
-          <div class="col-md-8 col-lg-6">
+          <div class="col-md-12 col-lg-10">
             <div class="form-group tracker-event">
                 <%= f.label :protocol_event_id, 'method' %>
                 <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "form-control" %>
             </div>
-            <div class="form-group tracker-event_date" style="display: block !important;">
+          </div>
+          <div class="col-md-4 col-lg-4">
+            <div class="form-group tracker-event_date">
                 <%= f.label :event_date %>
                 <%= f.date_field :event_date, {class: "form-control", autocomplete: 'off'} %>
             </div>
           </div>
-        </div>
-        <div class="row">
-            <div class="col-md-18">
+        </div>        
+        <div class="row">            
+            <div class="col-md-19">
               <div class="tracker-notes">
                 <%= f.label :notes %>
                 <%= f.text_area :notes, class: "form-control" %>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
 
               <div  class="form-group">
+                <label>&nbsp;</label>
                 <%= inline_cancel_button "" %> <%= f.submit class: "btn btn-primary" %>
               </div>
 
