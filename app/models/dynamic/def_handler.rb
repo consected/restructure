@@ -552,6 +552,7 @@ module Dynamic
     # Particularly useful if the schema_name is not set
     # @return [String|nil]
     def schema_name_in_db
+      Admin::MigrationGenerator.tables_and_views_reset!
       Admin::MigrationGenerator.table_schema_hash[table_name]
     end
 
