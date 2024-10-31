@@ -2,7 +2,7 @@
 
 class Admin::ActivityLogsController < AdminController
   before_action :set_defaults
-  after_action :routes_reload, only: %i[update create]
+  # after_action :routes_reload, only: %i[update create]
 
   protected
 

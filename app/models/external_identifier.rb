@@ -73,13 +73,18 @@ class ExternalIdentifier < ActiveRecord::Base
       m = active_model_configurations
       return if m.empty?
 
-      Rails.application.routes.draw do
+      routes = Rails.application.routes
+      routes.disable_clear_and_finalize = true
+      routes.draw do
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
             pg_name = mn.base_route_segments
 
-            Rails.logger.info "Setting up routes for #{mn}"
+            next if routes.url_helpers.respond_to?("master_#{pg_name}_path")
+
+            Rails.logger.info "Setting up routes for external identifer: #{pg_name}"
+
             resources pg_name, except: [:destroy]
             get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
           end
@@ -90,6 +95,9 @@ class ExternalIdentifier < ActiveRecord::Base
     rescue FphsException => e
       logger.warn "Not loading activity log routes. There is possibly an error in an extra log type configuration. Table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
+  ensure
+    routes ||= Rails.application.routes
+    routes.disable_clear_and_finalize = false
   end
 
   def external_id_range

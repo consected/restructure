@@ -4,7 +4,7 @@ class Admin::DynamicModelsController < AdminController
   helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_defaults
   helper_method :view_folder
-  after_action :routes_reload, only: %i[update create]
+  # after_action :routes_reload, only: %i[update create]
 
   def update_config_from_table
     set_instance_from_id
