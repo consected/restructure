@@ -508,7 +508,7 @@ DEPENDENCIES
   delayed_job
   delayed_job_active_record
   delayed_job_recurring
-  devise (>= 4.6.1)
+  devise (>= 4.9)
   devise-two-factor
   dicom
   execjs
