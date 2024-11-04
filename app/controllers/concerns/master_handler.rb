@@ -21,7 +21,8 @@ module MasterHandler
     before_action :check_creatable?, only: %i[new create]
     before_action :capture_ref_item, only: %i[create update]
 
-    helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name
+    helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name,
+                  :current_admin_sample
   end
 
   # Get the index JSON results from cache if the :cache_result param is set,
@@ -234,12 +235,14 @@ module MasterHandler
     if dopt
       cb = dopt.caption_before
       l = dopt.labels
+      db = dopt.dialog_before
     end
 
     {
       caption: object_instance.human_name,
       caption_before: cb,
-      labels: l
+      labels: l,
+      dialog_before: db
     }
   end
 
@@ -450,7 +453,10 @@ module MasterHandler
       build_with = secure_params
     rescue StandardError => e
       logger.warn("set_instance_from_build: #{e}")
+      build_with = {}
     end
+    build_with[:skip_presets] = 'preset_fields' if action_name != 'new'
+    build_with[:current_admin_sample] = true if current_admin_sample
     set_object_instance @master_objects.build(build_with)
 
     if set_master_on_build

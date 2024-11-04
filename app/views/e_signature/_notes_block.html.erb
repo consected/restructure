@@ -1,8 +1,18 @@
 <%
-key_sym = key.to_sym
+  key_sym = key.to_sym
 
   if caption_before.has_key? key_sym
     label = nil
+  end
+
+  fopt = field_options_for(@e_sign_document, key_sym)
+  fopt_format = fopt[:format]
+  def_format = app_config_text(:notes_field_format, alt_user: @current_user)
+  format = fopt_format || def_format
+  notes_markup = if format == 'markdown'
+    markdown_to_html(value)
+  else
+    pretty_string value, return_string: true
   end
 %>
 <% if label %>
@@ -10,6 +20,6 @@ key_sym = key.to_sym
 <% end %>
 <li class="e-sign-group-item result-notes-container notes-block <% unless value.present? %>notes-empty<% end %>">
   <div class="notes-text">
-  <%= pretty_string value, return_string: true %>
+    <%= notes_markup%>
   </div>
 </li>

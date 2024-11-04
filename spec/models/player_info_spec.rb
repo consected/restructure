@@ -118,6 +118,16 @@ RSpec.describe PlayerInfo, type: :model do
     expect(@player_info.errors.messages).to have_key(:source), "Errors should contain source: #{@player_info.errors.inspect}"
   end
 
+  it "calculates the player's age" do
+    @player_info.birth_date = Time.now - 50.years
+    age = @player_info.subject_age
+    expect(age).to eq 50
+
+    @player_info.birth_date = Time.now - 30.years + 1.day
+    age = @player_info.subject_age
+    expect(age).to eq 29
+  end
+
   #  it "presents an error if the birth_date is not set and the rank is not set to 881" do
   #    orig = Time.now - 60.years
   #    @player_info.birth_date = nil

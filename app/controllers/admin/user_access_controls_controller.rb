@@ -48,6 +48,9 @@ class Admin::UserAccessControlsController < AdminController
     {
       app_type_id: {
         'data-filters-select': '#admin_user_access_control_role_name'
+      },
+      resource_type: {
+        'data-filters-select': '#admin_user_access_control_access'
       }
     }
   end

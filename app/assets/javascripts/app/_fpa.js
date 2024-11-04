@@ -197,7 +197,11 @@ _fpa = {
   view_template: function (block, template_name, data, options, alt_preprocessor) {
     return new Promise(function (resolve, reject) {
       // Prevent an attempt to render the template in a block that has already been rendered in this request
-      if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
+      if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) {
+        console.debug(`block already rendered`)
+        resolve();
+        return
+      };
 
       // Potentially don't reload, especially if a sidebar request has been made
       // Allow this to be overridden in specific cases by specifying data-ignore-no-load="true"
@@ -205,7 +209,11 @@ _fpa = {
       if (block.parents('[data-no-load]').length &&
         !block.parents('[data-ignore-no-load]').length &&
         !block.attr('data-ignore-no-load')
-      ) return;
+      ) {
+        console.debug(`prevented reload for no-load`)
+        resolve();
+        return
+      };
 
       _fpa.ajax_working(block);
       if (!options) options = {};
@@ -271,6 +279,7 @@ _fpa = {
       var list_data_item_state_ids = [];
 
       if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
+        console.debug(`nothing: ${!url_data_type} or no non versioned template types`)
         resolve();
         return;
       }
@@ -315,6 +324,7 @@ _fpa = {
           // doesn't already exist. This prevents accidental bloating of the DOM with duplicates
           $(data).each(function () {
             var templateid = $(this).attr('id');
+            console.debug(`got template ${templateid}`)
             if (!$('#' + templateid).length) {
               temploc.after($(this));
             }
@@ -323,7 +333,8 @@ _fpa = {
           resolve();
         },
         error: function (data) {
-          for (var k in list_data_item_state_ids) {
+          for (var did in list_data_item_state_ids) {
+            console.error(`Failed to get template ${did}`)
             _fpa.state.template_config_versions[did] = false;
           }
           resolve();
@@ -453,6 +464,7 @@ _fpa = {
     if (pre) {
       pre = pre.replace(/-/g, '_');
       if (_fpa.preprocessors[pre]) {
+        console.debug(`preprocessor ${pre}()`)
         _fpa.preprocessors[pre](block, data);
         procfound = true;
       }
@@ -524,7 +536,10 @@ _fpa = {
       })
       .on('ajax:before', sel, function (ev) {
         // Prevent this being handled in a parent, such as happens if we have a link in a form
-        if (ev.target != ev.currentTarget) return;
+        if (ev.target != ev.currentTarget) {
+          console.log('target doesn\'t match')
+          return;
+        }
 
         var block = $(this);
         _fpa.remote_request = null;
@@ -561,6 +576,7 @@ _fpa = {
               cfs.removeClass('changed-field-danger');
             })
             ev.preventDefault();
+            console.debug('prevented cancelled request')
             return false;
           }
         }
@@ -571,6 +587,7 @@ _fpa = {
         // when expanding rather than collapsing
         if ($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')) {
           ev.preventDefault();
+          console.debug('prevented collapsed request')
           return false;
         }
 
@@ -579,12 +596,14 @@ _fpa = {
         if ($(this).hasClass('prevent-first-ajax')) {
           ev.preventDefault();
           $(this).removeClass('prevent-first-ajax');
+          console.debug('prevented first ajax')
           return false;
         }
 
         if ($(this).hasClass('one-time-only-ajax')) {
           if ($(this).hasClass('one-time-only-fired')) {
             ev.preventDefault();
+            console.debug('prevented one time only')
             return false;
           } else {
             $(this).addClass('one-time-only-fired');
@@ -719,6 +738,7 @@ _fpa = {
           ) {
             use_target = true;
           }
+          console.debug(`use target (${use_target}) for ${t}`)
 
           var options = {};
           if (use_target) {
@@ -755,7 +775,7 @@ _fpa = {
             // Since we may have specified multiple items to match the target, run through each in turn
             // making sure to use any specific templates they specify
             var default_tname = $(this).attr('data-template');
-
+            console.debug(`template name: ${default_tname} - ${b.length}`)
             b.each(function () {
               var $this = $(this);
 
@@ -773,6 +793,7 @@ _fpa = {
 
               var pre = $(this).attr('data-preprocessor');
               var prom = _fpa.view_template($this, tname, target_data, options, pre);
+              console.debug(`Added a promise ${prom}`)
               prep_template_promises.push(prom);
               prom.then(function () {
                 _fpa.try_app_post_callback($this);
@@ -780,141 +801,17 @@ _fpa = {
             });
           }
 
+          console.debug(`prep template promises: ${prep_template_promises}`)
           // Wait on all previous templates being viewed, to ensure items aren't overwritten incorrectly
-          Promise.all(prep_template_promises).then(function () {
-            if (!t_abs_force) {
-              if (block.hasClass('new-block')) {
-                block.html('');
-              }
-              // Run through the top level of data to pick the keys to look for in element subscriptions
-              for (var di in data) {
-                if (di == 'multiple_results') continue;
+          Promise.all(prep_template_promises)
+            .then(function () {
+              console.debug(`all promises resolved for ${block}`)
+              _fpa.display_result(block, data, t_abs_force, alt_data_key)
+            })
+            .catch((error) => {
+              console.error(error.message);
+            });
 
-                if (data.hasOwnProperty(di)) {
-                  var res = {};
-                  var d = data[di];
-
-                  // DOM attribute targeting
-                  // will only use the following targets
-                  // Certain refinements to each of these are identified through additional markup, specified below
-                  var targets = $(
-                    '[data-sub-item="' +
-                    di +
-                    '"], [data-sub-list="' +
-                    di +
-                    '"] [data-sub-item], [data-item-class="' +
-                    di +
-                    '"]'
-                  );
-
-                  res[di] = d;
-                  targets.each(function () {
-                    var $this = $(this);
-                    var use_data = res;
-                    var dsid = $this.attr('data-sub-id');
-                    var dst = $this.attr('data-sub-item');
-                    // data-item-class is used for activity logs that gain the step type in the data-sub-item, breaking the matching
-                    // data-item-class is the plain class name
-                    var dsc = $this.attr('data-item-class');
-                    if (dsid && (dst || dsc)) {
-                      use_data = null;
-                      // Optionally use a different ID attribute (such as master_id) for the following listeners
-                      var dsfor = $this.attr('data-sub-for');
-                      if (!dsfor) dsfor = 'id';
-
-                      // Check if we should be looking in the root of the data, rather than in the items
-                      // This special case only kicks in when the triggered block has the attribute data-sub-for-root
-                      // It allows for processing of groups of items with a 'master key' specified by the combo sub-for-root (naming the key) and
-                      // sub-id (specifying the value of that key), rather than just responding to individual items in the data.
-                      // Typical markup is:
-                      // <span data-sub-for-root="master_id" data-sub-id="234" data-sub-item="trackers" ...>{{trackers.length}}</span>
-                      // which responds to a data response like:
-                      // {master_id: 234, trackers: [{},{},{}]}
-                      // Since this will only respond to master_id == 234 and a root element 'trackers', we can be quite specific in the data
-                      // we respond to, while general enough that we can broadly listen to meaningful results.
-                      // As this sends the full set of data, it is especially for counters and handlers of arrays of elements
-                      var dsforroot = $this.attr('data-sub-for-root');
-                      if (dsforroot) {
-                        if (data[dsforroot]) {
-                          item_data = data;
-                          // if the returned data has the specified attribute in its root
-                          // and also has the specified data-sub-item attribute
-                          if (item_data[dsforroot] === +dsid && item_data[dst]) {
-                            use_data = {};
-                            use_data = item_data;
-                          }
-                        }
-                      } else if (d && d[dsfor]) {
-                        // Another special case when we are looking just for elements that match the item type
-                        // (forced back into the data at the start of response handling) and either the
-                        // id or the attribute specified by data-sub-for
-                        // For example:
-                        // <div data-sub-for="master_id" data-sub-id="789" data-sub-item="player_info">
-                        // which would respond to the data
-                        // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
-                        // This listener is looking for individual player_info records with a specific 'master key', and passing just
-                        // the content of that data to the template.
-                        // Note that we underscore the item_type, since this handles the compounded parent/item_type
-                        // results for 'works_with_item' classes
-                        item_data = d;
-                        var matching_data_sub_item = alt_data_key;
-                        if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
-                        if (item_data[dsfor] === +dsid) {
-                          if (matching_data_sub_item == null) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          } else if (matching_data_sub_item === dst) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          } else if (matching_data_sub_item === dsc) {
-                            use_data = {};
-                            use_data[dsc] = item_data;
-                            use_data[dst] = item_data;
-                          }
-                        }
-                      } else if (d) {
-                        // The least specific case is to run through the array of data elements, having
-                        // id or the attribute specified by data-sub-for, and seeing whether any
-                        // match the specified value
-                        // This is a simple case:
-                        // <div data-sub-item="player_contact" data-sub-id="456" ...>
-                        // which will match data like this:
-                        // {player_contact: {id: 456, <this data>}, player_info: {id: 888, <not this data>} }
-                        // and will pass just the matched item to the template
-                        for (var g in d) {
-                          var item_data = d[g];
-                          if (
-                            item_data &&
-                            typeof item_data != 'string' &&
-                            item_data[dsfor] === +dsid &&
-                            item_data.item_type === dst
-                          ) {
-                            use_data = {};
-                            use_data[dst] = item_data;
-                          }
-                        }
-                      }
-                    }
-
-                    // We got a usable result, so display it (according to the rule that
-                    // we can't overwrite a block previously processed in this request)
-                    if (use_data) {
-                      var dt = $this.attr('data-template');
-                      var pre = $(this).attr('data-preprocessor');
-                      if (!dt) console.log('WARN: no data-template template name found');
-                      var prom = _fpa.view_template($this, dt, use_data, null, pre);
-                      prom.then(function () {
-                        _fpa.try_app_post_callback($this);
-                      });
-                    }
-                  });
-                }
-              }
-            }
-            window.setTimeout(function () {
-              $('.view-template-created').removeClass('view-template-created');
-            }, 1)
-          });
         } else {
           var put_in_position = function (t, d) {
             var pos = t.attr('data-result-position');
@@ -938,8 +835,9 @@ _fpa = {
           if (!data) data = {};
 
           var trigger = $(this);
-
-          html.find('[data-result]').each(function () {
+          var h_res = html.find('[data-result]')
+          console.debug(`html result count: ${h_res.length}`)
+          h_res.each(function () {
             var d = $(this);
             var di = d.attr('data-result');
             var isform = d.find('form');
@@ -948,7 +846,7 @@ _fpa = {
             if (trigger.attr('data-target-force') === 'true') {
               var t = trigger.attr('data-target');
               if (!t || t === '')
-                console.log(
+                console.error(
                   'Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block'
                 );
               var targets = $(t);
@@ -1009,6 +907,7 @@ _fpa = {
         var block = $(this);
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);
+        console.error(`ajax:error - ${status}`)
 
         $('.ajax-clicked-running').removeClass('ajax-clicked-running').blur();
 
@@ -1026,17 +925,20 @@ _fpa = {
                 var msg =
                   '<p>Could not complete action. Please <a href="#" onclick="window.location.reload(); return false;">refresh the page</a> and try again.</p>';
             }
+            console.error(`xhr status - ${xhr.status} - ${msg}`)
 
             _fpa.flash_notice(msg, 'warning');
           } else {
             if (j) {
               msg = _fpa.format_message(j);
-              _fpa.flash_notice(msg, 'danger');
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
-              _fpa.flash_notice(xhr.responseText, 'danger');
+              msg = xhr.responseText;
             } else {
-              _fpa.flash_notice('An error occurred.', 'danger');
+              msg = 'An error occurred.';
             }
+            console.error(`message - ${msg}`)
+
+            _fpa.flash_notice(msg, 'danger');
           }
         }
 
@@ -1047,6 +949,159 @@ _fpa = {
       .addClass('attached');
 
     _fpa.state.remotes_setup = true;
+  },
+
+  display_result: function (block, data, t_abs_force, alt_data_key) {
+    if (!t_abs_force) {
+      if (block.hasClass('new-block')) {
+        block.html('');
+      }
+
+      if (data.length === 0) console.debug('No data to display')
+      // Run through the top level of data to pick the keys to look for in element subscriptions
+      for (var di in data) {
+        if (di == 'multiple_results') {
+          console.debug('multiple results specified')
+          continue;
+        }
+
+        if (data.hasOwnProperty(di)) {
+          var res = {};
+          var d = data[di];
+
+          // DOM attribute targeting
+          // will only use the following targets
+          // Certain refinements to each of these are identified through additional markup, specified below
+          var targets = $(
+            '[data-sub-item="' +
+            di +
+            '"], [data-sub-list="' +
+            di +
+            '"] [data-sub-item], [data-item-class="' +
+            di +
+            '"]'
+          );
+
+          res[di] = d;
+
+          if (targets.length === 0) console.log(`no targets found for ${di}`)
+          targets.each(function () {
+            var $this = $(this);
+            var use_data = res;
+            var dsid = $this.attr('data-sub-id');
+            var dst = $this.attr('data-sub-item');
+            // data-item-class is used for activity logs that gain the step type in the data-sub-item, breaking the matching
+            // data-item-class is the plain class name
+            var dsc = $this.attr('data-item-class');
+            if (dsid && (dst || dsc)) {
+              use_data = null;
+              // Optionally use a different ID attribute (such as master_id) for the following listeners
+              var dsfor = $this.attr('data-sub-for');
+              if (!dsfor) dsfor = 'id';
+
+              // Check if we should be looking in the root of the data, rather than in the items
+              // This special case only kicks in when the triggered block has the attribute data-sub-for-root
+              // It allows for processing of groups of items with a 'master key' specified by the combo sub-for-root (naming the key) and
+              // sub-id (specifying the value of that key), rather than just responding to individual items in the data.
+              // Typical markup is:
+              // <span data-sub-for-root="master_id" data-sub-id="234" data-sub-item="trackers" ...>{{trackers.length}}</span>
+              // which responds to a data response like:
+              // {master_id: 234, trackers: [{},{},{}]}
+              // Since this will only respond to master_id == 234 and a root element 'trackers', we can be quite specific in the data
+              // we respond to, while general enough that we can broadly listen to meaningful results.
+              // As this sends the full set of data, it is especially for counters and handlers of arrays of elements
+              var dsforroot = $this.attr('data-sub-for-root');
+              if (dsforroot) {
+                if (data[dsforroot]) {
+                  item_data = data;
+                  // if the returned data has the specified attribute in its root
+                  // and also has the specified data-sub-item attribute
+                  if (item_data[dsforroot] === +dsid && item_data[dst]) {
+                    use_data = {};
+                    use_data = item_data;
+                  }
+                }
+              } else if (d && d[dsfor]) {
+                // Another special case when we are looking just for elements that match the item type
+                // (forced back into the data at the start of response handling) and either the
+                // id or the attribute specified by data-sub-for
+                // For example:
+                // <div data-sub-for="master_id" data-sub-id="789" data-sub-item="player_info">
+                // which would respond to the data
+                // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
+                // This listener is looking for individual player_info records with a specific 'master key', and passing just
+                // the content of that data to the template.
+                // Note that we underscore the item_type, since this handles the compounded parent/item_type
+                // results for 'works_with_item' classes
+                item_data = d;
+                var matching_data_sub_item = alt_data_key;
+                if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
+                if (item_data[dsfor] === +dsid) {
+                  if (matching_data_sub_item == null) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  } else if (matching_data_sub_item === dst) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  } else if (matching_data_sub_item === dsc) {
+                    use_data = {};
+                    use_data[dsc] = item_data;
+                    use_data[dst] = item_data;
+                  }
+                }
+              } else if (d) {
+                // The least specific case is to run through the array of data elements, having
+                // id or the attribute specified by data-sub-for, and seeing whether any
+                // match the specified value
+                // This is a simple case:
+                // <div data-sub-item="player_contact" data-sub-id="456" ...>
+                // which will match data like this:
+                // {player_contact: {id: 456, <this data>}, player_info: {id: 888, <not this data>} }
+                // and will pass just the matched item to the template
+                for (var g in d) {
+                  var item_data = d[g];
+                  if (
+                    item_data &&
+                    typeof item_data != 'string' &&
+                    item_data[dsfor] === +dsid &&
+                    item_data.item_type === dst
+                  ) {
+                    use_data = {};
+                    use_data[dst] = item_data;
+                  }
+                }
+              }
+            }
+            else {
+              console.debug('not using the data sub id matcher')
+            }
+
+            // We got a usable result, so display it (according to the rule that
+            // we can't overwrite a block previously processed in this request)
+            if (use_data) {
+              var dt = $this.attr('data-template');
+              var pre = $(this).attr('data-preprocessor');
+              if (!dt) console.log('WARN: no data-template template name found');
+              var prom = _fpa.view_template($this, dt, use_data, null, pre);
+              console.debug('promising to view template')
+              prom.then(function () {
+                console.debug('promise of view template resolved')
+                _fpa.try_app_post_callback($this);
+              });
+            }
+            else {
+              console.debug('no usable data')
+            }
+          });
+        }
+      }
+    }
+    else {
+      console.log('t_abs_force was set')
+    }
+    window.setTimeout(function () {
+      $('.view-template-created').removeClass('view-template-created');
+    }, 1)
   },
 
   // Enable a long running ajax request to be canceled

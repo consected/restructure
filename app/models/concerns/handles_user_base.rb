@@ -48,6 +48,9 @@ module HandlesUserBase
     # Used primarily by #model_references to calculate ConditionalAction#calc_reference_if
     attr_accessor :reference, :embedded_item
 
+    # Prevent preset_value handling from running if true
+    attr_accessor :skip_presets
+
     NotPermittedParams = %i[user_id created_at updated_at tracker_id tracker_history_id admin_id disabled].freeze
 
     # Setup alternative id field methods

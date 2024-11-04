@@ -19,7 +19,9 @@ module Redcap
     end
 
     def self.default_schema_name
-      'redcap'
+      return 'redcap' if Rails.env.production?
+
+      'redcap_test'
     end
 
     def initialize(project_admin, qualified_table_name)
@@ -335,8 +337,16 @@ module Redcap
     # matching user
     def add_user_access_control
       admin = project_admin.current_admin
-      return unless admin&.matching_user && dynamic_model
-      return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
+
+      unless admin&.matching_user && dynamic_model
+        Rails.logger.warn "Not adding user access control to dynamic model for project #{project_admin.id}: #{admin&.matching_user} && #{dynamic_model}"
+        return
+      end
+
+      if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
+        Rails.logger.warn "Not adding user access control to dynamic model for project #{project_admin.id} - no access to #{dynamic_model.resource_name}"
+        return
+      end
 
       Admin::UserAccessControl.create!(app_type_id: admin.matching_user.app_type_id,
                                        resource_type: :table,

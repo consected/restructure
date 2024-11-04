@@ -10,11 +10,12 @@ module Dynamic
 
       after_save :add_master_association, if: -> { @regenerate }
       after_save :add_user_access_controls, if: -> { @regenerate }
-      after_save :reset_active_model_configurations!
+      after_save :routes_load, if: -> { @regenerate }
+      after_save :reset_active_model_configurations!, if: -> { @regenerate || disabled }
       after_save :handle_config_triggers
 
       # This double reset is intentional
-      after_commit :reset_active_model_configurations!
+      after_commit :reset_active_model_configurations!, if: -> { @regenerate || disabled }
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
@@ -55,9 +56,7 @@ module Dynamic
 
       # Reload routes when a definition is regenerated
       def routes_reload
-        return unless @regenerate
-
-        Rails.application.reload_routes!
+        # Rails.application.reload_routes!
         Rails.application.routes_reloader.reload!
       end
 
@@ -159,6 +158,12 @@ module Dynamic
       end
 
       # End of class_methods
+    end
+
+    #
+    # Handle reloading of routes on regeneration
+    def routes_load
+      self.class.routes_load
     end
 
     #

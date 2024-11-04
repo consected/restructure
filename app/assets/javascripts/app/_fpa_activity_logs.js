@@ -38,6 +38,11 @@ _fpa.activity_logs = {
 
     _fpa.activity_logs.handle_creatables(block, data);
 
+    // Shrink the activity log items if the panel view_options.default_expander option is set to "shrunk"
+    if (block.attr('data-default-expander') == "shrunk") {
+      block.find('.expander-switch.active').click()
+    }
+
     _fpa.activity_logs.show_only_one(block, data);
   },
 

@@ -4,7 +4,7 @@ class Admin::DynamicModelsController < AdminController
   helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_defaults
   helper_method :view_folder
-  after_action :routes_reload, only: %i[update create]
+  # after_action :routes_reload, only: %i[update create]
 
   def update_config_from_table
     set_instance_from_id
@@ -12,6 +12,13 @@ class Admin::DynamicModelsController < AdminController
     object_instance.update_config_from_table
     object_instance.save!
     edit
+  end
+
+  def versions
+    set_instance_from_id
+    object_instance.current_admin = current_admin
+    @all_versions = object_instance.all_versions_query
+    render partial: 'admin/common_templates/def_versions'
   end
 
   protected

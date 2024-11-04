@@ -17,7 +17,7 @@ module OptionConfigs
         name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings batch_trigger config_trigger
+        show_if_condition_strings batch_trigger config_trigger preset_fields
       ]
     end
 
@@ -78,6 +78,7 @@ module OptionConfigs
       clean_save_triggers
       clean_batch_triggers
       clean_config_triggers
+      clean_preset_fields
     end
 
     # Defintion label
@@ -113,6 +114,23 @@ module OptionConfigs
     def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
+
+      dialog_before.each do |k, v|
+        unless v.is_a? Hash
+          failed_config :dialog_before,
+                        "dialog_before must be a Hash: #{k}",
+                        level: :error
+          next
+        end
+
+        name = v[:name]
+        mt = Admin::MessageTemplate.active.find_by(name:)
+        next if mt
+
+        failed_config :dialog_before,
+                      "dialog_before specifies a named message template that doesn't exist: #{name}",
+                      level: :warn
+      end
     end
 
     # Field labels definitions
@@ -303,6 +321,13 @@ module OptionConfigs
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
 
+          # Avoid breaking app type imports if the resource being pointed to in the reference
+          # hasn't been set up yet.
+          if to_class.nil? || to_class.respond_to?(:definition) && !to_class.definition
+            Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
+            break
+          end
+
           if to_class
             elt = conf[:add_with] && conf[:add_with][:extra_log_type]
             add_with_elt = nil
@@ -398,6 +423,11 @@ module OptionConfigs
       self.config_trigger = self.config_trigger.symbolize_keys
       self.config_trigger = self.config_trigger.symbolize_keys
       self.config_trigger[:on_define] ||= {}
+    end
+
+    def clean_preset_fields
+      self.preset_fields ||= {}
+      self.preset_fields = self.preset_fields.symbolize_keys
     end
 
     # Check if any of the configs were bad

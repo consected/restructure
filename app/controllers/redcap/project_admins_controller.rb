@@ -112,6 +112,10 @@ class Redcap::ProjectAdminsController < AdminController
     Redcap::ProjectAdmin::Statuses.map { |_k, v| [v, v] }
   end
 
+  def server_url_list
+    Redcap::ProjectAdmin.active.pluck(:server_url).uniq
+  end
+
   def notes_editor
     :markdown
   end
@@ -151,12 +155,13 @@ class Redcap::ProjectAdminsController < AdminController
     {
       study: pas,
       status: status_options.transpose[0].uniq,
-      transfer_mode: transfer_mode_options.transpose[0].uniq
+      transfer_mode: transfer_mode_options.transpose[0].uniq,
+      server_url: server_url_list
     }
   end
 
   def filters_on
-    %i[study status transfer_mode]
+    %i[study status transfer_mode server_url]
   end
 
   #

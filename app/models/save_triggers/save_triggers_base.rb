@@ -42,39 +42,43 @@ class SaveTriggers::SaveTriggersBase
     ca.calc_action_if
   end
 
-  def handle_with_result(with_result, vals)
-    return unless with_result
+  def handle_with_result(with_results, vals)
+    return unless with_results
 
-    ca = ConditionalActions.new with_result[:from], @item
-    source = ca.get_this_val
+    with_results = [with_results] unless with_results.is_a? Array
 
-    unless source
-      raise FphsException, 'with_result.from returns no result - check return: return_result has been specified'
-    end
+    with_results.each do |with_result|
+      ca = ConditionalActions.new with_result[:from], @item
+      source = ca.get_this_val
 
-    with_attrs = with_result[:attributes].dup
+      unless source
+        raise FphsException, 'with_result.from returns no result - check return: return_result has been specified'
+      end
 
-    create_with_ei = with_attrs.delete(:embedded_item) if with_attrs[:embedded_item]
-    vals[:embedded_item] ||= {} if create_with_ei
+      with_attrs = with_result[:attributes].dup
 
-    with_attrs.each do |to, from|
-      sval = if from.include? '{{'
-               FieldDefaults.calculate_default(source, from)
-             else
-               source.attributes[from.to_s]
-             end
+      create_with_ei = with_attrs.delete(:embedded_item) if with_attrs[:embedded_item]
+      vals[:embedded_item] ||= {} if create_with_ei
 
-      vals[to] = sval
-    end
+      with_attrs.each do |to, from|
+        sval = if from.is_a?(Hash) || from.include?('{{')
+                 FieldDefaults.calculate_default(source, from)
+               else
+                 source.attributes[from.to_s]
+               end
 
-    create_with_ei&.each do |to, from|
-      sval = if from.include? '{{'
-               FieldDefaults.calculate_default(source, from)
-             else
-               source.attributes[from.to_s]
-             end
+        vals[to] = sval
+      end
 
-      vals[:embedded_item][to] = sval
+      create_with_ei&.each do |to, from|
+        sval = if from.is_a?(Hash) || from.include?('{{')
+                 FieldDefaults.calculate_default(source, from)
+               else
+                 source.attributes[from.to_s]
+               end
+
+        vals[:embedded_item][to] = sval
+      end
     end
   end
 

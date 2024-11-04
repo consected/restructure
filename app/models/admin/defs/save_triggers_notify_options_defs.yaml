@@ -28,6 +28,8 @@
             display_name: 'display name for email address'
           
           "from_user_email(alternative)": 'string email address'
+          ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+
           layout_template: 'name of layout template'
           content_template: 'name of content template'
           content_template_text: 'alternative content template text'

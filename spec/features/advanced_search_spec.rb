@@ -37,6 +37,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     expect(page).to have_css '#master_results_block', text: 'No Results'
 
+    sleep 1
+
     within '#simple_search_master' do
       fill_in 'Last name', with: "bad1\t"
     end
@@ -63,7 +65,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # don't do 'expect' on the ajax running symbol, since it might go away too fast
     have_css '#advanced_search_master.ajax-running'
     # wait a while!
-    sleep 1
+    sleep 2
+    js_console_log unless has_css?('#master_results_block', text: '')
     expect(page).to have_css '#master_results_block', text: ''
     expect(page).to have_css '#search_count', text: /[0-9]+/
 

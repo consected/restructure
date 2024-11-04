@@ -1,0 +1,46 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+
+    <%
+      admin_links = nil
+      index_params = object_instance.attribute_names
+    %>
+    <table class="table tablesorter admin-list">
+      <thead>
+        <tr>
+          <th class="no-sort"></th>
+          <%
+          index_params.each do |p|
+            if p.to_s == 'admin_id'
+              @show_admin_col = true
+              next
+            end
+
+            # is_options_field = (p.to_s.end_with?('options') || p.to_s.end_with?('template')) && !respond_to?("#{p}_options")
+            is_options_field = nil
+          %>
+          <% unless is_options_field %>
+            <th><%= p.to_s.humanize %></th>
+          <% end %>
+        <% end %>
+        <% if admin_links.present? %>
+          <th>Admin Links</th>
+        <% end %>
+        <% if @show_admin_col %>
+          <th>Admin</th>
+        <% end %>
+        </tr>
+      </thead>
+      <% @all_versions.each do |list_item| %>
+        <%= render partial: view_path('def_version_item'), locals: {list_item:, index_params:} %>
+      <% end %>
+    </table>
+    <script>
+      $('.expandable').not('.attached-exp').on('click', function(){
+          if($(this).attr('disabled')) return;
+          _fpa.form_utils.toggle_expandable($(this));
+      }).addClass('attached-exp');
+    </script>
+
+  </div>
+</div>

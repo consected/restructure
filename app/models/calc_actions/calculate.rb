@@ -32,7 +32,7 @@ module CalcActions
     # We won't use a query join when referring to tables based on these keys
     NonJoinTableNames = %i[this parent embedded_item referring_record top_referring_record this_references parent_references
                            parent_or_this_references user master condition value hide_error invalid_error_message
-                           role_name reference ids_referencing].freeze
+                           role_name reference ids_referencing and_latest_matches].freeze
 
     ReturnTypes = %w[return_value return_value_list return_result return_all_results].freeze
 
@@ -133,11 +133,18 @@ module CalcActions
       # For extra_conditions related to non query conditions, apply them directly
       if extra_conditions.present? && extra_conditions[0]&.strip&.present?
         # Handle replacement of AND or OR into the generated query conditions SQL
-        extra_conditions[0].gsub(BoolTypeString, bool)
+        extra_conditions[0].gsub!(BoolTypeString, bool)
         @condition_scope = @condition_scope.where(extra_conditions)
       end
 
-      @condition_scope = @condition_scope.order(id: :desc).limit(1) unless @this_val_where
+      if @and_latest_matches
+        tname = @and_latest_matches.first.first
+        latest_id = @condition_scope.select("#{tname}.id and_match_res_id").order(and_match_res_id: :desc).first&.and_match_res_id
+        @and_latest_matches[tname][:id] = latest_id
+        @condition_scope = @base_query.where(@and_latest_matches)
+      else
+        @condition_scope = @condition_scope.order(id: :desc).limit(1) unless @this_val_where
+      end
 
       # Return the usable @condition_scope
       @condition_scope
@@ -450,10 +457,20 @@ module CalcActions
     def generate_query_condition_values(val, table_name, field_name)
       return if val.in?(ReturnTypes)
       return if handle_condition_tag(val, table_name, field_name)
+      return if handle_and_matches(val, table_name, field_name)
 
       @condition_values[table_name] ||= {}
       val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
       @condition_values[table_name][field_name] = dynamic_value(val)
+    end
+
+    def handle_and_matches(val, table_name, field_name)
+      return unless field_name == :and_latest_matches
+
+      table_name = table_name.id_underscore
+
+      vals = val.transform_values { |v| dynamic_value(v) }
+      @and_latest_matches = { table_name => vals }
     end
 
     #

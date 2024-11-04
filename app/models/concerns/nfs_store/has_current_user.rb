@@ -44,7 +44,7 @@ module NfsStore
     end
 
     def current_user
-      master.current_user
+      master&.current_user
     end
 
     def master_id=(master_id)

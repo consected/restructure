@@ -6,6 +6,7 @@
     <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
     <li role="presentation"><a href="#datadic" aria-controls="datadic" role="tab" data-toggle="tab">Data Dictionary</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
+    <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -61,5 +62,10 @@
     <p>Not authorized to administer user access controls</p>
     <% end %>
     </div>
+
+    <div role="tabpanel" class="tab-pane  on-open-click" id="def-versions">
+      <%= render partial: 'admin/dynamic_models/versions_panel', locals: {object_instance: object_instance} %>
+    </div>
+
   </div>
 </div>

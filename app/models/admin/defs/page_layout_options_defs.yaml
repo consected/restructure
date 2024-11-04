@@ -33,6 +33,7 @@ view_options:
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
   hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
+  default_expander:                   # set to "shrunk" to initially shrink activity log items
   hide_activity_logs_header:          # hide the activity logs header including + buttons
   close_others:                       # when clicked to expand this tab, others will be closed
   show_for_single_master_only:        # Only show panel if a single master result is presented

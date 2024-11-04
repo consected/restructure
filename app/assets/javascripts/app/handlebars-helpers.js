@@ -72,6 +72,11 @@
     var re = new RegExp(right);
     return left.search(right) !== -1;
   });
+  eR.add('!includes', function (left, right) {
+    if (!left) return;
+    var re = new RegExp(right);
+    return left.search(right) === -1;
+  });
   eR.add('typeof', function (left, right) {
     if (!right) return;
     if (right == 'object') {

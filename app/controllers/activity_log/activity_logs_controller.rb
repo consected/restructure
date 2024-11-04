@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ActivityLog::ActivityLogsController < UserBaseController
+  before_action :set_extra_type_in_secure_params, only: :new
+
   include MasterHandler
   include ParentHandler
   include EmbeddedItemHandler
@@ -18,8 +20,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key("activity-log-template-config-#{@item_type}-#{@id_list}"))
     response.headers['Cache-Control'] = 'max-age=30'
     response.headers.delete 'Expires'
-    return unless stale?(etag: cache_key)   
-    
+    return unless stale?(etag: cache_key)
+
     refresh_embedded_item_for @instance_list
 
     render partial: 'activity_logs/common_search_results_template_set'
@@ -66,11 +68,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     cb.merge! extras_caption_before
 
     {
-      caption: caption,
+      caption:,
       caption_before: cb,
       labels: l,
       view_options: vo,
-      item_list: item_list,
+      item_list:,
       item_flags_after: :notes,
       save_action: sa
     }
@@ -148,10 +150,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
       al_type: params_namespace,
       item_type: item_type_us,
       item_types_name: @item_type,
-      item_id: item_id,
-      item_data: item_data,
+      item_id:,
+      item_data:,
       @item_type => items,
-      creatables: creatables
+      creatables:
     }
   end
 
@@ -202,7 +204,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     @item_id = @item.id
     #  return if the Activity Log does not work with this item_type / rec_type combo
     @implementation_class = ActivityLog.implementation_class_for @item
-    return not_found unless @implementation_class
+    not_found unless @implementation_class
   end
 
   #
@@ -267,5 +269,14 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # too many times.
   def check_authentication_still_valid
     sign_out(current_user) if current_user.access_locked?
+  end
+
+  def set_extra_type_in_secure_params
+    pname = params_namespace.singularize.to_sym
+
+    return if params[pname]
+
+    et = params[:extra_type]
+    params[pname] = { extra_log_type: et }
   end
 end

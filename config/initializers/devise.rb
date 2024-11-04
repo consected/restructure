@@ -196,6 +196,10 @@ Devise.setup do |config|
   # Allow a longer drift on two-factor authentication codes
   config.otp_allowed_drift = Settings::TwoFactorAuthDrift
 
+  # Ensure a long enough secret length to cover against advisory
+  # https://github.com/devise-two-factor/devise-two-factor/security/advisories/GHSA-qjxf-mc72-wjr2
+  config.otp_secret_length = 26
+
   # Warn on the last attempt before the account is locked.
   config.last_attempt_warning = true
 

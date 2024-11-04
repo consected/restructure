@@ -23,7 +23,7 @@ module AdminHelper
     return if no_edit
 
     if options[:copy]
-      path = new_path(copy_with_id: options[:copy]&.id)
+      path = new_path(copy_with_id: options[:copy]&.id, filter: filter_params_permitted)
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
     else
       path = edit_path(id, filter: filter_params_permitted)
@@ -144,6 +144,16 @@ module AdminHelper
     res = <<~END_HTML
       <span class="hidden">#{list_item.updated_at}</span>
       <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip"  title="last updated by: #{list_item.admin_email} at #{list_item.updated_at}"></span>
+    END_HTML
+
+    res.html_safe
+  end
+
+  def admin_submit_and_cancel(form)
+    res = <<~END_HTML
+      #{hidden_field_tag :updated_at, object_instance.updated_at}
+      #{form.submit class: 'btn btn-primary'}
+      #{admin_edit_cancel}
     END_HTML
 
     res.html_safe

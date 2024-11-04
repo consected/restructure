@@ -68,6 +68,10 @@ table.admin-list tbody {
   width: 300px;
 }
 
+input.form-control.tt-hint {
+  width: 100%;
+}
+
 .form-inline [data-out-attr-name="options"] textarea.form-control,
 textarea#activity_log_extra_log_types {
   width: 800px;

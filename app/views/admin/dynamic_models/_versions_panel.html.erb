@@ -1,0 +1,19 @@
+<div id="def-versions-embedded">
+  <h4>Definition Versions</h4>
+  <% if object_instance.persisted? 
+       @all_versions = object_instance.all_versions
+  
+  
+  %>
+
+  <div class="admin-result-index" id="embedded-dynamic-def-versions-embedded">
+    <%= link_to "Load", versions_admin_dynamic_model_path(                          
+                          view_as: 'simple-embedded', readonly: true), 
+                          'data-remote': true,
+                          'data-target-force': true,
+                          'data-target': '#embedded-dynamic-def-versions-embedded'
+                          %>
+  </div>
+
+  <% end %>
+</div>
