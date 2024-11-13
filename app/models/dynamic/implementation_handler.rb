@@ -265,13 +265,13 @@ module Dynamic
 
         init_value = config[:preset_value]
         if init_value
-          res = FieldDefaults.calculate_default self, init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end
 
         init_value = config[:blank_preset_value]
         if init_value
-          res = FieldDefaults.calculate_default self, init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res if attributes[name.to_s].blank?
         end
       end

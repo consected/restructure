@@ -12,7 +12,7 @@ module FieldDefaults
   # @param [DateTime] from_when - a DateTime to use instead of now
   # @param [Boolean] allow_nil - by default, return empty string instead of nil. Set true to allow nils
   # @return [String|Number|nil] the result after substitutions
-  def self.calculate_default(obj, value, type = nil, from_when: nil, allow_nil: false)
+  def self.calculate_default(obj, value, type = nil, from_when: nil, allow_nil: false, ignore_missing: false)
     value = '' if value.nil? && !allow_nil
 
     res = value
@@ -46,7 +46,7 @@ module FieldDefaults
       elsif value.include? '{{{'
         res = Formatter::Substitution.substitute_plain(value, data: obj)
       elsif value.include? '{{'
-        res = Formatter::Substitution.substitute(value, data: obj, tag_subs: nil)
+        res = Formatter::Substitution.substitute(value, data: obj, tag_subs: nil, ignore_missing:)
       end
     elsif value.is_a? Hash
       ca = ConditionalActions.new value, obj
