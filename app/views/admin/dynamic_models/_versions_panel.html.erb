@@ -8,7 +8,7 @@
 
   <div class="admin-result-index" id="embedded-dynamic-def-versions-embedded">
     <%= link_to "Load", versions_admin_dynamic_model_path(                          
-                          view_as: 'simple-embedded', readonly: true), 
+                          view_as: 'simple-embedded', readonly: true, id: object_instance.id), 
                           'data-remote': true,
                           'data-target-force': true,
                           'data-target': '#embedded-dynamic-def-versions-embedded'
