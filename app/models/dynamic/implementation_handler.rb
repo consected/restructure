@@ -13,7 +13,7 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results, :current_admin_sample
+      attr_accessor :skip_save_trigger, :save_trigger_results
     end
 
     class_methods do
