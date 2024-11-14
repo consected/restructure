@@ -12,13 +12,41 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.8.3] - 2024-08-22
+## Unreleased
+
+### From FPHS - PR #413 - 2024-11-13
+
+[Fixed] issues from merging recent PRs
+
+### From FPHS - PR #412 - 2024-11-04
+
+- [Fixed] CVE-2024-8796 for 2FA secret lengths and updated Devise to latest version
+- [Updated] brakeman whitelist for Rails
+- [Updated] gems to resolve security alerts in bundle-audit scan
+
+### From FPHS - PR #411 - 2024-10-31
 
 - [Fixed] spec based on schema name validation
 - [Fixed] error setting redcap schema name intermittently
-- [Added] logging of other potential issues
-- [Added] environment variable to control test log level
+
+### From FPHS - PR #410 - 2024-10-17
+
+- [Added] use of "chosen" drop down for admin forms to aid faster configurations
+- [Added] ignore_no_recipients as an option to notify sms
+- [Changed] presentation of fixed_... fields to avoid them being accidentally selected
+- [Added] admin filter on server url for Redcap projects
+- [Added] information to help with debugging common create_reference configuration error
+- [Added] config_trigger.on_define.embed options to allow_reconfiguration (default no) and prefix_config_libraries
+- [Added] format check for dialog_before configurations and check message template exists
+- [Added] a page layout view option for default_expander to present activity log blocks as "shrunk" by default
+
+### From FPHS - PR #409 - 2024-10-31
+
 - [Fixed] issue with presets and current admin sample
+- [Changed] handling of admin sample form to show dialog names, field names, form names of embedded forms
+
+### From FPHS - PR #408 - 2024-10-29
+
 - [Fixed] specs for browser testing
 - [Fixed] specs for redcap model generation
 - [Fixed] UI issues related to templates loading
@@ -27,15 +55,6 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] documentation of and_latest_matches
 - [Added] feedback of client errors in dev/test
 - [Fixed] styling of tracker new and edit forms
-- [Added] use of "chosen" drop down for admin forms to aid faster configurations
-- [Updated] Ruby to 3.2.5 and updated gems
-- [Added] ignore_no_recipients as an option to notify sms
-- [Changed] presentation of fixed_... fields to avoid them being accidentally selected
-- [Added] admin filter on server url for Redcap projects
-- [Added] information to help with debugging common create_reference configuration error
-- [Added] config_trigger.on_define.embed options to allow_reconfiguration (default no) and prefix_config_libraries
-- [Added] format check for dialog_before configurations and check message template exists
-- [Added] a page layout view option for default_expander to present activity log blocks as "shrunk" by default
 - [Fixed] display of filestore block in edit forms
 - [Fixed] handling of UI template loading to ensure blocks load correctly or report an error if not
 - [Fixed] failing specs due to missing attribute on standard models
@@ -51,24 +70,45 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] bad setup of dev filestore
 - [Fixed] handling of create_default.user_access_control to avoid breaking setup if the control already exists with a different access
 - [Fixed] showing new index when copying an admin item
-- [Changed] handling of admin sample form to show dialog names, field names, form names of embedded forms
+
+### From FPHS - PR #407 - 2024-10-10
+
+- [Updated] Ruby to 3.2.5 and updated gems
+
+### From FPHS - PR #406 - 2024-10-17
+
 - [Added] versions list to dynamic model admin panel
 - [Added] a check on saving a new version of an admin configuration, to ensure saved changes in another tab aren't overwritten - closes #387
+
+### From FPHS - PR #405 - 2024-10-23
+
 - [Changed] display of components to avoid duplication
 - [Changed] presentation of admin panel component selection panel to group by category
 - [Changed] formatting of admin panel component list
+
+### From FPHS - PR #404 - 2024-10-17
+
 - [Added] new "calculate" options for count_not_null and mean
 - [Added] and_latest_matches to if conditions to check if one value is the latest of a possible set
+
+### From FPHS - PR #403 - 2024-10-17
+
 - [Fixed] occasional error due to presets being loaded unnecessarily
 - [Added] ability for create/update reference and preset_fields to use with_results multiple times (array) to pull from different sources
 - [Added] preset_fields option to preset values to a mass of fields on initialization of new items, or before creating a reference.
 - [Fixed] issue with preset_value being set within a referenced item
+
+### From FPHS - PR #402 - 2024-10-21
+
 - [Fixed] label resizing for show_if changes
 - [Fixed] current_mode not being passed to embedded_item for show_if
 - [Fixed] issue with show_if checking time field conditions. Changes are now triggered.
 - [Fixed] issue with conditionally showing dialog placeholders in admin view
 - [Added] substitution comparisons in show_if rules
 - [Fixed] broken show_if
+
+### From FPHS - PR #401 - 2024-10-24
+
 - [Changed] handling of #is and #if substitutions to make it less sensitive to extra spaces
 - [Fixed] matching of {{#is...}} operators
 - [Fixed] substitutions in {{#is}} to handle integers correctly
@@ -79,17 +119,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] tag value retrieval on right hand side of {{#is...}} comparisons
 - [Added] {{#is ...}} handling to dialogs and captions in show mode
 - [Fixed] #is #else handling
-- [Changed] loading of routes to load only a single time after regenerating a model
-- [Fixed] issue preventing routes being regenerated
-- [Updated] gems
-- [Fixed] issues appearing during spec tests
-- [Fixed] current admin sample form showing embedded items named incorrectly
-- [Fixed] broken current admin sample view
-- [Added] viewing of embedded references in admin sample view
-- [Added] form info to admin sample when there are embedded references
-- [Changed] handling of admin sample form to show dialogs and field names
 
-## [8.8.11] - 2024-08-22
+### From FPHS - PR #400 - 2024-10-28
+
+[Changed] loading of routes to load only a single time after regenerating a model
+[Fixed] issue preventing routes being regenerated
+
+### From FPHS - [8.8.11] - PR #399 - 2024-09-12
 
 - [Changed] sorting of external identifier columns in master panel
 - [Added] logger info when an item is not creatable
@@ -98,7 +134,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] content type for create shortlink in substitutions
 - [Fixed] dynamic definition option `embed: <string>` doesn't work - fixes #388
 
-## [8.8.10] - 2024-08-22
+### From FPHS - [8.8.10] - PR #398 - 2024-09-11
 
 - [Fixed] message notifications sending SMS messages with HTML markup
 - [Added] {{#is ...}} to substitutions - closes #222
@@ -112,19 +148,19 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] extra information to help debug iterator issues in save trigger
 - [Fixed] formatting issue in dynamic model details panel
 
-## [8.8.9] - 2024-08-22
+### From FPHS - [8.8.9] - 2024-09-04
 
 - [Changed] handling of create_reference with embedded_item to ensure save triggers can reference the new embedded item
 - [Fixed] error message
 - [Fixed] to ensure calculations get the correct type of embedded item
 - [Fixed] batch_trigger user and app_type settings to use app_type if specified
 
-## [8.8.8] - 2024-09-03
+### From FPHS - [8.8.8] - 2024-09-03
 
 - [Changed] logging to use short backtrace
 - [Fixed] redcap storage issue with blank survey identifiers
 
-## [8.8.7] - 2024-09-03
+### From FPHS - [8.8.7] - 2024-09-03
 
 - [Added] skip_store_if_no_survey_identifier option to redcap projects
 - [Changed] handling of report record editing to correctly handle columns not editable or not configured to edit
@@ -133,27 +169,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] pattern documentation
 - [Fixed] show if comparisons for Redcap when the condition is based on a boolean field - fixes #381
 
-## [8.8.6] - 2024-08-29
+### From FPHS - [8.8.6] - 2024-08-29
 
 - [Added] checks for blank and incorrect schemas, and associated automatic initialization of the value
 - [Fixed] issues with local variables not existing
-
-## [8.8.5] - 2024-08-28
-
-- [Added] new check in Redcap project to ensure user has access to the associated external id table, if specified
-- [Added] ability for report edit table name and fields to be specified as {{table_name}} and {{table_fields}} to allow editing of arbitrary tables in the generic report
-- [Added] RedcapJobUserEmail setting to be viewed in server info
-- [Fixed] user creating an external identifier with additional fields loses their value - fixes #307
-- [Changed] external identifier details panel to add "search data" link - especially helpful if the user can edit the results for example to add other field entries to external id records
-- [Changed] specification of Redcap project run_jobs_in_app_type to only use the current user's app type if the configuration is not specified (it previously ignored a specified app not being found)
-- [Added] exceptions to make it clear if a master id was not found through an external id for various reasons
-- [Fixed] incorrect error message
-
-## [8.8.4] - 2024-08-27
-
-- [Added] save trigger create_reference, update_reference and update_this to accept embedded_item hash to create or update the appropriate item automatically
-
-## [8.8.3] - 2024-08-22
 
 ### From FPHS - [8.8.5] - 2024-08-28
 
