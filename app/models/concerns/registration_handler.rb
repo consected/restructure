@@ -31,6 +31,10 @@ module RegistrationHandler
     allow_users_to_register? && !a_template_or_batch_user? && self_registration_admin?
   end
 
+  def not_self_registration?
+    current_admin && !self_registration_admin?
+  end
+
   # The registration admin is assigned to newly created user through the user registration feature.
   # @return Admin
   def self.registration_admin
