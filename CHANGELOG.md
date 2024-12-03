@@ -349,6 +349,81 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] use of Etag headers for caching
 - [Changed] browser caching for common scenarios
 
+### Merge pull request #320 from hmsrc/hms-perf
+
+- [Added] exception information to failure mailer
+- [Updated] gems
+- [Fixed] specs
+- [Changed] logging of dynamic definition setup
+- [Changed] handling of info and help pages to show a not found for missing library or not authorized access
+- [Changed] handling of item flags for new selector caching
+- [Changed] handling of selector cache handling and application version to log when changes will affect performance
+- [Added] index to tracker_history to improve performance
+
+## [8.6.5] - 2024-05-02
+
+- [Updated] gems
+- [Fixed] logging of sensitive params
+- [Added] report search field options with the first option implemented for "select from model" drop downs being order: attr: asc|desc
+- [Added] action_position option to extra options references configurations to set a creatable reference action button to appear at the top or bottom of the form
+- [Added] a report results handler implementation to provide "expand all" link to tree view
+- [Changed] form fields to cancel previous request when clicking on a "chosen" select field
+- [Fixed] UI error if no match on date time string when converting to locale
+
+### Merge pull request #315 from hmsrc/gen-enhancements
+
+- [Added] set_item_flag options to add_flags and remove_flags
+- [Fixed] failure to show Redcap project if it is in the process of being
+
+### Merge pull request #314 from hmsrc/clean-log
+
+- [Changed] job error message to be clearer
+
+### Merge pull request #311 from hmsrc/change-save-trigger
+
+- [Added] set_item_flags save trigger to allow flags to be set against an item
+- [Added]  return of created masters, items and references from save triggers, so they can be used later
+- [Added] logging to show more information when failing to generate real show_if from Redcap definition
+- [Changed] external identifiers to allow update from save trigger if currently unassigned
+
+### Merge pull request #310 from hmsrc/fix-job-error
+
+- [Fixed] job failure notifications
+
+### Merge pull request #309 from hmsrc/app-import-errors
+
+- [Fixed] reporting of changes for app imports
+- [Changed] handling of user access control configurations to force blank fields to null
+- [Changed] app import error backtrace to include only essentials
+- [Fixed] reporting of error in app import
+- [Changed] reporting of updated configs in app type import when only updated_at timestamp changed
+- [Fixed] sidebar help to prevent it breaking simple hash hrefs
+
+## [8.6.4] - 2024-04-03
+
+- [Added] automatically select user date/time preferences based on user browser locale at registration - from pull request #284, issue #135
+- [Added] superscript and subscript support to the editor
+- [Fixed] editor bugs
+- [Fixed] strikethrough support in the editor
+- [Fixed] pasting from documents when certain <img> or <a> attributes are missing
+- [Added] auto creation of signature document when activity created through create_reference save trigger
+- [Changed] styles for e-sign and general forms
+- [Changed] e-signatures to allow a plain document to be created for signature - fixes #299
+- [Fixed] report not able to show tags in results correctly
+- [Fixed] bug trying to singularize configuration keys in e_sign setup
+
+## [8.6.3] - 2024-03-07
+
+- [Fixed] incorrect matching dynamic models on name. Use table_name instead.
+
+## [8.6.2] - 2024-03-06
+
+- [Fixed] parallel tests and specs
+- [Fixed] various rspec issues
+- [Changed] the naming of Redcap project dynamic models to be more human - fixes #276
+- [Fixed] to raise an exception if a nfs store container directory already exists
+- [Fixed] Redcap pull updating all records if there are empty `<vars>_chosen_array` fields - fixes #289
+
 ## [8.6.1] - 2024-03-04
 
 - [Bumped] version

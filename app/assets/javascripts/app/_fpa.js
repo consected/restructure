@@ -351,14 +351,17 @@ _fpa = {
     // Throw away the result if told to show no result
     if (!options.show_no_result) {
 
-      // Render the result using the template and data
-      try {
-        var html = template(data);
-      } catch (err) {
-        console.log('(' + err + ') template function not defined for ' + template_name);
-        console.log(err.stack);
+      if (template) {
+        console.log('template not set for render_template')
+        // Render the result using the template and data
+        try {
+          var html = template(data);
+        } catch (err) {
+          console.log('(' + err + ') template function not defined for ' + template_name);
+          console.log(err.stack);
+        }
+        html = $(html).addClass('view-template-created');
       }
-      html = $(html).addClass('view-template-created');
 
       var new_block = block;
 
@@ -745,17 +748,25 @@ _fpa = {
             // Check if a parent tells us to use a different target (a div around a form can force this to point to a specific location by putting the
             // target in the data-result-target-for-child attribute)
             var base_block = $('body');
-            // if(!t_abs_force) {
-            var pt = $(this).parents('[data-result-target-for-child]').first();
-            if (pt.length == 1) {
-              drtc = pt.attr('data-result-target-for-child');
-              if (drtc) {
-                t = drtc;
-                base_block = $(this).parents('[data-template]');
+            // Should we prevent a parent from redirecting the result?,
+            // which can happen even with `data-result-target-force=true`
+            var abs_loc = $(this).attr('data-result-abs-loc') == 'true';
+            if (abs_loc) {
+              // Ensure other handlers for the same event don't fire. jQuery only
+              // stops others.
+              e.stopImmediatePropagation();
+            }
+            else {
+              var pt = $(this).parents('[data-result-target-for-child]').first();
+              if (pt.length == 1) {
+                drtc = pt.attr('data-result-target-for-child');
+                if (drtc) {
+                  t = drtc;
+                  base_block = $(this).parents('[data-template]');
+                }
               }
             }
-            // }
-            // A specific target was specified an is being used.
+            // A specific target was specified and is being used.
             // Handle class markup that state whether to target this item directly, or add new elements above or below
             // the targeted element
             var b = base_block.find(t);
