@@ -12,13 +12,28 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.9.2] - 2024-11-14
+## Unreleased
+
+### From Viva - PR #418 - 2024-12-04
+
+- [Fixed] "created_by_user_id" field showing unnecessarily in edit forms
+
+### From Viva - PR #417 - 2024-12-03
+
+- [Fixed] filestore browser not loading correctly in vertical activity log block
+
+# [8.9.2] - 2024-11-14
 
 - [Build] FPHS version
 
 ## [8.9.1] - 2024-11-14
 
-### From FPHS - 2024-11-14
+## From FPHS - PR #416 - 2024-11-14
+
+- [Fixed] reloading of index after updating users and admins
+- [Added] ability for users to be added by an admin when self registration is allowed
+
+### From FPHS - PR #415 - 2024-11-14
 
 - [Fixed] failing versions list when creating a new dynamic model
 

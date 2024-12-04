@@ -113,6 +113,10 @@ li.list-group-item.placeholder-field-item {
   display: none !important;
 }
 
+li.edit-field-container[data-edit-field-name="created_by_user_id"] {
+  display: none !important;
+}
+
 .fixed-field {
   position: relative;
   input.form-control.has-value,
