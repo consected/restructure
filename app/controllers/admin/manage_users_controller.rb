@@ -24,7 +24,10 @@ class Admin::ManageUsersController < AdminController
 
     @user.current_admin = current_admin
     if @user.update(secure_params)
-      @users = User.all
+      pm = filtered_primary_model
+      pm = pm.limited_index
+      pm = pm.reorder('').order(default_index_order) if default_index_order.present?
+      @users = pm
       @updated_with = @user
       render partial: 'index'
     else
@@ -38,7 +41,10 @@ class Admin::ManageUsersController < AdminController
     set_object_instance primary_model.new(secure_params)
     object_instance.current_admin = current_admin
     if object_instance.save
-      @users = User.all
+      pm = filtered_primary_model
+      pm = pm.limited_index
+      pm = pm.reorder('').order(default_index_order) if default_index_order.present?
+      @users = pm
       @updated_with = @user
       render partial: 'index'
     else

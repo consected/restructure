@@ -257,7 +257,8 @@
           <% end %>
 
 
-          <li class="list-group-item edit-field-container column_type_<%= column_type %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
+          <li class="list-group-item edit-field-container column_type_<%= column_type %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>"
+              data-edit-field-name="<%= field_name_sym %>">
             <%= edit_form_field(**local_vars) %>
           </li>
 
