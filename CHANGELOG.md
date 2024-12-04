@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems to resolve Rails CVEs
+
 ### From Viva - PR #418 - 2024-12-04
 
 - [Fixed] "created_by_user_id" field showing unnecessarily in edit forms
