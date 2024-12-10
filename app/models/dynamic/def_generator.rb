@@ -507,14 +507,7 @@ module Dynamic
       res = []
 
       option_configs.map(&:references).compact.each do |act_refs|
-        act_refs.each do |ref_name, outer_config|
-          outer_config.each do |full_name, ref_config|
-            details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
-                                       :from, :without_reference, :no_master_association)
-            details.merge! reference_name: ref_name, full_ref_name: full_name
-            res << details
-          end
-        end
+        res += referenced_table_def(act_refs)
       end
 
       res
@@ -523,6 +516,19 @@ module Dynamic
         Failed to use the extra log options. It is likely that the 'references:' attribute of one of
         activities is not formatted as expected, or a @library inclusion has an error. #{e}
       END_TEXT
+    end
+
+    def referenced_table_def(act_refs)
+      res = []
+      act_refs.each do |ref_name, outer_config|
+        outer_config.each do |full_name, ref_config|
+          details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
+                                     :from, :without_reference, :no_master_association)
+          details.merge! reference_name: ref_name, full_ref_name: full_name
+          res << details
+        end
+      end
+      res
     end
   end
 end

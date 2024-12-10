@@ -1,0 +1,36 @@
+<%
+unless defined? show_table
+  show_table = false
+end
+
+to_table_name = ref_def[:to_table_name]
+link = nil
+if to_table_name
+  view_name = object_instance.reference_view_name(to_table_name)
+  type = ref_def[:to_class_type]
+  link = case type  
+          when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
+          when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
+          when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
+          end
+end
+  %>
+    <li>
+    <% if link %>
+      <%= link_to(full_ref_name, link, target: '_blank') %>
+      <% if show_table %>
+      <ul>
+        <li>table: <%= to_table_name %></li>
+        <li>view: <%= link_to(link_label_open_in_new(view_name), report_path('reference_data__table_data', 
+                                          table_name: view_name, 
+                                          schema_name: object_instance.schema_name, 
+                                          search_attrs: { no_run: true }
+                                        ), 
+                                        target: '_blank', class: '') %></li>
+                                      
+      </ul>
+      <% end %>
+  <%    else %>
+    <%= full_ref_name %>
+  <% end %>
+    </li>
