@@ -2,8 +2,13 @@
 
 class Admin::PageLayoutsController < AdminController
   helper_method :layout_options, :index_params
+  before_action :set_defaults
 
   protected
+
+  def set_defaults
+    @show_again_on_save = true
+  end
 
   def layout_options
     [['Master Panel', 'master'], ['User Profile', 'user_profile'], ['Dashboard / Page', 'standalone'],

@@ -52,7 +52,53 @@
       <% end %>
     </div>
   <% end %>
+</div>
+<div class="activity-list-section">
+  <label>activities</label>
+  <p>Add a new <code>[activity_name]:</code> underscored activity name without indentation.</p>
+  <p>Click an activity name from the list below to jump to its definition. Each activity shown lists the fields defined for it.<br/>&nbsp;</p>
+  <ul class="activity-list">
+  <% object_instance.option_configs_names&.each do |name| 
+       conf = object_instance.option_type_config_for(name)
 
+       next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
+  %>
+    <li class="activity-list-name"><%=name%><% unless conf %>(invalid)<% end %></li>
+      <% if conf&.label&.present?  %>
+      <div class="activity-list-activity-label"><%= conf.label %></div>
+      <% end %>
+      <% if conf&.fields&.present?  %>
+      <ul class="activity-list-activity-fields">
+        <li><%= conf.fields.join("</li> <li>").html_safe %></li>
+      </ul>
+      <% end %>
+      <% ref_def = conf&.embed
+         if ref_def&.present?  
+            got = ref_def.dig(:resource_model_def, :resource_item_name)
+      %>
+      <ul class="activity-list-activity-embed">
+        <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:} %>
+      </ul>
+      <% end %>
+      <% act_refs = conf&.references
+         if act_refs&.present?  
+         %>
+           <ul class="activity-list-activity-references">
+         <%
+              object_instance.referenced_table_def(act_refs)&.each do |ref_def|
+                full_ref_name = ref_def[:full_ref_name]
+         %>
+          <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:} %>
+              <% end %>
+          </ul>
+      <% end %>
+
+  <% end %>
+  </ul>
+  <div id="activity-list-detail" class="activity-list-detail"></div>
+</div>
+
+<div class="activity-list-all-fields">
   <label>all fields</label>
   <p>Set of all fields aggregated from all activities.</p>
   <p class="al-field-list">
@@ -65,26 +111,6 @@
   </p>
 </div>
 
-<div class="activity-list-section">
-  <label>activities</label>
-  <p>Click an activity name to jump to its definition. Each activity shown lists the fields defined for it.</p>
-  <ul class="activity-list">
-  <% object_instance.option_configs_names&.each do |name| 
-       conf = object_instance.option_type_config_for(name)
-
-       next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
-  %>
-    <li class="activity-list-name"><%=name%><% unless conf %>(invalid)<% end %></li>
-      <ul class="activity-list-fields">
-      <% if conf&.fields&.present?  %>
-        <li><%= conf.fields.join("</li> <li>").html_safe %></li>
-      <% end %>
-      </ul>
-  <% end %>
-  </ul>
-  <div id="activity-list-detail" class="activity-list-detail"></div>
-</div>
-
 <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
 
@@ -94,29 +120,13 @@
   rather than an intermediate model references to access embedded records.</p>
   <ul class="al-reference-list al-embed-list">
   <% shown_refs = []
-     object_instance.all_direct_embed_tables.each do |ref| 
+     object_instance.all_direct_embed_tables.each do |ref_def| 
   
-      got = ref.dig(:resource_model_def, :resource_item_name)
+      got = ref_def.dig(:resource_model_def, :resource_item_name)
       unless shown_refs.include?(got)
         shown_refs << got
-        to_table_name = ref.dig(:resource_model_def, :table_name)
-        type = ref.dig(:resource_model_def, :type)
-        link = case type  
-                when :dynamic_model then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                when :activity_log then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                when :external_identifier then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
-                end
-        if link
-  %>
-    <li>
-      <%= link_to(got, link, target: '_blank') %>
-      <ul>
-        <li>table: <%= to_table_name %></li>
-      </ul>
-  <%    else %>
-    <%= got %>
-  <%    end %>
-    </li>
+    %>
+    <%= render partial: 'admin/activity_logs/def_embed_info', locals: {resource_item_name: got, ref_def:, show_table: true} %>
     <%  end %>
   <% end %>
   </ul>
@@ -129,40 +139,13 @@
   
   <ul class="al-reference-list">
   <% shown_refs = []
-     object_instance.all_referenced_tables.each do |ref| 
+     object_instance.all_referenced_tables.each do |ref_def| 
   %>
-  <%  got = ref[:full_ref_name]
-      unless shown_refs.include?(got)
-        shown_refs << got
-        to_table_name = ref[:to_table_name]
-        link = nil
-        if to_table_name
-          view_name = object_instance.reference_view_name(to_table_name)
-          type = ref[:to_class_type]
-          link = case type  
-                  when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                  when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
-                  when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
-                  end
-        end
-        if link
+  <%  full_ref_name = ref_def[:full_ref_name]
+      unless shown_refs.include?(full_ref_name)
+        shown_refs << full_ref_name
   %>
-    <li>
-      <%= link_to(got, link, target: '_blank') %>
-      <ul>
-        <li>table: <%= to_table_name %></li>
-        <li>view: <%= link_to(link_label_open_in_new(view_name), report_path('reference_data__table_data', 
-                                          table_name: view_name, 
-                                          schema_name: object_instance.schema_name, 
-                                          search_attrs: { no_run: true }
-                                        ), 
-                                        target: '_blank', class: '') %></li>
-                                      
-      </ul>
-  <%    else %>
-    <li><%= got %></li>
-  <%    end %>
-    </li>
+    <%= render partial: 'admin/activity_logs/def_references_info', locals: {full_ref_name: full_ref_name, ref_def:, show_table: true} %>
     <%  end %>
   <% end %>
   </ul>
