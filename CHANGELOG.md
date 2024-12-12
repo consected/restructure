@@ -12,7 +12,14 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.8.3] - 2024-08-22
+## Unreleased
+
+- [Added] nested embed and references sections under activity list items
+- [Fixed] Admin reports panel add or edit report very slow (now only slow the first time) - fixes #420
+- [Changed] ordering of reports admin list
+- [Fixed] bad reloading of page layouts admin panel
+
+## [8.9.3] - 2024-12-04
 
 - [Updated] gems to resolve Rails CVEs
 
