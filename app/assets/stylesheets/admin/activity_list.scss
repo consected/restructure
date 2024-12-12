@@ -3,8 +3,18 @@
 .activity-list-embeds,
 .activity-list-libraries,
 .activity-list-file-filters,
-.activity-list-dialogs {
-  padding: 0 10px;
+.activity-list-dialogs,
+.activity-list-all-fields {
+  padding: 10px 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid silver;
+  background-color: #f3f3f3;
+}
+
+.activity-list-section {
+  padding: 14px 10px;
+  border-top: 1px solid silver;
 }
 
 ul.activity-list,
@@ -33,6 +43,55 @@ ul.admin-tag-list {
   }
 
 }
+
+ul.activity-list {
+  li.activity-list-name {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .activity-list-activity-label {
+    margin-left: 8px;
+    font-style: italic;
+  }
+
+  & > ul {
+    text-indent: -75px;
+    padding-left: 84px;
+
+    &:before {
+      
+      min-width: 70px;
+      display: inline-block;
+      text-indent: 0;
+      color: gray;
+    }
+
+    li {
+      text-indent: 0;
+    }
+  }
+
+  ul.activity-list-activity-fields {
+    &:before {
+      content: 'fields';
+    }
+  }
+  
+  ul.activity-list-activity-embed {
+    &:before {
+      content: 'embed';
+    }
+  }
+
+  ul.activity-list-activity-references {
+    &:before {
+      content: 'references';
+    }
+  }
+}
+
 
 span.activity-list-name {
   color: black;
