@@ -1,0 +1,13 @@
+<% 
+  prev_access = :not_set
+  uacs = Admin::UserAccessControl.active_for(app_type_id: , resource_name:) 
+  uacs.each do |uac|
+    access_changed = prev_access != uac.access
+    prev_access = uac.access
+%>
+<% if access_changed %><span class="activity-log-access-type"><%= uac.access.presence || 'no access' %></span><% end %>
+<li>
+  <%= uac.user&.email.presence || '' %> 
+  <%= uac.role_name.nil? ? '' :  link_to(uac.role_name, admin_user_roles_url(filter: {role_name: uac.role_name} ), target: '_blank') %>
+</li>
+<% end %>

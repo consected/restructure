@@ -92,6 +92,9 @@
               <% end %>
           </ul>
       <% end %>
+      <ul class="activity-list-activity-uacs">
+        <%= render partial: 'admin/activity_logs/def_activity_uac_info', locals: {app_type_id: current_admin.matching_user&.app_type_id, resource_name: conf.resource_name} %>
+      </ul>
 
   <% end %>
   </ul>
