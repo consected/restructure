@@ -23,6 +23,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Updated] gems to resolve Rails CVEs
 
+### From FPHS - PR #421 - 2024-12-12
+
+- [Added] nested embed and references sections under activity list items
+- [Fixed] Admin reports panel add or edit report very slow (now only slow the first time) - fixes #420
+- [Changed] ordering of reports admin list
+- [Fixed] bad reloading of page layouts admin panel
+
 ### From Viva - PR #418 - 2024-12-04
 
 - [Fixed] "created_by_user_id" field showing unnecessarily in edit forms
