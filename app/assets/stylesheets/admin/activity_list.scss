@@ -90,6 +90,17 @@ ul.activity-list {
       content: 'references';
     }
   }
+
+  ul.activity-list-activity-uacs {
+    &:before {
+      content: 'access';
+    }
+
+    span.activity-log-access-type {
+      font-style: italic;
+      padding: 0 10px 0 20px;
+    }
+  }
 }
 
 

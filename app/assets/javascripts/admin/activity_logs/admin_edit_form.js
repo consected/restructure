@@ -26,6 +26,9 @@ _fpa_admin.activity_logs.admin_edit_form = class {
       cm.scrollIntoView({ line: cm.lastLine() })
       cm.setSelection(cursor.from(), cursor.to());
       cm.scrollIntoView({ line: cursor.from().line + 1 })
+
+      // And set the sample form
+      $('#extra_log_type').val(val);
     })
 
   }

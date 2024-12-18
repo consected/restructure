@@ -120,6 +120,19 @@ class Admin::UserAccessControl < Admin::AdminBase
   end
 
   #
+  # Get a list of user access controls that are active for the specified
+  # app type and resource name
+  # @param [Integer] app_type_id
+  # @param [Symbol|String] resource_name
+  # @return [Array]
+  def self.active_for(app_type_id: nil, resource_name: nil)
+    res = active
+    res = res.where(app_type_id:) if app_type_id
+    res = res.where(resource_name:) if resource_name
+    res.order(access: :asc)
+  end
+
+  #
   # Is the combination access level valid for the resource type?
   # @param [String | Symbol] on_resource_type
   # @param [String | Symbol | Array] can_perform - will exit immediately with an Array
@@ -256,7 +269,6 @@ class Admin::UserAccessControl < Admin::AdminBase
   # @return [Hash{String => UserAccessControl} | nil] - Hash of { resource_name => UserAccessControl }
   def self.evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
                                alt_role_name: nil, add_conditions: nil)
-
     if can_perform
       unless can_perform.is_a?(Array) ||
              valid_access_level?(on_resource_type, can_perform) ||

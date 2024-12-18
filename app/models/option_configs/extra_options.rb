@@ -452,6 +452,7 @@ module OptionConfigs
       configs = []
 
       if config_text.present?
+        config_text = prepend_standard_definitions(config_text)
         config_text = include_libraries(config_text)
         begin
           res = YAML.safe_load(config_text, permitted_classes: [],
@@ -654,6 +655,33 @@ module OptionConfigs
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
+
+    #
+    # Add standard definitions that simplify configurations
+    def self.prepend_standard_definitions(content_to_update, force_type: nil)
+      return unless content_to_update
+
+      # First time through we ensure the common extra options defaults are added
+      content_to_update = prepend_standard_definitions(content_to_update, force_type: 'extra_options') unless force_type
+
+      force_type ||= name.demodulize.underscore
+
+      defsw = [
+        'app',
+        'models',
+        'admin',
+        'defs',
+        "#{force_type}_standard_option_defs.yaml"
+      ]
+
+      path = Rails.root.join(*defsw)
+      if File.exist?(path)
+        defs_yaml = File.read(path)
+        content_to_update = "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}"
+      end
+
+      content_to_update
+    end
 
     #
     # Inject config libraries into the provided content
