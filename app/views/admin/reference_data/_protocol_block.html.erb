@@ -1,4 +1,11 @@
+<%
+unless defined? tree_list_block_class
+  tree_list_block_class = ''
+end
+
+%>
 <div class="ref-data-protocol-events">
+  <% unless @protocol_tree_list_no_help %>
       <p><a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a></p>
       <div class="help-block collapse" id="p-help">
         <p>
@@ -22,21 +29,36 @@
           </code></p>
 
       </div>
+<% end %>
+      <div class="<%=tree_list_block_class%>">
       <ul id="protocols-list" style="overflow: auto; background-color: white;">
-        <% Classification::Protocol.all.sort.each do |p| %>
-        <li id="protocol-<%=p.id%>">
-          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
+        <% 
+        pid = @filter_protocol_tree_list&.dig(:protocol_id)
+        protocols = Classification::Protocol.all
+        protocols = protocols.where(id: pid) if pid
+        
+        init_collapsed = pid ? '' : 'collapsed'
+        init_collapse = pid ? 'collapse in' : 'collapse'
+
+        protocols.sort.each do |p| %>
+        <li id="protocol-<%=p.id%>" class="protocols-list--protocol">
+          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="<%=init_collapsed%>" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><span><%=p.id%></span> <strong><%= p.name %></strong></a>
         </li>
-        <ul id="pblock-<%=p.id%>" class="collapse">
-          <% p.sub_processes.all.each do |sp| %>
-          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
+        <ul id="pblock-<%=p.id%>" class="<%=init_collapse%>">
+          <% 
+          sid = @filter_protocol_tree_list&.dig(:sub_process_id)
+          sub_processes = p.sub_processes.all
+          sub_processes = sub_processes.where(id: sid) if sid
+          sub_processes.each do |sp| %>
+          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>" class="protocols-list--sub-process"><span><%=sp.id%></span> <strong><%= sp.name %></strong></li>
           <ul>
             <% sp.protocol_events.all.each do |pe| %>
-            <li style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><%=pe.id%> - <%= pe.name %></li>
+            <li style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>" class="protocols-list--event"><span><%=pe.id%></span> <strong><%= pe.name %></strong></li>
             <% end %>
           </ul>
           <% end %>
         </ul>
         <% end %>
       </ul>
+    </div>
 </div>

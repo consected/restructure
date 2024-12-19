@@ -3,6 +3,10 @@ class Admin::ProtocolEventsController < AdminController
 
   before_action :set_protocol, only: %i[index new show edit]
   before_action :set_protocol_for_edit, only: %i[create update]
+  before_action :setup_tree_list, only: [:index]
+
+  helper_method :extra_part
+
   def index
     if params[:all]
       set_objects_instance(@protocol_events = Classification::ProtocolEvent.all)
@@ -20,6 +24,19 @@ class Admin::ProtocolEventsController < AdminController
   end
 
   private
+
+  def show_head_info
+    true
+  end
+
+  def setup_tree_list
+    @filter_protocol_tree_list = { protocol_id: @protocol.id, sub_process_id: @sub_process.id }
+    @protocol_tree_list_no_help = true
+  end
+
+  def extra_part
+    'admin/protocols/tree_list'
+  end
 
   def title
     'Events'

@@ -1,7 +1,12 @@
 class Admin::SubProcessesController < AdminController
   include AdminControllerHandler
+
   before_action :set_protocol, only: %i[index new show edit]
   before_action :set_protocol_for_edit, only: %i[create update]
+  before_action :setup_tree_list, only: [:index]
+
+  helper_method :extra_part
+
   def index
     set_objects_instance(@sub_processes = @protocol.sub_processes)
     response_to_index
@@ -13,6 +18,19 @@ class Admin::SubProcessesController < AdminController
   end
 
   private
+
+  def show_head_info
+    true
+  end
+
+  def setup_tree_list
+    @filter_protocol_tree_list = { protocol_id: @protocol.id }
+    @protocol_tree_list_no_help = true
+  end
+
+  def extra_part
+    'admin/protocols/tree_list'
+  end
 
   def title
     'Sub Processes'
