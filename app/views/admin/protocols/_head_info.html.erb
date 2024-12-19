@@ -1,0 +1,9 @@
+<div class="container-fluid admin-head-blocks panel panel-default">
+  <div class="row">
+    <div class="col-sm-10 admin-head-block">
+      <h4>Position in Tracker</h4>
+      <p>Protocols will be ordered in the tracker based on the <b><%= app_config_text(:tracker_order, 'protocol position').strip.gsub("\n", '') %></b>.</p>
+      <p>Change this option in the <%= link_to 'App Configurations', admin_app_configurations_path(filter: {name: 'tracker order'}) %> <b>tracker order</b> setting.</p>
+    </div>
+  </div>
+</div>

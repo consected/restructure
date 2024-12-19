@@ -11,7 +11,7 @@ module AdminControllerHandler
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder,
+                  :help_section, :help_subsection, :title, :sub_title, :no_create, :show_head_info, :view_folder,
                   :no_options_field, :admin_labels, :filters_prevent_disabled
   end
 
@@ -216,6 +216,10 @@ module AdminControllerHandler
 
   def title
     object_name.pluralize.split('__').map { |t| t.humanize.captionize }.join(': ')
+  end
+
+  def sub_title
+    nil
   end
 
   #

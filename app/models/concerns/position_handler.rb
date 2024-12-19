@@ -34,6 +34,7 @@ module PositionHandler
     if attributes[position_attribute].nil?
       max_pos = self.class.active
                     .where(position_group)
+                    .reorder('')
                     .order(position_attribute => :desc)
                     .limit(1)
                     .pluck(position_attribute)
@@ -45,6 +46,7 @@ module PositionHandler
                         .where(position_group)
                         .where.not(id: id)
                         .where("#{position_attribute} >= ?", attributes[position_attribute])
+                        .reorder('')
                         .order(position_attribute => :asc)
 
       other_items.each do |p|

@@ -240,6 +240,11 @@ div.help-view-doc,
     overflow: visible;
   }
 
+  ul > li > ul {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
   li.list-group-item {
     list-style-position: outside;
     list-style-type: none;
