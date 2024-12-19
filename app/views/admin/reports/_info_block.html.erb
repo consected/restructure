@@ -37,7 +37,7 @@
       <% end %>
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
-      <h4>Protocol / status / method </h4>
+      <h4>Protocol / Sub Process / Event </h4>
       <%= Rails.cache.fetch('info-block-protocol-block') { render partial: 'admin/reference_data/protocol_block' }.html_safe %>
     </div>
     <div role="tabpanel" class="tab-pane" id="selection-options">

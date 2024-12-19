@@ -3,7 +3,19 @@
 class Admin::ProtocolsController < AdminController
   include AdminControllerHandler
 
+  before_action :setup_tree_list, only: [:index]
+
+  helper_method :extra_part
+
   private
+
+  def setup_tree_list
+    @protocol_tree_list_no_help = true
+  end
+
+  def extra_part
+    'tree_list'
+  end
 
   def view_folder
     'admin/common_templates'
