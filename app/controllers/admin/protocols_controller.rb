@@ -5,6 +5,22 @@ class Admin::ProtocolsController < AdminController
 
   private
 
+  def view_folder
+    'admin/common_templates'
+  end
+
+  def admin_links(item = nil)
+    return [true] unless item&.id
+
+    [
+      ['edit sub processes', admin_protocol_sub_processes_path(item)]
+    ]
+  end
+
+  def show_head_info
+    true
+  end
+
   def filters
     {
       app_type_id: Admin::AppType.all_by_name.merge('IS NULL': '(not set)')
@@ -16,6 +32,6 @@ class Admin::ProtocolsController < AdminController
   end
 
   def permitted_params
-    %i[app_type_id name disabled position]
+    %i[app_type_id name position disabled]
   end
 end

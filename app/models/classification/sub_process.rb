@@ -15,6 +15,10 @@ class Classification::SubProcess < ActiveRecord::Base
     id
   end
 
+  def to_s
+    "#{protocol_name} / #{name}"
+  end
+
   def protocol_name
     protocol&.name || ''
   end
