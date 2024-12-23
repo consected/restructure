@@ -576,10 +576,10 @@ class Admin::MigrationGenerator
     cname_us = "#{mode}_#{name}_#{version}"
 
     # Ensure we don't get overlapping migration version numbers
-    migtime = Time.new.to_s(:number)
+    migtime = Time.new.to_fs(:number)
     while Dir.glob("#{migtime}*", base: dirname).length > 0
       sleep 1.5
-      migtime = Time.new.to_s(:number)
+      migtime = Time.new.to_fs(:number)
     end
 
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
