@@ -59,7 +59,7 @@ development database before creating a test database.
 The following will dump just the required schemas, rather than
 everything in the development database, making subsequent creation faster.
 
-    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
+    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 
 **NOTE:** the `db/schema.rb` file is not used, and if it is present it does not
 represent a complete database and should not be used.

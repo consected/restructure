@@ -118,7 +118,7 @@ Then set up the database.
 ### Setup the database
 
 It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
-To ensure `psql` and all `rake db:structure:dump` works as expected, set the path to Postgres 12 binaries explicitly.
+To ensure `psql` and all `rails db:schema:dump` works as expected, set the path to Postgres 12 binaries explicitly.
 
     export PATH=/usr/lib/postgresql/12/bin:${PATH}
 
@@ -237,7 +237,7 @@ Rspec tests are available. To set up a test database, first get a dump of the cu
 development database structure (if you have made migrations)
 
     export PATH=/usr/lib/postgresql/12/bin:${PATH}
-    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rake db:structure:dump
+    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rails db:schema:dump
 
 To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
 to enable automatic authentication with your DB password, such as:

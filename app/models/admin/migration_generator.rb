@@ -635,7 +635,7 @@ class Admin::MigrationGenerator
           self.class.migration_context(db_migration_dirname).migrate
           # Don't dump until a build, otherwise differences in individual development environments
           # force unnecessary and confusing commits
-          # pid = spawn('bin/rake db:structure:dump')
+          # pid = spawn('bin/rails db:schema:dump')
           # Process.detach pid
         end
       end.join
