@@ -91,7 +91,7 @@ module Dynamic
         source_type: dmdd[:source_type] || 'database',
         form_name: dmdd[:form_name],
         storage_type: 'database',
-        db_or_fs: ActiveRecord::Base.connection_config[:database],
+        db_or_fs: ActiveRecord::Base.connection_db_config.configuration_hash[:database],
         schema_or_path: dynamic_model.schema_name,
         table_or_file: dynamic_model.table_name,
         is_derived_var: dmdd[:is_derived_var],

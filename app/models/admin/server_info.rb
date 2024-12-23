@@ -50,7 +50,7 @@ class Admin::ServerInfo
   # Get a hash of database settings based on the current database config
   # @return [Hash]
   def db_settings
-    cx = ActiveRecord::Base.connection_config.dup
+    cx = ActiveRecord::Base.connection_db_config.configuration_hash.dup
     cx[:password] = '(hidden)'
     {
       current_database: Admin::MigrationGenerator.current_database,
