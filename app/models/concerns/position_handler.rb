@@ -47,10 +47,10 @@ module PositionHandler
                         .where.not(id: id)
                         .where("#{position_attribute} >= ?", attributes[position_attribute])
                         .reorder('')
-                        .order(position_attribute => :asc)
+                        .order(position_attribute => :asc, id: :asc)
 
       other_items.each do |p|
-        p.update! position_attribute => pos, current_admin: admin if p.attributes[position_attribute] != pos
+        p.update_columns position_attribute => pos, admin_id: admin_id if p.attributes[position_attribute] != pos
         pos += 1
       end
     end

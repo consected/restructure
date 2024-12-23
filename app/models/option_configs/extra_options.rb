@@ -664,7 +664,11 @@ module OptionConfigs
       # First time through we ensure the common extra options defaults are added
       content_to_update = prepend_standard_definitions(content_to_update, force_type: 'extra_options') unless force_type
 
-      force_type ||= name.demodulize.underscore
+      new_force_type ||= name.demodulize.underscore
+      # Ensure we don't include extra_options defaults twice
+      return content_to_update if force_type.nil? && new_force_type == 'extra_options'
+
+      force_type = new_force_type
 
       defsw = [
         'app',
@@ -675,12 +679,10 @@ module OptionConfigs
       ]
 
       path = Rails.root.join(*defsw)
-      if File.exist?(path)
-        defs_yaml = File.read(path)
-        content_to_update = "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}\n"
-      end
+      return content_to_update unless File.exist?(path)
 
-      content_to_update
+      defs_yaml = File.read(path)
+      "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}\n"
     end
 
     #
