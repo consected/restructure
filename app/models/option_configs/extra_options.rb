@@ -677,7 +677,7 @@ module OptionConfigs
       path = Rails.root.join(*defsw)
       if File.exist?(path)
         defs_yaml = File.read(path)
-        content_to_update = "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}"
+        content_to_update = "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}\n"
       end
 
       content_to_update
