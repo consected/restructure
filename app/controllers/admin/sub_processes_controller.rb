@@ -8,13 +8,19 @@ class Admin::SubProcessesController < AdminController
   helper_method :extra_part
 
   def index
-    set_objects_instance(@sub_processes = @protocol.sub_processes)
+    @prevent_copy_item = true
+    @sub_processes = filtered_primary_model(@protocol.sub_processes)
+    @sub_processes = @sub_processes.limited_index
+    @sub_processes = @sub_processes.reorder('').order(default_index_order) if default_index_order.present?
+    set_objects_instance(@sub_processes)
     response_to_index
   end
 
   def new(options = {})
     set_object_instance(@sub_process = @protocol.sub_processes.build) unless options[:use_current_object]
-    render partial: 'form'
+    object_instance.protocol_id = @protocol_id
+    options[:use_current_object] = true
+    super
   end
 
   private
@@ -55,13 +61,17 @@ class Admin::SubProcessesController < AdminController
   def set_protocol
     protocol_id = params[:protocol_id] || object_instance.protocol_id
     @protocol = Classification::Protocol.find(protocol_id)
-    @parent_param = { protocol_id: @protocol.id }
+    @protocol_id = @protocol.id
+    @parent_param = { protocol_id: @protocol_id }
   end
 
   def set_protocol_for_edit
+    @prevent_copy_item = true
+
     protocol_id = secure_params[:protocol_id] || object_instance.protocol_id
     @protocol = Classification::Protocol.find(protocol_id)
-    @parent_param = { protocol_id: @protocol.id }
+    @protocol_id = @protocol.id
+    @parent_param = { protocol_id: @protocol_id }
   end
 
   def permitted_params

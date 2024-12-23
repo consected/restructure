@@ -8,19 +8,27 @@ class Admin::ProtocolEventsController < AdminController
   helper_method :extra_part
 
   def index
+    @prevent_copy_item = true
+
     if params[:all]
-      set_objects_instance(@protocol_events = Classification::ProtocolEvent.all)
+      @protocol_events = Classification::ProtocolEvent.all
       @sub_process_name = 'All Sub Processes'
     else
-      set_objects_instance(@protocol_events = @sub_process.protocol_events.reload)
+      @protocol_events = @sub_process.protocol_events.reload
       @sub_process_name = @sub_process.name
     end
+    @protocol_events = filtered_primary_model(@protocol_events)
+    @protocol_events = @protocol_events.limited_index
+    @protocol_events = @protocol_events.reorder('').order(default_index_order) if default_index_order.present?
+    set_objects_instance(@protocol_events)
     response_to_index
   end
 
   def new(options = {})
     set_object_instance(@protocol_event = @sub_process.protocol_events.build) unless options[:use_current_object]
-    render partial: 'form'
+    object_instance.sub_process_id = @sub_process_id
+    options[:use_current_object] = true
+    super
   end
 
   private
@@ -63,15 +71,23 @@ class Admin::ProtocolEventsController < AdminController
       @protocol = Classification::Protocol.find(params[:protocol_id])
       @sub_process = Classification::SubProcess.find(params[:sub_process_id])
     end
+
+    @protocol_id = @protocol.id
+    @sub_process_id = @sub_process.id
+    @parent_param = { protocol_id: @protocol_id, sub_process_id: @sub_process_id }
   end
 
   def set_protocol_for_edit
+    @prevent_copy_item = true
+
     @sub_process = Classification::SubProcess.find(secure_params[:sub_process_id])
+    @sub_process_id = @sub_process.id
     @protocol = @sub_process.protocol
-    @parent_param = { protocol_id: @protocol.id, sub_process_id: @sub_process.id }
+    @protocol_id = @protocol.id
+    @parent_param = { protocol_id: @protocol_id, sub_process_id: @sub_process_id }
   end
 
   def permitted_params
-    %i[name sub_process_id disabled milestone description]
+    %i[name milestone description disabled sub_process_id]
   end
 end
