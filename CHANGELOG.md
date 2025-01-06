@@ -12,7 +12,22 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.8.3] - 2024-08-22
+## Unreleased
+
+- [Fixed] specs for more info on failures and to fix inline activity log configurations
+- [Updated] schema for Postgres v15
+- [Added] new otp_secret field for devise-two-factor gem
+- [Fixed] tracker_histories association
+- [Changed] message when failing to load a dynamic model during reload
+- [Fixed] dynamic migrations
+- [Updated] sprockets gem to v4
+- [Changed] browser check to use new Rails support for browser version checking
+- [Updated] configs for Rails 7
+- [Updated] gems to Rails 7.2 via 7.0 and 7.1
+- [Fixed] admin panel email field styling
+- [Changed] login issues text to simplify it for users
+
+## [8.9.4] - 2024-08-22
 
 - [Added] nested embed and references sections under activity list items
 - [Fixed] Admin reports panel add or edit report very slow (now only slow the first time) - fixes #420
