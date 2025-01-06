@@ -36,7 +36,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 # For this to work, Procfile must call puma with `bundle exec`
 gem 'puma', '~> 6.0'
 
-gem 'rails', '~> 6.1', '>= 6.1.7'
+gem 'rails', '~> 7.0', '<7.3'
 
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
@@ -65,6 +65,7 @@ group :development, :test do
   gem 'parallel_tests' # , '3.8.1'
   gem 'rspec-rails'
   # gem 'ruby-debug-ide'
+  gem 'sassc-embedded'
   gem 'spring'
   # gem 'spring-commands-parallel-tests'
 end
@@ -83,6 +84,8 @@ end
 
 group :development, :assets do
   gem 'execjs'
-  gem 'sass-rails', '~> 5.1'
   gem 'terser'
 end
+
+gem 'sprockets', '~> 4.2'
+gem 'sprockets-rails', '~> 3.5'
