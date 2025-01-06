@@ -1,0 +1,25 @@
+# Standard options to simplify configurations
+
+_definitions___extra_options_standard_option_definitions___:
+
+  # Usage:
+  #   extra_option_name:
+  #     <<: *never_creatable
+  creatable_if_never: &never_creatable
+    creatable_if:
+      never: true
+
+  # Usage:
+  #   extra_option_name:
+  #     <<: *never_editable
+  editable_if_never: &never_editable
+    editable_if:  
+      never: true
+
+  # Usage:
+  #   extra_option_name:
+  #     <<: *never_showable
+  showable_if_never: &never_showable
+    showable_if:
+      never: true
+

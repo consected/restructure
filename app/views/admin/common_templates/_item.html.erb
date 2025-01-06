@@ -18,7 +18,7 @@
 <% else %>
   <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
 <% end %>
-    <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item.id, copy: list_item%>  </td>
+    <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item.id, copy: list_item unless @prevent_copy_item %>  </td>
     <% index_params.each do |p|
         next if p.to_s == 'admin_id'
 

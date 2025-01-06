@@ -90,12 +90,19 @@ a.collapsed>.caret {
 }
 
 .admin-edit-form .form-text-area-group {
-  margin: 0 10px 8px;
-  min-width: 400px;
+  margin: 0 0 8px;
+  width: 400px;
 }
 
 .admin-edit-form .form-group[data-out-attr-name='description'] {
   display: block;
+}
+
+.admin-edit-form .form-group {
+  width: 400px;
+  input[type="text"], input[type="email"] {
+    width: 100%;
+  }
 }
 
 .admin-flex-block {
@@ -247,4 +254,12 @@ a.link-disabled {
 
 [data-out-attr-name="user_id"] .chosen-container {
   min-width: 300px;
+}
+
+.admin-protocol-tree-list {
+  background-color: white;
+  margin-top: 14px;
+  border-top: 1px solid silver;
+  border-bottom: 1px solid silver;
+  padding: 10px;
 }

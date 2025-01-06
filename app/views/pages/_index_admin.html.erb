@@ -59,7 +59,7 @@
               <% if current_admin.can_admin?(:general_selections)%><% got_one ||= true %><li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li><%end%>
               <% if current_admin.can_admin?(:item_flag_names)%><% got_one ||= true %><li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li><%end%>
               <% if current_admin.can_admin?(:external_links)%><% got_one ||= true %><li class="nav"><%= link_to "External Links", admin_external_links_path %> </li><%end%>
-              <% if current_admin.can_admin?(:protocols)%><% got_one ||= true %><li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li><%end%>
+              <% if current_admin.can_admin?(:protocols)%><% got_one ||= true %><li class="nav"><%= link_to "Protocol / Sub Process / Event", admin_protocols_path %> </li><%end%>
               <% if current_admin.can_admin?(:colleges)%><% got_one ||= true %><li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li><%end%>
               <% unless got_one %><li class="nav nothing-admin-authed">Nothing authorized</li><% end %>
             </ul>

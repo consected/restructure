@@ -18,9 +18,16 @@
     <%= f.select :item_type, Classification::GeneralSelection.item_types, select_item_type, disabled: !!object_instance.id  %>
   </div>
   <div class="form-group">
-    <%= f.check_box :disabled %>
-    <%= f.label :disable %>
+    <%= f.label :position %>
+    <%= f.number_field :position %>
   </div>
+  <div class="form-group">
+    <div class="form-text-area-group">
+      <%= f.label :description %>
+      <%= f.text_area :description %>
+    </div>
+  </div>  
+  <br/>
   <div class="form-group">
     <%= f.check_box :create_with %>
     <%= f.label :create_with %>
@@ -38,12 +45,8 @@
     <%= f.label :edit_always %>
   </div>
   <div class="form-group">
-    <%= f.label :position %>
-    <%= f.number_field :position %>
-  </div>
-  <div class="form-text-area-group">
-    <%= f.label :description %>
-    <%= f.text_area :description, style: "width:50%; height:70px;" %>
+    <%= f.check_box :disabled %>
+    <%= f.label :disable %>
   </div>
 
   <div class="form-group">

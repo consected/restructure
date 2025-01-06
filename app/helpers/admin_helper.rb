@@ -106,7 +106,7 @@ module AdminHelper
       <div class="panel panel-default admin-action-page">
         <div class="panel-heading">
           #{render partial: 'admin/common_templates/app_components_dropdown'}
-          <h1 class="admin-title">#{alt_title}
+          <h1 class="admin-title">#{alt_title} <small>#{sub_title}</small>
             #{ link_to(
               '',
               help_page_path(

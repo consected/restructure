@@ -23,7 +23,13 @@
   <%if @external_identifier%>
     <%= link_to "external ID details", admin_external_identifier_details_path, class: "btn btn-warning" %>
   <%end%>
-  <%if allow_create %>
-    <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: filter_params_permitted), remote: true, class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create'] rescue nil%>
+  <%if allow_create 
+      uf_options = { action: :new, filter: filter_params_permitted }
+      uf_options.merge! @parent_param if @parent_param
+  %>
+    <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, 
+                url_for(uf_options), 
+                remote: true, 
+                class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create', 'update'] rescue nil%>
   <%end%>
 <%end%>

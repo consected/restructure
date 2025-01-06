@@ -37,6 +37,10 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
     :classification_sub_process
   end
 
+  def edit_form_admin
+    @edit_form_admin = 'admin/common_templates/_form'
+  end
+
   before(:example) do
     TrackerHistory.destroy_all
     Tracker.destroy_all
@@ -78,6 +82,8 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
 
       # Do this, since we can't guarantee the order of any particular controller response
       @created_items.each do |ci|
+        next if ci.disabled?
+
         expect(assigns(objects_symbol)).to include(ci), "Failed to get created items. #{@exceptions}"
       end
     end
@@ -132,7 +138,7 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
       it 'return success' do
         post :create, params: { object_param_symbol => valid_attributes }
         # expect(response).to redirect_to "/protocols/#{@protocol_id}/#{objects_symbol}"
-        expect(response).to render_template('_index')
+        expect(response).to render_template('admin/common_templates/_item')
       end
     end
 
@@ -178,7 +184,7 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
         put :update, params: { :id => item_id, object_param_symbol => new_attributes }
         expect(flash[:warning]).to_not be_present
         # expect(response).to redirect_to("/protocols/#{@protocol_id}/#{objects_symbol}")
-        expect(response).to render_template('_index')
+        expect(response).to render_template('admin/common_templates/_item')
       end
     end
 
@@ -186,7 +192,7 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
       it 'assigns the item as @var' do
         create_item
         ia = invalid_update_attributes
-        put :update,  params: { :id => item_id, object_param_symbol => ia }
+        put :update, params: { :id => item_id, object_param_symbol => ia }
         expect(flash[:warning]).to be_present, "No error was reported when assigning with invalid params: #{ia}"
         expect(assigns(object_symbol)).to eq(item)
       end

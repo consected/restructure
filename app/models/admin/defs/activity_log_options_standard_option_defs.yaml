@@ -1,0 +1,18 @@
+# Standard options to simplify configurations
+
+_definitions___activity_log_options_standard_option_definitions___:
+
+  # Usage:
+  #   extra_option_name:
+  #     creatable_if: *not_completed_this_activity
+  # Usage:
+  #   extra_option_name:
+  #     creatable_if: 
+  #       <<: *not_completed_this_activity
+  #       <<: *other_conditions
+  not_completed_this_activity: &not_completed_this_activity
+    not_any_completed_this:
+      definition_resources:
+        extra_log_type: '{{extra_log_type}}'
+
+  

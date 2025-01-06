@@ -196,6 +196,24 @@ textarea.admin-clean-sql {
   }
 }
 
+#protocols-list span {
+  font-size: 80%;
+}
+
+#protocols-list {
+  .protocols-list--protocol span:before {
+    content: 'protocol: '
+  }
+  
+  .protocols-list--sub-process span:before {
+    content: 'sub process: '
+  }
+  
+  .protocols-list--event span:before {
+    content: 'event: '
+  }
+}
+
 .ref-table-item {
   list-style: none;
   a {

@@ -57,6 +57,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "148ec49ab16570cd0003e12b36c2ba8117658ac25ca886745bcb3d23b5ea6d5c",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ActivityLog::ActivityLogsController",
+          "method": "edit_form",
+          "line": 34,
+          "file": "app/controllers/activity_log/activity_logs_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1588ef54c0f3d0a4977e81f54ac92bca4ad83ef96018c51bc9f2923e0d89f929",
@@ -99,29 +133,6 @@
       "confidence": "Medium",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "20b237d30191645e82d078ddcbffb4648a182fd08ff3af33c2fd292192ee1f3c",
-      "check_name": "Redirect",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/user_profiles_controller.rb",
-      "line": 51,
-      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(\"#{\"/masters/#{-1}\"}/#{UserProfile.new(:current_user => current_user).resource_info(params[:resource_name])[:base_route_segments]}/new\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "UserProfilesController",
-        "method": "show"
-      },
-      "user_input": "UserProfile.new(:current_user => current_user).resource_info(params[:resource_name])[:base_route_segments]",
-      "confidence": "High",
-      "cwe_id": [
-        601
       ],
       "note": ""
     },
@@ -275,13 +286,47 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "4799a1a59a8a0393088f897e52cc6865320b72051386d9ea4d23703fa52ae196",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ActivityLog::ActivityLogsController",
+          "method": "edit_form",
+          "line": 34,
+          "file": "app/controllers/activity_log/activity_logs_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "4c69ea9625a2d3b7118f4ca37e0b27ce844adf6486ebc03971da5b655c20ccbe",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/position_handler.rb",
-      "line": 47,
+      "line": 48,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "self.class.active.where(position_group).where.not(:id => id).where(\"#{self.class.position_attribute.to_s} >= ?\", attributes[self.class.position_attribute.to_s])",
       "render_path": null,
@@ -547,40 +592,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "8ed27130efd43a9fd39b280606c105c7d54358f9c088d10e34c136a626370645",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/layouts/application.html.erb",
-      "line": 40,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "AddressesController",
-          "method": "edit_form",
-          "line": 10,
-          "file": "app/controllers/addresses_controller.rb",
-          "rendered": {
-            "name": "layouts/application",
-            "file": "app/views/layouts/application.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "layouts/application"
-      },
-      "user_input": "current_user.app_type.name",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -696,40 +707,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "b779d1294b9d1acdcc65ff65de569078b876a155913d1fea1d8c68c04c6891e2",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/layouts/application.html.erb",
-      "line": 39,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "AddressesController",
-          "method": "edit_form",
-          "line": 10,
-          "file": "app/controllers/addresses_controller.rb",
-          "rendered": {
-            "name": "layouts/application",
-            "file": "app/views/layouts/application.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "layouts/application"
-      },
-      "user_input": "current_user.app_type.name",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "c4849bbd5ad704cab1a06825b331b0bb903881abf1a54590aab0ed6af1d03276",
@@ -837,25 +814,6 @@
       "confidence": "High",
       "cwe_id": [
         79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Unmaintained Dependency",
-      "warning_code": 120,
-      "fingerprint": "d84924377155b41e094acae7404ec2e521629d86f97b0ff628e3d1b263f8101c",
-      "check_name": "EOLRails",
-      "message": "Support for Rails 6.1.7.10 ended on 2024-10-01",
-      "file": "Gemfile.lock",
-      "line": 299,
-      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
-      "code": null,
-      "render_path": null,
-      "location": null,
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        1104
       ],
       "note": ""
     },
@@ -971,6 +929,5 @@
       "note": ""
     }
   ],
-  "updated": "2024-10-31 20:39:27 +0000",
-  "brakeman_version": "6.2.2"
+  "brakeman_version": "7.0.0"
 }

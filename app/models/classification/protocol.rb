@@ -9,6 +9,7 @@ class Classification::Protocol < ActiveRecord::Base
   include AppTyped
   include AdminHandler
   include SelectorCache
+  include PositionHandler
 
   RecordUpdatesProtocolName = 'Updates'
 
@@ -21,8 +22,20 @@ class Classification::Protocol < ActiveRecord::Base
   validates :name, presence: true
   before_save :reset_memos
 
+  def self.position_attribute
+    :position
+  end
+
+  def position_group
+    { app_type_id: }
+  end
+
   def value
     id
+  end
+
+  def to_s
+    name
   end
 
   # Use #select so we don't have to requery for each request for this scope

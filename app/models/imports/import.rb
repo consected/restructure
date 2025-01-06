@@ -56,8 +56,11 @@ class Imports::Import < ActiveRecord::Base
     duperrors = errors.dup
     save
     unless duperrors.empty?
-      duperrors.to_h.each do |k, e|
-        errors.add k, e
+      duperrors.to_hash.each do |k, e|
+        # The error is an array of errors
+        e.each do |e1|
+          errors.add k, e1
+        end
       end
     end
     self

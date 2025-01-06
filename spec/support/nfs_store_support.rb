@@ -301,6 +301,8 @@ module NfsStoreSupport
     @aldef.save!
     @aldef.option_configs(force: true)
     ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:step_1)
+    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('step_1') is nil after configuration"
 
     finalize_al_setup user: @user
     finalize_al_setup user: batch_user, skip_al_setup: true
@@ -309,7 +311,9 @@ module NfsStoreSupport
   def finalize_al_setup(activity: nil, user: nil, skip_al_setup: nil)
     user ||= @user
     activity ||= :step_1
-    @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity).resource_name
+    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity)
+    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('#{activity}') is nil - available: #{ActivityLog::PlayerContactPhone.definition.option_configs_names}"
+    @resource_name = otc.resource_name
 
     setup_access 'activity_log__player_contact_phones', user: user
     setup_access @resource_name, resource_type: :activity_log_type, user: user

@@ -13,6 +13,14 @@ RSpec.describe Admin::ProtocolsController, type: :controller do
     Classification::Protocol
   end
 
+  def edit_form_admin
+    @edit_form_admin = 'admin/common_templates/_form'
+  end
+
+  def saved_item_template
+    'admin/common_templates/_item'
+  end
+
   def item
     @protocol
   end

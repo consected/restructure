@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+require 'active_support/core_ext/integer/time'
 
 Rails.application.configure do
   config.log_level = :debug
@@ -6,8 +6,8 @@ Rails.application.configure do
 
   # Settings specified here will take precedence over those in config/application.rb.
 
-  # In the development environment your application's code is reloaded on
-  # every request. This slows down response time but is perfect for development
+  # In the development environment your application's code is reloaded any time
+  # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
@@ -20,10 +20,14 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
+  # Enable server timing
+  config.server_timing = true
+
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
-  if Rails.root.join('tmp', 'caching-dev.txt').exist?
+  if Rails.root.join('tmp/caching-dev.txt').exist?
     config.action_controller.perform_caching = true
+    config.action_controller.enable_fragment_cache_logging = true
 
     config.cache_store = :memory_store
     config.public_file_server.headers = {
@@ -39,27 +43,21 @@ Rails.application.configure do
 
   config.i18n.fallbacks = [I18n.default_locale]
 
-  # Store uploaded files on the local file system (see config/storage.yml for options)
-  # config.active_storage.service = :local
-
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = true
 
   config.action_mailer.delivery_method = :test
 
-  # config.action_mailer.smtp_settings = {
-  #   address: ENV['SMTP_SERVER'] || 'email-smtp.us-east-1.amazonaws.com',
-  #   port: ENV['SMTP_PORT'] || 465,
-  #   user_name: ENV['SMTP_USER_NAME'],
-  #   password: ENV['SMTP_PASSWORD'],
-  #   authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
-  #   enable_starttls_auto: true,
-  #   # openssl_verify_mode: :peer,
-  #   tls: true
-  # }
+  config.action_mailer.perform_caching = false
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
+
+  # Raise exceptions for disallowed deprecations.
+  config.active_support.disallowed_deprecation = :raise
+
+  # Tell Active Support which deprecation messages to disallow.
+  config.active_support.disallowed_deprecation_warnings = []
 
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
@@ -94,7 +92,7 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
-  config.assets.js_compressor = :terser
+  # config.assets.js_compressor = :terser
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 end

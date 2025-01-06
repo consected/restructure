@@ -267,7 +267,8 @@ class Admin::MigrationGenerator
   # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
   # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
   def self.migration_context(dirname)
-    schema_migration = ActiveRecord::Base.connection.schema_migration
+    connection_pool = ActiveRecord::Tasks::DatabaseTasks.migration_connection_pool
+    schema_migration = ActiveRecord::SchemaMigration.new(connection_pool)
     ActiveRecord::MigrationContext.new(dirname, schema_migration)
   end
 
@@ -576,10 +577,10 @@ class Admin::MigrationGenerator
     cname_us = "#{mode}_#{name}_#{version}"
 
     # Ensure we don't get overlapping migration version numbers
-    migtime = Time.new.to_s(:number)
+    migtime = Time.new.to_fs(:number)
     while Dir.glob("#{migtime}*", base: dirname).length > 0
       sleep 1.5
-      migtime = Time.new.to_s(:number)
+      migtime = Time.new.to_fs(:number)
     end
 
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
@@ -635,7 +636,7 @@ class Admin::MigrationGenerator
           self.class.migration_context(db_migration_dirname).migrate
           # Don't dump until a build, otherwise differences in individual development environments
           # force unnecessary and confusing commits
-          # pid = spawn('bin/rake db:structure:dump')
+          # pid = spawn('bin/rails db:schema:dump')
           # Process.detach pid
         end
       end.join

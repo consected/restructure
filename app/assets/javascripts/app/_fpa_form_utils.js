@@ -598,7 +598,7 @@ _fpa.form_utils = {
           var no_sel_text = 'no tags selected';
           var alt_nst = sel.attr('data-nothing-selected-text');
           if (alt_nst) no_sel_text = alt_nst;
-          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false, display_disabled_options: false });
+          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false, display_disabled_options: false, allow_single_deselect: true });
 
           sel.on('chosen:showing_dropdown', function (evt, params) {
 
@@ -835,12 +835,23 @@ _fpa.form_utils = {
               $(this).attr('data-group-num', ls[first]);
             }
           })
-          .hide().attr('disabled', 'disabled');
-        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+          .hide().attr('disabled', 'disabled').attr('data-disabled', 'disabled');
+        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null).attr('data-disabled', null);
+        // Clear any of the options that are in a disabled group
+        $(`${filter_sel} optgroup[disabled] option[selected="selected"]`).attr('selected', null)
         if ($(filter_sel).hasClass('attached-chosen')) {
           // Refresh the associate chosen.js values if chosen is attached to this field
           $(filter_sel).trigger('chosen:updated');
         }
+        var new_val = $(`${filter_sel} option[selected="selected"]`).val();
+
+        // Allow the value to be set - this is a necessary hack
+        $(`${filter_sel} optgroup[label][data-disabled="disabled"]`).attr('disabled', null)
+        $(filter_sel).val(new_val);
+        $(filter_sel).parent().find('.chosen-container .chosen-single span').html('tracker').removeClass('chosen-default')
+        console.log(`set filtered select ${filter_sel} to val: ${new_val} == ${$(filter_sel).val()}`)
+        // end of hack
+
 
       })
       .addClass('filters-select-attached');
