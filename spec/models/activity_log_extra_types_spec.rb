@@ -32,20 +32,20 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
 
     raise "Activity Log #{al_name} not set up" if al.nil?
 
-    al.extra_log_types = <<EOF
-    step_1:
-      label: Step 1
-      fields:
-        - select_call_direction
-        - select_who
+    al.extra_log_types = <<~EOF
+      step_1:
+        label: Step 1
+        fields:
+          - select_call_direction
+          - select_who
 
-    step_2:
-      label: Step 2
-      fields:
-        - select_call_direction
-        - extra_text
+      step_2:
+        label: Step 2
+        fields:
+          - select_call_direction
+          - extra_text
 
-EOF
+    EOF
 
     al.current_admin = @admin
 
