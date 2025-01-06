@@ -58,6 +58,8 @@ module ControllerMacros
     # # Can't reload, as that doesn't clear non-db attributes
     admin = Admin.find(admin.id)
 
+    raise 'Failed to store otp_secret' unless admin.otp_secret
+
     [admin, good_admin_password]
   end
 

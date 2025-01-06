@@ -16,7 +16,7 @@ class ActiveSupport::TimeWithZone
 
   def to_s(format = :default)
     if format == :db
-      utc.to_s(format)
+      utc.to_fs(format)
     elsif time_without_zone?
       strftime('%H:%M:%S')
     elsif formatter = ::Time::DATE_FORMATS[format]
