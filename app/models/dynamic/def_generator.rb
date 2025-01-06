@@ -218,7 +218,8 @@ module Dynamic
         opt[:fail_without_exception_newable_result]
       end
     rescue NameError => e
-      logger.warn e
+      err = "Failed to get the class #{icn} in parent #{parent_class}: #{e}"
+      logger.warn err
       false
     end
 
