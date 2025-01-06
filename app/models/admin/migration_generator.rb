@@ -267,7 +267,8 @@ class Admin::MigrationGenerator
   # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
   # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
   def self.migration_context(dirname)
-    schema_migration = ActiveRecord::Base.connection.schema_migration
+    connection_pool = ActiveRecord::Tasks::DatabaseTasks.migration_connection_pool
+    schema_migration = ActiveRecord::SchemaMigration.new(connection_pool)
     ActiveRecord::MigrationContext.new(dirname, schema_migration)
   end
 
