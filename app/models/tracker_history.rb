@@ -13,7 +13,7 @@ class TrackerHistory < UserBase
   include UserHandler
   include TrackerHandler
 
-  has_one :tracker, inverse_of: :tracker_histories
+  has_one :tracker, inverse_of: :tracker_histories, foreign_key: 'tracker_id'
   belongs_to :item, polymorphic: true, optional: true
 
   # Avoids a lot of unnecessary database lookups
