@@ -100,7 +100,7 @@ a.collapsed>.caret {
 
 .admin-edit-form .form-group {
   width: 400px;
-  input[type="text"] {
+  input[type="text"], input[type="email"] {
     width: 100%;
   }
 }
