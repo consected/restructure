@@ -48,7 +48,7 @@ RAILS_ENV=production \
 FPHS_POSTGRESQL_SCHEMA=${SCHEMA_NAME} \
 FPHS_POSTGRESQL_USERNAME=$DBOWNER \
 FPHS_POSTGRESQL_PORT=5432 \
-FPHS_RAILS_SECRET_KEY_BASE=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
+SECRET_KEY_BASE=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_RAILS_DEVISE_SECRET_KEY=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_POSTGRESQL_PASSWORD="${PWadmin}" \
 bundle exec rake db:migrate
