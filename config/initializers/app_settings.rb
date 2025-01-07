@@ -212,7 +212,8 @@ class Settings
   EncryptionSecretKeyBase = ENV['FPHS_ENC_SECRET_KEY_BASE'].presence || (Rails.env.production? ? nil : 'test')
   EncryptionSalt = ENV['FPHS_ENC_SALT'].presence || (Rails.env.production? ? nil : 'test-salt')
 
-  SecretKeyBase = ENV['FPHS_RAILS_SECRET_KEY_BASE']
+  # From ENV['SECRET_KEY_BASE'] in production, or the default config/credentials.yml file
+  SecretKeyBase = Rails.application.config.secret_key_base
 
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?

@@ -398,7 +398,7 @@ module StandardAuthentication
     self.otp_required_for_login = false
     #
     # NOTE: if this fails, it is usually because the otp_enc_key has changed compared to the value stored in this record.
-    # This may have been set by FPHS_RAILS_DEVISE_SECRET_KEY or FPHS_RAILS_SECRET_KEY_BASE as a fallback.
+    # This may have been set by FPHS_RAILS_DEVISE_SECRET_KEY or SECRET_KEY_BASE as a fallback.
     # If you absolutely must change the value in this field, in the database set:
     # encrypted_otp_secret = null, encrypted_otp_secret_iv = null, encrypted_otp_secret_salt = null
     #

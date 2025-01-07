@@ -19,11 +19,9 @@ Rails.application.configure do
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
-  # Ensures that a master key has been made available in either ENV["RAILS_MASTER_KEY"]
-  # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
-  # config.require_master_key = true
+  # No production encrypted credentials are secured by a master key in config/production.yml.enc
+  # The SECRET_KEY_BASE environment variable must be set
   config.require_master_key = false
-  config.read_encrypted_secrets = false
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
