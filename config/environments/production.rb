@@ -119,9 +119,4 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.active_job.queue_adapter = :delayed_job
-
-  # Set up encrypted fields
-  config.active_record.encryption.primary_key = ENV['FPHS_ENC_SECRET_KEY_BASE']
-  config.active_record.encryption.deterministic_key = "#{Rails.application.secrets[:secret_key_base]}-deterministic_key"
-  config.active_record.encryption.key_derivation_salt = ENV['FPHS_ENC_SALT']
 end
