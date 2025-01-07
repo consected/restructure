@@ -15,6 +15,8 @@ class Admin < ActiveRecord::Base
            otp_secret_encryption_key: otp_enc_key
   end
 
+  include StandardAuthenticationLegacyOtp
+    
   before_save :restrict_capabilities
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_re_enabling_admin, on: :update

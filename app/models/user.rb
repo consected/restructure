@@ -22,6 +22,9 @@ class User < ActiveRecord::Base
 
   devise(*supported_modules)
 
+  include StandardAuthenticationLegacyOtp
+
+
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
   has_one :user_preference, autosave: true, inverse_of: :user
