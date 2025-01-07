@@ -64,7 +64,10 @@ CURRVER=${CURRVERINFILE}
 
 if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
   echo "Latest version file version ${CURRVER} and latest tag ${LASTTAG} do not match"
-  read -p 'Use latest file version (1), latest tag version (2) or manual entry for latest version (3)? ' USEVER
+  
+  if [ -z "${USEVER}" ]; then
+    read -p 'Use latest file version (1), latest tag version (2) or manual entry for latest version (3)? ' USEVER
+  fi
 
   if [ "$USEVER" == '1' ]; then
     LASTTAG=${CURRVER}
