@@ -22,7 +22,7 @@ class Admin::ReferenceDataController < ApplicationController
     @table_info_for_schema = Admin::MigrationGenerator.tables_and_views
                                                       .filter { |ti| ti['schema_name'] == @schema_name }
 
-    render partial: 'table_list_schema_tables.html'
+    render partial: 'table_list_schema_tables'
   end
 
   def table_list_columns
