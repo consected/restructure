@@ -852,6 +852,9 @@ _fpa.form_utils = {
         console.log(`set filtered select ${filter_sel} to val: ${new_val} == ${$(filter_sel).val()}`)
         // end of hack
 
+        window.setTimeout(function () {
+          $($el).change()
+        }, 1)
 
       })
       .addClass('filters-select-attached');
