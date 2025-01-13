@@ -50,8 +50,8 @@ gem 'syslog-logger'
 group :development do
   gem 'flog', '~> 4.6', '>= 4.6.4'
   gem 'listen', '~> 3.7', '>= 3.7.1'
-  gem 'memory_profiler'
-  gem 'rack-mini-profiler'
+  # gem 'memory_profiler'
+  # gem 'rack-mini-profiler'
   gem 'solargraph-rails', '~> 0.2.0'
   gem 'web-console'
 end
