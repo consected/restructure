@@ -17,10 +17,6 @@
 
     <%= big_select_field(f, :name, Admin::AppConfiguration.configuation_meanings)%>
   </div>
-  <div class="form-group app-configuration-value-block">
-    <%= f.label :value %>
-    <%= f.text_area :value %>
-  </div>
   <div class="form-group">
     <%= f.label :role_name, 'Role name override' %>
     <%
@@ -36,6 +32,12 @@
     <%= f.label :user_id, 'User override' %>
     <%= f.select :user_id, active_user_options, include_blank: true %>
   </div>
+
+  <div class="form-group app-configuration-value-block">
+    <%= f.label :value %>
+    <%= f.text_area :value %>
+  </div>
+  
   <div class="form-group">
     <%= f.check_box :disabled %>
     <%= f.label :disable %>

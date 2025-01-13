@@ -3,6 +3,10 @@ class Admin::AppConfigurationsController < AdminController
 
   protected
 
+  def view_folder
+    'admin/common_templates'
+  end
+
   def filters
     {
       name: Admin::AppConfiguration.configurations,
