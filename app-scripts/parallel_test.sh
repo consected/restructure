@@ -14,7 +14,7 @@ fi
 
 # Ensure the tests run cleanly
 export DISABLE_SPRING=1
-spring stop
+bundle exec spring stop
 
 # First, run brakeman
 if [ "${NO_BRAKEMAN}" != 'true' ] && [ "${SKIP_BRAKEMAN}" != 'true' ]; then
