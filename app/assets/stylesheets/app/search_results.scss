@@ -1,4 +1,4 @@
-@import "../app_vars";
+@use "../app_vars" as *;
 
 span.disabled,
 a.disabled {
