@@ -654,7 +654,7 @@ module HandlesUserBase
         raise "#{attr} set (#{ext_id_val}), but it does not match a master record #{master_id}" unless found_master
 
         self.master_id = found_master.id
-      elsif ext_id_val && master_id && found_master&.id != master_id
+      elsif ext_id_val && master_id && found_master&.id && found_master&.id != master_id
         # An external id has been provided, and so has a master_id
         # but the master record found for the external id does not match
         # the master_id
