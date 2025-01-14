@@ -83,7 +83,7 @@ module NfsStoreSupport
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
-    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{user.first_name}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     @aldef.extra_log_types = <<~ENDDEF
@@ -377,9 +377,9 @@ module NfsStoreSupport
     create_filter('.*', resource_name: "activity_log__player_contact_phone__#{activity}", role_name: nil)
   end
 
-  def upload_file(filename = 'test-name.txt', content = nil)
+  def upload_file(filename = 'test-name.txt', content = nil, upload_set: nil)
     content ||= SecureRandom.hex
-    upload_set = SecureRandom.hex
+    upload_set ||= SecureRandom.hex
     md5tot = Digest::MD5.hexdigest(content)
     ioupload = StringIO.new(content)
 

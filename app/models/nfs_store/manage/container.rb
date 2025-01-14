@@ -16,7 +16,8 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
+      attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids,
+                    :save_trigger_results
 
       alias_attribute :container_id, :nfs_store_container_id
 
@@ -137,6 +138,7 @@ module NfsStore
 
         return unless parent_item&.can_edit?
 
+        self.save_trigger_results ||= {}
         extra_options_config.calc_save_trigger_if self, alt_on: :upload
       end
 
