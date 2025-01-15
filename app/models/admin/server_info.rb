@@ -13,6 +13,10 @@ class Admin::ServerInfo
     configuration_successful
   ].freeze
 
+  # Attempt to get the filename of the log from logger. If not, attempt to force it.
+  LogFilename = Rails.logger.instance_variable_get('@logdev')&.filename ||
+                Rails.root.join('log', "#{Rails.env}.log")
+
   attr_accessor :current_admin
 
   #
@@ -93,7 +97,7 @@ class Admin::ServerInfo
   end
 
   def rails_log(regex, max_count: 2000, tail_length: 10_000, trailing_context: 20)
-    logfilename = Rails.logger.instance_variable_get('@logdev')&.filename || 'none'
+    logfilename = LogFilename
     trailing_context = trailing_context.to_i
 
     cmds = [
