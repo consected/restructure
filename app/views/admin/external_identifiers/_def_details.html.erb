@@ -16,8 +16,12 @@
   </p>
 
   <label>identifier records</label>
-  <p><%=link_to link_label_open_in_new('create identifiers and view counts'), "/admin/external_identifier_details/#{object_instance.id}", target: '_blank' %></p>
-  <p><%= link_to link_label_open_in_new('search data'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+  <p><%= link_to link_label_open_in_new('create identifiers and view counts'), "/admin/external_identifier_details/#{object_instance.id}", target: '_blank' %></p>
+  <p><%= link_to link_label_open_in_new('list data'), 
+                "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+                target: '_blank' %></p>
+  <p><%= link_to link_label_open_in_new('search identifier'), 
+                report_path(id: @external_identifier.usage_report('Search', ExternalIdentifier::ReportItemSearchType, as_alt_resource_name: true)),
                 target: '_blank' %></p>
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
