@@ -69,12 +69,12 @@ module Fphs
       },
       not_trackers: {
         protocol_event_id: { value: :is,
-                             condition: 'NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)', joins: NotTrackerJoin },
+                             condition: 'NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)', joins: NotTrackerJoin },
         sub_process_id: { value: :is, condition: 'TRUE', joins: NotTrackerJoin }
       },
       not_tracker_histories: {
         protocol_event_id: { value: :is,
-                             condition: 'NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)', joins: NotTrackerHistoryJoin },
+                             condition: 'NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)', joins: NotTrackerHistoryJoin },
         sub_process_id: { value: :is, condition: 'TRUE', joins: NotTrackerHistoryJoin }
       },
       general_infos: {
@@ -302,9 +302,9 @@ module Fphs
         cval = nil if cval == '(null)'
 
         eoin = if cval.nil?
-                 'IS'
+                 'IS NULL'
                else
-                 '='
+                 '= ?'
                end
         alt = alt.gsub('EQUALS_OR_IS_NULL', eoin)
 
