@@ -75,7 +75,7 @@ _fpa.postprocessors_reports = {
 
       if (_fpa.templates['search-count-template']) {
         var h = _fpa.templates['search-count-template'](data);
-        block.find('.search_count_reports').html(h);
+        $('[data-report-count]').html(h);
       }
     }
 

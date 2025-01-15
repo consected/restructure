@@ -9,6 +9,7 @@
     <p>Unassigned IDs: <span><%=@unassigned_count%></span></p>
     <% end %>
     <h3>Reports</h3>
+    <p><%=link_to "Search for ID", report_path(id: @external_identifier.usage_report('Search', ExternalIdentifier::ReportItemSearchType, as_alt_resource_name: true)) %></p>
     <p><%=link_to "Assigned IDs", admin_external_identifier_detail_path(id: @external_identifier.id, do: :report, rep_type: 'Assigned') %>
     <% if @external_identifier.pregenerate_ids %>
       <p><%=link_to "Unassigned IDs", admin_external_identifier_detail_path(id: @external_identifier.id, do: :report, rep_type: 'Unassigned') %>
@@ -18,7 +19,7 @@
       <p><%=link_to "Generate IDs and assign them to all Master Records without an existing assignment", new_admin_external_identifier_detail_path(id: @external_identifier.id, all_master_records: true) %>
       
     <% end %>
-      
+    <h3>Configuration</h3>  
     <p><%=link_to "Configure External Identifier", admin_external_identifiers_path(filter: {name: @external_identifier.name})%></p>
   </div>
 </div>

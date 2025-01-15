@@ -27,7 +27,13 @@
         test_assoc_ids = nil if test_assoc_ids == p.to_s
         test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
 
-        next if respond_to?(:hide_edit_fields) && hide_edit_fields.include?(p.to_sym)
+        next if respond_to?(:hide_edit_fields) && hide_edit_fields.include?(p.to_sym)      
+        if false && test_assoc && test_assoc != 'app_type' && object_instance.respond_to?(test_assoc) 
+      %>
+        <%= f.hidden_field p %>
+      <% 
+          next
+        end 
       %>
       <div class="form-group" data-out-attr-name="<%= p %>" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
       <% if col_type == :boolean %>
@@ -66,9 +72,6 @@
       <% elsif respond_to?("#{p}_big_select") %>
         <%= form_field_label(f, p) %>
         <%= big_select_field(f, p, send("#{p}_big_select")) %>
-      <% elsif test_assoc && object_instance.respond_to?(test_assoc) %>
-        <%= f.hidden_field p %>
-
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= form_field_label(f, p) %>

@@ -113,11 +113,14 @@ class ExternalIdentifier < ActiveRecord::Base
   # @param [String] rep_type - one of the possible external ID report types
   # @param [String] item_type - optional item_type to find
   # @return [Report | nil]
-  def usage_report(rep_type, item_type = ReportItemType)
+  def usage_report(rep_type, item_type = ReportItemType, as_alt_resource_name: nil)
     rep_name = usage_report_name(rep_type)
     short_name = Report.gen_short_name(rep_name)
     arn = Report.alt_resource_name(item_type, short_name)
-    Report.active.find_by_alt_resource_name(arn, true)
+    res = Report.active.find_by_alt_resource_name(arn, true)
+    return res unless as_alt_resource_name
+
+    res&.alt_resource_name
   end
 
   def usage_report_name(rep_type)

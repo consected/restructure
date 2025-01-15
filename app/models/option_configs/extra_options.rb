@@ -668,7 +668,7 @@ module OptionConfigs
       # Ensure we don't include extra_options defaults twice
       return content_to_update if force_type.nil? && new_force_type == 'extra_options'
 
-      force_type = new_force_type
+      force_type ||= new_force_type
 
       defsw = [
         'app',

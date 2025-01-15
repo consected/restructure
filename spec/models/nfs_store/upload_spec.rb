@@ -176,4 +176,54 @@ RSpec.describe NfsStore::Upload, type: :model do
       upload_file file_name, 'text content diff'
     end.not_to raise_error
   end
+
+  it 'notifies role after upload' do
+    begin
+      create_user_role 'upload notify role', user: @user, app_type: @user.app_type
+    rescue StandardError
+      nil
+    end
+
+    expect(Admin::UserRole.find_by(role_name: 'upload notify role', app_type: @user.app_type)).not_to be nil
+
+    mn = Messaging::MessageNotification.last&.id || -1
+    file_name = 'test-notification.txt'
+    ids = []
+    upload_set = SecureRandom.hex
+    ids << upload_file(file_name, 'text content', upload_set:).id
+    ids << upload_file("2-#{file_name}", 'text content diff', upload_set:).id
+
+    res = @container.upload_done(ids)
+    expect(res).to be true
+    last_mn = Messaging::MessageNotification.all.reload.last
+    exp = { 'iterator_index' => 0,
+            'iterator_value' => nil,
+            'notify_errors' => [nil],
+            'notify_results' => [true],
+            'notify_messages' => [last_mn] }
+    expect(@container.save_trigger_results).to eq exp
+    expect(last_mn.id).to be > mn
+  end
+
+  it 'fails to notify role after upload' do
+    expect(Admin::UserRole.find_by(role_name: 'upload notify role', app_type: @user.app_type)).to be nil
+
+    mn = Messaging::MessageNotification.last&.id || -1
+    file_name = 'test-notification.txt'
+    ids = []
+    upload_set = SecureRandom.hex
+    ids << upload_file(file_name, 'text content', upload_set:).id
+    ids << upload_file("2-#{file_name}", 'text content diff', upload_set:).id
+
+    res = @container.upload_done(ids)
+    expect(res).to be true
+    last_mn = Messaging::MessageNotification.all.reload.last
+    exp = { 'iterator_index' => 0,
+            'iterator_value' => nil,
+            'notify_errors' => ['No recipients based on role: upload notify role, users or specified phones/emails in SaveTriggers::Notify'],
+            'notify_results' => [false],
+            'notify_messages' => [] }
+    expect(@container.save_trigger_results).to eq exp
+    expect(last_mn&.id || -1).to eq mn
+  end
 end

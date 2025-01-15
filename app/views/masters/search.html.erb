@@ -12,8 +12,8 @@
       <%= hidden_field_tag :mode, "MSID" %>
       <div class="form-group col-sm-3">
         <%= f.text_field :id, id: 'simple_m_id', class: 'form-control', min: 0, value: @master_id %>
-        <%= f.text_field 'external_id[id]', id: 'simple_external_id_id', class: 'form-control', min: 0, value: @ext_id %>
-        <%= f.text_field 'external_id[field]', id: 'simple_external_id_field', class: 'form-control', min: 0, value: @ext_field %>
+        <%= text_field_tag 'master[external_id][id]', @ext_id, id: 'simple_external_id_id', class: 'form-control', min: 0 %>
+        <%= text_field_tag 'master[external_id][field]', @ext_field, id: 'simple_external_id_field', class: 'form-control', min: 0 %>
       </div>
     <%= f.submit :search, id: 'msid_search_reg', class: "btn btn-default btn-sm pull-right auto-submitter #{@master_req_format == 'reg' ? 'run-master-search' : ''}" %>
     <%= f.submit "csv", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm #{@master_req_format == 'csv' ? 'run-master-search' : ''}" %>

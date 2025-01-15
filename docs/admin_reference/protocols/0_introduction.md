@@ -46,7 +46,7 @@ changed. This allows the protocols to appear as:
 
 - protocol position value
 - protocol name
-- latest entry
+- latest entry date
 
 ## Adding Sub Processes to a Protocol
 
