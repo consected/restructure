@@ -12,7 +12,30 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [8.8.3] - 2024-08-22
+## Unreleased
+
+- [Fixed] Zeus Advanced Search protocol not having a sub process query fails with SQL syntax error - fixes #438
+- [Added] sample form to external identifiers admin panel
+- [Added] fields sorter to external identifiers admin panel
+- [Added] resource name value to external identifiers admin panel
+- [Fixed] report  count button not working - fixes #439
+- [Added] link from external identifier details panel to pregenerated search report - fixes #377
+- [Changed] ordering of external identifier master panel based on size - fixes #390
+- [Fixed] incorrect URL for editing file classification record
+- [Fixed] error running notify after uploading files
+- [Added] save_trigger_results to notify
+- [Fixed] spring stop in parallel test
+- [Fixed] admin forms with dependent fields not setting up on load
+- [Fixed] admin forms display
+- [Fixed] tracker, protocol column shows with titelized case, rather than original entry - fixes #433
+- [Changed] use of `@import` in SCSS files to use `@use` without a namespace - fixes #436
+- [Fixed] Zeus toolbar search broken after upgrade to Rails 7 - fixes #437
+- [Fixed] a crosswalk error when requested master records don't match
+- [Fixed] incorrect documentation for tracker sorter options
+- [Fixed] failure of table lists to be rendered
+- [Fixed] dynamic options standard definitions not being preprended correctly
+
+## [9.0.3] - 2025-01-07
 
 - [Fixed] handling of legacy otp for 2FA
 
@@ -24,6 +47,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 NOTE: DB migration required
 
+- [Changed] handling of SECRET_KEY_BASE and other non-production credentials to use Rails standard environment variable and credentials rather than secrets
 - [Added] USEVER variable handling for batch use of release_and_build.sh
 - [Fixed] specs for more info on failures and to fix inline activity log configurations
 - [Updated] schema for Postgres v15
