@@ -112,6 +112,8 @@
     edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{name.pluralize}/{{this.id}}/edit"
   end
 
+  edit_button_href = edit_button_href&.html_safe
+
   # with_data provides an alternatively named set of data for a template to use, rather than just the name
   # this is useful when providing multiple templates that should use the same set of data on a single page
   unless defined? with_data

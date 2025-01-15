@@ -51,7 +51,7 @@ module Filestore
       when 'archived_file'
         @download = @container.archived_files.find_by(id: params[:download_id])
       else
-        raise FphsException, 'Incorrect retrieval_type set'
+        raise FphsException, "Incorrect retrieval_type set: #{@retrieval_type}"
       end
 
       @container.parent_item = @activity_log
