@@ -12,7 +12,7 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## Unreleased
+## [9.0.8] - 2025-01-20
 
 - [Fixed] issue with standard definitions for extra options
 - [Fixed] the use of masters resource name when using no_masters to lookup a crosswalk identifier
