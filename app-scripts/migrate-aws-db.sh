@@ -71,7 +71,7 @@ SECRET_KEY_BASE=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_RAILS_DEVISE_SECRET_KEY=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
 FPHS_LOAD_APP_TYPES=1 \
-rake db:migrate
+bundle exec rake db:migrate
 
 
 PGPASSWORD="$TEMP_DB_PW" psql -d $DB_NAME -h $DB_HOST -U $DB_USER 2>&1 << EOF
