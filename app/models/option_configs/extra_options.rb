@@ -452,6 +452,7 @@ module OptionConfigs
       configs = []
 
       if config_text.present?
+        config_text = config_text.sub("---\n", '')
         config_text = prepend_standard_definitions(config_text)
         config_text = include_libraries(config_text)
         begin
