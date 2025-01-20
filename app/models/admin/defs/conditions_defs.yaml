@@ -117,6 +117,14 @@
             id: 123
             return: return_result
 
+        all - crosswalk:
+          # no_masters can also be used to look up against the crosswalk identifiers. For example, get the
+          # master.id for the provided msid
+          no_masters: {}          
+          masters:
+            msid: 12345
+            id: return_value
+
         all - masters:
           # if the first key is 'masters' and the value an empty hash then the query will return against all masters rather than current master record
           masters: {}

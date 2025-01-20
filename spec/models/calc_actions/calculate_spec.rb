@@ -2920,6 +2920,23 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(res).to eq @alref
     end
 
+    it 'returns a master.id when looking up MSID in the crosswalk' do
+      msid = (Master.all.order(msid: :desc).first&.msid || 10) + 1
+      new_master = Master.create!(msid: msid, current_user: @alref2.user)
+      conf = {
+        masters: {
+          msid: msid,
+          id: 'return_value'
+        },
+        no_masters: {}
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq new_master.id
+    end
+
     it 'returns the first record referring to this one' do
       conf = {
         referring_record: {
