@@ -14,9 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-Rebuilt due to packaging failure.
+- [Fixed] issue with standard definitions for extra options
+- [Fixed] the use of masters resource name when using no_masters to lookup a crosswalk identifier
+- [Fixed] broken log filename in some environments
 
-## [9.0.5] - 2025-01-15
+## [9.0.7] - 2025-01-15
 
 Rebuilt due to packaging failure.
 
