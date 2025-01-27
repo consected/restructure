@@ -25,6 +25,7 @@ _fpa.substitution = class {
       new_data = Object.assign({}, data);
 
       //  Set user_preference and current_user_roles in the data for possible substitution
+      _fpa.state.current_user = _fpa.state.current_user || {}
       if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
       if (!new_data.current_user) new_data.current_user = _fpa.state.current_user;
       if (!new_data.current_user_id) new_data.current_user_id = _fpa.state.current_user.id;
@@ -151,6 +152,11 @@ _fpa.substitution = class {
           tag_value = vpair[0];
           if (tag_value && tag_value.toString().length) sub_text = if_block[6] || '';
         }
+
+        //  Handle {{else}}
+        if (sub_text == null)
+          sub_text = if_block[8] || ''
+
         text = text.replace(block_container, sub_text || '');
       });
     }

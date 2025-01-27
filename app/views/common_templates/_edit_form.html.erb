@@ -270,6 +270,13 @@
 
         <% end # item_list.each %>
 
+        <%
+          if form_object_instance.respond_to? :user_id
+        %>
+          <%= form.hidden_field :user_id, data: { attr_name: :user_id, object_name: form_object_item_type_us } %>
+        <%
+          end
+        %>
         <% unless embedded %>
           <% unless view_options[:show_embedded_at_top]  %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
