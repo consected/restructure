@@ -16,13 +16,16 @@
     end
     opt_label = opt.first
     opt_val = opt.last || ''
-    # opt_val_id = opt_val.hyphenate
+    
+    # Ensure styling of buttons works correctly
+    uid = "#{field_name_sym}#{SecureRandom.hex(10)}"
 
     add_options = {
       data: {
         attr_name: field_name_sym,
-        object_name: form_object_item_type_us
-      }
+        object_name: form_object_item_type_us        
+      },
+      id: uid
     }.merge( field_options_for(form_object_instance, field_name_sym) )
 
     add_options[:checked] = (opt_val == force_val) if force_val
@@ -30,6 +33,6 @@
 <div class="button-radio" data-attr-name="<%=field_name_sym%>">
   <%= form.radio_button field_name_sym, opt_val, add_options %>
 
-  <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label", force_show: true  %>
+  <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label", force_show: true, for: uid  %>
 </div>
 <% end %>
