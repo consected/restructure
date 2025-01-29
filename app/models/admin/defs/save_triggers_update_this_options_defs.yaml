@@ -8,6 +8,8 @@
             with_result: 
             # Map attributes from a related item to the target item.
             # NOTE: with: fields override any specified here
+            # from: may also just take a simple String such as `from: embedded_item` to
+            # as shorthand for the following full calculation            
               from:
                 embedded_item:
                   return: return_result
