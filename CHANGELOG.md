@@ -12,6 +12,16 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Added] previously default gems to Gemfile
+- [Fixed] edit field labels and formats for external id attribute
+- [Changed] handling of expandable blocks to expand if caret clicked
+- [Fixed] multiple radio buttons with same field name conflict
+- [Changed] migration timeout to allow for large model changes
+- [Fixed] missing user_id in forms passing to data for show_if
+- [Fixed] error handling `{{else}}` in front end evaluation of substitutions (such as show_if)
+
 ## [9.1.1] - 2025-01-20
 
 ### From FPHS - # PR 443 - 2025-01-20
