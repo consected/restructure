@@ -12,18 +12,23 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [9.0.8] - 2025-01-20
+## Unreleased
+
+- [Added] previously default gems to Gemfile
+- [Fixed] edit field labels and formats for external id attribute
+- [Changed] handling of expandable blocks to expand if caret clicked
+- [Fixed] multiple radio buttons with same field name conflict
+- [Changed] migration timeout to allow for large model changes
+- [Fixed] missing user_id in forms passing to data for show_if
+- [Fixed] error handling `{{else}}` in front end evaluation of substitutions (such as show_if)
+
+## [9.1.1] - 2025-01-20
+
+### From FPHS - # PR 443 - 2025-01-20
 
 - [Fixed] issue with standard definitions for extra options
 - [Fixed] the use of masters resource name when using no_masters to lookup a crosswalk identifier
 - [Fixed] broken log filename in some environments
-
-## [9.0.7] - 2025-01-15
-
-Rebuilt due to packaging failure.
-
-## [9.0.5] - 2025-01-15
-
 - [Fixed] Zeus Advanced Search protocol not having a sub process query fails with SQL syntax error - fixes #438
 - [Added] sample form to external identifiers admin panel
 - [Added] fields sorter to external identifiers admin panel
@@ -44,18 +49,11 @@ Rebuilt due to packaging failure.
 - [Fixed] incorrect documentation for tracker sorter options
 - [Fixed] failure of table lists to be rendered
 - [Fixed] dynamic options standard definitions not being preprended correctly
-
-## [9.0.3] - 2025-01-07
-
 - [Fixed] handling of legacy otp for 2FA
 
-## [9.0.2] - 2025-01-07
+### From FPHS - PR #442 - 2025-01-07
 
-- [Fixed] handling of legacy otp for 2FA
-
-## [9.0.1] - 2025-01-07
-
-NOTE: DB migration required
+**NOTE:** DB migration required
 
 - [Changed] handling of SECRET_KEY_BASE and other non-production credentials to use Rails standard environment variable and credentials rather than secrets
 - [Added] USEVER variable handling for batch use of release_and_build.sh
@@ -72,16 +70,38 @@ NOTE: DB migration required
 - [Fixed] admin panel email field styling
 - [Changed] login issues text to simplify it for users
 
-## [8.9.4] - 2024-08-22
+### From FPHS - PR #441 - 2024-12-23
 
-- [Added] nested embed and references sections under activity list items
-- [Fixed] Admin reports panel add or edit report very slow (now only slow the first time) - fixes #420
-- [Changed] ordering of reports admin list
-- [Fixed] bad reloading of page layouts admin panel
+- [Fixed] standard definition loading
+- [Fixed] position handling to avoid unnecessary recursion Fixed specs to account for admin panels filtering out disabled items correctly
+- [Fixed] protocol / subprocess / event issues Fixed bad styling in admin panels
 
-## [8.9.3] - 2024-12-04
+### From FPHS - PR #430 - 2024-12-19
 
-- [Updated] gems to resolve Rails CVEs
+- [Fixed] inconsistency in labelling protocols / sub processes / events for admin
+- [Added] DB table access information for protocols / sub processes / events to help
+- [Added] sub process and protocol event help docs (pointing back to protocol doc)
+
+### From FPHS - PR #429 - 2024-12-19
+
+- [Fixed] admin panels for protocol / sub process / event to allow more than one item to be added without breaking - fixes #42
+- [Added] information to the protocol admin panel to show the protocol ordering configured for the tracker
+- [Added] documentation for the configuration of protocols and the hierarchy of protocol / sub process / event
+
+### From FPHS - PR #428 - 2024-12-18
+
+- [Fixed] Can't select a "blank" no access option in user access controls - fixes #424
+- [Fixed] admin copy item select shows value, but this isn't actually submitted and the field is really submitted as blank
+
+### From FPHS - PR #427 - 2024-12-18
+
+- [Added] preconfigured yaml placeholders for dynamic definition options to simplify configurations
+- [Added] click on activity list item to auto select it in the sample forms
+- [Added] user access control information to each activity list item
+
+### From FPHS - PR #426 - 2024-12-18
+
+- [Fixed] e-signature form captions don't handle substitutions - fixes #425
 
 ### From FPHS - PR #421 - 2024-12-12
 

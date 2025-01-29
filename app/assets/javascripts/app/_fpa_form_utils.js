@@ -1010,6 +1010,8 @@ _fpa.form_utils = {
         // Only click the target if the caret is marked as collapsed currently
         if ($target.filter('.caret-target-collapsed').length) {
           $target.click();
+
+          $target.parents('.expandable-target').first().not('.expanded').click();
         }
       }).addClass('attached-hash-caret-target');
 

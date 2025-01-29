@@ -629,7 +629,7 @@ class Admin::MigrationGenerator
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.warn "Running migration from #{db_migration_dirname}"
 
-    Timeout.timeout(60) do
+    Timeout.timeout(Settings::MigrationTimeoutSec) do
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
