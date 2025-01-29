@@ -2,8 +2,9 @@
   primary_model = form_object_instance.class
 
   f_attr = primary_model.external_id_attribute
+  fa_sym = f_attr.to_sym
   unless primary_model.prevent_edit? %>
-  <%= form.label f_attr, label_for(f_attr, labels) %>
+  <%= form.label f_attr, label_for(fa_sym, labels) %>
   <% form_object_instance.send("#{f_attr}=", (form_object_instance.attributes[f_attr] || '').to_s.upcase)  %>
   <% if primary_model.alphanumeric %>
     <%= form.text_field f_attr, class: 'form-control', pattern: primary_model.external_id_edit_pattern %>
@@ -11,6 +12,6 @@
     <%= form.number_field f_attr, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
   <% end %>
 <% else %>
-  <%= form.label f_attr, label_for(f_attr, labels, force_default: "Assign #{primary_model.label}") %>
+  <%= form.label f_attr, label_for(fa_sym, labels, force_default: "Assign #{primary_model.label}") %>
   <%= form.hidden_field f_attr %>
 <% end %>

@@ -122,6 +122,12 @@ module Dynamic
         @label ||= definition.label || name.underscore.humanize.captionize
       end
 
+      # External identifers only use one config definition, under the 'default' key
+      # Simplify access to the default options configuration
+      def default_options
+        @default_options = definition.default_options
+      end
+
       # For external ID models that require an auto-generated or auto-assigned (from an existing list) ID,
       # the master association build method will use this method.
       # By default, the next available ID will be generated randomly.

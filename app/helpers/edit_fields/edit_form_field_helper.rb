@@ -17,7 +17,6 @@ module EditFields
       dialog_before: nil,
       embedded: nil
     )
-
       @matched_name = nil
       dialog_before ||= {}
 
@@ -118,11 +117,11 @@ module EditFields
 
       if !got && (form_object_instance.model_data_type == :external_identifier)
 
-        @already_shown_external_id = true
         unless @already_shown_external_id
           got = render partial: 'common_templates/edit_fields/is_external_id',
                        locals: local_vars[:locals]
         end
+        @already_shown_external_id = true
       end
 
       unless got

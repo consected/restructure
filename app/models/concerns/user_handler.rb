@@ -211,7 +211,7 @@ module UserHandler
   end
 
   def current_user
-    if self.class.no_master_association
+    if self.class.no_master_association || !respond_to?(:master)
       @current_user
     else
       master&.current_user
@@ -219,7 +219,7 @@ module UserHandler
   end
 
   def current_user=(cu)
-    if self.class.no_master_association
+    if self.class.no_master_association || !respond_to?(:master)
       @current_user = cu
     elsif master
       master.current_user = cu
