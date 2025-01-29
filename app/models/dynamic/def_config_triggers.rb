@@ -37,7 +37,7 @@ module Dynamic
     end
 
     def handle_all_option_configs
-      option_configs.each do |option_config|
+      option_configs.each do |option_config|        
         create_defaults(option_config)
         create_configs(option_config)
       end
@@ -50,19 +50,35 @@ module Dynamic
 
     private
 
-    def create_defaults(option_config)
+    def on_defines(option_config)
       config_trigger = option_config&.config_trigger
-      return unless config_trigger
+        return [] unless config_trigger
 
-      config = config_trigger.dig(:on_define, :create_defaults)
-      return unless config
-
-      setup config
-      create_role_for_admin_matching_user(config, option_config)
-      create_default_user_access_controls(config, option_config)
-      create_default_embed(config, option_config)
-      create_activity_log_page_layout(config, option_config)
+        config_trigger[:on_define]
     end
+
+    def create_defaults(option_config)
+      on_defines(option_config).each do |on_define|
+        config = on_define[:create_defaults]
+        next unless config
+
+        setup config
+        create_role_for_admin_matching_user(config, option_config)
+        create_default_user_access_controls(config, option_config)
+        create_default_embed(config, option_config)
+        create_activity_log_page_layout(config, option_config)
+      end
+    end
+
+    def create_configs(option_config)      
+      on_defines(option_config).each do |on_define|
+        config = on_define[:create_configs]
+        next unless config
+
+        create_config(config, option_config)
+      end      
+    end
+
 
     def setup(config)
       uac = config[:user_access_control] || {}
@@ -203,11 +219,7 @@ module Dynamic
       Admin::PageLayout.create! cond
     end
 
-    def create_configs(option_config)
-      config_trigger = option_config&.config_trigger
-      return unless config_trigger
-
-      config = config_trigger.dig(:on_define, :create_configs)
+    def create_config(config, option_config)
       return nil unless config
 
       subdata = if dynamic_def_type == :activity_log

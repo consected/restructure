@@ -420,9 +420,10 @@ module OptionConfigs
 
     def clean_config_triggers
       self.config_trigger ||= {}
-      self.config_trigger = self.config_trigger.symbolize_keys
-      self.config_trigger = self.config_trigger.symbolize_keys
-      self.config_trigger[:on_define] ||= {}
+      self.config_trigger = self.config_trigger.symbolize_keys      
+      od = self.config_trigger[:on_define] ||= []
+
+      self.config_trigger[:on_define] = [od] unless od.is_a?(Array)
     end
 
     def clean_preset_fields

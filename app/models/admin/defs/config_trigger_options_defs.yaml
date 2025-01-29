@@ -1,41 +1,41 @@
 # Config Trigger options      
-      create_defaults:
-      # Specify one or more of the following options to automatically set them up during definition
-        user_access_control:
-        # Create default user controls (and role for this admin user) to allow this resource
-        # and any embed to be created
-          role_name: optional role name
-          # If excluded the default role name will be `user - <category>`
-          access: create|update|read
-          # Default is create
-        embed:
-        # Create a default embed dynamic model. No fields need to be specified, and leaving the configuration without
-        # a `fields` key will prevent future updates the configuration
-          fields:
-            - status
-            - notes
-          allow_reconfiguration: nil (default) | true
-            # Allow reconfiguration with the specified fields  
-          prefix_config_libraries: string | array
-            # Either a `<category> <name>` pair for a library
-            # or a list of libraries in this format
-            # This will be added to the options, unless the embed already exists with non-blank options
-        page_layout:
-        # Create a master page layout for this definition resource.
-      create_configs:
-      # Create configs for any type of additional definition. This follows the format of an app type export.
-        associated_general_selections:
-          - name: Not Started
-            value: not started
-            item_type: '{{default_embed_resource_name}}_status'
-            position: 1600
-          - name: Pending
-            value: pending
-            item_type: #{rn}_status
-            position: 1601
-          - name: In Progress
-            value: in progress
-            item_type: #{rn}_status
-            position: 1602
+      - create_defaults:
+        # Specify one or more of the following options to automatically set them up during definition
+          user_access_control:
+          # Create default user controls (and role for this admin user) to allow this resource
+          # and any embed to be created
+            role_name: optional role name
+            # If excluded the default role name will be `user - <category>`
+            access: create|update|read
+            # Default is create
+          embed:
+          # Create a default embed dynamic model. No fields need to be specified, and leaving the configuration without
+          # a `fields` key will prevent future updates the configuration
+            fields:
+              - status
+              - notes
+            allow_reconfiguration: nil (default) | true
+              # Allow reconfiguration with the specified fields  
+            prefix_config_libraries: string | array
+              # Either a `<category> <name>` pair for a library
+              # or a list of libraries in this format
+              # This will be added to the options, unless the embed already exists with non-blank options
+          page_layout:
+          # Create a master page layout for this definition resource.
+      - create_configs:
+        # Create configs for any type of additional definition. This follows the format of an app type export.
+          associated_general_selections:
+            - name: Not Started
+              value: not started
+              item_type: '{{default_embed_resource_name}}_status'
+              position: 1600
+            - name: Pending
+              value: pending
+              item_type: #{rn}_status
+              position: 1601
+            - name: In Progress
+              value: in progress
+              item_type: #{rn}_status
+              position: 1602
 
         

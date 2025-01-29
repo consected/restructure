@@ -28,6 +28,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
       item_type: 'player_contact',
       process_name: 'embed_test'
     )
+    @test_role = "z-test-role-#{SecureRandom.hex(10)}"
 
     if keep_def
       @al = @als.first
@@ -39,17 +40,22 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
         al.update! disabled: true, current_admin: @admin
       end
 
+
       yaml = <<~END_YAML
         test1:
           config_trigger:
             on_define:
-              create_defaults:
-                user_access_control:
-                embed:
-                  fields:
-                    - status
-                    - notes
-                page_layout:
+              - create_defaults:
+                  user_access_control:
+                  embed:
+                    fields:
+                      - status
+                      - notes
+                  page_layout:
+              - create_defaults:
+                  user_access_control:
+                    role_name: #{@test_role}
+                    access: read
           embed: default_embed_resource
       END_YAML
 
@@ -86,7 +92,9 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @master.current_user = @user
 
     role_name = "user - #{@al.category || @app_type.name}"
-    expect(Admin::UserRole.active_app_roles(@user, app_type: @user.app_type).map(&:role_name)).to include role_name
+    rns = Admin::UserRole.active_app_roles(@user, app_type: @user.app_type).map(&:role_name)
+    expect(rns).to include role_name
+    expect(rns).to include @test_role
 
     expect(ActivityLog::PlayerContactEmbedTest.definition.option_configs.first.config_trigger[:on_define]).to be_present
     al = ActivityLog::PlayerContactEmbedTest.create(master: @master, player_contact_id: @player_contact.id, extra_log_type: :test1)
