@@ -1,4 +1,4 @@
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: true
   Max: 120
   Include:
