@@ -12,7 +12,12 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [9.0.8] - 2025-01-20
+## Unreleased
+
+- [Added] ability to define config_trigger.on_define as an array, allowing multiple similar configurations
+   to be added (for example user access controls) for each activity
+
+## [9.1.2] - 2025-01-29
 
 - [Added] previously default gems to Gemfile
 - [Fixed] edit field labels and formats for external id attribute
