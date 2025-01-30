@@ -48,7 +48,16 @@ class SaveTriggers::SaveTriggersBase
     with_results = [with_results] unless with_results.is_a? Array
 
     with_results.each do |with_result|
-      ca = ConditionalActions.new with_result[:from], @item
+      wr_from = with_result[:from]
+
+      # Allow simple use of 'embedded_item' or 'dynamic_model__some_recs'
+      if wr_from.is_a? String
+        wr_from = {
+          wr_from.to_sym => { return: return_result }
+        }
+      end
+
+      ca = ConditionalActions.new wr_from, @item
       source = ca.get_this_val
 
       unless source
