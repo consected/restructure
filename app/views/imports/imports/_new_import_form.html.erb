@@ -16,7 +16,7 @@ filled_items = 0
                 <tr>
                   <th>&nbsp;
                   </th>
-                  <% fields.each do |p| %>
+                  <% import_fields.each do |p| %>
                   <th>
                     <%= p %>
                   </th>
@@ -48,14 +48,14 @@ filled_items = 0
                   label_redefined = false
                 %>
 
-                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= final_blank_row ? 'final-blank-row' : filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.keys.join(",")%>" >
+                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= final_blank_row ? 'final-blank-row' : filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.attribute_names.join(",")%>" >
                   <td class="row-num">
                     <%= row_num %>
                   </td>
                   <%
                     gs_prefix = general_selection_prefix_name(form_object_instance)
                   %>
-                  <% fields.each do |field_name_sym|
+                  <% import_fields.each do |field_name_sym|
 
                   %>
                     <td data-col-type="<%=field_name_sym%>">
