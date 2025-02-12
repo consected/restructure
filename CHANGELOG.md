@@ -12,6 +12,14 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+- [Changed] add-activity-button0<extra log type> link hash to show as disabled if the panel activity button is not available
+- [Added] add-activity-button-<extra log type> as a link hash option for clicking activity log buttons in the current panel header
+- [Fixed] `{{#is tag '===' 'string literal'`}} comparison due to bad quote matching
+- [Fixed] broken view_with_formats for certain strings
+- [Updated] gems and yarn JS modules
+
 ## [9.2.1] - 2025-01-30
 
 ### From FPHS - PR #452 - 2025-01-30
