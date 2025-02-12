@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.2.3] - 2025-02-12
+
 - [Fixed] error using embed with simple use of 'embedded_item' or 'dynamic_model__some_recs'
 
 ## [9.2.2] - 2025-02-12
