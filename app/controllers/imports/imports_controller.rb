@@ -5,7 +5,7 @@ class Imports::ImportsController < ApplicationController
 
   before_action :set_import, only: %i[show edit update destroy]
 
-  helper_method :permitted_params, :fields, :name
+  helper_method :permitted_params, :import_fields, :name
 
   # Show previous uploads
   def index
@@ -219,7 +219,7 @@ class Imports::ImportsController < ApplicationController
     allow_cols = []
     array_cols = {}
 
-    fields.each do |f|
+    import_fields.each do |f|
       if item_class.columns.find { |c| c.name == f.to_s }&.array?
         array_cols[f] = []
       else
@@ -236,7 +236,7 @@ class Imports::ImportsController < ApplicationController
     Imports::Import.permitted_params_for @primary_table, include_alt_ids
   end
 
-  def fields
+  def import_fields
     if @readonly
       (permitted_params false).map(&:to_sym)
     else

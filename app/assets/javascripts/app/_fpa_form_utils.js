@@ -1016,6 +1016,34 @@ _fpa.form_utils = {
       }).addClass('attached-hash-caret-target');
 
     block
+      .find('a[href*="add-activity-button-"]')
+      .not('.attached-add-activity-button')
+      .each(function () {
+        var _this = this;
+        var $this = $(this);
+        const href = $(this).attr('href');
+        const re = new RegExp('add-activity-button-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let target = matches[1];
+        if (!target) return;
+
+        target = `.activity-logs-header a.add-item-button[data-extra-log-type="${target}"]`;
+
+        window.setTimeout(function () {
+          var $target = $this.parents('.activity-logs-generic-block').find(target);
+          var disabled = $target.length === 0 || !$target.is(':visible');
+          $this.attr('disabled', disabled);
+          _this.add_activity_button = $target;
+        }, 1000)
+      })
+      .on('click', function () {
+        const $target = this.add_activity_button;
+        if ($target.is(':visible')) $target.click();
+      }).addClass('attached-add-activity-button');
+
+    block
       .find('[data-toggle~="clear"]')
       .not('.attached-datatoggle-clear')
       .on('click', function () {

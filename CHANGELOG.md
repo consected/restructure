@@ -12,26 +12,55 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
-## [9.1.4] - 2025-01-30
+## Unreleased
 
-- [Added] ability to define config_trigger.on_define as an array, allowing multiple similar configurations  to be added (for example user access controls) for each activity
-- [Added] simplified `with: <String>` option to define item to use in a trigger
+- [Added] add-activity-button-<extra log type> as a link hash option for clicking activity log buttons in the current panel header
+- [Fixed] `{{#is tag '===' 'string literal'}}` comparison due to bad quote matching
+- [Fixed] broken view_with_formats for certain strings
+- [Updated] gems and yarn JS modules
+
+### From Viva - PR #454 - 2025-01-30
+
+- [Fixed] import CSV bugs
+
+### From Viva - PR #453 - 2025-01-30
+
+- [Fixed] log filename breaking Rails server log search
+
+## [9.2.1] - 2025-01-30
+
+### From FPHS - PR #452 - 2025-01-30
+
 - [Fixed] rubocop line length cop for new naming
 
-## [9.1.3] - 2025-01-29
+### From FPHS - PR #451 - 2025-01-30
+
+- [Added] simplified `with: <String>` option to define item to use in a trigger
+
+### From FPHS - PR #450 - 2025-01-29
 
 - [Added] ability to define config_trigger.on_define as an array, allowing multiple similar configurations
    to be added (for example user access controls) for each activity
 
-## [9.1.2] - 2025-01-29
+### From FPHS - PR #449 - 2025-01-29
 
-- [Added] previously default gems to Gemfile
+- [Added] previously default gems to Gemfile Fixed rubocop stub
+
+### From FPHS - PR #448 - 2025-01-29
+
 - [Fixed] edit field labels and formats for external id attribute
 - [Changed] handling of expandable blocks to expand if caret clicked
 - [Fixed] multiple radio buttons with same field name conflict
+- [Fixed] crash of foreign key through external identifier
+
+### From FPHS - PR #447 - 2025-01-29
+
 - [Changed] migration timeout to allow for large model changes
-- [Fixed] missing user_id in forms passing to data for show_if
+
+### From FPHS - PR #444 - 2025-01-27
+
 - [Fixed] error handling `{{else}}` in front end evaluation of substitutions (such as show_if)
+- [Fixed] missing user_id in forms passing to data for show_if
 
 ## [9.1.1] - 2025-01-20
 

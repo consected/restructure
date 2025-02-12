@@ -14,8 +14,8 @@ class Admin::ServerInfo
   ].freeze
 
   # Attempt to get the filename of the log from logger. If not, attempt to force it.
-  LogFilename = Rails.logger.instance_variable_get('@logdev')&.filename ||
-                Rails.root.join('log', "#{Rails.env}.log")
+  LogFilename = Rails.logger.instance_variable_get('@logdev')&.filename&.to_s ||
+                Rails.root.join('log', "#{Rails.env}.log").to_s
 
   attr_accessor :current_admin
 
