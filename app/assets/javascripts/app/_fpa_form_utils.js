@@ -1018,7 +1018,9 @@ _fpa.form_utils = {
     block
       .find('a[href*="add-activity-button-"]')
       .not('.attached-add-activity-button')
-      .on('click', function () {
+      .each(function () {
+        var _this = this;
+        var $this = $(this);
         const href = $(this).attr('href');
         const re = new RegExp('add-activity-button-([^:]+)');
         const matches = href.match(re);
@@ -1029,11 +1031,16 @@ _fpa.form_utils = {
 
         target = `.activity-logs-header a.add-item-button[data-extra-log-type="${target}"]`;
 
-        var $target = $(this).parents('.activity-logs-generic-block').find(target);
-
-        if ($target.is(':visible')) {
-          $target.click();
-        }
+        window.setTimeout(function () {
+          var $target = $this.parents('.activity-logs-generic-block').find(target);
+          var disabled = $target.length === 0 || !$target.is(':visible');
+          $this.attr('disabled', disabled);
+          _this.add_activity_button = $target;
+        }, 1000)
+      })
+      .on('click', function () {
+        const $target = this.add_activity_button;
+        if ($target.is(':visible')) $target.click();
       }).addClass('attached-add-activity-button');
 
     block
