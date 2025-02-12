@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] error using embed with simple use of 'embedded_item' or 'dynamic_model__some_recs'
+
 ## [9.2.2] - 2025-02-12
 
 - [Added] add-activity-button-<extra log type> as a link hash option for clicking activity log buttons in the current panel header
