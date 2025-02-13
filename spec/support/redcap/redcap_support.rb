@@ -290,6 +290,37 @@ module Redcap
         .to_return(status: 200, body: project_users_deleted_response, headers: {})
     end
 
+    def stub_requests_import_records(server_url, api_key, data:, force_auto_number: true, overwrite_behavior: 'normal')
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            "content"=>"record", 
+            "data"=>data, 
+            "forceAutoNumber"=>force_auto_number.to_s, 
+            "format"=>"json", 
+            "overwriteBehavior"=>overwrite_behavior, 
+            "returnContent"=>"ids", 
+            "returnFormat"=>"json", 
+            "type"=>"flat",
+            "token"=>api_key}
+        )
+        .to_return(status: 200, body: full_survey_import_record, headers: {})      
+    end
+
+    def stub_requests_survey_link(server_url, api_key, instrument:, record_id:)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            "content"=>"surveyLink", 
+            "format"=>"json", 
+            "instrument"=>instrument, 
+            "record"=>record_id.to_s, 
+            "returnFormat"=>"json",
+            "token"=>api_key}
+        )
+        .to_return(status: 200, body: full_survey_link, headers: {})     
+    end
+
     def stub_request_full_records(server_url, api_key)
       stub_request(:post, server_url)
         .with(
@@ -455,6 +486,14 @@ module Redcap
 
     def project_users_deleted_response
       File.read('spec/fixtures/redcap/full_project_users_deleted.json')
+    end
+
+    def full_survey_import_record
+      File.read('spec/fixtures/redcap/full_survey_import_record.json')
+    end
+
+    def full_survey_link
+      File.read('spec/fixtures/redcap/full_survey_link.txt')
     end
 
     def data_full_response(suffix = nil)
