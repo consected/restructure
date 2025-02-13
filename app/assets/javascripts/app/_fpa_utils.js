@@ -25,7 +25,7 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   catch (e) {
     var h = null;
   }
-  if (!h || h.length == 0) {
+  if (!isj && (!h || h.length == 0)) {
     var tparts = target.split('-');
     var l = tparts.length;
     var dii = tparts[l - 1];
