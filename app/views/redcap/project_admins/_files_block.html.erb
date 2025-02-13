@@ -1,7 +1,15 @@
 <h4>Files</h4>
 <div id="admin-filestore-block-<%= object_instance.id %>">
 </div>
-<% if object_instance&.file_store&.id %>
+<% if current_user.app_type&.name != 'ref-data' %>
+<p>The user must 
+  <%= link_to "switch to the <b>Ref Data</b>".html_safe, 
+              redcap_project_admins_path(
+                no_redirect: true, 
+                # use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
+              ) %>
+  project to view the stored REDCap files</p>
+<% elsif object_instance&.file_store&.id %>
 <script> 
 window.setTimeout(function() {
   var data = {

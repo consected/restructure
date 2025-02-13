@@ -114,7 +114,7 @@
               <li class="nav"><%= link_to "Projects", 
                                           redcap_project_admins_path(
                                             no_redirect: true, 
-                                            use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
+                                            # use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
                                           ) %> </li>
               <li class="nav"><%= link_to "Request Log", redcap_client_requests_path %> </li>
             </ul>
