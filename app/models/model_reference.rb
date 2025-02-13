@@ -187,7 +187,7 @@ class ModelReference < ActiveRecord::Base
     if without_reference
       if to_record_type_class.method_defined?(:master) && from_item_or_master &&
          !ref_created_by_user && without_reference != 'outside_master'
-        cond = { master: from_item_or_master }
+        cond = { master_id: from_item_or_master }
       end
       cond ||= {}
       cond.merge!(filter_by) if filter_by
