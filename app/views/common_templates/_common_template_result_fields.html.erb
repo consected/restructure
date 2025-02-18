@@ -133,11 +133,11 @@
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
     {{/if}}
   {{else is field_type "protocol_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" }}</strong></li>
   {{else is field_type "sub_process_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true"}}</strong></li>
   {{else is field_type "protocol_event_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true"}}</strong></li>
   {{else is field_type "tracker_history_id"}}
     {{#unless hide_tracker_panel}}
       {{#if result_data.tracker_histories}}
@@ -160,7 +160,7 @@
       {{#unless ../prevent_edit}}
       <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker add-linked-tracker">
         <div class="panel panel-default panel-body">
-          <p class="add-tracker-label">Add a specific tracker status record related to {{this_value}} item:</p>
+          <p class="add-tracker-label">Add a specific tracker status record related to {{result_data.protocol_name}} item:</p>
           <p class="text-center">
           <a href="/masters/{{result_data.master_id}}/trackers/new?record_type=activity_log/{{implementation_class_name}}&record_id={{result_data.id}}&tracker[protocol_id]={{result_data.protocol_id}}&tracker[event_date]={{result_data.called_when}}" data-toggle="scrollto-result uncollapse" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{result_data.master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
           </p>
