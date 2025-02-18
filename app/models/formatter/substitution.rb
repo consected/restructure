@@ -796,10 +796,10 @@ module Formatter
               nil
             end
 
-      unless tag_value.is_a?(Integer)
-        raise FphsException, "Unknown comparison operator for {{\#is}}: #{op}" if no_operator
+      return res unless no_operator
 
-        return res
+      if no_operator && !tag_value.is_a?(Integer) 
+        raise FphsException, "Unknown comparison operator for {{\#is}}: #{op}" 
       end
 
       no_operator = nil

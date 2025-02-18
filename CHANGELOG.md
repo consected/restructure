@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] broken lookups on preset field values in embedded items, and avoid unnecessary initialization of models
+- [Fixed] error for protocols in activity log related items (such as player contacts in phone logs)
+- [Fixed] broken `references:` configuration when specifying without_reference
+- [Changed] enforcement of ref-data app for admins when viewing Redcap projects
+- [Fixed] error comparing equality in `{{#is...}}` substitutions
+- [Added] clearer styling for loading panels
+- [Fixed] jump to linked item causing errors when passed a jQuery object
+
 ## [9.2.3] - 2025-02-12
 
 - [Fixed] error using embed with simple use of 'embedded_item' or 'dynamic_model__some_recs'
