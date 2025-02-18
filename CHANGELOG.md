@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.2.4] - 2025-02-18
+
 - [Fixed] broken lookups on preset field values in embedded items, and avoid unnecessary initialization of models
 - [Fixed] error for protocols in activity log related items (such as player contacts in phone logs)
 - [Fixed] broken `references:` configuration when specifying without_reference
