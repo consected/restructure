@@ -144,5 +144,5 @@ RSpec.describe Redcap::ApiClient, type: :model do
     res = pc.survey_link(instrument:, record_id:)
     expect(res).to be_a String
     expect(res).to eq 'https://redcap.server/redcap/surveys/?s=nQpny44G2vwTMoeF'
-  end  
+  end
 end

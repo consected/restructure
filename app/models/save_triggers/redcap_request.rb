@@ -3,6 +3,8 @@
 class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
   attr_accessor :response_code, :content
 
+  ValidMethods = %w[project project_users project_archive metadata instruments records survey_link survey_participants import_records file]
+
   def self.config_def(if_extras: {}); end
 
   def initialize(config, item)
@@ -31,7 +33,8 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
         end
 
         @this_config = config
-        data = run_request
+        run_request
+        data = content
         orig_data = data
 
         if data_field
@@ -82,33 +85,30 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
     end
   end
 
-  def run_request study:, project_name:
-    data = post_data_config
+  def run_request
+    data = request_data
 
-    rc = Redcap::ProjectAdmin.active.find_by(study:, project_name:)
-    rc.current_admin = @admin
+    rc = Redcap::ProjectAdmin.active.find_by(study:, name: project_name)
+    rc.current_admin = rc.job_admin
     pc = rc.api_client
 
     res = pc.send method_from_config, **request_data
     self.response_code = pc.response_code
     self.content = res
-    handle_response(to_config, response)
+    handle_response(request_options, res)
   end
 
   def request_data
-    data = post_data_config || {}
-    if data.is_a? Hash
-      data = data.deep_stringify_keys
-      data = data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
-      data = data.to_json
-    else
-      data = FieldDefaults.calculate_default @item, data
-    end
-    data
+    data = post_data || {}
+    raise FphsException, "save_trigger redcap_request post_data must be a Hash" unless data.is_a? Hash
+
+    data = data.deep_symbolize_keys
+    data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }    
   end  
 
-  def handle_response(sub_config, response)    
+  def handle_response(sub_config, result)    
     rc_method = method_from_config
+    sub_config ||= {}
     allow_empty_result = sub_config[:allow_empty_result]
     allow_response_codes = sub_config[:allow_response_codes] || []    
 
@@ -133,10 +133,17 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
   end
 
   def method_from_config
-    @this_config[:method]
+    config_m = @this_config[:method]
+
+    raise FphsException, "save_trigger redcap_request specifies an invalid method: #{config_m}" unless config_m.in?(ValidMethods)
+    config_m
   end
 
-  def post_data_config
+  def request_options
+    @this_config[:request_options]
+  end
+
+  def post_data
     @this_config[:post_data]
   end
 

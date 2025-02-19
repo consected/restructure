@@ -1,5 +1,7 @@
 module Redcap
   module RedcapSupport
+    DefaultStudy = 'Q2'
+
     def setup_redcap_project_admin_configs(mocks: true)
       setup_file_store
 
@@ -12,6 +14,10 @@ module Redcap
             @metadata_project = p
             stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
             stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
+          elsif p[:name] == 'save_trigger'
+            stub_request_project_save_trigger p[:server_url], p[:api_key]
+            stub_request_survey_link_save_trigger p[:server_url], p[:api_key]
+            stub_request_import_record_save_trigger p[:server_url], p[:api_key]
           else
             stub_request_project p[:server_url], p[:api_key]
             stub_request_metadata p[:server_url], p[:api_key]
@@ -21,7 +27,7 @@ module Redcap
         end
 
         pa = Redcap::ProjectAdmin.create! current_admin: @admin,
-                                          study: 'Q2',
+                                          study: DefaultStudy,
                                           name: p[:name],
                                           api_key: p[:api_key],
                                           server_url: p[:server_url]
@@ -39,7 +45,7 @@ module Redcap
         setup_file_store @admin
       end
 
-      expect(Redcap::ProjectAdmin.active.count).to eq 2
+      expect(Redcap::ProjectAdmin.active.count).to eq 3
       projects
     end
 
@@ -145,6 +151,34 @@ module Redcap
 
         )
         .to_return(status: 200, body: project_admin_sample_response, headers: {})
+    end
+
+    def stub_request_project_save_trigger(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: project_admin_save_trigger_response, headers: {})
+    end
+
+    def stub_request_survey_link_save_trigger(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'surveyLink', 'format' => 'json', "instrument"=>"research_form", "record"=>"107", "returnFormat"=>"json", 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: survey_link_save_trigger_response, headers: {})
+    end
+
+    def stub_request_import_record_save_trigger(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'record', "data"=>"[{\"record_id\":-1,\"study_id\":9999000}]",  "forceAutoNumber"=>"true", "format"=>"json", "overwriteBehavior"=>"normal", 
+                  "returnContent"=>"ids", "returnFormat"=>"json", "type"=>"flat", 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: import_record_save_trigger_response, headers: {})
     end
 
     def stub_request_metadata(server_url, api_key)
@@ -450,6 +484,18 @@ module Redcap
 
     def project_admin_sample_response
       File.read('spec/fixtures/redcap/full_project_info.json')
+    end
+
+    def project_admin_save_trigger_response
+      File.read('spec/fixtures/redcap/save_trigger_project_info.json')
+    end
+
+    def survey_link_save_trigger_response
+      File.read('spec/fixtures/redcap/save_trigger_survey_link.txt')  
+    end
+
+    def import_record_save_trigger_response
+      File.read('spec/fixtures/redcap/save_trigger_import_record.json')  
     end
 
     def project_admin_repeat_instrument_response
