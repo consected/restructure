@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.2.5] - 2025-02-24
+
 - [Added] save trigger for redcap requests, allowing save and batch triggers to perform any implemented Redcap action
 - [Fixed] handling of associate_master_through_external_id when using a field that is not redcap_survey_identifier
 
