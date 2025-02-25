@@ -182,5 +182,15 @@ RSpec.describe Admin::UserRole, type: :model do
     expect do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
     end.to raise_error FphsException
+
+        # Can't copy roles if the target user has roles in the specified app
+    expect do
+      Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
+    end.to raise_error FphsException
+
+    # Can copy roles if the target user has roles in the specified app and we say to force it
+    expect do
+      Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true
+    end.not_to raise_error
   end
 end

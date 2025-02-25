@@ -134,12 +134,13 @@ class Admin::UserRole < Admin::AdminBase
   # @param from_user [User] user to copy roles from
   # @param to_user [User] user to copy roles to
   # @param app_types [Admin::AppType | Array{Admin::AppType}] the app type(s) the roles belong to.
+  # @param force_not_empty [true | nil] - force copying to users that already have roles in this app type
   # @return [Array] array of Admin::UserRole instances created in the to_user
-  def self.copy_user_roles(from_user, to_user, app_types, current_admin)
+  def self.copy_user_roles(from_user, to_user, app_types, current_admin, force_not_empty: nil)
     raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?
 
     has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_types
-    unless has_roles.empty?
+    unless has_roles.empty? || force_not_empty
       message = app_types.is_a?(Array) ? "#{'s' unless app_types.one?}: #{app_types.join(', ')}" : ": #{app_types}"
       raise FphsException, "can not copy roles to a user with roles in the following app#{message}"
     end
@@ -148,12 +149,16 @@ class Admin::UserRole < Admin::AdminBase
 
     to_roles = []
     from_roles.each do |r|
-      new_role = {
-        current_admin: current_admin,
+      new_role = {        
         role_name: r.role_name,
         app_type: r.app_type,
         user: to_user
       }
+
+      # Skip if this exists in the user already
+      next if find_by(new_role)
+
+      new_role[:current_admin] = current_admin
       to_roles << create!(new_role)
     end
 
