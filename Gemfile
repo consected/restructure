@@ -42,6 +42,7 @@ gem 'rails', '~> 7.0', '<7.3'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
 # gem 'redcap', path: '../redcap'
+
 gem 'rqrcode'
 gem 'rubyzip', '~> 2.3.0'
 gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'
