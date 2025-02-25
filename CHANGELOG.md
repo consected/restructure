@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.2.6] - 2025-02-25
+
 - [Added] ability to copy roles from a user to a target user that already has roles
 - [Added] `iso8601_datetime` and `redcap_date` tag formatters
 
