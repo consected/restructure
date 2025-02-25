@@ -53,6 +53,8 @@ _fpa.tag_formatter = class {
       "time_sec",
       "dicom_datetime",
       "dicom_date",
+      "redcap_date",
+      "iso8601_datetime",
       "join_with_space",
       "join_with_comma",
       "join_with_semicolon",
@@ -270,6 +272,23 @@ _fpa.tag_formatter = class {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
+    return orig_val;
+  }
+
+  redcap_date(_res, orig_val) {
+
+    let dtf = '%Y-%m-%d';
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+    return orig_val;
+  }
+  iso8601_datetime(_res, orig_val) {
+    if (typeof orig_val == 'date') {
+      orig_val = orig_val.toISOString();
+    }
+    orig_val = orig_val.split('.')[0].replace(/[\:\-T]/g, '');
     return orig_val;
   }
 
