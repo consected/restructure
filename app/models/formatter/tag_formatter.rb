@@ -29,6 +29,8 @@ module Formatter
       time_sec
       dicom_datetime
       dicom_date
+      redcap_date
+      iso8601_datetime
       join_with_space
       join_with_comma
       join_with_csv
@@ -219,6 +221,14 @@ module Formatter
 
     def dicom_date(_res, orig_val)
       orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
+    end
+
+    def redcap_date(_res, orig_val)
+      orig_val.strftime('%Y-%m-%d') if orig_val.respond_to? :strftime
+    end
+
+    def iso8601_datetime(_res, orig_val)
+      orig_val.iso8601
     end
 
     def join_with_space(res, _orig_val)
