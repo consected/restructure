@@ -241,6 +241,8 @@ Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter
 - time_sec
 - dicom_datetime
 - dicom_date
+- redcap_date
+- iso8601_datetime
 - join_with_space
 - join_with_comma
 - join_with_semicolon
