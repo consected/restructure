@@ -11,14 +11,15 @@ class Admin::UserRolesController < AdminController
     from_user_id = params[:from_user_id]
     to_user_id = params[:to_user_id]
     app_type_id = params[:app_type_id]
+    force_not_empty = params[:force_not_empty]
 
     from_user = User.active.find from_user_id
     to_user = User.active.find to_user_id
     app_type = Admin::AppType.active.find app_type_id
 
-    res = Admin::UserRole.copy_user_roles from_user, to_user, app_type, current_admin
-
-    flash.now[:notice] = "#{to_user.email} now has #{res.length} roles for app #{app_type.name}"
+    res = Admin::UserRole.copy_user_roles(from_user, to_user, app_type, current_admin, force_not_empty:)
+    resc = res.length
+    flash.now[:notice] = "#{to_user.email} now has #{resc} new #{"role".pluralize(resc)} for app #{app_type.name}"
     index
   end
 
