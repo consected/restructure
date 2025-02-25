@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] ability to copy roles from a user to a target user that already has roles
+- [Added] `iso8601_datetime` and `redcap_date` tag formatters
+
 ## [9.2.5] - 2025-02-24
 
 - [Added] save trigger for redcap requests, allowing save and batch triggers to perform any implemented Redcap action
