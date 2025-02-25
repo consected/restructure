@@ -1,20 +1,28 @@
-<div class="col-sm-20 admin-head-block">
-  <h4>Copy Roles from One User to Another</h3>
+<div class="col-sm-24 admin-head-block">
+  <h4><a href="#copy-roles-block" data-toggle="collapse" class="collapsed"><span class="caret caret-large"></span></a> Copy Roles from One User to Another</h3>
 
-  <%= form_tag admin_user_roles_copy_user_roles_path, action: :post do %>
-  <%= label_tag :from_user_id %>
-  <%= select_tag :from_user_id, active_user_options, include_blank: true %>
-
-  <%= label_tag :to_user_id %>
-  <%= select_tag :to_user_id, active_user_options, include_blank: true %>
-
-  <%= label_tag :app_type_id %>
-  <%= select_tag :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item(use_current_user: true)) %>
-
-  <div class="form-group">
-    <%= hidden_filter_fields %>
-    <%= submit_tag :copy, class: "btn btn-primary" %>
+  <div id="copy-roles-block" class="collapse">
+    <div class="form-group">
+      <%= form_tag admin_user_roles_copy_user_roles_path, action: :post do %>
+      <%= label_tag :from_user_id %>
+      <%= select_tag :from_user_id, active_user_options, include_blank: true, class: 'use-chosen' %>
+    </div>
+    <div class="form-group">
+      <%= label_tag :to_user_id %>
+      <%= select_tag :to_user_id, active_user_options, include_blank: true, class: 'use-chosen' %>
+    </div>
+    <div class="form-group">
+      <%= label_tag :app_type_id %>
+      <%= select_tag :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item(use_current_user: true)) %>
+    </div>
+    <div class="">
+      <%= label_tag :force_not_empty, "copy even if target has roles already" %>
+      <%= check_box_tag :force_not_empty %>
+    </div>
+    <div class="form-group">
+      <%= hidden_filter_fields %>
+      <%= submit_tag :copy, class: "btn btn-primary" %>
+    </div>
   </div>
-
   <% end %>
 </div>
