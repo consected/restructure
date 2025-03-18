@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.2.7] - 2025-03-18
+
 - [Fixed] prepending _comments in extra options
 - [Fixed] failure to retrieve production.log due to Pathname
 
