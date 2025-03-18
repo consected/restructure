@@ -514,9 +514,9 @@ class DynamicModel < ActiveRecord::Base
     new_options = YAML.dump(hash)
     self.options ||= ''
     self.options = if self.options.index(/^#{key}:/)
-                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
+                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\n\n\\3")
                    else
-                     "#{new_options}\n#{self.options}"
+                     "#{new_options}\n\n#{self.options}"
                    end
 
     self.options = self.options.gsub(/^---.*\n/, '')
