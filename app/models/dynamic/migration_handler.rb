@@ -38,6 +38,7 @@ module Dynamic
 
       before_validation :init_schema_name
       validate :schema_name_ok
+      validate :table_name_ok
       after_create :generate_create_migration, if: -> { !disabled }
 
       after_save :generate_migration, if: -> { !disabled }
@@ -240,6 +241,12 @@ module Dynamic
                          else
                            db_migration_schema
                          end
+    end
+
+    def table_name_ok
+      return true if disabled? || table_name.blank? || table_name.id_underscore == table_name
+
+      errors.add :table_name, "must only include characters acceptable to the database: #{table_name}"
     end
 
     def schema_name_ok
