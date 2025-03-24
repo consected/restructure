@@ -46,13 +46,19 @@ class Admin < ActiveRecord::Base
   # Get the user that corresponds to this admin
   # @return [User | nil]
   def matching_user
-    User.active.find_by(email:)
+    @matching_user ||= User.active.find_by(email:)
   end
 
   # Get the current app type for the user that corresponds to this admin
   # @return [Admin::AppType | nil]
   def matching_user_app_type
-    @matching_user_app_type || matching_user&.app_type
+    @matching_user_app_type ||= matching_user&.app_type
+  end
+
+  def matching_user_app_type=(app_type)
+    return unless matching_user
+
+    matching_user.app_type = app_type
   end
 
   #
@@ -60,12 +66,12 @@ class Admin < ActiveRecord::Base
   # @param [User] user
   # @return [Admin]
   def self.for_user(user)
-    active.where(email: user.email).first
+    @for_user ||= active.find_by(email: user.email)
   end
 
   # Set the matching user's app type forcefully, to override the current value
   # This facilitates app type importing and automatic migrations
-  attr_writer :matching_user_app_type
+  # attr_writer :matching_user_app_type
 
   # Simple way to ensure that the current admin is allowed to create, re-enable, and update another admin.
   def can_manage_admins?
