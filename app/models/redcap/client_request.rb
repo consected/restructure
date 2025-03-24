@@ -17,7 +17,7 @@ module Redcap
 
     attr_accessor :disabled
 
-    scope :limited_index, -> { limit 1000 }
+    scope :limited_index, -> { limit 100 }
 
     def invalidate_cache
       logger.debug "Not invalidating cache (#{self.class.name})"
