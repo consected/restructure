@@ -31,6 +31,8 @@ module Dynamic
       return if dynamic_def.disabled? || !dynamic_def.ready_to_generate?
 
       inst = new(dynamic_def)
+      return unless inst.app_type
+      
       inst.handle_all_option_configs
 
       dynamic_def.force_option_config_parse
