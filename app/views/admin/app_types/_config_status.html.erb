@@ -57,7 +57,22 @@
       '<span class="val-unchecked" title="configure the filestore app filesystem"></span>'.html_safe  
     end
     %>
-    Filestore filsystem ready? 
+    Filestore filesystem ready? 
 </p>
+
+<div class="status-extra-info">
+  <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
+      <p>Configure the filestore app filesystem</p>
+      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
+    <% end %>
+    <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
+      <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
+      <pre><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=@app_type.id%></code></pre>
+    <% end %>   
+    <% unless current_search_paths.include?(@app_type.default_schema_name) %>
+      <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
+      <pre><code>FPHS_POSTGRESQL_SCHEMA=<%=ENV['FPHS_POSTGRESQL_SCHEMA']%>,<%=@app_type.default_schema_name%></code></pre>
+    <% end %>
+</div>
 
 </div>
