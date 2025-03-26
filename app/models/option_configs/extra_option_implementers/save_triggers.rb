@@ -16,7 +16,8 @@ module OptionConfigs
                              add_tracker
                              change_user_roles
                              pull_external_data
-                             set_item_flags].freeze
+                             set_item_flags
+                             redcap_request].freeze
 
       class_methods do
         #
