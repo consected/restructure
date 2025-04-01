@@ -363,6 +363,9 @@
       - pull_external_data: 
 #!defs(save_triggers_pull_external_data_options_defs.yaml)
 
+      - redcap_request: 
+#!defs(save_triggers_redcap_request_options_defs.yaml)
+
       - set_item_flags:
 #!defs(save_triggers_set_item_flags_options_defs.yaml)
 

@@ -101,7 +101,7 @@ class Admin::ServerInfo
     trailing_context = trailing_context.to_i
 
     cmds = [
-      ['tail', '-n', tail_length.to_s, logfilename],
+      ['tail', '-n', tail_length.to_s, logfilename.to_s],
       ['tac'],
       ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
       ['tac']

@@ -8,6 +8,8 @@ module Redcap
     CacheExpiresIn = 60.seconds
     ExpectedKeys = %i[server_url api_key name current_admin].freeze
 
+    OverwriteBehaviorOptions = %w[normal overwrite].freeze
+
     attr_accessor :project_admin,
                   :records_request_options,
                   :metadata_request_options,
@@ -96,6 +98,59 @@ module Redcap
     end
 
     #
+    # Get survey link for an instrument and specific record
+    # @param [String] instrument - name of instrument to retrieve link for
+    # @param [Integer] record_id - record ID to retrieve link for
+    # @return [Array{Hash}] hash with symbolized keys
+    def survey_link(instrument:, record_id:)
+      request_options = {
+        instrument:,
+        record: record_id.to_s,
+        returnFormat: 'json'
+      }
+      request :survey_link, request_options: request_options
+    end
+
+    #
+    # Get survey participants for all records in an instrument
+    # @param [String] instrument - name of instrument to retrieve link for
+    # @return [Array{Hash}] hash with symbolized keys
+    def survey_participants(instrument:, event:)
+      request_options = {
+        instrument:,
+        event:,
+        returnFormat: 'json'
+      }
+      request :participant_list, request_options: request_options
+    end
+
+    #
+    # Get survey participants for all records in an instrument
+    # @param [String] instrument - name of instrument to retrieve link for
+    # @return [Array{Hash}] hash with symbolized keys
+    def import_records(data:, force_auto_number: true, overwrite_behavior: 'normal')
+
+      unless overwrite_behavior&.in?(OverwriteBehaviorOptions)
+        raise FphsException, "Invalid import_records overwrite_behavior '#{overwrite_behavior}' - must be one of #{OverwriteBehaviorOptions}"
+      end
+
+      unless data.is_a?(Array) && data.first.is_a?(Hash)
+        raise FphsException, "Invalid import_records data format - must be an array of hashes"
+      end
+
+      data = data.to_json
+
+      request_options = {
+        data:,
+        forceAutoNumber: force_auto_number,
+        overwriteBehavior: overwrite_behavior,
+        returnContent: 'ids',
+        returnFormat: 'json'
+      }
+      request :create, request_options: request_options
+    end
+
+    #
     # Get a file from a file field.
     # Don't record the file field retrievals in ClientRequest
     # since it will flood them with useless logs
@@ -145,6 +200,10 @@ module Redcap
         res.each { |row| row.symbolize_keys! if row.is_a? Hash }
       end
       res
+    end
+
+    def response_code 
+      redcap.response_code
     end
 
     private
