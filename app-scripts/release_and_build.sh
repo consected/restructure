@@ -53,7 +53,8 @@ fi
 grep -A 12 '## Unreleased' CHANGELOG.md
 
 echo "Clean up assets before we start"
-FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
+# FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
+rm -rf public/assets
 git commit public/assets -m "Cleanup"
 git push
 
