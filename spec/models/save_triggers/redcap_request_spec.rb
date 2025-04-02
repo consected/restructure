@@ -84,7 +84,7 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
     expect(@al.save_trigger_results['import_response_success_if_res']).to be true
     expect(@al.save_trigger_results['import_response_http_response_code']).to eq 200
 
-    expect(@al.notes).to be_presenton
+    expect(@al.notes).to be_present
     dnotes = JSON.parse(@al.notes)
     expect(dnotes).to be_a String
     
