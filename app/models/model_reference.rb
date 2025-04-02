@@ -185,7 +185,7 @@ class ModelReference < ActiveRecord::Base
     end
 
     if without_reference
-      if to_record_type_class.respond_to?(:master) && from_item_or_master &&
+      if to_record_type_class.method_defined?(:master) && from_item_or_master &&
          !ref_created_by_user && without_reference != 'outside_master'
         cond = { master: from_item_or_master }
       end

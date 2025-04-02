@@ -246,7 +246,7 @@ describe User do
   end
 
   after :all do
-    if User.new.respond_to? :orig_password_updated_at
+    if User.method_defined? :orig_password_updated_at
       User.send :alias_method, :password_updated_at, :orig_password_updated_at
     end
   end
