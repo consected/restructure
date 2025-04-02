@@ -51,7 +51,8 @@ fi
 head -32 CHANGELOG.md | tail -13
 
 echo "Clean up assets before we start"
-FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
+# FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
+rm -rf public/assets
 git commit public/assets -m "Cleanup"
 git push
 

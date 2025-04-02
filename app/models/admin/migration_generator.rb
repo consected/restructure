@@ -575,6 +575,10 @@ class Admin::MigrationGenerator
 
     dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_#{version}"
+    
+    if cname_us != cname_us.id_underscore
+      raise FphsException, "Error in naming of migration #{cname_us}"
+    end
 
     # Ensure we don't get overlapping migration version numbers
     migtime = Time.new.to_fs(:number)
@@ -645,13 +649,15 @@ class Admin::MigrationGenerator
     self.class.tables_and_views_reset!
 
     true
-  rescue FphsException, StandardError => e
+  rescue Exception => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
+    msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}'"
+    Rails.logger.warn msg
     bt = e.backtrace
           .reject { |m| m.include?('/vendor/bundle/ruby/') }
           .join("\n")
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{bt}"
+    raise FphsException, "#{msg}:\n#{e}\n#{bt}"
   end
 
   #

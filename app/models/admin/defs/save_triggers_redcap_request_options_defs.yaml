@@ -1,0 +1,51 @@
+
+# Save Trigger: Redcap Request options        
+        - request_1:
+            # Import a record into the project and store the result in the local data.
+            # The response should be a single element array (or more if extra data: array items are specified)
+            # with the record id of the stored record.
+            study: Test
+            project_name: Test API
+            local_data: import_response
+            method: import_records
+            post_data:
+              data:
+              - record_id: -1 # Note, a record_id is always needed, even with autonumbering
+                study_id: '{{test_study_id}}'
+              force_auto_number: true
+            success_if:
+              all:
+                this:
+                  save_trigger_results:
+                    element: import_response
+                    condition: "<> ARRAY_LENGTH"
+                    value: 0
+        - request_2:
+            # If the previous record import was successful, go on to get the survey link
+            # for the new record and save it to the data field. 
+            # NOTE: the data field must be set to no_downcase: true and view_original_case: true in the field options,
+            # otherwise the mixed case URLs will become mangled.
+            # For example:
+            #    default:
+            #      field_options:
+            #        econsent_rc_link:
+            #          no_downcase: true
+            #          view_original_case: true            
+            study: Test
+            project_name: Test API
+            local_data: link_response
+            method: survey_link
+            force_not_editable_save: true
+            data_field: econsent_rc_link
+            data_field_format: txt
+            post_data:
+              instrument: research_form
+              record_id: "{{save_trigger_results.import_response.first}}"
+            success_if:
+              all:
+                this:
+                  save_trigger_results:
+                    element: link_response
+                    condition: "<> LENGTH"
+                    value: 0
+                    

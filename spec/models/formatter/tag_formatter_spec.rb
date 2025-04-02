@@ -89,6 +89,8 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:time_ignore_zone, time_without_zone, '10:35', @ldn_user24],
       [:dicom_datetime, date_time, '19891210134301+0000'],
       [:dicom_date, date, '20011009'],
+      [:redcap_date, date, '2001-10-09'],
+      [:iso8601_datetime, date_time, '1989-12-10T13:43:01+00:00'],
       [:date_time_with_zone, date_time, '12/10/1989 1:43 pm'],
       [:date_time_with_zone, date_time, '10/12/1989 1:43 pm', @ldn_user],
       [:date_time_with_zone, date_time_early, '12/10/1989 2:43 am'],

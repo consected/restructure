@@ -13,7 +13,8 @@ module Redcap
                   :current_admin, :retrieved_files, :upserted_records, :imported_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
-                  :skip_store_if_no_survey_identifier, :skipped_ids
+                  :skip_store_if_no_survey_identifier, :skipped_ids,
+                  :external_id_fkey_name
 
     def initialize(project_admin, class_name)
       super()
@@ -34,6 +35,7 @@ module Redcap
       self.step_count = UpdateJobRequestEvery
       self.survey_identifier_field_name = project_admin.survey_identifier_field.to_sym
       self.integer_survey_identifier_field_name = project_admin.integer_survey_identifier_field.to_sym
+      self.external_id_fkey_name = project_admin.associate_master_through_external_id_fkey_name&.to_sym
       self.set_master_id_using_association = project_admin.data_options.set_master_id_using_association
       self.skip_store_if_no_survey_identifier = project_admin.data_options.skip_store_if_no_survey_identifier
     end
@@ -124,6 +126,9 @@ module Redcap
       am = project_admin.data_options.associate_master_through_external_identifer
       return unless am
 
+      @has_integer_survey_identifier = true      
+      return unless external_id_fkey_name == integer_survey_identifier_field_name
+
       si_name = survey_identifier_field_name
       integer_si_name = integer_survey_identifier_field_name
 
@@ -135,7 +140,6 @@ module Redcap
         rec[integer_si_name] = val&.to_i
       end
 
-      @has_integer_survey_identifier = true
     end
 
     #
@@ -399,14 +403,14 @@ module Redcap
     def handle_setting_master_id(update_record, retrieved_record)
       return -1 unless do_handle_setting_master_id
 
-      isi = retrieved_record[integer_survey_identifier_field_name]
+      isi = retrieved_record[external_id_fkey_name]
       recid = retrieved_record.first.last
       if !isi && !skip_store_if_no_survey_identifier
         raise FphsException,
               "Integer survey identifier field is empty, can't set master id, for record #{recid}"
       elsif isi
         # Start by setting the integer survey identifier field, so the association can get the master with the new value
-        update_record[integer_survey_identifier_field_name] = isi
+        update_record[external_id_fkey_name] = isi
       elsif skip_store_if_no_survey_identifier
         # No survey identifier is returned and the project option skip_store_if_no_survey_identifier is set, so
         # just return with no result, indicating a skip.
@@ -527,7 +531,7 @@ module Redcap
                                              path:,
                                              replace: true)
           imported_files << res if res
-        rescue Exception => e # rubocop:disable Lint/RescueException
+        rescue Exception => e
           # We rescue Exception rather than StandardError, since file errors inherit from Exception
           msg = "Failed to retrieve or import REDCap file for record: #{record_id} - field name: #{field_name} - with user: #{current_user.email}.\n#{e}"
           Rails.logger.warn msg

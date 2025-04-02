@@ -12,6 +12,47 @@ Note that not every tagged version may be suitable for production use. A Github 
 
 Since [version 8.4.0](#840---2024-01-10) the convention is that releases made within forked repositories should be up-versioned with a patch release, *x.y.z+1*. When changes are incorporated back into the primary repo [consected/restructure](https://github.com/consected/restructure) a new minor release will be created, *x.y+1,0*.
 
+## Unreleased
+
+### From FPHS - PR #462 -  2025-04-02
+
+- [Fixed] issues with dynamic model default configs with missing attributes
+- [Added] details to app type status for extra setup required
+- [Added] better reporting of issues sorting references
+- [Changed] handling of default labels for report criteria if no label is specified
+- [Fixed] handling of the dry run and skip failures combination in app type imports - fixes #301
+- [Fixed] app type import creating default *app* user access controls in the matching user's current app. Now switches the app to the new app type on import
+- [Changed] handling of migration errors that include syntax errors
+- [Changed] activity log trigger
+- [Added] checking of migration table name
+- [Fixed] bad table naming when creating default embed
+- [Changed] maximum results for Redcap client request log
+
+### From Viva - PR #461 - 2025-04-02
+
+- [Changed] cleanup of assets to avoid needing a DB connection in release_and_build.sh script
+
+### From FPHS - PR #460 - 2025-03-18
+
+- [Fixed] prepending _comments in extra options
+
+### From FPHS - PR #457 - 2025-02-24
+
+- [Added] save trigger for redcap requests, allowing save and batch triggers to perform any implemented Redcap action
+- [Fixed] handling of associate_master_through_external_id when using a field that is not redcap_survey_identifier
+
+### From FPHS - PR #456 - 2025-02-25
+
+- [Added] `iso8601_datetime` and `redcap_date` tag formatters
+
+### From Viva - PR #454 - 2025-01-30
+
+- [Fixed] import CSV bugs
+
+### From Viva - PR #453 - 2025-01-30
+
+- [Fixed] log filename breaking Rails server log search
+
 ## [9.2.1] - 2025-01-30
 
 ### From FPHS - PR #452 - 2025-01-30

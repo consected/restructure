@@ -39,7 +39,7 @@ module ReportsHelper
     end
 
     value ||= report_field_default config
-    main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize)
+    main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize(keep_id_suffix: true).captionize)
     main_field += report_criteria_multiple_field(name, config, value, options) ||
                   report_criteria_dropdown_field(name, config, value, options) ||
                   report_criteria_text_field(name, config, value, options)
