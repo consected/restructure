@@ -47,10 +47,6 @@ fi
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
-# Clean up the temporary nfs_store directories
-rm -rf /var/tmp/nfs_store_tmp*
-rm -rf /var/tmp/nfs_store_test*
-
 if [ -z "$@" ]; then
   specs='spec/models spec/controllers spec/features spec/r.*'
 else
@@ -73,6 +69,10 @@ for spec in ${specs}; do
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
   echo "==>>>> $(date)" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
+  # Clean up the temporary nfs_store directories
+  rm -rf /var/tmp/nfs_store_tmp*
+  rm -rf /var/tmp/nfs_store_test*
+
   RAILS_ENV=test bundle exec rake parallel:spec["${spec}"] &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
     sleep 5
