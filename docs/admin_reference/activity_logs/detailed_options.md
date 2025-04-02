@@ -5,6 +5,8 @@
 # Activity Log Definitions
 
 !defs(extra_options_top_level_options_defs.yaml)
+!defs(extra_options_standard_option_defs.yaml)
+!defs(activity_log_options_standard_option_defs.yaml)
 !defs(activity_log_extra_log_type_defs.yaml)
 !defs(extra_options_defs.yaml)
 !defs(activity_log_options_defs.yaml)
