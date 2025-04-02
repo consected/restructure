@@ -67,9 +67,14 @@ class Admin
       results = { 'failures' => import_failures, 'updates / creations' => import_results }
 
       begin
-        if skip_fail
+        find_or_create
+
+        if skip_fail && !dry_run
+          # We can't skip failures if a dry run has been requested, since a transaction is
+          # required for the dry run rollback.
           import_set
         else
+          # Fail on first error and rollback, or if a dry run always rollback
           Admin::AppType.transaction do
             import_set
           end
@@ -93,22 +98,10 @@ class Admin
     end
 
     def import_set
-      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
-
-      # override the name if specified
-      a_conf[:current_admin] = admin
-      a_conf['name'] = name if name
-
-      dsn = a_conf['default_schema_name']
-      unless dsn.nil? || Admin::MigrationGenerator.current_search_paths&.include?(dsn)
-        raise FphsException, 'Import of the app requires the FPHS_POSTGRESQL_SCHEMA environment variable ' \
-                             "to include the default schema name of the app: #{dsn}"
-      end
-
-      self.app_type = find_or_create_with_config(a_conf)
-
       # set the app type to allow automatic migrations to work
       admin.matching_user_app_type = app_type
+      # Save, to ensure the default _app_ user access controls are created in the correct app
+      admin.matching_user&.save!
       app_type.setup_migrations
       force_report_short_names
 
@@ -165,9 +158,6 @@ class Admin
       app_type.reload
       self.new_id = app_type.id
 
-      # Reset the app type to allow the actual value to be used
-      admin.matching_user_app_type = nil
-
       # Rollback if a dry run was requested
       raise ActiveRecord::Rollback if dry_run
 
@@ -212,6 +202,31 @@ class Admin
     # matching on the name
     def find_or_create_with_config(a_conf)
       Admin::AppType.find_by(name: a_conf['name']) || Admin::AppType.create!(a_conf)
+    end
+
+    def find_or_create
+      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
+
+      # override the name if specified
+      a_conf[:current_admin] = admin
+      a_conf['name'] = name if name
+
+      dsn = a_conf['default_schema_name']
+      unless dsn.nil? || Admin::MigrationGenerator.current_search_paths&.include?(dsn)
+        raise FphsException, 'Import of the app requires the FPHS_POSTGRESQL_SCHEMA environment variable ' \
+                             "to include the default schema name of the app: #{dsn}"
+      end
+
+      self.app_type = find_or_create_with_config(a_conf)
+
+      olat = Settings::OnlyLoadAppTypes
+      if olat && !olat.include?(app_type.id)
+        raise FphsException, "Import of the app requires the FPHS_LOAD_APP_TYPES environment variable " \
+                             "to include the new app type ID: #{app_type.id}: " \
+                             "FPHS_LOAD_APP_TYPES=#{Settings::OnlyLoadAppTypes.join(',')},#{app_type.id}"
+      end
+
+      self.app_type
     end
 
     #

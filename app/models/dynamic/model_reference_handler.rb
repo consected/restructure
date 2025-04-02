@@ -157,7 +157,15 @@ module Dynamic
       null_value = vo[:null_value]
 
       top_item = res.delete_at(0) if keep_top
+      
+      begin
       res = res.sort_by { |a| a[smr] || null_value }
+      rescue StandardError => e
+        msg = "sort_references failed to sort - a null_value configuration is probably required: #{e}"
+        Rails.logger.warn msg
+        raise FphsException, msg
+      end
+
       res = res.reverse if sdir&.in?(['desc', 'reverse'])
       res.insert(0, top_item) if top_item
 
