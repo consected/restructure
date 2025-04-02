@@ -5,8 +5,27 @@
 .activity-logs-generic-block {
   margin-top: 0.8em;
   // margin-bottom: 1.4em;
-  &.ajax-running {
-    background: silver;
+  .activity-logs-inner-block {
+    min-height: 20px;
+  }
+
+  &.ajax-running .activity-logs-inner-block {
+    background: gray;
+    animation: runningAjax 4s;
+  }
+
+  &.formatting-block {
+    animation: none;    
+  }
+}
+
+@keyframes runningAjax {
+  from {
+    transform: scale(0,1);
+  }
+
+  to {
+    transform: scale(1,1);
   }
 }
 
