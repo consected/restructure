@@ -169,10 +169,18 @@ module Dynamic
       return schema_name if respond_to?(:schema_name) && schema_name.present?
 
       current_user_app_type = current_admin.matching_user_app_type
+
+      unless current_user_app_type
+        Rails.logger.warn "#{self.class.human_name} migration doesn't specify a schema_name and there is no matching user " \
+                          "for the current admin '#{current_admin.email}' or no app type is set '#{current_user_app_type}'"
+      end
+      
       dsn = current_user_app_type&.default_schema_name
       return dsn if dsn.present?
 
+      Rails.logger.warn "#{self.class.human_name} doesn't specify a schema_name - using the category or first in search path"
       res = category.split('-').first if category.present?
+      res = nil unless Admin::MigrationGenerator.current_search_paths.include?(res)
       res ||= Settings::DefaultMigrationSchema
       return res if res.present?
 
