@@ -18,6 +18,7 @@ module Redcap
             stub_request_project_save_trigger p[:server_url], p[:api_key]
             stub_request_survey_link_save_trigger p[:server_url], p[:api_key]
             stub_request_import_record_save_trigger p[:server_url], p[:api_key]
+            stub_request_metadata p[:server_url], p[:api_key]
           else
             stub_request_project p[:server_url], p[:api_key]
             stub_request_metadata p[:server_url], p[:api_key]

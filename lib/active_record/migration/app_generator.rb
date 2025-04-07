@@ -871,6 +871,7 @@ module ActiveRecord
 
       def activity_log_trigger_sql
         base_name_id = "#{belongs_to_model.to_s.underscore.gsub(%r{__|/}, '_')}_id"
+        log_al_prefix = "log_#{history_table_name}"
         <<~DO_TEXT
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -900,15 +901,15 @@ module ActiveRecord
           $$;
 
           DROP FUNCTION IF EXISTS #{schema}.log_#{table_name.singularize}_update () CASCADE;
-          DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
-          DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{log_al_prefix}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{log_al_prefix}_update ON #{schema}.#{table_name};
 
-          CREATE TRIGGER log_#{history_table_name}_insert
+          CREATE TRIGGER #{log_al_prefix}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-          CREATE TRIGGER log_#{history_table_name}_update
+          CREATE TRIGGER #{log_al_prefix}_update
             AFTER UPDATE ON #{schema}.#{table_name}
             FOR EACH ROW
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))

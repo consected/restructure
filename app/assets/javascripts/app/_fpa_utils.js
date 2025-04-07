@@ -25,7 +25,7 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   catch (e) {
     var h = null;
   }
-  if (!h || h.length == 0) {
+  if (!isj && (!h || h.length == 0)) {
     var tparts = target.split('-');
     var l = tparts.length;
     var dii = tparts[l - 1];
@@ -271,12 +271,12 @@ _fpa.utils.capitalize = function (str) {
 _fpa.utils.nl2br = function (text) {
   text = Handlebars.Utils.escapeExpression(text);
   var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
-  return new Handlebars.SafeString(nl2br);
+  return nl2br;
 };
 
 _fpa.utils.remove_tags = function (text) {
   var stre = (text + '').replace(/(\<[a-zA-Z0-9\s-=_"']+\/?\>)/g, '');
-  return new Handlebars.SafeString(stre);
+  return stre;
 };
 
 String.prototype.capitalize = function () {
