@@ -37,7 +37,7 @@ NOTE: Requires a database migration on upgrade
 ## From FPHS - PR #466 - 2025-02-12
 
 - [Added] add-activity-button-<extra log type> as a link hash option for clicking activity log buttons in the current panel header
-- [Changed add-activity-button-<extra log type> link hash to show as disabled if the panel activity button is not available
+- [Changed] add-activity-button-<extra log type> link hash to show as disabled if the panel activity button is not available
 - [Fixed] `{{#is tag '===' 'string literal'}}` comparison due to bad quote matching
 - [Fixed] broken view_with_formats for certain strings
 
