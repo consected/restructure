@@ -270,7 +270,8 @@
   });
 
   Handlebars.registerHelper('nl2br', function (text) {
-    return _fpa.utils.nl2br(text);
+    var nl2br = _fpa.utils.nl2br(text);
+    return new Handlebars.SafeString(nl2br)
   });
 
   Handlebars.registerHelper('quoteattr', function (text) {
@@ -462,7 +463,8 @@
 
   Handlebars.registerHelper('pretty_string', function (stre, options) {
     if (options && !options.hash) options.hash = {};
-    return _fpa.utils.pretty_print(stre, options.hash);
+    stre = _fpa.utils.pretty_print(stre, options.hash);
+    return new Handlebars.SafeString(stre)
   });
 
 

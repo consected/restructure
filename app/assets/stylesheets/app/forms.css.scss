@@ -301,6 +301,15 @@ a.add-icon {
   }
 }
 
+.attached-add-activity-button[disabled='disabled'] {
+    color: gray;
+    &:hover,
+    &:active,
+    &:link {
+      color: gray;     
+    }
+}
+
 .advanced-form-selections {
   line-height: 2.8;
 

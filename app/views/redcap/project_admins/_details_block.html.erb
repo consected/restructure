@@ -11,7 +11,13 @@
   </p>
 <% end %>
 <% if current_admin&.matching_user_app_type&.name != 'ref-data' %>
-  <h4>Important - switch to app ref-data to review and update Redcap information</h4>
+  <h4>Important - 
+    <%= link_to "switch to the <b>Ref Data</b> app".html_safe, 
+              redcap_project_admins_path(
+                no_redirect: true, 
+                # use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
+              ) %> 
+    to review and update Redcap information</h4>
 <% end%>
 <p><label>record retrieval status</label> <span><%= object_instance.status %></span>&nbsp;
   <% unless object_instance.persisted? %>        
@@ -134,7 +140,9 @@ if req&.result
     <% end %>
     <% am = object_instance.associate_master_through_external_id_resource_name
        if am && !object_instance.job_user&.has_access_to?(:access, :table, am, alt_app_type_id: object_instance.job_app_type&.id, force_reset: true ) %>
-    <p class="info-danger"><code><%=object_instance.job_user&.email%></code> is not permitted to access external identifier <code><%=am%></code> in <code><%=object_instance.job_app_type&.name%></code></p>         
+    <p class="info-danger"><code><%=object_instance.job_user&.email%></code> is not permitted to access external identifier <code><%=am%></code> in <code><%=object_instance.job_app_type&.name%></code>
+    <br/><%= link_to link_label_open_in_new('open User Access Controls'), admin_user_access_controls_path(filter: {app_type_id: object_instance.job_app_type&.id}), target: '_blank' %> and add this permission
+    </p>    
     <% end %>
   <% else %>
   <span>bad configuration</span>
