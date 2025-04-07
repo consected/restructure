@@ -368,6 +368,12 @@ a.glyphicon.glyphicon-remove-sign {
   transform: rotate(180deg);
 }
 
+.caret.caret-large {
+      border-top: 8px dashed;      
+      border-right: 8px solid transparent;
+      border-left: 8px solid transparent;
+}
+
 .nav.nav-pills {
   li {
     > a {
