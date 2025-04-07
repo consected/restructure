@@ -179,7 +179,7 @@ fi
 
 echo "Starting build container"
 cd ../restructure-build
-./build.sh ${build_arg}
+./build.sh ${build_arg} ${UPVLEVEL}
 if [ $? != 0 ]; then
   echo "***** build.sh failed with exit code $? *****"
   exit 101
