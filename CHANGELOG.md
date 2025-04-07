@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] error using embed with simple use of 'embedded_item' or 'dynamic_model__some_recs'
+
 ### From FPHS - PR #462 -  2025-04-02
 
 - [Fixed] issues with dynamic model default configs with missing attributes

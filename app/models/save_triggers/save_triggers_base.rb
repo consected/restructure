@@ -53,7 +53,7 @@ class SaveTriggers::SaveTriggersBase
       # Allow simple use of 'embedded_item' or 'dynamic_model__some_recs'
       if wr_from.is_a? String
         wr_from = {
-          wr_from.to_sym => { return: return_result }
+          wr_from.to_sym => { return: 'return_result' }
         }
       end
 
