@@ -14,7 +14,53 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #470 - 2025-01-20
+
+- [Fixed] migration script  to use `bundle exec`
+
+### From FPHS - PR #469 - 2025-02-12
+
 - [Fixed] error using embed with simple use of 'embedded_item' or 'dynamic_model__some_recs'
+
+### From FPHS - PR #468 - 2025-01-27
+
+NOTE: Requires a database migration on upgrade
+
+- [Changed] user and admin models for the new otp secret
+- [Added] DB migrations to bring user and admin history tables and triggers up to date
+- [Updated] schema dump
+
+### From FPHS - PR #467 - 2025-02-25
+
+- [Added] ability to copy roles from a user to a target user that already has roles
+
+## From FPHS - PR #466 - 2025-02-12
+
+- [Added] add-activity-button-<extra log type> as a link hash option for clicking activity log buttons in the current panel header
+- [Changed add-activity-button-<extra log type> link hash to show as disabled if the panel activity button is not available
+- [Fixed] `{{#is tag '===' 'string literal'}}` comparison due to bad quote matching
+- [Fixed] broken view_with_formats for certain strings
+
+### From FPHS - PR #465 - 2025-02-18
+
+- [Fixed] broken `references:` configuration when specifying without_reference
+- [Changed] enforcement of ref-data app for admins when viewing Redcap projects
+- [Fixed] error comparing equality in `{{#is...}}` substitutions
+- [Added] clearer styling for loading panels
+- [Fixed] jump to linked item causing errors when passed a jQuery object
+
+### From FPHS - PR #464 - 2025-02-18
+
+- [Fixed] broken lookups on preset field values in embedded items, and avoid unnecessary initialization of models
+- [Fixed] error for protocols in activity log related items (such as player contacts in phone logs)
+
+### From FPHS - PR #463 - 2025-04-02
+
+- [Added] details to reference definition_resources in the activity log admin info and default options in the documentation
+- [Fixed] unusual filestore directory issues during testing in parallel
+- [Added] details about Firefox and geckodriver
+- [Fixed] failing spec tests
+- [Added] logging to explain defaults selected for db migration schema
 
 ### From FPHS - PR #462 -  2025-04-02
 
