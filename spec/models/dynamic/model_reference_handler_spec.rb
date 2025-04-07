@@ -763,7 +763,10 @@ RSpec.describe 'Model reference implementation', type: :model do
       END_DEF
 
       dm.current_admin = @admin
+      dm.updated_at = Time.now
       dm.save!
+
+      expect(dm.option_configs.first&.references).to be_a Hash
     end
 
     it 'evaluates rules to show references' do
@@ -787,7 +790,11 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       dm.reset_model_references
 
-      puts dm.class.definition.option_configs if dm.model_references.empty?
+      if dm.model_references.empty?
+        put_to_saved_log 'evaluates rules to show references'
+        put_to_saved_log dm.class.definition.option_configs 
+        put_to_saved_log dm.class.definition.options
+      end
 
       # The player_contacts associated with this master record do not all appear in model references.
       # Only the last one that was explicitly added to the model references for this master record

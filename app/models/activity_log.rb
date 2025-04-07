@@ -764,7 +764,7 @@ class ActivityLog < ActiveRecord::Base
 
   def default_embed_table_name(extra_log_type)
     sname = process_name || [item_type, rec_type].compact.join('_')
-    [category, sname, extra_log_type, 'recs'].compact.join('_')
+    [category&.id_underscore, sname, extra_log_type, 'recs'].compact.join('_')
   end
 
   def default_embed_resource_name(extra_log_type)

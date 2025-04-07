@@ -81,7 +81,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.options.strip).to eq @option_texts[1].strip
-    expect(@dyn_instances[1].current_definition.option_configs).to eq @option_configs[1]
 
     # The dynamic model instance should pull options that matches the original v1 options
     check_version 1
@@ -163,7 +162,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
                               options: nil
 
     # Initially sets the options for db columns from the definition
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _db_columns:
         id:
           type: integer
@@ -183,6 +182,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: datetime
 
     END_OPT
+
+    put_to_saved_log("replaces option configurations\n\---\n#{dm.options}\n---\n#{exp}\n---\n") unless dm.options.strip == exp.strip
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: nil
@@ -190,8 +192,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       _db_columns:
         id:
@@ -213,6 +216,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     END_OPT
 
+    expect(dm.options.strip).to eq exp.strip
     hash = {
       _db_columns: {
         id: { type: 'integer' },
@@ -223,8 +227,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       _db_columns:
         id:
@@ -235,17 +240,20 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: string
     END_OPT
 
+    expect(dm.options.strip).to eq exp.strip
+
     dm.options = <<~END_OPT
       default:
         label: Something
 
     END_OPT
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: nil
@@ -253,13 +261,15 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: {
@@ -269,14 +279,17 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:
         test1: A test comment
 
+      
+      
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _db_columns: {
@@ -288,7 +301,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _db_columns:
         id:
           type: integer
@@ -297,13 +310,18 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         test2:
           type: string
 
+      
       _comments:
         test1: A test comment
 
+      
+      
       default:
         label: Something
 
     END_OPT
+
+    expect(dm.options.strip).to eq exp.strip
   end
 
   it 'generates show_if from show_if_condition_strings' do

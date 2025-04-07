@@ -260,7 +260,7 @@ _fpa.substitution = class {
 
     if (exp) {
       const exp_length = exp.length;
-      if (exp_length > 1 && exp[0].match(/#{StartQuote}/) && exp[exp_length - 1].match(/#{EndQuote}/)) {
+      if (exp_length > 1 && exp[0].match(new RegExp(StartQuote)) && exp[exp_length - 1].match(new RegExp(EndQuote))) {
         exp = exp.slice(1, exp_length - 1);
       }
       else if (exp.toLowerCase() == 'null') {
