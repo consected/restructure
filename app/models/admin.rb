@@ -11,12 +11,11 @@ class Admin < ActiveRecord::Base
   if two_factor_auth_disabled
     devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
-           otp_secret_encryption_key: otp_enc_key
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable
   end
 
   include StandardAuthenticationLegacyOtp
-    
+
   before_save :restrict_capabilities
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_re_enabling_admin, on: :update
