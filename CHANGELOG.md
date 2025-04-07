@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #471 -  2025-04-07
+
+- [Added] option to allow empty Unreleased section in release and build
+
 ## [9.12.0] - 2025-04-07
 
 ### From FPHS - PR #470 - 2025-01-20
