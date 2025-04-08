@@ -4,6 +4,11 @@ def put_now(msg)
   puts "#{Time.now} #{msg}"
 end
 
+def put_to_saved_log(msg)
+  msg = "#{Time.now} #{msg}\n"
+  File.write('tmp/test_saved.log', msg, mode: 'a')
+end
+
 # Provide a method to change app settings without a warning
 def change_setting(name, value)
   silence_warnings { Settings.const_set(name, value) }

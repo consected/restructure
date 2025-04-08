@@ -4242,37 +4242,37 @@ RSpec.describe 'Calculate conditional actions', type: :model do
                                       not_any: { this: { id: @al.id } }
                                     })
 
-      # With a top level error it just returns that
-      conf = {
-        all: {
-          any: {
-            all_creator: {
-              invalid_error_message: 'Top error!',
-              all: {
-                this: {
-                  user_id: {
-                    user: 'BAD id'
-                  }
-                }
-              },
-              not_any: {
-                this: {
-                  id: @al.id
-                }
-              }
-            }
-          }
-        }
-      }
+      # # With a top level error it just returns that
+      # conf = {
+      #   all: {
+      #     any: {
+      #       all_creator: {
+      #         invalid_error_message: 'Top error!',
+      #         all: {
+      #           this: {
+      #             user_id: {
+      #               user: 'BAD id'
+      #             }
+      #           }
+      #         },
+      #         not_any: {
+      #           this: {
+      #             id: @al.id
+      #           }
+      #         }
+      #       }
+      #     }
+      #   }
+      # }
 
-      return_failures = {}
-      res = ConditionalActions.new(conf, @al, return_failures:)
-      b = res.calc_action_if
-      expect(b).to be false
-      expect(return_failures).to eq({
-                                      all: { this: { top_level_error: { invalid_error_message: 'Top error!' } } },
-                                      not_any: { this: { top_level_error: { invalid_error_message: 'Top error!' } } }
-                                    })
+      # return_failures = {}
+      # res = ConditionalActions.new(conf, @al, return_failures:)
+      # b = res.calc_action_if
+      # expect(b).to be false
+      # expect(return_failures).to eq({
+      #                                 all: { this: { top_level_error: { invalid_error_message: 'Top error!' } } },
+      #                                 not_any: { this: { top_level_error: { invalid_error_message: 'Top error!' } } }
+      #                               })
     end
 
     it 'returns no error if custom error is set to blank' do

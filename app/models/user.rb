@@ -17,13 +17,12 @@ class User < ActiveRecord::Base
   if two_factor_auth_disabled
     supported_modules << :database_authenticatable
   else
-    supported_modules += [:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }]
+    supported_modules += [:two_factor_authenticatable]
   end
 
   devise(*supported_modules)
 
   include StandardAuthenticationLegacyOtp
-
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id

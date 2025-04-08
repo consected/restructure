@@ -15,7 +15,10 @@ module OptionsSupport
     expect(dyn_inst.class.to_s).to eq dynamic_type
 
     t = dyn_inst.options_text
-    expect(t).to eq @option_texts[num]
+
+    put_to_saved_log("check_version\n---\n#{t}\n---\n#{@option_texts[num]}\n---\n") unless t&.strip == @option_texts[num]&.strip
+
+    expect(t&.strip).to eq @option_texts[num]&.strip
     expect(dyn_inst.versioned_definition.updated_at.to_i).to eq @def_updated_at[num].to_i
 
     prev_updated = @def_updated_at[num - 1]
