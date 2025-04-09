@@ -1,4 +1,3 @@
-require File.expand_path('../../lib/logger/do_nothing_logger.rb', __dir__)
 require 'active_support/core_ext/integer/time'
 
 Rails.application.configure do
