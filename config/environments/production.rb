@@ -106,7 +106,7 @@ Rails.application.configure do
     config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new('restructure-app'))
   when 'DoNothing'
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
-    config.logger = DoNothingLogger.new
+    config.logger = nil
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :fatal

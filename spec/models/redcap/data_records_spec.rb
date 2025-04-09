@@ -589,7 +589,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect do
         dr.validate
-      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: {:record_id=>"4"}')
+      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: {record_id: "4"}')
     end
   end
 

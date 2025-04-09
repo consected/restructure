@@ -14,6 +14,21 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #477 - 2025-04-09
+
+- [Fixed] specs to get a clean parallel test run - fixes #476
+
+### From FPHS - PR #475 - 2025-04-09
+
+- [Removed] DoNothingLogger implementation and simplified initializer configuration to use a nil logger
+
+### From FPHS - PR #473 - 2025-04-09
+
+NOTE: New Ruby version will require AWS Elastic Beanstalk, test and dev environments to be updated to 3.4.2
+
+- [Updated] Ruby version to 3.4 - fixes #472
+- [Fixed] failing specs associated with new Ruby version
+
 ### From Viva - PR #471 -  2025-04-07
 
 - [Added] option to allow empty Unreleased section in release and build
