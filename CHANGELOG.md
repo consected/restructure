@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #477 - 2025-04-09
+
+- [Fixed] specs to get a clean parallel test run - fixes #476
+
 ### From FPHS - PR #475 - 2025-04-09
 
 - [Removed] DoNothingLogger implementation and simplified initializer configuration to use a nil logger
