@@ -9,7 +9,10 @@ unset RUBY_DEBUG_OPEN
 
 if [ ! "${USE_PG_HOST}" ] && [ "${NO_CLEAN_DB}" != 'true' ]; then
   echo "sudo is required to clean the database. Enter your password if prompted"
-  sudo whoami
+  if ! sudo whoami; then
+    echo "Failed to get sudo"
+    exit 101
+  fi
 fi
 
 # Ensure the tests run cleanly
