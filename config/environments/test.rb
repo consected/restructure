@@ -1,4 +1,3 @@
-require File.expand_path('../../lib/logger/do_nothing_logger.rb', __dir__)
 require 'active_support/core_ext/integer/time'
 
 # The test environment is used exclusively to run your application's
@@ -55,7 +54,7 @@ Rails.application.configure do
     config.log_formatter = ::Logger::Formatter.new
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
-    config.logger = DoNothingLogger.new
+    config.logger = nil
   end
 
   config.active_job.queue_adapter = :delayed_job
