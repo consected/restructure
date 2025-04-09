@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #470 - 2025-04-09
+
+- [Fixed] attempt to require removed do_nothing_logger in production - fixes #478
+
 ### From FPHS - PR #477 - 2025-04-09
 
 - [Fixed] specs to get a clean parallel test run - fixes #476
