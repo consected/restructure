@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #475 - 2025-04-09
+
+- [Removed] DoNothingLogger implementation and simplified initializer configuration to use a nil logger
+
 ### From FPHS - PR #473 - 2025-04-09
 
 NOTE: New Ruby version will require AWS Elastic Beanstalk, test and dev environments to be updated to 3.4.2
