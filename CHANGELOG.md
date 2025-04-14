@@ -18,6 +18,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Added] report option for plain text response, with various "markup" options - resolves #480
 
+## [9.12.1] - 2025-04-09
+
 ### From FPHS - PR #479 - 2025-04-09
 
 - [Fixed] attempt to require removed do_nothing_logger in production - fixes #478
