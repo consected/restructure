@@ -23,6 +23,11 @@ module OptionConfigs
 
     configure :list_options, with: %i[hide_in_list list_description]
     configure :tree_view_options, with: %i[num_levels column_levels expand_level]
+    configure :plain_text_options, with: %i[results_column return_content_type 
+                                            line_join_string column_join_string 
+                                            line_prefix line_suffix 
+                                            column_prefix column_suffix
+                                            header_text footer_text]
     configure :view_css, with: %i[classes selectors media_queries]
     configure :criteria_css, with: %i[classes selectors media_queries]
     configure :master_results_css, with: %i[classes selectors media_queries]
