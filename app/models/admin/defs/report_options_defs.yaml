@@ -109,6 +109,29 @@ tree_view_options:
     -
       - col3
 
+plain_text_options:
+  # If requesting results as plain text using a URL like:
+  #   server.tld/reports/test__test_plain_text?format=text&search_attrs[a]=1
+  # specify how the results are returned.
+  
+  # Content type to return in response
+  return_content_type: text/plain (default), example: text/xml
+  # Return a single column from a multicolumn query. If not set, all columns are returned
+  results_column: column_name
+  # Join lines with a character or string. Defaults to newline.
+  line_join_string: "Line separator:-\n"
+  # Prefix and suffix lines with strings. Default is no prefix.
+  line_prefix: <line>
+  line_suffix: </line>
+  # Join columns with a character or string. Default '|'
+  column_join_string: "\nValue:""
+  # Prefix and suffix individual columns with strings. Default is no prefix.
+  column_prefix: <col>
+  column_suffix: </col>
+  # Add header and footer text to the result. Default is no text.
+  header_text: "<start>\n"
+  footer_text: "\n</start>"
+  
 view_css:
   classes:
     a_class_name:
