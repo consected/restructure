@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #487 - 2025-04-15
+
+- [Changed] the creation of migration triggers onto history to avoid foreign keys blocking common DBA actions - fixes #394
+- [Added] an actions tab to the external identifier definitions form to tie in record counts and generation actions
+- [Added] ability to reset the estimated record count for dynamic definitions (used by external identifiers initially)
+- [Fixed] external identifier table triggers to update history tables, which were not being created - fixes #393
+
 ### From FPHS - PR #486 - 2025-04-15
 
 - [Fixed] significant delays when opening report definitions - fixes #328
