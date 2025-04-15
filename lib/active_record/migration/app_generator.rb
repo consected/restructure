@@ -321,7 +321,7 @@ module ActiveRecord
       end
 
       def create_external_identifier_trigger(_id_field)
-        return if history_table_exists || model_is_view
+        return unless history_table_exists && !model_is_view
 
         self.fields ||= []
         # self.fields.unshift id_field
