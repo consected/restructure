@@ -2,6 +2,9 @@
 
 class Admin::ReportsController < AdminController
   protected
+  def set_defaults
+    @show_again_on_save = true
+  end
 
   def default_index_order
     { updated_at: :desc }

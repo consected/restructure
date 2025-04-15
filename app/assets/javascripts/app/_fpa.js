@@ -851,6 +851,9 @@ _fpa = {
           h_res.each(function () {
             var d = $(this);
             var di = d.attr('data-result');
+            // Special case: handle the replacement of the element id specified
+            // on this data-result item. Use # to specify the selector fully (other selectors may be used)
+            var rid = d.attr('data-replace-element-id');
             var isform = d.find('form');
             var formcontainer = $(e.currentTarget).parents('[data-form-container]');
 
@@ -862,6 +865,12 @@ _fpa = {
                 );
               var targets = $(t);
               e.stopPropagation();
+            } else if (rid) {
+              // Replace element with id matching [data-replace-id] attribute `rid`
+              var targets = $(rid);
+              // The new element has a matching id in the data result
+              d = d.find(rid);
+              if (targets.length === 0) console.log('WARN: [data-replace-element-id="' + rid + '"] returns no targets');
             } else {
               if (isform.length == 1 && formcontainer.length == 1) {
                 if (formcontainer.attr('data-subscription') == di) var targets = formcontainer;

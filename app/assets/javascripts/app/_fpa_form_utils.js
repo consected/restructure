@@ -889,15 +889,19 @@ _fpa.form_utils = {
 
   setup_bootstrap_items: function (block) {
     if (!block) block = $(document);
-    block.find('[data-toggle~="tooltip"]').not('.attached_bs').tooltip().addClass('attached_bs');
-    block.find('[data-toggle~="popover"]').not('.attached_bs').popover().addClass('attached_bs');
-    block.find('[data-show-popover="auto"]').not('.attached_bs').popover('show').addClass('attached_bs');
-    block.find('.dropdown-toggle').not('.attached_bs').dropdown().addClass('attached_bs');
+    // In long admin indexes, this can be slow. Attempt to take it
+    // out of the usual flow.
+    window.setTimeout(function () {
+      block.find('[data-toggle~="tooltip"]').not('.attached_bs').tooltip().addClass('attached_bs');
+      block.find('[data-toggle~="popover"]').not('.attached_bs').popover().addClass('attached_bs');
+      block.find('[data-show-popover="auto"]').not('.attached_bs').popover('show').addClass('attached_bs');
+      block.find('.dropdown-toggle').not('.attached_bs').dropdown().addClass('attached_bs');
 
-    block.find('table').each(function () {
-      var c = $(this).attr('class');
-      if (c == null || c === '') $(this).addClass('table');
-    });
+      block.find('table').not('.table').each(function () {
+        var c = $(this).attr('class');
+        if (c == null || c === '') $(this).addClass('table');
+      });
+    }, 600);
   },
 
   setup_data_toggles: function (block) {
