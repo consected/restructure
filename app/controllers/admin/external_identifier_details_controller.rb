@@ -64,6 +64,8 @@ class Admin::ExternalIdentifierDetailsController < AdminController
         @external_identifier_items = @external_identifier.implementation_class.generate_ids(current_admin, cc.to_i)
       end
     end
+
+    @external_identifier.reset_estimated_record_count!
   end
 
   protected
