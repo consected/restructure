@@ -7,8 +7,9 @@ _fpa.preprocessors = {
     _fpa.form_utils.on_form_submit(block);
 
     // Mark the block a form was within, to make scrolling more reliable
+    // Allow class force-form-block to be specified to handle specific embedded forms
     if (block.is('form')) {
-      var b = block.parents('.common-template-item, .new-block').not('.no-processed-scroll').first();
+      var b = block.parents('.common-template-item, .new-block, .force-form-block').not('.no-processed-scroll').first();
       if (b.hasClass('new-block')) {
         var cti = b.parents('.common-template-item').first();
         if (cti.length) {
