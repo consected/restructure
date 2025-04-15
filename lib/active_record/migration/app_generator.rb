@@ -20,6 +20,29 @@ module ActiveRecord
                       :class_name, :view_sql_changed
       end
 
+      # 
+      # Define whether history table fields that reference different tables should
+      # have database referential integrity enforced through foreign keys. The fields
+      # themselves will still be created and populated.
+      # This allows history records to still be maintained, even if the DBA has to
+      # remove a primary table's record.
+      # The types of reference from the history table are:
+      #   - master (master_id -> masters.id)
+      #   - parent (<primary table (singular)>_id -> <primary table>.id )
+      #   - user (user_id -> users.id)
+      #   - admin (admin_id -> admin.id - for external identifiers )
+      #
+      # NOTE: For activity logs, the "parent" setting is used to set creation of foreign key to both
+      # the parent activity log table and the "item type" table if one is specified.
+      def add_history_foreign_keys
+        {
+          master: false,
+          parent: false,
+          user: true,
+          admin: true
+        }.freeze
+      end
+
       def force_rollback
         ENV['FORCE_ROLLBACK'] == 'true' && reverting?
       end
@@ -107,7 +130,9 @@ module ActiveRecord
 
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
+            t.belongs_to :master, 
+                          index: { name: "#{rand_id}_master_id_h_idx" }, 
+                          foreign_key: add_history_foreign_keys[:master]
 
             # Views can not be referenced by foreign keys
             if parent_model_is_view
@@ -115,15 +140,19 @@ module ActiveRecord
             else
               t.belongs_to belongs_to_model,
                            index: { name: "#{rand_id}_id_h_idx" },
-                           foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+                           foreign_key: 
+                             add_history_foreign_keys[:parent] && { to_table: belongs_to_model.pluralize.to_s }
             end
             create_fields t, true
             t.string :extra_log_type
-            t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
+            t.references :user, 
+                          index: { name: "#{rand_id}_user_id_h_idx" }, 
+                          foreign_key: add_history_foreign_keys[:user]
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" },
-                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize, 
+                          index: { name: "#{rand_id}_b_id_h_idx" },
+                          foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -210,17 +239,24 @@ module ActiveRecord
           end
 
         end
+
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
             unless no_master_association || fields.include?(:master_id)
-              t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
+              t.belongs_to :master, 
+                            index: { name: "#{rand_id}_history_master_id" }, 
+                            foreign_key: add_history_foreign_keys[:master]
             end
             create_fields t, true
-            t.references :user, index: { name: "#{rand_id}_hist_user_idx" }, foreign_key: true
+            t.belongs_to :user, 
+                          index: { name: "#{rand_id}_hist_user_idx" }, 
+                          foreign_key: add_history_foreign_keys[:user]
+
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" },
-                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize, 
+                          index: { name: "#{rand_id}_id_idx" },
+                          foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -306,14 +342,18 @@ module ActiveRecord
         end
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            t.belongs_to :master, index: { name: "eih#{rand_id}_id_idx" }, foreign_key: true
+            t.belongs_to :master, 
+                          index: { name: "eih#{rand_id}_id_idx" },
+                          foreign_key: add_history_foreign_keys[:master]
+
             create_fields t, true
-            t.references :user, index: true, foreign_key: true
-            t.references :admin, index: true, foreign_key: true
+            t.references :user, index: true, foreign_key: add_history_foreign_keys[:user]
+            t.references :admin, index: true, foreign_key: add_history_foreign_keys[:admin]
             t.timestamps null: false
 
-            t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" },
-                                                            foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to "#{table_name.singularize}_table", 
+                          index: { name: "#{table_name.singularize}_id_idx" },
+                          foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
