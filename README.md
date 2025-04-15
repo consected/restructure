@@ -10,11 +10,13 @@ The philosophy of the application is to provide an application layer on top of a
 
 ## Development and contributing
 
-**ReStructure** was built by Harvard Medical School to support the Football Players Health Study. The research team uses multiple applications built on the **ReStructure** platform (known internally as Athena and Zeus) on a daily basis, to manage highly sensitive study and project processes, personally identifiable information (PII), protected health information (PHI), documents and medical imaging files. Development has been running since 2015.
+**ReStructure** was built by Harvard Medical School to support the _Football Players Health Study_. The research team uses multiple applications built on the **ReStructure** platform (known internally as Athena and Zeus) on a daily basis, to manage highly sensitive study and project processes, personally identifiable information (PII), protected health information (PHI), documents and medical imaging files. Development has been running since 2015.
 
 The platform has been generously open-sourced by Harvard in the hope that other research studies can benefit from a modern end-user focused application. There are no restrictions on who can download, fork or use the project.
 
 The **ReStructure** open-source project is maintained by [Consected](https://www.consected.com), incorporating new features from the Harvard codebase into the project and vice versa.
+
+Other organizations contributing to the project are listed in [Contributors](#contributors).
 
 If you find a bug, please add an issue with details of how to reproduce it. If you find a **security issue**, please add an issue indicating that there is a security issue (but don't share the full details) and also email <admin@consected.com> with a clear subject line that this is a security issue related to the ReStructure project, and full details of the issue.
 
@@ -85,13 +87,27 @@ up relational database tables and maintain a central data dictionary.
 
 The design provides a clear separation between external or static data captured by third-parties, and live data from internal operations that may change and be added routinely. Data transfers can be automated through customization, or directly by uploads through the web interface.
 
+## Documentation and Reference Guides
+
+### Admin Documentation
+
+View the admin documentation directly in the app admin panel, or view the [Admin Guide directly](docs/admin_reference/main/README.md)
+
+### Developer (API) Reference
+
+A separate developer's reference, including API samples, is available in the [Dev Reference](docs/dev_reference/main/README.md)
+
+### User / Guest References
+
+Directly view the the documents targeted at [authenticated users](docs/user_reference/main/README.md) and [guests](docs/guest_reference/main/README.md) (for users not yet authenticated).
+
 ## Technology
 
-The **ReStructure** application is a complete _Ruby on Rails_ 6 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
+The **ReStructure** application is a complete _Ruby on Rails_ 7 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
 
 The database design follows common Rails conventions, with an easily understandable relational database model. As new configurations are made, new database table migrations are generated automatically, allowing rapid development, and clean deployment to production. PostgreSQL is the only supported database.
 
-The default application server is _Passenger_, although _Puma_ is used in development and may be selected for production.
+The default application server is _Puma_, although _Passenger_ has been used in the past and may be selected for production.
 
 _Memcached_ provides caching of performance and to relieve the load on the application server and database. Central or individual app-server caches may be used.
 
@@ -115,7 +131,7 @@ Then set up the database.
     git clone https://github.com/consected/restructure-apps.git
     git clone https://github.com/consected/restructure-docs.git
 
-### Setup the database
+### Set up the database
 
 It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
 To ensure `psql` and all `rails db:schema:dump` works as expected, set the path to Postgres 12 binaries explicitly.
@@ -144,7 +160,7 @@ Seed the database (even if you have populated demo data):
 
     bundle exec rake db:seed
 
-### Setup a simulated Filestore filesystem
+### Set up a simulated Filestore filesystem
 
 File storage in production is typically on an NFS filesystem. In development without NFS we simulate
 a separate filesystem with some internal mounts. Some directories will be created in the user's home directory
@@ -158,7 +174,7 @@ A Fuse filesystem can also be used as external storage rather than
 the home directories, and will be used if there is a Fuse filesystem mounted at `/media/$USER/Data` by skipping
 `app-scripts/setup-init-mounts.sh`
 
-### Setup a new admin user
+### Set up a new admin user
 
 Set up a new admin user:
 
@@ -304,11 +320,11 @@ It is recommended to periodically drop and recreate the test database, since ove
 
 There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out,
 although at least one should run an SMS notification as an integration test, and to allow a comparison against
-CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
+CloudWatch results. Set up your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
 
     export AWS_PROFILE=<profile name in ~/.aws/config>
 
-On well secured AWS accounts, you may have MFA configured. Either setup your credentials file to include the appropriate
+On well secured AWS accounts, you may have MFA configured. Either set up your credentials file to include the appropriate
 `aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
 
 The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
@@ -369,7 +385,7 @@ git push --force
 
 ## Future development themes
 
-Upgrade to Rails 7.
+Upgrade to Rails 8.
 
 The Javascript UI is a custom reactive front end. Near the beginning of development a simple platform was developed, which is tightly bound to the operation of the backend. Although completely functional without changes (except obviously for addition of new features), a long term vision is to replace the UI with Vue.js or React running against the existing API.
 
@@ -400,7 +416,7 @@ and made available as open source under the
 BSD-3 license
 (<https://opensource.org/licenses/BSD-3-Clause>).
 
-Copyright 2020 Harvard University
+Copyright 2025 Harvard University
 
 Redistribution and use in source and binary
 forms, with or without modification, are

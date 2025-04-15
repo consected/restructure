@@ -94,6 +94,9 @@ class ReportsController < UserBaseController
         format.csv do
           send_csv
         end
+        format.text do
+          render_text
+        end
       end
 
       @master_ids = @results.map { |r| r['master_id'] } if @results
@@ -514,6 +517,28 @@ class ReportsController < UserBaseController
     render json: { results: @results,
                    search_attributes: @runner.search_attr_values }
   end
+
+  def render_text
+    pto = @report.report_options.plain_text_options
+    ct = pto.return_content_type || 'text/plain'
+    linejoin = pto.line_join_string || "\n"
+    line_pre = pto.line_prefix || ''
+    line_suf = pto.line_suffix || ''
+    coljoin = pto.column_join_string || "|"
+    col_pre = pto.column_prefix || ''
+    col_suf = pto.column_suffix || ''    
+    ht = pto.header_text || ''
+    ft = pto.footer_text || ''
+    if pto.results_column
+      resa = @results.map {|r| "#{col_pre}#{r[pto.results_column]}#{col_suf}"}
+    else
+      resa = @results.map {|r| r.values.map {|c| "#{col_pre}#{c}#{col_suf}"}.join(coljoin)}
+    end
+    res = resa.map {|s| "#{line_pre}#{s}#{line_suf}"}.join(linejoin)
+    res = "#{ht}#{res}#{ft}"
+    render plain: res, status: 200, content_type: ct
+  end
+
 
   def clean_secure_params
     NotPermittedParams.each do |k|
