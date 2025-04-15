@@ -556,11 +556,19 @@ module Dynamic
       Admin::MigrationGenerator.table_schema_hash[table_name]
     end
 
+    def estimated_record_count_ckey
+      "estimated_record_count--#{self.class.name}-#{id}-#{created_at}-#{updated_at}"
+    end
+
+    def reset_estimated_record_count!
+      Rails.cache.delete(estimated_record_count_ckey)
+    end
+
     #
     # Get an estimated count of records in the table. Cached for 15 minutes
     # @return [Integer]
     def estimated_record_count
-      ckey = "estimated_record_count--#{self.class.name}-#{id}-#{created_at}-#{updated_at}"
+      ckey = estimated_record_count_ckey
       Rails.cache.fetch(ckey, expires_in: 15.minutes) do
         implementation_class.count
       rescue StandardError => e

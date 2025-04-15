@@ -1,0 +1,24 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+    <h4>Status</h4>
+    <p><b>Assigned IDs</b> <span><%=@assigned_count%></span></p>
+    <% if @external_identifier.pregenerate_ids %>
+    <p><b>Unassigned IDs</b> <span><%=@unassigned_count%></span></p>
+    <% end %>
+    <h4>Reports</h4>
+    <p><%=link_to link_label_open_in_new("Search for ID"), report_path(id: @external_identifier.usage_report('Search', ExternalIdentifier::ReportItemSearchType, as_alt_resource_name: true)), target: '_blank' %></p>
+    <p><%=link_to link_label_open_in_new("Assigned IDs"), admin_external_identifier_detail_path(id: @external_identifier.id, do: :report, rep_type: 'Assigned'), target: '_blank' %>
+    <% if @external_identifier.pregenerate_ids %>
+      <p><%=link_to link_label_open_in_new("Unassigned IDs"), admin_external_identifier_detail_path(id: @external_identifier.id, do: :report, rep_type: 'Unassigned'), target: '_blank' %>
+      <h4>Actions</h4>
+      <p><%=link_to link_label_open_in_new("Generate More Unassigned IDs"), new_admin_external_identifier_detail_path(id: @external_identifier.id), target: '_blank' %>
+
+      <p><%=link_to link_label_open_in_new("Generate IDs and assign them to all Master Records without an existing assignment"), new_admin_external_identifier_detail_path(id: @external_identifier.id, all_master_records: true), target: '_blank' %>
+      
+    <% end %>
+    <% unless view_embedded? %>
+    <h4>Configuration</h4>  
+    <p><%=link_to "Configure External Identifier", admin_external_identifiers_path(filter: {name: @external_identifier.name})%></p>
+    <% end %>
+  </div>
+</div>

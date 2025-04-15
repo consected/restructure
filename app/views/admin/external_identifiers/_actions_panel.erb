@@ -1,0 +1,15 @@
+<div id="actions-embedded">
+  <% if object_instance.persisted? && object_instance.enabled?%>
+    <%= link_to "refresh", admin_external_identifier_detail_path(
+                          object_instance.id, 
+                          view_as: 'simple-embedded',
+                          format: 'html'), 
+                          'data-remote': true,
+                          'data-target-force': true,
+                          'data-target': '#embedded-actions-embedded',
+                          class: 'btn btn-primary pull-right'
+                          %>
+  <div class="admin-result-index" id="embedded-actions-embedded">
+  </div>
+  <% end %>
+</div>
