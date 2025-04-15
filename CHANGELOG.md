@@ -14,6 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #486 - 2025-04-15
+
+- [Fixed] significant delays when opening report definitions - fixes #328
+- [Added] embedded report within definition block to simplify report testing
+- [Fixed] updating of a report definition form and the report list below to avoid confusing users or breaking the "updated at" check
+- [Fixed] scrolling issues for report admin forms
+
+### From FPHS - PR #485 - 2025-04-15
+
+- [Added] dynamic model link to CSV table generator - fixes #484
+- [Removed] initializer requiring csv directly - including csv as a gem no longer needs this
+
 ### From FPHS - #PR 481 - 2025-04-14
 
 - [Added] report option for plain text response, with various "markup" options - resolves #480
