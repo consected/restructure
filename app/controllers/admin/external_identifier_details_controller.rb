@@ -10,7 +10,11 @@ class Admin::ExternalIdentifierDetailsController < AdminController
       @external_ids = []
       @assigned_count = ic.assigned.length
       @unassigned_count = ic.unassigned.length
-      render 'admin_handler/index'
+      if view_embedded?
+        render partial: 'admin/external_identifier_details/details'
+      else
+        render 'admin_handler/index'
+      end
     end
 
     if params[:do] == 'report'
