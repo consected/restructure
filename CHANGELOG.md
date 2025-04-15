@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.12.2] - 2025-04-15
+
 ### From FPHS - PR #487 - 2025-04-15
 
 - [Changed] the creation of migration triggers onto history to avoid foreign keys blocking common DBA actions - fixes #394
