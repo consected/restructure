@@ -19,7 +19,7 @@ module OptionConfigs
                                       no_results_scroll show_all_booleans_as_checkboxed
                                       hide_list_labels_for_empty_content
                                       force_show_search_button no_sorting result_handlers add_classes
-                                      prevent_adding_items]
+                                      prevent_adding_items use_plain_attribute_names]
 
     configure :list_options, with: %i[hide_in_list list_description]
     configure :tree_view_options, with: %i[num_levels column_levels expand_level]
