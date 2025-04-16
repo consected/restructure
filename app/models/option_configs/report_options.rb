@@ -27,7 +27,9 @@ module OptionConfigs
                                             line_join_string column_join_string 
                                             line_prefix line_suffix 
                                             column_prefix column_suffix
-                                            header_text footer_text]
+                                            header_text footer_text
+                                            template]
+    configure :json_options, with: %i[show_as template key_column single_result]
     configure :view_css, with: %i[classes selectors media_queries]
     configure :criteria_css, with: %i[classes selectors media_queries]
     configure :master_results_css, with: %i[classes selectors media_queries]

@@ -513,9 +513,31 @@ class ReportsController < UserBaseController
     send_data res_a.join(''), filename: 'report.csv'
   end
 
-  def render_json
-    render json: { results: @results,
-                   search_attributes: @runner.search_attr_values }
+  def render_json(show_as: nil)
+    pto = @report.report_options.json_options
+    show_as ||= pto.show_as || 'results_and_attributes'
+    single_res = pto.single_result
+    template = pto.template
+    key_column = pto.key_column
+
+    show_results = if show_as == 'results_and_attributes'
+                      { 
+                        results: @results,
+                        search_attributes: @runner.search_attr_values 
+                      }
+                    elsif show_as == 'results_only'
+                      @results
+                    elsif show_as == 'row_template'
+                      @results.map do |r|        
+                        Formatter::Substitution.substitute_into_template(template, r.to_h)
+                      end
+                    elsif show_as == 'key_template'
+                      @results.map {|r| [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]}.to_h
+                    end
+
+    show_results = show_results.first if single_res && show_results.is_a?(Array) && show_results.length <= 1
+
+    render json: show_results    
   end
 
   def render_text
@@ -529,10 +551,14 @@ class ReportsController < UserBaseController
     col_suf = pto.column_suffix || ''    
     ht = pto.header_text || ''
     ft = pto.footer_text || ''
-    if pto.results_column
-      resa = @results.map {|r| "#{col_pre}#{r[pto.results_column]}#{col_suf}"}
+    template = pto.template
+
+    resa = if template
+      @results.map {|r| Formatter::Substitution.substitute(template, data: r)}
+    elsif pto.results_column
+      @results.map {|r| "#{col_pre}#{r[pto.results_column]}#{col_suf}"}
     else
-      resa = @results.map {|r| r.values.map {|c| "#{col_pre}#{c}#{col_suf}"}.join(coljoin)}
+      @results.map {|r| r.values.map {|c| "#{col_pre}#{c}#{col_suf}"}.join(coljoin)}
     end
     res = resa.map {|s| "#{line_pre}#{s}#{line_suf}"}.join(linejoin)
     res = "#{ht}#{res}#{ft}"

@@ -193,6 +193,25 @@ module Formatter
       Formatter::Substitution.value_for_tag(tagname, sub_data, ignore_missing: true, original_type: true)
     end
 
+    #
+    # Handle substitution of data into a template hash, array or string
+    def self.substitute_into_template(template, data)        
+      if template.is_a? Hash
+        template.transform_values {|v| substitute_into_template(v, data) }                
+      elsif template.is_a? Array
+        template.map {|r| substitute_into_template(r, data)}
+      elsif template.nil?
+        nil
+      elsif template.include? '{{{'
+        substitute_plain(template, data:)
+      elsif template.include? '{{'
+        substitute(template, data:)
+      else
+        template
+      end
+    end
+
+
     def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
 
