@@ -8,12 +8,12 @@
         <%= form_for(@report, url: url, remote: true, html:{class: "form-formatted"}) do |f| %>
           <%= render partial: 'admin_handler/form_errors' %>
           <%= render partial: 'admin/reports/form/fields', locals: {f: f} %>
-          <%= render partial: 'admin/reports/form/edit_table_block', locals: {f: f} %>
-          <%= render partial: 'admin/reports/form/description_block', locals: {f: f} %>
           <div class="report-admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right" %></div>
           <%= render partial: 'admin/reports/form/sql_block', locals: {f: f} %>
           <div class="report-admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right" %></div>          
+          <%= render partial: 'admin/reports/form/description_block', locals: {f: f} %>
           <%= render partial: 'admin/reports/form/options_block', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/edit_table_block', locals: {f: f} %>
           <div class="report-admin-submit-block">
             <a href="#report-admin-search-attr-add-block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Add Attribute</a>
             <a href="#search_attr_definer_config" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Attribute Configuration</a>
