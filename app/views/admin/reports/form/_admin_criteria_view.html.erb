@@ -18,7 +18,7 @@
     <div class="row report-criteria-fields">
     <% begin %>
       <%= render partial: 'reports/criteria/fields' %>
-      <%= render partial: 'reports/criteria/inline_search_button_block' %>
+      <%#= render partial: 'reports/criteria/inline_search_button_block' %>
 <% 
   rescue => e
 %>
@@ -31,11 +31,19 @@
 <% end 
 end%>      
     </div>
-    <div class="form-group form-actions clearfix" style="border-color: transparent;">
+    <div class="row form-actions" style="border-color: transparent;">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", 'results', id: nil%>
       <%= hidden_field_tag  "embed", true, id: nil%>
-      <%= render partial: 'reports/criteria/search_buttons_block', locals: {embedded_report: false} %>
+      <%= hidden_field_tag  "force_view_as", 'table', id: nil%>
+      
+      <%= button_tag :run,
+          name: 'commit', 
+          value: 'table', 
+          type: 'submit', 
+          class: "btn btn-default", 
+          id: "report-form-submit-btn"
+    %>
     </div>
 
     <%= render partial: 'reports/criteria_view_css' %>
