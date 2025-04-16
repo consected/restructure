@@ -65,6 +65,7 @@ class ReportsController < UserBaseController
     end
 
     set_search_attrs
+    @force_view_as = params[:force_view_as] if current_admin && params[:force_view_as].present?
 
     if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided

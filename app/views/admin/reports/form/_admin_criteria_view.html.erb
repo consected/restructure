@@ -35,6 +35,7 @@ end%>
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", 'results', id: nil%>
       <%= hidden_field_tag  "embed", true, id: nil%>
+      <%= hidden_field_tag  "force_view_as", 'table', id: nil%>
       
       <%= button_tag :run,
           name: 'commit', 
