@@ -1049,11 +1049,6 @@
     webpack-cli "^3.3.12"
     webpack-sources "^1.4.3"
 
-"@types/gensync@^1.0.0":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@types/gensync/-/gensync-1.0.4.tgz#7122d8f0cd3bf437f9725cc95b180197190cf50b"
-  integrity sha512-C3YYeRQWp2fmq9OryX+FoDy8nXS6scQ7dPptD8LnFDAUNcKWJjXQKDNJD3HVm+kOUsXhTOkpi69vI4EuAr95bA==
-
 "@types/glob@^7.1.1":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"
