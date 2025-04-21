@@ -105,6 +105,10 @@ echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
 source ../restructure-build/shared/build-vars.sh
+if [ -z "${RUBY_V}" ]; then
+  RUBY_V="$(cat .ruby-version)"
+fi
+
 if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
   echo "Ruby versions don't match: $(cat .ruby-version) != ${RUBY_V}"
   exit 7
