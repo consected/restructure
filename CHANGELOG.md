@@ -14,7 +14,61 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.12.2] - 2025-04-07
+## [9.13.0] - 2025-04-21
+
+### From FPHS - PR #491 - 2025-04-21
+
+- [Added] links for JSON, text and CSV to admin panel to simplify testing
+- [Added] report admin json_options Added template option to report admin plain_text_options for substitution into each row
+- [Fixed] admin report preview search form to always show a "run" button
+- [Added] report view_options.use_plain_attribute_names to use simple attributes if search_attrs[] is not present
+- [Added] ability for report admin to force view of a table, rather than the configured type in report options
+
+### From FPHS - PR #489 - 2025-04-16
+
+- [Changed] arrangement of report admin page for ease of use when editing SQL
+
+### From FPHS - PR #487 - 2025-04-15
+
+- [Changed] the creation of migration triggers onto history to avoid foreign keys blocking common DBA actions - fixes #394
+- [Added] an actions tab to the external identifier definitions form to tie in record counts and generation actions
+- [Added] ability to reset the estimated record count for dynamic definitions (used by external identifiers initially)
+- [Fixed] external identifier table triggers to update history tables, which were not being created - fixes #393
+
+### From FPHS - PR #486 - 2025-04-15
+
+- [Fixed] significant delays when opening report definitions - fixes #328
+- [Added] embedded report within definition block to simplify report testing
+- [Fixed] updating of a report definition form and the report list below to avoid confusing users or breaking the "updated at" check
+- [Fixed] scrolling issues for report admin forms
+
+### From FPHS - PR #485 - 2025-04-15
+
+- [Added] dynamic model link to CSV table generator - fixes #484
+- [Removed] initializer requiring csv directly - including csv as a gem no longer needs this
+
+### From FPHS - #PR 481 - 2025-04-14
+
+- [Added] report option for plain text response, with various "markup" options - resolves #480
+
+### From FPHS - PR #479 - 2025-04-09
+
+- [Fixed] attempt to require removed do_nothing_logger in production - fixes #478
+
+### From FPHS - PR #477 - 2025-04-09
+
+- [Fixed] specs to get a clean parallel test run - fixes #476
+
+### From FPHS - PR #475 - 2025-04-09
+
+- [Removed] DoNothingLogger implementation and simplified initializer configuration to use a nil logger
+
+### From FPHS - PR #473 - 2025-04-09
+
+NOTE: New Ruby version will require AWS Elastic Beanstalk, test and dev environments to be updated to 3.4.2
+
+- [Updated] Ruby version to 3.4 - fixes #472
+- [Fixed] failing specs associated with new Ruby version
 
 ### From Viva - PR #471 -  2025-04-07
 

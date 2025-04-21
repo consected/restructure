@@ -182,6 +182,7 @@ class DynamicModel < ActiveRecord::Base
     active.select(:category)
           .distinct(:category)
           .unscope(:order)
+          .reload
           .map { |s| s.category || 'default' }
   end
 
