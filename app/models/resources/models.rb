@@ -39,7 +39,7 @@ module Resources
       end
     end
 
-    mattr_accessor :resources
+    mattr_accessor :resources, :updated_at
 
     def self.init
       self.resources ||= {}
@@ -121,12 +121,14 @@ module Resources
                                       category: category&.freeze,
                                       option_type: option_type&.to_sym,
                                       updated_at: updated_at
+      self.updated_at = Time.now                                
       resources[resource_name]
     end
 
     #
     # Remove a resource from the cached set
     def self.remove(resource_name:)
+      self.updated_at = Time.now
       resources.delete(resource_name.to_sym)
     end
 

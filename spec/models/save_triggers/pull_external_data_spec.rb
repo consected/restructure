@@ -206,7 +206,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     @trigger.perform
 
     expect(@al.notes).to be_present
-    expect(@al.notes).to start_with('{"PubmedArticleSet"=>{"PubmedArticle"=>')
+    expect(@al.notes).to start_with('{"PubmedArticleSet" => {"PubmedArticle" =>')
   end
 
   it 'pulls xml from a url and saves to a JSON field' do
@@ -242,7 +242,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     @trigger.perform
 
     expect(@al.notes).to be_present
-    expect(@al.notes).to start_with('{"header"=>{"type"=>')
+    expect(@al.notes).to start_with('{"header" => {"type" =>')
   end
 
   it 'posts query string to a url' do

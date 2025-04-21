@@ -214,10 +214,12 @@ module ReportsHelper
   # Options for select for a "select from model" resource names drop down
   # @return [options_for_select]
   def select_from_model_resource_name_options
-    res = Resources::Models.all.values
-                           .reject { |r| r.option_type }
-                           .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
-                           .uniq
-    options_for_select res
+    Rails.cache.fetch("select_from_model_resource_name_options-#{Resources::Models.updated_at}") do
+      res = Resources::Models.all.values
+                            .reject { |r| r.option_type }
+                            .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+                            .uniq
+      options_for_select res
+    end
   end
 end
