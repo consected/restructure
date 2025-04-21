@@ -42,13 +42,15 @@ if [ -z "${cl_ur}" ]; then
   exit 2
 fi
 
-cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
-if [ "${cl_not_ok}" ]; then
-  echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."
-  exit 2
+if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
+  cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
+  if [ "${cl_not_ok}" ]; then
+    echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."
+    exit 2
+  fi
 fi
 
-head -32 CHANGELOG.md | tail -13
+grep -A 12 '## Unreleased' CHANGELOG.md
 
 echo "Clean up assets before we start"
 # FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber

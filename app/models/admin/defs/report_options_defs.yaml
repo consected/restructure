@@ -109,6 +109,55 @@ tree_view_options:
     -
       - col3
 
+plain_text_options:
+  # If requesting results as plain text using a URL like:
+  #   server.tld/reports/test__test_plain_text?format=text&search_attrs[a]=1
+  # specify how the results are returned.
+  
+  # Content type to return in response
+  return_content_type: text/plain (default), example: text/xml
+  # Return a single column from a multicolumn query. If not set, all columns are returned
+  results_column: column_name
+  # Join columns with a character or string. Default '|'
+  column_join_string: "\nValue:""
+  # Prefix and suffix individual columns with strings. Default is no prefix.
+  column_prefix: <col>
+  column_suffix: </col>
+  # Join lines with a character or string. Defaults to newline.
+  line_join_string: "Line separator:-\n"
+  # Prefix and suffix lines with strings. Default is no prefix.
+  line_prefix: <line>
+  line_suffix: </line>
+  # Add header and footer text to the result. Default is no text.
+  header_text: "<start>\n"
+  footer_text: "\n</start>"
+  # Specify a text template for each row returned with {{substitutions}}.
+  # The header_text, footer_text, line_prefix, line_suffix and line_join_string may still be used, but
+  # the template overrides the use of results_column, column_join_string, column_prefix and column_suffix.
+  template: |
+    - Employee Details:
+        Employee ID: {{employee_id}}
+        Name: {{first_name::titlize}} {{last_name::titlize}}  
+
+json_options:
+  # The format of the results:
+  # - results_and_attributes - (default) returns {results: Array, search_attributes: Hash}
+  # - results_only - returns an array of hash results
+  # - row_template - returns an array, substituting data into a template hash, array or string for each row
+  # - key_template - returns a hash keyed by the *key_column* value, substituting data into a template hash, array or string for each row
+  show_as: results_and_attributes|results_only|row_template|key_template
+  # Return a single row result as a hash rather than array if the result is a single row (or null if no results)
+  # Default is false - to return a single result or zero row result as an array
+  single_result: false|true
+  # Template for the hash, array or string for each row. Use triple curly braces to get numbers without conversion to a string (1 not "1")
+  template:
+      employee:
+        name: '{{first_name::titlize}} {{last_name::titlize}}'
+        id: '{{{employee_id}}}'
+      indicator: '{{user}}-{{res2}}'
+  # The value of the named column to be used in the key_template format
+  key_column: item_code
+
 view_css:
   classes:
     a_class_name:

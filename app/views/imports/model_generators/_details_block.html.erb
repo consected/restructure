@@ -15,8 +15,19 @@
     %>
       <p class="dynamic-item-type mono"><%= @dynamic_model.schema_name %>.<%= @dynamic_model.table_name 
     %>&nbsp;<%= link_to '', rpath, target: '_blank', class: 'glyphicon glyphicon-search' %>
-      </p>
+      </p>      
       <p><%= link_to link_label_open_in_new('import data to table'), nipath %>&nbsp;<%= link_to '', nipath, target: '_blank' %>
+      </p>
+      <label>dynamic model</label>
+      <p>
+      <%
+        if object_instance.dynamic_model_ready?
+          dm = object_instance.dynamic_model
+          dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled } )
+      %>
+        <span>(id: <%=dm.id%>) <%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
+      <% end %>
+
       </p>
       <div class="dynamic-details-fields">
         <label>fields</label>

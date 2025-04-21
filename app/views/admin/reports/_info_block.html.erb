@@ -14,6 +14,17 @@
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="report-def">
       <h4>Defintion</h4>
+      <% if object_instance.persisted? %>
+        <p><%= link_to 'refresh', edit_admin_report_path(object_instance), 
+        data: {
+          remote: true, 
+          target: "##{object_instance.resource_name.hyphenate}--",
+          'result-target': "##{object_instance.resource_name.hyphenate}--",
+          'result-target-force': "true"
+        },
+        class: 'btn btn-primary btn-sm pull-right' %>
+        </p>
+      <% end %>
       <%= render partial: 'def_block'%>
     </div>
     <div role="tabpanel" class="tab-pane" id="data-dicts">
@@ -42,7 +53,7 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="selection-options">
       <h4>General Selections </h4>
-      <%= render partial: 'admin/reference_data/general_selections_block'%>
+      <%= Rails.cache.fetch('info-block-gs-block') { render partial: 'admin/reference_data/general_selections_block'}.html_safe %>
     </div>
     <div role="tabpanel" class="tab-pane" id="flags">
       <h4>Item Flags</h4>
@@ -54,7 +65,7 @@
     </div>
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
     <% if current_admin.can_admin?(:user_access_controls)%>
-      <%= render partial: 'admin/reports/form/uac_panel' %>
+      <%= Rails.cache.fetch('info-block-uac-block') { render partial: 'admin/reports/form/uac_panel' }.html_safe %>
     <% else %>
       <p>Not authorized to administer user access controls</p>
     <% end %>
