@@ -16,6 +16,11 @@ class ReportsController < UserBaseController
   ResultsLimit = Master.results_limit
 
   NotPermittedParams = %i[user_id created_at updated_at tracker_id tracker_history_id admin_id].freeze
+  # "params" used to control forms and not to be used as search attributes
+  ControlParams = %i[get_filter_previous add_to_list update_list remove_from_list id table_name
+                     schema_name table_fields part report_id search_attrs embed no_run csv_blank
+                     view_context commit force_run ids_filter_previous
+                     controller action id format].freeze
 
   attr_accessor :failed
 
@@ -59,6 +64,9 @@ class ReportsController < UserBaseController
       return
     end
 
+    set_search_attrs
+    @force_view_as = params[:force_view_as] if current_admin && params[:force_view_as].present?
+
     if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided
       # and the query should be run
@@ -93,6 +101,9 @@ class ReportsController < UserBaseController
         end
         format.csv do
           send_csv
+        end
+        format.text do
+          render_text
         end
       end
 
@@ -433,6 +444,21 @@ class ReportsController < UserBaseController
   end
 
   #
+  # If the report options view_options.use_plain_attribute_names = true
+  # then we use plain, top level attributes as search attributes.
+  # Push these into the params to allow everything to function normally.
+  def set_search_attrs
+    return unless @report.report_options.view_options.use_plain_attribute_names
+    
+    if params[:search_attrs]
+      Rails.logger.info "search_attrs were received and used overriding view_options.use_plain_attribute_names"
+      return
+    end
+
+    params[:search_attrs] = params.permit!.to_h.except(*ControlParams)
+  end
+
+  #
   # Permit everything, since this is not used for assignment.
   # If the search_attrs param is a string, just return it
   def search_attrs_params_hash
@@ -510,10 +536,58 @@ class ReportsController < UserBaseController
     send_data res_a.join(''), filename: 'report.csv'
   end
 
-  def render_json
-    render json: { results: @results,
-                   search_attributes: @runner.search_attr_values }
+  def render_json(show_as: nil)
+    pto = @report.report_options.json_options
+    show_as ||= pto.show_as || 'results_and_attributes'
+    single_res = pto.single_result
+    template = pto.template
+    key_column = pto.key_column
+
+    show_results = if show_as == 'results_and_attributes'
+                      { 
+                        results: @results,
+                        search_attributes: @runner.search_attr_values 
+                      }
+                    elsif show_as == 'results_only'
+                      @results
+                    elsif show_as == 'row_template'
+                      @results.map do |r|        
+                        Formatter::Substitution.substitute_into_template(template, r.to_h)
+                      end
+                    elsif show_as == 'key_template'
+                      @results.map {|r| [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]}.to_h
+                    end
+
+    show_results = show_results.first if single_res && show_results.is_a?(Array) && show_results.length <= 1
+
+    render json: show_results    
   end
+
+  def render_text
+    pto = @report.report_options.plain_text_options
+    ct = pto.return_content_type || 'text/plain'
+    linejoin = pto.line_join_string || "\n"
+    line_pre = pto.line_prefix || ''
+    line_suf = pto.line_suffix || ''
+    coljoin = pto.column_join_string || "|"
+    col_pre = pto.column_prefix || ''
+    col_suf = pto.column_suffix || ''    
+    ht = pto.header_text || ''
+    ft = pto.footer_text || ''
+    template = pto.template
+
+    resa = if template
+      @results.map {|r| Formatter::Substitution.substitute(template, data: r)}
+    elsif pto.results_column
+      @results.map {|r| "#{col_pre}#{r[pto.results_column]}#{col_suf}"}
+    else
+      @results.map {|r| r.values.map {|c| "#{col_pre}#{c}#{col_suf}"}.join(coljoin)}
+    end
+    res = resa.map {|s| "#{line_pre}#{s}#{line_suf}"}.join(linejoin)
+    res = "#{ht}#{res}#{ft}"
+    render plain: res, status: 200, content_type: ct
+  end
+
 
   def clean_secure_params
     NotPermittedParams.each do |k|

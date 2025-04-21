@@ -12,7 +12,10 @@ _fpa_admin.reports.admin_edit_form = class {
 
     // Set up codemirror text editors
     _fpa.form_utils.setup_textarea_editor(block)
-    aef.setup_search_attr_config()
+    // Run at next step to avoid UI lock ups
+    window.setTimeout(function () {
+      aef.setup_search_attr_config();
+    })
   }
 
   // Handle templates for the report admin page.

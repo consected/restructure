@@ -18,7 +18,7 @@ describe 'no logging in production' do
   it 'should not log if the environment variable is not set' do
     ENV['FPHS_USE_LOGGER'] = nil
     old_logger = Rails.logger
-    Rails.logger = DoNothingLogger.new
+    Rails.logger = Logger.new(nil)
 
     d = DateTime.now
     s = "This is a test of the logger being disabled at #{d}"

@@ -33,6 +33,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     end
 
     expect(DynamicModel::Adder.definition.category).to eq 'extended-info'
+    pls = Admin::PageLayout
+      .active
+      .where(app_type_id: [nil, app.id], layout_name: 'master')
+    expect(pls).to be_empty
 
     # By default the app limits access to only those masters that have a BHS assignment
     # already made in another app.
@@ -65,6 +69,11 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
 
     b = m.bhs_assignments.build(bhs_id: bmax + 1)
     b.save!
+
+    dmcats = DynamicModel.categories - ['details']
+    if dmcats.length > 1
+      DynamicModel.active.where.not(category: 'extended-info').update_all(disabled: true)
+    end    
   end
 
   def as_user(role)
@@ -125,6 +134,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     as_user @ra
 
     expect(DynamicModel::Adder.definition.category).to eq 'extended-info'
+    dmcats = DynamicModel.categories - ['details']
+    l = dmcats.uniq.length
+    puts dmcats
+    expect(l).to eq 1
 
     search_player ''
 

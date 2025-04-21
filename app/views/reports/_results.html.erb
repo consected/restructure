@@ -36,10 +36,13 @@
       <% end %>
       <div class="report-results-inner">
         <%
-          render_as = @report.report_options.view_options.view_as || 'table'
+          render_as = @force_view_as || @report.report_options.view_options.view_as || 'table'
           render_as = render_as.gsub(/[^a-z_]/, '')
+          filename = "_#{render_as}.html.erb"
+          loc = Rails.root.join('app', 'views', 'reports', 'result_template', filename)
+          raise FphsException, "Bad report view_as option: #{render_as}" unless File.exist?(loc)
         %>
-        <%= render partial: "reports/result_template/#{render_as}", locals: {result_tables: result_tables} %>
+        <%= render partial: "reports/result_template/#{render_as}", locals: {result_tables: result_tables} %>        
       </div>
     </div>
   </div>

@@ -1,4 +1,3 @@
-require File.expand_path('../../lib/logger/do_nothing_logger.rb', __dir__)
 require 'active_support/core_ext/integer/time'
 
 Rails.application.configure do
@@ -106,7 +105,7 @@ Rails.application.configure do
     config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new('restructure-app'))
   when 'DoNothing'
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
-    config.logger = DoNothingLogger.new
+    config.logger = nil
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :fatal

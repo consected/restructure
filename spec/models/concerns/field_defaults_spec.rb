@@ -30,7 +30,7 @@ RSpec.describe FieldDefaults, type: :model do
 
     val = '{{data_val}}'
     res = FieldDefaults.calculate_default(data, val)
-    exp = '{"a"=>3, "b"=>2}'
+    exp = '{"a" => 3, "b" => 2}'
     expect(res).to eq exp
 
     val = '{{{data_val}}}'
