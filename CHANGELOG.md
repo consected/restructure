@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.13.0] - 2025-04-21
+
 ### From FPHS - PR #491 - 2025-04-21
 
 - [Added] links for JSON, text and CSV to admin panel to simplify testing
