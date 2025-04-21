@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.12.3] - 2025-04-21
+
 ### From FPHS - PR #489 - 2025-04-16
 
 - [Changed] arrangement of report admin page for ease of use when editing SQL
