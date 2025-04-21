@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #491 - 2025-04-21
+
+- [Added] links for JSON, text and CSV to admin panel to simplify testing
+- [Added] report admin json_options Added template option to report admin plain_text_options for substitution into each row
+- [Fixed] admin report preview search form to always show a "run" button
+- [Added] report view_options.use_plain_attribute_names to use simple attributes if search_attrs[] is not present
+- [Added] ability for report admin to force view of a table, rather than the configured type in report options
+
 ### From FPHS - PR #489 - 2025-04-16
 
 - [Changed] arrangement of report admin page for ease of use when editing SQL
