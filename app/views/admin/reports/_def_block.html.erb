@@ -4,8 +4,12 @@
     <%= @report.alt_resource_name %>
   </p>
   <label>path to report</label>
-  <p class="report-item-type">
+  <p class="report-item-paths">
     <%=link_to report_path(@report.alt_resource_name), report_path(@report.alt_resource_name), target: '_blank', class: 'report-admin-report-path-link' %>
+  
+    <%=link_to 'JSON', report_path(@report.alt_resource_name, format: 'json', search_attrs: { _report_id_: nil } ), target: '_blank', class: 'report-admin-report-path-link' %>
+    <%=link_to 'CSV', report_path(@report.alt_resource_name, format: 'csv', search_attrs: { _report_id_: nil }), target: '_blank', class: 'report-admin-report-path-link' %>
+    <%=link_to 'Text', report_path(@report.alt_resource_name, format: 'text', search_attrs: { _report_id_: nil }), target: '_blank', class: 'report-admin-report-path-link' %>
   </p>
   <label>options</label>
   <p class="report-item-options-test">
