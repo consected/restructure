@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Changed] selection of RUBY_V to use the source code version
+
 ## [9.13.0] - 2025-04-21
 
 ### From FPHS - PR #491 - 2025-04-21
