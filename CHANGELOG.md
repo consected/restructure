@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly
+
 ## [9.13.1] - 2025-04-21
 
 - [Changed] selection of RUBY_V to use the source code version
