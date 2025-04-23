@@ -33,7 +33,9 @@ class Application
 
     return 'unexpected error' unless record
 
-    record.errors.each do |r, v|
+    record.errors.each do |e|
+      r = e.attribute
+      v = e.message
       res << if v
                "#{r} #{v}"
              else
