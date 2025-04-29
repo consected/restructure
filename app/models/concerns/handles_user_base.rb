@@ -920,9 +920,7 @@ module HandlesUserBase
   def valid_embedded_item
     return unless embedded_item && !embedded_item.errors.empty?
 
-    embedded_item.errors.each do |k, v|
-      errors.add k, v
-    end
+    errors.merge!(embedded_item.errors)
   end
 
   #
