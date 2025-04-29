@@ -27,7 +27,7 @@ module Formatter
 
     # Set the methods from certain resources that should be accessible for substitution
     # as if they were real attributes
-    ValidMethodsAsAttributes = { player_infos: %i[subject_age rank_name] }
+    ValidMethodsAsAttributes = { player_infos: %i[subject_age rank_name] }.freeze
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
                             definition_resource_name definition_item_type_name].freeze
@@ -98,7 +98,7 @@ module Formatter
         op = is_block[2]
         exp = is_block[3]
         comp = eval_is_comp(op, tag_value, exp, sub_data, is_block:)
-        start_pos = 0
+
         # Handle {{is}}
         sub_text = is_block[4] || '' if comp
 
@@ -138,7 +138,7 @@ module Formatter
           tag_value = value_for_tag(tag, sub_data, tag_subs:, ignore_missing:)
         rescue FphsException => e
           all_content.gsub!(tag_container, "{{FAILED: #{tag}}}")
-          Rails.logger.warn "Failed to get tag for simple substitution: #{tag}\n#{all_content}"
+          Rails.logger.warn "Failed to get tag for simple substitution: #{tag}\n#{all_content}\n#{e}"
           raise
         end
 
@@ -149,7 +149,8 @@ module Formatter
       # Unless we have requested to show missing tags, check for {{tag}} left in the text,
       # indicating something was not replaced
       if ignore_missing != :show_tag && ignore_missing != true && all_content.scan(/{{.*}}/).present?
-        Rails.logger.warn "Not all the tags were replaced. This suggests there was an error in the markup. #{all_content.scan(/{{.*}}/)}"
+        Rails.logger.warn 'Not all the tags were replaced. This suggests there was an error in the markup. ' \
+                          "#{all_content.scan(/{{.*}}/)}"
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
@@ -195,11 +196,11 @@ module Formatter
 
     #
     # Handle substitution of data into a template hash, array or string
-    def self.substitute_into_template(template, data)        
+    def self.substitute_into_template(template, data)
       if template.is_a? Hash
-        template.transform_values {|v| substitute_into_template(v, data) }                
+        template.transform_values { |v| substitute_into_template(v, data) }
       elsif template.is_a? Array
-        template.map {|r| substitute_into_template(r, data)}
+        template.map { |r| substitute_into_template(r, data) }
       elsif template.nil?
         nil
       elsif template.include? '{{{'
@@ -210,7 +211,6 @@ module Formatter
         template
       end
     end
-
 
     def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
@@ -767,7 +767,7 @@ module Formatter
       nil
     end
 
-    def self.eval_is_comp(op, tag_value, exp, sub_data, is_block: nil)
+    def self.eval_is_comp(operator, tag_value, exp, sub_data, is_block: nil)
       if exp
         exp = if exp.length > 1 && exp.first.match(/#{StartQuote}/) && exp.last.match(/#{EndQuote}/)
                 exp[1..-2]
@@ -777,7 +777,8 @@ module Formatter
                 nil
               elsif exp.blank?
                 raise FphsException,
-                      "Can't eval expected value when it is blank (with no surrounding quotes): #{is_block && is_block[0]}"
+                      "Can't eval expected value when it is blank (with no surrounding quotes): " \
+                      "#{is_block && is_block[0]}"
               else
                 value_for_tag(exp, sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
               end
@@ -791,9 +792,23 @@ module Formatter
         end
       end
 
-      no_operator = nil
+      res, no_operator = compare_string_or_list(operator, tag_value, exp)
 
-      res = case op
+      return res unless no_operator
+
+      if no_operator && !tag_value.is_a?(Integer)
+        raise FphsException,
+              "Unknown comparison operator for {{\#is}}: #{operator}"
+      end
+
+      res, no_operator = compare_number(operator, tag_value, exp)
+      raise FphsException, "Unknown comparison operator for integer {{\#is}}: #{operator}" if no_operator
+
+      res
+    end
+
+    def self.compare_string_or_list(operator, tag_value, exp)
+      res = case operator
             when '==='
               tag_value.blank? && exp.blank? || tag_value == exp
             when '!=='
@@ -807,23 +822,27 @@ module Formatter
             when '!in'
               !tag_value.in?(exp)
             when 'includes'
-              tag_value.include?(exp)
+              if tag_value.is_a?(String)
+                tag_value.match(/#{exp}/)
+              else
+                tag_value.include?(exp)
+              end
             when '!includes'
-              !tag_value.include?(exp)
+              if tag_value.is_a?(String)
+                !tag_value.match(/#{exp}/)
+              else
+                !tag_value.include?(exp)
+              end
             else
               no_operator = true unless tag_value.blank? || exp.nil?
               nil
             end
 
-      return res unless no_operator
+      [res, no_operator]
+    end
 
-      if no_operator && !tag_value.is_a?(Integer) 
-        raise FphsException, "Unknown comparison operator for {{\#is}}: #{op}" 
-      end
-
-      no_operator = nil
-
-      res = case op
+    def self.compare_number(operator, tag_value, exp)
+      res = case operator
             when '>='
               tag_value >= exp
             when '<='
@@ -844,9 +863,7 @@ module Formatter
               no_operator = true
               nil
             end
-      raise FphsException, "Unknown comparison operator for integer {{\#is}}: #{op}" if no_operator
-
-      res
+      [res, no_operator]
     end
   end
 end

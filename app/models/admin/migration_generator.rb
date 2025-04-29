@@ -11,7 +11,7 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name, :dynamic_def, :app_type_name, :view_sql_changed
+                :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
@@ -21,7 +21,8 @@ class Admin::MigrationGenerator
                  view_sql_changed: nil,
                  allow_migrations: nil,
                  all_referenced_tables: nil,
-                 dynamic_def: nil)
+                 dynamic_def: nil,
+                 no_user_id: nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
     self.class_name = class_name
@@ -30,6 +31,7 @@ class Admin::MigrationGenerator
     self.all_implementation_fields = all_implementation_fields
     self.table_comments = table_comments
     self.no_master_association = no_master_association
+    self.no_user_id = no_user_id
     self.belongs_to_model = belongs_to_model
     self.db_configs = db_configs
     self.view_sql = view_sql
@@ -286,8 +288,10 @@ class Admin::MigrationGenerator
   # duplicating standard app columns for current table_name
   # @return [Array]
   def standard_columns
-    pset = %w[id created_at updated_at contactid user_id
+    pset = %w[id created_at updated_at contactid
               extra_log_type admin_id]
+
+    pset << 'user_id' unless no_user_id
 
     # Only add in the master_id if the master is a foreign key, not a standard integer field
     # so that we treat the field correctly in comparisons of new - old
@@ -575,10 +579,8 @@ class Admin::MigrationGenerator
 
     dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_#{version}"
-    
-    if cname_us != cname_us.id_underscore
-      raise FphsException, "Error in naming of migration #{cname_us}"
-    end
+
+    raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
 
     # Ensure we don't get overlapping migration version numbers
     migtime = Time.new.to_fs(:number)
