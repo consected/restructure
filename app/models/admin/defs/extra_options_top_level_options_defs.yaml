@@ -75,6 +75,8 @@ _configurations:
     #
     # Another common use case might be to have the *Foreign key name* set to "redcap_survey_identifier" and the
     # *foreign_key_through_external_id:* configuration would specify the external identifier type to use to lookup the associated master.
+  no_user_id: true|false (default)
+    # The table should be created without a user_id field or foreign key onto `users.id` and association to the User model.
 
 # To add a table or view to the data dictionary, add the _data_dictionary: with
 # the essential keys, study: and domain:, plus any others that are required.
