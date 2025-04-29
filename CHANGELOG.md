@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.13.3] - 2025-04-29
+
 ### From Viva - PR #498 - 2025-04-29
 
 - [Added] ability for dynamic models to use tables without user_id field for updates and creates - fixes #496
