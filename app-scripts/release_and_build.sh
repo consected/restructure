@@ -121,24 +121,26 @@ if [ "${RELEASESTARTED}" ]; then
 fi
 
 if [ -z "${SKIP_BRAKEMAN}" ]; then
+  tmpfile=$(mktemp /tmp/fphs-brakeman-summary.txt.XXXXXX)
   echo "Checking brakeman and bundle-audit before we go through the whole process"
-  bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
+  bin/brakeman -q --summary > ${tmpfile}
   if [ "$?" == 0 ]; then
     echo "Brakeman OK"
   else
-    cat /tmp/fphs-brakeman-summary.txt
-    echo "Brakeman Failed"
+    cat ${tmpfile}
+    echo "Brakeman Failed - see ${tmpfile}"
     exit 1
   fi
 
+  tmpfile=$(mktemp /tmp/bundle-audit-output.md.XXXXXX)
   bundle exec bundle-audit update 2>&1
-  bundle exec bundle-audit check 2>&1 > /tmp/bundle-audit-output.md
+  bundle exec bundle-audit check 2>&1 > ${tmpfile}
   RES=$?
   if [ "${RES}" == 0 ]; then
     echo "bundle-audit OK"
   else
-    echo "bundle-audit Failed: ${RES}"
-    cat /tmp/bundle-audit-output.md
+    cat ${tmpfile}
+    echo "bundle-audit Failed: ${RES} - see ${tmpfile}"
     exit 1
   fi
 fi
