@@ -14,6 +14,21 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #499 - 2025-04-29
+
+- [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly - fixes #494
+
+### From Viva - PR #498 - 2025-04-29
+
+- [Added] ability for dynamic models to use tables without user_id field for updates and creates - fixes #496
+
+### From Viva - PR #497 - 2025-04-29
+
+- [Added] open_panels calculation for masters based on substitutions
+- [Added] documentation of app configurations
+- [Added] markup to show empty results - to assist in styling
+- [Fixed] handlebars helper for includes and server substitutions to match
+
 ### From Viva - PR #493 - 2025-04-21
 
 - [Changed] selection of RUBY_V to use the source code version
