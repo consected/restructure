@@ -11,6 +11,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include BulkMsgSupport
   include DynamicModelSupport
   include TestNoMasterDmRecSupport
+  include TestNoUserIdDmRecSupport
 
   describe 'dynamic models with foreign key as master_id' do
     before :all do
@@ -273,6 +274,41 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       expect(rec.master).not_to be nil
       expect(rec.master_id).to eq @sts[1].master_id
+    end
+  end
+
+  describe 'no user_id' do
+    before :example do
+      # Seeds.setup
+
+      @user0, = create_user
+      create_admin
+      create_user
+      setup_access :trackers
+      # setup_access :tracker_history
+      @dm = setup_test_no_user_id_field_on_table
+
+      expect(@dm.implementation_class).to eq DynamicModel::NoUserIdTableRec
+
+      expect(DynamicModel::NoUserIdTableRec.attribute_names).not_to include 'user_id'
+    end
+
+    it 'can update a table without a user_id field' do
+      res = DynamicModel::NoUserIdTableRec.create!(data: 'hello!', info: 'has no user_id', current_user: @user)
+
+      res.update!(data: 'hi!', current_user: @user)
+    end
+
+    it 'can update a table without a user_id field' do
+      expect do
+        DynamicModel::NoUserIdTableRec.create!(data: 'hello!', info: 'has no user_id')
+      end.to raise_error(FphsException, 'no current_user in allows_current_user_access_to? (no master? true)')
+
+      res = DynamicModel::NoUserIdTableRec.create!(data: 'hello!', info: 'has no user_id', current_user: @user)
+      res = DynamicModel::NoUserIdTableRec.find(res.id)
+      expect do
+        res.update!(data: 'hi!')
+      end.to raise_error(FphsException, 'no current_user in allows_current_user_access_to? (no master? true)')
     end
   end
 end
