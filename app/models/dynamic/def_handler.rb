@@ -529,6 +529,10 @@ module Dynamic
       defined?(foreign_key_name) && foreign_key_name.blank?
     end
 
+    def implementation_no_user_id
+      configurations && configurations[:no_user_id]
+    end
+
     def prefix_class
       klass = Object
       klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
