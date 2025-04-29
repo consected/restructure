@@ -8,13 +8,13 @@
       <a href="/masters/{{id}}/trackers" data-panel-tab="tracker" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker collapsed">tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
     </li>
     <% end %>
-    <li role="presentation" class="<%= (default_panels.length == 0 ||  'details'.in?(default_panels)) ? 'on-open-click' : '' %>">
+    <li role="presentation" class="<%= (default_panels.length == 0) ? 'on-open-click' : class_for_open_panels('details', default_panels.length) %>">
       <a href="#/" data-panel-tab="details" data-toggle="collapse" data-target="#details-{{id}}" class="collapsed scroll-to-expanded ">details</a>
     </li>
     <%
     if viewable_external_ids.length > 0
     %>
-    <li role="presentation" class="<%= 'external_ids'.in?(default_panels) ? 'on-open-click' : '' %>">
+    <li role="presentation" class="<%= class_for_open_panels('external_ids', default_panels.length) %>">
       <a href="#/" data-panel-tab="external_ids" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded ">external ids</a>
     </li>
     <% end %>
@@ -40,7 +40,7 @@
     <%end%>
     <% (@dyn_cat_no_details).each do |cat| %>
       <% if DynamicModel.active_model_configurations.where(category: cat).all.select {|d| true_master_viewables.include? d.model_association_name }.length  > 0 %>
-    <li role="presentation" class="<%= cat.underscore.in?(default_panels) ? 'on-open-click' : '' %>">
+    <li role="presentation" class="<%= class_for_open_panels(cat.underscore, default_panels.length) %>">
       <a href="#/" data-toggle="collapse" data-panel-tab="<%=cat.underscore%>" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><%= cat.underscore.humanize.downcase %></a>
     </li>
       <% end %>
@@ -51,17 +51,21 @@
     <% end %>
 
     <% if current_user && current_user.can?(:view_external_links) %>
-    <li role="presentation" class="<%= 'external_links'.in?(default_panels) ? 'on-open-click' : '' %>">
+    <li role="presentation" class="<%= class_for_open_panels('external_links', default_panels.length) %>">
       <a href="#/"  data-panel-tab="view_external_links" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded ">web links</a>
     </li>
     <% end %>
 
-    <% ActivityLog.active.each do |a| %>
+    <% ActivityLog.active.each do |a| 
+         al_panel_name = "activity_log__#{a.item_type_name.pluralize}"
+    %>
       <% if master_viewables[a.full_item_types_name.to_sym]
-        initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name) || a.item_type_name.in?(default_panels)
+        # NOTE: show_activity_log_panel option appears to not be presented in the admin UI and is likely to be unused
+        # DO NOT use in the future
+        initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name)
       %>
-      <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"><%= a.name.downcase %></a>
+      <li role="presentation" class="<%= initial_show ? 'on-open-click' : class_for_open_panels(al_panel_name, default_panels.length) %>">
+        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="<%=al_panel_name%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"><%= a.name.downcase %></a>
       </li>
       <% end %>
     <% end %>

@@ -60,10 +60,18 @@ app home url: |
 hide master heading: |
   Hide the master heading, including id, prefix and title
 master header prefix: |
-  Prefix to display on the master header. May include curly `{{substitutions}}`
+  Prefix to display on the master header. May include curly `\{\{substitutions}}`
 master header title: |
   Alternative text  appear instead of participant info names on the master header. 
-  May include curly `\{\{substitutions}}`
+  May include curly `\{\{substitutions}}`. For example:
+
+  ```
+  ## \{\{activity_log__project_assignments.last.title}}
+
+  ### Investigator: 
+  \{\{#if dynamic_model__project_imports.investigator_name}}**\{\{dynamic_model__project_imports.investigator_name::strip}}**\{\{else}}**\{\{activity_log__project_assignments.last.created_by_user.first_name::strip}} \{\{activity_log__project_assignments.last.created_by_user.last_name::strip}}** (\{\{activity_log__project_assignments.last.created_by_user_email}})\{\{/if}}
+  ```
+
 master results panel css class: |
   Space separated list of additional classes to add to the results-panel
 menu research label: |
@@ -80,10 +88,18 @@ no search in master record: |
   Do not show search tabs or a search panel when link followed to a single master record
 open panels: |
   List of panels to open automatically when the master record is displayed. 
-  Comma separated list of default panel names or resource names for 
-  activity logs matching the Page Layout panels.
+  Newline (or comma) separated list of default panel names or resource names for 
+  categories and activity logs matching the Page Layout panels.
   Default panels are: trackers (the regular trackers panel), details (the participant name / contact panel), 
-  external_ids (all available external identifiers), external_links (master record links to websites)
+  external_ids (all available external identifiers), external_links (master record links to websites.)
+  For newline separated items, conditions may be specified with `\{\{#if}}` and `\{\{#is}}` substitutions. For example:
+
+      \{\{#is activity_log__project_assignments.last.status '===' "analysis plan approved"}}activity_log__data_request_assignments
+      \{\{else is activity_log__project_assignments.last.status '!==' "analysis plan proposal submitted"}}activity_log__project_assignments
+      \{\{/is}}
+
+  NOTE: this option will override a master panel's `view_options.initial_show` in page layouts 
+  if they have value nil, true or false
 prevent reload master list: |
   If the user refreshes a page showing master records from a search, the list of previous master records 
   will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value
