@@ -14,7 +14,38 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.12.3] - 2025-04-21
+### From Viva - PR #501 - 2025-04-29
+
+- [Fixed] brakeman and bunder-audit to write output to created temp files - fixes #500
+
+### From Viva - PR #499 - 2025-04-29
+
+- [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly - fixes #494
+
+### From Viva - PR #498 - 2025-04-29
+
+- [Added] ability for dynamic models to use tables without user_id field for updates and creates - fixes #496
+
+### From Viva - PR #497 - 2025-04-29
+
+- [Added] open_panels calculation for masters based on substitutions
+- [Added] documentation of app configurations
+- [Added] markup to show empty results - to assist in styling
+- [Fixed] handlebars helper for includes and server substitutions to match
+
+### From Viva - PR #493 - 2025-04-21
+
+- [Changed] selection of RUBY_V to use the source code version
+
+## [9.13.0] - 2025-04-21
+
+### From FPHS - PR #491 - 2025-04-21
+
+- [Added] links for JSON, text and CSV to admin panel to simplify testing
+- [Added] report admin json_options Added template option to report admin plain_text_options for substitution into each row
+- [Fixed] admin report preview search form to always show a "run" button
+- [Added] report view_options.use_plain_attribute_names to use simple attributes if search_attrs[] is not present
+- [Added] ability for report admin to force view of a table, rather than the configured type in report options
 
 ### From FPHS - PR #489 - 2025-04-16
 

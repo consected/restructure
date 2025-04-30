@@ -221,6 +221,11 @@ _fpa = {
         block.html('');
       }
 
+      if (data.multiple_results) {
+        data.results_count = data[data.multiple_results].length
+        block.attr('data-multiple-results-count', data.results_count)
+      }
+
       _fpa.prepare_template(block, template_name, data, options);
       _fpa.do_preprocessors(template_name, block, data, alt_preprocessor);
       _fpa.prepare_template_configs(data).then(function () {
