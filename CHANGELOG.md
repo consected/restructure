@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #501 - 2025-04-29
+
+- [Fixed] brakeman and bunder-audit to write output to created temp files - fixes #500
+
 ### From Viva - PR #499 - 2025-04-29
 
 - [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly - fixes #494
