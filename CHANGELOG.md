@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.13.1] - 2025-04-30
+
 ### From Viva - PR #501 - 2025-04-29
 
 - [Fixed] brakeman and bunder-audit to write output to created temp files - fixes #500
