@@ -87,7 +87,8 @@ module NfsStore
       def self.create_in_current_app(user: nil, name: nil, extra_params: {})
         app_type_id = user&.app_type_id
         unless app_type_id && user && name.present?
-          FsException::Action.new "Cannot create a container with app_type: #{app_type_id}, user: #{user&.id}, name: #{name}"
+          raise FsException::Action.new 'Cannot create a container with app_type: ' \
+                                        "#{app_type_id}, user: #{user&.id}, name: #{name}, extras: #{extra_params}"
         end
 
         create! extra_params.merge(app_type_id:, name:, current_user: user)
@@ -253,7 +254,6 @@ module NfsStore
       def can_download_or_view?
         return @can_download_or_view unless @can_download_or_view.nil?
 
-        cu = current_user
         @can_download_or_view = can_download? || can_view?
       end
 
