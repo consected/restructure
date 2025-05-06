@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.14.1] - 2025-05-06
+
 ### From FPHS - PR #503 - 2025-05-05
 
 - [Fixed] raising of exception if attempting to create a filestore container with incomplete information - fixes #502
