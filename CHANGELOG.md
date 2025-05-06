@@ -14,7 +14,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.13.4] - 2025-04-29
+### From FPHS - PR #503 - 2025-05-05
+
+- [Fixed] raising of exception if attempting to create a filestore container with incomplete information - fixes #502
+
+### From Viva - PR #501 - 2025-04-29
+
+- [Fixed] brakeman and bunder-audit to write output to created temp files - fixes #500
+
+### From Viva - PR #499 - 2025-04-29
 
 ## [9.13.3] - 2025-04-29
 
