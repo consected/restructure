@@ -32,7 +32,10 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
 
   def perform
     le = lookup_existing&.first if skip_if_exists
-    return le if le
+    if le
+      Rails.logger.info 'create_filestore_container exists: skipping'
+      return le
+    end
 
     container = NfsStore::Manage::Container.create_in_current_app user: item.master_user,
                                                                   name: name,

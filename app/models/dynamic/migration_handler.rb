@@ -174,7 +174,7 @@ module Dynamic
         Rails.logger.warn "#{self.class.human_name} migration doesn't specify a schema_name and there is no matching user " \
                           "for the current admin '#{current_admin.email}' or no app type is set '#{current_user_app_type}'"
       end
-      
+
       dsn = current_user_app_type&.default_schema_name
       return dsn if dsn.present?
 
@@ -226,6 +226,7 @@ module Dynamic
           all_implementation_fields: all_implementation_fields(ignore_errors: false),
           table_comments:,
           no_master_association: implementation_no_master_association,
+          no_user_id: implementation_no_user_id,
           prev_table_name: table_name_before_last_save,
           belongs_to_model: btm,
           db_configs: db_columns,

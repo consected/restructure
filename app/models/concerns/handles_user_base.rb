@@ -674,6 +674,10 @@ module HandlesUserBase
       (self.class.no_master_association && !respond_to?(:current_user))
   end
 
+  def no_user_id
+    !respond_to?(:user_id)
+  end
+
   #
   # Return true if there is no master association, or if the master is optional
   # i.e. this is an external identifier that has not yet been assigned to a participant
@@ -687,11 +691,13 @@ module HandlesUserBase
   # accidental changes. This method allows the model to write the user_id based on the
   # current user for the master that this object belongs to.
   def force_write_user
-    return true if no_user_validation
+    return true if no_user_validation || no_user_id
 
     # Special handling for editable reports and dynamic models with no_master_association or
     # external identifiers that have not been assigned a master.
     if respond_to?(:user_id) && respond_to?(:current_user) && allow_no_master_and_not_set?
+      raise FphsException, 'current_user must be set' unless current_user
+
       return write_attribute :user_id, current_user.id
     end
 
@@ -742,7 +748,7 @@ module HandlesUserBase
 
   # A validation method for if the user has been set
   def user_set
-    return true if no_user_validation
+    return true if no_user_validation || no_user_id
 
     unless user
       errors.add :user, 'must be authenticated and set'
@@ -914,9 +920,7 @@ module HandlesUserBase
   def valid_embedded_item
     return unless embedded_item && !embedded_item.errors.empty?
 
-    embedded_item.errors.each do |k, v|
-      errors.add k, v
-    end
+    errors.merge!(embedded_item.errors)
   end
 
   #
