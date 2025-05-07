@@ -14,6 +14,24 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #505 - 2025-05-07
+
+- [Added] script to call setup_filestore_app.sh based on the nfs container status file created during appserver startup
+- [Changed] setup of filestore app directories to be idempotent
+- [Changed] script to restart app server to avoid unnecessary error messages on non-EC2 servers
+- [Added] a file to indicate if filestore app type containers need to be created
+
+
+### From FPHS - PR #504 - 2025-05-07
+
+- [Changed] reporting of new / changed app type import items if only updated_at and admin_id fields have changed - fixes #371
+- [Changed] naming of activity log history trigger naming to avoid truncation 
+- [Changed] reverse migration drops to avoid failures
+
+### From FPHS - PR #503 - 2025-05-05
+
+- [Fixed] raising of exception if attempting to create a filestore container with incomplete information - fixes #502
+
 ## [9.13.1] - 2025-04-30
 
 ### From Viva - PR #501 - 2025-04-29
