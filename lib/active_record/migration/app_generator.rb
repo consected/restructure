@@ -916,6 +916,7 @@ module ActiveRecord
       def activity_log_trigger_sql
         base_name_id = "#{belongs_to_model.to_s.underscore.gsub(%r{__|/}, '_')}_id"
         log_al_prefix = "log_#{history_table_name}"
+        short_al_prefix = log_al_prefix.sub('activity_log_', 'al_')
         <<~DO_TEXT
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -947,13 +948,15 @@ module ActiveRecord
           DROP FUNCTION IF EXISTS #{schema}.log_#{table_name.singularize}_update () CASCADE;
           DROP TRIGGER IF EXISTS #{log_al_prefix}_insert ON #{schema}.#{table_name};
           DROP TRIGGER IF EXISTS #{log_al_prefix}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{short_al_prefix}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{short_al_prefix}_update ON #{schema}.#{table_name};
 
-          CREATE TRIGGER #{log_al_prefix}_insert
+          CREATE TRIGGER #{short_al_prefix}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-          CREATE TRIGGER #{log_al_prefix}_update
+          CREATE TRIGGER #{short_al_prefix}_update
             AFTER UPDATE ON #{schema}.#{table_name}
             FOR EACH ROW
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
@@ -966,7 +969,7 @@ module ActiveRecord
         if updating?
           activity_log_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION IF EXISTS #{trigger_fn_name}() CASCADE"
         end
       end
 
@@ -1014,7 +1017,7 @@ module ActiveRecord
         if updating?
           reference_view_sql(ref_config)
         else
-          "DROP VIEW #{schema}.#{ref_view_name(to_table_name)};"
+          "DROP VIEW if exists #{schema}.#{ref_view_name(to_table_name)};"
         end
       end
 
@@ -1032,7 +1035,7 @@ module ActiveRecord
         if updating?
           dynamic_model_view_sql
         else
-          "DROP VIEW #{schema}.#{table_name};"
+          "DROP VIEW is exists #{schema}.#{table_name};"
         end
       end
 
@@ -1086,7 +1089,7 @@ module ActiveRecord
         if updating?
           dynamic_model_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION if exists #{trigger_fn_name}() CASCADE"
         end
       end
 
@@ -1139,7 +1142,7 @@ module ActiveRecord
         if updating?
           external_identifier_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION if exists #{trigger_fn_name}() CASCADE"
         end
       end
 
