@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #506 - 2025-05-08
+
+- [Added] dynamic loading of the search attribute definer in report admin, to speed up opening of report definitions
+- [Fixed] report_type filter missing and causing errors when embedding in admin info blocks
+- [Fixed] unnecessary cache around user access controls block that loads dynamically
+- [Fixed] bad double curly substitutions in report description causing exception that can't be fixed in the report admin editor - fixes #327
+
 ### From FPHS - PR #505 - 2025-05-07
 
 - [Added] script to call setup_filestore_app.sh based on the nfs container status file created during appserver startup
