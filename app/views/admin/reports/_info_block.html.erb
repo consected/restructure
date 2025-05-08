@@ -65,7 +65,7 @@
     </div>
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
     <% if current_admin.can_admin?(:user_access_controls)%>
-      <%= Rails.cache.fetch('info-block-uac-block') { render partial: 'admin/reports/form/uac_panel' }.html_safe %>
+      <%= render(partial: 'admin/reports/form/uac_panel').html_safe %>
     <% else %>
       <p>Not authorized to administer user access controls</p>
     <% end %>

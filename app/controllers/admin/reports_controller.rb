@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 class Admin::ReportsController < AdminController
+
+  def search_attr_definer
+    Rails.cache.fetch('report_search_attr_definer', expires_in: 1.hour) do
+      @report = Report.new    
+      url = url_for([:admin, @report])
+      ActionController::Base.helpers.form_for(@report, url: url, remote: true) do |f|
+        render partial: 'admin/reports/form/search_attr_definer', locals: {f: f}
+      end
+    end
+  end
+
   protected
   def set_defaults
     @show_again_on_save = true
