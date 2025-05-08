@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.14.1] - 2025-05-08
+
 ### From FPHS - PR #506 - 2025-05-08
 
 - [Added] dynamic loading of the search attribute definer in report admin, to speed up opening of report definitions
