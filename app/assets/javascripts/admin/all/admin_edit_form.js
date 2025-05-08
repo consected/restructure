@@ -36,11 +36,13 @@ _fpa_admin.all.admin_edit_form = class {
 
 
   // Do some initial setup
-  admin_edit_form_setup() {
+  admin_edit_form_setup(no_scroll) {
     var block = this.block
     // Ensure we only scroll back to the form, not the top of the page
-    $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
-    _fpa.utils.scrollTo(block, 200, -50);
+    if (!no_scroll) {
+      $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
+      _fpa.utils.scrollTo(block, 200, -50);
+    }
     // If the form is marked as having been saved, attempt to run the sample embedded report
     var si = block.find('.saved-item');
     if (si.length) {
@@ -60,7 +62,7 @@ _fpa_admin.all.admin_edit_form = class {
 
     // Force some initial configuration of textarea blocks
     window.setTimeout(function () {
-      var el = $('.admin-edit-form textarea');
+      var el = $('.admin-edit-form textarea, .admin-edit-form .auto-click-link');
       el.click();
     }, 300);
 
