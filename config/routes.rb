@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     resources :external_identifiers, except: %i[show destroy]
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy]
+    get :report_search_attr_definer, to: 'reports#search_attr_definer'
     resources :config_libraries, except: %i[show destroy]
     resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: %i[show destroy] do
