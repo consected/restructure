@@ -1,5 +1,5 @@
 class Admin::AppConfigurationsController < AdminController
-  helper_method :role_name_options, :value_editor
+  helper_method :role_name_options, :value_editor, :name_big_select
 
   protected
 
@@ -36,6 +36,10 @@ class Admin::AppConfigurationsController < AdminController
 
   def value_editor
     :plain_text
+  end
+
+  def name_big_select
+    Admin::AppConfiguration.configuation_meanings
   end
 
   private
