@@ -17,7 +17,7 @@ module OptionConfigs
         name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings batch_trigger config_trigger preset_fields
+        show_if_condition_strings batch_trigger config_trigger preset_fields field_configs
       ]
     end
 
@@ -59,7 +59,8 @@ module OptionConfigs
 
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
       self.resource_item_name = resource_name
-
+      
+      clean_field_configs
       clean_label_def
       clean_caption_before_def
       clean_dialog_before_def
@@ -79,6 +80,7 @@ module OptionConfigs
       clean_batch_triggers
       clean_config_triggers
       clean_preset_fields
+
     end
 
     # Defintion label
@@ -429,6 +431,55 @@ module OptionConfigs
     def clean_preset_fields
       self.preset_fields ||= {}
       self.preset_fields = self.preset_fields.symbolize_keys
+    end
+
+    def clean_field_configs
+      valid_configs = %i[db_configs field_options labels caption_before dialog_before show_if]
+      
+      fla = fields || config_obj.field_list_array
+      if field_configs.nil?
+        # 'field_configs' was not explicitly set, so set it from the configurations listed in valid_configs
+        # for each of the valid fields
+        self.field_configs = {}  
+        valid_configs.each do |vc|
+          c = instance_variable_get("@#{vc}")
+          next unless c
+
+          c.symbolize_keys.each do |k, v|
+            # Only include valid fields from the field_list_array
+            # NOTE: this excludes caption_before 'all_fields' and 'submit'
+            next unless fla.include?(k.to_s)
+            
+            field_configs[k] ||= {}
+            field_configs[k].merge!({vc => v})
+          end
+        end
+        
+      else
+
+        # 'field_configs' was explicitly set, so use it to set the appropriate configurations
+        # for each of the valid_configs
+        self.field_configs ||= {}
+        self.field_configs = self.field_configs.symbolize_keys
+
+
+        field_configs.each do |fname, fconfig|
+          valid_configs.each do |vc|
+            # For each of the valid configs, add the corresponding definition to the
+            #  named attribute
+            c = fconfig[vc]
+            next unless c
+
+            instance_variable_get("@#{vc}").merge!(fname => c)
+          end        
+        end
+
+      end
+
+      efs = field_configs.keys.map(&:to_s) - fla
+      if efs.present?
+        failed_config :field_configs, "field_configs includes fields that are not in the field list: #{efs}"
+      end
     end
 
     # Check if any of the configs were bad
