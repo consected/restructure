@@ -469,8 +469,13 @@ module OptionConfigs
             #  named attribute
             c = fconfig[vc]
             next unless c
+            ivar = instance_variable_get("@#{vc}")
+            unless ivar
+              instance_variable_set("@#{vc}", {}) 
+              ivar = instance_variable_get("@#{vc}")
+            end
 
-            instance_variable_get("@#{vc}").merge!(fname => c)
+            ivar.merge!(fname => c)
           end        
         end
 
