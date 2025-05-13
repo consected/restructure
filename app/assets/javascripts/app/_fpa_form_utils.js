@@ -2013,8 +2013,12 @@ _fpa.form_utils = {
   },
 
   reorder_sub_list_columns: function (block) {
-    const $outer = block.parents('.reorder-sublist-columns');
-    if ($outer.length === 0) return;
+    var $outer = block.parents('.reorder-sublist-columns');
+    if ($outer.length === 0) {
+      const $inner = block.find('.reorder-sublist-columns');
+      if ($inner.length === 0) return;
+      $outer = $inner;
+    }
 
     window.setTimeout(function () {
       var heights = [];
