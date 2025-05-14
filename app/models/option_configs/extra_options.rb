@@ -59,8 +59,9 @@ module OptionConfigs
 
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
       self.resource_item_name = resource_name
-      
+      clean_fields_def
       clean_field_configs
+
       clean_label_def
       clean_caption_before_def
       clean_dialog_before_def
@@ -72,7 +73,6 @@ module OptionConfigs
       clean_access_if_def
       clean_valid_if_def
       clean_filestore_def
-      clean_fields_def
       clean_field_options_def
       clean_embed_def
       clean_references_def
@@ -116,11 +116,12 @@ module OptionConfigs
     def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
-
+      
+      dialog_before.transform_values! { |v| v.is_a?(String) ? { name: v } : v }
       dialog_before.each do |k, v|
         unless v.is_a? Hash
           failed_config :dialog_before,
-                        "dialog_before must be a Hash: #{k}",
+                        "dialog_before must be a Hash { name: '<template name>' } or String: #{k}",
                         level: :error
           next
         end
@@ -188,7 +189,11 @@ module OptionConfigs
     end
 
     def clean_fields_def
-      self.fields ||= []
+      if fields&.present?
+        config_obj.field_list = fields.join(" ")
+      else
+        self.fields = config_obj.field_list_array || []
+      end
     end
 
     def clean_field_options_def
@@ -436,7 +441,7 @@ module OptionConfigs
     def clean_field_configs
       valid_configs = %i[db_configs field_options labels caption_before dialog_before show_if]
       
-      fla = fields || config_obj.field_list_array
+      fla = fields
       if field_configs.nil?
         # 'field_configs' was not explicitly set, so set it from the configurations listed in valid_configs
         # for each of the valid fields
