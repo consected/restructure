@@ -236,6 +236,40 @@ _fpa.form_utils = {
       })
       .addClass('done-select-filtering');
   },
+  setup_select_as_radio_buttons(block) {
+    block.find('select.as-radio-buttons').not('.attached-radio-buttons').each(function () {
+      // Get the select element
+      var $selectElement = $(this);
+      var name = $selectElement.attr('name');
+      var sel_id = $selectElement.attr('id');
+      var attr_name = $(this).attr('data-attr-name');
+      var object_name = $(this).attr('data-object-name');
+
+      // Get the options from the select element
+      var $options = $selectElement.find('option');
+
+      // Create a container for the radio buttons
+      var $radioContainer = $(`<div class="select-as-radio-buttons button-radio" id="${sel_id}"></div>`);
+
+      // Iterate over the options and create radio buttons
+      $options.each(function () {
+        var value = $(this).attr('value');
+        var text = $(this).html();
+        if (!text || text == '') text = '(not set)'
+        var id = `${sel_id}_${value.id_underscore()}`;
+        var checked = $(this).is(':selected') ? 'checked' : '';
+        var data = `data-attr-name="${attr_name}" data-object-name="${object_name}"`;
+        // Create a radio button and label
+        var $radio = $(`<div class="sarb-item"><input ${checked} ${data} type="radio" name="${name}" id="${id}" value="${value}"/><label for="${id}" class="radio-label">${text}</label></div>`);
+
+        // Append the radio button and label to the container
+        $radioContainer.append($radio);
+      });
+
+      // Replace the select element with the radio buttons
+      $selectElement.replaceWith($radioContainer);
+    }).addClass('attached-radio-buttons');
+  },
 
   select_filtering_changed(val, el) {
     $(el).attr('data-big-select-subtype', val);
@@ -1871,7 +1905,7 @@ _fpa.form_utils = {
           var $get_data_from = $(get_data_from);
 
           var add_item = function (item) {
-            var $new_item = $(`<${items_as} data-field-name="${item}">${item}</${items_as}>`);
+            var $new_item = $(`<${items_as} data-field-name="${item}">${item}<div class="sb-subitem"></div></${items_as}>`);
             $sortable_block.append($new_item);
           };
 
@@ -2404,6 +2438,7 @@ _fpa.form_utils = {
     _fpa.form_utils.set_image_classes(block);
     _fpa.form_utils.setup_big_select_fields(block);
     _fpa.form_utils.setup_select_filtering(block);
+    _fpa.form_utils.setup_select_as_radio_buttons(block);
     _fpa.form_utils.setup_change_handling(block);
 
     block.removeClass('formatting-block');
