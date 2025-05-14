@@ -44,6 +44,8 @@ module AdminControllerHandler
     unless @copy_with
       # Add initialization of class specific attributes, if not set previously
       init_attrs ||= {}
+
+      init_attrs.merge! params.require(:init_with).permit(*permitted_params) if params[:init_with]
       init_attrs = init_new_with_attrs.merge(init_attrs)
     end
 
