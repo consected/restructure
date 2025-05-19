@@ -12,7 +12,7 @@
         <%= render partial: "#{p_pre}form"%>
       <% end %>
     </div>
-    <table class="table tablesorter admin-list">
+    <table class="table tablesorter admin-list common-template-index-table">
       <thead>
         <tr>
           <th class="no-sort"></th>
@@ -52,7 +52,7 @@
 </div>
 </div>
 <script>
-  $('.expandable').not('.attached-exp').on('click', function(){
+  $('.common-template-index-table .expandable').not('.attached-exp').on('click', function(){
       if($(this).attr('disabled')) return;
       _fpa.form_utils.toggle_expandable($(this));
   }).addClass('attached-exp');

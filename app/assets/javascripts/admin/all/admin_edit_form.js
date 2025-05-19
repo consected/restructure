@@ -60,6 +60,9 @@ _fpa_admin.all.admin_edit_form = class {
       block.html('');
     });
 
+    var blocks = $('.shrinkable-block, .config-error-block')
+    _fpa.utils.make_readable_notes_expandable(blocks, 100);
+
     // Force some initial configuration of textarea blocks
     window.setTimeout(function () {
       var el = $('.admin-edit-form textarea, .admin-edit-form .auto-click-link');
