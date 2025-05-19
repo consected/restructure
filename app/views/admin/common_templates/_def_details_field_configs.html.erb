@@ -53,7 +53,7 @@ if field_configs.present?
                dtext = find_dialog_by_config_or_name(config)&.template
                if dtext
                  dtext = markdown_to_html(dtext) 
-                 val = "#{val}<hr><div>#{dtext}</div>".html_safe
+                 val = "<div>#{dtext}</div><hr>#{val}".html_safe
                end
 
                dfc_class = 'dfc-dialog-text'
