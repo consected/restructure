@@ -192,7 +192,8 @@ module OptionConfigs
       if fields&.present?
         config_obj.field_list = fields.join(" ")
       else
-        self.fields = config_obj.field_list_array || []
+        fla = config_obj.field_list_array if config_obj.respond_to?(:field_list_array)
+        self.fields = fla || []
       end
     end
 
