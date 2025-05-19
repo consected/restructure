@@ -120,7 +120,10 @@
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
 <script>
+  window.setTimeout(function(){
+
     $('a#expand-captions-dialogs').not('.added-ecs-click-handler').on('click', function() {
       $('.dfc-field-config-block .dfc-config-name[href$="--labels"], .dfc-field-config-block .dfc-config-name[href$="--caption_before"], .dfc-field-config-block .dfc-config-name[href$="--dialog_before"]').not('[aria-expanded="true"]').click()    
     }).addClass('added-ecs-click-handler');
+  }, 400);
 </script>
