@@ -491,6 +491,14 @@ module OptionConfigs
       if efs.present?
         failed_config :field_configs, "field_configs includes fields that are not in the field list: #{efs}"
       end
+
+      field_configs.each do |fname, fconfig|
+        extra_keys = fconfig.keys - valid_configs
+        next if extra_keys.empty?
+
+        failed_config :field_configs,
+                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only #{valid_configs}"
+      end
     end
 
     # Check if any of the configs were bad
