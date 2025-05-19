@@ -1930,7 +1930,7 @@ _fpa.form_utils = {
           var texts = [];
           $sortable_block.find(items_as).each(function () {
             // Get the first text element only
-            texts.push($(this).contents().first().text());
+            texts.push($(this).attr('data-field-name'));
           });
           $get_data_from.val(texts.join(items_splitter));
         };
