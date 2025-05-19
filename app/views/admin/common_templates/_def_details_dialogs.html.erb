@@ -4,19 +4,9 @@
   <label>dialogs</label>
   <% if dialogs.present? %>
   <ul class="al-reference-list">  
-  <% dialogs.each do |l| 
-       mt = Admin::MessageTemplate.active.find_by(name: l[:name])
-       unless mt 
-  %>
-    <li>Add a <%= link_to link_label_open_in_new("new dialog for '#{l[:name]}'"), admin_message_templates_path(init_with: {message_type: 'dialog', template_type: 'content', category: object_instance.category, name: l[:name] }, perform_action: 'new'), target: "_blank" %>
-    with <i>message type:</i> <b>dialog</b>, <i>template type:</i> <b>content</b> &amp;  <i>name:</i> <b><%= l[:name] %></b>
-    </li>
-  <%
-          next
-        end
-  %>
+  <% dialogs.each do |l| %>       
   <li>
-    <%= link_to link_label_open_in_new("#{mt.category} - #{mt.name}"), admin_message_templates_path(filter: {id: mt.id}, perform_action: 'edit'), target: "_blank" %>
+    <%= link_to_dialog l[:name] %>
   </li>
   <% end %>
   </ul>

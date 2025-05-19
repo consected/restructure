@@ -22,8 +22,9 @@
 }
 
 .admin-main-options-block {
-  display: flex;
-  flex-direction: row;
+  width: 99%;
+  // display: flex;
+  // flex-direction: row;
 }
 
 .admin-options-editor-block {
@@ -34,9 +35,11 @@
 }
 
 .admin-options-ref-block {
-  height: 80vh;
+  min-height: 80vh;
+  height: auto;
   min-width: 300px;
-  width: 40vw;
+  // min-width: 40vw;
+  width: auto;
   margin: 6px;
 
   > div {
@@ -110,7 +113,7 @@ ul.admin-options-tag-list {
 }
 
 .admin-form-fields-block {
-  width: 800px;
+  width: auto;
   height: 80vh;
 }
 

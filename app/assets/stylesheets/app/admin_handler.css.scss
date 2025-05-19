@@ -205,3 +205,32 @@ ul.admin-menu-list {
   padding-left: 0;
   list-style: none;
 }
+
+.dfc-field-config-block ul.nav li {
+  font-family: var(--button-font-family);
+  padding: 0;
+  border-radius: 0;
+
+  a {
+    padding: 0 4px;
+  }
+}
+
+.admin-options-ref-block 
+.dfc-field-config-block .tab-content {
+    padding: 0;
+    padding-left: 4px;
+    border: none;
+    background: transparent
+
+    ul li {
+      list-style: normal;
+      border: none;
+      background: transparent
+    }
+}
+
+.dfc-text {
+  padding: 4px 0;
+  display: block;
+}

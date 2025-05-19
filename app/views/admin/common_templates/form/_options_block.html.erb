@@ -1,0 +1,9 @@
+  <% if has_options %>
+    <div></div>
+  <div class="admin-options-editor-block" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
+    <label><%= has_options.to_s.humanize %></label>
+    <div class="admin-form-fields-block">
+      <%= f.text_area has_options, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type}%>
+    </div>
+  </div>
+  <% end %>
