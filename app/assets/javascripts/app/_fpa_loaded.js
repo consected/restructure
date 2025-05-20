@@ -193,6 +193,30 @@ _fpa.loaded.default = function () {
     }
   });
 
+  // Allow a link to request a new or edit action to be called on an admin page
+  const $perform_action_item = $('[data-perform-action]');
+  const perform_action = $perform_action_item.attr('data-perform-action');
+  const init_params = $perform_action_item.attr('data-init-params');
+  if (perform_action) {
+    window.setTimeout(function () {
+      if (perform_action == 'new') {
+        const $button = $('.add-item-button')
+        const prev_url = $button.attr('href');
+        $button.attr('href', `${prev_url}?init_params=${init_params}`);
+        $button.click();
+        $button.attr('href', prev_url);
+      }
+      else if (perform_action == 'edit') {
+        const $button = $('.simple-admin-edit:visible')
+        if ($button.length !== 1) {
+          console.error('Error: expected exactly one button to be found for edit action');
+          return;
+        }
+
+        $button.click();
+      }
+    })
+  }
   window.onbeforeunload = function (ev) {
 
     if ($('body').hasClass('prevent-page-transition')) {
