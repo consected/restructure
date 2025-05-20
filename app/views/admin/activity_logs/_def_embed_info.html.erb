@@ -6,9 +6,9 @@ end
 to_table_name = ref_def.dig(:resource_model_def, :table_name)
 type = ref_def.dig(:resource_model_def, :type)
 link = case type  
-        when :dynamic_model then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
-        when :activity_log then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
-        when :external_identifier then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
+        when :dynamic_model then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
+        when :activity_log then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
+        when :external_identifier then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
         end
   %>
     <li>

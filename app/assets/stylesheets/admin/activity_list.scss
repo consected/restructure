@@ -125,12 +125,12 @@ span.activity-list-name {
 }
 
 .al-options-editor-block {
-  width: 800px;
+  // width: 800px;
   height: 80vh;
 }
 
 .al-options-ref-block {
-  width: 800px;
+  width: auto;
   height: auto;
 }
 
@@ -160,7 +160,8 @@ span.activity-list-name {
 }
 
 .al-form-info {
-  max-height: 111vh;
+  min-height: 128vh;
+  height: auto;
   overflow-y: auto;
   width: auto;
   flex-shrink: 0;

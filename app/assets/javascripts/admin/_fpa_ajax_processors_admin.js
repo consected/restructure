@@ -49,6 +49,15 @@ _fpa.postprocessors_admin = {
     }, 200);
 
 
+  },
+
+  search_attr_definer_setup: function (block, data) {
+    console.log('search_attr_definer_setup')
+    // Run at next step to avoid UI lock ups
+    window.setTimeout(function () {
+      var aef = new _fpa_admin.reports.admin_edit_form(block, data)
+      aef.setup_search_attr_config();
+    })
   }
 
 };

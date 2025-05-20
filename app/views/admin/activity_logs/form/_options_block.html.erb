@@ -1,0 +1,8 @@
+  <div class="main-options-block">
+    <%= form_field_label f, :activity_definitions %><br>
+    <div class="">
+      <div class="al-options-editor-block">
+        <%= f.text_area :extra_log_types, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type} %>
+      </div>
+    </div>
+  </div>
