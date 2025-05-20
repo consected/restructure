@@ -1,8 +1,10 @@
 .make-sortable {
   padding: 10px 0;
+  position: relative;
 
   .sortable-block {
     padding-inline-start: 0;
+    margin-right: 100px;
 
     > * {
       margin: 4px;
@@ -39,6 +41,12 @@
     min-height: 30px;
     background-color: rgb(208, 160, 160);
     padding: 4px;
+    width: 100px;
+    top: 0;
+    position: absolute;
+    right: 0;
+    height: 100%; 
+
     &:before {
       content: "(drop here to remove)";
       font-size: 11px;

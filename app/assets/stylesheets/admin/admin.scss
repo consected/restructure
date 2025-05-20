@@ -263,3 +263,17 @@ a.link-disabled {
   border-bottom: 1px solid silver;
   padding: 10px;
 }
+
+.admin-inline-update-report {
+  height: 18px;
+
+  .btn-primary {
+    margin-right: 10px;
+  }
+}
+
+.dynamic-field-list {
+  .sb-subitem {
+    margin-top: 8px;
+  }
+}

@@ -15,7 +15,7 @@ class ApplicationJob < ActiveJob::Base
       msg = "Job failed - #{e} : #{job}"
       puts msg unless Rails.env.test?
       Rails.logger.warn msg
-      Rails.logger.warn e.backtrace.join("\n")
+      Rails.logger.warn e.short_string_backtrace
       ApplicationJob.notify_failure job, e
     rescue StandardError, FsException, FphsException => e2
       msg = "Job failed in rescue: #{e2} : #{job}"

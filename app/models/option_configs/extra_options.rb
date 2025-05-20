@@ -17,7 +17,7 @@ module OptionConfigs
         name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings batch_trigger config_trigger preset_fields
+        show_if_condition_strings batch_trigger config_trigger preset_fields field_configs
       ]
     end
 
@@ -59,6 +59,8 @@ module OptionConfigs
 
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
       self.resource_item_name = resource_name
+      clean_fields_def
+      clean_field_configs
 
       clean_label_def
       clean_caption_before_def
@@ -71,7 +73,6 @@ module OptionConfigs
       clean_access_if_def
       clean_valid_if_def
       clean_filestore_def
-      clean_fields_def
       clean_field_options_def
       clean_embed_def
       clean_references_def
@@ -79,6 +80,7 @@ module OptionConfigs
       clean_batch_triggers
       clean_config_triggers
       clean_preset_fields
+
     end
 
     # Defintion label
@@ -114,11 +116,12 @@ module OptionConfigs
     def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
-
+      
+      dialog_before.transform_values! { |v| v.is_a?(String) ? { name: v } : v }
       dialog_before.each do |k, v|
         unless v.is_a? Hash
           failed_config :dialog_before,
-                        "dialog_before must be a Hash: #{k}",
+                        "dialog_before must be a Hash { name: '<template name>' } or String: #{k}",
                         level: :error
           next
         end
@@ -185,6 +188,11 @@ module OptionConfigs
       @config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
     end
 
+
+    #
+    # Clean the fields definition. This intentionally does not override the dynamic model field list
+    # or external identifier extra fields list. The fields definition is intended to be a list of
+    # fields that are presented to the end user, and may be a subset of the fields in the model.
     def clean_fields_def
       self.fields ||= []
     end
@@ -429,6 +437,68 @@ module OptionConfigs
     def clean_preset_fields
       self.preset_fields ||= {}
       self.preset_fields = self.preset_fields.symbolize_keys
+    end
+
+    def clean_field_configs
+      valid_configs = %i[db_configs field_options labels caption_before dialog_before show_if]
+      
+      fla = fields
+      if field_configs.nil?
+        # 'field_configs' was not explicitly set, so set it from the configurations listed in valid_configs
+        # for each of the valid fields
+        self.field_configs = {}  
+        valid_configs.each do |vc|
+          c = instance_variable_get("@#{vc}")
+          next unless c
+
+          c.symbolize_keys.each do |k, v|
+            # Only include valid fields from the field_list_array
+            # NOTE: this excludes caption_before 'all_fields' and 'submit'
+            next unless fla.include?(k.to_s)
+            
+            field_configs[k] ||= {}
+            field_configs[k].merge!({vc => v})
+          end
+        end
+        
+      else
+
+        # 'field_configs' was explicitly set, so use it to set the appropriate configurations
+        # for each of the valid_configs
+        self.field_configs ||= {}
+        self.field_configs = self.field_configs.symbolize_keys
+
+
+        field_configs.each do |fname, fconfig|
+          valid_configs.each do |vc|
+            # For each of the valid configs, add the corresponding definition to the
+            #  named attribute
+            c = fconfig[vc]
+            next unless c
+            ivar = instance_variable_get("@#{vc}")
+            unless ivar
+              instance_variable_set("@#{vc}", {}) 
+              ivar = instance_variable_get("@#{vc}")
+            end
+
+            ivar.merge!(fname => c)
+          end        
+        end
+
+      end
+
+      efs = field_configs.keys.map(&:to_s) - fla
+      if efs.present?
+        failed_config :field_configs, "field_configs includes fields that are not in the field list: #{efs}"
+      end
+
+      field_configs.each do |fname, fconfig|
+        extra_keys = fconfig.keys - valid_configs
+        next if extra_keys.empty?
+
+        failed_config :field_configs,
+                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only #{valid_configs}"
+      end
     end
 
     # Check if any of the configs were bad

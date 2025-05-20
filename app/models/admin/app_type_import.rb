@@ -24,7 +24,6 @@ class Admin
     # @return [Array] an array on [app_type, results]
     def self.import_config(config_text, admin,
                            name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil)
-
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -221,12 +220,12 @@ class Admin
 
       olat = Settings::OnlyLoadAppTypes
       if olat && !olat.include?(app_type.id)
-        raise FphsException, "Import of the app requires the FPHS_LOAD_APP_TYPES environment variable " \
+        raise FphsException, 'Import of the app requires the FPHS_LOAD_APP_TYPES environment variable ' \
                              "to include the new app type ID: #{app_type.id}: " \
                              "FPHS_LOAD_APP_TYPES=#{Settings::OnlyLoadAppTypes.join(',')},#{app_type.id}"
       end
 
-      self.app_type
+      app_type
     end
 
     #
@@ -456,11 +455,11 @@ class Admin
     # @param [Hash] item_identifiers
     # @return [Hash] of changes
     def updated_hash(orig_obj, item_identifiers)
-      # If we have saved any changes, and either we changed more than one attribute or
-      # the attribute changed wasn't just update_at,
+      # If we have saved any changes, and
+      # the attributes changed weren't just updated_at and admin_id,
       # then return the details.
       unless orig_obj.saved_changes? &&
-             (orig_obj.previous_changes.length > 1 || orig_obj.previous_changes['updated_at'])
+             (orig_obj.previous_changes.keys - %w[updated_at admin_id]).present?
         # Nothing was saved or we only changed the updated_at attribute, so just return
         return
       end
