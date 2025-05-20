@@ -35,7 +35,7 @@ module FilterUtils
         if v&.end_with?('%')
           likes[0] += ' AND ' if likes.length > 1
           likes[0] += "#{k} LIKE ?"
-          likes << v
+          likes << v.gsub('_', '\\_')
           p.delete(k)
         elsif v&.index(/is (not )?null/)
           likes[0] += "#{k} #{v}"

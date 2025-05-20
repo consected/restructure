@@ -5,7 +5,7 @@
       admin_links = nil
       index_params = object_instance.attribute_names
     %>
-    <table class="table tablesorter admin-list">
+    <table class="table tablesorter admin-list dynamic-versions-list">
       <thead>
         <tr>
           <th class="no-sort"></th>
@@ -36,7 +36,7 @@
       <% end %>
     </table>
     <script>
-      $('.expandable').not('.attached-exp').on('click', function(){
+      $('.dynamic-versions-list .expandable').not('.attached-exp').on('click', function(){
           if($(this).attr('disabled')) return;
           _fpa.form_utils.toggle_expandable($(this));
       }).addClass('attached-exp');

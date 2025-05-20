@@ -2,9 +2,11 @@
   100% {
     background: rgba(218, 218, 218, 0.25);
   }
+
   50% {
     background: rgba(218, 218, 218, 0.75);
   }
+
   0% {
     background: rgba(218, 218, 218, 0.45);
   }
@@ -32,6 +34,7 @@ form .full-width input.form-control {
   padding: 4px;
   background-color: #eee;
 }
+
 .tt-menu:hover {
   cursor: pointer;
 }
@@ -119,6 +122,7 @@ li.edit-field-container[data-edit-field-name="created_by_user_id"] {
 
 .fixed-field {
   position: relative;
+
   input.form-control.has-value,
   select.form-control.has-value,
   input.form-control,
@@ -157,9 +161,11 @@ li.list-group-item label {
   h2 {
     font-size: 22px;
   }
+
   h3 {
     font-size: 18px;
   }
+
   h4 {
     font-size: 16px;
   }
@@ -190,8 +196,9 @@ li.list-group-item label {
   color: rgb(128, 128, 128) !important;
 }
 
-.form-inline .row > div {
+.form-inline .row>div {
   text-align: right;
+
   div.form-group {
     padding-top: 4px;
     padding-bottom: 4px;
@@ -200,6 +207,7 @@ li.list-group-item label {
 
 select[multiple] {
   height: 30px;
+
   option {
     display: none;
   }
@@ -207,17 +215,20 @@ select[multiple] {
 
 div.chosen-container.chosen-disabled {
   opacity: 1 !important;
+
   li.search-choice {
     padding-right: 5px;
     background: white;
   }
+
   a.search-choice-close {
     display: none !important;
   }
 }
 
 
-div.chosen-container .chosen-results{
+div.chosen-container .chosen-results {
+
   li.group-result.group-result-disabled,
   li.group-option.disabled-result {
     display: none;
@@ -235,6 +246,7 @@ a.add-icon {
 
 .tracker-search-field {
   color: var(--project-color);
+
   select {
     border-color: var(--project-color);
     color: var(--project-color);
@@ -242,6 +254,7 @@ a.add-icon {
 
   &.has-warning select {
     color: #c00;
+
     option {
       color: var(--project-color);
     }
@@ -270,6 +283,7 @@ form.search_master label {
 form.search_master label.nowrap {
   white-space: nowrap;
 }
+
 a.add-icon {
   z-index: 5;
   position: relative;
@@ -302,12 +316,13 @@ a.add-icon {
 }
 
 .attached-add-activity-button[disabled='disabled'] {
+  color: gray;
+
+  &:hover,
+  &:active,
+  &:link {
     color: gray;
-    &:hover,
-    &:active,
-    &:link {
-      color: gray;     
-    }
+  }
 }
 
 .advanced-form-selections {
@@ -316,6 +331,7 @@ a.add-icon {
   .btn {
     color: var(--project-color);
     background: white;
+
     &:active {
       color: var(--link-active-color);
     }
@@ -324,6 +340,7 @@ a.add-icon {
       background: var(--project-color);
       color: white;
     }
+
     &.collapsed:active {
       color: white;
     }
@@ -339,6 +356,7 @@ a.add-icon {
 li.list-group-item.result-field-container,
 li.list-group-item.edit-field-container {
   visibility: hidden;
+
   &.done-label-resize,
   &.done-label-resize strong,
   &.has-caption-before,
@@ -398,6 +416,7 @@ fieldset.readonly-edit-fieldset {
   select.form-control {
     width: 100%;
   }
+
   textarea.form-control {
     min-height: 1em;
     height: auto;
@@ -413,6 +432,7 @@ fieldset.readonly-edit-fieldset {
       height: auto !important;
     }
   }
+
   input[type="checkbox"] {
     border: 1px solid silver;
     -moz-appearance: checkbox;
@@ -444,6 +464,7 @@ fieldset.readonly-edit-fieldset {
       -webkit-appearance: none;
     }
   }
+
   select::-ms-expand {
     display: none;
   }
@@ -453,18 +474,33 @@ fieldset.readonly-edit-fieldset {
   .button-radio[data-attr-name$="_blank_yes_no"]:first-of-type {
     display: none;
   }
+
   .button-radio[data-attr-name$="_blank_no_yes"]:first-of-type {
     display: none;
   }
+
   .button-radio[data-attr-name$="_blank_yes_no_dont_know"]:first-of-type {
     display: none;
   }
+
   .button-radio[data-attr-name$="_blank_no_yes_dont_know"]:first-of-type {
     display: none;
   }
 }
 
+.select-as-radio-buttons {
+  .sarb-item {
+    margin: 8px 0
+  }
+
+  .button-radio input[type=radio]+label {
+    white-space: normal;
+    width: 95%;
+  }
+}
+
 .list-group-item {
+
   &.save-the-form-ref-message,
   &.ref-new-edit {
     display: none;
@@ -478,6 +514,7 @@ fieldset.readonly-edit-fieldset {
 }
 
 .edit-field-container.done-label-resize {
+
   input[type="text"],
   input[type="email"],
   input[type="url"] {
@@ -496,6 +533,7 @@ fieldset.readonly-edit-fieldset {
   .form-group {
     margin-bottom: 0;
   }
+
   .model-ref-remove-btn {
     padding: 1px 6px;
     margin-top: -2px;
@@ -596,7 +634,7 @@ fieldset.readonly-edit-fieldset {
   }
 }
 
-.changed-field-danger {  
+.changed-field-danger {
   border-color: #cc0000;
 }
 

@@ -752,7 +752,7 @@ class Master < ActiveRecord::Base
     res = Formatter::Substitution.substitute res, data: self, tag_subs: nil, ignore_missing: true
     return unless res
 
-    res.gsub("\r\n", "\n").gsub("\n\n", "\n").strip
+    res.gsub(',', "\n").gsub("\r\n", "\n").gsub("\n\n", "\n").strip
   end
 
   #

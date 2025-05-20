@@ -1,0 +1,38 @@
+<div class="form-inline">
+  <div class="form-group">
+    <%= form_field_label f, :name %>
+    <%= f.text_field :name %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :category %>
+    <%= f.text_field :category %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :item_type %>
+    <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :process_name %>
+    <%= f.text_field :process_name %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :rec_type %>
+    <%= f.select :rec_type, general_selection("%_type", value: object_instance.rec_type, use_like: true), include_blank: true %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :schema_name %>
+    <%= f.text_field :schema_name %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :action_when_attribute %>
+    <%= f.text_field :action_when_attribute %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :hide_item_list_panel %>
+    <%= f.check_box :hide_item_list_panel %>
+  </div>
+  <div class="form-group">
+    <%= form_field_label f, :disable %>
+    <%= f.check_box :disabled %>
+  </div>
+</div>

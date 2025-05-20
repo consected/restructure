@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 class Admin::ReportsController < AdminController
-
+  SearchAttrBrowserCacheSeconds = 48.hours.to_i
   def search_attr_definer
-    Rails.cache.fetch('report_search_attr_definer', expires_in: 1.hour) do
-      @report = Report.new    
-      url = url_for([:admin, @report])
-      ActionController::Base.helpers.form_for(@report, url: url, remote: true) do |f|
-        render partial: 'admin/reports/form/search_attr_definer', locals: {f: f}
-      end
-    end
+    cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key('report_search_attr_definer'))
+    response.headers['Cache-Control'] = "max-age=#{SearchAttrBrowserCacheSeconds}"
+    response.headers.delete 'Expires'
+    return unless stale?(etag: cache_key)
+
+    render partial: 'admin/reports/form/search_attr_definer'
   end
 
   protected
+
   def set_defaults
     @show_again_on_save = true
   end
