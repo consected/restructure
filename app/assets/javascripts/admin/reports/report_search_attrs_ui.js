@@ -248,7 +248,7 @@ class ReportSearchAttrsUi {
     aef.setup_filtered_selects()
     aef.setup_codemirror_editors()
     aef.setup_yaml_help_viewers()
-      
+
     $('.report-attr-checks').collapse('hide');
     $('#search_no_disabled').val('1').attr('checked', true);
 
@@ -275,9 +275,20 @@ class ReportSearchAttrsUi {
     $('#report-admin-search-attr-add-block [required]').attr('disabled', true);
 
     $('#report-admin-search-attr-add-block').on('hidden.bs.collapse', function () {
-      $(this).find('[required]').attr('disabled', true)
+      var $this = $(this);
+      window.setTimeout(function () {
+        if ($this.hasClass('in')) return;
+
+        $this.find('[required]').attr('disabled', true)
+      }, 1000)
     }).on('shown.bs.collapse', function () {
-      $(this).find('[required]').attr('disabled', null)
+      var $this = $(this);
+      window.setTimeout(function () {
+        if (!$this.hasClass('in')) return;
+
+        $this.find('[required]').attr('disabled', null)
+      }, 1000)
+
     });
 
     _fpa.form_utils.setup_chosen(this.block);

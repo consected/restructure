@@ -14,7 +14,39 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.14.1] - 2025-05-08
+## [9.15.0] - 2025-05-20
+
+### From FPHS - PR #512 - 2025-05-20
+
+- [Fixed] label on "add field" input in dynamic model definer
+- [Changed] styling of form list definer "delete field" block
+- [Added] error check on field_configs setting
+- [Added] expanding of all label, caption and dialog definitions in dynamic model field definer
+- [Added] field details in dynamic model admin info panel
+- [Fixed] expandable text areas and blocks in admin forms and index lists
+- [Changed] browser cache time for report admin search attrs
+- [Added] better cache handling of page templates
+- [Added] more conditions to show_if when using `condition` option
+- [Added] `select as-radio-buttons` class to convert select field to radio buttons
+- [Added] ability to pass "perform_actions" attribute to admin requests, allowing new and edit actions to open directly the form
+- [Added] passing class to select field allows field_options.class to be used for `field_type: select_...`
+- [Fixed] issue starting javascript tests
+- [Added] consolidated list of 'field_configs' in extra options, to improve configurations - resolves #510
+
+### From FPHS - PR #511 - 2025-05-13
+
+- [Added] standard extra options for is_blank and is_not_blank conditions
+- [Fixed] templates referenced in report descriptions not included in app type export - fixes #341
+- [Fixed] external ids panel not reorganizing the blocks as expected - fixes #508
+- [Fixed] missing big select field for admin panel app configurations name
+- [Fixed] default panels not showing based on comma separated list of panels in application configurations
+- [Fixed] user access control panel in activity log showing too many items due to bad LIKE handling in SQL
+- [Fixed] search attributes dynamic load taking ages to complete on each page refresh - fixes #509
+- [Fixed] search attributes panel disabling fields unnecessarily
+
+### From FPHS - 2025-05-08
+
+- [Updated] brakeman whitelist for report descriptions
 
 ### From FPHS - PR #506 - 2025-05-08
 
@@ -30,11 +62,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Changed] script to restart app server to avoid unnecessary error messages on non-EC2 servers
 - [Added] a file to indicate if filestore app type containers need to be created
 
-
 ### From FPHS - PR #504 - 2025-05-07
 
 - [Changed] reporting of new / changed app type import items if only updated_at and admin_id fields have changed - fixes #371
-- [Changed] naming of activity log history trigger naming to avoid truncation 
+- [Changed] naming of activity log history trigger naming to avoid truncation
 - [Changed] reverse migration drops to avoid failures
 
 ### From FPHS - PR #503 - 2025-05-05

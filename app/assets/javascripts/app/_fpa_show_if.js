@@ -142,6 +142,7 @@ _fpa.show_if.methods = {
         if (cond_def.hasOwnProperty(cond_field)) {
 
           var exp_value = cond_def[cond_field];
+          var orig_exp_value = exp_value;
 
           if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
             // If the condition definition is a hash and does not have a "condition" key, 
@@ -164,6 +165,7 @@ _fpa.show_if.methods = {
 
             // Expect field data
             var exp_field_value = data[cond_field];
+            var orig_field_value = exp_field_value;
             if (typeof exp_field_value == 'number') exp_field_value = exp_field_value.toString();
             if (typeof exp_field_value == 'undefined') exp_field_value = null;
             if (exp_field_value === true || exp_field_value === false) {
@@ -189,6 +191,7 @@ _fpa.show_if.methods = {
               exp_value = [exp_value, (exp_value ? 'yes' : 'no'), (exp_value ? '1' : '0')];
             }
             else if (typeof exp_value == 'number') {
+              var orig_exp_value = exp_value;
               exp_value = [exp_value.toString()];
             }
             else if (typeof exp_value == 'object') {
@@ -230,9 +233,51 @@ _fpa.show_if.methods = {
                 case '<>':
                   matches = (exp_field_value != exp_value);
                   break;
+                case 'in':
+                  matches = exp_value.indexOf(exp_field_value) >= 0;
+                case '!in':
+                  matches = exp_value.indexOf(exp_field_value) < 0;
+                case 'includes':
+                  matches = exp_field_value.indexOf(exp_value) >= 0;
+                case '!includes':
+                  matches = exp_field_value.indexOf(exp_value) < 0;
                 default:
                   console.log(`The specified 'condition' '${explicit_cond}' is not valid.`)
                   break;
+              }
+
+              if (isNaN(parseInt(orig_exp_value))) {
+                var exp = orig_exp_value;
+                switch (explicit_cond) {
+
+                  case '>=':
+                    matches = orig_field_value >= exp;
+                    break;
+                  case '&gt;=':
+                    matches = orig_field_value >= exp;
+                    break;
+                  case '<=':
+                    matches = orig_field_value <= exp;
+                    break;
+                  case '&lt;=':
+                    matches = orig_field_value <= exp;
+                    break;
+                  case '>':
+                    matches = orig_field_value > exp;
+                    break;
+                  case '&gt;':
+                    matches = orig_field_value > exp;
+                    break;
+                  case '<':
+                    matches = orig_field_value < exp;
+                    break;
+                  case '&lt;':
+                    matches = orig_field_value < exp;
+                    break;
+                  default:
+                    console.log(`The specified for integer #is condition '${explicit_cond}' is not valid.`)
+                    break;
+                }
               }
             }
             else if (exp_field_value && Array.isArray(exp_field_value)) {
