@@ -188,13 +188,13 @@ module OptionConfigs
       @config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
     end
 
+
+    #
+    # Clean the fields definition. This intentionally does not override the dynamic model field list
+    # or external identifier extra fields list. The fields definition is intended to be a list of
+    # fields that are presented to the end user, and may be a subset of the fields in the model.
     def clean_fields_def
-      if fields&.present?
-        config_obj.field_list = fields.join(" ")
-      else
-        fla = config_obj.field_list_array if config_obj.respond_to?(:field_list_array)
-        self.fields = fla || []
-      end
+      self.fields ||= []
     end
 
     def clean_field_options_def
