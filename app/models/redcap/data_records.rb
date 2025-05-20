@@ -126,7 +126,7 @@ module Redcap
       am = project_admin.data_options.associate_master_through_external_identifer
       return unless am
 
-      @has_integer_survey_identifier = true      
+      @has_integer_survey_identifier = true
       return unless external_id_fkey_name == integer_survey_identifier_field_name
 
       si_name = survey_identifier_field_name
@@ -139,7 +139,6 @@ module Redcap
         val = nil if val.blank?
         rec[integer_si_name] = val&.to_i
       end
-
     end
 
     #
@@ -447,7 +446,11 @@ module Redcap
       existing_record = model.where(rec_ids).first
       if existing_record
         existing_record.no_track = true if existing_record.respond_to? :no_track
-        existing_record.current_user = current_user if existing_record.respond_to? :current_user=
+        if existing_record.respond_to? :current_user=
+          existing_record.current_user = current_user
+        else
+          Rails.logger.warn "Redcap::DataRecords#create_or_update: existing record #{model} doesn't respond to current_user"
+        end
 
         # Check if there is an exact match for the record. If so, we are done
         if record_matches_retrieved(existing_record, retrieved_record)
@@ -475,7 +478,11 @@ module Redcap
       else
         new_record = model.new(retrieved_record)
         new_record.no_track = true if new_record.respond_to? :no_track
-        new_record.current_user = current_user if new_record.respond_to? :current_user=
+        if new_record.respond_to? :current_user=
+          new_record.current_user = current_user
+        else
+          Rails.logger.warn "Redcap::DataRecords#create_or_update: new record #{model} doesn't respond to current_user"
+        end
 
         res = handle_setting_master_id(new_record, retrieved_record)
         unless res

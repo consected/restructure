@@ -168,6 +168,9 @@
   %>
   </p>
 </div>
+
+<%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
+
 <% else %>
   <label>not yet saved</label>
 <% end %>

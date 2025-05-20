@@ -124,7 +124,11 @@ class Admin
 
     # Select any tables that have some kind of access
     def associated_table_names
-      @associated_table_names ||= user_access_controls.valid_resources([:table]).where(resource_type: :table).select(&:access).map(&:resource_name).uniq
+      @associated_table_names ||= user_access_controls
+                                  .valid_resources([:table]).where(resource_type: :table)
+                                  .select(&:access)
+                                  .map(&:resource_name)
+                                  .uniq
     end
 
     def valid_associated_activity_logs
@@ -271,13 +275,13 @@ class Admin
       active_mts = Admin::MessageTemplate.active
       associated_activity_logs.all.each do |a|
         a.option_configs.each do |c|
-          c.dialog_before.each do |_d, v|
-            res = active_mts.find do |a|
-              a.name == v[:name] && a.message_type == 'dialog' && a.template_type == 'content'
+          c.dialog_before.each_value do |v|
+            res = active_mts.find do |b|
+              b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content'
             end
             ms << res if res
           end
-          c.save_trigger.each do |_d, sts|
+          c.save_trigger.each_value do |sts|
             sts = [sts] unless sts.is_a? Array
             sts.each do |stconfig|
               stsconfigs = stconfig.dig(:each, :do) || stconfig
@@ -292,9 +296,9 @@ class Admin
                   ct = v[:content_template]
                   mt = v[:type]
 
-                  res = active_mts.find { |a| a.name == lt && a.message_type == mt && a.template_type == 'layout' }
+                  res = active_mts.find { |b| b.name == lt && b.message_type == mt && b.template_type == 'layout' }
                   ms << res if res
-                  res = active_mts.find { |a| a.name == ct && a.message_type == mt && a.template_type == 'content' }
+                  res = active_mts.find { |b| b.name == ct && b.message_type == mt && b.template_type == 'content' }
                   ms << res if res
                 end
               end
@@ -304,11 +308,19 @@ class Admin
       end
       associated_dynamic_models.all.each do |a|
         a.option_configs.each do |c|
-          c.dialog_before.each do |_d, v|
+          c.dialog_before.each_value do |v|
             res = active_mts
-                  .find { |a| a.name == v[:name] && a.message_type == 'dialog' && a.template_type == 'content' }
+                  .find { |b| b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content' }
             ms << res if res
           end
+        end
+      end
+
+      associated_reports.all.each do |a|
+        rex = Regexp.new('{{template\\\\_block\\\\_(.+?)}}')
+        a.description.scan(rex) do |t|
+          res = active_mts.find { |b| b.name == t[0]&.gsub('\\_', ' ') && b.template_type == 'content' }
+          ms << res if res
         end
       end
 
@@ -409,14 +421,14 @@ class Admin
       res
     end
 
+    def self.reset_active_app_types!
+      @active_app_types = nil
+    end
+
     private
 
     def reset_active_app_types!
       self.class.reset_active_app_types!
-    end
-
-    def self.reset_active_app_types!
-      @active_app_types = nil
     end
   end
 end

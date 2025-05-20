@@ -1,7 +1,7 @@
 <%
   content = markdown_to_html @report.description
   if content.present?
-    content = Formatter::Substitution.substitute( content, data: @report).html_safe
+    content = Formatter::Substitution.substitute(content, data: @report, ignore_missing: :show_tag).html_safe
   end
 %>
 <div class="report-form-content">

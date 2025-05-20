@@ -7,7 +7,8 @@ class AdminController < ApplicationController
 
   layout 'admin_application'
   helper_method :object_has_admin_parent?, :object_name, :editor_code_type,
-                :filter_params_permitted, :filter_params_hash, :filter_params
+                :filter_params_permitted, :filter_params_hash, :filter_params,
+                :perform_action, :perform_action_init_params
 
   # Ensure 2FA has been set up if required
   before_action -> { redirect_to '/admins/show_otp' if current_admin.two_factor_setup_required? }
@@ -30,6 +31,22 @@ class AdminController < ApplicationController
   # for example to group controllers into specific capabilities (such as "redcap")
   def capability_name
     controller_name
+  end
+
+  def perform_action
+    pa = params[:perform_action]
+    return unless pa.in?(%w[new edit])
+
+    @perform_action ||= pa
+  end
+
+  def perform_action_init_params
+    iw = params[:init_with]
+    return unless iw
+
+    # convert hash into url params
+    sp = params.require(:init_with).permit(*permitted_params)
+    sp.to_query('init_with')
   end
 
   private

@@ -16,7 +16,7 @@ _fpa_admin.all.index_page = class {
   setup_shrinkable_blocks() {
 
     window.setTimeout(function () {
-      var blocks = $('.shrinkable-block')
+      var blocks = $('.shrinkable-block, .config-error-block')
       _fpa.utils.make_readable_notes_expandable(blocks, 100);
 
       $(document).on('change click', '#config', function () {
