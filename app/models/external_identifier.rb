@@ -283,17 +283,6 @@ class ExternalIdentifier < ActiveRecord::Base
           "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
   end
 
-  def fields=(new_fields)
-    return unless new_fields&.present?
-    
-    new_field = new_fields.join(' ') if new_fields.is_a? Array
-    self.extra_fields = new_fields        
-  end
-
-  def field_list=(new_fields)
-    self.fields = new_fields
-  end
-
   def field_list
     "#{external_id_attribute.to_sym} #{extra_fields}"
   end
