@@ -14,9 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.15.1] - 2025-05-20
-
 - [Build] FPHS version
+
+## [9.16.0] - 2025-05-20
+
+### From FPHS - PR #513 - 2025-05-20
+
+- [Fixed] bug setting fields and field_list definitions incorrectly, breaking the intent of the configurations
 
 ## [9.15.0] - 2025-05-20
 
