@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.15.0] - 2025-05-20
+
 ### From FPHS - PR #512 - 2025-05-20
 
 - [Fixed] label on "add field" input in dynamic model definer
