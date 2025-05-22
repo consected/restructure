@@ -436,6 +436,23 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res.calc_action_if).to be true
   end
 
+  it 'uses has_created_activity to check for an extra_log_type in this activity log having been done' do
+    m = @al.master
+    m.current_user = @user
+
+    conf = {
+      has_created_activity: @al.extra_log_type
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      has_created_activity: '_does_not_exist_'
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false    
+  end
+
   it 'checks if nested conditions work' do
     m = @al.master
     m.current_user = @user
