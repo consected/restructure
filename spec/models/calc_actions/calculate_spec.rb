@@ -450,7 +450,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       has_created_activity: '_does_not_exist_'
     }
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be false    
+    expect(res.calc_action_if).to be false
   end
 
   it 'checks if nested conditions work' do
@@ -1645,6 +1645,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     EOF_YAML
 
     conf = setup_config(confy)
+    @alnor.reset_model_references
 
     # We have two references
     expect(@alnor.model_references.count).to eq 3 # two addresses and one activity log
