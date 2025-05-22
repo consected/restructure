@@ -3,6 +3,11 @@
 _definitions___extra_options_standard_option_definitions___:
 
   # Usage:
+  # any_option: *never
+  any_option_never: &never
+    never: true
+
+  # Usage:
   #   extra_option_name:
   #     <<: *never_creatable
   creatable_if_never: &never_creatable
@@ -21,6 +26,14 @@ _definitions___extra_options_standard_option_definitions___:
   #     <<: *never_showable
   showable_if_never: &never_showable
     showable_if:
+      never: true
+
+  # Usage:
+  #   field_configs:
+  #     field_name:
+  #       <<: *never_show_field
+  field_configs_show_if_never: &never_show_field
+    show_if:
       never: true
 
   # Usage:

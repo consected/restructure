@@ -59,6 +59,9 @@ module CalcActions
       #     table_name: ...
 
       action_conf.each do |condition_type, condition_config_array|
+        # Handle shortcuts
+        condition_type, condition_config_array = handle_shortcuts(condition_type, condition_config_array)
+
         # If the condition definition is not an array, make it one
         condition_config_array = [condition_config_array] unless condition_config_array.is_a? Array
 
@@ -955,6 +958,24 @@ module CalcActions
     # Does the condition request the return of the instance as a result?
     def return_all_results_from_query?
       @this_val_where[:mode] == 'return_all_results'
+    end
+
+    # Allow special shortcut markup to simplify common conditions.
+    # Simply replace these with the full condition definition ahead of processing
+    def handle_shortcuts(condition_type, condition_config_array)
+      return condition_type, condition_config_array unless condition_type && condition_config_array
+
+      case condition_type
+      when :has_created_activity
+        condition_type = :all_completed_activity
+        condition_config_array = [
+            definition_resources: {
+              extra_log_type: condition_config_array
+          }
+        ]
+      end
+
+      return condition_type, condition_config_array
     end
 
     # Logging of results to aid debugging

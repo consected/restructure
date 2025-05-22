@@ -3,8 +3,8 @@
       template_postfix = ''
       template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
 
-      if default_panels.length > 0 && !(initial_show.in?([nil, true, false]))
-        # The "default" overrides the value set in the panel definition, if the panel definition value was nil, true or false
+      if default_panels.length > 0 && initial_show.nil?
+      # The "default" overrides the value set in the panel definition only if the panel definition was not set
         initial_show = resource.to_s.in?(default_panels)
       end
 

@@ -14,9 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.16.1] - 2025-05-20
+### From FPHS - PR #519 - 2025-05-22
 
-## [9.15.1] - 2025-05-20
+- [Changed] handling of extra options YAML to clean it when a dynamic definition is saved, and to make exports unlimited line width to simplify markup
+- [Added] extra options simplified condition `has_created_activity: <extra_log_type>` to simplify configurations - closes #518
+- [Fixed] `<<: *never_creatable` missing from default options
+- [Fixed] "category" not being passed when doing a perform_action "new" for a message_notification - fixes #517
+- [Fixed] page layout initial_show option not working, even if no open_panels option is set - fixes #516
+- [Changed] styling of text areas in admin forms to make them wider
+- [Fixed] configuration notices appearing in an accordian that doesn't operate correctly when viewing app type components - fixes #515
+- [Fixed] dashboard block showing "The requested resource was not found" when no report or resource actually configured - fixes #514
+
+## [9.16.1] - 2025-05-20
 
 - [Build] FPHS version
 
