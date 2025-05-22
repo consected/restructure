@@ -1,6 +1,6 @@
 <% 
-  if default_panels.length > 0 && !(initial_show.in?([nil, true, false]))
-    # The "default" overrides the value set in the panel definition, if the panel definition value was nil, true or false
+  if default_panels.length > 0 && initial_show.nil?
+    # The "default" overrides the value set in the panel definition only if the panel definition was not set
     initial_show = panel_name_us.to_s.in?(default_panels)
   end
   extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click-initial-show' : ''}"
