@@ -3,10 +3,16 @@
 <p><a href="#admin-panel-components">jump to components</a></p>
 <div class="config-error-block">
   <div class="panel-group" id="accordion-notices" role="tablist" aria-multiselectable="true">
-  <% @config_notices.each do |ce| 
+  <% 
+  prev_id = nil
+  sorted_cns = @config_notices.sort_by { |ce| "#{ce[:resource_name]}--#{ce[:name]}--#{ce[:type]}" }
+  sorted_cns.each do |ce| 
+    el_id = "app-type-config-notices-body--#{ce[:resource_name]}--#{ce[:name].id_hyphenate}-#{ce[:type].id_hyphenate}"
+    next if el_id == prev_id
+
+    prev_id = el_id
     head_el_id = "app-type-config-notices-heading--#{ce[:name].id_hyphenate}-#{ce[:type].id_hyphenate}"
-    el_id = "app-type-config-notices-body--#{ce[:name].id_hyphenate}-#{ce[:type].id_hyphenate}"
-    title = "<span class=\"activity-list-name\">#{ce[:name]}</span> - #{ce[:type]}".html_safe
+    title = "<span class=\"activity-list-name\">#{ce[:resource_name]} - #{ce[:name]}</span> - #{ce[:type]}".html_safe
   %>
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%=head_el_id%>">
@@ -21,8 +27,17 @@
       </div>
       <div id="<%=el_id%>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="<%=head_el_id%>">   
         <div class="panel-body">
-          <p><%= ce[:message] %></p>
-          <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+          <% sorted_cns
+              .filter { |cn| "#{cn[:resource_name]}--#{cn[:name]}--#{cn[:type]}" == "#{ce[:resource_name]}--#{ce[:name]}--#{ce[:type]}"}
+              .each do |cn| %>
+              <% if cn[:config_resource_name] %>
+          <p><%= link_to link_label_open_in_new('edit resource'), send("#{cn[:config_object].class.base_route_name.pluralize}_path", filter: {id: cn[:config_object].id}, perform_action: 'edit'), target: '_blank' %><p>
+              <% end %>
+          <div class="config-notice">
+            <p><%= cn[:message] %></p>
+            <pre><%= cn[:config_def].to_yaml.sub("---\n",'') %></pre>
+          </div>
+          <% end %>
         </div>
       </div>
     </div>

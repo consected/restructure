@@ -202,7 +202,7 @@ _fpa.loaded.default = function () {
       if (perform_action == 'new') {
         const $button = $('.add-item-button')
         const prev_url = $button.attr('href');
-        $button.attr('href', `${prev_url}?init_params=${init_params}`);
+        $button.attr('href', `${prev_url}?${init_params}`);
         $button.click();
         $button.attr('href', prev_url);
       }
