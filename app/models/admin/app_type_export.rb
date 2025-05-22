@@ -26,7 +26,19 @@ module Admin::AppTypeExport
     when :json
       JSON.pretty_generate(JSON.parse(to_json))
     when :yaml
-      YAML.dump(JSON.parse(to_json))
+      # Dump to YAML, having first simplified the data through a JSON
+      # dump and parse cycle. Use an unlimited line width to avoid
+      # line breaks in the YAML output.
+      h = JSON.parse(to_json)
+      YAML.dump(h, line_width: -1)
+
+      # In the future we may want to clean up the YAML output
+      # This has the unfortunate side effect that on import,
+      # all of the items with cleaned options will appear as
+      # being changed and will be imported. This may end up overwriting
+      # changes in the target system, which is undesirable.
+      # h = to_json.gsub("\r\n", "\n")
+      # YAML.dump(JSON.parse(h), line_width: -1)
     end
   end
 
