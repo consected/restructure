@@ -74,6 +74,8 @@ module OptionConfigs
         name: name,
         message: message,
         resource_name: resource_name,
+        config_resource_name: @config_obj.class.resource_name,
+        config_object: @config_obj,
         config_def: { type.to_s => send(type)&.deep_stringify_keys }
       }
     end
