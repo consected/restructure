@@ -2,7 +2,7 @@
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <ul class="nav nav-pills details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
-  <%
+  <% # Tabs shown are based on the panels in the page layout.
     drop_down = nil
     prev_drop_down = nil
     tab_panels = panels.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }

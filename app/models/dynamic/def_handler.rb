@@ -5,6 +5,7 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      before_save :clean_options_yaml
       after_save :force_option_config_parse
       after_save :handle_batch_schedule
       attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id
@@ -420,6 +421,17 @@ module Dynamic
       @use_current_version = nil
 
       option_configs force: true, raise_bad_configs: true
+    end
+
+    def clean_options_yaml
+      alt_option_config_attr ||= self.class.option_configs_attr
+      return unless alt_option_config_attr && respond_to?(alt_option_config_attr)
+
+      val = send(alt_option_config_attr)
+      return if val.blank?
+      
+      val = val.dup&.gsub("\r\n", "\n")
+      send("#{alt_option_config_attr}=", val)
     end
 
     #

@@ -17,7 +17,7 @@
 
       template_prefix = 'page-'
       template_prefix = "#{col['template_prefix']}-"  if col['template_prefix']
-
+      no_resource_or_report = false
       unless col_url
         inner_rows = col['rows']
         if inner_rows
@@ -76,6 +76,10 @@
             param_parts.compact!
 
             col_url = "/#{url_parts.join("/")}?#{param_parts.join("&")}"
+          else
+            # No report or resource was specified, so allow just literal header / footer text to be shown
+            # without complaining about a missing resource or report
+            no_resource_or_report = true
           end
         end
       end
@@ -90,7 +94,7 @@
       col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil).html_safe
 
   %>
-    <% if !@master_id && !col_url %>
+    <% if !@master_id && !col_url && !no_resource_or_report %>
     <%= render partial: 'layouts/error_page_block', locals: {error_title: 'Not Found', text: 'The requested resource was not found' } %>
     <% elsif inner_rows %>
     <div class="standalone-page-col-with-rows <%=col_classes%>" id="<%=col_block_id%>">

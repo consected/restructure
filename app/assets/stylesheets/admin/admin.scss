@@ -79,6 +79,9 @@ a.collapsed>.caret {
 
 .admin-edit-form .form-group,
 .admin-edit-form .form-text-area-group {
+  margin: 0 0 8px;
+  width: 400px;
+
   label {
     display: block;
   }
@@ -89,9 +92,12 @@ a.collapsed>.caret {
   }
 }
 
-.admin-edit-form .form-text-area-group {
-  margin: 0 0 8px;
-  width: 400px;
+
+.admin-edit-form .form-group.form-group-wide {
+  width: 800px;
+  .form-text-area-group {
+    width: 800px;
+  }
 }
 
 .admin-edit-form .form-group[data-out-attr-name='description'] {
