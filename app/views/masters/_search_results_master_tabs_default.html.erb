@@ -1,4 +1,6 @@
-<% default_panels = app_config_items(:open_panels) %>
+<% # When no page layout panels are defined, we show all the category tabs.
+   # The app configuration "open panels" sets if any of these are opened by default.
+default_panels = app_config_items(:open_panels) %>
 
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <ul class="nav nav-pills default-master-tabs details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
@@ -60,8 +62,9 @@
          al_panel_name = "activity_log__#{a.item_type_name.pluralize}"
     %>
       <% if master_viewables[a.full_item_types_name.to_sym]
-        # NOTE: show_activity_log_panel option appears to not be presented in the admin UI and is likely to be unused
+        # NOTE: show_activity_log_panel option has been deprecated
         # DO NOT use in the future
+        # Instead, use the "open panels" app configuration
         initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name)
       %>
       <li role="presentation" class="<%= initial_show ? 'on-open-click' : class_for_open_panels(al_panel_name, default_panels.length) %>">
