@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.16.2] - 2025-05-30
+
 - [Fixed] substitution error when an association returns no results - fixes #526
 
 ### From FPHS - PR #519 - 2025-05-22
