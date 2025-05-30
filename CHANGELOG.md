@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] substitution error when an association returns no results - fixes #526
+
 ### From FPHS - PR #519 - 2025-05-22
 
 - [Changed] handling of extra options YAML to clean it when a dynamic definition is saved, and to make exports unlimited line width to simplify markup
