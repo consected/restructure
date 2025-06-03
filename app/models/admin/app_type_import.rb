@@ -71,10 +71,22 @@ class Admin
         if skip_fail && !dry_run
           # We can't skip failures if a dry run has been requested, since a transaction is
           # required for the dry run rollback.
-          import_set
+
+          # Run this skip-fail import in a transaction so the lock can be held.
+          # Just ignore any exceptions raised, committing the transaction.
+          # requires_new ensures that any outer transactions are not rolled back.
+          Admin::AppType.transaction(requires_new: true) do
+            lock_app_types_table
+            import_set
+          rescue StandardError, ActiveRecord::Rollback => e
+            # Log error but continue
+            Rails.logger.warn("App type import error - skip fail and not dry run - : #{e.message}")
+          end
+  
         else
           # Fail on first error and rollback, or if a dry run always rollback
           Admin::AppType.transaction do
+            lock_app_types_table
             import_set
           end
         end
@@ -195,6 +207,15 @@ class Admin
         r.save!
       end
     end
+
+    #
+    # Use within a transation to add an exclusive update lock on the app_types table.
+    # Will return immediately with an exception if another transaction has locked the table.
+    def lock_app_types_table
+      Admin::AppType.connection.execute("LOCK TABLE app_types IN SHARE UPDATE EXCLUSIVE MODE NOWAIT")
+    rescue ActiveRecord::LockWaitTimeout => e
+      raise FphsException, "Cannot import app type - another import is currently in progress"      
+    end  
 
     #
     # Find or create an app type based on a configuration,
