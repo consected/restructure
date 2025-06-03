@@ -450,7 +450,33 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       has_created_activity: '_does_not_exist_'
     }
     res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false    
+
+    conf = {
+      all: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        has_created_activity: '_does_not_exist_'
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    val = res.calc_action_if
+    expect(val).to be false
+
+    conf = {
+      not_any: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
+
   end
 
   it 'checks if nested conditions work' do
