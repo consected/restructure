@@ -14,6 +14,30 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #541 - 2025-06-10
+
+- [Added] return failure value from parallel_specs.sh - resolves #535
+
+### From FPHS - PR #540 - 2025-06-10
+
+- [Added] App Type import "lock" to prevent multiple transactions from running simultaneously - fixes #528
+
+### From FPHS - PR #539 - 2025-06-10
+
+- [Fixed] user roles failing to be created (copied) if template has duplicates with the same name - fixes #531
+
+### From FPHS - PR #538 - 2025-06-10
+
+- [Fixed] substitution error when an association returns no results and subsequent regression - fixes #526 and  #534
+
+### From FPHS - PR #537 - 2025-06-10
+
+- [Added] has_not_created_activity
+- [Fixed] has_created_activity when nested in all:, any:, etc - fixes #532
+- [Changed] reporting of errors in conditional calculations to make debugging easier
+- [Added] more details to failing archive_retrieval_path if no role is set
+- [Fixed] checking for {{template_block...}} in app types breaks if description is NULL - fixes #533
+
 ## [9.17.0] - 2025-05-22
 
 ### From FPHS - PR #519 - 2025-05-22
