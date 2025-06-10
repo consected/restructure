@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.16.3] - 2025-06-10
+
 - [Added] has_not_created_activity
 - [Fixed] has_created_activity when nested in all:, any:, etc - fixes #532
 - [Changed] reporting of errors in conditional calculations to make debugging easier
