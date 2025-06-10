@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] has_not_created_activity
+- [Fixed] has_created_activity when nested in all:, any:, etc - fixes #532
+- [Changed] reporting of errors in conditional calculations to make debugging easier
+- [Added] more details to failing archive_retrieval_path if no role is set
+- [Added] App Type import "lock" to prevent multiple transactions from running simultaneously - fixes #528
+- [Fixed] user roles failing to be created (copied) if template has duplicates with the same name - fixes #531
+
 ## [9.16.2] - 2025-05-30
 
 - [Fixed] substitution error when an association returns no results - fixes #526

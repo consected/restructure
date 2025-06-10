@@ -451,6 +451,86 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false    
+
+    conf = {
+      all: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        this: {
+          id: @al.id
+        },
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        has_created_activity: '_does_not_exist_'
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    val = res.calc_action_if
+    expect(val).to be false
+
+    conf = {
+      not_any: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+  end
+
+  it 'uses has_not_created_activity to check for an extra_log_type in this activity log not having been done' do
+    m = @al.master
+    m.current_user = @user
+
+    conf = {
+      has_not_created_activity: @al.extra_log_type
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      has_not_created_activity: '_does_not_exist_'
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true    
+
+    conf = {
+      all: {
+        has_not_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        has_not_created_activity: '_does_not_exist_'
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    val = res.calc_action_if
+    expect(val).to be true
+
+    conf = {
+      not_any: {
+        has_not_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
   end
 
   it 'checks if nested conditions work' do
@@ -2935,6 +3015,34 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       res = ca.get_this_val
       expect(res).to eq @alref
+    end
+
+    it 'checks a condition based on finding a table ignoring masters' do
+      conf = {
+        all: {
+          no_masters: {},
+          player_contacts: {
+            data: @alref2.master.player_contacts.first.data,
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @alref2
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+
+
+      conf = {
+        all: {
+          no_masters: {},
+          player_contacts: {
+            data: 'bad data'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @alref2
+      res.calc_action_if
+      expect(res.calc_action_if).to be false
+
     end
 
     it 'returns a master.id when looking up MSID in the crosswalk' do
