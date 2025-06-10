@@ -270,7 +270,6 @@ GEM
     marcel (1.0.4)
     matrix (0.4.2)
     memoist (0.16.2)
-    memory_profiler (1.1.0)
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
@@ -320,8 +319,6 @@ GEM
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.1.16)
-    rack-mini-profiler (3.3.1)
-      rack (>= 1.2.0)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -442,7 +439,7 @@ GEM
     sassc-embedded (1.80.4)
       sass-embedded (~> 1.80)
     securerandom (0.4.1)
-    selenium-webdriver (4.33.0)
+    selenium-webdriver (4.28.0)
       base64 (~> 0.2)
       logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
@@ -573,7 +570,6 @@ DEPENDENCIES
   kramdown-parser-gfm
   listen (~> 3.7, >= 3.7.1)
   mail (>= 2.8.0)
-  memory_profiler
   mime-types
   mini_portile2 (>= 2.8.2)
   net-smtp
@@ -581,7 +577,6 @@ DEPENDENCIES
   parallel_tests
   pg (~> 1.4, >= 1.4.3)
   puma (~> 6.0)
-  rack-mini-profiler
   rails (~> 7.0, < 7.3)
   rails-controller-testing
   redcap!
@@ -589,7 +584,7 @@ DEPENDENCIES
   rspec-rails
   rubyzip (~> 2.3.0)
   sassc-embedded
-  selenium-webdriver (~> 4.8)
+  selenium-webdriver (= 4.28.0)
   shoulda-matchers (~> 5.1)
   simple_token_authentication (~> 1.0)!
   simplecov
@@ -599,7 +594,7 @@ DEPENDENCIES
   spring-commands-rspec
   sprockets (~> 4.2)
   sprockets-rails (~> 3.5)
-  stringio
+  stringio (>= 3.1.2)
   strong_password (~> 0.0.5)
   syslog
   syslog-logger
