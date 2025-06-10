@@ -309,13 +309,16 @@ module Formatter
     # @return [Hash] the return data structure
     #
     def self.setup_data(item, alt_item = nil)
-      if item.is_a? Hash
+      if item.is_a?(Hash)
         data = item.dup.symbolize_keys
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
+      elsif item.is_a?(Array)
+        data = item.dup
       elsif item
         item = item.first if item.respond_to? :where
-        data = item.attributes.dup
+        data = item.attributes.dup if item.respond_to?(:attributes)
+        data ||= {}
         data[:original_item] = item
         data[:alt_item] = alt_item
         data['data'] ||= item.data if item.respond_to? :data
@@ -577,6 +580,7 @@ module Formatter
       rescue StandardError => e
         an = ref_parts.join('.').to_sym
         Rails.logger.info "Get associations for #{an} failed: #{e}"
+        Rails.logger.info e.short_string_backtrace
       end
 
       res_data
