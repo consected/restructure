@@ -112,15 +112,22 @@ class Admin::UserRole < Admin::AdminBase
     res.distinct.pluck(:user_id)
   end
 
-  def self.find_user_role_for_user(user, app_type, role_name)
-    user.user_roles.where(app_type: app_type, role_name: role_name).first
+  def self.find_user_role_for_user(user, app_type, role_name, active: false)
+    ur = user.user_roles
+    ur = ur.active if active
+    ur.find_by(app_type: app_type, role_name: role_name)
   end
 
+  #
+  # Add the user role, or enable an existing matching role if one exists that was disabled
   def self.add_to_role(user, app_type, role_name, admin)
-    res = find_user_role_for_user user, app_type, role_name
+    res = find_user_role_for_user(user, app_type, role_name)
+    res_active = find_user_role_for_user(user, app_type, role_name, active: true)
     if res
-      res.with_admin(admin).enable! if res.disabled?
+      # Enable the role that was found, if it is disabled and there is not already a matching active role for the user
+      res.with_admin(admin).enable! if res.disabled? && !res_active
     else
+      # No role was found, so just create it
       user.user_roles.create!(app_type: app_type, role_name: role_name, disabled: false, current_admin: admin)
     end
   end
