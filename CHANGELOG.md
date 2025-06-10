@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] return failure value from parallel_specs.sh - resolves #535
+- [Fixed] regression introduced in #526 - fixes #534
+
 ## [9.16.3] - 2025-06-10
 
 - [Added] has_not_created_activity
