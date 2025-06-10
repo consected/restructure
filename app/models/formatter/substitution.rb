@@ -309,10 +309,12 @@ module Formatter
     # @return [Hash] the return data structure
     #
     def self.setup_data(item, alt_item = nil)
-      if item.is_a? Hash
+      if item.is_a?(Hash)
         data = item.dup.symbolize_keys
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
+      elsif item.is_a?(Array)
+        data = item.dup
       elsif item
         item = item.first if item.respond_to? :where
         data = item.attributes.dup if item.respond_to?(:attributes)
