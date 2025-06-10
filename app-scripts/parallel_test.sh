@@ -64,6 +64,8 @@ echo "Requested specs: ${specs}"
 pwd
 echo "========================================================================"
 
+rm -f tmp/parallel_specs_failed.txt
+
 for spec in ${specs}; do
   echo "========================================================================"
   echo "==>>>> Running parallel specs for '${spec}'"
@@ -76,7 +78,7 @@ for spec in ${specs}; do
   rm -rf /var/tmp/nfs_store_tmp*
   rm -rf /var/tmp/nfs_store_test*
 
-  RAILS_ENV=test bundle exec rake parallel:spec["${spec}"] &
+  RAILS_ENV=test bundle exec rake parallel:spec["${spec}"] || echo 'failed' > tmp/parallel_specs_failed.txt &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
     sleep 5
   done
@@ -105,3 +107,13 @@ mv tmp/working_failing_specs.log tmp/failing_specs.log
 
 echo "Started at  ${start_date}" >> tmp/failing_specs.log
 echo "Finished at $(date)" >> tmp/failing_specs.log
+
+if [ -f tmp/parallel_specs_failed.txt ]; then
+  echo "Parallel specs failed. Check tmp/failing_specs.log for details."
+  exit 1
+else
+  echo "All parallel specs passed."
+  exit 0
+fi
+
+
