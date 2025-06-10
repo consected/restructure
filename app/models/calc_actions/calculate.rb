@@ -106,7 +106,7 @@ module CalcActions
             break unless @loop_res
           rescue StandardError => e
             details = log_results(log_level: nil)
-            raise e, "Error in do_calc_action_if, with details:\n#{details.join("\n")}", e.backtrace
+            raise e, "Error in do_calc_action_if, with details:\n#{details&.join("\n")}", e.backtrace
           end
         end
 
@@ -1008,10 +1008,9 @@ module CalcActions
     #
     # Logging of results to aid debugging
     # @param [Symbol|nil] log_level to use for regular logging, or nil to just return the details
-    # @param [true|nil] force logging even in production mode
     # @return [Array] of message details
-    def log_results(log_level: :debug, force: nil)
-      return if Rails.env.production? && !force && !log_level
+    def log_results(log_level: :debug)
+      return if Rails.env.production? && log_level == :debug
 
       details = []
       begin
@@ -1030,7 +1029,6 @@ module CalcActions
         details << YAML.dump(@action_conf.deep_stringify_keys)
         details << '*******************************************************************************************'
         Rails.logger.send log_level, details.join("\n") if log_level
-        details
       rescue StandardError => e
         details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                           " - @orig_loop_res: #{@orig_loop_res}"
@@ -1041,6 +1039,7 @@ module CalcActions
         Rails.logger.warn details.join("\n")
         raise e, "Failure in log_results: #{e}", e.backtrace
       end
+      details
     end
   end
 end
