@@ -615,6 +615,18 @@ module CalcActions
     # Setup the condition config for this loop's condition
     # @param [Hash] condition_config
     def setup_condition_config(condition_config)
+
+      extras = {}
+      condition_config.each do |orig_condition_type, condition_config_array|
+        condition_type = orig_condition_type
+        condition_type, condition_config_array, changed = handle_shortcuts(condition_type, condition_config_array)
+        next unless changed
+
+        condition_config.delete(orig_condition_type)
+        extras[condition_type] = condition_config_array
+      end
+      condition_config.merge!(extras) if extras.present?
+      
       @condition_config = condition_config.dup
 
       iem = @condition_config.delete(:invalid_error_message)
@@ -970,6 +982,7 @@ module CalcActions
     def handle_shortcuts(condition_type, condition_config_array)
       return condition_type, condition_config_array unless condition_type && condition_config_array
 
+      changed = true
       case condition_type
       when :has_created_activity
         condition_type = :all_completed_activity
@@ -978,9 +991,18 @@ module CalcActions
               extra_log_type: condition_config_array
           }
         ]
+      when :has_not_created_activity
+        condition_type = :not_any_completed_activity
+        condition_config_array = [
+            definition_resources: {
+              extra_log_type: condition_config_array
+          }
+        ]
+      else
+        changed = false
       end
 
-      return condition_type, condition_config_array
+      return condition_type, condition_config_array, changed
     end
 
     #
