@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.16.5] - 2025-06-11
+
 - [Fixed] when attempting to disable a page layout configuration, it still checks for uniqueness of the name - fixes #524
 - [Fixed] add_tracker setting event_date from a condition reference doesn't work - fixes #542
 - [Fixed] Activity subprocess for activity logs is not created as new protocols are added - fixes #543
