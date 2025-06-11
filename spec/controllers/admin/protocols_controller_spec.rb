@@ -31,10 +31,10 @@ RSpec.describe Admin::ProtocolsController, type: :controller do
       delete from protocol_event_history;
       delete from protocol_events;
       delete from sub_process_history;
-      delete from sub_processes;
+      delete from sub_processes where name <> 'record updates';
       delete from protocol_history;
-      delete from protocols;
-    "
+      delete from protocols where name <> 'Updates';    
+      "
   end
   it_behaves_like 'a standard admin controller'
 end
