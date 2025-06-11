@@ -53,5 +53,10 @@ describe Classification::Protocol do
       expect(pa.name).to eq "new name by me"
     end
     
+    it 'updates activity log tracker events when a protocol is created' do
+      p = create_item name: "Test tracker events #{Time.now.to_f}"
+      expect(p.sub_processes.pluck(:name)).to include('Activity')
+    end
+
   end
 end
