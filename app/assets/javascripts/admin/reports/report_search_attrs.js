@@ -257,6 +257,16 @@ class ReportSearchAttr {
     this.def_block.filter_selector = val;
   }
 
+  get show_if() {
+    return this.def_block.show_if;
+  }
+
+  set show_if(val) {
+    if (!val) return;
+
+    this.def_block.show_if = val;
+  }
+
   get yaml() {
     return jsyaml.dump(this.hash);
   }

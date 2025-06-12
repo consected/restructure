@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] base_master_segment to support URL generation
+- [Changed] handling of exceptions if a master is not set when it should be
+- [Fixed] report failing when an embedded_block is used and the data to form the URL varies based on the resource being queried
+- [Added] extra attributes for SQL substitutions (and report criteria / descriptions)
+- [Changed] handling of substitutions into report descriptions to use more details related to the table being accessed
+- [Added] show_if configuration to search criteria field, allowing it to be conditionally shown
+- [Fixed] disappearing error notice when areport is run automatically when saving the definition in the admin panel
+
 ## [9.16.5] - 2025-06-11
 
 - [Fixed] when attempting to disable a page layout configuration, it still checks for uniqueness of the name - fixes #524
