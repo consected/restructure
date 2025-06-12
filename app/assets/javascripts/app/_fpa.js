@@ -9,6 +9,7 @@ _fpa = {
     template_config_versions: {},
   },
 
+  before_send_processors: {},
   view_handlers: {},
   app_specific: {},
   version: '0',
@@ -461,6 +462,18 @@ _fpa = {
     }
   },
 
+  // Preprocess data before it is sent (submitted forms, for example)
+  // Add the data-before-send-processor="<function name>" to the form block
+  // Ensure there is a matching function in _fpa.before_send_processors object.
+  
+  do_before_send: function (block, alt_proc) {
+    const proc = block.attr('data-before-send-processor');
+    if (!proc) return;
+
+    const fn = _fpa.before_send_processors[proc];
+    if (fn) fn(block);
+  },
+
   // Run preprocessing function
   // Use the *pre* argument as the primary function name to use
   // If not found using this, and alt_preprocessor is specified, try this instead
@@ -619,6 +632,8 @@ _fpa = {
         }
 
         _fpa.preprocessors.before_all(block);
+        _fpa.do_before_send(block);
+
         _fpa.ajax_working(block);
         _fpa.form_utils.set_field_errors(block);
 
