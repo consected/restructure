@@ -38,6 +38,8 @@ module ReportsHelper
       raise FphsException, "Bad report field config configured: #{config}"
     end
 
+    return unless report_criteria_show_if(name, config, value, options)
+
     value ||= report_field_default config
     main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize(keep_id_suffix: true).captionize)
     main_field += report_criteria_multiple_field(name, config, value, options) ||
@@ -221,5 +223,15 @@ module ReportsHelper
                             .uniq
       options_for_select res
     end
+  end
+
+  def report_criteria_show_if(name, config, value, options)    
+    return true unless config.show_if
+
+    d = @report.attributes
+                 .merge(@runner.data_reference.substitution_data)
+                 .merge(criteria_field: name, criteria_value: value, criteria_options: options)
+    res = Formatter::Substitution.substitute(config.show_if, data: d, ignore_missing: :show_tag)
+    res&.strip&.present?
   end
 end
