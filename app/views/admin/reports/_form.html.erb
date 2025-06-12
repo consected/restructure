@@ -5,7 +5,7 @@
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-report <% if @updated_with %>saved-item<% end %>">
       <div class="row">
         <div class="col-sm-12" style="text-align: left">
-        <%= form_for(@report, url: url, remote: true, html:{class: "form-formatted keep-notices"}) do |f| %>
+        <%= form_for(@report, url: url, remote: true, html: { class: "form-formatted keep-notices", 'data-before-send-processor': "report_admin_form" }) do |f| %>
           <%= render partial: 'admin_handler/form_errors' %>
           <%= render partial: 'admin/reports/form/fields', locals: {f: f} %>
           <div class="report-admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right" %></div>
