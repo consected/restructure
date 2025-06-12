@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.16.6] - 2025-06-12
+
 - [Added] base_master_segment to support URL generation
 - [Changed] handling of exceptions if a master is not set when it should be
 - [Fixed] report failing when an embedded_block is used and the data to form the URL varies based on the resource being queried
