@@ -30,7 +30,7 @@ module Formatter
     ValidMethodsAsAttributes = { player_infos: %i[subject_age rank_name] }.freeze
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
-                            definition_resource_name definition_item_type_name].freeze
+                            definition_resource_name definition_item_type_name table_name schema_name].freeze
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items

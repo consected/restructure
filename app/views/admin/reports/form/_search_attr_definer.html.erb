@@ -155,6 +155,16 @@ field2 (any of):
             <p class="help-block">For multiple values, enter each value on a new line.</p>
           </div>
         </div>
+
+        <div class="report-admin-subblock">
+          <div class="report-admin-sb-item">show if</div>
+          <p class="help-block">Use {{substitutions}} to return a value based on a condition. If nothing is set, the field is always shown. Otherwise, if the substitutions return any non-blank value then the field is shown.</p>
+          <div class="report-admin-sb-field-block">
+            <textarea id="search_attrs_show_if" data-attr-el="show_if"></textarea>
+            <p class="help-block">For example <code>{{#is col_names "includes" "master_id"}}true{{/is}}</code></p>
+          </div>
+        </div>
+
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item"></div>
           <div class="report-admin-sb-item-submit">
