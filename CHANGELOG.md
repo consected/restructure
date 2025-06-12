@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.16.7] - 2025-06-12
+
 - [Fixed] Web Application Firewall (WAF) blocks definition of reports in admin console - it assumes the SQL is an attempt at SQL injection - fixes #527
 
 ## [9.16.6] - 2025-06-12
