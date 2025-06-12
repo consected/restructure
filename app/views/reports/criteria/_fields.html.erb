@@ -16,10 +16,14 @@ configs.each do |name, config|
   # Add up to 4 fields to a row. Restart the row every 4
 %>
   <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%>
+  <% 
+      field_res = report_criteria_field name, config, field_val, options 
+      next if field_res.blank?
+  %>
   <div class="col-md-8 col-lg-6 <%= config.hidden ? 'hidden' : '' %>" style="padding-bottom: 1em;">
-    <%= report_criteria_field name, config, field_val, options %>
+    <%= field_res %>
   </div>
 <% 
-  i += 1
+  i += 1 unless config.hidden
 end # all fields have been added
 %>
