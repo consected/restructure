@@ -10,7 +10,7 @@ class Admin::AppConfigurationsController < AdminController
   def filters
     {
       name: Admin::AppConfiguration.configurations,
-      app_type_id: Admin::AppType.all_by_name
+      app_type_id: Admin::AppType.all_by_name.merge('IS NULL': '(default)')
     }
   end
 

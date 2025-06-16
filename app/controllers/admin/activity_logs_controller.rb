@@ -45,11 +45,6 @@ class Admin::ActivityLogsController < AdminController
   # Override to specify attributes to initialize a definition with
   # @return [Hash]
   def init_new_with_attrs
-    {
-      extra_log_types: <<~END_CONFIG
-        _configurations:
-          use_current_version: true
-      END_CONFIG
-    }
+    initial_attrs_config_for(:default_options_activity_log)
   end
 end

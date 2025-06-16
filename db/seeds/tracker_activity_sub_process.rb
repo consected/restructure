@@ -14,7 +14,7 @@ module Seeds
         a.update_tracker_events
       end
 
-      log '- Handing DynamicModel'
+      log '- Handling DynamicModel'
       DynamicModel.active.each do |a|
         a.current_admin = admin
         a.update_tracker_events
