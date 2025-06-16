@@ -11,6 +11,10 @@
 class Admin::AppConfiguration < Admin::AdminBase
   self.table_name = 'app_configurations'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include SelectorCache
   include AppTyped
