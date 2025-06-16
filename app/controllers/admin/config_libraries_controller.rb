@@ -19,6 +19,15 @@ class Admin::ConfigLibrariesController < AdminController
     { updated_at: :desc }
   end
 
+  def before_send_processor
+    'config_libraries_admin_form'
+  end
+
+  def encode_options_fields
+    { options: :base64 }
+  end
+
+
   def filters
     {
       category: Admin::ConfigLibrary.active.pluck(:category).uniq.compact,
