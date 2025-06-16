@@ -1,15 +1,3 @@
-// Provide a namespace for admin classes
-var _fpa_admin = {
-  all: {},
-  activity_logs: {},
-  dynamic_models: {},
-  external_identifiers: {},
-  reports: {},
-  user_access_controls: {},
-  user_roles: {}
-}
-
-
 _fpa.postprocessors_admin = {
 
   // When an edit form is shown
