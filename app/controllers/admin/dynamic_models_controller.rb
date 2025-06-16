@@ -23,6 +23,14 @@ class Admin::DynamicModelsController < AdminController
 
   protected
 
+  def before_send_processor
+    'dynamic_models_admin_form'
+  end
+
+  def encode_options_fields
+    { options: :base64 }
+  end
+
   def routes_reload
     DynamicModel.routes_reload
   end
