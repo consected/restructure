@@ -68,11 +68,6 @@ class Admin::ExternalIdentifiersController < AdminController
   # Override to specify attributes to initialize a definition with
   # @return [Hash]
   def init_new_with_attrs
-    {
-      options: <<~END_CONFIG
-        _configurations:
-          use_current_version: true
-      END_CONFIG
-    }
+    initial_attrs_config_for(:default_options_external_identifier)
   end
 end

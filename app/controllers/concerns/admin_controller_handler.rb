@@ -375,6 +375,28 @@ module AdminControllerHandler
     {}
   end
 
+  def initial_attrs_config_for(key)
+    res = app_config_text(key, '')
+    return {} if res.strip.blank?
+
+    app_type = current_admin.matching_user&.app_type
+    subs = {
+      default_schema_name: primary_model.default_schema_name(app_type:),
+      default_category: primary_model.default_category(app_type:)
+    }
+
+    vals = YAML.safe_load(res)
+    vals.transform_values do |v| 
+      res = if v.is_a?(Hash) 
+              v = YAML.dump(v)&.sub(/^---\n/, '')
+            else 
+              v 
+            end
+      Formatter::Substitution.substitute(res, data: subs, ignore_missing: true)
+    end
+  end
+
+
   #
   # Return a hash of fields to be encoded - override in individual admin controllers
   # Use the value for each to specify the encoding type, for example: 
