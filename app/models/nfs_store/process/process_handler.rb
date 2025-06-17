@@ -132,7 +132,6 @@ module NfsStore
       #
       # Set the status of #last_process_name_run to *name*
       # for all container files
-      # rubocop:disable Style/AccessorMethodName
       def set_container_file_statuses(name)
         self.class.set_container_file_statuses(name, container_files)
       end
@@ -147,7 +146,6 @@ module NfsStore
           container_file.save!
         end
       end
-      # rubocop:enable Style/AccessorMethodName
 
       def self.job_class(name)
         classname = "#{name}_job".camelize
@@ -226,6 +224,7 @@ module NfsStore
       def self.setup_container_file_current_user(container_file, in_app_type_id)
         user = container_file.user
         if user.disabled
+          Rails.logger.warn "Job container file user (#{user.id}) is disabled, using batch user instead for app type: #{in_app_type_id}"
           orig_user = user
           user = User.use_batch_user(in_app_type_id)
           has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
@@ -235,7 +234,14 @@ module NfsStore
                   "nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
           end
         end
+
         container_file.current_user = user
+        return user if container_file.current_role_name
+
+        Rails.logger.info "Setting current role name for user #{user.id} in app type #{in_app_type_id}"
+        file_path, role_name = container_file.file_path_and_role_name
+        container_file.current_role_name = role_name
+        user
       end
     end
   end
