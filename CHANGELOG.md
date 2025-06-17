@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.18.1] - 2025-06-17
+
 - Rebuild
 
 ## [9.18.0] - 2025-06-17
