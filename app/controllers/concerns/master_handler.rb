@@ -402,7 +402,13 @@ module MasterHandler
     id = params[:id]
     found_inst = primary_model.find_by_id_or_secondary_key(id)
     set_object_instance found_inst
-    object_instance.master.current_user = current_user unless primary_model.no_master_association
+    if primary_model.no_master_association
+      object_instance.current_user = current_user 
+    elsif object_instance.master.nil?
+      raise FphsException, "No master set for item"
+    else
+      object_instance.master.current_user = current_user 
+    end
     @id = object_instance.id
   end
 

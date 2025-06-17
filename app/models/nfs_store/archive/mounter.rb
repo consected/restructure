@@ -341,6 +341,8 @@ module NfsStore
 
           container = stored_file.container
 
+          Rails.logger.warn "stored_file.current_role_name is nil - the following operations may fail" unless stored_file.current_role_name
+
           all_afs = []
           files.each do |f|
             pn = Pathname.new f
@@ -365,7 +367,8 @@ module NfsStore
                 all_afs << af
               rescue StandardError => e
                 failures += 1
-                Rails.logger.warn "Failure (#{failures}) during extract_archived_files. #{e}\n#{e.backtrace.join("\n")}"
+                Rails.logger.warn "Failure (#{failures}) during extract_archived_files. #{e}"
+                Rails.logger.warn e.short_string_backtrace
                 # Continue on to the next one.
               end
             end

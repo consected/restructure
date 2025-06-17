@@ -197,7 +197,7 @@ module ReportResults
       split_url = split_url.reject(&:blank?)
       id = split_url.last
       master_id = split_url[1] if split_url.first == 'masters'
-      hyph_name = split_url[-2].hyphenate.singularize
+      hyph_name = split_url[-2]&.hyphenate&.singularize || ''
 
       html = <<~END_HTML
         <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true">#{a_text}</a>

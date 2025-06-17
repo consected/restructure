@@ -21,6 +21,7 @@ class Classification::Protocol < ActiveRecord::Base
 
   validates :name, presence: true
   before_save :reset_memos
+  after_save :create_activity_tracker_events
 
   def self.position_attribute
     :position
@@ -62,5 +63,12 @@ class Classification::Protocol < ActiveRecord::Base
     Classification::SubProcess.reset_memos
     Classification::ProtocolEvent.reset_memos
     reset_record_updates_protocol!
+  end
+
+  def create_activity_tracker_events
+    ActivityLog.active.each do |a|
+      a.current_admin = current_admin
+      a.update_tracker_events
+    end
   end
 end

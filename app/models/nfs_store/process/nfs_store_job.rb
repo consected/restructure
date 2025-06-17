@@ -97,6 +97,7 @@ module NfsStore
             msg = "Job #{name} failed for file #{job_container_file} : #{e} : #{job}"
             puts msg unless Rails.env.test?
             Rails.logger.warn msg
+            Rails.logger.warn e.short_string_backtrace
             NfsStore::Process::ProcessHandler.set_container_file_statuses "failed: #{name}", job_container_file
             job_process_handler.clear_processing_flags
             ApplicationJob.notify_failure job, e
@@ -104,6 +105,7 @@ module NfsStore
             msg = "Job #{name} failed in rescue: #{e2} : #{job}"
             puts msg
             Rails.logger.warn msg
+            Rails.logger.error e.backtrace.join("\n")
             ApplicationJob.notify_failure job, e
           end
           raise

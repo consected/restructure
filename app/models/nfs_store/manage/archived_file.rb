@@ -54,7 +54,7 @@ module NfsStore
       # Full retrieval path for the specific archive file within the mounted archive
       # @return [String] full path
       def archive_retrieval_path
-        raise FsException::Container, 'No current role name set' unless current_role_name
+        raise FsException::Container, "No current role name set - #{current_user} - #{user_id}" unless current_role_name
 
         path_for role_name: current_role_name
       end

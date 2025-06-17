@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
 module AdminControllerHandler
+  EncodingToken = { base64: "<Base64Encoded>" }.freeze
   extend ActiveSupport::Concern
 
   included do
     before_action :init_vars_admin_controller_handler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: %i[edit update destroy]
-
+    before_action :handle_options_encoding, only: [:create, :update]
+  
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
                   :help_section, :help_subsection, :title, :sub_title, :no_create, :show_head_info, :view_folder,
-                  :no_options_field, :admin_labels, :filters_prevent_disabled
+                  :no_options_field, :admin_labels, :filters_prevent_disabled, :before_send_processor
   end
 
   def index
@@ -143,6 +145,14 @@ module AdminControllerHandler
   def filters_prevent_disabled
     false
   end
+
+  #
+  # Override to specify _fpa.before_send_processors.<method name>
+  # if processing of the admin form is required before sending to the client.
+  def before_send_processor
+    nil
+  end
+
 
   #
   # Alternative labels to use for admin form fields
@@ -364,4 +374,64 @@ module AdminControllerHandler
   def init_new_with_attrs
     {}
   end
+
+  def initial_attrs_config_for(key)
+    res = app_config_text(key, '')
+    return {} if res.strip.blank?
+
+    app_type = current_admin.matching_user&.app_type
+    subs = {
+      default_schema_name: primary_model.default_schema_name(app_type:),
+      default_category: primary_model.default_category(app_type:)
+    }
+
+    vals = YAML.safe_load(res)
+    vals.transform_values do |v| 
+      res = if v.is_a?(Hash) 
+              v = YAML.dump(v)&.sub(/^---\n/, '')
+            else 
+              v 
+            end
+      Formatter::Substitution.substitute(res, data: subs, ignore_missing: true)
+    end
+  end
+
+
+  #
+  # Return a hash of fields to be encoded - override in individual admin controllers
+  # Use the value for each to specify the encoding type, for example: 
+  #     { options: :base64, sql: :base64 }
+  # @return [nil|Hash]
+  def encode_options_fields
+    nil
+  end
+
+  #
+  # On update or creates, check if the SQL field has been base64 encoded on the front end.
+  # The EncodingToken[encoding_type] token will be prepended if this is the case.
+  # The SQL field is then decoded and the token is removed, so that the report definition
+  # can be saved in the original plain text format.
+  # The rationale for this is to avoid WAFs blocking requests that appear to be SQL injection.
+  def handle_options_encoding
+    return unless encode_options_fields
+
+    encode_options_fields.each do |field, encoding_type|
+      next unless secure_params[field].present?
+
+      encoding_token = EncodingToken[encoding_type]
+      options = secure_params[field]
+      next unless options&.start_with?(encoding_token)
+      
+      b64options = options.sub(encoding_token, '')
+
+      case encoding_type
+      when :base64
+        options = Base64.decode64(b64options)
+        secure_params[field].sub!(/.*/, options)
+      else
+        raise FphsException, "Unknown encoding type: #{encoding_type} for field: #{field}"
+      end
+    end
+  end
+
 end

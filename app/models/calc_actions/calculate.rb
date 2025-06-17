@@ -79,30 +79,35 @@ module CalcActions
 
         # For each condition config definition, run the main tests
         condition_config_array.each do |condition_config|
-          setup_condition_config(condition_config)
-          calc_base_query
+          begin
+            setup_condition_config(condition_config)
+            calc_base_query
 
-          #### :all ####
-          case @condition_type
-          when :all
-            condition_type_all
-          #### :not_all ####
-          when :not_all
-            condition_type_not_all
-          #### :any ####
-          when :any
-            condition_type_any
-          #### :not_any ####
-          when :not_any
-            condition_type_not_any
-          else
-            raise FphsException, "Incorrect condition type specified when calculating action if: #{@condition_type}"
+            #### :all ####
+            case @condition_type
+            when :all
+              condition_type_all
+            #### :not_all ####
+            when :not_all
+              condition_type_not_all
+            #### :any ####
+            when :any
+              condition_type_any
+            #### :not_any ####
+            when :not_any
+              condition_type_not_any
+            else
+              raise FphsException, "Incorrect condition type specified when calculating action if: #{@condition_type}"
+            end
+
+            log_results
+
+            # We can end the loop, unless the last result was a success
+            break unless @loop_res
+          rescue StandardError => e
+            details = log_results(log_level: nil)
+            raise e, "Error in do_calc_action_if, with details:\n#{details&.join("\n")}", e.backtrace
           end
-
-          log_results
-
-          # We can end the loop, unless the last result was a success
-          break unless @loop_res
         end
 
         final_res &&= @loop_res
@@ -610,6 +615,18 @@ module CalcActions
     # Setup the condition config for this loop's condition
     # @param [Hash] condition_config
     def setup_condition_config(condition_config)
+
+      extras = {}
+      condition_config.each do |orig_condition_type, condition_config_array|
+        condition_type = orig_condition_type
+        condition_type, condition_config_array, changed = handle_shortcuts(condition_type, condition_config_array)
+        next unless changed
+
+        condition_config.delete(orig_condition_type)
+        extras[condition_type] = condition_config_array
+      end
+      condition_config.merge!(extras) if extras.present?
+      
       @condition_config = condition_config.dup
 
       iem = @condition_config.delete(:invalid_error_message)
@@ -965,6 +982,7 @@ module CalcActions
     def handle_shortcuts(condition_type, condition_config_array)
       return condition_type, condition_config_array unless condition_type && condition_config_array
 
+      changed = true
       case condition_type
       when :has_created_activity
         condition_type = :all_completed_activity
@@ -973,34 +991,55 @@ module CalcActions
               extra_log_type: condition_config_array
           }
         ]
+      when :has_not_created_activity
+        condition_type = :not_any_completed_activity
+        condition_config_array = [
+            definition_resources: {
+              extra_log_type: condition_config_array
+          }
+        ]
+      else
+        changed = false
       end
 
-      return condition_type, condition_config_array
+      return condition_type, condition_config_array, changed
     end
 
+    #
     # Logging of results to aid debugging
-    def log_results
-      return if Rails.env.production?
+    # @param [Symbol|nil] log_level to use for regular logging, or nil to just return the details
+    # @return [Array] of message details
+    def log_results(log_level: :debug)
+      return if Rails.env.production? && log_level == :debug
 
+      details = []
       begin
-        Rails.logger.debug "**#{@orig_cond_type}***********************************************************************"
-        Rails.logger.debug "this instance: #{@current_instance.id}"
-        Rails.logger.debug "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
+        details << "*************************************************************************"
+        details << "original condition type: #{@orig_cond_type}"
+        details << "this instance: #{@current_instance.id}"
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                            " - @orig_loop_res: #{@orig_loop_res}"
-        Rails.logger.debug @condition_config
-        Rails.logger.debug @non_query_conditions&.conditions
-        Rails.logger.debug @base_query.to_sql if @base_query
-        Rails.logger.debug @condition_scope.to_sql if @condition_scope
-        Rails.logger.debug '*******************************************************************************************'
+        details << 'condition_config:'
+        details << YAML.dump(@condition_config.deep_stringify_keys)
+        details << 'non_query_conditions:'
+        details << YAML.dump(@non_query_conditions&.conditions) rescue nil
+        details << @base_query.to_sql rescue nil if @base_query
+        details << @condition_scope.to_sql rescue nil if @condition_scope
+        details << 'full conditions:'
+        details << YAML.dump(@action_conf.deep_stringify_keys)
+        details << '*******************************************************************************************'
+        Rails.logger.send log_level, details.join("\n") if log_level
       rescue StandardError => e
-        Rails.logger.warn "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                           " - @orig_loop_res: #{@orig_loop_res}"
-        Rails.logger.warn @condition_config
-        Rails.logger.warn @join_tables
-        Rails.logger.warn JSON.pretty_generate(@action_conf)
-        Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
-        raise e
+        details << @condition_config
+        details << @join_tables
+        details << JSON.pretty_generate(@action_conf)
+        details << "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+        Rails.logger.warn details.join("\n")
+        raise e, "Failure in log_results: #{e}", e.backtrace
       end
+      details
     end
   end
 end

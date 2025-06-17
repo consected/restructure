@@ -30,7 +30,8 @@ module Formatter
     ValidMethodsAsAttributes = { player_infos: %i[subject_age rank_name] }.freeze
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
-                            definition_resource_name definition_item_type_name].freeze
+                            definition_resource_name definition_item_type_name table_name schema_name
+                            default_schema_name].freeze
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
@@ -187,6 +188,8 @@ module Formatter
     # @return [Object|nil]
     def self.substitute_plain(content, data: {})
       tagnames = content.match(/{{{(.+)}}}/)
+      return content unless tagnames
+
       tagname = tagnames[1]
       return unless tagname
 
@@ -262,7 +265,7 @@ module Formatter
                       ''
                     end
                   else
-                    get_tag_value d, tag
+                    get_tag_value d, tag, original_type:
                   end
 
       # Handle the formatting of html tags for tag substitutions, if they have been specified
@@ -309,13 +312,16 @@ module Formatter
     # @return [Hash] the return data structure
     #
     def self.setup_data(item, alt_item = nil)
-      if item.is_a? Hash
+      if item.is_a?(Hash)
         data = item.dup.symbolize_keys
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
+      elsif item.is_a?(Array)
+        data = item.dup
       elsif item
         item = item.first if item.respond_to? :where
-        data = item.attributes.dup
+        data = item.attributes.dup if item.respond_to?(:attributes)
+        data ||= {}
         data[:original_item] = item
         data[:alt_item] = alt_item
         data['data'] ||= item.data if item.respond_to? :data
@@ -438,9 +444,10 @@ module Formatter
     #
     # @param [Hash] data from {substitute}
     # @param [String] tag_and_operator tag name and optionally formatting operators after ::
+    # @param [Boolean] original_type - if true, return the original type of the tag value, without formatting based on the class
     # @return [String] result
     #
-    def self.get_tag_value(data, tag_and_operator)
+    def self.get_tag_value(data, tag_and_operator, original_type: nil)
       tagp = tag_and_operator.split('::')
       tag = tagp.first
 
@@ -464,7 +471,7 @@ module Formatter
 
       res = orig_val || ''
 
-      res = Formatter::Formatters.formatter_do(res.class, res, current_user:)
+      res = Formatter::Formatters.formatter_do(res.class, res, current_user:) unless original_type
 
       return if res.nil? && tagp[1] != 'ignore_missing'
 
@@ -577,6 +584,7 @@ module Formatter
       rescue StandardError => e
         an = ref_parts.join('.').to_sym
         Rails.logger.info "Get associations for #{an} failed: #{e}"
+        Rails.logger.info e.short_string_backtrace
       end
 
       res_data
