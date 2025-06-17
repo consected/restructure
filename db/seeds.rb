@@ -15,6 +15,30 @@ module Seeds
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
     # puts "#{Time.now} Starting seed setup"
 
+    so = ENV['SEED_ONLY']
+    if so
+      log "Running seed setup from environment variable SEED_ONLY: #{so}"
+      list = so.split(',').map(&:strip)
+      do_list list
+    else
+      log "Running all seed setup"
+      do_all
+    end
+
+    Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
+    # puts "#{Time.now} Completed seed setup"
+    $seed_results
+
+  end
+
+  def self.do_list(list)
+    list.each do |c|
+      s = Seeds.const_get(c)
+      s.setup
+    end
+  end
+
+  def self.do_all
     do_last = []
     do_first = []
     do_mid = []
@@ -33,10 +57,6 @@ module Seeds
     do_first.each(&:setup)
     do_mid.each(&:setup)
     do_last.each(&:setup)
-
-    Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
-    # puts "#{Time.now} Completed seed setup"
-    $seed_results
   end
 end
 

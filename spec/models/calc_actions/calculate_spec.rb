@@ -1725,6 +1725,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     EOF_YAML
 
     conf = setup_config(confy)
+    @alnor.reset_model_references
 
     # We have two references
     expect(@alnor.model_references.count).to eq 3 # two addresses and one activity log

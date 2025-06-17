@@ -36,14 +36,14 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
                                      resource_name: :create_master, current_admin: @admin, user: @user
 
-    ac = Admin::AppConfiguration.active.where(app_type: @user.app_type, name: 'create master with').first
+    ac = Admin::AppConfiguration.active.find_by(app_type: @user.app_type, name: 'create master with')
 
     if ac
       ac.value = 'player_info'
       ac.current_admin = @admin
       ac.updated_at = DateTime.now
       ac.save!
-    else
+    else      
       Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info',
                                       current_admin: @admin
     end
@@ -52,6 +52,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     raise "Player List college is blank: #{bp}" if bp
 
     setup_access :addresses
+    setup_access :player_infos
+    setup_access :player_infos, user: @user
     setup_access :addresses, user: @user
     setup_access :player_contacts
     setup_access :player_contacts, user: @user
@@ -304,14 +306,19 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     validate_setup
 
     # login_as @user, scope: :user
+    expect(@user.has_access_to?(:create, :table, :player_infos))
     expect(@user.has_access_to?(:create, :table, :player_contacts))
     expect(@user.has_access_to?(:read, :general, :create_master))
     login
   end
 
   it 'should allow a new MSID and player information to be added' do
+    expect(@user.has_access_to?(:create, :table, :player_infos))
     expect(@user.has_access_to?(:create, :table, :player_contacts))
     expect(@user.has_access_to?(:read, :general, :create_master))
+
+    ac = Admin::AppConfiguration.active.find_by(app_type: @user.app_type, name: 'create master with')
+    expect(ac.value).to eq('player_info')
 
     visit '/masters/search'
     finish_page_loading

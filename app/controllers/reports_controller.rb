@@ -67,7 +67,7 @@ class ReportsController < UserBaseController
     set_search_attrs
     @force_view_as = params[:force_view_as] if current_admin && params[:force_view_as].present?
 
-    if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
+    if params[:search_attrs].present? && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -462,7 +462,7 @@ class ReportsController < UserBaseController
   # Permit everything, since this is not used for assignment.
   # If the search_attrs param is a string, just return it
   def search_attrs_params_hash
-    @search_attrs_params_hash ||= if params[:search_attrs].nil? || params[:search_attrs] == '_use_defaults_'
+    @search_attrs_params_hash ||= if params[:search_attrs].blank? || params[:search_attrs] == '_use_defaults_'
                                     @runner.using_defaults = true
                                     { _use_defaults_: '_use_defaults_' }
                                   else
