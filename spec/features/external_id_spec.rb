@@ -64,6 +64,10 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     # Find the external ID tab
     l = all('a[data-panel-tab="external_ids"]').first
 
+    unless l
+      ls = all('a[data-panel-tab]').map {|a| a['data-panel-tab'] }
+      puts "About to fail a[data-panel-tab=\"external_ids\"] - available tabs: #{ls.join(',')}"
+    end
     expect(l).not_to be nil
 
     l.click
