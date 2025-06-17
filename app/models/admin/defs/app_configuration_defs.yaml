@@ -123,3 +123,28 @@ show search form on single result: |
   (not used)
 show activity log panel: |
   (deprecated) Display a specific activity log panel when master record loads. Use "open panels" instead'
+default options activity log: |
+  Default options for activity log definitions, keyed by the field to set. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      extra_log_types: |
+        _configurations:
+          use_current_version: true
+default options external identifier: |
+  Default options for external identifier definitions. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      options: |
+        _configurations:
+          use_current_version: true
+default options dynamic model: |
+  Default options for dynamic model definitions. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      options: |
+        _configurations:
+          use_current_version: true
+          

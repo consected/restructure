@@ -2,8 +2,6 @@
 
 class Admin::ReportsController < AdminController
   SearchAttrBrowserCacheSeconds = 48.hours.to_i
-  EncodingTokenBase64 = "<Base64Encoded>"
-  before_action :handle_sql_encoding, only: [:create, :update]
 
   def search_attr_definer
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key('report_search_attr_definer'))
@@ -36,25 +34,14 @@ class Admin::ReportsController < AdminController
     'sql'
   end
 
+  def encode_options_fields
+    { sql: :base64 }
+  end
+
   private
 
   def permitted_params
     %i[id name item_type primary_table sql description disabled report_type auto searchable position search_attrs
        edit_model edit_field_names selection_fields short_name options]
-  end
-
-  #
-  # On update or creates, check if the SQL field has been base64 encoded on the front end.
-  # The EncodingTokenBase64 token will be prepended if this is the case.
-  # The SQL field is then decoded and the token is removed, so that the report definition
-  # can be saved in the original plain text format.
-  # The rationale for this is to avoid WAFs blocking requests that appear to be SQL injection.
-  def handle_sql_encoding
-    sql = secure_params[:sql]
-    return unless sql&.start_with?(EncodingTokenBase64)
-
-    b64sql = sql.sub(EncodingTokenBase64, '')
-    sql = Base64.decode64(b64sql)
-    secure_params[:sql].sub!(/.*/, sql)
   end
 end
