@@ -5,7 +5,7 @@
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-report <% if @updated_with %>saved-item<% end %>">
       <div class="row">
         <div class="col-sm-12" style="text-align: left">
-        <%= form_for(@report, url: url, remote: true, html:{class: "form-formatted"}) do |f| %>
+        <%= form_for(@report, url: url, remote: true, html:{class: "form-formatted keep-notices"}) do |f| %>
           <%= render partial: 'admin_handler/form_errors' %>
           <%= render partial: 'admin/reports/form/fields', locals: {f: f} %>
           <div class="report-admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right" %></div>
@@ -21,7 +21,7 @@
             <%= f.submit class: "btn btn-primary pull-right" %>
           </div>
           <div id="search_attr_definer-block-container" data-subscription="search_attr_definer_block" data-preprocessor="search_attr_definer_setup"> >
-            <%= link_to "loading...", admin_report_search_attr_definer_path, remote: true, class: 'auto-click-link' %>
+            <%= link_to "loading...", admin_report_search_attr_definer_path, remote: true, class: 'auto-click-link keep-notices' %>
           </div>
           <div class="col-sm-24 collapse" id="search_attr_definer_config">
             <div class="" style="text-align: left;">
