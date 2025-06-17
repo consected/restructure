@@ -237,7 +237,11 @@ class Tracker < UserBase
   def self.add_record_update_entries(name, admin, update_type = 'record', no_create: nil)
     begin
       protocol = Classification::Protocol.updates.reload.first
-      sp = protocol.sub_processes.active.reload.find_by_name("#{update_type} updates").reload
+      raise FphsException, 'No "Updates" protocol found' unless protocol
+
+      sp = protocol.sub_processes.active.reload.find_by_name("#{update_type} updates")&.reload
+      raise FphsException, "No sub_process found for 'Updates/#{update_type} updates'" unless sp
+
       values = []
 
       name = name.humanize.downcase

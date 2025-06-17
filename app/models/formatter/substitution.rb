@@ -262,7 +262,7 @@ module Formatter
                       ''
                     end
                   else
-                    get_tag_value d, tag
+                    get_tag_value d, tag, original_type:
                   end
 
       # Handle the formatting of html tags for tag substitutions, if they have been specified
@@ -441,9 +441,10 @@ module Formatter
     #
     # @param [Hash] data from {substitute}
     # @param [String] tag_and_operator tag name and optionally formatting operators after ::
+    # @param [Boolean] original_type - if true, return the original type of the tag value, without formatting based on the class
     # @return [String] result
     #
-    def self.get_tag_value(data, tag_and_operator)
+    def self.get_tag_value(data, tag_and_operator, original_type: nil)
       tagp = tag_and_operator.split('::')
       tag = tagp.first
 
@@ -467,7 +468,7 @@ module Formatter
 
       res = orig_val || ''
 
-      res = Formatter::Formatters.formatter_do(res.class, res, current_user:)
+      res = Formatter::Formatters.formatter_do(res.class, res, current_user:) unless original_type
 
       return if res.nil? && tagp[1] != 'ignore_missing'
 
