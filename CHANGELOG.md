@@ -14,6 +14,56 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #555 - 2025-06-17
+
+- [Fixed] spec tests
+- [Changed] logging on job failure
+- [Added] better logging and attempt to set current_role_name if not set when indexing archived files in NFS Store - fixes #547
+
+### From FPHS - PR #554 - 2025-06-17
+
+- [Fixed] missing form change to allow for base64 encoding of fields
+
+### From FPHS - PR 553 - 2025-06-17
+
+- [Added] initialization of admin attributes based on default_options... app configurations
+- [Added] default_schema_name to not be titleized and logic to prevent plain triple curly substitution from crashing if none are in the content
+- [Added] environment variable SEED_ONLY to control list of seeds to run
+- [Added] seeds for app_configurations
+- [Changed] handling of default_schema_name and added default_category
+- [Added] app configurations for default options...
+- [Changed] app configurations so app type is not required
+- [Added] admin filter on blank app type
+- [Fixed] Web Application Firewall blocks definition of dynamic models (and config libraries) with view_sql in admin console - it assumes the SQL is an attempt at SQL injection - fixes #545
+
+### From FPHS - PR #552 - 2025-06-17
+
+- [Fixed] error reported when clicking between search tabs with certain reports - fixes #546
+
+### From FPHS - PR #551 - 2025-06-17
+
+- [Fixed] Web Application Firewall (WAF) blocks definition of reports in admin console - it assumes the SQL is an attempt at SQL injection - fixes #527
+
+### From FPHS - PR #550 - 2025-06-17
+
+- [Added] base_master_segment to support URL generation
+- [Changed] handling of exceptions if a master is not set when it should be
+- [Fixed] report failing when an embedded_block is used and the data to form the URL varies based on the resource being queried
+- [Added] extra attributes for SQL substitutions (and report criteria / descriptions)
+- [Changed] handling of substitutions into report descriptions to use more details related to the table being accessed
+- [Added] show_if configuration to search criteria field, allowing it to be conditionally shown
+- [Fixed] disappearing error notice when areport is run automatically when saving the definition in the admin panel
+
+### From FPHS - PR #549 - 2025-06-17
+
+- [Fixed] when attempting to disable a page layout configuration, it still checks for uniqueness of the name - fixes #524
+- [Fixed] add_tracker setting event_date from a condition reference doesn't work - fixes #542
+- [Fixed] Activity subprocess for activity logs is not created as new protocols are added - fixes #543
+
+### From FPHS - PR #548 - 2025-06-17
+
+- [Fixed] regression in PR #537 when providing additional logging information related to failed calculated conditions
+
 ### From FPHS - PR #541 - 2025-06-10
 
 - [Added] return failure value from parallel_specs.sh - resolves #535
