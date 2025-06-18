@@ -12,6 +12,12 @@ default report tab: |
   The default report category (tab) to display when listing reports. A report category
 file browser default view: |
   Initial view on a filestore brower. One of "no details", "file info", "classifications"
+secure view default zoom: |
+  Initial zoom setting for a secure view preview of an image. Must be one of the default values, or match
+  one of the items in the list set by `secure view zoom factors`
+secure view zoom factors: |
+  Comma separated list of zoom factors for the secure view preview. By default these are:
+      fit,35,50,66,75,100,125,150
 header no subject details label: |
   Text to display in a master record header if no participant details are available. 
   By default "(no subject details)". Will be presented as blank if the value is "none"
