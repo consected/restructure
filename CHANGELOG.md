@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.18.2] - 2025-06-18
+
 - [Added] ability to set default zoom and available zoom factors for secure viewer in app configurations
 - [Fixed] issue matching files to MIME types, causing error previewing documents or images in secure viewer - fixes #556
 - [Fixed] external-links panel not showing even if enabled for a user - fixes #557
