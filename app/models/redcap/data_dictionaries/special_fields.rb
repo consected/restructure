@@ -181,7 +181,7 @@ module Redcap
 
       #
       # A redcap_event_name field representation to support the extra field
-      # that Redcap adds for logitudinal projects with defined events
+      # that Redcap adds for longitudinal projects with defined events
       # @param [Redcap::DataDictionaries::Form] form
       # @return [Redcap::DataDictionaries::Field]      
       def self.event_name_field(data_dictionary)
