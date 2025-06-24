@@ -2,6 +2,7 @@
 
 class Admin::ReportsController < AdminController
   SearchAttrBrowserCacheSeconds = 48.hours.to_i
+
   def search_attr_definer
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key('report_search_attr_definer'))
     response.headers['Cache-Control'] = "max-age=#{SearchAttrBrowserCacheSeconds}"
@@ -31,6 +32,10 @@ class Admin::ReportsController < AdminController
 
   def editor_code_type
     'sql'
+  end
+
+  def encode_options_fields
+    { sql: :base64 }
   end
 
   private

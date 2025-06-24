@@ -206,3 +206,10 @@
           #   all_completed_activity:
           #     definition_resources:
           #       extra_log_type: <extra_log_type String | Array>
+
+        has_not_created_activity: <extra_log_type>
+          # Has the specified extra_log_type not been created in this activity log?
+          # Equivalent to:
+          #   not_any_completed_activity:
+          #     definition_resources:
+          #       extra_log_type: <extra_log_type String | Array>

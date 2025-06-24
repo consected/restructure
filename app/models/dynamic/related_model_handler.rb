@@ -119,13 +119,16 @@ module Dynamic
       # be sure about the user being set, to avoid hidden errors
       raise 'no user set when syncing tracker' unless master.current_user
 
-      t = master.trackers.create(protocol_id: protocol_id,
-                                 sub_process_id: sub_process_id,
-                                 protocol_event_id: protocol_event_id,
-                                 item_id: id,
-                                 item_type: self.class.name,
-                                 event_date: action_when,
-                                 notes: data)
+      attrs = {
+        protocol_id: protocol_id,
+        sub_process_id: sub_process_id,
+        protocol_event_id: protocol_event_id,
+        item_id: id,
+        item_type: self.class.name,
+        event_date: action_when,
+        notes: data
+      }
+      t = master.trackers.create(attrs)
 
       # check and raise error that is usable by a user if there was a problem (for example, a required field not set)
       raise FphsException, "could not create tracker record: #{t.errors.full_messages.join('; ')}" unless t&.valid?

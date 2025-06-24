@@ -318,7 +318,7 @@ class Admin
 
       associated_reports.all.each do |a|
         rex = Regexp.new('{{template\\\\_block\\\\_(.+?)}}')
-        a.description.scan(rex) do |t|
+        a.description&.scan(rex) do |t|
           res = active_mts.find { |b| b.name == t[0]&.gsub('\\_', ' ') && b.template_type == 'content' }
           ms << res if res
         end

@@ -41,6 +41,11 @@ module Redcap
         result = { error:, backtrace: }
       end
       project_admin.record_job_request(action, result:)
+
+    rescue StandardError => e
+      msg = "Failed to create failure record for job: #{self} - #{exception} - #{action} - #{response}"
+      Rails.logger.error msg
+      Rails.logger.error(backtrace)
     end
   end
 end

@@ -90,7 +90,12 @@
       </div>
     {{/if}}
     </li>
-
+  {{else is field_type '===' 'redcap_file'}}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }}
+      {{#if this_value}}      
+      <a class="redcap-file-use-secure-view" href="/redcap/project_user_requests/{{name}}/download_field_file/{{key}}/{{result_data.record_id}}">{{this_value}}</a>
+      {{/if}}
+    </li>
 
 {{! #######  Field name matches ...}}
   {{else is field_type "notes"}}

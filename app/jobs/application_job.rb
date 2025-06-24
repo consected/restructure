@@ -10,14 +10,14 @@ class ApplicationJob < ActiveJob::Base
   around_perform do |job, block|
     Rails.logger.info "Run job - #{job}"
     block.call
-  rescue StandardError, FsException, FphsException => e
+  rescue StandardError, FsException, FphsException, RuntimeError, IOError => e
     begin
       msg = "Job failed - #{e} : #{job}"
       puts msg unless Rails.env.test?
       Rails.logger.warn msg
       Rails.logger.warn e.short_string_backtrace
       ApplicationJob.notify_failure job, e
-    rescue StandardError, FsException, FphsException => e2
+    rescue StandardError, FsException, FphsException, RuntimeError, IOError => e2
       msg = "Job failed in rescue: #{e2} : #{job}"
       puts msg
       Rails.logger.error msg
