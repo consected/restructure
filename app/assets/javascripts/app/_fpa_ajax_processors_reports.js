@@ -47,12 +47,15 @@ _fpa.postprocessors_reports = {
       _fpa.hide_modal(1);
       return;
     }
+    block.removeClass('sv-added-setup-links')
     _fpa.show_modal(html, null, true, 'embedded-dynamic-block', 1)
     window.setTimeout(function () {
       $(block).contents().appendTo(`#${target_block}`)
       $(block).html('');
       window.setTimeout(function () {
-        _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
+        const $target_block = $(`#${target_block}`);
+        _fpa.form_utils.resize_labels($target_block, null, true)
+        _fpa.secure_view.setup_links($target_block, 'a.redcap-file-use-secure-view');
       }, 500);
     }, 500);
   },
