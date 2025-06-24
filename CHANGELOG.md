@@ -14,6 +14,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #569 - 2025-06-24
+
+- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
+
+### From FPHS - PR #570 - 2025-06-24
+
+- [Added] `field_has_no_tags` default options definition
+- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
+- [Fixed] no field_options being passed to field name_ends_with_year
+- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
+
 ## [9.20.1] - 2025-06-24
 
 ## [9.20.0] - 2025-06-24
