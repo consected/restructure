@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.18.4] - 2025-06-24
+
 - [Updated] gems (important - to include newest Redcap gem)
 
 ## [9.18.3] - 2025-06-24
