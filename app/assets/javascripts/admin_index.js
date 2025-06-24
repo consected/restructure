@@ -41,6 +41,7 @@
 //= require js-yaml/dist/js-yaml 
 //
 //= require sortablejs/Sortable.js
+//= require js-base64/base64.js
 //
 // All other required admin components
 //= require_tree ./admin
