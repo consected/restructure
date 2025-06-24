@@ -146,8 +146,8 @@ module Redcap
     # specific record. The most recent request is stored to the
     # retrieved_files Hash.
     # @return [Hash{Symbol => File}] <description>
-    def retrieve_file(record_id, field_name)
-      retrieved_files[field_name] = project_admin.api_client.file record_id, field_name
+    def retrieve_file(record_id, field_name, event: nil)
+      retrieved_files[field_name] = project_admin.api_client.file record_id, field_name, event:
     end
 
     #
@@ -524,7 +524,12 @@ module Redcap
 
         record_id = record[record_id_field]
         begin
-          temp_file = retrieve_file(record_id, field_name)
+          # In order to retrieve files from longitudinal records (within events),
+          # we need to pass the event name as well.
+          # This is not required for classic instruments, since they do not have events, and will just be ignored.
+          event = record[:redcap_event_name]
+
+          temp_file = retrieve_file(record_id, field_name, event:)
           # We must change the permissions now, since the final NFS store
           # requires the group to have read-write.
           path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}"
@@ -543,6 +548,7 @@ module Redcap
           msg = "Failed to retrieve or import REDCap file for record: #{record_id} - field name: #{field_name} - with user: #{current_user.email}.\n#{e}"
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
+          record.update_column(field_name, nil)
           raise
         ensure
           temp_file&.close
