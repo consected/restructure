@@ -63,9 +63,10 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     end
     if sf
       url = "/nfs_store/downloads/#{container.id}?activity_log_id=#{container.parent_item&.id}&activity_log_type=redcap__project_admin&download_id=#{sf.id}&retrieval_type=stored_file&#{svp.to_query}"
+      redirect_to url
+    else
+      render json: { message: 'File not found or inaccessible' }, status: 404
     end
-  
-    redirect_to url
   end
 
   private
