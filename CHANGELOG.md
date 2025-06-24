@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems (important - to include newest Redcap gem)
+
 ## [9.18.3] - 2025-06-24
 
 ### From FPHS - PR #563 - 2025-06-24
