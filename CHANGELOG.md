@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #567 - 2025-06-24
+
+- [Added] js-base64 javascript package to handle non ASCII characters in admin options, then force to UTF-8 encoding when decoding on the server
+- [Changed] handling of error logging to ensure a sensible message is always returned to the front end
+
 ## [9.19.0] - 2025-06-24
 
 - [Updated] gems (important - to include newest Redcap gem)
