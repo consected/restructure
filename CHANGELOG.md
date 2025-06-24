@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.19.1] - 2025-06-24
+
 ### From FPHS - PR #567 - 2025-06-24
 
 - [Added] js-base64 javascript package to handle non ASCII characters in admin options, then force to UTF-8 encoding when decoding on the server
