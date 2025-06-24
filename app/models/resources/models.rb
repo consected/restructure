@@ -12,7 +12,7 @@ module Resources
       KEYS = %i[type class_name model table_name option_type
                 resource_name resource_item_name
                 hyphenated_name hyphenated_item_name
-                base_route_name base_route_segments category].freeze
+                base_route_name base_route_segments base_master_segment category].freeze
 
       # type: one of :dynamic_model, :external_identifier, :activity_log, :activity_log_type, :default, :data_dictionary
       # class_name: simple String respresenting the namespaced class name
@@ -31,6 +31,7 @@ module Resources
       #                  For example `send("new_#{base_route_name}_path")` returns the path
       #                  to the "new" controller action
       # base_route_segments: a URI (sub) path, such as "activity_log/player_contact_phones" or "dynamic_model/projects"
+      # base_master_segment: a URI (prefix) path for '/masters/' only if it is needed
 
       KEYS.each do |key_name|
         define_method key_name do
@@ -103,6 +104,7 @@ module Resources
       end
       base_route_name = model.base_route_name if !base_route_name && model.respond_to?(:base_route_name)
       base_route_segments = model.base_route_segments if !base_route_segments && model.respond_to?(:base_route_segments)
+      base_master_segment = '/masters' if !base_master_segment && model.respond_to?(:no_master_association) && !model.no_master_association
       category = model.category if !category && model.respond_to?(:category)
 
       updated_at = model.definition.updated_at if model.respond_to? :definition
@@ -116,6 +118,7 @@ module Resources
                                       resource_item_name: resource_item_name.to_sym,
                                       base_route_name: base_route_name&.freeze,
                                       base_route_segments: base_route_segments&.freeze,
+                                      base_master_segment: base_master_segment,
                                       hyphenated_name: hyphenated_name&.freeze,
                                       hyphenated_item_name: hyphenated_item_name&.freeze,
                                       category: category&.freeze,

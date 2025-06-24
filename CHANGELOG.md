@@ -14,7 +14,114 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.17.1] - 2025-05-22
+## [9.20.0] - 2025-06-24
+
+### From FPHS - PR #567 - 2025-06-24
+
+- [Added] js-base64 javascript package to handle non ASCII characters in admin options, then force to UTF-8 encoding when decoding on the server
+- [Changed] handling of error logging to ensure a sensible message is always returned to the front end
+
+## [9.19.0] - 2025-06-24
+
+- [Updated] gems (important - to include newest Redcap gem)
+
+## [9.18.3] - 2025-06-24
+
+### From FPHS - PR #563 - 2025-06-24
+
+- [Fixed] failed reporting of Redcap job failures by allowing empty data in notifications
+- [Added] form field for retrieving Redcap files with a simpler path that redirects to the full nfs_store request - resolves #560
+- [Fixed] Redcap files can't be pulled for longitudinal projects with redcap_event_name field - fixes #561
+- [Added] longitudinal fields to redcap requests if the the project is set to is_longitudinal - resolves #559
+
+### From FPHS - PR #562 - 2025-06-24
+
+- [Added] longitudinal fields to Redcap requests if the the project is set to is_longitudinal - resolves #559
+
+### From FPHS - PR #565 - 2024-06-24
+
+- [Added] ability to set default zoom and available zoom factors for secure viewer in app configurations
+- [Fixed] issue matching files to MIME types, causing error previewing documents or images in secure viewer - fixes #556
+
+### From FPHS - PR #564 - 2024-06-24
+
+- [Fixed] external-links panel not showing even if enabled for a user - fixes #557
+
+## [9.18.0] - 2025-06-17
+
+### From FPHS - PR #555 - 2025-06-17
+
+- [Fixed] spec tests
+- [Changed] logging on job failure
+- [Added] better logging and attempt to set current_role_name if not set when indexing archived files in NFS Store - fixes #547
+
+### From FPHS - PR #554 - 2025-06-17
+
+- [Fixed] missing form change to allow for base64 encoding of fields
+
+### From FPHS - PR 553 - 2025-06-17
+
+- [Added] initialization of admin attributes based on default_options... app configurations
+- [Added] default_schema_name to not be titleized and logic to prevent plain triple curly substitution from crashing if none are in the content
+- [Added] environment variable SEED_ONLY to control list of seeds to run
+- [Added] seeds for app_configurations
+- [Changed] handling of default_schema_name and added default_category
+- [Added] app configurations for default options...
+- [Changed] app configurations so app type is not required
+- [Added] admin filter on blank app type
+- [Fixed] Web Application Firewall blocks definition of dynamic models (and config libraries) with view_sql in admin console - it assumes the SQL is an attempt at SQL injection - fixes #545
+
+### From FPHS - PR #552 - 2025-06-17
+
+- [Fixed] error reported when clicking between search tabs with certain reports - fixes #546
+
+### From FPHS - PR #551 - 2025-06-17
+
+- [Fixed] Web Application Firewall (WAF) blocks definition of reports in admin console - it assumes the SQL is an attempt at SQL injection - fixes #527
+
+### From FPHS - PR #550 - 2025-06-17
+
+- [Added] base_master_segment to support URL generation
+- [Changed] handling of exceptions if a master is not set when it should be
+- [Fixed] report failing when an embedded_block is used and the data to form the URL varies based on the resource being queried
+- [Added] extra attributes for SQL substitutions (and report criteria / descriptions)
+- [Changed] handling of substitutions into report descriptions to use more details related to the table being accessed
+- [Added] show_if configuration to search criteria field, allowing it to be conditionally shown
+- [Fixed] disappearing error notice when areport is run automatically when saving the definition in the admin panel
+
+### From FPHS - PR #549 - 2025-06-17
+
+- [Fixed] when attempting to disable a page layout configuration, it still checks for uniqueness of the name - fixes #524
+- [Fixed] add_tracker setting event_date from a condition reference doesn't work - fixes #542
+- [Fixed] Activity subprocess for activity logs is not created as new protocols are added - fixes #543
+
+### From FPHS - PR #548 - 2025-06-17
+
+- [Fixed] regression in PR #537 when providing additional logging information related to failed calculated conditions
+
+### From FPHS - PR #541 - 2025-06-10
+
+- [Added] return failure value from parallel_specs.sh - resolves #535
+
+### From FPHS - PR #540 - 2025-06-10
+
+- [Added] App Type import "lock" to prevent multiple transactions from running simultaneously - fixes #528
+
+### From FPHS - PR #539 - 2025-06-10
+
+- [Fixed] user roles failing to be created (copied) if template has duplicates with the same name - fixes #531
+
+### From FPHS - PR #538 - 2025-06-10
+
+- [Fixed] substitution error when an association returns no results and subsequent regression - fixes #526 and  #534
+
+### From FPHS - PR #537 - 2025-06-10
+
+- [Added] has_not_created_activity
+- [Fixed] has_created_activity when nested in all:, any:, etc - fixes #532
+- [Changed] reporting of errors in conditional calculations to make debugging easier
+- [Added] more details to failing archive_retrieval_path if no role is set
+- [Fixed] checking for {{template_block...}} in app types breaks if description is NULL - fixes #533
 
 ## [9.17.0] - 2025-05-22
 

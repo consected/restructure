@@ -9,7 +9,7 @@
 %>
 <div class="report-criteria container-fluid <%=extra_classes%>" id="<%= @criteria_block_id %>-block">
   <div class="report-description">
-    <%= Formatter::Substitution.substitute(markdown_to_html(description), data: current_user, ignore_missing: :show_tag)&.html_safe %>
+    <%= Formatter::Substitution.substitute(markdown_to_html(description), data: @runner.data_reference, ignore_missing: :show_tag)&.html_safe %>
   </div>
   <%= render partial: 'reports/criteria' %>
 </div>

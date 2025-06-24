@@ -1,0 +1,52 @@
+[
+  {
+    "record_id": "31",
+    "redcap_event_name": "event_1_arm_1",
+    "text1": "a1a1",
+    "study_id": "123",
+    "research_form_complete": "2",
+    "test_name": "",
+    "email": "",
+    "visit_form_complete": ""
+  },
+  {
+    "record_id": "31",
+    "redcap_event_name": "event_2_arm_1",
+    "text1": "a1a1e2",
+    "study_id": "123",
+    "research_form_complete": "2",
+    "test_name": "",
+    "email": "",
+    "visit_form_complete": ""
+  },
+  {
+    "record_id": "32",
+    "redcap_event_name": "event_1_arm_2",
+    "text1": "",
+    "study_id": "",
+    "research_form_complete": "",
+    "test_name": "a2 visit e1",
+    "email": "",
+    "visit_form_complete": "2"
+  },
+  {
+    "record_id": "32",
+    "redcap_event_name": "event_2_arm_2",
+    "text1": "a2 visit e2",
+    "study_id": "123",
+    "research_form_complete": "2",
+    "test_name": "",
+    "email": "",
+    "visit_form_complete": ""
+  },
+  {
+    "record_id": "32",
+    "redcap_event_name": "event_3_arm_2",
+    "text1": "",
+    "study_id": "",
+    "research_form_complete": "",
+    "test_name": "a2 visit e3",
+    "email": "",
+    "visit_form_complete": "2"
+  }
+]

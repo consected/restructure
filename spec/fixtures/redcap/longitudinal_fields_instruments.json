@@ -1,0 +1,10 @@
+[
+  {
+    "instrument_name": "research_form",
+    "instrument_label": "Research Form"
+  },
+  {
+    "instrument_name": "visit_form",
+    "instrument_label": "Visit Form"
+  }
+]

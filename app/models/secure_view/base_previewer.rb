@@ -123,12 +123,16 @@ module SecureView
       @mime_type ||= NfsStore::Utils::MimeType.full_mime_type(orig_path)
     end
 
+    def mime_type_is?(content_type)
+      NfsStore::Utils::MimeType.is?(mime_type, content_type)
+    end
+
     def viewable_image?
-      mime_type == MIME::Type.new('image/png') ||
-        mime_type == MIME::Type.new('image/jpeg') ||
-        mime_type == MIME::Type.new('image/gif') ||
-        mime_type == MIME::Type.new('image/bmp') ||
-        mime_type == MIME::Type.new('image/tiff') ||
+      mime_type_is?('image/png') ||
+        mime_type_is?('image/jpeg') ||
+        mime_type_is?('image/gif') ||
+        mime_type_is?('image/bmp') ||
+        mime_type_is?('image/tiff') ||
         viewable_dicom?
     end
 
@@ -138,11 +142,11 @@ module SecureView
     # @param [String] type - simple type name
     # @return [Boolean] result
     def image_is(type)
-      mime_type == MIME::Type.new("image/#{type}")
+      mime_type_is?("image/#{type}")
     end
 
     def dicom?
-      mime_type == MIME::Type.new('application/dicom')
+      mime_type_is?('application/dicom')
     end
 
     # Is it a dicom image, and can we handle dicom image conversions?
@@ -155,19 +159,19 @@ module SecureView
     end
 
     def pdf?
-      mime_type == MIME::Type.new('application/pdf')
+      mime_type_is?('application/pdf')
     end
 
     def tiff?
-      mime_type == MIME::Type.new('image/tiff')
+      mime_type_is?('image/tiff')
     end
 
     def html?
-      mime_type == MIME::Type.new('text/html')
+      mime_type_is?('text/html')
     end
 
     def text?
-      mime_type == MIME::Type.new('text/plain')
+      mime_type_is?('text/plain')
     end
 
     def spreadsheet?

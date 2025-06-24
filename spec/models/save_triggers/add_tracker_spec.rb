@@ -257,7 +257,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
                     sub_process_name: #{sp1_name}
                     protocol_event_name: #{pe1_name}
                     notes: #{text1}
-                    event_date: '-5 days'
+                    event_date: '{{{called_when}}}'
               - Q1:
                   with:
                     sub_process_name: non-existent
@@ -288,7 +288,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     alstep1.save!
     expect(alstep1).to be_persisted
 
-    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1')
+    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1', called_when: Date.today - 15.days)
     alstep2.save!
 
     tracker = TrackerHistory.reorder('').last
@@ -299,7 +299,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     expect(tracker.sub_process.name).to eq sp1_name
     expect(tracker.protocol_event.name).to eq pe1_name
     expect(tracker.notes).to eq text1.gsub('{{master_id}}', alstep2.master_id.to_s)
-    expect(tracker.event_date).to eq (Date.today - 5.days).strftime('%Y-%m-%d')
+    expect(tracker.event_date).to eq (Date.today - 15.days).strftime('%Y-%m-%d')
     expect(tracker.item).to eq alstep2
     expect(tracker.master_id).to eq alstep2.master.id
   end

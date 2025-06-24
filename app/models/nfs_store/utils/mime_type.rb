@@ -16,6 +16,22 @@ module NfsStore
           mime
         end
       end
+
+      #
+      # Compare the #mime_type against the specified String content_type.
+      # Handles the Columnar subtype that MIME::Type introduced at some point, breaking comparisons    
+      # @param [String|MIME::Type|MIME::Type::Columnar] content_type
+      # @return [true|false]
+      def self.is?(mime_type, content_type)
+        content_type = content_type.content_type if content_type.respond_to?(:content_type)
+
+        case mime_type
+        when MIME::Type::Columnar
+          mime_type == MIME::Types[content_type].first
+        when MIME::Type
+          mime_type == MIME::Type.new(content_type)
+        end
+      end
     end
   end
 end

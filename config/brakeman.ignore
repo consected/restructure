@@ -110,7 +110,7 @@
       "check_name": "UnsafeReflection",
       "message": "Unsafe reflection method `constantize` called on model attribute",
       "file": "app/models/calc_actions/calculate.rb",
-      "line": 719,
+      "line": 739,
       "link": "https://brakemanscanner.org/docs/warning_types/remote_code_execution/",
       "code": "Resources::Models.find_by(:resource_name => @join_tables.first).class_name.constantize",
       "render_path": null,
@@ -213,7 +213,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/app_type.rb",
-      "line": 240,
+      "line": 244,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "Classification::GeneralSelection.active.where(\"item_type ~ '#{\"^(#{associated_table_names.map do\n \"#{tn.singularize}_|#{tn}_\"\n end.join(\"|\")})\"}'\")",
       "render_path": null,
@@ -339,7 +339,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 116,
+      "line": 120,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
       "render_path": [
@@ -367,7 +367,7 @@
         {
           "type": "template",
           "name": "page_layouts/_show_row",
-          "line": 99,
+          "line": 103,
           "file": "app/views/page_layouts/_show_row.html.erb",
           "rendered": {
             "name": "page_layouts/_show_row",
@@ -509,40 +509,6 @@
       "confidence": "High",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "6ff4d53db0c0046121db6032bdb3d72c37873cef0a5e2d129d3ab373d78f46c5",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/reports/_form.html.erb",
-      "line": 12,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Formatter::Substitution.substitute(markdown_to_html(Report.find_by_id_or_resource_name(params[:id]).description), :data => current_user, :ignore_missing => :show_tag)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 124,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_form",
-            "file": "app/views/reports/_form.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_form"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        79
       ],
       "note": ""
     },
@@ -910,6 +876,40 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "e01acc70f83b4df206d1f1315bd16870e40b80767b6079f2c2d35afa7391117a",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/reports/_form.html.erb",
+      "line": 12,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html(Report.find_by_id_or_resource_name(params[:id]).description), :data => Report.find_by_id_or_resource_name(params[:id]).runner.data_reference, :ignore_missing => :show_tag)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ReportsController",
+          "method": "show",
+          "line": 124,
+          "file": "app/controllers/reports_controller.rb",
+          "rendered": {
+            "name": "reports/_form",
+            "file": "app/views/reports/_form.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "reports/_form"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "e76fa00b707c077dca2724d24b6cfca0685ffc06df826578358d6eccbd8e6f61",
@@ -939,7 +939,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 107,
+      "line": 111,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
       "render_path": [
@@ -967,7 +967,7 @@
         {
           "type": "template",
           "name": "page_layouts/_show_row",
-          "line": 99,
+          "line": 103,
           "file": "app/views/page_layouts/_show_row.html.erb",
           "rendered": {
             "name": "page_layouts/_show_row",

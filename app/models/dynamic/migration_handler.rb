@@ -45,6 +45,25 @@ module Dynamic
       after_save :run_migration, if: -> { @do_migration }
     end
 
+    class_methods do
+      def default_schema_name(app_type: nil, category: nil)
+        dsn = app_type&.default_schema_name
+        return dsn if dsn.present?
+
+        res = category.split('-').first if category.present?
+        res = nil unless Admin::MigrationGenerator.current_search_paths.include?(res)
+        res ||= Settings::DefaultMigrationSchema
+        return res if res.present?
+
+        # Default to the first in the search path if nothing else works
+        Admin::MigrationGenerator.current_search_paths.first
+      end
+
+      def default_category(app_type: nil)
+        app_type&.name&.id_underscore
+      end
+    end
+
     #
     # Typically we only allow migrations in development, but an app setting
     # can allow this on servers running in Rails production that are used for
@@ -174,18 +193,9 @@ module Dynamic
         Rails.logger.warn "#{self.class.human_name} migration doesn't specify a schema_name and there is no matching user " \
                           "for the current admin '#{current_admin.email}' or no app type is set '#{current_user_app_type}'"
       end
-
-      dsn = current_user_app_type&.default_schema_name
-      return dsn if dsn.present?
-
-      Rails.logger.warn "#{self.class.human_name} doesn't specify a schema_name - using the category or first in search path"
-      res = category.split('-').first if category.present?
-      res = nil unless Admin::MigrationGenerator.current_search_paths.include?(res)
-      res ||= Settings::DefaultMigrationSchema
-      return res if res.present?
-
-      # Default to the first in the search path if nothing else works
-      Admin::MigrationGenerator.current_search_paths.first
+      
+      Rails.logger.warn "#{self.class.human_name} doesn't specify a schema_name - using the app type default, category or first in search path"
+      self.class.default_schema_name(app_type: current_user_app_type, category:)
     end
 
     #

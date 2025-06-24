@@ -33,9 +33,9 @@
         <%= link_to '', '#', id: "sv-download-link", class: "sv-download-link btn btn-default btn-sm glyphicon glyphicon-download-alt", title: 'download', target: '_blank' %>
       </div>
 
-      <div class="secure-view-zoom-selector sv-control-block">
+      <div class="secure-view-zoom-selector sv-control-block" data-view-default-zoom="<%= @secure_view_default_zoom %>">
         <% @secure_view_zoom_factors.each do |zoom| %>
-        <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom == @secure_view_default_zoom ? 'focus' : '') %>
+        <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom.to_s == @secure_view_default_zoom.to_s ? 'focus' : '') %>
         <% end %>
       </div>
 

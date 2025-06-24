@@ -2,18 +2,32 @@ module Redcap
   module RedcapSupport
     DefaultStudy = 'Q2'
 
-    def setup_redcap_project_admin_configs(mocks: true)
+    #
+    # Set up the redcap configurations and webmocks
+    # Ensure server is in the credentials file: `VISUAL=nano rails credentials:edit`
+    # During setup, use `WebMock.allow_net_connect!` in rails_helper.rb
+    # @param [true|nil] mocks - moke the requests
+    # @param [String] only_project - only set up a specific project
+    def setup_redcap_project_admin_configs(mocks: true, only_project: nil)
       setup_file_store
 
       projects = redcap_project_configs(mocks:)
 
       Redcap::ProjectAdmin.update_all(disabled: true)
       projects.each do |p|
+        next unless only_project.nil? || p[:name] == only_project
+
         if mocks
           if p[:name].in?(['metadata'])
             @metadata_project = p
             stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
             stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
+          elsif p[:name].in?(['longitudinal'])
+              @longitudinal_project = p
+              stub_request_longitudinal_field_project p[:server_url], p[:api_key]
+              stub_request_longitudinal_field_metadata p[:server_url], p[:api_key]
+              stub_request_longitudinal_field_instruments p[:server_url], p[:api_key]
+
           elsif p[:name] == 'save_trigger'
             stub_request_project_save_trigger p[:server_url], p[:api_key]
             stub_request_survey_link_save_trigger p[:server_url], p[:api_key]
@@ -46,7 +60,10 @@ module Redcap
         setup_file_store @admin
       end
 
-      expect(Redcap::ProjectAdmin.active.count).to eq 3
+      pcount = 4
+      pcount = 1 if only_project
+
+      expect(Redcap::ProjectAdmin.active.count).to eq pcount
       projects
     end
 
@@ -129,6 +146,16 @@ module Redcap
       stub_request_repeat_instrument_field_records server_url_2('repeat_instrument'), @metadata_project[:api_key]
       stub_request_project_users server_url_2('repeat_instrument'), @metadata_project[:api_key]
       stub_request_instruments server_url_2('repeat_instrument'), @metadata_project[:api_key]
+    end
+
+    def mock_longitudinal_field_requests
+      url = server_url('longitudinal')
+      api_key = @longitudinal_project[:api_key]
+      stub_request_longitudinal_field_project url, api_key
+      stub_request_longitudinal_field_metadata url, api_key
+      stub_request_longitudinal_field_records url, api_key
+      stub_request_project_users url, api_key
+      stub_request_longitudinal_field_instruments url, api_key
     end
 
     # Get project configurations from encrypted credential storage
@@ -298,6 +325,19 @@ module Redcap
     end
 
     alias stub_request_full_instruments stub_request_instruments
+
+    def stub_request_longitudinal_field_instruments(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'instrument',
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: project_instruments_longitudinal_fields_response, headers: {})
+    end
 
     def stub_request_project_users_updated(server_url, api_key)
       stub_request(:post, server_url)
@@ -483,6 +523,34 @@ module Redcap
         .to_return(status: 200, body: data_repeat_instrument_response, headers: {})
     end
 
+    def stub_request_longitudinal_field_project(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
+        )
+        .to_return(status: 200, body: project_admin_longitudinal_response, headers: {})
+    end
+
+    def stub_request_longitudinal_field_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+        )
+        .to_return(status: 200, body: metadata_longitudinal_response, headers: {})
+    end
+
+    def stub_request_longitudinal_field_records(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json'
+          }
+        )
+        .to_return(status: 200, body: data_longitudinal_response, headers: {})
+    end
+
     def project_admin_sample_response
       File.read('spec/fixtures/redcap/full_project_info.json')
     end
@@ -503,6 +571,10 @@ module Redcap
       File.read('spec/fixtures/redcap/repeat_instrument_project_info.json')
     end
 
+    def project_admin_longitudinal_response
+      File.read('spec/fixtures/redcap/longitudinal_project_info.json')
+    end
+
     def metadata_sample_response
       File.read('spec/fixtures/redcap/short_metadata_narrow.json')
     end
@@ -519,12 +591,20 @@ module Redcap
       File.read('spec/fixtures/redcap/repeat_instrument_metadata.json')
     end
 
+    def metadata_longitudinal_response
+      File.read('spec/fixtures/redcap/longitudinal_metadata.json')
+    end
+
     def project_users_full_response
       File.read('spec/fixtures/redcap/full_project_users.json')
     end
 
     def project_instruments_full_response
       File.read('spec/fixtures/redcap/full_project_instruments.json')
+    end
+
+    def project_instruments_longitudinal_fields_response
+      File.read('spec/fixtures/redcap/longitudinal_fields_instruments.json')
     end
 
     def project_users_updated_response
@@ -557,6 +637,10 @@ module Redcap
 
     def data_repeat_instrument_response(suffix = nil)
       File.read("spec/fixtures/redcap/repeat_instrument_records#{suffix}.json")
+    end
+
+    def data_longitudinal_response(suffix = nil)
+      File.read("spec/fixtures/redcap/longitudinal_records#{suffix}.json")
     end
 
     #
@@ -671,5 +755,20 @@ module Redcap
                                                              api_key: @metadata_project[:api_key], study: 'Repeat',
                                                              current_admin: @admin, dynamic_model_table: tn
     end
+
+    def setup_longitudinal_fields(alt_name = nil)
+      mock_longitudinal_field_requests
+
+      tn = alt_name || 'test.test_longitudinal_fields_recs'
+      name = @longitudinal_project[:name]
+
+      @project_admin_metadata = Redcap::ProjectAdmin.where(name:, study: 'Repeat', dynamic_model_table: tn).first
+      return @project_admin_metadata if @project_admin_metadata
+
+      @project_admin_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url('longitudinal'),
+                                                             api_key: @longitudinal_project[:api_key], study: 'Repeat',
+                                                             current_admin: @admin, dynamic_model_table: tn
+    end
+
   end
 end
