@@ -14,11 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.18.4] - 2025-06-24
+## [9.19.0] - 2025-06-24
 
 - [Updated] gems (important - to include newest Redcap gem)
-
-## [9.18.3] - 2025-06-24
 
 ### From FPHS - PR #563 - 2025-06-24
 
@@ -31,15 +29,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Added] longitudinal fields to Redcap requests if the the project is set to is_longitudinal - resolves #559
 
-## [9.18.2] - 2025-06-18
+### From FPHS - PR #565 - 2024-06-24
 
 - [Added] ability to set default zoom and available zoom factors for secure viewer in app configurations
 - [Fixed] issue matching files to MIME types, causing error previewing documents or images in secure viewer - fixes #556
+
+### From FPHS - PR #564 - 2024-06-24
+
 - [Fixed] external-links panel not showing even if enabled for a user - fixes #557
-
-## [9.18.1] - 2025-06-17
-
-- Rebuild
 
 ## [9.18.0] - 2025-06-17
 
