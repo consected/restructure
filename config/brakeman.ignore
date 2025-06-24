@@ -788,6 +788,29 @@
       "note": ""
     },
     {
+      "warning_type": "Remote Code Execution",
+      "warning_code": 25,
+      "fingerprint": "c7c6c1154ec87f956418d64e1b4b9c513d5970d648dcf5b3cdbba080a42b50ee",
+      "check_name": "Deserialize",
+      "message": "Use of `Marshal.load` may be dangerous",
+      "file": "app/models/option_configs/extra_options.rb",
+      "line": 87,
+      "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
+      "code": "Marshal.load(Marshal.dump(field_configs))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "OptionConfigs::ExtraOptions",
+        "method": "initialize"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        502
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "cc839fcc3d042100ab0bb70eceec8f0fd0d467d612241405a0e96380c5dcb7a2",

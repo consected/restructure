@@ -84,6 +84,7 @@ module OptionConfigs
 
       # Add the cleaned values back into field_configs - save a raw version for use elsewhere
       # This needs to be "deep cloned", to avoid a simple clone just copying references
+      # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
       self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
       add_field_configs_from_standalone_defs
     end
