@@ -150,7 +150,7 @@ module AppExceptionHandler
   def return_and_log_error(error, msg, code, log_level: nil)
     log_level ||= :error
     logger.send(log_level, error.inspect)
-    logger.send(log_level, error.backtrace.join("\n")) if error.backtrace
+    logger.send(log_level, error.short_string_backtrace) if error.backtrace
 
     if code.in? [400, 500]
       user_id = current_user&.id
@@ -192,7 +192,13 @@ module AppExceptionHandler
       type.all do
         render plain: msg, status: code, content_type: 'text/plain'
       end
-    end
+    end    
+    true
+
+  rescue ActionController::RespondToMismatchError => e
+    # This error is raised when the response format does not match any of the requested formats.
+    # Catch it so we can send a useful response.
+    render plain: msg, status: code, content_type: 'text/plain'
     true
   end
 end
