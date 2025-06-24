@@ -56,7 +56,7 @@ if req&.result
 <%
   if object_instance.dynamic_model_ready?
     dm = object_instance.dynamic_storage&.dynamic_model
-    dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled } )
+    dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled }, perform_action: 'edit' )
 %>
   <span>(id: <%=dm.id%>) <%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
 <% else %>
@@ -152,6 +152,14 @@ if req&.result
 <% end %>
 <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
+  <div class="help-block">
+  <p>To allow users access to the field files, they must have </p>
+  <ul>
+    <li>user role <%= link_to link_label_open_in_new(object_instance.send :nfs_role),  admin_user_roles_path(filter: { role_name: object_instance.send(:nfs_role) }), target: '_blank' %> 
+    <li>file filter on resource <%= link_to link_label_open_in_new("redcap__project_admins"), admin_nfs_store_filter_filters_path(filter: { resource_name: 'redcap__project_admins' }), target: '_blank' %> with filter <code>.*/file-fields/.*</code>
+  </ul>
+  </div>
+  
 <% else %>
   <p><label>filestore</label> not set up</p>
 <% end %>
