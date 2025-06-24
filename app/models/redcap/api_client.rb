@@ -90,6 +90,30 @@ module Redcap
     end
 
     #
+    # Get the project arms results (for longitudinal projects)
+    # @return [Array{Hash}] hash with symbolized keys
+    def arms(request_options: nil)
+      request_options ||= metadata_request_options
+      request :arm, request_options: request_options
+    end
+
+    #
+    # Get the project events results (for longitudinal projects)
+    # @return [Array{Hash}] hash with symbolized keys
+    def events(request_options: nil)
+      request_options ||= metadata_request_options
+      request :event, request_options: request_options
+    end
+
+    #
+    # Get the project events results (for longitudinal projects)
+    # @return [Array{Hash}] hash with symbolized keys
+    def repeating_forms_events(request_options: nil)
+      request_options ||= metadata_request_options
+      request :repeating_forms_events, request_options: request_options
+    end
+
+    #
     # Get the data records for the project
     # @return [Array{Hash}] hash with symbolized keys
     def records(request_options: nil)
@@ -156,9 +180,10 @@ module Redcap
     # since it will flood them with useless logs
     # @param [String | Integer] record_id
     # @param [String | Symbol] field_name
+    # @param [String] event - optional event name for longitudinal projects
     # @return [File] - temp file result
-    def file(record_id, field_name)
-      tempfile = redcap.file record_id, field_name
+    def file(record_id, field_name, event: nil)
+      tempfile = redcap.file(record_id, field_name, event:)
       FileUtils.chmod 0o660, tempfile
       tempfile
     end

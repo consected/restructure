@@ -3,7 +3,7 @@
 class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
   attr_accessor :response_code, :content
 
-  ValidMethods = %w[project project_users project_archive metadata instruments records survey_link survey_participants import_records file]
+  ValidMethods = %w[project project_users project_archive metadata instruments records survey_link survey_participants import_records file arms events repeating_forms_events]
 
   def self.config_def(if_extras: {}); end
 

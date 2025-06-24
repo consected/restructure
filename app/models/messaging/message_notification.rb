@@ -78,12 +78,14 @@ module Messaging
     def generate(ignore_missing: false)
       data = self.data
       if data.blank?
-        raise FphsException, 'Data is blank and item_type / item_id does not return an item' unless item
-
-        data = Formatter::Substitution.setup_data item, for_item
+        if item          
+          data = Formatter::Substitution.setup_data item, for_item
+        else
+          Rails.logger.warn 'MessageNotification#generate data is blank and item_type / item_id does not return an item' 
+          data = {}
+        end
         data[:_subject] = subject
         data[:extra_substitutions] = extra_substitutions_data
-
       end
 
       raise FphsException, "Layout template #{layout_template_name} was not found" unless layout_template

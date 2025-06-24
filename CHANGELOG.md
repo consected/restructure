@@ -14,6 +14,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #563 - 2025-06-24
+
+- [Fixed] failed reporting of Redcap job failures by allowing empty data in notifications
+- [Added] form field for retrieving Redcap files with a simpler path that redirects to the full nfs_store request - resolves #560
+- [Fixed] Redcap files can't be pulled for longitudinal projects with redcap_event_name field - fixes #561
+- [Added] longitudinal fields to redcap requests if the the project is set to is_longitudinal - resolves #559
+
+### From FPHS - PR #562 - 2025-06-24
+
+- [Added] longitudinal fields to Redcap requests if the the project is set to is_longitudinal - resolves #559
+
 ## [9.18.2] - 2025-06-18
 
 - [Added] ability to set default zoom and available zoom factors for secure viewer in app configurations

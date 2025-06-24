@@ -33,6 +33,10 @@ module Redcap
         fields[:redcap_repeat_instance] = repeat_instance_field(data_dictionary)
       end
 
+      def self.add_defined_event_field(fields, data_dictionary)
+        fields[:redcap_event_name] = event_name_field(data_dictionary)
+      end
+
       #
       # Add a survey identifier field to the hash of fields in this form
       # @param [Hash] fields <description>
@@ -171,6 +175,19 @@ module Redcap
         field_metadata = {
           field_name: :redcap_repeat_instance,
           field_type: 'repeat'
+        }
+        Field.new(nil, field_metadata, data_dictionary:)
+      end
+
+      #
+      # A redcap_event_name field representation to support the extra field
+      # that Redcap adds for longitudinal projects with defined events
+      # @param [Redcap::DataDictionaries::Form] form
+      # @return [Redcap::DataDictionaries::Field]      
+      def self.event_name_field(data_dictionary)
+        field_metadata = {
+          field_name: :redcap_event_name,
+          field_type: 'event'
         }
         Field.new(nil, field_metadata, data_dictionary:)
       end
