@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.20.2] - 2025-06-24
+
 ### From FPHS - PR #569 - 2025-06-24
 
 - [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
