@@ -126,6 +126,7 @@ Rails.application.routes.draw do
         post :request_records
         post :request_archive
         post :request_users
+        get 'download_field_file/:field_name/:record_id', to: 'download_field_file'
       end
     end
   end
