@@ -361,6 +361,14 @@ module Redcap
     end
 
     #
+    # Store the arms and events metadata from Redcap for future reference
+    # Calls a delayed job to actually do the work
+    def request_arms_and_events
+      # Redcap::Arm.capture_arms(self)
+      # Redcap::Event.capture_events(self)
+    end
+
+    #
     # Check if the dynamic model for storage is ready to use,
     # both the DB table has been created and the class is defined
     # @return [true | nil]
@@ -483,6 +491,15 @@ module Redcap
     def repeating_instruments?
       captured_project_info &&
         captured_project_info[:has_repeating_instruments_or_events] == 1
+    end
+
+    #
+    # Does the project have longitudinal defined events, based on the
+    # project metadata returned?
+    # @return [true|false]
+    def is_longitudinal?
+      captured_project_info &&
+        captured_project_info[:is_longitudinal] == 1
     end
 
     #

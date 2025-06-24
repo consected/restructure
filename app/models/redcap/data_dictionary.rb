@@ -119,6 +119,7 @@ module Redcap
         handle_integer_survey_field(all_rf, special_fields)
       end
       special_fields.add_repeat_instrument_fields(all_rf, self) if redcap_project_admin.repeating_instruments?
+      special_fields.add_defined_event_field(all_rf, self) if redcap_project_admin.is_longitudinal?
 
       all_rf
     end
@@ -147,11 +148,12 @@ module Redcap
     end
 
     #
-    # For repeating instruments, extra fields are required in addition to the #record_id_field
+    # For repeating instruments and longitudinal events, extra fields are required in addition to the #record_id_field
     # to uniquely identify a record
     # @return [Array{Symbol} | nil] <description>
     def record_id_extra_fields
       return %i[redcap_repeat_instrument redcap_repeat_instance] if redcap_project_admin.repeating_instruments?
+      return %i[redcap_event_name] if redcap_project_admin.is_longitudinal?
 
       nil
     end
