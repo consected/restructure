@@ -9,10 +9,10 @@ if to_table_name
   view_name = object_instance.reference_view_name(to_table_name)
   type = ref_def[:to_class_type]
   link = case type  
-          when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
-          when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
-          when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
-          end
+          when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
+          when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
+          when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled }, perform_action: 'edit' )
+         end
 end
   %>
     <li>
