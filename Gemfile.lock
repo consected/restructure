@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/consected/redcap.git
-  revision: 9ecfe340f4eace9b41d8a8cdb0456539b18f632c
+  revision: f7b93fe313f223f184edb4d92ef185c100d7d61d
   specs:
-    redcap (0.3.11)
+    redcap (0.3.12)
       dotenv
       hashie (~> 3.4.6)
       json
@@ -105,7 +105,7 @@ GEM
     ansi (1.5.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1119.0)
+    aws-partitions (1.1120.0)
     aws-sdk-cloudwatchlogs (1.118.0)
       aws-sdk-core (~> 3, >= 3.225.0)
       aws-sigv4 (~> 1.5)
