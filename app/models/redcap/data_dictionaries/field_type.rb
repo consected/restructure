@@ -39,7 +39,8 @@ module Redcap
         form_timestamp: 'redcap completion timestamp', # This is not a real REDCap type, but is used as a lookup
         survey_identifier: 'survey identifier', # This is not a real REDCap type, but is used as a lookup
         integer_survey_identifier: 'integer survey identifier', # This is not a real REDCap type, but is used as a lookup
-        repeat: 'repeat instrument' # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat instrument', # This is not a real REDCap type, but is used as a lookup
+        event_name: 'event name' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {
@@ -83,7 +84,8 @@ module Redcap
         form_timestamp: 'completion_timestamp', # This is not a real REDCap type, but is used as a lookup
         survey_identifier: 'survey_identifier', # This is not a real REDCap type, but is used as a lookup
         integer_survey_identifier: 'integer_survey_identifier', # This is not a real REDCap type, but is used as a lookup
-        repeat: 'repeat_instrument' # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat_instrument', # This is not a real REDCap type, but is used as a lookup
+        event_name: 'event_name' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToModelTypes = {
