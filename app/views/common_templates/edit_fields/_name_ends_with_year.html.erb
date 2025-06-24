@@ -9,4 +9,21 @@
   end
 
 %>
-<%= form.number_field field_name_sym, h.merge( { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}) %>
+<% 
+  default_options= {
+    step: 1,
+    pattern: '\\d{4,4}',
+    minlength: 4,
+    maxlength: 4,
+    data: {
+      attr_name: field_name_sym, 
+      object_name: form_object_item_type_us
+    },
+    class: 'no-mask year-field'
+  }
+
+  new_options = h.merge(default_options)
+  new_options = new_options.merge(field_options_for(form_object_instance, field_name_sym))  
+%>
+
+<%= form.number_field field_name_sym, new_options %>
