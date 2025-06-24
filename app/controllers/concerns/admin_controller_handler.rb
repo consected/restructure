@@ -426,8 +426,11 @@ module AdminControllerHandler
 
       case encoding_type
       when :base64
-        options = Base64.decode64(b64options)
-        secure_params[field].sub!(/.*/, options)
+        decoded = Base64.decode64(b64options).force_encoding('UTF-8')
+        unless decoded.valid_encoding?
+          raise FphsException, "Invalid UTF-8 encoding in base64 data for field: #{field}"
+        end
+        secure_params[field].sub!(/.*/, decoded)
       else
         raise FphsException, "Unknown encoding type: #{encoding_type} for field: #{field}"
       end

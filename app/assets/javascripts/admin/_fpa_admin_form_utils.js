@@ -18,7 +18,7 @@ _fpa_admin.form_utils = class {
       var options_value = $options_field.val();
       if (options_value) {
         // Encode the options value in Base64 and add a token
-        const send_val = `${EncodingTokenBase64}${btoa(options_value)}`
+        const send_val = `${EncodingTokenBase64}${Base64.encode(options_value)}`
         $options_field.val(send_val);
       }
     }
