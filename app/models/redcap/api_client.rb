@@ -180,9 +180,10 @@ module Redcap
     # since it will flood them with useless logs
     # @param [String | Integer] record_id
     # @param [String | Symbol] field_name
+    # @param [String] event - optional event name for longitudinal projects
     # @return [File] - temp file result
-    def file(record_id, field_name)
-      tempfile = redcap.file record_id, field_name
+    def file(record_id, field_name, event: nil)
+      tempfile = redcap.file(record_id, field_name, event:)
       FileUtils.chmod 0o660, tempfile
       tempfile
     end
