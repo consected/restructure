@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.21.0] - 2025-06-25
+
 ### From Viva - PR #574 - 2025-06-25
 
 - [Added] auto population of release CHANGELOG from git commits, if the "unrelased" section is empty - resolves #573
