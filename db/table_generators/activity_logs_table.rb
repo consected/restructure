@@ -3,7 +3,7 @@
 module TableGenerators
   def self.singularize(str)
     if str.end_with? 'ies'
-      str[0..-4] + 'y'
+      "#{str[0..-4]}y"
     elsif str.end_with? 'es'
       str[0..-3]
     elsif str.end_with? 's'
@@ -20,7 +20,7 @@ module TableGenerators
     name = args[0]
     base_name_plural = args[1]
     generate_table = args[2]
-    attrib = args[3..-1]
+    attrib = args[3..]
 
     if name.nil?
       puts "Usage:
@@ -30,7 +30,7 @@ module TableGenerators
       return
     end
 
-    name = 'activity_log_' + name unless name.start_with? 'activity_log_'
+    name = "activity_log_#{name}" unless name.start_with? 'activity_log_'
     created_by = nil
 
     @implementation_table_name = name
@@ -54,14 +54,13 @@ module TableGenerators
     item_type_id = "#{singular_name.sub('activity_log_', '')}_id"
 
     if %i[drop drop_do].include?(generate_table)
-      sql = <<EOF
+      sql = <<~END_SQL
 
-      DROP TABLE if exists #{singular_name}_history CASCADE;
-      DROP TABLE if exists #{name} CASCADE;
-      DROP FUNCTION if exists log_#{singular_name}_update();
+        DROP TABLE if exists #{singular_name}_history CASCADE;
+        DROP TABLE if exists #{name} CASCADE;
+        DROP FUNCTION if exists log_#{singular_name}_update();
 
-
-EOF
+      END_SQL
 
     else
 
@@ -94,7 +93,7 @@ EOF
         attrib_pair[a] = f
       end
 
-      sql = <<~EOF
+      sql = <<~END_SQL
 
         -- Command line:
         -- table_generators/generate.sh activity_logs_table create #{name} #{base_name} #{attrib.join(' ')}
@@ -216,7 +215,7 @@ EOF
 
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
-        #{'      '}
+
               #{created_by ? '' : '--'} ALTER TABLE ONLY #{singular_name}_history
               #{created_by ? '' : '--'}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
@@ -224,7 +223,7 @@ EOF
               GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
               GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
               GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-      EOF
+      END_SQL
     end
 
     if [true, :create_do, :drop_do].include?(generate_table)

@@ -11,13 +11,14 @@ module OptionConfigs
     ValidValidIfTriggers = %i[on_create on_save on_update].freeze
     ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
     def self.base_key_attributes
       %i[
         name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings batch_trigger config_trigger preset_fields field_configs
+        show_if_condition_strings batch_trigger config_trigger preset_fields field_configs raw_field_configs
       ]
     end
 
@@ -81,6 +82,10 @@ module OptionConfigs
       clean_config_triggers
       clean_preset_fields
 
+      # Add the cleaned values back into field_configs - save a raw version for use elsewhere
+      # This needs to be "deep cloned", to avoid a simple clone just copying references
+      self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
+      add_field_configs_from_standalone_defs
     end
 
     # Defintion label
@@ -116,7 +121,7 @@ module OptionConfigs
     def clean_dialog_before_def
       self.dialog_before ||= {}
       self.dialog_before = self.dialog_before.symbolize_keys
-      
+
       dialog_before.transform_values! { |v| v.is_a?(String) ? { name: v } : v }
       dialog_before.each do |k, v|
         unless v.is_a? Hash
@@ -187,7 +192,6 @@ module OptionConfigs
       self.db_configs ||= {}
       @config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
     end
-
 
     #
     # Clean the fields definition. This intentionally does not override the dynamic model field list
@@ -428,7 +432,7 @@ module OptionConfigs
 
     def clean_config_triggers
       self.config_trigger ||= {}
-      self.config_trigger = self.config_trigger.symbolize_keys      
+      self.config_trigger = self.config_trigger.symbolize_keys
       od = self.config_trigger[:on_define] ||= []
 
       self.config_trigger[:on_define] = [od] unless od.is_a?(Array)
@@ -440,64 +444,71 @@ module OptionConfigs
     end
 
     def clean_field_configs
-      valid_configs = %i[db_configs field_options labels caption_before dialog_before show_if]
-      
       fla = fields
       if field_configs.nil?
-        # 'field_configs' was not explicitly set, so set it from the configurations listed in valid_configs
-        # for each of the valid fields
-        self.field_configs = {}  
-        valid_configs.each do |vc|
-          c = instance_variable_get("@#{vc}")
-          next unless c
-
-          c.symbolize_keys.each do |k, v|
-            # Only include valid fields from the field_list_array
-            # NOTE: this excludes caption_before 'all_fields' and 'submit'
-            next unless fla.include?(k.to_s)
-            
-            field_configs[k] ||= {}
-            field_configs[k].merge!({vc => v})
-          end
-        end
-        
+        self.field_configs = {}
       else
-
         # 'field_configs' was explicitly set, so use it to set the appropriate configurations
         # for each of the valid_configs
         self.field_configs ||= {}
         self.field_configs = self.field_configs.symbolize_keys
 
-
         field_configs.each do |fname, fconfig|
-          valid_configs.each do |vc|
-            # For each of the valid configs, add the corresponding definition to the
+          ValidFieldConfigs.each do |vc|
+            # For each of the ValidFieldConfigs, add the corresponding definition to the
             #  named attribute
             c = fconfig[vc]
             next unless c
+
             ivar = instance_variable_get("@#{vc}")
             unless ivar
-              instance_variable_set("@#{vc}", {}) 
+              instance_variable_set("@#{vc}", {})
               ivar = instance_variable_get("@#{vc}")
             end
 
             ivar.merge!(fname => c)
-          end        
+          end
         end
 
       end
 
+      # Build the list of errors from the explicitly defined field_configs
       efs = field_configs.keys.map(&:to_s) - fla
       if efs.present?
         failed_config :field_configs, "field_configs includes fields that are not in the field list: #{efs}"
       end
 
       field_configs.each do |fname, fconfig|
-        extra_keys = fconfig.keys - valid_configs
+        extra_keys = fconfig.keys - ValidFieldConfigs
         next if extra_keys.empty?
 
         failed_config :field_configs,
-                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only #{valid_configs}"
+                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only #{ValidFieldConfigs}"
+      end
+
+      # Now that the field_configs errors have been checked for the explicitly definition,
+      # go ahead and merge in the values from the standalone definitions
+      add_field_configs_from_standalone_defs
+    end
+
+    # Set field_configs from the configurations listed in ValidFieldConfigs
+    # for each of the valid fields
+    def add_field_configs_from_standalone_defs
+      fla = fields
+
+      self.field_configs ||= {}
+      ValidFieldConfigs.each do |vc|
+        c = instance_variable_get("@#{vc}")
+        next unless c
+
+        c.symbolize_keys.each do |k, v|
+          # Only include valid fields from the field_list_array
+          # NOTE: this excludes caption_before 'all_fields' and 'submit'
+          next unless fla.include?(k.to_s)
+
+          field_configs[k] ||= {}
+          field_configs[k].merge!({ vc => v })
+        end
       end
     end
 

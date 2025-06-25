@@ -185,6 +185,17 @@ class Admin::MigrationGenerator
   end
 
   #
+  # The name of a reference view for the target table
+  # Views provide a way to get a simple record linking referenced tables
+  # @param [String] to_table_name
+  # @return [String]
+  def self.reference_view_name(table_name, to_table_name)
+    tn = table_name.sub('activity_log_', 'al_')
+    ttn = to_table_name.sub('activity_log_', 'al_')
+    "#{ttn}_from_#{tn}".first(Settings::MaxPostgresIdentifierLength)
+  end
+
+  #
   # Generate a data dictionary table name related to the provided table name
   # and check if it exists.
   # If it does, run a query to retrieve the full data dictionary content as an array,
@@ -318,11 +329,12 @@ class Admin::MigrationGenerator
 
   #
   # Identify change to database table or view comment based on the
-  # current table_comments configuration
+  # current table_comments configuration.
+  # Ensure the comment is not nil, to avoid accidentally breaking the migration
   # @return [String|nil] - new comment, or nil if unchanged
   def table_comment_changes
-    comment = table_or_view_comment
-    new_comment = table_comments[:table]
+    comment = table_or_view_comment || ''
+    new_comment = table_comments[:table] || ''
     return unless comment != new_comment
 
     new_comment
@@ -548,6 +560,9 @@ class Admin::MigrationGenerator
         self.view_sql_changed = #{!!view_sql_changed}
       VSTEXT
     end
+
+    # Avoid table comments from appearing as 'null'
+    tcs[:table] ||= ''
 
     <<~SETATTRIBS
           self.schema = '#{db_migration_schema}'

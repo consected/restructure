@@ -26,7 +26,7 @@
   <% if object_instance.schema_name.blank? %>
     <p>The schema name is not specified in the definition.</p>
     <p>The assumed schema name from the database is: <code><%= object_instance.schema_name_in_db %></code>
-  <% elsif object_instance.schema_name != object_instance.schema_name_in_db %>
+  <% elsif object_instance.table_or_view && object_instance.schema_name != object_instance.schema_name_in_db %>
   <div class="config-error-block">
     <p>The schema name in the definition <code><%=object_instance.schema_name%></code> does not match the schema the database is using for the table <code><%= object_instance.schema_name_in_db %></code></p>
   </div>

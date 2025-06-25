@@ -49,4 +49,11 @@ _definitions___extra_options_standard_option_definitions___:
   field_is_blank: &is_not_blank
     condition: '<>'
     value: ''
-      
+
+  # Usage:
+  #   condition_table:
+  #     tag_field_name: *field_has_no_tags
+  field_has_no_tags: &field_has_no_tags
+    - null
+    - []
+    - ['']
