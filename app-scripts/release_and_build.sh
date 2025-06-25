@@ -55,6 +55,8 @@ if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
     done
     IFS=$oldifs
     sed -i -E "s/## Unreleased/## Unreleased\n/" CHANGELOG.md
+    git commit CHANGELOG.md -m "Updated CHANGELOG.md with git commits" && \
+    git push
   fi
 
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
