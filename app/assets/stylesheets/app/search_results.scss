@@ -652,14 +652,19 @@ ul[data-address-is-us="false"] {
 .selected-item {
   .list-group-item:first-child {
     &:not(.is-sub-heading) {
-      background-color: #fff6e2;
+      background-color: var(--item-highlight-color);
     }
   }
 }
 
+li.list-group-item.item-highlight,
+li.list-group-item:has(> .item-highlight) {
+  background-color: var(--item-highlight-color) !important;
+}
+
 tr.item-highlight {
   border: solid 1px gray;
-  background: #fff6e2;
+  background: var(--item-highlight-color);
 }
 
 .linked-item-highlight {
