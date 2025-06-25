@@ -752,7 +752,7 @@ class ActivityLog < ActiveRecord::Base
   # @param [String] to_table_name
   # @return [String]
   def reference_view_name(to_table_name)
-    Admin::MigrationGenerator.reference_view_name(to_table_name)
+    Admin::MigrationGenerator.reference_view_name(table_name, to_table_name)
   end
 
   # Hyphenated name, typically used in HTML markup for referencing target blocks and panels

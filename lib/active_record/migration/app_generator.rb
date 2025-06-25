@@ -974,7 +974,7 @@ module ActiveRecord
       end
 
       def ref_view_name(to_table_name)
-        Admin::MigrationGenerator.reference_view_name(to_table_name)
+        Admin::MigrationGenerator.reference_view_name(table_name, to_table_name)
       end
 
       def reference_view_sql(ref_config)

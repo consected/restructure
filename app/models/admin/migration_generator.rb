@@ -189,10 +189,10 @@ class Admin::MigrationGenerator
   # Views provide a way to get a simple record linking referenced tables
   # @param [String] to_table_name
   # @return [String]
-  def self.reference_view_name(to_table_name)
+  def self.reference_view_name(table_name, to_table_name)
     tn = table_name.sub('activity_log_', 'al_')
     ttn = to_table_name.sub('activity_log_', 'al_')
-    "#{ttn}_from_#{tn}".left(Settings::MaxPostgresIdentifierLength)
+    "#{ttn}_from_#{tn}".first(Settings::MaxPostgresIdentifierLength)
   end
 
   #
