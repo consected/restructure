@@ -185,6 +185,17 @@ class Admin::MigrationGenerator
   end
 
   #
+  # The name of a reference view for the target table
+  # Views provide a way to get a simple record linking referenced tables
+  # @param [String] to_table_name
+  # @return [String]
+  def self.reference_view_name(to_table_name)
+    tn = table_name.sub('activity_log_', 'al_')
+    ttn = to_table_name.sub('activity_log_', 'al_')
+    "#{ttn}_from_#{tn}".left(Settings::MaxPostgresIdentifierLength)
+  end
+
+  #
   # Generate a data dictionary table name related to the provided table name
   # and check if it exists.
   # If it does, run a query to retrieve the full data dictionary content as an array,

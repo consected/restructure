@@ -974,9 +974,7 @@ module ActiveRecord
       end
 
       def ref_view_name(to_table_name)
-        tn = table_name.sub('activity_log_', 'al_')
-        ttn = to_table_name.sub('activity_log_', 'al_')
-        "#{ttn}_from_#{tn}"
+        Admin::MigrationGenerator.reference_view_name(to_table_name)
       end
 
       def reference_view_sql(ref_config)
