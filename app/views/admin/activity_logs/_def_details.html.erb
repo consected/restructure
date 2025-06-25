@@ -66,10 +66,10 @@
 
        next if name.in?([:primary, :blank_log]) && !conf&.fields&.present?
   %>
-    <li class="activity-list-name"><%=name%><% unless conf %>(invalid)<% end %></li>
-      <% if conf&.label&.present?  %>
-      <div class="activity-list-activity-label"><%= conf.label %></div>
-      <% end %>
+    <li class="activity-list-name" data-al-elt-block="#al_ib_<%=name%>"><span class="activity-list-name"><%=name%></span> <% unless conf %>(invalid)<% end %>
+    <% if conf&.label&.present?  %><span class="activity-list-activity-label"><%= conf.label %></span><% end %>
+    </li>
+    <div class="activity-list-item-block collapse" id="al_ib_<%=name%>">  
       <% if conf&.fields&.present?  %>
       <ul class="activity-list-activity-fields">
         <li><%= conf.fields.join("</li> <li>").html_safe %></li>
@@ -98,7 +98,7 @@
       <ul class="activity-list-activity-uacs">
         <%= render partial: 'admin/activity_logs/def_activity_uac_info', locals: {app_type_id: current_admin.matching_user&.app_type_id, resource_name: conf.resource_name} %>
       </ul>
-
+    </div>
   <% end %>
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
