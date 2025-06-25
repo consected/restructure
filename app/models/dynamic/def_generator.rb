@@ -524,7 +524,7 @@ module Dynamic
       act_refs.each do |ref_name, outer_config|
         outer_config.each do |full_name, ref_config|
           details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
-                                     :from, :without_reference, :no_master_association)
+                                     :from, :without_reference, :no_master_association, :label)
           details.merge! reference_name: ref_name, full_ref_name: full_name
           res << details
         end

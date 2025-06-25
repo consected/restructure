@@ -35,10 +35,22 @@ ul.admin-tag-list {
     font-size: 12px;
   }
 
+  ul.activity-list-activity-references li {
+    border: 0;
+    display: block;
+
+    em.al-ref-this {
+      color: gray;
+    }
+  }
+
   li.activity-list-name {
     background-color: rgb(221, 221, 221);
     &:hover {
       cursor: pointer;
+    }
+    &.al-name-selected {      
+      background-color: #f4f498 !important; 
     }
   }
 

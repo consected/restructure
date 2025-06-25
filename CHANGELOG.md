@@ -14,6 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Changed] handling of table comments to avoid broken migrations
+- [Changed] setting of schema name causing it to be blanked out - fixes #397
+- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
+- [Cleaned] activity log table generator
+- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
+- [Fixed] reference_view_name
+- [Fixed] spec
+- [Added] automatic retest of failed specs
+- [Changed] activity log admin activities list to improve usability
+- [Added] auto population of release CHANGELOG
+- [Updated] to commit CHANGELOG
+
 ## [9.20.2] - 2025-06-24
 
 ### From FPHS - PR #569 - 2025-06-24
