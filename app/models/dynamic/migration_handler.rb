@@ -193,7 +193,7 @@ module Dynamic
         Rails.logger.warn "#{self.class.human_name} migration doesn't specify a schema_name and there is no matching user " \
                           "for the current admin '#{current_admin.email}' or no app type is set '#{current_user_app_type}'"
       end
-      
+
       Rails.logger.warn "#{self.class.human_name} doesn't specify a schema_name - using the app type default, category or first in search path"
       self.class.default_schema_name(app_type: current_user_app_type, category:)
     end
@@ -253,7 +253,7 @@ module Dynamic
     # or the default for server
     # @return [String] new schema_name
     def init_schema_name
-      return if disabled?
+      return if disabled? || schema_name.present?
 
       self.schema_name = if persisted?
                            schema_name_in_db
@@ -271,8 +271,8 @@ module Dynamic
     def schema_name_ok
       return true if disabled? || Admin::MigrationGenerator.current_search_paths.include?(schema_name)
 
-      errors.add :schema_name, "not in current search_path (#{schema_name}) - " \
-                           "#{Admin::MigrationGenerator.current_search_paths}"
+      errors.add :schema_name, "(#{schema_name}) not in current search_path for #{table_name} - " \
+                           "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
     end
   end
 end
