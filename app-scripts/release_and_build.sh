@@ -45,9 +45,23 @@ fi
 if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
   if [ "${cl_not_ok}" ]; then
-    echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."
-    exit 2
+    echo "CHANGELOG.md does not have anything entered for the Unreleased section. Will populate it from git log"
+    oldifs=$IFS
+    IFS=$'\n'
+    for line in $(git log --format=%s --no-merges new-master..HEAD) ; do 
+      [[ $line =~ ^([a-zA-Z]+)\ (.+) ]]
+      res="$(echo "- [${BASH_REMATCH[1]}] ${BASH_REMATCH[2]}")"
+      sed -i -E "s/## Unreleased/## Unreleased\n${res}/" CHANGELOG.md
+    done
+    IFS=$oldifs
+    sed -i -E "s/## Unreleased/## Unreleased\n/" CHANGELOG.md
   fi
+
+  cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
+  if [ "${cl_not_ok}" ]; then
+    echo "CHANGELOG.md still does not have anything entered for the Unreleased section. Please edit it and retry."
+    exit 3
+  fi  
 fi
 
 grep -A 12 '## Unreleased' CHANGELOG.md
