@@ -318,11 +318,12 @@ class Admin::MigrationGenerator
 
   #
   # Identify change to database table or view comment based on the
-  # current table_comments configuration
+  # current table_comments configuration.
+  # Ensure the comment is not nil, to avoid accidentally breaking the migration
   # @return [String|nil] - new comment, or nil if unchanged
   def table_comment_changes
-    comment = table_or_view_comment
-    new_comment = table_comments[:table]
+    comment = table_or_view_comment || ''
+    new_comment = table_comments[:table] || ''
     return unless comment != new_comment
 
     new_comment
@@ -548,6 +549,9 @@ class Admin::MigrationGenerator
         self.view_sql_changed = #{!!view_sql_changed}
       VSTEXT
     end
+
+    # Avoid table comments from appearing as 'null'
+    tcs[:table] ||= ''
 
     <<~SETATTRIBS
           self.schema = '#{db_migration_schema}'
