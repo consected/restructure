@@ -22,6 +22,28 @@ module ReportsHelper
             class: 'edit-entity glyphicon glyphicon-pencil'
   end
 
+  #
+  # Get the id field value for the current report result row
+  # Will attempt to use the id field from the report runner. If this is not
+  # set (which is unlikely), it will use the first field in the results.
+  # If the runner specifies a field name, but it is not in the results,
+  # then we raise an exception.
+  # @param [Array] list_item
+  # @return [Objec] the result value
+  def id_field_value(list_item)
+    # Find the column number for the id field, if not already set
+    # Returns 0 if the runner doesn't return an id field, which is unlikely
+    @col_num ||= if @runner&.data_reference&.id_field
+                   fn = @runner.data_reference.id_field
+                   @results.fields.index(fn)
+                 else
+                   0
+                 end
+    raise FphsException, "No id field #{fn} in results" unless @col_num
+
+    list_item[@col_num]
+  end
+
   def report_edit_cancel
     link_to '',
             '#',
@@ -157,7 +179,7 @@ module ReportsHelper
   # @param [Hash] options - field options
   # @return [String | nil]
   def report_criteria_multiple_field(name, config, value, options)
-    return unless config.multiple == 'multiple' || config.multiple == 'multiple-regex'
+    return unless ['multiple', 'multiple-regex'].include?(config.multiple)
 
     use_dropdown = report_criteria_use_dropdown_options(config, value)
     if use_dropdown
@@ -218,19 +240,19 @@ module ReportsHelper
   def select_from_model_resource_name_options
     Rails.cache.fetch("select_from_model_resource_name_options-#{Resources::Models.updated_at}") do
       res = Resources::Models.all.values
-                            .reject { |r| r.option_type }
-                            .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
-                            .uniq
+                             .reject { |r| r.option_type }
+                             .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+                             .uniq
       options_for_select res
     end
   end
 
-  def report_criteria_show_if(name, config, value, options)    
+  def report_criteria_show_if(name, config, value, options)
     return true unless config.show_if
 
     d = @report.attributes
-                 .merge(@runner.data_reference.substitution_data)
-                 .merge(criteria_field: name, criteria_value: value, criteria_options: options)
+               .merge(@runner.data_reference.substitution_data)
+               .merge(criteria_field: name, criteria_value: value, criteria_options: options)
     res = Formatter::Substitution.substitute(config.show_if, data: d, ignore_missing: :show_tag)
     res&.strip&.present?
   end

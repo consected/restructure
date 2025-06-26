@@ -14,34 +14,16 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] CHANGELOG
+- [Updated] CHANGELOG
+- [Cleaned] rspec to start
+- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
+- [Added] real lookup of report table id field for better editing - fixes #576
+- [Fixed] spec
+
 ## [9.21.1] - 2025-06-26
 
-- [Updated] CHANGELOG
-- [] 
-- [Built] and tested release-ready version '9.20.0' - dev repo
-- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
-- [Fixed] no field_options being passed to field name_ends_with_year
-- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
-- [Added] `field_has_no_tags` default options definition
-- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
-- [Changed] handling of table comments to avoid broken migrations
-- [Changed] setting of schema name causing it to be blanked out - fixes #397
-- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
-- [Cleaned] activity log table generator
-- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
-- [Fixed] reference_view_name
-- [Fixed] spec
-- [Added] automatic retest of failed specs
-- [Changed] activity log admin activities list to improve usability
-- [Added] simple styling change for highlighted items
-- [Added] auto population of release CHANGELOG
-- [Updated] to commit CHANGELOG
-- [Updated] CHANGELOG
-- [] 
-- [Ignored] brakeman warning - already addressed
-- [] 
-- [] 
-- [Built] and tested release-ready version '9.21.0' - dev repo
+- [Build] FPHS version
 
 ## [9.21.0] - 2025-06-25
 
@@ -57,6 +39,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
 - [Added] automatic retest of failed specs
 - [Changed] activity log admin activities list to improve usability
+
+### From Viva - PR #570 - 2025-06-24
+
+- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
+- [Fixed] no field_options being passed to field name_ends_with_year
+- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
+- [Added] `field_has_no_tags` default options definition
+
+### From FPHS - PR #569 - 2025-06-24
+
+- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
 
 ## [9.20.0] - 2025-06-24
 

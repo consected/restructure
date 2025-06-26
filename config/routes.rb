@@ -75,6 +75,8 @@ Rails.application.routes.draw do
         resources :protocol_events, except: %i[show destroy]
       end
     end
+    post 'protocols/copy_sub_processes', to: 'protocols#copy_sub_processes'
+
     resources :protocol_events, except: %i[show destroy]
     resources :sub_processes, except: %i[show destroy]
 

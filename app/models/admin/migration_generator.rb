@@ -277,6 +277,36 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Get the primary key for a database table definition.
+  # Raises an exception if the table does not exist.
+  # @param [String] schema_name
+  # @param [String] table_name
+  # @return [String|nil] the column name or nil if not found
+  def self.find_primary_key(schema_name, table_name)
+    sql = <<~SQL
+      SELECT
+        pg_attribute.attname as column_name
+      FROM pg_index, pg_class, pg_attribute, pg_namespace
+      WHERE
+        pg_class.oid = $1::regclass
+        AND indrelid = pg_class.oid
+        AND pg_class.relnamespace = pg_namespace.oid
+        AND pg_attribute.attrelid = pg_class.oid
+        AND pg_attribute.attnum = any(pg_index.indkey)
+        AND indisprimary;
+    SQL
+
+    type = ActiveModel::Type::String.new
+    schema_and_table = "#{schema_name}.#{table_name}"
+    binds = [
+      ActiveRecord::Relation::QueryAttribute.new('schema_and_table', schema_and_table, type)
+    ]
+
+    result = connection.exec_query sql, 'SQL', binds
+    result.first&.fetch('column_name')
+  end
+
+  #
   # Wrap ActiveRecord::MigrationContext since its interface changes between Rails 5, 6 and 7
   # @return [ActiveRecord::MigrationContext] instance of ActiveRecord::MigrationContext for the specified migration dirname
   def self.migration_context(dirname)
