@@ -160,6 +160,7 @@ describe Classification::Protocol do
     end
 
     it 'maintains data consistency in transaction' do
+      prev_count = target_protocol.sub_processes.reload.count
       allow(target_protocol.sub_processes).to receive(:create!).and_raise('Test error')
 
       expect do
@@ -167,7 +168,7 @@ describe Classification::Protocol do
       end.to raise_error('Test error')
 
       # Verify no partial data was created
-      expect(target_protocol.sub_processes.count).to eq(0)
+      expect(target_protocol.sub_processes.reload.count).to eq(prev_count)
     end
   end
 end
