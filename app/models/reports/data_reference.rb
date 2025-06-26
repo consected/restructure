@@ -1,11 +1,10 @@
 module Reports
   # Handle data reference when running reports
   class DataReference
-    ValidSqlSubstitutions = %i[table_name schema_name table_fields id_field 
+    ValidSqlSubstitutions = %i[table_name schema_name table_fields id_field
                                col_names resource_model user_can master_route_prefix current_user].freeze
 
-    attr_accessor(*ValidSqlSubstitutions)
-    attr_accessor :runner, :substitution_data
+    attr_accessor(*ValidSqlSubstitutions, :runner, :substitution_data)
 
     def initialize(runner)
       self.runner = runner
@@ -29,8 +28,11 @@ module Reports
       raise FphsException, 'invalid table name' unless table_exists
 
       self.col_names = Admin::MigrationGenerator.table_column_names(table_name)
-      self.id_field = if col_names.include?('id')
-                        'id' 
+      pk = Admin::MigrationGenerator.find_primary_key(schema_name, table_name)
+      self.id_field = if pk
+                        pk
+                      elsif col_names.include?('id')
+                        'id'
                       else
                         col_names.first
                       end
@@ -39,7 +41,7 @@ module Reports
       if resource_model
 
         self.master_route_prefix = "'/masters/' || master_id" if resource_model.base_master_segment
-        [:access, :edit, :update, :create].each do |access|
+        %i[access edit update create].each do |access|
           user_can[access] = resource_model.model.allows_user_access_to?(runner.current_user, access)
         end
       end

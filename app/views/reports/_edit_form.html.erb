@@ -9,6 +9,7 @@
   end
   labels ||= {}
 
+  id_field = @runner.data_reference.id_field
 %>
     <table>
       <%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create, report_id: @report.id) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result",  'data-object-id' => object_instance.id }) do |f| %>
@@ -19,25 +20,24 @@
             <%= params[:table_name].present? ? hidden_field_tag(:table_name, params[:table_name]) : '' %>
             <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
           </td>
-          <% if object_instance.respond_to?(:id) %>
-            <td class="report-el report-el-object-id"><%= object_instance.id %></td>
-          <% end %>
           <%             
             cached_result_fields = Reports::Runner.cached_fields(params[:runner_hash])
             raise FphsException, "Results are out of date. Re-run the report before attempting to edit it."  unless cached_result_fields
 
-            cached_result_fields = cached_result_fields - [:id]
+            cached_result_fields = cached_result_fields #- [:id]
 
             edit_fields = @report.edit_fields
-            cached_result_fields.each do |field_name_sym| %>
+            cached_result_fields.each do |field_name_sym| 
+              field_name = field_name_sym.to_s
+              is_pk = field_name != id_field
+            %>
 
-            <% if edit_fields.include?(field_name_sym) %>
+            <% if edit_fields.include?(field_name_sym)  %>
               <%
             form_object_instance = object_instance
             form_object_item_type_us = form_object_instance.item_type_us
             label_redefined = false
 
-            field_name = field_name_sym.to_s
             col = form_object_instance.class.columns_hash[field_name]
             # raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
             # External IDs and master crosswalk ids (msid) do not feature in the item. Ignore if they appear
@@ -70,9 +70,15 @@
                 <%= edit_form_field(**local_vars) %>
               </td>
             <% else%>
-              <td class="report-el report-el-edit-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
-                &nbsp;
-              </td>
+                <% if is_pk %>
+                  <td class="report-el report-el-edit-cell report-el-edit-id-field-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
+                    <%= col = object_instance[field_name] %>
+                  </td>
+                <% else %>
+                  <td class="report-el report-el-edit-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
+                    &nbsp;
+                  </td>
+                <% end %>
             <% end %>
           <% end %>
         </tr>
