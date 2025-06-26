@@ -33,12 +33,14 @@
     </thead>
     <tbody>
 
-      <% @results.each_row do |list_item| %>
+      <% @results.each_row do |list_item| 
+           id_val = id_field_value(list_item)
+      %>
 
 
-        <tr class="<%=is_editable_class%>" id="report-item-<%=list_item[0]%>">
+        <tr class="<%=is_editable_class%>" id="report-item-<%=id_val.to_s.id_underscore%>">
          <% if is_editable %>
-         <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
+         <td class="report-el report-edit-btn-cell"><%= report_edit_btn id_val %> </td>
          <% end %>
           <%
             i = 0 
