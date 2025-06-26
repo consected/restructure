@@ -29,6 +29,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] automatic retest of failed specs
 - [Changed] activity log admin activities list to improve usability
 
+### From Viva - PR #570 - 2025-06-24
+
+- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
+- [Fixed] no field_options being passed to field name_ends_with_year
+- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
+- [Added] `field_has_no_tags` default options definition
+
+### From FPHS - PR #569 - 2025-06-24
+
+- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
+
 ## [9.20.0] - 2025-06-24
 
 ### From FPHS - PR #567 - 2025-06-24
