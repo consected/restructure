@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] CHANGELOG
+- [Updated] CHANGELOG
+- [Cleaned] rspec to start
+- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
+- [Added] real lookup of report table id field for better editing - fixes #576
+- [Fixed] spec
+
 ## [9.21.1] - 2025-06-26
 
 - [Build] FPHS version
