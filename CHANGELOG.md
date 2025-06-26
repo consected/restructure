@@ -14,7 +14,22 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.19.1] - 2025-06-24
+## [9.21.0] - 2025-06-25
+
+### From Viva - PR #574 - 2025-06-25
+
+- [Added] auto population of release CHANGELOG from git commits, if the "unrelased" section is empty - resolves #573
+
+### From Viva - PR #572 - 2025-06-25
+
+- [Changed] handling of table comments to avoid broken migrations - fixes #571
+- [Changed] setting of schema name causing it to be blanked out - fixes #397
+- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
+- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
+- [Added] automatic retest of failed specs
+- [Changed] activity log admin activities list to improve usability
+
+## [9.20.0] - 2025-06-24
 
 ### From FPHS - PR #567 - 2025-06-24
 

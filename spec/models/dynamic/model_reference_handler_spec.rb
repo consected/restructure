@@ -786,13 +786,15 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(dm.user_id).to eq @user&.id
       expect(dm.current_user).to eq @master.current_user
 
-      ModelReference.create_from_master_with(dm.master, @player_contact)
+      ref = ModelReference.create_from_master_with(dm.master, @player_contact)
+      expect(ref).to be_persisted
 
-      dm.reset_model_references
+      # Force a clean instance to be tested
+      dm = dm.class.find(dm.id)
 
       if dm.model_references.empty?
         put_to_saved_log 'evaluates rules to show references'
-        put_to_saved_log dm.class.definition.option_configs 
+        put_to_saved_log dm.class.definition.option_configs
         put_to_saved_log dm.class.definition.options
       end
 

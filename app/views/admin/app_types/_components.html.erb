@@ -131,6 +131,7 @@
               got_path[path] = true
 
               tabid = vs[:pair]&.join('--').ns_underscore
+              path = "#{path}&perform_action=edit"
           %>
               <li class="app-component-name">
                 <% if open_in_new %>              
