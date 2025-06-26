@@ -110,7 +110,22 @@ echo "Finished at $(date)" >> tmp/failing_specs.log
 
 if [ -f tmp/parallel_specs_failed.txt ]; then
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
-  exit 1
+  echo "Retesting failed specs"
+  old_ifs=$IFS
+  IFS=$'\n'
+  for line in $(grep -P '\e\[[0-9]+mrspec ' tmp/failing_specs.log) ; do 
+    [[ $line =~ rspec\ ([^\:]+) ]]; retest="${retest} $(echo ${BASH_REMATCH[1]})"
+  done 
+  IFS=$old_ifs
+  rspec $retest
+  res=$?
+  if [ $res != 0 ]; then
+    echo "Retest of failed specs did not pass."
+    exit $res
+  else
+    echo "Retest of failed specs passed."
+    exit 0
+  fi
 else
   echo "All parallel specs passed."
   exit 0

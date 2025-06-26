@@ -14,7 +14,49 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.19.1] - 2025-06-24
+- [Updated] CHANGELOG
+- [] 
+- [Built] and tested release-ready version '9.20.0' - dev repo
+- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
+- [Fixed] no field_options being passed to field name_ends_with_year
+- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
+- [Added] `field_has_no_tags` default options definition
+- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
+- [Changed] handling of table comments to avoid broken migrations
+- [Changed] setting of schema name causing it to be blanked out - fixes #397
+- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
+- [Cleaned] activity log table generator
+- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
+- [Fixed] reference_view_name
+- [Fixed] spec
+- [Added] automatic retest of failed specs
+- [Changed] activity log admin activities list to improve usability
+- [Added] simple styling change for highlighted items
+- [Added] auto population of release CHANGELOG
+- [Updated] to commit CHANGELOG
+- [Updated] CHANGELOG
+- [] 
+- [Ignored] brakeman warning - already addressed
+- [] 
+- [] 
+- [Built] and tested release-ready version '9.21.0' - dev repo
+
+## [9.21.0] - 2025-06-25
+
+### From Viva - PR #574 - 2025-06-25
+
+- [Added] auto population of release CHANGELOG from git commits, if the "unrelased" section is empty - resolves #573
+
+### From Viva - PR #572 - 2025-06-25
+
+- [Changed] handling of table comments to avoid broken migrations - fixes #571
+- [Changed] setting of schema name causing it to be blanked out - fixes #397
+- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
+- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
+- [Added] automatic retest of failed specs
+- [Changed] activity log admin activities list to improve usability
+
+## [9.20.0] - 2025-06-24
 
 ### From FPHS - PR #567 - 2025-06-24
 
