@@ -14,11 +14,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #581 - 2025-06-30
+
+- [Documented] why conditions have a missing association with no_masters - resolves #580
+
+### From FPHS - PR #582 - 2025-06-30
+
+- [Fixed] failure to read nfs_apps_list.txt file during initialization breaks the server - fixes #579 (also requires EB config changes outside this repo)
+- [Fixed] logging of calc_if errors to ensure the actual error is available
+
 ## [9.21.0] - 2025-06-25
 
 ### From Viva - PR #574 - 2025-06-25
 
-- [Added] auto population of release CHANGELOG from git commits, if the "unrelased" section is empty - resolves #573
+- [Added] auto population of release CHANGELOG from git commits, if the "unreleased" section is empty - resolves #573
 
 ### From Viva - PR #572 - 2025-06-25
 
