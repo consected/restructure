@@ -14,6 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #588 - 2025-06-30
+
+- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
+
+### From FPHS - PR #587 - 2025-06-30
+
+- [Added] real lookup of report table id field for better editing - fixes #576
+
+### From FPHS - PR #586 - 2025-06-30
+
+- [Changed] selecting a new app in the app type selector, so that the user is redirected to the configured home page, not masters/search - resolves #575
+
 ### From FPHS - PR #581 - 2025-06-30
 
 - [Documented] why conditions have a missing association with no_masters - resolves #580
