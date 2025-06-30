@@ -79,35 +79,33 @@ module CalcActions
 
         # For each condition config definition, run the main tests
         condition_config_array.each do |condition_config|
-          begin
-            setup_condition_config(condition_config)
-            calc_base_query
+          setup_condition_config(condition_config)
+          calc_base_query
 
-            #### :all ####
-            case @condition_type
-            when :all
-              condition_type_all
-            #### :not_all ####
-            when :not_all
-              condition_type_not_all
-            #### :any ####
-            when :any
-              condition_type_any
-            #### :not_any ####
-            when :not_any
-              condition_type_not_any
-            else
-              raise FphsException, "Incorrect condition type specified when calculating action if: #{@condition_type}"
-            end
-
-            log_results
-
-            # We can end the loop, unless the last result was a success
-            break unless @loop_res
-          rescue StandardError => e
-            details = log_results(log_level: nil)
-            raise e, "Error in do_calc_action_if: #{e}\nDetails:\n#{details&.join("\n")}", e.backtrace
+          #### :all ####
+          case @condition_type
+          when :all
+            condition_type_all
+          #### :not_all ####
+          when :not_all
+            condition_type_not_all
+          #### :any ####
+          when :any
+            condition_type_any
+          #### :not_any ####
+          when :not_any
+            condition_type_not_any
+          else
+            raise FphsException, "Incorrect condition type specified when calculating action if: #{@condition_type}"
           end
+
+          log_results
+
+          # We can end the loop, unless the last result was a success
+          break unless @loop_res
+        rescue StandardError => e
+          details = log_results(log_level: nil)
+          raise e, "Error in do_calc_action_if: #{e}\nDetails:\n#{details&.join("\n")}", e.backtrace
         end
 
         final_res &&= @loop_res
@@ -615,7 +613,6 @@ module CalcActions
     # Setup the condition config for this loop's condition
     # @param [Hash] condition_config
     def setup_condition_config(condition_config)
-
       extras = {}
       condition_config.each do |orig_condition_type, condition_config_array|
         condition_type = orig_condition_type
@@ -626,7 +623,7 @@ module CalcActions
         extras[condition_type] = condition_config_array
       end
       condition_config.merge!(extras) if extras.present?
-      
+
       @condition_config = condition_config.dup
 
       iem = @condition_config.delete(:invalid_error_message)
@@ -987,22 +984,29 @@ module CalcActions
       when :has_created_activity
         condition_type = :all_completed_activity
         condition_config_array = [
-            definition_resources: {
-              extra_log_type: condition_config_array
+          definition_resources: {
+            extra_log_type: condition_config_array
           }
         ]
       when :has_not_created_activity
         condition_type = :not_any_completed_activity
         condition_config_array = [
-            definition_resources: {
-              extra_log_type: condition_config_array
+          definition_resources: {
+            extra_log_type: condition_config_array
           }
         ]
       else
         changed = false
       end
 
-      return condition_type, condition_config_array, changed
+      [condition_type, condition_config_array, changed]
+    end
+
+    #
+    # Get the current user for the current instance.
+    # @return [User|nil]
+    def current_user
+      @current_instance&.current_user
     end
 
     #
@@ -1014,17 +1018,35 @@ module CalcActions
 
       details = []
       begin
-        details << "*************************************************************************"
+        details << '*************************************************************************'
         details << "original condition type: #{@orig_cond_type}"
         details << "this instance: #{@current_instance.id}"
         details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                            " - @orig_loop_res: #{@orig_loop_res}"
+        details << "current user: #{current_user&.email} - " \
+                   "in app type: #{current_user&.app_type&.name}"
         details << 'condition_config:'
         details << YAML.dump(@condition_config.deep_stringify_keys)
         details << 'non_query_conditions:'
-        details << YAML.dump(@non_query_conditions&.conditions) rescue nil
-        details << @base_query.to_sql rescue nil if @base_query
-        details << @condition_scope.to_sql rescue nil if @condition_scope
+        begin
+          details << YAML.dump(@non_query_conditions&.conditions)
+        rescue StandardError
+          nil
+        end
+        if @base_query
+          begin
+            details << @base_query.to_sql
+          rescue StandardError => e
+            details << "Base query to_sql causes error: #{e}"
+          end
+        end
+        if @condition_scope
+          begin
+            details << @condition_scope.to_sql
+          rescue StandardError => e
+            details << "Condition scope to_sql causes error: #{e}"
+          end
+        end
         details << 'full conditions:'
         details << YAML.dump(@action_conf.deep_stringify_keys)
         details << '*******************************************************************************************'
