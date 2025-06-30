@@ -56,19 +56,24 @@ ActiveSupport.on_load(:nfs_store_config) do
     ares = Kernel.system 'which unzip'
     configuration_failed_reason << 'unzip not in the path' unless ares
 
-    nfs_apps_list_file = File.open(NFS_APPS_LIST_FILE, 'w')
-    app_types = Admin::AppType.active_app_types
-    app_types.each do |app_type|
-      exists = NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
-      subdir = Rails.env.production? ? '' : 'test-fphsfs'
-      nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir}"
-      next if exists
+    begin
+      nfs_apps_list_file = File.open(NFS_APPS_LIST_FILE, 'w')
+      app_types = Admin::AppType.active_app_types
+      app_types.each do |app_type|
+        exists = NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
+        subdir = Rails.env.production? ? '' : 'test-fphsfs'
+        nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir}"
+        next if exists
 
-      configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
+        configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
+      end
+      configuration_failed_reason << 'No App Type available' if app_types.empty?
+
+      nfs_apps_list_file.close
+    rescue Exception => e
+      # Catch any exception, since we don't want the server to crash just because of some background file error.
+      Rails.logger.error "Error writing NFS apps list file: #{e}\n#{e.short_string_backtrace}"
     end
-    configuration_failed_reason << 'No App Type available' if app_types.empty?
-
-    nfs_apps_list_file.close
   end
 
   self.configuration_successful = configuration_failed_reason.blank?
