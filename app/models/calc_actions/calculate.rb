@@ -106,7 +106,7 @@ module CalcActions
             break unless @loop_res
           rescue StandardError => e
             details = log_results(log_level: nil)
-            raise e, "Error in do_calc_action_if, with details:\n#{details&.join("\n")}", e.backtrace
+            raise e, "Error in do_calc_action_if: #{e}\nDetails:\n#{details&.join("\n")}", e.backtrace
           end
         end
 
