@@ -109,7 +109,7 @@
 
         all - no masters:
           # if a key is specified as 'no_masters', then the first key in the list will be used as the base table
-          # for the query. Results will not be joined to the masters table, allowing for abitrary tables and views to be
+          # for the query. Results will not be joined to the masters table, allowing for arbitrary tables and views to be
           # used to calculate conditions, even if they don't have a master_id or the master_id field can be null.
           # Additional associations can be specified, but they must be defined within the new base table.
           # NOTE: This may lead to errors with associations that are not defined in the new base table, even when attempting to
