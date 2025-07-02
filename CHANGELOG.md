@@ -14,13 +14,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] evaluation of active_values field option, much like preset_value does, but repeats evaluation even if the instance has been persisted - resolves #593
+
 ## [9.21.4] - 2025-07-02
 
 ## [9.21.3] - 2025-06-30
 
 - [Fixed] failure to read nfs_apps_list.txt file during initialization breaks the server - fixes #579 (also requires EB config changes outside this repo)
 - [Fixed] logging of calc_if errors to ensure the actual error is available
-- [] 
+- []
 - [Fixed] typo
 - [Updated] CHANGELOG
 - [Added] real lookup of report table id field for better editing - fixes #576
