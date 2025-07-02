@@ -44,15 +44,15 @@ module Utilities
       new.decrypt_and_verify(value)
     end
 
-    private
-
-    def raise_if_no_key!
+    def self.raise_if_no_key!
       unless Settings::EncryptionSecretKeyBase
         raise FphsException, 'Encryption needs Settings::EncryptionSecretKeyBase to be set'
       end
       raise FphsException, 'Encryption needs Settings::EncryptionSalt to be set' unless Settings::EncryptionSalt
       raise FphsException, 'Encryption KEY not set' unless defined?(KEY) && KEY
     end
+
+    private
 
     def encryptor
       ActiveSupport::MessageEncryptor.use_authenticated_message_encryption = false
