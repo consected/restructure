@@ -55,7 +55,12 @@ _fpa.postprocessors_reports = {
       window.setTimeout(function () {
         const $target_block = $(`#${target_block}`);
         _fpa.form_utils.resize_labels($target_block, null, true)
-        _fpa.secure_view.setup_links($target_block, 'a.redcap-file-use-secure-view');
+
+        // Ensure that the viewer is set up with the user's capabilities to view and download
+        var sv_opt = { allow_actions: null };
+        sv_opt.allow_actions = _fpa.state.user_can;
+
+        _fpa.secure_view.setup_links($target_block, 'a.redcap-file-use-secure-view', sv_opt);
       }, 500);
     }, 500);
   },

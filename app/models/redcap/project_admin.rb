@@ -568,8 +568,10 @@ module Redcap
       return @job_user if @job_user
 
       ju = data_options.run_jobs_as_user
-      res = User.find_active_by_email_or_id(ju)
+      res = User.find_active_by_email_or_id(ju) unless ju.blank?
       res ||= job_admin&.matching_user
+      raise FphsException, "No user or matching admin found for job user '#{ju}'" unless res
+
       res.app_type = job_app_type if job_app_type
       @job_user = res
     end
@@ -578,7 +580,8 @@ module Redcap
       return @job_admin if @job_admin
 
       ju = data_options.run_jobs_as_user
-      res = Admin.find_active_by_email_or_id(ju)
+      res = Admin.find_active_by_email_or_id(ju) unless ju.blank?
+
       @job_admin = res || current_admin || admin
     end
 

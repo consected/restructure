@@ -31,7 +31,7 @@ module Formatter
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
                             definition_resource_name definition_item_type_name table_name schema_name
-                            default_schema_name].freeze
+                            default_schema_name redcap_event_name].freeze
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
@@ -244,14 +244,14 @@ module Formatter
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
       setup_methods_as_attributes(d)
 
-      unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) ||
-              d&.key?(tag_name.to_sym)) ||
+      unless (d.is_a?(Hash) && (d&.key?(tag_name.to_s) ||
+              d&.key?(tag_name.to_sym))) ||
              tag.index(OverrideTags) ||
-             d.is_a?(Enumerable) && (tag_name.to_s == tag_name.to_s.to_i.to_s || tag_name.in?(['first', 'last']))
+             (d.is_a?(Enumerable) && (tag_name.to_s == tag_name.to_s.to_i.to_s || tag_name.in?(['first', 'last'])))
         unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}' " \
-                 "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
+                "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
         end
 
         d = {}
@@ -806,11 +806,11 @@ module Formatter
 
       if no_operator && !tag_value.is_a?(Integer)
         raise FphsException,
-              "Unknown comparison operator for {{\#is}}: #{operator}"
+              "Unknown comparison operator for {{#is}}: #{operator}"
       end
 
       res, no_operator = compare_number(operator, tag_value, exp)
-      raise FphsException, "Unknown comparison operator for integer {{\#is}}: #{operator}" if no_operator
+      raise FphsException, "Unknown comparison operator for integer {{#is}}: #{operator}" if no_operator
 
       res
     end
@@ -818,13 +818,13 @@ module Formatter
     def self.compare_string_or_list(operator, tag_value, exp)
       res = case operator
             when '==='
-              tag_value.blank? && exp.blank? || tag_value == exp
+              (tag_value.blank? && exp.blank?) || tag_value == exp
             when '!=='
-              !(tag_value.blank? && exp.blank? || tag_value == exp)
+              !((tag_value.blank? && exp.blank?) || tag_value == exp)
             when '!='
-              !(tag_value.blank? && exp.blank? || tag_value == exp)
+              !((tag_value.blank? && exp.blank?) || tag_value == exp)
             when '=='
-              tag_value.blank? && exp.blank? || tag_value == exp
+              (tag_value.blank? && exp.blank?) || tag_value == exp
             when 'in'
               tag_value.in?(exp)
             when '!in'

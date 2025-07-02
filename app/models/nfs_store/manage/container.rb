@@ -370,8 +370,13 @@ module NfsStore
         @can_perform_if[perform] = ca.calc_action_if
       end
 
+      def can_access_if_admin_master?
+        is_admin_container = Settings.admin_master&.id == master&.id
+        is_admin_container && current_user.role_names.include?(Settings.admin_nfs_role)
+      end
+
       def raise_if_no_access!
-        return if allows_current_user_access_to? :access
+        return if can_access_if_admin_master? || allows_current_user_access_to?(:access)
 
         cp = parent_item
         cpm = cp&.master&.id if cp.respond_to?(:master)
@@ -410,7 +415,7 @@ module NfsStore
         perform = perform.to_sym
         cu = current_user
         !!(cu.can?(perform) && (
-            can_perform_if?(perform) == :no_config && can_edit? ||
+            (can_perform_if?(perform) == :no_config && can_edit?) ||
             can_perform_if?(perform)
           ))
       end
@@ -421,7 +426,7 @@ module NfsStore
       # @param [String|Symbol] perform - the action to test
       # @return [Object]
       def can_perform_if_config(perform)
-        perform = "#{perform}_if".to_sym
+        perform = :"#{perform}_if"
         nfs_store_config_for(:can)&.dig(perform)
       end
 
@@ -456,10 +461,10 @@ module NfsStore
         end
 
         unless res
-          raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. "\
-                                          "App type: #{user.app_type.name} (#{user.app_type.id}). "\
-                                          "Name: #{name}. "\
-                                          "Roles: #{roles.join(', ')}"
+          raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. " \
+                                     "App type: #{user.app_type.name} (#{user.app_type.id}). " \
+                                     "Name: #{name}. " \
+                                     "Roles: #{roles.join(', ')}"
         end
 
         true
