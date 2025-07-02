@@ -125,21 +125,25 @@ module Redcap
     # Get survey link for an instrument and specific record
     # @param [String] instrument - name of instrument to retrieve link for
     # @param [Integer] record_id - record ID to retrieve link for
+    # @param [String] event - optional event name for longitudinal projects
     # @return [Array{Hash}] hash with symbolized keys
-    def survey_link(instrument:, record_id:)
+    def survey_link(instrument:, record_id:, event: nil)
       request_options = {
         instrument:,
         record: record_id.to_s,
         returnFormat: 'json'
       }
+
+      request_options[:event] = event if event.present?
       request :survey_link, request_options: request_options
     end
 
     #
     # Get survey participants for all records in an instrument
     # @param [String] instrument - name of instrument to retrieve link for
+    # @param [String] event - optional event name for longitudinal projects
     # @return [Array{Hash}] hash with symbolized keys
-    def survey_participants(instrument:, event:)
+    def survey_participants(instrument:, event: nil)
       request_options = {
         instrument:,
         event:,
@@ -153,22 +157,24 @@ module Redcap
     # @param [String] instrument - name of instrument to retrieve link for
     # @return [Array{Hash}] hash with symbolized keys
     def import_records(data:, force_auto_number: true, overwrite_behavior: 'normal')
-
       unless overwrite_behavior&.in?(OverwriteBehaviorOptions)
-        raise FphsException, "Invalid import_records overwrite_behavior '#{overwrite_behavior}' - must be one of #{OverwriteBehaviorOptions}"
+        raise FphsException,
+              "Invalid import_records overwrite_behavior '#{overwrite_behavior}' - " \
+              "must be one of #{OverwriteBehaviorOptions}"
       end
 
       unless data.is_a?(Array) && data.first.is_a?(Hash)
-        raise FphsException, "Invalid import_records data format - must be an array of hashes"
+        raise FphsException, 'Invalid import_records data format - must be an array of hashes'
       end
 
       data = data.to_json
+      return_content = force_auto_number ? 'auto_ids' : 'ids'
 
       request_options = {
         data:,
         forceAutoNumber: force_auto_number,
         overwriteBehavior: overwrite_behavior,
-        returnContent: 'ids',
+        returnContent: return_content,
         returnFormat: 'json'
       }
       request :create, request_options: request_options
@@ -227,7 +233,7 @@ module Redcap
       res
     end
 
-    def response_code 
+    def response_code
       redcap.response_code
     end
 
@@ -253,6 +259,11 @@ module Redcap
         project_admin.record_job_request action, result: { retrieved_from: retrieved_from, count: res&.length }
       end
       res
+    rescue StandardError => e
+      Rails.logger.error "Redcap::ApiClient request failed for action '#{action}' - #{e} - " \
+                         "code: #{e.response.code} - body: #{e.response.body} - " \
+                         "with request options: #{request_options}"
+      raise
     end
 
     def cache_key(action, request_options = nil)

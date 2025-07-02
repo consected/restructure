@@ -29,7 +29,7 @@
             edit_fields = @report.edit_fields
             cached_result_fields.each do |field_name_sym| 
               field_name = field_name_sym.to_s
-              is_pk = field_name != id_field
+              is_pk = field_name == id_field
             %>
 
             <% if edit_fields.include?(field_name_sym)  %>
@@ -72,7 +72,7 @@
             <% else%>
                 <% if is_pk %>
                   <td class="report-el report-el-edit-cell report-el-edit-id-field-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
-                    <%= col = object_instance[field_name] %>
+                    <%= object_instance[field_name] %>
                   </td>
                 <% else %>
                   <td class="report-el report-el-edit-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">

@@ -24,7 +24,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     render json: { message: msg }, status: 200
   end
 
-  # 
+  #
   # Request Redcap project archive, if the user has a matching admin profile or is logged in as an admin currently
   def request_archive
     set_instance_from_id
@@ -34,7 +34,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     render json: { message: msg }, status: 200
   end
 
-  # 
+  #
   # Request project user list, if the user has a matching admin profile or is logged in as an admin currently
   def request_users
     set_instance_from_id
@@ -50,21 +50,24 @@ class Redcap::ProjectUserRequestsController < UserBaseController
   def download_field_file
     record_id = params[:record_id]
     field_name = params[:field_name]
-    tn = "\.#{params[:id].pluralize}"
+    tn = "\\.#{params[:id].pluralize}"
 
     svp = { secure_view: params[:secure_view]&.to_unsafe_h }
 
-    project_admin = Redcap::ProjectAdmin.active.find_by("dynamic_model_table ~ ?", tn)
+    project_admin = Redcap::ProjectAdmin.active.order(id: :desc).find_by('dynamic_model_table ~ ?', tn)
     if project_admin
-      project_admin.current_user = current_user 
+      project_admin.current_user = current_user
       container = project_admin.file_store
       path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}" if record_id
-      sf = container&.stored_files.find_by(path:, file_name: field_name) if path
+      sf = container&.stored_files&.find_by(path:, file_name: field_name) if path
     end
     if sf
-      url = "/nfs_store/downloads/#{container.id}?activity_log_id=#{container.parent_item&.id}&activity_log_type=redcap__project_admin&download_id=#{sf.id}&retrieval_type=stored_file&#{svp.to_query}"
+      url = "/nfs_store/downloads/#{container.id}?activity_log_id=#{container.parent_item&.id}&" \
+            "activity_log_type=redcap__project_admin&download_id=#{sf.id}&retrieval_type=stored_file&#{svp.to_query}"
       redirect_to url
     else
+      Rails.logger.warn "Download field file failed for record_id: #{record_id}, field_name: #{field_name}, " \
+                        "project_admin: #{project_admin&.id}, container: #{container&.id}, path: #{path}, tn: #{tn}"
       render json: { message: 'File not found or inaccessible' }, status: 404
     end
   end

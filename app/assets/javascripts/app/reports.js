@@ -136,7 +136,11 @@ _fpa.reports = {
       $(this).html(new_html);
 
       if (orig_action.trim() == 'view file') {
-        _fpa.secure_view.setup_links($(this), 'a.' + dctaus);
+        // Ensure that the viewer is set up with the user's capabilities to view and download
+        var sv_opt = { allow_actions: null };
+        sv_opt.allow_actions = _fpa.state.user_can;
+
+        _fpa.secure_view.setup_links($(this), 'a.' + dctaus, sv_opt);
         $('a.' + dctaus).on('click', function (ev) {
           ev.preventDefault();
         });

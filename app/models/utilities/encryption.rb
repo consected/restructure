@@ -31,13 +31,25 @@ module Utilities
     def self.encrypt(value)
       return unless value.present?
 
+      raise_if_no_key!
+
       new.encrypt_and_sign(value)
     end
 
     def self.decrypt(value)
       return unless value.present?
 
+      raise_if_no_key!
+
       new.decrypt_and_verify(value)
+    end
+
+    def self.raise_if_no_key!
+      unless Settings::EncryptionSecretKeyBase
+        raise FphsException, 'Encryption needs Settings::EncryptionSecretKeyBase to be set'
+      end
+      raise FphsException, 'Encryption needs Settings::EncryptionSalt to be set' unless Settings::EncryptionSalt
+      raise FphsException, 'Encryption KEY not set' unless defined?(KEY) && KEY
     end
 
     private
