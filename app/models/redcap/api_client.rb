@@ -131,9 +131,10 @@ module Redcap
       request_options = {
         instrument:,
         record: record_id.to_s,
-        event:,
         returnFormat: 'json'
       }
+
+      request_options[:event] = event if event.present?
       request :survey_link, request_options: request_options
     end
 
