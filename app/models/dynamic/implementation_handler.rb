@@ -6,6 +6,7 @@ module Dynamic
     included do
       after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
+      after_initialize :evaluate_active_values
 
       before_save :handle_before_save_triggers
       after_commit :handle_save_triggers
@@ -273,6 +274,28 @@ module Dynamic
         if init_value
           res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res if attributes[name.to_s].blank?
+        end
+      end
+    end
+
+    #
+    # Evaluate active values for fields, much like preset_value does, but repeats evaluation
+    # even if the instance has been persisted.
+    def evaluate_active_values
+      return if skip_presets_for(:force_preset_values)
+
+      fo = option_type_config&.field_options
+      return unless fo
+
+      fo.each do |name, config|
+        next unless config.key?(:active_value)
+
+        next unless attribute_names.include?(name.to_s)
+
+        init_value = config[:active_value]
+        if init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+          send "#{name}=", res
         end
       end
     end

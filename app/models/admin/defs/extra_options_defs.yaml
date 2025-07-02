@@ -132,13 +132,21 @@
       preset_value: |
         default value | now() | today() | \{\{substitutions\}\}
         
-        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field
+        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field.
+        It is not applied to persisted instances.
       blank_preset_value: |
         default value | now() | today() | \{\{substitutions\}\}
         
         NOTE this is set only if the attribute is blank when building the instances 
-        and may be used to drive logic like an embed_resource_name field
-
+        and may be used to drive logic like an embed_resource_name field.
+        It is not applied to persisted instances.
+      active_value: |
+        default value | now() | today() | \{\{substitutions\}\}
+        
+        NOTE this is set whenever an instance is initialized. It allows for live UI substitutions that wouldn't otherwise
+        have access to attributes in other models. The data generated will be persisted to the database whenever the item is saved.
+        On re-accessing the item, the value will be re-evaluated. If not saved, the live value will be lost and will be
+        re-evaluated on the next access.
       no_downcase: true - to prevent downcasing of the attribute when stored to the database
       view_original_case: true - to prevent the UI capitalizing downcased fields
       view_with_formats: |
