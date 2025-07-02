@@ -14,6 +14,32 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] failure to read nfs_apps_list.txt file during initialization breaks the server - fixes #579 (also requires EB config changes outside this repo)
+- [Fixed] logging of calc_if errors to ensure the actual error is available
+- [] 
+- [Fixed] typo
+- [Updated] CHANGELOG
+- [Added] real lookup of report table id field for better editing - fixes #576
+- [Fixed] incorrect logic showing primary key in report table editing
+- [Fixed] incorrect logic showing primary key in report table editing
+- [Cleaned] rspec to start
+- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
+- [Fixed] spec
+- [Updated] CHANGELOG
+- [Fixed] secure view not being set up correctly
+- [Fixed] download_field_file not finding the correct project if there are duplicates
+- [Added] redcap_event_name to the list not to titleize
+- [Added] the ability to bypass container access check for a container in the admin master (-2) if the user has the appropriate role
+- [Fixed] redcap api calls to get survey_links and import records, plus added better logging if there's a failure
+- [Changed] model reference filter_by to allow hash lookup of values and triple curly substitutions
+- [Fixed] failed json edit field
+- [Added] more information to a failed extract of archived files
+- [Fixed] redcap specs
+- [Fixed] spec to more accurately represent test objects
+- [Added] better error reporting if the run_jobs_as_user setting in redcap project admin configuration is not found
+- [Added] better error for missing settings in Encryption
+- [Added] check during initialization for encryption settings
+
 ## [9.21.3] - 2025-06-30
 
 ### From FPHS - PR #588 - 2025-06-30
