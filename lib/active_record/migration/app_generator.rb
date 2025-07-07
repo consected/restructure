@@ -294,9 +294,15 @@ module ActiveRecord
       end
 
       def create_dynamic_model_view
-        return unless view_sql_changed
+        miv = model_is_view
+        # There is no need to recreate the view if the SQL has not changed
+        # and the view actually exists in the database.
+        if !view_sql_changed && miv
+          Rails.logger.warn "Skipping view creation for #{schema}.#{table_name} as the SQL has not changed"
+          return
+        end
 
-        if model_is_view
+        if miv
           deps = get_dependent_objects(schema, table_name)
           extra = "\ndependent objects:\n#{deps.to_yaml}\n\n"
         end
@@ -312,7 +318,9 @@ module ActiveRecord
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
-        raise "#{e}\n#{extra}" unless force_rollback
+        Rails.logger.warn "Failed to create or update dynamic model view #{schema}.#{table_name}:\n#{e}\n#{e.backtrace.join("\n")}"
+        Rails.logger.warn "Dependent objects:\n#{extra}" if extra.present?
+        raise e, "#{extra}\n#{e}\n#{e.short_string_backtrace}" unless force_rollback
       end
 
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -1020,8 +1028,6 @@ module ActiveRecord
       end
 
       def dynamic_model_view_sql
-        return unless view_sql&.strip&.present? && view_sql_changed
-
         <<~DO_TEXT
           DROP VIEW if exists #{schema}.#{table_name};
           CREATE VIEW #{schema}.#{table_name} AS
