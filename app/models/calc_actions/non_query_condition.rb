@@ -259,9 +259,7 @@ module CalcActions
 
       loc_this_val = attribute_from_instance(in_instance, field_name)
 
-      res = if expected_val == 'return_value'
-              true
-            elsif expected_val.is_a?(Hash) && expected_val[:element] && loc_this_val.is_a?(Hash)
+      res = if expected_val.is_a?(Hash) && expected_val[:element] && loc_this_val.is_a?(Hash)
               element = expected_val[:element]
               test_value = traverse_element(loc_this_val, element)
               eval_simple_condition(test_value, expected_val)
