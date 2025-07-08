@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.22.2] - 2025-07-08
+
 ## [9.22.1] - 2025-07-08
 
 - [Changed] handling of table comments to avoid broken migrations
