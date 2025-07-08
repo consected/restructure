@@ -14,6 +14,32 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #600 - 2025-07-07
+
+- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
+
+### From FPHS - PR #599 - 2025-07-07
+
+- [Fixed] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
+
+### From FPHS - PR #594 - 2025-07-02
+
+- [Added] evaluation of active_values field option, much like preset_value does, but repeats evaluation even if the instance has been persisted - resolves #593
+
+### From FPHS - PR #591 - 2025-07-02
+
+- [Fixed] secure view not being set up correctly
+- [Fixed] download_field_file not finding the correct project if there are duplicates
+- [Added] redcap_event_name to the substitution list not to titleize
+- [Added] the ability to bypass container access check for a container in the admin master (-2) if the user has the appropriate role
+- [Fixed] redcap api calls to get survey_links and import records, plus added better logging if there's a failure
+- [Changed] model reference filter_by to allow hash lookup of values and triple curly substitutions
+- [Fixed] failed json edit field causing infinite recursion
+- [Added] more information logged when there is a failed extract of archived files
+- [Added] better error reporting if the run_jobs_as_user setting in redcap project admin configuration is not found
+- [Added] better error for missing settings in Encryption
+- [Added] check during initialization for encryption settings
+
 ### From FPHS - PR #588 - 2025-06-30
 
 - [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
