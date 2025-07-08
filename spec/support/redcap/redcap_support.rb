@@ -23,10 +23,10 @@ module Redcap
             stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
             stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
           elsif p[:name].in?(['longitudinal'])
-              @longitudinal_project = p
-              stub_request_longitudinal_field_project p[:server_url], p[:api_key]
-              stub_request_longitudinal_field_metadata p[:server_url], p[:api_key]
-              stub_request_longitudinal_field_instruments p[:server_url], p[:api_key]
+            @longitudinal_project = p
+            stub_request_longitudinal_field_project p[:server_url], p[:api_key]
+            stub_request_longitudinal_field_metadata p[:server_url], p[:api_key]
+            stub_request_longitudinal_field_instruments p[:server_url], p[:api_key]
 
           elsif p[:name] == 'save_trigger'
             stub_request_project_save_trigger p[:server_url], p[:api_key]
@@ -193,7 +193,7 @@ module Redcap
     def stub_request_survey_link_save_trigger(server_url, api_key)
       stub_request(:post, server_url)
         .with(
-          body: { 'content' => 'surveyLink', 'format' => 'json', "instrument"=>"research_form", "record"=>"107", "returnFormat"=>"json", 'token' => api_key }
+          body: { 'content' => 'surveyLink', 'format' => 'json', 'instrument' => 'research_form', 'record' => '107', 'returnFormat' => 'json', 'token' => api_key }
 
         )
         .to_return(status: 200, body: survey_link_save_trigger_response, headers: {})
@@ -202,8 +202,8 @@ module Redcap
     def stub_request_import_record_save_trigger(server_url, api_key)
       stub_request(:post, server_url)
         .with(
-          body: { 'content' => 'record', "data"=>"[{\"record_id\":-1,\"study_id\":9999000}]",  "forceAutoNumber"=>"true", "format"=>"json", "overwriteBehavior"=>"normal", 
-                  "returnContent"=>"ids", "returnFormat"=>"json", "type"=>"flat", 'token' => api_key }
+          body: { 'content' => 'record', 'data' => '[{"record_id":-1,"study_id":9999000}]', 'forceAutoNumber' => 'true', 'format' => 'json', 'overwriteBehavior' => 'normal',
+                  'returnContent' => 'auto_ids', 'returnFormat' => 'json', 'type' => 'flat', 'token' => api_key }
 
         )
         .to_return(status: 200, body: import_record_save_trigger_response, headers: {})
@@ -366,34 +366,37 @@ module Redcap
     end
 
     def stub_requests_import_records(server_url, api_key, data:, force_auto_number: true, overwrite_behavior: 'normal')
+      return_content = force_auto_number ? 'auto_ids' : 'ids'
       stub_request(:post, server_url)
         .with(
           body: {
-            "content"=>"record", 
-            "data"=>data, 
-            "forceAutoNumber"=>force_auto_number.to_s, 
-            "format"=>"json", 
-            "overwriteBehavior"=>overwrite_behavior, 
-            "returnContent"=>"ids", 
-            "returnFormat"=>"json", 
-            "type"=>"flat",
-            "token"=>api_key}
+            'content' => 'record',
+            'data' => data,
+            'forceAutoNumber' => force_auto_number.to_s,
+            'format' => 'json',
+            'overwriteBehavior' => overwrite_behavior,
+            'returnContent' => return_content,
+            'returnFormat' => 'json',
+            'type' => 'flat',
+            'token' => api_key
+          }
         )
-        .to_return(status: 200, body: full_survey_import_record, headers: {})      
+        .to_return(status: 200, body: full_survey_import_record, headers: {})
     end
 
     def stub_requests_survey_link(server_url, api_key, instrument:, record_id:)
       stub_request(:post, server_url)
         .with(
           body: {
-            "content"=>"surveyLink", 
-            "format"=>"json", 
-            "instrument"=>instrument, 
-            "record"=>record_id.to_s, 
-            "returnFormat"=>"json",
-            "token"=>api_key}
+            'content' => 'surveyLink',
+            'format' => 'json',
+            'instrument' => instrument,
+            'record' => record_id.to_s,
+            'returnFormat' => 'json',
+            'token' => api_key
+          }
         )
-        .to_return(status: 200, body: full_survey_link, headers: {})     
+        .to_return(status: 200, body: full_survey_link, headers: {})
     end
 
     def stub_request_full_records(server_url, api_key)
@@ -560,11 +563,11 @@ module Redcap
     end
 
     def survey_link_save_trigger_response
-      File.read('spec/fixtures/redcap/save_trigger_survey_link.txt')  
+      File.read('spec/fixtures/redcap/save_trigger_survey_link.txt')
     end
 
     def import_record_save_trigger_response
-      File.read('spec/fixtures/redcap/save_trigger_import_record.json')  
+      File.read('spec/fixtures/redcap/save_trigger_import_record.json')
     end
 
     def project_admin_repeat_instrument_response
@@ -769,6 +772,5 @@ module Redcap
                                                              api_key: @longitudinal_project[:api_key], study: 'Repeat',
                                                              current_admin: @admin, dynamic_model_table: tn
     end
-
   end
 end

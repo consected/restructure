@@ -14,11 +14,58 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #600 - 2025-07-07
+
+- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
+
+### From FPHS - PR #599 - 2025-07-07
+
+- [Fixed] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
+
+### From FPHS - PR #594 - 2025-07-02
+
+- [Added] evaluation of active_values field option, much like preset_value does, but repeats evaluation even if the instance has been persisted - resolves #593
+
+### From FPHS - PR #591 - 2025-07-02
+
+- [Fixed] secure view not being set up correctly
+- [Fixed] download_field_file not finding the correct project if there are duplicates
+- [Added] redcap_event_name to the substitution list not to titleize
+- [Added] the ability to bypass container access check for a container in the admin master (-2) if the user has the appropriate role
+- [Fixed] redcap api calls to get survey_links and import records, plus added better logging if there's a failure
+- [Changed] model reference filter_by to allow hash lookup of values and triple curly substitutions
+- [Fixed] failed json edit field causing infinite recursion
+- [Added] more information logged when there is a failed extract of archived files
+- [Added] better error reporting if the run_jobs_as_user setting in redcap project admin configuration is not found
+- [Added] better error for missing settings in Encryption
+- [Added] check during initialization for encryption settings
+
+### From FPHS - PR #588 - 2025-06-30
+
+- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
+
+### From FPHS - PR #587 - 2025-06-30
+
+- [Added] real lookup of report table id field for better editing - fixes #576
+
+### From FPHS - PR #586 - 2025-06-30
+
+- [Changed] selecting a new app in the app type selector, so that the user is redirected to the configured home page, not masters/search - resolves #575
+
+### From FPHS - PR #581 - 2025-06-30
+
+- [Documented] why conditions have a missing association with no_masters - resolves #580
+
+### From FPHS - PR #582 - 2025-06-30
+
+- [Fixed] failure to read nfs_apps_list.txt file during initialization breaks the server - fixes #579 (also requires EB config changes outside this repo)
+- [Fixed] logging of calc_if errors to ensure the actual error is available
+
 ## [9.21.0] - 2025-06-25
 
 ### From Viva - PR #574 - 2025-06-25
 
-- [Added] auto population of release CHANGELOG from git commits, if the "unrelased" section is empty - resolves #573
+- [Added] auto population of release CHANGELOG from git commits, if the "unreleased" section is empty - resolves #573
 
 ### From Viva - PR #572 - 2025-06-25
 
@@ -28,6 +75,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
 - [Added] automatic retest of failed specs
 - [Changed] activity log admin activities list to improve usability
+
+### From Viva - PR #570 - 2025-06-24
+
+- [Fixed] save buttons overlapping with options editor in dynamic model and external identifier admin - fixes #520
+- [Fixed] no field_options being passed to field name_ends_with_year
+- [Fixed] field_configs not picking up the values from standalone fields, and presenting weird captions (already "cleaned")
+- [Added] `field_has_no_tags` default options definition
+
+### From FPHS - PR #569 - 2025-06-24
+
+- [Added] admin components menu and dynamic def reference links open individual items in edit mode automatically - resolves #568
 
 ## [9.20.0] - 2025-06-24
 
