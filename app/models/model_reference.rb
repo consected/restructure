@@ -164,7 +164,6 @@ class ModelReference < ActiveRecord::Base
                            active: nil,
                            order_by: nil,
                            ref_created_by_user: nil)
-
     ref_order ||= default_ref_order
     filter_by = substitute_filter(filter_by, from_item_or_master)
 
@@ -307,9 +306,7 @@ class ModelReference < ActiveRecord::Base
     filter = filter.dup
     if filter.is_a? Hash
       filter.each do |k, v|
-        if v.is_a?(String) && v.include?('{{')
-          filter[k] = Formatter::Substitution.substitute(v, data:, ignore_missing: true)
-        end
+        filter[k] = FieldDefaults.calculate_default(data, v, allow_nil: true, ignore_missing: true)
       end
     end
     filter
@@ -323,8 +320,8 @@ class ModelReference < ActiveRecord::Base
   def self.to_record_class_for_type(rec_type)
     rec_type.ns_camelize.constantize
   rescue NameError => e
-    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n"\
-                        "#{e}\n#{e.short_string_backtrace}"
+    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n" \
+                       "#{e}\n#{e.short_string_backtrace}"
     nil
   end
 
@@ -400,7 +397,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_label
-    to_record_options_config && to_record_options_config[:result_label] || to_record.human_name
+    (to_record_options_config && to_record_options_config[:result_label]) || to_record.human_name
   end
 
   def to_record_type_us
@@ -605,7 +602,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :_created
 
     # Don't return the full referenced object
-    super(extras)
+    super
   end
 
   private
@@ -635,12 +632,12 @@ class ModelReference < ActiveRecord::Base
 
     unless force_create? || from_record.can_edit? || from_record.can_add_reference?
       errors.add :reference,
-                 'can not be created from a read-only parent '\
-                 "(from: #{from_record_type} "\
-                 "id: #{from_record_id} "\
-                 "to: #{to_record_type}) => ("\
-                 "force? #{!!force_create?} || "\
-                 "edit? #{!!from_record.can_edit?} || "\
+                 'can not be created from a read-only parent ' \
+                 "(from: #{from_record_type} " \
+                 "id: #{from_record_id} " \
+                 "to: #{to_record_type}) => (" \
+                 "force? #{!!force_create?} || " \
+                 "edit? #{!!from_record.can_edit?} || " \
                  "add reference? #{!!from_record.can_add_reference?})"
     end
     true

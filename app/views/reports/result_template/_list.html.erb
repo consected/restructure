@@ -8,10 +8,12 @@
 <div class="report-results-list-block no-table-results <%=@view_options&.add_classes&.join(' ')%>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
   <div class="report-list" data-results-count="<%=@results.count%>">
     <div>
-      <% @results.each_row do |list_item| %>
-        <div class="report-list-result" id="report-item-<%=list_item[0].to_s.id_underscore%>">
+      <% @results.each_row do |list_item| 
+           id_val = id_field_value(list_item)
+      %>
+        <div class="report-list-result" id="report-item-<%=id_val.to_s.id_underscore%>">
           <% if editable? %>
-            <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
+            <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn id_val %> </div>
           <% end %>
           <% i = 0 %>
           <% 
