@@ -5,6 +5,14 @@
 - ["Forking" to a Private Repository](forking_to_a_private_repository.md)
 - [Running **rspec** tests](running_rspec_tests.md)
 
+## Getting git log for CHANGELOG
+
+```
+git log --format=%b%n --merges new-master..HEAD
+```
+
+Copy and paste the relevant messages into the CHANGELOG `## Unreleased` section.
+
 ## Samples
 
 - [Sample](../../dev_reference/samples/0_introduction.md)

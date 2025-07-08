@@ -765,8 +765,9 @@ _fpa.form_utils = {
     var sv_opt = { allow_actions: null };
     sv_opt.allow_actions = _fpa.state.user_can;
 
-    _fpa.secure_view.setup_links(block, 'a.use-secure-view', sv_opt);
-    block.on('click', 'a.use-secure-view', function (ev) {
+    var sv_sel = 'a.use-secure-view, a.redcap-file-use-secure-view';
+    _fpa.secure_view.setup_links(block, sv_sel, sv_opt);
+    block.on('click', sv_sel, function (ev) {
       ev.preventDefault();
     });
   },

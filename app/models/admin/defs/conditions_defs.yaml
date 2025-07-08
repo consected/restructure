@@ -109,9 +109,19 @@
 
         all - no masters:
           # if a key is specified as 'no_masters', then the first key in the list will be used as the base table
-          # for the query. Results will not be joined to the masters table, allowing for abitrary tables and views to be
+          # for the query. Results will not be joined to the masters table, allowing for arbitrary tables and views to be
           # used to calculate conditions, even if they don't have a master_id or the master_id field can be null.
-          # Additional associations can be specified, but they must be defined within the new base table
+          # Additional associations can be specified, but they must be defined within the new base table.
+          # NOTE: This may lead to errors with associations that are not defined in the new base table, even when attempting to
+          # perform a comparison against "this" - for example, the following may fail:
+          #  all:
+          #    player_contacts:
+          #      data:
+          #        this: email
+          # Instead, try the following, which substitutes the email value into the comparison, outside of any associations:
+          #  all:
+          #    player_contacts:
+          #      data: '{{email}}'
           no_masters: {}
           dynamic_model__some_tables:
             id: 123

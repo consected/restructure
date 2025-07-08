@@ -7,6 +7,27 @@ class Admin::ProtocolsController < AdminController
 
   helper_method :extra_part
 
+  #
+  # Handle the request to copy sub processes and their events from one protocol to another
+  def copy_sub_processes
+    from_protocol_id = params[:from_protocol_id]
+    to_protocol_id = params[:to_protocol_id]
+
+    from_protocol = Classification::Protocol.find from_protocol_id
+    to_protocol = Classification::Protocol.find to_protocol_id
+    to_protocol.current_admin = current_admin
+
+    res = to_protocol.copy_from(from_protocol)
+
+    flash[:notice] = if res.empty?
+                       "#{from_protocol.name} has no new sub processes to copy"
+                     else
+                       "#{from_protocol.name} added:\n#{res.to_yaml}"
+                     end
+
+    redirect_to admin_protocol_sub_processes_path(to_protocol.id)
+  end
+
   private
 
   def setup_tree_list

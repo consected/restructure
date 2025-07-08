@@ -25,6 +25,8 @@ class Settings
     configuration_failed_reason << 'AdminEmail address is blank.' if AdminEmail.blank?
     configuration_failed_reason << 'BatchUserEmail address is blank.' if BatchUserEmail.blank?
     configuration_failed_reason << 'BatchUserEmail does not match a user profile' unless User.batch_user
+    configuration_failed_reason << 'EncryptionSecretKeyBase is not set' if EncryptionSecretKeyBase.blank?
+    configuration_failed_reason << 'EncryptionSalt is not set' if EncryptionSalt.blank?
 
     configuration_failed_reason.blank?
   end

@@ -3,7 +3,7 @@ _fpa.loaded.preload = function () {
   $('body').addClass('page-loading');
 
   $(document).on('change', '#use_app_type_select', function () {
-    window.location.href = '/masters/search?use_app_type=' + $(this).val()
+    window.location.href = '/pages/home?use_app_type=' + $(this).val()
   });
 
   $(document).on('click', 'a[disabled], btn[disabled]', function (ev) {
