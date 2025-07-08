@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.22.1] - 2025-07-08
+
 - [Changed] handling of table comments to avoid broken migrations
 - [Changed] setting of schema name causing it to be blanked out - fixes #397
 - [Added] Postgres maximum identifier length to settings and use this to fix reference view names
