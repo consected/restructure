@@ -308,7 +308,14 @@
           embedded_item:
             field_name: value
       filter_by:
-        field_name: value to filter the referenced items by - may include [substitutions](../general/substitutions.md)
+        field_name: literal value to filter the referenced items by - may include [substitutions](../general/substitutions.md)
+        field_name2:
+          this: 
+            field_name: return_value
+            # Note that this is evaluated in the context of the current item, so
+            # the attributes returned are relative to the `from:` item:
+            #   `from: this`, then the attributes are from the current item
+            #   `from: master` or `from: any`, then they are from the master item
       order_by: # Order results within model references matching this model and filter
                 # Note that this can be overridden by view_options.sort_references, sorting the
                 # results across all references
