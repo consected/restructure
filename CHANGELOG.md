@@ -14,61 +14,23 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.22.2] - 2025-07-08
+- [Built] local version
 
-## [9.22.1] - 2025-07-08
+## [9.23.0] - 2025-07-29
 
-- [Changed] handling of table comments to avoid broken migrations
-- [Changed] setting of schema name causing it to be blanked out - fixes #397
-- [Added] Postgres maximum identifier length to settings and use this to fix reference view names
-- [Cleaned] activity log table generator
-- [Fixed] incorrect reporting of missing schema when the table or view doesn't even exist
-- [Fixed] reference_view_name
-- [Fixed] spec
-- [Added] automatic retest of failed specs
-- [Changed] activity log admin activities list to improve usability
-- [Added] simple styling change for highlighted items
-- [Added] auto population of release CHANGELOG
-- [Updated] to commit CHANGELOG
-- [Updated] CHANGELOG
-- [] 
-- [Ignored] brakeman warning - already addressed
-- [] 
-- [] 
-- [Built] and tested release-ready version '9.21.0' - dev repo
-- [Updated] CHANGELOG
-- [Fixed] failure to read nfs_apps_list.txt file during initialization breaks the server - fixes #579 (also requires EB config changes outside this repo)
-- [Fixed] logging of calc_if errors to ensure the actual error is available
-- [] 
-- [Fixed] typo
-- [Updated] CHANGELOG
-- [Added] real lookup of report table id field for better editing - fixes #576
-- [Fixed] incorrect logic showing primary key in report table editing
-- [Cleaned] rspec to start
-- [Added] a mechanism to copy all the sub_process, protocol_event tree from one protocol to another - resolves #578
-- [Fixed] spec
-- [Updated] CHANGELOG
-- [Fixed] secure view not being set up correctly
-- [Fixed] download_field_file not finding the correct project if there are duplicates
-- [Added] redcap_event_name to the list not to titleize
-- [Added] the ability to bypass container access check for a container in the admin master (-2) if the user has the appropriate role
-- [Fixed] redcap api calls to get survey_links and import records, plus added better logging if there's a failure
-- [Changed] model reference filter_by to allow hash lookup of values and triple curly substitutions
-- [Fixed] failed json edit field
-- [Added] more information to a failed extract of archived files
-- [Fixed] redcap specs
-- [Fixed] spec to more accurately represent test objects
-- [Added] better error reporting if the run_jobs_as_user setting in redcap project admin configuration is not found
-- [Added] better error for missing settings in Encryption
-- [Added] check during initialization for encryption settings
-- [Added] evaluation of active_values field option, much like preset_value does, but repeats evaluation even if the instance has been persisted - resolves #593
-- [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
-- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
-- [Added] info on getting entries for the CHANGELOG
-- [Updated] CHANGELOG
-- [Updated] gem and yarn packages
-- [] 
-- [Built] and tested release-ready version '9.22.0' - dev repo
+- [Updated] Ruby version to version 3.4.5
+- [Updated] gems
+
+NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in development environments that include Postgres v17, to avoid issues when connecting to the database with the new gem pg v1.6.0.
+
+### From FPHS - PR #610 - 2025-07-02
+
+- [Added] missing documentation for use_plain_attribute_names report option - resolves #2
+
+### From Viva - PR #602 - 2025-07-08
+
+- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to test it works if there are no other conditions - fixes #601
+- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
 
 ## [9.22.0] - 2025-07-08
 

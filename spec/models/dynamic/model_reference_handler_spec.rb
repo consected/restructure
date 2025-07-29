@@ -280,6 +280,63 @@ RSpec.describe 'Model reference implementation', type: :model do
                 add: one_to_this
                 prevent_disable: true
 
+        mr_filter_by_hash:
+          label: Filter By Hash
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: master
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id:
+                    this:
+                      # `from: master` - means that we get the attribute to return from the master
+                      id: return_value
+
+        mr_filter_by_this_hash:
+          label: Filter By This Hash
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: this
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id:
+                    this:
+                      # `from: this` - means that we get the attribute to return from the current instance
+                      master_id: return_value
+
+        mr_filter_by_substitution:
+          label: Filter By Substitution
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: master
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id: '{{master_id}}'
+
       END_DEF
 
       al.current_admin = @admin
@@ -302,6 +359,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
       setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
       setup_option_config 12, 'Prevent Disable', %w[select_call_direction select_who]
+      setup_option_config 13, 'Filter By Hash', %w[select_call_direction select_who]
+      setup_option_config 14, 'Filter By This Hash', %w[select_call_direction select_who]
+      setup_option_config 15, 'Filter By Substitution', %w[select_call_direction select_who]
     end
 
     it 'evaluates rules to optionally show references' do
@@ -731,6 +791,47 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       res = mr.can_disable
       expect(res).to be false
+    end
+
+    it 'filters by substitutions' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_substitution',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by substitution test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+    end
+
+    it 'filters by hash conditions from master' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_hash',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by hash test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+    end
+    it 'filters by hash conditions from this' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_this_hash',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by this hash test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
     end
   end
 
