@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.23.1] - 2025-07-29
+
 - [Built] local version
 
 ## [9.23.0] - 2025-07-29
