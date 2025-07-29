@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.25.0] - 2025-07-29
+
 - [Updated] gems
 
 ## [9.24.0] - 2025-07-29
