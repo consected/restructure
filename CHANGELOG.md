@@ -14,6 +14,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] Ruby version to version 3.4.5
+- [Updated] gems
+
+NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in development environments that include Postgres v17, to avoid issues when connecting to the database with the new gem pg v1.6.0.
+
+### From FPHS - PR #610 - 2025-07-02
+
+- [Added] missing documentation for use_plain_attribute_names report option - resolves #2
+
+### From Viva - PR #602 - 2025-07-08
+
+- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to test it works if there are no other conditions - fixes #601
+- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
+
 ## [9.22.0] - 2025-07-08
 
 ### From FPHS - PR #600 - 2025-07-07
