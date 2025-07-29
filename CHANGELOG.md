@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] missing documentation for use_plain_attribute_names report option - resolves #2
+
 ## [9.21.5] - 2025-07-02
 
 - [Added] evaluation of active_values field option, much like preset_value does, but repeats evaluation even if the instance has been persisted - resolves #593
