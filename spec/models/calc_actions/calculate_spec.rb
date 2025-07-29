@@ -450,7 +450,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       has_created_activity: '_does_not_exist_'
     }
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be false    
+    expect(res.calc_action_if).to be false
 
     conf = {
       all: {
@@ -487,7 +487,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
   end
 
   it 'uses has_not_created_activity to check for an extra_log_type in this activity log not having been done' do
@@ -504,7 +503,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       has_not_created_activity: '_does_not_exist_'
     }
     res = ConditionalActions.new conf, @al
-    expect(res.calc_action_if).to be true    
+    expect(res.calc_action_if).to be true
 
     conf = {
       all: {
@@ -530,7 +529,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
   end
 
   it 'checks if nested conditions work' do
@@ -2602,9 +2600,57 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       ca = ConditionalActions.new conf, @al
       res = ca.get_this_val
       expect(res).to eq @al.select_who
+
+      conf = {
+        all: {
+          this: {
+            select_who: 'return_value'
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
+
+      conf = {
+        all: {
+          this: {
+            id: @al.id,
+            select_who: 'return_value'
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
     end
 
     it 'returns the return_value attribute from whichever subcondition is matched first' do
+      # Alternatively return one value or another
+      conf = {
+
+        any: {
+          all_1: {
+            activity_log__player_contact_phones: {
+              id: @al2.id + 100,
+              select_who: 'return_value'
+            }
+          },
+          all_2: {
+            activity_log__player_contact_phones: {
+              id: @al.id,
+              select_who: 'return_value'
+            }
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
+
       # Alternatively return one value or another
       conf = {
 
@@ -3023,14 +3069,13 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         all: {
           no_masters: {},
           player_contacts: {
-            data: @alref2.master.player_contacts.first.data,
+            data: @alref2.master.player_contacts.first.data
           }
         }
       }
       res = ConditionalActions.new conf, @alref2
       res.calc_action_if
       expect(res.calc_action_if).to be true
-
 
       conf = {
         all: {
@@ -3043,7 +3088,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ConditionalActions.new conf, @alref2
       res.calc_action_if
       expect(res.calc_action_if).to be false
-
     end
 
     it 'returns a master.id when looking up MSID in the crosswalk' do
