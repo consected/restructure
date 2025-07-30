@@ -14,6 +14,22 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.25.0] - 2025-07-29
+
+- [Updated] gems
+
+## [9.24.0] - 2025-07-29
+
+- [Updated] Correctly updated Ruby version to version 3.4.5
+- [Updated] gems
+
+## [9.23.0] - 2025-07-29
+
+- [Updated] Ruby version to version 3.4.5
+- [Updated] gems
+
+NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in development environments that include Postgres v17, to avoid issues when connecting to the database with the new gem pg v1.6.0.
+
 ### From FPHS - PR #610 - 2025-07-02
 
 - [Added] missing documentation for use_plain_attribute_names report option - resolves #2
