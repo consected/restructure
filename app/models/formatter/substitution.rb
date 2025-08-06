@@ -95,7 +95,7 @@ module Formatter
       is_blocks.each do |is_block|
         block_container = is_block[0]
         tag = is_block[1]
-        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
+        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
         op = is_block[2]
         exp = is_block[3]
         comp = eval_is_comp(op, tag_value, exp, sub_data, is_block:)
@@ -110,7 +110,8 @@ module Formatter
           else_is_tag = is_block[start_pos + 1]
           else_is_op = is_block[start_pos + 2]
           else_is_exp = is_block[start_pos + 3]
-          else_is_tag_value = value_for_tag(else_is_tag, sub_data, tag_subs: nil, ignore_missing: true)
+          else_is_tag_value = value_for_tag(else_is_tag, sub_data, tag_subs: nil, ignore_missing: true,
+                                                                   original_type: true)
           comp = eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, sub_data, is_block:)
 
           if comp
