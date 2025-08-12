@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.25.1] - 2025-08-12
+
 - [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
 - [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
 - [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
