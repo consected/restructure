@@ -109,7 +109,7 @@ module Redcap
 
         cf_name = field.chosen_array_field_name
         records.each do |rec|
-          vals = ccfs.map { |ccf| rec[ccf.to_sym] == '1' && DataDictionaries::Field.choice_field_value(ccf) }
+          vals = ccfs.map { |ccf| rec[ccf.to_sym] == '1' && field.choice_field_value(ccf) }
                      .select { |item| item }
           rec[cf_name] = vals
         end
@@ -173,6 +173,7 @@ module Redcap
       overlapping_fields = records.first.keys & model.attribute_names.map(&:to_sym)
       unless overlapping_fields.length == records.first.keys.length
         missing_fields = records.first.keys - model.attribute_names.map(&:to_sym)
+        puts "#{missing_fields.join(' ')}"
         raise FphsException, "Redcap::DataRecords::ModelMissingFields retrieved record fields are not present in the model:\n" \
                              "#{missing_fields.join(' ')}"
       end

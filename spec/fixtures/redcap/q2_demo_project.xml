@@ -1185,7 +1185,7 @@ on average, before playing in the NFL?</TranslatedText><redcap:FormattedTranslat
 on average, while playing in the NFL?</TranslatedText><redcap:FormattedTranslatedText>How many cigarettes did you smoke per day,&lt;br/&gt;on average, &lt;u&gt;while playing&lt;/u&gt; in the NFL?</redcap:FormattedTranslatedText></Question>
 		<CodeListRef CodeListOID="smoke_nfl.choices"/>
 	</ItemDef>
-	<ItemDef OID="smoke_postnfl" Name="smoke_postnfl" DataType="text" Length="1" redcap:Variable="smoke_postnfl" redcap:FieldType="select" redcap:FieldNote="Cigarettes/day" redcap:BranchingLogic="[smoketime(anfl)] = &#039;1&#039;" redcap:CustomAlignment="RH">
+	<ItemDef OID="smoke_postnfl" Name="smoke_postnfl" DataType="text" Length="1" redcap:Variable="smoke_postnfl" redcap:FieldType="select" redcap:FieldNote="Cigarettes/day" redcap:BranchingLogic="[smoketime(ANFL)] = &#039;1&#039;" redcap:CustomAlignment="RH">
 		<Question><TranslatedText>How many cigarettes have you smoked per day,
 on average, since leaving the NFL?
 (If you have quit smoking, please provide 
@@ -4154,15 +4154,15 @@ Once you have advanced to the next section, you will not be able to return.
 		<CodeListItem CodedValue="2"><Decode><TranslatedText>Yes - quit</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>No - never smoked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="smoketime___pnfl.choices" Name="smoketime___pnfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="smoketime___pnfl.choices" Name="smoketime___pnfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="smoketime___dnfl.choices" Name="smoketime___dnfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="smoketime___dnfl.choices" Name="smoketime___dnfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="smoketime___anfl.choices" Name="smoketime___anfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="smoketime___anfl.choices" Name="smoketime___anfl" DataType="boolean" redcap:Variable="smoketime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
@@ -7202,15 +7202,15 @@ beverages&lt;/font&gt;</TranslatedText><redcap:FormattedTranslatedText>&lt;font 
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>No - never</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="2"><Decode><TranslatedText>No - quit</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="marijtime___pnfl.choices" Name="marijtime___pnfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="marijtime___pnfl.choices" Name="marijtime___pnfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="marijtime___dnfl.choices" Name="marijtime___dnfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="marijtime___dnfl.choices" Name="marijtime___dnfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>
-	<CodeList OID="marijtime___anfl.choices" Name="marijtime___anfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | anfl, After playing in the NFL">
+	<CodeList OID="marijtime___anfl.choices" Name="marijtime___anfl" DataType="boolean" redcap:Variable="marijtime" redcap:CheckboxChoices="pnfl, Before playing in the NFL | dnfl, While playing in the NFL | ANFL, After playing in the NFL">
 		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
 		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
 	</CodeList>

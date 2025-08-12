@@ -85,6 +85,10 @@ view_options:
   prevent_adding_items: false (default) | true
   # If the report is editable, prevent allowing a new item to be added
 
+  use_plain_attribute_names: false (default) | true
+  # Use simple attributes if search_attrs[] is not present. Allows third-party apps to call reports using their own
+  # attribute names, rather than requiring the formatting imposed by search_attrs[].
+
 list_options:
   hide_in_list: false (default) | true
   # Hide this report in the list of available reports, but still

@@ -216,6 +216,7 @@ module Redcap
       # A "checkbox" type field is actually represented in record data with multiple fields,
       # named '<base_field_name>___<choice_value[n]>'
       # something like 'smoketime___after', 'smoketime___before', 'smoketime___never'
+      # NOTE: the choice value must be downcased, since this matches the way Redcap returns them through the API.
       # @return [Array{Symbol} | nil] - array of record field names or nil if not a checkbox type field
       def checkbox_choice_fields
         return nil unless field_type.name == :checkbox
@@ -226,18 +227,22 @@ module Redcap
       #
       # Generate the field name for a checkbox choice from the
       # root field name and the choice value
+      # NOTE: the choice value must be downcased, since this matches the way Redcap returns them through the API.
       # @param [String] value
       # @return [String]
       def choice_field_name(value)
-        "#{name}___#{value}"
+        "#{name}___#{value.downcase}"
       end
 
       #
-      # Field value for a choice field name
+      # Field value for a choice field name.
+      # This retrieves the value for a specific choice field based on its name,
+      # since we can't rely on the field name being correct if the choice is uppercased.
       # @param [String|Symbol] name
       # @return [String]
-      def self.choice_field_value(name)
-        name.to_s.split('___').last
+      def choice_field_value(name)
+        val_lower = name.to_s.split('___').last
+        field_choices.choices_values.find { |v| v.downcase == val_lower }
       end
 
       def multiple_choice?
