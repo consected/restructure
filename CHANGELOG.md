@@ -14,6 +14,44 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
+- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
+- [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
+- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
+- [Updated] gem and yarn packages
+- [Added] info on getting entries for the CHANGELOG
+- [Updated] CHANGELOG
+- [Updated] gem and yarn packages
+- [] 
+- [Built] and tested release-ready version '9.22.0' - dev repo
+- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to ensure it works if there are no other conditions - fixes #601
+- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
+- [Updated] Ruby version and gems
+- [Updated] CHANGELOG
+- [Checkpoint] from VS Code for coding agent session
+- [Initial] plan
+- [Updated] CHANGELOG
+- [Updated] CHANGELOG
+- [Initial] plan
+- [Updated] Ruby version, gems and note in CHANGELOG regarding postgres version
+- [] 
+- [Built] and tested release-ready version '9.23.0' - dev repo
+- [Updated] CHANGELOG
+- [Updated] ruby version correctly
+- [] 
+- [] 
+- [] 
+- [] 
+- [] 
+- [Updated] gems
+- [Built] and tested release-ready version '9.24.0' - dev repo
+- [Updated] CHANGELOG.md with git commits
+- [] 
+- [Built] and tested release-ready version '9.25.0' - dev repo
+- [Fixed] `{{#is array "includes" 'val'}}` failing because it treats array as a string - fixes #618
+- [Fixed] Redcap integration handling multiple choice fields "incorrectly" with choices containing uppercase characters - fixes #625
+- [Updated] gems
+
 ## [9.25.0] - 2025-07-29
 
 - [Updated] gems
