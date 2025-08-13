@@ -6,8 +6,17 @@
   setup_column_options
   is_editable = editable?
   is_editable_class = is_editable ? 'row-editable' : 'row-not-editable'
+  # Set current user this way, since background jobs that need to access it may not have the same context
+  current_user = @report.current_user
+  is_editable_table_class = [
+    "report-id-#{@report.id}",
+    "report-rn-#{@report.alt_resource_name}",
+  ]
+  is_editable_table_class << "report-edit-#{@report.editable_data? ? '' : 'not-' }model-set"
+  is_editable_table_class << "report-user-can-#{current_user&.can?(:edit_report_data) ? '' : 'not-'}edit-report-data"
+  is_editable_table_class = is_editable_table_class.join(' ')
 %>
-<div class="report-results-table-block <%=@view_options&.add_classes&.join(' ')%>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
+<div class="report-results-table-block <%=@view_options&.add_classes&.join(' ')%> <%= is_editable_table_class %>" id="<%=@outer_block_id%>-table-block" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 
   <table class="report-table table <%= @view_options&.no_sorting ? 'no-tablesorter' : 'tablesorter' %>" data-results-count="<%=@results.count%>">
     <thead>
