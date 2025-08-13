@@ -237,11 +237,13 @@ _fpa.form_utils = {
       .addClass('done-select-filtering');
   },
   setup_select_as_radio_buttons(block) {
-    block.find('select.as-radio-buttons').not('.attached-radio-buttons').each(function () {
+    const $els = block.find('select.as-radio-buttons').not('.attached-radio-buttons');
+    $els.each(function () {
       // Get the select element
+      var uid = Math.random().toString().id_underscore();
       var $selectElement = $(this);
       var name = $selectElement.attr('name');
-      var sel_id = $selectElement.attr('id');
+      var sel_id = `${$selectElement.attr('id')}--${uid}`;
       var attr_name = $(this).attr('data-attr-name');
       var object_name = $(this).attr('data-object-name');
 
@@ -269,6 +271,30 @@ _fpa.form_utils = {
       // Replace the select element with the radio buttons
       $selectElement.replaceWith($radioContainer);
     }).addClass('attached-radio-buttons');
+
+    if ($els.length) {
+      // If any radio buttons replaced select fields, initialize them to trigger show_if items
+      var form_data = _fpa.form_utils.data_from_form(block);
+      _fpa.form_utils.init_edit_form_show_if_triggers(block, form_data);
+    }
+  },
+
+  init_edit_form_show_if_triggers: function (block, form_data) {
+    const form_els = block.find('[data-attr-name][data-object-name]').not('.attached-show-if-triggers');
+    form_els.on('change click keyup', function () {
+      const $el = $(this);
+      const obj_name = $el.attr('data-object-name');
+      const a_name = $el.attr('data-attr-name');
+      if (a_name != 'e_signed_how' && form_data[obj_name]) {
+        if ($el.attr('type') == 'checkbox') {
+          form_data[obj_name][a_name] = $el.is(':checked');
+        } else {
+          form_data[obj_name][a_name] = $el.val();
+        }
+        form_data[obj_name].current_mode = 'edit';
+        _fpa.show_if.methods.show_items(block, form_data[obj_name]);
+      }
+    }).addClass('attached-show-if-triggers');
   },
 
   select_filtering_changed(val, el) {
