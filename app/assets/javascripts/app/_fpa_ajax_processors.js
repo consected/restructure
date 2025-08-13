@@ -130,21 +130,8 @@ _fpa.postprocessors = {
     // Handle conditional form fields
     if (data.form_data) {
       var form_data = data.form_data;
-      var form_els = block.find('[data-attr-name][data-object-name]');
-      form_els.on('change click keyup', function () {
-        var e = $(this);
-        var obj_name = e.attr('data-object-name');
-        var a_name = e.attr('data-attr-name');
-        if (a_name != 'e_signed_how' && form_data[obj_name]) {
-          if (e.attr('type') == 'checkbox') {
-            form_data[obj_name][a_name] = e.is(':checked');
-          } else {
-            form_data[obj_name][a_name] = e.val();
-          }
-          form_data[obj_name].current_mode = 'edit';
-          _fpa.show_if.methods.show_items(block, form_data[obj_name]);
-        }
-      });
+      _fpa.form_utils.init_edit_form_show_if_triggers(block, form_data);
+
       for (var fe in form_data) {
         if (form_data.hasOwnProperty(fe)) {
           form_data[fe].current_mode = 'edit';
