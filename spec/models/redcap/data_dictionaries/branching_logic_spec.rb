@@ -496,6 +496,22 @@ RSpec.describe 'Redcap::DataDictionaries::BranchingLogic', type: :model do
       expect(final_res).to eq final_exp
 
       test = <<~ENDSTR.strip
+        [smoketime(ANFL)] = '1'
+      ENDSTR
+
+      final_exp = {
+        all_no_op_0: {
+          all_nonblock_0: {
+            smoketime___anfl: '1'
+          }
+        }
+      }
+
+      @bl = Redcap::DataDictionaries::BranchingLogic.new(test)
+      final_res = @bl.generate_show_if
+      expect(final_res).to eq final_exp
+
+      test = <<~ENDSTR.strip
         [smoketime(pnfl)] = '1'
       ENDSTR
 

@@ -345,6 +345,9 @@ Good?)
       {{#is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
       {{#is int_val '==' null}}is null{{else is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}not null and 50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
       {{#is int_val '!=' null}}is null{{else is int_val '<' 50}}too large {{int_val}}{{else is int_val '<' 50000}}50 < {{int_val}} < 50000{{else}}no show {{int_val}}{{/is}}
+      {{#is arr_val 'includes' "id"}}includes id{{else is arr_val 'includes' "master_id"}}includes master_id{{/is}}
+      {{#is arr_val 'includes' "id"}}includes id{{else is arr_val 'includes' "master"}}includes master{{else is arr_val 'includes' "master_id"}}includes master_id{{/is}}
+      {{#is arr_val2 'includes' "id"}}includes id{{else is arr_val2 'includes' "master_id"}}includes master_id{{/is}}
 
       All done!
     END_TEXT
@@ -352,7 +355,7 @@ Good?)
     if_blocks = txt.scan Formatter::Substitution::IsBlockRegEx
 
     # 5 blocks each of 10 elements
-    expect(if_blocks.length).to eq 7
+    expect(if_blocks.length).to eq 10
     expect(if_blocks[0].length).to eq 17
     expect(if_blocks[0][0]).to eq '{{#is some_text "==" \'this is optional\'}}shows {{some_text}}{{/is}}'
     expect(if_blocks[0][1]).to eq 'some_text'
@@ -400,7 +403,9 @@ Good?)
       true_val: true,
       false_val: false,
       nil_val: nil,
-      blank_val: ''
+      blank_val: '',
+      arr_val: ['col1', 'master_id', 'col2', 'col3'],
+      arr_val2: ['id', 'master_id', 'col2', 'col3']
     }
 
     res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
@@ -415,6 +420,9 @@ Good?)
       50 < 12345 < 50000
       not null and 50 < 12345 < 50000
       is null
+      includes master_id
+      includes master_id
+      includes id
 
       All done!
     END_TEXT

@@ -753,6 +753,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(all_rf_summ[:smoketime_chosen_array].field_type.name).to eq :checkbox_chosen_array
 
       stub_request_records @project[:server_url], @project[:api_key]
+
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
       dr.retrieve
@@ -774,10 +775,34 @@ RSpec.describe Redcap::DataRecords, type: :model do
         sa = r.smoketime_chosen_array
 
         # Get the actual choices
-        exp_array = %w[pnfl dnfl anfl].map { |choice| r["smoketime___#{choice}"] && choice }.select { |item| item }
-
+        exp_array = %w[pnfl dnfl ANFL].map { |choice| r["smoketime___#{choice.downcase}"] && choice }.select { |item| item }
         expect(sa).to eq exp_array
       end
+
+      dmic = dr.send :model
+      #  Check we have a record that will exercise the uppercase choice
+      res = dmic.where(smoketime___anfl: 1)
+      expect(res.count).to be > 0
+
+      # Now test all records to ensure choices in the summary array and the columns match
+      # paying extra attention to those where the choice is uppercase in the definition
+      # and therefore would have a column name (always downcased) that doesn't simply match the
+      # uppercase value retrieved from Redcap and subsequently stored to the summary array field.
+      res = dmic.all
+      all_choices = %w[pnfl dnfl ANFL]
+      matched = 0
+      res.each do |r|
+        all_choices.each do |choice|
+          colval = r["smoketime___#{choice.downcase}"]
+          expect(colval).not_to be_nil, "Column smoketime___#{choice.downcase} should not be nil for record #{r.record_id}"
+          if colval
+            expect(r.smoketime_chosen_array).to include choice
+            matched += 1
+          end
+        end
+      end
+
+      expect(matched).to be > 0
     end
   end
 
