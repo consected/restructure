@@ -14,6 +14,35 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Built] and tested release-ready version '9.22.2' - dev repo
+- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to ensure it works if there are no other conditions - fixes #601
+- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
+- [Updated] Ruby version and gems
+- [Updated] CHANGELOG
+- [Updated] CHANGELOG
+- [Initial] plan
+- [Updated] Ruby version, gems and note in CHANGELOG regarding postgres version
+- [] 
+- [Built] and tested release-ready version '9.23.0' - dev repo
+- [Updated] CHANGELOG
+- [Updated] gems and yarn
+- [Updated] CHANGELOG
+- [Updated] ruby version correctly
+- [] 
+- [Built] and tested release-ready version '9.23.1' - dev repo
+- [] 
+- [] 
+- [] 
+- [] 
+- [Updated] gems
+- [Built] and tested release-ready version '9.24.0' - dev repo
+- [Updated] CHANGELOG.md with git commits
+- [] 
+- [Built] and tested release-ready version '9.25.0' - dev repo
+- [Built] and tested release-ready version '9.25.1' - dev repo
+- [Fixed] create_master with move_this breaks if there is an embedded item that has no master association and provide new specs - fixes #635
+- [Changed] position of `self.table_name` assignment to avoid breakages in included modules
+
 ## [9.25.1] - 2025-07-29
 
 ## [9.25.0] - 2025-07-29
