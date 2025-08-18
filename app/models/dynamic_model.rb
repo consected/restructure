@@ -401,6 +401,9 @@ class DynamicModel < ActiveRecord::Base
         end
       end
     end
+  rescue StandardError => e
+    Rails.logger.error "Failed to set up routes for dynamic model: #{e}"
+    Rails.logger.error e.short_string_backtrace
   ensure
     routes ||= Rails.application.routes
     routes.disable_clear_and_finalize = false

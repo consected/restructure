@@ -368,6 +368,12 @@ module Dynamic
       @option_configs ||= self.class.options_provider.parse_config(self, force)
       self.class.options_provider.raise_bad_configs @option_configs if raise_bad_configs
       @option_configs
+    rescue StandardError => e
+      Rails.logger.error "Error retrieving option_configs for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise e if raise_bad_configs
+
+      []
     end
 
     #
@@ -375,6 +381,10 @@ module Dynamic
     # @return [Array{Symbol}]
     def option_configs_names
       option_configs&.map(&:name)
+    rescue StandardError => e
+      Rails.logger.error "Error retrieving option_configs_names for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      nil
     end
 
     #
@@ -429,7 +439,7 @@ module Dynamic
 
       val = send(alt_option_config_attr)
       return if val.blank?
-      
+
       val = val.dup&.gsub("\r\n", "\n")
       send("#{alt_option_config_attr}=", val)
     end
