@@ -81,6 +81,14 @@ module AdminHandler
     def base_route_name
       base_route_segments.singularize.gsub('/', '_')
     end
+
+    unless respond_to? :no_master_association
+      # In case we are attempting to use the admin models in references or
+      # other dynamic definition configurations, ensure they know there is no master association defined
+      def no_master_association
+        true
+      end
+    end
   end
 
   def init_vars_admin_handler

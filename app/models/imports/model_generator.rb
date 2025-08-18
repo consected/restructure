@@ -6,10 +6,9 @@ module Imports
   # create DynamicModels from them, including the underlying database table
   # matching the retrieved data.
   class ModelGenerator < ActiveRecord::Base
+    self.table_name = 'imports_model_generators'
     include AdminHandler
     include Dynamic::ModelGenerator
-
-    self.table_name = 'imports_model_generators'
 
     belongs_to :admin
 

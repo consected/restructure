@@ -6,9 +6,8 @@ module Datadic
   # Used by admin processes and through the admin panel.
   # An equivalent class UserVariable provides user access to the same table.
   class Variable < Admin::AdminBase
-    include AdminHandler
-
     self.table_name = 'datadic_variables'
+    include AdminHandler
 
     belongs_to :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', optional: true
     belongs_to :equivalent_to, class_name: 'Datadic::Variable', optional: true

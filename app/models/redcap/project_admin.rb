@@ -30,11 +30,10 @@ module Redcap
   #   "has_repeating_instruments_or_events": 0
   # }
   class ProjectAdmin < Admin::AdminBase
+    self.table_name = 'redcap_project_admins'
     include AdminHandler
     include NfsStore::ForAdminResources
     include OptionsHandler
-
-    self.table_name = 'redcap_project_admins'
 
     Statuses = {
       schedule_run_set_configured: 'scheduled run configured',
