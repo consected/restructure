@@ -70,7 +70,9 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
         @item.action_name = 'show'
 
         ei = @item.embedded_item
-        if ei
+        if ei &&
+           !(ei.class.respond_to?(:no_master_association) && ei.class.no_master_association) &&
+           ei.respond_to?(:master_id) && ei.respond_to?(:master)
           ei.master = @new_master
           ei.update_columns(master_id: new_master_id)
           mr = @item.model_references.select do |mra|
