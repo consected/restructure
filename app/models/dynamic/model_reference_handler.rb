@@ -157,9 +157,9 @@ module Dynamic
       null_value = vo[:null_value]
 
       top_item = res.delete_at(0) if keep_top
-      
+
       begin
-      res = res.sort_by { |a| a[smr] || null_value }
+        res = res.sort_by { |a| a[smr] || null_value }
       rescue StandardError => e
         msg = "sort_references failed to sort - a null_value configuration is probably required: #{e}"
         Rails.logger.warn msg
@@ -786,7 +786,7 @@ module Dynamic
       return unless res
 
       if res.class.no_master_association
-        res.current_user ||= master_user
+        res.current_user ||= master_user if res.respond_to?(:current_user=)
       else
         res.master ||= master
         res.master.current_user ||= master_user
