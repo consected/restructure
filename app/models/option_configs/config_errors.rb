@@ -31,10 +31,21 @@ module OptionConfigs
 
       #
       # Return list of config errors and warnings across all option_configs, or nil if there are none
-      # @param [option_configs] option_configs
+      # @param [object_instance] object_instance
       # @return [true | nil]
-      def all_option_configs_notices(option_configs)
-        return unless option_configs
+      def all_option_configs_notices(object_instance)
+        return unless object_instance
+
+        begin
+          option_configs = object_instance.option_configs(raise_bad_configs: true)
+        rescue StandardError => e
+          msg = "Error retrieving option_configs for #{object_instance.class.name}/#{object_instance.id}: #{e}"
+          Rails.logger.error msg
+          Rails.logger.error e.short_string_backtrace
+          res = []
+          failed_config(res, :parse_yaml_config, msg, extra_details: e.backtrace.join("\n"), level: :error)
+          return res
+        end
 
         res = []
         option_configs.select do |oc|
