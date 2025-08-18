@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.25.2] - 2025-08-18
+
 - [Built] and tested release-ready version '9.22.2' - dev repo
 - [Fixed] extra options references.filter_by to document that a Hash must return_value, and to ensure it works if there are no other conditions - fixes #601
 - [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
