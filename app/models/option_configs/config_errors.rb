@@ -14,6 +14,25 @@ module OptionConfigs
         # @todo
       end
 
+      def failed_config(target, type, message, extra_details: nil, level: :error)
+        rn = resource_name if respond_to?(:resource_name)
+        crn = @config_obj.class&.resource_name if @config_obj
+        cd = { type.to_s => send(type)&.deep_stringify_keys } if respond_to?(type)
+        cd ||= {}
+      ensure
+        target << {
+          type: type,
+          config_class: @config_obj.class.name,
+          name: name,
+          message: message,
+          resource_name: rn,
+          config_resource_name: crn,
+          config_object: @config_obj,
+          config_def: cd,
+          extra_details:
+        }
+      end
+
       #
       # Return list of config errors across all option_configs, or nil if there are none
       # @param [option_configs] option_configs
@@ -78,17 +97,7 @@ module OptionConfigs
                else
                  config_errors
                end
-
-      target << {
-        type: type,
-        config_class: @config_obj.class.name,
-        name: name,
-        message: message,
-        resource_name: resource_name,
-        config_resource_name: @config_obj.class.resource_name,
-        config_object: @config_obj,
-        config_def: { type.to_s => send(type)&.deep_stringify_keys }
-      }
+      self.class.failed_config(target, type, message, level:)
     end
   end
 end

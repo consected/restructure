@@ -551,7 +551,7 @@ module OptionConfigs
             puts errtext
           end
 
-          bt = e.backtrace + [errtext]
+          bt = [e.short_string_message] + [errtext]
           raise e, "#{e.message} -- see end of stacktrace for failed configuration YAML", bt
         end
       else

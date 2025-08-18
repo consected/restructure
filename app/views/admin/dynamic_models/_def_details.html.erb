@@ -61,7 +61,12 @@
           <div>
             <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
             <p><%= ce[:message] %></p>
-            <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+            <% if ce[:extra_details] %>
+              <pre><%= ce[:extra_details] %></pre>
+            <% end %>
+            <% if ce[:config_def].present? %>
+              <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+            <% end %>
           </div>
       <% end %>
     </div>
