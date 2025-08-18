@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.26.0] - 2025-08-18
+
 - [Updated] gems to address CVE-2025-24293
 
 ### From Viva - PR #637 - 2025-08-18
