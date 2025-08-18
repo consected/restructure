@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #637 - 2025-08-18
+
+- [Fixed] create_master with move_this breaks if there is an embedded item that has no master association and provide new specs - fixes #635
+- [Changed] position of `self.table_name` assignment to avoid breakages in included modules
+
 ## [9.25.0] - 2025-07-29
 
 - [Updated] gems
