@@ -25,6 +25,8 @@ module MasterSupport
   end
 
   def objects_symbol
+    return unless defined? object_class
+
     object_class.to_s.ns_underscore.pluralize.to_sym
   end
 

@@ -46,7 +46,7 @@ module UserSupport
     end
 
     # Set confirmed for features tests
-    user.confirmed_at ||= Time.now if respond_to?(:page) && !(opt[:not_confirmed])
+    user.confirmed_at ||= Time.now if respond_to?(:page) && !opt[:not_confirmed]
 
     user.save!
     expect(user.two_factor_setup_required?).to be_falsey
@@ -158,6 +158,11 @@ module UserSupport
 
     resource_name ||= objects_symbol
 
+    unless resource_name
+      Rails.logger.warn "No resource name for #{resource_type} - #{self.class}"
+      return
+    end
+
     app_type ||= @user.app_type
 
     uac = Admin::UserAccessControl.where(app_type:, resource_type:, resource_name:)
@@ -184,8 +189,10 @@ module UserSupport
 
     uac
   rescue StandardError => e
+    puts "Failed to create access for #{resource_name} - needs to be one of:\n#{Admin::UserAccessControl.resource_names_for(resource_type.to_sym)}"
+    puts "#{e}\n#{e.backtrace.join("\n")}"
     Rails.logger.debug "Failed to create access for #{resource_name}"
-    Rails.logger.debug "#{e}\n#{e.backtrace.join("\n")}"
+    puts "#{e}\n#{e.backtrace.join("\n")}"
   end
 
   def add_user_to_role(role_name, for_user: nil)
