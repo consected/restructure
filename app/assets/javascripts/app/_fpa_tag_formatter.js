@@ -48,6 +48,7 @@ _fpa.tag_formatter = class {
       "date_time_with_zone",
       "date_time_show_zone",
       "time",
+      "time_ignore_zone",
       "time_with_zone",
       "time_show_zone",
       "time_sec",
@@ -211,7 +212,7 @@ _fpa.tag_formatter = class {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours: minutes
@@ -221,7 +222,7 @@ _fpa.tag_formatter = class {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours:minutes and timezone of displayed time
@@ -232,7 +233,7 @@ _fpa.tag_formatter = class {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours:minutes and timezone of displayed time
@@ -243,7 +244,7 @@ _fpa.tag_formatter = class {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time for hours: minutes: seconds
@@ -251,7 +252,7 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.time_format(true);
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      res = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
     return orig_val;
 
@@ -334,12 +335,12 @@ _fpa.tag_formatter = class {
 
   join_with_2newlines(res, _orig_val) {
     if (Array.isArray(res))
-      return res.join('\n');
+      return res.join('\n\n');
   }
 
   compact(res, _orig_val) {
     if (Array.isArray(res))
-      res.filter(item => (item));
+      return res.filter(item => (item));
   }
 
   sort(res, _orig_val) {
@@ -370,6 +371,7 @@ _fpa.tag_formatter = class {
         done.push(strItem);
       }
     }
+    return newres;
   }
 
   markdown_list(res, _orig_val) {
