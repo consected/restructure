@@ -55,7 +55,7 @@ module SpecSetup
     setup_access :activity_log__player_contact_phones
     setup_access :trackers
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, access: :create
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create
 
     ActiveRecord::Base.connection.execute("
                            delete from activity_log_player_contact_phone_history;

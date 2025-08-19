@@ -10,7 +10,7 @@ module ESignatureSupport
   def create_item(att = nil, item = nil, no_model_to_sign: nil, alt_elt: nil)
     @model_to_sign = nil
     unless @player_info
-      setup_access :player_infos
+      setup_access :player_infos, user: @master.current_user
 
       @player_info = @master.player_infos.create!({
                                                     first_name: 'bob',

@@ -9,6 +9,9 @@ rlit = field_name.sub('pick_multiple_records_from_table_', '').singularize
 cn = rl = rlit
 
 cl = cn.camelize.constantize
+
+# Order by ctid, which is a system column that represents
+# the physical location of the row version within its table, which is a short-lived value.
 reslist = cl.all.order('ctid asc')
 
 grouped = {}
@@ -46,5 +49,5 @@ html_options = {
 }
 
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl) %>
+<%= edit_field_label(form, field_name_sym, labels, force_default: rl) %>
 <%= form.select field_name_sym, reslist, options, html_options%>

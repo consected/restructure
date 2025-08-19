@@ -442,7 +442,7 @@ class Admin::UserAccessControl < Admin::AdminBase
         elsif !user_id && res.user_id.nil? && role_name == res.role_name
           # If the new record has no user set and has a matching role_name
           errors.add :user_access_control,
-                     "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} " \
+                     "already exists for #{access} role '#{role_name}' on #{resource_type} #{resource_name} " \
                      "#{show_at_name} #{options}"
         end
       end

@@ -18,6 +18,8 @@ module Redcap
     attr_accessor :disabled
 
     scope :limited_index, -> { limit 100 }
+    # Since we don't want to absolutely trust the system not to attempt to pull millions of records.
+    default_scope -> { limit 1000 }
 
     def invalidate_cache
       logger.debug "Not invalidating cache (#{self.class.name})"

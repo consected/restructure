@@ -7,6 +7,9 @@ class Master < ActiveRecord::Base
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table
   TemporaryMasterIds = [-1, -2].freeze
+
+  scope :no_temporary_masters, -> { where.not(id: TemporaryMasterIds) }
+
   Resources::Models.add(Master, resource_name: :temporary_master)
   Resources::Models.add(Master, resource_name: :masters)
   has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'

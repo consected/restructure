@@ -7,7 +7,7 @@ else
   runas=serve
 fi
 
-if [ -z "${DBUS_SESSION_BUS_ADDRESS}"]; then
+if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
   export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
 fi
 

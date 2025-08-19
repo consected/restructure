@@ -25,6 +25,8 @@ module MasterSupport
   end
 
   def objects_symbol
+    return unless defined? object_class
+
     object_class.to_s.ns_underscore.pluralize.to_sym
   end
 
@@ -95,7 +97,7 @@ module MasterSupport
     master.current_user = user
     master.save!
 
-    setup_access
+    setup_access unless objects_symbol == :activity_logs
     setup_access :trackers unless user.has_access_to? :create, :table, :trackers
 
     @master_id = master.id
