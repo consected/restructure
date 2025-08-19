@@ -17,7 +17,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     create_admin
     create_user
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
 
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user

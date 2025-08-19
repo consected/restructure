@@ -165,19 +165,22 @@ module UserSupport
 
     app_type ||= @user.app_type
 
-    uac = Admin::UserAccessControl.where(app_type:, resource_type:, resource_name:)
+    uac = Admin::UserAccessControl.where(app_type:, resource_type:, resource_name:, role_name: [nil, ''])
     uac = uac.where(user:) if user
 
     uac.active.update_all(disabled: true) if uac.active.length > 1
     uac = uac.active.first || uac.first
     if uac
+      disabled = uac.user&.disabled # The UAC must be disabled if the user is disabled
       uac.access = access
-      uac.disabled = false
+      uac.disabled = disabled
       uac.current_admin = auto_admin
       uac.save!
     else
+      disabled = user&.disabled # The UAC must be disabled if the user is disabled
       uac = Admin::UserAccessControl.create! app_type:, access:, resource_type:,
-                                             resource_name:, user:, current_admin: auto_admin
+                                             resource_name:, user:, current_admin: auto_admin,
+                                             disabled: disabled
     end
 
     if user && access && resource_name != :app_type
@@ -189,10 +192,10 @@ module UserSupport
 
     uac
   rescue StandardError => e
-    puts "Failed to create access for #{resource_name} - needs to be one of:\n#{Admin::UserAccessControl.resource_names_for(resource_type.to_sym)}"
-    puts "#{e}\n#{e.backtrace.join("\n")}"
-    Rails.logger.debug "Failed to create access for #{resource_name}"
-    puts "#{e}\n#{e.backtrace.join("\n")}"
+    puts "Failed to create access for #{resource_name}: #{e}"
+    puts "resource_name needs to be one of:\n#{Admin::UserAccessControl.resource_names_for(resource_type.to_sym)}"
+    puts "#{e}\n#{e.short_string_backtrace}"
+    Rails.logger.info "Failed to create access for #{resource_name}"
   end
 
   def add_user_to_role(role_name, for_user: nil)
