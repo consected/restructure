@@ -236,6 +236,20 @@ module ApplicationHelper
     }
   end
 
+  def edit_field_label(form, field_name_sym, labels, options_or_remove = nil, options = {})
+    if options_or_remove.is_a? Hash
+      options = options_or_remove
+    else
+      remove = options_or_remove
+    end
+
+    force_default = options.delete(:force_default)
+    label = label_for(field_name_sym, labels, remove, force_default:)
+    return if label == ''
+
+    form.label field_name_sym, label, options
+  end
+
   #
   # Cache key for pregenerated partials
   def partial_cache_key(partial, force_user_or_admin: nil)

@@ -19,7 +19,6 @@ module EditFields
     def self.list_record_data_for_select(form_object_instance, assoc_or_class_name,
                                          value_attr: :data, label_attr: :data, group_split_char: nil,
                                          no_assoc: nil)
-
       sf = SelectFieldHandler.new
       sf.form_object_instance = form_object_instance
       sf.assoc_or_class_name = assoc_or_class_name
@@ -101,7 +100,8 @@ module EditFields
       target = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
       if target
         target_class = target[:model]
-        no_assoc ||= target_class.no_master_association || !target_class.method_defined?(:master)
+        no_assoc ||= (target_class.respond_to?(:no_master_association) && target_class.no_master_association) ||
+                     !target_class.method_defined?(:master)
       end
 
       unless no_assoc || !form_object_instance.respond_to?(:master)
@@ -256,6 +256,18 @@ module EditFields
     # @param [ActiveRecord::Relation] reslist <description>
     # @return [Array]
     def list_for_complex_attributes(reslist)
+      return reslist if reslist.empty?
+
+      first_res = reslist.first
+      unless first_res.respond_to?(label_attr)
+        raise FphsException,
+              "SelectFieldHandler generate_record_data with complex attributes: #{first_res.class} does not respond to #{label_attr}"
+      end
+      unless first_res.respond_to?(value_attr)
+        raise FphsException,
+              "SelectFieldHandler generate_record_data with complex attributes: #{first_res.class} does not respond to #{value_attr}"
+      end
+
       reslist.all
              .map { |i| [i.send(label_attr), i.send(value_attr)] }
              .sort { |x, y| x.first <=> y.first }

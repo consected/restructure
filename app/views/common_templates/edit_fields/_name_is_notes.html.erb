@@ -10,10 +10,8 @@
     editor_format = fopt[:format] || def_format
     editor_id = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
   end
-
-  lf = label_for(field_name_sym, labels)
 %>
-<% if lf.present? %><%= form.label field_name_sym, lf %><% end %>
+<%= edit_field_label(form, field_name_sym, labels) %>
 
 <% if editor_format == 'markdown' %>
   <%= render partial: 'common_templates/markdown_editor/show_editor', locals: { editor_format: editor_format, 

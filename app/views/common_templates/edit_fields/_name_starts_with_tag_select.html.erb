@@ -38,5 +38,5 @@ html_options = {
 
 
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
+<%= edit_field_label(form, field_name_sym, labels, opt) %>
 <%= form.select field_name_sym, gs, options, html_options %>
