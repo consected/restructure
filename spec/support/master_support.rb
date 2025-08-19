@@ -97,7 +97,7 @@ module MasterSupport
     master.current_user = user
     master.save!
 
-    setup_access
+    setup_access unless objects_symbol == :activity_logs
     setup_access :trackers unless user.has_access_to? :create, :table, :trackers
 
     @master_id = master.id

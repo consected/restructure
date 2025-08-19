@@ -9,7 +9,7 @@ RSpec.describe Tracker, type: :model do
     create_user
     create_admin
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
     @p1 = Classification::Protocol.create name: 'P1', current_admin: @admin
     @p2 = Classification::Protocol.create name: 'P2', current_admin: @admin
 

@@ -26,7 +26,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     create_admin
     create_user
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
   end
 
   it 'gets the correct version of extra options based on creation date of the instance' do
