@@ -377,7 +377,7 @@ the state of the upstream/develop branch that will be receiving the PR commits.
 
 ```sh
 feature_branch="$(git branch --show-current)"
-git checkout -b up-develop upstream/develop
+git checkout up-develop || git checkout -b up-develop upstream/develop
 git branch --set-upstream-to=origin
 git pull
 git checkout ${feature_branch}
