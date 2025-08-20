@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.27.0] - 2025-08-20
+
 ### From FPHS - PR #642 - 2025-08-20
 
 - [Added] script to get CHANGELOG.md entries from git and fixed the release_and_build.sh script to use it - fixes #641
