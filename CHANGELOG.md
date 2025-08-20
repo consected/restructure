@@ -14,41 +14,30 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.25.1] - 2025-08-12
+- [Added] markup classes to debug table editing permission issues
+- [Fixed] 'as-radio-buttons' class on a select field failing to operate or initialize show_ifs if multiple forms with this option were showing - fixes #631
+- [Fixed] missing space in jasmine tests script
+- [Fixed] Redcap fields with a single checkbox and no choice label show a humanized field name, which is wrong - fixes #629
+- [Added] cache of table header and comments to speed up reports
+- [Changed] parallel_test retries listing
+- [Fixed] excessive time to retrieve client requests in large tables. We could consider indexing on updated_at in the future. Fixes #624
+- [Changes] to support debugging
+- [Fixed] Redcap ref-data app change link
+- [Changed] short string backtrace to help specs
+- [Fixed] many access control errors in specs and added better logging to support this
+- [Fixed] Time and other formatter bugs in JS - fixes #622
+- [Fixed] time fieldsin form (show mode) not being handled correctly - fixes #622 - fixes #623
+- [Fixed] submit buttons on registration and password change not graying out - fixes #638
+- [Added] new reloading of routes after creating or disabling dynamic definitions
+- [Fixes] _fpa.js reports "An error occurred." for 502 and 503 errors, for which we should tell the user there was an error connecting to the server. - fixes #628
+- [Added] HTML markup for autocomplete in new password and 2FA forms - fixes #592
+- [Added] versions tab to activity log definition panel, like we have with dynamic models - resolves #615
+- [Fixed] a "New User Registered" email is sent when creating a ...@template user - fixes #596
+- [Fixed] message notification content not showing in message notifications admin panel
+- [Changed] release script to produce a better CHANGELOG update from git
 
-- [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
-- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
-- [Fixes] importing an app with view definitions, if the SQL failed, future migrations just wouldn't run - fixes #597
-- [Fixed] nfs_apps_list.txt not being written on startup of server and doesn't recognize the NFS mountpoint - fixes #598
-- [Updated] gem and yarn packages
-- [Added] info on getting entries for the CHANGELOG
-- [Updated] CHANGELOG
-- [Updated] gem and yarn packages
-- [] 
-- [Built] and tested release-ready version '9.22.0' - dev repo
-- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to ensure it works if there are no other conditions - fixes #601
-- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
-- [Updated] Ruby version and gems
-- [Updated] CHANGELOG
-- [Checkpoint] from VS Code for coding agent session
-- [Initial] plan
-- [Updated] CHANGELOG
-- [Updated] CHANGELOG
-- [Initial] plan
-- [Updated] Ruby version, gems and note in CHANGELOG regarding postgres version
-- [] 
-- [Built] and tested release-ready version '9.23.0' - dev repo
-- [Updated] CHANGELOG
-- [Updated] ruby version correctly
-- [] 
-- [] 
-- [] 
-- [] 
-- [] 
-- [Updated] gems
-- [Built] and tested release-ready version '9.24.0' - dev repo
-- [Updated] CHANGELOG.md with git commits
-- [] 
+## [9.26.0] - 2025-08-18
+
 - [Built] and tested release-ready version '9.25.0' - dev repo
 - [Fixed] `{{#is array "includes" 'val'}}` failing because it treats array as a string - fixes #618
 - [Fixed] Redcap integration handling multiple choice fields "incorrectly" with choices containing uppercase characters - fixes #625
