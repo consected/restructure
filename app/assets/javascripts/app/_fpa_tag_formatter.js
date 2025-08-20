@@ -73,6 +73,7 @@ _fpa.tag_formatter = class {
       "html_list",
       "plaintext",
       "strip",
+      "split_space",
       "split_lines",
       "split_comma",
       "split_csv",
@@ -109,7 +110,7 @@ _fpa.tag_formatter = class {
 
 
   capitalize(res, _orig_val) {
-    return res.capitalize();
+    return _fpa.utils.capitalize(res, true);
   }
 
   titleize(res, _orig_val) {
@@ -167,39 +168,54 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.date_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      if (d.isValid) {
+        orig_val = d.toFormat(dtf).toLowerCase();
+      }
+      else {
+        console.log(`Date is invalid: ${orig_val}`)
+      }
+    }
+    else {
+      console.log('User preferences don\'t include date format');
     }
     return orig_val;
   }
 
+
+  // Show the date and time as it was set(as if no timezone was specified)
+  // without adjusting to the user's timezone.  
   date_time(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.setZone('UTC').toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
   }
 
-  // Date and time only including hours:minutes and timezone of displayed time
-  // TODO: this does not return the timezone
+  // Forces the stored timezone to the user's timezone preference, without changing the date.
+  // A stored date time intended to not have a timezone
+  // will be returned as a new date time based on the user's timezone.
   date_time_with_zone(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.setZone(dtz).toFormat(dtf).toLowerCase() : orig_val;
     }
 
     return orig_val;
   }
 
   // Date and time only including hours:minutes and timezone of displayed time
-  // TODO: this does not return the timezone
   date_time_show_zone(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
+    let dtz = UserPreferences.timezone();
+    let dtzh = UserPreferences.timezone_human();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
+      orig_val = `${orig_val} ${dtzh}`;
     }
 
     return orig_val;
@@ -208,9 +224,10 @@ _fpa.tag_formatter = class {
   // Time only including hours: minutes
   time(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
   }
@@ -220,7 +237,7 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.time_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
   }
@@ -229,9 +246,10 @@ _fpa.tag_formatter = class {
   // TODO: this does not return the timezone
   time_with_zone(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
   }
@@ -240,9 +258,12 @@ _fpa.tag_formatter = class {
   // TODO: this does not return the timezone
   time_show_zone(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
+    let dtzh = UserPreferences.timezone_human();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
+      orig_val = `${orig_val} ${dtzh}`;
     }
     return orig_val;
   }
@@ -252,25 +273,26 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.time_format(true);
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
 
   }
 
   dicom_datetime(_res, orig_val) {
-    if (typeof orig_val == 'date') {
-      orig_val = orig_val.toISOString();
+    let dtf = 'yyyyMMddHHmmss+0000';
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    orig_val = orig_val.split('.')[0].replace(/[\:\-T]/g, '');
     return orig_val;
   }
 
   dicom_date(_res, orig_val) {
 
-    let dtf = '%Y%m%d';
+    let dtf = 'yyyyMMdd';
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
     return orig_val;
@@ -278,18 +300,18 @@ _fpa.tag_formatter = class {
 
   redcap_date(_res, orig_val) {
 
-    let dtf = '%Y-%m-%d';
+    let dtf = 'yyyy-MM-dd';
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
     return orig_val;
   }
+
   iso8601_datetime(_res, orig_val) {
     if (typeof orig_val == 'date') {
       orig_val = orig_val.toISOString();
     }
-    orig_val = orig_val.split('.')[0].replace(/[\:\-T]/g, '');
     return orig_val;
   }
 
@@ -393,6 +415,10 @@ _fpa.tag_formatter = class {
 
   strip(res, _orig_val) {
     return res.trim()
+  }
+
+  split_space(res, _orig_val) {
+    return res.split(" ")
   }
 
   split_lines(res, _orig_val) {
