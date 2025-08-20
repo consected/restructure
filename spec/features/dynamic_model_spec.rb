@@ -39,6 +39,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: app_type.id))
     setup_access :dynamic_model__test_all_v2_fields, user: @user, app_type: app_type
     expect(@user.has_access_to?(:create, :table, :dynamic_model__test_all_v2_fields)).to be_truthy
+    Rails.application.routes_reloader.reload!
   end
 
   before :each do
