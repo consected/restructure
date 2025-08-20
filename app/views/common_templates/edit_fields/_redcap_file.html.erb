@@ -19,7 +19,7 @@
     url = "/nfs_store/downloads/#{container.id}?activity_log_id=#{container.parent_item&.id}&activity_log_type=redcap__project_admin&download_id=#{sf.id}&retrieval_type=stored_file"
   end
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, /^fixed_/) %>
+<%= edit_field_label(form, field_name_sym, labels, /^fixed_/) %>
 <span class="redcap-file-field">
   <% if url %><%= link_to fn, url, class: 'redcap-file-use-secure-view' %><% else %><%=fn%><% end %>  
 </span>

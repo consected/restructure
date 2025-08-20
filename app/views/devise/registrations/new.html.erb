@@ -85,7 +85,7 @@
         }
       %>
       <% else %>
-      <%= f.submit "Sign up", class: "btn btn-primary" %>
+      <%= f.submit "Sign up", class: "btn btn-primary", data: {disable_with: 'submitting...', orig_value: 'Sign up'} %>
       <% end %>
     </div>
     <%= render "devise/shared/links" %>

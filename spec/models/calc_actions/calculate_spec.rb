@@ -23,12 +23,12 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     setup_access :activity_log__player_contact_phones
     setup_access :addresses
-    setup_access :activity_log__player_contact_phone__primary
-    setup_access :activity_log__player_contact_phone__blank
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type
 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     @al2 = create_item
     @al0 = create_item
@@ -2941,7 +2941,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       create_user
       setup_access :activity_log__player_contact_phones
       setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
-      setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+      setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type
 
       # create_master
 

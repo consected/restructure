@@ -51,7 +51,8 @@
     </div>
 
     <div class="actions">
-      <%= link_to "Back", :back, class: "btn btn-danger" %>    <%= f.submit "Update", class: "btn btn-primary" %>
+      <%= link_to "Back", :back, class: "btn btn-danger" %>    
+      <%= f.submit "Update", class: "btn btn-primary", data: {disable_with: 'submitting...', orig_value: 'Update'} %>
     </div>
   <% end %>
 
