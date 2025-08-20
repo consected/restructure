@@ -525,7 +525,11 @@ module StandardAuthentication
     return unless notify.present?
 
     Users::NewUserAdded.notify(self) if is_a?(Admin) && notify.include?('admin')
-    Users::NewUserAdded.notify(self) if is_a?(User) && notify.include?('user')
+
+    # Only send a notification about a user if the email does not match the @template pattern
+    return unless is_a?(User) && notify.include?('user') && !email.end_with?(Settings::TemplateUserEmailPattern)
+
+    Users::NewUserAdded.notify(self)
   end
 
   def clean_memos

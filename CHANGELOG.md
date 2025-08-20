@@ -14,6 +14,12 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #642 - 2025-08-20
+
+- [Added] script to get CHANGELOG.md entries from git and fixed the release_and_build.sh script to use it - fixes #641
+
+### From FPHS - PR #640 - 2025-08-20
+
 - [Added] markup classes to debug table editing permission issues
 - [Fixed] 'as-radio-buttons' class on a select field failing to operate or initialize show_ifs if multiple forms with this option were showing - fixes #631
 - [Fixed] missing space in jasmine tests script
@@ -35,6 +41,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] a "New User Registered" email is sent when creating a ...@template user - fixes #596
 - [Fixed] message notification content not showing in message notifications admin panel
 - [Changed] release script to produce a better CHANGELOG update from git
+
+## [9.26.0] - 2025-08-18
+
+- [Updated] gems to address CVE-2025-24293
+
+### From Viva - PR #637 - 2025-08-18
+
+- [Fixed] create_master with move_this breaks if there is an embedded item that has no master association and provide new specs - fixes #635
+- [Changed] position of `self.table_name` assignment to avoid breakages in included modules
 
 ## [9.26.0] - 2025-08-18
 
