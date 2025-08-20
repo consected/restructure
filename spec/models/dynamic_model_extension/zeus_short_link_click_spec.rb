@@ -14,7 +14,7 @@ RSpec.describe 'DynamicModelExtension::ZeusShortLinkClick', type: :model do
     create_admin
     create_user
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
 
     import_bulk_msg_app
 

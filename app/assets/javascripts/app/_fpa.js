@@ -465,7 +465,6 @@ _fpa = {
   // Preprocess data before it is sent (submitted forms, for example)
   // Add the data-before-send-processor="<function name>" to the form block
   // Ensure there is a matching function in _fpa.before_send_processors object.
-  
   do_before_send: function (block, alt_proc) {
     const proc = block.attr('data-before-send-processor');
     if (!proc) return;
@@ -974,7 +973,12 @@ _fpa = {
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
               msg = xhr.responseText;
             } else {
-              msg = 'An error occurred.';
+              if (xhr.status == 502 || xhr.status == 503) {
+                msg = 'The server is currently unavailable. Please wait 60 seconds then try again.';
+              }
+              else {
+                msg = 'An error occurred. Possibly the server is currently unavailable. Please wait 60 seconds then try again';
+              }
             }
             console.error(`message - ${msg}`)
 

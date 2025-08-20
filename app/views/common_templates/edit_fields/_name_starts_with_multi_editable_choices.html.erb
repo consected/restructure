@@ -9,7 +9,6 @@
 fopt = field_options_for(form_object_instance, field_name_sym)
 
 alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
-opt = {}
 begin
   data = form_object_instance[field_name_sym.to_s]&.to_h
   data = data&.transform_values { |d| d.gsub("\n", ' ') }
@@ -28,5 +27,5 @@ html_options = {
   value: gs
 }
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, /^multi_editable_choices/), opt %>
+<%= edit_field_label(form, field_name_sym, labels, /^multi_editable_choices/) %>
 <%= form.text_area field_name_sym, html_options %>

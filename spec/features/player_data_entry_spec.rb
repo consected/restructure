@@ -43,7 +43,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
       ac.current_admin = @admin
       ac.updated_at = DateTime.now
       ac.save!
-    else      
+    else
       Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info',
                                       current_admin: @admin
     end

@@ -18,6 +18,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    create_user(create_master: false, no_app_type_setup: true) unless @user
     User.active.where.not(email: Settings::TemplateUserEmail).where.not(id: @user&.id).update_all(disabled: true)
 
     SetupHelper.feature_setup
@@ -43,7 +44,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
     @app_type = @user.app_type

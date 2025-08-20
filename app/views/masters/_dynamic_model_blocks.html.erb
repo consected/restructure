@@ -27,8 +27,10 @@ category_models.each do |m|
     elsif orientation && orientation != 'none'
 %>
       <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-    <% else %>
-    <div class="<%= layout_item_block_sizes[:regular] %> orientation-<%=orientation%> sublist-column">
+<% 
+    else 
+%>
+    <div class="<%= layout_item_block_sizes[:regular] %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
       <% unless hide_sl %>
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
       <% end %>
