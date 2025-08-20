@@ -23,6 +23,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] create_master with move_this breaks if there is an embedded item that has no master association and provide new specs - fixes #635
 - [Changed] position of `self.table_name` assignment to avoid breakages in included modules
 
+## [9.26.0] - 2025-08-18
+
+- [Built] and tested release-ready version '9.25.0' - dev repo
+- [Fixed] `{{#is array "includes" 'val'}}` failing because it treats array as a string - fixes #618
+- [Fixed] Redcap integration handling multiple choice fields "incorrectly" with choices containing uppercase characters - fixes #625
+- [Updated] gems
+
 ## [9.25.0] - 2025-07-29
 
 - [Updated] gems

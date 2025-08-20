@@ -3,6 +3,11 @@
 echo "Starting release and build"
 CURRDIR="$(pwd)"
 
+if [ ! -f CHANGELOG.md ]; then
+  echo 'Must run this script from the root of the repository'
+  exit 1
+fi
+
 if [ "$1" == 'clean' ]; then
   build_arg='clean'
   echo 'Cleaning up old container and rebuilding it from scratch'
@@ -46,15 +51,7 @@ if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
   if [ "${cl_not_ok}" ]; then
     echo "CHANGELOG.md does not have anything entered for the Unreleased section. Will populate it from git log"
-    oldifs=$IFS
-    IFS=$'\n'
-    for line in $(git log --format=%s --no-merges new-master..HEAD) ; do 
-      [[ $line =~ ^([a-zA-Z]+)\ (.+) ]]
-      res="$(echo "- [${BASH_REMATCH[1]}] ${BASH_REMATCH[2]}")"
-      sed -i -E "s/## Unreleased/## Unreleased\n${res}/" CHANGELOG.md
-    done
-    IFS=$oldifs
-    sed -i -E "s/## Unreleased/## Unreleased\n/" CHANGELOG.md
+    app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
     git commit CHANGELOG.md -m "Updated CHANGELOG.md with git commits" && \
     git push
   fi
