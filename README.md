@@ -376,11 +376,25 @@ PR will a feature branch might lead to junk that the upstream repo doesn't want.
 the state of the upstream/develop branch that will be receiving the PR commits.
 
 ```sh
+feature_branch="$(git branch --show-current)"
 git checkout -b up-develop upstream/develop
 git branch --set-upstream-to=origin
-git checkout ${feature-branch}
+git pull
+git checkout ${feature_branch}
 git rebase --onto up-develop ${commit-prior-to-first-in-feature-branch}
 git push --force
+```
+
+Then update the CHANGELOG using git commit entries:
+
+```sh
+app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
+```
+
+Check the updates and commit
+
+```sh
+git commit CHANGELOG.md -m 'Updated CHANGELOG' && git push
 ```
 
 ## Future development themes
