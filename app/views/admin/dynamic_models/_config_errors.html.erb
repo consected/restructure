@@ -1,0 +1,34 @@
+  <% 
+  ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
+  if ces %>
+    <div class="config-error-block">
+  <label>configuration errors</label>
+
+      <% ces.each do |ce| %>
+          <div>
+            <div class="config-error-def-section">
+              <span class="config-error-list-name"><%= ce[:name] %></span>:
+            </div>
+            <div class="config-error-def-config-type">  
+              <span class="config-error-list-type"><%= ce[:type] %></span>
+            </div>
+            <br/>
+            <p><%= ce[:message] %></p>
+            <% if ce[:extra_details].is_a?(Array) %>
+              <div class="ceb-extra-details">
+                <pre><%= ce[:extra_details].join("\n") %></pre>
+              </div>
+            <% elsif ce[:extra_details] %>
+              <div class="ceb-extra-details">
+                <pre><%= ce[:extra_details] %></pre>
+              </div>
+            <% end %>
+            <% if ce[:config_def].present? %>
+              <div class="ceb-config-def">
+                <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
+              </div>
+            <% end %>
+          </div>
+      <% end %>
+    </div>
+  <% end %>

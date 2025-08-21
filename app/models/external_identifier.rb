@@ -69,32 +69,30 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def self.routes_load
     mn = nil
-    begin
-      m = active_model_configurations
-      return if m.empty?
 
-      routes = Rails.application.routes
-      routes.disable_clear_and_finalize = true
-      routes.draw do
-        resources :masters, only: %i[show index new create] do
-          m.each do |pg|
-            mn = pg
-            pg_name = mn.base_route_segments
+    m = active_model_configurations
+    return if m.empty?
 
-            next if routes.url_helpers.respond_to?("master_#{pg_name}_path")
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw do
+      resources :masters, only: %i[show index new create] do
+        m.each do |pg|
+          mn = pg
+          pg_name = mn.base_route_segments
 
-            Rails.logger.info "Setting up routes for external identifer: #{pg_name}"
+          next if routes.url_helpers.respond_to?("master_#{pg_name}_path")
 
-            resources pg_name, except: [:destroy]
-            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
-          end
+          Rails.logger.info "Setting up routes for external identifer: #{pg_name}"
+
+          resources pg_name, except: [:destroy]
+          get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
         end
       end
-    rescue ActiveRecord::StatementInvalid => e
-      logger.warn "Not loading activity log routes. The table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
-    rescue FphsException => e
-      logger.warn "Not loading activity log routes. There is possibly an error in an extra log type configuration. Table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
+  rescue StandardError => e
+    Rails.logger.error "Failed to set up routes for external identifier #{mn}: #{e}"
+    Rails.logger.error e.short_string_backtrace
   ensure
     routes ||= Rails.application.routes
     routes.disable_clear_and_finalize = false
@@ -304,14 +302,14 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def name_format_correct
-    errors.add :name, "must not be #{name}" if name.downcase == 'externals' || name.downcase == 'exts'
+    errors.add :name, "must not be #{name}" if ['externals', 'exts'].include?(name.downcase)
     errors.add :name, 'must be a lowercase, underscored, DB table name' unless name.downcase.ns_underscore == name
     unless name.to_sym == model_association_name
       errors.add :name, 'not acceptable - must be plural and avoid numbers after underscores in names'
     end
 
     # Unfortunately we have clash in the existing scantrons naming. Ignore this case and work around as necessary.
-    if (external_id_attribute == "#{name.singularize}_id" || external_id_attribute == 'external_id') &&
+    if ["#{name.singularize}_id", 'external_id'].include?(external_id_attribute) &&
        name.downcase != 'scantrons'
       errors.add :external_id_attribute,
                  "must not be named #{external_id_attribute} or external_id. " \
