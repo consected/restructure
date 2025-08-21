@@ -721,9 +721,13 @@ module OptionConfigs
       ci = ref_config[key]
       return default_if_no_config unless ci
 
-      Rails.logger.debug "Checking calc_reference_if with #{key} on #{obj} with #{ci}"
       ca = ConditionalActions.new ci, obj
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_reference_if with #{key} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_reference_if condition - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     #
@@ -737,10 +741,13 @@ module OptionConfigs
       raise FphsException, "invalid calc_if key #{key}" unless key.in?(ValidCalcIfKeys)
 
       config = send(key)
-
-      Rails.logger.debug "Checking calc_if with #{key} on #{obj} with #{config}"
       ca = ConditionalActions.new config, obj
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_if with #{key} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_if condition - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     #
@@ -759,6 +766,11 @@ module OptionConfigs
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_valid_if with #{action_type} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_valid_if condition on #{action_type} - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
