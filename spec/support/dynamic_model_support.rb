@@ -16,7 +16,6 @@ module DynamicModelSupport
       TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id', 'use_def_version_time', 'text_array')
     end
 
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
@@ -38,7 +37,6 @@ module DynamicModelSupport
 
   def generate_test_dynamic_view
     create_user
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 

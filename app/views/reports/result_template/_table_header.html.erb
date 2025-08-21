@@ -1,0 +1,20 @@
+<thead>
+  <tr>
+    <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
+    <%
+      i = 0
+      hide_cols = []
+
+      @results.fields.each do |col|
+        @col = col
+        hide_this = report_table_hidden_columns[i]
+        unless hide_this
+    %>
+    <%= report_table_header_cell(i, col) %>
+    <%  
+        end
+        i += 1
+      end 
+    %>
+  </tr>
+</thead>

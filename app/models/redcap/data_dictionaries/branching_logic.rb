@@ -85,8 +85,9 @@ module Redcap
 
         re = /\[([a-zA-Z0-9_]+)\(([a-zA-Z0-9]+)\)\]/
         # checkbox choice varname abc(1) -> abc___1 or smoketime(pnfl) smoketime___pnfl
+        # NOTE: uppercase choices become lowercase fields: smoketime(ANFL) smoketime___anfl
         condition_string.scan(re).each do |match|
-          vars << match.join('___')
+          vars << match.join('___').downcase
           condition_string.sub!(re, "%%VAR#{pos}%%")
           pos += 1
         end
@@ -212,7 +213,7 @@ module Redcap
           else
             sub_list.last.first.last << left
           end
-          op_changed = (prev_op && prev_op != op)
+          op_changed = prev_op && prev_op != op
 
           matchnum += 1
           prev_op = op

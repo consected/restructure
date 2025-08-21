@@ -14,38 +14,71 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.25.2] - 2025-08-18
+## [9.28.0] - 2025-08-21
 
-- [Built] and tested release-ready version '9.22.2' - dev repo
-- [Fixed] extra options references.filter_by to document that a Hash must return_value, and to ensure it works if there are no other conditions - fixes #601
-- [Reverted] change returning true result on return_value, to avoid unexpected issues in current conditions
-- [Updated] Ruby version and gems
-- [Updated] CHANGELOG
-- [Updated] CHANGELOG
-- [Initial] plan
-- [Updated] Ruby version, gems and note in CHANGELOG regarding postgres version
-- [] 
-- [Built] and tested release-ready version '9.23.0' - dev repo
-- [Updated] CHANGELOG
-- [Updated] gems and yarn
-- [Updated] CHANGELOG
-- [Updated] ruby version correctly
-- [] 
-- [Built] and tested release-ready version '9.23.1' - dev repo
-- [] 
-- [] 
-- [] 
-- [] 
-- [Updated] gems
-- [Built] and tested release-ready version '9.24.0' - dev repo
-- [Updated] CHANGELOG.md with git commits
-- [] 
-- [Built] and tested release-ready version '9.25.0' - dev repo
-- [Built] and tested release-ready version '9.25.1' - dev repo
+### From Viva - PR #646 - 2025-08-21
+
+- [Fixed] comparison of user_role in user access controls when role names are '' and nil
+- [Fixed] conditional calculation failures shouldn't show so much info to end users - fixes #643
+- [Changed] exception handling for dynamic def route generation
+- [Changed] dynamic def config triggers to avoid running if the option configs are invalid
+- [Fixed] failing to start server if dynamic definition yaml options contain error during parse - fixes #633
+- [Changed] reporting of option config errors and report any errors during cleaning with a separate exception class
+- [Changed] option error display in admin panels
+- [Added] new exception types specific to options
+- [Added] ability to report yaml parsing issues directly in admin panel
+- [Changed] handling of dynamic definition configuration setup to avoid unnecessary exceptions
+
+### From Viva - PR #645 - 2025-08-21
+
+- [Fixed] Admin users without specific capabilities shouldn't be shown links in app type components sidebar or page - fixes #636
+- [Fixed] changes to user or admin not reflected in cached partials
+
+## [9.27.0] - 2025-08-20
+
+### From FPHS - PR #642 - 2025-08-20
+
+- [Added] script to get CHANGELOG.md entries from git and fixed the release_and_build.sh script to use it - fixes #641
+
+### From FPHS - PR #640 - 2025-08-20
+
+- [Added] markup classes to debug table editing permission issues
+- [Fixed] 'as-radio-buttons' class on a select field failing to operate or initialize show_ifs if multiple forms with this option were showing - fixes #631
+- [Fixed] missing space in jasmine tests script
+- [Fixed] Redcap fields with a single checkbox and no choice label show a humanized field name, which is wrong - fixes #629
+- [Added] cache of table header and comments to speed up reports
+- [Changed] parallel_test retries listing
+- [Fixed] excessive time to retrieve client requests in large tables. We could consider indexing on updated_at in the future. Fixes #624
+- [Changes] to support debugging
+- [Fixed] Redcap ref-data app change link
+- [Changed] short string backtrace to help specs
+- [Fixed] many access control errors in specs and added better logging to support this
+- [Fixed] Time and other formatter bugs in JS - fixes #622
+- [Fixed] time fieldsin form (show mode) not being handled correctly - fixes #622 - fixes #623
+- [Fixed] submit buttons on registration and password change not graying out - fixes #638
+- [Added] new reloading of routes after creating or disabling dynamic definitions
+- [Fixes] _fpa.js reports "An error occurred." for 502 and 503 errors, for which we should tell the user there was an error connecting to the server. - fixes #628
+- [Added] HTML markup for autocomplete in new password and 2FA forms - fixes #592
+- [Added] versions tab to activity log definition panel, like we have with dynamic models - resolves #615
+- [Fixed] a "New User Registered" email is sent when creating a ...@template user - fixes #596
+- [Fixed] message notification content not showing in message notifications admin panel
+- [Changed] release script to produce a better CHANGELOG update from git
+
+## [9.26.0] - 2025-08-18
+
+- [Updated] gems to address CVE-2025-24293
+
+### From Viva - PR #637 - 2025-08-18
+
 - [Fixed] create_master with move_this breaks if there is an embedded item that has no master association and provide new specs - fixes #635
 - [Changed] position of `self.table_name` assignment to avoid breakages in included modules
 
-## [9.25.1] - 2025-07-29
+## [9.26.0] - 2025-08-18
+
+- [Built] and tested release-ready version '9.25.0' - dev repo
+- [Fixed] `{{#is array "includes" 'val'}}` failing because it treats array as a string - fixes #618
+- [Fixed] Redcap integration handling multiple choice fields "incorrectly" with choices containing uppercase characters - fixes #625
+- [Updated] gems
 
 ## [9.25.0] - 2025-07-29
 
@@ -158,8 +191,6 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 
 - [Updated] gems (important - to include newest Redcap gem)
 
-## [9.18.3] - 2025-06-24
-
 ### From FPHS - PR #563 - 2025-06-24
 
 - [Fixed] failed reporting of Redcap job failures by allowing empty data in notifications
@@ -269,6 +300,10 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 - [Fixed] configuration notices appearing in an accordian that doesn't operate correctly when viewing app type components - fixes #515
 - [Fixed] dashboard block showing "The requested resource was not found" when no report or resource actually configured - fixes #514
 
+## [9.16.1] - 2025-05-20
+
+- [Build] FPHS version
+
 ## [9.16.0] - 2025-05-20
 
 ### From FPHS - PR #513 - 2025-05-20
@@ -332,6 +367,8 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 ### From FPHS - PR #503 - 2025-05-05
 
 - [Fixed] raising of exception if attempting to create a filestore container with incomplete information - fixes #502
+
+## [9.13.1] - 2025-04-30
 
 ### From Viva - PR #501 - 2025-04-29
 
@@ -398,6 +435,8 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 ### From FPHS - #PR 481 - 2025-04-14
 
 - [Added] report option for plain text response, with various "markup" options - resolves #480
+
+## [9.12.1] - 2025-04-09
 
 ### From FPHS - PR #479 - 2025-04-09
 
@@ -641,6 +680,10 @@ NOTE: Requires a database migration on upgrade
 ### From Viva - PR #417 - 2024-12-03
 
 - [Fixed] filestore browser not loading correctly in vertical activity log block
+
+# [8.9.2] - 2024-11-14
+
+- [Build] FPHS version
 
 ## [8.9.1] - 2024-11-14
 

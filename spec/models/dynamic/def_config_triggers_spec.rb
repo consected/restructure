@@ -18,7 +18,6 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @user.save
     @app_type = @user.app_type
 
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
@@ -39,7 +38,6 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
       @als.each do |al|
         al.update! disabled: true, current_admin: @admin
       end
-
 
       yaml = <<~END_YAML
         test1:

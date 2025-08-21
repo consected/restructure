@@ -12,6 +12,9 @@ module ESignImportConfig
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'test esign_config.json'
     SetupHelper.setup_app_from_import 'test esign', config_dir, config_fn
+
+    als = ActivityLog.active.find_by(table_name: 'activity_log_player_info_e_signs')
+    raise 'ActivityLog for player info e-signs not found' if als.nil?
   end
 
   def setup_config
@@ -20,8 +23,9 @@ module ESignImportConfig
     create_admin
     create_user
 
-    als = ActivityLog.active.where(table_name: 'activity_log_player_info_e_signs')
-    als.active.first.implementation_class_defined?(::ActivityLog)
+    als = ActivityLog.active.find_by(table_name: 'activity_log_player_info_e_signs')
+    expect(als).not_to be nil
+    als.implementation_class_defined?(::ActivityLog)
     expect(defined? ActivityLog::PlayerInfoESign).to be_truthy
 
     new_app_type = Admin::AppType.where(name: 'test esign').first

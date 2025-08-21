@@ -117,10 +117,10 @@ if [ -f tmp/parallel_specs_failed.txt ]; then
     [[ $line =~ rspec\ ([^\:]+) ]]; retest="${retest} $(echo ${BASH_REMATCH[1]})"
   done 
   IFS=$old_ifs
-  rspec $retest
+  bundle exec rspec -f d $retest
   res=$?
   if [ $res != 0 ]; then
-    echo "Retest of failed specs did not pass."
+    echo "Retest of failed specs did not pass"
     exit $res
   else
     echo "Retest of failed specs passed."

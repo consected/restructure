@@ -252,16 +252,24 @@ _fpa.utils.get_data_attribs = function (block) {
   return attrs;
 };
 
-_fpa.utils.capitalize = function (str) {
+//  Capitalize the first letter of each word unless the format is an email address
+// Use first_only to only capitalize the first word, to match the way Rails does it
+_fpa.utils.capitalize = function (str, first_only) {
   var res = '';
   if (str != null && str.replace) {
     var email_address_test = /.+@.+\..+/;
     var email_address = email_address_test.test(str);
-    if (!email_address)
-      res = str.replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      });
-    else res = str;
+    if (!email_address) {
+      if (first_only) {
+        res = str.replace(/\w*/, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      } else {
+        res = str.replace(/\w\S*/g, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      }
+    } else res = str;
   } else {
     res = str;
   }

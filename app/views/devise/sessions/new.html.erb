@@ -38,7 +38,7 @@
           View the entry named <b><%=Settings::TwoFactorAuthIssuer%> (<%=resource_name%>)</b>.<br />
           Enter the 6 digit number presented, then click <b>Log in</b>.<br />
         </p>
-        <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
+        <%= f.text_field :otp_attempt, autocomplete: "one-time-code", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
       </div>
     </div>
 

@@ -40,5 +40,5 @@ options[:selected] = value.to_s if value.is_a?(Time)
 
 
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
+<%= edit_field_label(form, field_name_sym, labels, opt) %>
 <%= form.select field_name_sym, gs, options, new_options %>

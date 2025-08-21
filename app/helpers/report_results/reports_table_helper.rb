@@ -3,6 +3,27 @@
 module ReportResults
   module ReportsTableHelper
     #
+    # Determine which columns should be hidden in the report table
+    # @return [Array<Boolean>] an ordered array indicating which columns are hidden
+    def report_table_hidden_columns
+      return @report_table_hidden_columns if @report_table_hidden_columns
+
+      @report_table_hidden_columns = @results.fields.each_with_index.map do |_col, i|
+        report_cell_hide?(i)
+      end
+    end
+
+    #
+    # Report table headers are cached using a standard partial cache against
+    # report and the schema name / table name for the admin table viewer
+    # @return [String] the cache key for the report table header
+    def report_table_header_cache_key
+      sn = @runner.data_reference.schema_name
+      tn = @runner.data_reference.table_name
+      partial_cache_key("report_table_header--#{@report.id}--#{@report.updated_at}--#{sn}--#{tn}")
+    end
+
+    #
     # Generate the full table cell markup
     def report_table_result_cell(field_num, col_content)
       orig_col_content = col_content
@@ -47,11 +68,13 @@ module ReportResults
     def report_table_header_cell(field_num, header_content, alt_html_tag = nil)
       alt_html_tag ||= 'th'
       col_name = report_column_name(field_num)
-      cell = ReportResults::ReportsTableHeaderCell.new(header_content,
-                                                       table_name: @runner&.data_reference&.table_name,
-                                                       schema_name: @runner&.data_reference&.schema_name,
-                                                       view_options: @view_options)
+      @rth_cells ||= ReportResults::ReportsTableHeaderCell.new(header_content,
+                                                               table_name: @runner&.data_reference&.table_name,
+                                                               schema_name: @runner&.data_reference&.schema_name,
+                                                               view_options: @view_options)
 
+      @rth_cells.header_content = header_content
+      cell = @rth_cells
       header_content = alt_column_header(field_num) || header_content
 
       comment = cell.column_comment

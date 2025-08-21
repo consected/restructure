@@ -81,7 +81,7 @@ class ModelReference < ActiveRecord::Base
       master_user = to_item.master_user
     end
 
-    master_user ||= from_item.current_user
+    master_user ||= from_master.current_user
 
     ModelReference.create! from_record_type: nil,
                            from_record_id: nil,

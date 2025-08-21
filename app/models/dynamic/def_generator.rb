@@ -21,7 +21,8 @@ module Dynamic
       after_commit :clean_schema, if: -> { @regenerate }
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
-
+      after_update_commit -> { self.class.routes_reload }, if: -> { saved_change_to_disabled? }
+      after_create_commit -> { self.class.routes_reload }
       attr_accessor :force_regenerate
     end
 
@@ -56,7 +57,7 @@ module Dynamic
 
       # Reload routes when a definition is regenerated
       def routes_reload
-        # Rails.application.reload_routes!
+        Rails.logger.info 'Reloading routes based on dynamic def generator'
         Rails.application.routes_reloader.reload!
       end
 
@@ -94,6 +95,9 @@ module Dynamic
           puts msg
           Rails.logger.warn msg
         end
+      rescue StandardError, Psych::Exception => e
+        Rails.logger.error "Error enabling active configurations: #{e.message}"
+        Rails.logger.error e.short_string_backtrace
       end
 
       #

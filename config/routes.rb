@@ -43,7 +43,11 @@ Rails.application.routes.draw do
     resources :manage_users, except: %i[show destroy]
     resources :manage_admins, except: %i[show destroy]
     resources :accuracy_scores, except: %i[show destroy]
-    resources :activity_logs, except: %i[show destroy]
+    resources :activity_logs, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :app_configurations, except: %i[show destroy]
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
