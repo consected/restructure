@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.28.1] - 2025-08-21
+
 ## [9.28.0] - 2025-08-21
 
 ### From Viva - PR #646 - 2025-08-21
