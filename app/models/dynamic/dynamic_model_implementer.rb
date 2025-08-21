@@ -98,9 +98,18 @@ module Dynamic
       :dynamic_model
     end
 
-    # The dynamic model option type is always 'default'
+    # The dynamic model option type is always 'default' unless it
+    # is set in the _configurations.option_type_attr_name
     def option_type
-      'default'
+      option_type_attr_name = self.class.option_type_attr_name
+      send(option_type_attr_name) || 'default' unless option_type_attr_name == :option_type
+    end
+
+    def option_type=(value)
+      option_type_attr_name = self.class.option_type_attr_name
+      return unless option_type_attr_name
+
+      send("#{option_type_attr_name}=", value)
     end
 
     def id

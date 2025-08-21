@@ -175,6 +175,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def set_item
     return @item if @item && @implementation_class
 
+    @master ||= object_instance.master
     raise 'Failed to get @master' unless @master
 
     if params[:item_id].blank?
@@ -238,6 +239,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     etp = params[:extra_type]
     etp = params[:extra_log_type] if etp.blank?
     etp = object_instance.extra_log_type if etp.blank?
+    @is_activity_log_option_type = true
 
     etp = if etp.blank?
             object_instance ? :primary : :blank_log
