@@ -362,11 +362,13 @@ class DynamicModel < ActiveRecord::Base
   #
   # Load dynamic model routes for all active implementations
   def self.routes_load
+    mn = nil
     m = active_model_configurations
     routes = Rails.application.routes
     routes.disable_clear_and_finalize = true
     routes.draw do
       m.each do |dm|
+        mn = dm
         pg_name = dm.base_route_segments
         short_pg_name = dm.base_route_short_name
         if dm.foreign_key_name.present?
@@ -402,7 +404,7 @@ class DynamicModel < ActiveRecord::Base
       end
     end
   rescue StandardError => e
-    Rails.logger.error "Failed to set up routes for dynamic model: #{e}"
+    Rails.logger.error "Failed to set up routes for dynamic model #{mn}: #{e}"
     Rails.logger.error e.short_string_backtrace
   ensure
     routes ||= Rails.application.routes
