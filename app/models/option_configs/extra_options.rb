@@ -58,35 +58,41 @@ module OptionConfigs
               "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
 
-      self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
-      self.resource_item_name = resource_name
-      clean_fields_def
-      clean_field_configs
+      begin
+        self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
+        self.resource_item_name = resource_name
+        clean_fields_def
+        clean_field_configs
 
-      clean_label_def
-      clean_caption_before_def
-      clean_dialog_before_def
-      clean_labels_def
-      clean_show_if_def
-      clean_save_action_def
-      clean_view_options_def
-      clean_db_configs_def
-      clean_access_if_def
-      clean_valid_if_def
-      clean_filestore_def
-      clean_field_options_def
-      clean_embed_def
-      clean_references_def
-      clean_save_triggers
-      clean_batch_triggers
-      clean_config_triggers
-      clean_preset_fields
+        clean_label_def
+        clean_caption_before_def
+        clean_dialog_before_def
+        clean_labels_def
+        clean_show_if_def
+        clean_save_action_def
+        clean_view_options_def
+        clean_db_configs_def
+        clean_access_if_def
+        clean_valid_if_def
+        clean_filestore_def
+        clean_field_options_def
+        clean_embed_def
+        clean_references_def
+        clean_save_triggers
+        clean_batch_triggers
+        clean_config_triggers
+        clean_preset_fields
 
-      # Add the cleaned values back into field_configs - save a raw version for use elsewhere
-      # This needs to be "deep cloned", to avoid a simple clone just copying references
-      # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
-      self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
-      add_field_configs_from_standalone_defs
+        # Add the cleaned values back into field_configs - save a raw version for use elsewhere
+        # This needs to be "deep cloned", to avoid a simple clone just copying references
+        # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
+        self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
+        add_field_configs_from_standalone_defs
+      rescue StandardError => e
+        Rails.logger.warn "Failed to initialize ExtraOptions for #{@name}: #{e}"
+        Rails.logger.warn e.short_string_backtrace
+        raise FphsOptionsGeneralError, "Failed to initialize ExtraOptions for #{@name}: #{e}", e.backtrace
+      end
     end
 
     # Defintion label
@@ -242,7 +248,8 @@ module OptionConfigs
 
       unless self.valid_if.keys.empty? || (self.valid_if.keys - ValidValidIfTriggers).empty?
         failed_config :valid_if,
-                      "valid_if contains invalid keys #{valid_if.keys} - expected only #{ValidValidIfTriggers}"
+                      "valid_if contains invalid keys #{valid_if.keys} - expected only:",
+                      extra_details: ValidValidIfTriggers
       end
 
       os = self.valid_if[:on_save]
@@ -402,7 +409,8 @@ module OptionConfigs
 
       unless self.save_trigger.keys.empty? || (self.save_trigger.keys - ValidSaveTriggerTriggers).empty?
         failed_config :save_trigger,
-                      "save_trigger contains invalid keys #{save_trigger.keys} - expected only #{ValidSaveTriggerTriggers}"
+                      "save_trigger contains invalid keys #{save_trigger.keys} - expected only:",
+                      extra_details: ValidSaveTriggerTriggers
       end
 
       # Make save_trigger.on_save the default for on_create and on_update
@@ -453,8 +461,15 @@ module OptionConfigs
         # for each of the valid_configs
         self.field_configs ||= {}
         self.field_configs = self.field_configs.symbolize_keys
-
+        failed = false
         field_configs.each do |fname, fconfig|
+          unless fconfig&.is_a? Hash
+            failed_config :field_configs, "field '#{fname}' is not a Hash"
+            failed = true
+            self.field_configs[fname] = {}
+            next
+          end
+
           ValidFieldConfigs.each do |vc|
             # For each of the ValidFieldConfigs, add the corresponding definition to the
             #  named attribute
@@ -471,12 +486,15 @@ module OptionConfigs
           end
         end
 
+        return if failed
+
       end
 
       # Build the list of errors from the explicitly defined field_configs
       efs = field_configs.keys.map(&:to_s) - fla
       if efs.present?
-        failed_config :field_configs, "field_configs includes fields that are not in the field list: #{efs}"
+        failed_config :field_configs, 'field_configs includes fields that are not in the field list:',
+                      extra_details: efs
       end
 
       field_configs.each do |fname, fconfig|
@@ -484,7 +502,8 @@ module OptionConfigs
         next if extra_keys.empty?
 
         failed_config :field_configs,
-                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only #{ValidFieldConfigs}"
+                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only:",
+                      extra_details: ValidFieldConfigs
       end
 
       # Now that the field_configs errors have been checked for the explicitly definition,
@@ -516,13 +535,17 @@ module OptionConfigs
     # Check if any of the configs were bad
     # This should be extended to provide additional checks when options are saved
     # @todo - work out why the "raise" was disabled and whether it needs changing
-    def self.raise_bad_configs(option_configs)
-      ces = all_option_configs_errors(option_configs)
+    def self.raise_bad_configs(object_instance_or_config)
+      ces = all_option_configs_errors(object_instance_or_config)
       return unless ces
 
       Rails.logger.warn("Bad #{name} configurations: #{ces}")
-      raise FphsException, "Bad configurations in #{name}"
+      raise FphsOptionsBadConfig, "Bad configurations in #{name}"
       ces
+    end
+
+    def self.bad_configs?(object_instance_or_config)
+      !!all_option_configs_errors(object_instance_or_config)
     end
 
     #
@@ -552,8 +575,8 @@ module OptionConfigs
             puts errtext
           end
 
-          bt = e.backtrace + [errtext]
-          raise e, "#{e.message} -- see end of stacktrace for failed configuration YAML", bt
+          bt = ["#{e.class.name} #{e}"] + [errtext]
+          raise FphsOptionsParseError, "#{e.class.name} #{e} -- review failed configuration YAML", bt
         end
       else
         res = {}
@@ -698,9 +721,13 @@ module OptionConfigs
       ci = ref_config[key]
       return default_if_no_config unless ci
 
-      Rails.logger.debug "Checking calc_reference_if with #{key} on #{obj} with #{ci}"
       ca = ConditionalActions.new ci, obj
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_reference_if with #{key} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_reference_if condition - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     #
@@ -714,10 +741,13 @@ module OptionConfigs
       raise FphsException, "invalid calc_if key #{key}" unless key.in?(ValidCalcIfKeys)
 
       config = send(key)
-
-      Rails.logger.debug "Checking calc_if with #{key} on #{obj} with #{config}"
       ca = ConditionalActions.new config, obj
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_if with #{key} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_if condition - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     #
@@ -736,6 +766,11 @@ module OptionConfigs
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if
+    rescue StandardError => e
+      Rails.logger.error "Error occurred while checking calc_valid_if with #{action_type} on #{obj} user #{obj.current_user}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsCalcConditionError,
+            "Error occurred while checking calc_valid_if condition on #{action_type} - user #{obj.current_user} - time #{Time.now}: #{e}"
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
