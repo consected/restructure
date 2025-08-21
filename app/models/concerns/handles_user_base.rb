@@ -212,6 +212,10 @@ module HandlesUserBase
       table_name.to_s
     end
 
+    def base_route_short_name
+      table_name.to_s
+    end
+
     # The base string for route names
     # For example `send("new_#{base_route_name}_path")` returns the path
     # to the "new" controller action

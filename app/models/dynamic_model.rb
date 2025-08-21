@@ -49,6 +49,10 @@ class DynamicModel < ActiveRecord::Base
     table_name.singularize
   end
 
+  def item_type_name
+    "dynamic_model__#{implementation_model_name}"
+  end
+
   #
   # All fields used by the implementation are either specified in the field list
   # or if empty, the fields are pulled from the underlying table fields, removing

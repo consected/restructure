@@ -1,7 +1,7 @@
 <script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="new-button-container">
     <div class="text-center">
-      <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{pluralize name}}/new"
+      <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{base_route_segments}}/new"
           data-toggle="scrollto-result"
           data-target="#{{hyphenate name}}-{{../master_id}}-" 
           data-remote="true"
@@ -19,7 +19,7 @@
 
       {{#unless prevent_create}}
         {{#unless view_options.only_create_as_reference}}
-          {{>common_template_list_new_button_container master_id=../master_id}}
+          {{>common_template_list_new_button_container master_id=../master_id base_route_segments=base_route_segments}}
         {{/unless}}
       {{/unless}}
 

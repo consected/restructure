@@ -67,6 +67,10 @@ class ExternalIdentifier < ActiveRecord::Base
     model_association_name.to_s
   end
 
+  def base_route_short_name
+    model_association_name
+  end
+
   def self.routes_load
     mn = nil
     begin
@@ -304,14 +308,14 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def name_format_correct
-    errors.add :name, "must not be #{name}" if name.downcase == 'externals' || name.downcase == 'exts'
+    errors.add :name, "must not be #{name}" if ['externals', 'exts'].include?(name.downcase)
     errors.add :name, 'must be a lowercase, underscored, DB table name' unless name.downcase.ns_underscore == name
     unless name.to_sym == model_association_name
       errors.add :name, 'not acceptable - must be plural and avoid numbers after underscores in names'
     end
 
     # Unfortunately we have clash in the existing scantrons naming. Ignore this case and work around as necessary.
-    if (external_id_attribute == "#{name.singularize}_id" || external_id_attribute == 'external_id') &&
+    if ["#{name.singularize}_id", 'external_id'].include?(external_id_attribute) &&
        name.downcase != 'scantrons'
       errors.add :external_id_attribute,
                  "must not be named #{external_id_attribute} or external_id. " \
