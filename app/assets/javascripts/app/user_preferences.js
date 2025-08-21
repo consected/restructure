@@ -32,4 +32,8 @@ class UserPreferences {
     static timezone() {
         return _fpa.state.current_user_preference.timezone_iana;
     }
+
+    static timezone_human() {
+        return _fpa.state.current_user_preference.timezone;
+    }
 }

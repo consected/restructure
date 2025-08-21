@@ -6,7 +6,9 @@
   <%= link_to "switch to the <b>Ref Data</b>".html_safe, 
               redcap_project_admins_path(
                 no_redirect: true, 
-                # use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
+                use_app_type: 'ref-data',
+                filter: {id: object_instance.id},
+                perform_action: 'edit'
               ) %>
   project to view the stored REDCap files</p>
 <% elsif object_instance&.file_store&.id %>

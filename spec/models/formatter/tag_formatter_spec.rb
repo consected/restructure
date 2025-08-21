@@ -95,6 +95,8 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:date_time_with_zone, date_time, '10/12/1989 1:43 pm', @ldn_user],
       [:date_time_with_zone, date_time_early, '12/10/1989 2:43 am'],
       [:date_time_with_zone, date_time_early, '10/12/1989 2:43 am', @ldn_user],
+      [:date_time_with_zone, date_time_est, '12/10/1989 1:43 pm'],
+      [:date_time_with_zone, date_time_est, '10/12/1989 1:43 pm', @ldn_user],
       [:date_time_show_zone, date_time, '12/10/1989 8:43 am Eastern Time (US & Canada)'],
       [:date_time_show_zone, date_time, '10/12/1989 1:43 pm London', @ldn_user],
       [:date_time_show_zone, date_time_early, '12/09/1989 9:43 pm Eastern Time (US & Canada)'],

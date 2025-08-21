@@ -177,7 +177,7 @@ module Formatter
                                            keep_date: true)
     end
 
-    # Time only including hours:minutes
+    # Time only including hours:minutes in the user's timezone
     def time(_res, orig_val)
       Formatter::TimeWithZone.format(orig_val, current_user: current_user,
                                                time_only: true)
