@@ -1,0 +1,2 @@
+class FphsOptionsGeneralError < StandardError
+end

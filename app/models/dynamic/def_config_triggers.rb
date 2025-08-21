@@ -28,18 +28,18 @@ module Dynamic
     end
 
     def self.process(dynamic_def)
-      return if dynamic_def.disabled? || !dynamic_def.ready_to_generate?
+      return if dynamic_def.disabled? || !dynamic_def.ready_to_generate? || dynamic_def.failed_option_configs?
 
       inst = new(dynamic_def)
       return unless inst.app_type
-      
+
       inst.handle_all_option_configs
 
       dynamic_def.force_option_config_parse
     end
 
     def handle_all_option_configs
-      option_configs.each do |option_config|        
+      option_configs.each do |option_config|
         create_defaults(option_config)
         create_configs(option_config)
       end
@@ -54,9 +54,9 @@ module Dynamic
 
     def on_defines(option_config)
       config_trigger = option_config&.config_trigger
-        return [] unless config_trigger
+      return [] unless config_trigger
 
-        config_trigger[:on_define]
+      config_trigger[:on_define]
     end
 
     def create_defaults(option_config)
@@ -72,15 +72,14 @@ module Dynamic
       end
     end
 
-    def create_configs(option_config)      
+    def create_configs(option_config)
       on_defines(option_config).each do |on_define|
         config = on_define[:create_configs]
         next unless config
 
         create_config(config, option_config)
-      end      
+      end
     end
-
 
     def setup(config)
       uac = config[:user_access_control] || {}

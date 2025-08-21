@@ -1,0 +1,2 @@
+class FphsOptionsBadConfig < StandardError
+end
