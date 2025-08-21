@@ -67,6 +67,10 @@ class ExternalIdentifier < ActiveRecord::Base
     model_association_name.to_s
   end
 
+  def base_route_short_name
+    model_association_name
+  end
+
   def self.routes_load
     mn = nil
 
