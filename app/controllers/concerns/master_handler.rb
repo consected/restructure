@@ -231,18 +231,20 @@ module MasterHandler
   # The method may be overridden by actual controllers
   # @return [Hash]
   def edit_form_extras
-    dopt = object_instance.class.default_options
+    dopt = @option_type_config || object_instance.class.default_options
     if dopt
       cb = dopt.caption_before
       l = dopt.labels
       db = dopt.dialog_before
+      vo = dopt.view_options
     end
 
     {
       caption: object_instance.human_name,
       caption_before: cb,
       labels: l,
-      dialog_before: db
+      dialog_before: db,
+      view_options: vo
     }
   end
 
@@ -297,7 +299,7 @@ module MasterHandler
   end
 
   def check_editable?
-    handle_option_type_config if action_name == 'edit' && respond_to?(:handle_option_type_config, true)
+    handle_option_type_config if action_name == 'edit' && respond_to?(:handle_option_type_config)
     return if object_instance.allows_current_user_access_to?(:edit)
 
     not_editable
@@ -305,7 +307,7 @@ module MasterHandler
   end
 
   def check_creatable?
-    handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config, true)
+    handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config)
     return if current_admin_sample || object_instance.allows_current_user_access_to?(:create)
 
     Rails.logger.warn "This item is not creatable: #{object_instance.class.name} - #{object_instance&.attributes}"
@@ -402,12 +404,15 @@ module MasterHandler
     id = params[:id]
     found_inst = primary_model.find_by_id_or_secondary_key(id)
     set_object_instance found_inst
+
+    handle_option_type_config if respond_to?(:handle_option_type_config)
+
     if primary_model.no_master_association
-      object_instance.current_user = current_user 
+      object_instance.current_user = current_user
     elsif object_instance.master.nil?
-      raise FphsException, "No master set for item"
+      raise FphsException, 'No master set for item'
     else
-      object_instance.master.current_user = current_user 
+      object_instance.master.current_user = current_user
     end
     @id = object_instance.id
   end
@@ -463,6 +468,10 @@ module MasterHandler
     end
     build_with[:skip_presets] = 'preset_fields' if action_name != 'new'
     build_with[:current_admin_sample] = true if current_admin_sample
+    unless @is_activity_log_option_type || !respond_to?(:handle_option_type_config)
+      handle_option_type_config
+      build_with[:option_type] = @option_type_name
+    end
     set_object_instance @master_objects.build(build_with)
 
     if set_master_on_build
