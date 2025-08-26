@@ -14,6 +14,28 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.28.0] - 2025-08-21
+
+### From Viva - PR #646 - 2025-08-21
+
+- [Fixed] comparison of user_role in user access controls when role names are '' and nil
+- [Fixed] conditional calculation failures shouldn't show so much info to end users - fixes #643
+- [Changed] exception handling for dynamic def route generation
+- [Changed] dynamic def config triggers to avoid running if the option configs are invalid
+- [Fixed] failing to start server if dynamic definition yaml options contain error during parse - fixes #633
+- [Changed] reporting of option config errors and report any errors during cleaning with a separate exception class
+- [Changed] option error display in admin panels
+- [Added] new exception types specific to options
+- [Added] ability to report yaml parsing issues directly in admin panel
+- [Changed] handling of dynamic definition configuration setup to avoid unnecessary exceptions
+
+### From Viva - PR #645 - 2025-08-21
+
+- [Fixed] Admin users without specific capabilities shouldn't be shown links in app type components sidebar or page - fixes #636
+- [Fixed] changes to user or admin not reflected in cached partials
+
+## [9.27.0] - 2025-08-20
+
 ### From FPHS - PR #642 - 2025-08-20
 
 - [Added] script to get CHANGELOG.md entries from git and fixed the release_and_build.sh script to use it - fixes #641
