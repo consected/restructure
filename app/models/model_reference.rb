@@ -46,12 +46,19 @@ class ModelReference < ActiveRecord::Base
   # Create an item referenced from a specific from_item
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with(from_item, to_item, force_create: false)
+    if to_item.respond_to?(:master_id)
+      to_record_master_id = to_item.master_id
+      master_user = to_item.master_user
+    end
+
+    master_user ||= from_item.current_user
+
     m = ModelReference.where from_record_type: from_item.class.name,
                              from_record_id: from_item.id,
                              from_record_master_id: from_item.master_id,
                              to_record_type: to_item.class.name,
                              to_record_id: to_item.id,
-                             to_record_master_id: to_item.master_id
+                             to_record_master_id: to_record_master_id
 
     return unless m.limit(1).empty?
 
@@ -61,22 +68,29 @@ class ModelReference < ActiveRecord::Base
                            from_record_master_id: from_item.master_id,
                            to_record_type: to_item.class.name,
                            to_record_id: to_item.id,
-                           to_record_master_id: to_item.master_id,
-                           user: to_item.master_user,
-                           current_user: to_item.master_user,
+                           to_record_master_id: to_record_master_id,
+                           user: master_user,
+                           current_user: master_user,
                            force_create:
   end
 
   # Create a reference from a master only, not an individual item.
   def self.create_from_master_with(from_master, to_item, force_create: false)
+    if to_item.respond_to?(:master_id)
+      to_record_master_id = to_item.master_id
+      master_user = to_item.master_user
+    end
+
+    master_user ||= from_master.current_user
+
     ModelReference.create! from_record_type: nil,
                            from_record_id: nil,
                            from_record_master_id: from_master.id,
                            to_record_type: to_item.class.name,
                            to_record_id: to_item.id,
-                           to_record_master_id: to_item.master_id,
-                           user: to_item.master_user,
-                           current_user: to_item.master_user,
+                           to_record_master_id: to_record_master_id,
+                           user: master_user,
+                           current_user: master_user,
                            force_create:
   end
 
@@ -497,7 +511,7 @@ class ModelReference < ActiveRecord::Base
       raise FphsException, "Model Reference (#{id}) 'to record' not found: #{to_record_class} #{to_record_id}"
     end
 
-    @to_record.current_user ||= current_user
+    @to_record.current_user ||= current_user if @to_record.respond_to?(:current_user=)
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
   end

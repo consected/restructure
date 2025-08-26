@@ -931,15 +931,13 @@ RSpec.describe SaveTriggers::SaveTriggersBase, type: :model do
       al_def.reload
       al_def.force_option_config_parse
 
-      unless al_def.option_configs_names == %i[batch_trigger_test_1 batch_trigger_test_2 batch_trigger_scheduled primary blank_log]
-        Application.refresh_dynamic_defs
-      end
+      Application.refresh_dynamic_defs unless al_def.option_configs_names == %i[batch_trigger_test_1 primary blank_log]
 
       setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__batch_trigger_test_1, resource_type: :activity_log_type, access: :create, user: @user
-      setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
+      # setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
       expect(@user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_phone__batch_trigger_test_1)).to be_truthy
       al_def.add_master_association
 
@@ -1008,7 +1006,7 @@ RSpec.describe SaveTriggers::SaveTriggersBase, type: :model do
       al_def.reload
       al_def.force_option_config_parse
 
-      unless al_def.option_configs_names == %i[batch_trigger_test_1 batch_trigger_test_2 batch_trigger_scheduled primary blank_log]
+      unless al_def.option_configs_names == %i[batch_trigger_test_1 batch_trigger_scheduled primary blank_log]
         Application.refresh_dynamic_defs
       end
 
@@ -1016,7 +1014,7 @@ RSpec.describe SaveTriggers::SaveTriggersBase, type: :model do
       setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__batch_trigger_test_1, resource_type: :activity_log_type, access: :create, user: @user
-      setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
+      # setup_access :activity_log__player_contact_phone__batch_trigger_test_2, resource_type: :activity_log_type, access: :create, user: @user
       expect(@user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_phone__batch_trigger_test_1)).to be_truthy
       al_def.add_master_association
 

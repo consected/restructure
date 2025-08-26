@@ -5,9 +5,8 @@ module Redcap
   # Each request to the API is recorded in the table for audit. Additionally,
   # background Redcap record storage is also captured.
   class ClientRequest < Admin::AdminBase
-    include AdminHandler
-
     self.table_name = 'redcap_client_requests'
+    include AdminHandler
 
     belongs_to :redcap_project_admin, class_name: 'Redcap::ProjectAdmin'
 
@@ -18,6 +17,8 @@ module Redcap
     attr_accessor :disabled
 
     scope :limited_index, -> { limit 100 }
+    # Since we don't want to absolutely trust the system not to attempt to pull millions of records.
+    default_scope -> { limit 1000 }
 
     def invalidate_cache
       logger.debug "Not invalidating cache (#{self.class.name})"

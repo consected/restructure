@@ -139,7 +139,8 @@ module Dynamic
       return if @ran_migration || !allow_migrations
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
-      option_configs(force: true)
+      result = option_configs(force: true, return_value_on_error: nil)
+      return unless result
 
       # Return if there is nothing to update
       return unless (!config_view_sql && migration_generator.migration_update_table) ||

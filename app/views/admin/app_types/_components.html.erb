@@ -39,6 +39,7 @@
         title_hyph = title.id_hyphenate
         init_link_class = 'collapsed'
         init_panel_class = ''
+        next unless current_admin.can_admin?(kclean)
       %>
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="<%="app-type-component-heading--#{title_hyph}"%>">

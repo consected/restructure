@@ -28,10 +28,10 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     setup_access :activity_log__player_contact_phones
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
     @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'

@@ -28,7 +28,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       create_admin
       create_user
       setup_access :trackers
-      setup_access :tracker_history
+      setup_access :tracker_histories
 
       import_bulk_msg_app
       dm = DynamicModel::ZeusBulkMessage.definition
@@ -256,7 +256,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       create_admin
       create_user
       setup_access :trackers
-      setup_access :tracker_history
+      setup_access :tracker_histories
       @ext = ExternalIdentifier.active.first.implementation_class
       @dm = setup_test_no_master_dm_rec_dynamic_model_alt_id @ext.resource_name
     end
@@ -285,7 +285,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       create_admin
       create_user
       setup_access :trackers
-      # setup_access :tracker_history
+      # setup_access :tracker_histories
       @dm = setup_test_no_user_id_field_on_table
 
       expect(@dm.implementation_class).to eq DynamicModel::NoUserIdTableRec

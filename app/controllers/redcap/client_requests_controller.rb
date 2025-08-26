@@ -34,8 +34,11 @@ class Redcap::ClientRequestsController < AdminController
     'admin/common_templates'
   end
 
+  # Although logically it may make more sense to sort by updated_at,
+  # we need to sort by id to take advantage of database indexing on
+  # possibly massive tables.
   def default_index_order
-    { updated_at: :desc }
+    { id: :desc }
   end
 
   def primary_model

@@ -38,7 +38,7 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
     allow(User).to receive(:batch_user) { @user }
     @batch_user = User.use_batch_user(Settings.bulk_msg_app)
 
-    setup_access :tracker
+    setup_access :trackers
     let_user_create :trackers
     let_user_create :tracker_histories
     let_user_create :player_contacts

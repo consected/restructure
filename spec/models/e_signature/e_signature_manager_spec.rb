@@ -8,6 +8,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignImportConfig
 
   before :example do
+    expect(ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')).to be true
     ESignImportConfig.import_config
     setup_config
     aldef = ActivityLog::PlayerInfoESign.definition
@@ -27,7 +28,6 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     create_master
 
     setup_access_as :user
-
     setup_access_as :user, for_user: @user_0
 
     add_user_to_role 'nfs_store group 600'
@@ -56,6 +56,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe 'creation of a document to sign when a user creates the signature activity' do
     before :each do
+      @player_info = nil
       @al = create_item(no_model_to_sign: true, alt_elt: 'auto_create')
 
       @auto_al = @al.class.find_by(extra_log_type: 'auto_create_and_sign', master_id: @al.master_id)

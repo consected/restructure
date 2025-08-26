@@ -42,7 +42,7 @@ RSpec.describe 'Performance', type: :model do
     create_user
     create_admin
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
 
     @masters = []
 

@@ -404,17 +404,17 @@ class Admin
     def check_option_configs
       res = []
       valid_associated_activity_logs.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 
       associated_dynamic_models.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 
       associated_external_identifiers.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 

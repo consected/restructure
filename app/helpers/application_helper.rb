@@ -236,10 +236,32 @@ module ApplicationHelper
     }
   end
 
+  def edit_field_label(form, field_name_sym, labels, options_or_remove = nil, options = {})
+    if options_or_remove.is_a? Hash
+      options = options_or_remove
+    else
+      remove = options_or_remove
+    end
+
+    force_default = options.delete(:force_default)
+    label = label_for(field_name_sym, labels, remove, force_default:)
+    return if label == ''
+
+    form.label field_name_sym, label, options
+  end
+
   #
   # Cache key for pregenerated partials
   def partial_cache_key(partial, force_user_or_admin: nil)
-    u = force_user_or_admin || current_user || current_admin
+    raise FphsException, 'Unable to generate partial cache key for blank partial' if partial.blank?
+
+    begin
+      u = force_user_or_admin || current_user || current_admin
+    rescue StandardError => e
+      Rails.logger.error "Error generating partial cache key for #{partial}: #{e.message}"
+      u = User.batch_user
+    end
+
     auth_type = u.class.name
     if u.is_a? User
       apptype = u.app_type_id
@@ -271,13 +293,14 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{u&.updated_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    prev_key = "#{partial}-#{auth_type}-#{u&.id}"
     @@prev_partial_cache_key ||= {}
-    prev = @@prev_partial_cache_key[partial]
+    prev = @@prev_partial_cache_key[prev_key]
     changed = prev != res
     if changed
-      Rails.logger.warn "Partial cache key changed (#{partial}): \nfrom:#{prev}\nto:  #{res}"
-      @@prev_partial_cache_key[partial] = res
+      Rails.logger.warn "Partial cache key changed (#{prev_key}): \nfrom:#{prev}\nto:  #{res}"
+      @@prev_partial_cache_key[prev_key] = res
     end
     res
   end

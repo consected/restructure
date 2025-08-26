@@ -1,0 +1,2 @@
+class FphsCalcConditionError < StandardError
+end
