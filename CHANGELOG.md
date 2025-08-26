@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -238,6 +240,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states
 - [Added] ability to only show listed tabs using `<uri>?only_tabs[<resource_name>]=true## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -460,6 +464,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] masters index history being pushed if the aim is to not prevent a reload
 - [Fixed] caching of apps available to users
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states...` or `?only_tabs[categories]=true## Unreleased
+
+## [9.28.1] - 2025-08-26
 
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
@@ -1207,6 +1213,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Built] and tested release-ready version '9.28.0' - dev repo
 - [Updated] README to include details on merging latest upstream version and test ## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -1431,6 +1439,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states
 - [Added] ability to only show listed tabs using `<uri>?only_tabs[<resource_name>]=true## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -1653,6 +1663,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] masters index history being pushed if the aim is to not prevent a reload
 - [Fixed] caching of apps available to users
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states...` or `?only_tabs[categories]=true## Unreleased
+
+## [9.28.1] - 2025-08-26
 
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
@@ -2399,6 +2411,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Updated] CHANGELOG
 - [Built] and tested release-ready version '9.28.0' - dev repo## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -2623,6 +2637,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states
 - [Added] ability to only show listed tabs using `<uri>?only_tabs[<resource_name>]=true## Unreleased
 
+## [9.28.1] - 2025-08-26
+
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
 - [new] version created 8.2.81
@@ -2845,6 +2861,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Fixed] masters index history being pushed if the aim is to not prevent a reload
 - [Fixed] caching of apps available to users
 - [Added] master panel options to page layouts to allow filtering of resource items by configured filter, or by page URL query params Added master panel options to "show for single master only" and "show for multi master only" so different panels can be shown for different UI states...` or `?only_tabs[categories]=true## Unreleased
+
+## [9.28.1] - 2025-08-26
 
 - [new] version created 8.2.80
 - [Built] and tested release-ready version '8.2.80'
