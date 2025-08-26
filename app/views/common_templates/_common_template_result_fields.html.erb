@@ -14,6 +14,11 @@
     {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
     >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}</li>
+    {{else}}
+      {{log 'caption_before state item not found'}}
+      {{log (underscore name)}}
+      {{log vdef_version}}
+      {{log key}}
     {{/if}}
   {{/if}}
   
@@ -364,7 +369,13 @@
 
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
+{{log "common_template_result_fields"}}
+{{log this}}
+{{log ..}}
   {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
+  {{log 'template config'}}
+  {{log this}}
+  {{log (underscore ../name)}}
   {{> common_template_result_field this_value=../this key=(to_string @key) field_type=(lookup this.field_edit_as_types @key) name=../../name template_config=this result_data=../../result_data}}
   {{/with}}
 
