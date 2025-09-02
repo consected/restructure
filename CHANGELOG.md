@@ -14,9 +14,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.28.2] - 2025-09-01
+## [9.29.0] - 2025-09-02
 
-## [9.28.1] - 2025-08-21
+### From Viva - PR #657 - 2025-09-02
+
+- [Fixed] MIME type comparisons for previewing files in filestore - fixes #656
+
+### From Viva - PR #655 - 2025-09-02
+
+- [Added] better styling to make it more obvious which report tab has been selected - fixes #654
 
 ## [9.28.0] - 2025-08-21
 
