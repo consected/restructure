@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.0] - 2025-09-02
+
 ### From Viva - PR #657 - 2025-09-02
 
 - [Fixed] MIME type comparisons for previewing files in filestore - fixes #656
