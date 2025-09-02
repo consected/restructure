@@ -365,6 +365,12 @@ The easiest way to deal with migrations is to drop the test database and recreat
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
+Parallel testing will attempt to retry any failed tests using a regular non-parallel _rspec_ test, allowing for a clean test run to be performed without manual intervention. If there are no errors at the end of this, then a return code 0 will be the result, allowing to test and build in a single action.
+
+```sh
+app-scripts/parallel_test.sh && app-scripts/release_and_build.sh
+```
+
 ## Pull Requests
 
 Contributions back to upstream ReStructure are much appreciated. Assuming you have forked from <https://github.com/consected/restructure>
@@ -395,6 +401,16 @@ Check the updates and commit
 
 ```sh
 git commit CHANGELOG.md -m 'Updated CHANGELOG' && git push
+```
+
+## Getting the latest version from upstream
+
+To pull the latest version from the upstream ReStructure Github repo, ensure you have committed any changes in the _develop_ branch then run the following to merge the latest version. Where there might be merge conflicts, the merge shows a preference for changes coming from upstream.
+
+```sh
+git remote show upstream > /dev/null || git remote add upstream https://github.com/consected/restructure.git
+git fetch upstream && git checkout develop && git pull && \
+git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit -a -m "Commit" && git push
 ```
 
 ## Future development themes

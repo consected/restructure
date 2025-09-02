@@ -187,9 +187,17 @@ module SecureView
     end
 
     def file_with_extensions?(extensions)
+      test_mime_type = mime_type
+      Rails.logger.warn 'file_with_extensions? mime_type is not set' unless test_mime_type
+
       extensions.each do |ext|
         mt = MIME::Types.type_for("doc.#{ext}")
-        return true if mime_type == mt
+        unless test_mime_type.is_a? MIME::Type
+          Rails.logger.warn "file_with_extensions? for '#{ext}' mime_type is not a MIME::Type"
+          next
+        end
+
+        return true if mt&.include? test_mime_type
       end
       nil
     end
