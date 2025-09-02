@@ -21,6 +21,14 @@ while [ "$1" ]; do
 done
 
 base_branch=${base_branch:=new-master}
+feature_branch="$(git branch --show-current)"
+git checkout ${base_branch} > /dev/null 2>&1 && git pull origin ${base_branch} > /dev/null 2>&1 && \
+git checkout ${feature_branch} > /dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+  echo "Failed to checkout feature branch: ${feature_branch}"
+  exit 1
+fi
 
 oldifs=$IFS
 IFS=$'\n'
