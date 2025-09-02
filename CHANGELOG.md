@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.1] - 2025-09-02
+
 - [Merge] branch '160-valid-if'
 - [Merge] branch '162-field-change'
 - [Fixed] viewing of tag select fields with edit_as alt_options defintion
