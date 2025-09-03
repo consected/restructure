@@ -19,6 +19,19 @@ module ApplicationHelper
     controller_name.singularize.hyphenate
   end
 
+  def full_hyphenated_name
+    return hyphenated_name unless object_instance.class.respond_to? :definition
+
+    object_instance.class.definition.full_item_type_name.hyphenate
+  end
+
+  # For dynamic models using option types, add a URL marker for substitution on the front end
+  def option_type_url_marker
+    return unless object_instance.class.respond_to? :definition
+
+    'OPTION_TYPE-' if object_instance.class.definition.option_type_attr_name
+  end
+
   #
   # Current email is the user or admin if the user is not logged in
   def current_email
@@ -77,7 +90,7 @@ module ApplicationHelper
     class_extras ||= 'pull-right' unless link_text
 
     <<~END_HTML
-      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
+      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{full_hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{full_hyphenated_name}-#{option_type_url_marker}result-template" >#{link_text}</a>
     END_HTML
       .html_safe
   end
@@ -85,7 +98,7 @@ module ApplicationHelper
   #
   # Generate the edit form id for a common template
   def common_edit_form_id
-    "#{hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
+    "#{full_hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
   end
 
   #
@@ -96,9 +109,9 @@ module ApplicationHelper
     res[:remote] = true
     res[:html] ||= {}
     res[:html].merge!(
-      'data-result-target' => "##{hyphenated_name}-#{@master&.id}-#{@id}, " \
-                              "[form-res-id='#{hyphenated_name}-#{@master&.id}-#{@id}']",
-      'data-template' => "#{hyphenated_name}-result-template"
+      'data-result-target' => "##{full_hyphenated_name}-#{@master&.id}-#{@id}, " \
+                              "[form-res-id='#{full_hyphenated_name}-#{@master&.id}-#{@id}']",
+      'data-template' => "#{full_hyphenated_name}-#{option_type_url_marker}result-template"
     )
     res
   end

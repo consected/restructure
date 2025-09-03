@@ -386,7 +386,6 @@ _fpa = {
     if (!options.show_no_result) {
 
       if (template) {
-        console.log('template not set for render_template')
         // Render the result using the template and data
         try {
           var html = template(data);

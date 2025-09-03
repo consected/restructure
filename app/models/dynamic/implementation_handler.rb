@@ -306,6 +306,8 @@ module Dynamic
     end
 
     def set_option_type_attr_name
+      return unless self.class.respond_to? :definition
+
       @option_type_attr_name = self.class.definition.option_type_attr_name
     end
   end
