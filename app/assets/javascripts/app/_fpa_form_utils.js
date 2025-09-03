@@ -274,8 +274,9 @@ _fpa.form_utils = {
 
     if ($els.length) {
       // If any radio buttons replaced select fields, initialize them to trigger show_if items
-      var form_data = _fpa.form_utils.data_from_form(block);
-      _fpa.form_utils.init_edit_form_show_if_triggers(block, form_data);
+      // Don't pass form_data, since the initial value will be used in the on "change" function,
+      // which won't reflect field changes made by the user subsequently.
+      _fpa.form_utils.init_edit_form_show_if_triggers(block);
     }
   },
 
@@ -285,6 +286,8 @@ _fpa.form_utils = {
       const $el = $(this);
       const obj_name = $el.attr('data-object-name');
       const a_name = $el.attr('data-attr-name');
+      // Initialize form_data if not provided.
+      form_data = form_data || _fpa.form_utils.data_from_form(block);
       if (a_name != 'e_signed_how' && form_data[obj_name]) {
         if ($el.attr('type') == 'checkbox') {
           form_data[obj_name][a_name] = $el.is(':checked');
