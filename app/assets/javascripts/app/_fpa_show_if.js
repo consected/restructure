@@ -19,6 +19,9 @@ _fpa.show_if.methods = {
     var form_key = data.full_option_type;
     var def_version = data.def_version
     if (!def_version) {
+      // If the embedded_item flag is not specified, check if the block item class corresponds to the data.
+      // If not, assume that this is an embedded item.
+      embedded_item = embedded_item || (block.attr('data-item-class') !== item_key)
       var block_attr_name = embedded_item ? 'data-embedded-item-def-version' : 'data-def-version';
       def_version = block.attr(block_attr_name);
     }
