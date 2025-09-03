@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.1] - 2025-09-03
+
 ### From Viva - PR #659 - 2025-09-02
 
 - [Fixed] get_changelog_entries_from_git.sh incorrectly lists commits - fixes #658
