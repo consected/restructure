@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #661 - 2025-09-03
+
+- [Fixed] versioned activity logs breaking the versions of embedded items - fixes #660
+
 ### From Viva - PR #659 - 2025-09-02
 
 - [Fixed] get_changelog_entries_from_git.sh incorrectly lists commits - fixes #658
