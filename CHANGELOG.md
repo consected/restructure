@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.4] - 2025-09-03
+
 - [Fixed] select-as-radio-buttons breaking show_ifs when other fields are also involved in the conditions - fixes #663
 
 ## [9.29.3] - 2025-09-03
