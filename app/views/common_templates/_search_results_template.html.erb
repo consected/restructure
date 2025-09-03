@@ -121,7 +121,7 @@
   end
 
   unless defined? edit_button_href
-    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{name.pluralize}/{{this.id}}/edit"
+    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{base_route_segments}/{{this.id}}/edit"
   end
 
   edit_button_href = edit_button_href&.html_safe
@@ -194,6 +194,11 @@
   unless defined? embed
     embed = nil
   end
+
+  unless defined? name_with_option_type
+    name_with_option_type = nil
+  end
+  name_with_option_type ||= name
   
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
@@ -271,19 +276,20 @@
   end
 %>
 
-<script id="fpa_state_config--<%=name.underscore%>--v<%=def_version%>">
+<script id="fpa_state_config--<%=name_with_option_type.underscore%>--v<%=def_version%>">
 
-  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name.underscore%> || {};
-  _fpa.state.caption_before.<%=name.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
-  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name.underscore%> || {};
-  _fpa.state.labels_<%=name.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
+  _fpa.state.caption_before.<%=name_with_option_type.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%> || {};
+  _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name_with_option_type.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%> || {};
+  _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
 
-  _fpa.state.template_config.<%=name.underscore%> = _fpa.state.template_config.<%=name.underscore%> || {};
-  _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>  = {
+  _fpa.state.template_config.<%=name_with_option_type.underscore%> = _fpa.state.template_config.<%=name_with_option_type.underscore%> || {};
+  _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>  = {
     def_version: <%= def_version || 'null' %>,
     vdef_version: '<%= vdef_version %>',
     name: '<%=name%>',
     full_name: '<%=full_name%>',
+    name_with_option_type: '<%= name_with_option_type %>',
     caption: Handlebars.compile('<%=caption%>'),
     button_label: Handlebars.compile('<%=button_label || caption%>'),
     item_class_name: '<%=item_class_name%>',
@@ -329,25 +335,33 @@
     <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',<% end%>
   }
 
-<% unless full_name.underscore.to_s == name.underscore.to_s %>
+<% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
-  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>;
 <% end %>
 
-<% if resource_name && resource_name != name.underscore.to_s && resource_name != full_name.underscore.to_s %>
+<% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
   _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name.underscore%> || {};
   _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
 <% end %>
 
   _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
+  <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+  _fpa.show_if.forms['<%=name_with_option_type%>'] = _fpa.show_if.forms['<%=name_with_option_type%>'] || {};
+  <% end %>
+
   <% if full_name.to_s.end_with?('_primary') %>
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
   <% end %>
   _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+  <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+  _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+  <% end %>
+
   <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == 'default' %>
   _fpa.show_if.forms['<%=full_name%>_default'] = _fpa.show_if.forms['<%=full_name%>'];
-  _fpa.show_if.forms['<%=full_name%>_default'].<%=vdef_version%> = _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%>;
+  _fpa.show_if.forms['<%=full_name%>_default'].<%=vdef_version%> = _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%>;  
   <% end %>
   
 </script>
@@ -384,7 +398,7 @@
     } %>
 
 
-<script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<script id="<%=name_with_option_type.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name%>' result_data=this}}
   {{/with}}

@@ -102,14 +102,22 @@ module Dynamic
     # is set in the _configurations.option_type_attr_name
     def option_type
       option_type_attr_name = self.class.option_type_attr_name
-      send(option_type_attr_name) || 'default' unless option_type_attr_name == :option_type
+      if option_type_attr_name == :option_type
+        @option_type
+      else
+        send(option_type_attr_name) || 'default'
+      end
     end
 
     def option_type=(value)
       option_type_attr_name = self.class.option_type_attr_name
       return unless option_type_attr_name
 
-      send("#{option_type_attr_name}=", value)
+      if option_type_attr_name == :option_type
+        @option_type = value
+      else
+        send("#{option_type_attr_name}=", value)
+      end
     end
 
     def id

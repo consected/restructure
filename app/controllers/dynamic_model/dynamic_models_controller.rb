@@ -60,24 +60,22 @@ class DynamicModel::DynamicModelsController < UserBaseController
   #
   # Setup the option type config for :default
   def handle_option_type_config
-    # Set the option type from the param
-    etp = params[:option_type_name] if current_admin_sample
+    return @option_type_config if @option_type_config
 
     # Find the option type attribute name from the definition _configurations.option_type_attr_name
     impl_class = @implementation_class || object_instance.class
     @option_type_attr_name = impl_class.option_type_attr_name if impl_class.respond_to?(:option_type_attr_name)
     return unless @option_type_attr_name
 
+    # Set the option type from the param if we are using a current admin sample form
+    etp = params[:option_type_name] if current_admin_sample
     # Get the value from the specified attribute name
     etp = object_instance&.send(@option_type_attr_name).to_s.underscore.to_sym if etp.blank?
-
-    # set_item
-
-    unless etp.present? && @implementation_class && @implementation_class.definition.option_configs_names&.include?(etp.to_sym)
-      return
-    end
+    return unless etp.present?
 
     etp = etp.to_sym
+    return unless @implementation_class.definition.option_configs_names&.include?(etp)
+
     @option_type_name = etp
     # Get the options that were current when the form was originally created, or the current
     # options if this is a new instance
