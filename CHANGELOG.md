@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #662 - 2025-09-03
+
+- [Added] broader checks for embedded item def versions
+
 ## [9.29.2] - 2025-09-03
 
 ### From FPHS - PR #661 - 2025-09-03
