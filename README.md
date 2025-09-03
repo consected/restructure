@@ -410,7 +410,7 @@ To pull the latest version from the upstream ReStructure Github repo, ensure you
 ```sh
 git remote show upstream > /dev/null || git remote add upstream https://github.com/consected/restructure.git
 git fetch upstream && git checkout develop && git pull && \
-git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit -a -m "Commit" && git push
+git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit --allow-empty -a -m "Commit" && git push
 ```
 
 ## Future development themes
