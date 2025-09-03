@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.2] - 2025-09-03
+
 ### From FPHS - PR #661 - 2025-09-03
 
 - [Fixed] versioned activity logs breaking the versions of embedded items - fixes #660
