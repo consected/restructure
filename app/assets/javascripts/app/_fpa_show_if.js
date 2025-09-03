@@ -4,7 +4,7 @@ _fpa.show_if = {
 
 _fpa.show_if.methods = {
 
-  show_items: function (block, data) {
+  show_items: function (block, data, embedded_item) {
     if (!block || !data) return;
 
     data.current_user_roles = _fpa.state.current_user_roles;
@@ -12,12 +12,16 @@ _fpa.show_if.methods = {
     if (data.embedded_item) {
       data.embedded_item.current_user_roles = _fpa.state.current_user_roles;
       data.embedded_item.current_mode = data.current_mode;
-      _fpa.show_if.methods.show_items(block, data.embedded_item);
+      _fpa.show_if.methods.show_items(block, data.embedded_item, true);
     }
 
     var item_key = data.item_type;
     var form_key = data.full_option_type;
-    var def_version = data.def_version || block.attr('data-def-version');
+    var def_version = data.def_version
+    if (!def_version) {
+      var block_attr_name = embedded_item ? 'data-embedded-item-def-version' : 'data-def-version';
+      def_version = block.attr(block_attr_name);
+    }
     var vdef_version = 'v';
     if (def_version) vdef_version += def_version;
 

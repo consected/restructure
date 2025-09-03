@@ -72,6 +72,7 @@
        data-human-name="{{>show_result_caption result_data=result_data}}"
        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
        data-def-version="{{def_version}}"
+       data-embedded-item-def-version="{{result_data.embedded_item.def_version}}"
        >
   {{else}}
   <span class="common-template-item-inner index-{{_created}} inner-{{hyphenate name}}-item {{../extra_class}} inner-{{is_activity_log_class}}" >
