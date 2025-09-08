@@ -62,12 +62,10 @@
                 begin
                   Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
                   <option value="<%=i%>"><%=i%></option>
-                <%
-                  rescue StandardError => e
-                    Rails.logger.error "Error loading defined selectors: #{e.message}\n#{e.short_string_backtrace}"
-                    %><option value="error">Error loading defined selectors</option><%
-                  end
-                %>
+                <% end %>
+                <% rescue StandardError => e %>
+                  <option value="error">Error loading defined selectors</option>
+                <% end %>
               </select>
             </div>
           </div>                   
