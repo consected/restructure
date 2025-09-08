@@ -22,8 +22,12 @@ done
 
 base_branch=${base_branch:=new-master}
 feature_branch="$(git branch --show-current)"
-git checkout ${base_branch} > /dev/null 2>&1 && git pull origin ${base_branch} > /dev/null 2>&1 && \
-git checkout ${feature_branch} > /dev/null 2>&1
+if [ ${base_branch} != ${feature_branch} ]; then
+  git checkout ${base_branch} > /dev/null 2>&1 && git pull origin ${base_branch} > /dev/null 2>&1 && \
+  git checkout ${feature_branch} > /dev/null 2>&1
+else
+  git pull origin ${base_branch} > /dev/null 2>&1
+fi
 
 if [ $? -ne 0 ]; then
   echo "Failed to checkout feature branch: ${feature_branch}"
