@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.29.5] - 2025-09-08
+
 - [Fixed] AJAX errors reported to users
 - [Fixed] potential error if dynamic model has no primary key
 - [Fixed] error where errors reported through flash are too large and break max header length for reverse proxy
