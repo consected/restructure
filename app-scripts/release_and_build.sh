@@ -51,7 +51,7 @@ if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
   if [ "${cl_not_ok}" ]; then
     echo "CHANGELOG.md does not have anything entered for the Unreleased section. Will populate it from git log"
-    app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
+    app-scripts/get_changelog_entries_from_git.sh new-master --update-cl
     git commit CHANGELOG.md -m "Updated CHANGELOG.md with git commits" && \
     git push
   fi
