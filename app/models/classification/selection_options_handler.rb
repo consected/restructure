@@ -367,7 +367,7 @@ class Classification::SelectionOptionsHandler
       end
     rescue StandardError => e
       raise FphsException, "Failure getting selector_with_config_overrides(#{conditions}) for implementation: " \
-      "#{impl_class}\n#{e}\n#{e.backtrace.join("\n")}"
+      "#{impl_class}\n#{e}\n#{e.short_string_backtrace}"
     end
 
     res

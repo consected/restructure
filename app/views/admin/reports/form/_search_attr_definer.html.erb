@@ -59,9 +59,15 @@
             <div class="report-admin-sb-field-block">
               <select id="search_attrs_defined_selector" data-attr-el="defined_selector" class="use-chosen">
                 <% 
-                Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
+                begin
+                  Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
                   <option value="<%=i%>"><%=i%></option>
-                <% end %>
+                <%
+                  rescue StandardError => e
+                    Rails.logger.error "Error loading defined selectors: #{e.message}\n#{e.short_string_backtrace}"
+                    %><option value="error">Error loading defined selectors</option><%
+                  end
+                %>
               </select>
             </div>
           </div>                   
