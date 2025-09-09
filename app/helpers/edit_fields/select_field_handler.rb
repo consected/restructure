@@ -190,8 +190,13 @@ module EditFields
       pluck_attrs += val_pluck_attrs
       pluck_attrs.uniq!
       sort_attr = pluck_attrs.first
-
       pluck_attrs_strs = pluck_attrs.map(&:to_s)
+
+      if pluck_attrs.empty? || sort_attr.blank?
+        raise FphsException, "value_attr or label_attr (#{pluck_attrs_strs}) configs are invalid and lead to an " \
+                             'empty set of attributes to retrieve or a blank first attribute for: ' \
+                             "#{reslist.model}: #{reslist.attribute_names} / #{model}"
+      end
 
       if (reslist.attribute_names & pluck_attrs_strs).sort != pluck_attrs_strs.sort
         on_fail_return = FailedValuesArray if on_fail_return == :default
@@ -258,7 +263,9 @@ module EditFields
     def list_for_complex_attributes(reslist)
       return reslist if reslist.empty?
 
-      first_res = reslist.first
+      # NOTE: we use #take rather than #first, since we don't force ordering. #first may break if there is
+      # no primary key defined
+      first_res = reslist.take
       unless first_res.respond_to?(label_attr)
         raise FphsException,
               "SelectFieldHandler generate_record_data with complex attributes: #{first_res.class} does not respond to #{label_attr}"
@@ -271,9 +278,11 @@ module EditFields
       reslist.all
              .map { |i| [i.send(label_attr), i.send(value_attr)] }
              .sort { |x, y| x.first <=> y.first }
-    rescue SystemStackError => e
-      msg = "list_for_complex_attributes fails with #{label_attr} and #{value_attr}: #{e}"
+    rescue StandardError, SystemStackError => e
+      sql = reslist.to_sql if reslist.respond_to?(:to_sql)
+      msg = "list_for_complex_attributes fails with #{label_attr} and #{value_attr}: #{e}\n#{sql}"
       Rails.logger.error msg
+      Rails.logger.error e.short_string_backtrace
       raise FphsException, msg
     end
   end
