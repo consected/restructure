@@ -51,7 +51,7 @@ if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
   if [ "${cl_not_ok}" ]; then
     echo "CHANGELOG.md does not have anything entered for the Unreleased section. Will populate it from git log"
-    app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
+    app-scripts/get_changelog_entries_from_git.sh new-master --update-cl
     git commit CHANGELOG.md -m "Updated CHANGELOG.md with git commits" && \
     git push
   fi
@@ -71,12 +71,15 @@ rm -rf public/assets
 git commit public/assets -m "Cleanup"
 git push
 
+BUILD_DIR=../restructure-build
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
 LASTTAG=$(echo "${ALLTAGS/-dev/}" | head -n1)
 CURRVERINFILE=$(cat ${CURRVERFILE})
 CURRVER=${CURRVERINFILE}
+DEF_RUBY_V_FILE=${BUILD_DIR}/shared/default-ruby-version.sh
+BUILD_VARS_FILE=${BUILD_DIR}/shared/build-vars.sh
 
 if [ "${CURRVERINFILE}" != "${LASTTAG}" ]; then
   echo "Latest version file version ${CURRVER} and latest tag ${LASTTAG} do not match"
@@ -117,7 +120,9 @@ RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
-source ../restructure-build/shared/build-vars.sh
+cat .ruby-version > ${DEF_RUBY_V_FILE}
+
+source ${BUILD_VARS_FILE}
 if [ -z "${RUBY_V}" ]; then
   RUBY_V="$(cat .ruby-version)"
 fi
@@ -199,7 +204,7 @@ if [ $? != 0 ]; then
 fi
 
 echo "Starting build container"
-cd ../restructure-build
+cd ${BUILD_DIR}
 ./build.sh ${build_arg} ${UPVLEVEL}
 if [ $? != 0 ]; then
   echo "***** build.sh failed with exit code $? *****"
