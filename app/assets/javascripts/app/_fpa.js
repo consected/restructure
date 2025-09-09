@@ -973,11 +973,29 @@ _fpa = {
             } else if (xhr.responseText && xhr.responseText[0] != '<') {
               msg = xhr.responseText;
             } else {
-              if (xhr.status == 502 || xhr.status == 503) {
-                msg = 'The server is currently unavailable. Please wait 60 seconds then try again.';
-              }
-              else {
-                msg = 'An error occurred. Possibly the server is currently unavailable. Please wait 60 seconds then try again';
+              switch (xhr.status) {
+                case 502:
+                case 503:
+                  msg = 'The server is currently unavailable. Please wait 60 seconds then try again.';
+                  break;
+                case 500:
+                  msg = 'The server reported an error. Please contact the administrator if this continues.';
+                  break;
+                case 400:
+                  msg = 'A bad request was made.';
+                  break;
+                case 401:
+                  msg = 'Unauthorized access to the requested resource. Please ensure you are logged in or have the necessary permissions.';
+                  break;
+                case 403:
+                  msg = 'Forbidden access to the requested resource. Please refresh the page and try again.';
+                  break;
+                case 404:
+                  msg = 'The requested resource could not be found.';
+                  break;
+                default:
+                  msg = 'An error occurred. Possibly the server is currently unavailable. Please wait 60 seconds then try again';
+                  break;
               }
             }
             console.error(`message - ${msg}`)

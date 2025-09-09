@@ -29,6 +29,15 @@ module AppExceptionHandler
   protected
 
   #
+  # Consistent flash handling, to avoid long messages from
+  # overloading the header length passed to the client.
+  # @param [String] message The message to display
+  # @param [Symbol] level The flash level (e.g. :info, :warning, :danger)
+  def flash_this_now(message, level = :info)
+    flash.now[level] = message.to_s[0..2000]
+  end
+
+  #
   # General method for showing errors, either as plain text or as an error page
   def show_error(title, status, text: nil, flash_level: nil)
     text = text.to_s[0..2000] if text
@@ -38,7 +47,7 @@ module AppExceptionHandler
       @error_title = title
       render 'layouts/error_page', status:, locals: { text: }
     else
-      flash.now[flash_level] = title
+      flash_this_now(title, flash_level)
       msg = title
       msg = "#{title} - #{text}" if text
       render plain: msg, status:
@@ -58,7 +67,7 @@ module AppExceptionHandler
   end
 
   def not_found
-    flash.now[:danger] = 'Requested information not found'
+    flash_this_now('Requested information not found', :danger)
     routing_error_handler ActionController::RoutingError.new('Not Found')
   end
 
@@ -165,7 +174,7 @@ module AppExceptionHandler
     end
 
     if performed?
-      flash.now[:danger] = msg[0..2000]
+      flash_this_now(msg[0..2000], :danger)
       return true
     end
     errors = { error: [msg] }
@@ -186,15 +195,14 @@ module AppExceptionHandler
       end
       # special handling for CSV failures as they open new windows
       type.csv do
-        flash[:danger] = msg[0..2000]
+        flash_this_now(msg, :danger)
         redirect_to child_error_reporter_path
       end
       type.all do
         render plain: msg, status: code, content_type: 'text/plain'
       end
-    end    
+    end
     true
-
   rescue ActionController::RespondToMismatchError => e
     # This error is raised when the response format does not match any of the requested formats.
     # Catch it so we can send a useful response.

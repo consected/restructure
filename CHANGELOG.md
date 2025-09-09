@@ -14,9 +14,36 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.29.1] - 2025-09-02
+## [9.30.0] - 2025-09-09
 
-- [Fixed] CHANGELOG
+### From FPHS - PR #667 - 2025-09-09
+
+- [Fixed] AJAX errors reported to users
+- [Fixed] potential error if dynamic model has no primary key
+- [Fixed] error where errors reported through flash are too large and break max header length for reverse proxy
+- [Fixed] errors that prevented report attribute configuration editor from loading - fixes #667
+- [Changed] build scripts to correctly use the Ruby version from the codebase.
+- [Fixed] bad creation of CHANGELOG entries
+
+### From FPHS - PR #664 - 2025-09-03
+
+- [Fixed] select-as-radio-buttons breaking show_ifs when other fields are also involved in the conditions - fixes #663
+
+### From FPHS - PR #662 - 2025-09-03
+
+- [Added] broader checks for embedded item def versions
+
+### From FPHS - PR #661 - 2025-09-03
+
+- [Fixed] versioned activity logs breaking the versions of embedded items - fixes #660
+
+### From Viva - PR #659 - 2025-09-02
+
+- [Fixed] get_changelog_entries_from_git.sh incorrectly lists commits - fixes #658
+
+### Local Change - 2025-09-02
+
+- [Changed] details on committing merge for latest release
 
 ## [9.29.0] - 2025-09-02
 
