@@ -120,7 +120,7 @@ RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
-cat .ruby-version > ${DEF_RUBY_V_FILE}
+echo "export RUBY_V=$(cat .ruby-version)" > ${DEF_RUBY_V_FILE}
 
 source ${BUILD_VARS_FILE}
 if [ -z "${RUBY_V}" ]; then
