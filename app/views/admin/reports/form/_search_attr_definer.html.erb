@@ -59,8 +59,12 @@
             <div class="report-admin-sb-field-block">
               <select id="search_attrs_defined_selector" data-attr-el="defined_selector" class="use-chosen">
                 <% 
-                Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
+                begin
+                  Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
                   <option value="<%=i%>"><%=i%></option>
+                <% end %>
+                <% rescue StandardError => e %>
+                  <option value="error">Error loading defined selectors</option>
                 <% end %>
               </select>
             </div>
