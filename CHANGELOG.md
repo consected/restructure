@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.0] - 2025-09-09
+
 ### From FPHS - PR #667 - 2025-09-09
 
 - [Fixed] AJAX errors reported to users
