@@ -14,11 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.30.3] - 2025-09-09
-
-## [9.30.2] - 2025-09-09
-
 ## [9.30.1] - 2025-09-09
+
+### From Viva - 2025-09-09
+
+- [Fixed] release_and_build.sh to correctly set the default ruby version
 
 ## [9.30.0] - 2025-09-09
 
