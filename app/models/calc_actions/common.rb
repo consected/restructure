@@ -104,6 +104,8 @@ module CalcActions
       cond_changes = res_conds.dup
 
       res_conds.each do |t, res|
+        next unless res.is_a?(Hash) && res.present?
+
         field = res.first.first
         conf = @condition_config.first.last
         val_msg = conf[field] if conf.is_a?(Hash)
