@@ -14,7 +14,19 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.29.5] - 2025-09-08
+### From FPHS - PR #682 - 2025-09-18
+
+- [Fixed] valid_if condition with `masters: {}` causes error - fixes #681
+
+## [9.30.1] - 2025-09-09
+
+### From Viva - 2025-09-09
+
+- [Fixed] release_and_build.sh to correctly set the default ruby version
+
+## [9.30.0] - 2025-09-09
+
+### From FPHS - PR #667 - 2025-09-09
 
 - [Fixed] AJAX errors reported to users
 - [Fixed] potential error if dynamic model has no primary key
@@ -23,17 +35,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Changed] build scripts to correctly use the Ruby version from the codebase.
 - [Fixed] bad creation of CHANGELOG entries
 
-## [9.29.4] - 2025-09-03
+### From FPHS - PR #664 - 2025-09-03
 
 - [Fixed] select-as-radio-buttons breaking show_ifs when other fields are also involved in the conditions - fixes #663
-
-## [9.29.3] - 2025-09-03
 
 ### From FPHS - PR #662 - 2025-09-03
 
 - [Added] broader checks for embedded item def versions
-
-## [9.29.2] - 2025-09-03
 
 ### From FPHS - PR #661 - 2025-09-03
 
