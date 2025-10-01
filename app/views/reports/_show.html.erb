@@ -40,7 +40,7 @@
   </div>
 </div>
 <%= render partial: 'criteria_view_css' %>
-<% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
+<% if @report.returns_master_results_list %><%= render partial: 'reports/master_results_css' %><% end %>
 <div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" class="report-results-outer is-<%= embedded_report ? '' : 'not-' %>embedded-report">
   <% if @results %>
     <%= render partial: 'results' %>
