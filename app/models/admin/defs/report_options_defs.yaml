@@ -14,7 +14,11 @@ view_options:
 
   hide_search_button: false (default) | true
   # Don't show the report search button - the report will not be
-  # searchable unless it auto runs.
+  # searchable unless it auto runs or is "searchable"
+
+  hide_master_results_list_search_button: false (default) | true
+  # Don't show the master search results search button - the report will not be
+  # searchable unless it auto runs or runs as a table
 
   hide_export_buttons: false (default) | true
   # Don't show the export (csv, json) buttons even if a

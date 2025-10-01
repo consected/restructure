@@ -3,6 +3,7 @@
 @btn_class = !@click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
 @view_options = @report.report_options.view_options
 @hidden_class = !@report_criteria && @report.auto && !@view_options&.force_show_search_button ? 'hidden' : ''
+@mrl_search_hidden_class = !@report_criteria && @report.auto && !@view_options&.force_show_search_button || @view_options&.hide_master_results_list_search_button ? 'hidden' : ''
 @auto_submitter_class = (!@report_page || @view_options&.report_auto_submit_on_change) && @view_options&.report_auto_submit_on_change != false ? 'auto-submitter' : ''
 @auto_run_class = !@report_page && @report.auto || @force_run ? 'auto-run' : nil
 %>
