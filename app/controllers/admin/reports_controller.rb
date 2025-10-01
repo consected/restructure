@@ -44,4 +44,8 @@ class Admin::ReportsController < AdminController
     %i[id name item_type primary_table sql description disabled report_type auto searchable position search_attrs
        edit_model edit_field_names selection_fields short_name options]
   end
+
+  def index_params
+    %i[name item_type category report_type auto searchable admin_id]
+  end
 end
