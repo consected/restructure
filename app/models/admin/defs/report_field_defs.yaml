@@ -1,0 +1,21 @@
+Name: |
+  name shown in Reports list and searchable tabs
+  
+Short name: |
+  identifier for the report, combined with Category to generate the full item type name used in URLs
+
+Report type: |
+  how the report will run and show results.
+
+  - *count*: will attempt to wrap the SQL to make it into a `select count(*) from ...` query and just display the result
+  - *regular_report*: typically returns a table, or whatever other formatting is specified in the option `view_options.view_as`
+  - *search*: displays the result as a master record list (NOTE: the SQL must return a `master_id` column)
+
+Searchable: |
+  present the report as a search tab on the user home page.
+
+  NOTE: if the *Report type* is set to *regular_report* then the report can be run as a standard tabular report from the
+  Reports list and a master results list from the search tabs. The SQL must return a `master_id` column
+
+
+
