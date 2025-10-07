@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.3] - 2025-10-07
+
 ### From FPHS - PR #688 - 2025-10-07
 
 - [Fixed] Redcap import_records returning an array with a single string - fixes #687
