@@ -6,10 +6,12 @@ module Redcap
     # Set up the redcap configurations and webmocks
     # Ensure server is in the credentials file: `VISUAL=nano rails credentials:edit`
     # During setup, use `WebMock.allow_net_connect!` in rails_helper.rb
-    # @param [true|nil] mocks - moke the requests
+    # @param [true|nil] mocks - mock the requests
     # @param [String] only_project - only set up a specific project
     def setup_redcap_project_admin_configs(mocks: true, only_project: nil)
       setup_file_store
+
+      mocks = false if ENV['NO_REDCAP_MOCKS'] == 'true'
 
       projects = redcap_project_configs(mocks:)
 
