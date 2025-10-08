@@ -7,7 +7,7 @@
 
 # Any key: value pairs set here will be included in the object for use within
 # runtime `\{\{constants.constant_name\}\}` substitutions
-_contants:
+_constants:
   constant_name: a value
 
 # Add table and field comments to the underlying database.
