@@ -16,6 +16,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
 
+### From FPHS - PR #694 - 2025-10-14
+
+- [Fixed] small documentation issues
+- [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
+- [Added] ability for embedded reports to run within models for backend substitutions to function
+- [Added] environment variables to control spec webmocks and Redcap API mocks
+- [Changed] presentation of report admin index
+- [Fixed] master list "search" button can't be hidden with the current hide_search_button option - fixes #686
+- [Added] url search attributes section to report admin info block
+- [Fixes] report_type=search and searchable checkbox seem to affect the display of the master results block differently - fixes #685
+- [Added] extra documentation for report admin
+- [Changed] handling of field popovers to allow markdown formatting
+- [Changed] admin panel display to hide navbar search fields
+
 ### From FPHS - PR #693 - 2025-10-14
 
 - [Fixed] user access control incorrectly checks for existence - fixes #692
