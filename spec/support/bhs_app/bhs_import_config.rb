@@ -21,7 +21,9 @@ module BhsImportConfig
 
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_config.json'
-    app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
+    app, exception = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
+
+    raise exception if exception.is_a?(Exception)
 
     # By default, an app with no page layouts should show everything. Clear everything before the import
     Admin::PageLayout.active.where(app_type_id: app.id).each do |p|

@@ -175,6 +175,7 @@ module UserSupport
       uac.access = access
       uac.disabled = disabled
       uac.current_admin = auto_admin
+      uac.updated_at = DateTime.now
       uac.save!
     else
       disabled = user&.disabled # The UAC must be disabled if the user is disabled

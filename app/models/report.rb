@@ -235,6 +235,10 @@ class Report < ActiveRecord::Base
     :report
   end
 
+  def returns_master_results_list
+    searchable || report_type == 'search'
+  end
+
   private
 
   def search_attributes_config_valid
