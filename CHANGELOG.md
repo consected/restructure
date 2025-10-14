@@ -16,6 +16,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
 
+### From FPHS - PR #693 - 2025-10-14
+
+- [Fixed] user access control incorrectly checks for existence - fixes #692
+
 ## [9.30.4] - 2025-10-07
 
 - [Fixed] view_sql and default YAML anchors fail - fixed #689
