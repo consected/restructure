@@ -48,9 +48,9 @@
     <% elsif p_type == :boolean %>
       <td class="admin-field-<%=p%>">
         <%= if list_val
-          "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+          "<span class=\"glyphicon glyphicon-check val-checked\"><span class=\"hidden\">1</span></span>".html_safe  
         else
-          "<span class=\"val-unchecked\"></span>".html_safe  
+          "<span class=\"val-unchecked\"><span class=\"hidden\">0</span></span>".html_safe  
         end
         %>
       </td>
