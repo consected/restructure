@@ -113,8 +113,9 @@ if [ -f tmp/parallel_specs_failed.txt ]; then
   echo "Retesting failed specs"
   old_ifs=$IFS
   IFS=$'\n'
+  retest=''
   for line in $(grep -P '\e\[[0-9]+mrspec ' tmp/failing_specs.log) ; do 
-    [[ $line =~ rspec\ ([^\:]+) ]]; retest="${retest} $(echo ${BASH_REMATCH[1]})"
+    [[ $line =~ rspec\ ([a-zA-Z0-9_\./]+) ]]; retest="${retest} $(echo ${BASH_REMATCH[1]})"
   done 
   IFS=$old_ifs
   bundle exec rspec -f d $retest
