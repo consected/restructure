@@ -13,8 +13,22 @@
       <td><%= list_item.item_type %></td>
 
       <td><%= list_item.report_type %></td>
-      <td><%= list_item.auto %></td>
-      <td><%= list_item.searchable %></td>
+      <td>
+        <%= if list_item.auto
+          "<span class=\"glyphicon glyphicon-check val-checked\"><span class=\"hidden\">1</span></span>".html_safe
+        else
+          "<span class=\"val-unchecked\"><span class=\"hidden\">0</span></span>".html_safe
+        end
+        %>
+      </td>
+      <td>
+        <%= if list_item.searchable
+          "<span class=\"glyphicon glyphicon-check val-checked\"><span class=\"hidden\">1</span></span>".html_safe
+        else
+          "<span class=\"val-unchecked\"><span class=\"hidden\">0</span></span>".html_safe
+        end
+        %>
+      </td>
 
       <td class="admin-item-admin-infos">
         <%= admin_last_updated_by_icon(list_item) %>

@@ -2,10 +2,14 @@
 
 module ReportsHelper
   def editable?
+    return if @embedded_report
+
     @editable = @report.editable_data? && (current_admin || current_user&.can?(:edit_report_data))
   end
 
   def creatable?
+    return if @embedded_report
+
     @creatable = @report.creatable_data? &&
                  (current_admin || current_user&.can?(:create_report_data)) &&
                  !@view_options&.prevent_adding_items
