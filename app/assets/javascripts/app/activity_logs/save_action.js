@@ -75,6 +75,9 @@ _fpa.activity_logs.save_action = class {
     });
   }
 
+  redirect_to_url() {
+    window.location.href = this.action_value
+  }
 
   create_next_creatable() {
     var sel = '.activity-logs-generic-block[data-sub-id="' + this.master_id + '"][data-sub-item="' + this.obj_data.item_types + '"] a.add-item-button[data-extra-log-type]';
