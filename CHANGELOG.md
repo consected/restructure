@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #697 - 2025-10-16
+
+- [Added] `redirect_to_url` as a `save_action.on_...` option - resolves #696
+- [Fixed] `save_action.on_...` doesn't work if there is a `label:` defined for the save button - fixes #695
+
 ## [9.30.5] - 2025-10-14
 
 - [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem

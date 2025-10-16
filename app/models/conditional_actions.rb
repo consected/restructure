@@ -85,12 +85,14 @@ class ConditionalActions
   #    then true will be returned for the action if any conditions match
   #
   # @param [true | nil] check_action_if - default not set
+  # @params [Array{Symbol} | nil] reject_keys - reject the specified keys from the result
   # @return [Hash | nil | Object] - returns:
   #                                   Hash of results for {on_save:, on_create:, on_update:}
   #                                   nil if the Hash has no entries
   #                                   the original configuration if not a Hash
-  def calc_save_option_if(check_action_if: nil)
+  def calc_save_option_if(check_action_if: nil, reject_keys: nil)
     sa = @action_conf
+    sa = sa.except(*reject_keys) if reject_keys
     res = {}
 
     return sa unless sa.is_a? Hash
