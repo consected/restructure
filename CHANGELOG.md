@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.6] - 2025-10-16
+
 ### From FPHS - PR #697 - 2025-10-16
 
 - [Added] `redirect_to_url` as a `save_action.on_...` option - resolves #696
