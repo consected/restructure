@@ -68,9 +68,6 @@ _fpa.substitution = class {
         else if (Number(next_tag) == next_tag) {
           got = iter_data[Number(next_tag)]
         }
-        else if (next_tag.indexOf('embedded_report') === 0) {
-
-        }
         else {
           // If nothing specified, just use the first item
           got = iter_data[0];
@@ -88,6 +85,10 @@ _fpa.substitution = class {
       else if (next_tag.indexOf('glyphicon_') === 0) {
         const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
         got = `<span class="glyphicon glyphicon-${icon}"></span>`;
+      }
+      else if (next_tag.indexOf('embedded_report') === 0) {
+        var repname = next_tag.replace('embedded_report_', '');
+        got = _fpa.utils.embedded_report(repname, this.data);
       }
       else if (iter_data.model_references) {
         // Get array of matching references with this resource name
