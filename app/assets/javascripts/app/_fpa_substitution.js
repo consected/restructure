@@ -86,6 +86,10 @@ _fpa.substitution = class {
         const icon = next_tag.replace('glyphicon_', '').replace('_', '-');
         got = `<span class="glyphicon glyphicon-${icon}"></span>`;
       }
+      else if (next_tag.indexOf('embedded_report') === 0) {
+        var repname = next_tag.replace('embedded_report_', '');
+        got = _fpa.utils.embedded_report(repname, this.data);
+      }
       else if (iter_data.model_references) {
         // Get array of matching references with this resource name
         got = iter_data.model_references.filter((el) => el.to_record_resource_name == next_tag);
