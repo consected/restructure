@@ -95,6 +95,9 @@ module Dynamic
           puts msg
           Rails.logger.warn msg
         end
+      rescue StandardError, Psych::Exception => e
+        Rails.logger.error "Error enabling active configurations: #{e.message}"
+        Rails.logger.error e.short_string_backtrace
       end
 
       #

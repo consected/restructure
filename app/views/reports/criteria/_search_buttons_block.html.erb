@@ -1,7 +1,7 @@
 <% if @click_to_search %> <span></span><%end%>
 <% if @report.report_type == 'search' 
     if  !(@report.editable_data? || !@report_criteria) %>
-      <%= submit_tag :search, value: :search, class: "#{@btn_class} #{@hidden_class} #{@auto_submitter_class} #{@auto_run_class}" %>
+      <%= submit_tag :search, value: :search, class: "#{@btn_class} #{@mrl_search_hidden_class} #{@auto_submitter_class} #{@auto_run_class}" %>
       <% unless @view_context==:search %>
         <%= button_tag (@view_options&.search_button_label || 'table'), 
               name: 'commit', 

@@ -13,6 +13,7 @@ module OptionConfigs
                                       hide_field_names_with_comments
                                       humanize_column_names
                                       hide_result_count hide_export_buttons hide_search_button
+                                      hide_master_results_list_search_button
                                       hide_criteria_panel prevent_collapse_for_list
                                       show_column_comments corresponding_data_dic
                                       view_as search_button_label report_auto_submit_on_change
@@ -23,9 +24,9 @@ module OptionConfigs
 
     configure :list_options, with: %i[hide_in_list list_description]
     configure :tree_view_options, with: %i[num_levels column_levels expand_level]
-    configure :plain_text_options, with: %i[results_column return_content_type 
-                                            line_join_string column_join_string 
-                                            line_prefix line_suffix 
+    configure :plain_text_options, with: %i[results_column return_content_type
+                                            line_join_string column_join_string
+                                            line_prefix line_suffix
                                             column_prefix column_suffix
                                             header_text footer_text
                                             template]

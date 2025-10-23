@@ -6,9 +6,10 @@ module Dynamic
 
     included do
       before_save :clean_options_yaml
-      after_save :force_option_config_parse
+      after_save :force_option_config_parse_no_raise
       after_save :handle_batch_schedule
-      attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id
+      attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id,
+                    :failed_option_configs
     end
 
     class_methods do
@@ -365,16 +366,37 @@ module Dynamic
     #
     # Parse option configs
     # @param [Boolean] force forces the memoized version to be updated
-    # @param [<Type>] raise_bad_configs ensures bad configurations are checked and
-    #    exceptions raised to halt execution
+    # @param [nil|true|StandardError|Array[StandardError]] raise_bad_configs ensures bad configurations are checked and
+    #    exceptions raised to halt execution - true catches all exceptions,
+    #    or specify a particular error class or array of classes
     # @return [Array] configurations
-    def option_configs(force: false, raise_bad_configs: false)
+    def option_configs(force: false, raise_bad_configs: nil, return_value_on_error: [])
       return if disabled?
 
+      raise_bad_configs = nil if raise_bad_configs == false
+      @failed_option_configs = nil
       @option_configs = nil if force
       @option_configs ||= self.class.options_provider.parse_config(self, force)
-      self.class.options_provider.raise_bad_configs @option_configs if raise_bad_configs
+      if raise_bad_configs
+        self.class.options_provider.raise_bad_configs @option_configs
+      else
+        @failed_option_configs = self.class.options_provider.bad_configs?(@option_configs)
+      end
+
       @option_configs
+    rescue FphsOptionsBadConfig, FphsOptionsParseError, FphsOptionsGeneralError, FphsException => e
+      Rails.logger.error "Error retrieving option_configs for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      @failed_option_configs = true
+      raise if raise_bad_configs == true || raise_bad_configs == e.class || (
+        raise_bad_configs.is_a?(Array) && raise_bad_configs&.include?(e.class)
+      )
+
+      @option_configs || return_value_on_error
+    end
+
+    def failed_option_configs?
+      @failed_option_configs
     end
 
     #
@@ -382,6 +404,10 @@ module Dynamic
     # @return [Array{Symbol}]
     def option_configs_names
       option_configs&.map(&:name)
+    rescue StandardError => e
+      Rails.logger.error "Error retrieving option_configs_names for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      nil
     end
 
     #
@@ -419,7 +445,7 @@ module Dynamic
     #
     # Simply parse option configs, forcing the memoized version to be updated
     # @return [Array] parsed configs
-    def force_option_config_parse
+    def force_option_config_parse(raise_bad_configs: true)
       return if disabled?
 
       @secondary_key_set = false
@@ -427,7 +453,11 @@ module Dynamic
       @use_current_version_set = false
       @use_current_version = nil
 
-      option_configs force: true, raise_bad_configs: true
+      option_configs force: true, raise_bad_configs:
+    end
+
+    def force_option_config_parse_no_raise
+      force_option_config_parse(raise_bad_configs: false)
     end
 
     def clean_options_yaml

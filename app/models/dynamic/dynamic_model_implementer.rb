@@ -17,7 +17,7 @@ module Dynamic
         ro = result_order
         return unless primary_key.present?
 
-        use_key = primary_key
+        use_key = primary_key || attribute_names.first
 
         ro = { use_key => :desc } if result_order.blank?
         default_scope -> { order ro }

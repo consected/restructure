@@ -177,7 +177,16 @@ module Redcap
         returnContent: return_content,
         returnFormat: 'json'
       }
-      request :create, request_options: request_options
+      res = request :create, request_options: request_options
+      return res if res.is_a?(Array) && res.length == 2
+
+      # Handle the situation where the API incorrectly returns a string within an array
+      if res.is_a?(Array) && res.length == 1 && res.first.is_a?(String)
+        Rails.logger.warn "Redcap API returned a string within an array for import_records #{request_options} - #{res}"
+        res = res.first.split(',')
+      end
+
+      res
     end
 
     #
@@ -275,6 +284,7 @@ module Redcap
     end
 
     def post_action(action, request_options)
+      redcap.raw_response = nil
       res = redcap.send(action, request_options: request_options)
       self.class.symbolize_result res
     end

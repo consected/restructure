@@ -603,6 +603,10 @@ div.popover {
   min-width: 150px;
 }
 
+.popover-content p:last-child {
+  margin-bottom: 0;
+}
+
 .invisible {
   visibility: hidden;
   height: 1px;

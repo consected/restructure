@@ -433,13 +433,24 @@ class Admin::UserAccessControl < Admin::AdminBase
     elsif !disabled && !persisted?
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
                                                                             alt_app_type_id: app_type_id
+      # NOTE: this will return an access record for nil app_type if the user.app_type_id or alt_app_type_id
+      # wasn't matched. This is because access can be set to be independent of app, with individual apps
+      # potentially overriding the general access if required. If a record exists for the specified app_type_id
+      # then this will always be returned, even if there is a more general one that's been overridden.
+      # The following conditions need to check that an additional user access control is being added
+      # to a matching app_type_id (either set or not set), otherwise it's not possible to override general
+      # (not set) controls at the level of an app.
+
       if res && res.id != id # If we have a result and it is not this record
         show_at_name = app_type ? app_type.name : ''
-        if user_id && user_id == res.user_id # If the user has the authorization set
+        if user_id && user_id == res.user_id && app_type_id == res.app_type_id
+          # If the user has the authorization set
           errors.add :user,
                      "already has the access control #{access} on #{resource_type} #{resource_name} " \
                      "#{show_at_name} #{options}"
-        elsif !user_id && res.user_id.nil? && role_name == res.role_name
+        elsif !user_id && res.user_id.nil? &&
+              (role_name || '') == (res.role_name || '') &&
+              app_type_id == res.app_type_id
           # If the new record has no user set and has a matching role_name
           errors.add :user_access_control,
                      "already exists for #{access} role '#{role_name}' on #{resource_type} #{resource_name} " \

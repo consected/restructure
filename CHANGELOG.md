@@ -14,6 +14,129 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #700 - 2025-10-23
+
+- [Fixed] documentation for preset_fields and others that use with_results - fixes #698
+
+### From Viva - PR #699 - 2025-10-23
+
+- [Added] feedback to help with misconfigurations
+- [Fixed] disabling a dynamic model shows error `private method 'select' called for nil` - fixes #680
+
+## [9.30.6] - 2025-10-16
+
+### From FPHS - PR #697 - 2025-10-16
+
+- [Added] `redirect_to_url` as a `save_action.on_...` option - resolves #696
+- [Fixed] `save_action.on_...` doesn't work if there is a `label:` defined for the save button - fixes #695
+
+## [9.30.5] - 2025-10-14
+
+- [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
+
+### From FPHS - PR #694 - 2025-10-14
+
+- [Fixed] small documentation issues
+- [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
+- [Added] ability for embedded reports to run within models for backend substitutions to function
+- [Added] environment variables to control spec webmocks and Redcap API mocks
+- [Changed] presentation of report admin index
+- [Fixed] master list "search" button can't be hidden with the current hide_search_button option - fixes #686
+- [Added] url search attributes section to report admin info block
+- [Fixes] report_type=search and searchable checkbox seem to affect the display of the master results block differently - fixes #685
+- [Added] extra documentation for report admin
+- [Changed] handling of field popovers to allow markdown formatting
+- [Changed] admin panel display to hide navbar search fields
+
+### From FPHS - PR #693 - 2025-10-14
+
+- [Fixed] user access control incorrectly checks for existence - fixes #692
+
+## [9.30.4] - 2025-10-07
+
+- [Fixed] view_sql and default YAML anchors fail - fixed #689
+
+## [9.30.3] - 2025-10-07
+
+### From FPHS - PR #688 - 2025-10-07
+
+- [Fixed] Redcap import_records returning an array with a single string - fixes #687
+
+## [9.30.2] - 2025-09-18
+
+### From FPHS - PR #682 - 2025-09-18
+
+- [Fixed] valid_if condition with `masters: {}` causes error - fixes #681
+
+## [9.30.1] - 2025-09-09
+
+### From Viva - 2025-09-09
+
+- [Fixed] release_and_build.sh to correctly set the default ruby version
+
+## [9.30.0] - 2025-09-09
+
+### From FPHS - PR #667 - 2025-09-09
+
+- [Fixed] AJAX errors reported to users
+- [Fixed] potential error if dynamic model has no primary key
+- [Fixed] error where errors reported through flash are too large and break max header length for reverse proxy
+- [Fixed] errors that prevented report attribute configuration editor from loading - fixes #667
+- [Changed] build scripts to correctly use the Ruby version from the codebase.
+- [Fixed] bad creation of CHANGELOG entries
+
+### From FPHS - PR #664 - 2025-09-03
+
+- [Fixed] select-as-radio-buttons breaking show_ifs when other fields are also involved in the conditions - fixes #663
+
+### From FPHS - PR #662 - 2025-09-03
+
+- [Added] broader checks for embedded item def versions
+
+### From FPHS - PR #661 - 2025-09-03
+
+- [Fixed] versioned activity logs breaking the versions of embedded items - fixes #660
+
+### From Viva - PR #659 - 2025-09-02
+
+- [Fixed] get_changelog_entries_from_git.sh incorrectly lists commits - fixes #658
+
+### Local Change - 2025-09-02
+
+- [Changed] details on committing merge for latest release
+
+## [9.29.0] - 2025-09-02
+
+### From Viva - PR #657 - 2025-09-02
+
+- [Fixed] MIME type comparisons for previewing files in filestore - fixes #656
+
+### From Viva - PR #655 - 2025-09-02
+
+- [Added] better styling to make it more obvious which report tab has been selected - fixes #654
+
+## [9.28.0] - 2025-08-21
+
+### From Viva - PR #646 - 2025-08-21
+
+- [Fixed] comparison of user_role in user access controls when role names are '' and nil
+- [Fixed] conditional calculation failures shouldn't show so much info to end users - fixes #643
+- [Changed] exception handling for dynamic def route generation
+- [Changed] dynamic def config triggers to avoid running if the option configs are invalid
+- [Fixed] failing to start server if dynamic definition yaml options contain error during parse - fixes #633
+- [Changed] reporting of option config errors and report any errors during cleaning with a separate exception class
+- [Changed] option error display in admin panels
+- [Added] new exception types specific to options
+- [Added] ability to report yaml parsing issues directly in admin panel
+- [Changed] handling of dynamic definition configuration setup to avoid unnecessary exceptions
+
+### From Viva - PR #645 - 2025-08-21
+
+- [Fixed] Admin users without specific capabilities shouldn't be shown links in app type components sidebar or page - fixes #636
+- [Fixed] changes to user or admin not reflected in cached partials
+
+## [9.27.0] - 2025-08-20
+
 ### From FPHS - PR #642 - 2025-08-20
 
 - [Added] script to get CHANGELOG.md entries from git and fixed the release_and_build.sh script to use it - fixes #641
