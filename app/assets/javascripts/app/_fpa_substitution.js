@@ -68,6 +68,9 @@ _fpa.substitution = class {
         else if (Number(next_tag) == next_tag) {
           got = iter_data[Number(next_tag)]
         }
+        else if (next_tag.indexOf('embedded_report') === 0) {
+
+        }
         else {
           // If nothing specified, just use the first item
           got = iter_data[0];

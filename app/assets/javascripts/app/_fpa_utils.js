@@ -795,3 +795,26 @@ _fpa.utils.get_params = function (key1, key2, full_key) {
 
   return data;
 }
+
+_fpa.utils.embedded_report = function (repname) {
+  const referring_record = this.referenced_from && this.referenced_from[0];
+
+  // Get the appropriate id, master_id and type for the report call params
+  if (referring_record) {
+    var list_id = referring_record.from_record_id;
+    var list_master_id = referring_record.from_record_master_id;
+    var list_type = referring_record.from_record_type_us;
+  }
+  else {
+    var list_id = this.id;
+    var list_master_id = this.master_id;
+    var list_type = this.item_type;
+  }
+
+  console.log(`rhembedded: ${repname}`);
+  const search_attrs = `search_attrs[master_id]=${list_master_id}&search_attrs[list_id]=${list_id}&search_attrs[list_type]=${list_type}`
+  const divid = `tag_embedded_report_results-${repname}-${list_master_id}-${list_id}-${list_type}`
+  const htags = `data-remote="true" data-result-target="#${divid}" data-target="#${divid}" data-target-force="true"`;
+  var res = `<div class="tag-embedded-report" id="${divid}"><a ${htags} href="/reports/${repname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
+  return res;
+}
