@@ -32,9 +32,14 @@
   overflow-x: scroll;
 }
 
-.embedded-report-block .report-results-table-block {
-  height: auto;
-  overflow: auto;
+.embedded-report-block, .tag-embedded-report {
+  .report-results-table-block {
+    height: auto;
+    overflow: auto;
+  }
+    .report-results-block {
+      margin: 0;
+    }
 }
 
 #embed_results_block {
