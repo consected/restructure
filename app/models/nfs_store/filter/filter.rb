@@ -223,6 +223,10 @@ module NfsStore
                                               [full_sql] + [extra_log_type] + filter_strings + filter_strings)
         end
 
+        if sql_sets.empty?
+          raise FphsException, 'Failed to generate filters - current user has access to no file filters'
+        end
+
         res = sql_sets.join("\n  OR\n  ")
         "(\n#{res}\n)"
       end

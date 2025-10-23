@@ -61,7 +61,7 @@ ActiveSupport.on_load(:nfs_store_config) do
         app_types = Admin::AppType.active_app_types
         app_types.each do |app_type|
           exists = NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
-          subdir = Rails.env.production? ? '' : 'test-fphsfs'
+          subdir = Rails.env.production? || Rails.env.development? ? '' : 'test-fphsfs'
           nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir}"
           next if exists
 
@@ -69,7 +69,9 @@ ActiveSupport.on_load(:nfs_store_config) do
         end
         configuration_failed_reason << 'No App Type available' if app_types.empty?
       end
-      Rails.logger.error "NFS apps list file not written to #{NFS_APPS_LIST_FILE}" unless File.exist?(NFS_APPS_LIST_FILE)
+      unless File.exist?(NFS_APPS_LIST_FILE)
+        Rails.logger.error "NFS apps list file not written to #{NFS_APPS_LIST_FILE}"
+      end
     rescue Exception => e
       # Catch any exception, since we don't want the server to crash just because of some background file error.
       Rails.logger.error "Error writing NFS apps list file: #{e}\n#{e.short_string_backtrace}"

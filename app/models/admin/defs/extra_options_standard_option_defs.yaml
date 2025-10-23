@@ -46,7 +46,7 @@ _definitions___extra_options_standard_option_definitions___:
   # Usage:
   #   condition_table:
   #     field_name: *is_not_blank
-  field_is_blank: &is_not_blank
+  field_is_not_blank: &is_not_blank
     condition: '<>'
     value: ''
 

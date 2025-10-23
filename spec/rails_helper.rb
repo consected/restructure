@@ -87,8 +87,11 @@ require 'webmock/rspec'
 # at the top of a spec module (in before :all) to get full information on
 # the requirements of each stub.
 
-# WebMock.allow_net_connect!
-WebMock.disable_net_connect!(allow_localhost: true)
+if ENV['WEBMOCK_NET_CONNECT'] == 'allow'
+  WebMock.allow_net_connect!
+else
+  WebMock.disable_net_connect!(allow_localhost: true)
+end
 
 put_now 'Browser setups'
 
