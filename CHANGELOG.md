@@ -14,6 +14,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #700 - 2025-10-23
+
+- [Fixed] documentation for preset_fields and others that use with_results - fixes #698
+
+### From Viva - PR #699 - 2025-10-23
+
+- [Added] feedback to help with misconfigurations
+- [Fixed] disabling a dynamic model shows error `private method 'select' called for nil` - fixes #680
+
 ## [9.30.6] - 2025-10-16
 
 ### From FPHS - PR #697 - 2025-10-16
