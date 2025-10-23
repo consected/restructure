@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #703 - 2025-10-23
+
+- [Added] documentation on setting search_path directly on the database user - resolves #577
+
 ## [9.30.4] - 2025-09-16
 
 ## [9.30.1] - 2025-09-09
