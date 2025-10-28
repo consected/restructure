@@ -1674,7 +1674,7 @@ _fpa.form_utils = {
   setup_extra_actions: function (block) {
     block
       .find('.collapse')
-      .not('.attached-force-collapse')
+      .not('.attached-force-collapse, .no-force-collapse')
       .each(function () {
         var el = $(this);
         el.on('show.bs.collapse', function () {
