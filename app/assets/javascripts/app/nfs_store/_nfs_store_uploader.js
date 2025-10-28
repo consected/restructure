@@ -39,6 +39,8 @@ _nfs_store.uploader = function ($outer) {
   var abortClicked;
   var uploadedIds;
   var uploadSet;
+  var $completed_uploads = $outer.find('.uploaded-files');
+  var $completed_uploads_outer = $outer.find('.uploaded-files-outer');
 
   var frOnload = function (e) {
 
@@ -139,6 +141,8 @@ _nfs_store.uploader = function ($outer) {
     $block.removeClass('process-ready').addClass('process-complete');
     $block.removeClass('progress-running');
     removeAbortButton($block);
+    showCompletedBlocks();
+    $block.appendTo($completed_uploads);
     console.log('completed upload of file');
   };
 
@@ -175,8 +179,13 @@ _nfs_store.uploader = function ($outer) {
   };
 
   var clearFileBlocks = function () {
-    $outer.find('.data-context .file-block[data-file-index]').remove();
+    $completed_uploads_outer.hide();
+    $outer.find('.data-context .file-block[data-file-index], .uploaded-files .file-block[data-file-index]').remove();
   };
+
+  var showCompletedBlocks = function () {
+    $completed_uploads_outer.show();
+  }
 
   var getFileBlock = function () {
     return $outer.find('.data-context .file-block.process-ready').first();
