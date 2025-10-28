@@ -55,10 +55,10 @@ module NfsStore
       # @param [NfsStore::Container] container - The container the file belongs to
       # @param [User] current_user - Current user, which will be set if the container doesn't supply it
       # @return [NfsStore::Manage::StoredFile] The new or persisted stored file
-      def self.index_missing_entry path:, file_name:, 
-                                   persist: nil, container: nil, current_user: nil
-        msf = Manage::StoredFile.new(path: , file_name:) 
-        return msf unless persist && !NfsStore::Archive::Mounter.file_is_indicator?(file_name)
+      def self.index_missing_entry(path:, file_name:,
+                                   persist: nil, container: nil, current_user: nil)
+        msf = Manage::StoredFile.new(path:, file_name:)
+        return msf unless persist && !file_name.index(/\.__.+.*__$/)
 
         msf.container = container
         msf.current_user ||= current_user
