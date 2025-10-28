@@ -8,6 +8,12 @@ module NfsStore
       ProcessingArchiveSuffix = '.__processing-archive__'
       FailedArchiveSuffix = '.__failed-archive__'
       ProcessingIndexSuffix = '.__processing-index__'
+      FileIndicatorSuffixes = [
+        ArchiveMountSuffix,
+        ProcessingArchiveSuffix,
+        FailedArchiveSuffix,
+        ProcessingIndexSuffix
+      ].freeze
       MountPerms = '227'
       ExtractionTimeout = 1800
       ProcessingRetryTime = ExtractionTimeout + 240
@@ -100,6 +106,10 @@ module NfsStore
         path.end_with? ArchiveMountSuffix
       end
 
+      def self.file_is_indicator?(path)
+        path.to_s.end_with?(*FileIndicatorSuffixes)
+      end
+
       # Filename of the flag used to indicate an archive extract is in progress
       # @param archive_file_name [String] the file name of the archive file to be mounted
       # @return [String] the flag filename
@@ -181,14 +191,16 @@ module NfsStore
       # Need to check number of files in zip file against number on filesystem after unzip
       # unzip -v zipname.zip | grep 'Defl:N' | wc -l
       def mount
-        res = true
         return :not_archive unless has_archive_extension?
         return if extract_in_progress?
 
         extract_in_progress!
         pn = Pathname.new(mounted_path)
         Dir.rmdir mounted_path if pn.exist? && pn.empty?
-        return :non_empty_dir_already_exists if pn.exist?
+        if pn.exist?
+          extract_failed!
+          raise FsException::Action, "Can't unzip - the target directory already exists: #{archive_file_name}"
+        end
 
         unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
           extract_failed!
@@ -209,7 +221,7 @@ module NfsStore
         unless res
           extract_failed!
           puts "Failed to unzip the archive file: #{archive_path}"
-          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}"
+          raise FsException::Action, "Failed to unzip the archive file: #{archive_file_name}"
         end
 
         FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
@@ -225,10 +237,10 @@ module NfsStore
             FileUtils.rm_rf mounted_path
           rescue StandardError => e2
             raise FsException::Action,
-                  "Failed to move the extracted archive files and remove the mounted path for: #{archive_path}\n" \
+                  "Failed to move the extracted archive files and remove the mounted path for: #{archive_file_name}\n" \
                   "#{e}\n#{e2}"
           end
-          raise FsException::Action, "Failed to move the extracted archive files: #{archive_path}\n#{e}"
+          raise FsException::Action, "Failed to move the extracted archive files: #{archive_file_name}\n#{e}"
         end
 
         extract_completed! if res
@@ -398,7 +410,7 @@ module NfsStore
           # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
           # table. To fix this it is fastest to complete the import, then remove the duplicates.
 
-          NfsStore::Manage::ArchivedFile.remove_duplicates archive_file_name
+          NfsStore::Manage::ArchivedFile.remove_duplicates(archive_file_name, stored_file.id)
         end
 
         result

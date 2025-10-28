@@ -322,6 +322,7 @@ var SecureView = function () {
 
     $('.sv-close').not('.sv-added-click-ev').on('click', function (ev) {
       _this.close();
+      ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
 

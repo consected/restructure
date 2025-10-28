@@ -141,9 +141,12 @@ _nfs_store.uploader = function ($outer) {
     $block.removeClass('process-ready').addClass('process-complete');
     $block.removeClass('progress-running');
     removeAbortButton($block);
+    console.log('completed upload of file');
+
+    if ($block.hasClass('file-upload-failed')) return;
+
     showCompletedBlocks();
     $block.appendTo($completed_uploads);
-    console.log('completed upload of file');
   };
 
   var setBlockFailed = function (error_array, $block) {
@@ -154,7 +157,7 @@ _nfs_store.uploader = function ($outer) {
     $block.find('.file-error').text('file upload failed: ' + error_array.join(' | '));
     $block.find('.progress-bar').addClass('progress-bar-failed').removeClass('progress-bar-success');
     $block.find('.progress-bar-status-text').text('failed');
-    $block.removeClass('progress-running');
+    $block.removeClass('progress-running').addClass('file-upload-failed');
     removeAbortButton($block);
     showAddFilesButton();
   };

@@ -1292,10 +1292,10 @@ _fpa.form_utils = {
           var $a = $(a);
           if (last) $a = $a.last();
           var rect = $a.get(0);
+          if (attempt_count > 10) {
+            return;
+          }
           if (!rect) {
-            if (attempt_count > 10) {
-              return;
-            }
             attempt_count++;
             window.setTimeout(function () {
               doscroll();

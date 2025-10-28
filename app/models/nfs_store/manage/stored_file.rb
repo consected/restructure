@@ -45,6 +45,35 @@ module NfsStore
         Archive::Mounter.mount self
       end
 
+      #
+      # Add stored file entry for a file without a current database entry
+      # Persist to database if persist: true
+      # <Description>
+      # @param [String] path - The full retrieval path to the file
+      # @param [String] file_name - Filename
+      # @param [Boolean] persist - Whether to persist the entry to the database
+      # @param [NfsStore::Container] container - The container the file belongs to
+      # @param [User] current_user - Current user, which will be set if the container doesn't supply it
+      # @return [NfsStore::Manage::StoredFile] The new or persisted stored file
+      def self.index_missing_entry path:, file_name:, 
+                                   persist: nil, container: nil, current_user: nil
+        msf = Manage::StoredFile.new(path: , file_name:) 
+        return msf unless persist && !NfsStore::Archive::Mounter.file_is_indicator?(file_name)
+
+        msf.container = container
+        msf.current_user ||= current_user
+        msf.analyze_file!
+        msf.file_hash = msf.class.hash_for_file(msf.retrieval_path)
+        begin
+          msf.save!
+        rescue FsException::Action, StandardError => e
+          msf.title = "Failed to index file - #{e.message}"
+          Rails.logger.warn "Failed to index missing entry #{path} / #{file_name} - container #{container.id}"
+          Rails.logger.warn "#{e}\n#{e.short_string_backtrace}"
+        end
+        msf
+      end
+
       # File path relative to the container, returning results based on multiple options
       # @param no_filename [Boolean] default (falsey) the filename is returned, otherwise (true) it is not
       # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path, otherwise (true) the final slash is included

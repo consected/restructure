@@ -8,8 +8,12 @@ module NfsStore
     # @param [NfsStore::Manage::Container] container the container to list
     # @param [ActivityLog | nil] activity_log - optional activity log owner of the container
     # @param [Array] | nil] include_flags - optional list of container file types to include item_flags for
+    # @param [Boolean] index_missing_entries - (default true) will index filesystem files with missing DB entries
     # @return [Array(ContainerFile)] list of ContainerFile subclass instances sorted by path
-    def self.list_files_from(container, activity_log: nil, include_flags: nil)
+    def self.list_files_from(container, 
+                             activity_log: nil, 
+                             include_flags: nil, 
+                             index_missing_entries: true)
       unless container.exists?
         raise FsException::NotFound, "Container nfs_store storage is not found: #{container.name}"
       end
@@ -42,8 +46,14 @@ module NfsStore
       missing_db_files.each do |f|
         pn = Pathname.new f
         can_show = NfsStore::Filter::Filter.evaluate f, item_for_filter
-        missing_db << Manage::StoredFile.new(path: pn.dirname, file_name: pn.basename) if can_show
-        # missing_db.analyze_file!
+        next unless can_show
+                
+        msf = NfsStore::Manage::StoredFile.index_missing_entry path: pn.dirname, 
+                                                        file_name: pn.basename,
+                                                        persist: index_missing_entries,
+                                                        container:, 
+                                                        current_user: orig_user
+          missing_db << msf
       end
 
       # The result is a sorted list of all the DB files and files missing DB entries, sorted by the container path
