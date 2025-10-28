@@ -1,13 +1,12 @@
-<% random_id = SecureRandom.hex(10) %>
 <div class="data-context"></div>
 
 <!-- The container for the uploaded files -->
 <div class="uploaded-files-outer">
   <div class="uploaded-files-control">
-    <a data-target="#uploaded-files-<%= random_id %>" data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-right caret-target-collapsed"></a>
+    <a data-target="#uploaded-files-{{new_random}}" data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-right caret-target-collapsed"></a>
     <span>uploaded files</span>
   </div>
-  <div id="uploaded-files-<%= random_id %>" class="uploaded-files collapse no-force-collapse"></div>
+  <div id="uploaded-files-{{get_random}}" class="uploaded-files collapse no-force-collapse"></div>
 </div>
 
 
