@@ -58,7 +58,7 @@ module NfsStore
       def self.index_missing_entry(path:, file_name:,
                                    persist: nil, container: nil, current_user: nil)
         msf = Manage::StoredFile.new(path:, file_name:)
-        return msf unless persist && !file_name.index(/\.__.+.*__$/)
+        return msf unless persist && !file_name.to_s.index(/\.__.+__$/)
 
         msf.container = container
         msf.current_user ||= current_user
