@@ -71,7 +71,17 @@
              value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
       >        
     {{else}}
+      {{#if is_processing}}
       <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_processing_arch}}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_failed_arch }}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_processing_index}}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else}}  
+      <span class="file-entry-not-downloadable glyphicon glyphicon-question-sign" data-toggle="popover" data-content="{{title}}"></span>
+      {{/if}}    
     {{/if}}
     {{#if id}}
       <a href="{{filename_path}}" 
@@ -108,9 +118,11 @@
         {{else if is_processing_arch}}
           <span class="file-processing-tag">(processing archive...)</span>
         {{else if is_failed_arch }}
-          <span class="file-processing-tag">(failed processing archive...)</span>
+          <span class="file-processing-tag failed-processing-archive-tag">(failed processing archive...)</span>
         {{else if is_processing_index}}
           <span class="file-processing-tag">(processing index...)</span>
+        {{else if title}}
+          <span class="file-entry-not-downloadable-reason">({{title}})</span>
         {{/if}}
       </span>
       <span class="browse-entry-meta missing-db-entry"></span>

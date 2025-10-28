@@ -48,6 +48,10 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
       expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.zip.__mounted-archive__'
       expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      mp = mounter.mounted_path
+      if Pathname.new(mp).exist?
+        FileUtils.mv(mp, "#{mp.to_s}-#{SecureRandom.hex(25)}")
+      end
       expect(mounter.mount).to be_truthy
       expect(mounter.archive_file_count).to eq 11
     end
@@ -171,6 +175,11 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
       expect(mounter.temp_mounted_path).to end_with '/.tmp-dicoms.tar.gz.__mounted-archive__'
       expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
+      mp = mounter.mounted_path
+      if Pathname.new(mp).exist?
+        FileUtils.mv(mp, "#{mp.to_s}-#{SecureRandom.hex(25)}")
+      end
+
       expect(mounter.mount).to be_truthy
       expect(mounter.archive_file_count).to eq 10
     end

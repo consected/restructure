@@ -1292,10 +1292,10 @@ _fpa.form_utils = {
           var $a = $(a);
           if (last) $a = $a.last();
           var rect = $a.get(0);
+          if (attempt_count > 10) {
+            return;
+          }
           if (!rect) {
-            if (attempt_count > 10) {
-              return;
-            }
             attempt_count++;
             window.setTimeout(function () {
               doscroll();
@@ -1674,7 +1674,7 @@ _fpa.form_utils = {
   setup_extra_actions: function (block) {
     block
       .find('.collapse')
-      .not('.attached-force-collapse')
+      .not('.attached-force-collapse, .no-force-collapse')
       .each(function () {
         var el = $(this);
         el.on('show.bs.collapse', function () {

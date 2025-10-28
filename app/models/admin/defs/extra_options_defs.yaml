@@ -195,22 +195,31 @@
   preset_fields:
     with_result: 
     # Map attributes from a related item to the target item.
+    # A list of models to retrieve from and attributes to assign allow multiple sources to
+    # be used.
     # NOTE: with: fields override any specified here
     # from: may also just take a simple String such as `from: embedded_item` to
     # as shorthand for the following full calculation
-      from:
-        embedded_item:
-          return: return_result
-      attributes:
-        receipt_date: event_date
-        receipt_time: event_time
-        received_by: received_by
-        select_facility: 'Lab: {{select_lab}}'
-        # Substitutions use data only from the "from:" item                
-        embedded_item:
-          rank: rank
-          rec_type: rec_type
-          data: '{{select_lab}}'
+      - from:
+          embedded_item:
+            return: return_result
+        attributes:
+          receipt_date: event_date
+          receipt_time: event_time
+          received_by: received_by
+          select_facility: 'Lab: {{select_lab}}'
+          # Substitutions use data only from the "from:" item
+
+          # Also set attributes in the embedded item
+          embedded_item:
+            rank: rank
+            rec_type: rec_type
+            data: '{{select_lab}}'
+      - from: 
+          dynamic_model__some_recs:
+            return: return_result
+        attributes:
+          a_value: value_from_result
     with: 
       field_name: 'now()'
       field_name_2: 'literal value'
