@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.9] - 2025-10-28
+
 ## [9.30.8] - 2025-10-28
 
 - [Fixed] Filestore adding .__processing__ files to index - fixes #710
