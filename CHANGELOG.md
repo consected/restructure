@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.7] - 2025-10-28
+
 ### From FPHS - PR #709 - 2025-10-28
 
 - [Fixed] Filestore not indexing files uploaded in a Zip with multiple levels of subdirectories - fixes #704
