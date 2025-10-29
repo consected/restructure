@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.30.11] - 2025-10-29
+
 - [Fixed] bug checking timed out indicators
 
 ## [9.30.10] - 2025-10-29
