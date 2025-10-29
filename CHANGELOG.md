@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] bug checking timed out indicators
+
 ## [9.30.10] - 2025-10-29
 
 - [Changed] Filestore exceptions to inherit from StandardError
