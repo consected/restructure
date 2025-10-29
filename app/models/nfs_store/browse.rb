@@ -61,6 +61,9 @@ module NfsStore
                                                                persist: index_missing_entries,
                                                                container:,
                                                                current_user: orig_user
+        # It's possible that the result was `nil`, typically indicating that an indicator file
+        # had been cleaned up after a timeout period had elapsed. Just skip this if the
+        # result is not a StoredFile
         next unless msf.is_a? NfsStore::Manage::StoredFile
 
         missing_db << msf
