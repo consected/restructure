@@ -1,4 +1,4 @@
 module FsException
-  class NotFound < Exception
+  class NotFound < StandardError
   end
 end

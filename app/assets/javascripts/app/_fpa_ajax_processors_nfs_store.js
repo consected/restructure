@@ -109,7 +109,7 @@ _fpa.preprocessors_nfs_store = {
           else if (value.file_name.match(/\.__processing__$/))
             value.is_processing = true
 
-          value.file_name = value.file_name.replace(/(.+)\.__processing.*__$/, '$1')
+          value.file_name = value.file_name.replace(/(.+)\.__.+.*__$/, '$1')
         }
       }
     }
@@ -121,7 +121,7 @@ _fpa.preprocessors_nfs_store = {
 _fpa.postprocessors_nfs_store = {
 
   refresh_container_if_needed: function (block) {
-    var tel = block.find('.file-processing-tag');
+    var tel = block.find('.file-processing-tag').not('.failed-processing-archive-tag');
     if (tel.length) {
       if (!tel.is(':visible')) return;
       window.setTimeout(function () {
@@ -179,6 +179,11 @@ _fpa.postprocessors_nfs_store = {
         button.show();
         container_block.parents('.upload-dropzone-disabled').removeClass('upload-dropzone-disabled').addClass('upload-dropzone');
       }
+
+      // Move the file status folder to the top of the list
+      var $container_top = container_block.find('.container-list-items');
+      container_block.find('.is-file-status-folder-items').prependTo($container_top);
+      container_block.find('.is-file-status-folder').prependTo($container_top);
 
       _fpa.form_utils.format_block(block);
 

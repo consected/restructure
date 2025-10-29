@@ -7,6 +7,6 @@ Transfer mode: One of none | manual | scheduled
 Frequency: |
   For scheduled transfers, the period of time between transfers.
 
-  Enter this in the form "<number> <unit>" - such as "15 minutes" or "12 hours" or "1 day"
+  Enter this in the form "<number> <unit>" - such as '15 minutes' or '12 hours' or '1 day'
 Notes: Enter any notes to document the project
 Options: Advanced configuration options

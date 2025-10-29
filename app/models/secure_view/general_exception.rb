@@ -1,4 +1,4 @@
 module SecureView
-  class GeneralException < Exception
+  class GeneralException < StandardError
   end
 end

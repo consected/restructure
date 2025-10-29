@@ -87,11 +87,12 @@ module NfsStore
       # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
       # table. Remove these by associating the earlier duplicates with a "duplicates-<timestamp>" archive file.
       # @param [String] archive_file - the name of the archive file within which to remove duplicate entries
-      def self.remove_duplicates(archive_file)
+      def self.remove_duplicates(archive_file, stored_file_id)
         remove_dups = <<~END_SQL
           UPDATE nfs_store_archived_files
           SET file_name = $1
           WHERE
+          nfs_store_stored_file_id = $4 AND
           archive_file = $2 AND
           id NOT IN (
             SELECT id FROM
@@ -99,18 +100,25 @@ module NfsStore
               SELECT MAX(t.id) id
                   , t.file_hash
                   , t.file_name
+                  , t.path
               FROM nfs_store_archived_files t
-              WHERE archive_file = $3
-              GROUP BY file_hash, file_name
+              WHERE
+              nfs_store_stored_file_id = $5 AND
+              archive_file = $3
+              GROUP BY file_hash, file_name, path
             ) t
           );
         END_SQL
 
-        bind_type = ActiveRecord::Type::String.new
+        bind_type_string = ActiveRecord::Type::String.new
+        bind_type_int = ActiveRecord::Type::Integer.new
+
         binds = [
-          ActiveRecord::Relation::QueryAttribute.new('file_name', "duplicates-#{DateTime.now.to_f}", bind_type),
-          ActiveRecord::Relation::QueryAttribute.new('archive_file', archive_file, bind_type),
-          ActiveRecord::Relation::QueryAttribute.new('t.archive_file', archive_file, bind_type)
+          ActiveRecord::Relation::QueryAttribute.new('file_name', "duplicates-#{DateTime.now.to_f}", bind_type_string),
+          ActiveRecord::Relation::QueryAttribute.new('archive_file', archive_file, bind_type_string),
+          ActiveRecord::Relation::QueryAttribute.new('t.archive_file', archive_file, bind_type_string),
+          ActiveRecord::Relation::QueryAttribute.new('nfs_store_stored_file_id', stored_file_id, bind_type_int),
+          ActiveRecord::Relation::QueryAttribute.new('t.nfs_store_stored_file_id', stored_file_id, bind_type_int)
         ]
 
         connection.exec_query(remove_dups, 'SQL', binds)
