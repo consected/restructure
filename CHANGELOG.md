@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Changed] Filestore exceptions to inherit from StandardError
+- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713 Added better reporting of Zip "mounter" errors that occur in background processes
+- [Changed] "file status" to appear at the top of a Filestore browser
+
 ## [9.30.9] - 2025-10-28
 
 ## [9.30.8] - 2025-10-28
