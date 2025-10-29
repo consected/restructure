@@ -61,19 +61,25 @@ module NfsStore
         msf = Manage::StoredFile.new(path:, file_name:, container: container)
         msf.current_user ||= current_user
 
-        # If the file is actually in an extracted archive folder, don't return it
+        # If the file is actually in an extracted archive folder, just return it - don't attempt to persist
         return msf if msf.named_like_archive?
 
         mounter = NfsStore::Archive::Mounter.new(stored_file: msf)
         # If the file is a failed archive indicator, get its content which has the failure reason
         msf.title = mounter.extract_failure_reason if mounter.failed_indicator?
 
-        # If requested not to persist or the file is an indicator file, return it without persisting
-        return msf unless persist &&
-                          !(
-                            file_is_indicator?(file_name) &&
-                            !mounter.indicator_timed_out?(clear: true)
-                          )
+        # If requested not to persist just return the StoredFile
+        return msf unless persist
+
+        # If file is an indicator file always return
+        if file_is_indicator?(file_name)
+          # Also check if it has timed out. If it has, nothing should be returned as the file
+          # has been cleaned up
+          return if mounter.indicator_timed_out?(clear: true)
+
+          # Otherwise return the StoredFile
+          return msf
+        end
 
         msf.analyze_file!
         msf.file_hash = msf.class.hash_for_file(msf.retrieval_path)
