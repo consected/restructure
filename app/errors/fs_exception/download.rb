@@ -1,4 +1,4 @@
 module FsException
-  class Download < Exception
+  class Download < StandardError
   end
 end

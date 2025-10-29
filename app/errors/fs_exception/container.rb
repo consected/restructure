@@ -1,4 +1,4 @@
 module FsException
-  class Container < Exception
+  class Container < StandardError
   end
 end

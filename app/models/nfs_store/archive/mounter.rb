@@ -2,23 +2,47 @@
 
 module NfsStore
   module Archive
+    #
+    # Provides support for extracting files from archive and compressed files
+    # with common archive file extensions. The original archive files are a StoredFile
+    # and the resulting extracted files are captured as a set of ArchiveFile records
+    # stored in a directory that has a name that matches the original StoredFile, plus
+    # a suffix ArchiveMountSuffix.
+    #
+    # The extraction process is idempotent, and will not re-extract files.
+    # Any failures during extraction are captured by flag files in the same directory
+    # as the archive file, with special suffixes to indicate processing state.
+    #
+    # It should be noted that this class is named Mounter, since it originally used
+    # a Zip mount approach to access files within zip archives. This was slow and
+    # unreliable due to the need to perform subsequent processing of individual ArchivedFiles
+    # within the archive, over the networked NFS mount. The current
+    # implementation extracts files physically from the archive into a directory.
     class Mounter
       ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2', '.7z'].freeze
+
+      # Suffix added to archive directories where files are extracted from
+      # original stored files with ArchiveExtensions
       ArchiveMountSuffix = '.__mounted-archive__'
+
+      # Suffixes used to indicate various processing states
       ProcessingArchiveSuffix = '.__processing-archive__'
       FailedArchiveSuffix = '.__failed-archive__'
       ProcessingIndexSuffix = '.__processing-index__'
-      FileIndicatorSuffixes = [
-        ArchiveMountSuffix,
-        ProcessingArchiveSuffix,
-        FailedArchiveSuffix,
-        ProcessingIndexSuffix
-      ].freeze
-      MountPerms = '227'
+
+      # Timeout for archive extraction process (in seconds) - 30 minutes
       ExtractionTimeout = 1800
+      # Allow automatic retry of processing after this time (timeout + 4 minutes)
       ProcessingRetryTime = ExtractionTimeout + 240
+
       attr_accessor :stored_file
 
+      def initialize(stored_file: nil)
+        self.stored_file = stored_file
+        super()
+      end
+
+      #
       # Attempt to mount the stored file as an archive
       # @param store_file [NfsStore::Manage::StoredFile]
       def self.mount(stored_file)
@@ -103,11 +127,22 @@ module NfsStore
         path = NfsStore::Manage::Filesystem.clean_path(path)
         return unless path
 
-        path.end_with? ArchiveMountSuffix
+        path.include?(ArchiveMountSuffix)
       end
 
-      def self.file_is_indicator?(path)
-        path.to_s.end_with?(*FileIndicatorSuffixes)
+      def failed_indicator?
+        archive_path.to_s.end_with?(FailedArchiveSuffix)
+      end
+
+      def indicator_timed_out?(clear: false)
+        return false unless File.exist?(archive_path) && !failed_indicator?
+
+        if (Time.now - File.mtime(archive_path)) >= ProcessingRetryTime
+          FileUtils.rm_f(archive_path) if clear
+          false
+        else
+          true
+        end
       end
 
       # Filename of the flag used to indicate an archive extract is in progress
@@ -149,9 +184,15 @@ module NfsStore
         FileUtils.touch(processing_archive_flag_path)
       end
 
-      def extract_failed!
+      def extract_failed!(exception)
         extract_completed!
-        FileUtils.touch(failed_archive_flag_path)
+        File.write(failed_archive_flag_path, exception.message)
+      end
+
+      def extract_failure_reason
+        return unless File.exist?(archive_path) && archive_path.end_with?(FailedArchiveSuffix)
+
+        File.read(archive_path)
       end
 
       def extract_completed!
@@ -198,12 +239,10 @@ module NfsStore
         pn = Pathname.new(mounted_path)
         Dir.rmdir mounted_path if pn.exist? && pn.empty?
         if pn.exist?
-          extract_failed!
           raise FsException::Action, "Can't unzip - the target directory already exists: #{archive_file_name}"
         end
 
         unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
-          extract_failed!
           raise FsException::Filesystem,
                 "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
         end
@@ -218,11 +257,7 @@ module NfsStore
 
         cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
         res = Kernel.system(*cmd)
-        unless res
-          extract_failed!
-          puts "Failed to unzip the archive file: #{archive_path}"
-          raise FsException::Action, "Failed to unzip the archive file: #{archive_file_name}"
-        end
+        raise FsException::Action, "Failed to unzip the archive file: #{archive_file_name}" unless res
 
         FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
         FileUtils.cp_r tmpzipdir, temp_mounted_path
@@ -231,7 +266,6 @@ module NfsStore
           FileUtils.mv temp_mounted_path, mounted_path
           FileUtils.rm_rf dir
         rescue StandardError => e
-          extract_failed!
           begin
             FileUtils.rm_rf temp_mounted_path
             FileUtils.rm_rf mounted_path
@@ -245,6 +279,9 @@ module NfsStore
 
         extract_completed! if res
         res
+      rescue FsException::Action, StandardError => e
+        extract_failed! e
+        raise
       end
 
       #

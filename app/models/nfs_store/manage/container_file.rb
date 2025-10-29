@@ -107,6 +107,14 @@ module NfsStore
       end
 
       #
+      # File name or path represents any type of indicator flag
+      # @param [String] path file name or full path
+      # @return [Boolean] true if the path is an indicator flag
+      def self.file_is_indicator?(file_name)
+        file_name.to_s.index(/\.__.+__$/)
+      end
+
+      #
       # Calculate the new path for a file moved to trash
       # @return [<Type>] <description>
       def trash_path

@@ -12,7 +12,8 @@ module NfsStore
 
       validate :not_named_like_archive
 
-      # Finalize an upload, moving a file from its temporary upload location to the file location and mounting the archive if necessary
+      # Finalize an upload, moving a file from its temporary upload location to the file location and mounting the
+      # archive if necessary
       # @param orig_file_obj [NfsStore::Upload] the original upload instance with file information
       # @param [String] the temporary file path to be moved from
       # @return [NfsStore::Manage::StoredFile] the generated stored file object
@@ -57,11 +58,23 @@ module NfsStore
       # @return [NfsStore::Manage::StoredFile] The new or persisted stored file
       def self.index_missing_entry(path:, file_name:,
                                    persist: nil, container: nil, current_user: nil)
-        msf = Manage::StoredFile.new(path:, file_name:)
-        return msf unless persist && !file_name.to_s.index(/\.__.+__$/)
-
-        msf.container = container
+        msf = Manage::StoredFile.new(path:, file_name:, container: container)
         msf.current_user ||= current_user
+
+        # If the file is actually in an extracted archive folder, don't return it
+        return msf if msf.named_like_archive?
+
+        mounter = NfsStore::Archive::Mounter.new(stored_file: msf)
+        # If the file is a failed archive indicator, get its content which has the failure reason
+        msf.title = mounter.extract_failure_reason if mounter.failed_indicator?
+
+        # If requested not to persist or the file is an indicator file, return it without persisting
+        return msf unless persist &&
+                          !(
+                            file_is_indicator?(file_name) &&
+                            !mounter.indicator_timed_out?(clear: true)
+                          )
+
         msf.analyze_file!
         msf.file_hash = msf.class.hash_for_file(msf.retrieval_path)
         begin
@@ -89,8 +102,12 @@ module NfsStore
         res
       end
 
+      def named_like_archive?
+        NfsStore::Archive::Mounter.path_is_archive?(file_name) || NfsStore::Archive::Mounter.path_is_archive?(path)
+      end
+
       def not_named_like_archive
-        if NfsStore::Archive::Mounter.path_is_archive?(file_name) || NfsStore::Archive::Mounter.path_is_archive?(path)
+        if named_like_archive?
           errors.add :file_name, 'has an invalid name. Rename before attempting to upload.'
           return false
         end
