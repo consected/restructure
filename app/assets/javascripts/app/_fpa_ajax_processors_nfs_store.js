@@ -180,6 +180,11 @@ _fpa.postprocessors_nfs_store = {
         container_block.parents('.upload-dropzone-disabled').removeClass('upload-dropzone-disabled').addClass('upload-dropzone');
       }
 
+      // Move the file status folder to the top of the list
+      var $container_top = container_block.find('.container-list-items');
+      container_block.find('.is-file-status-folder-items').prependTo($container_top);
+      container_block.find('.is-file-status-folder').prependTo($container_top);
+
       _fpa.form_utils.format_block(block);
 
       _fpa.postprocessors_nfs_store.handle_item_flags(block, data)

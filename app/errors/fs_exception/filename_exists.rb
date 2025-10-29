@@ -1,4 +1,4 @@
 module FsException
-  class FilenameExists < Exception
+  class FilenameExists < StandardError
   end
 end
