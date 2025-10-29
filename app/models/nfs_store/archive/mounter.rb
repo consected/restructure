@@ -134,14 +134,29 @@ module NfsStore
         archive_path.to_s.end_with?(FailedArchiveSuffix)
       end
 
+      #
+      # Is the #stored_file an indicator that doesn't represent a failure?
+      # (we don't want failure indicators to time out)
+      # If the:
+      # - file didn't exist for some reason - consider it to not be an indicator so return nil
+      # - file is a failure indicator that shouldn't time out - return false
+      # - indicator hasn't timed out - return false
+      # - indicator timed out - return true
+      # @param [Boolean] clear - flag that the indicator should be cleaned up if timed out
+      # @return [true|false|nil]
       def indicator_timed_out?(clear: false)
-        return false unless File.exist?(archive_path) && !failed_indicator?
+        # File is missing - consider it not an indicator and return
+        return unless File.exist?(archive_path)
+        # File represents a failure indicator - these don't time out so return false
+        return false if failed_indicator?
 
         if (Time.now - File.mtime(archive_path)) >= ProcessingRetryTime
+          # Timed out. Clean up if `clear: true`
           FileUtils.rm_f(archive_path) if clear
-          false
-        else
           true
+        else
+          # Indicator hasn't timed out yet
+          false
         end
       end
 
