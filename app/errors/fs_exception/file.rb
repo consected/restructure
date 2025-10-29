@@ -1,4 +1,4 @@
 module FsException
-  class File < Exception
+  class File < StandardError
   end
 end

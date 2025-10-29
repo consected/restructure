@@ -1,4 +1,4 @@
 module FsException
-  class NoAccess < Exception
+  class NoAccess < StandardError
   end
 end
