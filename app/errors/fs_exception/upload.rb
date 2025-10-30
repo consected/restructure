@@ -1,4 +1,4 @@
 module FsException
-  class Upload < Exception
+  class Upload < StandardError
   end
 end

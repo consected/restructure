@@ -413,6 +413,43 @@ git fetch upstream && git checkout develop && git pull && \
 git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit --allow-empty -a -m "Commit" && git push
 ```
 
+## Database connections
+
+The database must allow IP port connections. It is recommended that a database user is created for each app server (or group of servers behind a load balancer), so that access permission specific to the ReStructure apps can be set even when sharing a single database.
+
+The database connection is set by the following environment variables:
+
+```
+FPHS_POSTGRESQL_USERNAME=<database username>
+FPHS_POSTGRESQL_PASSWORD=<complex password>
+FPHS_POSTGRESQL_HOSTNAME=<database hostname>
+FPHS_POSTGRESQL_PORT=<database port>
+FPHS_POSTGRESQL_DATABASE=<database name>
+FPHS_POSTGRESQL_SCHEMA=<schema search path>
+```
+
+### Schema search_path
+
+The PostgreSQL `search_path` setting states the order that schemas are checked for database objects such as tables when a query doesn't explicitly qualify which schema is required.
+
+As a minimum, when using the default database definition, the search path should be `ml_app,ref_data,redcap,dynamic`. Additional schemas should be added on the end as they are created.
+
+Schemas can be placed at the front of the list to contain tables, triggers, functions and views that override the defaults. One example might be for the `delayed_job` table when there is a need to share configurations across multiple app servers that have very different background job processing requirements.
+
+It is also possible to set the search_path value directly on the user, so that it is set automatically when connecting. This may be preferable in a production environment, since user permissions limit the schemas available to the user and setting the search_path on the user provides the database control over adding or removing schemas and setting the search path ordering without having to rely on changes to the environment variables.
+
+For example:
+
+```
+create user app_user password 'devdbpassword1';
+-- if necessary set the role to inherit from
+grant common_app_role to app_user with inherit true;
+-- now set the search_path
+alter role app_user in database app_database set search_path to ml_app,ref_data,redcap,dynamic,organization,projects,data_requests;
+```
+
+For this to function, ensure that the app server is started with the environment variable: `FPHS_POSTGRESQL_SCHEMA=` or `FPHS_POSTGRESQL_SCHEMA=null`. This prevents Rails attempting to override the search_path when it connects.
+
 ## Future development themes
 
 Upgrade to Rails 8.
@@ -426,6 +463,9 @@ Provide more structured admin panel configuration, especially around case manage
 Refactor and comment code to provide a better future development environment.
 
 Provide better test coverage.
+
+NOTE: Proposed enhancements related or unrelated to these themes may be found as GitHub issues, tagged as **enhancement**:
+<https://github.com/consected/restructure/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement>
 
 ## Support
 

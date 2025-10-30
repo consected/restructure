@@ -1,4 +1,4 @@
 module SecureView
-  class ConfigException < Exception
+  class ConfigException < StandardError
   end
 end

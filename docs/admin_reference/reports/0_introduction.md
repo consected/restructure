@@ -8,8 +8,13 @@ the risk of SQL injection.
 
 Administration is provided in [Admin: Reports](/admin/reports)
 
+## Field Definitions
+
+!defs(report_field_defs.yaml)
+
 ## Contents
 
 - [SQL Search Attributes](search_attributes.md)
+- [URL Search Attributes](url_search_attributes.md)
 - [Detailed Options](detailed_options.md)
 - [File Filtering](file_filtering.md)

@@ -25,7 +25,8 @@ module Reports
                                             report: report,
                                             results: results,
                                             outer_block_id: outer_block_id,
-                                            runner:
+                                            runner:,
+                                            embedded_report: true
                                           }).html_safe
       html = <<~END_HTML
         <div class="embedded-report-block" id="embedded-report-block--#{list_id}-#{list_type}-#{list_master_id}">
