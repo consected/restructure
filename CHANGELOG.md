@@ -14,15 +14,95 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.30.1] - 2025-09-09
+### From FPHS - PR #715 - 2025-10-29
+
+- [Fixed] bug checking timed out indicators
+
+### From FPHS - PR #714 - 2025-10-29
+
+- [Changed] Filestore exceptions to inherit from StandardError
+- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713
+- [Added] better reporting of Zip "mounter" errors that occur in background processes
+- [Changed] "file status" to appear at the top of a Filestore browser
+
+### From FPHS - PR #711 - 2025-10-28
+
+- [Fixed] Filestore adding .__processing__ files to index - fixes #710
+
+### From FPHS - PR #709 - 2025-10-28
+
+- [Fixed] Filestore not indexing files uploaded in a Zip with multiple levels of subdirectories - fixes #704
+- [Added] Filestore auto setup of DB stored file records that don't have a corresponding entry - resolves #70
+- [Changed] handling and display of archive / unzip errors
+- [Fixed] page jumping to top when cancelling a secure view file that can't be viewed
+- [Fixed] admin field popover error
+- [Fixed] unnecessary attempts to scroll page
+
+### From FPHS - PR #707 - 2025-10-28
+
+- [Changed] Filestore upload multi files - condensed list of uploaded files - resolves #705
+
+## [9.30.7] - 2025-10-28
+
+### From Viva - PR #703 - 2025-10-23
+
+- [Added] documentation on setting search_path directly on the database user - resolves #577
+
+### From Viva - PR #700 - 2025-10-23
+
+- [Fixed] documentation for preset_fields and others that use with_results - fixes #698
+
+### From Viva - PR #699 - 2025-10-23
+
+- [Added] feedback to help with misconfigurations
+- [Fixed] disabling a dynamic model shows error `private method 'select' called for nil` - fixes #680
+
+## [9.30.6] - 2025-10-16
+
+### From FPHS - PR #697 - 2025-10-16
+
+- [Added] `redirect_to_url` as a `save_action.on_...` option - resolves #696
+- [Fixed] `save_action.on_...` doesn't work if there is a `label:` defined for the save button - fixes #695
+
+## [9.30.5] - 2025-10-14
+
+- [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
+
+### From FPHS - PR #694 - 2025-10-14
+
+- [Fixed] small documentation issues
+- [Fixed] potential error returning raw results and JSON parsed results by updating the "redcap" gem
+- [Added] ability for embedded reports to run within models for backend substitutions to function
+- [Added] environment variables to control spec webmocks and Redcap API mocks
+- [Changed] presentation of report admin index
+- [Fixed] master list "search" button can't be hidden with the current hide_search_button option - fixes #686
+- [Added] url search attributes section to report admin info block
+- [Fixes] report_type=search and searchable checkbox seem to affect the display of the master results block differently - fixes #685
+- [Added] extra documentation for report admin
+- [Changed] handling of field popovers to allow markdown formatting
+- [Changed] admin panel display to hide navbar search fields
+
+### From FPHS - PR #693 - 2025-10-14
+
+- [Fixed] user access control incorrectly checks for existence - fixes #692
+
+### From FPHS - PR #690 - 2025-10-14
+
+- [Fixed] view_sql and default YAML anchors fail - fixed #689
+
+### From FPHS - PR #688 - 2025-10-07
+
+- [Fixed] Redcap import_records returning an array with a single string - fixes #687
+
+### From FPHS - PR #682 - 2025-09-18
+
+- [Fixed] valid_if condition with `masters: {}` causes error - fixes #681
 
 ### From Viva - 2025-09-09
 
 - [Fixed] release_and_build.sh to correctly set the default ruby version
 
-## [9.30.0] - 2025-09-09
-
-### From FPHS - PR #667 - 2025-09-09
+### From FPHS - PR #668 - 2025-09-09
 
 - [Fixed] AJAX errors reported to users
 - [Fixed] potential error if dynamic model has no primary key
@@ -657,7 +737,7 @@ NOTE: Requires a database migration on upgrade
 
 ### From FPHS - PR #442 - 2025-01-07
 
-**NOTE:** DB migration required
+__NOTE:__ DB migration required
 
 - [Changed] handling of SECRET_KEY_BASE and other non-production credentials to use Rails standard environment variable and credentials rather than secrets
 - [Added] USEVER variable handling for batch use of release_and_build.sh
@@ -2179,10 +2259,10 @@ First attempt at building with app and organization specific files in restructur
 ### Transferred from Viva @8.0.52 - 2022-03-08
 
 - [Added] paths and resource names when referencing activity log types
-- [Added] much more consistent handling of resource names with **Resources::Models**
+- [Added] much more consistent handling of resource names with __Resources::Models__
 - [Added] user profiles tabs definable using page layout definitions
 - [Added] ability to include activity log type as a resource in a page layout definition
-- [Added] **add_item_button** substitution for captions and report headers
+- [Added] __add_item_button__ substitution for captions and report headers
 - [Added] user definable user preferences for timezones and formats
 - [Added] per-server caching of latest dynamic definition versions, to allow automated reloading on a page refresh
 - [Added] view_options for references in activity log def to always open a reference
@@ -2297,7 +2377,7 @@ First attempt at building with app and organization specific files in restructur
 ### Transfer from Harvard @7.4.71 - 2021-11-09
 
 - [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
-- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Report results options added __embedded_block__ to show dynamic models as forms from report resutls
 - [Added] Contributor field to data dictionary variable records, to accompany target field.
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
@@ -2310,7 +2390,7 @@ First attempt at building with app and organization specific files in restructur
 
 ## Transfer from Harvard @7.4.70 - 2021-10-31
 
-- [Added] Report criteria field type **select_from_model**
+- [Added] Report criteria field type __select_from_model__
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
 - [Fixed] DB comments now updating when a dynamic model is a view
