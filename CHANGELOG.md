@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems
+
 ### From FPHS - PR #715 - 2025-10-29
 
 - [Fixed] bug checking timed out indicators
