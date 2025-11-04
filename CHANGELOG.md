@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #716 - 2025-11-04
+
+- [Fixed] issue with show_if fields from activity logs
+
 ## [9.31.0] - 2025-10-30
 
 - [Updated] gems
@@ -96,7 +100,6 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Fixed] view_sql and default YAML anchors fail - fixed #689
 
->>>>>>>
 ### From FPHS - PR #688 - 2025-10-07
 
 - [Fixed] Redcap import_records returning an array with a single string - fixes #687
