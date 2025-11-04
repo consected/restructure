@@ -130,7 +130,7 @@ _fpa.postprocessors = {
     // Handle conditional form fields
     if (data.form_data) {
       var form_data = data.form_data;
-      _fpa.form_utils.init_edit_form_show_if_triggers(block, form_data);
+      _fpa.form_utils.init_edit_form_show_if_triggers(block);
 
       for (var fe in form_data) {
         if (form_data.hasOwnProperty(fe)) {

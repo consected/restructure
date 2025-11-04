@@ -280,14 +280,17 @@ _fpa.form_utils = {
     }
   },
 
-  init_edit_form_show_if_triggers: function (block, form_data) {
+  // Setup change triggers on form fields to handle show_if conditions in edit forms
+  // This previously accepted form_data, but the closure held the initial value of the form fields
+  // causing incorrect behaviour. Now form_data is initialized from the form fields on each change event.
+  init_edit_form_show_if_triggers: function (block) {
     const form_els = block.find('[data-attr-name][data-object-name]').not('.attached-show-if-triggers');
     form_els.on('change click keyup', function () {
       const $el = $(this);
       const obj_name = $el.attr('data-object-name');
       const a_name = $el.attr('data-attr-name');
-      // Initialize form_data if not provided.
-      form_data = form_data || _fpa.form_utils.data_from_form(block);
+      // Initialize form_data from the form fields.
+      var form_data = _fpa.form_utils.data_from_form(block);
       if (a_name != 'e_signed_how' && form_data[obj_name]) {
         if ($el.attr('type') == 'checkbox') {
           form_data[obj_name][a_name] = $el.is(':checked');

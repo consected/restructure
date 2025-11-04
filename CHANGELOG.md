@@ -14,23 +14,24 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.30.11] - 2025-10-29
+## [9.31.0] - 2025-10-30
+
+- [Updated] gems
+
+### From FPHS - PR #715 - 2025-10-29
 
 - [Fixed] bug checking timed out indicators
 
-## [9.30.10] - 2025-10-29
+### From FPHS - PR #714 - 2025-10-29
 
 - [Changed] Filestore exceptions to inherit from StandardError
-- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713 Added better reporting of Zip "mounter" errors that occur in background processes
+- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713
+- [Added] better reporting of Zip "mounter" errors that occur in background processes
 - [Changed] "file status" to appear at the top of a Filestore browser
 
-## [9.30.9] - 2025-10-28
-
-## [9.30.8] - 2025-10-28
+### From FPHS - PR #711 - 2025-10-28
 
 - [Fixed] Filestore adding .__processing__ files to index - fixes #710
-
-## [9.30.7] - 2025-10-28
 
 ### From FPHS - PR #709 - 2025-10-28
 
@@ -91,31 +92,24 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Fixed] user access control incorrectly checks for existence - fixes #692
 
-## [9.30.4] - 2025-10-07
+### From FPHS - PR #690 - 2025-10-14
 
 - [Fixed] view_sql and default YAML anchors fail - fixed #689
 
-## [9.30.3] - 2025-10-07
-
+>>>>>>>
 ### From FPHS - PR #688 - 2025-10-07
 
 - [Fixed] Redcap import_records returning an array with a single string - fixes #687
-
-## [9.30.2] - 2025-09-18
 
 ### From FPHS - PR #682 - 2025-09-18
 
 - [Fixed] valid_if condition with `masters: {}` causes error - fixes #681
 
-## [9.30.1] - 2025-09-09
-
 ### From Viva - 2025-09-09
 
 - [Fixed] release_and_build.sh to correctly set the default ruby version
 
-## [9.30.0] - 2025-09-09
-
-### From FPHS - PR #667 - 2025-09-09
+### From FPHS - PR #668 - 2025-09-09
 
 - [Fixed] AJAX errors reported to users
 - [Fixed] potential error if dynamic model has no primary key
@@ -750,7 +744,7 @@ NOTE: Requires a database migration on upgrade
 
 ### From FPHS - PR #442 - 2025-01-07
 
-**NOTE:** DB migration required
+__NOTE:__ DB migration required
 
 - [Changed] handling of SECRET_KEY_BASE and other non-production credentials to use Rails standard environment variable and credentials rather than secrets
 - [Added] USEVER variable handling for batch use of release_and_build.sh
@@ -2272,10 +2266,10 @@ First attempt at building with app and organization specific files in restructur
 ### Transferred from Viva @8.0.52 - 2022-03-08
 
 - [Added] paths and resource names when referencing activity log types
-- [Added] much more consistent handling of resource names with **Resources::Models**
+- [Added] much more consistent handling of resource names with __Resources::Models__
 - [Added] user profiles tabs definable using page layout definitions
 - [Added] ability to include activity log type as a resource in a page layout definition
-- [Added] **add_item_button** substitution for captions and report headers
+- [Added] __add_item_button__ substitution for captions and report headers
 - [Added] user definable user preferences for timezones and formats
 - [Added] per-server caching of latest dynamic definition versions, to allow automated reloading on a page refresh
 - [Added] view_options for references in activity log def to always open a reference
@@ -2390,7 +2384,7 @@ First attempt at building with app and organization specific files in restructur
 ### Transfer from Harvard @7.4.71 - 2021-11-09
 
 - [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
-- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Report results options added __embedded_block__ to show dynamic models as forms from report resutls
 - [Added] Contributor field to data dictionary variable records, to accompany target field.
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
@@ -2403,7 +2397,7 @@ First attempt at building with app and organization specific files in restructur
 
 ## Transfer from Harvard @7.4.70 - 2021-10-31
 
-- [Added] Report criteria field type **select_from_model**
+- [Added] Report criteria field type __select_from_model__
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
 - [Fixed] DB comments now updating when a dynamic model is a view
