@@ -1,16 +1,42 @@
-<%# Templates for "standalone page" views (intranet / dashboard type views) of activity logs %>
+<%
+  # Templates for "standalone page" views (intranet / dashboard type views) of activity logs 
+%>
+
+<%
+  # Partial that sets up the template config for the display of a full standalone page activity log result item
+  # and passes the `result_data` as a specific parameter.
+  # Then it simply calls the following partial "common_page_template_result_inner" with appropriate parameters.
+  # Logging is included to help diagnose missing template configurations.
+%>
 <script id="common_page_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
-    {{> common_page_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
+    {{> common_page_template_result_inner result_data=../result_data name=../name orig_name=../orig_name activity_log_references_name=../activity_log_references_name template_config=this _created=../_created vdef_version=../vdef_version}}
+  {{else}}
+    {{log 'template_config not found for the page version information below'}}
+    {{log fpa_state_item 'template_config' (underscore name) vdef_version}}
+    {{log (fpa_state_item 'template_config' (underscore name) vdef_version)}}
+    {{log this}}
   {{/with}}
 </script>
 
+<%
+  # Partial that renders the full activity log result item for a standalone page.
+  # This is called by the previous partial "common_page_template_result".
+  # The values of `this` are the `template_config` retrieved by the calling partial,
+  # which are actually built by the OptionConfigs::TemplateOptionMapping
+  # method for activity logs.
+
+  # It should be noted that currently activity log standalone page views don't provide any
+  # ability to show an edit form or create new activity log records. The attribute 'data-subscription'
+  # has been provided, as has a hidden edit button, although this functionality is currently untested.
+%>
 <script id="common_page_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
-  <div class="common-template-item common-page-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}} default-layout-{{id_hyphenate result_data.default_layout}}" 
+  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}"  data-orig-name="{{orig_name}}" {{{ data_sort_str }}}> {{/is}}
+  <div class="common-page-templates--result-item common-template-item common-page-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}} default-layout-{{id_hyphenate result_data.default_layout}}" 
        data-model-data-type="{{model_data_type}}" 
        id="{{hyphenate full_name}}-{{result_data.master_id}}-{{result_data.id}}" 
-       data-template="{{hyphenate name}}-result-template" 
+       data-subscription="{{#if orig_name}}{{hyphenate orig_name}}{{else}}{{hyphenate name}}{{/if}}-edit-form-{{result_data.master_id}}-{{result_data.id}}"
+       data-template="{{hyphenate full_name}}-OPTION_TYPE-result-template" 
        data-item-class="{{item_class_name}}" 
        data-sub-item="{{full_name}}" 
        data-sub-id="{{result_data.id}}" 
@@ -22,6 +48,7 @@
        data-def-version="{{def_version}}"
        data-default-layout="{{result_data.default_layout}}"
   >
+    <span class="hidden common-page-templates--edit-button">{{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}</span>
     {{#caption_before_substitutions result_data }}
     <ul class="page-item-container list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
 

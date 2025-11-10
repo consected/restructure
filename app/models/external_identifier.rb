@@ -63,8 +63,16 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  def item_type_name
+    implementation_model_name
+  end
+
   def base_route_segments
     model_association_name.to_s
+  end
+
+  def base_route_short_name
+    model_association_name
   end
 
   def self.routes_load

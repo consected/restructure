@@ -5,6 +5,10 @@
 - ["Forking" to a Private Repository](forking_to_a_private_repository.md)
 - [Running **rspec** tests](running_rspec_tests.md)
 
+## The app UI
+
+- [UI templates for Master record search results](../app-ui/ui-templates-for-master-record-search-results.md)
+
 ## Getting git log for CHANGELOG
 
 ```
