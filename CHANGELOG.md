@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.31.1] - 2025-11-10
+
 ### From Viva - PR #718 - 2025-11-10
 
 - [Added] support for selecting templates with option types - resolves #605

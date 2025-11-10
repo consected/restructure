@@ -1,5 +1,5 @@
 Download ruby-advisory-db ...
 ruby-advisory-db:
-  advisories: 1032 advisories
-  last updated: 2025-10-29 10:18:51 -0700
-  commit: 0a596546572d8cf32f7d8f0ea045ccb0e97819ba
+  advisories:	1034 advisories
+  last updated:	2025-11-07 11:11:35 -0800
+  commit:	6b7ac0296e267b6eb6f974014fcbeb08b0ade640
