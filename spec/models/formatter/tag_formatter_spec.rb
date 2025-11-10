@@ -215,7 +215,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
 
     tests = [
       [:general_selection_label, '10', 'primary', nil, 'rank', pi],
-      [:general_selection_label, 'nflpa2', 'NFLPA2', nil, 'source', pi],
+      [:general_selection_label, 'nflpa2', 'NFLPA 2', nil, 'source', pi],
       [:general_selection_label, 'email', 'Email', nil, 'rec_type', pi]
     ]
 

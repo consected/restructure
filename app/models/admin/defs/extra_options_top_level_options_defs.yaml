@@ -134,6 +134,31 @@ _definitions:
   reusable_key: |
     &anchor reusable objects for substitution in definitions
 
+# Keys to be applied to all dynamic definitions. The actual
+# definitions will take precedence by replacing the full key definition.
 _default:
-  key1: applied to all activity definitions
-  key2: applied to all activity definitions
+  key1: applied to all dynamic definitions
+  key2: applied to all dynamic definitions
+
+# Keys to be "deep merged" in to all dynamic definitions. The actual
+# inner items will take precedence over these items.
+_merge_default:
+  key1: 
+    inner: will be merged into key1 within all dynamic definitions
+  key2:
+    inner: will be merged into key2 within all dynamic definitions
+
+# Keys to be "deep merged" in to all dynamic definitions. These inner items 
+# will take precedence over the later inner items. The rest of the key
+# definition will remain untouched.
+_merge_override:
+  key1: 
+    inner: will be merged into key1 within all dynamic definitions
+  key2:
+    inner: will be merged into key2 within all dynamic definitions
+
+# Keys to be applied to all dynamic definitions. These
+# definitions will take precedence by replacing the later key definitions.
+_override:
+  key1: applied to all dynamic definitions
+  key2: applied to all dynamic definitions

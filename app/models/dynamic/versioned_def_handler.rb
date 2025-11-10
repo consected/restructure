@@ -16,6 +16,10 @@ module Dynamic
         definition.base_route_segments
       end
 
+      def base_route_short_name
+        definition.base_route_short_name
+      end
+
       # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
       def hyphenated_name
         definition.hyphenated_name

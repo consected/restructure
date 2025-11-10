@@ -1,6 +1,13 @@
 <%
   # Show the search tabs at the top of the page, a hidden form to trigger an AJAX
-  # request to fulfill the requested search, and the final results block
+  # request to fulfill the requested search, and the final results block.
+
+  # The #master_results_block div has its contents rendered based on templates defined
+  # in `app/views/masters/_search_results_template.html.erb`, which is prepared and preprocessed on
+  # the masters page load.
+
+  # The AJAX request fired by the form triggers this, based on `data-sub-item="masters"`
+  # leading to it being identified as a subscriber of `masters` results.
   
 %>
 <span class="from-master-action-<%=action_name%> <%= @no_search ? 'no-search-in-master-record' : '' %>">
