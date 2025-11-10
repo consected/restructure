@@ -14,8 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.31.0] - 2025-10-30
+### From Viva - PR #718 - 2025-11-10
 
+- [Added] support for selecting templates with option types - resolves #605
+  - [Added] use of option type request parameters and record fields
+  - [Changed] handling of UI templates to support option types for dynamic definition forms
+  - [Added] base_route_... information to support consistent paths in URLs and templates
+- [Added] _override,_merge_default and_merge_override options to dyanmic definitions - resolves #326
+- [Added] logging to help debug
+- [Added] initial documentation of the UI templates
+- [Fixed] setup of test apps
+- [Fixed] issue parsing extra options YAML
+- [Fixed] specs
 - [Updated] gems
 
 ### From FPHS - PR #715 - 2025-10-29
