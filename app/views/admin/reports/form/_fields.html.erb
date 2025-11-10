@@ -1,37 +1,37 @@
 <div class="form-inline">
   <div class="form-group">
-    <%= f.label :name %>
+    <%= form_field_label f, :name %>
     <%= f.text_field :name %>
   </div>
   <div class="form-group">
-    <%= f.label :category %>
+    <%= form_field_label f, :category %>
     <%= f.text_field :item_type %>
   </div>
   <% if @report.persisted? %>
   <div class="form-group">
-    <%= f.label :short_name %>
+    <%= form_field_label f, :short_name %>
     <%= f.text_field :short_name %>
   </div>
   <% end %>
   <div class="form-group">
-    <%= f.label :report_type %>
+    <%= form_field_label f, :report_type %>
     <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
   </div>
   <div class="form-group">
-    <%= f.label :position %>
+    <%= form_field_label f, :position %>
     <%= f.text_field :position, type: :number%>
   </div>
   <br/>
   <div class="form-group">
     <%= f.check_box :auto %>
-    <%= f.label :run_automatically %>
+    <%= form_field_label f, :run_automatically %>
   </div>
   <div class="form-group">
     <%= f.check_box :searchable %>
-    <%= f.label :searchable %>
+    <%= form_field_label f, :searchable %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>
-    <%= f.label :disable %>
+    <%= form_field_label f, :disable %>
   </div>
 </div>

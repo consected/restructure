@@ -99,7 +99,7 @@ module OptionConfigs
 
     def calc_save_action_if(obj)
       ca = ConditionalActions.new save_action, obj
-      ca.calc_save_option_if check_action_if: true
+      ca.calc_save_option_if check_action_if: true, reject_keys: [:label]
     end
 
     class << self

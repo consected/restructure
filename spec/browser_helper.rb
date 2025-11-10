@@ -66,6 +66,8 @@ module BrowserHelper
     cb.current_driver = :app_firefox_driver
     cb.default_max_wait_time = 2.5
 
+    Selenium::WebDriver.logger.ignore(:clear_local_storage, :clear_session_storage)
+
     puts '--> Done setup browser'
   end
 end

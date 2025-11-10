@@ -41,10 +41,13 @@
 <script id="nfs_store_browse_list_folder"   type="text/x-handlebars-template" class="hidden handlebars-partial">
   
   
-    <li class="container-folder container-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive">
+    <li class="container-folder container-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive {{#is show_folder_name '===' 'file status'}}is-file-status-folder{{/is}}">
       {{#is folder '!==' './.'}}
       <input type="checkbox" class="container-folder-selector ff ignore-field-change" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>
       {{/is}}
+      {{#is folder '===' './.'}}
+      <span class="folder-icon not-archive glyphicon glyphicon-info-sign"></span>&nbsp;
+      {{else}}
       <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is folder '===' './.'}}glyphicon-info-sign{{else}}glyphicon-folder-close{{/is}}"
             title="expand folder"
             data-toggle="collapse"
@@ -52,9 +55,10 @@
             aria-controls="{{container_id}}--{{id_hyphenate folder}}"
             aria-expanded="true"
       ></span>&nbsp;
-    {{show_folder_name}}{{#if is_archive}} <span class="file-archive-tag">(archive files)</span>{{/if}}
+      {{/is}}
+    {{show_folder_name}}{{#if is_archive}} <span class="file-archive-tag">(extracted archive files)</span>{{/if}}
     </li>
-    <ul class="container-folder-items collapse {{#is folder_name '===' '.'}}in{{/is}}" data-folder-items="{{folder}}" id="{{container_id}}--{{id_hyphenate folder}}">
+    <ul class="container-folder-items collapse {{#is folder_name '===' '.'}}in{{/is}} {{#is show_folder_name '===' 'file status'}}is-file-status-folder-items{{/is}}" data-folder-items="{{folder}}" id="{{container_id}}--{{id_hyphenate folder}}">
       {{>nfs_store_browse_list_folders curr_folder=folder}}
     </ul>
 </script>
@@ -71,7 +75,19 @@
              value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
       >        
     {{else}}
+      {{#if is_processing}}
       <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_processing_arch}}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_failed_arch }}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if is_processing_index}}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+      {{else if title}}
+        <span class="file-entry-not-downloadable glyphicon glyphicon-question-sign" data-toggle="popover" data-trigger="click hover" data-content="{{title}}"></span>
+      {{else}}
+        <span class="file-entry-not-downloadable glyphicon glyphicon-ban-circle" data-toggle="popover" data-trigger="click hover" data-content="File is not downloadable"></span>
+      {{/if}}    
     {{/if}}
     {{#if id}}
       <a href="{{filename_path}}" 
@@ -108,9 +124,11 @@
         {{else if is_processing_arch}}
           <span class="file-processing-tag">(processing archive...)</span>
         {{else if is_failed_arch }}
-          <span class="file-processing-tag">(failed processing archive...)</span>
+          <span class="file-processing-tag failed-processing-archive-tag">(failed processing archive{{#if title}}: {{title}}{{/if}})</span>
         {{else if is_processing_index}}
           <span class="file-processing-tag">(processing index...)</span>
+        {{else if title}}
+          <span class="file-entry-not-downloadable-reason">({{title}})</span>
         {{/if}}
       </span>
       <span class="browse-entry-meta missing-db-entry"></span>

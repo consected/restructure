@@ -106,6 +106,14 @@
           if: 'ref: ** conditions reference **'
         - value: next - this literal value tells the action to open the next available reference tab
           if: 'ref: ** conditions reference **'
+      go_to_master: true
+        # Reloads the page using the master id of the item.
+        # This is often used when a new activity is created in the temporary master record and is subsequently
+        # moved to a new master id.
+      redirect_to_url:
+        value: relative or absolute URL
+        if: 'ref: ** conditions reference **'
+
     on_create: {}
     on_save:
       notes: |
@@ -183,26 +191,35 @@
   # Add preset values to a mass of fields on initialization of new items, or before
   # creating a reference.
   # `field_options.<field_name>.preset_value` and `field_options.<field_name>.blank_preset_value` are
-  # evalutated after this, and may override any settings here.
+  # evaluated after this, and may override any settings here.
   preset_fields:
     with_result: 
     # Map attributes from a related item to the target item.
+    # A list of models to retrieve from and attributes to assign allow multiple sources to
+    # be used.
     # NOTE: with: fields override any specified here
     # from: may also just take a simple String such as `from: embedded_item` to
     # as shorthand for the following full calculation
-      from:
-        embedded_item:
-          return: return_result
-      attributes:
-        receipt_date: event_date
-        receipt_time: event_time
-        received_by: received_by
-        select_facility: 'Lab: {{select_lab}}'
-        # Substitutions use data only from the "from:" item                
-        embedded_item:
-          rank: rank
-          rec_type: rec_type
-          data: '{{select_lab}}'
+      - from:
+          embedded_item:
+            return: return_result
+        attributes:
+          receipt_date: event_date
+          receipt_time: event_time
+          received_by: received_by
+          select_facility: 'Lab: {{select_lab}}'
+          # Substitutions use data only from the "from:" item
+
+          # Also set attributes in the embedded item
+          embedded_item:
+            rank: rank
+            rec_type: rec_type
+            data: '{{select_lab}}'
+      - from: 
+          dynamic_model__some_recs:
+            return: return_result
+        attributes:
+          a_value: value_from_result
     with: 
       field_name: 'now()'
       field_name_2: 'literal value'

@@ -1,31 +1,16 @@
-<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase')}}fo-no-downcase{{/if}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')}}fo-view-original-case{{/if}}</script>
-
-<script id="field_capitalize" type="text/x-handlebars-template" class="hidden handlebars-partial">true</script>
-
 <script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-  {{#if no_caption_before}}
-  {{else is key 'in' caption_before_keys}}
-    {{#if (fpa_state_item 'dialog_before' (underscore name) vdef_version key)}}
-      {{{fpa_state_item 'dialog_before' (underscore name) vdef_version key}}}
-    {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
-    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}</li>
-    {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
-    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}</li>
-    {{/if}}
-  {{/if}}
+  {{> common_template_result_field_caption_or_dialog caption_resource_name=(underscore (or name_with_option_type name)) dialog_resource_name=(underscore name) }}
   
 {{! #######  Show fields - the order of processing matches that used for edit fields}}
   {{#is field_type 'includes' '^placeholder_' }}
-    <li class="{{> field_result_class}} hidden placeholder-field-item" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong></strong></li>
+    <li class="{{> field_result_class}} hidden placeholder-field-item" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^placeholder_' }} <strong></strong></li>
   {{else is field_type 'includes' 'embedded_report_on_master_id_'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="url-link-value">
       <a href="/reports/{{replace key 'embedded_report_on_master_id_' ''}}?embed=true&search_attrs[list_id]={{result_data.master_id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
     </span></strong></li>
   {{else is field_type 'includes' 'embedded_report_'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="url-link-value">
       <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
     </span></strong></li>
   {{else is field_type 'includes' 'embed_resource_'}}
@@ -33,15 +18,15 @@
 
 {{! #######  start with redcap_ -- others not listed here will be handled by the remaining conditions successfully}}
   {{else is field_type 'includes' '^redcap_select' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^redcap_select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^redcap_select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^redcap_radio' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^redcap_radio_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^redcap_radio_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^redcap_tag_select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^tag_select_' }}
       {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
     </li>
   {{else is field_type 'includes' '^redcap_true_false'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^redcap_true_false' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^redcap_true_false' }}
     {{#if this_value}}
       <div class="button-radio-view">
         <span class="val-checked"></span><strong>True</strong>
@@ -66,7 +51,7 @@
     {{/if}}
     </li>    
   {{else is field_type 'includes' '^redcap_yes_no'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^redcap_yes_no' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^redcap_yes_no' }}
     {{#if this_value}}
       <div class="button-radio-view">
         <span class="val-checked"></span><strong>Yes</strong>
@@ -91,7 +76,7 @@
     {{/if}}
     </li>
   {{else is field_type '===' 'redcap_file'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }}
       {{#if this_value}}      
       <a class="redcap-file-use-secure-view" href="/redcap/project_user_requests/{{name}}/download_field_file/{{key}}/{{result_data.record_id}}">{{this_value}}</a>
       {{/if}}
@@ -104,16 +89,16 @@
   {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config}}
   {{else is field_type "message"}}
   {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config }}
-  {{else is (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'field_type') 'notes' }}
+  {{else is (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'edit_as' 'field_type') 'notes' }}
   {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}
   {{else is field_type 'country' }}
     <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
-      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      {{> field_label label_resource_name=(or name_with_option_type name) }}
       <strong>{{#if (not this_value)}}{{else if (fpa_state_item 'special_field_options' 'address_country' this_value)}}{{fpa_state_item 'special_field_options' 'address_country' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
     </li>
   {{else is field_type 'us_state' }}
     <li class="{{> field_result_class}} is--us-state-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
-      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      {{> field_label label_resource_name=(or name_with_option_type name) }}
       <strong>{{#if (not this_value)}}{{else if (fpa_state_item 'special_field_options' 'us_state' this_value)}}{{fpa_state_item 'special_field_options' 'us_state' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
     </li>
   {{else is field_type "data" }}
@@ -135,14 +120,14 @@
 
   {{else is field_type 'rank' }}
     {{#if hide_rank_badge }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
     {{/if}}
   {{else is field_type "protocol_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" }}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" }}</strong></li>
   {{else is field_type "sub_process_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true"}}</strong></li>
   {{else is field_type "protocol_event_id"}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true"}}</strong></li>
   {{else is field_type "tracker_history_id"}}
     {{#unless hide_tracker_panel}}
       {{#if result_data.tracker_histories}}
@@ -178,7 +163,7 @@
 
 {{! ####### Field name starts with ...}}
   {{else is field_type 'includes' '^multi_' }}
-    <li class="{{> field_result_class}} is--select-field is--multi" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_' }}
+    <li class="{{> field_result_class}} is--select-field is--multi" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^multi_' }}
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this '!in' "0,false,no" }}
@@ -193,7 +178,7 @@
   </li>
 
   {{else is field_type 'includes' '^fixed_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^fixed_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^e_signed_' }}
     {{#with result_data}}
     {{> e_signature_parts name=(pluralize ../name) value=../this_value }}
@@ -201,23 +186,23 @@
 
 
   {{else is field_type 'includes' '^tag_select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^tag_select_' }}
       {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
     </li>
 
   {{else is field_type 'includes' '^select_record_from_table_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_record_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_from_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_record_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_id_from_table_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_record_id_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_id_from_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_record_id_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
 
   {{else if (get result_data._general_selections key this_value 'name')}}
-    <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
 
 {{! #######  Field ends with ... }}
   {{else is field_type 'includes' "_notes$"}}
@@ -228,10 +213,10 @@
   {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}
 
   {{else is field_type 'includes' '_selection$' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_selection$' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
 
   {{else is field_type 'includes' '_attribs$' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_attribs$' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_attribs$' }}
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this '!in' "0,false,no" }}
@@ -247,46 +232,46 @@
 
 
   {{else is field_type 'includes' '_blank_yes_no_dont_know$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_yes_no_dont_know$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_blank_yes_no$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_blank_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_yes_no$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_no_yes$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_no_yes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_no_yes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_check$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_check$' }} <strong>{{#is this_value true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_check$' }} <strong>{{#is this_value true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
   {{else is field_type 'includes' '_time$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{local_time this_value}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>{{local_time this_value}}</strong></li>
   {{else is field_type 'includes' '_notes$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_notes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='_notes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '_description$' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
 
   {{else is field_type 'includes' '_master_id$'}}
     {{! Show a link to another master record }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="url-link-value">
     <a href="/masters/{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
 
   {{else is field_type 'includes' '_url$'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="url-link-value">
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
   {{else is field_type 'includes' '_link$'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="url-link-value">
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
   {{else is field_type 'includes' '_rank$' }}
     {{#if hide_rank_badge }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
     {{/if}}
 
 {{! #######  Type is ... }}
   {{else is this_value 'typeof' 'boolean'}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>
     {{#if this_value}}
       <span class="glyphicon glyphicon-check val-checked"></span>
     {{else}}
@@ -296,7 +281,7 @@
 
   {{else is this_value 'typeof' 'object'}}
       <li class="list-group-item typeof-object-field result-field-container {{hyphenate full_name}}-{{key}}" data-field-name="{{key}}">
-      {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}
+      {{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key  'show_expanded')}}
       {{else}}
       <div class="view-object-label">{{humanize key}}
         {{#is this_value.length 0}}
@@ -314,7 +299,7 @@
         {{/each}}
       </ul>
       {{else}}
-      <ul class="view-object collapse {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}uncollapse-children in{{/if}}" id="view-object-{{get_random}}" aria-expanded="{{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}true{{else}}false{{/if}}">
+      <ul class="view-object collapse {{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key  'show_expanded')}}uncollapse-children in{{/if}}" id="view-object-{{get_random}}" aria-expanded="{{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key  'show_expanded')}}true{{else}}false{{/if}}">
       {{#each this_value}}
       {{#with ../template_config}}
       {{> common_template_result_field no_caption_before="true" this_value=../this key=(to_string @key) name=name field_type=(lookup this.field_edit_as_types @key) template_config=this result_data=../result_data show_raw_text=true}}
@@ -325,16 +310,16 @@
 
       </li>
   {{else is (lookup field_types @key) '===' 'time'}}    
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="time" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{local_time this_value}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="time" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>{{local_time this_value}}</strong></li>
   {{else is (lookup field_types @key) '===' 'date'}}    
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-date-local="true">{{this_value}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong data-format-date-local="true">{{this_value}}</strong></li>
   {{else is (lookup field_types @key) '===' 'datetime'}}    
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-datetime-local="true">{{this_value}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong data-format-datetime-local="true">{{this_value}}</strong></li>
 
   {{! #######  Field has alt_options defined, but should have been caught by a previous select field above }}
-    {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
-      <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
-      {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
+    {{else if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
+      <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>
+      {{#each (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
         {{#is ../this_value '==' this }}{{@key}}{{/is}}
       {{/each}}
       </strong></li>
@@ -343,7 +328,7 @@
   {{else is this_value '===' null}}
 {{! #######  Default! }}
   {{else}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true" view_with_formats=(fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_with_formats')}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true" view_with_formats=(fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_with_formats')}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}
@@ -357,19 +342,26 @@
 
 </script>
 
-<script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
-{{#is 'all_fields' 'in' template_config.caption_before_keys}}
-  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore name) vdef_version 'all_fields' 'show_caption'}}}</li>
-{{/is}}
-
+<script id="common_template_result_fields_filter" type="text/x-handlebars-template" class="hidden handlebars-partial">
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
-  {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
+  {{#with ../template_config}}
   {{> common_template_result_field this_value=../this key=(to_string @key) field_type=(lookup this.field_edit_as_types @key) name=../../name template_config=this result_data=../../result_data}}
   {{/with}}
-
 {{/filter}}
 {{/if}}
+</script>
+
+<script id="common_template_result_caption_before_all_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{#is 'all_fields' 'in' template_config.caption_before_keys}}
+  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore (or name_with_option_type name)) vdef_version 'all_fields' 'show_caption'}}}</li>
+{{/is}}
+</script>
+
+
+<script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{> common_template_result_caption_before_all_fields template_config=(fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version)}}
+{{> common_template_result_fields_filter template_config=(fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version)}}
 </script>
 
 

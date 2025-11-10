@@ -1,4 +1,4 @@
 module FsException
-  class Config < Exception
+  class Config < StandardError
   end
 end

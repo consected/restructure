@@ -17,8 +17,12 @@
     @user_emails[a.id.to_s] = a.email
   end
 
-  @resource_names_for_type = Admin::UserAccessControl.resource_names_by_type
-
+  begin
+    @resource_names_for_type = Admin::UserAccessControl.resource_names_by_type
+  rescue StandardError => e
+    Rails.logger.error "Failed to get resource names for type in user access controls index: #{e}"
+    Rails.logger.error e.short_string_backtrace
+  end
 
 %>
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>

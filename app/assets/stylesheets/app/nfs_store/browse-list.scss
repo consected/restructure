@@ -75,6 +75,12 @@
       color: gray;
       padding-left: 0.6em;
     }
+
+    .file-entry-not-downloadable-reason {
+      font-style: italic;
+      color: gray;
+      padding-left: 0.6em;
+    }
   }
 
   .container-list-file-count {
@@ -173,6 +179,29 @@
 .container-browser.browser-hide-classifications {
   .browse-entry-classifications {
     display: none;
+  }
+}
+
+.container-browser {
+  .is-file-status-folder,
+  .is-file-status-folder-items {
+    background: #ededed;
+    padding: 4px;
+  }
+
+  .container-folder-items.is-file-status-folder-items {
+    .container-entry {
+      word-wrap: normal;
+      white-space: normal;
+    }
+
+    .file-entry-not-downloadable {
+      display: none;
+    }
+    .browse-filename {
+      background: transparent;
+      position: relative;
+    }
   }
 }
 

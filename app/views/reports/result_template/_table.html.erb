@@ -4,8 +4,9 @@
   @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
   @result_tables = result_tables if local_assigns[:result_tables]
   @runner = runner if local_assigns[:runner]
+  @embedded_report = runner if local_assigns[:embedded_report]
   setup_column_options
-  is_editable = editable?
+  is_editable = editable? unless embedded_report
   is_editable_class = is_editable ? 'row-editable' : 'row-not-editable'
   # Set current user this way, since background jobs that need to access it may not have the same context
   current_user = @report.current_user

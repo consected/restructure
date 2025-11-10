@@ -96,6 +96,10 @@ module Dynamic
       options_attr_name = self.class.option_configs_attr.to_s
       v1 = attribute_before_last_save(options_attr_name)
       v2 = attributes[options_attr_name]
+      v1 = v1.sub("---\n", '')
+      v2 = v2.sub("---\n", '')
+      v1 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v1)
+      v2 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v2)
       v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
       v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
       if v1

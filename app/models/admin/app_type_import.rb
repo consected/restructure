@@ -82,7 +82,6 @@ class Admin
             # Log error but continue
             Rails.logger.warn("App type import error - skip fail and not dry run - : #{e.message}")
           end
-  
         else
           # Fail on first error and rollback, or if a dry run always rollback
           Admin::AppType.transaction do
@@ -164,7 +163,9 @@ class Admin
 
       import_config_sub_items 'valid_user_access_controls',
                               %w[resource_type resource_name role_name],
-                              add_vals: { allow_bad_resource_name: true }
+                              add_vals: { allow_bad_resource_name: true },
+                              compare_blanks_on: ['role_name'],
+                              disable_if_disabled_user: true
 
       app_type.reload
       self.new_id = app_type.id
@@ -181,11 +182,12 @@ class Admin
     def app_type_config
       return @app_type_config if @app_type_config
 
-      if format == :json
+      case format
+      when :json
         config = JSON.parse(config_text)
-      elsif format == :yaml
+      when :yaml
         config = YAML.safe_load(config_text)
-      elsif format == :raw
+      when :raw
         config = config_text.deep_stringify_keys
       else
         raise FphsException, 'specify app type import format as one of :json or :yaml'
@@ -212,10 +214,10 @@ class Admin
     # Use within a transation to add an exclusive update lock on the app_types table.
     # Will return immediately with an exception if another transaction has locked the table.
     def lock_app_types_table
-      Admin::AppType.connection.execute("LOCK TABLE app_types IN SHARE UPDATE EXCLUSIVE MODE NOWAIT")
-    rescue ActiveRecord::LockWaitTimeout => e
-      raise FphsException, "Cannot import app type - another import is currently in progress"      
-    end  
+      Admin::AppType.connection.execute('LOCK TABLE app_types IN SHARE UPDATE EXCLUSIVE MODE NOWAIT')
+    rescue ActiveRecord::LockWaitTimeout
+      raise FphsException, 'Cannot import app type - another import is currently in progress'
+    end
 
     #
     # Find or create an app type based on a configuration,
@@ -266,9 +268,14 @@ class Admin
     # @param [Hash] add_vals - a hash representing attribute / values to add to every imported item
     # @param [Array[String]] filter_on - list attributes to compare between new and existing items to identify matches
     #                                  - these do not need to exist in the database, and can be methods
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
+    # @param [true|false] disable_if_disabled_user - if true, and the sub item has a user that is disabled then
+    #                                                the item will be disabled too
     # @return [Array{Object}] returns an array of the objects representing new and updated sub items
     def import_config_sub_items(key, lookup_existing_with_fields,
-                                reject: nil, add_vals: {}, filter_on: nil)
+                                reject: nil, add_vals: {}, filter_on: nil, compare_blanks_on: nil,
+                                disable_if_disabled_user: false)
       results = []
       failures = []
       self.current_key = key
@@ -286,9 +293,12 @@ class Admin
         user = app_type_item_user(config_item['user_email'])
         next if user == :unknown
 
-        app_type_item = find_app_type_item(lookup_existing_with_fields, filter_on)
+        app_type_item = find_app_type_item(lookup_existing_with_fields, filter_on:, compare_blanks_on:)
         new_vals = new_values_from_config(lookup_existing_with_fields, add_vals)
         new_vals[:user] = user if user
+
+        new_vals[:disabled] = true if disable_if_disabled_user && (user&.disabled? || app_type_item&.user&.disabled?)
+
         begin
           app_type_item, item_changes = create_or_update(app_type_item, new_vals)
         rescue StandardError, FphsException => e
@@ -359,10 +369,16 @@ class Admin
     #
     # Conditions used to lookup existing items
     # @param [Array] lookup_existing_with_fields - fields used to identify existing items
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
     # @return [Hash] conditions for #where
-    def app_type_item_conditions(lookup_existing_with_fields)
+    def app_type_item_conditions(lookup_existing_with_fields, compare_blanks_on = nil)
       cond = config_item.slice(*lookup_existing_with_fields)
-      cond.each { |k, v| cond[k] = nil if v.blank? }
+      cond.each do |k, v|
+        cmp = nil
+        cmp = [nil, ''] if compare_blanks_on&.include?(k)
+        cond[k] = cmp if v.blank?
+      end
       user = app_type_item_user(config_item['user_email'])
       cond[:user] = user if user
       cond
@@ -396,9 +412,11 @@ class Admin
     # specified in the config item
     # @param [Array] lookup_existing_with_fields - fields used to identify existing items
     # @param [Array] filter_on - optional list of attributes/methods from the config item to refine the filter
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
     # @return [ActiveRecord::Model]
-    def find_app_type_item(lookup_existing_with_fields, filter_on = nil)
-      self.found_with_conditions = cond = app_type_item_conditions(lookup_existing_with_fields)
+    def find_app_type_item(lookup_existing_with_fields, filter_on: nil, compare_blanks_on: nil)
+      self.found_with_conditions = cond = app_type_item_conditions(lookup_existing_with_fields, compare_blanks_on)
       app_type_item = dyn_cname.where(cond).reorder('').order('disabled asc nulls first, id desc')
 
       filter = config_item.slice(*filter_on) if filter_on

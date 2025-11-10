@@ -115,4 +115,14 @@
       display: inline-block;
     }
   }
+  .uploaded-files-outer {
+    display: none;
+
+    .uploaded-files-control {
+      margin: 8px 16px;
+      span {
+        font-weight: bold;
+      }
+    }
+  }
 }

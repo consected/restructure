@@ -308,7 +308,9 @@ module SetupHelper
 
   def self.setup_test_app
     MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
-    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+    ata = Admin::AppType.active
+    admin = Admin.active.first
+    ata.where(label: 'Brain Health Study').or(ata.where(name: 'bhs')).each { |a| a.update!(disabled: true, label: 'BHS OLD', name: "bhs-old-#{a.id}", current_admin: admin) }
     reload_configs
 
     check_activity_logs
@@ -373,15 +375,10 @@ module SetupHelper
     setup_ref_data_app_nfs
   end
 
-  # Setup an app from an import configuration (json or yaml)
+  # Setup an app database structure
   #
-  # @param [String] name the name of the app to be set
   # @param [String] sql_source_dir location of the SQL files to be run
   # @param [String] sql_files list of SQL files to be run through PSQL
-  # @param [String] config_dir location of the configuration file
-  # @param [String] config_fn filename of the configuration file (must have file extension .json or .yaml)
-  # @return [Array(Admin::AppType, Hash)] returns the results from Admin::AppTypeImport.import_config
-  #
   def self.setup_app_db(sql_source_dir, sql_files)
     sql_files.each do |fn|
       sqlfn = Rails.root.join(sql_source_dir, fn)
@@ -422,7 +419,8 @@ module SetupHelper
     res = Admin::AppTypeImport.import_config(File.read(Rails.root.join(config_dir, config_fn)),
                                              admin,
                                              name:,
-                                             format:)
+                                             format:,
+                                             force_update: true)
 
     reload_configs
 
