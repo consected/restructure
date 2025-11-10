@@ -242,7 +242,7 @@ _fpa = {
       return;
     }
 
-    if (template_name.indexOf('-OPTION_TYPE-')) {
+    if (template_name.indexOf('-OPTION_TYPE-') > 0) {
 
       var option_type;
       for (var k in data) {

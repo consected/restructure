@@ -1,4 +1,44 @@
 <%
+
+# Provides the column or row container for each category or dynamic model list
+# in a panel, or dynamic models with the category "default" in the Details panel.
+# This is used to render dynamic model lists based on specific dynamic model searches auto-loaded
+# within panels. The master details panel doesn't use this for participant info, alt info,
+# contact details or addresses, as those are rendered based on the returned master record data.
+# Within that panel, only the dynamic models with category "details" are rendered using this partial.
+# All other dynamic model category panels use this partial to render their dynamic model lists.
+#
+# This provides some outdated and confusing orientation handling, for backward compatibility. 
+# It is recommended that the panel view option for orientation is set directly for dynamic model panels.
+# That said, it is possible that anything other than 'horizontal' should just be set to 'none' to ensure
+# a column layout with sublist controls.
+#
+# It should be noted that there is some overlap with the partial `common_template_list` 
+# found in `views/common_templates/common_template_list.html.erb`,
+#
+# -- More details --
+#
+# The orientation set based on the first of the following that is defined:
+# - The panel has a view option for orientation set to 'horizontal' => 'horizontal'
+# - The dynamic model has an orientation (based on category name - see below) of horizontal => 'horizontal'
+# - The panel view option for orientation is set to some other value => use value
+#
+#
+# It should be noted that setting dynamic model orientation based on category value is generally unreliable,
+# and setting it directly in the panel view options is preferred. If not set in the panel view options,
+# the DynamicModel.orientation(category) method is used to determine the orientation, 
+# returning 'horizontal' if a category value includes the string 'history' or '-records', 
+# or 'vertical' otherwise.
+#
+# The sublist_controls partial is only shown if the orientation (set by the panel view options)
+# is 'none', or if not set the dynamic model category does not have an orientation set to horizontal.
+# Setting the panel view option orientation to 'none' forces the sublist controls to be shown in dynamic
+# model lists. Otherwise there is a risk that a dynamic model category name might break the orientation
+# and the sublist controls display.
+#
+# NOTE: dynamic models without a `foreign key name` set will not be auto-loaded, to avoid loading
+# large numbers of unrelated records.
+
 unless defined? panel
   panel = nil
 end
@@ -20,21 +60,24 @@ category_models.each do |m|
     orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
 
     if orientation.in?(['columns'])
+    # Just aligns a dynamic model list vertically. Sublist controls must be handled externally 
+    # (such as is done in the Master Details panel for participant info, alt info, contact details and address).
 %>
-      <div class="col-md-6 common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-
+      <div class="masters--dynamic-model-blocks col-md-6 common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
 <%
     elsif orientation && orientation != 'none'
+    # Just aligns a dynamic model list horizontally. Sublist controls must be handled externally.
 %>
-      <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="masters--dynamic-model-blocks row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
 <% 
-    else 
-%>
-    <div class="<%= layout_item_block_sizes[:regular] %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
+    else # orientation is nil or 'none'
+    # Generally used to gernerate full markup for the dynamic model list column with sublist controls
+%>  
+    <div class="masters--dynamic-model-blocks-outer-alt-orientation <%= layout_item_block_sizes[:regular] %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
       <% unless hide_sl %>
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
       <% end %>
-      <div class="dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="masters--dynamic-model-blocks dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     </div>
 <%
     end

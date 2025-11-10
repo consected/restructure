@@ -26,10 +26,8 @@
   option_type_config = form_object_instance.option_type_config
 
 
-  unless defined? view_options
-    d = option_type_config
-    view_options = d.view_options if d
-    # view_options = {}
+  unless defined?(view_options) && view_options
+    view_options = option_type_config&.view_options
   end
   view_options ||= {}
   view_handlers = (view_options[:view_handlers] || [])
@@ -39,12 +37,14 @@
   # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
 
   if embedded
-    form_block = [:fields_for, :embedded_item, form_object_instance, {data: { view_handlers: view_handlers }}]
+    data_attrs = { view_handlers: view_handlers, option_type_config_name: option_type_config&.name }
+    form_block = [:fields_for, :embedded_item, form_object_instance, {data: data_attrs}]
     form_block_object = form_embed
   else
     edit_form_hash_val = edit_form_hash.dup || {}
     edit_form_hash_val[:html] ||= {}
     edit_form_hash_val[:html]["data-view-handlers"] = view_handlers if view_handlers.present?
+    edit_form_hash_val[:html]['data-option-type-config-name'] = option_type_config.name if option_type_config
     
     form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_val]
     form_block_object = self
@@ -53,7 +53,7 @@
 
   form_object_item_type_us = form_object_instance.item_type_us
 
-  unless defined? caption
+  unless defined?(caption) && caption
     if embedded
       caption = form_object_instance.human_name
     else
@@ -61,38 +61,30 @@
     end
   end
 
-  unless defined? caption_before
+  unless defined?(caption_before) && caption_before
     if embedded
-      d = option_type_config
-      caption_before = d.caption_before if d
+      caption_before = option_type_config&.caption_before
     else
       caption_before = {}
     end
   end
   caption_before ||= {}
 
-  unless defined? dialog_before
+  unless defined?(dialog_before) && dialog_before
     if embedded
-      d = option_type_config
-      dialog_before = d.dialog_before if d
-    else
-      dialog_before = {}
+      dialog_before = option_type_config&.dialog_before
     end
   end
   dialog_before ||= {}
 
-  unless defined? labels
+  unless defined?(labels) && labels
     if embedded
-      d = option_type_config
-      labels = d.labels if d
-    else
-      labels = {}
+      labels = option_type_config&.labels
     end
   end
   labels ||= {}
 
   if caption.blank?
-    # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
       caption = object_instance.human_name
   end
 
@@ -101,26 +93,17 @@
   end
 
   unless defined? save_action
-    d = option_type_config
-    save_action = d.save_action if d
-    save_action ||= { label: 'Save' }
+    save_action = option_type_config&.save_action
   end
 
+  save_action ||= { label: 'Save' }
   save_label = save_action[:label] || 'Save'
-
   show_cancel = view_options[:show_cancel] if view_options
 
 
-  unless defined? item_list
-    if form_object_instance.class.respond_to? :readonly_params
-      readonly_params = form_object_instance.class.readonly_params
-    else
-      readonly_params = []
-    end
-    item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id] - readonly_params
+  unless defined?(item_list) && item_list
+    item_list = form_object_instance.edit_form_field_list
   end
-
-  item_list = item_list - [:tracker_history_id]
 
   unless defined? item_flags_after
     item_flags_after = nil
@@ -146,7 +129,7 @@
           <%= model_reference_fields form %>
 
           <% if caption_before[:select_reference] %>
-            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-select_reference select-reference-caption">
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-select_reference select-reference-caption" data-cb-field-name="select_reference">
               <%= show_caption_before :select_reference, caption_before %>
             </li>
           <% end %>
@@ -165,9 +148,15 @@
 
       <%= form_block_object.send(*form_block) do |form|%>
       <% form_embed = form if @embedded_item && !embedded %>
-      <% if @option_type_config && !embedded %>
+      <% if @option_type_config && !embedded 
+           unless @option_type_attr_name == :option_type && item_list.include?(:option_type)
+           # Skip showing the hidden field, since a visible field will be shown later
+      %>
         <%= form.hidden_field @option_type_attr_name, value: @option_type_name, data: {attr_name: 'option_type', option_type: @option_type_attr_name, object_name: form_object_item_type_us} %>
-      <% else %>
+      <% 
+           end
+         else 
+      %>
         <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
       <% end %>
       <%= model_reference_fields form %>
@@ -195,7 +184,7 @@
         <% end %>
 
         <% if caption_before[:all_fields] %>
-          <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-caption"><%= show_caption_before :all_fields, caption_before %></li>
+          <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-caption" data-cb-field-name="all_fields"><%= show_caption_before :all_fields, caption_before %></li>
         <% end %>
 
 
@@ -252,7 +241,7 @@
               showed_caption_before = true
               showed_caption_before_kl = caption_before[field_name_sym][:keep_label] ? 'caption-before-keep-label' : ''
           %>
-            <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>"
+            <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>" data-cb-field-name="<%= field_name_sym %>"
             ><%= show_caption_before field_name_sym, caption_before %></li>
           <% end %>
 
@@ -289,7 +278,7 @@
             </li>
           <% elsif caption_before[:submit]
           %>
-            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-submit">
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-submit" data-cb-field-name="submit">
               <%= show_caption_before :submit, caption_before %>
             </li>
           <% end %>

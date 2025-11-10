@@ -1,6 +1,19 @@
-<script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
+<%
+# Common templates for an individual result item, such as a dynamic model record.
+# Partials are embedded directly within result sublists in panels, or when an item is
+# created or saved (or cancelled during editing).
 
+%>
+
+<% # Produce HTML attributes to help identify the block of fields, applying tag substitutions to each value %>
+<script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
+<% # Get the result heading caption, applying tag substitutions %>
 <script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{run_template ../caption}}}{{/with}}</script>
+<% 
+  # Format extra CSS classes for the result item block. 
+  # Adds in the `template_class` value set by the standard mapping. 
+  # Will apply tag substitutions to the dynamic definition's `view_options.extra_class` value
+%>
 <script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{../template_class}} {{run_template ../extra_class}}{{/with}}</script>
 
 
@@ -41,9 +54,15 @@
 
 </script>
 
+<%
+  # Partial that sets up the template config for the display of a full dynamic result item, such
+  # as a dynamic model record, and passes the `result_data` as a specific parameter.
+  # Then it simply calls the following partial "common_template_result_inner" with appropriate parameters.
+  # Logging is included to help diagnose missing template configurations.
+%>
 <script id="common_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
-    {{> common_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
+  {{# with (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version )}}
+    {{> common_template_result_inner result_data=../result_data name=../name orig_name=../orig_name activity_log_references_name=../activity_log_references_name name_with_option_type=../name_with_option_type template_config=this _created=../_created vdef_version=../vdef_version}}
   {{else}}
     {{log 'template_config not found for the version information below'}}
     {{log fpa_state_item 'template_config' (underscore name) vdef_version}}
@@ -52,36 +71,49 @@
   {{/with}}
 </script>
 
+<%
+  # Partial that renders the full dynamic result item, such
+  # as a dynamic model record.
+  # This is called by the previous partial "common_template_result".
+  # The values of `this` are the `template_config` retrieved by the calling partial,
+  # which are actually built by the OptionConfigs::TemplateOptionMapping
+  # method for external identifiers, dynamic models and activity logs.
+%>
 <script id="common_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}
-  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
-
-  <div class="common-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" 
+  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" data-orig-name="{{orig_name}}" {{{ data_sort_str }}}> {{/is}}
+    {{log this}}
+  <div class="common-templates--result-item common-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" 
        data-model-data-type="{{model_data_type}}" 
-       id="{{hyphenate name}}-{{result_data.master_id}}-{{result_data.id}}" 
-       data-subscription="{{hyphenate name}}-edit-form-{{result_data.master_id}}-{{result_data.id}}" 
-       data-template="{{hyphenate name_with_option_type}}-result-template" 
-       data-item-class="{{item_class_name}}" 
+       id="{{hyphenate (or orig_name name)}}-{{result_data.master_id}}-{{result_data.id}}" 
+       data-subscription="{{#if orig_name}}{{hyphenate orig_name}}{{else}}{{hyphenate name}}{{/if}}-edit-form-{{result_data.master_id}}-{{result_data.id}}" 
+       data-template="{{hyphenate full_name}}-{{#if use_option_type}}OPTION_TYPE-{{/if}}result-template" 
+       data-item-class="{{item_class_name}}"
        data-sub-item="{{full_name}}" 
        data-sub-id="{{result_data.id}}" 
        data-item-id="{{result_data.item_id}}" 
        data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" 
        {{{ data_sort_str }}} 
-       data-preprocessor="{{name}}_edit_form" 
-       {{#each extra_data_attribs}}data-{{hyphenate this}}={{lookup ../result_data this}}{{/each}} 
+       data-preprocessor="{{or orig_name name}}_edit_form" 
+       {{#each extra_data_attribs}}data-{{hyphenate this}}="{{lookup ../result_data this}}"{{/each}} 
        data-human-name="{{>show_result_caption result_data=result_data}}"
        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
        data-def-version="{{def_version}}"
        data-embedded-item-def-version="{{result_data.embedded_item.def_version}}"
        >
   {{else}}
-  <span class="common-template-item-inner index-{{_created}} inner-{{hyphenate name}}-item {{../extra_class}} inner-{{is_activity_log_class}}" >
+  <span class="common-template-item-inner index-{{_created}} inner-{{hyphenate name}}-item {{../extra_class}} inner-{{is_activity_log_class}}"
+        {{#each extra_data_attribs}}data-{{hyphenate this}}="{{lookup ../result_data this}}"{{/each}} 
+        data-human-name="{{>show_result_caption result_data=result_data}}"
+        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
+        data-option-type-config-name="{{result_data.option_type}}"
+  >
   {{/was}}
   {{#caption_before_substitutions result_data }}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
     {{#unless item_list.length}}
       <li class="list-group-item {{name}}-{{name}}_id is-heading zero-item-heading">
-        {{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}
+        {{#with result_data}}{{>edit_item_button resource=(or ../orig_name ../name)  edit_button_href=../edit_button_href}}{{/with}}
         <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
       </li>
       {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'all_fields' )}}
@@ -91,7 +123,7 @@
     {{else}}
       <li class="list-group-item is-heading object-results-header {{#is model_data_type 'external_identifier' }}header-for-external-identifier{{else}}header-for-gen-model hide-if-children-invisible{{/is}}">
         {{#with result_data}}
-          {{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}
+          {{>edit_item_button resource=(or ../orig_name ../name) edit_button_href=../edit_button_href}}
           {{#unless ../hide_rank_badge }}
             {{> rank_button name_h=(hyphenate ../name) }}
           {{/unless}}
@@ -105,7 +137,7 @@
             {{/unless}}
           {{/is}}
         {{/with}}
-        {{#is model_data_type 'external_identifier' }}
+        {{#is model_data_type 'external_identifier'}}
           {{#if external_id_options}}
           <h4 class="list-group-item-heading external-id-heading">
             <span>{{>show_result_caption result_data=result_data}}</span> <strong>{{#if external_id_options.formatter}}{{{format_with external_id_options.formatter (lookup result_data external_id_options.attribute)}}}{{else}}{{pretty_string (lookup result_data external_id_options.attribute) return_string="true"}}{{/if}} </strong>
@@ -131,7 +163,11 @@
     {{/unless}}
 
     {{#with result_data}}
-    {{> (concat 'activity_log_' (underscore ../name) '_references') }}
+      {{#if ../activity_log_references_name}}
+      {{> (underscore ../activity_log_references_name) }}
+      {{else}}
+      {{> (concat 'activity_log_' (underscore ../name) '_references') }}
+      {{/if}}
     {{/with}}
 
     {{#if item_list.length}}

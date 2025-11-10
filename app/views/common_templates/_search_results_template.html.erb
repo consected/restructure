@@ -1,4 +1,13 @@
 <%
+  # Render the templates used for the display of results in participant Details panel and
+  # all other dynamic model definitions:
+  # - common_template_result
+  # - common_template_list
+  #
+  # It also generates inline scripts for state, show_if, caption_before, labels and
+  # template_config for each dynamic model definition.
+  #
+  # This partial is called by a range of specific views
 
   unless defined?  base_route_segments
     base_route_segments = nil
@@ -103,6 +112,10 @@
     full_name = name
   end
 
+  unless defined? template_name
+    template_name = "#{full_name}-OPTION_TYPE"
+  end
+
   unless defined? item_class_name
     item_class_name = full_name
   end
@@ -199,6 +212,13 @@
     name_with_option_type = nil
   end
   name_with_option_type ||= name
+
+  unless defined? pluralize_name_with_option_type
+    pluralize_name_with_option_type = nil
+  end
+  pluralize_name_with_option_type ||= name.pluralize
+
+  activity_log_references_name = "activity_log_#{name.underscore}_references"
   
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
@@ -332,12 +352,13 @@
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>,
     base_route_segments: '<%= base_route_segments %>',
     base_route_short_name: '<%= base_route_short_name %>',
-    <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',<% end%>
+    <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',
+    use_option_type: true<% end %>
   }
 
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
-  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> || _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>;
 <% end %>
 
 <% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
@@ -345,23 +366,22 @@
   _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
 <% end %>
 
-  _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
-  <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.show_if.forms['<%=name_with_option_type%>'] = _fpa.show_if.forms['<%=name_with_option_type%>'] || {};
-  <% end %>
+  _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
 
   <% if full_name.to_s.end_with?('_primary') %>
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
-  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>;
   <% end %>
-  _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+
   <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-  _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+  _fpa.show_if.forms.<%=full_name.underscore%> = _fpa.show_if.forms.<%=full_name.underscore%> || {};
+  _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
   <% end %>
 
   <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == 'default' %>
-  _fpa.show_if.forms['<%=full_name%>_default'] = _fpa.show_if.forms['<%=full_name%>'];
-  _fpa.show_if.forms['<%=full_name%>_default'].<%=vdef_version%> = _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%>;  
+  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
+  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
   <% end %>
   
 </script>
@@ -400,16 +420,16 @@
 
 <script id="<%=name_with_option_type.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
-    {{> common_template_result name='<%=name%>' result_data=this}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
 </script>
 
 <script id="<%=full_name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
 </script>
 
 <script id="<%=full_name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v') compact=true prevent_create=true }}
 </script>
 
 <% end %>

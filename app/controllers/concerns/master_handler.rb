@@ -237,6 +237,8 @@ module MasterHandler
       l = dopt.labels
       db = dopt.dialog_before
       vo = dopt.view_options
+      item_list = object_instance.edit_form_field_list
+      sa = dopt.save_action
     end
 
     {
@@ -244,7 +246,9 @@ module MasterHandler
       caption_before: cb,
       labels: l,
       dialog_before: db,
-      view_options: vo
+      view_options: vo,
+      item_list:,
+      save_action: sa
     }
   end
 

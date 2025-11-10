@@ -14,12 +14,15 @@ module OptionConfigs
       formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"' if formatter.blank? && !pattern.blank?
 
       field_list = def_record.field_list_array
-      view_options = option_type_config.view_options
+      view_options = option_type_config.view_options || {}
 
       plural_name = external_id_type.plural_name
 
       can_create = current_user.has_access_to?(:create, :table, plural_name)
       can_edit = can_create || current_user.has_access_to?(:edit, :table, plural_name)
+
+      full_name = def_record.item_type_name
+      item_list = option_type_config.fields || field_list.dup
 
       default_options = option_type_config
       view_options = default_options.view_options
@@ -28,14 +31,17 @@ module OptionConfigs
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || external_id_type.label,
         button_label: option_type_config.button_label || external_id_type.label,
-        name: external_id_type.name.underscore,
-        full_name: external_id_type.name.underscore,
+        name_with_option_type: "#{full_name}_#{option_type_config.name}",
+        plural_name_with_option_type: "#{full_name.pluralize}_#{option_type_config.name}",
+        name: full_name,
+        full_name: full_name,
         resource_name: def_record.resource_name,
+        option_type_config_name: option_type_config.name,
         implementation_class: def_record.implementation_class,
         model_data_type: :external_identifier,
         prevent_edit: external_id_type.prevent_edit? || can_edit,
         prevent_create: external_id_type.prevent_create? || !can_create,
-        item_list: field_list,
+        item_list:,
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,
         labels: option_type_config.labels,
@@ -96,6 +102,7 @@ module OptionConfigs
         caption: view_options[:header_caption] || def_record.name,
         button_label: default_options.button_label,
         name_with_option_type: "#{full_name}_#{option_type_config.name}",
+        plural_name_with_option_type: "#{full_name.pluralize}_#{option_type_config.name}",
         name: full_name,
         full_name:, # "#{full_name}_#{option_type_config.name}",
         resource_name: "#{def_record.resource_name}__#{option_type_config.name}",
@@ -116,10 +123,9 @@ module OptionConfigs
         embed: direct_embed_type(def_record, option_type_config),
         extra_class: view_options[:extra_class],
         template_class: nil,
-        extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
+        extra_data_attribs: field_list.include?('rec_type') ? %i[rec_type option_type] : [:option_type],
         extra_options_config: option_type_config,
         column_defs: def_record.implementation_class&.columns_hash,
-        extra_data_attribs: [:option_type],
         option_configs: def_record.option_configs,
         base_route_segments: def_record.base_route_segments,
         base_route_short_name: def_record.base_route_short_name

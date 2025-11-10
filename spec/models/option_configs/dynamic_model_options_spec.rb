@@ -408,4 +408,86 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     # The raw field configs remain
     expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
   end
+
+  it 'shows different view options' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        # The default option type is a special case.
+        # When no fields are specified, so they are all included
+        # All other option types must specify fields to include
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields
+          test1: has a caption before test1
+            # This will be overridden
+          test2: has a caption before test2
+            # This will be merged into the field_configs def
+
+      view_1:
+        # No fields are specified, so none are included
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields in view_1
+          test2: has a caption before test2
+
+      view_2:
+        fields:
+          - test2
+          - placeholder_view_2
+        field_configs:
+          placeholder_view_2:
+            caption_before: placeholder caption before for view_2
+            show_if:
+              test2: show placeholder_view_2
+          test1:
+            caption_before: not shown
+          test2:
+            caption_before: has a caption before test2
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+    expect(dmdef.default_options.fields).to eq(dmdef.field_list_array)
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
+    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
+    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
+    expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
+
+    view_1_options = dmdef.option_type_config_for(:view_1)
+    expect(view_1_options.fields).to be_empty
+    expect(view_1_options.show_if[:test1]).to be_a Hash
+    expect(view_1_options.show_if[:test1]).to eq(never: true)
+    expect(view_1_options.caption_before[:all_fields]).to be_a Hash
+    expect(view_1_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields in view_1</p>')
+    expect(view_1_options.caption_before[:test1]).to be_a Hash
+    expect(view_1_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(view_1_options.caption_before[:test2]).to be_a Hash
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+
+    view_2_options = dmdef.option_type_config_for(:view_2)
+    expect(view_2_options.fields).to eq(%w[test2 placeholder_view_2])
+    expect(view_2_options.field_configs[:placeholder_view_2][:caption_before][:caption]).to eq('<p>placeholder caption before for view_2</p>')
+    expect(view_2_options.field_configs[:placeholder_view_2][:show_if]).to eq(test2: 'show placeholder_view_2')
+    expect(view_2_options.caption_before[:test1][:caption]).to eq('<p>not shown</p>')
+    expect(view_2_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_2_options.show_if[:placeholder_view_2]).to eq(test2: 'show placeholder_view_2')
+  end
 end

@@ -626,6 +626,30 @@ module HandlesUserBase
     update! disabled: true
   end
 
+  #
+  # Get the full field list for the common template edit form.
+  # If there is am options config defined, use the field list defined there,
+  # otherwise fall back to the default permitted params.
+  # Remove any readonly params from the list, as well as standard fields.
+  # @return [Array<Symbol>] The list of fields for the edit form.
+  def edit_form_field_list
+    dopt = option_type_config || self.class.default_options
+    item_list = if dopt
+                  dopt.fields
+                else
+                  self.class.permitted_params
+                end
+
+    readonly_params = if self.class.respond_to? :readonly_params
+                        self.class.readonly_params
+                      else
+                        []
+                      end
+
+    item_type_id = "#{item_type}_id".to_sym
+    item_list - readonly_params - [:id, :master_id, :item_id, :tracker_history_id, item_type_id]
+  end
+
   protected
 
   #

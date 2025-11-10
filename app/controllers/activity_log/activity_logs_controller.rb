@@ -238,7 +238,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def handle_option_type_config
     etp = params[:extra_type]
     etp = params[:extra_log_type] if etp.blank?
-    etp = object_instance.extra_log_type if etp.blank?
+    etp = object_instance&.extra_log_type if etp.blank?
     @is_activity_log_option_type = true
 
     etp = if etp.blank?
@@ -256,13 +256,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
     @option_type_name = etp
     # Get the options that were current when the form was originally created, or the current
     # options if this is a new instance
-    @option_type_config = if object_instance.persisted?
+    @option_type_config = if object_instance&.persisted?
                             object_instance.option_type_config
                           else
                             @implementation_class.definition.option_type_config_for(etp)
                           end
     @option_type_attr_name = :extra_log_type
-    object_instance.extra_log_type = @option_type_name unless object_instance.persisted?
+    object_instance.extra_log_type = @option_type_name unless object_instance.nil? || object_instance.persisted?
   end
 
   #
