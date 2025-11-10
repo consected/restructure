@@ -486,5 +486,131 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
         click_on 'Save'
       end
     end
+
+    # Test creation of a dynamic model and show a form with all available field types
+    # Although we don't exercise all the fields for data entry, showing them ensures that
+    # there isn't a regression in the UI.
+    it 'creates a dynamic model and tests _merge... and _override' do
+      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
+      dismiss_modal
+
+      expect(page).to have_css("#master-#{@master.id}")
+      expect(page).not_to have_css('.alert')
+
+      # Find the external ID tab
+      l = all('a[data-panel-tab="details"]').first
+      expect(l).not_to be nil
+      l.click
+
+      expect(page).to have_css("#details-#{@master_id}")
+      c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
+      expect(page).to have_css(c)
+      b = all(c).first
+      expect(b).not_to be nil
+
+      # Start by adding a new item
+      # The "new" form will be set to view_option = 'default'
+      # This shows a placeholder, 3 fields and a placeholder.
+      # The third field is only shown if the second field is set to 'Choice 2'
+      b.click
+
+      #
+      # View Type: default
+      #
+      expect_block.to have_new_form
+
+      dm_form_mode :new
+
+      within(new_form_css) do
+        sleep 2
+        expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        # Initially, field 3 should be hidden
+        expect_block.not_to have_input_field(field_name)
+
+        # The final placeholder shows
+        expect_block.to have_caption_before('placeholder_default_bottom', 'This is the default view placeholder at the bottom')
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'option_type'
+        expect_block.to have_field_label(field_name, 'View Type')
+        expect_block.to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_view_1_top')
+        expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+        fill_in 'Field 1 Label', with: 'Test string value'
+        select 'Choice 1', from: 'Field 2 Label'
+        sleep 1
+
+        field_name = 'field_3'
+
+        # Check third field is not shown
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.not_to have_field_label(field_name)
+
+        select 'Choice 2', from: 'Field 2 Label'
+        sleep 1
+        # Now the third field should appear
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 3 Label')
+        fill_in 'View Type', with: 'view_3'
+
+        click_on 'Save'
+      end
+
+      dm_form_mode :show
+      expect_block.to have_show_form(@resource_name)
+
+      field_name = 'field_1'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'field_2'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'field_3'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'field 3 in view 3')
+
+      field_name = 'field_4'
+      expect_block.to have_input_field(field_name)
+      # field_name = 'field_5'
+      # expect_block.to have_input_field(field_name)
+
+      expect_block.not_to have_caption_before('placeholder_view_1_top')
+      expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+      expect_block.to have_caption_before('placeholder_merge_default', 'This caption will remain set')
+      expect_block.to have_caption_before('placeholder_merge_override', 'Override with this caption')
+
+      # Click the edit button and check the edit form reappears correctly
+      click_edit_button_in(show_form_css)
+      expect_block.to have_edit_form(@resource_name)
+
+      # Set the value of field_5 to test the _override option.
+      within(edit_form_css) do
+        sleep 2
+        fill_in 'Field 5', with: 'never valid'
+        click_on 'Save'
+      end
+
+      expect(page).to have_css('.error-help', text: 'Entry is invalid. Expected value not to be : never valid')
+    end
   end
 end

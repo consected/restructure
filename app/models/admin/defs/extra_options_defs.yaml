@@ -191,7 +191,7 @@
   # Add preset values to a mass of fields on initialization of new items, or before
   # creating a reference.
   # `field_options.<field_name>.preset_value` and `field_options.<field_name>.blank_preset_value` are
-  # evalutated after this, and may override any settings here.
+  # evaluated after this, and may override any settings here.
   preset_fields:
     with_result: 
     # Map attributes from a related item to the target item.

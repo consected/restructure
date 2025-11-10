@@ -22,6 +22,23 @@ module TestOptionTypesDmSupport
           field_1:
             no_downcase: true
 
+      _merge_default:
+        field_configs:
+          placeholder_merge_default:
+            caption_before: Default caption will remain set
+
+      _merge_override:
+        field_configs:
+          placeholder_merge_override:
+            caption_before: Override with this caption
+
+      _override:
+        valid_if:
+          on_save:
+            not_any:
+              this:
+                field_5: never valid
+
       default:
         fields:
           - placeholder_default_top
@@ -87,6 +104,36 @@ module TestOptionTypesDmSupport
           field_5:
             show_if:
               field_4: choice v2-2
+
+      view_3:
+        fields:
+          - placeholder_override
+          - placeholder_merge_override
+          - placeholder_merge_default
+          - field_3
+          - field_4
+          - field_5
+        field_configs:
+          placeholder_override:
+            caption_before: This caption will be overridden
+          placeholder_merge_default:
+            caption_before: This caption will remain set
+          field_3:
+            labels: field 3 in view 3
+          field_4:
+            field_options:
+              edit_as:
+                field_type: select_field_4
+                alt_options:
+                  'Choice v2-1': choice v3-1
+                  'Choice v2-2': choice v3-2
+          field_5:
+            labels: Field 5
+
+        valid_if:
+          on_save:
+            always: true
+
     END_YAML
 
     DynamicModel.active.where(table_name: 'test_multi_options').reload.each { |dm| dm.disable!(@admin) }
