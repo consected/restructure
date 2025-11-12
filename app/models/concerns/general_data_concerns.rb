@@ -285,6 +285,7 @@ module GeneralDataConcerns
       extras[:methods] << :prevent_add_reference if respond_to? :prevent_add_reference
       extras[:methods] << :can_download? if respond_to? :can_download?
       extras[:methods] << :option_type if respond_to? :option_type
+      extras[:methods] << :default_option_type_name if respond_to? :default_option_type_name
       extras[:methods] << :alt_order if respond_to? :alt_order
       extras[:methods] << :user_preference if respond_to? :user_preference
 

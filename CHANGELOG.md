@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #722 - 2025-10-12
+
+- [Added] an dynamic definition option to allow the default option type name to be set to a value other than "default" - resolves #721
+
+### From Viva - PR #720 - 2025-10-12
+
+- [Added] tests for alternative option type field in dynamic definition - resolves #719
+
 ## [9.31.1] - 2025-11-10
 
 ### From Viva - PR #718 - 2025-11-10

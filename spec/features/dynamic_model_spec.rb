@@ -253,7 +253,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     # Test creation of a dynamic model and show a form with all available field types
     # Although we don't exercise all the fields for data entry, showing them ensures that
     # there isn't a regression in the UI.
-    it 'creates a dynamic model' do
+    it 'creates a dynamic model with option_type views' do
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
 
@@ -487,9 +487,8 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
       end
     end
 
-    # Test creation of a dynamic model and show a form with all available field types
-    # Although we don't exercise all the fields for data entry, showing them ensures that
-    # there isn't a regression in the UI.
+    # Test creation of a dynamic model that incorporates
+    # options with _default, _merge... and _override
     it 'creates a dynamic model and tests _merge... and _override' do
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
@@ -611,6 +610,516 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
       end
 
       expect(page).to have_css('.error-help', text: 'Entry is invalid. Expected value not to be : never valid')
+    end
+  end
+
+  describe 'dynamic model fields for multiple views using a different option type field name' do
+    before(:all) do
+      @resource_name = :dynamic_model__test_multi_options
+      set_up_feature
+      setup_multi_option_types_dm(option_type_field: 'alt_option_type')
+
+      expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
+      setup_access @resource_name, user: @user, app_type: @app_type
+      expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      Rails.application.routes_reloader.reload!
+    end
+
+    before :each do
+      validate_setup
+      login
+    end
+
+    # Test creation of a dynamic model and show a form with all available field types
+    # Although we don't exercise all the fields for data entry, showing them ensures that
+    # there isn't a regression in the UI.
+    it 'creates a dynamic model with option type views using a different option type field' do
+      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
+      dismiss_modal
+
+      expect(page).to have_css("#master-#{@master.id}")
+      expect(page).not_to have_css('.alert')
+
+      # Find the external ID tab
+      l = all('a[data-panel-tab="details"]').first
+      expect(l).not_to be nil
+      l.click
+
+      expect(page).to have_css("#details-#{@master_id}")
+      c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
+      expect(page).to have_css(c)
+      b = all(c).first
+      expect(b).not_to be nil
+
+      # Start by adding a new item
+      # The "new" form will be set to view_option = 'default'
+      # This shows a placeholder, 3 fields and a placeholder.
+      # The third field is only shown if the second field is set to 'Choice 2'
+      b.click
+
+      #
+      # View Type: default
+      #
+      expect_block.to have_new_form
+
+      dm_form_mode :new
+
+      within(new_form_css) do
+        sleep 2
+        expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        # Initially, field 3 should be hidden
+        expect_block.not_to have_input_field(field_name)
+
+        # The final placeholder shows
+        expect_block.to have_caption_before('placeholder_default_bottom', 'This is the default view placeholder at the bottom')
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.to have_field_label(field_name, 'View Type')
+        expect_block.to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_view_1_top')
+        expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+        fill_in 'Field 1 Label', with: 'Test string value'
+        select 'Choice 1', from: 'Field 2 Label'
+        sleep 1
+
+        field_name = 'field_3'
+
+        # Check third field is not shown
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.not_to have_field_label(field_name)
+
+        select 'Choice 2', from: 'Field 2 Label'
+        sleep 1
+        # Now the third field should appear
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+        click_on 'Save'
+      end
+
+      dm_form_mode :show
+      expect_block.to have_show_form(@resource_name)
+
+      expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+      field_name = 'field_1'
+      expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+      expect_block.to have_field_label(field_name, 'Field 1 Label')
+      expect_block.to have_input_field(field_name)
+
+      field_name = 'field_2'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 2 Label')
+      expect_block.to have_input_field(field_name, tagname: 'select')
+
+      field_name = 'field_3'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+      # Remaining fields are not listed
+      field_name = 'field_4'
+      expect_block.not_to have_input_field(field_name)
+      field_name = 'field_5'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'alt_option_type'
+      expect_block.to have_field_label(field_name, 'View Type')
+      expect_block.to have_input_field(field_name)
+
+      expect_block.not_to have_caption_before('placeholder_view_1_top')
+      expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+      # Click the edit button and check the edit form reappears correctly
+      click_edit_button_in(show_form_css)
+      expect_block.to have_edit_form(@resource_name)
+
+      within(edit_form_css) do
+        dm_form_mode :edit
+        expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.to have_field_label(field_name, 'View Type')
+        expect_block.to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_view_1_top')
+        expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+        # Now set the view type to 'view_1', which should show a different form in the next series of steps
+        fill_in 'View Type', with: 'view_1'
+        click_on 'Save'
+      end
+
+      #
+      # View Type: view_1
+      #
+      dm_form_mode :show
+      expect_block.to have_show_form
+      expect_block.to have_show_form(option_type: 'view_1')
+
+      expect_block.to have_caption_before('placeholder_view_1_top', 'This is view 1 placeholder at the top')
+
+      field_name = 'field_1'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 1 Label')
+      expect_block.to have_input_field(field_name)
+
+      field_name = 'field_2'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 2 Label')
+      expect_block.to have_input_field(field_name, tagname: 'select')
+
+      field_name = 'field_3'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.not_to have_input_field(field_name)
+
+      # Remaining fields are not listed
+      field_name = 'field_4'
+      expect_block.not_to have_input_field(field_name)
+      field_name = 'field_5'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'alt_option_type'
+      expect_block.not_to have_field_label(field_name)
+      expect_block.not_to have_input_field(field_name)
+
+      expect_block.not_to have_caption_before('placeholder_default_top')
+      expect_block.not_to have_caption_before('placeholder_default_bottom')
+
+      # Click the edit button and check the edit form reappears correctly
+      click_edit_button_in(show_form_css)
+      expect_block.to have_edit_form(option_type: 'view_1')
+
+      within(edit_form_css) do
+        dm_form_mode :edit
+        expect_block.to have_caption_before('placeholder_view_1_top', 'This is view 1 placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.not_to have_input_field(field_name)
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.not_to have_field_label(field_name)
+        expect_block.not_to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_default_top')
+        expect_block.not_to have_caption_before('placeholder_default_bottom')
+
+        select 'Choice v1-1', from: 'Field 2 Label'
+        select 'Choice v1-2', from: 'Field 2 Label'
+        select 'Choice v1-3', from: 'Field 2 Label'
+        click_on 'Save'
+      end
+    end
+  end
+
+  describe 'dynamic model fields for multiple views using a different default option type name' do
+    before(:all) do
+      @resource_name = :dynamic_model__test_multi_options
+      set_up_feature
+      setup_multi_option_types_dm(option_type_field: 'alt_option_type', default_option_type_name: 'alt_default')
+
+      expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
+      setup_access @resource_name, user: @user, app_type: @app_type
+      expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      Rails.application.routes_reloader.reload!
+    end
+
+    before :each do
+      validate_setup
+      login
+    end
+
+    # Test creation of a dynamic model and show a form with all available field types
+    # Although we don't exercise all the fields for data entry, showing them ensures that
+    # there isn't a regression in the UI.
+    it 'creates a dynamic model with option type views using a different default option type name' do
+      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
+      dismiss_modal
+
+      expect(page).to have_css("#master-#{@master.id}")
+      expect(page).not_to have_css('.alert')
+
+      # Find the external ID tab
+      l = all('a[data-panel-tab="details"]').first
+      expect(l).not_to be nil
+      l.click
+
+      expect(page).to have_css("#details-#{@master_id}")
+      c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
+      expect(page).to have_css(c)
+      b = all(c).first
+      expect(b).not_to be nil
+
+      # Start by adding a new item
+      # The "new" form will be set to view_option = 'alt_default'
+      # This shows a placeholder, 3 fields and a placeholder.
+      # The third field is only shown if the second field is set to 'Choice 2'
+      b.click
+
+      #
+      # View Type: alt_default
+      #
+      expect_block.to have_new_form
+
+      dm_form_mode :new
+
+      within(new_form_css) do
+        sleep 2
+        expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        # Initially, field 3 should be hidden
+        expect_block.not_to have_input_field(field_name)
+
+        # The final placeholder shows
+        expect_block.to have_caption_before('placeholder_default_bottom', 'This is the default view placeholder at the bottom')
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.to have_field_label(field_name, 'View Type')
+        expect_block.to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_view_1_top')
+        expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+        fill_in 'Field 1 Label', with: 'Test string value'
+        select 'Choice 1', from: 'Field 2 Label'
+        sleep 1
+
+        field_name = 'field_3'
+
+        # Check third field is not shown
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.not_to have_field_label(field_name)
+
+        select 'Choice 2', from: 'Field 2 Label'
+        sleep 1
+        # Now the third field should appear
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+        click_on 'Save'
+      end
+
+      dm_form_mode :show
+      expect_block.to have_show_form
+
+      expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+      field_name = 'field_1'
+      expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+      expect_block.to have_field_label(field_name, 'Field 1 Label')
+      expect_block.to have_input_field(field_name)
+
+      field_name = 'field_2'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 2 Label')
+      expect_block.to have_input_field(field_name, tagname: 'select')
+
+      field_name = 'field_3'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+      # Remaining fields are not listed
+      field_name = 'field_4'
+      expect_block.not_to have_input_field(field_name)
+      field_name = 'field_5'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'alt_option_type'
+      expect_block.to have_field_label(field_name, 'View Type')
+      expect_block.to have_input_field(field_name)
+
+      expect_block.not_to have_caption_before('placeholder_view_1_top')
+      expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+      # Click the edit button and check the edit form reappears correctly
+      click_edit_button_in(show_form_css)
+      expect_block.to have_edit_form(@resource_name)
+
+      within(edit_form_css) do
+        dm_form_mode :edit
+        expect_block.to have_caption_before('placeholder_default_top', 'This is the default view placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.to have_caption_before(field_name, 'This is the default view caption for field 1')
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 3 Label')
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.to have_field_label(field_name, 'View Type')
+        expect_block.to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_view_1_top')
+        expect_block.not_to have_caption_before('placeholder_view_1_bottom')
+
+        # Now set the view type to 'view_1', which should show a different form in the next series of steps
+        fill_in 'View Type', with: 'view_1'
+        click_on 'Save'
+      end
+
+      #
+      # View Type: view_1
+      #
+      dm_form_mode :show
+      expect_block.to have_show_form
+      expect_block.to have_show_form(option_type: 'view_1')
+
+      expect_block.to have_caption_before('placeholder_view_1_top', 'This is view 1 placeholder at the top')
+
+      field_name = 'field_1'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 1 Label')
+      expect_block.to have_input_field(field_name)
+
+      field_name = 'field_2'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.to have_field_label(field_name, 'Field 2 Label')
+      expect_block.to have_input_field(field_name, tagname: 'select')
+
+      field_name = 'field_3'
+      expect_block.not_to have_caption_before(field_name)
+      expect_block.not_to have_input_field(field_name)
+
+      # Remaining fields are not listed
+      field_name = 'field_4'
+      expect_block.not_to have_input_field(field_name)
+      field_name = 'field_5'
+      expect_block.not_to have_input_field(field_name)
+
+      field_name = 'alt_option_type'
+      expect_block.not_to have_field_label(field_name)
+      expect_block.not_to have_input_field(field_name)
+
+      expect_block.not_to have_caption_before('placeholder_default_top')
+      expect_block.not_to have_caption_before('placeholder_default_bottom')
+
+      # Click the edit button and check the edit form reappears correctly
+      click_edit_button_in(show_form_css)
+      expect_block.to have_edit_form(option_type: 'view_1')
+
+      within(edit_form_css) do
+        dm_form_mode :edit
+        expect_block.to have_caption_before('placeholder_view_1_top', 'This is view 1 placeholder at the top')
+
+        field_name = 'field_1'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 1 Label')
+        expect_block.to have_input_field(field_name)
+
+        field_name = 'field_2'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.to have_field_label(field_name, 'Field 2 Label')
+        expect_block.to have_input_field(field_name, tagname: 'select')
+
+        field_name = 'field_3'
+        expect_block.not_to have_caption_before(field_name)
+        expect_block.not_to have_input_field(field_name)
+
+        # Remaining fields are not listed
+        field_name = 'field_4'
+        expect_block.not_to have_input_field(field_name)
+        field_name = 'field_5'
+        expect_block.not_to have_input_field(field_name)
+
+        field_name = 'alt_option_type'
+        expect_block.not_to have_field_label(field_name)
+        expect_block.not_to have_input_field(field_name)
+
+        expect_block.not_to have_caption_before('placeholder_default_top')
+        expect_block.not_to have_caption_before('placeholder_default_bottom')
+
+        select 'Choice v1-1', from: 'Field 2 Label'
+        select 'Choice v1-2', from: 'Field 2 Label'
+        select 'Choice v1-3', from: 'Field 2 Label'
+        click_on 'Save'
+      end
     end
   end
 end

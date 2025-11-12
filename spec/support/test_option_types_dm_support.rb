@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 module TestOptionTypesDmSupport
-  def setup_multi_option_types_dm
+  def setup_multi_option_types_dm(option_type_field: 'option_type', default_option_type_name: nil)
     dm_options = <<~END_YAML
       _configurations:
-        option_type_attr_name: option_type
+        option_type_attr_name: #{option_type_field}
+        #{default_option_type_name ? "default_option_type_name: #{default_option_type_name}" : ''}
 
       _default:
         view_options:
@@ -16,7 +17,7 @@ module TestOptionTypesDmSupport
           field_3: Field 3 Label
           field_4: Field 4 Label
           field_5: Field 5 Label
-          option_type: View Type
+          #{option_type_field}: View Type
 
         field_options:
           field_1:
@@ -39,13 +40,13 @@ module TestOptionTypesDmSupport
               this:
                 field_5: never valid
 
-      default:
+      #{default_option_type_name || 'default'}:
         fields:
           - placeholder_default_top
           - field_1
           - field_2
           - field_3
-          - option_type
+          - #{option_type_field}
           - placeholder_default_bottom
 
         field_configs:
@@ -145,7 +146,7 @@ module TestOptionTypesDmSupport
                               table_name: 'test_multi_options',
                               category: :details,
                               options: dm_options,
-                              field_list: 'field_1 field_2 field_3 field_4 field_5 option_type',
+                              field_list: "field_1 field_2 field_3 field_4 field_5 #{option_type_field}",
                               primary_key_name: 'id',
                               foreign_key_name: 'master_id',
                               position: 10
