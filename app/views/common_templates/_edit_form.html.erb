@@ -25,7 +25,9 @@
   @form_object_instance = form_object_instance
   option_type_config = form_object_instance.option_type_config
 
-
+  dyn_definition = form_object_instance.class.definition if form_object_instance.class.respond_to?(:definition)
+  default_option_type_name = dyn_definition.default_option_type_name if dyn_definition.respond_to?(:default_option_type_name)
+  
   unless defined?(view_options) && view_options
     view_options = option_type_config&.view_options
   end
@@ -37,7 +39,11 @@
   # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
 
   if embedded
-    data_attrs = { view_handlers: view_handlers, option_type_config_name: option_type_config&.name }
+    data_attrs = { 
+      view_handlers: view_handlers, 
+      option_type_config_name: option_type_config&.name,
+      default_option_type_name:
+    }
     form_block = [:fields_for, :embedded_item, form_object_instance, {data: data_attrs}]
     form_block_object = form_embed
   else

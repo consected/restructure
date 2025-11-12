@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 module TestOptionTypesDmSupport
-  def setup_multi_option_types_dm(option_type_field: 'option_type')
+  def setup_multi_option_types_dm(option_type_field: 'option_type', default_option_type_name: nil)
     dm_options = <<~END_YAML
       _configurations:
         option_type_attr_name: #{option_type_field}
+        #{default_option_type_name ? "default_option_type_name: #{default_option_type_name}" : ''}
 
       _default:
         view_options:
@@ -39,7 +40,7 @@ module TestOptionTypesDmSupport
               this:
                 field_5: never valid
 
-      default:
+      #{default_option_type_name || 'default'}:
         fields:
           - placeholder_default_top
           - field_1

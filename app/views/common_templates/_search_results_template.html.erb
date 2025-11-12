@@ -21,6 +21,11 @@
     option_type_config_name = nil
   end
 
+  unless defined? default_option_type_name
+    default_option_type_name = :default
+  end
+  default_option_type_name ||= :default
+
   unless defined? resource_name
     resource_name = nil
   end
@@ -352,6 +357,7 @@
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>,
     base_route_segments: '<%= base_route_segments %>',
     base_route_short_name: '<%= base_route_short_name %>',
+    <% if default_option_type_name %> default_option_type_name: '<%= default_option_type_name %>',<% end %>
     <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',
     use_option_type: true<% end %>
   }
@@ -379,7 +385,7 @@
   _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
   <% end %>
 
-  <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == 'default' %>
+  <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
   _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
   _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
   <% end %>
