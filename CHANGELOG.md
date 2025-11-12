@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #720 - 2025-10-12
+
+- [Added] tests for alternative option type field in dynamic definition - resolves #719
+
 ## [9.31.1] - 2025-11-10
 
 ### From Viva - PR #718 - 2025-11-10
