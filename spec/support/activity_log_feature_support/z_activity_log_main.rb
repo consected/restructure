@@ -9,6 +9,7 @@ module ActivityLogMain
   StudyProtocol = 'Study'
   ActivitySubProcess = 'Activity'
   PhoneLogProtocolEvent = 'AL Filter Test 2'
+  ActivityLogName = 'AL Filter Test 2'
 
   include FeatureHelper
   include FeatureSupport
