@@ -70,6 +70,10 @@ module Dynamic
       def option_type_attr_name
         definition.option_type_attr_name
       end
+
+      def default_option_type_name
+        definition.default_option_type_name
+      end
     end
 
     #
@@ -141,6 +145,10 @@ module Dynamic
       return if @processing_data
 
       dopt.view_options[:data_attribute]
+    end
+
+    def default_option_type_name
+      self.class.definition.default_option_type_name
     end
 
     # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,

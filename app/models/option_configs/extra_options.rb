@@ -584,6 +584,9 @@ module OptionConfigs
       end
       res.deep_symbolize_keys!
 
+      # Configurations need to be set in order for
+      # defaults to be set correctly
+      config_obj.configurations = res.delete(:_configurations)
       set_defaults config_obj, res
 
       opt_default = res.delete(:_default)
@@ -591,7 +594,6 @@ module OptionConfigs
       opt_merge_override = res.delete(:_merge_override)
       opt_override = res.delete(:_override)
 
-      config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
       config_obj.db_columns = res.delete(:_db_columns)
       config_obj.data_dictionary = res.delete(:_data_dictionary)
@@ -654,7 +656,7 @@ module OptionConfigs
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
-      default = res[:default]
+      default = res[config_obj.default_option_type_name]
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
