@@ -238,7 +238,7 @@ _fpa = {
 
   prepare_template: function (block, template_name, data, options) {
     if (!template_name) {
-      console.log('no template_name provided');
+      console.error('no template_name provided');
       return;
     }
 
@@ -265,7 +265,7 @@ _fpa = {
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
     if (!template) console.log('template for ' + template_name + ' was not found');
-    
+
     // Pass the template back in the options for use later
     options.template = template;
     options.template_name = template_name;
@@ -379,11 +379,13 @@ _fpa = {
     template_name = options.template_name || template_name;
 
     if (!template) {
-      console.log('template not set for render_template')
+      console.log(`template not set for render_template with name ${template_name}`);
       // Attempt to prepare the template again
       _fpa.prepare_template(block, template_name, data, options);
       template = options.template;
       template_name = options.template_name || template_name;
+    } else {
+      console.debug(`rendering template ${template_name}`)
     }
 
     var process_block = block;
@@ -396,8 +398,8 @@ _fpa = {
         try {
           var html = template(data);
         } catch (err) {
-          console.log(`${err} template function not defined for ${template_name}`);
-          console.log(err.stack);
+          console.error(`${err} template function not defined for ${template_name}`);
+          console.error(err.stack);
         }
         html = $(html).addClass('view-template-created');
       }
@@ -1083,7 +1085,7 @@ _fpa = {
 
           res[di] = d;
 
-          if (targets.length === 0) console.log(`no targets found for ${di}`)
+          if (targets.length === 0) console.debug(`no targets found for ${di}`)
           targets.each(function () {
             var $this = $(this);
             var use_data = res;

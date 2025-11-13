@@ -148,7 +148,7 @@
             {{#if extra_log_type}}
             <% all_option_configs.each do |c| %>
               {{#is extra_log_type '===' '<%=c.name%>'}}
-                {{> common_page_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
+                {{> common_page_template_result name='<%= full_name %>_<%=c.name%>' orig_name="<%=name.underscore%>" result_data=this _created=@index}}                
               {{/is}}
             <% end %>
             {{/if}}
