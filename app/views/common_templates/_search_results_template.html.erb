@@ -388,6 +388,9 @@
   <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
   _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
   _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
+  _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=name.underscore.pluralize%> = _fpa.state.template_config.<%=name.underscore.pluralize%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> = _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> || _fpa.state.template_config.<%=name.underscore%>
   <% end %>
   
 </script>
