@@ -858,7 +858,10 @@ _fpa = {
                 tname = alt_tname;
               }
 
-              if (!tname) console.log('Warning: data-template for this triggering element was not found');
+              if (!tname) {
+                console.log('Warning: data-template for this triggering element was not found');
+                console.log($this);
+              }
 
               var pre = $(this).attr('data-preprocessor');
               var prom = _fpa.view_template($this, tname, target_data, options, pre);
@@ -1182,7 +1185,10 @@ _fpa = {
             if (use_data) {
               var dt = $this.attr('data-template');
               var pre = $(this).attr('data-preprocessor');
-              if (!dt) console.log('WARN: no data-template template name found');
+              if (!dt) {
+                console.log('WARN: no data-template template name found');
+                console.log($this);
+              }
               var prom = _fpa.view_template($this, dt, use_data, null, pre);
               console.debug('promising to view template')
               prom.then(function () {
