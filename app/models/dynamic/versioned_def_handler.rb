@@ -41,7 +41,7 @@ module Dynamic
     end
 
     # Option type configuration for the current instance
-    # For a dynamic model this is just the 'default'
+    # For a dynamic model this is either the option_type or 'default'
     # For an activity log this is the config matching the extra_log_type
     def option_type_config
       res = versioned_definition.option_type_config_for option_type,
