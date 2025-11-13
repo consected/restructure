@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #724 - 2025-10-13
+
+- [Fixed] page layouts (/content/...) requests to honor user_app_type URL param - fixes #723
+
 ### From FPHS - PR #716 - 2025-11-04
 
 - [Fixed] issue with show_if fields from activity logs
