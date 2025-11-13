@@ -558,9 +558,10 @@ module OptionConfigs
       configs = []
 
       if config_text.present?
-        config_text = config_text.sub("---\n", '')
+        config_text = config_text.gsub(/^---.*\n/, '')
         config_text = prepend_standard_definitions(config_text)
         config_text = include_libraries(config_text)
+        config_text = config_text.gsub(/^---.*\n/, '')
         begin
           res = YAML.safe_load(config_text, permitted_classes: [],
                                             permitted_symbols: [],
@@ -583,11 +584,16 @@ module OptionConfigs
       end
       res.deep_symbolize_keys!
 
+      # Configurations need to be set in order for
+      # defaults to be set correctly
+      config_obj.configurations = res.delete(:_configurations)
       set_defaults config_obj, res
 
       opt_default = res.delete(:_default)
+      opt_merge_default = res.delete(:_merge_default)
+      opt_merge_override = res.delete(:_merge_override)
+      opt_override = res.delete(:_override)
 
-      config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
       config_obj.db_columns = res.delete(:_db_columns)
       config_obj.data_dictionary = res.delete(:_data_dictionary)
@@ -604,11 +610,22 @@ module OptionConfigs
       res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
       res.each do |name, value|
-        # If defined, use the optional _default entry as the basis for all individual options,
-        # allowing for a definable set of default values
+        unless name.in?(%i[primary blank_log])
+          # If defined, use the optional _default entry as the basis for all individual options,
+          # allowing for a definable set of default values
+          value = opt_default.merge(value) if opt_default
 
-        value = opt_default.merge(value) if opt_default && !name.in?(%i[primary blank_log])
+          # If defined, use the optional opt_merge_default entry to "deep merge" item options
+          # over the merge_default items.
+          value = opt_merge_default.deep_merge(value) if opt_merge_default
 
+          # If defined, use the optional opt_merge_override entry to "deep merge" options
+          # over the existing items.
+          value = value.deep_merge(opt_merge_override) if opt_merge_override
+
+          # If defined, use the optional _override entry to replace individual options.
+          value = value.merge(opt_override) if opt_override
+        end
         i = new name, value, config_obj
         configs << i
       end
@@ -639,7 +656,7 @@ module OptionConfigs
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
-      default = res[:default]
+      default = res[config_obj.default_option_type_name]
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize

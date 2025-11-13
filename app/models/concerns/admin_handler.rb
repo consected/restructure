@@ -75,6 +75,10 @@ module AdminHandler
       "admin/#{table_name}"
     end
 
+    def base_route_short_name
+      table_name
+    end
+
     # The base string for route names
     # For example `send("new_#{base_route_name}_path")` returns the path
     # to the "new" controller action

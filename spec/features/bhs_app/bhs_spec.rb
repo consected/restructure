@@ -12,11 +12,11 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   include BhsActions
 
   def bhs_app_type
-    Admin::AppType.active.find_by(name: BhsImportConfig.bhs_app_name)
+    Admin::AppType.active.reload.find_by(name: BhsImportConfig.bhs_app_name)
   end
 
   before :all do
-    app = BhsImportConfig.import_config
+    app = BhsImportConfig.import_config name: BhsImportConfig.bhs_app_name
     SetupHelper.feature_setup
     change_setting('TwoFactorAuthDisabledForUser', false)
     seed_database
@@ -25,8 +25,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     create_admin
 
     @app_type = bhs_app_type
+    expect(@app_type.id).not_to be_nil
     expect(@app_type.id).to eq app.id
 
+    SetupHelper.reload_configs
     # By default, an app with no page layouts should show everything. Clear everything before the import
     Admin::PageLayout.active.where(app_type_id: app.id).each do |p|
       p.disable! @admin
@@ -34,8 +36,8 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
 
     expect(DynamicModel::Adder.definition.category).to eq 'extended-info'
     pls = Admin::PageLayout
-      .active
-      .where(app_type_id: [nil, app.id], layout_name: 'master')
+          .active
+          .where(app_type_id: [nil, app.id], layout_name: 'master')
     expect(pls).to be_empty
 
     # By default the app limits access to only those masters that have a BHS assignment
@@ -71,9 +73,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     b.save!
 
     dmcats = DynamicModel.categories - ['details']
-    if dmcats.length > 1
-      DynamicModel.active.where.not(category: 'extended-info').update_all(disabled: true)
-    end    
+    DynamicModel.active.where.not(category: 'extended-info').update_all(disabled: true) if dmcats.length > 1
   end
 
   def as_user(role)

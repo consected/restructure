@@ -386,6 +386,10 @@ class ActivityLog < ActiveRecord::Base
     "activity_log/#{implementation_model_name.pluralize.to_sym}"
   end
 
+  def base_route_short_name
+    implementation_model_name.pluralize.to_sym
+  end
+
   # set up a route for each available activity log definition
   def self.routes_load
     mn = nil

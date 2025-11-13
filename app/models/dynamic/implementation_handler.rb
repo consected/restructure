@@ -4,6 +4,7 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      after_find :set_option_type_attr_name
       after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
       after_initialize :evaluate_active_values
@@ -14,7 +15,7 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results
+      attr_accessor :skip_save_trigger, :save_trigger_results, :option_type
     end
 
     class_methods do
@@ -64,6 +65,14 @@ module Dynamic
           obj.handle_record_batch_trigger(alt_user:)
           obj.id
         end
+      end
+
+      def option_type_attr_name
+        definition.option_type_attr_name
+      end
+
+      def default_option_type_name
+        definition.default_option_type_name
       end
     end
 
@@ -136,6 +145,10 @@ module Dynamic
       return if @processing_data
 
       dopt.view_options[:data_attribute]
+    end
+
+    def default_option_type_name
+      self.class.definition.default_option_type_name
     end
 
     # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
@@ -298,6 +311,12 @@ module Dynamic
           send "#{name}=", res
         end
       end
+    end
+
+    def set_option_type_attr_name
+      return unless self.class.respond_to? :definition
+
+      @option_type_attr_name = self.class.definition.option_type_attr_name
     end
   end
 end
