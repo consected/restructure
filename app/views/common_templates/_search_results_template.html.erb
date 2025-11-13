@@ -390,6 +390,7 @@
   _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
   _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name%> || _fpa.state.template_config.<%=name.underscore%>;
   _fpa.state.template_config.<%=name.underscore.pluralize%> = _fpa.state.template_config.<%=name.underscore.pluralize%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> = _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> || _fpa.state.template_config.<%=name.underscore%>
   <% end %>
   
 </script>
