@@ -189,7 +189,7 @@ module Dynamic
     # This method represents the resource_name for the extra_log_type
     # The resource name for the total process is the class method {resource_name}
     def resource_name
-      extra_log_type_config.resource_name
+      extra_log_type_config&.resource_name
     end
 
     def human_name

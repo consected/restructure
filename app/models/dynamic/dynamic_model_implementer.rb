@@ -103,11 +103,12 @@ module Dynamic
     def option_type
       option_type_attr_name = self.class.option_type_attr_name
       if option_type_attr_name == :option_type
-        return read_attribute(option_type_attr_name) if attribute_names.include?(option_type_attr_name.to_s)
+        res = read_attribute(option_type_attr_name) if attribute_names.include?(option_type_attr_name.to_s)
 
-        @option_type
+        res = res.presence || @option_type
+        res.presence || default_option_type_name
       else
-        send(option_type_attr_name) || 'default'
+        send(option_type_attr_name) || default_option_type_name
       end
     end
 

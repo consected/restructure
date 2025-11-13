@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] saving a dynamic definition with `dialog_before: some string` causes an error - fixes #726
+- [Fixed] Portal pages relying on common_page_template_results partial are not showing the actual content - fixes #725
+- [Fixed] issue with reports embedded by handlebars
+- [Fixed] issues with activity log references showing dynamic models, based on a regression due to option types
+
 ## [9.31.2] - 2025-11-12
 
 ### From FPHS - PR #722 - 2025-10-12
