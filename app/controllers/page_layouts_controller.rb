@@ -2,14 +2,15 @@
 
 # View a page layout as a standalone dashboard or page
 class PageLayoutsController < ApplicationController
+  # App type changes must happen before checking user access controls
+  include AppTypeChange
+
   before_action :authenticate_user_or_admin!
   before_action :index_authorized?, only: %i[index]
   before_action :show_authorized?, only: %i[show show_content]
   before_action :set_page_layout, only: %i[show show_content]
   before_action :set_page_filters, only: %i[show]
   attr_accessor :object_instance, :objects_instance
-
-  include AppTypeChange
 
   def index
     pm = Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
