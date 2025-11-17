@@ -181,9 +181,10 @@ class Admin::UserAccessControl < Admin::AdminBase
   #                                                     apply to if the user does not have a current app_type set
   # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
   # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @param [True | nil] log - enable logging of access checks
   # @return [Admin::UserAccessControl | nil]
   def self.access_for?(user, can_perform, on_resource_type, named, with_options = nil,
-                       alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
+                       alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil, log: false)
     raise FphsException, 'Options can not be added to access_for?' if with_options
 
     user = User.find(user) if user.is_a?(Integer)
@@ -193,11 +194,21 @@ class Admin::UserAccessControl < Admin::AdminBase
     cache_key = cache_key_for_access_for(user&.id, user&.current_sign_in_at&.to_i, can_perform, on_resource_type, named, app_type_id, alt_role_name,
                                          add_conditions)
 
+    from_cache = true
     res = Rails.cache.fetch(cache_key) do
+      from_cache = false
       rns = evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
                                 alt_role_name:,
-                                add_conditions:)
+                                add_conditions:,
+                                log:)
       rns[named.to_sym]
+    end
+
+    if log
+      Rails.logger.info "UserAccessControl.access_for? result: #{res} " \
+                        "fetched from cache: #{from_cache} for user #{user&.id} " \
+                        "app_type_id #{app_type_id} resource_type #{on_resource_type} resource_name #{named} " \
+                        "can_perform #{can_perform} alt_role_name #{alt_role_name} add_conditions #{add_conditions}"
     end
     remake_from_attributes(res)
   end
@@ -266,9 +277,10 @@ class Admin::UserAccessControl < Admin::AdminBase
   #                                                     apply to if the user does not have a current app_type set
   # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
   # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @param [True | nil] log - enable logging of access checks
   # @return [Hash{String => UserAccessControl} | nil] - Hash of { resource_name => UserAccessControl }
   def self.evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
-                               alt_role_name: nil, add_conditions: nil)
+                               alt_role_name: nil, add_conditions: nil, log: false)
     if can_perform
       unless can_perform.is_a?(Array) ||
              valid_access_level?(on_resource_type, can_perform) ||
@@ -298,14 +310,21 @@ class Admin::UserAccessControl < Admin::AdminBase
       # Skip if a result has already been found. We only want the first one, even if it was nil
       next if results.key?(rn)
 
-      results[rn] = if can_perform
-                      can_perform = [can_perform] unless can_perform.is_a? Array
-                      res_access = res.access&.to_sym
-                      res = nil unless res_access.in?(can_perform)
-                      res&.attributes
-                    else
-                      res&.attributes
-                    end
+      if can_perform
+        can_perform = [can_perform] unless can_perform.is_a? Array
+        res_access = res.access&.to_sym
+        res = nil unless res_access.in?(can_perform)
+      end
+
+      results[rn] = res&.attributes
+    end
+
+    if log
+      Rails.logger.info "evaluate_access_for user #{user&.id} results: #{results}" \
+                        "app_type_id #{app_type_id} " \
+                        "resource_type #{on_resource_type} resource_name #{named} " \
+                        "can_perform #{can_perform} alt_role_name #{alt_role_name} " \
+                        "add_conditions #{add_conditions} found #{accesses.length} access records"
     end
     results
   end
