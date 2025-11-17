@@ -40,9 +40,10 @@ module AppExceptionHandler
   #
   # General method for showing errors, either as plain text or as an error page
   def show_error(title, status, text: nil, flash_level: nil)
+    flash_level ||= :danger
+    Rails.logger.warn("AppExceptionHandler.show_error (#{flash_level}): #{title} (#{status})\n#{text}")
     text = text.to_s[0..2000] if text
 
-    flash_level ||= :danger
     if request.format == :html
       @error_title = title
       render 'layouts/error_page', status:, locals: { text: }
