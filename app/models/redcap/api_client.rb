@@ -269,9 +269,11 @@ module Redcap
       end
       res
     rescue StandardError => e
+      r_code = response_code
+      r_body = res
       Rails.logger.error "Redcap::ApiClient request failed for action '#{action}' - #{e} - " \
-                         "code: #{e.response.code} - body: #{e.response.body} - " \
-                         "with request options: #{request_options}"
+                         "with request options: #{request_options} - " \
+                         "code: #{r_code} - body: #{r_body}"
       raise
     end
 
