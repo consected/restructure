@@ -3,10 +3,18 @@
   # Show the identifying info in the header
   attribute_set.each do |k3, v3| 
     next if k3 == 'changed attributes (from/to)'
+
+    tagname = 'span'
+    if k3 == 'exception!'
+      v3 = YAML.dump(JSON.parse(v3.to_json))
+      tagname = 'pre'
+    elsif v3.to_s.include?("\n")
+      tagname = 'pre'
+    end
 %>
     <tr>
       <th><%= k3 %></th>
-      <th colspan="2"><%= v3 %></th>
+      <th colspan="2"><<%=tagname%>><%= v3 %></<%=tagname%>></th>
     </tr>
 <% 
   end 
