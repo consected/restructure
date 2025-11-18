@@ -17,7 +17,7 @@ module ActiveRecord
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
                       :requested_action, :resource_type, :prev_table_name, :view_sql, :all_referenced_tables,
-                      :class_name, :view_sql_changed, :no_user_id
+                      :class_name, :view_sql_changed, :no_user_id, :al_reference_views
       end
 
       #
@@ -530,15 +530,9 @@ module ActiveRecord
           removed_history = []
         end
 
-        # If there was an activity log referencing this table, drop it, then recreate it at the end
-        view_tn = table_name.sub(/^activity_log_/, 'al_')
-        view_name = "#{view_tn}_from_al_%"
-        reference_views = Admin::MigrationGenerator.view_definitions(schema, view_name)
-        reference_views&.each do |view|
-          execute <<~END_SQL
-            DROP VIEW #{view['schemaname']}.#{view['viewname']};
-          END_SQL
-        end
+        drop_activity_log_views(schema, table_name)
+
+        drop_reference_views(schema, table_name)
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           begin
@@ -673,8 +667,61 @@ module ActiveRecord
           end
         end
 
-        # Recreate the activity log reference views
+        recreate_activity_log_views
+
+        change_comments
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
+      #
+      # Drops all activity log related views referencing the specified table
+      # @param [String] schema for the table
+      # @param [String] table_name to check for references
+      # @return [Array{Hash}] all dropped views
+      def drop_activity_log_views(schema, table_name)
+        # If there was an activity log referencing this table, drop it, then recreate it at the end
+        view_tn = table_name.sub(/^activity_log_/, 'al_')
+        view_name = "#{view_tn}_from_al_%"
+        reference_views = Admin::MigrationGenerator.view_definitions(schema, view_name)
         reference_views&.each do |view|
+          Rails.logger.warn "Dropping AL dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name} via activity log"
+          execute <<~END_SQL
+            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+          END_SQL
+        end
+
+        self.al_reference_views = reference_views
+      end
+
+      #
+      # Drop all views referencing the specified table, only if they
+      # have a dynamic model definition (view matches dynamic model "table_name"),
+      # so that we don't inadvertently drop any views created in the DB outside of ReStructure
+      # @param [String] schema for the table
+      # @param [String] table_name to check for references
+      # @return [Array{Hash}] all dropped views
+      def drop_reference_views(schema, table_name)
+        other_ref_views = Admin::MigrationGenerator.views_referencing_table(schema, table_name)
+        other_ref_views = other_ref_views.select do |v|
+          DynamicModel.active.find_by table_name: v['viewname']
+        end
+
+        other_ref_views&.each do |view|
+          Rails.logger.warn "Dropping dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name}\n" \
+          "view_definition: \n#{view['view_definition']}"
+          execute <<~END_SQL
+            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+          END_SQL
+        end
+
+        other_ref_views
+      end
+
+      #
+      # Recreate the activity log reference views previously dropped in #drop_activity_log_views
+      def recreate_activity_log_views
+        al_reference_views&.each do |view|
           new_view_sql = view['definition'].dup
           new_view_sql = new_view_sql.gsub(/dest\..+,\n/, "--removed-col\n")
           new_view_sql = new_view_sql.sub('--removed-col', 'dest.*,')
@@ -684,10 +731,6 @@ module ActiveRecord
             #{new_view_sql}
           END_SQL
         end
-
-        change_comments
-      rescue StandardError, ActiveRecord::StatementInvalid => e
-        raise e unless force_rollback
       end
 
       def change_comments

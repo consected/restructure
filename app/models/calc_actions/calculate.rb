@@ -1020,7 +1020,11 @@ module CalcActions
       begin
         details << '*************************************************************************'
         details << "original condition type: #{@orig_cond_type}"
+        details << "this instance class: #{@current_instance.class.name}"
         details << "this instance: #{@current_instance.id}"
+        if @current_instance.respond_to?(:extra_log_type)
+          details << "extra log type: #{@current_instance.extra_log_type}"
+        end
         details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                            " - @orig_loop_res: #{@orig_loop_res}"
         details << "current user: #{current_user&.email} - " \
