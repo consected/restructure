@@ -18,12 +18,13 @@ fo.each do |filter_on|
   if all_filters.first
 %>
   <%= filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol) %>
+  <%= filter_btn('not set', filter_on, 'IS NULL') if all_filters.first.last.is_a?(Symbol) %>
 <%
   single_filter_set = all_filters.length > 1
 
   all_filters.each do |title, vals|
 
-    if vals.is_a?( Symbol) || vals.is_a?( String)
+    if vals.is_a?(Symbol) || vals.is_a?(String)
 %>
       <%= filter_btn(title, filter_on, vals) %>
 <%  else %>
@@ -37,6 +38,7 @@ fo.each do |filter_on|
     <div id="collapse-<%=filter_on%>-<%=title%>" class="panel-collapse collapse <%=is_first ? 'in' : ''%>" role="tabpanel" aria-labelledby="heading-<%=filter_on%>-<%=title%>">
       <div class="panel-body">
       <%= filter_btn('all', filter_on, nil) %>
+      <%= filter_btn('not set', filter_on, 'IS NULL') %>
 <%
       if vals.is_a? Hash
         vals.sort_by{|k, v| v}.each do |k,v|

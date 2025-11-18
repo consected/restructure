@@ -156,6 +156,25 @@ class Admin::MigrationGenerator
     end
   end
 
+  def self.views_referencing_table(schema_name, table_name)
+    res = connection.execute <<~END_SQL
+      select
+        u.view_schema "schemaname",
+        u.view_name "viewname",
+        u.table_schema referenced_table_schema,
+        u.table_name referenced_table_name,
+        v.view_definition
+      from information_schema.view_table_usage u
+      join information_schema.views v on u.view_schema = v.table_schema
+        and u.view_name = v.table_name
+      where u.table_schema not in ('information_schema', 'pg_catalog')
+        and u.table_name = '#{table_name}'
+        and u.table_schema = '#{schema_name}'
+      order by u.view_schema, u.view_name
+    END_SQL
+    res.to_a
+  end
+
   #
   # Returns a list of foreign key definitions for all tables in the search path.
   # Returns an array of hashes that link source and target:
