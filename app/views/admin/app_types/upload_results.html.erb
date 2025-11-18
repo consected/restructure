@@ -106,9 +106,10 @@
             <h4><%= k2 %></h4>
             <% 
                 ignore_diffs = false
-                if k2 == 'failed item'
+                if k2 == 'failed item' || resource_type_name == 'failures'
                   ignore_diffs = true
                 end
+                
                 if v2a.is_a?(Hash)
                   v2a = [v2a] 
                   ignore_diffs = true

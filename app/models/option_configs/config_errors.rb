@@ -79,7 +79,7 @@ module OptionConfigs
         end
 
         res = []
-        option_configs.select do |oc|
+        option_configs&.select do |oc|
           if levels.include?(:errors)
             val = oc.config_errors
             res += val if val
