@@ -5,6 +5,7 @@
     prevent_edit: false,
     prevent_create: false,
     item_list: UserPreference.attribute_names - %w[id created_at updated_at admin_id user_id],
+    edit_button_href: '/user_preferences/{{id}}/edit',
   }.merge(user_preferences_form_options) 
 %>
 

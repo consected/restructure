@@ -1,7 +1,8 @@
 require 'active_support/core_ext/integer/time'
 
 Rails.application.configure do
-  config.log_level = :debug
+  # Set log level to :info, :warn, :error, :fatal, or default to :debug
+  config.log_level = ENV['FPHS_LOG_LEVEL'].presence&.to_sym || :debug
   config.log_formatter = ::Logger::Formatter.new
 
   # Settings specified here will take precedence over those in config/application.rb.
