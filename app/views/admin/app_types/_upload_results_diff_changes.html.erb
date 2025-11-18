@@ -1,0 +1,25 @@
+<% 
+if diff_changes.present? 
+# Show the diffs in the body
+%>
+<tbody>
+<% 
+diff_changes.each do |k4, v4|
+        d0 = v4[0]
+        d1 = v4[1]
+        next if d0 == d1                       
+        
+        diff = Diffy::SplitDiff.new(d0, d1, format: :html)
+%>
+<tr>
+        <td><%= k4 %></td>
+        <td><%= diff.left.html_safe %></td>
+        <td><%= diff.right.html_safe %></td>
+</tr>
+<% 
+end 
+%>
+</tbody>
+<% 
+end # if diff_changes.present?
+%>

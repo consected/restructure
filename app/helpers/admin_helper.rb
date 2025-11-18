@@ -100,13 +100,14 @@ module AdminHelper
     @app_type ||= current_user&.app_type || current_admin.matching_user&.app_type || Admin::AppType.active.first
   end
 
-  def show_admin_heading(alt_title = nil)
+  def show_admin_heading(alt_title = nil, alt_sub_title = nil)
     alt_title ||= title
+    alt_sub_title ||= sub_title
     res = <<~END_HTML
       <div class="panel panel-default admin-action-page">
         <div class="panel-heading">
           #{render partial: 'admin/common_templates/app_components_dropdown'}
-          <h1 class="admin-title">#{alt_title} <small>#{sub_title}</small>
+          <h1 class="admin-title">#{alt_title} <small>#{alt_sub_title}</small>
             #{ link_to(
               '',
               help_page_path(
