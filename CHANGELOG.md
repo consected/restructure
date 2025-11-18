@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.31.4] - 2025-11-18
+
 ### From Viva - PR #737 - 2025-11-18
 
 - [Added] diff of changes for results of app imports - resolves #736
