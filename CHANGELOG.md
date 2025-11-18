@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #737 - 2025-11-18
+
+- [Added] diff of changes for results of app imports - resolves #736
+
 ## [9.31.3] - 2025-11-13
 
 - [Fixed] saving a dynamic definition with `dialog_before: some string` causes an error - fixes #726
