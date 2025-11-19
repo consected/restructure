@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #743 - 2025-11-19
+
+- [Fixed] big_select fields don't trigger show_if field rules - fixes #742
+- [Fixed] show_ifs in admin sample of dynamic model
+
 ### From Viva - PR #741 - 2025-11-19
 
 - [Added] logging of backtrace to support errors - related to #733
