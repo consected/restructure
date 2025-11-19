@@ -104,6 +104,10 @@
 <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
+<% # Load the appropriate configurations for showing the form correctly
+   if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? %>
+<%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: object_instance, force: true } %>
+<% end %>
 <script>
   window.setTimeout(function(){
 

@@ -117,7 +117,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     $desc.attr('data-content', val);
 
     val = val || ''
-    $field_overlay.val(val.replace(/\n/g, ' '));
+    $field_overlay.val(val.replace(/\n/g, ' ')).change();
   }
 
 
