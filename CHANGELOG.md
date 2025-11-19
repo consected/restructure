@@ -20,9 +20,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## [9.31.4] - 2025-11-18
 
+### From Viva - PR #739 - 2025-11-18
+
+- [Fixed] user profile user details (activity log) tab doesn't show any content - fixes #735
+- [Added] logging info for failing calc_if
+- [Added] blank option to admin filters
+- [Fixed] inability to import  - related to #90
+
 ### From Viva - PR #737 - 2025-11-18
 
 - [Added] diff of changes for results of app imports - resolves #736
+
+### From Viva - PR #734 - 2025-11-17
+
+- [Added] option to log access authorization information for a request (param `_log_access=true`) - resolves #733
 
 ## [9.31.3] - 2025-11-13
 
