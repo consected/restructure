@@ -58,7 +58,7 @@
       %>
       <% elsif respond_to?("#{p}_big_select") %>
         <%= form_field_label(f, p) %>
-        <%= big_select_field(f, p, object_instance.item_type_us, send("#{p}_big_select")) %>
+        <%= big_select_field(f, p, object_instance.admin_item_type_us, send("#{p}_big_select")) %>
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= form_field_label(f, p) %>
