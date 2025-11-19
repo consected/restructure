@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.31.5] - 2025-11-19
+
 ### From Viva - PR #743 - 2025-11-19
 
 - [Fixed] big_select fields don't trigger show_if field rules - fixes #742

@@ -3,10 +3,8 @@ begin;
 -- PostgreSQL database dump
 --
 
-\restrict UbqB8lstiPcpIabwLU8OpFhV0glMazIXResaCFmehmjBg90i5zrdGplfaH5HsGh
-
--- Dumped from database version 15.14
--- Dumped by pg_dump version 15.14
+-- Dumped from database version 15.13
+-- Dumped by pg_dump version 15.13
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -13574,7 +13572,5 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict UbqB8lstiPcpIabwLU8OpFhV0glMazIXResaCFmehmjBg90i5zrdGplfaH5HsGh
 
 commit;
