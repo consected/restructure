@@ -38,7 +38,7 @@
     <%
       object_instance.resource_name = filter_params_hash.first.last if filter_params_hash&.first&.first == 'resource_name'  && object_instance.resource_name.blank?
     %>
-    <%= big_select_field(f, :resource_name, Resources::UserAccessControl.resource_descriptions_for(:general), subtype: :general) %>
+    <%= big_select_field(f, :resource_name, object_instance.item_type_us, Resources::UserAccessControl.resource_descriptions_for(:general), subtype: :general) %>
     <%= big_select_field_data(:table, Resources::UserAccessControl.resource_descriptions_for(:table)) %>
     <%= big_select_field_data(:report, Resources::UserAccessControl.resource_descriptions_for(:report)) %>
     <%= big_select_field_data(:standalone_page, Resources::UserAccessControl.resource_descriptions_for(:standalone_page)) %>

@@ -15,7 +15,7 @@
     <% select_item_type = {}
        select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'name'    %>
 
-    <%= big_select_field(f, :name, Admin::AppConfiguration.configuation_meanings)%>
+    <%= big_select_field(f, :name, object_instance.item_type_us, Admin::AppConfiguration.configuation_meanings)%>
   </div>
   <div class="form-group">
     <%= f.label :role_name, 'Role name override' %>

@@ -6,12 +6,14 @@ module BigSelectFieldHelper
   # *options* include:
   #   hide_popover: true (show the selected value with an overlay field)
   #   filtered: true (filter the options shown based on the value of another selection field)
-  # @param [Form] form
+  # @param [Form] form - Rails form instance
+  # @param [Symbol] field - the field name
+  # @param [String] object_name - the object name (typically form_object_item_type_us)
   # @param [Hash] data - key value definitions
   # @param [Symbol] subtype - use an alterative subtype as the default
   # @param [Hash] options
   # @return [String] - html result
-  def big_select_field(form, field, data, subtype: nil, options: {})
+  def big_select_field(form, field, object_name, data, subtype: nil, options: {})
     @big_select_field_id = nil
     if options[:filtered]
       not_done = true
@@ -20,25 +22,27 @@ module BigSelectFieldHelper
       data.each do |k, v|
         if not_done
           not_done = false
-          res = "#{res} #{big_select_field_main(form, field, v, subtype: k, options: options)}"
+          res = "#{res} #{big_select_field_main(form, field, object_name, v, subtype: k, options: options)}"
         else
           res = "#{res} #{big_select_field_data(form, field_id, k, v)}"
         end
       end
       res.html_safe
     else
-      big_select_field_main(form, field, data, subtype: subtype, options: options)
+      big_select_field_main(form, field, object_name, data, subtype: subtype, options: options)
     end
   end
 
   #
   # Show initial components of big-select field
   # @param [Form] form
+  # @param [Symbol] field
+  # @param [String] object_name
   # @param [Hash] data - key value definitions
   # @param [Symbol] subtype - use an alterative subtype as the default
   # @param [Hash] options
   # @return [String] - html result
-  def big_select_field_main(form, field, data, subtype: nil, options: {})
+  def big_select_field_main(form, field, object_name, data, subtype: nil, options: {})
     field_id = big_select_field_id # "#{form.object_name}_#{field}"
 
     hide_popover = options[:hide_popover]
@@ -48,7 +52,11 @@ module BigSelectFieldHelper
       class: "use-big-select #{extra_class}",
       readonly: 'readonly',
       id: field_id,
-      data: { 'big-select-subtype': subtype, attr_name: field }
+      data: {
+        'big-select-subtype': subtype,
+        attr_name: field,
+        object_name:
+      }
     }
 
     field_html = if options[:no_instance]
