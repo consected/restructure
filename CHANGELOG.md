@@ -14,10 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems for broken `mail` gem - references #745
+
 ## [9.31.7] - 2025-11-19
 
 ## [9.31.6] - 2025-11-19
-
 
 ## [9.31.5] - 2025-11-19
 
