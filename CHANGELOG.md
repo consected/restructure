@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #741 - 2025-11-19
+
+- [Added] logging of backtrace to support errors - related to #733
+
 ## [9.31.4] - 2025-11-18
 
 ### From Viva - PR #737 - 2025-11-18
