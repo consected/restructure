@@ -308,7 +308,9 @@ module SetupHelper
 
   def self.setup_test_app
     MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
-    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+    ata = Admin::AppType.active
+    admin = Admin.active.first
+    ata.where(label: 'Brain Health Study').or(ata.where(name: 'bhs')).each { |a| a.update!(disabled: true, label: 'BHS OLD', name: "bhs-old-#{a.id}", current_admin: admin) }
     reload_configs
 
     check_activity_logs
@@ -417,7 +419,8 @@ module SetupHelper
     res = Admin::AppTypeImport.import_config(File.read(Rails.root.join(config_dir, config_fn)),
                                              admin,
                                              name:,
-                                             format:)
+                                             format:,
+                                             force_update: true)
 
     reload_configs
 

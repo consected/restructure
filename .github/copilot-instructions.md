@@ -10,6 +10,14 @@
 4. **Activity Logs**: Process management and case management workflows with embedded steps
 5. **Dynamic Models**: Runtime-generated Rails models from database configurations
 
+### The Master Record Pattern
+
+Everything in ReStructure relates to a Master record (participant/subject). This is enforced through:
+- `master_id` foreign key on nearly all tables (exception: external identifiers before assignment)
+- `current_user` passed through master: `master.current_user` not `self.current_user`
+- Access controls verified at master level: `master.allows_user_access`
+- Controllers set user once: `@master.current_user = current_user`
+
 ### Key Components
 
 - **Admin Panel**: Configuration management at `/admin/*` routes using database-stored YAML configs
@@ -30,23 +38,62 @@ ReStructure follows a hierarchical configuration pattern:
 
 This approach ensures consistent user experience and proper data relationships throughout the application.
 
+### Activity Log Workflow System
+
+Activity Logs provide case management through `extra_log_types` (individual workflow steps) configured in YAML:
+
+```yaml
+step_name:
+  label: Step Label
+  fields: [field1, field2]
+  creatable_if:  # Controls when this step can be created
+    all:
+      this:
+        status: 'previous_step_complete'
+  references:  # Links to other records/models
+    - dynamic_model__some_model:
+        label: Related Item
+        from: this
+        add: many
+```
+
+**Key Workflow Concepts:**
+- `extra_log_type` attribute stores which step a record represents (e.g., 'proposal_submission', 'review')
+- `creatable_if` conditions control sequential workflow - steps only appear when prerequisites are met
+- `references` create relationships to other models (dynamic models, other activity logs)
+- `status` field typically drives workflow state transitions
+- Each activity log process (defined in admin) generates a runtime model class in `ActivityLog::` namespace
+
 ## Essential Development Patterns
 
 ### Dynamic Model System
 
-The platform's core feature is runtime model generation. When developing:
+The platform's core feature is runtime model generation from database configurations:
 
-- Models are created through admin configurations, not code files
-- Use `DynamicModel.define_models` to regenerate after config changes  
+**How It Works:**
+1. Admin creates/updates a `DynamicModel` record with YAML `options` configuration
+2. `after_save :generate_model` callback triggers class generation
+3. Runtime class created in `DynamicModel::` namespace (e.g., `DynamicModel::TestData`)
+4. Database migration auto-generated and run to create/update table
+5. Routes auto-generated via `DynamicModel.routes_reload`
+6. Master association added automatically: `has_many :dynamic_model__test_datas`
+
+**Key Files:**
+- `app/models/dynamic/def_generator.rb`: Core generation logic, memoization, regeneration triggers
+- `app/models/dynamic/model_generator.rb`: Parses configs, creates migrations
+- `lib/active_record/migration/app_generator.rb`: Migration execution
 - Controllers inherit from `DynamicModelControllerHandler` for generated models
-- Routes are auto-generated via `DynamicModel.routes_reload`
 
-Example workflow:
+**Critical Pattern:**
+Models are NOT code files - they're runtime-generated Ruby classes stored in memory. Changes to configs trigger regeneration:
 ```ruby
-# After creating a dynamic model config
+# After creating/updating dynamic model admin config
+# This happens automatically, but may need manual trigger in tests
 DynamicModel.routes_reload
 Rails.application.routes_reloader.reload!
 ```
+
+**Memoization:** Generated models cached in `DynamicModel.models` hash and `Resources::Models` - cleared on regeneration
 
 ### User Base Pattern
 
@@ -133,11 +180,29 @@ FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rails db:migrate
 - File access controlled via Linux groups
 - API token authentication available
 
-### UI
-- The UI is split between user-facing single-page application and admin panel
-  - `app/assets/javascripts/application.js` handles end-user logic
-  - `app/assets/javascripts/admin.js` handles admin panel logic, which relies on single-page application components from the end-user front-end
-- The `app/assets/javascripts/app/_fpa.js` file contains the main single-page application front-end application logic.
+### UI Architecture (Handlebars-Based Single-Page Application)
+
+The front-end is a custom reactive single-page application using Handlebars templates:
+
+**Template Generation Flow:**
+1. ERB partials in `app/views/common_templates/_search_results_template.html.erb` generate Handlebars templates at page load
+2. For each model type (player_info, activity logs, dynamic models), three templates are created:
+   - `<model>-result-template`: Individual item rendering
+   - `<models>-list-template`: Collection rendering  
+   - `<models>-compact-list-template`: Condensed view
+3. `app/assets/javascripts/app/_fpa.js` orchestrates the front-end logic and Handlebars rendering
+4. AJAX requests return JSON data, which Handlebars templates render client-side
+
+**Key Template Files:**
+- `app/views/masters/_search_results_master_tabs.html.erb`: Master record structure and tabs
+- `app/views/common_templates/_common_template_list.html.erb`: Generic list handler
+- `app/views/common_templates/_common_template_result.html.erb`: Individual item renderer with fields
+- See `docs/dev_reference/app-ui/ui-templates-for-master-record-search-results.md` for complete template hierarchy
+
+**UI Split:**
+- User-facing: `app/assets/javascripts/application.js` + `app/_fpa.js` 
+- Admin panel: `app/assets/javascripts/admin.js` (reuses user components)
+- Templates are configuration-driven - most UI changes happen through admin panel YAML configs, not code
 
 ### Environment Variables
 Key variables (see `app-scripts/get-aws-env-vars.sh`):

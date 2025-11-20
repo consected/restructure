@@ -10,7 +10,7 @@ module PlayerInfoSupport
     res = []
 
     (1..5).each do |_l|
-      bd = (Date.today - rand(30..79).years)
+      bd = (Date.today - rand(31..79).years)
       bd = opt(bd)
 
       dd = nil

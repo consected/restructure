@@ -814,10 +814,16 @@ _fpa.utils.embedded_report = function (repname, alt_data) {
     var list_type = alt_data.item_type;
   }
 
-  console.log(`rhembedded: ${repname}`);
+  console.debug(`rhembedded: ${repname}`);
   const search_attrs = `search_attrs[master_id]=${list_master_id}&search_attrs[list_id]=${list_id}&search_attrs[list_type]=${list_type}`
   const divid = `tag_embedded_report_results-${repname}-${list_master_id}-${list_id}-${list_type}`
   const htags = `data-remote="true" data-result-target="#${divid}" data-target="#${divid}" data-target-force="true"`;
-  var res = `<div class="tag-embedded-report" id="${divid}"><a ${htags} href="/reports/${repname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
+
+  if (!list_id || !list_master_id || !list_type) {
+    console.error(`rhembedded: missing data for ${repname} - list_id: ${list_id}, list_master_id: ${list_master_id}, list_type: ${list_type}`);
+    console.error(referring_record);
+    return `<div class="tag-embedded-report--error" id="tag_embedded_report_results-${divid}-missing-data">Cannot load report - missing data</div>`;
+  }
+  var res = `<div class="tag-embedded-report tag_embedded_report_results-${repname}" id="${divid}"><a ${htags} href="/reports/${repname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
   return res;
 }

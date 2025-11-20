@@ -237,14 +237,38 @@ _fpa = {
   },
 
   prepare_template: function (block, template_name, data, options) {
-    if (!template_name) console.log('no template_name provided');
+    if (!template_name) {
+      console.error('no template_name provided');
+      return;
+    }
+
+    if (template_name.indexOf('-OPTION_TYPE-') > 0) {
+
+      var option_type, default_option_type_name;
+      for (var k in data) {
+        var data_item = data[k];
+        if (data.hasOwnProperty(k) && data_item) {
+          default_option_type_name = data_item.default_option_type_name
+          option_type = data_item.option_type;
+          break;
+        }
+      }
+      if (!option_type) {
+        option_type = (default_option_type_name || 'default').hyphenate();
+      }
+      else {
+        option_type = option_type.hyphenate();
+      }
+      template_name = template_name.replace('-OPTION_TYPE-', `-${option_type}-`);
+    }
 
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
-
     if (!template) console.log('template for ' + template_name + ' was not found');
 
+    // Pass the template back in the options for use later
     options.template = template;
+    options.template_name = template_name;
   },
 
   // A function that provides a promise.
@@ -352,21 +376,36 @@ _fpa = {
   // Render a retrieved template using the appropriate data in the DOM
   render_template: function (block, template_name, data, options, alt_preprocessor) {
     var template = options.template;
+    template_name = options.template_name || template_name;
+
+    if (!template) {
+      console.log(`template not set for render_template with name ${template_name}`);
+      // Attempt to prepare the template again
+      _fpa.prepare_template(block, template_name, data, options);
+      template = options.template;
+      template_name = options.template_name || template_name;
+    } else {
+      console.debug(`rendering template ${template_name}`)
+    }
+
     var process_block = block;
 
     // Throw away the result if told to show no result
     if (!options.show_no_result) {
 
       if (template) {
-        console.log('template not set for render_template')
         // Render the result using the template and data
         try {
           var html = template(data);
         } catch (err) {
-          console.log('(' + err + ') template function not defined for ' + template_name);
-          console.log(err.stack);
+          console.error(`${err} template function not defined for ${template_name}`);
+          console.error(err.stack);
         }
         html = $(html).addClass('view-template-created');
+      }
+
+      if (!html || html.length === 0) {
+        console.log(`no html returned from template ${template_name}`);
       }
 
       var new_block = block;
@@ -819,7 +858,10 @@ _fpa = {
                 tname = alt_tname;
               }
 
-              if (!tname) console.log('Warning: data-template for this triggering element was not found');
+              if (!tname) {
+                console.log('Warning: data-template for this triggering element was not found');
+                console.log($this);
+              }
 
               var pre = $(this).attr('data-preprocessor');
               var prom = _fpa.view_template($this, tname, target_data, options, pre);
@@ -1046,7 +1088,7 @@ _fpa = {
 
           res[di] = d;
 
-          if (targets.length === 0) console.log(`no targets found for ${di}`)
+          if (targets.length === 0) console.debug(`no targets found for ${di}`)
           targets.each(function () {
             var $this = $(this);
             var use_data = res;
@@ -1143,7 +1185,10 @@ _fpa = {
             if (use_data) {
               var dt = $this.attr('data-template');
               var pre = $(this).attr('data-preprocessor');
-              if (!dt) console.log('WARN: no data-template template name found');
+              if (!dt) {
+                console.log('WARN: no data-template template name found');
+                console.log($this);
+              }
               var prom = _fpa.view_template($this, dt, use_data, null, pre);
               console.debug('promising to view template')
               prom.then(function () {

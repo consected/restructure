@@ -75,6 +75,10 @@ module AdminHandler
       "admin/#{table_name}"
     end
 
+    def base_route_short_name
+      table_name
+    end
+
     # The base string for route names
     # For example `send("new_#{base_route_name}_path")` returns the path
     # to the "new" controller action
@@ -241,6 +245,17 @@ module AdminHandler
     return super if defined? super
 
     resource_name.humanize
+  end
+
+  #
+  # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+  # otherwise it returns just the basic name
+  def admin_item_type
+    self.class.name.singularize.ns_underscore
+  end
+
+  def admin_item_type_us
+    admin_item_type.ns_underscore
   end
 
   #

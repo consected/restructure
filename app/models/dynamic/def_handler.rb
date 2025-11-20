@@ -297,6 +297,21 @@ module Dynamic
       # End of class_methods
     end
 
+    # The instance attribute that will hold the current option_type value
+    # Use the _configuration.option_type_attr_name value or :option_type if not set
+    # If set in the configurations, this should be a persisted field
+    def option_type_attr_name
+      @option_type_attr_name = configurations&.dig(:option_type_attr_name)&.to_sym.presence || :option_type
+    end
+
+    # The default option type value to use for the default view.
+    # The default view is used for new item forms and common options such as
+    # `view_options` and `showable_if`.
+    # By default name is :default if not specified in the configurations
+    def default_option_type_name
+      @default_option_type_name = configurations&.dig(:default_option_type_name)&.to_sym.presence || :default
+    end
+
     def secondary_key
       return @secondary_key if @secondary_key_set
 
@@ -340,7 +355,7 @@ module Dynamic
     # At this time dynamic models only use one config definition, under the 'default' key
     # Simplify access to the default options configuration
     def default_options
-      option_type_config_for :default
+      option_type_config_for default_option_type_name
     end
 
     #
@@ -412,9 +427,10 @@ module Dynamic
     #      - :first_config - get the first item in the option_configs array
     #      - generates an empty configuration with the name specified in result_if_empty
     # @return [Class] options provider instance
-    def option_type_config_for(name, result_if_empty: :default)
+    def option_type_config_for(name, result_if_empty: nil)
       return unless option_configs
 
+      result_if_empty ||= default_option_type_name
       res = option_configs.find { |s| s.name == name.to_s.underscore.to_sym }
 
       if !res && self.class.allow_empty_options

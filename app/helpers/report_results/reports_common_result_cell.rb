@@ -197,10 +197,10 @@ module ReportResults
       split_url = split_url.reject(&:blank?)
       id = split_url.last
       master_id = split_url[1] if split_url.first == 'masters'
-      hyph_name = split_url[-2]&.hyphenate&.singularize || ''
+      hyph_name = split_url[-3..-2]&.join('__')&.hyphenate&.singularize || ''
 
       html = <<~END_HTML
-        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true">#{a_text}</a>
+        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{a_text}</a>
         <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"></div>
       END_HTML
 

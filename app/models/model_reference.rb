@@ -528,6 +528,7 @@ class ModelReference < ActiveRecord::Base
   # Helps the front end identify which template should be used to render this result
   def to_record_template
     return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
+    return to_record_type_us if to_record_type.start_with?('DynamicModel::')
 
     to_record_short_type_us
   end
