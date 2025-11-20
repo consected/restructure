@@ -38,6 +38,6 @@ Rails.application.configure do
   }
 
   # Set both the `:open_timeout` and `:read_timeout` values for `:smtp` delivery method.
-  config.action_mailer.smtp_timeout = ENV['SMTP_TIMEOUT'].presence&.to_i || 5
+  config.action_mailer.smtp_timeout = ENV['SMTP_TIMEOUT'].presence&.to_i || 30
   config.action_mailer.perform_caching = false
 end
