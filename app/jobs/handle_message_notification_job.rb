@@ -7,7 +7,7 @@ class HandleMessageNotificationJob < ApplicationJob
 
   def perform(message_notification, for_item: nil, on_complete_config: nil, alt_batch_user: nil,
               ignore_no_recipients: nil)
-    puts "Performing job on #{message_notification.inspect}" unless Rails.env.test?
+    Rails.logger.info "Performing job on #{message_notification.inspect}"
     message_notification.handle_notification_now logger: Delayed::Worker.logger,
                                                  for_item:,
                                                  on_complete_config:,
