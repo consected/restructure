@@ -14,6 +14,85 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva - PR #746 - 2025-11-20
+
+- [Fixed] mail misconfiguration exception with `mail` new gem version - fixes #745
+
+### From Viva - PR #743 - 2025-11-19
+
+- [Fixed] big_select fields don't trigger show_if field rules - fixes #742
+- [Fixed] show_ifs in admin sample of dynamic model
+
+### From Viva - PR #741 - 2025-11-19
+
+- [Added] logging of backtrace to support errors - related to #733
+
+Fixed brakeman allow list
+
+### From Viva - PR #739 - 2025-11-18
+
+- [Fixed] user profile user details (activity log) tab doesn't show any content - fixes #735
+- [Added] logging info for failing calc_if
+- [Added] blank option to admin filters
+- [Fixed] inability to import  - related to #90
+
+Fixed reporting multiple failures
+
+### From Viva - PR #737 - 2025-11-18
+
+- [Added] diff of changes for results of app imports - resolves #736
+
+### From Viva - PR #734 - 2025-11-17
+
+- [Added] option to log access authorization information for a request (param `_log_access=true`) - resolves #733
+
+### From FPHS - PR #732 - 2025-11-17
+
+- [Fixed] error handling from Redcap client requests - fixes  #731
+
+### From Viva - PR #730 - 2025-11-13
+
+- [Changed] reporting of parallel test failures - retesting needs to save results - resolves #729
+
+### From Viva - PR #728 - 2025-11-13
+
+- [Fixed] issues with activity log references showing dynamic models, based on a regression due to option types
+- [Fixed] issue with reports embedded by handlebars
+- [Fixed] Portal pages relying on common_page_template_results partial are not showing the actual content - fixes #725
+
+### From FPHS - PR #727 - 2025-11-13
+
+- [Fixed] saving a dynamic definition with `dialog_before: some string` causes an error - fixes #726
+
+### From FPHS - PR #724 - 2025-10-13
+
+- [Fixed] page layouts (/content/...) requests to honor user_app_type URL param - fixes #723
+
+### From FPHS - PR #722 - 2025-10-12
+
+- [Added] an dynamic definition option to allow the default option type name to be set to a value other than "default" - resolves #721
+
+### From Viva - PR #720 - 2025-10-12
+
+- [Added] tests for alternative option type field in dynamic definition - resolves #719
+
+### From Viva - PR #718 - 2025-11-10
+
+- [Added] support for selecting templates with option types - resolves #605
+  - [Added] use of option type request parameters and record fields
+  - [Changed] handling of UI templates to support option types for dynamic definition forms
+  - [Added] base_route_... information to support consistent paths in URLs and templates
+- [Added] _override,_merge_default and_merge_override options to dyanmic definitions - resolves #326
+- [Added] logging to help debug
+- [Added] initial documentation of the UI templates
+- [Fixed] setup of test apps
+- [Fixed] issue parsing extra options YAML
+- [Fixed] specs
+
+### From FPHS - PR #716 - 2025-11-04
+
+- [Fixed] issue with show_if fields from actiivity logs
+
 ## [9.31.0] - 2025-10-30
 
 - [Updated] gems
