@@ -11,8 +11,7 @@ module Users
     # @param [User] user
     def self.notify(user)
       Rails.logger.info("Setting up the notification when a user tries to change the password. User #{user.email}")
-      HandlePasswordChangedNotificationJob.perform_now(user)
+      HandlePasswordChangedNotificationJob.perform_later(user)
     end
-
   end
 end
