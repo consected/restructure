@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] mail misconfiguration exception with `mail` new gem version - fixes #745
+
 ## [9.31.8] - 2025-11-19
 
 - [Updated] gems for broken `mail` gem - references #745

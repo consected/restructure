@@ -78,10 +78,10 @@ module Messaging
     def generate(ignore_missing: false)
       data = self.data
       if data.blank?
-        if item          
+        if item
           data = Formatter::Substitution.setup_data item, for_item
         else
-          Rails.logger.warn 'MessageNotification#generate data is blank and item_type / item_id does not return an item' 
+          Rails.logger.warn 'MessageNotification#generate data is blank and item_type / item_id does not return an item'
           data = {}
         end
         data[:_subject] = subject
@@ -217,7 +217,7 @@ module Messaging
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
                                 ignore_no_recipients: nil)
-      logger.info "Handling item #{id}"
+      logger.info "MessageNotification: handling item #{id}"
       update! status: StatusInProgress
 
       self.ignore_no_recipients ||= ignore_no_recipients
@@ -236,10 +236,10 @@ module Messaging
 
       update! status: StatusComplete
       fire_item_on_complete_triggers
-      logger.info "Handled item #{id}"
+      logger.info "MessageNotification: handled item #{id}"
     rescue StandardError => e
       update! status: StatusFailed
-      raise FphsException, "Exception captured in handle_notification_now: #{e}"
+      raise FphsException, "Exception captured in handle_notification_now: #{e}", e.backtrace
     end
 
     #
