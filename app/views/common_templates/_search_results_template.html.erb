@@ -427,6 +427,18 @@
     } %>
 
 
+<script id="<%=name.underscore.gsub('dynamic_model__', '').hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with <%=with_data || full_name%>}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
+  {{/with}}
+</script>
+
+<script id="<%=name.underscore.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with <%=with_data || full_name%>}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
+  {{/with}}
+</script>
+
 <script id="<%=name_with_option_type.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}

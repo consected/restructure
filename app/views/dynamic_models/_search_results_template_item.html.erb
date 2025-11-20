@@ -1,10 +1,15 @@
-<% 
+<%
+  unless defined? force
+    force = false
+  end
+
   mapped_vars = OptionConfigs::TemplateOptionMapping.dynamic_model_all_configs_mapping(def_record, current_user)
+  mapped_vars[:force] = force
 
   if def_record.implementation_class_defined?(::DynamicModel, fail_without_exception: true)
 %>
 <%= render partial: 'dynamic_models/common_search_results_template', 
-           locals: mapped_vars  if current_user.has_access_to?(:access, :table, def_record.resource_name) %>
+           locals: mapped_vars  if force || current_user.has_access_to?(:access, :table, def_record.resource_name) %>
 <% 
   end
 %>

@@ -248,6 +248,17 @@ module AdminHandler
   end
 
   #
+  # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+  # otherwise it returns just the basic name
+  def admin_item_type
+    self.class.name.singularize.ns_underscore
+  end
+
+  def admin_item_type_us
+    admin_item_type.ns_underscore
+  end
+
+  #
   # Invalidate the cache and latest update value
   # @return [<Type>] <description>
   def invalidate_cache
