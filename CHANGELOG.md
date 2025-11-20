@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.32.0] - 2025-11-20
+
 ### From Viva - PR #746 - 2025-11-20
 
 - [Fixed] mail misconfiguration exception with `mail` new gem version - fixes #745
