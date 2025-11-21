@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.32.2] - 2025-11-21
+
 ### From Viva - PR #748 - 1015-11-21
 
 - [Changed] precendence of selecting SMTP TLS or STARTTLS
