@@ -216,7 +216,9 @@ module Redcap
 
       opt = {
         host: server_url,
-        token: api_key
+        token: api_key,
+        logger: Rails.logger,
+        log_level:
       }
 
       @redcap = ::Redcap.new(opt)
@@ -273,7 +275,8 @@ module Redcap
       r_body = res
       Rails.logger.error "Redcap::ApiClient request failed for action '#{action}' - #{e} - " \
                          "with request options: #{request_options} - " \
-                         "code: #{r_code} - body: #{r_body}"
+                         "code: #{r_code} - body: #{r_body}\n" \
+                         "#{e.backtrace.join("\n")}"
       raise
     end
 
@@ -289,6 +292,14 @@ module Redcap
       redcap.raw_response = nil
       res = redcap.send(action, request_options: request_options)
       self.class.symbolize_result res
+    end
+
+    def log_level
+      return @log_level if @log_level.present?
+
+      log_level_s = Settings::LogLevel[:redcap_api].to_s
+      @log_level = Logger::Severity.const_get(log_level_s.upcase) if log_level_s.present?
+      @log_level ||= Rails.logger.level
     end
   end
 end
