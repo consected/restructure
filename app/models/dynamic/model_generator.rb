@@ -73,14 +73,9 @@ module Dynamic
         }
       }.deep_stringify_keys!
 
-      options = YAML.dump default_options
+      options = String.yaml_dump(default_options)
 
-      if prefix_config_library.present?
-        options = options.sub(
-          /^---/,
-          "---\n#{prefix_config_library_string}\n"
-        )
-      end
+      options = "#{prefix_config_library_string}\n\n#{options}" if prefix_config_library.present?
 
       fla = field_list.split
 
