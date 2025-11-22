@@ -6,7 +6,7 @@
 
     tagname = 'span'
     if k3 == 'exception!'
-      v3 = YAML.dump(JSON.parse(v3.to_json))
+      v3 = String.yaml_dump(v3)
       tagname = 'pre'
     elsif v3.to_s.include?("\n")
       tagname = 'pre'
