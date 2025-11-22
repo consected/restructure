@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module AdminControllerHandler
-  EncodingToken = { base64: "<Base64Encoded>" }.freeze
+  EncodingToken = { base64: '<Base64Encoded>' }.freeze
   extend ActiveSupport::Concern
 
   included do
     before_action :init_vars_admin_controller_handler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: %i[edit update destroy]
-    before_action :handle_options_encoding, only: [:create, :update]
-  
+    before_action :handle_options_encoding, only: %i[create update]
+
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
@@ -153,7 +153,6 @@ module AdminControllerHandler
     nil
   end
 
-
   #
   # Alternative labels to use for admin form fields
   def admin_labels
@@ -202,7 +201,7 @@ module AdminControllerHandler
         res_a = []
         res_a << objects_instance.attribute_names.to_csv
         objects_instance.each do |row|
-          res_a << (row.attributes.map { |_k, val| val || '' }).to_csv
+          res_a << row.attributes.map { |_k, val| val || '' }.to_csv
         end
         send_data res_a.join(''), filename: 'admin.csv'
       end
@@ -386,20 +385,19 @@ module AdminControllerHandler
     }
 
     vals = YAML.safe_load(res)
-    vals.transform_values do |v| 
-      res = if v.is_a?(Hash) 
-              v = YAML.dump(v)&.sub(/^---\n/, '')
-            else 
-              v 
+    vals.transform_values do |v|
+      res = if v.is_a?(Hash)
+              v = String.yaml_dump(v)
+            else
+              v
             end
       Formatter::Substitution.substitute(res, data: subs, ignore_missing: true)
     end
   end
 
-
   #
   # Return a hash of fields to be encoded - override in individual admin controllers
-  # Use the value for each to specify the encoding type, for example: 
+  # Use the value for each to specify the encoding type, for example:
   #     { options: :base64, sql: :base64 }
   # @return [nil|Hash]
   def encode_options_fields
@@ -421,20 +419,18 @@ module AdminControllerHandler
       encoding_token = EncodingToken[encoding_type]
       options = secure_params[field]
       next unless options&.start_with?(encoding_token)
-      
+
       b64options = options.sub(encoding_token, '')
 
       case encoding_type
       when :base64
         decoded = Base64.decode64(b64options).force_encoding('UTF-8')
-        unless decoded.valid_encoding?
-          raise FphsException, "Invalid UTF-8 encoding in base64 data for field: #{field}"
-        end
+        raise FphsException, "Invalid UTF-8 encoding in base64 data for field: #{field}" unless decoded.valid_encoding?
+
         secure_params[field].sub!(/.*/, decoded)
       else
         raise FphsException, "Unknown encoding type: #{encoding_type} for field: #{field}"
       end
     end
   end
-
 end

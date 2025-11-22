@@ -723,7 +723,7 @@ module Redcap
       field_list = data_sample_response_fields(type).dup
       field_list << 'disabled' if disable
 
-      options = YAML.dump j.deep_stringify_keys
+      options = String.yaml_dump(j)
 
       @dynamic_model = DynamicModel.create! current_admin: @admin,
                                             name: @project[:name],

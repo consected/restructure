@@ -6,7 +6,7 @@
     cleaned = Admin::AppTypeImport.clean_exception(@results)
     if importer.respond_to?(:current_key)
       current_key = importer.current_key
-      head = YAML.dump(JSON.parse(importer.config_item.to_json)) if importer&.config_item
+      head = String.yaml_dump(importer.config_item) if importer&.config_item
     end
 
     @results = { current_key => { 'failed item' => importer&.config_item } }

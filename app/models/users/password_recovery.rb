@@ -11,8 +11,7 @@ module Users
     # @param [User] user
     def self.notify(user, options)
       Rails.logger.info("Setting up the notification when a user tries to reset the password. User #{user.email}")
-      HandlePasswordRecoveryNotificationJob.perform_now(user, options)
+      HandlePasswordRecoveryNotificationJob.perform_later(user, options)
     end
-
   end
 end
