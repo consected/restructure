@@ -190,6 +190,35 @@ module Redcap
     end
 
     #
+    # Export log messages, optionally by record_id, between a date range and for a log type
+    # @param [String | Integer | nil] record_id
+    # @param [Time | nil] begin_time
+    # @param [Time | nil] end_time
+    # @param [String | Symbol | nil] log_type - one of Redcap::ApiClient::ValidEventLogTypes keys
+    # @return [Array<Hash>] hash with symbolized keys
+    def export_logs(record_id: nil, begin_time: nil, end_time: nil, log_type: nil)
+      request :export_log, request_options: { record: record_id,
+                                              beginTime: begin_time,
+                                              endTime: end_time,
+                                              logType: log_type }
+    end
+
+    #
+    # export the instrument-event mappings for a project (i.e., how the data collection instruments are designated for certain events in a longitudinal project).
+    # NOTE: This only works for longitudinal projects.
+    # @return [Array<Hash>] hash with symbolized keys
+    def form_event_mapping
+      request :form_event_mapping
+    end
+
+    #
+    # Export List of Export Field Names (i.e. variables used during exports and imports)
+    # @return [Array<Hash>] hash with symbolized keys
+    def export_field_names
+      request :export_field_names
+    end
+
+    #
     # Get a file from a file field.
     # Don't record the file field retrievals in ClientRequest
     # since it will flood them with useless logs
