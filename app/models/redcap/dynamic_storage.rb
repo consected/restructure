@@ -93,15 +93,23 @@ module Redcap
 
     #
     # Configuration of fields used by the model generator
+    # @param [Symbol | false] option_type - optional option type to return fields for
     # @return [Hash{String => String}]
-    def fields
-      return @fields if @fields
+    def fields(option_type: false)
+      @fields_for_option_type ||= {}
+      return @fields_for_option_type[option_type] if @fields_for_option_type[option_type]
 
-      @fields = {}
+      @fields_for_option_type[option_type] = @fields = {}
       @show_if_condition_strings = {}
       all_retrievable_fields = data_dictionary.all_retrievable_fields
 
-      data_dictionary.all_fields.each do |field_name, field|
+      process_fields = if option_type == false
+                         data_dictionary.all_fields
+                       else
+                         data_dictionary.forms[option_type].fields
+                       end
+
+      process_fields.each do |field_name, field|
         choices = nil
 
         fn = "placeholder_#{field_name}__title"
@@ -294,6 +302,24 @@ module Redcap
       end
 
       @field_options
+    end
+
+    #
+    # Returns a Hash of field names (symbols) keyed by option type (Redcap form name)
+    # @return [Hash{Symbol => Array}]
+    def field_names_by_option_type
+      fbot = {}
+      option_types.each do |ot|
+        fbot[ot] = fields(option_type: ot).symbolize_keys.keys
+      end
+      fbot
+    end
+
+    #
+    # List of option types, which are the Redcap form names
+    # @return [Array{Symbol}]
+    def option_types
+      data_dictionary.forms.keys
     end
 
     #

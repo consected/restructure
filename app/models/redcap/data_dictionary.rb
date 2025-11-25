@@ -82,7 +82,7 @@ module Redcap
       return @all_fields if @all_fields
 
       @all_fields = {}
-      forms.each do |_k, form|
+      forms.each_value do |form|
         @all_fields.merge! form.fields
       end
 
@@ -109,6 +109,9 @@ module Redcap
     def all_retrievable_fields(summary_fields: false)
       return unless captured_metadata.present?
 
+      @all_retrievable_fields ||= {}
+      return @all_retrievable_fields[summary_fields] if @all_retrievable_fields[summary_fields]
+
       summary_fields &&= redcap_project_admin.data_options.add_multi_choice_summary_fields
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self, summary_fields:)
 
@@ -121,7 +124,7 @@ module Redcap
       special_fields.add_repeat_instrument_fields(all_rf, self) if redcap_project_admin.repeating_instruments?
       special_fields.add_defined_event_field(all_rf, self) if redcap_project_admin.is_longitudinal?
 
-      all_rf
+      @all_retrievable_fields[summary_fields] = all_rf
     end
 
     #

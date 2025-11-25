@@ -147,6 +147,61 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     end
   end
 
+  describe 'dynamic storage for Redcap project getting fields by option type' do
+    before :all do
+      create_admin
+      setup_redcap_project_admin_configs
+      setup_repeat_instrument_fields
+    end
+
+    before :example do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
+    end
+    it 'gets a list of field names by option type from the data dictionary' do
+      setup_repeat_instrument_fields
+      rc = @project_admin_metadata
+      rc.reload
+      rc.current_admin = @admin
+
+      fbot = rc.dynamic_storage.field_names_by_option_type
+      expect(fbot).to be_a Hash
+      expect(fbot.keys).to eq %i[static_variable_information visitspecific_information]
+      expect(fbot[:static_variable_information]).to eq %i[varname var_label var_type placeholder_restrict_var restrict_var___0 restrict_var___1 restrict_var___2 restrict_var___3 restrict_var___4 oth_restrict domain_viva placeholder_subdomain subdomain___1 subdomain___2 target_of_q data_source val_instr ext_instrument internal_instrument doc_yn doc_link long_yn placeholder_long_timepts long_timepts___1 long_timepts___2 long_timepts___3 long_timepts___4 long_timepts___5 long_timepts___6 long_timepts___7 long_timepts___8 long_timepts___9 long_timepts___10 long_timepts___11 long_timepts___12 long_timepts___13 long_timepts___14 long_timepts___15 long_timepts___16 long_timepts___17 long_timepts___18 long_timepts___19 long_timepts___20 long_timepts___21 long_timepts___22 long_timepts___23]
+      expect(fbot[:visitspecific_information]).to eq %i[event_type visit_name visit_time assay_specimen assay_type lab_assay_dataset form_label_ep placeholder_form_version_ep form_version_ep___1 form_version_ep___2 form_version_ep___3 form_version_ep___4 form_version_ep___5 form_version_ep___6 form_version_ep___7 form_version_ep___8 form_label_mp placeholder_form_version_mp form_version_mp___1 form_version_mp___2 form_version_mp___3 form_version_mp___4 form_label_del placeholder_form_version_del form_version_del___1 form_version_del___2 form_version_del___3 form_version_del___4 form_version_del___5 form_version_del___6 form_version_del___7 form_label_6m placeholder_form_version_6m form_version_6m___1 form_version_6m___2 form_version_6m___3 form_version_6m___4 form_version_6m___5 form_version_6m___6 form_version_6m___7 form_version_6m___8 form_version_6m___9 form_version_6m___10 form_label_1y placeholder_form_version_1y form_version_1y___1 form_label_2y placeholder_form_version_2y form_version_2y___1 form_label_3y placeholder_form_version_3y form_version_3y___1 form_version_3y___2 form_version_3y___3 form_version_3y___4 form_version_3y___5 form_version_3y___6 form_version_3y___7 form_version_3y___8 form_version_3y___9 form_version_3y___10 form_version_3y___11 form_version_3y___12 form_version_3y___13 form_version_3y___14 form_label_4y placeholder_form_version_4y form_version_4y___1 form_label_5y placeholder_form_version_5y form_version_5y___1 form_label_6y placeholder_form_version_6y form_version_6y___1 form_label_7y placeholder_form_version_7y form_version_7y___1 form_version_7y___2 form_version_7y___3 form_version_7y___4 form_version_7y___5 form_version_7y___6 form_version_7y___7 form_version_7y___8 form_version_7y___9 form_version_7y___10 form_version_7y___11 form_version_7y___12 form_version_7y___13 form_version_7y___14 form_version_7y___15 form_version_7y___16 form_version_7y___17 form_label_8y placeholder_form_version_8y form_version_8y___1 form_label_9y placeholder_form_version_9y form_version_9y___1 form_version_9y___2 form_label_10y placeholder_form_version_10y form_version_10y___1 form_version_10y___2 form_label_11y placeholder_form_version_11y form_version_11y___1 form_version_11y___2 form_label_12y placeholder_form_version_12y form_version_12y___1 form_version_12y___2 form_version_12y___3 form_version_12y___4 form_version_12y___5 form_version_12y___6 form_version_12y___7 form_version_12y___8 form_version_12y___9 form_version_12y___10 form_version_12y___11 form_version_12y___12 form_version_12y___13 form_version_12y___14 form_version_12y___15 form_version_12y___16 form_label_14y placeholder_form_version_14y form_version_14y___1 form_version_14y___2 form_label_15y placeholder_form_version_15y form_version_15y___1 form_version_15y___2 form_label_16y placeholder_form_version_16y form_version_16y___1 form_version_16y___2 form_label_mt form_version_mt form_label_19y placeholder_form_version_19y form_version_19y___1 form_version_19y___2 not_time_specific var_level units model_type response_options elig_sample elig_n actual_n an_var orig_deriv placeholder_corr_derived_yn corr_derived_yn___0 corr_derived_yn___1 der_varname dervar_explain orig_varnames]
+    end
+
+    it 'generates a dynamic model with fields by option type from the data dictionary' do
+      setup_repeat_instrument_fields
+      rc = @project_admin_metadata
+      rc.reload
+      rc.current_admin = @admin
+      ds = rc.dynamic_storage
+      dm = ds.dynamic_model
+      expect(dm).to be_a DynamicModel
+      ocs = dm.option_configs(force: true)
+
+      expect(dm.option_configs_names).to eq %i[default static_variable_information visitspecific_information]
+
+      # Check the configuration for the default option type
+      oc = dm.option_type_config_for(:default)
+      # We always have the full set of fields in the default option type if no fields are explicitly set
+      expect(oc.fields).to eq dm.field_list_array
+
+      # Check the configuration for the static_variable_information option type
+      oc = dm.option_type_config_for(:static_variable_information)
+      expect(oc.fields).to eq %w[varname var_label var_type placeholder_restrict_var restrict_var___0 restrict_var___1 restrict_var___2 restrict_var___3 restrict_var___4 oth_restrict domain_viva placeholder_subdomain subdomain___1 subdomain___2 target_of_q data_source val_instr ext_instrument internal_instrument doc_yn doc_link long_yn placeholder_long_timepts long_timepts___1 long_timepts___2 long_timepts___3 long_timepts___4 long_timepts___5 long_timepts___6 long_timepts___7 long_timepts___8 long_timepts___9 long_timepts___10 long_timepts___11 long_timepts___12 long_timepts___13 long_timepts___14 long_timepts___15 long_timepts___16 long_timepts___17 long_timepts___18 long_timepts___19 long_timepts___20 long_timepts___21 long_timepts___22 long_timepts___23]
+
+      # Check the configuration for the visitspecific_information option type
+      oc = dm.option_type_config_for(:visitspecific_information)
+      expect(oc.fields).to eq %w[event_type visit_name visit_time assay_specimen assay_type lab_assay_dataset form_label_ep placeholder_form_version_ep form_version_ep___1 form_version_ep___2 form_version_ep___3 form_version_ep___4 form_version_ep___5 form_version_ep___6 form_version_ep___7 form_version_ep___8 form_label_mp placeholder_form_version_mp form_version_mp___1 form_version_mp___2 form_version_mp___3 form_version_mp___4 form_label_del placeholder_form_version_del form_version_del___1 form_version_del___2 form_version_del___3 form_version_del___4 form_version_del___5 form_version_del___6 form_version_del___7 form_label_6m placeholder_form_version_6m form_version_6m___1 form_version_6m___2 form_version_6m___3 form_version_6m___4 form_version_6m___5 form_version_6m___6 form_version_6m___7 form_version_6m___8 form_version_6m___9 form_version_6m___10 form_label_1y placeholder_form_version_1y form_version_1y___1 form_label_2y placeholder_form_version_2y form_version_2y___1 form_label_3y placeholder_form_version_3y form_version_3y___1 form_version_3y___2 form_version_3y___3 form_version_3y___4 form_version_3y___5 form_version_3y___6 form_version_3y___7 form_version_3y___8 form_version_3y___9 form_version_3y___10 form_version_3y___11 form_version_3y___12 form_version_3y___13 form_version_3y___14 form_label_4y placeholder_form_version_4y form_version_4y___1 form_label_5y placeholder_form_version_5y form_version_5y___1 form_label_6y placeholder_form_version_6y form_version_6y___1 form_label_7y placeholder_form_version_7y form_version_7y___1 form_version_7y___2 form_version_7y___3 form_version_7y___4 form_version_7y___5 form_version_7y___6 form_version_7y___7 form_version_7y___8 form_version_7y___9 form_version_7y___10 form_version_7y___11 form_version_7y___12 form_version_7y___13 form_version_7y___14 form_version_7y___15 form_version_7y___16 form_version_7y___17 form_label_8y placeholder_form_version_8y form_version_8y___1 form_label_9y placeholder_form_version_9y form_version_9y___1 form_version_9y___2 form_label_10y placeholder_form_version_10y form_version_10y___1 form_version_10y___2 form_label_11y placeholder_form_version_11y form_version_11y___1 form_version_11y___2 form_label_12y placeholder_form_version_12y form_version_12y___1 form_version_12y___2 form_version_12y___3 form_version_12y___4 form_version_12y___5 form_version_12y___6 form_version_12y___7 form_version_12y___8 form_version_12y___9 form_version_12y___10 form_version_12y___11 form_version_12y___12 form_version_12y___13 form_version_12y___14 form_version_12y___15 form_version_12y___16 form_label_14y placeholder_form_version_14y form_version_14y___1 form_version_14y___2 form_label_15y placeholder_form_version_15y form_version_15y___1 form_version_15y___2 form_label_16y placeholder_form_version_16y form_version_16y___1 form_version_16y___2 form_label_mt form_version_mt form_label_19y placeholder_form_version_19y form_version_19y___1 form_version_19y___2 not_time_specific var_level units model_type response_options elig_sample elig_n actual_n an_var orig_deriv placeholder_corr_derived_yn corr_derived_yn___0 corr_derived_yn___1 der_varname dervar_explain orig_varnames]
+    end
+  end
+
   describe 'dynamic storage for Redcap project with multiple choice summary fields' do
     before :all do
       @bad_admin, = create_admin
