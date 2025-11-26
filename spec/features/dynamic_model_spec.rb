@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver do
+describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport

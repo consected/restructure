@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'public info pages', js: true, driver: :app_firefox_driver do
+describe 'public info pages', js: true, driver: $browser_driver do
   include UserSupport
 
   before :all do
