@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'user sign in process', js: true, driver: :app_firefox_driver do
+describe 'user sign in process', js: true, driver: $browser_driver do
   include ModelSupport
 
   context '2FA complete' do
