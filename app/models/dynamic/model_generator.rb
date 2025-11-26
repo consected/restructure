@@ -64,14 +64,28 @@ module Dynamic
           fields: comments
         },
         _data_dictionary: data_dictionary_config,
-        _db_columns: db_columns,
-        default: {
+        _db_columns: db_columns
+      }
+
+      default_options.merge!(
+        _default_from_model_generator: {
           field_options:,
           caption_before:,
           labels:,
           show_if_condition_strings:
-        }
-      }.deep_stringify_keys!
+        },
+        default: {}
+      )
+
+      if respond_to?(:option_types) && (ots = option_types)
+        ots.each do |name|
+          default_options.merge!(
+            name => { fields: field_names_by_option_type[name.to_sym] }
+          )
+        end
+      end
+
+      default_options.deep_stringify_keys!
 
       options = String.yaml_dump(default_options)
 
