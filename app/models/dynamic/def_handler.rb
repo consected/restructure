@@ -298,7 +298,7 @@ module Dynamic
     end
 
     # The instance attribute that will hold the current option_type value
-    # Use the _configurations.option_type_attr_name value or :option_type if not set
+    # Use the _configuration.option_type_attr_name value or :option_type if not set
     # If set in the configurations, this should be a persisted field
     def option_type_attr_name
       @option_type_attr_name = configurations&.dig(:option_type_attr_name)&.to_sym.presence || :option_type

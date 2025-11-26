@@ -783,7 +783,7 @@ _fpa = {
           // decide if the rendered template should display where this attribute requests
           // We use the specified result-target if we get a _created or _merged response (when the request
           // is returning a result that is mostly likely different to that we would normally expect, such as an update returning a list of changed elements).
-          // If no data-sub-item or data-sub-list is specified that matches a key in the response data, then we really have no other option but to position the result
+          // If no data-sub-item or data-sub-list is specified that matches a key in the reponse data, then we really have no other option but to position the result
           // where requested.
           // Finally if the results are 'multiple_results' but there was no original_item specified, then this a pure index. If there is a target, use it.
           if (

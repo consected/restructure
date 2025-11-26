@@ -245,19 +245,14 @@ module Formatter
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
       setup_methods_as_attributes(d)
 
-      unless (
-               d.is_a?(Hash) &&
-               (d&.key?(tag_name.to_s) || d&.key?(tag_name.to_sym))
-             ) ||
+      unless (d.is_a?(Hash) && (d&.key?(tag_name.to_s) ||
+              d&.key?(tag_name.to_sym))) ||
              tag.index(OverrideTags) ||
-             (
-               d.is_a?(Enumerable) &&
-               (tag_name.to_s == tag_name.to_s.to_i.to_s || tag_name.in?(['first', 'last']))
-             )
+             (d.is_a?(Enumerable) && (tag_name.to_s == tag_name.to_s.to_i.to_s || tag_name.in?(['first', 'last'])))
         unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}' " \
-                "or :#{tag_name} for #{tagpair}"
+                "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
         end
 
         d = {}

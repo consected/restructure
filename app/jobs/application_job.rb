@@ -35,8 +35,6 @@ class ApplicationJob < ActiveJob::Base
   def self.notify_failure(job, exception = nil)
     Rails.cache.fetch('delayed_job-failure-notification', expires_in: 1.hour) do
       job_id = job.id if job.respond_to? :id
-      job_id = job.job_id if job_id.nil? && job.respond_to?(:job_id)
-
       nj = FailureMailer.notify_job_failure(
         job_id,
         job.inspect.gsub(' @', "\n@"),
