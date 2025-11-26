@@ -16,7 +16,7 @@
 
 require 'rails_helper'
 
-describe 'Call log searching and reporting', driver: :app_firefox_driver do
+describe 'Call log searching and reporting', driver: $browser_driver do
   include ActivityLogMain
 
   before :all do

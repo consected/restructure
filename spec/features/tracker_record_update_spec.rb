@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'tracker record update', js: true, driver: :app_firefox_driver do
+describe 'tracker record update', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport

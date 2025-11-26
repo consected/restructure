@@ -14,7 +14,7 @@
 
 require 'rails_helper'
 
-describe 'Register an incoming call', driver: :app_firefox_driver do
+describe 'Register an incoming call', driver: $browser_driver do
   include ActivityLogMain
 
   before :all do

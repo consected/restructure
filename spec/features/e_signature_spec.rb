@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'Electronically sign a record', driver: :app_firefox_driver do
+describe 'Electronically sign a record', driver: $browser_driver do
   include ActivityLogMain
 
   before :all do
