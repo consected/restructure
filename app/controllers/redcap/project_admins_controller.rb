@@ -65,6 +65,15 @@ class Redcap::ProjectAdminsController < AdminController
     render json: { message: msg }, status: 200
   end
 
+  def request_logs
+    set_instance_from_id
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.request_logs
+
+    msg = "Project logs requested at #{DateTime.now}"
+    render json: { message: msg }, status: 200
+  end
+
   def force_reconfig
     set_instance_from_id
     @redcap__project_admin.current_admin ||= current_admin

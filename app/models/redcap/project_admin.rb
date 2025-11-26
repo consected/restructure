@@ -360,6 +360,13 @@ module Redcap
     end
 
     #
+    # Request the event log from Redcap
+    # Calls a delayed job to actually do the work
+    def request_logs
+      Redcap::ExportLogs.export_logs(self)
+    end
+
+    #
     # Store the arms and events metadata from Redcap for future reference
     # Calls a delayed job to actually do the work
     def request_arms_and_events
