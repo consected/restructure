@@ -740,7 +740,7 @@ module Redcap
 
       tn = alt_name || 'redcap_test.test_file_field_recs'
 
-      @project_admin = Redcap::ProjectAdmin.where(name: @project[:name], study: 'Q3', dynamic_model_table: tn).first
+      @project_admin = Redcap::ProjectAdmin.active.where(name: @project[:name], study: 'Q3', dynamic_model_table: tn).first
       return @project_admin if @project_admin
 
       @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
@@ -753,7 +753,7 @@ module Redcap
       tn = alt_name || 'test.test_repinst_field_recs'
       name = @metadata_project[:name]
 
-      @project_admin_metadata = Redcap::ProjectAdmin.where(name:, study: 'Repeat', dynamic_model_table: tn).first
+      @project_admin_metadata = Redcap::ProjectAdmin.active.where(name:, study: 'Repeat', dynamic_model_table: tn).first
       return @project_admin_metadata if @project_admin_metadata
 
       @project_admin_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url_2('repeat_instrument'),
@@ -767,7 +767,7 @@ module Redcap
       tn = alt_name || 'test.test_longitudinal_fields_recs'
       name = @longitudinal_project[:name]
 
-      @project_admin_metadata = Redcap::ProjectAdmin.where(name:, study: 'Repeat', dynamic_model_table: tn).first
+      @project_admin_metadata = Redcap::ProjectAdmin.active.where(name:, study: 'Repeat', dynamic_model_table: tn).first
       return @project_admin_metadata if @project_admin_metadata
 
       @project_admin_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url('longitudinal'),
