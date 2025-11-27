@@ -57,6 +57,12 @@ module Dynamic
         def_configs[:foreign_key_through_external_id] = associate_master_through_external_id_resource_name
       end
 
+      if dynamic_model
+        dynamic_model.option_configs(force: true)
+        existing_configs = dynamic_model.configurations
+        def_configs = existing_configs.merge(def_configs) if existing_configs.present?
+      end
+
       default_options = {
         _configurations: def_configs,
         _comments: {
@@ -97,7 +103,7 @@ module Dynamic
       # the foreign_key_name was not already set or was set to master_id already
       if fla.include?('master_id') && (foreign_key_name.blank? || foreign_key_name == 'master_id')
         foreign_key_name = 'master_id'
-        @field_list = fla.select { |f| f != 'master_id' }.join(' ')
+        @field_list = fla.reject { |f| f == 'master_id' }.join(' ')
       end
 
       if dynamic_model
@@ -134,11 +140,11 @@ module Dynamic
     # The table name can be qualified with a schema name, as <schema name>.<table name>
     # @param [true] no_check - don't check if the table is ready to use, otherwise return nil if it isn't
     # @return [DynamicModel]
-    def dynamic_model(no_check: nil)
-      return @dynamic_model if @dynamic_model
+    def dynamic_model(no_check: nil, force: nil)
+      return @dynamic_model if @dynamic_model && !force
 
       schema_name, table_name = schema_and_table_name
-      name = table_name.singularize
+      table_name.singularize
 
       schema_name = [nil, ''] if schema_name.blank?
 
@@ -350,7 +356,7 @@ module Dynamic
       res = super if defined?(super)
       return res if res
 
-      schema_name, table_name = schema_and_table_name
+      _, table_name = schema_and_table_name
       table_name.singularize.humanize.titleize
     end
 

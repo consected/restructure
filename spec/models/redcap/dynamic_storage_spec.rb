@@ -145,6 +145,37 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       dm = @ds.dynamic_model
       expect(dm.name).to eq project_name
     end
+
+    it 'updates the existing _configurations without overwriting them' do
+      project_name = @project[:name]
+      rc = Redcap::ProjectAdmin.active.find_by(name: project_name)
+      rc.current_admin = @admin
+      dm = @ds.dynamic_model
+      options = dm.options
+      expect(options.index(/_configurations:.*$/)).to be_truthy
+
+      # Set up a new configurations item
+      orig_configs = <<~END_TEXT
+        _configurations:
+          use_current_version: true
+      END_TEXT
+      dm.options = dm.options.sub(/^_configurations:.*$/, orig_configs)
+      dm.save!
+      dm.reload
+
+      expect(dm.options.index(/^  use_current_version: true$/)).to be_truthy
+
+      # Ensure we don't overwrite the new configurations item when we recreate the dynamic model
+      # First, simulate adding a new option to the _configurations through the Redcap project admin
+      @ds.project_admin.data_options.associate_master_through_external_identifer = 'dynamic_model__tests'
+      #  Update the dynamic model
+      @ds.create_dynamic_model
+      # Reload the dynamic model
+      new_options = @ds.dynamic_model(force: true).options
+      expect(new_options.index(/^  use_current_version: true$/)).to be_truthy
+      expect(new_options.index(/^  foreign_key_through_external_id: dynamic_model__tests$/)).to be_truthy
+      puts new_options
+    end
   end
 
   describe 'dynamic storage for Redcap project getting fields by option type' do
