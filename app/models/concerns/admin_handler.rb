@@ -18,6 +18,8 @@ module AdminHandler
     before_create :setup_values
     after_save :invalidate_cache
 
+    attr_reader :updated_from_report
+
     add_model_to_list
   end
 
@@ -121,6 +123,10 @@ module AdminHandler
     save!
   end
 
+  def updated_from_report!
+    @updated_from_report = true
+  end
+
   def admin_name
     return unless admin_id
 
@@ -189,6 +195,11 @@ module AdminHandler
     options[:methods] << :_class_name
     options[:methods] << :user_email
 
+    # If the record has been updated from a report, ensure that we override
+    # any except options to ensure all fields are included in the results.
+    # Devise will apply a very restrictive set of fields otherwise
+    options[:force_except] = [] if updated_from_report
+
     super(options)
   end
 
@@ -256,6 +267,10 @@ module AdminHandler
 
   def admin_item_type_us
     admin_item_type.ns_underscore
+  end
+
+  def model_data_type
+    :admin_model
   end
 
   #
