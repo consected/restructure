@@ -35,7 +35,13 @@
             <% if edit_fields.include?(field_name_sym)  %>
               <%
             form_object_instance = object_instance
-            form_object_item_type_us = form_object_instance.item_type_us
+            if form_object_instance.respond_to?(:item_type_us)
+              form_object_item_type_us = form_object_instance.item_type_us
+            elsif form_object_instance.respond_to?(:admin_item_type_us)
+              form_object_item_type_us = form_object_instance.admin_item_type_us
+            else
+              raise FphsException.new "This type of object can't be edited in reports"
+            end
             label_redefined = false
 
             col = form_object_instance.class.columns_hash[field_name]
