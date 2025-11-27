@@ -41,13 +41,17 @@ fi
 
 echo "Setup filestore"
 app-scripts/setup-dev-filestore.sh
+if [ $? != 0 ]; then
+  echo "Failed to set up filestore"
+  exit 6
+fi
 
 if [ "${NO_CLEAN_DB}" != 'true' ]; then
   echo "Clean database"
-  app-scripts/drop-test-db.sh
-  app-scripts/create-test-db.sh
+  app-scripts/drop-test-db.sh > /dev/null
+  app-scripts/create-test-db.sh > /dev/null
+  reset
 fi
-reset
 
 if [ "${SKIP_ZEITWERK}" != 'true' ]; then
   # Check zeitwerk before continuing
