@@ -343,7 +343,7 @@ module OptionConfigs
 
           # Avoid breaking app type imports if the resource being pointed to in the reference
           # hasn't been set up yet.
-          if to_class.nil? || to_class.respond_to?(:definition) && !to_class.definition
+          if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
             Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
             break
           end
@@ -556,7 +556,8 @@ module OptionConfigs
       loaded_config = parse_options_text(config_obj)
       # Configurations need to be set in order for
       # defaults to be set correctly
-      config_obj.configurations = loaded_config.delete(:_configurations)
+      config_obj.configurations = options_based_on_keys_stating_with('_configurations', loaded_config)
+
       set_defaults config_obj, loaded_config
 
       config_obj.table_comments = loaded_config.delete(:_comments)
@@ -564,6 +565,8 @@ module OptionConfigs
       config_obj.data_dictionary = loaded_config.delete(:_data_dictionary)
       config_obj.options_constants = loaded_config.delete(:_constants)
 
+      # Definitions '_definitions...' are only used by YAML for the definition of anchors
+      # and so will already by incorporated into the relevant configurations.
       loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
       configs = handle_defaults_merges_overrides(config_obj, loaded_config)
@@ -594,7 +597,7 @@ module OptionConfigs
                                                       aliases: true)
         rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
-          errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
+          errtext = config_text.split("\n").map { |l| "#{linei += 1}: #{l}" }.join("\n")
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
@@ -621,12 +624,7 @@ module OptionConfigs
       configs = []
 
       # Handle any entry starting with "_default"
-      opt_default = {}
-      loaded_config.each_key do |k|
-        next unless k.to_s.start_with? '_default'
-
-        opt_default.merge!(loaded_config.delete(k))
-      end
+      opt_default = options_based_on_keys_stating_with('_default', loaded_config)
 
       opt_merge_default = loaded_config.delete(:_merge_default)
       opt_merge_override = loaded_config.delete(:_merge_override)
@@ -634,6 +632,8 @@ module OptionConfigs
 
       loaded_config.each do |name, value|
         unless name.in?(%i[primary blank_log])
+          value ||= {}
+
           # If defined, use the optional _default entry as the basis for all individual options,
           # allowing for a definable set of default values
           value = opt_default.merge(value) if opt_default.present?
@@ -803,7 +803,7 @@ module OptionConfigs
         raise FphsException, "incorrect action type requested in calc_valid_if #{action_type}"
       end
 
-      ci = self.valid_if["on_#{action_type}".to_sym]
+      ci = self.valid_if[:"on_#{action_type}"]
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if
@@ -889,6 +889,22 @@ module OptionConfigs
       end
 
       reshashes
+    end
+
+    #
+    # Set up a hash of options for keys starting with a certain string.
+    # Delete the found options for the loaded configuration
+    # @param [String] keys_start_with The prefix string to match keys against
+    # @param [Hash] loaded_config The configuration hash to process
+    # @return [Hash] A hash of options extracted from the loaded configuration
+    def self.options_based_on_keys_stating_with(keys_start_with, loaded_config)
+      options = {}
+      loaded_config.each_key do |k|
+        next unless k.to_s.start_with? keys_start_with
+
+        options.merge!(loaded_config.delete(k))
+      end
+      options
     end
   end
 end

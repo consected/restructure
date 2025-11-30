@@ -55,7 +55,7 @@ module Redcap
     # @return [Hash]
     def field_types
       @field_types = {}
-      data_dictionary&.all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
+      all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
         @field_types[field_name] = field.field_type.database_type.to_s
       end
 
@@ -77,7 +77,7 @@ module Redcap
       return @array_fields if @array_fields
 
       @array_fields = {}
-      data_dictionary&.all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
+      all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
         @array_fields[field_name] = field.field_type.database_array?
       end
 
@@ -92,16 +92,18 @@ module Redcap
     end
 
     #
-    # Configuration of fields used by the model generator
+    # Configuration of fields used by the model generator.
+    # This is a mix of real database fields and additional "marker" fields such as
+    # placeholders and embedded reports. This set is derived from the Redcap
+    # project fields, and includes every "field" that appears in the final dynamic model.
     # @param [Symbol | false] option_type - optional option type to return fields for
-    # @return [Hash{String => String}]
+    # @return [Hash{String => Hash}]
     def fields(option_type: false)
       @fields_for_option_type ||= {}
       return @fields_for_option_type[option_type] if @fields_for_option_type[option_type]
 
       @fields_for_option_type[option_type] = @fields = {}
       @show_if_condition_strings = {}
-      all_retrievable_fields = data_dictionary.all_retrievable_fields
 
       process_fields = if option_type == false
                          data_dictionary.all_fields
@@ -139,7 +141,6 @@ module Redcap
 
           choices = field.field_choices.choices(plain_text: true, rails_format: true)
           @fields[field_name][:edit_options] = choices.to_h if choices
-
         end
 
         bl = field.branching_logic
@@ -181,6 +182,17 @@ module Redcap
         end
       end
 
+      unless option_type
+        extras = {}
+        data_dictionary.merge_special_project_fields!(extras)
+        data_dictionary.merge_all_form_complete_fields!(extras)
+
+        extras.each_key do |field_name|
+          @fields[field_name.to_s] = {}
+        end
+
+      end
+
       # Add a disabled field if one is not present and we need to disable deleted records
       @fields['disabled'] ||= { label: 'disabled' } if project_admin.data_options.handle_deleted_records == 'disabled'
 
@@ -198,15 +210,18 @@ module Redcap
       return {} unless data_dictionary&.all_fields
 
       all_fields = data_dictionary.all_fields
-      all_retrievable_fields = data_dictionary.all_retrievable_fields
-
       field_names = all_fields.keys
       before_field = 'submit'
 
       field_names.reverse_each do |field_name|
         field = all_fields[field_name]
 
-        if !all_retrievable_fields.key?(field_name)
+        if all_retrievable_fields.key?(field_name)
+          # This has a real column in the database, so can be
+          # used to reference the position of a preceding field
+          # No placeholder is required for the caption
+          before_field = field_name
+        else
           # This does not have a column in the database
           # We add a placeholder field for the caption
           # keeping the placeholder field name as a reference
@@ -224,11 +239,6 @@ module Redcap
           phname = "placeholder_#{field_name}"
           @placeholder_fields[before_field.to_s] = phname
           before_field = phname
-        else
-          # This has a real column in the database, so can be#
-          # used to reference the position of a preceding field
-          # No placeholder is required for the caption
-          before_field = field_name
         end
 
         next unless field.title.present?
@@ -244,6 +254,15 @@ module Redcap
       @placeholder_fields
     end
 
+    def all_retrievable_fields(summary_fields: false)
+      data_dictionary.all_retrievable_fields(summary_fields:)
+    end
+
+    #
+    # Dfeine the extra fields to be included in a dynamic model, based on project
+    # configurations. This includes `disabled`, `master_id` and array fields summarizing
+    # chosen values for multiple choice (checkbox) fields.
+    # @return [<Type>] <description>
     def extra_fields
       return @extra_fields if @extra_fields
 
@@ -253,7 +272,7 @@ module Redcap
 
       return @extra_fields unless project_admin.data_options.add_multi_choice_summary_fields
 
-      data_dictionary.all_fields.each do |_field_name, field|
+      data_dictionary.all_fields.each_value do |field|
         next unless field.multiple_choice?
 
         # Create a "chosen array" if the project configuration requires a summary field
@@ -272,40 +291,39 @@ module Redcap
     def field_options
       @field_options = {}
 
+      # Prevent all fields from automatically downcasing values when persisted
       field_types.each_key do |field_name|
         @field_options[field_name] = {
           no_downcase: no_downcase_field(field_name)
         }
       end
 
-      if respond_to?(:fields) && fields
-        fields.each do |field_name, config|
-          edit_field_type = config_value(config, :edit_field_type)
-          next unless edit_field_type
+      fields&.each do |field_name, config|
+        edit_field_type = config_value(config, :edit_field_type)
+        next unless edit_field_type
 
-          @field_options[field_name].merge! edit_as: {
-            field_type: "redcap_#{edit_field_type}"
-          }
-
-          edit_options = config_value(config, :edit_options)
-          next unless edit_options
-
-          @field_options[field_name][:edit_as].merge! alt_options: edit_options
-        end
-
-        # Set the record id field to be displayed fixed.
-        record_id_fn = field_types.keys.first
-        @field_options[record_id_fn][:edit_as] = {
-          field_type: "fixed_#{record_id_fn}"
+        @field_options[field_name].merge! edit_as: {
+          field_type: "redcap_#{edit_field_type}"
         }
 
+        edit_options = config_value(config, :edit_options)
+        next unless edit_options
+
+        @field_options[field_name][:edit_as].merge! alt_options: edit_options
       end
+
+      # Set the record id field to be displayed fixed.
+      record_id_fn = field_types.keys.first
+      @field_options[record_id_fn][:edit_as] = {
+        field_type: "fixed_#{record_id_fn}"
+      }
 
       @field_options
     end
 
     #
-    # Returns a Hash of field names (symbols) keyed by option type (Redcap form name)
+    # Returns a Hash of dynamic model field names (symbols)
+    # keyed by option type (Redcap form name)
     # @return [Hash{Symbol => Array}]
     def field_names_by_option_type
       fbot = {}
@@ -320,6 +338,16 @@ module Redcap
     # @return [Array{Symbol}]
     def option_types
       data_dictionary.forms.keys
+    end
+
+    #
+    # Indicate that all fields should be listed when generating option types
+    # so that show_if in fields from other forms work correctly.
+    # The value is :hide_external_fields to indicate the fields from other option types
+    # should be hidden
+    # @return [Symbol]
+    def include_all_fields_in_option_types
+      :hide_external_fields
     end
 
     #
@@ -383,7 +411,7 @@ module Redcap
                                        user_id: admin.matching_user.id)
     end
 
-    def dm_name
+    def dynamic_model_name
       project_admin.name
     end
   end
