@@ -44,9 +44,6 @@ module TestOptionTypesDmSupport
               this:
                 field_5: never valid
 
-      # Simple way to test what the defaults look like before any other configurations are applied
-      defaults_only:
-
       #{default_option_type_name || 'default'}:
         fields:
           - placeholder_default_top
@@ -141,6 +138,9 @@ module TestOptionTypesDmSupport
         valid_if:
           on_save:
             always: true
+
+      # Simple way to test what the defaults look like before any other configurations are applied
+      test_defaults_only:
 
     END_YAML
 

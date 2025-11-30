@@ -636,18 +636,18 @@ module OptionConfigs
 
           # If defined, use the optional _default entry as the basis for all individual options,
           # allowing for a definable set of default values
-          value = opt_default.merge(value) if opt_default.present?
+          value = opt_default.deep_dup.merge(value) if opt_default.present?
 
           # If defined, use the optional opt_merge_default entry to "deep merge" item options
           # over the merge_default items.
-          value = opt_merge_default.deep_merge(value) if opt_merge_default
+          value = opt_merge_default.deep_dup.deep_merge(value) if opt_merge_default
 
           # If defined, use the optional opt_merge_override entry to "deep merge" options
           # over the existing items.
-          value = value.deep_merge(opt_merge_override) if opt_merge_override
+          value = value.deep_dup.deep_merge(opt_merge_override) if opt_merge_override
 
           # If defined, use the optional _override entry to replace individual options.
-          value = value.merge(opt_override) if opt_override
+          value = value.deep_dup.merge(opt_override) if opt_override
         end
         i = new name, value, config_obj
         configs << i
