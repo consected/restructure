@@ -57,7 +57,7 @@ group :development do
   gem 'listen', '~> 3.7', '>= 3.7.1'
   # gem 'memory_profiler'
   # gem 'rack-mini-profiler'
-  gem 'solargraph-rails', '~> 0.2.0'
+  # gem 'solargraph-rails', '~> 0.2.0'
   gem 'web-console'
 end
 
@@ -70,6 +70,9 @@ group :development, :test do
   gem 'parallel_tests' # , '3.8.1'
   gem 'rspec-rails'
   # gem 'ruby-debug-ide'
+  gem 'rubocop', require: false
+  gem 'rubocop-rails', require: false
+  gem 'rubocop-rspec', require: false
   gem 'sassc-embedded'
   gem 'spring'
   # gem 'spring-commands-parallel-tests'
