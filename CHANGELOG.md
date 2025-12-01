@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] Ruby version to version 3.4.7
+- [Updated] gems
+
 ## [9.33.0] - 2025-12-01
 
 ### From FPHS - PR #770 - 2025-12-01
