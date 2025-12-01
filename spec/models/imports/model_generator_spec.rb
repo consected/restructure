@@ -8,7 +8,6 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   before :all do
     create_admin
 
-
     csv = File.read('spec/fixtures/import/test-types.csv')
     ds = Imports::ModelGenerator.new dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs",
                                      category: 'dynamic-test-env',
@@ -62,7 +61,6 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
     new_yaml = mg.generator_config.send(:config_hash_to_yaml)
     expect(new_yaml).to eq <<~END_TEXT
-      ---
       data_dictionary:
         study:#{' '}
         source_name:#{' '}
@@ -158,7 +156,6 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     mg.save!
 
     updated_yaml = <<~END_TEXT
-      ---
       data_dictionary:
         study:#{' '}
         source_name:#{' '}

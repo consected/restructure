@@ -155,6 +155,7 @@ class ReportsController < UserBaseController
 
     clean_secure_params
 
+    @report_item.updated_from_report! if @report_item.respond_to?(:updated_from_report!)
     if @report_item.update!(secure_params)
       refresh_updated_data
       render json: { report_item: @report_item }
@@ -449,9 +450,9 @@ class ReportsController < UserBaseController
   # Push these into the params to allow everything to function normally.
   def set_search_attrs
     return unless @report.report_options.view_options.use_plain_attribute_names
-    
+
     if params[:search_attrs]
-      Rails.logger.info "search_attrs were received and used overriding view_options.use_plain_attribute_names"
+      Rails.logger.info 'search_attrs were received and used overriding view_options.use_plain_attribute_names'
       return
     end
 
@@ -529,7 +530,7 @@ class ReportsController < UserBaseController
     if @results
       res_a << @results.fields.to_csv
       @results.each_row do |row|
-        res_a << (row.collect { |val| val || blank_value }).to_csv
+        res_a << row.collect { |val| val || blank_value }.to_csv
       end
     end
 
@@ -544,23 +545,25 @@ class ReportsController < UserBaseController
     key_column = pto.key_column
 
     show_results = if show_as == 'results_and_attributes'
-                      { 
-                        results: @results,
-                        search_attributes: @runner.search_attr_values 
-                      }
-                    elsif show_as == 'results_only'
-                      @results
-                    elsif show_as == 'row_template'
-                      @results.map do |r|        
-                        Formatter::Substitution.substitute_into_template(template, r.to_h)
-                      end
-                    elsif show_as == 'key_template'
-                      @results.map {|r| [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]}.to_h
-                    end
+                     {
+                       results: @results,
+                       search_attributes: @runner.search_attr_values
+                     }
+                   elsif show_as == 'results_only'
+                     @results
+                   elsif show_as == 'row_template'
+                     @results.map do |r|
+                       Formatter::Substitution.substitute_into_template(template, r.to_h)
+                     end
+                   elsif show_as == 'key_template'
+                     @results.map do |r|
+                       [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]
+                     end.to_h
+                   end
 
     show_results = show_results.first if single_res && show_results.is_a?(Array) && show_results.length <= 1
 
-    render json: show_results    
+    render json: show_results
   end
 
   def render_text
@@ -569,29 +572,34 @@ class ReportsController < UserBaseController
     linejoin = pto.line_join_string || "\n"
     line_pre = pto.line_prefix || ''
     line_suf = pto.line_suffix || ''
-    coljoin = pto.column_join_string || "|"
+    coljoin = pto.column_join_string || '|'
     col_pre = pto.column_prefix || ''
-    col_suf = pto.column_suffix || ''    
+    col_suf = pto.column_suffix || ''
     ht = pto.header_text || ''
     ft = pto.footer_text || ''
     template = pto.template
 
     resa = if template
-      @results.map {|r| Formatter::Substitution.substitute(template, data: r)}
-    elsif pto.results_column
-      @results.map {|r| "#{col_pre}#{r[pto.results_column]}#{col_suf}"}
-    else
-      @results.map {|r| r.values.map {|c| "#{col_pre}#{c}#{col_suf}"}.join(coljoin)}
-    end
-    res = resa.map {|s| "#{line_pre}#{s}#{line_suf}"}.join(linejoin)
+             @results.map { |r| Formatter::Substitution.substitute(template, data: r) }
+           elsif pto.results_column
+             @results.map { |r| "#{col_pre}#{r[pto.results_column]}#{col_suf}" }
+           else
+             @results.map { |r| r.values.map { |c| "#{col_pre}#{c}#{col_suf}" }.join(coljoin) }
+           end
+    res = resa.map { |s| "#{line_pre}#{s}#{line_suf}" }.join(linejoin)
     res = "#{ht}#{res}#{ft}"
     render plain: res, status: 200, content_type: ct
   end
 
-
+  #
+  # Clean the secure params being used to create or update a record
+  # by removing any params we don't want to be updated (NotPermittedParams)
+  # and setting any fields that are an empty string to be null
   def clean_secure_params
     NotPermittedParams.each do |k|
       secure_params.delete(k)
     end
+
+    secure_params.transform_values! { |v| v.is_a?(String) && v.empty? ? nil : v }
   end
 end

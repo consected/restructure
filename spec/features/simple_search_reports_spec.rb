@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'simple search reports', js: true, driver: :app_firefox_driver do
+describe 'simple search reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport

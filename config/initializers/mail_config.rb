@@ -13,15 +13,15 @@ Rails.application.configure do
 
   if Settings::TestMailBadConfig
     # Test ActionMailer with bad configuration (passed to `mail` gem)
-    smtp_starttls_auto = true
+    smtp_starttls = true
     smtp_tls = true
   else
     # For production
     # assume SMTP with STARTTLS if TLS is not set
     # It is a requirement of the `mail` gem used by ActionMailer that
     # both are not set at the same time. This ensures that one TLS option is set.
-    smtp_tls = ENV['SMTP_TLS'].present?
-    smtp_starttls_auto = !smtp_tls
+    smtp_starttls = ENV['SMTP_STARTTLS'].present?
+    smtp_tls = !smtp_starttls
   end
 
   use_smtp = Rails.env.production? || Settings::TestMail
@@ -33,11 +33,11 @@ Rails.application.configure do
     user_name: ENV['SMTP_USER_NAME'],
     password: ENV['SMTP_PASSWORD'],
     authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
-    enable_starttls_auto: smtp_starttls_auto,
+    enable_starttls: smtp_starttls,
     tls: smtp_tls
   }
 
   # Set both the `:open_timeout` and `:read_timeout` values for `:smtp` delivery method.
-  config.action_mailer.smtp_timeout = ENV['SMTP_TIMEOUT'].presence&.to_i || 5
+  config.action_mailer.smtp_timeout = ENV['SMTP_TIMEOUT'].presence&.to_i || 30
   config.action_mailer.perform_caching = false
 end

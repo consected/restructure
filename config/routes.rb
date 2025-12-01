@@ -120,6 +120,7 @@ Rails.application.routes.draw do
         post :request_archive
         post :request_users
         post :request_data_collection_instruments
+        post :request_logs
         post :force_reconfig
         post :update_dynamic_model
       end

@@ -186,6 +186,10 @@ if req&.result
               method: :post, 
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
+        <p><%= link_to 'retrieve event logs', request_logs_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
       <% end %>
       <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
         <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), 

@@ -46,6 +46,7 @@
 
 <script id="common_template_result_field_caption_or_dialog" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#if no_caption_before}}
+  {{else is field_type 'includes' '^hidden_' }}
   {{else is key 'in' caption_before_keys}}
     {{#if (fpa_state_item 'dialog_before' dialog_resource_name vdef_version key)}}
       {{{fpa_state_item 'dialog_before' dialog_resource_name vdef_version key}}}

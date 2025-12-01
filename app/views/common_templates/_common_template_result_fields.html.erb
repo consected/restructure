@@ -179,6 +179,8 @@
 
   {{else is field_type 'includes' '^fixed_' }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^fixed_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{else is field_type 'includes' '^hidden_' }}
+    <li class="{{> field_result_class}} hidden" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^hidden_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^e_signed_' }}
     {{#with result_data}}
     {{> e_signature_parts name=(pluralize ../name) value=../this_value }}

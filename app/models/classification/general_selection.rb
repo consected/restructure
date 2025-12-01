@@ -64,6 +64,8 @@ class Classification::GeneralSelection < ActiveRecord::Base
       record.item_type_us
     elsif record.model_data_type == :report
       "report_#{record.definition.name.id_underscore}"
+    elsif record.model_data_type == :admin_model
+      "admin/#{record.admin_item_type_us}"
     else
       record.item_type_us.pluralize
     end
@@ -107,10 +109,10 @@ class Classification::GeneralSelection < ActiveRecord::Base
       # throw(:abort)
 
     end
-    if item_type_changed? && persisted?
-      errors.add(:item_type, 'change not allowed!')
-      # throw(:abort)
-    end
+    return unless item_type_changed? && persisted?
+
+    errors.add(:item_type, 'change not allowed!')
+    # throw(:abort)
   end
 
   private

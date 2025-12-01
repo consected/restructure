@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'tracker block', js: true, driver: :app_firefox_driver do
+describe 'tracker block', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport

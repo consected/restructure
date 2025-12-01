@@ -516,5 +516,30 @@ describe('show_if', function () {
 
   })
 
+  it("tests that field names can have a regex style pattern that formulate regular show_if definitions", function () {
+    var show_if_field_defs = {
+      '/field_[bc]/': {
+        field_a: 2,
+        field_b: ['some', 'value'],
+      },
+      field_d: {
+        always: true
+      },
+      field_e: {
+        field_a: 3
+      }
+    }
+
+    var data = {
+      field_a: 2,
+      field_b: 'value',
+      field_c: ''
+    }
+
+    _fpa.show_if.methods.set_up_regex_pattern_fields(show_if_field_defs, data);
+    console.log(show_if_field_defs);
+    expect(Object.keys(show_if_field_defs).sort()).toEqual(['field_b', 'field_c', 'field_d', 'field_e']);
+  });
+
 
 });

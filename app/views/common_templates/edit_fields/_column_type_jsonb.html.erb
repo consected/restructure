@@ -19,7 +19,7 @@ rescue StandardError
 end
 data ||= ''
 
-gs = YAML.dump(data).gsub(/^---.*\n/, '') if data
+gs = String.yaml_dump(data) if data
 options = field_options_for(form_object_instance, field_name_sym)
 
 html_options = {

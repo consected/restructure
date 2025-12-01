@@ -521,7 +521,7 @@ class DynamicModel < ActiveRecord::Base
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
     key = hash.keys.first
-    new_options = YAML.dump(hash)
+    new_options = String.yaml_dump(hash)
     self.options ||= ''
     self.options = if self.options.index(/^#{key}:/)
                      self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\n\n\\3")

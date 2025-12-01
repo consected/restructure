@@ -1,4 +1,17 @@
 #!/bin/bash
+# RUN_RESTESTS: If set to 'true', the script will run the retest script for failed specs.
+# NO_CLEAN_DB: If set to 'true', the script will skip cleaning the test database.
+# NO_BRAKEMAN: If set to 'true', the script will skip running Brakeman security analysis.
+# SKIP_BRAKEMAN: equivalent to NO_BRAKEMAN. 
+# USE_PG_HOST: If set, the script will not use sudo to clean the database, and will connect to the specified PostgreSQL host via a TCP port.
+# SKIP_ZEITWERK: If set to 'true', the script will skip checking Zeitwerk.
+# PARALLEL_TEST_PROCESSORS: Number of parallel processes to use for running tests. Defaults to number of CPU cores.
+
+if [ "${RUN_RESTESTS}" == 'true' ]; then
+  $(dirname $0)/parallel_test_retest.sh
+  exit $?
+fi
+
 echo > log/test.log
 echo > tmp/failing_specs.log
 echo > tmp/working_failing_specs.log
@@ -28,13 +41,17 @@ fi
 
 echo "Setup filestore"
 app-scripts/setup-dev-filestore.sh
+if [ $? != 0 ]; then
+  echo "Failed to set up filestore"
+  exit 6
+fi
 
 if [ "${NO_CLEAN_DB}" != 'true' ]; then
   echo "Clean database"
-  app-scripts/drop-test-db.sh
-  app-scripts/create-test-db.sh
+  app-scripts/drop-test-db.sh > /dev/null
+  app-scripts/create-test-db.sh > /dev/null
+  reset
 fi
-reset
 
 if [ "${SKIP_ZEITWERK}" != 'true' ]; then
   # Check zeitwerk before continuing
@@ -110,29 +127,7 @@ echo "Finished at $(date)" >> tmp/failing_specs.log
 
 if [ -f tmp/parallel_specs_failed.txt ]; then
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
-  echo "Retesting failed specs"
-  old_ifs=$IFS
-  IFS=$'\n'
-  retest=''
-  for line in $(grep -P '\e\[[0-9]+mrspec ' tmp/failing_specs.log) ; do 
-    [[ $line =~ rspec\ ([a-zA-Z0-9_\./]+) ]]
-    retest="${retest}"$'\n'"$(echo ${BASH_REMATCH[1]})"
-  done 
-  retest=$(echo "${retest}" | uniq)
-  IFS=$old_ifs
-  bundle exec rspec -f d $retest
-  res=$?
-  echo "Retested: ${retest}"
-  echo "Retested: ${retest}" >> tmp/failing_specs.log
-  if [ $res != 0 ]; then
-    echo "Retest of failed specs did not pass"
-    echo "Retest of failed specs did not pass" >> tmp/failing_specs.log
-    exit $res
-  else
-    echo "Retest of failed specs passed."
-    echo "Retest of failed specs passed." >> tmp/failing_specs.log
-    exit 0
-  fi
+  $(dirname $0)/parallel_test_retest.sh
 else
   echo "All parallel specs passed."
   echo "All parallel specs passed."  >> tmp/failing_specs.log
