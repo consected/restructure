@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'user sign in process for users that can self register', js: true, driver: :app_firefox_driver do
+describe 'user sign in process for users that can self register', js: true, driver: $browser_driver do
   include ModelSupport
 
   before(:all) do

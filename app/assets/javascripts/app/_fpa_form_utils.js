@@ -189,7 +189,7 @@ _fpa.form_utils = {
   locale_datetime_to_iso(v) {
     if (!v) return;
 
-    return _fpa.utils.parseLocaleDateTime(v).asYMD();
+    return _fpa.utils.parseLocaleDateTime(v).toISOString();
   },
 
   // Handle big-select fields
@@ -1478,7 +1478,12 @@ _fpa.form_utils = {
           dynamic: true,
           dropdown: true,
           scrollbar: true,
-          change: function (time) { $field.change() }
+          default: 'now',
+          change: function (time) {
+            window.setTimeout(function () {
+              $field.change()
+            }, 10);
+          }
         });
       });
   },
@@ -1575,9 +1580,10 @@ _fpa.form_utils = {
           tres = te.val();
           dres = de.val();
 
-          if (dres) {
-            var text = `${dres} ${tres || ''}`;
-            text = _fpa.form_utils.locale_datetime_to_iso(text);
+          if (dres && tres) {
+            var text = `${dres} ${tres} UTC`;
+          } else if (dres) {
+            var text = `${dres}`;
           } else {
             var text = '';
           }

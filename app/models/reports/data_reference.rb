@@ -41,8 +41,11 @@ module Reports
       if resource_model
 
         self.master_route_prefix = "'/masters/' || master_id" if resource_model.base_master_segment
-        %i[access edit update create].each do |access|
-          user_can[access] = resource_model.model.allows_user_access_to?(runner.current_user, access)
+
+        if resource_model.model.respond_to?(:allows_user_access_to?)
+          %i[access edit update create].each do |access|
+            user_can[access] = resource_model.model.allows_user_access_to?(runner.current_user, access)
+          end
         end
       end
 

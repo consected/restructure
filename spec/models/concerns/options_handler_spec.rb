@@ -48,7 +48,6 @@ RSpec.describe 'OptionsHandler', type: :model do
     t.var2 = 'test2'
 
     expect(t.send(:config_hash_to_yaml)).to eq <<~END_TEXT
-      ---
       var1: test
       var2: test2
       var3:#{' '}
@@ -98,7 +97,6 @@ RSpec.describe 'OptionsHandler', type: :model do
     expect(t.test2_var1.test2_var1_a2).to eq 'test-a2'
 
     expect(t.send(:config_hash_to_yaml)).to eq <<~END_TEXT
-      ---
       test2_var1:
         test2_var1_a1: test-a1
         test2_var1_a2: test-a2
@@ -110,7 +108,6 @@ RSpec.describe 'OptionsHandler', type: :model do
     t.test2_var2.test2_var2_a1 = 'newval1'
     t.test2_var2.test2_var2_a2 = 'newval2'
     expect(t.send(:config_hash_to_yaml)).to eq <<~END_TEXT
-      ---
       test2_var1:
         test2_var1_a1: test-a1
         test2_var1_a2: test-a2
@@ -161,7 +158,6 @@ RSpec.describe 'OptionsHandler', type: :model do
     expect(t.test3_var1[:entry2].test3_var1_a1).to eq 'test-b1'
 
     expect(t.send(:config_hash_to_yaml)).to eq <<~END_TEXT
-      ---
       test3_var1:
         entry1:
           test3_var1_a1: test-a1

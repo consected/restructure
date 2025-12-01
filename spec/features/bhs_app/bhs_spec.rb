@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
+describe 'Create a BHS subject and activity', driver: $browser_driver do
   include MasterDataSupport
   include FeatureSupport
   include BhsActivityLogSetup

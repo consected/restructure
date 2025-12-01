@@ -377,6 +377,6 @@ module OptionsHandler
 
   def config_hash_to_yaml
     config = options_to_config_hash
-    YAML.dump(JSON.parse(config.to_json))
+    String.yaml_dump(config)
   end
 end
