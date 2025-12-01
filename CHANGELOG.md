@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.33.0] - 2025-12-01
+
 ### From FPHS - PR #770 - 2025-12-01
 
 - [Fixed] truncation of long radio button labels
