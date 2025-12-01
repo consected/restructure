@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.34.1] - 2025-12-01
+
 - [Fixed] Dynamic models - caption_before with escaped characters break the _comments: fields: and cause YAML issues - fixes #676
 - [Fixed] typos
 - [Added] more default options
