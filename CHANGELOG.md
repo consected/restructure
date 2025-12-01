@@ -14,6 +14,35 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] Dynamic models - caption_before with escaped characters break the _comments: fields: and cause YAML issues - fixes #676
+- [Fixed] typos
+- [Added] more default options
+- [Experimental] use of Chrome as an optional test browser - relates to #753
+- [Added] better logging and exception handling (especially for network errors)
+- [Added] redcap API methods to export_logs form_event_mapping export_field_names - related to #683
+- [Added] Redcap project button to call export_logs and save result as a file to the project filestore container
+- [Added] correct viewing of Redcap fields with multiple data collection instruments, relying on option types - resolves #606
+- [Added] dynamic definition show_if configuration allows affected fields to be defined using regex patterns - resolves #296 and #612 (with extra configurations)
+- [Fixed] Date Time edit field incorrectly implemented - fixes #760
+- [Fixed] Reference Data for Tables can't view users table - fixes #752
+- [Fixed] small issue in parallel_tests script
+- [Fixed] Redcap project updating dynamic model removes any existing settings in the _configurations - fixes #675
+- [Cleanup] configuration of Rubocop
+- [Added] hidden field type to hide captions, labels and fields while keeping the value available for show_if evaluation
+- [Added] ability for Redcap  forms represented as option_type to acccess fields in other forms for branching logic show_if evaluation - resolves #764
+- [Fixed] issue with accidental merging option configs into _default options
+- [Added] option type handling to Redcap model generation
+- [Fixed] generation of real show_if when choice values have underscores - fixes #650
+- [Fixed] setting option_type from active_value - fixes #769
+- [Fixed] small admin panel display bug
+- [Fixed] caption_before fields that are empty from being added incorrectly in the model generator
+- [Fixed] truncation of long radio button labels
+- [Updated] CHANGELOG
+- [Updated] gems
+- [Built] and tested release-ready version '9.33.0' - dev repo
+- [Updated] to Ruby version to version 3.4.7
+- [Built] and tested release-ready version '9.34.0' - dev repo
+
 ## [9.34.0] - 2025-12-01
 
 - [Updated] Ruby version to version 3.4.7
