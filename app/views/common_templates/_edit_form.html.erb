@@ -234,8 +234,13 @@
             local_vars[:locals] = local_vars
 
             showed_caption_before = nil
+                        
+            opt = field_options_for(form_object_instance, field_name_sym, reset: true)
+            alt_ft = opt.dig(:edit_as,:field_type)
+            hide_field = alt_ft&.start_with?('hidden_')            
           %>
 
+          <% unless hide_field %>
           <% if dialog_before[field_name_sym]
               showed_caption_before = true
               showed_caption_before_kl = dialog_before[field_name_sym][:keep_label] ? 'showed-caption-before-keep-label' : 'showed-caption-before'
@@ -250,12 +255,15 @@
             <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>" data-cb-field-name="<%= field_name_sym %>"
             ><%= show_caption_before field_name_sym, caption_before %></li>
           <% end %>
-
-
           <li class="list-group-item edit-field-container column_type_<%= column_type %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>"
               data-edit-field-name="<%= field_name_sym %>">
             <%= edit_form_field(**local_vars) %>
           </li>
+          <% else %>
+          <%= edit_form_field(**local_vars) %>
+          <% end %>
+
+          
 
           <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>
           <li class="list-group-item item-flag-container <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
