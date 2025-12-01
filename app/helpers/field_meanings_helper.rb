@@ -37,7 +37,7 @@ module FieldMeaningsHelper
       <i class="glyphicon glyphicon-question-sign label-help-icon"
           data-toggle="popover"
           data-trigger="click hover"
-          data-content="#{meaning}"
+          data-content="#{CGI.escape_html(meaning.gsub('"', '&quot;'))}"
           data-html="true"
       ></i>
     END_HTML

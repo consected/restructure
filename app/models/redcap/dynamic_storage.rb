@@ -322,9 +322,9 @@ module Redcap
       # to set the value to the form name of the completed form.
       unless fields['redcap_repeat_instrument']
         bpv = ''
-        test = 'if'
+        test = '#if'
         option_types.each do |ot|
-          bpv = "#{bpv}{{##{test} #{ot}_complete}}#{ot}"
+          bpv = "#{bpv}{{#{test} #{ot}_complete}}#{ot}"
           test = 'else if'
         end
         bpv = "#{bpv}{{/if}}"

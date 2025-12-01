@@ -259,9 +259,11 @@ module Dynamic
 
       fields.each do |name, config|
         html = config_value(config, :caption)
-        next unless html
+        next unless html.present?
 
         html = Redcap::Utilities.html_to_markdown(html)
+        next unless html.present?
+
         @caption_before[name] = html
       end
 
