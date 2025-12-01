@@ -14,9 +14,84 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.34.0] - 2025-12-01
+
+- [Updated] Ruby version to version 3.4.7
+- [Updated] gems
+
+## [9.33.0] - 2025-12-01
+
+### From FPHS - PR #770 - 2025-12-01
+
+- [Fixed] truncation of long radio button labels
+- [Fixed] caption_before fields that are empty from being added incorrectly in the model generator
+- [Fixed] small admin panel display bug
+- [Fixed] setting option_type from active_value - fixes #769
+
+### From FPHS - PR #768 - 2025-12-01
+
+- [Fixed] generation of real show_if when choice values have underscores - fixes #650
+
+### From FPHS - PR #767 - 2025-12-01
+
+- [Added] option type handling to Redcap model generation - resolves #765
+- [Fixed] issue with accidental merging option configs into _default options
+- [Added] ability for Redcap  forms represented as option_type to acccess fields in other forms for branching logic show_if evaluation - resolves #764
+- [Added] hidden field type to hide captions, labels and fields while keeping the value available for show_if evaluation
+
+### From FPHS - PR #766 - 2025-11-30
+
+- [Cleanup] configuration of Rubocop for development
+
+### From FPHS - PR #763 - 2025-11-27
+
+- [Fixed] Redcap project updating dynamic model removes any existing settings in the _configurations - fixes #675
+
+### From FPHS - PR #762 - 2025-11-27
+
+- [Fixed] small issue in parallel_tests script
+- [Fixed] Reference Data for Tables can't view users table - fixes #752
+
+### From FPHS - PR #761 - 2025-11-27
+
+- [Fixed] Date Time edit field incorrectly implemented - fixes #760
+
+### From FPHS - PR #758 - 2025-11-26
+
+- [Added] dynamic definition show_if configuration allows affected fields to be defined using regex patterns - resolves #296 and #612 (with extra configurations)
+
+### From FPHS - PR #757 - 2025-11-26
+
+- [Added] correct viewing of Redcap fields with multiple data collection instruments, relying on option types - resolves #606
+
+### From FPHS - PR #756 - 2025-11-26
+
+- [Added] Redcap project button to call export_logs and save result as a file to the project filestore container
+- [Added] redcap API methods to export_logs form_event_mapping export_field_names - related to #683
+- [Added] better logging and exception handling (especially for network errors)
+
+### From FPHS - PR #755 - 2025-11-26
+
+- [Added] more default options
+- [Cleaned] code
+- [Fixed] typos
+
+### From FPHS - PR #754 - 2025-11-26
+
+- [Experimental] use of Chrome as an optional test browser - relates to #753
+
 ### From FPHS - PR #749 - 2025-11-22
 
 - [Fixed] Dynamic models - caption_before with escaped characters break the_comments: fields: and cause YAML issues - fixes #676
+
+### From Viva - PR #748 - 1015-11-21
+
+- [Changed] precendence of selecting SMTP TLS or STARTTLS
+
+### From Viva - PR #747 - 2025-11-20
+
+- [Changed] user email notifications to perform in the background
+- [Fixed] SMTP timeout too low for SES
 
 ## [9.32.0] - 2025-11-20
 
