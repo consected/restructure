@@ -75,7 +75,9 @@ module Redcap
     end
 
     #
-    # Get an hash of all fields from all forms
+    # Get an hash of all fields from all forms, as defined by a Redcap admin in the data collection
+    # instrument definer.
+    # This doesn't include completion or other redcap special fields (redcap_repeat_instrument etc)
     # @return [Hash]
     def all_fields
       return unless captured_metadata.present?
@@ -116,21 +118,37 @@ module Redcap
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self, summary_fields:)
 
       records_request_options = redcap_project_admin.records_request_options
-      special_fields = Redcap::DataDictionaries::SpecialFields
-      if records_request_options&.exportSurveyFields
-        special_fields.add_survey_identifier_field(all_rf, self)
-        handle_integer_survey_field(all_rf, special_fields)
-      end
-      special_fields.add_repeat_instrument_fields(all_rf, self) if redcap_project_admin.repeating_instruments?
-      special_fields.add_defined_event_field(all_rf, self) if redcap_project_admin.is_longitudinal?
+      merge_special_project_fields!(all_rf)
+      handle_integer_survey_field(all_rf) if records_request_options&.exportSurveyFields
 
       @all_retrievable_fields[summary_fields] = all_rf
     end
 
     #
+    # Merge in the special project fields
+    # @param [Hash] fields_hash
+    def merge_special_project_fields!(fields_hash)
+      records_request_options = redcap_project_admin.records_request_options
+
+      special_fields.add_survey_identifier_field(fields_hash, self) if records_request_options&.exportSurveyFields
+      special_fields.add_repeat_instrument_fields(fields_hash, self) if redcap_project_admin.repeating_instruments?
+      special_fields.add_defined_event_field(fields_hash, self) if redcap_project_admin.is_longitudinal?
+    end
+
+    #
+    # Merge in the form complete fields
+    # @param [Hash] fields_hash
+    def merge_all_form_complete_fields!(fields_hash)
+      forms.each_value do |in_form|
+        special_fields.add_form_complete_field(fields_hash, in_form)
+        special_fields.add_form_timestamp_field(fields_hash, in_form)
+      end
+    end
+
+    #
     # If we are going to join on the default redcap_survey_identifier, we need it to be an integer.
     # Add a separate integer version of this field to be stored alongside the original string field.
-    def handle_integer_survey_field(all_retrievable_fields, special_fields)
+    def handle_integer_survey_field(fields_hash)
       fk_eid = redcap_project_admin.data_options.associate_master_through_external_identifer
       return unless fk_eid
 
@@ -140,7 +158,7 @@ module Redcap
       return unless add_fk_id == fname
 
       # We are using the integer survey id field. Add it.
-      special_fields.add_integer_survey_identifier_field(all_retrievable_fields, self)
+      special_fields.add_integer_survey_identifier_field(fields_hash, self)
     end
 
     #
@@ -178,12 +196,11 @@ module Redcap
     def refresh_variables_records
       return unless captured_metadata
 
-      forms.each do |_k, form|
-        form.fields.each do |_k, field|
+      forms.each_value do |form|
+        form.fields.each_value do |field|
           field.refresh_variable_record
         end
-
-        Redcap::DataDictionaries::SpecialFields.form_complete_field(form).refresh_variable_record
+        special_fields.form_complete_field(form).refresh_variable_record
       end
 
       # Trigger updates on the project admin to ensure updates there if needed
@@ -201,6 +218,10 @@ module Redcap
           field.field_choices.refresh_choices_records
         end
       end
+    end
+
+    def special_fields
+      Redcap::DataDictionaries::SpecialFields
     end
   end
 end

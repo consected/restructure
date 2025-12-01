@@ -488,10 +488,18 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
     end
 
     # Test creation of a dynamic model that incorporates
-    # options with _default, _merge... and _override
+    # options with _default..., _merge... and _override.
+    # Also tests _configurations...
     it 'creates a dynamic model and tests _merge... and _override' do
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
+
+      dm_def = DynamicModel::TestMultiOption.definition
+      expect(dm_def.configurations[:use_current_version]).to be true
+      expect(dm_def.configurations[:option_type_attr_name]).to eq 'option_type'
+      expect(dm_def.option_type_config_for(:test_defaults_only).view_options).to eq(data_attribute: 'field_1')
+      expect(dm_def.option_type_config_for(:test_defaults_only).field_options).to eq(field_1: { no_downcase: true })
+      expect(dm_def.option_type_config_for(:test_defaults_only).labels).to eq(field_1: 'Field 1 Label', field_2: 'Field 2 Label', field_3: 'Field 3 Label', field_4: 'Field 4 Label', field_5: 'Field 5 Label', option_type: 'View Type')
 
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
