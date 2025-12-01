@@ -178,6 +178,21 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
       expect(dm.configurations[:use_current_version]).to be true
       expect(dm.configurations[:foreign_key_through_external_id]).to eq 'dynamic_model__tests'
+      expect(dm.configurations[:option_type_attr_name]).to eq 'option_type'
+    end
+
+    it 'automatically sets the option_type field value' do
+      project_name = @project[:name]
+      rc = Redcap::ProjectAdmin.active.find_by(name: project_name)
+      rc.current_admin = @admin
+
+      # Reload the dynamic model
+      dm = @ds.dynamic_model(force: true)
+
+      otc = dm.option_type_config_for(:default)
+
+      expect(otc.field_options[:option_type]).to be_a Hash
+      expect(otc.field_options.dig(:option_type, :active_value)).to eq('{{#if q2_survey_complete}}q2_survey{{#else if test_complete}}test{{/if}}')
     end
   end
 
@@ -220,6 +235,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       dm.option_configs(force: true)
 
       expect(dm.option_configs_names).to eq %i[default static_variable_information visitspecific_information]
+      expect(dm.configurations[:option_type_attr_name]).to eq 'redcap_repeat_instrument'
 
       # Check the configuration for the default option type
       oc = dm.option_type_config_for(:default)

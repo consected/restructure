@@ -705,6 +705,11 @@ module Redcap
             dd: { type: 'timestamp' },
             yes_or_no: { type: 'boolean' },
             test_complete: { type: 'integer' }
+          },
+          field_options: {
+            option_type: {
+              active_value: "{{#is q2_survey_complete '===' 2}}q2_survey{{#else is test_complete '===' 2}}test{{/is}}"
+            }
           }
         }
       }

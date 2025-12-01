@@ -196,7 +196,7 @@ module Redcap
       # Add a disabled field if one is not present and we need to disable deleted records
       @fields['disabled'] ||= { label: 'disabled' } if project_admin.data_options.handle_deleted_records == 'disabled'
 
-      @fields
+      @fields.stringify_keys
     end
 
     #
@@ -318,7 +318,27 @@ module Redcap
         field_type: "fixed_#{record_id_fn}"
       }
 
+      # If we don't have a redcap_repeat_instrument field, set a blank preset value for option_type
+      # to set the value to the form name of the completed form.
+      unless fields['redcap_repeat_instrument']
+        bpv = ''
+        test = 'if'
+        option_types.each do |ot|
+          bpv = "#{bpv}{{##{test} #{ot}_complete}}#{ot}"
+          test = 'else if'
+        end
+        bpv = "#{bpv}{{/if}}"
+
+        @field_options['option_type'] = {
+          active_value: bpv
+        }
+      end
+
       @field_options
+    end
+
+    def option_type_attr_name
+      fields['redcap_repeat_instrument'] ? 'redcap_repeat_instrument' : 'option_type'
     end
 
     #

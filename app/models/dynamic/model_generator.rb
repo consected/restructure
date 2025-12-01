@@ -14,7 +14,8 @@ module Dynamic
       attr_accessor :field_types, :array_fields, :prefix_config_library,
                     :associate_master_through_external_id_resource_name,
                     :associate_master_through_external_id_fkey_name,
-                    :include_all_fields_in_option_types, :foreign_key_name
+                    :include_all_fields_in_option_types, :foreign_key_name,
+                    :option_type_attr_name
       attr_accessor :parent, :qualified_table_name, :category
     end
 
@@ -348,6 +349,8 @@ module Dynamic
         def_configs[:foreign_key_through_external_id] = associate_master_through_external_id_resource_name
       end
 
+      def_configs[:option_type_attr_name] = option_type_attr_name if option_type_attr_name.present?
+
       default_options = {}
       if dynamic_model
         # Load the existing option configurations if the dynamic model exists
@@ -406,20 +409,26 @@ module Dynamic
           ot_fields = all_field_names.dup
           ot_field_options = {}
           external_fields = all_field_names - fields_for_ot
-          external_fields.each do |fn|
-            if fn.to_s.index(/(placeholder_|embedded_report_)/)
-              # For external fields that are not "real", remove them from the list
-              # since there is no field value to actually retrieve
-              ot_fields.delete_if { |v| v == fn }
-              next
-            end
+          all_field_names.each do |fn|
+            if external_fields.include?(fn)
+              if fn.to_s.index(/(placeholder_|embedded_report_)/)
+                # For external fields that are not "real", remove them from the list
+                # since there is no field value to actually retrieve
+                ot_fields.delete_if { |v| v == fn }
+                next
+              end
 
-            # Set the field to be hidden
-            ot_field_options[fn] = {
-              edit_as: {
-                field_type: "hidden_#{fn}"
-              }
-            }
+              # Set the field to be hidden
+              # and maintain the other field options if they exist
+              ot_field_options[fn] = (field_options[fn] || {}).deep_dup.merge(
+                edit_as: {
+                  field_type: "hidden_#{fn}"
+                }
+              )
+            elsif field_options[fn]
+              # Use the normal field options
+              ot_field_options[fn] = field_options[fn].deep_dup
+            end
           end
         else
           # The field options are not needed since the field won't be hidden
