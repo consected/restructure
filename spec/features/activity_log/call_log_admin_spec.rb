@@ -24,9 +24,9 @@
 
 require 'rails_helper'
 
-describe 'Call log admin', driver: :app_firefox_driver do
+describe 'Call log admin', driver: $browser_driver do
   include ActivityLogMain
-  
+
   before :all do
     SetupHelper.feature_setup
     setup_database

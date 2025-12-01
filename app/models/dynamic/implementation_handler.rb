@@ -5,6 +5,7 @@ module Dynamic
 
     included do
       after_find :set_option_type_attr_name
+      after_initialize :set_option_type_attr_name
       after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
       after_initialize :evaluate_active_values
@@ -82,7 +83,7 @@ module Dynamic
     # @return [Array{Symbol}]
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
-      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type]&.include?('notes') }
+      res = fo&.filter { |_k, v| v[:no_downcase] || (v[:edit_as] && v[:edit_as][:field_type]&.include?('notes')) }
 
       res&.keys
     end
@@ -303,7 +304,7 @@ module Dynamic
       fo.each do |name, config|
         next unless config.key?(:active_value)
 
-        next unless attribute_names.include?(name.to_s)
+        next unless attribute_names.include?(name.to_s) || @option_type_attr_name.to_s == name.to_s
 
         init_value = config[:active_value]
         if init_value

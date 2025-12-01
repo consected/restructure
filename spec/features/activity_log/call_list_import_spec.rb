@@ -11,7 +11,7 @@
 
 require 'rails_helper'
 
-describe 'Import list of calls to log', driver: :app_firefox_driver do
+describe 'Import list of calls to log', driver: $browser_driver do
   include ActivityLogMain
 
   before :all do

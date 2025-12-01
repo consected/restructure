@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'reports', js: true, driver: :app_firefox_driver do
+describe 'reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include ItemFlagSupport

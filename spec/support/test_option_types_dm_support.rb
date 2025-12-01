@@ -4,8 +4,11 @@ module TestOptionTypesDmSupport
   def setup_multi_option_types_dm(option_type_field: 'option_type', default_option_type_name: nil)
     dm_options = <<~END_YAML
       _configurations:
+        use_current_version: true
+
+      _configurations_extras:
         option_type_attr_name: #{option_type_field}
-        #{default_option_type_name ? "default_option_type_name: #{default_option_type_name}" : ''}
+        #{"default_option_type_name: #{default_option_type_name}" if default_option_type_name}
 
       _default:
         view_options:
@@ -19,6 +22,7 @@ module TestOptionTypesDmSupport
           field_5: Field 5 Label
           #{option_type_field}: View Type
 
+      _default_extras:
         field_options:
           field_1:
             no_downcase: true
@@ -134,6 +138,9 @@ module TestOptionTypesDmSupport
         valid_if:
           on_save:
             always: true
+
+      # Simple way to test what the defaults look like before any other configurations are applied
+      test_defaults_only:
 
     END_YAML
 
