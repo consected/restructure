@@ -69,9 +69,14 @@ module Dynamic
     # can allow this on servers running in Rails production that are used for
     # app development.
     def allow_migrations
-      return @allow_migrations unless @allow_migrations.nil?
+      unless @allow_migrations.nil?
+        Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+        return @allow_migrations
+      end
 
       @allow_migrations = Settings::AllowDynamicMigrations && !prevent_migrations
+      Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      @allow_migrations
     end
 
     #
@@ -94,8 +99,8 @@ module Dynamic
       return true if saved_change_to_disabled? && !disabled
 
       options_attr_name = self.class.option_configs_attr.to_s
-      v1 = attribute_before_last_save(options_attr_name)
-      v2 = attributes[options_attr_name]
+      v1 = attribute_before_last_save(options_attr_name) || ''
+      v2 = attributes[options_attr_name] || ''
       v1 = v1.sub("---\n", '')
       v2 = v2.sub("---\n", '')
       v1 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v1)
@@ -117,7 +122,7 @@ module Dynamic
       changed = (v1_sql != v2_sql)
       if changed
         Rails.logger.info "In migration, the view_sql for #{table_name} is going to change (from/to):\n" \
-        "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
+                          "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
       end
       !!changed
     end
@@ -277,7 +282,7 @@ module Dynamic
       return true if disabled? || Admin::MigrationGenerator.current_search_paths.include?(schema_name)
 
       errors.add :schema_name, "(#{schema_name}) not in current search_path for #{table_name} - " \
-                           "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
+                               "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
     end
   end
 end

@@ -53,17 +53,17 @@ module BrowserHelper
     cb.reuse_server = false
     service = nil
 
-    if ENV['BROWSER'] == 'chrome'
-      $browser_driver = :app_chrome_driver
-      puts '--> Using Chrome browser for tests'
-      cb.register_driver $browser_driver do |app|
-        set_up_chrome_driver(app, browser_args)
-      end
-    else
+    if ENV['BROWSER'] == 'firefox'
       $browser_driver = :app_firefox_driver
       puts '--> Using Firefox browser for tests'
       cb.register_driver $browser_driver do |app|
         set_up_firefox_driver(app, browser_args)
+      end
+    else
+      $browser_driver = :app_chrome_driver
+      puts '--> Using Chrome browser for tests'
+      cb.register_driver $browser_driver do |app|
+        set_up_chrome_driver(app, browser_args)
       end
     end
 
