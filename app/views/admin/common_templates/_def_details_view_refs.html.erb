@@ -1,0 +1,29 @@
+<% if object_instance.persisted? && object_instance.options_text 
+     schema = object_instance.schema_name
+     table_name = object_instance.table_name
+     begin
+      view_refs = Admin::MigrationGenerator.views_referencing_table(schema, table_name)  
+     rescue StandardError => e
+       Rails.logger.error "Error loading views referencing #{schema}.#{table_name} : #{e.message}"
+       view_refs = []
+     end  
+    %>
+<div class="activity-list-view-refs">
+  <label>views referencing database table</label>
+  <% if view_refs.present? %>
+  <ul class="al-reference-list">  
+  <% view_refs.each do |l| 
+       dm =  DynamicModel.active.find_by table_name: l['viewname'] %>
+  <li>
+    <code><%= "#{l['schema']}  #{l['viewname']}" %></code>
+    <% if dm %>
+      <%= link_to "Dynamic Model: #{dm.name}", admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled }), target: "_blank" %>
+    <% end %>
+  </li>
+  <% end %>
+  </ul>
+  <% else %>
+  <p>none</p>
+  <% end %>
+</div>
+<% end %>
