@@ -518,6 +518,8 @@ module ActiveRecord
           removed_history = []
         end
 
+        field_changes = added.present? || removed.present? || changed.present?
+
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
         setup_fields(full_field_list)
 
@@ -531,8 +533,7 @@ module ActiveRecord
         end
 
         drop_activity_log_views(schema, table_name)
-
-        drop_reference_views(schema, table_name)
+        dropped_reference_views = drop_reference_views(schema, table_name) if field_changes
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           begin
@@ -570,7 +571,7 @@ module ActiveRecord
 
           # If we are rolling back, skip this one unless the col name exists in the table
           # or if migrating up, skip this one unless the col name does not exist in the table
-          next unless reverting? && c.in?(col_names) || !reverting? && !c.in?(col_names)
+          next unless (reverting? && c.in?(col_names)) || (!reverting? && !c.in?(col_names))
 
           if fdef == :references
             begin
@@ -593,7 +594,7 @@ module ActiveRecord
 
           # If we are rolling back, skip this one unless the col name does not exist in the table
           # or if migrating up, skip this one unless the col name exists in the table
-          next unless reverting? && !c.in?(col_names) || !reverting? && c.in?(col_names)
+          next unless (reverting? && !c.in?(col_names)) || (!reverting? && c.in?(col_names))
 
           # Special case
 
@@ -616,7 +617,7 @@ module ActiveRecord
 
             # If we are rolling back, skip this one unless the col name exists in the table
             # or if migrating up, skip this one unless the col name does not exist in the table
-            next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
+            next unless (reverting? && c.in?(history_col_names)) || (!reverting? && !c.in?(history_col_names))
 
             if fdef == :references
               options[:index][:name] += '_hist'
@@ -638,7 +639,7 @@ module ActiveRecord
 
             # If we are rolling back, skip this one unless the col name does not exist in the table
             # or if migrating up, skip this one unless the col name exists in the table
-            next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
+            next unless (reverting? && !c.in?(history_col_names)) || (!reverting? && c.in?(history_col_names))
 
             if fdef == :references
               options[:index][:name] += '_hist'
@@ -667,6 +668,7 @@ module ActiveRecord
           end
         end
 
+        recreate_reference_views(dropped_reference_views, schema, table_name) if field_changes
         recreate_activity_log_views
 
         change_comments
@@ -700,7 +702,7 @@ module ActiveRecord
       # so that we don't inadvertently drop any views created in the DB outside of ReStructure
       # @param [String] schema for the table
       # @param [String] table_name to check for references
-      # @return [Array{Hash}] all dropped views
+      # @return [Array{Hash}] array of view definitions that were dropped
       def drop_reference_views(schema, table_name)
         other_ref_views = Admin::MigrationGenerator.views_referencing_table(schema, table_name)
         other_ref_views = other_ref_views.select do |v|
@@ -709,13 +711,29 @@ module ActiveRecord
 
         other_ref_views&.each do |view|
           Rails.logger.warn "Dropping dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name}\n" \
-          "view_definition: \n#{view['view_definition']}"
+                            "view_definition: \n#{view['view_definition']}"
           execute <<~END_SQL
             DROP VIEW #{view['schemaname']}.#{view['viewname']};
           END_SQL
         end
 
         other_ref_views
+      end
+
+      #
+      # Recreate views related to dynamic models, that were previously dropped
+      # @param [Array{Hash}] dropped_reference_views array of view definitions that were dropped
+      # @param [String] schema_name for the table that caused the view to be dropped
+      # @param [String] table_name for the table that caused the view to be dropped
+      def recreate_reference_views(dropped_reference_views, schema_name, table_name)
+        dropped_reference_views&.each do |view|
+          Rails.logger.warn "Recreate dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema_name}.#{table_name}\n" \
+                            "view_definition: \n#{view['view_definition']}"
+          execute <<~END_SQL
+            create view #{view['schemaname']}.#{view['viewname']} as
+            #{view['view_definition']}
+          END_SQL
+        end
       end
 
       #
@@ -1052,9 +1070,9 @@ module ActiveRecord
           from #{to_schema_table} dest
           inner join model_references mr on
             dest.id = mr.to_record_id and
-            #{to_no_master ? '' : 'dest.master_id = mr.to_record_master_id and'}
+            #{'dest.master_id = mr.to_record_master_id and' unless to_no_master}
             not coalesce (mr.disabled, false) and
-            #{from_what == 'this' ? "mr.from_record_type = '#{class_name}' and" : ''}
+            #{"mr.from_record_type = '#{class_name}' and" if from_what == 'this'}
             mr.to_record_type = '#{to_model_class_name}'
           ;
 
@@ -1096,16 +1114,16 @@ module ActiveRecord
             AS $$
           BEGIN
             INSERT INTO #{history_table_name} (
-              #{no_master_id_as_fkey ? '' : 'master_id,'}
+              #{'master_id,' unless no_master_id_as_fkey}
               #{"#{fields.join(', ')}," if fields.present?}
-              #{no_user_id ? '' : 'user_id,'}
+              #{'user_id,' unless no_user_id}
               created_at,
               updated_at,
               #{history_table_id_attr})
             SELECT
-              #{no_master_id_as_fkey ? '' : 'NEW.master_id,'}
+              #{'NEW.master_id,' unless no_master_id_as_fkey}
               #{"#{new_fields.join(', ')}," if fields.present?}
-              #{no_user_id ? '' : 'NEW.user_id,'}
+              #{'NEW.user_id,' unless no_user_id}
               NEW.created_at,
               NEW.updated_at,
               NEW.id;
