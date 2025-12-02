@@ -98,6 +98,7 @@ module TableGenerators
         -- Command line:
         -- table_generators/generate.sh activity_logs_table create #{name} #{base_name} #{attrib.join(' ')}
 
+              DROP TABLE if exists #{singular_name}_history CASCADE;
               CREATE TABLE #{singular_name}_history (
                   id integer NOT NULL,
                   master_id integer,
@@ -122,7 +123,7 @@ module TableGenerators
                   disabled boolean default false
               );
 
-              CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
+              CREATE or replace FUNCTION log_#{singular_name}_update() RETURNS trigger
                   LANGUAGE plpgsql
                   AS $$
                       BEGIN
@@ -130,7 +131,7 @@ module TableGenerators
                           (
                               master_id,
                               #{base_name_id},
-                              #{attrib.join(",\n                      ")}#{!attrib.empty? ? ',' : ''}
+                              #{attrib.join(",\n                      ")}#{',' unless attrib.empty?}
                               extra_log_type,
                               user_id,
                               created_at,
@@ -141,7 +142,9 @@ module TableGenerators
                           SELECT
                               NEW.master_id,
                               NEW.#{base_name_id},
-                              #{!attrib.empty? ? 'NEW.' : ''}#{attrib.join(",\n                      NEW.")}#{!attrib.empty? ? ',' : ''}
+                              #{unless attrib.empty?
+                                  'NEW.'
+                                end}#{attrib.join(",\n                      NEW.")}#{',' unless attrib.empty?}
                               NEW.extra_log_type,
                               NEW.user_id,
                               NEW.created_at,
@@ -201,8 +204,10 @@ module TableGenerators
                   ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
               ALTER TABLE ONLY #{name}
                   ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (#{base_name_id}) REFERENCES #{item_type_name}(id);
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{name}
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{name}
+              #{unless created_by
+                  '--'
+                end}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_users FOREIGN KEY (user_id) REFERENCES users(id);
@@ -216,8 +221,10 @@ module TableGenerators
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
 
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{singular_name}_history
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{singular_name}_history
+              #{unless created_by
+                  '--'
+                end}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
               GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;

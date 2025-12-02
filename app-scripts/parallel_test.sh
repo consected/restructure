@@ -1,4 +1,5 @@
 #!/bin/bash
+# BROWSER: 'chrome' (default) or 'firefox'
 # RUN_RESTESTS: If set to 'true', the script will run the retest script for failed specs.
 # NO_CLEAN_DB: If set to 'true', the script will skip cleaning the test database.
 # NO_BRAKEMAN: If set to 'true', the script will skip running Brakeman security analysis.
@@ -6,6 +7,8 @@
 # USE_PG_HOST: If set, the script will not use sudo to clean the database, and will connect to the specified PostgreSQL host via a TCP port.
 # SKIP_ZEITWERK: If set to 'true', the script will skip checking Zeitwerk.
 # PARALLEL_TEST_PROCESSORS: Number of parallel processes to use for running tests. Defaults to number of CPU cores.
+
+BROWSER=${BROWSER:-chrome}
 
 if [ "${RUN_RESTESTS}" == 'true' ]; then
   $(dirname $0)/parallel_test_retest.sh

@@ -154,6 +154,8 @@
   </p>
 </div>
 
+<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
+
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
 <% else %>
