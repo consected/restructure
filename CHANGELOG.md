@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.35.0] - 2025-12-02
+
 ### From FPHS - PR #773 - 2025-12-02
 
 - [Changed] default test browser to Chrome - related to #753
