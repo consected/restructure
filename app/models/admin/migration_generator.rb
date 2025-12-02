@@ -551,14 +551,14 @@ class Admin::MigrationGenerator
 
     <<~ARCONTENT
       self.no_master_association = #{!!no_master_association}
-      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
-      #{table_name_changed ? '    update_table_name' : ''}
-      #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields&.join(' ')}]"}
-          \# added: #{added}
-          \# removed: #{removed}
-          \# changed type: #{changed}
-      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
+      #{"    self.prev_table_name = '#{prev_table_name}'" if table_name_changed}
+      #{'    update_table_name' if table_name_changed}
+      #{"    self.prev_fields = %i[#{prev_fields&.join(' ')}]" unless table_name_changed}
+          # added: #{added}
+          # removed: #{removed}
+          # changed type: #{changed}
+      #{"    # new table comment: #{new_table_comment.gsub("\n", '\n')}" if new_table_comment}
+      #{"    # new fields comments: #{new_fields_comments.keys}" if new_fields_comments.present?}
           update_fields
     ARCONTENT
   end
@@ -577,11 +577,11 @@ class Admin::MigrationGenerator
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
-      #{table_name_changed ? '    update_table_name' : ''}
+      #{"    self.prev_table_name = '#{prev_table_name}'" if table_name_changed}
+      #{'    update_table_name' if table_name_changed}
           self.prev_fields = %i[#{prev_fields&.join(' ')}]
-      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
+      #{"    # new table comment: #{new_table_comment.gsub("\n", '\n')}" if new_table_comment}
+      #{"    # new fields comments: #{new_fields_comments.keys}" if new_fields_comments.present?}
           create_or_update_dynamic_model_view
     ARCONTENT
   end
@@ -694,8 +694,10 @@ class Admin::MigrationGenerator
   #
   # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
-    return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
-
+    unless allow_migrations && db_migration_schema != DefaultMigrationSchema
+      Rails.logger.warn "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
+      return
+    end
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.warn "Running migration from #{db_migration_dirname}"
 
@@ -790,7 +792,7 @@ class Admin::MigrationGenerator
           #{migration_set_attribs}
 
           #{do_create_or_update}
-          #{table_or_view == 'tables' ? 'create_dynamic_model_trigger' : ''}
+          #{'create_dynamic_model_trigger' if table_or_view == 'tables'}
         end
       end
     CONTENT
