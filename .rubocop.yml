@@ -90,3 +90,12 @@ Style/SpecialGlobalVars:
 
 Style/ClassAndModuleChildren:
   Enabled: false
+
+RuboCopNaming/VariableNumber:
+  Enabled: false
+
+Lint/NestedMethodDefinition:
+  Enabled: false
+
+Style/FetchEnvVar:
+  Enabled: false
