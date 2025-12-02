@@ -14,6 +14,15 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #773 - 2025-12-02
+
+- [Changed] default test browser to Chrome - related to #753
+
+### From FPHS - PR #772 - 2025-12-02
+
+- [Added] view reference info to dynamic definiition admin details panels
+- [Fixed] AppGenerator drops reference views if they have dynamic model definitions, but doesn't recreate them afterwards - fixes #771
+
 ## [9.34.0] - 2025-12-01
 
 - [Updated] Ruby version to version 3.4.7
