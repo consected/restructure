@@ -32,6 +32,10 @@ module Dynamic
       end
     end
 
+    def history_table_name
+      @history_table_name ||= Admin::MigrationGenerator.history_table_name_for(table_name)
+    end
+
     #
     # Get the definition record version from history, current
     # at the time of the current_at argument
