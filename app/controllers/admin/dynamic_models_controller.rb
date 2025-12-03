@@ -22,6 +22,8 @@ class Admin::DynamicModelsController < AdminController
     render partial: 'admin/common_templates/def_versions'
   end
 
+  protected
+
   def calculate_version_diffs(all_versions)
     return [] if all_versions.blank?
 
@@ -54,8 +56,6 @@ class Admin::DynamicModelsController < AdminController
 
     diffs
   end
-
-  protected
 
   def before_send_processor
     'dynamic_models_admin_form'

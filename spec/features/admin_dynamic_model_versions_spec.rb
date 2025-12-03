@@ -87,6 +87,9 @@ describe 'admin dynamic model versions', js: true, driver: $browser_driver do
       find('a.edit-entity.glyphicon-pencil').click
     end
 
+    # Wait for the edit form to load via AJAX
+    expect(page).to have_css('.nav-tabs', wait: 10)
+
     # Navigate to the Versions tab (on-open-click JavaScript will auto-trigger Load)
     click_link 'Versions'
     expect(page).to have_css('#def-versions', visible: true)
@@ -102,79 +105,68 @@ describe 'admin dynamic model versions', js: true, driver: $browser_driver do
     expect(version_sections.length).to be >= 3
   end
 
-  # TODO: Fix UI navigation timing issues
-  xit 'shows split diff format for changed fields' do
+  it 'shows split diff format for changed fields' do
+    # Create a dynamic model programmatically with version history
+    dm = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'Test Split Diff Display2',
+      table_name: 'test_version_tracking_recs',
+      schema_name: 'dynamic_test',
+      category: 'test',
+      field_list: 'test_field',
+      options: "field_1:\n  label: Original Label"
+    )
+    dm.current_admin = @admin
+    dm.update_tracker_events
+
+    # Update to create a version with changes
+    dm.update!(options: "field_1:\n  label: Updated Label\n  type: string")
+
     admin_sign_in_with_2fa
 
     # Navigate to Dynamic Models admin page
     visit '/admin/dynamic_models'
 
-    # Create a new dynamic model
-    all('a.add-item-button').first.click
+    # Wait for the admin list to load
+    expect(page).to have_css("#admin-item-#{dm.id}", wait: 10)
 
-    within 'form#new_dynamic_model' do
-      fill_in 'Name', with: 'Test Split Diff Display'
-      fill_in 'Table name', with: 'test_version_tracking_recs'
-      fill_in 'Category', with: 'test'
-      fill_in 'Field list', with: 'test_field'
-
-      all('input[type="submit"][value="save"]').first.click
+    # Find and click the Edit button for our dynamic model
+    within "#admin-item-#{dm.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
     end
 
-    sleep 1
+    # Wait for the edit form to load via AJAX
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1 # Extra pause for JS to initialize
 
-    # Add options via edit
-    click_link 'Edit'
-
-    within 'form.edit_dynamic_model' do
-      options = <<~YAML
-        field_1:
-          label: Original Label
-      YAML
-      fill_in 'Options', with: options
-
-      all('input[type="submit"][value="save"]').first.click
+    # Navigate to the Versions tab
+    within '.nav-tabs' do
+      click_link 'Versions'
     end
+    expect(page).to have_css('#def-versions', visible: true, wait: 10)
 
-    # Update to create a version
-    click_link 'Edit'
+    # Wait for AJAX to load versions automatically
+    expect(page).to have_css('.version-diff-section', wait: 10)
 
-    within 'form.edit_dynamic_model' do
-      updated_options = <<~YAML
-        field_1:
-          label: Updated Label
-          type: string
-      YAML
-      fill_in 'Options', with: updated_options
-
-      all('input[type="submit"][value="save"]').first.click
-    end
-
-    sleep 1
-
-    # View versions
-    click_link 'Versions'
-
-    within '#def-versions-embedded' do
-      click_link 'Load'
-    end
-
-    sleep 2
-
-    # Verify split diff display
+    # Verify split diff display structure
     within '#embedded-dynamic-def-versions-embedded' do
       # Should show the Diffy split diff with previous and current columns
       expect(page).to have_css('table.app-import-upload-results tbody tr')
 
-      # Check for the field name and diff columns
-      first_row = all('table.app-import-upload-results tbody tr').first
-      within first_row do
+      # Find the Options row (there may be other changed fields too)
+      options_row = all('table.app-import-upload-results tbody tr').find do |row|
+        row.has_content?(/Options/i)
+      end
+
+      expect(options_row).to be_present, 'Expected to find a row with Options field'
+
+      within options_row do
         # Should have 3 columns: field name, previous value, current value
         tds = all('td')
         expect(tds.length).to eq(3)
 
         # First td should be the field name
-        expect(tds[0]).to have_content(/\w+/) # Some field name
+        expect(tds[0]).to have_content(/Options/i)
 
         # Second and third should have Diffy HTML content
         # Diffy adds ul/li elements for line-by-line diffs
@@ -183,37 +175,54 @@ describe 'admin dynamic model versions', js: true, driver: $browser_driver do
     end
   end
 
-  # TODO: Fix stale element timing issues
-  xit 'handles dynamic models with no version history' do
+  it 'handles dynamic models with no version history' do
+    # Create a dynamic model programmatically with no updates (only 1 version)
+    dm = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'Test No Versions',
+      table_name: 'test_version_tracking_recs',
+      schema_name: 'dynamic_test',
+      category: 'test',
+      field_list: 'test_field',
+      options: "field_1:\n  label: Single Version Field"
+    )
+    dm.current_admin = @admin
+    dm.update_tracker_events
+
+    # Don't make any updates - only one version should exist
+
     admin_sign_in_with_2fa
 
+    # Navigate to Dynamic Models admin page
     visit '/admin/dynamic_models'
-    all('a.add-item-button').first.click
 
-    within 'form#new_dynamic_model' do
-      fill_in 'Name', with: 'Test No Versions'
-      fill_in 'Table name', with: 'test_version_tracking_recs'
-      fill_in 'Category', with: 'test'
-      fill_in 'Field list', with: 'test_field'
+    # Wait for the admin list to load
+    expect(page).to have_css("#admin-item-#{dm.id}", wait: 10)
 
-      all('input[type="submit"][value="save"]').first.click
+    # Find and click the Edit button for our dynamic model
+    within "#admin-item-#{dm.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
     end
 
-    # Navigate to versions immediately (before any updates)
-    click_link 'Versions'
+    # Wait for the edit form to load via AJAX
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1 # Extra pause for JS to initialize
 
-    within '#def-versions-embedded' do
-      click_link 'Load'
+    # Navigate to the Versions tab
+    within '.nav-tabs' do
+      click_link 'Versions'
     end
+    expect(page).to have_css('#def-versions', visible: true, wait: 10)
 
-    sleep 1
+    # Wait for AJAX to load versions automatically
+    # With only one version, there should be no diffs to display
+    sleep 2
 
-    # Should show empty state or just current version
+    # Should show no version diff sections since there's nothing to compare
     within '#embedded-dynamic-def-versions-embedded' do
-      # Either no version diff sections, or empty message
       version_sections = all('.version-diff-section')
-      # A newly created model should have at most 1 version (the current one)
-      # With no previous version to compare, there should be no diff sections
+      # A newly created model with no updates should have no diff sections
+      # (no previous version to compare against)
       expect(version_sections.length).to eq(0)
     end
   end

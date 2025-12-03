@@ -12,6 +12,8 @@ class Admin::ActivityLogsController < AdminController
     render partial: 'admin/common_templates/def_versions'
   end
 
+  protected
+
   def calculate_version_diffs(all_versions)
     return [] if all_versions.blank?
 
@@ -44,8 +46,6 @@ class Admin::ActivityLogsController < AdminController
 
     diffs
   end
-
-  protected
 
   def routes_reload
     DynamicModel.routes_reload

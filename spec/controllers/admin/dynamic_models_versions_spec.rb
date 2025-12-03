@@ -29,7 +29,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
         }
       ]
 
-      diffs = @controller.calculate_version_diffs(versions)
+      diffs = @controller.send(:calculate_version_diffs, versions)
 
       expect(diffs.length).to eq(1)
       expect(diffs[0][:changes]['options']).to be_present
@@ -55,13 +55,13 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
         }
       ]
 
-      diffs = @controller.calculate_version_diffs(versions)
+      diffs = @controller.send(:calculate_version_diffs, versions)
 
       expect(diffs).to be_empty
     end
 
     it 'handles empty versions array' do
-      diffs = @controller.calculate_version_diffs([])
+      diffs = @controller.send(:calculate_version_diffs, [])
       expect(diffs).to eq([])
     end
 
@@ -81,7 +81,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
         }
       ]
 
-      diffs = @controller.calculate_version_diffs(versions)
+      diffs = @controller.send(:calculate_version_diffs, versions)
 
       expect(diffs[0][:changes].keys).not_to include('id')
       expect(diffs[0][:changes].keys).not_to include('def_version')
@@ -100,7 +100,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
         }
       ]
 
-      diffs = @controller.calculate_version_diffs(versions)
+      diffs = @controller.send(:calculate_version_diffs, versions)
 
       expect(diffs).to be_empty
     end
