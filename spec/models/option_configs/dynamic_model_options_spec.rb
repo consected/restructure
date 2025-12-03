@@ -184,7 +184,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     END_OPT
 
     unless dm.options.strip == exp.strip
-      put_to_saved_log("replaces option configurations\n\---\n#{dm.options}\n---\n#{exp}\n---\n")
+      put_to_saved_log("replaces option configurations\n---\n#{dm.options}\n---\n#{exp}\n---\n")
     end
     expect(dm.options.strip).to eq exp.strip
 
@@ -489,5 +489,83 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect(view_2_options.caption_before[:test1][:caption]).to eq('<p>not shown</p>')
     expect(view_2_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
     expect(view_2_options.show_if[:placeholder_view_2]).to eq(test2: 'show placeholder_view_2')
+  end
+
+  it 'handles show_if conditions with embedded_item data' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        show_if:
+          test1:
+            any:
+              test2: main_form_value
+              embedded_item:
+                embedded_field: embedded_value
+          user_id:
+            all:
+              test1: required_value
+              embedded_item:
+                embedded_status: active
+        field_configs:
+          test1:
+            caption_before: test1 caption
+          test2:
+            caption_before: test2 caption
+          user_id:
+            caption_before: user_id caption
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    # Verify the show_if configuration is properly structured
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to have_key(:any)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:test2)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:test1][:any][:embedded_item]).to eq(embedded_field: 'embedded_value')
+
+    expect(dmdef.default_options.show_if[:user_id]).to be_a Hash
+    expect(dmdef.default_options.show_if[:user_id]).to have_key(:all)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:test1)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:user_id][:all][:embedded_item]).to eq(embedded_status: 'active')
+  end
+
+  it 'handles nested show_if conditions with embedded_item' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      option_type_3:
+        show_if:
+          field_to_show:
+            any:
+              another_field_in_this_form: a value
+              embedded_item:
+                all:
+                  a_field_in_the_embedded_item: another value
+                  embedded_score:
+                    condition: '>='
+                    value: 10
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    option_type_3 = dmdef.option_type_config_for(:option_type_3)
+
+    # Verify the show_if configuration structure
+    expect(option_type_3.show_if[:field_to_show]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:another_field_in_this_form]).to eq('a value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:a_field_in_the_embedded_item]).to eq('another value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:condition]).to eq('>=')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:value]).to eq(10)
   end
 end

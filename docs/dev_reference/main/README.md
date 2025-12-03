@@ -8,6 +8,7 @@
 ## The app UI
 
 - [UI templates for Master record search results](../app-ui/ui-templates-for-master-record-search-results.md)
+- [show_if with embedded_item](../app-ui/show_if_embedded_item.md)
 
 ## Getting git log for CHANGELOG
 

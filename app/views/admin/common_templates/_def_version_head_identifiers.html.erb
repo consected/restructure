@@ -1,0 +1,33 @@
+<thead>
+  <tr>
+    <th style="width: 20%;">Attribute</th>
+    <th style="width: 40%;">Previous Version</th>
+    <th style="width: 40%;">Current Version</th>
+  </tr>
+  <% 
+    # Show key identifying information in the header
+    identifier_fields = %w[id name table_name category item_type process_name created_at updated_at]
+    
+    identifier_fields.each do |field|
+      next unless current_version.key?(field)
+      
+      current_val = current_version[field]
+      previous_val = previous_version[field]
+      
+      # Skip if both values are the same for identifier fields (except dates)
+      next if current_val == previous_val && !%w[created_at updated_at].include?(field)
+      
+      tagname = 'span'
+      if current_val.to_s.include?("\n") || previous_val.to_s.include?("\n")
+        tagname = 'pre'
+      end
+  %>
+    <tr class="info">
+      <th><%= field.humanize %></th>
+      <td><<%=tagname%>><%= previous_val %></<%=tagname%>></td>
+      <td><<%=tagname%>><%= current_val %></<%=tagname%>></td>
+    </tr>
+  <% 
+    end 
+  %>
+</thead>
