@@ -3,6 +3,7 @@
 class Admin::ConfigLibrary < Admin::AdminBase
   self.table_name = 'config_libraries'
   include AdminHandler
+  include Dynamic::VersionHandler
 
   def self.valid_formats
     %w[yaml html markdown sql]
