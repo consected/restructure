@@ -23,5 +23,26 @@
   .app-import-upload-results {
     margin-top: 15px;
     background-color: white;
+    
+    .line-number {
+      display: inline-block;
+      width: 35px;
+      text-align: right;
+      padding-right: 8px;
+      margin-right: 8px;
+      color: #999;
+      border-right: 1px solid #ddd;
+      user-select: none;
+      font-family: monospace;
+      font-size: 0.85em;
+      vertical-align: top;
+    }
+
+  }
+}
+
+.def-versions-embedded--dynamic-model, .def-versions-embedded--activity-log {
+  .diff del, .diff ins {
+    display: inline;
   }
 }
