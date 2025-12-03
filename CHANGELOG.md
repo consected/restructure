@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.36.0] - 2025-12-03
+
 ### From FPHS - PR #777 - 2025-12-03
 
 - [Fixed] issue where tables appear in multiple schemas in the search path, a dynamic model may warn that that the table schema name is incorrectly defined - fixes #651
