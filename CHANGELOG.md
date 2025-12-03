@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.37.0] - 2025-12-03
+
 - [Updated] gems
 
 ### From Consected - PR #778 - 2023-12-03
