@@ -99,14 +99,18 @@ module MasterDataSupport
   # but has the side effect of leaving the database with data
   # after each run
   def create_data_set_outside_tx(options = {})
+    t0 = Time.now
     Rails.logger.info '** Creating data set outside transaction **'
-    puts "#{Time.now} ** Creating data set outside transaction **"
+    puts "#{t0} ** Creating data set outside transaction **"
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         SeedSupport.setup
         create_data_set options
       end
     end.join
+    t1 = Time.now
+    puts "** Created data set outside transaction in #{t1 - t0} seconds **"
+    Rails.logger.info "** Created data set outside transaction in #{t1 - t0} seconds **"
   end
 
   def create_data_set(options = {})
@@ -193,8 +197,8 @@ module MasterDataSupport
     @master.current_user = @user
     @master.save!
     l[:rank] = 10
-    l[:birth_date] = (l[:birth_date] || DateTime.now - 20.years) - 1.years
-    p[:birth_date] = (p[:birth_date] || DateTime.now - 20.years) - 1.years
+    l[:birth_date] = (l[:birth_date] || (DateTime.now - 20.years)) - 1.years
+    p[:birth_date] = (p[:birth_date] || (DateTime.now - 20.years)) - 1.years
     create_player_info l, @master
     create_pro_info p, @master
     @master_count += 1
@@ -245,6 +249,8 @@ module MasterDataSupport
   end
 
   def master_error(res, params = nil)
-    "Expected master #{@full_master_record.inspect}, with #{@full_player_info.inspect} and #{@full_pro_info.inspect}\nGot #{res.first ? res.first.player_infos.first.inspect : nil}.\nParams: #{params}"
+    "Expected master #{@full_master_record.inspect}, with #{@full_player_info.inspect} and #{@full_pro_info.inspect}\nGot #{if res.first
+                                                                                                                              res.first.player_infos.first.inspect
+                                                                                                                            end}.\nParams: #{params}"
   end
 end

@@ -101,9 +101,25 @@ class Admin::MigrationGenerator
 
   #
   # Return a hash keyed by table name and value schema name
+  # When a table exists in multiple schemas, the first schema in the search path takes precedence
   # @return [Hash{String=>String}]
   def self.table_schema_hash
-    Admin::MigrationGenerator.tables_and_views.map { |a| [a['table_name'], a['schema_name']] }.to_h
+    search_path = current_search_paths
+    result = {}
+
+    # Build hash by iterating through tables, but only set value if not already set
+    # This ensures that when we encounter a table in multiple schemas, the first one
+    # in the search path wins (assuming tables_and_views are ordered by schema_name)
+    # We need to sort by search path order to ensure correct precedence
+    tables_and_views.sort_by { |t| [search_path.index(t['schema_name']) || 999, t['table_name']] }.each do |t|
+      table_name = t['table_name']
+      schema_name = t['schema_name']
+
+      # Only set if not already present - first occurrence (earliest in search path) wins
+      result[table_name] ||= schema_name
+    end
+
+    result
   end
 
   #

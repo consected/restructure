@@ -1,46 +1,28 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-
-    <%
-      admin_links = nil
-      index_params = object_instance.attribute_names
-    %>
-    <table class="table tablesorter admin-list dynamic-versions-list">
-      <thead>
-        <tr>
-          <th class="no-sort"></th>
-          <%
-          index_params.each do |p|
-            if p.to_s == 'admin_id'
-              @show_admin_col = true
-              next
-            end
-
-            # is_options_field = (p.to_s.end_with?('options') || p.to_s.end_with?('template')) && !respond_to?("#{p}_options")
-            is_options_field = nil
-          %>
-          <% unless is_options_field %>
-            <th><%= p.to_s.humanize %></th>
-          <% end %>
-        <% end %>
-        <% if admin_links.present? %>
-          <th>Admin Links</th>
-        <% end %>
-        <% if @show_admin_col %>
-          <th>Admin</th>
-        <% end %>
-        </tr>
-      </thead>
-      <% @all_versions.each do |list_item| %>
-        <%= render partial: view_path('def_version_item'), locals: {list_item:, index_params:} %>
+    <% if @version_diffs.blank? %>
+      <p class="text-muted">No version changes to display.</p>
+    <% else %>
+      <% @version_diffs.each_with_index do |diff_data, idx| %>
+        <div class="version-diff-section" style="margin-bottom: 30px;">
+          <h4>
+            Version Change <%= idx + 1 %>
+            <small class="text-muted">
+              <%= Time.parse(diff_data[:current]['updated_at'] || diff_data[:current]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+              →
+              <%= Time.parse(diff_data[:previous]['updated_at'] || diff_data[:previous]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+            </small>
+          </h4>
+          
+          <table class="app-import-upload-results table table-bordered">
+            <%= render partial: 'admin/common_templates/def_version_head_identifiers', 
+                       locals: { current_version: diff_data[:current], previous_version: diff_data[:previous] } %>
+            <%= render partial: 'admin/common_templates/def_version_diff_changes', 
+                       locals: { changes: diff_data[:changes] } %>
+          </table>
+        </div>
       <% end %>
-    </table>
-    <script>
-      $('.dynamic-versions-list .expandable').not('.attached-exp').on('click', function(){
-          if($(this).attr('disabled')) return;
-          _fpa.form_utils.toggle_expandable($(this));
-      }).addClass('attached-exp');
-    </script>
+    <% end %>
 
   </div>
 </div>

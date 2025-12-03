@@ -588,6 +588,20 @@ module OptionConfigs
 
       if config_text.present?
         config_text = config_text.gsub(/^---.*\n/, '')
+
+        # Check for redefined standard anchors before processing
+        redefined_anchors = check_for_redefined_anchors(config_obj.options_text)
+        if redefined_anchors.any?
+          anchor_list = redefined_anchors.map { |a| "&#{a}" }.join(', ')
+          error_msg = "Configuration redefines standard anchors that should be referenced with *anchor instead: #{anchor_list}"
+
+          # Find the specific lines with the problematic anchor redefinitions
+          problem_lines = find_anchor_redefinition_lines(config_obj.options_text, redefined_anchors)
+
+          bt = [error_msg] + [problem_lines]
+          raise FphsOptionsParseError, error_msg, bt
+        end
+
         config_text = prepend_standard_definitions(config_text)
         config_text = include_libraries(config_text)
         config_text = config_text.gsub(/^---.*\n/, '')
@@ -815,6 +829,90 @@ module OptionConfigs
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
+
+    #
+    # Extract standard anchor names from standard definition files
+    # @param [String] force_type - optional type to check specific standard defs file
+    # @return [Array<String>] list of anchor names defined in standard files
+    def self.extract_standard_anchors(force_type: nil)
+      anchors = []
+
+      # Check both extra_options and type-specific standard definitions
+      types_to_check = ['extra_options']
+      if force_type && force_type != 'extra_options'
+        types_to_check << force_type
+      elsif force_type.nil?
+        # If no force_type, also check the current class type
+        types_to_check << name.demodulize.underscore
+      end
+
+      types_to_check.uniq.each do |type|
+        defsw = [
+          'app',
+          'models',
+          'admin',
+          'defs',
+          "#{type}_standard_option_defs.yaml"
+        ]
+        path = Rails.root.join(*defsw)
+        next unless File.exist?(path)
+
+        content = File.read(path)
+        # Match YAML anchor definitions: &anchor_name
+        content.scan(/&([a-zA-Z0-9_]+)/).each do |match|
+          anchors << match[0]
+        end
+      end
+
+      anchors.uniq
+    end
+
+    #
+    # Check if user's options text accidentally redefines any standard anchors
+    # @param [String] options_text - the user's configuration YAML (before prepending standards)
+    # @return [Array<String>] list of redefined anchor names, or empty array
+    def self.check_for_redefined_anchors(options_text)
+      return [] unless options_text.present?
+
+      standard_anchors = extract_standard_anchors
+      return [] if standard_anchors.empty?
+
+      redefined = []
+
+      # Check for anchor redefinitions in user's text
+      # The options_text passed in should be the RAW user text before prepending standards
+      standard_anchors.each do |anchor|
+        # Match &anchor_name but not *anchor_name (which is a reference, not a definition)
+        # Match after: start of line, whitespace, or colon (for cases like `field:&anchor`)
+        redefined << anchor if options_text.match?(/(?:^|[\s:])&#{Regexp.escape(anchor)}\b/)
+      end
+
+      redefined
+    end
+
+    #
+    # Find the specific lines in the options text that contain anchor redefinitions
+    # @param [String] options_text - the user's configuration YAML
+    # @param [Array<String>] redefined_anchors - list of anchor names that were redefined
+    # @return [String] formatted string showing line numbers and content of problematic lines
+    def self.find_anchor_redefinition_lines(options_text, redefined_anchors)
+      return '' unless options_text.present? && redefined_anchors.any?
+
+      lines = options_text.split("\n")
+      problem_lines = []
+
+      redefined_anchors.each do |anchor|
+        # Find all lines that contain this anchor redefinition
+        lines.each_with_index do |line, idx|
+          if line.match?(/(?:^|[\s:])&#{Regexp.escape(anchor)}\b/)
+            line_num = idx + 1
+            problem_lines << "#{line_num}: #{line}"
+          end
+        end
+      end
+
+      problem_lines.uniq.join("\n")
+    end
 
     #
     # Add standard definitions that simplify configurations
