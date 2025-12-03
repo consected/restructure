@@ -1,0 +1,28 @@
+<% 
+if changes.present? 
+  # Show the diffs in the body
+%>
+<tbody>
+<% 
+  changes.each do |field_name, values|
+    previous_val = values[0]
+    current_val = values[1]
+    
+    # Skip if values are identical after cleaning
+    next if previous_val == current_val
+    
+    # Use Diffy to generate visual diffs
+    diff = Diffy::SplitDiff.new(previous_val, current_val, format: :html)
+%>
+  <tr>
+    <td><strong><%= field_name.to_s.humanize %></strong></td>
+    <td><%= diff.left.html_safe %></td>
+    <td><%= diff.right.html_safe %></td>
+  </tr>
+<% 
+  end 
+%>
+</tbody>
+<% 
+end # if changes.present?
+%>
