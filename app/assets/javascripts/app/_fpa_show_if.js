@@ -206,7 +206,17 @@ _fpa.show_if.methods = {
           var exp_value = cond_def[cond_field];
           var orig_exp_value = exp_value;
 
-          if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
+          // Handle special case for embedded_item field first
+          if (cond_field == 'embedded_item') {
+            // Handle embedded_item conditions by recursively evaluating against embedded_item data
+            if (data.embedded_item && typeof (exp_value) == 'object' && !Array.isArray(exp_value)) {
+              matches = _fpa.show_if.methods.calc_conditions(exp_value, data.embedded_item);
+            } else {
+              // If there's no embedded_item data, the condition fails
+              matches = false;
+            }
+          }
+          else if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
             // If the condition definition is a hash and does not have a "condition" key, 
             // then this is an embedded condition. Handle it.
             var subdef = {};

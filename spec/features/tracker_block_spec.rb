@@ -115,8 +115,9 @@ describe 'tracker block', js: true, driver: $browser_driver do
     within '#advanced_search_master' do
       click_link 'clear fields'
       fill_in 'master_player_infos_attributes_0_first_name', with: @full_player_info.first_name
+      sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
-      sleep 1
+      sleep 0.5
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
 
@@ -252,11 +253,12 @@ describe 'tracker block', js: true, driver: $browser_driver do
 
     within '.tracker-tree-results #new_tracker' do
       select protocol.name, from: 'tracker_protocol_id'
+      sleep 0.5
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option
-
+      sleep 0.5
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-
+      sleep 0.5
       dd = find('.tracker-event_date input')
       if dd[:type] == 'date'
         dd.send_keys '2010-01-02'
@@ -265,6 +267,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
         sleep 0.5
         dd.set '01/02/2010'
       end
+      sleep 0.5
       click_button 'Create Tracker'
     end
 
@@ -287,12 +290,17 @@ describe 'tracker block', js: true, driver: $browser_driver do
     click_link 'clear fields'
     within '#advanced_search_master' do
       fill_in 'master_player_infos_attributes_0_first_name', with: @full_player_info.first_name
+      sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
+      sleep 0.5
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
-
+      sleep 0.5
       select protocol.name, from: 'master_trackers_attributes_0_protocol_id'
+      sleep 0.5
       find("#master_trackers_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
+      sleep 0.5
       find("#master_trackers_attributes_0_protocol_event_id option[value='#{pe.id}']").select_option
+      sleep 0.5
     end
 
     dismiss_modal
@@ -335,7 +343,9 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Search for the player by current Classification::Protocol, subprocess and event, but not the historical event
     within '#advanced_search_master' do
       find("#master_not_tracker_histories_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
+      sleep 0.5
       find("#master_not_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option
+      sleep 0.5
     end
 
     # We expect no results, as we know this player has that historical record
@@ -344,9 +354,13 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Now remove the Not condition, and instead require the historical item
     within '#advanced_search_master' do
       find("#master_not_tracker_histories_attributes_0_sub_process_id option[value='']").select_option
+      sleep 0.5
       find("#master_not_tracker_histories_attributes_0_protocol_event_id option[value='']").select_option
+      sleep 0.5
       find("#master_tracker_histories_attributes_0_sub_process_id option[value='#{sp.id}']").select_option
+      sleep 0.5
       find("#master_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option
+      sleep 0.5
     end
 
     dismiss_modal
@@ -364,7 +378,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     expect(items.length).to be > 0
 
     h = open_player_element items.first, items
-
+    sleep 1
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}']" do
       click_link 'edit tracker record'
     end
@@ -383,8 +397,9 @@ describe 'tracker block', js: true, driver: $browser_driver do
 
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] form" do
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp_new.id}']").select_option
-
+      sleep 0.5
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option
+      sleep 0.5
 
       # Avoid a failure when we don't need to
       expect_tracker_date_to_be_today unless tracker_field_event_date(Date.parse('2030-02-02'))
@@ -398,6 +413,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
         sleep 0.5
         dd.set '10/01/2125'
       end
+      sleep 0.5
       click_button 'Update Tracker'
     end
 

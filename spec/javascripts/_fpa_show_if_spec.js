@@ -541,5 +541,167 @@ describe('show_if', function () {
     expect(Object.keys(show_if_field_defs).sort()).toEqual(['field_b', 'field_c', 'field_d', 'field_e']);
   });
 
+  it("tests that embedded_item data can be used for condition evaluation", function () {
+    var res;
+
+    // Test basic embedded_item condition
+    var field_def_init = {
+      any: {
+        another_field_in_this_form: 'a value',
+        embedded_item: {
+          a_field_in_the_embedded_item: 'another value'
+        }
+      }
+    };
+
+    var data = {
+      another_field_in_this_form: 'wrong value',
+      embedded_item: {
+        a_field_in_the_embedded_item: 'another value'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    // Test when embedded_item condition doesn't match
+    var data = {
+      another_field_in_this_form: 'wrong value',
+      embedded_item: {
+        a_field_in_the_embedded_item: 'wrong embedded value'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(false);
+
+    // Test when main form field matches
+    var data = {
+      another_field_in_this_form: 'a value',
+      embedded_item: {
+        a_field_in_the_embedded_item: 'wrong embedded value'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    // Test with 'all' condition type
+    var field_def_init = {
+      all: {
+        another_field_in_this_form: 'a value',
+        embedded_item: {
+          a_field_in_the_embedded_item: 'another value'
+        }
+      }
+    };
+
+    var data = {
+      another_field_in_this_form: 'a value',
+      embedded_item: {
+        a_field_in_the_embedded_item: 'another value'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    // Test with 'all' where one condition fails
+    var data = {
+      another_field_in_this_form: 'wrong value',
+      embedded_item: {
+        a_field_in_the_embedded_item: 'another value'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(false);
+
+    // Test with nested embedded_item conditions
+    var field_def_init = {
+      any: {
+        field_a: 'value1',
+        embedded_item: {
+          all: {
+            embedded_field_a: 'embedded_val_a',
+            embedded_field_b: 'embedded_val_b'
+          }
+        }
+      }
+    };
+
+    var data = {
+      field_a: 'wrong',
+      embedded_item: {
+        embedded_field_a: 'embedded_val_a',
+        embedded_field_b: 'embedded_val_b'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    // Test without embedded_item data (should fail)
+    var data = {
+      field_a: 'wrong'
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(false);
+
+    // Test with array values in embedded_item
+    var field_def_init = {
+      all: {
+        main_field: 'main_value',
+        embedded_item: {
+          status: ['active', 'pending', 'approved']
+        }
+      }
+    };
+
+    var data = {
+      main_field: 'main_value',
+      embedded_item: {
+        status: 'pending'
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    // Test with explicit conditions in embedded_item
+    var field_def_init = {
+      any: {
+        main_field: 'value',
+        embedded_item: {
+          score: {
+            condition: '>=',
+            value: 10
+          }
+        }
+      }
+    };
+
+    var data = {
+      main_field: 'wrong',
+      embedded_item: {
+        score: 15
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(true);
+
+    var data = {
+      main_field: 'wrong',
+      embedded_item: {
+        score: 5
+      }
+    };
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data);
+    expect(res).toBe(false);
+  });
+
 
 });
