@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems
+
 ### From Consected - PR #778 - 2023-12-03
 
 - [Added] a link from dynamic model, activity log and external identifier admin panels to search the relevant history table - #647
