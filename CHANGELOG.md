@@ -14,6 +14,23 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #777 - 2025-12-03
+
+- [Fixed] issue where tables appear in multiple schemas in the search path, a dynamic model may warn that that the table schema name is incorrectly defined - fixes #651
+- [Added] small fixes for testing reliability
+
+### From Consected - PR #776 - 2025-12-03
+
+- [Added] diff of versions in dynamic definitions admin panels - resolves #744
+
+### From Consected - PR #775 - 2025-12-03
+
+- [Added] check of dynamic definition options for redefinition of standard anchors - resolves #678
+
+### From Consected - PR #774 - 2025-12-03
+
+- [Added] show_if referencing embedded_item data in its conditions - resolves #759
+
 ## [9.35.0] - 2025-12-02
 
 ### From FPHS - PR #773 - 2025-12-02
