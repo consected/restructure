@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] CHANGELOG.md with git commits
+
 
 ## [9.37.0] - 2025-12-03
 
