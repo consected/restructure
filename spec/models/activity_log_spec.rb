@@ -336,8 +336,8 @@ RSpec.describe 'Activity Log definition', type: :model do
       al_def.reload
       al_def.force_option_config_parse
 
-      setup_access :activity_log_player_contact_view_tests, resource_type: :table, access: :create, user: @user
-      setup_access :activity_log_player_contact_view_test__step_1, resource_type: :activity_log_type, access: :create, user: @user
+      setup_access :activity_log__player_contact_view_tests, resource_type: :table, access: :create, user: @user
+      setup_access :activity_log__player_contact_view_test__step_1, resource_type: :activity_log_type, access: :create, user: @user
       al_def.add_master_association
 
       @al_def = al_def

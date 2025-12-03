@@ -132,14 +132,14 @@ module Dynamic
       #   for example:
       #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
       # @return [Array] array of string names
-      def all_option_configs_resource_names(&block)
+      def all_option_configs_resource_names(&)
         res = []
 
         @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
-                   a.select(&block)
+                   a.select(&)
                  else
                    a
                  end
@@ -157,17 +157,19 @@ module Dynamic
       #   for example:
       #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
       # @return [Array] array of string names
-      def all_option_configs_grouped_resources(&block)
+      def all_option_configs_grouped_resources(&)
         res = {}
 
         @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
-                   a.select(&block)
+                   a.select(&)
                  else
                    a
                  end
+
+          next unless a.first
 
           group_name = [a.first.def_item.category, a.first.def_item.name].select(&:present?).join(': ')
           res[group_name] = elts.map { |r| [r.resource_name, r.label] }.to_h
@@ -217,7 +219,7 @@ module Dynamic
                              .map do |a|
               mn = imp_class.model_name.to_s.ns_underscore
               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-              "#{mn}_#{a}".to_sym
+              :"#{mn}_#{a}"
             end
           end
 
