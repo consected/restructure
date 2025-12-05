@@ -85,6 +85,8 @@ module Redcap
 
     before_save :empty_disabled_api_key
 
+    before_save :clear_frequency_if_none
+
     before_save :set_schedule_status, if: lambda {
                                             frequency_changed? ||
                                               transfer_mode_changed? ||
@@ -537,6 +539,13 @@ module Redcap
     end
 
     #
+    # Check if transfer mode is set to 'none'
+    # @return [Boolean]
+    def transfer_mode_none?
+      transfer_mode == 'none'
+    end
+
+    #
     # Returns true if the data_options.prefix_dynamic_model_config_library setting is blank
     # or if the dynamic model has the specified library in its options
     # @return [true|false]
@@ -662,6 +671,14 @@ module Redcap
       return unless disabled?
 
       self.api_key = nil
+    end
+
+    #
+    # Called before save to clear frequency if transfer mode is 'none'
+    def clear_frequency_if_none
+      return unless transfer_mode == 'none'
+
+      self.frequency = nil
     end
 
     #

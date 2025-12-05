@@ -238,4 +238,88 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
       expect(Redcap::ProjectAdmin.any_failed_scheduled_projects?).to be true
     end
   end
+
+  describe 'transfer mode "none" enforcement' do
+    it 'sets frequency to nil when transfer_mode is set to "none"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.frequency).to be_nil
+    end
+
+    it 'sets frequency to nil when transfer_mode changes to "none"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '30 minutes'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.frequency).to eq '30 minutes'
+
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.frequency).to be_nil
+    end
+
+    it 'does not clear frequency when transfer_mode is "scheduled"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.frequency).to eq '1 hour'
+    end
+
+    it 'does not clear frequency when transfer_mode is "manual"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '2 hours'
+      rc.transfer_mode = 'manual'
+      rc.save!
+
+      expect(rc.frequency).to eq '2 hours'
+    end
+
+    it 'identifies transfer_mode_none? correctly' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be true
+    end
+
+    it 'identifies transfer_mode_none? as false for other modes' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be false
+
+      rc.transfer_mode = 'manual'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be false
+    end
+
+    it 'clears frequency immediately on update to none' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.update!(frequency: '1 hour', transfer_mode: 'scheduled')
+      expect(rc.frequency).to eq '1 hour'
+
+      rc.update!(transfer_mode: 'none')
+      expect(rc.frequency).to be_nil
+
+      # Verify it persisted
+      rc.reload
+      expect(rc.frequency).to be_nil
+    end
+  end
 end
