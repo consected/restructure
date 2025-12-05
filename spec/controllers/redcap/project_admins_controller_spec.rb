@@ -36,4 +36,98 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
   end
 
   it_behaves_like 'a standard admin controller'
+
+  describe 'transfer mode "none" action restrictions' do
+    before_each_login_admin
+
+    before(:each) do
+      setup_redcap_project_admin_configs
+    end
+
+    let!(:project_admin) do
+      pa = Redcap::ProjectAdmin.active.first
+      pa.current_admin = @admin
+      pa.transfer_mode = 'none'
+      pa.save!
+      pa
+    end
+
+    it 'prevents request_latest_rc_configs action when transfer_mode is none' do
+      post :request_latest_rc_configs, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_records action when transfer_mode is none' do
+      project_admin.update!(dynamic_model_table: 'test.test_tables')
+
+      post :request_records, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_archive action when transfer_mode is none' do
+      post :request_archive, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_users action when transfer_mode is none' do
+      post :request_users, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_data_collection_instruments action when transfer_mode is none' do
+      post :request_data_collection_instruments, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents request_logs action when transfer_mode is none' do
+      post :request_logs, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents force_reconfig action when transfer_mode is none' do
+      post :force_reconfig, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'prevents update_dynamic_model action when transfer_mode is none' do
+      post :update_dynamic_model, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
+    it 'allows actions when transfer_mode is "scheduled"' do
+      project_admin.update!(transfer_mode: 'scheduled')
+
+      expect do
+        post :request_users, params: { id: project_admin.id }, format: :json
+      end.not_to raise_error
+
+      expect(response).to have_http_status(200)
+    end
+
+    it 'allows actions when transfer_mode is "manual"' do
+      project_admin.update!(transfer_mode: 'manual')
+
+      expect do
+        post :request_users, params: { id: project_admin.id }, format: :json
+      end.not_to raise_error
+
+      expect(response).to have_http_status(200)
+    end
+  end
 end
