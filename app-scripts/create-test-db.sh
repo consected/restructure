@@ -22,16 +22,20 @@ function setup() {
 
   cd "$(dirname "${BASEDIR}")" || return
 
-  if [ "${USE_PG_HOST}" ]; then
+  if [ "${USE_PG_HOST}" ] || [ "${USE_PG_UNAME}" ]; then
     USE_PG_UNAME=${USE_PG_UNAME:=postgres}
-    psql -c "create extension if not exists pgcrypto;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
-    psql -c "create database $DBNAME;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+    PSQL_ARGS="-U ${USE_PG_UNAME}"
+    if [ "${USE_PG_HOST}" ]; then
+      PSQL_ARGS="${PSQL_ARGS} -h ${USE_PG_HOST}"
+    fi
+    psql -c "create extension if not exists pgcrypto;" $PSQL_ARGS
+    psql -c "create database $DBNAME;" $PSQL_ARGS
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
-      psql -c "create user ${user} password 'fphs';" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+      psql -c "create user ${user} password 'fphs';" $PSQL_ARGS
     done
-    psql -d "$DBNAME" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}" < "../db/structure.sql"
-    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
-    psql -d "$DBNAME" -c "create schema if not exists ref_data;" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+    psql -d "$DBNAME" $PSQL_ARGS < "../db/structure.sql"
+    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" $PSQL_ARGS
+    psql -d "$DBNAME" -c "create schema if not exists ref_data;" $PSQL_ARGS
   else
     sudo -u postgres psql -c "create extension if not exists pgcrypto;"
     sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
