@@ -4,6 +4,7 @@
 # NO_CLEAN_DB: If set to 'true', the script will skip cleaning the test database.
 # NO_BRAKEMAN: If set to 'true', the script will skip running Brakeman security analysis.
 # SKIP_BRAKEMAN: equivalent to NO_BRAKEMAN. 
+# USE_PG_UNAME: If set, the script will use this database user to connect to PostgreSQL when cleaning the database.
 # USE_PG_HOST: If set, the script will not use sudo to clean the database, and will connect to the specified PostgreSQL host via a TCP port.
 # SKIP_ZEITWERK: If set to 'true', the script will skip checking Zeitwerk.
 # PARALLEL_TEST_PROCESSORS: Number of parallel processes to use for running tests. Defaults to number of CPU cores.
@@ -23,7 +24,7 @@ echo > tmp/working_failing_specs.log
 unset QUICK
 unset RUBY_DEBUG_OPEN
 
-if [ ! "${USE_PG_HOST}" ] && [ "${NO_CLEAN_DB}" != 'true' ]; then
+if [ ! "${USE_PG_HOST}" ] && [ ! "${USE_PG_UNAME}" ]&& [ "${NO_CLEAN_DB}" != 'true' ]; then
   echo "sudo is required to clean the database. Enter your password if prompted"
   if ! sudo whoami; then
     echo "Failed to get sudo"
