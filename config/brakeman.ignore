@@ -64,7 +64,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 747,
+      "line": 765,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -133,7 +133,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 171,
+      "line": 187,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select\\n  u.view_schema \\\"schemaname\\\",\\n  u.view_name \\\"viewname\\\",\\n  u.table_schema referenced_table_schema,\\n  u.table_name referenced_table_name,\\n  v.view_definition\\nfrom information_schema.view_table_usage u\\njoin information_schema.views v on u.view_schema = v.table_schema\\n  and u.view_name = v.table_name\\nwhere u.table_schema not in ('information_schema', 'pg_catalog')\\n  and u.table_name = '#{table_name}'\\n  and u.table_schema = '#{schema_name}'\\norder by u.view_schema, u.view_name\\n\")",
       "render_path": null,
@@ -207,6 +207,39 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "377f63b8b4bf6e917f2e914bec659d87874fe12f73de8683b03f91e24e8dd4fc",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/pages/_admin_redcap_status_indicators.html.erb",
+      "line": 12,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name).map do\n \"#{p.name} (#{p.study}) - #{current_user_date_time(p.failed_at)}\"\n end.join(\"<li>\")",
+      "render_path": [
+        {
+          "type": "template",
+          "name": "pages/_index_admin",
+          "line": 111,
+          "file": "app/views/pages/_index_admin.html.erb",
+          "rendered": {
+            "name": "pages/_admin_redcap_status_indicators",
+            "file": "app/views/pages/_admin_redcap_status_indicators.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "pages/_admin_redcap_status_indicators"
+      },
+      "user_input": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name)",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "3c5e6a5b7b311bb51b49c35ff669a55b2ac5f277738e7d6ab4db258ed43779f8",
@@ -259,7 +292,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 469,
+      "line": 470,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -416,7 +449,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 1210,
+      "line": 1228,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"SELECT DISTINCT v.oid::regclass AS view\\nFROM pg_depend AS d      -- objects that depend on the table\\n  JOIN pg_rewrite AS r  -- rules depending on the table\\n      ON r.oid = d.objid\\n  JOIN pg_class AS v    -- views for the rules\\n      ON v.oid = r.ev_class\\nWHERE \\n--v.relkind = 'v'    -- only interested in views\\n  --AND \\n  d.classid = 'pg_rewrite'::regclass\\n  AND d.refclassid = 'pg_class'::regclass\\n  AND d.deptype = 'n'    -- normal dependency\\n  AND d.refobjid = '#{schema}.#{table_name}'::regclass;\\n\")",
       "render_path": null,
@@ -496,7 +529,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 458,
+      "line": 459,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -565,7 +598,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 149,
+      "line": 165,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT\\n    cols.table_schema \\\"schema_name\\\",\\n    cols.table_name,\\n    cols.column_name,\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\nFROM\\n    information_schema.columns cols\\nINNER JOIN pg_catalog.pg_class c\\nON\\n  c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n  AND c.relname = cols.table_name\\n\\nWHERE\\n    cols.table_catalog = '#{current_database}' AND\\n    cols.table_schema IN (#{quoted_schemas}) AND\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n;\\n\")",
       "render_path": null,
@@ -645,7 +678,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 233,
+      "line": 249,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
