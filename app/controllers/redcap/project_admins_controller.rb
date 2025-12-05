@@ -11,6 +11,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_latest_rc_configs
     set_instance_from_id
+    check_transfer_mode_not_none
 
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.request_latest_config = true
@@ -23,6 +24,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_records
     set_instance_from_id
+    check_transfer_mode_not_none
     if @redcap__project_admin.dynamic_model_table.blank?
       raise FphsException, 'set the dynamic model table name before requesting records'
     end
@@ -40,6 +42,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_archive
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.dump_archive
 
@@ -49,6 +52,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_users
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.capture_project_users
 
@@ -58,6 +62,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_data_collection_instruments
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.request_data_collection_instruments
 
@@ -67,6 +72,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def request_logs
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.request_logs
 
@@ -76,6 +82,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def force_reconfig
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.force_refresh = true
     @redcap__project_admin.data_dictionary_version = nil
@@ -87,6 +94,7 @@ class Redcap::ProjectAdminsController < AdminController
 
   def update_dynamic_model
     set_instance_from_id
+    check_transfer_mode_not_none
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.update_dynamic_model
 
@@ -140,7 +148,9 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def default_index_order
-    { updated_at: :desc }
+    # Sort by transfer_mode (non-'none' first), then by updated_at descending
+    # Using CASE to prioritize non-'none' transfer modes
+    Arel.sql("CASE WHEN transfer_mode = 'none' THEN 1 ELSE 0 END ASC, updated_at DESC")
   end
 
   def primary_model
@@ -181,5 +191,14 @@ class Redcap::ProjectAdminsController < AdminController
     return if object_instance.file_store
 
     object_instance.create_file_store
+  end
+
+  #
+  # Check that transfer mode is not 'none' before allowing actions
+  def check_transfer_mode_not_none
+    return unless @redcap__project_admin.transfer_mode_none?
+
+    raise FphsException,
+          'Actions cannot be performed on projects with transfer mode "none"'
   end
 end

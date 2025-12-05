@@ -166,7 +166,8 @@ if req&.result
   <p><label>filestore</label> not set up</p>
 <% end %>
 <p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
-<% if object_instance.persisted? && object_instance.enabled? %>
+<% if object_instance.persisted? && object_instance.enabled? && !object_instance.transfer_mode_none? %>
+<div class="project-admin-actions-block">
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
@@ -233,4 +234,5 @@ if req&.result
       </p>
     </div>
   </div>
+</div>
 <% end %>
