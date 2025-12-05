@@ -30,23 +30,28 @@ To skip an AWS authorization check at the start of testing:
 
 ## Creating a test database
 
-By default, the scripts use sudo to connect to the database as the superuser **postgres**. Run the following
-script to create a test database using the current `db/structure.sql` schema script:
+By default, the scripts use sudo to connect to the database as the superuser **postgres**. It is preferrable
+if you have a Postgres user with your OS username with the attributes:
+
+- `CREATEDB`
+- `CREATEROLE`
+
+If you have this user, set this environment variable to avoid a "sudo" login:
+
+```
+export USE_PG_UNAME=$(whoami)
+```
+
+Use `USE_PG_HOST=localhost` for IP rather than socket connections.
+
+Run the following script to create a test database using the current `db/structure.sql` schema script:
 
     app-scripts/create-test-db.sh 1
-
-... or if connecting to the database as the superuser over IP rather than OS user **postgres**
-
-    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/create-test-db.sh 1
 
 The argument **1** ensures only a single database is created. For setup of multiple test databases to
 support parallel testing, described below, run without any arguments.
 
     app-scripts/create-test-db.sh
-
-... or if connecting to the database as the superuser over IP rather than OS user **postgres**
-
-    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/create-test-db.sh
 
 This will create a test database for every available processor or core on the test machine.
 
@@ -74,6 +79,9 @@ bloated and slowing down simple tests after repeated runs.
     app-scripts/drop-test-db.sh
 
 This will drop test databases for all processors / cores on the machine.
+
+It also cleans up the test `/var/tmp/` directory structures used by the Filestore functionality,
+to avoid attempts to overwrite directories pointed to by the previous database.
 
 ## Migrations
 
