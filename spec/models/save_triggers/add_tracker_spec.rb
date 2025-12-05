@@ -330,4 +330,57 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
 
     expect { @trigger.perform }.to raise_error(FphsException, 'no master record set to add the tracker to')
   end
+
+  it 'provides detailed error information when tracker creation fails' do
+    sp_name = 'REDCap'
+    pe_name = 'bounced email'
+    text = "This is a test.\nIt works!"
+
+    config = {
+      Q1: {
+        with: {
+          sub_process_name: sp_name,
+          protocol_event_name: pe_name,
+          notes: text
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::AddTracker.new(config, @al)
+
+    # Mock the tracker creation to fail by intercepting the association's create! method
+    tracker_association = @master.trackers
+    allow(@master).to receive(:trackers).and_return(tracker_association)
+    allow(tracker_association).to receive(:create!).and_raise(
+      FphsException.new('This item can not be created (Tracker)')
+    )
+
+    # Capture the logger output
+    expect(Rails.logger).to receive(:error) do |message|
+      expect(message).to include('AddTracker failed:')
+      expect(message).to include("Master ID: #{@master.id}")
+      expect(message).to include("Current User ID: #{@user.id}")
+      expect(message).to include("App Type ID: #{@user.app_type_id}")
+      expect(message).to include("Item ID: #{@al.id}")
+      expect(message).to include("Item Type: #{@al.class.name}")
+      expect(message).to include('Protocol ID:')
+      expect(message).to include('Sub Process ID:')
+      expect(message).to include("Triggering Object: #{@al.class.name}")
+      expect(message).to include("Extra Log Type: #{@al.extra_log_type}") if @al.respond_to?(:extra_log_type)
+    end
+
+    # Expect the enhanced error message
+    expect { @trigger.perform }.to raise_error(FphsException) do |error|
+      expect(error.message).to include('AddTracker failed with error')
+      expect(error.message).to include('This item can not be created (Tracker)')
+      expect(error.message).to include("Master ID: #{@master.id}")
+      expect(error.message).to include("Current User ID: #{@user.id}")
+      expect(error.message).to include("App Type ID: #{@user.app_type_id}")
+      expect(error.message).to include("Item ID: #{@al.id}")
+      expect(error.message).to include("Item Type: #{@al.class.name}")
+      expect(error.message).to include('Protocol ID:')
+      expect(error.message).to include('Sub Process ID:')
+      expect(error.message).to include("Triggering Object: #{@al.class.name}")
+    end
+  end
 end
