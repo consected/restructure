@@ -143,14 +143,17 @@ li.list-group-item {
 
   &:not(.caption-before, .notes-block, .dialog-before) {
     strong {
-      text-transform: capitalize;
+      // text-transform: capitalize;
       text-transform: none;
       visibility: hidden;
     }
 
     small {
-      /* Required to prevent a weird spacing issue with long lines in strong results */
-      position: absolute;
+      /* Previously used absolute to prevent a weird spacing issue with long lines in strong results.
+         This caused truncation of long labels (such as radio buttons labels) so changed to relative.
+         The result is not perfect with long strong results, but better than hiding important text.
+      */
+      position: relative;
     }
   }
 }

@@ -4,6 +4,8 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      after_find :set_option_type_attr_name
+      after_initialize :set_option_type_attr_name
       after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
       after_initialize :evaluate_active_values
@@ -14,7 +16,7 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results
+      attr_accessor :skip_save_trigger, :save_trigger_results, :option_type
     end
 
     class_methods do
@@ -65,6 +67,14 @@ module Dynamic
           obj.id
         end
       end
+
+      def option_type_attr_name
+        definition.option_type_attr_name
+      end
+
+      def default_option_type_name
+        definition.default_option_type_name
+      end
     end
 
     #
@@ -73,7 +83,7 @@ module Dynamic
     # @return [Array{Symbol}]
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
-      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type]&.include?('notes') }
+      res = fo&.filter { |_k, v| v[:no_downcase] || (v[:edit_as] && v[:edit_as][:field_type]&.include?('notes')) }
 
       res&.keys
     end
@@ -136,6 +146,10 @@ module Dynamic
       return if @processing_data
 
       dopt.view_options[:data_attribute]
+    end
+
+    def default_option_type_name
+      self.class.definition.default_option_type_name
     end
 
     # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
@@ -290,7 +304,7 @@ module Dynamic
       fo.each do |name, config|
         next unless config.key?(:active_value)
 
-        next unless attribute_names.include?(name.to_s)
+        next unless attribute_names.include?(name.to_s) || @option_type_attr_name.to_s == name.to_s
 
         init_value = config[:active_value]
         if init_value
@@ -298,6 +312,12 @@ module Dynamic
           send "#{name}=", res
         end
       end
+    end
+
+    def set_option_type_attr_name
+      return unless self.class.respond_to? :definition
+
+      @option_type_attr_name = self.class.definition.option_type_attr_name
     end
   end
 end

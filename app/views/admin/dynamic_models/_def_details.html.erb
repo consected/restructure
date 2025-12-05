@@ -38,9 +38,49 @@
     <%= link_to link_label_open_in_new('search data'), "/reports/reference_data__table_data?schema_name=#{schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
                 target: '_blank' %>
   </p>
+  <p>
+    <%= link_to link_label_open_in_new('search data history'), "/reports/reference_data__table_data?schema_name=#{schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.history_table_name}", 
+                target: '_blank' %>
+  </p>
 
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
+
+  <% 
+    # Ensure configurations is loaded
+    object_instance.option_configs unless object_instance.configurations
+    if object_instance.configurations&.dig(:batch_trigger).present?
+  %>
+  <label>batch jobs</label>
+  <p>
+    <% 
+      gid = object_instance.to_global_id.to_s
+      job = Delayed::Job.where('handler LIKE ?', "%#{gid}%").where(queue: 'batch').first
+    %>
+    
+    <% if job.present? %>
+      <span class="job-summary help-block">
+        <strong>next run:</strong> 
+        <span data-format-datetime-local="true"><%= job.run_at&.iso8601 %></span>
+        &nbsp;&nbsp;
+        <strong>status:</strong> 
+        <% if job.failed_at.present? %>
+          <span class="text-danger">Failed at <span data-format-datetime-local="true"><%= job.failed_at&.iso8601 %></span></span>
+        <% else %>
+          <span class="text-success">Active</span>
+        <% end %>
+        &nbsp;&nbsp;
+        <strong>last updated:</strong> 
+        <span data-format-datetime-local="true"><%= job.updated_at&.iso8601 %></span>
+        &nbsp;&nbsp;
+        <%= link_to link_label_open_in_new('view job'), 
+                    admin_job_reviews_path(filter: { queue: 'batch' }, search_attrs: { handler: gid }), 
+                    target: '_blank',
+                    class: 'batch-jobs-link' %>
+      </span>
+    <% end %>
+  </p>
+  <% end %>
 
   <% unless object_instance.table_or_view_ready?%>
   <div class="help-block">
@@ -102,8 +142,13 @@
 <% end %>
 <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
+<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
+<% # Load the appropriate configurations for showing the form correctly
+   if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? %>
+<%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: object_instance, force: true } %>
+<% end %>
 <script>
   window.setTimeout(function(){
 

@@ -14,10 +14,12 @@
 
 require 'rails_helper'
 
-describe 'Register an incoming call', driver: :app_firefox_driver do
+describe 'Register an incoming call', driver: $browser_driver do
   include ActivityLogMain
 
   before :all do
+    SetupHelper.setup_al_gen_tests ActivityLogMain::ActivityLogName, nil, 'player_contact', rec_type: 'phone'
+
     create_user(create_master: false, no_app_type_setup: true) unless @user
     User.active.where.not(email: Settings::TemplateUserEmail).where.not(id: @user&.id).update_all(disabled: true)
 

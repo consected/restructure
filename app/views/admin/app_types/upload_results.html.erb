@@ -1,16 +1,17 @@
 <%
+  # Set up variables for display if the results represent an exception, or not
   if @results.is_a?(Exception) && !@results.is_a?(ActiveRecord::Rollback)
     @message = 'FAILED'
     importer = @res_obj
     cleaned = Admin::AppTypeImport.clean_exception(@results)
     if importer.respond_to?(:current_key)
       current_key = importer.current_key
-      head = YAML.dump(JSON.parse(importer.config_item.to_json)) if importer&.config_item
+      head = String.yaml_dump(importer.config_item) if importer&.config_item
     end
 
+    @results = { current_key => { 'failed item' => importer&.config_item } }
+
     @primary = <<~END_TEXT
-      #{current_key}
-      #{head}
       ---------------
       #{cleaned['message']}
       ---------------
@@ -25,67 +26,153 @@
                 else
                   'SUCCESS'
                 end
-    @primary = YAML.dump(JSON.parse(@results.to_json))
   end
 
   @message = "DRY RUN #{@message} (changes rolled back)" if dry_run
-
   current_search_paths = Admin::MigrationGenerator.current_search_paths || [] 
   active_ids = Admin::AppType.active_app_types.pluck(:id)
   user_has_access = Admin::AppType.all_available_to(current_user).find { |app| app.id == @app_type.id } if @app_type
 %>
+<% if @app_type&.id 
+    #  An app type was created or updated
+    sub_title = "#{@app_type.label} <small><strong>#{@app_type.name}</strong> ##{@app_type.id}</small>".html_safe
+%>
+<%= show_admin_heading @message, sub_title %>
+<% end %>
+
 <div class="container-fluid">
-  <h1><%=@message%></h1>
   <div class="row">
-    <div class="col-md-24">
+    <% unless @app_type&.id 
+        #  An app type was created or updated
+    %>
+    <%= show_admin_heading @message %>
+    <div class="col-md-22 col-md-offset-1">      
       <p>back to <%= link_to 'app types', admin_app_types_path %></p>
     </div>
-    <% if @app_type&.id %>
-    <div class="col-md-24">
-      <h2>Additional setup information</h2>
-    <p>App type enabled? 
-                <%= if !@app_type.disabled
-                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
-                else
-                  '<span class="glyphicon glyphicon-exclamation-sign" title="app type has been marked as disabled"></span>'.html_safe
-                end
-                %>       
-    </p>
-    <p>App type active on server? 
-                <%= if @app_type.active_on_server?
-                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
-                elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
-                  '<span class="glyphicon glyphicon-exclamation-sign" title="app active but schema not in search path"></span>'.html_safe
-                else
-                  "<span class=\"val-unchecked\"></span>".html_safe  
-                end
-                %>                 
-    </p>
-    <p>Current user has access to app?
-                <%= if user_has_access
-                  "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
-                else
-                  "<span class=\"val-unchecked\"></span>".html_safe  
-                end
-                %>           
-    </p>
-    <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
-      <p>Configure the filestore app filesystem</p>
-      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
     <% end %>
-    <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
-      <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
-      <pre><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=@app_type.id%></code></pre>
-    <% end %>   
-    <% unless current_search_paths.include?(@app_type.default_schema_name) %>
-      <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
-      <pre><code>FPHS_POSTGRESQL_SCHEMA=<%=ENV['FPHS_POSTGRESQL_SCHEMA']%>,<%=@app_type.default_schema_name%></code></pre>
-    <% end %>
-    </div>
-    <% end %>
-    <div class="col-md-24">
-      <h2>Detailed Updates</h2>
-      <pre><%=@primary%></pre>
+    <% if @app_type&.id 
+        #  An app type was created or updated
+    %>
+    <div class="col-md-22 col-md-offset-1">
+        <p>back to <%= link_to 'app types', admin_app_types_path %></p>      
+        <h2>Additional setup information</h2>
+        <p>App type enabled? 
+                    <%= if !@app_type.disabled
+                      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                    else
+                      '<span class="glyphicon glyphicon-exclamation-sign" title="app type has been marked as disabled"></span>'.html_safe
+                    end
+                    %>       
+        </p>
+        <p>App type active on server? 
+                    <%= if @app_type.active_on_server?
+                      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                    elsif active_ids&.include?(@app_type.id) || !active_ids || active_ids.empty?
+                      '<span class="glyphicon glyphicon-exclamation-sign" title="app active but schema not in search path"></span>'.html_safe
+                    else
+                      "<span class=\"val-unchecked\"></span>".html_safe  
+                    end
+                    %>                 
+        </p>
+        <p>Current user has access to app?
+                    <%= if user_has_access
+                      "<span class=\"glyphicon glyphicon-check val-checked\"></span>".html_safe  
+                    else
+                      "<span class=\"val-unchecked\"></span>".html_safe  
+                    end
+                    %>           
+      </p>
+      <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
+        <p>Configure the filestore app filesystem</p>
+        <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
+      <% end %>
+      <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
+        <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
+        <pre><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=@app_type.id%></code></pre>
+      <% end %>   
+      <% unless current_search_paths.include?(@app_type.default_schema_name) %>
+        <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
+        <pre><code>FPHS_POSTGRESQL_SCHEMA=<%=ENV['FPHS_POSTGRESQL_SCHEMA']%>,<%=@app_type.default_schema_name%></code></pre>
+      <% end %>
+      </div>
+    <% end # @app_type&.id %>
+
+    <div class="col-md-22 col-md-offset-1">
+      <% if @results.respond_to?(:each) %>      
+        <h2>Detailed Updates</h2>
+        <% @results.each do |resource_type_name, resource_results| %>
+          <h3><%= resource_type_name %></h3>
+          <% resource_results&.each do |k2, v2a| %>
+            <h4><%= k2 %></h4>
+            <% 
+                ignore_diffs = false
+                if k2 == 'failed item' || resource_type_name == 'failures'
+                  ignore_diffs = true
+                end
+                
+                if v2a.is_a?(Hash)
+                  v2a = [v2a] 
+                  ignore_diffs = true
+                end
+                # Run through each item. If it's an Array then
+                # we'll first show the header (identifying info) and then
+                # show any diffs in changed attributes
+                if v2a.is_a?(Array) 
+                  v2a.each do |v2|
+                    v2 = v2.attributes if v2.respond_to?(:attributes)
+                    changes = nil
+                    diff_changes = nil
+                    
+                    # Find any diffs in 'changed attributes (from/to)'
+                    v2.each do |k3, v3| 
+
+                      if k3 == 'changed attributes (from/to)'
+                        # The value of this item is a hash of changes
+                        # Check each one to see if there is a difference (after cleaning line endings)
+                        # and collect into a diff_changes Hash
+                        changes = v3
+                        diff_changes = changes.map do |k4, v4|
+                          d0 = v4[0].to_s.gsub("\r\n", "\n")
+                          d1 = v4[1].to_s.gsub("\r\n", "\n")
+                          [ k4, [d0, d1] ] unless d0 == d1
+                        end
+                        diff_changes = diff_changes.compact.to_h
+                      end
+                    end
+                    
+                    unless ignore_diffs
+                      # Skip if no diffs were detected
+                      next if diff_changes.nil? || diff_changes.empty?
+
+                      # Skip if the only change was to 'updated_at' and 'admin_id'
+                      next if (diff_changes.stringify_keys.keys - %w[updated_at admin_id]).empty?
+                    end
+                %>                
+                <table class="app-import-upload-results table">              
+                  <%= render partial: 'admin/app_types/upload_results_head_identifiers', locals: { attribute_set: v2 } %> 
+                  <%= render partial: 'admin/app_types/upload_results_diff_changes', locals: { diff_changes: } %>
+                </table>
+              <% 
+                  end # v2a.each              
+                else # The v2a item is not an array, just show the value
+              %>
+              <pre><%= v2a %></pre>  
+              <% 
+                end # else (not v2a.is_a?(Array))
+              %>
+        <% 
+              end # resource_results.each
+            end # @results.each
+          end
+        %>
+      
+      <% 
+          if @primary.present? %>
+            <h2>Error Details</h2>
+            <pre><%= @primary%></pre>
+      <% 
+          end 
+      %>
     </div>
   </div>
 </div>

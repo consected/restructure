@@ -283,6 +283,8 @@ class Admin
       return unless acs
 
       acs = acs.reject(&reject) if reject
+      # Fix missing updated_at values to the epoch so they are always older
+      acs.each { |v| v['updated_at'] ||= '1970-01-01T00:00:00Z' }
       # Ensure we apply them in the correct order (although this doesn't account for other types of resource)
       acs.sort! { |a, b| a['updated_at'] <=> b['updated_at'] }
       acs.each do |ci|

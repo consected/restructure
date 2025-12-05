@@ -11,7 +11,7 @@ module Users
     # @param [User] user
     def self.notify(user_or_admin)
       Rails.logger.info('Setting up the notification to the administrator when a new user or admin registers.')
-      HandleNewUserAddedNotificationJob.perform_now(user_or_admin)
+      HandleNewUserAddedNotificationJob.perform_later(user_or_admin)
     end
   end
 end

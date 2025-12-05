@@ -64,7 +64,7 @@ class NotificationMailer < ActionMailer::Base
     }
 
     logger.info "Sending email options: #{options}"
-    return if Rails.env.test?
+    return if Rails.env.test? && !Settings::TestMail
 
     mail(options)
   end

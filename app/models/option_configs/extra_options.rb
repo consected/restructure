@@ -343,7 +343,7 @@ module OptionConfigs
 
           # Avoid breaking app type imports if the resource being pointed to in the reference
           # hasn't been set up yet.
-          if to_class.nil? || to_class.respond_to?(:definition) && !to_class.definition
+          if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
             Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
             break
           end
@@ -553,21 +553,65 @@ module OptionConfigs
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Array {ExtraOptions}]
     def self.parse_config(config_obj, force_all = nil)
+      loaded_config = parse_options_text(config_obj)
+      # Configurations need to be set in order for
+      # defaults to be set correctly
+      config_obj.configurations = options_based_on_keys_stating_with('_configurations', loaded_config)
+
+      set_defaults config_obj, loaded_config
+
+      config_obj.table_comments = loaded_config.delete(:_comments)
+      config_obj.db_columns = loaded_config.delete(:_db_columns)
+      config_obj.data_dictionary = loaded_config.delete(:_data_dictionary)
+      config_obj.options_constants = loaded_config.delete(:_constants)
+
+      # Definitions '_definitions...' are only used by YAML for the definition of anchors
+      # and so will already by incorporated into the relevant configurations.
+      loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
+
+      configs = handle_defaults_merges_overrides(config_obj, loaded_config)
+      # Update comments for table and fields, based on the default option type configuration
+      # after all the _default, _merge_... and _override processing has been completed
+      handle_table_comments_just_if_saved(config_obj, configs, force_all)
+
+      configs
+    rescue FphsException => e
+      raise FphsException, e
+    end
+
+    #
+    # Parse the options text from the dynamic definition, producing an initial Hash
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @return [Hash] initial configuration hash
+    def self.parse_options_text(config_obj)
       config_text = config_obj.options_text
 
-      configs = []
-
       if config_text.present?
-        config_text = config_text.sub("---\n", '')
+        config_text = config_text.gsub(/^---.*\n/, '')
+
+        # Check for redefined standard anchors before processing
+        redefined_anchors = check_for_redefined_anchors(config_obj.options_text)
+        if redefined_anchors.any?
+          anchor_list = redefined_anchors.map { |a| "&#{a}" }.join(', ')
+          error_msg = "Configuration redefines standard anchors that should be referenced with *anchor instead: #{anchor_list}"
+
+          # Find the specific lines with the problematic anchor redefinitions
+          problem_lines = find_anchor_redefinition_lines(config_obj.options_text, redefined_anchors)
+
+          bt = [error_msg] + [problem_lines]
+          raise FphsOptionsParseError, error_msg, bt
+        end
+
         config_text = prepend_standard_definitions(config_text)
         config_text = include_libraries(config_text)
+        config_text = config_text.gsub(/^---.*\n/, '')
         begin
-          res = YAML.safe_load(config_text, permitted_classes: [],
-                                            permitted_symbols: [],
-                                            aliases: true)
+          loaded_config = YAML.safe_load(config_text, permitted_classes: [],
+                                                      permitted_symbols: [],
+                                                      aliases: true)
         rescue Psych::SyntaxError, Psych::DisallowedClass, Psych::Exception => e
           linei = 0
-          errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
+          errtext = config_text.split("\n").map { |l| "#{linei += 1}: #{l}" }.join("\n")
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
@@ -579,43 +623,64 @@ module OptionConfigs
           raise FphsOptionsParseError, "#{e.class.name} #{e} -- review failed configuration YAML", bt
         end
       else
-        res = {}
+        loaded_config = {}
       end
-      res.deep_symbolize_keys!
+      loaded_config.deep_symbolize_keys!
+    end
 
-      set_defaults config_obj, res
+    #
+    # Create a final set of configurations for each of the main option types,
+    # incorporating _default..., _merge_... and _override entries
+    # @param [ActiveRecord::Base] config_obj dynamic definition record
+    # @param [Hash] loaded_config configuration hash
+    # @return [Array] configuration instances
+    def self.handle_defaults_merges_overrides(config_obj, loaded_config)
+      configs = []
 
-      opt_default = res.delete(:_default)
+      # Handle any entry starting with "_default"
+      opt_default = options_based_on_keys_stating_with('_default', loaded_config)
 
-      config_obj.configurations = res.delete(:_configurations)
-      config_obj.table_comments = res.delete(:_comments)
-      config_obj.db_columns = res.delete(:_db_columns)
-      config_obj.data_dictionary = res.delete(:_data_dictionary)
-      config_obj.options_constants = res.delete(:_constants)
+      opt_merge_default = loaded_config.delete(:_merge_default)
+      opt_merge_override = loaded_config.delete(:_merge_override)
+      opt_override = loaded_config.delete(:_override)
 
-      # Only run through additional processing of comments if the
-      # configuration was just saved
-      if config_obj.saved_changes? || force_all
-        handle_table_comments config_obj, res
-      elsif config_obj.table_comments
-        config_obj.table_comments[:original_fields] = config_obj.table_comments[:fields]
-      end
+      loaded_config.each do |name, value|
+        unless name.in?(%i[primary blank_log])
+          value ||= {}
 
-      res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
+          # If defined, use the optional _default entry as the basis for all individual options,
+          # allowing for a definable set of default values
+          value = opt_default.deep_dup.merge(value) if opt_default.present?
 
-      res.each do |name, value|
-        # If defined, use the optional _default entry as the basis for all individual options,
-        # allowing for a definable set of default values
+          # If defined, use the optional opt_merge_default entry to "deep merge" item options
+          # over the merge_default items.
+          value = opt_merge_default.deep_dup.deep_merge(value) if opt_merge_default
 
-        value = opt_default.merge(value) if opt_default && !name.in?(%i[primary blank_log])
+          # If defined, use the optional opt_merge_override entry to "deep merge" options
+          # over the existing items.
+          value = value.deep_dup.deep_merge(opt_merge_override) if opt_merge_override
 
+          # If defined, use the optional _override entry to replace individual options.
+          value = value.deep_dup.merge(opt_override) if opt_override
+        end
         i = new name, value, config_obj
         configs << i
       end
-
       configs
-    rescue FphsException => e
-      raise FphsException, e
+    end
+
+    # Only run through additional processing of comments if the
+    # configuration was just saved
+    def self.handle_table_comments_just_if_saved(config_obj, configs, force_all)
+      if config_obj.saved_changes? || force_all
+        # Get the default option type configuration
+        default_config = configs.find { |c| c.name == config_obj.default_option_type_name }&.orig_config
+        return unless default_config
+
+        handle_table_comments config_obj, default_config
+      elsif config_obj.table_comments
+        config_obj.table_comments[:original_fields] = config_obj.table_comments[:fields]
+      end
     end
 
     #
@@ -625,26 +690,16 @@ module OptionConfigs
     # with default option type config caption_before and labels.
     # Save the result back to the *config_obj.table_comments* attribute
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
-    # @param [Hash] res - comments hash results to update
+    # @param [Hash] default_config - default option type configuration hash
     # @return [Hash] - comments hash
-    def self.handle_table_comments(config_obj, res)
+    def self.handle_table_comments(config_obj, default_config)
       # Clean up the incoming _comments entry, to avoid it impacting later configurations
       tc = config_obj.table_comments ||= {}
 
       ts = config_obj.table_comments && config_obj.table_comments[:table]
-
-      new_tc = config_obj.name.underscore.humanize.captionize
-      if ts.blank? # ts != new_tc
-        # Set a default table comment value
-        config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
-      end
-
-      default = res[:default]
-      return unless default
-
-      new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
-      if ts.blank? # ts != new_tc
-        # Set the table comment from the config label if it was not set
+      if ts.blank?
+        # Set the table comment from the config label or class name if no comment was previously set
+        new_tc = default_config[:label] || config_obj.name.underscore.humanize.captionize
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
@@ -652,8 +707,8 @@ module OptionConfigs
       fs = tc[:fields] || {}
       original_fs = fs.dup
 
-      ls = default[:labels] || {}
-      cb = default[:caption_before] || {}
+      ls = default_config[:labels] || {}
+      cb = default_config[:caption_before] || {}
 
       # Get a list of the columns for the table to ensure we
       # skip captioning fields that don't exist
@@ -762,7 +817,7 @@ module OptionConfigs
         raise FphsException, "incorrect action type requested in calc_valid_if #{action_type}"
       end
 
-      ci = self.valid_if["on_#{action_type}".to_sym]
+      ci = self.valid_if[:"on_#{action_type}"]
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if
@@ -774,6 +829,90 @@ module OptionConfigs
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
+
+    #
+    # Extract standard anchor names from standard definition files
+    # @param [String] force_type - optional type to check specific standard defs file
+    # @return [Array<String>] list of anchor names defined in standard files
+    def self.extract_standard_anchors(force_type: nil)
+      anchors = []
+
+      # Check both extra_options and type-specific standard definitions
+      types_to_check = ['extra_options']
+      if force_type && force_type != 'extra_options'
+        types_to_check << force_type
+      elsif force_type.nil?
+        # If no force_type, also check the current class type
+        types_to_check << name.demodulize.underscore
+      end
+
+      types_to_check.uniq.each do |type|
+        defsw = [
+          'app',
+          'models',
+          'admin',
+          'defs',
+          "#{type}_standard_option_defs.yaml"
+        ]
+        path = Rails.root.join(*defsw)
+        next unless File.exist?(path)
+
+        content = File.read(path)
+        # Match YAML anchor definitions: &anchor_name
+        content.scan(/&([a-zA-Z0-9_]+)/).each do |match|
+          anchors << match[0]
+        end
+      end
+
+      anchors.uniq
+    end
+
+    #
+    # Check if user's options text accidentally redefines any standard anchors
+    # @param [String] options_text - the user's configuration YAML (before prepending standards)
+    # @return [Array<String>] list of redefined anchor names, or empty array
+    def self.check_for_redefined_anchors(options_text)
+      return [] unless options_text.present?
+
+      standard_anchors = extract_standard_anchors
+      return [] if standard_anchors.empty?
+
+      redefined = []
+
+      # Check for anchor redefinitions in user's text
+      # The options_text passed in should be the RAW user text before prepending standards
+      standard_anchors.each do |anchor|
+        # Match &anchor_name but not *anchor_name (which is a reference, not a definition)
+        # Match after: start of line, whitespace, or colon (for cases like `field:&anchor`)
+        redefined << anchor if options_text.match?(/(?:^|[\s:])&#{Regexp.escape(anchor)}\b/)
+      end
+
+      redefined
+    end
+
+    #
+    # Find the specific lines in the options text that contain anchor redefinitions
+    # @param [String] options_text - the user's configuration YAML
+    # @param [Array<String>] redefined_anchors - list of anchor names that were redefined
+    # @return [String] formatted string showing line numbers and content of problematic lines
+    def self.find_anchor_redefinition_lines(options_text, redefined_anchors)
+      return '' unless options_text.present? && redefined_anchors.any?
+
+      lines = options_text.split("\n")
+      problem_lines = []
+
+      redefined_anchors.each do |anchor|
+        # Find all lines that contain this anchor redefinition
+        lines.each_with_index do |line, idx|
+          if line.match?(/(?:^|[\s:])&#{Regexp.escape(anchor)}\b/)
+            line_num = idx + 1
+            problem_lines << "#{line_num}: #{line}"
+          end
+        end
+      end
+
+      problem_lines.uniq.join("\n")
+    end
 
     #
     # Add standard definitions that simplify configurations
@@ -848,6 +987,22 @@ module OptionConfigs
       end
 
       reshashes
+    end
+
+    #
+    # Set up a hash of options for keys starting with a certain string.
+    # Delete the found options for the loaded configuration
+    # @param [String] keys_start_with The prefix string to match keys against
+    # @param [Hash] loaded_config The configuration hash to process
+    # @return [Hash] A hash of options extracted from the loaded configuration
+    def self.options_based_on_keys_stating_with(keys_start_with, loaded_config)
+      options = {}
+      loaded_config.each_key do |k|
+        next unless k.to_s.start_with? keys_start_with
+
+        options.merge!(loaded_config.delete(k))
+      end
+      options
     end
   end
 end

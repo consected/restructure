@@ -28,5 +28,5 @@ unless big_select
 <% else %>
 <%= edit_field_label(form, field_name_sym, labels, force_default: assoc_or_class_name) %>
 <% reslist = big_select_list_from_options(reslist, group_split_char) %>
-<%= big_select_field(form, field_name_sym, reslist, options: big_select) %>
+<%= big_select_field(form, field_name_sym, form_object_item_type_us, reslist, options: big_select) %>
 <% end %>

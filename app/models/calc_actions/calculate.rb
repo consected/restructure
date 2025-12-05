@@ -1020,16 +1020,20 @@ module CalcActions
       begin
         details << '*************************************************************************'
         details << "original condition type: #{@orig_cond_type}"
+        details << "this instance class: #{@current_instance.class.name}"
         details << "this instance: #{@current_instance.id}"
+        if @current_instance.respond_to?(:extra_log_type)
+          details << "extra log type: #{@current_instance.extra_log_type}"
+        end
         details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
                            " - @orig_loop_res: #{@orig_loop_res}"
         details << "current user: #{current_user&.email} - " \
                    "in app type: #{current_user&.app_type&.name}"
         details << 'condition_config:'
-        details << YAML.dump(@condition_config.deep_stringify_keys)
+        details << String.yaml_dump(@condition_config)
         details << 'non_query_conditions:'
         begin
-          details << YAML.dump(@non_query_conditions&.conditions)
+          details << String.yaml_dump(@non_query_conditions&.conditions)
         rescue StandardError
           nil
         end
@@ -1048,7 +1052,7 @@ module CalcActions
           end
         end
         details << 'full conditions:'
-        details << YAML.dump(@action_conf.deep_stringify_keys)
+        details << String.yaml_dump(@action_conf)
         details << '*******************************************************************************************'
         Rails.logger.send log_level, details.join("\n") if log_level
       rescue StandardError => e
@@ -1057,7 +1061,7 @@ module CalcActions
         details << @condition_config
         details << @join_tables
         details << JSON.pretty_generate(@action_conf)
-        details << "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+        details << "Failure in calc_actions: #{e}\n#{e.short_string_backtrace}"
         Rails.logger.warn details.join("\n")
         raise e, "Failure in log_results: #{e}", e.backtrace
       end

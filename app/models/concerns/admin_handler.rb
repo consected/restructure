@@ -18,6 +18,8 @@ module AdminHandler
     before_create :setup_values
     after_save :invalidate_cache
 
+    attr_reader :updated_from_report
+
     add_model_to_list
   end
 
@@ -75,6 +77,10 @@ module AdminHandler
       "admin/#{table_name}"
     end
 
+    def base_route_short_name
+      table_name
+    end
+
     # The base string for route names
     # For example `send("new_#{base_route_name}_path")` returns the path
     # to the "new" controller action
@@ -115,6 +121,10 @@ module AdminHandler
     self.current_admin = current_admin if current_admin
     self.disabled = false
     save!
+  end
+
+  def updated_from_report!
+    @updated_from_report = true
   end
 
   def admin_name
@@ -185,6 +195,11 @@ module AdminHandler
     options[:methods] << :_class_name
     options[:methods] << :user_email
 
+    # If the record has been updated from a report, ensure that we override
+    # any except options to ensure all fields are included in the results.
+    # Devise will apply a very restrictive set of fields otherwise
+    options[:force_except] = [] if updated_from_report
+
     super(options)
   end
 
@@ -241,6 +256,21 @@ module AdminHandler
     return super if defined? super
 
     resource_name.humanize
+  end
+
+  #
+  # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+  # otherwise it returns just the basic name
+  def admin_item_type
+    self.class.name.singularize.ns_underscore
+  end
+
+  def admin_item_type_us
+    admin_item_type.ns_underscore
+  end
+
+  def model_data_type
+    :admin_model
   end
 
   #

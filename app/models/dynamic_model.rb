@@ -49,6 +49,10 @@ class DynamicModel < ActiveRecord::Base
     table_name.singularize
   end
 
+  def item_type_name
+    "dynamic_model__#{implementation_model_name}"
+  end
+
   #
   # All fields used by the implementation are either specified in the field list
   # or if empty, the fields are pulled from the underlying table fields, removing
@@ -517,7 +521,7 @@ class DynamicModel < ActiveRecord::Base
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
     key = hash.keys.first
-    new_options = YAML.dump(hash)
+    new_options = String.yaml_dump(hash)
     self.options ||= ''
     self.options = if self.options.index(/^#{key}:/)
                      self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\n\n\\3")

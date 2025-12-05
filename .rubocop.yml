@@ -1,3 +1,20 @@
+AllCops:
+  NewCops: enable
+  Include:
+    - 'app/**/*'
+    - 'config/**/*'
+    - 'seeds/**/*'
+  Exclude:
+    - 'db/migrate/**/*'
+    - 'bin/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+    - 'log/*'
+    - 'tmp/**/*'
+    - 'spec/migrations/*'
+    - 'spec/javascripts/*'
+
+
 Layout/LineLength:
   Enabled: true
   Max: 120
@@ -71,4 +88,13 @@ Style/SpecialGlobalVars:
   Enabled: false
 
 Style/ClassAndModuleChildren:
+  Enabled: false
+
+RuboCopNaming/VariableNumber:
+  Enabled: false
+
+Lint/NestedMethodDefinition:
+  Enabled: false
+
+Style/FetchEnvVar:
   Enabled: false

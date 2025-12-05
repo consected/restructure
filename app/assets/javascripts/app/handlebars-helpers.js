@@ -348,18 +348,53 @@
 
   Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2, sub_key3, sub_key4, sub_key5) {
     var res = _fpa.state[name];
-    if (res && key && !key.hash)
+    if (!res) {
+      console.log(`fpa_state_item: could not find ${name}`);
+      return;
+    }
+    if (res && key && !key.hash) {
       res = res[key];
-    if (res && sub_key && !sub_key.hash)
+      if (!res) {
+        var level = sub_key ? 'log' : 'debug';
+        console[level](`fpa_state_item: could not find ${name} ${key}`);
+        return;
+      }
+    }
+    if (res && sub_key && !sub_key.hash) {
       res = res[sub_key];
-    if (res && sub_key2 && !sub_key2.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key}`);
+        return;
+      }
+    }
+    if (res && sub_key2 && !sub_key2.hash) {
       res = res[sub_key2];
-    if (res && sub_key3 && !sub_key3.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2}`);
+        return;
+      }
+    }
+    if (res && sub_key3 && !sub_key3.hash) {
       res = res[sub_key3];
-    if (res && sub_key4 && !sub_key4.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3}`);
+        return;
+      }
+    }
+    if (res && sub_key4 && !sub_key4.hash) {
       res = res[sub_key4];
-    if (res && sub_key5 && !sub_key5.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3} ${sub_key4}`);
+        return;
+      }
+    }
+    if (res && sub_key5 && !sub_key5.hash) {
       res = res[sub_key5];
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3} ${sub_key4} ${sub_key5}`);
+        return;
+      }
+    }
     return res;
   });
 
@@ -616,7 +651,7 @@
   Handlebars.registerHelper('embedded_report', function (resname, t, opt) {
     if (!resname) return;
     if (typeof resname !== 'string') return resname;
-    var res = _fpa.utils.embedded_report(resname);
+    var res = _fpa.utils.embedded_report(resname, this);
     return new Handlebars.SafeString(res);
   });
 

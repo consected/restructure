@@ -139,7 +139,7 @@ module EditFields
 
       got ||= render partial: 'common_templates/edit_fields/default', locals: local_vars[:locals]
 
-      if is_current_admin_sample?
+      if is_current_admin_sample? && !curr_field_name.start_with?('hidden')
         got = "<div class=\"admin-sample-field-info\"><span>#{field_name}</span></div>#{got}".html_safe
       end
 

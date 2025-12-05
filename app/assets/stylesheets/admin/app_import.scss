@@ -1,0 +1,48 @@
+.app-import-upload-results {
+  thead {
+    background-color: #e7e7e7;
+  }
+
+  th {
+    max-width: 300px;
+  }
+}
+
+.version-diff-section {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  background-color: #f9f9f9;
+
+  h4 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .app-import-upload-results {
+    margin-top: 15px;
+    background-color: white;
+    
+    .line-number {
+      display: inline-block;
+      width: 35px;
+      text-align: right;
+      padding-right: 8px;
+      margin-right: 8px;
+      color: #999;
+      border-right: 1px solid #ddd;
+      user-select: none;
+      font-family: monospace;
+      font-size: 0.85em;
+      vertical-align: top;
+    }
+
+  }
+}
+
+.def-versions-embedded--dynamic-model, .def-versions-embedded--activity-log {
+  .diff del, .diff ins {
+    display: inline;
+  }
+}

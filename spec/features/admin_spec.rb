@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'admin sign in process', driver: :app_firefox_driver do
+describe 'admin sign in process', driver: $browser_driver do
   include ModelSupport
 
   def make_an_admin

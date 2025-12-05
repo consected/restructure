@@ -119,7 +119,7 @@ module HandlesUserBase
     def human_name
       cn = name
 
-      if respond_to?(:is_dynamic_model) && is_dynamic_model || respond_to?(:is_activity_log) && is_activity_log
+      if (respond_to?(:is_dynamic_model) && is_dynamic_model) || (respond_to?(:is_activity_log) && is_activity_log)
         cn = cn.split('::').last
       end
 
@@ -209,6 +209,10 @@ module HandlesUserBase
     # For example "player_infos"
     # Dynamic configurations will override this
     def base_route_segments
+      table_name.to_s
+    end
+
+    def base_route_short_name
       table_name.to_s
     end
 
@@ -595,7 +599,7 @@ module HandlesUserBase
   # Set the background_job_ref attribute, either using a job, or directly with a string.
   # The stored format is "namespace__class_name%id"
   # @param [Job | String] job
-  def set_background_job_ref(job) # rubocop:disable RuboCopNaming/AccessorMethodName
+  def set_background_job_ref(job) # rubocop:disable Naming/AccessorMethodName
     return unless respond_to?(:background_job_ref=)
 
     job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
@@ -620,6 +624,30 @@ module HandlesUserBase
     force_save! if force_save
     self.current_user ||= current_user
     update! disabled: true
+  end
+
+  #
+  # Get the full field list for the common template edit form.
+  # If there is am options config defined, use the field list defined there,
+  # otherwise fall back to the default permitted params.
+  # Remove any readonly params from the list, as well as standard fields.
+  # @return [Array<Symbol>] The list of fields for the edit form.
+  def edit_form_field_list
+    dopt = option_type_config || self.class.default_options
+    item_list = if dopt
+                  dopt.fields
+                else
+                  self.class.permitted_params
+                end
+
+    readonly_params = if self.class.respond_to? :readonly_params
+                        self.class.readonly_params
+                      else
+                        []
+                      end
+
+    item_type_id = :"#{item_type}_id"
+    item_list - readonly_params - [:id, :master_id, :item_id, :tracker_history_id, item_type_id]
   end
 
   protected
@@ -683,7 +711,7 @@ module HandlesUserBase
   # i.e. this is an external identifier that has not yet been assigned to a participant
   # @return [true|false] <description>
   def allow_no_master_and_not_set?
-    !!(self.class.no_master_association || self.class.external_identifier? && !master)
+    !!(self.class.no_master_association || (self.class.external_identifier? && !master))
   end
 
   #
@@ -708,7 +736,7 @@ module HandlesUserBase
     unless mu.is_a?(User) && mu.persisted?
       master = '[not defined]' unless respond_to? :master
       raise "bad user (for master id: #{master&.id || 'nil'}) being pulled from master_user " \
-      "(#{mu.class.name} #{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
+            "(#{mu.class.name} #{'not a user' unless mu.is_a?(User)}#{' not persisted' unless mu && mu.persisted?})"
     end
 
     write_attribute :user_id, mu.id
@@ -740,7 +768,7 @@ module HandlesUserBase
     mu = master_user
     unless mu.is_a?(User) && mu.persisted?
       raise "bad user (for master #{master}) being pulled from master_user when creating record " \
-            "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
+            "(#{'not a user' unless mu.is_a?(User)}#{' not persisted' unless mu && mu.persisted?})"
     end
 
     write_attribute :created_by_user_id, mu.id
@@ -786,7 +814,7 @@ module HandlesUserBase
     attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }
               .reject { |k, _v| k && k.match(ignore)[0].present? }
               .each do |k, v|
-                send("#{k}=".to_sym, v.downcase) if attributes[k].is_a? String
+                send(:"#{k}=", v.downcase) if attributes[k].is_a? String
               end
     true
   end
@@ -795,15 +823,15 @@ module HandlesUserBase
   # Check if the record can be saved (based on editable and creatable rules) and if not, raise an exception
   def check_can_save
     if persisted? && !can_edit?
-      msg = "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}" \
-            " - #{current_user.email} - #{current_user.app_type&.name}"
+      msg = "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id} " \
+            "- #{current_user.email} - #{current_user.app_type&.name}"
       raise FphsException, msg
     end
 
     return unless !persisted? && !can_create?
 
-    msg = "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})" \
-          " - #{current_user.email} - #{current_user.app_type&.name}"
+    msg = "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name}) " \
+          "- #{current_user.email} - #{current_user.app_type&.name}"
 
     raise FphsException, msg
   end
@@ -869,7 +897,7 @@ module HandlesUserBase
       c_vals.each do |table, cond|
         cond = { table => cond } unless cond.is_a? Hash
         cond.each do |k, v|
-          v = v.present? ? v : '(blank)'
+          v = '(blank)' unless v.present?
           if v.is_a? Hash
             next if v[:hide_error]
 
@@ -894,7 +922,7 @@ module HandlesUserBase
           else
             v = ": #{v}"
           end
-          k = table == :this ? k : "#{table}.#{k}"
+          k = "#{table}.#{k}" unless table == :this
 
           msg = nil
           case cond_type

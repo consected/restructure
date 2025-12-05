@@ -184,7 +184,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     END_OPT
 
     unless dm.options.strip == exp.strip
-      put_to_saved_log("replaces option configurations\n\---\n#{dm.options}\n---\n#{exp}\n---\n")
+      put_to_saved_log("replaces option configurations\n---\n#{dm.options}\n---\n#{exp}\n---\n")
     end
     expect(dm.options.strip).to eq exp.strip
 
@@ -407,5 +407,165 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
     # The raw field configs remain
     expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
+  end
+
+  it 'shows different view options' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        # The default option type is a special case.
+        # When no fields are specified, so they are all included
+        # All other option types must specify fields to include
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields
+          test1: has a caption before test1
+            # This will be overridden
+          test2: has a caption before test2
+            # This will be merged into the field_configs def
+
+      view_1:
+        # No fields are specified, so none are included
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields in view_1
+          test2: has a caption before test2
+
+      view_2:
+        fields:
+          - test2
+          - placeholder_view_2
+        field_configs:
+          placeholder_view_2:
+            caption_before: placeholder caption before for view_2
+            show_if:
+              test2: show placeholder_view_2
+          test1:
+            caption_before: not shown
+          test2:
+            caption_before: has a caption before test2
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+    expect(dmdef.default_options.fields).to eq(dmdef.field_list_array)
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
+    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
+    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
+    expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
+
+    view_1_options = dmdef.option_type_config_for(:view_1)
+    expect(view_1_options.fields).to be_empty
+    expect(view_1_options.show_if[:test1]).to be_a Hash
+    expect(view_1_options.show_if[:test1]).to eq(never: true)
+    expect(view_1_options.caption_before[:all_fields]).to be_a Hash
+    expect(view_1_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields in view_1</p>')
+    expect(view_1_options.caption_before[:test1]).to be_a Hash
+    expect(view_1_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(view_1_options.caption_before[:test2]).to be_a Hash
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+
+    view_2_options = dmdef.option_type_config_for(:view_2)
+    expect(view_2_options.fields).to eq(%w[test2 placeholder_view_2])
+    expect(view_2_options.field_configs[:placeholder_view_2][:caption_before][:caption]).to eq('<p>placeholder caption before for view_2</p>')
+    expect(view_2_options.field_configs[:placeholder_view_2][:show_if]).to eq(test2: 'show placeholder_view_2')
+    expect(view_2_options.caption_before[:test1][:caption]).to eq('<p>not shown</p>')
+    expect(view_2_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_2_options.show_if[:placeholder_view_2]).to eq(test2: 'show placeholder_view_2')
+  end
+
+  it 'handles show_if conditions with embedded_item data' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        show_if:
+          test1:
+            any:
+              test2: main_form_value
+              embedded_item:
+                embedded_field: embedded_value
+          user_id:
+            all:
+              test1: required_value
+              embedded_item:
+                embedded_status: active
+        field_configs:
+          test1:
+            caption_before: test1 caption
+          test2:
+            caption_before: test2 caption
+          user_id:
+            caption_before: user_id caption
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    # Verify the show_if configuration is properly structured
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to have_key(:any)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:test2)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:test1][:any][:embedded_item]).to eq(embedded_field: 'embedded_value')
+
+    expect(dmdef.default_options.show_if[:user_id]).to be_a Hash
+    expect(dmdef.default_options.show_if[:user_id]).to have_key(:all)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:test1)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:user_id][:all][:embedded_item]).to eq(embedded_status: 'active')
+  end
+
+  it 'handles nested show_if conditions with embedded_item' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      option_type_3:
+        show_if:
+          field_to_show:
+            any:
+              another_field_in_this_form: a value
+              embedded_item:
+                all:
+                  a_field_in_the_embedded_item: another value
+                  embedded_score:
+                    condition: '>='
+                    value: 10
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    option_type_3 = dmdef.option_type_config_for(:option_type_3)
+
+    # Verify the show_if configuration structure
+    expect(option_type_3.show_if[:field_to_show]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:another_field_in_this_form]).to eq('a value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:a_field_in_the_embedded_item]).to eq('another value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:condition]).to eq('>=')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:value]).to eq(10)
   end
 end

@@ -4,18 +4,21 @@ _fpa.show_if = {
 
 _fpa.show_if.methods = {
 
+  // Show fields in the specified block based on the show_if definitions for the specified form.  
+  // Handles both show and edit modes.
+  // block: jQuery object for the block containing the form fields
+  // data: hash of field_name => field_value for the form
+  // embedded_item: boolean indicating whether this is an embedded item
   show_items: function (block, data, embedded_item) {
     if (!block || !data) return;
 
     data.current_user_roles = _fpa.state.current_user_roles;
 
-    if (data.embedded_item) {
-      data.embedded_item.current_user_roles = _fpa.state.current_user_roles;
-      data.embedded_item.current_mode = data.current_mode;
-      _fpa.show_if.methods.show_items(block, data.embedded_item, true);
-    }
+    _fpa.show_if.methods.handle_embedded_item(block, data);
 
     var item_key = data.item_type;
+    if (!item_key) return;
+
     var form_key = data.full_option_type;
     var def_version = data.def_version
     if (!def_version) {
@@ -26,21 +29,40 @@ _fpa.show_if.methods = {
       def_version = block.attr(block_attr_name);
     }
     var vdef_version = 'v';
-    if (def_version) vdef_version += def_version;
-
-    if (!form_key && data.option_type && data.option_type != 'default') form_key = item_key + '_' + data.option_type;
+    if (def_version) vdef_version = `v${def_version}`;
+    if (!form_key && data.option_type && data.option_type != 'default') form_key = `${item_key}_${data.option_type}`;
     if (!form_key) form_key = item_key;
-    if (!item_key) return;
 
     if (_fpa.show_if.forms[form_key] && _fpa.show_if.forms[form_key][vdef_version]) {
-      var form_obj = _fpa.show_if.forms[form_key][vdef_version];
-      for (var show_field in form_obj) {
-        if (form_obj.hasOwnProperty(show_field)) {
-          _fpa.show_if.methods.show_item(block, data, item_key, show_field, form_key, form_obj);
-        }
-      }
+      // Get the hash describing the show_if definition for each of the fields for the specified form version.
+      var show_if_field_defs = _fpa.show_if.forms[form_key][vdef_version];
+      _fpa.show_if.methods.do_show_items(block, data, item_key, form_key, show_if_field_defs);
     }
 
+    _fpa.show_if.methods.handle_post_show_if(block);
+  },
+
+  // Perform the show_if processing for each of the fields in the show_if definition
+  do_show_items: function (block, data, item_key, form_key, show_if_field_defs) {
+    _fpa.show_if.methods.set_up_regex_pattern_fields(show_if_field_defs, data);
+    for (var show_field in show_if_field_defs) {
+      if (show_if_field_defs.hasOwnProperty(show_field)) {
+        _fpa.show_if.methods.show_item(block, data, item_key, show_field, form_key, show_if_field_defs);
+      }
+    }
+  },
+
+  // Handle any embedded item show_if processing
+  handle_embedded_item: function (block, data) {
+    if (data.embedded_item) {
+      data.embedded_item.current_user_roles = _fpa.state.current_user_roles;
+      data.embedded_item.current_mode = data.current_mode;
+      _fpa.show_if.methods.show_items(block, data.embedded_item, true);
+    }
+  },
+
+  // Handle any post-show_if actions, such as resizing labels, setting up e-signature fields, etc.
+  handle_post_show_if: function (block) {
     window.setTimeout(function () {
       _fpa.form_utils.resize_labels(block, null, true);
     })
@@ -57,11 +79,42 @@ _fpa.show_if.methods = {
         $(document).scrollTo(els.first(), 200, { offset: -0.2 * wh });
       }
       els.removeClass('dialog-made-visible');
-
     }, 250);
+  },
+
+  // Handle Regex pattern style field names, where we want to match multiple fields
+  // with a single show_if definition.
+  // show_if_field_defs: hash of field_name => show_if definition
+  //                     will be modified if field names with regex patterns found
+  // data_fields: hash of all field_name => field_value in the form
+  set_up_regex_pattern_fields: function (show_if_field_defs, data_fields) {
+    if (!data_fields) return;
+    // Run through each field name in the show_if_fields to find any that have a regex pattern
+    for (var field_name in show_if_field_defs) {
+      if (!show_if_field_defs.hasOwnProperty(field_name)) continue;
+      if (field_name.indexOf('/') !== 0 || field_name.lastIndexOf('/') !== field_name.length - 1) continue;
+
+      // This field name is a regex pattern (starting and ending with / characters)
+      // Generate an actual regex from the name
+      var re_field_name = field_name.replaceAll('/', '')
+      var re = new RegExp(re_field_name);
+      // Run through all the fields in the form and check for field names
+      // that match the regex
+      for (var match_field in data_fields) {
+        if (match_field.match(re)) {
+          // When a field matches, assign it the same show_if configuration
+          // as the original definition
+          show_if_field_defs[match_field] = show_if_field_defs[field_name]
+        }
+      }
+      // Delete the regex style field name, since it is meaningless now 
+      // we've 
+      delete show_if_field_defs[field_name];
+    }
 
   },
 
+  // Handle the actual showing/hiding of a single field based on the conditions of the show_if definition being satisfied
   show_item: function (block, data, form_name, field_name, form_key, form_obj) {
 
     if (form_obj) {
@@ -104,11 +157,13 @@ _fpa.show_if.methods = {
     }
   },
 
+  // Calculate whether the specified condition definition is satisfied by the data
+  // cond_def_init: condition definition hash
+  // data: hash of field_name => field_value for the form
   calc_conditions: function (cond_def_init, data) {
 
     // Valid condition types
     const cond_types = ['all', 'any', 'not_all', 'not_any'];
-    // valid binary_conds = ['=', '<', '>', '<>', '<=', '>='];
     var cond_success = true;
 
     // Iterate through each top level rule
@@ -151,7 +206,17 @@ _fpa.show_if.methods = {
           var exp_value = cond_def[cond_field];
           var orig_exp_value = exp_value;
 
-          if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
+          // Handle special case for embedded_item field first
+          if (cond_field == 'embedded_item') {
+            // Handle embedded_item conditions by recursively evaluating against embedded_item data
+            if (data.embedded_item && typeof (exp_value) == 'object' && !Array.isArray(exp_value)) {
+              matches = _fpa.show_if.methods.calc_conditions(exp_value, data.embedded_item);
+            } else {
+              // If there's no embedded_item data, the condition fails
+              matches = false;
+            }
+          }
+          else if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
             // If the condition definition is a hash and does not have a "condition" key, 
             // then this is an embedded condition. Handle it.
             var subdef = {};

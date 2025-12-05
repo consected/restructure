@@ -40,6 +40,11 @@
   <p><%= link_to link_label_open_in_new('list data'), 
                 "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
                 target: '_blank' %></p>
+  <p>
+    <%= link_to link_label_open_in_new('list data history'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.history_table_name}", 
+                target: '_blank' %>
+  </p>
+                
   <p><%= link_to link_label_open_in_new('search identifier'), 
                 report_path(id: @external_identifier.usage_report('Search', ExternalIdentifier::ReportItemSearchType, as_alt_resource_name: true)),
                 target: '_blank' %></p>
@@ -79,4 +84,5 @@
 <% end %>
 <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
+<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>

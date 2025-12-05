@@ -31,8 +31,10 @@
 
 <script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <small class="ctlabel">
-    {{#if (fpa_state_item labels vdef_version @key )}}
+    {{#if labels}}
       {{fpa_state_item labels vdef_version @key }}
+    {{else if (fpa_state_item (concat 'labels_' (underscore label_resource_name)) vdef_version @key )}}
+      {{fpa_state_item (concat 'labels_' (underscore label_resource_name)) vdef_version @key }}
     {{else if force_default}}
       {{force_default}}
     {{else}}
@@ -40,6 +42,30 @@
     {{/if}}
   </small>
 </script>
+
+
+<script id="common_template_result_field_caption_or_dialog" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#if no_caption_before}}
+  {{else is field_type 'includes' '^hidden_' }}
+  {{else is key 'in' caption_before_keys}}
+    {{#if (fpa_state_item 'dialog_before' dialog_resource_name vdef_version key)}}
+      {{{fpa_state_item 'dialog_before' dialog_resource_name vdef_version key}}}
+    {{else if (fpa_state_item 'caption_before' caption_resource_name vdef_version key 'show_caption')}}
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' caption_resource_name vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}" data-cb-field-name="{{key}}"
+    >{{{fpa_state_item 'caption_before' caption_resource_name vdef_version key 'show_caption'}}}</li>
+    {{else if (fpa_state_item 'caption_before' caption_resource_name vdef_version key 'caption')}}
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' caption_resource_name vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}" data-cb-field-name="{{key}}"
+    >{{{fpa_state_item 'caption_before' caption_resource_name vdef_version key 'caption'}}}</li>
+    {{else}}
+      {{log 'caption_before state item not found'}}
+      {{log caption_resource_name}}
+      {{log vdef_version}}
+      {{log key}}
+    {{/if}}
+  {{/if}}
+</script>
+
+<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase')}}fo-no-downcase{{/if}} {{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')}}fo-view-original-case{{/if}}</script>
 
 <script id="edit_item_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
 {{#unless prevent_edit }}

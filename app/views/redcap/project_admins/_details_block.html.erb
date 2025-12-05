@@ -166,7 +166,8 @@ if req&.result
   <p><label>filestore</label> not set up</p>
 <% end %>
 <p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
-<% if object_instance.persisted? && object_instance.enabled? %>
+<% if object_instance.persisted? && object_instance.enabled? && !object_instance.transfer_mode_none? %>
+<div class="project-admin-actions-block">
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
@@ -183,6 +184,10 @@ if req&.result
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
         <p><%= link_to 'retrieve data collection instruments list', request_data_collection_instruments_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+        <p><%= link_to 'retrieve event logs', request_logs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
@@ -229,4 +234,5 @@ if req&.result
       </p>
     </div>
   </div>
+</div>
 <% end %>

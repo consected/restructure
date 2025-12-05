@@ -9,7 +9,7 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
   before :example do
     create_admin
     @projects = setup_redcap_project_admin_configs
-    @project = @projects.find {|h| h[:name] == 'save_trigger' }
+    @project = @projects.find { |h| h[:name] == 'save_trigger' }
   end
 
   before :example do
@@ -23,9 +23,7 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end
 
-
   it 'pushes data to Redcap' do
-
     # SetupHelper.get_webmock_responses
     # WebMock.allow_net_connect!
 
@@ -33,7 +31,7 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
 
     instrument = 'research_form'
     record_id = -1
-    study_id = 9999000
+    study_id = 9_999_000
     project_name = @project[:name]
     study = @project[:study] || Redcap::RedcapSupport::DefaultStudy
 
@@ -42,9 +40,9 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
         study:,
         project_name:,
         local_data: 'import_response',
-        method: 'import_records',        
+        method: 'import_records',
         post_data: {
-          data: [{ record_id: , study_id:  }],
+          data: [{ record_id:, study_id: }],
           force_auto_number: true
         },
         success_if: {
@@ -70,11 +68,11 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
           instrument:,
           record_id: '{{save_trigger_results.import_response.first}}'
         }
-      },
+      }
 
     }
 
-    puts YAML.dump(JSON.parse(config.to_json))
+    puts String.yaml_dump(config)
 
     @trigger = SaveTriggers::RedcapRequest.new(config, @al)
     @trigger.perform
@@ -87,8 +85,5 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
     expect(@al.notes).to be_present
     dnotes = JSON.parse(@al.notes)
     expect(dnotes).to be_a String
-    
-
   end
-
 end

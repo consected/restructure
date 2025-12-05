@@ -14,23 +14,266 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.30.11] - 2025-10-29
+### From FPHS - PR #789 - 2025-1205
+
+- [Fixed] deprecation warnings for SCSS files - fixes #669
+
+### From FPHS - PR #788 - 2025-12-05
+
+Added more information when the save trigger add_tracker fails for some reason - fixes #280
+
+### From FPHS - PR #648 - 2025-12-05
+
+- [Added] Redcap transfer to include failed files count - resolves #648
+
+### From FPHS - PR #617 - 2025-12-05
+
+- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
+
+- [Fixed] documentation related to notify save trigger
+
+- [Allow] use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+
+### From FPHS - PR #785 - 2025-12-05
+
+- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
+
+### From FPHS - PR 784 - 2025-12-05
+
+- [Changed] database setup for better testing (avoid need for sudo and remove Filestore temp files)
+
+### From FPHS - PR #783 - 2025-12-05
+
+- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
+
+### From Consected - PR #782 - 2025-12-03
+
+- [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
+
+### From Consected - PR #781 - 2025-12-03
+
+- [Added] version diffs to config_libraries in a new admin panel tab - resolves #780
+
+## [9.38.0] - 2025-12-03
+
+- [Updated] CHANGELOG.md with git commits
+
+## [9.37.0] - 2025-12-03
+
+- [Updated] gems
+
+### From Consected - PR #778 - 2023-12-03
+
+- [Added] a link from dynamic model, activity log and external identifier admin panels to search the relevant history table - #647
+
+## [9.36.0] - 2025-12-03
+
+### From FPHS - PR #777 - 2025-12-03
+
+- [Fixed] issue where tables appear in multiple schemas in the search path, a dynamic model may warn that that the table schema name is incorrectly defined - fixes #651
+- [Added] small fixes for testing reliability
+
+### From Consected - PR #776 - 2025-12-03
+
+- [Added] diff of versions in dynamic definitions admin panels - resolves #744
+
+### From Consected - PR #775 - 2025-12-03
+
+- [Added] check of dynamic definition options for redefinition of standard anchors - resolves #678
+
+### From Consected - PR #774 - 2025-12-03
+
+- [Added] show_if referencing embedded_item data in its conditions - resolves #759
+
+## [9.35.0] - 2025-12-02
+
+### From FPHS - PR #773 - 2025-12-02
+
+- [Changed] default test browser to Chrome - related to #753
+
+### From FPHS - PR #772 - 2025-12-02
+
+- [Added] view reference info to dynamic definiition admin details panels
+- [Fixed] AppGenerator drops reference views if they have dynamic model definitions, but doesn't recreate them afterwards - fixes #771
+
+## [9.34.0] - 2025-12-01
+
+- [Updated] Ruby version to version 3.4.7
+- [Updated] gems
+
+## [9.33.0] - 2025-12-01
+
+### From FPHS - PR #770 - 2025-12-01
+
+- [Fixed] truncation of long radio button labels
+- [Fixed] caption_before fields that are empty from being added incorrectly in the model generator
+- [Fixed] small admin panel display bug
+- [Fixed] setting option_type from active_value - fixes #769
+
+### From FPHS - PR #768 - 2025-12-01
+
+- [Fixed] generation of real show_if when choice values have underscores - fixes #650
+
+### From FPHS - PR #767 - 2025-12-01
+
+- [Added] option type handling to Redcap model generation - resolves #765
+- [Fixed] issue with accidental merging option configs into _default options
+- [Added] ability for Redcap  forms represented as option_type to acccess fields in other forms for branching logic show_if evaluation - resolves #764
+- [Added] hidden field type to hide captions, labels and fields while keeping the value available for show_if evaluation
+
+### From FPHS - PR #766 - 2025-11-30
+
+- [Cleanup] configuration of Rubocop for development
+
+### From FPHS - PR #763 - 2025-11-27
+
+- [Fixed] Redcap project updating dynamic model removes any existing settings in the _configurations - fixes #675
+
+### From FPHS - PR #762 - 2025-11-27
+
+- [Fixed] small issue in parallel_tests script
+- [Fixed] Reference Data for Tables can't view users table - fixes #752
+
+### From FPHS - PR #761 - 2025-11-27
+
+- [Fixed] Date Time edit field incorrectly implemented - fixes #760
+
+### From FPHS - PR #758 - 2025-11-26
+
+- [Added] dynamic definition show_if configuration allows affected fields to be defined using regex patterns - resolves #296 and #612 (with extra configurations)
+
+### From FPHS - PR #757 - 2025-11-26
+
+- [Added] correct viewing of Redcap fields with multiple data collection instruments, relying on option types - resolves #606
+
+### From FPHS - PR #756 - 2025-11-26
+
+- [Added] Redcap project button to call export_logs and save result as a file to the project filestore container
+- [Added] redcap API methods to export_logs form_event_mapping export_field_names - related to #683
+- [Added] better logging and exception handling (especially for network errors)
+
+### From FPHS - PR #755 - 2025-11-26
+
+- [Added] more default options
+- [Cleaned] code
+- [Fixed] typos
+
+### From FPHS - PR #754 - 2025-11-26
+
+- [Experimental] use of Chrome as an optional test browser - relates to #753
+
+### From FPHS - PR #749 - 2025-11-22
+
+- [Fixed] Dynamic models - caption_before with escaped characters break the_comments: fields: and cause YAML issues - fixes #676
+
+### From Viva - PR #748 - 1015-11-21
+
+- [Changed] precedence of selecting SMTP TLS or STARTTLS
+
+### From Viva - PR #747 - 2025-11-20
+
+- [Changed] user email notifications to perform in the background
+- [Fixed] SMTP timeout too low for SES
+
+## [9.32.0] - 2025-11-20
+
+### From Viva - PR #746 - 2025-11-20
+
+- [Fixed] mail misconfiguration exception with `mail` new gem version - fixes #745
+
+### From Viva - PR #743 - 2025-11-19
+
+- [Fixed] big_select fields don't trigger show_if field rules - fixes #742
+- [Fixed] show_ifs in admin sample of dynamic model
+
+### From Viva - PR #741 - 2025-11-19
+
+- [Added] logging of backtrace to support errors - related to #733
+
+Fixed brakeman allow list
+
+### From Viva - PR #739 - 2025-11-18
+
+- [Fixed] user profile user details (activity log) tab doesn't show any content - fixes #735
+- [Added] logging info for failing calc_if
+- [Added] blank option to admin filters
+- [Fixed] inability to import  - related to #90
+
+Fixed reporting multiple failures
+
+### From Viva - PR #737 - 2025-11-18
+
+- [Added] diff of changes for results of app imports - resolves #736
+
+### From Viva - PR #734 - 2025-11-17
+
+- [Added] option to log access authorization information for a request (param `_log_access=true`) - resolves #733
+
+### From FPHS - PR #732 - 2025-11-17
+
+- [Fixed] error handling from Redcap client requests - fixes  #731
+
+### From Viva - PR #730 - 2025-11-13
+
+- [Changed] reporting of parallel test failures - retesting needs to save results - resolves #729
+
+### From Viva - PR #728 - 2025-11-13
+
+- [Fixed] issues with activity log references showing dynamic models, based on a regression due to option types
+- [Fixed] issue with reports embedded by handlebars
+- [Fixed] Portal pages relying on common_page_template_results partial are not showing the actual content - fixes #725
+
+### From FPHS - PR #727 - 2025-11-13
+
+- [Fixed] saving a dynamic definition with `dialog_before: some string` causes an error - fixes #726
+
+### From FPHS - PR #724 - 2025-10-13
+
+- [Fixed] page layouts (/content/...) requests to honor user_app_type URL param - fixes #723
+
+### From FPHS - PR #722 - 2025-10-12
+
+- [Added] an dynamic definition option to allow the default option type name to be set to a value other than "default" - resolves #721
+
+### From Viva - PR #720 - 2025-10-12
+
+- [Added] tests for alternative option type field in dynamic definition - resolves #719
+
+### From Viva - PR #718 - 2025-11-10
+
+- [Added] support for selecting templates with option types - resolves #605
+  - [Added] use of option type request parameters and record fields
+  - [Changed] handling of UI templates to support option types for dynamic definition forms
+  - [Added] base_route_... information to support consistent paths in URLs and templates
+- [Added] _override,_merge_default and_merge_override options to dyanmic definitions - resolves #326
+- [Added] logging to help debug
+- [Added] initial documentation of the UI templates
+- [Fixed] setup of test apps
+- [Fixed] issue parsing extra options YAML
+- [Fixed] specs
+
+### From FPHS - PR #716 - 2025-11-04
+
+- [Fixed] issue with show_if fields from actiivity logs
+
+## [9.31.0] - 2025-10-30
+
+- [Updated] gems
+
+### From FPHS - PR #715 - 2025-10-29
 
 - [Fixed] bug checking timed out indicators
 
-## [9.30.10] - 2025-10-29
+### From FPHS - PR #714 - 2025-10-29
 
 - [Changed] Filestore exceptions to inherit from StandardError
-- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713 Added better reporting of Zip "mounter" errors that occur in background processes
+- [Fixed] Filestore incorrectly indexing mounted archive folders if they haven't been processed - fixes #713
+- [Added] better reporting of Zip "mounter" errors that occur in background processes
 - [Changed] "file status" to appear at the top of a Filestore browser
 
-## [9.30.9] - 2025-10-28
-
-## [9.30.8] - 2025-10-28
+### From FPHS - PR #711 - 2025-10-28
 
 - [Fixed] Filestore adding .__processing__ files to index - fixes #710
-
-## [9.30.7] - 2025-10-28
 
 ### From FPHS - PR #709 - 2025-10-28
 
@@ -91,31 +334,23 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Fixed] user access control incorrectly checks for existence - fixes #692
 
-## [9.30.4] - 2025-10-07
+### From FPHS - PR #690 - 2025-10-14
 
 - [Fixed] view_sql and default YAML anchors fail - fixed #689
-
-## [9.30.3] - 2025-10-07
 
 ### From FPHS - PR #688 - 2025-10-07
 
 - [Fixed] Redcap import_records returning an array with a single string - fixes #687
 
-## [9.30.2] - 2025-09-18
-
 ### From FPHS - PR #682 - 2025-09-18
 
 - [Fixed] valid_if condition with `masters: {}` causes error - fixes #681
-
-## [9.30.1] - 2025-09-09
 
 ### From Viva - 2025-09-09
 
 - [Fixed] release_and_build.sh to correctly set the default ruby version
 
-## [9.30.0] - 2025-09-09
-
-### From FPHS - PR #667 - 2025-09-09
+### From FPHS - PR #668 - 2025-09-09
 
 - [Fixed] AJAX errors reported to users
 - [Fixed] potential error if dynamic model has no primary key
@@ -750,7 +985,7 @@ NOTE: Requires a database migration on upgrade
 
 ### From FPHS - PR #442 - 2025-01-07
 
-**NOTE:** DB migration required
+__NOTE:__ DB migration required
 
 - [Changed] handling of SECRET_KEY_BASE and other non-production credentials to use Rails standard environment variable and credentials rather than secrets
 - [Added] USEVER variable handling for batch use of release_and_build.sh
@@ -2272,10 +2507,10 @@ First attempt at building with app and organization specific files in restructur
 ### Transferred from Viva @8.0.52 - 2022-03-08
 
 - [Added] paths and resource names when referencing activity log types
-- [Added] much more consistent handling of resource names with **Resources::Models**
+- [Added] much more consistent handling of resource names with __Resources::Models__
 - [Added] user profiles tabs definable using page layout definitions
 - [Added] ability to include activity log type as a resource in a page layout definition
-- [Added] **add_item_button** substitution for captions and report headers
+- [Added] __add_item_button__ substitution for captions and report headers
 - [Added] user definable user preferences for timezones and formats
 - [Added] per-server caching of latest dynamic definition versions, to allow automated reloading on a page refresh
 - [Added] view_options for references in activity log def to always open a reference
@@ -2390,7 +2625,7 @@ First attempt at building with app and organization specific files in restructur
 ### Transfer from Harvard @7.4.71 - 2021-11-09
 
 - [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
-- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Report results options added __embedded_block__ to show dynamic models as forms from report resutls
 - [Added] Contributor field to data dictionary variable records, to accompany target field.
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
@@ -2403,7 +2638,7 @@ First attempt at building with app and organization specific files in restructur
 
 ## Transfer from Harvard @7.4.70 - 2021-10-31
 
-- [Added] Report criteria field type **select_from_model**
+- [Added] Report criteria field type __select_from_model__
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
 - [Fixed] DB comments now updating when a dynamic model is a view

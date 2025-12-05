@@ -28,6 +28,12 @@
                 target: '_blank' %>
   </p>
 
+  <p>
+    <%= link_to link_label_open_in_new('search data history'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.history_table_name}", 
+                target: '_blank' %>
+  </p>
+
+
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
 
@@ -153,6 +159,8 @@
   %>
   </p>
 </div>
+
+<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
 
 <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 

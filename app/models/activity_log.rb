@@ -277,7 +277,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   # Set up an association to this class on the Master
-  def add_master_association(&association_block)
+  def add_master_association(&)
     return if disabled || !errors.empty?
 
     begin
@@ -287,11 +287,11 @@ class ActivityLog < ActiveRecord::Base
       logger.debug "Associated master: has_many #{model_association_name} with class_name: #{full_implementation_class_name}"
       awa = action_when_attribute.to_sym
       awa = :created_at if awa == :alt_order
-      Master.has_many model_association_name,
+      Master.has_many(model_association_name,
                       -> { order(awa => :desc, id: :desc) },
                       inverse_of: :master,
                       class_name: full_implementation_class_name,
-                      &association_block
+                      &)
 
       # Add an association for each extra log type
       rns = self.class.all_option_configs_resource_names do |e|
@@ -330,17 +330,17 @@ class ActivityLog < ActiveRecord::Base
     impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
 
       def create(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
 
       def create!(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
     end
 
@@ -361,17 +361,17 @@ class ActivityLog < ActiveRecord::Base
                                  class_name: full_implementation_class_name do
         def build(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
 
         def create(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
 
         def create!(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
       end
     end
@@ -384,6 +384,10 @@ class ActivityLog < ActiveRecord::Base
 
   def base_route_segments
     "activity_log/#{implementation_model_name.pluralize.to_sym}"
+  end
+
+  def base_route_short_name
+    implementation_model_name.pluralize.to_sym
   end
 
   # set up a route for each available activity log definition
@@ -677,7 +681,7 @@ class ActivityLog < ActiveRecord::Base
 
     begin
       implementation_class
-    rescue StandardError => e
+    rescue StandardError
       # logger.debug e
       return false
     end

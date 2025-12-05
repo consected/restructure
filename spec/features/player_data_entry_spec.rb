@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'advanced search', js: true, driver: :app_firefox_driver do
+describe 'advanced search', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport
@@ -219,6 +219,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
       have_css('.tt-suggestion')
       h = '.tt-suggestion .tt-highlight'
+      has_css?(h)
       expect(page).to have_css(h), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
       expect(page.all(h).first.text.downcase).to eq(keyed)
       page.all(h).first.click

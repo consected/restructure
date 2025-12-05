@@ -101,9 +101,25 @@ class Admin::MigrationGenerator
 
   #
   # Return a hash keyed by table name and value schema name
+  # When a table exists in multiple schemas, the first schema in the search path takes precedence
   # @return [Hash{String=>String}]
   def self.table_schema_hash
-    Admin::MigrationGenerator.tables_and_views.map { |a| [a['table_name'], a['schema_name']] }.to_h
+    search_path = current_search_paths
+    result = {}
+
+    # Build hash by iterating through tables, but only set value if not already set
+    # This ensures that when we encounter a table in multiple schemas, the first one
+    # in the search path wins (assuming tables_and_views are ordered by schema_name)
+    # We need to sort by search path order to ensure correct precedence
+    tables_and_views.sort_by { |t| [search_path.index(t['schema_name']) || 999, t['table_name']] }.each do |t|
+      table_name = t['table_name']
+      schema_name = t['schema_name']
+
+      # Only set if not already present - first occurrence (earliest in search path) wins
+      result[table_name] ||= schema_name
+    end
+
+    result
   end
 
   #
@@ -154,6 +170,25 @@ class Admin::MigrationGenerator
 
       res.to_a
     end
+  end
+
+  def self.views_referencing_table(schema_name, table_name)
+    res = connection.execute <<~END_SQL
+      select
+        u.view_schema "schemaname",
+        u.view_name "viewname",
+        u.table_schema referenced_table_schema,
+        u.table_name referenced_table_name,
+        v.view_definition
+      from information_schema.view_table_usage u
+      join information_schema.views v on u.view_schema = v.table_schema
+        and u.view_name = v.table_name
+      where u.table_schema not in ('information_schema', 'pg_catalog')
+        and u.table_name = '#{table_name}'
+        and u.table_schema = '#{schema_name}'
+      order by u.view_schema, u.view_name
+    END_SQL
+    res.to_a
   end
 
   #
@@ -532,14 +567,14 @@ class Admin::MigrationGenerator
 
     <<~ARCONTENT
       self.no_master_association = #{!!no_master_association}
-      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
-      #{table_name_changed ? '    update_table_name' : ''}
-      #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields&.join(' ')}]"}
-          \# added: #{added}
-          \# removed: #{removed}
-          \# changed type: #{changed}
-      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
+      #{"    self.prev_table_name = '#{prev_table_name}'" if table_name_changed}
+      #{'    update_table_name' if table_name_changed}
+      #{"    self.prev_fields = %i[#{prev_fields&.join(' ')}]" unless table_name_changed}
+          # added: #{added}
+          # removed: #{removed}
+          # changed type: #{changed}
+      #{"    # new table comment: #{new_table_comment.gsub("\n", '\n')}" if new_table_comment}
+      #{"    # new fields comments: #{new_fields_comments.keys}" if new_fields_comments.present?}
           update_fields
     ARCONTENT
   end
@@ -558,11 +593,11 @@ class Admin::MigrationGenerator
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
-      #{table_name_changed ? '    update_table_name' : ''}
+      #{"    self.prev_table_name = '#{prev_table_name}'" if table_name_changed}
+      #{'    update_table_name' if table_name_changed}
           self.prev_fields = %i[#{prev_fields&.join(' ')}]
-      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
+      #{"    # new table comment: #{new_table_comment.gsub("\n", '\n')}" if new_table_comment}
+      #{"    # new fields comments: #{new_fields_comments.keys}" if new_fields_comments.present?}
           create_or_update_dynamic_model_view
     ARCONTENT
   end
@@ -675,8 +710,10 @@ class Admin::MigrationGenerator
   #
   # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
-    return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
-
+    unless allow_migrations && db_migration_schema != DefaultMigrationSchema
+      Rails.logger.warn "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
+      return
+    end
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.warn "Running migration from #{db_migration_dirname}"
 
@@ -771,7 +808,7 @@ class Admin::MigrationGenerator
           #{migration_set_attribs}
 
           #{do_create_or_update}
-          #{table_or_view == 'tables' ? 'create_dynamic_model_trigger' : ''}
+          #{'create_dynamic_model_trigger' if table_or_view == 'tables'}
         end
       end
     CONTENT

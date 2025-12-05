@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'API tokens and CSRF', js: true, driver: :app_firefox_driver do
+describe 'API tokens and CSRF', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterSupport
 

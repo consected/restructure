@@ -252,10 +252,18 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   #
   # The full content template text to use for the message,
   # specified by config[:content_template_text]
-  # If a hash is specified then the text will be retreived using a conditional action
+  # If a hash is specified then the text will be retreived using a conditional action.
+  # If the value is a string, substitutions will be performed. When the message is sent,
+  # further substitutions will be performed to render the final message.
   # @return [String | nil]
   def content_template_text
     @content_template_text ||= calc_field_or_return(@config[:content_template_text])
+    # return @content_template_text if @content_template_text
+
+    # cond = @config[:content_template_text]
+    # cond = ConditionalActions.new(cond, item).get_this_val if cond.is_a? Hash
+
+    # @content_template_text = cond
   end
 
   #
@@ -337,6 +345,11 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   end
 
   def calc_field_or_return(cond)
-    ConditionalActions.calc_field_or_return cond, item
+    # Delegate to ConditionalActions which now handles:
+    # - Hash conditions
+    # - {{template}} substitutions via FieldDefaults
+    # - Arrays (treated as array of literal values)
+    # - Literal values
+    FieldDefaults.calculate_default(item, cond, allow_nil: true, ignore_missing: true)
   end
 end

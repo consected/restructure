@@ -40,9 +40,11 @@ module AppExceptionHandler
   #
   # General method for showing errors, either as plain text or as an error page
   def show_error(title, status, text: nil, flash_level: nil)
+    flash_level ||= :danger
+    Rails.logger.warn("AppExceptionHandler.show_error (#{flash_level}): #{title} (#{status})\n#{text}")
+    Rails.logger.warn(short_string_backtrace(caller))
     text = text.to_s[0..2000] if text
 
-    flash_level ||= :danger
     if request.format == :html
       @error_title = title
       render 'layouts/error_page', status:, locals: { text: }
@@ -96,7 +98,7 @@ module AppExceptionHandler
   end
 
   def unhandled_exception_handler(error)
-    msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
+    msg = "An unexpected error occurred. Contact the administrator if this condition persists.\n#{error.message}"
     code = 500
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
@@ -208,5 +210,11 @@ module AppExceptionHandler
     # Catch it so we can send a useful response.
     render plain: msg, status: code, content_type: 'text/plain'
     true
+  end
+
+  def short_string_backtrace(from_caller)
+    from_caller.select do |m|
+      m.include?(Rails.root.join('app').to_s) || m.include?(Rails.root.join('spec').to_s)
+    end.join("\n")
   end
 end
