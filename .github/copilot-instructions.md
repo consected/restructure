@@ -215,11 +215,12 @@ Key variables (see `app-scripts/get-aws-env-vars.sh`):
 - **RSpec**: Main test framework with parallel execution support
 - **Capybara**: Feature tests with Firefox/Geckodriver
 - **Database Cleaner**: Test isolation
-- Tests require Filestore mount setup: `app-scripts/setup-dev-filestore.sh`
+- Tests require Filestore mount setup - this needs "sudo" to run: `app-scripts/setup-dev-filestore.sh`
 
 Test commands:
 ```bash
-IGNORE_MFA=true bundle exec rspec  # Skip AWS MFA
+bundle exec rspec  # Run in headless mode
+NOT_HEADLESS=true bundle exec rspec  # Suggest a human developer reviews the actual browser output
 app-scripts/parallel_test.sh       # Parallel execution
 ```
 
@@ -239,6 +240,13 @@ app-scripts/parallel_test.sh       # Parallel execution
 - Token-based API authentication via `simple_token_authentication`
 - RESTful endpoints following Rails conventions
 - Configurable API access controls
+
+### Code Style
+- Always format `.rb` files using the default VSCode formatter
+- Use modern Ruby syntax 
+  - safe navigation
+  - keyword arguments
+  - omit values in Hash literals and method call keys with variables matching keys
 
 ## Common Gotchas
 
