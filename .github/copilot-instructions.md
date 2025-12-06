@@ -222,18 +222,44 @@ Key variables (see `app-scripts/get-aws-env-vars.sh`):
 - **Feature specs** should be produced for all new UI functionality
 - **Run `rspec` on new spec tests** after implementing new features to make sure they run
 
-To avoid 2FA logins blocking tests, the following settings are recommended in test setup (in `before(:all)` block):
-```ruby
-change_setting('TwoFactorAuthDisabledForUser', false)
-change_setting('TwoFactorAuthDisabledForAdmin', false)
+If needed, clean the test database:
+```bash
+app-scripts/clean-test-db.sh
 ```
+
 
 Test commands:
 ```bash
 bundle exec rspec  # Run in headless mode
 NOT_HEADLESS=true bundle exec rspec  # Suggest a human developer reviews the actual browser output
-app-scripts/parallel_test.sh       # Parallel execution
+app-scripts/parallel_test.sh       # Parallel execution for many tests - the results are found in tmp/failing_specs.log
+app-scripts/retest_failed_parallel_tests.sh # Re-run only the failed tests from the last parallel test run
 ```
+
+### Rspec feature test tips
+
+To avoid 2FA logins blocking tests, the following settings are recommended in test setup (in `before(:all)` block):
+```ruby
+change_setting('TwoFactorAuthDisabledForUser', true)
+change_setting('TwoFactorAuthDisabledForAdmin', true)
+```
+
+Never click on elements programmatically using Javascript if they may not be interactable. Instead, use JavaScript to scroll them into view first:
+```ruby
+edit_link = find('a', text: 'edit tracker record')
+page.execute_script('arguments[0].scrollIntoView(true);', edit_link)
+sleep 0.5  # Allow time for scrolling
+```
+Then click the link:
+```ruby
+click_link 'edit tracker record'
+```
+
+Attempt to follow the real user / admin flow through the UI as much as possible, avoiding direct model manipulation except for setup/teardown. Avoid using `visit` to go directly to pages that would not normally be accessible through the UI flow. 
+
+Any "edit" button represented by a glyphicon should be clicked in the UI rather than visiting the edit URL directly. These buttons typically have the HTML class something like: "edit-entity glyphicon glyphicon-pencil".
+
+Any link or button that has the HTML attribute `data-remote="true"` (which may appear in a Rails helper like `<%= link_to ..., remote: true %>`) should be clicked in the UI rather than visiting the URL directly. This is because these links typically perform AJAX requests that update parts of the page dynamically.
 
 ## Integration Points
 
