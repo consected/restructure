@@ -50,7 +50,7 @@ if [ "$(whoami)" == 'root' ] && [ -z "${FS_FORCE_ROOT}" ]; then
   echo Do not run as sudo
   exit
 else
-  sudo echo > /dev/null
+  sudo echo "Set up dev filestore" > /dev/null
 fi
 
 if [ "${RAILS_ENV}" != 'test' ]; then
