@@ -19,7 +19,7 @@
 
 
 BROWSER=${BROWSER:-chrome}
-USE_PG_UNAME=${USE_PG_UNAME:=$(whoami)}
+export USE_PG_UNAME=${USE_PG_UNAME:=$(whoami)}
 if [ "${SUDO_POSTGRES}" ]; then
   unset USE_PG_UNAME
 fi
