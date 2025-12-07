@@ -260,16 +260,17 @@ to enable automatic authentication with your DB password, such as:
 
     localhost:5432:restr_test:username:mysecretpw
 
-To create a single test database for running rspec directly:
+To create a single test database for running rspec directly. First, ensure your postgres user has the appropriate privileges:
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    ALTER USER <username> WITH CREATEDB CREATEROLE LOGIN;
+
+On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
+The run:
     app-scripts/create-test-db.sh 1
 
-Make sure the Filestore mounts are in place:
-
+Make sure the Filestore mounts are in place (this requires sudo privileges) once after a reboot:
     app-scripts/setup-dev-filestore.sh
 
 By default, browser feature tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
@@ -293,11 +294,12 @@ For more rspec information, check [running rspec tests](docs/dev_reference/main/
 
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+NOTE: On Mac, between Docker containers, or just when connecting the  DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
-    app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1
+Clean a single test database:
+
+    app-scripts/clean-test-db.sh
 
 ### Running tests against AWS APIs
 
@@ -318,9 +320,10 @@ For faster testing, _parallel_tests_ provides parallelization of Rspec, although
 
 The following will create a set of test databases for the number of processor cores on your machine:
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+ On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
+
+Create drop and create the databasees:
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
@@ -340,11 +343,15 @@ To review failed results:
 
     less -r tmp/failing_specs.log
 
+This will also list a set of rerun tests, which may subsequently pass. To rerun them again:
+
+  app-script/retest_failed_parallel_test.sh
+
 The easiest way to deal with migrations is to drop the test database and recreate.
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
+
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
