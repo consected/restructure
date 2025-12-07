@@ -1,0 +1,6 @@
+<div class="dynamic-details-section">
+<% if object_instance.persisted? %>
+  <h4>Include with</h4>
+  <pre><code># @library <%=object_instance.category%> <%=object_instance.name%></code></pre>
+<% end %>
+</div>

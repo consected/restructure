@@ -10,7 +10,7 @@ module Redcap
 
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
-                  :current_admin, :retrieved_files, :upserted_records, :imported_files,
+                  :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
@@ -32,6 +32,7 @@ module Redcap
       self.retrieved_files = {}
       self.upserted_records = []
       self.imported_files = []
+      self.failed_files = []
       self.step_count = UpdateJobRequestEvery
       self.survey_identifier_field_name = project_admin.survey_identifier_field.to_sym
       self.integer_survey_identifier_field_name = project_admin.integer_survey_identifier_field.to_sym
@@ -173,7 +174,6 @@ module Redcap
       overlapping_fields = records.first.keys & model.attribute_names.map(&:to_sym)
       unless overlapping_fields.length == records.first.keys.length
         missing_fields = records.first.keys - model.attribute_names.map(&:to_sym)
-        puts "#{missing_fields.join(' ')}"
         raise FphsException, "Redcap::DataRecords::ModelMissingFields retrieved record fields are not present in the model:\n" \
                              "#{missing_fields.join(' ')}"
       end
@@ -182,7 +182,7 @@ module Redcap
       # for completeness of the retrieved records, since the API offers
       # no way of recognizing which forms have surveys available and would
       # therefore return a _timestamp field when completed.
-      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| "#{f}_timestamp".to_sym }
+      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| :"#{f}_timestamp" }
       expected_minus_form_timestamps = all_data_dictionary_fields.keys - timestamp_fields
       records.each do |r|
         actual_fields_minus_timestamps = r.keys - timestamp_fields
@@ -234,7 +234,7 @@ module Redcap
       from = 0
       step = step_count
 
-      (records.length / step + 1).times do
+      ((records.length / step) + 1).times do
         subset = records[from, step]
         self.upserted_records = []
         subset.each do |record|
@@ -549,8 +549,9 @@ module Redcap
           msg = "Failed to retrieve or import REDCap file for record: #{record_id} - field name: #{field_name} - with user: #{current_user.email}.\n#{e}"
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
+          failed_files << { record_id:, field_name:, error: e.message }
           record.update_column(field_name, nil)
-          raise
+          # Continue processing other files instead of raising
         ensure
           temp_file&.close
           temp_file&.unlink
@@ -618,6 +619,7 @@ module Redcap
         table: project_admin.dynamic_model_table,
         errors:,
         imported_files_count: imported_files&.length,
+        failed_files_count: failed_files&.length,
         job: job&.id
       }
 
