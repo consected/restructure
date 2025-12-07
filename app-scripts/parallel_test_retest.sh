@@ -27,6 +27,10 @@ echo "Retesting: ${retest}"
 echo "bundle exec rspec -f d $retest"
 bundle exec rspec -f d $retest
 res=$?
+if [ "$QUIETLY" == "true" ]; then
+  exit $res
+fi
+
 echo "Retested: ${retest}"
 echo "Retested: ${retest}" >> tmp/failing_specs.log
 if [ $res != 0 ]; then
