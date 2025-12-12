@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.38.2] - 2025-12-12
+
 - [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
 - [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
 - [Changed] database setup for better testing
