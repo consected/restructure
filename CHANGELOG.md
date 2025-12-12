@@ -14,6 +14,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
+- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
+- [Changed] database setup for better testing
+- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
+- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
+- [Added] Redcap transfer to include failed files count - resolves #648
+- [Added] more information when the save trigger add_tracker fails for some reason - fixes #280
+- [Fixed] deprecation warnings for SCSS files - fixes #669
+- [Added] brakeman ignore entry
+- [Fixed] parallel_test script issue
+- [Added] test fixes and new scripts for improved automation support
+- [Fixed] more test scripts for automation
+- [Fixed] test scripts
+
 ## [9.38.1] - 2025-12-03
 
 - [Build] Viva version

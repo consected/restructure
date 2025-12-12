@@ -2,6 +2,7 @@
 
 class ConditionalActions
   include CalcActions::Calculate
+
   attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config
 
   def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil, return_this: nil,
@@ -37,20 +38,6 @@ class ConditionalActions
     @action_conf = { all: @action_conf }
     do_calc_action_if
     this_val
-  end
-
-  # If the condition supplied is a Hash, attempt to calculate the result_value
-  # Otherwise just return the provided value
-  # @param cond [Hash | Class] A condition definition with a result_value defined, or just a literal value
-  # @param item [UserBase] An object to test against
-  def self.calc_field_or_return(cond, item)
-    if cond.is_a? Hash
-      action_conf = cond
-      ca = ConditionalActions.new action_conf, item
-      ca.get_this_val
-    else
-      cond
-    end
   end
 
   #

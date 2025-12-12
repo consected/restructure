@@ -118,7 +118,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
       sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
       sleep 0.5
-      find("\#master_player_infos_attributes_0_last_name").send_keys :tab
+      find('#master_player_infos_attributes_0_last_name').send_keys :tab
     end
 
     have_css '#advanced_search_master.ajax-running'
@@ -293,7 +293,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
       sleep 0.5
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
       sleep 0.5
-      find("\#master_player_infos_attributes_0_last_name").send_keys :tab
+      find('#master_player_infos_attributes_0_last_name').send_keys :tab
       sleep 0.5
       select protocol.name, from: 'master_trackers_attributes_0_protocol_id'
       sleep 0.5
@@ -380,6 +380,10 @@ describe 'tracker block', js: true, driver: $browser_driver do
     h = open_player_element items.first, items
     sleep 1
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}']" do
+      edit_link = find('a.edit-tracker', visible: :all, wait: 10)
+      # Scroll into view and click using JavaScript since element exists but may not be interactable
+      page.execute_script('arguments[0].scrollIntoView(true);', edit_link)
+      sleep 0.5
       click_link 'edit tracker record'
     end
 

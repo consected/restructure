@@ -75,6 +75,7 @@ The platform's core feature is runtime model generation from database configurat
 2. `after_save :generate_model` callback triggers class generation
 3. Runtime class created in `DynamicModel::` namespace (e.g., `DynamicModel::TestData`)
 4. Database migration auto-generated and run to create/update table
+   (NOTE: auto migrations are denied for the "ml_app" schema - spec tests should use the "dynamic_test" schema)
 5. Routes auto-generated via `DynamicModel.routes_reload`
 6. Master association added automatically: `has_many :dynamic_model__test_datas`
 
@@ -212,16 +213,74 @@ Key variables (see `app-scripts/get-aws-env-vars.sh`):
 
 ## Testing Approach
 
-- **RSpec**: Main test framework with parallel execution support
-- **Capybara**: Feature tests with Firefox/Geckodriver
-- **Database Cleaner**: Test isolation
-- Tests require Filestore mount setup: `app-scripts/setup-dev-filestore.sh`
+Background to the test framework and conventions:
 
-Test commands:
+- **RSpec**: Main test framework with parallel execution support
+- **Capybara**: Feature tests with Chrome by default, or Firefox/Geckodriver
+- **Database Cleaner**: Test isolation
+- **Model specs** must be produced to cover all new model logic
+- **Feature specs** should be produced for all new UI functionality
+- **Run `rspec` on new spec tests** after implementing new features to make sure they run
+
+If needed, clean the test database:
 ```bash
-IGNORE_MFA=true bundle exec rspec  # Skip AWS MFA
-app-scripts/parallel_test.sh       # Parallel execution
+app-scripts/clean-test-db.sh
 ```
+
+### Running tests
+Before running tests for the very first time after a reboot, set up the filestore simulation. Tests require Filestore mount setup once only after a system restart: 
+```bash
+app-scripts/setup-dev-filestore.sh
+```
+NOTE: this needs "sudo" to run, and although the Rspec suite attempts to run this automatically if required, it is best to run this manually once after a reboot to avoid test failures.
+
+Standard Rspec tests:
+```bash
+bundle exec rspec  # Run in headless mode
+```
+For non-headless (visible browser) feature tests:
+```bash
+NOT_HEADLESS=true bundle exec rspec  
+```
+Since these require a human developer to approve the run and review the actual browser output, this will slow the process of test and fixing significantly and should be reserved for final verification of feature tests only, or if a visual check is required.
+
+### Parallel test execution
+```bash
+app-scripts/parallel_test.sh
+```
+NOTE: the full test suite is slow, so only run when a full coverage test is required! Add arguments for spec paths if required.
+
+The results are found in tmp/failing_specs.log or on the console. Any issues are reported by the final section after the "Retesting" of any failures has completed.
+
+To rerun only the failed tests from the last parallel test run:
+```bash
+app-scripts/retest_failed_parallel_tests.sh
+```
+
+### Rspec feature test tips
+
+To avoid 2FA logins blocking tests, the following settings are recommended in test setup (in `before(:all)` block):
+```ruby
+change_setting('TwoFactorAuthDisabledForUser', true)
+change_setting('TwoFactorAuthDisabledForAdmin', true)
+```
+
+Never click on elements programmatically using Javascript if they may not be interactable. Instead, use JavaScript to scroll them into view first:
+```ruby
+edit_link = find('a', text: 'edit tracker record')
+page.execute_script('arguments[0].scrollIntoView(true);', edit_link)
+sleep 0.5  # Allow time for scrolling
+```
+Then click the link:
+```ruby
+click_link 'edit tracker record'
+```
+
+Attempt to follow the real user / admin flow through the UI as much as possible, avoiding direct model manipulation except for setup/teardown. Avoid using `visit` to go directly to pages that would not normally be accessible through the UI flow. 
+
+Any "edit" button represented by a glyphicon should be clicked in the UI rather than visiting the edit URL directly. These buttons typically have the HTML class something like: "edit-entity glyphicon glyphicon-pencil".
+
+Any link or button that has the HTML attribute `data-remote="true"` (which may appear in a Rails helper like `<%= link_to ..., remote: true %>`) should be clicked in the UI rather than visiting the URL directly. This is because these links typically perform AJAX requests that update parts of the page dynamically.
 
 ## Integration Points
 
@@ -239,6 +298,13 @@ app-scripts/parallel_test.sh       # Parallel execution
 - Token-based API authentication via `simple_token_authentication`
 - RESTful endpoints following Rails conventions
 - Configurable API access controls
+
+### Code Style
+- Always format files using the default VSCode formatter (Ruby-LSP is set to use Rubocop)
+- Use modern Ruby syntax 
+  - safe navigation
+  - keyword arguments
+  - omit values in Hash literals and method call keys with variables matching keys
 
 ## Common Gotchas
 
