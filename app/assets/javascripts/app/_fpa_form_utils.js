@@ -45,7 +45,7 @@ _fpa.form_utils = {
             fn = fn || '';
             v = fn + ' ' + v;
           }
-          var el = $('<p class="help-block error-help">' + v + '</p>');
+          var el = $(`<p class="help-block error-help" data-error-key="${p.underscore()}">${v}</p>`);
           $field.append(el);
           delete obj[p];
           obj.Form = 'has errors. Check the highlighted fields.';

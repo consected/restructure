@@ -171,7 +171,7 @@
       <ul class="list-group" data-item-id="<%= form_object_instance.id %>">
         <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
-          <h4 class="list-group-item-heading"><%=caption%></h4>
+          <h4 class="list-group-item-heading edit-form-heading--<%=caption.id_hyphenate%>"><%=caption%></h4>
           <%
              rfl = object_instance.referenced_from.length
              if rfl > 1
