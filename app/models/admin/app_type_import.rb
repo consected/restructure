@@ -43,10 +43,12 @@ class Admin
     end
 
     def self.import_in_progress?
+      @@import_config_in_progress ||= nil
       @@import_config_in_progress == true
     end
 
     def self.prevent_migrations?
+      @@prevent_migrations ||= nil
       @@prevent_migrations == true
     end
 
