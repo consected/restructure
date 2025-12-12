@@ -44,8 +44,10 @@ module StandardAuthentication
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
-      return Settings::TwoFactorAuthDisabledForUser if self == User
-      return Settings::TwoFactorAuthDisabledForAdmin if self == Admin
+      # Compare class names rather than actual classes, to avoid issues
+      # during testing or server resets when class identities seem to change
+      return Settings::TwoFactorAuthDisabledForUser if name == 'User'
+      return Settings::TwoFactorAuthDisabledForAdmin if name == 'Admin'
 
       nil
     end
@@ -74,7 +76,7 @@ module StandardAuthentication
       res = (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
       if !res || res.length < 32
         raise FphsException, "otp_enc_key is either nil or less than 32 characters (#{res&.length})" \
-          'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
+                             'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
       end
       res
     end
