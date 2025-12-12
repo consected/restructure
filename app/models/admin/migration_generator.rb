@@ -669,13 +669,12 @@ class Admin::MigrationGenerator
     cname = nil
     version ||= migration_version
     cname_us = "#{mode}_#{name}_#{version}"
-    while Dir.glob("#{migtime}*", base: dirname).length > 0 || Dir.glob("#{version}*", base: dirname).length > 0
+    raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
+
+    while Dir.glob("#{migtime}*", base: dirname).length > 0
       sleep 1.5
-      raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
 
       migtime = Time.new.to_fs(:number)
-      version = migration_version
-      cname_us = "#{mode}_#{name}_#{version}"
     end
 
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
@@ -757,7 +756,7 @@ class Admin::MigrationGenerator
   #
   # Set a migration version timestamp
   def migration_version
-    @migration_version ||= DateTime.now.to_i.to_s(36)
+    @migration_version ||= (Time.now.to_f * 100_000).to_i.to_s(36)
   end
 
   #
