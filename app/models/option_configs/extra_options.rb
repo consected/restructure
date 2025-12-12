@@ -1007,7 +1007,10 @@ module OptionConfigs
       loaded_config.each_key do |k|
         next unless k.to_s.start_with? keys_start_with
 
-        options.merge!(loaded_config.delete(k))
+        merge_hash = loaded_config.delete(k)
+        next unless merge_hash.is_a? Hash
+
+        options.merge!(merge_hash)
       end
       options
     end
