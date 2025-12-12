@@ -710,6 +710,11 @@ class Admin::MigrationGenerator
   #
   # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
+    if Admin::AppTypeImport.prevent_migrations?
+      Rails.logger.warn 'Migrations prevented by Admin::AppTypeImport - skipping migration'
+      return
+    end
+
     unless allow_migrations && db_migration_schema != DefaultMigrationSchema
       Rails.logger.warn "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
       return
@@ -722,10 +727,6 @@ class Admin::MigrationGenerator
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
           self.class.migration_context(db_migration_dirname).migrate
-          # Don't dump until a build, otherwise differences in individual development environments
-          # force unnecessary and confusing commits
-          # pid = spawn('bin/rails db:schema:dump')
-          # Process.detach pid
         end
       end.join
     end
@@ -846,6 +847,8 @@ class Admin::MigrationGenerator
   # Content for a migration to create a schema
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
+
+    raise FphsException, "No schema owner provided for schema #{schema_name}" unless owner.present?
 
     <<~CONTENT
       require 'active_record/migration/app_generator'

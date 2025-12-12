@@ -23,7 +23,10 @@ class Admin
     #                             end. A restart of the server should be forced to ensure consistency of state and DB
     # @return [Array] an array on [app_type, results]
     def self.import_config(config_text, admin,
-                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil)
+                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
+                           prevent_migrations: false)
+      @@import_config_in_progress = true
+      @@prevent_migrations = prevent_migrations
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -34,6 +37,17 @@ class Admin
       importer.do_import_config
     rescue StandardError, FphsException => e
       [importer, e]
+    ensure
+      @@import_config_in_progress = false
+      @@prevent_migrations = false
+    end
+
+    def self.import_in_progress?
+      @@import_config_in_progress == true
+    end
+
+    def self.prevent_migrations?
+      @@prevent_migrations == true
     end
 
     #
