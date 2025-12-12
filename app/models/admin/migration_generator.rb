@@ -191,6 +191,13 @@ class Admin::MigrationGenerator
     res.to_a
   end
 
+  def self.schemas_in_db
+    res = connection.execute <<~END_SQL
+      SELECT schema_name FROM information_schema.schemata;
+    END_SQL
+    res.map { |r| r['schema_name'] }
+  end
+
   #
   # Returns a list of foreign key definitions for all tables in the search path.
   # Returns an array of hashes that link source and target:
@@ -655,18 +662,20 @@ class Admin::MigrationGenerator
   def write_db_migration(mig_text, name, version = nil, mode: 'create', export_type: nil)
     return unless allow_migrations
 
-    version ||= migration_version
-
     dirname = db_migration_dirname export_type
-    cname_us = "#{mode}_#{name}_#{version}"
 
-    raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
-
-    # Ensure we don't get overlapping migration version numbers
+    # Ensure we don't get overlapping migration version numbers or class names
     migtime = Time.new.to_fs(:number)
-    while Dir.glob("#{migtime}*", base: dirname).length > 0
+    cname = nil
+    version ||= migration_version
+    cname_us = "#{mode}_#{name}_#{version}"
+    while Dir.glob("#{migtime}*", base: dirname).length > 0 || Dir.glob("#{version}*", base: dirname).length > 0
       sleep 1.5
+      raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
+
       migtime = Time.new.to_fs(:number)
+      version = migration_version
+      cname_us = "#{mode}_#{name}_#{version}"
     end
 
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"

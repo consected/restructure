@@ -91,7 +91,7 @@ module Dynamic
       raise FphsException, "Use a plural table name: #{table_name}" if table_name.singularize == table_name
 
       gs = migration_generator.generator_script(self.class)
-      migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
+      migration_generator.write_db_migration(gs, table_name)
       run_migration
     end
 
@@ -169,7 +169,7 @@ module Dynamic
 
       mode = 'update'
       gs = migration_generator.generator_script(self.class, mode)
-      fn = migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version, mode:)
+      fn = migration_generator.write_db_migration(gs, table_name, mode:)
       @do_migration = fn
     end
 
@@ -184,7 +184,7 @@ module Dynamic
       mg.app_type_name = app_type_name
       mode = 'create_or_update'
       gs = mg.generator_script(self.class, mode)
-      mg.write_db_migration(gs, table_name, mg.migration_version, mode:, export_type:)
+      mg.write_db_migration(gs, table_name, mode:, export_type:)
     end
 
     #
