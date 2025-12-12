@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 module FeatureHelper
+  def scroll_into_view(element)
+    page.execute_script('arguments[0].scrollIntoView(true);', element)
+  end
+
   def scroll_to(el_selector, options = {})
     options[:check_it] = true if options[:check_it].nil?
 
+    puts "FeatureHelper#scroll_to: Scrolling to #{el_selector}"
     if all(el_selector).present?
 
       run_script = "document.querySelectorAll('#{el_selector.gsub("'", '"')}')[0].scrollTop += 100;"
