@@ -799,7 +799,7 @@ module FeatureSupport
   def puts_modals
     puts_debug 'Modals visible:'
     results = []
-    all('.modal.in', wait: false, visible: true, wait: 0).each do |m|
+    all('.modal.in', wait: false, visible: true).each do |m|
       res = {}
       res[:id] = m[:id]
       res[:title] = res.find('.modal-title')
