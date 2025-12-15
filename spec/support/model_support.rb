@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seed_support"
-require "#{::Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seed_support"
+require "#{Rails.root}/spec/support/user_support"
 
 module ModelSupport
   include ::UserSupport

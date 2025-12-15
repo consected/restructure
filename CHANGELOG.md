@@ -14,6 +14,25 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva
+
+- [Added] support for cleaner feature spec testing
+- [Added] links to directories for environment specific specs
+- [Added] developer and AI agent documentation to support test development
+- [Added] ability to RUN_APP_SPECS, keeping environment specific acceptance tests outside core
+- [Fxied] regression around avoiding duplicated migration names
+- [Fixed] regression due to not initializing class variables
+- [Changed] handling of dynamically generated migrations to avoid duplications
+- [Fixed] issue with empty `_default...:` options
+- [Added] test to protect essential models from being removed
+- [Added] more markup for automated tests
+- [Fixed] 2FA authentication disabled check edge case
+- [Changed] handling of schema ownership to only be applied in production, to allow effective testing
+- [Changed] error reporting level when SQL fails in a report
+- [Added] scripts to assist automated test runs
+- [Changed] app type imports to improve reliability and reporting of errors
+- [Added] UI markup to assist with automated tests
+
 ## [9.38.2] - 2025-12-12
 
 - [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
