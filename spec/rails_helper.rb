@@ -275,13 +275,7 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
-  unless ENV['RUN_APP_SPECS'] == 'true'
-    config.exclude_pattern = 'spec/support/apps/**/*.rb'
-    config.exclude_pattern = 'spec/features/apps/**/*.rb'
-  end
-  # config.define_derived_metadata(file_path: escaped_path) do |metadata|
-  #             metadata[:type] ||= type
-  #           end
+  config.exclude_pattern = 'spec/features/apps/**/*.rb,spec/support/apps/**/*.rb' unless ENV['RUN_APP_SPECS'] == 'true'
 
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
