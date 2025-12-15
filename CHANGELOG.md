@@ -14,10 +14,48 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From Viva
+
+- [Added] support for cleaner feature spec testing
+- [Added] links to directories for environment specific specs
+- [Added] developer and AI agent documentation to support test development
+- [Added] ability to RUN_APP_SPECS, keeping environment specific acceptance tests outside core
+- [Fxied] regression around avoiding duplicated migration names
+- [Fixed] regression due to not initializing class variables
+- [Changed] handling of dynamically generated migrations to avoid duplications
+- [Fixed] issue with empty `_default...:` options
+- [Added] test to protect essential models from being removed
+- [Added] more markup for automated tests
+- [Fixed] 2FA authentication disabled check edge case
+- [Changed] handling of schema ownership to only be applied in production, to allow effective testing
+- [Changed] error reporting level when SQL fails in a report
+- [Added] scripts to assist automated test runs
+- [Changed] app type imports to improve reliability and reporting of errors
+- [Added] UI markup to assist with automated tests
+
+## [9.38.2] - 2025-12-12
+
+- [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
+- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
+- [Changed] database setup for better testing
+- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
+- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
+- [Added] Redcap transfer to include failed files count - resolves #648
+- [Added] more information when the save trigger add_tracker fails for some reason - fixes #280
+- [Fixed] deprecation warnings for SCSS files - fixes #669
+- [Added] brakeman ignore entry
+- [Fixed] parallel_test script issue
+- [Added] test fixes and new scripts for improved automation support
+- [Fixed] more test scripts for automation
+- [Fixed] test scripts
+
+## [9.38.1] - 2025-12-03
+
+- [Build] Viva version
+
 ## [9.38.0] - 2025-12-03
 
 - [Updated] CHANGELOG.md with git commits
-
 
 ## [9.37.0] - 2025-12-03
 
