@@ -285,10 +285,10 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
       expect(page).to have_css('table', wait: 10)
 
       # Should see job for first dynamic model
-      expect(page).to have_css('table tr', text: job1.id.to_s)
+      expect(page).to have_content(job1.id.to_s)
 
-      # Should NOT see job for second dynamic model (check within table rows only)
-      expect(page).not_to have_css('table tbody tr', text: /\A\s*#{Regexp.escape(job2.id.to_s)}\s/)
+      # Should NOT see job for second dynamic model
+      expect(page).not_to have_content(job2.id.to_s)
     end
 
     # Now test the second dynamic model
@@ -324,10 +324,10 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
       expect(page).to have_css('table', wait: 10)
 
       # Should see job for second dynamic model
-      expect(page).to have_css('table tr', text: job2.id.to_s)
+      expect(page).to have_content(job2.id.to_s)
 
-      # Should NOT see job for first dynamic model (check within table rows only)
-      expect(page).not_to have_css('table tbody tr', text: /\A\s*#{Regexp.escape(job1.id.to_s)}\s/)
+      # Should NOT see job for first dynamic model
+      expect(page).not_to have_content(job1.id.to_s)
     end
   ensure
     # Always restore the original delay_jobs setting

@@ -1,7 +1,8 @@
 <h4>Files</h4>
 <div id="admin-filestore-block-<%= object_instance.id %>">
 </div>
-<% if current_user.app_type&.name != 'ref-data' %>
+<%  cuat = current_user&.app_type || current_admin&.matching_user_app_type
+    if cuat&.name != 'ref-data' %>
 <p>The user must 
   <%= link_to "switch to the <b>Ref Data</b>".html_safe, 
               redcap_project_admins_path(

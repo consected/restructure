@@ -23,7 +23,7 @@ function setup() {
   cd "$(dirname "${BASEDIR}")" || return
 
   if [ "${USE_PG_HOST}" ] || [ "${USE_PG_UNAME}" ]; then
-    USE_PG_UNAME=${USE_PG_UNAME:=postgres}
+    export USE_PG_UNAME=${USE_PG_UNAME:=postgres}
     PSQL_ARGS="-U ${USE_PG_UNAME}"
     if [ "${USE_PG_HOST}" ]; then
       PSQL_ARGS="${PSQL_ARGS} -h ${USE_PG_HOST}"

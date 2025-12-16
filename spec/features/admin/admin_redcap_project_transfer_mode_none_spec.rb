@@ -15,8 +15,9 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     @admin = Admin.find(@admin.id)
     @good_password = @admin.generate_password
     @admin.save!
-    # Don't require 2FA for this admin since we disabled it in settings
-    @admin.otp_required_for_login = false
+    @admin.otp_secret = Admin.generate_otp_secret
+    @admin.otp_required_for_login = true
+    @admin.new_two_factor_auth_code = false
     @admin.save!
 
     @good_password
@@ -40,8 +41,17 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
       click_button 'Log in'
     end
 
-    # Since 2FA is disabled, we should be signed in directly
-    expect(page).to have_css('.flash .alert', text: 'Signed in successfully.', wait: 10)
+    # Enter 2FA code
+    expect(page).to have_selector('.login-2fa-block', visible: true)
+    expect(page).to have_selector('#new_admin', visible: true)
+    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
+
+    within '#new_admin' do
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
+    end
+
+    expect(page).to have_css('.flash .alert', text: 'Signed in successfully.')
   end
 
   def create_admin_matching_user
@@ -64,26 +74,16 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     expect(@admin.matching_user.app_type).not_to be_nil
     expect(@admin.matching_user).to eq user
 
-    # Ensure admin's matching user is reloaded and properly associated
-    @admin.reload
-    expect(@admin.matching_user).not_to be_nil
-    expect(@admin.matching_user.app_type).not_to be_nil
-
     user
   end
 
   before(:example) do
-    SetupHelper.feature_setup
-    change_setting('TwoFactorAuthDisabledForAdmin', true)
-    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('TwoFactorAuthDisabledForUser', false)
 
     make_an_admin
+    setup_redcap_project_admin_configs
     create_admin_matching_user
-    @projects = setup_redcap_project_admin_configs
-
-    # Close any extra windows from previous tests
-    windows.last.close while windows.length > 1 if respond_to?(:windows)
-
     admin_sign_in_with_2fa
   end
 
@@ -95,17 +95,9 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     project.frequency = nil
     project.save!
 
-    # Ensure file store exists
-    project.create_file_store unless project.file_store
-    project.reload
-
-    project_id = project.id
-
-    # Navigate directly to the REDCap Project Admins page
-    visit '/redcap/project_admins'
-
-    # Wait for the projects list to load
-    expect(page).to have_content(project.name, wait: 10)
+    # Navigate to the project edit page
+    visit "/admin/redcap/project_admins?filter[id]=#{project.id}&perform_action=edit"
+    expect(page).to have_content(project.name)
 
     # Check that the actions block is not visible
     expect(page).not_to have_css('.project-admin-actions-block')
@@ -124,37 +116,15 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     project.current_admin = @admin
     project.transfer_mode = 'scheduled'
     project.frequency = '1 hour'
-    project.disabled = false
     project.save!
 
-    # Ensure file store exists
-    project.create_file_store unless project.file_store
-    project.reload
-
-    # Verify the project settings
-    expect(project.transfer_mode).to eq('scheduled')
-    expect(project.enabled?).to be true
-
-    project_id = project.id
-
-    # Navigate directly to the REDCap Project Admins page
-    visit '/redcap/project_admins'
-
-    # Wait for the projects list to load
-    expect(page).to have_css("#admin-item-#{project_id}", wait: 10)
-
-    # Click the edit button for this project
-    within "#admin-item-#{project_id}" do
-      find('a.edit-entity.glyphicon-pencil').click
-    end
-
-    # Wait for the edit form to load
-    expect(page).to have_content(project.name, wait: 10)
+    # Navigate to the project edit page
+    visit "/admin/redcap/project_admins?filter[id]=#{project.id}&perform_action=edit"
+    expect(page).to have_content(project.name)
 
     # Check that the actions block is visible
     expect(page).to have_css('.project-admin-actions-block')
-    # NOTE: Specific action links only appear if dynamic_model_ready? is true
-    # The presence of the action block itself indicates transfer_mode is not 'none'
+    expect(page).to have_link('retrieve user list')
   end
 
   it 'shows action buttons when transfer_mode is "manual"' do
@@ -162,37 +132,15 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     project.current_admin = @admin
     project.transfer_mode = 'manual'
     project.frequency = nil
-    project.disabled = false
     project.save!
 
-    # Ensure file store exists
-    project.create_file_store unless project.file_store
-    project.reload
-
-    # Verify the project settings
-    expect(project.transfer_mode).to eq('manual')
-    expect(project.enabled?).to be true
-
-    project_id = project.id
-
-    # Navigate directly to the REDCap Project Admins page
-    visit '/redcap/project_admins'
-
-    # Wait for the projects list to load
-    expect(page).to have_css("#admin-item-#{project_id}", wait: 10)
-
-    # Click the edit button for this project
-    within "#admin-item-#{project_id}" do
-      find('a.edit-entity.glyphicon-pencil').click
-    end
-
-    # Wait for the edit form to load
-    expect(page).to have_content(project.name, wait: 10)
+    # Navigate to the project edit page
+    visit "/admin/redcap/project_admins?filter[id]=#{project.id}&perform_action=edit"
+    expect(page).to have_content(project.name)
 
     # Check that the actions block is visible
     expect(page).to have_css('.project-admin-actions-block')
-    # NOTE: Specific action links only appear if dynamic_model_ready? is true
-    # The presence of the action block itself indicates transfer_mode is not 'none'
+    expect(page).to have_link('retrieve user list')
   end
 
   it 'displays transfer mode status correctly for "none"' do
@@ -201,28 +149,11 @@ describe 'admin REDCap project with transfer mode "none"', js: true, driver: $br
     project.transfer_mode = 'none'
     project.save!
 
-    # Ensure file store exists
-    project.create_file_store unless project.file_store
-    project.reload
-
-    project_id = project.id
-
-    # Navigate directly to the REDCap Project Admins page
-    visit '/redcap/project_admins'
-
-    # Wait for the projects list to load
-    expect(page).to have_css("#admin-item-#{project_id}", wait: 10)
-
-    # Click the edit button for this project
-    within "#admin-item-#{project_id}" do
-      find('a.edit-entity.glyphicon-pencil').click
-    end
-
-    # Wait for the edit form to load
-    expect(page).to have_content(project.name, wait: 10)
+    visit "/admin/redcap/project_admins?filter[id]=#{project.id}&perform_action=edit"
+    expect(page).to have_content(project.name)
 
     # Check that transfer mode displays as "none"
-    expect(page).to have_content('Transfer mode')
+    expect(page).to have_content('pull schedule')
     expect(page).to have_content('none')
   end
 end

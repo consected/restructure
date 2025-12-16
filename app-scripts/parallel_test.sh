@@ -4,13 +4,30 @@
 # NO_CLEAN_DB: If set to 'true', the script will skip cleaning the test database.
 # NO_BRAKEMAN: If set to 'true', the script will skip running Brakeman security analysis.
 # SKIP_BRAKEMAN: equivalent to NO_BRAKEMAN. 
+# SUDO_POSTGRES: If set, the script will use sudo (as postgres) to clean the database.
+# USE_PG_UNAME: If set, the script will use this database user to connect to PostgreSQL when cleaning the database.
 # USE_PG_HOST: If set, the script will not use sudo to clean the database, and will connect to the specified PostgreSQL host via a TCP port.
 # SKIP_ZEITWERK: If set to 'true', the script will skip checking Zeitwerk.
 # PARALLEL_TEST_PROCESSORS: Number of parallel processes to use for running tests. Defaults to number of CPU cores.
+#
+# NOTE: if running without SUDO_POSTGRES, the Postgres user must have the following permission attributes:
+# - CREATEDB
+# - CREATEROLE
+# - LOGIN
+# These can be set by a Postgres superuser with the command:
+# ALTER USER <username> WITH CREATEDB CREATEROLE LOGIN;
+
 
 BROWSER=${BROWSER:-chrome}
+export USE_PG_UNAME=${USE_PG_UNAME:=$(whoami)}
+if [ "${SUDO_POSTGRES}" ]; then
+  unset USE_PG_UNAME
+fi
+
 
 if [ "${RUN_RESTESTS}" == 'true' ]; then
+  $(dirname $0)/clean-test-db.sh
+  echo "Running retest for failed specs"
   $(dirname $0)/parallel_test_retest.sh
   exit $?
 fi
@@ -23,7 +40,7 @@ echo > tmp/working_failing_specs.log
 unset QUICK
 unset RUBY_DEBUG_OPEN
 
-if [ ! "${USE_PG_HOST}" ] && [ "${NO_CLEAN_DB}" != 'true' ]; then
+if [ ! "${USE_PG_HOST}" ] && [ ! "${USE_PG_UNAME}" ]&& [ "${NO_CLEAN_DB}" != 'true' ]; then
   echo "sudo is required to clean the database. Enter your password if prompted"
   if ! sudo whoami; then
     echo "Failed to get sudo"
@@ -130,6 +147,8 @@ echo "Finished at $(date)" >> tmp/failing_specs.log
 
 if [ -f tmp/parallel_specs_failed.txt ]; then
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
+  $(dirname $0)/clean-test-db.sh
+  echo "Running retest for failed specs"
   $(dirname $0)/parallel_test_retest.sh
 else
   echo "All parallel specs passed."
