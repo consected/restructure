@@ -16,6 +16,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ### From Viva
 
+- [Fixed] file exclusion for rspec
+- [Updated] CHANGELOG
+- [Fixed] duplicated arguments in calling method
 - [Added] support for cleaner feature spec testing
 - [Added] links to directories for environment specific specs
 - [Added] developer and AI agent documentation to support test development
