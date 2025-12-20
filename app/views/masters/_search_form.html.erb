@@ -18,7 +18,7 @@
           add_class = (is_default ? 'is_default_report' : 'collapsed')
           add_class += ' prevent-list-collapse' if r.report_options.view_options.prevent_collapse_for_list
       %>
-        <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse  search-selector-btn <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.alt_resource_name%> .searchable-report" data-target="#master-report-<%=r.alt_resource_name%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.alt_resource_name%>" id="expand-searchable-report-<%=r.alt_resource_name%>" ><%=r.name%></a>
+        <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse  search-selector-btn <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-report-resource-name="<%=r.alt_resource_name%>" data-result-target="#master-report-<%=r.alt_resource_name%> .searchable-report" data-target="#master-report-<%=r.alt_resource_name%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.alt_resource_name%>" id="expand-searchable-report-<%=r.alt_resource_name%>" ><%=r.name%></a>
       <% end %>
     <% end %>
   </div>

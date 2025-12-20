@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seeds"
+require "#{Rails.root}/spec/support/seeds"
 require './db/table_generators/external_identifiers_table'
 
 $STARTED_AT = DateTime.now.to_i
@@ -118,7 +118,7 @@ module SetupHelper
     puts 'DB validation'
 
     # Ensure we are set up for this test
-    pgpass = File.read("#{ENV['HOME']}/.pgpass")
+    pgpass = File.read("#{ENV.fetch('HOME', nil)}/.pgpass")
     res = pgpass.include?(db_name) || pgpass.include?('localhost:5432:*')
     raise ".pgpass does not contain entry for database #{db_name}" unless res
 
@@ -261,7 +261,7 @@ module SetupHelper
       process_name:,
       disabled: false,
       action_when_attribute: 'called_when',
-      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,'\
+      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,' \
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
@@ -293,7 +293,7 @@ module SetupHelper
     cname.constantize
   rescue StandardError, FphsException => e
     raise "Failed to setup gen test (#{name}, #{process_name}, #{item_type}, #{rec_type}) " \
-      "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
+          "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
   end
 
   def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil, created_by: nil, assign_access: nil, add_disabled: nil)
@@ -404,6 +404,10 @@ module SetupHelper
     res = res.to_a
   end
 
+  def self.spec_tally_names
+    check_spec_db.map { |r| r['name'] }
+  end
+
   def self.add_to_spec_db(name, updated_at: Time.now)
     res = ActiveRecord::Base.connection.execute("insert into #{SpecTallyTable} (name, updated_at) values ('#{name}', '#{updated_at}');")
   end
@@ -455,5 +459,24 @@ module SetupHelper
       puts '=============================================='
       puts
     end
+  end
+
+  #
+  # Run extra setups in environment specific "sourced" specs
+  # @return [<Type>] <description>
+  def self.run_extra_setups
+    @@extra_setups ||= []
+    @@extra_setups.each do |setup_proc|
+      puts 'Running extra setup...'
+      setup_proc.call
+    end
+  end
+
+  #
+  # Add a block to be run as part of extra setups from environment specific "sourced" specs
+  # @param [Lambda] block - to be run later
+  def self.add_to_extra_setups(block)
+    @@extra_setups ||= []
+    @@extra_setups << block
   end
 end

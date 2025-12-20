@@ -380,7 +380,7 @@ class Admin
       return true if self.class.active.where(default_schema_name:).count > 1
 
       migration_generator = Admin::MigrationGenerator.new(default_schema_name)
-      migration_generator.add_schema
+      migration_generator.add_schema unless Admin::MigrationGenerator.schemas_in_db.include?(default_schema_name)
     end
 
     #

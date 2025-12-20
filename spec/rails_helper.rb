@@ -74,10 +74,9 @@ if ENV['QUICK'] == 'true'
 else
   put_now 'check_spec_db for skips'
   # Use a database table to track creations in the test db
-  res = SetupHelper.check_spec_db
-  names = res.map { |r| r['name'] }
-  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
+  spec_tally_names = SetupHelper.spec_tally_names
+  ENV['SKIP_DB_SETUP'] = 'true' if spec_tally_names.include?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if spec_tally_names.include?('app_setup')
 end
 
 put_now 'Require webmock'
@@ -116,6 +115,7 @@ SetupHelper.setup_nfs_directories
 put_now 'Devise and warden'
 require 'devise'
 include Warden::Test::Helpers
+
 Warden.test_mode!
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -131,7 +131,7 @@ SetupHelper.setup_full_test_db unless ENV['SKIP_DB_SETUP']
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
 
-  res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
+  res = `#{Rails.root}/app-scripts/setup-dev-filestore.sh`
   if res != "mountpoint OK\n"
     put_now res
     put_now 'Run app-scripts/setup-dev-filestore.sh and try again'
@@ -147,11 +147,12 @@ put_now 'Require more'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-require "#{::Rails.root}/spec/support/master_support.rb"
-require "#{::Rails.root}/spec/support/model_support.rb"
+require "#{Rails.root}/spec/support/master_support.rb"
+require "#{Rails.root}/spec/support/model_support.rb"
 SetupHelper.check_bhs_assignments_table
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec/support/apps/*/*.rb')].sort.each { |f| require f }
 SetupHelper.check_bhs_assignments_table
 unless ENV['SKIP_DB_SETUP']
   # Checks for pending migrations before tests are run.
@@ -190,6 +191,10 @@ unless ENV['SKIP_DB_SETUP']
   puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
 end
 
+SetupHelper.run_extra_setups if ENV['RUN_APP_SPECS'] == 'true'
+
+put_now 'RSpec configure'
+
 RSpec.configure do |config|
   config.before(:suite) do
     SetupHelper.check_bhs_assignments_table
@@ -197,7 +202,7 @@ RSpec.configure do |config|
     # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
     tue = Settings::TemplateUserEmail&.downcase
-    require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
+    require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
     tu = User.find_by(email: tue)
     Seeds::BUsers.setup if tu.nil?
 
@@ -240,13 +245,15 @@ RSpec.configure do |config|
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP'])
+    if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV.fetch('SKIP_APP_SETUP', nil))
+      Rake::Task['assets:precompile'].invoke
+    end
     put_now 'Done before suite'
   end
 
   put_now 'Fixtures'
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = ["#{::Rails.root}/spec/fixtures"]
+  config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -267,6 +274,8 @@ RSpec.configure do |config|
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
+
+  config.exclude_pattern = 'spec/features/apps/**/*.rb,spec/support/apps/**/*.rb' unless ENV['RUN_APP_SPECS'] == 'true'
 
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
