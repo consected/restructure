@@ -9,6 +9,7 @@ gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
 gem 'aws-sdk-sns', '~> 1'
 gem 'bootsnap'
+gem 'connection_pool', '< 3' # connection_pool 3.0 breaks MemCacheStore
 gem 'country_select', '~> 8.0'
 gem 'crass', '~> 1.0.4'
 gem 'csv'
