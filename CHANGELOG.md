@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.38.3] - 2025-12-21
+
 ### From Viva
 
 - [Fixed] file exclusion for rspec
