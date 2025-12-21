@@ -70,6 +70,12 @@ def auto_admin
   @admin
 end
 
+module Seeds
+  def self.auto_admin
+    Object.new.send(:auto_admin)
+  end
+end
+
 def log(txt)
   msg = "#{Time.now} #{txt}"
   $seed_results << msg

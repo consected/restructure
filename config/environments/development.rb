@@ -3,14 +3,14 @@ require 'active_support/core_ext/integer/time'
 Rails.application.configure do
   # Set log level to :info, :warn, :error, :fatal, or default to :debug
   config.log_level = ENV['FPHS_LOG_LEVEL'].presence&.to_sym || :debug
-  config.log_formatter = ::Logger::Formatter.new
+  config.log_formatter = Logger::Formatter.new
 
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded any time
   # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  config.enable_reloading = true
 
   # Do not eager load code on boot.
   config.eager_load = false

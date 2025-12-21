@@ -23,7 +23,7 @@ module Seeds
 
         other.each do |o|
           skip_ids << o.id
-          o.current_admin = auto_admin
+          o.current_admin = Seeds.auto_admin
           o.disabled = true
           done = o.save
           log "Disabled duplicate app config #{o.id}" if done

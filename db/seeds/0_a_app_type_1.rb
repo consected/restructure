@@ -9,7 +9,7 @@ module Seeds
       return if app_type&.enabled?
 
       if app_type&.disabled?
-        app_type.current_admin = auto_admin
+        app_type.current_admin = Seeds.auto_admin
         app_type.disabled = false
         app_type.save!
       end
@@ -22,7 +22,7 @@ module Seeds
         label: 'Zeus',
         disabled: false,
         default_schema_name: 'ml_app',
-        current_admin: auto_admin
+        current_admin: Seeds.auto_admin
       )
     end
 

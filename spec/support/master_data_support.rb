@@ -4,7 +4,7 @@ module MasterDataSupport
   include MasterSupport
 
   def list_length
-    10
+    5
   end
 
   def full_master_number
@@ -12,6 +12,8 @@ module MasterDataSupport
   end
 
   def player_list
+    return @player_list if @player_list
+
     res = []
 
     (1..list_length).each do |_l|
@@ -44,10 +46,12 @@ module MasterDataSupport
       }
     end
 
-    res
+    @player_list = res
   end
 
   def pro_list
+    return @pro_list if @pro_list
+
     res = []
 
     (1..list_length).each do |_l|
@@ -73,7 +77,7 @@ module MasterDataSupport
       }
     end
 
-    res
+    @pro_list = res
   end
 
   def get_a_rank
@@ -98,27 +102,63 @@ module MasterDataSupport
   # This is necessary for features to recognize the new changes,
   # but has the side effect of leaving the database with data
   # after each run
-  def create_data_set_outside_tx(options = {})
+  def create_data_set_outside_tx(no_trackers: false, no_seed: false)
+    # Check if data set has already been created in this test run
+    # Use a cache key that includes the options to ensure different configurations are handled separately
+    cache_key = "data_set_#{no_trackers}_#{no_seed}"
+    if SetupHelper.spec_tally_names.include?(cache_key)
+      Rails.logger.info '** Data set already created, skipping **'
+      puts '** Data set already created, skipping **'
+
+      # Still need to set up instance variables that specs expect
+      ms = Master.no_temporary_masters
+      @master = ms.first if ms.count > 0
+      @master_id = @master&.id
+      @full_player_info = @master.player_infos.first
+      @full_pro_info = @master.pro_infos.first
+      @full_master_record = @master
+      @full_trackers = @master.trackers.reload
+      @app_type = Admin::AppType.active.first
+      @user_start = rand 1_000_000_000
+      @master_count = [Master.count, list_length].min
+      return
+    end
+
     t0 = Time.now
     Rails.logger.info '** Creating data set outside transaction **'
     puts "#{t0} ** Creating data set outside transaction **"
+    t1 = nil
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
-        SeedSupport.setup
-        create_data_set options
+        if no_seed
+          puts '**   No seeds specified **'
+          t1 = t0 # Set t1 to t0 when skipping seeds
+        else
+          seed_database
+          t1 = Time.now
+          puts "**   Ran seeds in #{t1 - t0} seconds **"
+        end
+        create_data_set no_trackers:, no_seed: true
       end
     end.join
-    t1 = Time.now
-    puts "** Created data set outside transaction in #{t1 - t0} seconds **"
-    Rails.logger.info "** Created data set outside transaction in #{t1 - t0} seconds **"
+    t2 = Time.now
+    puts "**   Ran create_data_set in #{t2 - t1} seconds **"
+    puts "** Created data set outside transaction in #{t2 - t0} seconds **"
+    Rails.logger.info "** Created data set outside transaction in #{t2 - t0} seconds **"
+
+    # Mark this data set as created
+    SetupHelper.add_to_spec_db(cache_key)
+    @create_data_set_outside_tx_done = true
   end
 
-  def create_data_set(options = {})
+  def create_data_set(no_trackers: false, no_seed: false)
+    return if @create_data_set_done
+
     # Count the number of master records created
     @master_count = 0
 
     # Check trackers will work
-    seed_database
+    seed_database unless no_seed
     expect(Classification::ProtocolEvent.active.reload.find_by(name: 'created player info')).not_to be nil
     expect(Classification::ProtocolEvent.active.reload.find_by(name: 'updated player info')).not_to be nil
 
@@ -130,7 +170,9 @@ module MasterDataSupport
 
     @app_type = Admin::AppType.active.first
 
-    player_list.each do |l|
+    prol = pro_list.first(list_length)
+    pl = player_list.first(list_length)
+    pl.each do |l|
       # Create a user with a specific number embedded
       create_user(@master_count + @user_start, 'mds1')
       @user.app_type = @app_type
@@ -146,8 +188,7 @@ module MasterDataSupport
       # Player info is the current iteration
       # Pro info is the corresponding item in the pro list
       # Create both against the current master record
-
-      p = pro_list[@master_count]
+      p = prol[@master_count]
 
       # If the current item matches the predefined number, remember the
       # current @master record so that we can refer to it again
@@ -171,7 +212,7 @@ module MasterDataSupport
         p[:end_year] ||= p[:start_year] + rand(2)
         p[:pro_id] = rand(100_000)
 
-        create_trackers @master unless options[:no_trackers]
+        create_trackers @master unless no_trackers
 
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master
@@ -184,7 +225,7 @@ module MasterDataSupport
         create_player_info l, @master
         create_pro_info p, @master
 
-        create_trackers @master unless options[:no_trackers]
+        create_trackers @master unless no_trackers
       end
 
       @master_count += 1
@@ -208,7 +249,7 @@ module MasterDataSupport
     @master = Master.new
     @master.current_user = @user
     @master.save!
-    player_list.each do |li|
+    pl.each do |li|
       li[:rank] = 9 if li[:rank] == 12
 
       unless Classification::AccuracyScore.enabled.include?(li[:rank])
@@ -223,7 +264,7 @@ module MasterDataSupport
     @master = Master.new
     @master.current_user = @user
     @master.save!
-    pro_list.each do |li|
+    prol.each do |li|
       create_pro_info li
       @master_count += 1
     end

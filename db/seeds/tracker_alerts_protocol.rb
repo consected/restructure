@@ -4,18 +4,18 @@ module Seeds
     def self.add_values values, sub_process
       values.each do |v|
         res = sub_process.protocol_events.find_or_initialize_by(v)
-        res.update!(current_admin: auto_admin) unless res.admin
+        res.update!(current_admin: Seeds.auto_admin) unless res.admin
       end
     end
 
     def self.create_protocol_events
 
       protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Study')
-      protocol.current_admin = auto_admin
+      protocol.current_admin = Seeds.auto_admin
       protocol.position = 10
       protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Alerts')
-      sp.current_admin = auto_admin
+      sp.current_admin = Seeds.auto_admin
       sp.save!
 
       values = [
@@ -29,7 +29,7 @@ module Seeds
 
 
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Opt Out')
-      sp.current_admin = auto_admin
+      sp.current_admin = Seeds.auto_admin
       sp.save!
 
 

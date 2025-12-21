@@ -6,7 +6,7 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
 
-      admin = auto_admin
+      admin = Seeds.auto_admin
 
       log '- Handling ExternalIdentifier'
       ExternalIdentifier.active.each do |a|

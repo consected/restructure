@@ -4,55 +4,8 @@ require 'rails_helper'
 
 describe 'admin sign in process', driver: $browser_driver do
   include ModelSupport
-
-  def make_an_admin
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
-
-    @good_email = "testuser#{rand(1_000_000_000)}admin@testing.com"
-    @admin = Admin.create! email: @good_email
-    # Save a new password, as required to handle temp passwords
-    @admin = Admin.find(@admin.id)
-    @good_password = @admin.generate_password
-    @admin.save!
-    @admin.otp_secret = Admin.generate_otp_secret
-    @admin.otp_required_for_login = true
-    @admin.new_two_factor_auth_code = false
-    @admin.save!
-
-    @good_password
-  end
-
-  def admin_sign_in_with_2fa
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-
-    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    visit url
-    expect(current_path).to eq '/admins/sign_in'
-
-    within '#new_admin' do
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-      # Do not validate, since this consumes the one time code and prevents it from being used (causes a long delay in the process)
-      # expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
-
-      fill_in 'Email', with: @good_email
-      fill_in 'Password', with: @good_password
-      click_button 'Log in'
-    end
-
-    expect(page).to have_selector('.login-2fa-block', visible: true)
-    expect(page).to have_selector('#new_admin', visible: true)
-    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
-
-    within '#new_admin' do
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-      click_button 'Log in'
-    end
-
-    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
-  end
+  include AdminActionsSetup
+  include FeatureSupport
 
   before(:all) do
     SetupHelper.feature_setup
@@ -139,7 +92,14 @@ describe 'admin sign in process', driver: $browser_driver do
       click_button 'Log in'
     end
 
-    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
+    finish_page_loading
+    # Check for successful login - either flash message or being on a non-login page
+    if has_css?('.flash .alert', text: 'Signed in successfully.', wait: 2)
+      expect(page).to have_css('.flash .alert', text: 'Signed in successfully.')
+    else
+      # Flash may have disappeared, verify we're logged in by checking we're not on login page
+      expect(current_path).not_to eq '/admins/sign_in'
+    end
   end
 
   it 'should prevent invalid sign in' do

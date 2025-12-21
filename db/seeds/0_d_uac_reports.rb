@@ -18,7 +18,7 @@ module Seeds
           next unless rn.present?
 
           unless rn.include?('_')
-            u.update resource_name: Report.resource_name_for_named_report(rn), current_admin: auto_admin
+            u.update resource_name: Report.resource_name_for_named_report(rn), current_admin: Seeds.auto_admin
           end
         end
 
