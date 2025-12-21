@@ -13,19 +13,39 @@ module Dynamic
       # The base string for route
       # For example "dynamic_model/some_models"
       def base_route_segments
+        if definition.nil?
+          Rails.logger.warn "VersionedDefHandler: definition not set for #{name}"
+          return
+        end
+
         definition.base_route_segments
       end
 
       def base_route_short_name
+        if definition.nil?
+          Rails.logger.warn "VersionedDefHandler: definition not set for #{name}"
+          return
+        end
+
         definition.base_route_short_name
       end
 
       # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
       def hyphenated_name
+        if definition.nil?
+          Rails.logger.warn "VersionedDefHandler: definition not set for #{name}"
+          return
+        end
+
         definition.hyphenated_name
       end
 
       def category
+        if definition.nil?
+          Rails.logger.warn "VersionedDefHandler: definition not set for #{name}"
+          return
+        end
+
         definition.category
       end
     end
@@ -82,7 +102,7 @@ module Dynamic
     # @return [ActiveRecord::Base] dynamic class definition record
     def versioned_definition
       return @versioned_definition unless @versioned_definition.nil? ||
-                                          @versioned_definition.def_version.nil? && id
+                                          (@versioned_definition.def_version.nil? && id)
 
       return @versioned_definition = current_definition if current_definition.use_current_version
 

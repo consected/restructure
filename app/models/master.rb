@@ -347,7 +347,7 @@ class Master < ActiveRecord::Base
       raise 'Setting current_user to nil is not allowed'
     else
       raise 'Attempting to set current_user with non user: ' \
-             "#{user} #{user.class.name} #{user.class.__id__} #{User.__id__}"
+            "#{user} #{user.class.name} #{user.class.__id__} #{User.__id__}"
     end
   end
 
@@ -702,7 +702,7 @@ class Master < ActiveRecord::Base
       extras[:methods] << id_attr
     end
 
-    res = super(extras)
+    res = super
 
     # Handled the filtered lists, changing their names back to match the original expected objects names
     res.transform_keys! do |k|

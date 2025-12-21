@@ -689,7 +689,7 @@ module ActiveRecord
         reference_views&.each do |view|
           Rails.logger.warn "Dropping AL dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name} via activity log"
           execute <<~END_SQL
-            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+            DROP VIEW #{view['schemaname']}.#{view['viewname']} CASCADE;
           END_SQL
         end
 
@@ -1090,7 +1090,7 @@ module ActiveRecord
 
       def dynamic_model_view_sql
         <<~DO_TEXT
-          DROP VIEW if exists #{schema}.#{table_name};
+          DROP VIEW if exists #{schema}.#{table_name} CASCADE;
           CREATE VIEW #{schema}.#{table_name} AS
           #{view_sql};
         DO_TEXT
@@ -1100,7 +1100,7 @@ module ActiveRecord
         if updating?
           dynamic_model_view_sql
         else
-          "DROP VIEW is exists #{schema}.#{table_name};"
+          "DROP VIEW if exists #{schema}.#{table_name} CASCADE;"
         end
       end
 
