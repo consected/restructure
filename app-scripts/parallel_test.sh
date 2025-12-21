@@ -9,6 +9,7 @@
 # USE_PG_HOST: If set, the script will not use sudo to clean the database, and will connect to the specified PostgreSQL host via a TCP port.
 # SKIP_ZEITWERK: If set to 'true', the script will skip checking Zeitwerk.
 # PARALLEL_TEST_PROCESSORS: Number of parallel processes to use for running tests. Defaults to number of CPU cores.
+# RUN_APP_SPECS: Set to 'false' to avoid running the environment specific app specs
 #
 # NOTE: if running without SUDO_POSTGRES, the Postgres user must have the following permission attributes:
 # - CREATEDB
@@ -24,6 +25,7 @@ if [ "${SUDO_POSTGRES}" ]; then
   unset USE_PG_UNAME
 fi
 
+export RUN_APP_SPECS=${RUN_APP_SPECS:-true}
 
 if [ "${RUN_RESTESTS}" == 'true' ]; then
   $(dirname $0)/clean-test-db.sh
@@ -88,7 +90,7 @@ fi
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
 if [ -z "$@" ]; then
-  specs='spec/models spec/controllers spec/features spec/r.*'
+  specs='spec/models spec/controllers spec/system spec/r.*'
 else
   specs="$@"
 fi
