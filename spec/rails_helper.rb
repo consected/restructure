@@ -74,10 +74,9 @@ if ENV['QUICK'] == 'true'
 else
   put_now 'check_spec_db for skips'
   # Use a database table to track creations in the test db
-  res = SetupHelper.check_spec_db
-  names = res.map { |r| r['name'] }
-  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
+  spec_tally_names = SetupHelper.spec_tally_names
+  ENV['SKIP_DB_SETUP'] = 'true' if spec_tally_names.include?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if spec_tally_names.include?('app_setup')
 end
 
 put_now 'Require webmock'

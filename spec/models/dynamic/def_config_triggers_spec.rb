@@ -75,7 +75,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
   end
 
   before :all do
-    Settings::AllowDynamicMigrations = true
+    change_setting('AllowDynamicMigrations', true)
     # SetupHelper.setup_al_player_contact_phones
     # ::ActivityLog.define_models
     create_user
@@ -83,7 +83,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     let_user_create_player_contacts
     @player_contact = create_item(data: rand(10_000_000_000_000_000), rank: 10)
     generate_test_al
-    Settings::AllowDynamicMigrations = nil
+    change_setting('AllowDynamicMigrations', nil)
   end
 
   it 'creates an activity log with default user access control and embedded item' do

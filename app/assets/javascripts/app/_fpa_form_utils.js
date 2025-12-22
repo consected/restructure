@@ -19,7 +19,8 @@ _fpa.form_utils = {
     for (var p in obj) {
       if (obj.hasOwnProperty(p)) {
         var v = obj[p];
-        var $field = block.find("[data-attr-name='" + p.underscore() + "']").parent().filter(':visible');
+        var p_underscore = p.underscore();
+        var $field = block.find(`[data-attr-name="${p_underscore}"]`).parent().filter(':visible');
 
         // In certain cases there may be more than one matching item (such as for radio buttons)
         // If so, try to jump to the main .list-group-item container
@@ -45,7 +46,7 @@ _fpa.form_utils = {
             fn = fn || '';
             v = fn + ' ' + v;
           }
-          var el = $('<p class="help-block error-help">' + v + '</p>');
+          var el = $(`<p class="help-block error-help error-for-${p_underscore}" data-error-key="${p_underscore}">${v}</p>`);
           $field.append(el);
           delete obj[p];
           obj.Form = 'has errors. Check the highlighted fields.';

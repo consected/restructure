@@ -79,15 +79,19 @@ module Dynamic
       @allow_migrations
     end
 
+    def app_import_prevents_migrations?
+      Admin::AppTypeImport.prevent_migrations?
+    end
+
     #
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      return if @ran_migration || table_or_view_ready? || !allow_migrations
+      return if @ran_migration || table_or_view_ready? || !allow_migrations || app_import_prevents_migrations?
 
       raise FphsException, "Use a plural table name: #{table_name}" if table_name.singularize == table_name
 
       gs = migration_generator.generator_script(self.class)
-      migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
+      migration_generator.write_db_migration(gs, table_name)
       run_migration
     end
 
@@ -165,7 +169,7 @@ module Dynamic
 
       mode = 'update'
       gs = migration_generator.generator_script(self.class, mode)
-      fn = migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version, mode:)
+      fn = migration_generator.write_db_migration(gs, table_name, mode:)
       @do_migration = fn
     end
 
@@ -180,12 +184,14 @@ module Dynamic
       mg.app_type_name = app_type_name
       mode = 'create_or_update'
       gs = mg.generator_script(self.class, mode)
-      mg.write_db_migration(gs, table_name, mg.migration_version, mode:, export_type:)
+      mg.write_db_migration(gs, table_name, mode:, export_type:)
     end
 
     #
     # Run a generated migration triggered after_save
     def run_migration
+      return if @ran_migration
+
       @ran_migration = true
       migration_generator.run_migration
     end

@@ -191,6 +191,13 @@ class Admin::MigrationGenerator
     res.to_a
   end
 
+  def self.schemas_in_db
+    res = connection.execute <<~END_SQL
+      SELECT schema_name FROM information_schema.schemata;
+    END_SQL
+    res.map { |r| r['schema_name'] }
+  end
+
   #
   # Returns a list of foreign key definitions for all tables in the search path.
   # Returns an array of hashes that link source and target:
@@ -655,17 +662,18 @@ class Admin::MigrationGenerator
   def write_db_migration(mig_text, name, version = nil, mode: 'create', export_type: nil)
     return unless allow_migrations
 
-    version ||= migration_version
-
     dirname = db_migration_dirname export_type
-    cname_us = "#{mode}_#{name}_#{version}"
 
+    # Ensure we don't get overlapping migration version numbers or class names
+    migtime = Time.new.to_fs(:number)
+    cname = nil
+    version ||= migration_version
+    cname_us = "#{mode}_#{name}_#{version}"
     raise FphsException, "Error in naming of migration #{cname_us}" if cname_us != cname_us.id_underscore
 
-    # Ensure we don't get overlapping migration version numbers
-    migtime = Time.new.to_fs(:number)
     while Dir.glob("#{migtime}*", base: dirname).length > 0
       sleep 1.5
+
       migtime = Time.new.to_fs(:number)
     end
 
@@ -710,6 +718,11 @@ class Admin::MigrationGenerator
   #
   # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
+    if Admin::AppTypeImport.prevent_migrations?
+      Rails.logger.warn 'Migrations prevented by Admin::AppTypeImport - skipping migration'
+      return
+    end
+
     unless allow_migrations && db_migration_schema != DefaultMigrationSchema
       Rails.logger.warn "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
       return
@@ -722,10 +735,6 @@ class Admin::MigrationGenerator
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
           self.class.migration_context(db_migration_dirname).migrate
-          # Don't dump until a build, otherwise differences in individual development environments
-          # force unnecessary and confusing commits
-          # pid = spawn('bin/rails db:schema:dump')
-          # Process.detach pid
         end
       end.join
     end
@@ -747,7 +756,7 @@ class Admin::MigrationGenerator
   #
   # Set a migration version timestamp
   def migration_version
-    @migration_version ||= DateTime.now.to_i.to_s(36)
+    @migration_version ||= (Time.now.to_f * 100_000).to_i.to_s(36)
   end
 
   #
@@ -846,6 +855,8 @@ class Admin::MigrationGenerator
   # Content for a migration to create a schema
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
+
+    raise FphsException, "No schema owner provided for schema #{schema_name}" unless owner.present?
 
     <<~CONTENT
       require 'active_record/migration/app_generator'

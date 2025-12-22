@@ -50,7 +50,7 @@ module Reports
           # Set the type_map to handle JSON correctly
           results.type_map = type_map
         rescue StandardError => e
-          Rails.logger.info "Failed to run sql: #{e.inspect}.\n#{sql}"
+          Rails.logger.warn "Failed to run sql: #{e.inspect}.\n#{sql}"
           msg = 'Failed to run query.'
           msg += e.to_s if current_admin
           raise FphsException, msg
@@ -251,7 +251,7 @@ module Reports
     # @param [String] sql
     # @return [String] SQL with substitutions
     def substitute_count(sql)
-      sql = "select count(*) \"result_count\" from (#{sql}) t".dup if count_only
+      sql = "select count(*) \"result_count\" from (#{sql}) t" if count_only
       sql
     end
 

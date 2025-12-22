@@ -19,7 +19,8 @@
        data-toggle-caret="true"       
        class="glyphicon glyphicon-triangle-right caret-target-collapsed view-item  mr-expander {{#is (fpa_state_item 'template_config' (underscore name) vdef_version 'item_list') 'includes' ',' }}{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}{{/is}} {{#if to_record_options_config.view_options.always_open}}on-postprocess-click{{/if}}" 
        data-use-alt-result-key="{{to_record_result_key}}"
-       id="mr-expander-{{ns_hyphenate to_record_label}}"></a>
+       id="mr-expander-{{ns_hyphenate to_record_label}}"
+       data-label-for="{{ns_hyphenate to_record_label}}"></a>
     {{/is}}
     {{else}}
     <span class="glyphicon glyphicon-ban-circle"></span>

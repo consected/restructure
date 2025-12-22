@@ -465,4 +465,23 @@ module SetupHelper
       puts
     end
   end
+
+  #
+  # Run extra setups in environment specific "sourced" specs
+  # @return [<Type>] <description>
+  def self.run_extra_setups
+    @@extra_setups ||= []
+    @@extra_setups.each do |setup_proc|
+      puts 'Running extra setup...'
+      setup_proc.call
+    end
+  end
+
+  #
+  # Add a block to be run as part of extra setups from environment specific "sourced" specs
+  # @param [Lambda] block - to be run later
+  def self.add_to_extra_setups(block)
+    @@extra_setups ||= []
+    @@extra_setups << block
+  end
 end
