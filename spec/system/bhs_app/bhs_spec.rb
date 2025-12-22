@@ -18,7 +18,7 @@ describe 'Create a BHS subject and activity', driver: $browser_driver do
   before :all do
     app = BhsImportConfig.import_config name: BhsImportConfig.bhs_app_name
     SetupHelper.feature_setup
-    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForUser', true)
     seed_database
     create_data_set_outside_tx
 

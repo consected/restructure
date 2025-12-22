@@ -273,7 +273,8 @@ The run:
 Make sure the Filestore mounts are in place (this requires sudo privileges) once after a reboot:
     app-scripts/setup-dev-filestore.sh
 
-By default, browser feature tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
+We no longer use features specs for UI testing. These have all been moved to system specs.
+By default, browser system tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
 
 To use Firefox:
 
@@ -284,11 +285,11 @@ Also, complete the following to ensure you have Firefox and the most appropriate
 
 Run the test suite:
 
-    IGNORE_MFA=true bundle exec rspec
+    bundle exec rspec
 
 Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 
-    bundle exec rspec
+    AWS_PROFILE=<profile> bundle exec rspec
 
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 

@@ -4,7 +4,7 @@
   end
   text = '&nbsp;'.html_safe unless defined?(text) && text.present?
 %>
-<div class="container well">
+<div class="container well error-page-block">
   <h1><%= error_title || 'Unexpected Error' %></h1>
   <p class="">
     <%= text %>

@@ -22,7 +22,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @master.current_user = @user
 
     # Clean up old definition
-    @als = ActivityLog.active.where(
+    als = ActivityLog.active.where(
       name: 'activity_log_player_contacts',
       item_type: 'player_contact',
       process_name: 'embed_test'
@@ -30,12 +30,12 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @test_role = "z-test-role-#{SecureRandom.hex(10)}"
 
     if keep_def
-      @al = @als.first
+      @al = als.first
       @al.updated_at = Time.now
       @al.current_admin = @admin
       @al.save!
     else
-      @als.each do |al|
+      als.each do |al|
         al.update! disabled: true, current_admin: @admin
       end
 

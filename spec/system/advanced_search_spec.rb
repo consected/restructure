@@ -8,7 +8,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
   include FeatureSupport
 
   before(:all) do
-    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForUser', true)
     SetupHelper.feature_setup
 
     seed_database

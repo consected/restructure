@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seeds"
+require "#{Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seeds"
 require './db/table_generators/external_identifiers_table'
 
 $STARTED_AT = DateTime.now.to_i
@@ -118,7 +119,7 @@ module SetupHelper
     puts 'DB validation'
 
     # Ensure we are set up for this test
-    pgpass = File.read("#{ENV['HOME']}/.pgpass")
+    pgpass = File.read("#{ENV.fetch('HOME', nil)}/.pgpass")
     res = pgpass.include?(db_name) || pgpass.include?('localhost:5432:*')
     raise ".pgpass does not contain entry for database #{db_name}" unless res
 
@@ -261,7 +262,7 @@ module SetupHelper
       process_name:,
       disabled: false,
       action_when_attribute: 'called_when',
-      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,'\
+      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,' \
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
@@ -293,7 +294,7 @@ module SetupHelper
     cname.constantize
   rescue StandardError, FphsException => e
     raise "Failed to setup gen test (#{name}, #{process_name}, #{item_type}, #{rec_type}) " \
-      "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
+          "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
   end
 
   def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil, created_by: nil, assign_access: nil, add_disabled: nil)
@@ -391,6 +392,8 @@ module SetupHelper
     end
   end
 
+  # Create and check the spec tally table
+  # to flag if global setups have been run
   def self.check_spec_db
     tn = SpecTallyTable
     unless Admin::MigrationGenerator.table_or_view_exists_in_schema?(tn, 'ml_app')
@@ -404,6 +407,12 @@ module SetupHelper
     res = res.to_a
   end
 
+  # Get the names of items in the spec tally table
+  def self.spec_tally_names
+    check_spec_db.map { |r| r['name'] }
+  end
+
+  # Add an entry to the spec tally table when global setups are done
   def self.add_to_spec_db(name, updated_at: Time.now)
     res = ActiveRecord::Base.connection.execute("insert into #{SpecTallyTable} (name, updated_at) values ('#{name}', '#{updated_at}');")
   end

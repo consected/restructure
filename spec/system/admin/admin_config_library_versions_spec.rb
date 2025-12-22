@@ -4,53 +4,7 @@ require 'rails_helper'
 
 describe 'admin config library versions', js: true, driver: $browser_driver do
   include ModelSupport
-
-  def make_an_admin
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
-
-    @good_email = "testuser#{rand(1_000_000_000)}admin@testing.com"
-    @admin = Admin.create! email: @good_email
-    # Save a new password, as required to handle temp passwords
-    @admin = Admin.find(@admin.id)
-    @good_password = @admin.generate_password
-    @admin.save!
-    @admin.otp_secret = Admin.generate_otp_secret
-    @admin.otp_required_for_login = true
-    @admin.new_two_factor_auth_code = false
-    @admin.save!
-
-    @good_password
-  end
-
-  def admin_sign_in_with_2fa
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-
-    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    visit url
-    expect(current_path).to eq '/admins/sign_in'
-
-    within '#new_admin' do
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-
-      fill_in 'Email', with: @good_email
-      fill_in 'Password', with: @good_password
-      click_button 'Log in'
-    end
-
-    expect(page).to have_selector('.login-2fa-block', visible: true)
-    expect(page).to have_selector('#new_admin', visible: true)
-    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
-
-    within '#new_admin' do
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-      click_button 'Log in'
-    end
-
-    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
-  end
+  include AdminActionsSetup
 
   before(:all) do
     SetupHelper.feature_setup

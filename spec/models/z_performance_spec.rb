@@ -23,18 +23,30 @@ RSpec.describe 'Performance', type: :model do
     end
   end
 
-  def create_trackers_for_all_types_for(master)
-    Classification::Protocol.active.each do |p|
-      p.sub_processes.active.each do |sp|
-        active_sp = sp.protocol_events.active
-        if !active_sp.empty?
-          active_sp.each do |pe|
-            master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, protocol_event_id: pe.id, event_date: DateTime.now)
+  def create_trackers_for_all_types_for(master, limit_to: 10_000)
+    Timeout.timeout(60.seconds) do
+      created_count = 0
+      ps = Classification::Protocol.active
+      ps_count = ps.count
+      puts "Limiting #{ps_count} active protocols to #{NumProtocols}" unless NumProtocols == ps_count
+      ps.limit(NumProtocols).each do |p|
+        p.sub_processes.active.each do |sp|
+          active_sp = sp.protocol_events.active
+          if active_sp.empty?
+            master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, event_date: DateTime.now)
+            created_count += 1
+          else
+            active_sp.each do |pe|
+              master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, protocol_event_id: pe.id, event_date: DateTime.now)
+              created_count += 1
+              break if created_count >= limit_to
+            end
           end
-        else
-          master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, event_date: DateTime.now)
+          break if created_count >= limit_to
         end
+        break if created_count >= limit_to
       end
+      puts "Created #{created_count} tracker items"
     end
   end
 
@@ -162,8 +174,10 @@ RSpec.describe 'Performance', type: :model do
 
   it "Creates tracker history items for each master and checks the performance encode the #{NumMasters} masters" do
     puts 'Creating tracker items for Masters'
+    @masters = @masters.first(NumMasters) if @masters.length != NumMasters
+
     @masters.each do |master|
-      create_trackers_for_all_types_for master
+      create_trackers_for_all_types_for master, limit_to: 20
     end
 
     puts 'Benchmarking tracker items for Masters'

@@ -42,6 +42,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
       setup_file_store
       @projects = setup_redcap_project_admin_configs
       @project = @projects.first
@@ -364,6 +365,21 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                 .where('created_at > :created_at', created_at: start_time)
                                 .last
 
+      if cr.nil?
+        req = {
+          admin: request_admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          created_at: start_time
+        }
+        puts "About to fail - no ClientRequest found for #{req}"
+        Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).each do |r|
+          puts "  Found ClientRequest #{r.attributes}"
+        end
+      end
+      expect(cr).to be_present, "No ClientRequest found. Available: #{Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).pluck(:action).join(', ')}"
       expect(cr.result).to be_a Hash
       expect(cr.result['storage_stage']).to be_present
       expect(cr.result['count_retrieved']).to be > 0
