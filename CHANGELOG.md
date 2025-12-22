@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.39.0] - 2025-12-22
+
 - [Updated] gems to address CVE:
   - CVE-2025-14762
 

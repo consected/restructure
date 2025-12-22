@@ -3,10 +3,10 @@ begin;
 -- PostgreSQL database dump
 --
 
-\restrict JdSYhOu7cuFY7zthyhuTVeaB1FgXEqIL1geuuTsFnxC5Jxr5GZIql23VVisqFY5
+\restrict fqfxbvN08eQDJGt9ZVAX0BNEmSMlEK4Hj96kukER38s1lh4QsaCyKe1b8wH7Mjy
 
--- Dumped from database version 15.14
--- Dumped by pg_dump version 15.14
+-- Dumped from database version 15.15
+-- Dumped by pg_dump version 15.15
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -13332,14 +13332,6 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.trackers
-    ADD CONSTRAINT valid_protocol_sub_process FOREIGN KEY (protocol_id, sub_process_id) REFERENCES ml_app.sub_processes(protocol_id, id) MATCH FULL;
-
-
---
 -- Name: tracker_history valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -13348,11 +13340,11 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: trackers valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
-    ADD CONSTRAINT valid_sub_process_event FOREIGN KEY (sub_process_id, protocol_event_id) REFERENCES ml_app.protocol_events(sub_process_id, id);
+    ADD CONSTRAINT valid_protocol_sub_process FOREIGN KEY (protocol_id, sub_process_id) REFERENCES ml_app.sub_processes(protocol_id, id) MATCH FULL;
 
 
 --
@@ -13360,6 +13352,14 @@ ALTER TABLE ONLY ml_app.trackers
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
+    ADD CONSTRAINT valid_sub_process_event FOREIGN KEY (sub_process_id, protocol_event_id) REFERENCES ml_app.protocol_events(sub_process_id, id);
+
+
+--
+-- Name: trackers valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.trackers
     ADD CONSTRAINT valid_sub_process_event FOREIGN KEY (sub_process_id, protocol_event_id) REFERENCES ml_app.protocol_events(sub_process_id, id);
 
 
@@ -13575,6 +13575,6 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 -- PostgreSQL database dump complete
 --
 
-\unrestrict JdSYhOu7cuFY7zthyhuTVeaB1FgXEqIL1geuuTsFnxC5Jxr5GZIql23VVisqFY5
+\unrestrict fqfxbvN08eQDJGt9ZVAX0BNEmSMlEK4Hj96kukER38s1lh4QsaCyKe1b8wH7Mjy
 
 commit;
