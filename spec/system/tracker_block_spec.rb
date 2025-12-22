@@ -17,7 +17,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     end
 
     seed_database
-    create_data_set_outside_tx no_trackers: true
+    create_data_set_outside_tx no_trackers: true, no_seed: true
 
     # a blank master to test for empty tracker record sets
     # we have to force a new thread and connection to make this a transaction outside of the normal flow,

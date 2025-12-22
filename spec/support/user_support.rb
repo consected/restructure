@@ -15,10 +15,11 @@ module UserSupport
     admin, = @admin || create_admin
 
     attr = {
-      email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
+      email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}",
+      password: Devise.friendly_token(30)
     }
 
-    good_password = attr[:password] = Devise.friendly_token(30) if opt[:with_password]
+    good_password = attr[:password] if opt[:with_password]
 
     user = User.create! attr
 
@@ -45,7 +46,7 @@ module UserSupport
       user.new_two_factor_auth_code = false
     end
 
-    # Set confirmed for features tests
+    # Set confirmed for system tests
     user.confirmed_at ||= Time.now if respond_to?(:page) && !opt[:not_confirmed]
 
     user.save!
@@ -75,6 +76,8 @@ module UserSupport
                                        resource_name: :create_master, current_admin: @admin, user:
     end
     @user = user
+    @good_email = user.email
+    @good_password = good_password
     let_user_create :player_contacts
 
     delay = Time.now - start_time
@@ -186,6 +189,8 @@ module UserSupport
 
     unless resource_name
       Rails.logger.warn "No resource name for #{resource_type} - #{self.class}"
+      Rails.logger.warn ExceptionExtensions.short_string_backtrace(caller)
+
       return
     end
 

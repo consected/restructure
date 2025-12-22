@@ -8,9 +8,9 @@ module Seeds
       values.each do |v|
         res = Admin::AppType.find_by_name(v['name'])
         if res
-          res.update(current_admin: auto_admin) unless res.admin
+          res.update(current_admin: Seeds.auto_admin) unless res.admin
         else
-          v[:current_admin] = auto_admin
+          v[:current_admin] = Seeds.auto_admin
           Admin::AppType.create!(v)
         end
       end

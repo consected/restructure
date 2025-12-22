@@ -6,7 +6,7 @@ module Seeds
       values.each do |v|
         val = v['value']
         unless Classification::AccuracyScore.active.where(value: val).first
-          v = v.merge current_admin: auto_admin
+          v = v.merge current_admin: Seeds.auto_admin
           Classification::AccuracyScore.create(v)
         end
       end

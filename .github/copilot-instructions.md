@@ -1,218 +1,116 @@
 # ReStructure AI Coding Guidelines
 
-## Architecture Overview
+## 🚨 QUICK REFERENCE FOR AGENTS
 
-**ReStructure** is a research data management platform built on Rails 7 with a flexible, configuration-driven architecture. The system is designed around five core concepts:
+### Most Critical Rules (READ FIRST)
+1. **Never set environment variables** - use app-scripts instead
+2. **Always run tests after making changes** to verify functionality
+3. **Never redirect scripts stdout or stderr to /dev/null**
+4. **Never run commands in the background** - all commands exit when complete with success or failure codes
 
-1. **App Types**: Encapsulate all configurations for an end-user application (like Zeus or Athena)
-2. **Master Records**: Central participant/subject records that everything relates to
-3. **External Identifiers**: Real-world numbering systems for people or entities represented by master records
-4. **Activity Logs**: Process management and case management workflows with embedded steps
-5. **Dynamic Models**: Runtime-generated Rails models from database configurations
+### Rspec System Spec Best Practices
+1. **ALWAYS use helper methods for system specs** from `spec/support/feature_support.rb`
+2. **Run `debug_process_status`** when fields/sections can't be found
+3. **Wait for AJAX** using `finish_page_loading` and `finish_form_formatting` after interactions
+4. **Expand sections before accessing fields** - forms load via AJAX
+5. **Never write raw Capybara selectors in system specs**
 
-### The Master Record Pattern
+### First Steps When Stuck
+1. Run `debug_process_status` to see current UI state
+2. Check if section needs expanding: `expand_model_reference('Section Name')`
+3. Check if edit button needs clicking: `click_edit_button_within_target(form)`
+4. Verify show_if conditions are met for hidden fields
+5. As last resort: `debug_state('action_name', 'description')` to save HTML snapshot, screenshot and UI status
 
-Everything in ReStructure relates to a Master record (participant/subject). This is enforced through:
-- `master_id` foreign key on nearly all tables (exception: external identifiers before assignment)
-- `current_user` passed through master: `master.current_user` not `self.current_user`
-- Access controls verified at master level: `master.allows_user_access`
-- Controllers set user once: `@master.current_user = current_user`
+### Ruby on Rails Conventions
 
-### Key Components
+- Follow the RuboCop Style Guide and use tools like `rubocop`, `standardrb`, or `rufo` for consistent formatting.
+- Use snake_case for variables/methods and CamelCase for classes/modules.
+- Keep methods short and focused; use early returns, guard clauses, and private methods to reduce complexity.
+- Favor meaningful names over short or generic ones.
+- Comment only when necessary — avoid explaining the obvious.
+- Apply the Single Responsibility Principle to classes, methods, and modules.
+- Prefer composition over inheritance; extract reusable logic into modules or services.
+- Keep controllers thin — move business logic into models, services, or command/query objects.
+- Apply the “fat model, skinny controller” pattern thoughtfully and with clean abstractions.
+- Extract business logic into service objects for reusability and testability.
+- Use partials or view components to reduce duplication and simplify views.
+- Use `unless` for negative conditions, but avoid it with `else` for clarity.
+- Avoid deeply nested conditionals — favor guard clauses and method extractions.
+- Use safe navigation (`&.`) instead of multiple `nil` checks.
+- Prefer `.present?`, `.blank?`, and `.any?` over manual nil/empty checks.
+- Scope queries in models or use query objects for clarity and reuse.
+- Use `before_action` callbacks sparingly — avoid business logic in them.
+- Use `Rails.cache` to store expensive computations or frequently accessed data.
+- Construct file paths with `Rails.root.join(...)` instead of hardcoding.
+- Use `class_name` and `foreign_key` in associations for explicit relationships.
+- Keep secrets and config out of the codebase using ENV variables.
+- Write isolated unit tests for models, services, and helpers.
+- Cover end-to-end logic with request/system tests.
+- Use background jobs (ActiveJob) for non-blocking operations like sending emails or calling APIs.
+- Document complex code paths and methods with YARD
 
-- **Admin Panel**: Configuration management at `/admin/*` routes using database-stored YAML configs
-- **User Interface**: Single-page application with custom JavaScript front-end
-- **Filestore**: NFS-based file management with Linux group security
-- **Background Jobs**: `delayed_job` for file processing and notifications
-- **User Access Controls**: Granular role-based permissions system controlling table/field access
+### Helper Methods Quick Reference
 
-### Top-Down Development Approach
+| Task | Helper Method | Example |
+|------|--------------|------|
+| Text input | `fill_in_field(name, value)` | `fill_in_field('description', 'My text')` |
+| Dropdown | `select_from_dropdown_field(name, value)` | `select_from_dropdown_field('status', 'Active')` |
+| Multi-select | `select_multiple_from_chosen(name, values)` | `select_multiple_from_chosen('tags', ['A', 'B'])` |
+| Radio buttons | `set_yes_no_field(name, value)` | `set_yes_no_field('approved', 'yes')` |
+| Checkbox | `set_checkbox_field(name, checked)` | `set_checkbox_field('active', true)` |
+| Big select | `select_from_big_select_field(name, value)` | `select_from_big_select_field('grant', 'Title')` |
+| Expand section | `expand_model_reference(name)` | `form = expand_model_reference('Grant Aims')` |
+| Expand master | `expand_master_record(text: title)` | `expand_master_record(text: 'Proposal')` |
+| Edit button | `click_edit_button_within_target(elem)` | `form = click_edit_button_within_target(form)` |
+| Wait for AJAX | `finish_page_loading` | `finish_page_loading` |
+| Debug current state | `debug_process_status` | `debug_process_status` |
+| Available fields | `available_form_fields` | `available_form_fields` |
 
-ReStructure follows a hierarchical configuration pattern:
+## Running Bash Scripts and Terminal Commands
 
-1. **App Type Configuration**: Define the overall application scope and user roles
-2. **External Identifier Setup**: Configure real-world ID systems (SSN, study IDs, etc.)
-3. **Activity Log Creation**: Define main workflow processes and case management
-4. **Activity Log Types**: Configure individual workflow steps/activities within processes
-5. **Embedded Dynamic Models**: Create forms and data structures for each workflow step
+### IMPORTANT Terminal Command Rules for AI Agents
 
-This approach ensures consistent user experience and proper data relationships throughout the application.
+#### ❌ NEVER Do These Things
 
-### Activity Log Workflow System
-
-Activity Logs provide case management through `extra_log_types` (individual workflow steps) configured in YAML:
-
-```yaml
-step_name:
-  label: Step Label
-  fields: [field1, field2]
-  creatable_if:  # Controls when this step can be created
-    all:
-      this:
-        status: 'previous_step_complete'
-  references:  # Links to other records/models
-    - dynamic_model__some_model:
-        label: Related Item
-        from: this
-        add: many
-```
-
-**Key Workflow Concepts:**
-- `extra_log_type` attribute stores which step a record represents (e.g., 'proposal_submission', 'review')
-- `creatable_if` conditions control sequential workflow - steps only appear when prerequisites are met
-- `references` create relationships to other models (dynamic models, other activity logs)
-- `status` field typically drives workflow state transitions
-- Each activity log process (defined in admin) generates a runtime model class in `ActivityLog::` namespace
-
-## Essential Development Patterns
-
-### Dynamic Model System
-
-The platform's core feature is runtime model generation from database configurations:
-
-**How It Works:**
-1. Admin creates/updates a `DynamicModel` record with YAML `options` configuration
-2. `after_save :generate_model` callback triggers class generation
-3. Runtime class created in `DynamicModel::` namespace (e.g., `DynamicModel::TestData`)
-4. Database migration auto-generated and run to create/update table
-   (NOTE: auto migrations are denied for the "ml_app" schema - spec tests should use the "dynamic_test" schema)
-5. Routes auto-generated via `DynamicModel.routes_reload`
-6. Master association added automatically: `has_many :dynamic_model__test_datas`
-
-**Key Files:**
-- `app/models/dynamic/def_generator.rb`: Core generation logic, memoization, regeneration triggers
-- `app/models/dynamic/model_generator.rb`: Parses configs, creates migrations
-- `lib/active_record/migration/app_generator.rb`: Migration execution
-- Controllers inherit from `DynamicModelControllerHandler` for generated models
-
-**Critical Pattern:**
-Models are NOT code files - they're runtime-generated Ruby classes stored in memory. Changes to configs trigger regeneration:
-```ruby
-# After creating/updating dynamic model admin config
-# This happens automatically, but may need manual trigger in tests
-DynamicModel.routes_reload
-Rails.application.routes_reloader.reload!
-```
-
-**Memoization:** Generated models cached in `DynamicModel.models` hash and `Resources::Models` - cleared on regeneration
-
-### User Base Pattern
-
-All user-facing models inherit from `UserBase` through `HandlesUserBase` concern:
-
-- Always requires authenticated user context via `current_user`
-- Enforces master record associations (participant linking)
-- Implements granular access controls through `user_access_controls`
-- Uses crosswalk validation for external identifiers
-
-### User Roles and Access Controls
-
-ReStructure implements a sophisticated role-based permission system:
-
-- **App Types**: Users belong to specific app types that determine their application scope
-- **User Access Controls**: Database-driven permissions defining who can access what resources
-- **Resource-Level Security**: Controls access to tables, fields, and specific records
-- **Role Hierarchy**: Permissions cascade from app type → user role → specific resources
-- **Master-Based Security**: All access is contextual to the master records users can see
-
-Access control checks happen at multiple levels:
-```ruby
-# Table-level access
-user.has_access_to?(:create, :table, 'player_infos')
-# Record-level access through master association
-record.allows_current_user_access_to?(:edit)
-```
-
-### Configuration-Driven Development
-
-Most functionality is configured, not coded:
-
-- **Access Controls**: `user_access_controls` table defines granular permissions
-- **Form Rules**: YAML configurations define field visibility and validation
-- **Process Workflows**: Activity log configurations manage case processes
-- **Data Structures**: Dynamic model configurations define database schema
-- **External ID Systems**: Configure how real-world identifiers map to master records
-
-## Critical Commands
-
-### General Terminal Command Limitations
-
-When running as an agent, adhere to the following rules when using terminal commands:
-
-- DO NOT set any environment variables - use the appropriate development scripts that handle environment variables internally
-- DO NOT redirect any output to `>/dev/null` or `2>/dev/null`
-
-Don't pipe output to other commands like `grep`, `tail`, `awk`, `sed`, etc since after running that time the output is lost. It is preferable to redirect output and errors to `/tmp/` then analyzing the files with grep, awk, sed, or other text processing tools. In this way the output of a long running test can be examined in multiple ways after completion. For example:
-
-**Don't do this:**
 ```bash
-bundle exec rspec spec/features/ 2>&1 | grep -E "PHASE|✓ Grant|Failures|Finished|examples" | tail -15
+# ❌ Setting environment variables (scripts handle this internally)
+RAILS_ENV=test bundle exec rspec
+FPHS_2FA_AUTH_DISABLED=true bundle exec rails runner "puts 'test'"
+
+# ❌ Piping long-running commands (lose visibility into progress and errors)
+bundle exec rspec spec/system/ 2>&1 | grep "Error" | tail -15
+
+# ❌ Running in background (can't track completion or errors)
+nohup bundle exec rspec spec/system/ &
+bundle exec rspec spec/system/ > /tmp/output.log 2>&1 &
+
+# ❌ Redirecting output to /dev/null (lose debugging information)
+bundle exec rspec spec/system/ >/dev/null 2>&1
+bundle exec rspec spec/system/ 2>/dev/null
 ```
 
-**Do this instead:**
+#### ✅ ALWAYS Do This Instead
+
 ```bash
-bundle exec rspec spec/features/ 2>&1 | tee /tmp/rspec_output.log | tail -100
-grep -E "PHASE|✓ Grant|Failures|Finished|examples" /tmp/rspec_output.log | tail -15
+# ✅ Let test output stream, then analyze the saved log
+bundle exec rspec spec/system/ 2>&1 | tee /tmp/rspec_output.log | tail -100
+grep -E "pattern" /tmp/rspec_output.log | tail -15
+grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
+
+# ✅ Use app-scripts that set environment variables internally
+app-scripts/rails_runner_test.sh "puts User.count"
+app-scripts/headless_rspec.sh spec/system/my_spec.rb
+app-scripts/not_headless_rspec.sh spec/system/my_spec.rb
 ```
 
-**Because then you can also do follow up commands, such as:**
-```bash
-grep -E --after-context=100 "Available fields" /tmp/rspec_output.log | tail -200
-```
+#### Why These Rules Exist
 
-
-### Extracting results from HTML files using CSS selectors
-
-To extract using CSS selectors from a stored HTML file:
-
-Get the first heading with class `some-classification` tag
-```bash
-irb --noverbose <<EOF
-require 'nokogiri';
-file = File.open("/tmp/saved.html", "rb");
-page = Nokogiri::HTML(file.read);
-first_style_tag = page.css('h1.some-classification')[0];
-first_style_tag.text
-EOF
-```
-
-Get all `data-attr-name` attribute values
-```bash
-irb  --noverbose <<EOF
-require 'nokogiri';
-file = File.open("/tmp/grant_aims_expanded.html", "rb");
-page = Nokogiri::HTML(file.read);
-result = page.css('[data-attr-name]');
-result.map {|r| r['data-attr-name']}.join("\n")
-EOF
-```
-
-
-### Development Setup
-```bash
-# Database setup
-app-scripts/setup-dev-filestore.sh
-app-scripts/add_admin.sh <email>
-FPHS_2FA_AUTH_DISABLED=true bundle exec rails s
-
-# Test database
-app-scripts/create-test-db.sh 1
-app-scripts/parallel_test.sh
-```
-
-### Production Workflow
-```bash
-# Release and build (handles versioning, branching, Docker builds)
-app-scripts/release_and_build.sh
-app-scripts/release_and_build.sh minor  # for minor version bumps
-```
-
-### Database Migrations
-Dynamic models create migrations automatically. For manual migrations:
-```bash
-# Always specify schema
-FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rails db:migrate
-```
+- **Terminal tools can lose output** if commands pipe before completion
+- **Background processes hide errors** and completion status from the agent
+- **Environment variables must be consistent** - app-scripts ensure this
+- **Tee allows both viewing and analyzing** output without losing information
+- **Agents need full output** to diagnose failures accurately
 
 ## Project-Specific Conventions
 
@@ -223,7 +121,8 @@ FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rails db:migrate
 - Dynamic controllers live in `app/controllers/dynamic_model/`
 
 ### Naming Patterns
-- Tables use `ml_app` schema prefix in production
+- Tables use `ml_app` DB schema in production for core tables only
+- Dynamic model tables use project or feature specific DB schema, e.g. `redcap`, `grant_aims`
 - Dynamic models: `DynamicModel::ClassName` namespace
 - Activity logs: `ActivityLog::LogTypeName` namespace
 - Route helpers: auto-generated based on table names
@@ -264,15 +163,17 @@ Key variables (see `app-scripts/get-aws-env-vars.sh`):
 - `FPHS_2FA_AUTH_DISABLED`: Disable 2FA in development
 - `FPHS_LOAD_APP_TYPES`: Load dynamic configurations on startup
 
+NOTE: AI agents must NOT set environment variables directly in terminal commands. Use the appropriate app-scripts that handle environment variables internally.
+
 ## Testing Approach
 
 Background to the test framework and conventions:
 
 - **RSpec**: Main test framework with parallel execution support
-- **Capybara**: Feature tests with Chrome by default, or Firefox/Geckodriver
+- **Capybara**: systems tests with Chrome by default, or Firefox/Geckodriver
 - **Database Cleaner**: Test isolation
 - **Model specs** must be produced to cover all new model logic
-- **Feature specs** should be produced for all new UI functionality
+- **System specs** (not features specs) should be produced for all new UI functionality
 - **Run `rspec` on new spec tests** after implementing new features to make sure they run
 
 ### Running tests
@@ -283,27 +184,30 @@ app-scripts/setup-dev-filestore.sh
 NOTE: this needs "sudo" to run, and although the Rspec suite attempts to run this automatically if required, it is best to run this manually once after a reboot to avoid test failures.
 
 Standard Rspec tests, which exclude environment / app specific tests in 
-`spec/features/apps/` and `spec/support/apps/`
+`spec/system/apps/` and `spec/support/apps/`
 ```bash
 bundle exec rspec  # Run in headless mode
 ```
 
-For headless (visible browser) feature tests, which include the environment / app specific specs:
+For headless (visible browser) system tests, which include the environment / app specific specs:
 ```bash
-app-scripts/headless_rspec.sh spec/features/apps/grant_aims/grant_aims_process_spec.rb
+app-scripts/headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
 ```
 
-For non-headless (visible browser) feature tests, which include the environment / app specific specs:
+For non-headless (visible browser) system tests, which include the environment / app specific specs:
 ```bash
-app-scripts/not_headless_rspec.sh spec/features/apps/grant_aims/grant_aims_process_spec.rb
+app-scripts/not_headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
 ```
 
-To use the Rails runner without prompting a human for approval, use:
+AI Agents: to use the Rails runner, use one of the following:
 
 ```bash
 app-scripts/rails_runner_test.sh "<command to run>"
+# Or
+bundle exec rails runner -e test "<command to run>"
 ```
-This is the equivalent of:
+
+AI Agents: DO NOT use environment variables
 ```bash
 RAILS_ENV=test bundle exec rails runner "<command to run>"
 ```
@@ -312,7 +216,6 @@ If needed, clean the test database:
 ```bash
 app-scripts/clean-test-db.sh
 ```
-
 ### Parallel test execution
 ```bash
 app-scripts/parallel_test.sh
@@ -326,12 +229,11 @@ To rerun only the failed tests from the last parallel test run:
 app-scripts/retest_failed_parallel_tests.sh
 ```
 
-### Rspec feature test tips
+### Rspec system test tips
 
-To avoid 2FA logins blocking tests, the following settings are recommended in test setup (in `before(:all)` block):
+To avoid 2FA logins blocking user tests, the following settings are recommended in test setup (in `before(:all)` block):
 ```ruby
 change_setting('TwoFactorAuthDisabledForUser', true)
-change_setting('TwoFactorAuthDisabledForAdmin', true)
 ```
 
 Never click on elements programmatically using Javascript if they may not be interactable. Instead, use JavaScript to scroll them into view first:
@@ -350,7 +252,51 @@ save_html_snapshot('/tmp/debug_page.html')
 ```
 
 
+## System Specs
+
+System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs.
+
+### 🔍 Troubleshooting Decision Tree
+
+#### "Field Not Found" Error
+1. **Did you expand the section?** → Use `expand_model_reference('Section')` or `expand_embedded_reference('Name')`
+2. **Did you click edit button?** → Use `click_edit_button_within_target(form)`
+3. **Are show_if conditions met?** → Set prerequisite fields first, add `sleep 1`
+4. **Check field name** → Run `available_form_fields` to see actual field names
+5. **Still not found?** → Run `debug_process_status` and examine output
+
+#### "Element Not Interactable" Error
+1. **Scroll element into view** → Use `scroll_into_view(element)` or helper handles it automatically
+2. **Wait for AJAX** → Call `finish_page_loading`
+3. **Check if hidden by CSS** → Use helper methods which handle `visible: false`
+4. **Check if in collapsed section** → Expand section first
+5. **Check if read-only view** → Click edit button to make form editable
+
+#### Empty Big Select / Dropdown
+1. **Check database relationships** → Review YAML configuration foreign keys
+2. **Verify test data exists** → Check setup creates necessary records
+3. **Debug available options** → `puts field.all('option').map(&:text).inspect`
+4. **Check query configuration** → Examine `blank_preset_value` in YAML
+
+#### Test Passes Locally But Fails in CI
+1. **Timing issues** → Add `finish_page_loading` or `finish_form_formatting` after AJAX interactions
+2. **Race conditions** → Add small `sleep` after triggering show_if rules
+3. **Different data state** → Ensure setup is idempotent and complete
+4. **Browser differences** → Test with both Chrome and Firefox if possible
+
+### Best Practices
+
 Attempt to follow the real user / admin flow through the UI as much as possible, avoiding direct model manipulation except for setup/teardown. Avoid using `visit` to go directly to pages that would not normally be accessible through the UI flow. 
+
+For example:
+```ruby
+# Don't do this:
+visit "/redcap/project_admins/edit/#{project.id}"
+# Do this instead:
+visit "/redcap/project_admins?filter[id]=#{project.id}&perform_action=edit"
+finish_page_loading
+# If this doesn't work for some reason, check for Javascript errors
+```
 
 Any "edit" button represented by a glyphicon should be clicked in the UI rather than visiting the edit URL directly. These buttons typically have the HTML class something like: "edit-entity glyphicon glyphicon-pencil".
 
@@ -358,11 +304,59 @@ Any link or button that has the HTML attribute `data-remote="true"` (which may a
 
 Don't use Javascript to manipulate or show fields not visible due to `show_if` rules. These are hidden due to the business logic, and if the tests dictate they should be shown then this indicates a bug.
 
-## Feature Spec Development Patterns
+Avoid relying on `skip` or `xit` in spec files. Instead, fix the underlying issues causing test failures. The aim is not to have tests that simply run without errors, but to have tests that accurately verify the functionality.
 
-This section captures critical patterns and learnings from end-to-end feature spec development, particularly for Activity Log workflows. These patterns are essential for successful test implementation.
+If changes are made to a spec file, make sure to re-run the tests to verify they still pass. Nothing should be considered "fixed" until the tests pass successfully.
+
+
+### Development Patterns
+
+These patterns are essential for successful test implementation.
 
 **CRITICAL:** ReStructure provides comprehensive helper methods in `spec/support/feature_support.rb`. **Always use these helpers** rather than writing raw Capybara selectors or inspecting HTML directly. The helpers handle AJAX waits, scrolling, visibility issues, and provide debug output when things fail.
+
+### Common Error Messages and Solutions
+
+#### `Capybara::ElementNotFound: Unable to find field "description"`
+**Cause:** Field doesn't exist in current DOM state  
+**Solutions:**
+1. Expand section: `expand_model_reference('Section Name')`
+2. Click edit: `click_edit_button_within_target(target)`
+3. Check show_if: Set prerequisite fields first
+4. Debug: `debug_process_status` or `available_form_fields`
+
+#### `Selenium::WebDriver::Error::ElementNotInteractableError`
+**Cause:** Element exists but can't be clicked/filled  
+**Solutions:**
+1. Scroll into view: `scroll_into_view(element)`
+2. Use helper method (handles visibility): `fill_in_field('name', 'value')`
+3. Wait for AJAX: `finish_page_loading`
+4. Check if hidden by show_if rules
+5. Check if read-only view (click edit button first)
+
+#### `Selenium::WebDriver::Error::StaleElementReferenceError`
+**Cause:** Element reference outdated after DOM update  
+**Solutions:**
+1. Re-find element after AJAX: `element = find('.class')`
+2. Use `finish_page_loading` before re-finding
+3. Use within block to limit scope: `within target { ... }`
+4. Store container, not individual elements
+
+#### Test fails with "Validation errors" but no details shown
+**Cause:** Form validation failed silently  
+**Solutions:**
+1. Check validation: `puts_form_validation_errors`
+2. Check alerts: `puts_alerts`
+3. Take snapshot: `debug_state('after_submit', 'checking validation')`
+4. Verify all required fields filled
+
+#### `Ambiguous match, found 2 elements matching...`
+**Cause:** Selector matches multiple elements  
+**Solutions:**
+1. Use more specific selector with ID or unique class
+2. Use `within` block to limit scope: `within '#specific-form' { ... }`
+3. Use helper methods which handle specificity
+4. Check if duplicate elements exist in DOM
 
 ### Using Helper Methods (ALWAYS DO THIS)
 
@@ -410,7 +404,8 @@ save_html_snapshot('/tmp/debug.html')  # Save HTML (last resort)
 
 **Enable debug output:**
 ```bash
-FEATURE_DEBUG=true bundle exec rspec spec/features/your_spec.rb
+app-scripts/headless_rspec.sh spec/system/your_spec.rb
+
 ```
 
 ### Edit Button AJAX Pattern
@@ -502,8 +497,12 @@ within form do
   select_from_dropdown_field('funding_agency', 'NIH')
 end
 ```
+**Scroll Elements into View:**
+```ruby
+scroll_into_view(element)
+```
 
-**Debug Technique (when development):**
+**Debug Technique (when developing system specs):**
 ```ruby
 # See what sections are available
 debug_process_status  # Shows all model reference expanders
@@ -514,7 +513,7 @@ available_model_reference_expanders  # Lists all expandable sections
 
 ### Show_if Conditional Field Visibility
 
-Fields may appear or disappear based on other field values via `show_if` configuration rules. This is pure business logic - don't circumvent it.
+Fields may appear or disappear based on other field values via `show_if` configuration rules. This is pure business logic - DO NOT circumvent it by injecting JavaScript or forcibly showing hidden fields.
 
 **Common Pattern:**
 ```ruby
@@ -707,62 +706,253 @@ before(:all) do
 end
 ```
 
-### Debug Techniques
+## Complete Workflow Examples
 
-**Save HTML Snapshots:**
+### Example 1: Creating Activity Log with Nested Forms
+
 ```ruby
-# At any point in the test
-File.write('/tmp/debug_page.html', page.html)
+# 1. Expand master record
+expand_master_record(text: proposal_title)
+finish_page_loading
 
-# Then examine with command line:
-grep -A 5 'field-name' /tmp/debug_page.html
+# 2. Expand activity log section (loads via AJAX)
+form = expand_model_reference('Grant Aims')
+finish_page_loading
+
+# 3. Click edit button to make form editable (if showing read-only view)
+form = click_edit_button_within_target(form)
+finish_page_loading
+
+# 4. Fill conditional fields in correct order
+within form do
+  # First, set field that controls show_if visibility
+  select_from_dropdown_field('funding_source', 'Grant')
+  sleep 1  # Allow show_if rules to process
+  
+  # Now dependent field becomes visible
+  select_from_big_select_field('select_grant', grant_title)
+  
+  # Fill remaining fields
+  fill_in_field('description', 'My description')
+  set_yes_no_field('approved', 'yes')
+  set_checkbox_field('is_selectable', true)
+end
+
+# 5. Submit and verify
+click_submit_field('Submit for Review')
+finish_page_loading
+expect_no_validation_errors
+expect(page).to have_content('Submitted successfully', wait: 10)
 ```
 
-**Extract with Nokogiri:**
+### Example 2: Searching and Editing Records
+
+```ruby
+# 1. Navigate to search page
+visit '/dynamic_model/grant_aims'
+finish_page_loading
+
+# 2. Fill search form with exact field names
+fill_in 'search_attrs[title]', with: grant_title, wait: 5
+click_button 'Search'
+finish_page_loading
+
+# 3. Verify result appears
+expect(page).to have_content(grant_title, wait: 10)
+
+# 4. Expand master record
+expand_master_record(text: grant_title)
+finish_page_loading
+
+# 5. Expand and edit section
+form = expand_embedded_reference('Grant Details')
+form = click_edit_button_within_target(form)
+finish_page_loading
+
+# 6. Update fields
+within form do
+  fill_in_field('description', 'Updated description')
+  select_from_dropdown_field('status', 'Active')
+end
+
+# 7. Save changes
+click_submit_field('Save')
+finish_page_loading
+expect_no_validation_errors
+```
+
+### Example 3: Debugging When Something Goes Wrong
+
+```ruby
+# When you can't find a field or section:
+
+# Step 1: Check overall page state
+debug_process_status
+# This shows: alerts, tabs, modals, sections, fields, buttons
+
+# Step 2: Check specific items
+available_form_fields          # See all fields with visibility
+available_model_reference_expanders  # See expandable sections
+available_submit_fields        # See submit buttons
+puts_alerts                    # Check for error messages
+
+# Step 3: If still stuck, save state
+debug_state('stuck_point', 'cannot find description field')
+# This saves HTML snapshot and screenshot
+
+# Step 4: Analyze saved HTML
+# In terminal:
+# irb --noverbose <<EOF
+# require 'nokogiri'
+# file = File.open("/tmp/stuck_point.html", "rb")
+# page = Nokogiri::HTML(file.read)
+# result = page.css('[data-attr-name]')
+# result.map {|r| r['data-attr-name']}.join("\n")
+# EOF
+```
+
+## When Starting a New System Spec
+
+### Setup Checklist
+
+```ruby
+RSpec.describe 'My Feature', type: :system do
+  before(:all) do
+    # ✅ 1. Disable 2FA FIRST (before any other setup)
+    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', true)
+    
+    # ✅ 2. Import configs and setup database
+    SetupHelper.feature_setup
+    
+    # ✅ 3. Create test user with proper access
+    @user = create_user('testuser@example.com')
+    setup_access(@user, 'Grant Aims', user_type: 'read_write')
+    
+    # ✅ 4. Create necessary test data
+    @grant = create_test_grant
+    @proposal = create_test_proposal
+  end
+  
+  before(:each) do
+    # ✅ 5. Login for each test
+    login_as(@user, scope: :user)
+  end
+  
+  it 'completes the workflow' do
+    # ✅ 6. Navigate to feature
+    visit '/dashboard'
+    finish_page_loading
+    
+    # Your test code here...
+  end
+end
+```
+
+### During Development
+
+1. ✅ **Run `debug_process_status` liberally** - see what's actually on the page
+2. ✅ **Use `debug_state(name, desc)` at key points** - save state for analysis
+3. ✅ **Save HTML snapshots when stuck** - `save_html_snapshot('/tmp/debug.html')`
+4. ✅ **Check for JavaScript errors** - look in browser console output
+5. ✅ **Use helper methods exclusively** - don't write raw Capybara selectors
+6. ✅ **Add `finish_page_loading` after AJAX** - ensure DOM is ready
+7. ✅ **Follow real user flow** - don't use `visit` to skip steps
+
+### Before Committing
+
+1. ✅ **Run spec to verify it passes** - `bundle exec rspec spec/system/my_spec.rb`
+2. ✅ **Remove debug statements** - clean up `debug_process_status`, `debug_state`, etc.
+3. ✅ **Remove snapshots and screenshots** - delete temporary debug files
+4. ✅ **Remove `skip` or `xit`** - fix issues instead of skipping tests
+5. ✅ **Verify test follows real user flow** - no artificial shortcuts with `visit`
+6. ✅ **Check test isolation** - ensure test doesn't depend on other tests
+7. ✅ **Add comments for complex show_if logic** - explain conditional field dependencies
+
+### Debug Techniques
+Print and save state (including HTML snapshot and screenshot) during test development to diagnose issues.
+```ruby
+debug_state(name, description)
+```
+
+#### Extracting results from HTML files using CSS selectors
+
+To extract using CSS selectors from a stored HTML file:
+
+Get the first heading with class `some-classification` tag
 ```bash
-# Get all field names
 irb --noverbose <<EOF
 require 'nokogiri';
-file = File.open("/tmp/debug_page.html", "rb");
+file = File.open("/tmp/saved.html", "rb");
+page = Nokogiri::HTML(file.read);
+first_style_tag = page.css('h1.some-classification')[0];
+first_style_tag.text
+EOF
+```
+
+Get all `data-attr-name` attribute values
+```bash
+irb  --noverbose <<EOF
+require 'nokogiri';
+file = File.open("/tmp/grant_aims_expanded.html", "rb");
 page = Nokogiri::HTML(file.read);
 result = page.css('[data-attr-name]');
 result.map {|r| r['data-attr-name']}.join("\n")
 EOF
 ```
 
-**List Available Elements:**
-
+#### Extracting results from debug screenshots in system specs
+Use screenshots for debugging complex UI issues. To save a screenshot during a system spec test, use the following pattern:
 ```ruby
-debug_process_status  # Shows all sections, fields, buttons, etc
+take_screenshot(name, description, force: true)
 ```
 
-If you need to dig in to the HTML, use Capybara selectors:
+
+If an AI Agent can't read the screenshot directly, extract text from the screenshot image using Tesseract OCR:
+```bash
+tesseract /path/to/screenshot.png stdout
+```
+
+
+#### List Available Elements
+
+Shows a YAML representation of the following information based on the state of the UI:
+
+- error page block, if an error page rather than intended page is shown
+- visible alerts
+- report tabs
+- visible modals
+- for a stacked activity log process:
+  - available mr-expander sections
+  - user instructions placeholders at the top of the primary activity log block
+  - available form fields with types, visibility, and current values
+  - available submit buttons
+  - visible embedded model reference "add" buttons
+
+```ruby
+debug_process_status  
+```
+
+If you need to dig deeper into the HTML, use Capybara selectors:
 ```ruby
 # Find what sections are available
 all('.mr-expander').each do |elem|
-  puts "ID: #{elem[:id]}, Text: #{elem.text}"
+  puts_debug "ID: #{elem[:id]}, Text: #{elem.text}"
 end
 
 # Find all forms
 all('form').each do |form|
-  puts "Action: #{form[:action]}, Method: #{form[:method]}"
+  puts_debug "Action: #{form[:action]}, Method: #{form[:method]}"
 end
 
 # Find all inputs in a section
 within result_target do
   all('input, select, textarea', visible: :all).each do |field|
-    puts "Name: #{field[:name]}, Type: #{field[:type]}"
+    puts_debug "Name: #{field[:name]}, Type: #{field[:type]}"
   end
 end
 ```
 
-**Scroll Elements into View:**
-```ruby
-def scroll_into_view(element)
-  page.execute_script('arguments[0].scrollIntoView(true);', element)
-  sleep 0.5  # Allow scrolling to complete
-end
-```
 
 ### Common Pitfalls and Solutions
 
@@ -776,6 +966,47 @@ end
 | AJAX timing issues | Intermittent failures | Use `finish_page_loading` and proper waits |
 | Empty big select | Only shows clear option | Check table relationships in query configuration |
 | Ambiguous match | `Ambiguous match, found 2 elements` | Use more specific selector (ID, unique class, within block) |
+
+## UI Pattern Recognition Guide
+
+### How to Identify What Pattern to Use
+
+| If you see in HTML... | Pattern type | Use this helper |
+|----------------------|-------------|------------------|
+| `<li>` with text values, pencil icon | Edit button AJAX | `click_edit_button_within_target()` |
+| Caret icon `▶`, `data-remote="true"` | Collapsible section | `expand_model_reference()` |
+| `<select class="use-chosen">` | Chosen dropdown | `select_from_dropdown_field()` |
+| `<select multiple>` | Multi-select chosen | `select_multiple_from_chosen()` |
+| `<input class="use-big-select">` | Big select dialog | `select_from_big_select_field()` |
+| Radio with `visible: false` CSS | Hidden yes/no field | `set_yes_no_field()` |
+| Form field appears/disappears | show_if conditional | Set prerequisite + `sleep 1` |
+| `data-toggle-caret="true"` | mr-expander section | `expand_model_reference()` |
+| Class `edit-entity glyphicon-pencil` | Edit button | `click_edit_button_within_target()` |
+| `data-remote="true"` link/button | AJAX action | Click in UI, don't visit URL directly |
+
+### 🚨 CRITICAL: Always Use Helpers
+
+**NEVER write raw Capybara code like this:**
+```ruby
+find('input[name="description"]').set('value')  # ❌ DON'T DO THIS
+find('select#status').select('Active')          # ❌ DON'T DO THIS
+find('.glyphicon-pencil').click                 # ❌ DON'T DO THIS
+```
+
+**ALWAYS use helper methods:**
+```ruby
+fill_in_field('description', 'value')           # ✅ DO THIS
+select_from_dropdown_field('status', 'Active')  # ✅ DO THIS
+form = click_edit_button_within_target(form)    # ✅ DO THIS
+```
+
+**Why helpers are critical:**
+- Handle AJAX waiting automatically
+- Scroll elements into view
+- Handle hidden field visibility (`visible: false`)
+- Provide detailed error messages with context
+- Handle chosen.js, big select, and custom UI components
+- Consistent behavior across all tests
 
 ## UI interaction with specific components
 
@@ -828,6 +1059,40 @@ Since activity logs are case management workflows, each record in the `activity_
 
 Resource names are used extensively in access control definitions and naming of associations within the code. They are a unique way of referring to specific models or subsets of records within models. The `Resources::Models` module maps resource names to their corresponding runtime classes and acts as a registry for all dynamic definitions. If in doubt, try to look up resources in `Resources::Models` to find the correct class, resource name or actual class itself.
 
+
+## Development Setup
+```bash
+# Run once after reboot to setup filestore simulation
+app-scripts/setup-dev-filestore.sh 
+
+# Database setup
+app-scripts/add_admin.sh <email>
+FPHS_2FA_AUTH_DISABLED=true bundle exec rails s
+
+# Set up test database
+app-scripts/create-test-db.sh 1
+
+# Run parallel test suite to validate configuration
+app-scripts/parallel_test.sh
+```
+
+## Production Build Workflow
+```bash
+# Release and build (handles versioning, branching, Docker builds)
+app-scripts/release_and_build.sh
+# Release and build with a minor version bump (for the ReStructure upstream repo)
+app-scripts/release_and_build.sh minor  
+```
+
+## Database Migrations
+Dynamic models create migrations automatically. The test environment runs migrations automatically
+when specs are run.
+
+For manual migrations in the development environment:
+```bash
+bundle exec rails db:migrate
+```
+
 ## Integration Points
 
 ### REDCap Integration
@@ -863,6 +1128,7 @@ Resource names are used extensively in access control definitions and naming of 
 Focus on configuration over code - most features should be achievable through admin panel settings rather than new Ruby code.
 
 ## Additional Resources
+- [Architecture Overview](docs/dev_reference/main/architecture_overview.md): High-level system design
 - [ReStructure Admin Guide](docs/admin_reference/main/README.md): Instructions for configuring the platform
 - [Template Structures](app/models/admin/defs): Various files providing outlines for configurations and defintition of admin panel fields
 - [Supplementary Developer Docs](docs/dev_reference/main/README.md): Details on common developer requirements

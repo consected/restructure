@@ -185,16 +185,16 @@ spec/support/{feature}_feature_support/
 
 ```bash
 # Standard headless run
-bundle exec rspec spec/features/your_spec.rb
+bundle exec rspec spec/system/your_spec.rb
 
 # With visible browser
-app-scripts/not_headless_rspec.sh spec/features/your_spec.rb
+app-scripts/not_headless_rspec.sh spec/system/your_spec.rb
 
 # Capture full output
-bundle exec rspec spec/features/your_spec.rb 2>&1 | tee /tmp/test_run.log | tail -100
+bundle exec rspec spec/system/your_spec.rb 2>&1 | tee /tmp/test_run.log | tail -100
 
 # Specific test
-bundle exec rspec spec/features/your_spec.rb:38
+bundle exec rspec spec/system/your_spec.rb:38
 
 # Clean database first
 app-scripts/clean-test-db.sh
@@ -202,11 +202,10 @@ app-scripts/clean-test-db.sh
 
 ## When You Get Stuck
 
-1. **Save HTML:** `File.write('/tmp/debug.html', page.html)`
-2. **Check sections:** `all('.mr-expander').each { |e| puts e[:id] }`
-3. **List fields:** `all('input, select', visible: :all).each { |f| puts f[:name] }`
-4. **Check visibility:** `all('input[name*="field"]', visible: :all).count`
-5. **Run with browser:** `app-scripts/not_headless_rspec.sh`
+1. **Save HTML:** `save_html_snapshot`
+2. **Check sections:** `debug_process_status`
+3. **List fields:** `available_form_fields`
+4. **Run with browser:** `app-scripts/not_headless_rspec.sh`
 
 ## Full Documentation
 

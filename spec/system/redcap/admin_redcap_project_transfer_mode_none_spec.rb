@@ -4,77 +4,11 @@ require 'rails_helper'
 
 describe 'admin REDCap project with transfer mode "none"', js: true, driver: $browser_driver do
   include ModelSupport
+  include AdminActionsSetup
   include Redcap::RedcapSupport
-
-  def make_an_admin
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
-
-    @good_email = "testuser#{rand(1_000_000_000)}admin@testing.com"
-    @admin = Admin.create! email: @good_email
-    # Save a new password, as required to handle temp passwords
-    @admin = Admin.find(@admin.id)
-    @good_password = @admin.generate_password
-    @admin.save!
-    # Don't require 2FA for this admin since we disabled it in settings
-    @admin.otp_required_for_login = false
-    @admin.save!
-
-    @good_password
-  end
-
-  def admin_sign_in_with_2fa
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-
-    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    visit url
-    expect(current_path).to eq '/admins/sign_in'
-
-    within '#new_admin' do
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-
-      fill_in 'Email', with: @good_email
-      fill_in 'Password', with: @good_password
-      click_button 'Log in'
-    end
-
-    # Since 2FA is disabled, we should be signed in directly
-    expect(page).to have_css('.flash .alert', text: 'Signed in successfully.', wait: 10)
-  end
-
-  def create_admin_matching_user
-    app_type = Admin::AppType.active.find_by_name('ref-data')
-    app_type_id = app_type.id
-    create_user(nil, '', email: @admin.email) unless @admin.matching_user
-
-    @user = user = @admin.matching_user
-
-    enable_user_app_access app_type.name, user
-    user.update!(app_type_id: app_type_id)
-
-    expect(app_type_id).not_to be_nil
-    expect(Settings.admin_master).not_to be_nil
-
-    setup_access 'trackers', user: user
-    setup_access 'nfs_store__manage__containers', user: user
-    setup_access 'nfs_store__manage__stored_files', user: user
-    setup_access 'nfs_store__manage__archived_files', user: user
-    expect(@admin.matching_user.app_type).not_to be_nil
-    expect(@admin.matching_user).to eq user
-
-    # Ensure admin's matching user is reloaded and properly associated
-    @admin.reload
-    expect(@admin.matching_user).not_to be_nil
-    expect(@admin.matching_user.app_type).not_to be_nil
-
-    user
-  end
 
   before(:example) do
     SetupHelper.feature_setup
-    change_setting('TwoFactorAuthDisabledForAdmin', true)
     change_setting('TwoFactorAuthDisabledForUser', true)
 
     make_an_admin

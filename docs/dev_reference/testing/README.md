@@ -99,13 +99,13 @@ General information about the Grant Aims tests:
 
 ```bash
 # Standard run (headless)
-bundle exec rspec spec/features/your_spec.rb
+bundle exec rspec spec/system/your_spec.rb
 
 # With visible browser for debugging
-app-scripts/not_headless_rspec.sh spec/features/your_spec.rb
+app-scripts/not_headless_rspec.sh spec/system/your_spec.rb
 
 # Specific test
-bundle exec rspec spec/features/your_spec.rb:38
+bundle exec rspec spec/system/your_spec.rb:38
 
 # Clean database first
 app-scripts/clean-test-db.sh
@@ -147,7 +147,7 @@ change_setting('TwoFactorAuthDisabledForAdmin', true)
    - ~400 lines of in-context guidance
 
 5. **Grant Aims Implementation Status** (UPDATED)
-   - Location: `spec/features/grant_aims/IMPLEMENTATION_STATUS.md`
+   - Location: `spec/system/grant_aims/IMPLEMENTATION_STATUS.md`
    - Updated status from "tests pass but don't fill forms" to "Phases 1-5 fully working"
    - Phase 6 blocking issue documented
 

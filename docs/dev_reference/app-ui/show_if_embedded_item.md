@@ -113,7 +113,7 @@ Run with: `bundle exec rspec spec/models/option_configs/dynamic_model_options_sp
 
 ### Feature Tests
 
-Location: `spec/features/dynamic_model_show_if_spec.rb`
+Location: `spec/system/dynamic_model_show_if_spec.rb`
 
 Tests validate:
 
@@ -123,7 +123,7 @@ Tests validate:
 
 Support module: `spec/support/test_show_if_dm_support.rb`
 
-Run with: `bundle exec rspec spec/features/dynamic_model_show_if_spec.rb`
+Run with: `bundle exec rspec spec/system/dynamic_model_show_if_spec.rb`
 
 ## Related Documentation
 

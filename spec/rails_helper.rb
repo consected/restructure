@@ -94,7 +94,7 @@ end
 
 put_now 'Browser setups'
 
-# The setting for AllowUsersToRegister is forced to *true* for the test environment, to allow features tests to work.
+# The setting for AllowUsersToRegister is forced to *true* for the test environment, to allow system tests to work.
 # We set this back to false here, which does not affect those tests, but allows controllers, models, etc specs to
 # run without AllowUsersToRegister being set.
 change_setting('AllowUsersToRegister', false)
@@ -109,7 +109,7 @@ SetupHelper.setup_nfs_directories
 
 `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-`mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*test_imports*.rb`
+`mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
 `rm -f db/app_migrations/test/*test_*.rb`
 
 put_now 'Devise and warden'
@@ -151,7 +151,7 @@ require "#{Rails.root}/spec/support/master_support.rb"
 require "#{Rails.root}/spec/support/model_support.rb"
 SetupHelper.check_bhs_assignments_table
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
-Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec/support/**/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/apps/*/*.rb')].sort.each { |f| require f }
 SetupHelper.check_bhs_assignments_table
 unless ENV['SKIP_DB_SETUP']
@@ -191,7 +191,10 @@ unless ENV['SKIP_DB_SETUP']
   puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
 end
 
-SetupHelper.run_extra_setups if ENV['RUN_APP_SPECS'] == 'true'
+if ENV['RUN_APP_SPECS'] == 'true' && !ENV.fetch('SKIP_APP_SETUP', nil)
+  put_now 'Run extra app setups'
+  SetupHelper.run_extra_setups
+end
 
 put_now 'RSpec configure'
 
@@ -275,7 +278,7 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
-  config.exclude_pattern = 'spec/features/apps/**/*.rb,spec/support/apps/**/*.rb' unless ENV['RUN_APP_SPECS'] == 'true'
+  config.exclude_pattern = 'spec/system/apps/**/*_spec.rb' unless ENV['RUN_APP_SPECS'] == 'true'
 
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
@@ -285,6 +288,26 @@ RSpec.configure do |config|
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!
+  end
+
+  # For system tests that need javascript, use selenium_chrome
+  # The following avoids this needing to be specified in each spec file
+  config.before(:each, type: :system, js: true) do
+    driven_by $browser_driver
+  end
+
+  config.before(:each) do
+    instance_variables.each do |var|
+      # Check if the variable's class has been reloaded since it was assigned
+      var_val = instance_variable_get(var)
+      var_class = var_val.class
+      next if var_class&.name.nil? # Typically if an instance variable is holding a Class object itself
+      # CollectionProxy is just a wrapper, skip it
+      next if var_class.name == 'ActiveRecord::Associations::CollectionProxy'
+      next unless var_class.name =~ /^[A-Z]/ # Skip non-constant class names (e.g., "scantrons")
+
+      expect(var_class).to eq(var_class.name.constantize), "Class of instance variable #{var} (#{var_class.name}) has been reloaded in #{self}. Please reassign it within the test to avoid stale class issues."
+    end
   end
 
   Shoulda::Matchers.configure do |config|

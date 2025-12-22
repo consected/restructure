@@ -97,7 +97,7 @@ _fpa.loaded.default = function () {
     _fpa.printing.appPrintHandler();
   });
 
-  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0 && _fpa.status.controller !== 'registrations') {
+  if (_fpa.state.current_user && _fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0 && _fpa.status.controller !== 'registrations') {
     const key_viewed_intro = `viewed-introduction-${_fpa.state.current_user.email}`;
     var viewed = localStorage.getItem(key_viewed_intro);
     if (!viewed) {

@@ -17,14 +17,38 @@ require 'rails_helper'
 describe 'Register an incoming call', driver: $browser_driver do
   include ActivityLogMain
 
+  def set_up_user_access
+    puts_debug 'set up user access'
+    ensure_user_matches_login_email
+    setup_access :player_contacts
+    setup_access :player_contacts, user: @user
+
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
+
+    expect(@user.has_access_to?(:read, :general, :app_type)).to be_truthy
+    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
+    @app_type = @user.app_type
+    expect(ActivityLog.model_names).to include 'player_contact_phone'
+
+    expect(@user.has_access_to?(:access, :table, :activity_log__player_contact_phones)).to be_truthy
+    expect(@user.has_access_to?(:access, :activity_log_type, :activity_log__player_contact_phone__primary)).to be_truthy
+
+    ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
+    ac&.disable!(@admin)
+    puts_debug 'done setting up user access'
+  end
+
   before :all do
     SetupHelper.setup_al_gen_tests ActivityLogMain::ActivityLogName, nil, 'player_contact', rec_type: 'phone'
 
-    create_user(create_master: false, no_app_type_setup: true) unless @user
+    create_user(create_master: false) unless @user
+    expect(@user.has_access_to?(:read, :general, :app_type)).to be_truthy
+
     User.active.where.not(email: Settings::TemplateUserEmail).where.not(id: @user&.id).update_all(disabled: true)
 
     SetupHelper.feature_setup
-    seed_database
     setup_database
 
     all_als = ActivityLog.active.select { |a| a.item_type_name == 'player_contact_phone' }
@@ -38,32 +62,17 @@ describe 'Register an incoming call', driver: $browser_driver do
       end
     end
 
-    ::ActivityLog.define_models
-
-    ensure_user_matches_login_email
-    setup_access :player_contacts
-    setup_access :player_contacts, user: @user
-
-    setup_access :activity_log__player_contact_phones, user: @user
-    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
-
-    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
-    @app_type = @user.app_type
-    expect(ActivityLog.model_names).to include 'player_contact_phone'
-
-    expect(@user.has_access_to?(:access, :table, :activity_log__player_contact_phones)).to be_truthy
-    expect(@user.has_access_to?(:access, :activity_log_type, :activity_log__player_contact_phone__primary)).to be_truthy
-
-    ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
-    ac&.disable!(@admin)
+    ActivityLog.define_models
+    set_up_user_access
   end
 
   before :example do
+    create_user(create_master: false)
+    set_up_user_access
     ensure_user_matches_login_email
+    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
     user_logs_in
     expect(User.find(@user.id).app_type_id).to eq @app_type.id
-    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
   end
 
   it 'records the details of an incoming call' do
