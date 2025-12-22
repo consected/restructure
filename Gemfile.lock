@@ -264,8 +264,7 @@ GEM
     loofah (2.25.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
-    mail (2.9.0)
-      logger
+    mail (2.8.1)
       mini_mime (>= 0.1.1)
       net-imap
       net-pop
@@ -559,7 +558,7 @@ DEPENDENCIES
   kramdown
   kramdown-parser-gfm
   listen (~> 3.7, >= 3.7.1)
-  mail (>= 2.8.0)
+  mail (>= 2.8.0, < 2.9.0)
   mime-types
   mini_portile2 (>= 2.8.2)
   net-smtp

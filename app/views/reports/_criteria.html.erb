@@ -12,7 +12,12 @@
         method: :get, 
         class: 'form-formatted search_report', 
         id: "report_query_form", 
-        data: { result_target: "##{@results_target}", preprocessor: 'reports_result' }, 
+        data: { 
+          result_target: "##{@results_target}", 
+          preprocessor: 'reports_result',
+          report_resource_name: @report.resource_name,
+          report_name: @report.name
+        },        
         remote: true do 
   %>
     <% if @report.uses_table_subs? %>

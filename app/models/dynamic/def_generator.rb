@@ -349,7 +349,7 @@ module Dynamic
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
       return unless klass.constants.include?(assoc_ext_name.to_sym)
 
-      klass.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
+      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
@@ -361,7 +361,7 @@ module Dynamic
       return unless implementation_class_defined?(klass, fail_without_exception: true,
                                                          fail_without_exception_newable_result: true)
 
-      klass.send(:remove_const, model_class_name)
+      remove_const_for(klass, model_class_name)
     rescue StandardError => e
       logger.info <<~END_TEXT
         *************************************************************************************
@@ -376,13 +376,19 @@ module Dynamic
 
       # This may fail if an underlying dependent class (parent class) has been redefined by
       # another dynamic implementation, such as external identifier
-      klass.send(:remove_const, full_implementation_controller_name)
+      remove_const_for(klass, full_implementation_controller_name)
     rescue StandardError => e
       logger.info <<~END_TEXT
         *************************************************************************************
         Failed to remove the old definition of #{full_implementation_controller_name}. #{e.inspect}
         *************************************************************************************
       END_TEXT
+    end
+
+    def remove_const_for(klass, constant_name)
+      raise 'Bad attempt to remove a constant' if constant_name.in?(%w[User Admin UsersController AdminsController])
+
+      klass.send(:remove_const, constant_name)
     end
 
     #
@@ -478,7 +484,7 @@ module Dynamic
       return if res
 
       err = "The implementation of #{self.class.name}::#{model_class_name} was not completed. " \
-            "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
+            "The DB table #{table_name} has #{'NOT ' unless table_or_view_ready?}been created"
       logger.warn err
       errors.add :name, err
       # Force exit of callbacks

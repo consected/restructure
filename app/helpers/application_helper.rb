@@ -57,7 +57,7 @@ module ApplicationHelper
   #
   # class name for the body class attribute
   def current_app_type_id_class
-    "app-type-id-#{current_user.app_type_id}" if current_user
+    "app-type-id-#{current_user.app_type_id} app-type-name-#{current_user.app_type&.name&.id_hyphenate}" if current_user
   end
 
   def user_roles_for_attr
@@ -70,7 +70,7 @@ module ApplicationHelper
   # 'class=""' attribute to add to the main body tag
   def body_classes
     class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} " \
-    "#{Rails.env.test? ? 'rails-env-test' : ''}"
+                 "#{'rails-env-test' if Rails.env.test?}"
 
     " class=\"#{class_list} initial-compiling \"".html_safe
   end
@@ -90,7 +90,9 @@ module ApplicationHelper
     class_extras ||= 'pull-right' unless link_text
 
     <<~END_HTML
-      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{full_hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{full_hyphenated_name}-#{option_type_url_marker}result-template" >#{link_text}</a>
+      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{unless link_text
+                                                                                      button_class
+                                                                                    end}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{full_hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{full_hyphenated_name}-#{option_type_url_marker}result-template" >#{link_text}</a>
     END_HTML
       .html_safe
   end
@@ -210,7 +212,7 @@ module ApplicationHelper
 
     mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
-    caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
+    caption = caption[:"#{mode}_caption"] || caption[:caption] || '' if caption.is_a?(Hash)
     if @form_object_instance && !no_sub
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing:)

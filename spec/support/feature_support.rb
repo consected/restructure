@@ -5,6 +5,7 @@ require './spec/support/user_actions_setup'
 module FeatureSupport
   include FeatureHelper
   include UserActionsSetup
+  include FeatureExpectations
 
   ResultsMasterPanel = '.results-panel .master-panel'
   ResultsMasterExpander = '.master-expander'
@@ -65,6 +66,8 @@ module FeatureSupport
       return if user_logged_in?
 
       visit '/users/sign_in'
+      finish_page_loading
+      finish_form_formatting
       have_css('#new_user')
 
       if all('#new_user').empty?
@@ -96,16 +99,9 @@ module FeatureSupport
         end
       end
 
+      puts_debug "⚠️  Login error: #{alert_messages.join(' | ')}" if flashed_alert?('warning')
       already_signed_in = user_logged_in?
-      next if already_signed_in
-
-      have_css '.flash .alert'
-
-      fa = all('.flash .alert')[0]
-      if fa
-        just_signed_in = (fa.text == "×\nSigned in successfully.")
-        puts fa.text unless just_signed_in
-      end
+      break if already_signed_in
 
       fa = all('.flash .alert', wait: 0)[0]
       just_signed_in = (fa&.text == "×\nSigned in successfully.")
@@ -132,18 +128,34 @@ module FeatureSupport
       puts_debug 'Attempting another login'
     end
 
+    puts_debug "⚠️  Login error: #{alert_messages.join(' | ')}" if flashed_alert?('warning')
     expect(just_signed_in || already_signed_in).to be true
+    dismiss_all_alerts
     finish_page_loading
   end
 
   def logout
+    finish_page_loading
     dismiss_modal
+    dismiss_all_alerts
     sleep 1
+
     have_css('.navbar-right a[data-do-action="show-user-options"]')
-    find('.navbar-right a[data-do-action="show-user-options"]').click
+    user_menu = find('.navbar-right a[data-do-action="show-user-options"]')
+    page.execute_script('arguments[0].scrollIntoView(true);', user_menu)
+    sleep 0.3
+    user_menu.click
+
     have_css('.navbar-right li.dropdown.open .dropdown-menu')
     expect(page).to have_css('.dropdown-menu a[data-do-action="user-logout"]')
-    click_link 'logout'
+
+    logout_link = find('.dropdown-menu a[data-do-action="user-logout"]')
+    page.execute_script('arguments[0].scrollIntoView(true);', logout_link)
+    sleep 0.3
+    logout_link.click
+    finish_page_loading
+    puts_alerts
+    dismiss_all_alerts
   end
 
   def finish_form_formatting
@@ -175,6 +187,15 @@ module FeatureSupport
       has_no_css?('.modal.fade.in')
       has_css?('.modal[style~="display: none"]')
     end
+  end
+
+  def dismiss_all_modals
+    all('button[data-dismiss="modal"]', wait: false).each do |m|
+      m.click
+    end
+    # wait for the modal to fade out before continuing
+    has_no_css?('.modal.fade.in')
+    has_css?('.modal[style~="display: none"]')
   end
 
   def open_player_element(el, items)
