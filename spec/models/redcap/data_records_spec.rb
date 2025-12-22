@@ -42,6 +42,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
       setup_file_store
       @projects = setup_redcap_project_admin_configs
       @project = @projects.first
@@ -308,10 +309,19 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                 .last
 
       expect(cr.result).to be_a Hash
+      expect(cr.result['storage_stage']).to be_present
+      expect(cr.result['count_retrieved']).to be > 0
       expect(cr.result['count_created_ids']).to be > 0
       expect(cr.result['count_updated_ids']).to eq 0
       expect(cr.result['count_unchanged_ids']).to eq 0
+      expect(cr.result['count_disabled_ids']).to eq 0
+      expect(cr.result['count_skipped_ids']).to eq 0
+      expect(cr.result['count_processed']).to be > 0
+      expect(cr.result['table']).to eq dm.table_name
       expect(cr.result['errors']).to be_empty
+      expect(cr.result['imported_files_count']).to eq 0
+      expect(cr.result['failed_files_count']).to eq 0
+      expect(cr.result).to have_key('job')
     end
 
     it 'retrieves all records in the background if there are more model than storage fields' do
@@ -355,11 +365,35 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                 .where('created_at > :created_at', created_at: start_time)
                                 .last
 
+      if cr.nil?
+        req = {
+          admin: request_admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          created_at: start_time
+        }
+        puts "About to fail - no ClientRequest found for #{req}"
+        Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).each do |r|
+          puts "  Found ClientRequest #{r.attributes}"
+        end
+      end
+      expect(cr).to be_present, "No ClientRequest found. Available: #{Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).pluck(:action).join(', ')}"
       expect(cr.result).to be_a Hash
+      expect(cr.result['storage_stage']).to be_present
+      expect(cr.result['count_retrieved']).to be > 0
       expect(cr.result['count_created_ids']).to be > 0
       expect(cr.result['count_updated_ids']).to eq 0
       expect(cr.result['count_unchanged_ids']).to eq 0
+      expect(cr.result['count_disabled_ids']).to eq 0
+      expect(cr.result['count_skipped_ids']).to eq 0
+      expect(cr.result['count_processed']).to be > 0
+      expect(cr.result['table']).to be_present
       expect(cr.result['errors']).to be_empty
+      expect(cr.result['imported_files_count']).to eq 0
+      expect(cr.result['failed_files_count']).to eq 0
+      expect(cr.result).to have_key('job')
     end
 
     it 'fails to start background request if model has missing fields' do
@@ -477,6 +511,64 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(files.count).to eq 2
     end
 
+    it 'tracks failed file imports' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      expect(@user.has_access_to?(:edit, :table, rc.dynamic_storage.dynamic_model.resource_name))
+      expect(@user.role_names).to include(Settings.admin_nfs_role)
+
+      clean_file_fields_filesystem rc.file_store
+
+      # Mock REDCap API file retrieval
+      mock_file_field_requests
+
+      # Mock file import to fail for file1 but succeed for signature
+      call_count = 0
+      allow(NfsStore::Import).to receive(:import_file).and_wrap_original do |method, *args, **kwargs|
+        call_count += 1
+        filename_str = args[1].to_s
+        raise Exception.new("Simulated file import failure for #{filename_str}") if filename_str == 'file1'
+
+        # Simulate a file import failure
+
+        # Call original method with all arguments
+        result = method.call(*args, **kwargs)
+        result
+      end
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      expect(dr.records.length).to be > 0
+
+      # Create/update records first so we have ActiveRecord instances
+      dr.records.each do |record|
+        dr.send(:create_or_update, record)
+      end
+
+      # Find a record that has both file1 and signature fields
+      model_record = dr.upserted_records.find { |r| r[:file1].present? && r[:signature].present? }
+      expect(model_record).to be_present
+
+      dr.send(:capture_files, model_record)
+
+      # Check that we have both successful and failed files
+      expect(dr.imported_files.count).to eq 1 # signature succeeded
+      expect(dr.failed_files.count).to eq 1 # file1 failed
+      expect(dr.failed_files.first[:field_name]).to eq :file1
+      expect(dr.failed_files.first[:error]).to include 'Simulated file import failure'
+      expect(dr.errors.count).to eq 1
+      expect(dr.errors.first[:action]).to eq :capture_files
+
+      # Verify the file field was cleared in the database record
+      model_record.reload
+      expect(model_record.file1).to be_nil
+      expect(model_record.signature).to be_present
+    end
+
     it 'downloads files in background' do
       rc = @project_admin
       rc.current_admin = @admin
@@ -523,6 +615,20 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(files.count).to eq 4
       expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
         .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
+
+      # Verify job result includes file counts
+      start_time = DateTime.now - 1.minute
+      cr = Redcap::ClientRequest.where(admin: request_admin,
+                                       action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+
+      expect(cr.result).to be_a Hash
+      expect(cr.result['imported_files_count']).to eq 4
+      expect(cr.result['failed_files_count']).to eq 0
     end
   end
 

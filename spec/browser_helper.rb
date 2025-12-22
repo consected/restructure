@@ -48,9 +48,8 @@ module BrowserHelper
     # browser_args << '--new-instance'
 
     cb = Capybara
-    cb.server = :puma
-    # cb.threadsafe = true
-    cb.reuse_server = false
+    # cb.server = :puma
+    # cb.reuse_server = false
     service = nil
 
     if ENV['BROWSER'] == 'firefox'
@@ -102,7 +101,7 @@ module BrowserHelper
     options = Selenium::WebDriver::Firefox::Options.new(args: browser_args)
     service = Selenium::WebDriver::Firefox::Service.new
 
-    exe = ENV['GECKO_PATH']
+    exe = ENV.fetch('GECKO_PATH', nil)
     exe = if exe.blank?
             alt_exe = ['/snap/bin/firefox.geckodriver', '/usr/local/bin/geckodriver']
             exe = alt_exe.select { |p| File.exist?(p) }.first

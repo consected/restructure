@@ -14,10 +14,75 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems to address CVE:
+  - CVE-2025-14762
+
+### From Viva - PR #800 - 2025-12-22
+
+- [Updated] gems to restrict connection_pool version
+
+### From Viva and FPHS - PR #799 -2025-12-22
+
+Combined effort related to both projects with similar issues.
+
+- [Fixed] specs and test automation
+
+Fixed-test-script
+
+### From FPHS - PR #791 - 2025-12-07
+
+- [Added] test scripts to aid automated testing
+- [Changed] handling of test database cleaning using a Postgres user with appropriate privileges, rather than the superuser
+- [Fixed] specs for reliability
+
+Added brakeman ignore entry
+
+### From FPHS - PR #789 - 2025-1205
+
+- [Fixed] deprecation warnings for SCSS files - fixes #669
+
+### From FPHS - PR #788 - 2025-12-05
+
+Added more information when the save trigger add_tracker fails for some reason - fixes #280
+
+### From FPHS - PR #648 - 2025-12-05
+
+- [Added] Redcap transfer to include failed files count - resolves #648
+
+### From FPHS - PR #617 - 2025-12-05
+
+- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
+
+- [Fixed] documentation related to notify save trigger
+
+- [Allow] use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+Fixed documentation related to notify save trigger
+
+Allow use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+
+### From FPHS - PR #785 - 2025-12-05
+
+- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
+
+### From FPHS - PR 784 - 2025-12-05
+
+- [Changed] database setup for better testing (avoid need for sudo and remove Filestore temp files)
+
+### From FPHS - PR #783 - 2025-12-05
+
+- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
+
+### From Consected - PR #782 - 2025-12-03
+
+- [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
+
+### From Consected - PR #781 - 2025-12-03
+
+- [Added] version diffs to config_libraries in a new admin panel tab - resolves #780
+
 ## [9.38.0] - 2025-12-03
 
 - [Updated] CHANGELOG.md with git commits
-
 
 ## [9.37.0] - 2025-12-03
 

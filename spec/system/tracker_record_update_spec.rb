@@ -19,7 +19,7 @@ describe 'tracker record update', js: true, driver: $browser_driver do
     end
 
     seed_database
-    create_data_set_outside_tx no_trackers: true
+    create_data_set_outside_tx no_trackers: true, no_seed: true
 
     @user, @good_password = create_user
     @good_email = @user.email
@@ -60,7 +60,7 @@ describe 'tracker record update', js: true, driver: $browser_driver do
       fill_in 'master_player_infos_attributes_0_first_name', with: @full_player_info.first_name
       fill_in 'master_player_infos_attributes_0_last_name', with: @full_player_info.last_name.to_s
       sleep 1
-      find("\#master_player_infos_attributes_0_last_name").send_keys :tab
+      find('#master_player_infos_attributes_0_last_name').send_keys :tab
     end
 
     have_css '#advanced_search_master.ajax-running'

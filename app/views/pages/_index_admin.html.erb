@@ -108,14 +108,13 @@
           </div>
           <% if current_admin.can_admin?(:redcap)%>
           <div class="col-sm-6">
-            <h3>REDCap</h3>
+            <h3>REDCap <%= render partial: 'pages/admin_redcap_status_indicators' %></h3>
           <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
             <ul class="nav">
-              <li class="nav"><%= link_to "Projects", 
-                                          redcap_project_admins_path(
-                                            no_redirect: true, 
-                                            # use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
-                                          ) %> </li>
+              <li class="nav">
+                <%= link_to "Projects", 
+                            redcap_project_admins_path(no_redirect: true) %>
+              </li>
               <li class="nav"><%= link_to "Request Log", redcap_client_requests_path %> </li>
             </ul>
           <% elsif !Admin::AppType.where(name: 'ref-data').first&.active_on_server? %>

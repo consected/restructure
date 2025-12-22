@@ -8,7 +8,7 @@ module Seeds
         res = ExternalIdentifier.find_by(name: v['name'])
         next if res
 
-        v[:current_admin] = auto_admin
+        v[:current_admin] = Seeds.auto_admin
         res = ExternalIdentifier.new(v)
 
         updated = res.save!
@@ -43,13 +43,13 @@ module Seeds
         unless defined? Scantron
           log 'Reloading external identifiers since Scantron is not defined'
           ExternalIdentifier.define_models
-          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
+          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: Seeds.auto_admin)
         end
       else
         s = ExternalIdentifier.find_by(name: 'scantrons')
         raise 'Scantron not found' unless s
 
-        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+        s.update!(current_admin: Seeds.auto_admin, disabled: false) if s.disabled?
       end
       # ::ExternalIdentifier.refresh_outdated unless defined? Scantron
       raise "Scantron not defined: #{sa}\n#{s}" unless defined? Scantron
@@ -59,13 +59,13 @@ module Seeds
         unless defined? SageAssignment
           log 'Reloading external identifiers since SageAssignment is not defined'
           ExternalIdentifier.define_models
-          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: auto_admin)
+          sa.update!(disabled: false, updated_at: DateTime.now, current_admin: Seeds.auto_admin)
         end
       else
         s = ExternalIdentifier.find_by(name: 'sage_assignments')
         raise 'SageAssignment not found' unless s
 
-        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+        s.update!(current_admin: Seeds.auto_admin, disabled: false) if s.disabled?
       end
       # ::ExternalIdentifier.refresh_outdated unless defined? SageAssignment
       raise "SageAssignment not defined: #{sa}\n#{s}" unless defined? SageAssignment
@@ -73,8 +73,8 @@ module Seeds
       Master.reset_external_id_matching_fields!
 
       Admin::AppType.active.each do |app_type|
-        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: auto_admin)
-        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: auto_admin)
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: Seeds.auto_admin)
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: Seeds.auto_admin)
       end
     end
   end

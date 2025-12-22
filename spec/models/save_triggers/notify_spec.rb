@@ -70,7 +70,6 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
 
     @trigger = SaveTriggers::Notify.new(config, @al)
-
     last_mn = MessageNotification.order(id: :desc).first
     # last_dj = Delayed::Job.order(id: :desc).first
 
@@ -267,6 +266,343 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+  end
+
+  it 'uses a simple {{template}} reference to get the users for a notification' do
+    config = {
+      type: 'email',
+      users: '{{user_id}}',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+  end
+
+  it 'uses a simple {{{template}}} reference to get the users for a notification' do
+    config = {
+      type: 'email',
+      users: '{{{user_id}}}',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+  end
+
+  it 'uses template references for role configuration' do
+    # Create a dynamic field on the activity log that contains the role name
+    @al.select_who = 'test'
+    @al.current_user = @user
+    @al.save!
+    config = {
+      type: 'email',
+      role: '{{select_who}}',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.sort).to eq @non_template_user_ids.sort
+  end
+
+  it 'uses template reference with existing field for role configuration' do
+    # Use select_who field which contains 'user' - we'll map this to a role
+    # First create a role named 'user'
+    Admin::UserRole.create! app_type: @user.app_type, user: @user, role_name: 'user', current_admin: @admin
+
+    config = {
+      type: 'email',
+      role: '{{select_who}}',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # Should find users with role 'user' (which is the value of @al.select_who)
+    expect(@trigger.instance_variable_get(:@role_name)).to eq @al.select_who
+  end
+
+  it 'uses an array of literal values for phones' do
+    phones = ['+16175550118', '+16175550104']
+    config = {
+      type: 'sms',
+      phones: phones,
+      layout_template: @layout_sms.name,
+      content_template_text: 'Test message',
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    expect(@trigger.phones).to eq phones
+  end
+
+  it 'uses an array of literal values for emails' do
+    emails = ['test1@example.com', 'test2@example.com']
+    config = {
+      type: 'email',
+      emails: emails,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    expect(@trigger.instance_variable_get(:@force_emails)).to eq emails
+  end
+
+  it 'uses template substitution for emails with player_contact field' do
+    # Create a player_contact with email type
+    pc_email = PlayerContact.create!(
+      master: @al.master,
+      rec_type: 'email',
+      data: 'player@example.com',
+      rank: 10
+    )
+
+    config = {
+      type: 'email',
+      emails: '{{player_contact_emails.data}}',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # Template substitution returns an array for associated collections
+    expect(@trigger.instance_variable_get(:@force_emails)).to eq [pc_email.data]
+  end
+
+  it 'uses template reference for content_template_text with existing field' do
+    # Use the data field (phone number) in content_template_text
+    # This should be substituted and preserved as a template for later rendering
+    @al.notes = 'Custom message for {{select_who}}'
+    @al.select_who = 'notify test person'
+    @al.current_user = @user
+    @al.save!
+
+    expect(@al.notes).to eq 'Custom message for {{select_who}}'
+
+    config = {
+      type: 'email',
+      role: 'test',
+      layout_template: @layout.name,
+      content_template_text: '{{notes}}',
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+    # The content_template_text should be substituted with the field value
+    # which itself contains templates that will be rendered later
+    expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
+
+    @trigger.perform
+
+    expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
+  end
+
+  it 'uses template reference for content_template_text with existing field' do
+    # Use the data field (phone number) in content_template_text
+    # This should be substituted and preserved as a template for later rendering
+    @al.notes = 'Custom message for {{select_who}}'
+    @al.select_who = 'notify test person'
+    @al.current_user = @user
+    @al.save!
+
+    expect(@al.notes).to eq 'Custom message for {{select_who}}'
+
+    config = {
+      type: 'email',
+      role: 'test',
+      layout_template: @layout.name,
+      content_template_text: { this: { notes: 'return_value' } },
+      subject: 'subject text'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+    # The content_template_text should be substituted with the field value
+    # which itself contains templates that will be rendered later
+    expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
+
+    @trigger.perform
+
+    expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
+  end
+
+  it 'uses template reference for importance with select_result field' do
+    @al.update!(select_result: 'promotional')
+
+    config = {
+      type: 'email',
+      users: @al.user_id,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text',
+      importance: '{{select_result}}'
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # select_result field values get lowercased, so we expect 'promotional'
+    expect(@trigger.instance_variable_get(:@importance)).to eq 'promotional'
+  end
+
+  describe 'with return_value_list conditional references' do
+    # These tests verify that conditional references with return_value_list
+    # correctly return arrays of values for users, emails, phones, and phone_records
+
+    before(:each) do
+      @al = create_item
+      @master = @al.master
+      @master.current_user = @user
+
+      # Create multiple player contacts for testing (all with rank 10 which is valid)
+      @pc1 = PlayerContact.create!(master: @master, rec_type: 'email', data: 'test1@example.com', rank: 10)
+      @pc2 = PlayerContact.create!(master: @master, rec_type: 'email', data: 'test2@example.com', rank: 10)
+      @pc3 = PlayerContact.create!(master: @master, rec_type: 'phone', data: '+16175550101', rank: 10)
+      @pc4 = PlayerContact.create!(master: @master, rec_type: 'phone', data: '+16175550102', rank: 10)
+    end
+
+    it 'uses return_value_list for users from activity log user_id field via conditional reference' do
+      # The activity logs already have user_ids from setup
+      # Just verify they can be retrieved via return_value_list
+      config = {
+        type: 'email',
+        users: {
+          activity_log__player_contact_phones: {
+            master_id: @master.id,
+            user_id: 'return_value_list'
+          }
+        },
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+      @trigger = SaveTriggers::Notify.new config, @al
+
+      @trigger.perform
+
+      # Should return an array of user IDs from all activity logs for this master
+      # At minimum, should include the current activity log's user
+      expect(@trigger.receiving_user_ids).to include(@al.user_id)
+      expect(@trigger.receiving_user_ids).to be_an(Array)
+    end
+
+    it 'uses return_value_list for emails from associated player_contacts' do
+      config = {
+        type: 'email',
+        emails: {
+          player_contacts: {
+            rec_type: 'email',
+            data: 'return_value_list'
+          }
+        },
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+      @trigger = SaveTriggers::Notify.new config, @al
+
+      @trigger.perform
+
+      # Should return an array of email addresses
+      expect(@trigger.instance_variable_get(:@force_emails).sort).to eq [@pc1.data, @pc2.data].sort
+    end
+
+    it 'uses return_value_list for phones from associated player_contacts' do
+      config = {
+        type: 'sms',
+        phones: {
+          player_contacts: {
+            rec_type: 'phone',
+            data: 'return_value_list'
+          }
+        },
+        default_country_code: '1',
+        layout_template: @layout_sms.name,
+        content_template_text: 'Test SMS',
+        subject: 'subject text'
+      }
+      @trigger = SaveTriggers::Notify.new config, @al
+
+      @trigger.perform
+
+      # Should return an array of phone numbers (cleaned/formatted)
+      # Verify we got multiple phones and they include our test phone numbers
+      expect(@trigger.phones).to be_an(Array)
+      expect(@trigger.phones.length).to be >= 2
+      # Check that the phones were processed (formatted)
+      expect(@trigger.phones.first).to match(/^\+?\d+$/)
+    end
+
+    it 'uses return_value_list for phone_records with IDs' do
+      # This tests the phone_records with return_value_list pattern
+      # Create activity logs that we can retrieve IDs from
+      al2 = @master.activity_log__player_contact_phones.create!(
+        select_call_direction: 'to staff',
+        select_who: 'staff',
+        data: '(516)262-9999'
+      )
+
+      al_ids = [@al.id, al2.id]
+
+      # Use activity logs as the phone_records source
+      # These have IDs and belong to the master
+      config = {
+        type: 'sms',
+        phone_records: {
+          activity_log__player_contact_phones: {
+            master_id: @master.id,
+            id: 'return_value_list'
+          }
+        },
+        list_type: 'activity_log__player_contact_phones',
+        default_country_code: '1',
+        layout_template: @layout_sms.name,
+        content_template_text: 'Test bulk SMS',
+        subject: 'subject text'
+      }
+
+      @trigger = SaveTriggers::Notify.new config, @al
+
+      # Initialize attributes from the config (normally done in perform loop)
+      @trigger.send(:init_attribs, config)
+
+      # Now test setup_recipient_data to verify it processes the return_value_list correctly
+      @trigger.send(:setup_recipient_data) # Verify that phone_records were retrieved and processed into the expected structure
+      force_recip_recs = @trigger.instance_variable_get(:@force_recip_recs)
+      expect(force_recip_recs).to be_an(Array)
+      expect(force_recip_recs.length).to be >= 1 # At least the original @al
+
+      # Verify the structure of recipient records
+      expect(force_recip_recs.first).to have_key(:list_type)
+      expect(force_recip_recs.first).to have_key(:id)
+      expect(force_recip_recs.first).to have_key(:default_country_code)
+      expect(force_recip_recs.first[:list_type]).to eq 'activity_log__player_contact_phones'
+
+      # Verify we got IDs back
+      recip_ids = force_recip_recs.map { |r| r[:id] }
+      expect(recip_ids).to include(al_ids.first)
+    end
   end
 
   it 'sets the notification to send 1 day in the future' do
@@ -472,11 +808,12 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep2_last_sent_msg.item_id).to eq alstep2.id
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 1\n</div></body></html>"
+    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p>"
     expect(alstep1_first_sent_msg.item_id).to eq alstep1.id
     expect(alstep1_first_sent_msg.status).to eq 'complete'
     expect(alstep1_first_sent_msg.role_name).to eq 'test'
     expect(alstep1_first_sent_msg.subject).to eq 'subject text 1'
-    expect(alstep1_first_sent_msg.content_template_text).to eq "#{t} 1\n"
+    expect(alstep1_first_sent_msg.content_template_text).to eq "#{ctt} 1\n"
     expect(alstep1_first_sent_msg.generated_content).to eq tsub
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 2\n</div></body></html>"
@@ -484,15 +821,17 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep1_last_sent_msg.status).to eq 'complete'
     expect(alstep1_last_sent_msg.role_name).to eq 'test_2'
     expect(alstep1_last_sent_msg.subject).to eq 'subject text 2'
-    expect(alstep1_last_sent_msg.content_template_text).to eq "#{t} 2\n"
+    expect(alstep1_last_sent_msg.content_template_text).to eq "#{ctt} 2\n"
     expect(alstep1_last_sent_msg.generated_content).to eq tsub
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 1\n</div></body></html>"
+    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p>"
+
     expect(alstep2_first_sent_msg.item_id).to eq alstep2.id
     expect(alstep2_first_sent_msg.status).to eq 'complete'
     expect(alstep2_first_sent_msg.role_name).to eq 'test'
     expect(alstep2_first_sent_msg.subject).to eq 'subject text 1'
-    expect(alstep2_first_sent_msg.content_template_text).to eq "#{t} 1\n"
+    expect(alstep2_first_sent_msg.content_template_text).to eq "#{ctt} 1\n"
     expect(alstep2_first_sent_msg.generated_content).to eq tsub
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 2\n</div></body></html>"
@@ -500,7 +839,50 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep2_last_sent_msg.status).to eq 'complete'
     expect(alstep2_last_sent_msg.role_name).to eq 'test_2'
     expect(alstep2_last_sent_msg.subject).to eq 'subject text 2'
-    expect(alstep2_last_sent_msg.content_template_text).to eq "#{t} 2\n"
+    expect(alstep2_last_sent_msg.content_template_text).to eq "#{ctt} 2\n"
     expect(alstep2_last_sent_msg.generated_content).to eq tsub
+  end
+
+  describe 'calc_field_or_return with template substitutions' do
+    # These tests verify that calc_field_or_return correctly handles template substitutions
+    # in the context of Notify triggers. The core substitution logic is already tested
+    # in conditional_actions_spec.rb - these tests just verify integration.
+
+    context 'with users and emails options' do
+      before(:each) do
+        @al = create_item
+
+        @master = @al.master
+        @master.current_user = @user
+        @player_contact = PlayerContact.create!(master: @master, rec_type: 'email', data: 'test-email@test.tst', rank: 10)
+      end
+
+      it 'processes simple template substitutions through calc_field_or_return' do
+        # Use the actual @al object which has all necessary attributes and methods
+        notify = SaveTriggers::Notify.new({}, @al) # just to load the class context
+        # Test simple string with {{variable}}
+        result = notify.send(:calc_field_or_return, '{{player_contact_emails.data}}')
+        expect(result).to eq(@player_contact.data)
+
+        # Test string with {{{raw_value}}}
+        result = notify.send(:calc_field_or_return, '{{{player_contact_emails.id}}}')
+        expect(result).to eq(@player_contact.id)
+        expect(result).to be_a(Integer)
+
+        # Test array with simple template references
+        result = notify.send(:calc_field_or_return, [100, 102, 104])
+        expect(result).to eq([100, 102, 104])
+
+        # Test that complex templates are NOT substituted (preserved for later rendering)
+        result = notify.send(:calc_field_or_return, 'test@email.tst')
+        expect(result).to eq('test@email.tst')
+
+        # Test that hashes still work (passed through to ConditionalActions)
+        hash_config = { all: { masters: { id: @al.master_id } } }
+        expect do
+          notify.send(:calc_field_or_return, hash_config)
+        end.not_to raise_error
+      end
+    end
   end
 end

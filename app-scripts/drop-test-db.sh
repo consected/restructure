@@ -21,9 +21,13 @@ function drop() {
   SCHEMA_NAME=ml_app
   DBOWNER=$(whoami)
 
-  if [ "${USE_PG_HOST}" ]; then
-    USE_PG_UNAME=${USE_PG_UNAME:=postgres}
-    psql -c "drop database $DBNAME" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+  if [ "${USE_PG_HOST}" ] || [ "${USE_PG_UNAME}" ]; then
+    export USE_PG_UNAME=${USE_PG_UNAME:=postgres}
+    PSQL_ARGS="-U ${USE_PG_UNAME}"
+    if [ "${USE_PG_HOST}" ]; then
+      PSQL_ARGS="${PSQL_ARGS} -h ${USE_PG_HOST}"
+    fi
+    psql -c "drop database $DBNAME" $PSQL_ARGS
   else
     sudo -u postgres psql -c "drop database $DBNAME;"
   fi
@@ -50,3 +54,7 @@ else
     drop
   done
 fi
+
+# Clean up the temporary nfs_store directories
+rm -rf /var/tmp/nfs_store_tmp*
+rm -rf /var/tmp/nfs_store_test*

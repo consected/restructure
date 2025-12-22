@@ -12,7 +12,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
 
   def set_up_feature
     SetupHelper.feature_setup
-    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForUser', true)
 
     create_admin
 
@@ -33,7 +33,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
     @good_email = @user.email
     @app_type = @user.app_type
     expect(@app_type).not_to be nil
-    expect(@user.two_factor_auth_disabled).to be_falsey
+    expect(@user.two_factor_auth_disabled).to be_truthy
   end
 
   describe 'dynamic model show_if conditions' do

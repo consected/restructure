@@ -93,14 +93,20 @@ class Admin::JobReviewsController < AdminController
   def filtered_primary_model(pm = nil)
     job_id = params.dig(:filter, :job_id)
     id = params.dig(:filter, :id)
+    handler_filter = params.dig(:search_attrs, :handler)
+
     if job_id.present?
       job = Delayed::Job.find_by_job_id(job_id)
       pm = primary_model.where(id: job&.id)
     elsif id.present?
       pm = primary_model.where(id: id)
+    elsif handler_filter.present?
+      # Filter by GlobalID in the handler YAML
+      # The handler contains YAML with the GlobalID, so we use a LIKE query
+      pm = primary_model.where('handler LIKE ?', "%#{handler_filter}%")
     else
       pm ||= primary_model
     end
-    super(pm)
+    super
   end
 end

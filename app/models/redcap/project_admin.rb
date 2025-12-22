@@ -85,6 +85,8 @@ module Redcap
 
     before_save :empty_disabled_api_key
 
+    before_save :clear_frequency_if_none
+
     before_save :set_schedule_status, if: lambda {
                                             frequency_changed? ||
                                               transfer_mode_changed? ||
@@ -266,7 +268,7 @@ module Redcap
       attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
       attrs[:use_hash_config][:data_options] ||= Settings::RedcapDataOptions
 
-      super(attrs)
+      super
     end
 
     #
@@ -537,6 +539,13 @@ module Redcap
     end
 
     #
+    # Check if transfer mode is set to 'none'
+    # @return [Boolean]
+    def transfer_mode_none?
+      transfer_mode == 'none'
+    end
+
+    #
     # Returns true if the data_options.prefix_dynamic_model_config_library setting is blank
     # or if the dynamic model has the specified library in its options
     # @return [true|false]
@@ -607,6 +616,53 @@ module Redcap
       logger.debug "Not invalidating cache (#{self.class.name})"
     end
 
+    #
+    # Check if this project has a failed status
+    # @return [Boolean]
+    def failed?
+      return false unless frequency.present?
+
+      status.in?([
+                   Statuses[:scheduled_run_failed],
+                   Statuses[:manual_run_failed],
+                   Statuses[:request_failed]
+                 ])
+    end
+
+    #
+    # Get the timestamp of the most recent failure
+    # @return [DateTime | nil]
+    def failed_at
+      return nil unless failed?
+
+      # Get the most recent client request that might indicate when the failure occurred
+      latest_request = redcap_client_requests
+                       .order(updated_at: :desc, id: :desc)
+                       .first
+
+      latest_request&.updated_at || updated_at
+    end
+
+    #
+    # Get all projects that are scheduled and have failed
+    # @return [ActiveRecord::Relation]
+    def self.failed_scheduled_projects
+      active
+        .where.not(frequency: [nil, ''])
+        .where(status: [
+                 Statuses[:scheduled_run_failed],
+                 Statuses[:manual_run_failed],
+                 Statuses[:request_failed]
+               ])
+    end
+
+    #
+    # Check if there are any failed scheduled projects
+    # @return [Boolean]
+    def self.any_failed_scheduled_projects?
+      failed_scheduled_projects.exists?
+    end
+
     private
 
     #
@@ -615,6 +671,14 @@ module Redcap
       return unless disabled?
 
       self.api_key = nil
+    end
+
+    #
+    # Called before save to clear frequency if transfer mode is 'none'
+    def clear_frequency_if_none
+      return unless transfer_mode == 'none'
+
+      self.frequency = nil
     end
 
     #

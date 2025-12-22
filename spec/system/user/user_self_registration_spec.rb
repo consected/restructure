@@ -16,6 +16,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     change_setting('TwoFactorAuthDisabledForAdmin', false)
 
     create_admin
+    change_setting('RegistrationAdminEmail', @admin.email)
 
     # create a template user with some roles
     @template_user = RegistrationHandler.registration_template_user
@@ -175,7 +176,9 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   describe 'user should be allowed to self-register' do
-    before { visit '/users/sign_up' }
+    before do
+      visit '/users/sign_up'
+    end
     subject { page }
 
     it { is_expected.to have_select('Country') }
