@@ -8,10 +8,10 @@ describe 'advanced search', js: true, driver: $browser_driver do
   include FeatureSupport
 
   before(:all) do
+    puts "start #{Time.now} advanced search setup"
     SetupHelper.feature_setup
 
-    seed_database
-    create_data_set_outside_tx
+    create_data_set_outside_tx no_seed: true
     @admin, = create_admin
 
     gs = Classification::GeneralSelection.all
@@ -19,7 +19,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
       g.current_admin = @admin
       g.create_with = true
       g.edit_always = true
-      g.save!
+      g.save
     end
 
     # Clean up the general selection list to only allow one phone, email etc
@@ -68,12 +68,16 @@ describe 'advanced search', js: true, driver: $browser_driver do
     setup_access :create_master, resource_type: :general, access: :read
     setup_access :create_master, resource_type: :general, access: :read, user: @user
     expect(@user.can?(:create_master)).to be_truthy
+    puts "end #{Time.now} advanced search setup"
   end
 
   def add_contact(ctype, entry, expected)
     expect(page).to have_css('[data-sub-list="player_contacts"]')
-    find('[data-sub-list="player_contacts"] a.add-item-button').click
-    expect(page).to have_css('form#new_player_contact')
+    btn = find('[data-sub-list="player_contacts"] a.add-item-button')
+    scroll_into_view(btn)
+    btn.click
+    sleep 0.5 # Allow time for AJAX form to load
+    expect(page).to have_css('form#new_player_contact', wait: 10)
 
     within 'form#new_player_contact' do
       select ctype, from: 'Record type'
@@ -189,20 +193,20 @@ describe 'advanced search', js: true, driver: $browser_driver do
       click_button 'Save'
     end
 
-    if startyear != ''
+    if startyear == ''
+      expect(all('.player-info-start_year strong').length).to eq 0
+    else
       expect(page).to have_css('.player-info-item .list-group')
       t = find('.player-info-start_year strong').text
       expect(t).to eq startyear
-    else
-      expect(all('.player-info-start_year strong').length).to eq 0
     end
 
-    if endyear != ''
+    if endyear == ''
+      expect(all('.player-info-end_year strong').length).to eq 0
+    else
       expect(page).to have_css('.player-info-item .list-group')
       t = find('.player-info-end_year strong').text
       expect(t).to eq endyear
-    else
-      expect(all('.player-info-end_year strong').length).to eq 0
     end
 
     # ensure that we wait for the results to fully show before returning
@@ -210,17 +214,25 @@ describe 'advanced search', js: true, driver: $browser_driver do
   end
 
   def edit_college(college, keyed)
-    have_css('form.edit_player_info')
+    expect(college).not_to be_empty
+    expect(keyed).not_to be_empty
+    expect(keyed.length).to be >= 3
+    unless has_css?('form.edit_player_info', wait: 3)
+      debug_state('edit_player_info_missing', "Expected to be in edit_player_info form to edit college '#{college}'")
+    end
     within 'form.edit_player_info' do
       f = find('#player_info_college')
       f.click
       f.send_keys(keyed)
-      sleep 1
+      unless has_css?('.tt-suggestion', wait: 5)
+        debug_state('college_typeahead', "Typing college '#{keyed}' to get typeahead suggestions")
+      end
+      # Wait for typeahead suggestions to appear
+      expect(page).to have_css('.tt-suggestion', wait: 5), "Failed typing college '#{keyed}' to get typeahead suggestions"
 
-      have_css('.tt-suggestion')
       h = '.tt-suggestion .tt-highlight'
-      has_css?(h)
-      expect(page).to have_css(h), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
+      # Wait for highlighted suggestion
+      expect(page).to have_css(h, wait: 5), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
       expect(page.all(h).first.text.downcase).to eq(keyed)
       page.all(h).first.click
 
@@ -341,8 +353,9 @@ describe 'advanced search', js: true, driver: $browser_driver do
     expect(page).to have_css('.player-info-item')
     b = all ".player-info-item a[title='edit']"
     b.first.click
+    sleep 0.5 # Allow edit form to load via AJAX
 
-    expect(page).to have_css('form.edit_player_info')
+    expect(page).to have_css('form.edit_player_info', wait: 10)
 
     item_type = 'player_infos_source'
     sources = Classification::GeneralSelection.where(item_type: item_type)
@@ -352,6 +365,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
     # edit college
     b = all ".player-info-item a[title='edit']"
     b.first.click
+    sleep 0.5 # Allow edit form to load via AJAX
 
     edit_college 'Harvard', 'har'
 
@@ -409,11 +423,15 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     # add player info tags
 
-    find('a.add-flags').click
+    af = find('a.add-flags')
+    scroll_into_view af
+    af.click
 
     sleep 1
     # Trigger the chosen drop down
     i = 'ul.chosen-choices .search-field input.default'
+    debug_state('chosen_dropdown_trigger', 'Trigger Chosen drop down for item flags') unless page.has_css?(i, wait: 5)
+
     expect(page).to have_css(i)
     sleep 1
     f = find(i)
@@ -421,6 +439,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     # An absolutely positioned drop down is now shown. Interact with this instead
     i = 'body > .chosen-container ul.chosen-choices .search-field input'
+    debug_state('chosen_dropdown_input', 'Chosen drop down for item flags') unless page.has_css?(i, wait: 5)
     expect(page).to have_css(i)
     f = find(i)
 

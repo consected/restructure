@@ -12,6 +12,12 @@ module ExceptionExtensions
   def short_string_message
     to_s
   end
+
+  def self.short_string_backtrace(from_caller)
+    from_caller.select do |m|
+      m.include?(Rails.root.join('app').to_s) || m.include?(Rails.root.join('spec').to_s)
+    end.join("\n")
+  end
 end
 
 class Exception

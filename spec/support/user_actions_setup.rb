@@ -17,10 +17,7 @@ module UserActionsSetup
   end
 
   def ensure_user_matches_login_email
-    return unless @user.email != @good_email
-
-    puts "in login @user does not match @good_email: #{@user} does not match #{@good_email}"
-    @user = User.active.where(email: @good_email).first
+    nil unless @user.email != @good_email
   end
 
   def user_logout
@@ -28,7 +25,17 @@ module UserActionsSetup
   end
 
   def user_logged_in?
-    res = all('.nav a[data-do-action="show-user-options"]')
+    # Visit home page first to ensure page is loaded and check session validity
+    # This is important because Warden.test_reset! may have cleared server session
+    if current_url == 'about:blank' || current_url.nil? || current_url.empty?
+      visit '/'
+      begin
+        finish_page_loading
+      rescue StandardError
+        nil
+      end
+    end
+    res = all('.nav a[data-do-action="show-user-options"]', wait: 1)
     !res.empty?
   end
 

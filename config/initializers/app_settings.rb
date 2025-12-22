@@ -36,8 +36,8 @@ class Settings
     extra_dictionary_words: :word_list,
     use_dictionary: !Rails.env.test?,
     min_length: (ENV['PW_MIN_LEN'] || 10).to_i,
-    regex: ENV['PW_REGEX'],
-    regex_requirements: ENV['PW_REGEX_REQ']
+    regex: ENV.fetch('PW_REGEX', nil),
+    regex_requirements: ENV.fetch('PW_REGEX_REQ', nil)
   }.freeze
 
   PasswordUnlockTimeMins = (ENV['PW_UNLOCK_TIME_MINS'].presence || 60).to_i.freeze
@@ -103,7 +103,7 @@ class Settings
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
-  # For feature tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
+  # For system tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
   AllowUsersToRegister = Rails.env.test? || (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
   # Admin assigned to newly created user through the user registration feature
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'].presence || AdminEmail.presence
@@ -131,14 +131,14 @@ class Settings
   DidntReceiveConfirmationInstructionsUrl = AllowUsersToRegister ? '/users/confirmation/new' : LoginIssuesUrl
 
   # Block to appear at top of login page as a user message
-  LoginMessage = ENV['LOGIN_MESSAGE']
+  LoginMessage = ENV.fetch('LOGIN_MESSAGE', nil)
   # Maximum limit on master search results
   SearchResultsLimit = ENV['FPHS_RESULT_LIMIT'].presence
 
   #
   # Limit the app types an application server delivers.
   # A comma separated list, where all entries must be active app types in app_types table
-  olat = ENV['FPHS_LOAD_APP_TYPES']
+  olat = ENV.fetch('FPHS_LOAD_APP_TYPES', nil)
   prev_olat = Rails.cache.read('Settings::FPHS_LOAD_APP_TYPES')
   # Check if the environment variable requested different app types in dev.
   # If so, clean the cache to avoid unexpected errors

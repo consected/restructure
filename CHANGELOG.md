@@ -14,6 +14,31 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.39.0] - 2025-12-22
+
+- [Updated] gems to address CVE:
+  - CVE-2025-14762
+
+### From Viva - PR #800 - 2025-12-22
+
+- [Updated] gems to restrict connection_pool version
+
+### From Viva and FPHS - PR #799 -2025-12-22
+
+Combined effort related to both projects with similar issues.
+
+- [Fixed] specs and test automation
+
+Fixed-test-script
+
+### From FPHS - PR #791 - 2025-12-07
+
+- [Added] test scripts to aid automated testing
+- [Changed] handling of test database cleaning using a Postgres user with appropriate privileges, rather than the superuser
+- [Fixed] specs for reliability
+
+Added brakeman ignore entry
+
 ### From FPHS - PR #789 - 2025-1205
 
 - [Fixed] deprecation warnings for SCSS files - fixes #669
@@ -33,6 +58,9 @@ Added more information when the save trigger add_tracker fails for some reason -
 - [Fixed] documentation related to notify save trigger
 
 - [Allow] use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+Fixed documentation related to notify save trigger
+
+Allow use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
 
 ### From FPHS - PR #785 - 2025-12-05
 

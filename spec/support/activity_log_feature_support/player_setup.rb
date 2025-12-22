@@ -1,12 +1,10 @@
 module PlayerSetup
-
   def select_player
-
     player = pick_one_from @test_player_infos
     expect(player).to be_a(PlayerInfo)
-    have_link("Research")
-    click_link "Research"
-    have_css("#master-search-simple-form")
+    expect(page).to have_link('Research')
+    click_link 'Research'
+    have_css('#master-search-simple-form')
     within '#master-search-simple-form' do
       fill_in 'Last name', with: player.last_name
       fill_in 'First or nick name', with: player.first_name
@@ -18,7 +16,6 @@ module PlayerSetup
     dismiss_modal
     player
   end
-
 
   def edit_player_info_record
     expect(@master.id).not_to be nil

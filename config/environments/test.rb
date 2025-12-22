@@ -8,9 +8,6 @@ require 'active_support/core_ext/integer/time'
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  # Turn false under Spring and add config.action_view.cache_template_loading = true.
-  config.cache_classes = true
-
   # Eager loading loads your whole application. When running a single test locally,
   # this probably isn't necessary. It's a good idea to do in a continuous integration
   # system, or in some way before deploying your code.
@@ -44,7 +41,7 @@ Rails.application.configure do
   if ['TRUE', 'true'].include?(ENV['FPHS_USE_LOGGER'])
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = ENV['FPHS_LOG_LEVEL']&.to_sym || :warn
-    config.log_formatter = ::Logger::Formatter.new
+    config.log_formatter = Logger::Formatter.new
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = nil
@@ -53,7 +50,7 @@ Rails.application.configure do
   config.active_job.queue_adapter = :delayed_job
 
   # Support parallel tests
-  assets_cache_path = Rails.root.join("tmp/cache/assets/paralleltests#{ENV['TEST_ENV_NUMBER']}")
+  assets_cache_path = Rails.root.join("tmp/cache/assets/paralleltests#{ENV.fetch('TEST_ENV_NUMBER', nil)}")
   config.assets.configure do |env|
     FileUtils.mkdir_p assets_cache_path
     env.cache = Sprockets::Cache::FileStore.new(assets_cache_path)
@@ -62,15 +59,14 @@ Rails.application.configure do
   # fs_cache_path = Rails.root.join('tmp', 'cache', 'cache-fs', "paralleltests#{ENV['TEST_ENV_NUMBER']}")
   # FileUtils.mkdir_p fs_cache_path
   # config.cache_store = :file_store, fs_cache_path
-  config.cache_store = :memory_store, { namespace: "paralleltests#{ENV['TEST_ENV_NUMBER']}" }
+  config.cache_store = :memory_store, { namespace: "paralleltests#{ENV.fetch('TEST_ENV_NUMBER', nil)}" }
 
   config.active_record.dump_schema_after_migration = false
 
   # config.time_zone = 'Eastern Time (US & Canada)'
   # config.active_record.default_timezone = :local
 
-  config.enable_reloading = true
-  config.cache_classes = false
+  config.enable_reloading = false
 
   # Raise exceptions for disallowed deprecations.
   config.active_support.disallowed_deprecation = :raise

@@ -4,7 +4,7 @@ module Seeds
     def self.add_values values
       values.each do |v|
         res = Classification::ItemFlagName.find_or_initialize_by(v)
-        res.update(current_admin: auto_admin) unless res.admin
+        res.update(current_admin: Seeds.auto_admin) unless res.admin
       end
 
     end

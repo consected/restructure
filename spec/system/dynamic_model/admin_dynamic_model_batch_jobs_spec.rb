@@ -4,63 +4,18 @@ require 'rails_helper'
 
 describe 'admin dynamic model batch jobs link', js: true, driver: $browser_driver do
   include ModelSupport
-
-  def make_an_admin
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
-
-    @good_email = "testuser#{rand(1_000_000_000)}admin@testing.com"
-    @admin = Admin.create! email: @good_email
-    # Save a new password, as required to handle temp passwords
-    @admin = Admin.find(@admin.id)
-    @good_password = @admin.generate_password
-    @admin.save!
-    @admin.otp_secret = Admin.generate_otp_secret
-    @admin.otp_required_for_login = true
-    @admin.new_two_factor_auth_code = false
-    @admin.save!
-
-    @good_password
-  end
-
-  def admin_sign_in_with_2fa
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-
-    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    visit url
-    expect(current_path).to eq '/admins/sign_in'
-
-    within '#new_admin' do
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-
-      fill_in 'Email', with: @good_email
-      fill_in 'Password', with: @good_password
-      click_button 'Log in'
-    end
-
-    # Enter 2FA code
-    expect(page).to have_selector('.login-2fa-block', visible: true)
-    expect(page).to have_selector('#new_admin', visible: true)
-    expect(page).to have_selector('input[type="submit"]:not([disabled])', visible: true)
-
-    within '#new_admin' do
-      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
-      click_button 'Log in'
-    end
-
-    # Wait for successful login
-    expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.")
-  end
+  include AdminActionsSetup
 
   before(:all) do
     SetupHelper.feature_setup
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
     make_an_admin
   end
 
   it 'shows batch jobs link when batch_trigger is configured' do
+    # Close any extra windows and switch to main window
+    windows.last.close while windows.length > 1
+    switch_to_window(windows.first)
+
     # Create a dynamic model with batch_trigger configuration
     dm = DynamicModel.create!(
       current_admin: @admin,
@@ -118,6 +73,16 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
   end
 
   it 'does not show batch jobs link when batch_trigger is not configured' do
+    # Close any extra windows from previous tests and switch to main window
+    windows.last.close while windows.length > 1
+    switch_to_window(windows.first)
+
+    # Log out if already signed in from previous test
+    if page.has_css?('.admin-navbar', wait: 1)
+      visit '/admins/sign_out'
+      expect(page).to have_current_path('/admins/sign_in')
+    end
+
     # Create a dynamic model without batch_trigger
     dm = DynamicModel.create!(
       current_admin: @admin,
@@ -135,10 +100,6 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
     )
     dm.current_admin = @admin
     dm.update_tracker_events
-
-    # Close any extra windows from previous tests and switch to main window
-    windows.last.close while windows.length > 1
-    switch_to_window(windows.first)
 
     admin_sign_in_with_2fa
 
@@ -167,6 +128,12 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
     # Close any extra windows from previous tests and switch to main window
     windows.last.close while windows.length > 1
     switch_to_window(windows.first)
+
+    # Log out if already signed in from previous test
+    if page.has_css?('.admin-navbar', wait: 1)
+      visit '/admins/sign_out'
+      expect(page).to have_current_path('/admins/sign_in')
+    end
 
     # Enable delayed job creation but prevent execution
     # This allows RecurringBatchTask.schedule_task to create job records
@@ -285,13 +252,16 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
       expect(page).to have_css('table', wait: 10)
 
       # Should see job for first dynamic model
-      expect(page).to have_content(job1.id.to_s)
-
-      # Should NOT see job for second dynamic model
-      expect(page).not_to have_content(job2.id.to_s)
+      expect(page).to have_css('table tr', text: job1.id.to_s)
+      # Should NOT see job for second dynamic model (check within table rows only)
+      expect(page).not_to have_css('table tbody tr', text: /\A\s*#{Regexp.escape(job2.id.to_s)}\s/)
     end
 
     # Now test the second dynamic model
+    # Close extra windows and switch back to main window
+    windows.last.close while windows.length > 1
+    switch_to_window(windows.first)
+
     visit '/admin/dynamic_models'
 
     # Wait for the dynamic models page to load
@@ -324,10 +294,9 @@ describe 'admin dynamic model batch jobs link', js: true, driver: $browser_drive
       expect(page).to have_css('table', wait: 10)
 
       # Should see job for second dynamic model
-      expect(page).to have_content(job2.id.to_s)
-
-      # Should NOT see job for first dynamic model
-      expect(page).not_to have_content(job1.id.to_s)
+      expect(page).to have_css('table tr', text: job2.id.to_s)
+      # Should NOT see job for first dynamic model (check within table rows only)
+      expect(page).not_to have_css('table tbody tr', text: /\A\s*#{Regexp.escape(job1.id.to_s)}\s/)
     end
   ensure
     # Always restore the original delay_jobs setting

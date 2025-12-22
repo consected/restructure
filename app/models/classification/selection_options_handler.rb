@@ -320,7 +320,7 @@ class Classification::SelectionOptionsHandler
       end
 
       res.each do |r|
-        if r[:item_type].start_with?(prefix)
+        if r[:item_type]&.start_with?(prefix)
           r.merge!(base_item_type: prefix,
                    field_name: r[:item_type].sub("#{prefix}_", '').to_sym)
         end
@@ -367,7 +367,7 @@ class Classification::SelectionOptionsHandler
       end
     rescue StandardError => e
       raise FphsException, "Failure getting selector_with_config_overrides(#{conditions}) for implementation: " \
-      "#{impl_class}\n#{e}\n#{e.short_string_backtrace}"
+                           "#{impl_class}\n#{e}\n#{e.short_string_backtrace}"
     end
 
     res

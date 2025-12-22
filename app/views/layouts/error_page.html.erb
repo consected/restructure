@@ -4,7 +4,7 @@
  tag = 'p'
  tag='pre' if text.include?("\n")
 %>
-<div class="container well">
+<div class="container well error-page-block">
   <h1><%= @error_title || 'Unexpected Error' %></h1>
   <<%= tag %> class="">
     <%= text %>

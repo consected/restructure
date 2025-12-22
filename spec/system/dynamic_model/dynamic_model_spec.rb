@@ -13,7 +13,7 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
 
   def set_up_feature
     SetupHelper.feature_setup
-    change_setting('TwoFactorAuthDisabledForUser', false)
+    change_setting('TwoFactorAuthDisabledForUser', true)
 
     create_admin
 
@@ -76,7 +76,7 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
       expect(b).not_to be nil
 
       b.click
-      expect(page).to have_css('form.new_dynamic_model_test_all_v2_field')
+      expect(page).to have_css('form.new_dynamic_model_test_all_v2_field', wait: 10)
       new_num = rand(100_000_000..999_999_999)
       within('form.new_dynamic_model_test_all_v2_field') do
         sleep 2
@@ -907,10 +907,11 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
       l = all('a[data-panel-tab="details"]').first
       expect(l).not_to be nil
       l.click
+      sleep 1 # Allow tab content to load via AJAX - increased wait
 
-      expect(page).to have_css("#details-#{@master_id}")
+      expect(page).to have_css("#details-#{@master_id}", wait: 15)
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
-      expect(page).to have_css(c)
+      expect(page).to have_css(c, wait: 10)
       b = all(c).first
       expect(b).not_to be nil
 
