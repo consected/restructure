@@ -247,6 +247,26 @@ If changes are ever made to any of the _restructure-build_ scripts, the Docker c
 
      app-scripts/release_and_build.sh clean <optional: minor>
 
+### Merge commits and the CHANGELOG
+
+The upstream ReStructure repo is the canonical source of the CHANGELOG. The downstream projects are obviously welcome to maintain their own CHANGELOG files although if maintained in the root directory they shouldn't be sent upstream.
+
+Merge commits, the result of PRs should contain the full content of the associated CHANGELOG entry. This allows upstream to simply run:
+
+```sh
+git log --format=%b new-master..HEAD
+```
+
+The results of this are added to the _Unreleased_ section of the CHANGELOG before building.
+
+Downstream repos may use a helper script to get their commits into a format suitable for the CHANGELOG entries:
+
+```sh
+app-scripts/get_changelog_entries_from_git.sh
+```
+
+If building with the environment variable `ALLOW_EMPTY_UNRELEASED` set to any value, these entries will automatically added into the _Unreleased_ section.
+
 ## Testing
 
 Rspec tests are available. To set up a test database, first get a dump of the current

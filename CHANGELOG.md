@@ -14,49 +14,73 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.38.3] - 2025-12-21
+## [9.39.0] - 2025-12-22
 
-### From Viva
+- [Updated] gems to address CVE:
+  - CVE-2025-14762
 
-- [Fixed] file exclusion for rspec
-- [Updated] CHANGELOG
-- [Fixed] duplicated arguments in calling method
-- [Added] support for cleaner feature spec testing
-- [Added] links to directories for environment specific specs
-- [Added] developer and AI agent documentation to support test development
-- [Added] ability to RUN_APP_SPECS, keeping environment specific acceptance tests outside core
-- [Fxied] regression around avoiding duplicated migration names
-- [Fixed] regression due to not initializing class variables
-- [Changed] handling of dynamically generated migrations to avoid duplications
-- [Fixed] issue with empty `_default...:` options
-- [Added] test to protect essential models from being removed
-- [Added] more markup for automated tests
-- [Fixed] 2FA authentication disabled check edge case
-- [Changed] handling of schema ownership to only be applied in production, to allow effective testing
-- [Changed] error reporting level when SQL fails in a report
-- [Added] scripts to assist automated test runs
-- [Changed] app type imports to improve reliability and reporting of errors
-- [Added] UI markup to assist with automated tests
+### From Viva - PR #800 - 2025-12-22
 
-## [9.38.2] - 2025-12-12
+- [Updated] gems to restrict connection_pool version
+
+### From Viva and FPHS - PR #799 -2025-12-22
+
+Combined effort related to both projects with similar issues.
+
+- [Fixed] specs and test automation
+
+Fixed-test-script
+
+### From FPHS - PR #791 - 2025-12-07
+
+- [Added] test scripts to aid automated testing
+- [Changed] handling of test database cleaning using a Postgres user with appropriate privileges, rather than the superuser
+- [Fixed] specs for reliability
+
+Added brakeman ignore entry
+
+### From FPHS - PR #789 - 2025-1205
+
+- [Fixed] deprecation warnings for SCSS files - fixes #669
+
+### From FPHS - PR #788 - 2025-12-05
+
+Added more information when the save trigger add_tracker fails for some reason - fixes #280
+
+### From FPHS - PR #648 - 2025-12-05
+
+- [Added] Redcap transfer to include failed files count - resolves #648
+
+### From FPHS - PR #617 - 2025-12-05
+
+- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
+
+- [Fixed] documentation related to notify save trigger
+
+- [Allow] use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+Fixed documentation related to notify save trigger
+
+Allow use of `return_value_list` calculated value to return multiple results form the data for emails and phones in notify save trigger
+
+### From FPHS - PR #785 - 2025-12-05
+
+- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
+
+### From FPHS - PR 784 - 2025-12-05
+
+- [Changed] database setup for better testing (avoid need for sudo and remove Filestore temp files)
+
+### From FPHS - PR #783 - 2025-12-05
+
+- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
+
+### From Consected - PR #782 - 2025-12-03
 
 - [Added] dynamic model batch_trigger job details and link in dynamic model admin panel - resolves #691
-- [Added] a warning indicator on the Redcap Project admin panel link to show if any scheduled pulls are marked as "failed" - resolves #639
-- [Changed] database setup for better testing
-- [Changed] handling of Redcap projects with transfer mode "none" to reinforce its meaning as "never transfer this project" - resolves #630
-- [Added] notify save trigger to allow curly substitutions for emails, users and other configurations -  resolves #617
-- [Added] Redcap transfer to include failed files count - resolves #648
-- [Added] more information when the save trigger add_tracker fails for some reason - fixes #280
-- [Fixed] deprecation warnings for SCSS files - fixes #669
-- [Added] brakeman ignore entry
-- [Fixed] parallel_test script issue
-- [Added] test fixes and new scripts for improved automation support
-- [Fixed] more test scripts for automation
-- [Fixed] test scripts
 
-## [9.38.1] - 2025-12-03
+### From Consected - PR #781 - 2025-12-03
 
-- [Build] Viva version
+- [Added] version diffs to config_libraries in a new admin panel tab - resolves #780
 
 ## [9.38.0] - 2025-12-03
 
