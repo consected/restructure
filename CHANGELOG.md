@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] NfsStore::Dicom::MetadataHandler bug when guarding against a missing file_path due to user not having appropriate user roles - fixes #796
+- [Fixed] missing spec setup methods
+
 ## [9.39.0] - 2025-12-22
 
 - [Updated] gems to address CVE:
