@@ -5,7 +5,7 @@
       <% unless hide_player_tabs? %>
         <a href="#<%=panel_name%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity btn-close-panel" title="close panel"></a>
       <% end %>
-      <h4 class="list-group-item-heading"><%=panel_label%></h4>
+      <h4 class="list-group-item-heading panel-heading--<%=panel_label.id_hyphenate%>"><%=panel_label%></h4>
     </div>
 
   <% if category.in? special_categories %>

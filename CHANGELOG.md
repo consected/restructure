@@ -289,6 +289,75 @@ Fixed reporting multiple failures
 
 ## [9.31.0] - 2025-10-30
 
+- [Fixed] mail misconfiguration exception with `mail` new gem version - fixes #745
+
+## [9.31.8] - 2025-11-19
+
+- [Updated] gems for broken `mail` gem - references #745
+
+## [9.31.7] - 2025-11-19
+
+## [9.31.6] - 2025-11-19
+
+## [9.31.5] - 2025-11-19
+
+### From Viva - PR #743 - 2025-11-19
+
+- [Fixed] big_select fields don't trigger show_if field rules - fixes #742
+- [Fixed] show_ifs in admin sample of dynamic model
+
+### From Viva - PR #741 - 2025-11-19
+
+- [Added] logging of backtrace to support errors - related to #733
+
+## [9.31.4] - 2025-11-18
+
+### From Viva - PR #739 - 2025-11-18
+
+- [Fixed] user profile user details (activity log) tab doesn't show any content - fixes #735
+- [Added] logging info for failing calc_if
+- [Added] blank option to admin filters
+- [Fixed] inability to import  - related to #90
+
+### From Viva - PR #737 - 2025-11-18
+
+- [Added] diff of changes for results of app imports - resolves #736
+
+### From Viva - PR #734 - 2025-11-17
+
+- [Added] option to log access authorization information for a request (param `_log_access=true`) - resolves #733
+
+## [9.31.3] - 2025-11-13
+
+- [Fixed] saving a dynamic definition with `dialog_before: some string` causes an error - fixes #726
+- [Fixed] Portal pages relying on common_page_template_results partial are not showing the actual content - fixes #725
+- [Fixed] issue with reports embedded by handlebars
+- [Fixed] issues with activity log references showing dynamic models, based on a regression due to option types
+
+## [9.31.2] - 2025-11-12
+
+### From FPHS - PR #722 - 2025-10-12
+
+- [Added] an dynamic definition option to allow the default option type name to be set to a value other than "default" - resolves #721
+
+### From Viva - PR #720 - 2025-10-12
+
+- [Added] tests for alternative option type field in dynamic definition - resolves #719
+
+## [9.31.1] - 2025-11-10
+
+### From Viva - PR #718 - 2025-11-10
+
+- [Added] support for selecting templates with option types - resolves #605
+  - [Added] use of option type request parameters and record fields
+  - [Changed] handling of UI templates to support option types for dynamic definition forms
+  - [Added] base_route_... information to support consistent paths in URLs and templates
+- [Added] _override,_merge_default and_merge_override options to dyanmic definitions - resolves #326
+- [Added] logging to help debug
+- [Added] initial documentation of the UI templates
+- [Fixed] setup of test apps
+- [Fixed] issue parsing extra options YAML
+- [Fixed] specs
 - [Updated] gems
 
 ### From FPHS - PR #715 - 2025-10-29
@@ -780,7 +849,7 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 
 ### From Viva - PR #499 - 2025-04-29
 
-- [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly - fixes #494
+## [9.13.3] - 2025-04-29
 
 ### From Viva - PR #498 - 2025-04-29
 
@@ -792,6 +861,12 @@ NOTE: It is essential to run `export PATH=/usr/lib/postgresql/15/bin:${PATH}` in
 - [Added] documentation of app configurations
 - [Added] markup to show empty results - to assist in styling
 - [Fixed] handlebars helper for includes and server substitutions to match
+
+## [9.13.2] - 2025-04-23
+
+- [Fixed] issue from Rails 7 upgrade where errors from embedded item are not merged into the parent (or master) correctly
+
+## [9.13.1] - 2025-04-21
 
 ### From Viva - PR #493 - 2025-04-21
 

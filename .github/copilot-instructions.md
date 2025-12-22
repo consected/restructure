@@ -176,11 +176,6 @@ Background to the test framework and conventions:
 - **System specs** (not features specs) should be produced for all new UI functionality
 - **Run `rspec` on new spec tests** after implementing new features to make sure they run
 
-If needed, clean the test database:
-```bash
-app-scripts/clean-test-db.sh
-```
-
 ### Running tests
 Before running tests for the very first time after a reboot, set up the filestore simulation. Tests require Filestore mount setup once only after a system restart: 
 ```bash
@@ -251,6 +246,11 @@ Then click the link:
 ```ruby
 click_link 'edit tracker record'
 ```
+If an HTML snapshot is needed for debugging, use the helper method:
+```ruby
+save_html_snapshot('/tmp/debug_page.html')
+```
+
 
 ## System Specs
 

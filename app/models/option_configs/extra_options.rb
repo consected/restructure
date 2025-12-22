@@ -626,6 +626,13 @@ module OptionConfigs
         loaded_config = {}
       end
       loaded_config.deep_symbolize_keys!
+    rescue StandardError => e
+      raise if e.is_a?(FphsOptionsParseError)
+
+      Rails.logger.error "Error occurred in parse_options_text in #{config_obj}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      raise FphsException,
+            "Error occurred in parse_options_text in #{config_obj}: #{e}"
     end
 
     #
@@ -1000,7 +1007,10 @@ module OptionConfigs
       loaded_config.each_key do |k|
         next unless k.to_s.start_with? keys_start_with
 
-        options.merge!(loaded_config.delete(k))
+        merge_hash = loaded_config.delete(k)
+        next unless merge_hash.is_a? Hash
+
+        options.merge!(merge_hash)
       end
       options
     end
