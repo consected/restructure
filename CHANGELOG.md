@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Updated] gems to address CVE:
+  - CVE-2025-14762
+
 ### From Viva - PR #800 - 2025-12-22
 
 - [Updated] gems to restrict connection_pool version
