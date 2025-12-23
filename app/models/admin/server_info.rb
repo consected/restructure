@@ -63,6 +63,37 @@ class Admin::ServerInfo
     }
   end
 
+  #
+  # Get the database server version
+  # @return [String]
+  def db_version
+    result = ActiveRecord::Base.connection.execute('select version();')
+    result.first['version']
+  rescue StandardError => e
+    "not available: #{e.message}"
+  end
+
+  #
+  # Get memcached connection stats
+  # @return [Hash]
+  def memcached_stats
+    unless Rails.cache.is_a?(ActiveSupport::Cache::MemCacheStore)
+      return { status: 'not configured', details: 'Cache store is not Dalli' }
+    end
+
+    stats = Rails.cache.stats
+    status =
+      if stats.any?
+        res = stats.find { |server, conn| conn.nil? }
+        res ? 'connection failed' : 'connected'
+      else
+        'no server configured'
+      end
+    { status: status, servers: stats }
+  rescue StandardError => e
+    { status: 'connection failed', error: e.message }
+  end
+
   def passenger_status
     IO.popen('passenger-status').read
   rescue StandardError
