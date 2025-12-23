@@ -74,10 +74,8 @@ if ENV['QUICK'] == 'true'
 else
   put_now 'check_spec_db for skips'
   # Use a database table to track creations in the test db
-  res = SetupHelper.check_spec_db
-  names = res.map { |r| r['name'] }
-  ENV['SKIP_DB_SETUP'] = 'true' if names.include?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if names.include?('app_setup')
+  ENV['SKIP_DB_SETUP'] = 'true' if SetupHelper.spec_tally_done?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if SetupHelper.spec_tally_done?('app_setup')
 end
 
 put_now 'Require webmock'
@@ -95,7 +93,7 @@ end
 
 put_now 'Browser setups'
 
-# The setting for AllowUsersToRegister is forced to *true* for the test environment, to allow features tests to work.
+# The setting for AllowUsersToRegister is forced to *true* for the test environment, to allow system tests to work.
 # We set this back to false here, which does not affect those tests, but allows controllers, models, etc specs to
 # run without AllowUsersToRegister being set.
 change_setting('AllowUsersToRegister', false)
@@ -107,15 +105,12 @@ include BrowserHelper
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
 SetupHelper.setup_nfs_directories
-
-`mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
-`mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-`mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*test_imports*.rb`
-`rm -f db/app_migrations/test/*test_*.rb`
+SetupHelper.clean_app_migrations_dirs
 
 put_now 'Devise and warden'
 require 'devise'
 include Warden::Test::Helpers
+
 Warden.test_mode!
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -131,7 +126,7 @@ SetupHelper.setup_full_test_db unless ENV['SKIP_DB_SETUP']
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
 
-  res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
+  res = `#{Rails.root}/app-scripts/setup-dev-filestore.sh`
   if res != "mountpoint OK\n"
     put_now res
     put_now 'Run app-scripts/setup-dev-filestore.sh and try again'
@@ -139,114 +134,45 @@ unless ENV['SKIP_FS_SETUP']
   end
 end
 
-SetupHelper.check_bhs_assignments_table
-
-put_now 'Require more'
-# The following line is provided for convenience purposes. It has the downside
-# of increasing the boot-up time by auto-requiring all files in the support
-# directory. Alternatively, in the individual `*_spec.rb` files, manually
-# require only the support files necessary.
-#
-require "#{::Rails.root}/spec/support/master_support.rb"
-require "#{::Rails.root}/spec/support/model_support.rb"
-SetupHelper.check_bhs_assignments_table
+put_now 'Require essential support files'
+require "#{Rails.root}/spec/support/master_support.rb" unless defined? MasterSupport
+require "#{Rails.root}/spec/support/model_support.rb" unless defined? ModelSupport
+put_now 'Require all support files'
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
-Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec/support/**/*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec/support/apps/*/*.rb')].sort.each { |f| require f }
 SetupHelper.check_bhs_assignments_table
-unless ENV['SKIP_DB_SETUP']
-  # Checks for pending migrations before tests are run.
-  # If you are not using ActiveRecord, you can remove this line.
-  put_now 'Enforce migrations'
-  # ActiveRecord::Migration.maintain_test_schema!
 
-  SetupHelper.check_bhs_assignments_table
+SetupHelper.run_test_migrations unless ENV['SKIP_DB_SETUP']
 
-  sql = <<~END_SQL
-    DROP SCHEMA IF EXISTS redcap_test CASCADE;
-    CREATE SCHEMA redcap_test;
-    DROP SCHEMA IF EXISTS dynamic_test CASCADE;
-    CREATE SCHEMA dynamic_test;
-
-    -- Clean up the migrations that need to be rerun in redcap-test
-    delete from schema_migrations where version in (
-      '20211105105700',
-      '20211105105701',
-      '20211105105702',
-      '20210215184600',
-      '20210215184601',
-      '20210305184601',
-      '20211101051705'
-    );
-  END_SQL
-
-  ActiveRecord::Base.connection.execute sql
-
-  SetupHelper.check_bhs_assignments_table
-  # We need to ensure that dynamic tables are in place before we setup dynamic models
-  # in each example, otherwise the tests lock up.
-  db_migration_dirname = Rails.root.join('spec/migrations')
-  Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
-  SetupHelper.check_bhs_assignments_table
-  puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
+if ENV['RUN_APP_SPECS'] == 'true' && !ENV.fetch('SKIP_APP_SETUP', nil)
+  put_now 'Run extra app setups'
+  SetupHelper.run_extra_setups
 end
+
+put_now 'RSpec configure'
 
 RSpec.configure do |config|
   config.before(:suite) do
     SetupHelper.check_bhs_assignments_table
-
-    # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
-    tue = Settings::TemplateUserEmail&.downcase
-    require "#{::Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
-    tu = User.find_by(email: tue)
-    Seeds::BUsers.setup if tu.nil?
-
-    Rails.cache.clear
+    SetupHelper.setup_template_user
     SetupHelper.reload_configs
 
     # Skip app setups with an env variable
-    unless ENV['SKIP_APP_SETUP']
-      SetupHelper.check_bhs_assignments_table
-
-      put_now 'Setup apps'
-      sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
-      ActiveRecord::Base.connection.execute sql
-      put_now 'Setup ActivityLogPlayerContactPhone'
-      SetupHelper.setup_al_player_contact_phones
-      # Seeds::ActivityLogPlayerContactPhone.setup
-      put_now 'setup_al_player_contact_emails'
-      SetupHelper.setup_al_player_contact_emails
-      put_now 'setup_al_player_contact_embed_tests'
-      SetupHelper.setup_al_player_contact_embed_tests
-      put_now 'Setup ext_identifier'
-      SetupHelper.setup_ext_identifier
-      put_now 'setup_test_app'
-      SetupHelper.setup_test_app
-      SetupHelper.check_bhs_assignments_table true
-
-      raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
-
-      put_now 'setup_ref_data_app'
-      SetupHelper.setup_ref_data_app
-
-      put_now 'Handle zeus_bulk_message'
-      als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
-      als.each do |a|
-        a.update! current_admin: a.admin, disabled: true if a.enabled?
-      end
-
-      SetupHelper.add_to_spec_db('app_setup')
-    end
+    SetupHelper.full_app_setup unless ENV['SKIP_APP_SETUP']
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP'])
+    if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV.fetch('SKIP_APP_SETUP', nil))
+      Rake::Task['assets:precompile'].invoke
+    end
     put_now 'Done before suite'
   end
 
   put_now 'Fixtures'
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = ["#{::Rails.root}/spec/fixtures"]
+  config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -268,6 +194,8 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
+  config.exclude_pattern = 'spec/system/apps/**/*_spec.rb' unless ENV['RUN_APP_SPECS'] == 'true'
+
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
   config.include Devise::Test::ControllerHelpers, type: :controller
@@ -276,6 +204,16 @@ RSpec.configure do |config|
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!
+  end
+
+  # For system tests that need javascript, use selenium_chrome
+  # The following avoids this needing to be specified in each spec file
+  config.before(:each, type: :system, js: true) do
+    driven_by $browser_driver
+  end
+
+  config.before(:each) do
+    SetupHelper.raise_if_stale_instance_variables!(instance_variables)
   end
 
   Shoulda::Matchers.configure do |config|

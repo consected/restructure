@@ -73,7 +73,7 @@ represent a complete database and should not be used.
 
 Although the majority of tests run within a transaction and clean up after the example has run, some setup is performed
 outside of transactions. Specifically, database configurations and user data is created outside transactions so that
-_rspec/features/_ tests can see the data in the separate Selenium processes. This can lead to the test database becoming
+_rspec/system/_ tests can see the data in the separate Selenium processes. This can lead to the test database becoming
 bloated and slowing down simple tests after repeated runs.
 
     app-scripts/drop-test-db.sh
@@ -104,7 +104,7 @@ After the first run, use the following to skip additional setup that happens wit
 
     SKIP_APP_SETUP=true SKIP_BROWSER_SETUP=true bundle exec rspec spec/path...
 
-This will skip app, db and virtual display browser (for `spec/features`) setup, assuming they are already in place.
+This will skip app, db and virtual display browser (for `spec/system`) setup, assuming they are already in place.
 It is not recommended to use these environment variables when starting parallel tests.
 
 ## Running parallel tests

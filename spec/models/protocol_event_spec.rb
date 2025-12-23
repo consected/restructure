@@ -3,6 +3,7 @@ require 'rails_helper'
 describe Classification::ProtocolEvent do
   include ModelSupport
   include ProtocolEventSupport
+
   describe 'definition' do
     before :each do
       seed_database
@@ -35,19 +36,13 @@ describe Classification::ProtocolEvent do
     it 'allows multiple Classification::Protocol Events to be created and returned in order based on name' do
       expect(@created_count).to eq @list.length
 
-      #      Classification::ProtocolEvent.all.each do |p|
-      #
-      #        p.current_admin = @admin
-      #        p.save!
-      #      end
+      # Verify that the database returns items in the order defined by its default_scope (ORDER BY name)
+      # Note: Database collation may differ from Ruby string comparison
+      names = Classification::ProtocolEvent.active.pluck(:name)
+      expected_names = Classification::ProtocolEvent.active.order(:name).pluck(:name)
 
-      prev_pos = nil
-      Classification::ProtocolEvent.active.each do |p|
-        expect(p.name.downcase).to be >= prev_pos if prev_pos
-        prev_pos = p.name.downcase if p.name
-      end
-
-      expect(prev_pos).not_to be_nil
+      expect(names).to eq expected_names
+      expect(names).not_to be_empty
     end
 
     it 'can return active items only' do

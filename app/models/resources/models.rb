@@ -23,7 +23,8 @@ module Resources
       # resource_item_name: an item resource name that is typically singularized resource_name, but for activity_log_type
       #                     may be pluralized to match the extra log type name
       # hyphenated_name: hyphenated names are typically used by the UI to identify component lists and panels
-      #                  for table resources this is pluralized
+      #                  - for table resources this is pluralized
+      #                  - for dynamic models this doesn't have the 'dynamic_model' prefix
       # hyphenated_item_name: hyphenated item name represents the UI ID of a single result
       #                       (within a hyphenated name list block) - and is typically singularized hyphenated_name,
       #                        but for activity_log_type may be pluralized to match the extra log type name
@@ -104,7 +105,10 @@ module Resources
       end
       base_route_name = model.base_route_name if !base_route_name && model.respond_to?(:base_route_name)
       base_route_segments = model.base_route_segments if !base_route_segments && model.respond_to?(:base_route_segments)
-      base_master_segment = '/masters' if !base_master_segment && model.respond_to?(:no_master_association) && !model.no_master_association
+      base_master_segment = nil
+      if !base_master_segment && model.respond_to?(:no_master_association) && !model.no_master_association
+        base_master_segment = '/masters'
+      end
       category = model.category if !category && model.respond_to?(:category)
 
       updated_at = model.definition.updated_at if model.respond_to? :definition
@@ -124,7 +128,7 @@ module Resources
                                       category: category&.freeze,
                                       option_type: option_type&.to_sym,
                                       updated_at: updated_at
-      self.updated_at = Time.now                                
+      self.updated_at = Time.now
       resources[resource_name]
     end
 

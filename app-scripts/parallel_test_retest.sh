@@ -1,10 +1,15 @@
 #!/bin/bash
 # Retest failed specs from the last parallel_test.sh run. This is based on the
 # tmp/parallel_specs_failed.txt file created by that script.
+# If you just want to see which specs would be retested, run with the --no-run option.
 
 if [ ! -f tmp/parallel_specs_failed.txt ]; then
   echo "No failed specs to retest."
   exit 0
+fi
+
+if [ "$1" == "--no-run" ]; then
+  NO_RUN=true
 fi
 
 echo "Retesting failed specs"
@@ -25,6 +30,12 @@ fi
 
 echo "Retesting: ${retest}"
 echo "bundle exec rspec -f d $retest"
+if [ -z "${NO_RUN}" ]; then
+  echo "Running retest..."
+else
+  echo "NO_RUN is set. Skipping retest run."
+  exit 0
+fi
 bundle exec rspec -f d $retest
 res=$?
 if [ "$QUIETLY" == "true" ]; then

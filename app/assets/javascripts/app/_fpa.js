@@ -1235,7 +1235,7 @@ _fpa = {
       return;
     }
 
-    var a = '<div class="alert alert-' + type + '" role="alert">';
+    var a = `<div class="alert alert-${type}" data-severity="${type}" role="alert">`;
     a +=
       '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
     if (type == 'error' || type == 'danger') {

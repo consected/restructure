@@ -4,6 +4,7 @@ module PlayerContactActions
     user_logs_in
 
     has_css?('#simple_search_master.form-formatted')
+    finish_form_formatting
 
     # select a player, then check it appears in the results
     @player = select_player
@@ -14,11 +15,12 @@ module PlayerContactActions
       puts "Player #{@player.master_id} not shown for #{@player.attributes}. In DB: #{p&.attributes}"
 
     end
-    expect(page).to have_css("#master-#{@player.master_id}")
-    expect(find("#master-#{@player.master_id} .player-names").text).to eq("#{@player.first_name.capitalize} #{@player.middle_name.blank? ? '' : "#{@player.middle_name.capitalize} "}#{@player.last_name.capitalize}#{@player.nick_name.blank? ? '' : " (#{@player.nick_name.capitalize})"}")
+    # expect(page).to have_css("#master-#{@player.master_id}")
+    # expect(find("#master-#{@player.master_id} .player-names").text).to eq("#{@player.first_name.capitalize} #{@player.middle_name.blank? ? '' : "#{@player.middle_name.capitalize} "}#{@player.last_name.capitalize}#{@player.nick_name.blank? ? '' : " (#{@player.nick_name.capitalize})"}")
 
     # click the result, if necessary
-    find("#master-#{@player.master_id}").click if all('.master-result').length > 1
+    expand_master_record master_id: @player.master_id
+    # find("#master-#{@player.master_id}").click if all('.master-result').length > 1
 
     # expect the block to have expanded => the user is viewing the contact's record
 

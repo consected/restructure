@@ -4,7 +4,7 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
-  config.cache_classes = true
+  config.enable_reloading = false
 
   config.log_level = :fatal
 
@@ -56,7 +56,6 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "fpa1_production"
 
-
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   #  config.i18n.fallbacks = [I18n.default_locale]
@@ -71,14 +70,14 @@ Rails.application.configure do
                        :fatal
                      end
 
-  case ENV['FPHS_USE_LOGGER']
+  case ENV.fetch('FPHS_USE_LOGGER', nil)
   when 'TRUE', 'true', 'default'
     puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
     # Use default logging formatter so that PID and timestamp are not suppressed.
-    config.log_formatter = ::Logger::Formatter.new
+    config.log_formatter = Logger::Formatter.new
   when 'STDOUT'
     logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = ::Logger::Formatter.new
+    logger.formatter = Logger::Formatter.new
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   when 'syslog'
     # Use a different logger for distributed setups.
@@ -91,7 +90,7 @@ Rails.application.configure do
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :fatal
-    config.log_formatter = ::Logger::Formatter.new
+    config.log_formatter = Logger::Formatter.new
   end
 
   # Do not dump schema after migrations.

@@ -247,6 +247,26 @@ If changes are ever made to any of the _restructure-build_ scripts, the Docker c
 
      app-scripts/release_and_build.sh clean <optional: minor>
 
+### Merge commits and the CHANGELOG
+
+The upstream ReStructure repo is the canonical source of the CHANGELOG. The downstream projects are obviously welcome to maintain their own CHANGELOG files although if maintained in the root directory they shouldn't be sent upstream.
+
+Merge commits, the result of PRs should contain the full content of the associated CHANGELOG entry. This allows upstream to simply run:
+
+```sh
+git log --format=%b new-master..HEAD
+```
+
+The results of this are added to the _Unreleased_ section of the CHANGELOG before building.
+
+Downstream repos may use a helper script to get their commits into a format suitable for the CHANGELOG entries:
+
+```sh
+app-scripts/get_changelog_entries_from_git.sh
+```
+
+If building with the environment variable `ALLOW_EMPTY_UNRELEASED` set to any value, these entries will automatically added into the _Unreleased_ section.
+
 ## Testing
 
 Rspec tests are available. To set up a test database, first get a dump of the current
@@ -273,7 +293,8 @@ The run:
 Make sure the Filestore mounts are in place (this requires sudo privileges) once after a reboot:
     app-scripts/setup-dev-filestore.sh
 
-By default, browser feature tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
+We no longer use features specs for UI testing. These have all been moved to system specs.
+By default, browser system tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
 
 To use Firefox:
 
@@ -284,11 +305,11 @@ Also, complete the following to ensure you have Firefox and the most appropriate
 
 Run the test suite:
 
-    IGNORE_MFA=true bundle exec rspec
+    bundle exec rspec
 
 Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 
-    bundle exec rspec
+    AWS_PROFILE=<profile> bundle exec rspec
 
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 

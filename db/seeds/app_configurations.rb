@@ -7,7 +7,7 @@ module Seeds
         slice = v.slice(:app_type_id, :name)
         next if Admin::AppConfiguration.active.find_by(slice)
         
-        v = v.merge current_admin: auto_admin
+        v = v.merge current_admin: Seeds.auto_admin
         Admin::AppConfiguration.create!(v)
       end
     end

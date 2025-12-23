@@ -64,7 +64,7 @@ module Dynamic
         # a master_id = ? condition automatically, based on the underlying association.
         # Not sure when this requirement was introduced, but it is necessary.
         item = unscoped.unassigned.first
-        raise NoUnassignedAvailable unless item
+        raise NoUnassignedAvailable, 'No available IDs for assignment' unless item
 
         logger.info "Got next available external id #{item.id}"
         item.assigned_by = 'fphsapp' if item.respond_to? :assigned_by=

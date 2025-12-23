@@ -23,6 +23,8 @@ RSpec.describe Redcap::ClientRequest, type: :model do
     rc.api_client.project
 
     expect(Redcap::ClientRequest.count).to be > num
-    expect(Redcap::ClientRequest.last.action).to eq 'project'
+    project_request = Redcap::ClientRequest.where(action: 'project').last
+    expect(project_request).to be_present
+    expect(project_request.action).to eq 'project'
   end
 end

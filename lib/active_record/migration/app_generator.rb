@@ -74,8 +74,8 @@ module ActiveRecord
         return if schema_exists?(schema)
 
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
-        sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
-        ActiveRecord::Base.connection.execute sql
+        sql += " AUTHORIZATION #{owner}" if owner.present? && Rails.env.production?
+        execute sql
       end
 
       def add_fields_to_tables
@@ -175,7 +175,7 @@ module ActiveRecord
                 next
               end
 
-              ActiveRecord::Base.connection.execute refsql
+              execute refsql
             end
           end
           dir.down do
@@ -188,7 +188,7 @@ module ActiveRecord
               refsql = reverse_reference_view_sql(ref_config)
               next unless refsql
 
-              ActiveRecord::Base.connection.execute refsql
+              execute refsql
             end
           end
         end
@@ -200,11 +200,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute activity_log_trigger_sql
+            execute activity_log_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_activity_log_trigger_sql
+            execute reverse_activity_log_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -263,6 +263,7 @@ module ActiveRecord
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
+        puts e
         raise e unless force_rollback
       end
 
@@ -274,11 +275,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute dynamic_model_trigger_sql
+            execute dynamic_model_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_dynamic_model_trigger_sql
+            execute reverse_dynamic_model_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -310,11 +311,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace view #{schema}.#{table_name}"
-            ActiveRecord::Base.connection.execute dynamic_model_view_sql
+            execute dynamic_model_view_sql
           end
           dir.down do
             puts "-- drop view #{schema}.#{table_name}"
-            ActiveRecord::Base.connection.execute reverse_dynamic_model_view_sql
+            execute reverse_dynamic_model_view_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -382,11 +383,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute external_identifier_trigger_sql
+            execute external_identifier_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
+            execute reverse_external_identifier_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -402,11 +403,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
+            execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
+            execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -689,7 +690,7 @@ module ActiveRecord
         reference_views&.each do |view|
           Rails.logger.warn "Dropping AL dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name} via activity log"
           execute <<~END_SQL
-            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+            DROP VIEW #{view['schemaname']}.#{view['viewname']} CASCADE;
           END_SQL
         end
 
@@ -761,7 +762,7 @@ module ActiveRecord
         if old_table_comment != table_comment
           if model_is_view
             puts "Adding view comment: #{old_table_comment} != #{table_comment}"
-            ActiveRecord::Base.connection.execute <<~END_SQL
+            execute <<~END_SQL
               COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';
             END_SQL
           else
@@ -1090,7 +1091,7 @@ module ActiveRecord
 
       def dynamic_model_view_sql
         <<~DO_TEXT
-          DROP VIEW if exists #{schema}.#{table_name};
+          DROP VIEW if exists #{schema}.#{table_name} CASCADE;
           CREATE VIEW #{schema}.#{table_name} AS
           #{view_sql};
         DO_TEXT
@@ -1100,7 +1101,7 @@ module ActiveRecord
         if updating?
           dynamic_model_view_sql
         else
-          "DROP VIEW is exists #{schema}.#{table_name};"
+          "DROP VIEW if exists #{schema}.#{table_name} CASCADE;"
         end
       end
 
@@ -1212,7 +1213,7 @@ module ActiveRecord
       end
 
       def get_dependent_objects(schema, table_name)
-        res = ActiveRecord::Base.connection.execute <<~END_SQL
+        res = execute <<~END_SQL
           SELECT DISTINCT v.oid::regclass AS view
           FROM pg_depend AS d      -- objects that depend on the table
             JOIN pg_rewrite AS r  -- rules depending on the table

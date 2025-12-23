@@ -22,7 +22,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @master.current_user = @user
 
     # Clean up old definition
-    @als = ActivityLog.active.where(
+    als = ActivityLog.active.where(
       name: 'activity_log_player_contacts',
       item_type: 'player_contact',
       process_name: 'embed_test'
@@ -30,12 +30,12 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     @test_role = "z-test-role-#{SecureRandom.hex(10)}"
 
     if keep_def
-      @al = @als.first
+      @al = als.first
       @al.updated_at = Time.now
       @al.current_admin = @admin
       @al.save!
     else
-      @als.each do |al|
+      als.each do |al|
         al.update! disabled: true, current_admin: @admin
       end
 
@@ -75,7 +75,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
   end
 
   before :all do
-    Settings::AllowDynamicMigrations = true
+    change_setting('AllowDynamicMigrations', true)
     # SetupHelper.setup_al_player_contact_phones
     # ::ActivityLog.define_models
     create_user
@@ -83,7 +83,7 @@ RSpec.describe 'Dynamic Definition Generation', type: :model do
     let_user_create_player_contacts
     @player_contact = create_item(data: rand(10_000_000_000_000_000), rank: 10)
     generate_test_al
-    Settings::AllowDynamicMigrations = nil
+    change_setting('AllowDynamicMigrations', nil)
   end
 
   it 'creates an activity log with default user access control and embedded item' do

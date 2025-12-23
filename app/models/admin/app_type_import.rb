@@ -23,7 +23,10 @@ class Admin
     #                             end. A restart of the server should be forced to ensure consistency of state and DB
     # @return [Array] an array on [app_type, results]
     def self.import_config(config_text, admin,
-                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil)
+                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
+                           prevent_migrations: false)
+      @@import_config_in_progress = true
+      @@prevent_migrations = prevent_migrations
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -34,6 +37,19 @@ class Admin
       importer.do_import_config
     rescue StandardError, FphsException => e
       [importer, e]
+    ensure
+      @@import_config_in_progress = false
+      @@prevent_migrations = false
+    end
+
+    def self.import_in_progress?
+      @@import_config_in_progress ||= nil
+      @@import_config_in_progress == true
+    end
+
+    def self.prevent_migrations?
+      @@prevent_migrations ||= nil
+      @@prevent_migrations == true
     end
 
     #
@@ -125,6 +141,15 @@ class Admin
       import_config_sub_items 'associated_general_selections', %w[item_type value],
                               reject: reject_items
 
+      # Import config libraries twice to handle libraries that reference other libraries
+      # First pass: import with skip_fail to allow missing library references
+      # Second pass: respect user's skip_fail setting to catch genuine errors
+      original_skip_fail = skip_fail
+      self.skip_fail = true
+      import_config_sub_items 'associated_config_libraries', %w[name category format]
+
+      # Second pass with original skip_fail setting
+      self.skip_fail = original_skip_fail
       import_config_sub_items 'associated_config_libraries', %w[name category format]
 
       import_config_sub_items 'associated_external_identifiers', ['name']

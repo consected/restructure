@@ -25,7 +25,11 @@ extra_params[:embed] = true if link_extras[:data] && link_extras[:data][:remote]
     
           content = markdown_to_html list_item.list_description
           if content.present?
-            content = Formatter::Substitution.substitute( content, data: list_item, ignore_missing: true).html_safe
+            begin
+              content = Formatter::Substitution.substitute( content, data: list_item, ignore_missing: true).html_safe
+            rescue StandardError => e
+              content = "<p class='text-danger'>Error processing report description: #{e.message}</p>".html_safe
+            end
           end    
     %>
     <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">

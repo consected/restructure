@@ -42,6 +42,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
       setup_file_store
       @projects = setup_redcap_project_admin_configs
       @project = @projects.first
@@ -356,14 +357,28 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.existing_records_length).to be > 0
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
                                 .where('created_at > :created_at', created_at: start_time)
                                 .last
 
+      if cr.nil?
+        req = {
+          admin: request_admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          created_at: start_time
+        }
+        puts "About to fail - no ClientRequest found for #{req}"
+        Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).each do |r|
+          puts "  Found ClientRequest #{r.attributes}"
+        end
+      end
+      expect(cr).to be_present, "No ClientRequest found. Available: #{Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).pluck(:action).join(', ')}"
       expect(cr.result).to be_a Hash
       expect(cr.result['storage_stage']).to be_present
       expect(cr.result['count_retrieved']).to be > 0
@@ -405,8 +420,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -423,8 +437,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.existing_records_length).to eq 0
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -433,8 +446,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(cr.result['storage_stage']).to eq 'validate'
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'capture records job',
+      cr = Redcap::ClientRequest.where(action: 'capture records job',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -602,8 +614,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       # Verify job result includes file counts
       start_time = DateTime.now - 1.minute
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)

@@ -183,7 +183,7 @@ RSpec.describe Admin::UserRole, type: :model do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
     end.to raise_error FphsException
 
-        # Can't copy roles if the target user has roles in the specified app
+    # Can't copy roles if the target user has roles in the specified app
     expect do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
     end.to raise_error FphsException
@@ -192,5 +192,49 @@ RSpec.describe Admin::UserRole, type: :model do
     expect do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true
     end.not_to raise_error
+  end
+
+  it 're-enables disabled roles when copying with reenable_disabled option' do
+    create_admin
+    app_type_0 = create_app_type name: 'apptype0', label: 'apptype0'
+    user0, = create_user
+    user1, = create_user
+
+    # Create roles in source user
+    r1 = create_user_role 'source_role_1', user: user0, app_type: app_type_0
+    r2 = create_user_role 'source_role_2', user: user0, app_type: app_type_0
+    r3 = create_user_role 'source_role_3', user: user0, app_type: app_type_0
+
+    # Create matching roles in target user, but disable some of them
+    t1 = create_user_role 'source_role_1', user: user1, app_type: app_type_0
+    t2 = create_user_role 'source_role_2', user: user1, app_type: app_type_0
+    t2.update!(disabled: true, current_admin: @admin)
+    t3 = create_user_role 'source_role_3', user: user1, app_type: app_type_0
+    t3.update!(disabled: true, current_admin: @admin)
+
+    # Copy without reenable_disabled - should return empty array (all roles already exist)
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true
+    expect(res.length).to eq 0
+
+    # Verify disabled roles are still disabled
+    t2.reload
+    t3.reload
+    expect(t2.disabled?).to be true
+    expect(t3.disabled?).to be true
+
+    # Copy with reenable_disabled - should re-enable the disabled roles
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true, reenable_disabled: true
+    expect(res.length).to eq 2 # Two roles were re-enabled
+
+    # Verify disabled roles are now enabled
+    t2.reload
+    t3.reload
+    expect(t2.disabled?).to be false
+    expect(t3.disabled?).to be false
+    expect(t1.disabled?).to be false # Was never disabled
+
+    # Verify all roles are now active
+    active_roles = Admin::UserRole.active.where(app_type: app_type_0, user: user1).role_names.sort
+    expect(active_roles).to eq ['source_role_1', 'source_role_2', 'source_role_3']
   end
 end

@@ -15,10 +15,11 @@ module UserSupport
     admin, = @admin || create_admin
 
     attr = {
-      email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
+      email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}",
+      password: Devise.friendly_token(30)
     }
 
-    good_password = attr[:password] = Devise.friendly_token(30) if opt[:with_password]
+    good_password = attr[:password] if opt[:with_password]
 
     user = User.create! attr
 
@@ -45,7 +46,7 @@ module UserSupport
       user.new_two_factor_auth_code = false
     end
 
-    # Set confirmed for features tests
+    # Set confirmed for system tests
     user.confirmed_at ||= Time.now if respond_to?(:page) && !opt[:not_confirmed]
 
     user.save!
@@ -75,6 +76,8 @@ module UserSupport
                                        resource_name: :create_master, current_admin: @admin, user:
     end
     @user = user
+    @good_email = user.email
+    @good_password = good_password
     let_user_create :player_contacts
 
     delay = Time.now - start_time
@@ -91,7 +94,7 @@ module UserSupport
                                     resource_name: :app_type, current_admin: @admin, user:
   end
 
-  def self.create_admin(part = nil)
+  def self.create_admin(part = nil, with_matching_user: false)
     a = Admin.order(id: :desc).first
     unless part
       part = 1
@@ -104,19 +107,45 @@ module UserSupport
     # Save a new password, as required to handle temp passwords
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password
-    admin.otp_secret = Admin.generate_otp_secret
-    admin.otp_required_for_login = true
-    admin.new_two_factor_auth_code = false
+
+    # Only set up 2FA if it's not disabled
+    unless Admin.two_factor_auth_disabled
+      admin.otp_secret = Admin.generate_otp_secret
+      admin.otp_required_for_login = true
+      admin.new_two_factor_auth_code = false
+    end
+
     admin.save!
 
     # # Can't reload, as that doesn't clear non-db attributes
     admin = Admin.find(admin.id)
+
+    if with_matching_user
+
+      attr = {
+        email: admin.email, current_admin: admin, first_name: admin.first_name, last_name: admin.last_name
+      }
+
+      good_password = attr[:password] = Devise.friendly_token(30)
+
+      user = User.create! attr
+      raise 'Not a user' unless user.is_a?(User)
+      raise "User email #{user.email} does not match admin email #{admin.email}" unless user.email == admin.email
+    end
+
     [admin, good_admin_password]
   end
 
-  def create_admin(part = nil)
+  def create_admin(part = nil, with_matching_user: false)
     admin, good_admin_password = UserSupport.create_admin(part)
     @admin = admin
+
+    if with_matching_user
+      user, good_user_password = create_user(nil, nil, email: admin.email)
+      expect(user).to be_a User
+      expect(user.email).to eq admin.email
+    end
+
     [admin, good_admin_password]
   end
 
@@ -160,6 +189,8 @@ module UserSupport
 
     unless resource_name
       Rails.logger.warn "No resource name for #{resource_type} - #{self.class}"
+      Rails.logger.warn ExceptionExtensions.short_string_backtrace(caller)
+
       return
     end
 

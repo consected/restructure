@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seed_support"
-require "#{::Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seed_support"
+require "#{Rails.root}/spec/support/user_support"
 
 module ModelSupport
   include ::UserSupport
@@ -50,9 +50,4 @@ module ModelSupport
     pn = random_phone_number while PlayerContact.where(data: pn).count > 0
     pn
   end
-
-  # Force a database seed at config time, to avoid issues later
-  Rails.logger.info 'Starting seed setup in setup of Master Support'
-  puts "#{Time.now} Starting seed setup in setup of Master Support"
-  # SeedSupport.setup
 end

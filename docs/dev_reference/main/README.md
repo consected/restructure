@@ -5,6 +5,13 @@
 - ["Forking" to a Private Repository](forking_to_a_private_repository.md)
 - [Running **rspec** tests](running_rspec_tests.md)
 
+## Testing
+
+- [Testing Documentation Index](../testing/README.md) - Complete guide to feature spec development
+  - [Feature Spec Quick Reference](../testing/feature-spec-quick-reference.md) - Essential patterns on one page
+  - [Feature Spec Development Guide](../testing/feature-spec-development-guide.md) - Comprehensive patterns and examples
+  - [Grant Aims Development Summary](../testing/grant-aims-development-summary.md) - Real implementation case study
+
 ## The app UI
 
 - [UI templates for Master record search results](../app-ui/ui-templates-for-master-record-search-results.md)
