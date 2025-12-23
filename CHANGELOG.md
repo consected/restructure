@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.41.1] - 2025-12-23
+
 ### From FPHS - PR #806 - 2025-12-23
 
 - [Added] memcached connection status, version and stats and DB server info in Server info - resolves #627
