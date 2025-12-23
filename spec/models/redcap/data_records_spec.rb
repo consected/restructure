@@ -357,8 +357,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.existing_records_length).to be > 0
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -421,8 +420,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -439,8 +437,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(dr.existing_records_length).to eq 0
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -449,8 +446,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       expect(cr.result['storage_stage']).to eq 'validate'
 
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'capture records job',
+      cr = Redcap::ClientRequest.where(action: 'capture records job',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)
@@ -618,8 +614,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       # Verify job result includes file counts
       start_time = DateTime.now - 1.minute
-      cr = Redcap::ClientRequest.where(admin: request_admin,
-                                       action: 'store records',
+      cr = Redcap::ClientRequest.where(action: 'store records',
                                        server_url: rc.server_url,
                                        name: rc.name,
                                        redcap_project_admin: rc)

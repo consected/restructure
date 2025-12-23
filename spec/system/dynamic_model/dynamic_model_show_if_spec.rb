@@ -65,9 +65,12 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       l = all('a[data-panel-tab="details"]').first
       expect(l).not_to be nil
       l.click
+      finish_page_loading
+      finish_form_formatting
 
       expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-show-if-fields .new-button-container a.btn'
+      debug_state('test_show_if_fields', 'new button not found') unless has_css?(c)
       expect(page).to have_css(c)
       b = all(c).first
       expect(b).not_to be nil
@@ -140,11 +143,13 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       l = all('a[data-panel-tab="details"]').first
       expect(l).not_to be nil
       l.click
-
+      finish_page_loading
+      finish_form_formatting
       expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-show-if-fields .new-button-container a.btn'
       expect(page).to have_css(c)
       b = all(c).first
+      debug_state('test_show_if_fields_2', 'new button not found') unless has_css?(c)
       expect(b).not_to be nil
 
       b.click
@@ -216,9 +221,12 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       l = all('a[data-panel-tab="details"]').first
       expect(l).not_to be nil
       l.click
+      finish_page_loading
+      finish_form_formatting
 
       expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-show-if-fields .new-button-container a.btn'
+      debug_state('test_show_if_fields_3', 'details tab not found') unless has_css?(c)
       expect(page).to have_css(c)
       b = all(c).first
       expect(b).not_to be nil
