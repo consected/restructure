@@ -122,6 +122,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
       else
         f.click
+        finish_form_formatting
         sleep 0.5
         p = Capybara.find(:xpath, '//body').find('.datepicker')
 

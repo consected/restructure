@@ -936,7 +936,7 @@ module FeatureSupport
     puts_debug("DEBUG STATE: #{name} - #{description}")
     begin
       filename = "#{self.class&.name&.underscore}_#{name}.html"
-      filepath = File.join('tmp', filename)
+      filepath = File.join('/tmp', filename)
       save_html_snapshot(filepath)
     rescue Exception
       puts_debug '  - Failed to save HTML snapshot'
@@ -947,7 +947,7 @@ module FeatureSupport
       puts_debug '  - Failed to debug process status'
     end
     begin
-      take_screenshot('edit_player_info_missing', "Expected to be in edit_player_info form to edit college '#{college}'", force: true)
+      take_screenshot(name.underscore, "Expected to be in edit_player_info form to edit college '#{college}'", force: true)
     rescue Exception
       puts_debug '  - Failed to take screenshot'
     end
