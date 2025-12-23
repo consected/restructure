@@ -14,6 +14,26 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #806 - 2025-12-23
+
+- [Added] memcached connection status, version and stats and DB server info in Server info - resolves #627
+
+### From FPHS - PR #805 - 2025-12-23
+
+- [Added] option to copy roles that also set the target user's disabled roles back to enabled - resolves #672
+
+### From FPHS - PR #804 - 2025-12-23
+
+- [Added] admin info panel to view a "parsed config" of dynamic definitions after the config libraries, cleaned configs and YAML anchors have been applied - resolves #795
+
+### From FPHS - PR  #803 - 2025-12-23
+
+- [Added] multiple repetitions to allow config libraries referenced within config libraries to be successfully imported within an app import - resolves #793
+
+### From FPHS - PR #802 - 2025-12-23
+
+- [Fixed] add_item_button incorrect markup for dynamic models - fixes #798
+
 ## [9.41.0] - 2025-12-22
 
 - [Updated] gems and yarn
@@ -24,7 +44,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Updates] to support improved testing and app import reliability
 
-### From FPHS - #PR 796- 2025-12-22
+### From FPHS - PR #801- 2025-12-22
 
 - [Fixed] NfsStore::Dicom::MetadataHandler bug when guarding against a missing file_path due to user not having appropriate user roles - fixes #796
 
