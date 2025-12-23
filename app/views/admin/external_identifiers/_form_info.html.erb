@@ -5,6 +5,7 @@
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
     <li role="presentation"><a href="#actions-panel" aria-controls="actions-panel" role="tab" data-toggle="tab">Actions</a></li>
+    <li role="presentation"><a href="#parsed-config" aria-controls="parsed-config" role="tab" data-toggle="tab">Parsed Config</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
 
@@ -23,6 +24,10 @@
 
     <div role="tabpanel" class="tab-pane on-open-click" id="actions-panel">
       <%= render partial: 'admin/external_identifiers/actions_panel', locals: {object_instance: object_instance} %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane on-open-click" id="parsed-config">
+      <%= render partial: 'admin/common/parsed_config_panel', locals: {object_instance: object_instance} %>
     </div>
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
