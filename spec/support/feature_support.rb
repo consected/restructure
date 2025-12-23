@@ -652,14 +652,23 @@ module FeatureSupport
     available_report_tabs
     puts_modals
     current_activity_log = all('.activity-logs-generic-block.in', match: :first).first
-    return unless current_activity_log
-
-    within current_activity_log do
-      available_model_reference_expanders
-      user_instructions_placeholders
-      available_form_fields
-      available_submit_fields
-      available_embedded_model_reference_add_buttons
+    forms = all('form')
+    if current_activity_log
+      within current_activity_log do
+        available_model_reference_expanders
+        user_instructions_placeholders
+        available_form_fields
+        available_submit_fields
+        available_embedded_model_reference_add_buttons
+      end
+    elsif forms.length > 0
+      forms.each do |f|
+        puts_debug "Form ##{f[:id]}:"
+        within f do
+          available_form_fields
+          available_submit_fields
+        end
+      end
     end
   rescue Selenium::WebDriver::Error::StaleElementReferenceError
     puts_debug 'StaleElementReferenceError encountered in debug_process_status - skipping'
@@ -728,6 +737,7 @@ module FeatureSupport
       res = {}
       res[:field_name] = f['data-attr-name']
       res[:tag_name] = f.tag_name
+      res[:type] = f[:type] if f[:type]
       res[:visible] = f.visible?
       res[:value] = f.value
       res[:is_chosen] = f[:class].include?('use-chosen')
@@ -881,8 +891,8 @@ module FeatureSupport
     all('.modal.in', visible: true, wait: 0).each do |m|
       res = {}
       res[:id] = m[:id]
-      res[:title] = res.find('.modal-title')
-      res[:body] = res.find('.modal-body').text[0..100]
+      res[:title] = m.all('.modal-title').first&.text
+      res[:body] = m.all('.modal-body').first&.text
       results << res
     end
     puts String.yaml_dump(results)
