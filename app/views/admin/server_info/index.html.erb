@@ -36,6 +36,23 @@
   <div class="well">  
     <h3>Database Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
+    <h4>Database Server Version</h4>
+    <pre class="si-db-version"><%=@db_version%></pre>
+  </div>
+  <div class="well">  
+    <h3>Memcached Connection</h3>
+    <table class="server-info-settings si-memcached-stats">
+      <tr><td class="setting-key">status</td><td class="setting-value si-memcached-status"><%=@memcached_stats[:status]%></td></tr>
+      <% if @memcached_stats[:servers] %>
+        <% @memcached_stats[:servers].each do |server, stats| %>
+          <tr><td class="setting-key"><%=server%></td><td class="setting-value"><pre><%=stats.to_yaml%></pre></td></tr>
+        <% end %>
+      <% elsif @memcached_stats[:details] %>
+        <tr><td class="setting-key">details</td><td class="setting-value"><%=@memcached_stats[:details]%></td></tr>
+      <% elsif @memcached_stats[:error] %>
+        <tr><td class="setting-key">error</td><td class="setting-value si-memcached-error"><%=@memcached_stats[:error]%></td></tr>
+      <% end %>
+    </table>
   </div>
   <div class="well">  
     <h3>NfsStore Settings</h3>

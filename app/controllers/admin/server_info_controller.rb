@@ -9,6 +9,8 @@ class Admin::ServerInfoController < AdminController
     @app_settings = si.app_settings
     @nfs_store_settings = si.nfs_store_settings
     @db_settings = si.db_settings
+    @db_version = si.db_version
+    @memcached_stats = si.memcached_stats
     @passenger_stats = si.passenger_status
     @passenger_memory_stats = si.passenger_memory_stats
     @processes = si.processes
