@@ -102,7 +102,7 @@ class Admin::UserRole < Admin::AdminBase
 
   # conditions must include app_type and role_name, and may include other conditions
   def self.active_user_ids(conditions = nil, app_type:, role_name:)
-    condsql = '(user_roles.disabled is null or user_roles.disabled = false) AND '\
+    condsql = '(user_roles.disabled is null or user_roles.disabled = false) AND ' \
               '(users.disabled is null or users.disabled = false)'
     res = select('user_id').joins(:user).where(condsql)
 
@@ -142,8 +142,9 @@ class Admin::UserRole < Admin::AdminBase
   # @param to_user [User] user to copy roles to
   # @param app_types [Admin::AppType | Array{Admin::AppType}] the app type(s) the roles belong to.
   # @param force_not_empty [true | nil] - force copying to users that already have roles in this app type
-  # @return [Array] array of Admin::UserRole instances created in the to_user
-  def self.copy_user_roles(from_user, to_user, app_types, current_admin, force_not_empty: nil)
+  # @param reenable_disabled [true | nil] - re-enable disabled roles in target user that match source roles
+  # @return [Array] array of Admin::UserRole instances created or re-enabled in the to_user
+  def self.copy_user_roles(from_user, to_user, app_types, current_admin, force_not_empty: nil, reenable_disabled: nil)
     raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?
 
     has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_types
@@ -156,15 +157,26 @@ class Admin::UserRole < Admin::AdminBase
 
     to_roles = []
     from_roles.each do |r|
-      new_role = {        
+      new_role = {
         role_name: r.role_name,
         app_type: r.app_type,
         user: to_user
       }
 
-      # Skip if this exists in the user already
-      next if find_by(new_role)
+      # Check if this role already exists (enabled or disabled)
+      existing_role = find_by(new_role)
 
+      if existing_role
+        # If the role exists and is disabled, re-enable it if requested
+        if existing_role.disabled? && reenable_disabled
+          existing_role.update!(disabled: false, current_admin: current_admin)
+          to_roles << existing_role
+        end
+        # Otherwise skip this role (it already exists and is active, or we're not re-enabling)
+        next
+      end
+
+      # No existing role found, so create it
       new_role[:current_admin] = current_admin
       to_roles << create!(new_role)
     end

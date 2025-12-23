@@ -3,6 +3,12 @@
 ## 🚨 QUICK REFERENCE FOR AGENTS
 
 ### Most Critical Rules (READ FIRST)
+1. **When implementing new features, ALWAYS write and run corresponding Rspec specs** to cover new functionality
+2. **Follow [Ruby on Rails Conventions](#ruby-on-rails-conventions)** below for all code you write
+3. **Explain why changes to existing methods in models and other core components are necessary**
+4. **Rspec tests must be written to demonstrate new functionality works as intended** not just to make tests pass
+
+### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
 2. **Always run tests after making changes** to verify functionality
 3. **Never redirect scripts stdout or stderr to /dev/null**
@@ -175,6 +181,7 @@ Background to the test framework and conventions:
 - **Model specs** must be produced to cover all new model logic
 - **System specs** (not features specs) should be produced for all new UI functionality
 - **Run `rspec` on new spec tests** after implementing new features to make sure they run
+- **Do not use `skip` or `xit` in spec files**. Instead, fix the underlying issues causing test failures. 
 
 ### Running tests
 Before running tests for the very first time after a reboot, set up the filestore simulation. Tests require Filestore mount setup once only after a system restart: 
