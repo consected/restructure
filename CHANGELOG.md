@@ -14,6 +14,12 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.41.0] - 2025-12-22
+
+- [Updated] gems and yarn
+
+## [9.40.0] - 2025-12-22
+
 ### From Viva - 2025-12-22
 
 - [Updates] to support improved testing and app import reliability
