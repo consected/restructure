@@ -19,6 +19,10 @@
       <%= label_tag :force_not_empty, "copy even if target has roles already" %>
       <%= check_box_tag :force_not_empty %>
     </div>
+    <div class="">
+      <%= label_tag :reenable_disabled, "re-enable any disabled roles in target that match source" %>
+      <%= check_box_tag :reenable_disabled %>
+    </div>
     <div class="form-group">
       <%= hidden_filter_fields %>
       <%= submit_tag :copy, class: "btn btn-primary" %>
