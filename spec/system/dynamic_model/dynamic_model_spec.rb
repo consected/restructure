@@ -909,6 +909,7 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
       l.click
       sleep 1 # Allow tab content to load via AJAX - increased wait
 
+      debug_state('details_tab_loaded') unless has_css?("#details-#{@master_id}", wait: 15)
       expect(page).to have_css("#details-#{@master_id}", wait: 15)
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
       expect(page).to have_css(c, wait: 10)
