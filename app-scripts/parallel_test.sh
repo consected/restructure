@@ -90,7 +90,7 @@ fi
 export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 
 if [ -z "$@" ]; then
-  specs='spec/models spec/controllers spec/system spec/r.*'
+  specs='spec'
 else
   specs="$@"
 fi

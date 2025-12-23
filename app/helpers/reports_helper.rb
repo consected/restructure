@@ -122,7 +122,7 @@ module ReportsHelper
       def_value = value
       resource_name = config.resource_name
       res = Resources::Models.find_by(resource_name:) if resource_name
-      raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
+      raise FphsException, "No resource matches resource_name in report criteria: #{resource_name}" unless res
 
       # Use the configuration of selections to define which fields to pull as the options
       # The selections configuration is "<label field>: <value field>"
