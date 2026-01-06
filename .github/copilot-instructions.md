@@ -264,6 +264,20 @@ If an HTML snapshot is needed for debugging, use the helper method:
 save_html_snapshot('/tmp/debug_page.html')
 ```
 
+To capture console logs from the browser, store them to a global array variable during the test run
+and retrieve them later for debugging:
+
+```ruby
+# At the start of the test run
+page.execute_script('window.browserLogs = []; console.log = function(msg) { window.browserLogs.push(msg); };')
+```
+
+```ruby
+# At the end of the test run
+logs = page.evaluate_script('window.browserLogs')
+puts "Browser console logs:\n#{logs.join("\n")}"
+```
+
 
 ## System Specs
 
