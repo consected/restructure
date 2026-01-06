@@ -211,6 +211,14 @@ module NfsStore
         (cf.current_user || cf.user)&.app_type_id
       end
 
+      #
+      # The current app_type_id of a user for a persisted container file may change over time. Rather than relying on
+      # the value set at some arbitrary time, we use the default app_type_id for the current context.
+      # @return [Integer] app_type_id
+      def self.default_app_type_id
+        Settings.nfs_store_default_app_type_id
+      end
+
       # @see ProcessHandler#setup_container_file_current_user
       def setup_container_file_current_user(container_file)
         self.class.setup_container_file_current_user(container_file, app_type_id_for_file_user)
@@ -233,6 +241,9 @@ module NfsStore
                   "Job container file user (#{orig_user.id}) is disabled and batch user (#{User.batch_user}) does not have an " \
                   "nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
           end
+        elsif user.app_type_id != default_app_type_id
+          Rails.logger.warn "ProcessHandler - setting user #{user.id} app_type_id from #{user.app_type_id} to #{default_app_type_id}"
+          user.update!(app_type_id: default_app_type_id)
         end
 
         container_file.current_user = user
