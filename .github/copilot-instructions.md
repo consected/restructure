@@ -105,9 +105,10 @@ grep -E "pattern" /tmp/rspec_output.log | tail -15
 grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
 
 # ✅ Use app-scripts that set environment variables internally
+# NOTE: the arguments after the script are the same as you would pass to the underlying command
 app-scripts/rails_runner_test.sh "puts User.count"
-app-scripts/headless_rspec.sh spec/system/my_spec.rb
-app-scripts/not_headless_rspec.sh spec/system/my_spec.rb
+app-scripts/headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
+app-scripts/not_headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
 ```
 
 #### Why These Rules Exist
@@ -196,7 +197,7 @@ Standard Rspec tests, which exclude environment / app specific tests in
 bundle exec rspec  # Run in headless mode
 ```
 
-For headless (visible browser) system tests, which include the environment / app specific specs:
+For headless (invisible browser) system tests, which include the environment / app specific specs:
 ```bash
 app-scripts/headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
 ```
@@ -222,6 +223,11 @@ RAILS_ENV=test bundle exec rails runner "<command to run>"
 If needed, clean the test database:
 ```bash
 app-scripts/clean-test-db.sh
+
+```
+If needed, clean test assets and cache:
+```bash
+app-scripts/clean-test-assets-and-cache.sh
 ```
 ### Parallel test execution
 ```bash
@@ -256,6 +262,20 @@ click_link 'edit tracker record'
 If an HTML snapshot is needed for debugging, use the helper method:
 ```ruby
 save_html_snapshot('/tmp/debug_page.html')
+```
+
+To capture console logs from the browser, store them to a global array variable during the test run
+and retrieve them later for debugging:
+
+```ruby
+# At the start of the test run
+page.execute_script('window.browserLogs = []; console.log = function(msg) { window.browserLogs.push(msg); };')
+```
+
+```ruby
+# At the end of the test run
+logs = page.evaluate_script('window.browserLogs')
+puts "Browser console logs:\n#{logs.join("\n")}"
 ```
 
 
@@ -411,9 +431,9 @@ save_html_snapshot('/tmp/debug.html')  # Save HTML (last resort)
 
 **Enable debug output:**
 ```bash
-app-scripts/headless_rspec.sh spec/system/your_spec.rb
-
+app-scripts/headless_rspec.sh spec/system/your_spec.rb -e 'the example to run'
 ```
+This calls rspec with `FEATURE_DEBUG=true` environment variable.
 
 ### Edit Button AJAX Pattern
 

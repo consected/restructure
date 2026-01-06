@@ -76,6 +76,8 @@ class Admin::UserRole < Admin::AdminBase
   end
 
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
+  # Note that the results are sorted by app type id (string rather than integer sort)
+  # to ensure consistent ordering, especially for testing.
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name(conditions: nil)
     res = select(:role_name, :app_type_id).distinct.includes(:app_type).order(role_name: :asc)
@@ -83,16 +85,16 @@ class Admin::UserRole < Admin::AdminBase
 
     items = {}
     res.each do |role|
-      m = role.app_type
-      n = if m
-            "#{m.id}/#{m.name}"
+      app_type = role.app_type
+      n = if app_type
+            "#{app_type.id}/#{app_type.name}"
           else
             '/'
           end
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end
-    items
+    items.sort.to_h
   end
 
   def self.users
