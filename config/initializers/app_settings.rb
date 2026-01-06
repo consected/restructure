@@ -186,6 +186,10 @@ class Settings
     'nfs_store group 601'
   end
 
+  def self.nfs_store_default_app_type_id
+    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
+  end
+
   # A list of resource names for admin classes that us filestore for file storage
   FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
 
@@ -234,7 +238,7 @@ class Settings
   RedcapDataOptions = {
     run_jobs_as_user: RedcapJobUserEmail,
     run_jobs_in_app_type: 'ref-data'
-  }
+  }.freeze
 
   # Alternative to blindly using inflector acronyms.
   # This array of acronyms will be enforced for titleize only, avoiding
@@ -299,6 +303,7 @@ class Settings
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
+    NfsStoreJobDefaultAppTypeId
     DefaultCountrySelect GdprCountryCodes
   ].freeze
 end
