@@ -285,30 +285,7 @@
 
   showable_if: 'ref: ** conditions reference **'
   add_reference_if: 'ref: ** conditions reference **'
-  valid_if:
-    on_save: ''
-    on_create:
-      hide_error: true|false (default false) to hide an error associated with this validation
-    on_update:
-        "ref: conditions": '** ref: conditions'
-        all: 
-          "model_table_name | this":
-            validation_field_name_5: 
-              validation_type: 'validation options'
-              invalid_error_message: '(optional) custom error message to return if invalid'
-            data:
-              validate: # apply a special format validation for the data using one of the following
-                phone: true
-                email: true
-                source: true
-                zip: true
-                min_length: 7
-                
-    error_messages:
-      on_save:
-        
-      on_create:                  
-      on_update:
+#!defs(valid_if_options_defs.yaml)
 
   # embed can be defined in one of three styles:
   embed: default_embed_resource 
