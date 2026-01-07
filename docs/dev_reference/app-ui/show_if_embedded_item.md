@@ -88,15 +88,12 @@ fields:
 
 ### JavaScript Tests
 
-Location: `spec/javascripts/_fpa_show_if_spec.js`
+Location: `spec/javascripts/`
 
 Tests validate:
 
-- Basic embedded_item conditions
-- Nested conditions with any/all logic
-- Explicit operators (>=, <, in?, etc.)
-- Array value matching
-- Missing embedded_item handling
+- Field show_if
+- Tag formatting
 
 Run with: `app-scripts/jasmine-serve.sh`
 

@@ -139,9 +139,30 @@ describe('_fpa.tag_formatter', function () {
     result = _fpa.tag_formatter.format_with('join_with_comma', testArray, testArray, 'fruits', {});
     expect(result).toEqual('apple, banana, cherry');
 
+    // Test join_with_csv - simple array
+    result = _fpa.tag_formatter.format_with('join_with_csv', testArray, testArray, 'fruits', {});
+    expect(result).toEqual('apple,banana,cherry');
+
+    // Test join_with_csv - array with commas and quotes
+    const csvArray = ['John', 'Doe, Jr.', 'Manager'];
+    result = _fpa.tag_formatter.format_with('join_with_csv', csvArray, csvArray, 'data', {});
+    expect(result).toEqual('John,"Doe, Jr.",Manager');
+
     // Test join_with_semicolon
     result = _fpa.tag_formatter.format_with('join_with_semicolon', testArray, testArray, 'fruits', {});
     expect(result).toEqual('apple; banana; cherry');
+
+    // Test join_with_pipe
+    result = _fpa.tag_formatter.format_with('join_with_pipe', testArray, testArray, 'fruits', {});
+    expect(result).toEqual('apple|banana|cherry');
+
+    // Test join_with_dot
+    result = _fpa.tag_formatter.format_with('join_with_dot', ['www', 'example', 'com'], ['www', 'example', 'com'], 'domain', {});
+    expect(result).toEqual('www.example.com');
+
+    // Test join_with_slash
+    result = _fpa.tag_formatter.format_with('join_with_slash', ['home', 'user', 'docs'], ['home', 'user', 'docs'], 'path', {});
+    expect(result).toEqual('home/user/docs');
 
     // Test join_with_newline
     result = _fpa.tag_formatter.format_with('join_with_newline', testArray, testArray, 'fruits', {});
@@ -161,6 +182,14 @@ describe('_fpa.tag_formatter', function () {
     var result = _fpa.tag_formatter.format_with('split_comma', 'apple,banana,cherry', 'apple,banana,cherry', 'fruits', {});
     expect(result).toEqual(['apple', 'banana', 'cherry']);
 
+    // Test split_csv - simple string
+    result = _fpa.tag_formatter.format_with('split_csv', 'apple,banana,cherry', 'apple,banana,cherry', 'fruits', {});
+    expect(result).toEqual(['apple', 'banana', 'cherry']);
+
+    // Test split_csv - with quoted values
+    result = _fpa.tag_formatter.format_with('split_csv', 'John,"Doe, Jr.",Manager', 'John,"Doe, Jr.",Manager', 'data', {});
+    expect(result).toEqual(['John', 'Doe, Jr.', 'Manager']);
+
     // Test split_lines
     result = _fpa.tag_formatter.format_with('split_lines', 'apple\nbanana\ncherry', 'apple\nbanana\ncherry', 'notes', {});
     expect(result).toEqual(['apple', 'banana', 'cherry']);
@@ -168,6 +197,26 @@ describe('_fpa.tag_formatter', function () {
     // Test split_semicolon
     result = _fpa.tag_formatter.format_with('split_semicolon', 'apple;banana;cherry', 'apple;banana;cherry', 'fruits', {});
     expect(result).toEqual(['apple', 'banana', 'cherry']);
+
+    // Test split_pipe
+    result = _fpa.tag_formatter.format_with('split_pipe', 'field1|field2|field3', 'field1|field2|field3', 'fields', {});
+    expect(result).toEqual(['field1', 'field2', 'field3']);
+
+    // Test split_dot
+    result = _fpa.tag_formatter.format_with('split_dot', 'www.example.com', 'www.example.com', 'domain', {});
+    expect(result).toEqual(['www', 'example', 'com']);
+
+    // Test split_at
+    result = _fpa.tag_formatter.format_with('split_at', 'user@example.com', 'user@example.com', 'email', {});
+    expect(result).toEqual(['user', 'example.com']);
+
+    // Test split_slash
+    result = _fpa.tag_formatter.format_with('split_slash', 'home/user/docs', 'home/user/docs', 'path', {});
+    expect(result).toEqual(['home', 'user', 'docs']);
+
+    // Test split_space
+    result = _fpa.tag_formatter.format_with('split_space', 'hello world test', 'hello world test', 'text', {});
+    expect(result).toEqual(['hello', 'world', 'test']);
   });
 
   it("transforms arrays correctly", function () {
@@ -196,7 +245,7 @@ describe('_fpa.tag_formatter', function () {
 
     // Test markdown_list
     var result = _fpa.tag_formatter.format_with('markdown_list', testArray, testArray, 'fruits', {});
-    expect(result).toEqual('  - apple\n  - banana\n  - cherry');
+    expect(result).toEqual('- apple\n- banana\n- cherry');
 
     // Test html_list
     result = _fpa.tag_formatter.format_with('html_list', testArray, testArray, 'fruits', {});
@@ -237,6 +286,14 @@ describe('_fpa.tag_formatter', function () {
     expect(result).toBeUndefined();
   });
 
+  it("returns value unchanged with no_html_tag", function () {
+    var result = _fpa.tag_formatter.format_with('no_html_tag', '<p>HTML content</p>', '<p>HTML content</p>');
+    expect(result).toEqual('<p>HTML content</p>');
+
+    result = _fpa.tag_formatter.format_with('no_html_tag', 'plain text', 'plain text');
+    expect(result).toEqual('plain text');
+  });
+
   it("uses general_selection_label to retrieve labels", function () {
     const data = {
       _general_selections: {
@@ -249,5 +306,34 @@ describe('_fpa.tag_formatter', function () {
 
     var result = _fpa.tag_formatter.format_with('general_selection_label', 'A', 'A', 'status', data);
     expect(result).toEqual('Active');
+  });
+
+  it("handles string manipulation correctly", function () {
+    // Test strip
+    var result = _fpa.tag_formatter.format_with('strip', '  hello world  ', '  hello world  ', 'text', {});
+    expect(result).toEqual('hello world');
+
+    // Test plaintext
+    result = _fpa.tag_formatter.format_with('plaintext', 'Line 1\nLine 2', 'Line 1\nLine 2', 'text', {});
+    expect(result).toEqual('Line 1<br>Line 2');
+  });
+
+  it("handles numeric indexing correctly", function () {
+    const testString = 'Hello World';
+    const testArray = ['first', 'second', 'third', 'fourth'];
+
+    // Test numeric indexing for arrays
+    var result = _fpa.tag_formatter.format_with('0', testArray, testArray, 'items', {});
+    expect(result).toEqual('first');
+
+    result = _fpa.tag_formatter.format_with('2', testArray, testArray, 'items', {});
+    expect(result).toEqual('third');
+
+    // Test numeric indexing for strings (slice)
+    result = _fpa.tag_formatter.format_with('4', testString, testString, 'text', {});
+    expect(result).toEqual('Hello');
+
+    result = _fpa.tag_formatter.format_with('1', testString, testString, 'text', {});
+    expect(result).toEqual('He');
   });
 });

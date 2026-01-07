@@ -135,6 +135,7 @@ RSpec.describe Formatter::TagFormatter, type: :model do
     tests = [
       [:plaintext, "1\ntest, this\n\nlike it\n\nand\n99", '1<br>test, this<br><br>like it<br><br>and<br>99'],
       [:strip, string, 'abh jkj fff 9'],
+      [:split_space, 'hello world test', ['hello', 'world', 'test']],
       [:split_lines, "1\ntest, this\n\nlike it\n\nand", ['1', 'test, this', '', 'like it', '', 'and']],
       [:split_comma, ' abh,jkj,fff,9 ', [' abh', 'jkj', 'fff', '9 ']],
       [:split_csv, '" abh","jkj","fff,ggg",9,""', [' abh', 'jkj', 'fff,ggg', '9', '']],
@@ -144,6 +145,17 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:split_at, 'phil.ayres@test.tst', ['phil.ayres', 'test.tst']],
       [:split_slash, 'abc/def', ['abc', 'def']],
       [:markup, "# Hello!\n\nHere is some text", "<h1 id=\"hello\">Hello!</h1>\n\n<p>Here is some text</p>\n"]
+    ]
+
+    run tests
+  end
+
+  it 'handles pass-through and utility formatters' do
+    tests = [
+      [:no_html_tag, 'test value', 'test value'],
+      [:no_html_tag, '<p>HTML content</p>', '<p>HTML content</p>'],
+      [:ignore_missing, nil, ''],
+      [:ignore_missing, 'present', 'present']
     ]
 
     run tests
@@ -227,6 +239,100 @@ RSpec.describe Formatter::TagFormatter, type: :model do
 
     tests = [
       [:general_selection_label, 'nflpa2', 'NFLPA 2', nil, 'source', pi]
+    ]
+
+    run tests
+  end
+
+  it 'handles string manipulation and conversion' do
+    html_string = '<p>Hello <strong>World</strong></p>\nSecond line'
+    markdown_string = "# Title\n\nThis is **bold** text."
+
+    tests = [
+      [:strip, '  spaced text  ', 'spaced text'],
+      [:plaintext, html_string, '<p>Hello <strong>World</strong></p>\\nSecond line'],
+      [:markup, markdown_string, "<h1 id=\"title\">Title</h1>\n\n<p>This is <strong>bold</strong> text.</p>\n"],
+      [:ignore_missing, nil, ''],
+      [:ignore_missing, 'present', 'present']
+    ]
+
+    run tests
+  end
+
+  it 'handles data format conversion' do
+    data_hash = { 'key1' => 'value1', 'key2' => ['item1', 'item2'] }
+    data_array = ['item1', 'item2', 'item3']
+
+    yaml_expected = "key1: value1\nkey2:\n- item1\n- item2\n"
+
+    json_expected = <<~JSON.strip
+      {
+        "key1": "value1",
+        "key2": [
+          "item1",
+          "item2"
+        ]
+      }
+    JSON
+
+    tests = [
+      [:yaml, data_hash, yaml_expected],
+      [:json, data_hash, json_expected],
+      [:yaml, data_array, "- item1\n- item2\n- item3\n"],
+      [:json, data_array, "[\n  \"item1\",\n  \"item2\",\n  \"item3\"\n]"]
+    ]
+
+    run tests
+  end
+
+  it 'handles numeric indexing for strings and arrays' do
+    test_string = 'Hello World'
+    test_array = ['first', 'second', 'third', 'fourth']
+
+    # The numeric indexing is processed by the process method
+    # For strings: operation.to_i != 0 → curr_val[0..operation.to_i]
+    # For arrays: operation.to_i.to_s == operation → curr_val[operation.to_i]
+
+    tests = [
+      [0, test_array, 'first'],         # First element of array (0 as string matches to_i.to_s)
+      [2, test_array, 'third'],         # Third element of array
+      [10, test_array, nil],            # Beyond array bounds
+      [1, test_string, 'He'],           # First 2 characters from string (0..1)
+      [4, test_string, 'Hello']         # First 5 characters from string (0..4)
+    ]
+
+    run tests
+  end
+
+  it 'handles specialized date time formats with edge cases' do
+    utc_datetime = DateTime.parse('2023-03-15T14:30:45Z')
+    date_only = Date.parse('2023-03-15')
+
+    tests = [
+      [:dicom_datetime, utc_datetime, '20230315143045+0000'],
+      [:dicom_date, date_only, '20230315'],
+      [:dicom_date, utc_datetime, '20230315'],
+      [:redcap_date, date_only, '2023-03-15'],
+      [:redcap_date, utc_datetime, '2023-03-15'],
+      [:iso8601_datetime, utc_datetime, '2023-03-15T14:30:45+00:00'],
+      [:dicom_datetime, 'not a date', nil],
+      [:dicom_date, 'not a date', nil],
+      [:redcap_date, 'not a date', nil]
+    ]
+
+    run tests
+  end
+
+  it 'handles timezone edge cases' do
+    # Test daylight saving time transitions
+    winter_datetime = DateTime.parse('2023-01-15T18:30:00Z')  # UTC winter
+    summer_datetime = DateTime.parse('2023-07-15T18:30:00Z')  # UTC summer
+
+    tests = [
+      [:date_time_show_zone, winter_datetime, '01/15/2023 1:30 pm Eastern Time (US & Canada)'],
+      [:date_time_show_zone, summer_datetime, '07/15/2023 2:30 pm Eastern Time (US & Canada)'],
+      [:date_time_show_zone, winter_datetime, '15/01/2023 6:30 pm London', @ldn_user],
+      [:date_time_show_zone, summer_datetime, '15/07/2023 7:30 pm London', @ldn_user]
     ]
 
     run tests
