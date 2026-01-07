@@ -5,6 +5,7 @@ include SetupHelper
 
 describe User do
   include ModelSupport
+
   before(:each) do
     @user, @good_password = create_user
     @good_email = @user.email
@@ -241,6 +242,51 @@ describe User do
     expect(Delayed::Job.count).to eq 1
     # No new message has been created yet, since it is not created until the job is processed, which is way in the future
     expect(Messaging::MessageNotification.count).to eq(message_count + 1)
+  ensure
+    Delayed::Worker.delay_jobs = false
+  end
+
+  it 'does not send password expiration notification to disabled users' do
+    Delayed::Worker.delay_jobs = false
+    Messaging::MessageNotification.delete_all
+    expect(Messaging::MessageNotification.layout_template(Users::Reminders.password_expiration_defaults[:layout])).to be_a Admin::MessageTemplate
+
+    create_admin
+
+    @user = User.new email: "#{@user.email}-disabled-allow-test-email", current_admin: @admin, first_name: 'fn', last_name: 'ln'
+    @user.otp_required_for_login = false
+
+    # Set the password to be expiring soon
+    unless @user.class.method_defined?(:orig_password_updated_at)
+      @user.class.send :alias_method, :orig_password_updated_at, :password_updated_at
+    end
+    @user.class.send(:define_method, :password_updated_at) do
+      Time.now - (Settings::PasswordAgeLimit - 2.9).days
+    end
+
+    @user.save!
+    reset_expiration_user
+
+    # Verify that a notification was sent for the active user
+    initial_message_count = Messaging::MessageNotification.count
+    expect(initial_message_count).to be > 0
+
+    # Now disable the user
+    @user.disabled = true
+    @user.current_admin = @admin
+    @user.save!
+
+    # Clear previous notifications for this test
+    Messaging::MessageNotification.delete_all
+
+    # Try to perform the job - it should not create a notification
+    HandlePasswordExpirationReminderJob.new.perform(@user)
+
+    # Verify no new notification was created for the disabled user
+    expect(Messaging::MessageNotification.count).to eq 0
+
+    # Verify the job returns early without raising an exception
+    expect { HandlePasswordExpirationReminderJob.new.perform(@user) }.not_to raise_error
   ensure
     Delayed::Worker.delay_jobs = false
   end
