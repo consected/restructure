@@ -49,6 +49,7 @@ module Formatter
       html_list
       plaintext
       strip
+      split_space
       split_lines
       split_comma
       split_csv
@@ -62,6 +63,7 @@ module Formatter
       json
       ignore_missing
       last
+      no_html_tag
       general_selection_label
     ].freeze
 
@@ -98,46 +100,90 @@ module Formatter
       end
     end
 
+    #
+    # Converts the first character to uppercase and the rest to lowercase
+    # @param [String] res - the string value to format
+    # @return [String] capitalized string
     def capitalize(res, _orig_val)
       res.capitalize
     end
 
+    #
+    # Converts each word's first character to uppercase (title case)
+    # @param [String] res - the string value to format
+    # @return [String] title case string
     def titleize(res, _orig_val)
       res.captionize
     end
 
+    #
+    # Converts all characters to uppercase
+    # @param [String] res - the string value to format
+    # @return [String] uppercase string
     def uppercase(res, _orig_val)
       res.upcase
     end
 
+    #
+    # Converts all characters to lowercase
+    # @param [String] res - the string value to format
+    # @return [String] lowercase string
     def lowercase(res, _orig_val)
       res.downcase
     end
 
+    #
+    # Converts camelCase or spaces to snake_case format
+    # @param [String] res - the string value to format
+    # @return [String] underscored string
     def underscore(res, _orig_val)
       res.underscore
     end
 
+    #
+    # Converts spaces to hyphens
+    # @param [String] res - the string value to format
+    # @return [String] hyphenated string
     def hyphenate(res, _orig_val)
       res.hyphenate
     end
 
+    #
+    # Converts to a hyphenated identifier (alphanumeric with hyphens, ending with hyphen)
+    # @param [String] res - the string value to format
+    # @return [String] hyphenated identifier
     def id_hyphenate(res, _orig_val)
       res.id_hyphenate
     end
 
+    #
+    # Converts to an underscored identifier (alphanumeric with underscores, ending with underscore)
+    # @param [String] res - the string value to format
+    # @return [String] underscored identifier
     def id_underscore(res, _orig_val)
       res.id_underscore
     end
 
+    #
+    # Returns the first character in uppercase
+    # @param [String] res - the string value to format
+    # @return [String] first character in uppercase
     def initial(res, _orig_val)
       res.first&.upcase
     end
 
+    #
+    # Returns the first character as-is
+    # @param [String] res - the string value to format
+    # @return [String] first character
     def first(res, _orig_val)
       res.first
     end
 
+    #
+    # Calculates age in years from a date value
+    # @param [Date, DateTime] orig_val - the date to calculate age from
+    # @return [Integer, nil] age in years or nil if not a valid date
     def age(_res, orig_val)
       return unless orig_val.respond_to? :year
 
@@ -147,6 +193,10 @@ module Formatter
       age
     end
 
+    #
+    # Formats a date according to user's date format preference (e.g., mm/dd/yyyy or dd/mm/yyyy)
+    # @param [Date, DateTime] orig_val - the date to format
+    # @return [String] formatted date string
     def date(_res, orig_val)
       Formatter::Date.format(orig_val, current_user: current_user)
     end
@@ -215,30 +265,58 @@ module Formatter
                                                include_sec: true)
     end
 
+    #
+    # Formats date/time in DICOM format (YYYYMMDDHHMMSS+0000)
+    # @param [Date, DateTime] orig_val - the date/time to format
+    # @return [String, nil] DICOM datetime string or nil if not a valid date
     def dicom_datetime(_res, orig_val)
       orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
     end
 
+    #
+    # Formats date in DICOM format (YYYYMMDD)
+    # @param [Date, DateTime] orig_val - the date to format
+    # @return [String, nil] DICOM date string or nil if not a valid date
     def dicom_date(_res, orig_val)
       orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
     end
 
+    #
+    # Formats date in REDCap format (YYYY-MM-DD)
+    # @param [Date, DateTime] orig_val - the date to format
+    # @return [String, nil] REDCap date string or nil if not a valid date
     def redcap_date(_res, orig_val)
       orig_val.strftime('%Y-%m-%d') if orig_val.respond_to? :strftime
     end
 
+    #
+    # Formats date/time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS+00:00)
+    # @param [Date, DateTime] orig_val - the date/time to format
+    # @return [String] ISO 8601 datetime string
     def iso8601_datetime(_res, orig_val)
       orig_val.iso8601
     end
 
+    #
+    # Joins array elements with spaces
+    # @param [Array] res - the array to join
+    # @return [String, nil] space-separated string or nil if not an array
     def join_with_space(res, _orig_val)
       res.join(' ') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with commas and spaces
+    # @param [Array] res - the array to join
+    # @return [String, nil] comma-separated string or nil if not an array
     def join_with_comma(res, _orig_val)
       res.join(', ') if res.is_a? Array
     end
 
+    #
+    # Joins array elements in CSV format with proper escaping for commas and quotes
+    # @param [Array] res - the array to join
+    # @return [String, nil] CSV-formatted string or nil if not an array
     def join_with_csv(res, _orig_val)
       return unless res.is_a? Array
 
@@ -249,117 +327,246 @@ module Formatter
       res.split("\n").first
     end
 
+    #
+    # Joins array elements with semicolons and spaces
+    # @param [Array] res - the array to join
+    # @return [String, nil] semicolon-separated string or nil if not an array
     def join_with_semicolon(res, _orig_val)
       res.join('; ') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with pipe characters
+    # @param [Array] res - the array to join
+    # @return [String, nil] pipe-separated string or nil if not an array
     def join_with_pipe(res, _orig_val)
       res.join('|') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with dots
+    # @param [Array] res - the array to join
+    # @return [String, nil] dot-separated string or nil if not an array
     def join_with_dot(res, _orig_val)
       res.join('.') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with @ symbols (useful for email addresses)
+    # @param [Array] res - the array to join
+    # @return [String, nil] @-separated string or nil if not an array
     def join_with_at(res, _orig_val)
       res.join('@') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with forward slashes
+    # @param [Array] res - the array to join
+    # @return [String, nil] slash-separated string or nil if not an array
     def join_with_slash(res, _orig_val)
       res.join('/') if res.is_a? Array
     end
 
+    #
+    # Joins array elements with newlines
+    # @param [Array] res - the array to join
+    # @return [String, nil] newline-separated string or nil if not an array
     def join_with_newline(res, _orig_val)
       res.join("\n") if res.is_a? Array
     end
 
+    #
+    # Joins array elements with double newlines
+    # @param [Array] res - the array to join
+    # @return [String, nil] double newline-separated string or nil if not an array
     def join_with_2newlines(res, _orig_val)
       res.join("\n\n") if res.is_a? Array
     end
 
+    #
+    # Removes blank/empty elements from array
+    # @param [Array] res - the array to compact
+    # @return [Array, nil] array without blank elements or nil if not an array
     def compact(res, _orig_val)
       res.reject(&:blank?) if res.is_a? Array
     end
 
+    #
+    # Sorts array elements in ascending order
+    # @param [Array] res - the array to sort
+    # @return [Array, nil] sorted array or nil if not an array
     def sort(res, _orig_val)
       res.sort if res.is_a? Array
     end
 
+    #
+    # Sorts array elements in descending order
+    # @param [Array] res - the array to sort
+    # @return [Array, nil] reverse-sorted array or nil if not an array
     def sort_reverse(res, _orig_val)
       res.sort.reverse if res.is_a? Array
     end
 
+    #
+    # Removes duplicate elements from array
+    # @param [Array] res - the array to process
+    # @return [Array, nil] array with unique elements or nil if not an array
     def uniq(res, _orig_val)
       res.uniq if res.is_a? Array
     end
 
+    #
+    # Converts array to Markdown unordered list format
+    # @param [Array] res - the array to convert
+    # @return [String, nil] Markdown list string or nil if not an array
     def markdown_list(res, _orig_val)
       "- #{res.join("\n- ")}" if res.is_a? Array
     end
 
+    #
+    # Converts array to HTML unordered list format
+    # @param [Array] res - the array to convert
+    # @return [String, nil] HTML list string or nil if not an array
     def html_list(res, _orig_val)
       "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>" if res.is_a? Array
     end
 
+    #
+    # Sanitizes HTML and converts newlines to <br> tags
+    # @param [String] res - the string to process
+    # @return [String] sanitized HTML-safe string
     def plaintext(res, _orig_val)
       res = ActionController::Base.helpers.sanitize(res)
       res.gsub("\n", '<br>').html_safe
     end
 
+    #
+    # Removes leading and trailing whitespace
+    # @param [String] res - the string to strip
+    # @return [String] trimmed string
     def strip(res, _orig_val)
       res.strip
     end
 
+    #
+    # Splits string into array by spaces
+    # @param [String] res - the string to split
+    # @return [Array] array of space-separated values
+    def split_space(res, _orig_val)
+      res.split(' ')
+    end
+
+    #
+    # Splits string into array by newlines
+    # @param [String] res - the string to split
+    # @return [Array] array of lines
     def split_lines(res, _orig_val)
       res.split("\n")
     end
 
+    #
+    # Splits string into array by commas
+    # @param [String] res - the string to split
+    # @return [Array] array of comma-separated values
     def split_comma(res, _orig_val)
       res.split(',')
     end
 
+    #
+    # Parses CSV string into array with proper handling of quoted values
+    # @param [String] res - the CSV string to parse
+    # @return [Array] array of parsed CSV values
     def split_csv(res, _orig_val)
       CSV.parse_line(res)
     end
 
+    #
+    # Splits string into array by semicolons
+    # @param [String] res - the string to split
+    # @return [Array] array of semicolon-separated values
     def split_semicolon(res, _orig_val)
       res.split(';')
     end
 
+    #
+    # Splits string into array by pipe characters
+    # @param [String] res - the string to split
+    # @return [Array] array of pipe-separated values
     def split_pipe(res, _orig_val)
       res.split('|')
     end
 
+    #
+    # Splits string into array by dots
+    # @param [String] res - the string to split
+    # @return [Array] array of dot-separated values
     def split_dot(res, _orig_val)
       res.split('.')
     end
 
+    #
+    # Splits string into array by @ symbols
+    # @param [String] res - the string to split
+    # @return [Array] array of @-separated values
     def split_at(res, _orig_val)
       res.split('@')
     end
 
+    #
+    # Splits string into array by forward slashes
+    # @param [String] res - the string to split
+    # @return [Array] array of slash-separated values
     def split_slash(res, _orig_val)
       res.split('/')
     end
 
+    #
+    # Converts Markdown text to HTML
+    # @param [String] res - the Markdown string to convert
+    # @return [String] HTML-safe converted string
     def markup(res, _orig_val)
       Kramdown::Document.new(res).to_html.html_safe
     end
 
+    #
+    # Converts object to YAML format (without document separator)
+    # @param [Object] res - the object to convert
+    # @return [String, nil] YAML string or nil if object doesn't respond to to_yaml
     def yaml(res, _orig_val)
       res.to_yaml.sub("---\n", '') if res.respond_to?(:to_yaml)
     end
 
+    #
+    # Converts object to pretty-formatted JSON
+    # @param [Object] res - the object to convert
+    # @return [String, nil] pretty JSON string or nil if object doesn't respond to to_json
     def json(res, _orig_val)
       JSON.pretty_generate(res) if res.respond_to?(:to_json)
     end
 
+    #
+    # Returns the value or empty string if nil/missing
+    # @param [Object] res - the value to check
+    # @return [String] the value or empty string
     def ignore_missing(res, _orig_val)
       res || ''
     end
 
+    #
+    # Returns the last character of string or last element of array
+    # @param [String, Array] res - the string or array to get last element from
+    # @return [String, Object] last character or element
     def last(res, _orig_val)
       res.last
+    end
+
+    #
+    # Pass-through formatter that returns the value unchanged
+    # Used in JavaScript for compatibility, acts as a no-op
+    # @param [Object] res - the value to return
+    # @return [Object] unchanged value
+    def no_html_tag(res, _orig_val)
+      res
     end
 
     #

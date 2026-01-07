@@ -207,6 +207,11 @@ For non-headless (visible browser) system tests, which include the environment /
 app-scripts/not_headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
 ```
 
+For javascript tests (in `spec/javascripts/`):
+```bash
+app-scripts/jasmine-serve.sh headless
+```
+
 AI Agents: to use the Rails runner, use one of the following:
 
 ```bash
