@@ -337,4 +337,110 @@ describe 'admin dynamic model run batch now button', js: true, driver: $browser_
       expect(page).to have_content('Batch processing completed', wait: 5)
     end
   end
+
+  it 'run batch now button works after saving the dynamic model definition' do
+    cleanup_browser_state
+
+    # Create a dynamic model with batch_trigger configuration
+    dm = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'Test Button After Save',
+      table_name: 'test_version_tracking_recs',
+      schema_name: 'dynamic_test',
+      category: 'test',
+      field_list: 'test_field',
+      options: <<~YAML
+        _configurations:
+          batch_trigger:
+            frequency: '1 hour'
+            limit: 5
+            user: batch_test_user@test.com
+
+        default:
+          label: Default
+          fields:
+            - test_field
+        #{'  '}
+          batch_trigger:
+            on_record:
+              update_this:
+                one:
+                  with:
+                    test_field: 'batch processed'
+      YAML
+    )
+    dm.current_admin = @admin
+    dm.update_tracker_events
+
+    admin_sign_in_with_2fa
+
+    # Navigate to Dynamic Models admin page
+    visit '/admin/dynamic_models'
+    expect(page).to have_css("#admin-item-#{dm.id}", wait: 10)
+
+    # Click Edit to open the edit form
+    within "#admin-item-#{dm.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    # Wait for the edit form to load
+    expect(page).to have_css('.nav-tabs', wait: 10)
+    expect(page).to have_css('#def-details-block', wait: 5)
+
+    # Verify Run Batch Now button is present before save
+    within '#def-details-block' do
+      expect(page).to have_css('a.show-in-modal', text: 'Run Batch Now', wait: 5)
+    end
+
+    # Save the dynamic model by clicking submit button in the admin form
+    # The form is in the admin-edit-form block, which is above the tabs
+    within '.admin-edit-form' do
+      # Scroll to and click the save button
+      save_button = find('input[type="submit"][value="save"]', match: :first)
+      page.execute_script('arguments[0].scrollIntoView(true);', save_button)
+      sleep 0.3
+      save_button.click
+    end
+
+    # Wait for the form to reload after saving
+    # The admin edit form shows success via re-rendering the updated item
+    expect(page).to have_css('.admin-edit-form', wait: 10)
+
+    # Click Edit again to reopen the form with fresh content
+    within "#admin-item-#{dm.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    # Wait for the edit form to reload
+    expect(page).to have_css('.nav-tabs', wait: 10)
+    expect(page).to have_css('#def-details-block', wait: 5)
+
+    # Verify the Run Batch Now button still works after the AJAX update
+    within '#def-details-block' do
+      expect(page).to have_css('label', text: 'batch jobs', wait: 5)
+      expect(page).to have_css('a.show-in-modal', text: 'Run Batch Now', wait: 5)
+
+      # Click the Run Batch Now button to open the confirmation dialog
+      find('a.show-in-modal', text: 'Run Batch Now').click
+    end
+
+    # Wait for modal to appear - this is the key test!
+    # Previously this would fail because the event handler was lost after AJAX update
+    expect(page).to have_css('.modal', visible: true, wait: 5)
+
+    # Verify confirmation message appears
+    within '.modal' do
+      expect(page).to have_content('This will run immediately on the server')
+      expect(page).to have_content('Click Run if you are sure')
+
+      # Click the Run button to execute batch processing
+      click_link 'Run'
+    end
+
+    # Wait for result and verify success
+    expect(page).to have_css('.dynamic-model--run-batch-result', wait: 10)
+    within '.dynamic-model--run-batch-result-container' do
+      expect(page).to have_content('Batch processing completed', wait: 10)
+    end
+  end
 end
