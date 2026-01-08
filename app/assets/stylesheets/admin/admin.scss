@@ -100,6 +100,29 @@ a.collapsed>.caret {
   }
 }
 
+// Batch processing result container
+.dynamic-model--run-batch-result-container {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  
+  .dynamic-model--run-batch-result {
+    padding: 12px 15px;
+    border-radius: 3px;
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    color: #31708f;
+    
+    // Error state styling
+    &:has(*:contains('failed')),
+    &:has(*:contains('error')) {
+      background-color: #f2dede;
+      border-color: #ebccd1;
+      color: #a94442;
+    }
+  }
+}
+
 .admin-edit-form .form-group[data-out-attr-name='description'] {
   display: block;
 }
