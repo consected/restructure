@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.41.4] - 2026-01-08
+
 ### From FPHS - PR #819 - 2026-01-08
 
 - [Fixed] create_reference force_valid: true option not working for standard "player" models - fixes #818
