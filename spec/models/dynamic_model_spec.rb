@@ -120,7 +120,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       dm.current_admin = @admin
       dm.update_tracker_events
 
-      expect(dm).to be_a ::DynamicModel
+      expect(dm).to be_a DynamicModel
       # The field list has been set up
       expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
       # The keys have been set up automatically
@@ -166,7 +166,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       dm.current_admin = @admin
       dm.update_tracker_events
 
-      expect(dm).to be_a ::DynamicModel
+      expect(dm).to be_a DynamicModel
       # The field list has been set up
       expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
       # The keys have been set up automatically
@@ -195,7 +195,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       dm = DynamicModel.find(dm.id)
       dm.option_configs force: true
-      expect(dm).to be_a ::DynamicModel
+      expect(dm).to be_a DynamicModel
       # The field list has been set up
       expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
       # The keys have been set up automatically
@@ -309,6 +309,129 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       expect do
         res.update!(data: 'hi!')
       end.to raise_error(FphsException, 'no current_user in allows_current_user_access_to? (no master? true)')
+    end
+  end
+
+  describe 'YAML anchor and alias handling' do
+    before :example do
+      @user0, = create_user
+      create_admin
+      create_user
+      setup_access :trackers
+    end
+
+    it 'allows fixing broken YAML anchors by updating with valid YAML' do
+      # Create a dynamic model with valid YAML using anchors
+      table_name = 'yaml_anchor_test_table'
+      schema_name = 'ml_app'
+
+      # Clean up any existing table
+      DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+      ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{schema_name}.#{table_name}")
+
+      # Create table
+      sql = <<~SQL
+        CREATE TABLE IF NOT EXISTS #{schema_name}.#{table_name} (
+          id SERIAL PRIMARY KEY,
+          master_id INTEGER,
+          name VARCHAR(255),
+          user_id INTEGER,
+          created_at TIMESTAMP,
+          updated_at TIMESTAMP
+        )
+      SQL
+      ActiveRecord::Base.connection.execute(sql)
+
+      # Valid YAML with anchor
+      valid_yaml_with_anchor = <<~YAML
+        _definitions:
+          common_settings: &common
+            label: Common Label
+            caption_before: Common Caption
+        #{'  '}
+        default:
+          fields:
+            - name
+          name:
+            <<: *common
+            caption_before: Name
+      YAML
+
+      # Create dynamic model with valid YAML
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'YAML Anchor Test',
+        table_name:,
+        schema_name:,
+        category: 'table',
+        primary_key_name: :id,
+        foreign_key_name: :master_id,
+        field_list: 'name master_id',
+        options: valid_yaml_with_anchor
+      )
+
+      # Verify it was created successfully and options parse correctly
+      expect(dm.persisted?).to be true
+      expect { dm.force_option_config_parse }.not_to raise_error
+      expect(dm.failed_option_configs?).to be_falsey
+
+      # Now update with broken YAML (anchor removed but alias still referenced)
+      broken_yaml = <<~YAML
+        default:
+          fields:
+            - name
+          name:
+            <<: *common
+            caption_before: Name
+      YAML
+
+      dm.reload
+      dm.current_admin = @admin
+      dm.options = broken_yaml
+
+      # Broken YAML should be allowed to save (so admin can fix it later)
+      expect(dm.save).to be true
+
+      # But trying to parse the options should reveal the error
+      dm.reload
+      expect(dm.failed_option_configs?).to be_truthy
+
+      # And all_option_configs_notices should return the parse error
+      ces = OptionConfigs::ExtraOptions.all_option_configs_notices(dm)
+      expect(ces).not_to be_nil
+      expect(ces.first[:type]).to eq(:parse_error)
+      expect(ces.first[:message]).to include('alias')
+
+      # Now fix it by re-adding the anchor
+      fixed_yaml = <<~YAML
+        _definitions:
+          common_settings: &common
+            label: Fixed Common Label
+            caption_before: Fixed Common Caption
+        #{'  '}
+        default:
+          fields:
+            - name
+          name:
+            <<: *common
+            caption_before: Name Fixed
+      YAML
+
+      dm.reload
+      dm.current_admin = @admin
+      dm.options = fixed_yaml
+
+      # This should now save successfully
+      # This is the critical test - currently this fails because the broken YAML
+      # from the database is being parsed during validation, not the new valid YAML
+      save_result = dm.save
+      puts "Save failed with errors: #{dm.errors.full_messages}" unless save_result
+      expect(save_result).to be true
+
+      # Verify the fixed YAML parses correctly
+      dm.reload
+      expect { dm.force_option_config_parse }.not_to raise_error
+      expect(dm.failed_option_configs?).to be_falsey
     end
   end
 end
