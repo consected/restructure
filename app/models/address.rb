@@ -5,8 +5,8 @@ class Address < UserBase
   include RankHandler
   include ViewHandlers::Address
 
-  validates :source, 'validates/source' => true, allow_blank: true
-  validates :rank, presence: true
+  validates :source, 'validates/source' => true, allow_blank: true, unless: :ignore_configurable_valid_if
+  validates :rank, presence: true, unless: :ignore_configurable_valid_if
 
   before_save :handle_country
 
