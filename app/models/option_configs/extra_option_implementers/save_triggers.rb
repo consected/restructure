@@ -129,7 +129,8 @@ module OptionConfigs
             all_iter_configs = iter_configs[:do]
             all_iter_configs = [all_iter_configs] unless all_iter_configs.is_a? Array
             all_iter_configs.each do |iter_config|
-              res &&= calc_triggers_for_action(obj, action, iter_config)
+              result = calc_triggers_for_action(obj, action, iter_config)
+              res &&= result
             end
           end
         end
