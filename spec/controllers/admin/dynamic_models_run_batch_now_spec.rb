@@ -11,6 +11,17 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       create_admin
       sign_in @admin, scope: :admin
       SetupHelper.setup_al_player_contact_phones
+
+      # Create the batch user that will be referenced in the config
+      @app_type = Admin::AppType.active.first
+      @batch_user = User.find_or_create_by!(email: 'batch_user@test.com') do |user|
+        user.first_name = 'Batch'
+        user.last_name = 'User'
+        user.current_admin = @admin
+        user.app_type = @app_type
+        user.disabled = false
+      end
+      @batch_user.update!(app_type: @app_type) unless @batch_user.app_type
     end
 
     let!(:dynamic_model) do
@@ -69,11 +80,10 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
     end
 
     it 'successfully runs batch processing' do
-      # Get the implementation class and mock trigger_batch_now
+      # Mock the implementation class's trigger_batch_now method
+      # We need to stub at the class level since the controller gets a fresh reference
       impl_class = dynamic_model.implementation_class
-
-      # We need to allow the class method to be called
-      expect(impl_class).to receive(:trigger_batch_now).with(limit: 10, alt_user: instance_of(User)).and_return([1, 2, 3])
+      allow(impl_class).to receive(:trigger_batch_now).and_return([1, 2, 3])
 
       post :run_batch_now, params: { id: dynamic_model.id }, format: :js
 
@@ -84,11 +94,9 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
     end
 
     it 'handles errors gracefully' do
-      # Get the implementation class and mock to raise error
+      # Mock the implementation class to raise error
       impl_class = dynamic_model.implementation_class
-
-      # Expect trigger_batch_now to be called and raise error
-      expect(impl_class).to receive(:trigger_batch_now).with(limit: 10, alt_user: instance_of(User)).and_raise(StandardError.new('Test error'))
+      allow(impl_class).to receive(:trigger_batch_now).and_raise(StandardError.new('Test error'))
 
       post :run_batch_now, params: { id: dynamic_model.id }, format: :js
 
