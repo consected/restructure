@@ -5,13 +5,13 @@ class PlayerInfo < UserBase
   include ViewHandlers::Subject
 
   FollowUpScore = 881
-  BirthDateRanks = (1..BestAccuracyScore).freeze
+  BirthDateRanks = (1..BestAccuracyScore)
 
   # Allow simple search and compound searches to function
   attr_accessor :contact_data, :younger_than, :older_than, :age
 
   before_validation :prevent_user_changes, on: :update
-  before_save :check_college
+  before_save :check_college, unless: :ignore_configurable_valid_if
   add_model_to_list
 
   def self.human_name

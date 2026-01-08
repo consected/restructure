@@ -64,8 +64,8 @@ module UserHandler
 
     has_many :item_flags, -> { eager_load(:item_flag_name) }, as: :item, inverse_of: :item
 
-    validate :source_correct
-    validate :rank_correct
+    validate :source_correct, unless: :ignore_configurable_valid_if
+    validate :rank_correct, unless: :ignore_configurable_valid_if
 
     after_save :set_previous_action_flags
     after_save :track_record_update
@@ -99,7 +99,7 @@ module UserHandler
       r = { inverse_of: assoc_inverse }
       r[:foreign_key] = foreign_key_name if foreign_key_name && foreign_key_name != :master_id
       r[:primary_key] = primary_key_name if primary_key_name && primary_key_name != :id
-      if defined?(no_master_association) && no_master_association || (self < Dynamic::ExternalIdentifierBase)
+      if (defined?(no_master_association) && no_master_association) || (self < Dynamic::ExternalIdentifierBase)
         r[:optional] = true
       end
       r
@@ -243,7 +243,7 @@ module UserHandler
   # Even if they don't directly, but have an attribute, we'll catch it
   # @return [String]
   def data
-    return super() if defined? super
+    return super if defined? super
 
     a_list = %w[id master_id user_id admin_id rank source rec_type notes]
     (attributes[(attribute_names - a_list).first] || '').to_s

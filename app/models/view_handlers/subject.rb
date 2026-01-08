@@ -7,7 +7,7 @@ module ViewHandlers
     BestAccuracyScore = Settings::BestAccuracyScore
 
     included do
-      validate :dates_sensible
+      validate :dates_sensible, unless: :ignore_configurable_valid_if
       validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?
 
       # If the class is a dynamic definition, add a singular association, allowing a single
