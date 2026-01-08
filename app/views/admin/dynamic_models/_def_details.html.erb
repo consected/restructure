@@ -80,6 +80,30 @@
       </span>
     <% end %>
   </p>
+  <p>
+    <p>
+    <a class="btn btn-primary btn-sm show-in-modal" 
+        data-content-el="#dmdef-run-batch-now-<%=object_instance.id%>" 
+        data-title=""><span class="glyphicon glyphicon-play"></span> Run Batch Now</a>
+        </p>
+    <div id="dmdef-run-batch-now-<%=object_instance.id%>" class="hidden">
+      <h2>This will run immediately on the server and may take some time to complete.</h2>
+      <p>Click Run if you are sure</p>
+      <p>
+        <%= link_to run_batch_now_admin_dynamic_model_path(object_instance), 
+            remote: true,
+            class: 'btn btn-danger btn-sm',
+            method: :post,
+            data: { disable_with: "<span class='glyphicon glyphicon-refresh spinning'></span> Processing..." } do %>
+          <span class="glyphicon glyphicon-play"></span> Run
+        <% end %>
+      </p>
+      <div class="dynamic-model--run-batch-result-container"
+        id="dynamic-model--run-batch-result-container" 
+        data-subscription="dynamic-model--run-batch-result">
+      </div>
+    </div>
+  </p>
   <% end %>
 
   <% unless object_instance.table_or_view_ready?%>

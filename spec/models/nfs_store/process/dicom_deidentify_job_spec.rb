@@ -16,7 +16,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
   def do_dicom_test_uploads; end
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    seed_database && ActivityLog.define_models
 
     @other_users = []
     @other_users << create_user.first
@@ -270,5 +270,72 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     expect(file_metadata["Patient's Name"]).to eq 'new value'
     expect(file_metadata['Patient ID']).to eq 'another tagval'
     expect(file_metadata.keys).not_to include "Patient's Age"
+  end
+
+  it 'updates user app_type_id when it differs from default_app_type_id' do
+    app_type_2 = create_app_type name: 'apptype_test_nfs_default', label: 'apptype_test_nfs_default'
+
+    enable_user_app_access app_type_2.name, @user
+
+    # Setup: User with valid app type id
+    original_app_type = @user.app_type_id
+
+    f = 'make_copy_3.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    @make_copy_3_file = upload_file(f, dicom_content)
+
+    ul = @make_copy_3_file
+    sf = ul.stored_file
+
+    sf.current_user = @user
+    app_type_id = @user.app_type_id
+    expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
+
+    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+
+    # Get the original metadata
+    fs_path, = sf.file_path_and_role_name
+    dcm = DICOM::DObject.read(fs_path)
+    file_metadata = dcm.to_hash
+
+    expect(file_metadata["Patient's Name"]).not_to be_blank
+    expect(file_metadata['Patient ID']).not_to be_blank
+
+    # Change the app type id of the current user
+    @user.update!(app_type_id: app_type_2.id, current_admin: @admin)
+    expect(@user.app_type_id).to eq app_type_2.id
+
+    # Brute force reload the file
+    sf = sf.class.find(sf.id)
+    sf.current_user = @user
+
+    dij = NfsStore::Process::DicomDeidentifyJob.new
+
+    dij.perform(sf, @user.app_type_id, nil, use_pipeline: { user_file_actions: 'disable_check' })
+
+    expect(sf.current_user.app_type_id).to eq(Settings.nfs_store_default_app_type_id)
+
+    @user.update!(app_type_id: app_type_id, current_admin: @admin)
+    expect(@user.app_type_id).to eq app_type_id
+
+    expect(@user.user_roles.pluck(:role_name)).to include 'nfs_store group 600'
+
+    # Brute force reload the file
+    sf = sf.class.find(sf.id)
+    sf.current_user = @user
+    fs_path, = sf.file_path_and_role_name
+
+    expect(fs_path).to be_present
+
+    dcm = DICOM::DObject.read(fs_path)
+    file_metadata = dcm.to_hash
+
+    expect(file_metadata["Patient's Name"]).to eq 'new value'
+    expect(file_metadata['Patient ID']).to eq 'another tagval'
+    expect(file_metadata.keys).not_to include "Patient's Age"
+
+    # Verify user's app_type_id was updated to default
+    expect(@user.reload.app_type_id).to eq(original_app_type)
+    expect(sf.current_user.app_type_id).to eq(Settings.nfs_store_default_app_type_id)
   end
 end

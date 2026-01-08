@@ -430,6 +430,7 @@ module FeatureSupport
   end
 
   # Helper method to interact with chosen dropdowns (single or multi-select)
+  # To function, this method must be called outside of any within blocks
   def select_from_chosen(field_name, value, is_multi: false, is_report: false)
     field_id = id_for_field(field_name, is_report:)
     chosen_id = "#{field_id}_chosen"

@@ -36,6 +36,7 @@ Rails.application.routes.draw do
     resources :dynamic_models, except: %i[show destroy] do
       member do
         post :update_config_from_table
+        post :run_batch_now
         get :versions
       end
     end
