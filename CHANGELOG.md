@@ -14,6 +14,40 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #819 - 2026-01-08
+
+- [Fixed] create_reference force_valid: true option not working for standard "player" models - fixes #818
+
+### From FPHS - PR #817 - 2026-01-08
+
+- [Fixed] batch and save triggers not running the full set of triggers - fixes #816
+
+### From FPHS - PR #815 - 2026-01-08
+
+- [Added] feature to run dynamic model batch jobs immediately in the admin panel - resolves #814
+
+### From FPHS - PR #813 - 2026-01-07
+
+- [Added] tests and documentation for valid_if dynamic definition option - resolves #228
+
+### From FPHS - PR #812 - 2026-01-07
+
+- [Fixed] scenario where a user has been disabled but we still attempt to send a password notification, causing an exception - fixes #544
+
+### From FPHS - PR #811 - 2026-01-07
+
+- [Added] documentation for tag formatters Fixed implementation and test differences between Ruby and Javascript tag formatters - resolves #679
+- [Fixed] failure to run DicomMetadataJob when the original user's app type id has changed - fixes #808
+
+### From FPHS - PR #810 - 2026-01-06
+
+- [Fixed] failure to run DicomMetadataJob when the original user's app type id has changed - fixes #808
+
+### From FPHS - PR #809 - 2026-01-06
+
+- [Fixed] user access control admin panel copy or editing item causes drop downs to lose values - fixes #395
+- [Added] AI tools
+
 ## [9.41.3] - 2025-12-23
 
 ## [9.41.2] - 2025-12-23
