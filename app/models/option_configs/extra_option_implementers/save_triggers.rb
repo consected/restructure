@@ -19,7 +19,9 @@ module OptionConfigs
                              set_item_flags
                              redcap_request
                              run_batch_trigger
-                             log].freeze
+                             log
+                             transaction
+                             background].freeze
 
       class_methods do
         #
