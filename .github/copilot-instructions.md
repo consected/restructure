@@ -56,6 +56,12 @@
 - Use background jobs (ActiveJob) for non-blocking operations like sending emails or calling APIs.
 - Document complex code paths and methods with YARD
 
+### Database Conventions
+- Use migrations for all schema changes; avoid direct DB modifications for implementation.
+- Name tables according to Rails conventions (plural snake_case) aligning with model names.
+- Use history tables to allow auditing changes to important models.
+- For user data tables, data will be automatically downcased for storage and titleized for display unless otherwise specified.
+
 ### Helper Methods Quick Reference
 
 | Task | Helper Method | Example |
@@ -286,7 +292,13 @@ puts "Browser console logs:\n#{logs.join("\n")}"
 
 ## System Specs
 
-System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs.
+System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs. We write system specs to simulate real user/admin interactions through the UI as much as possible. Interacting with underlying Javascript is discouraged; use Jasmine tests for Javascript-specific behavior. 
+
+### Things to Remember
+- Standard string / varchar fields downcase data on storage and titleize on display. Keep this in mind when writing system specs that interact with user data fields.
+- Some fields rely heavily on Javascript for rendering and interaction (e.g., chosen.js dropdowns, big select dialogs, custom rich text editors). Always use the provided helper methods to interact with these fields.
+- Field visibility is controlled by `show_if` rules. Always set prerequisite fields first and allow time for the UI to update.
+- Don't navigate directly to edit URLs; always use the UI flow to reach forms (e.g. </masters/123> then click edit button for the appropriate block).
 
 ### 🔍 Troubleshooting Decision Tree
 

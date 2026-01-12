@@ -7,7 +7,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignatureSupport
   include ESignImportConfig
 
-  before :example do
+  before :all do
+    change_setting('TwoFactorAuthDisabledForUser', false)
     expect(ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')).to be true
     ESignImportConfig.import_config
     setup_config
@@ -15,10 +16,16 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     aldef.current_admin = @admin
     aldef.update_tracker_events
 
-    aldef = ::IpaInexChecklist.definition
+    aldef = IpaInexChecklist.definition
     aldef.current_admin = @admin
     aldef.update_tracker_events
+  end
 
+  after :all do
+    change_setting('TwoFactorAuthDisabledForUser', true)
+  end
+
+  before :each do
     @user_0, @good_password_0 = create_user
     @user, @good_password = create_user
 

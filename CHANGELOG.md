@@ -14,6 +14,28 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #827 - 2026-01-12
+
+- [Fixed] incorrect listing of filesystem flag files
+- [Fixed] specs for reliability
+- [Fixed] cleanup of test database to also clean temp filestore test files
+- [Added] save or batch trigger mechanism to reload "this" - resolves #824
+- [Added] save trigger that acts as a transaction block around other save triggers
+- [Added] save trigger that runs all the listed triggers in a single background job
+- [Added] save trigger to add log entry - resolves #823
+- [Added] save trigger to run a batch trigger in another dynamic model - resolves #822
+- [Fixed] "Run Batch Now" button not working after saving a dynamic model definition
+- [Fixed] broken YAML in dynamic model with view_sql prevents changes being saved
+- [Added] developer documentation to show simple implementation of "AJAX Requests and Responses Using Regular Markup"
+- [Added] ability for report row create and edit to operate for admins without explicit user access controls
+- [Fixed] create_master to return a valid value
+- [Added] more information to add_trackers failure if protocol name or id not found
+
+### From Viva
+
+- [Changed] custom editor tests to split out reusable helpers
+- [Fixed] the markdown editor failing to paste multiple paragraphs of text successfully from Word docs - fixes #825
+
 ## [9.41.4] - 2026-01-08
 
 ### From FPHS - PR #819 - 2026-01-08

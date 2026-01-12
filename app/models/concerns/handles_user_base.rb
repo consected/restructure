@@ -202,7 +202,7 @@ module HandlesUserBase
     #
     # Save this model in the resources list
     def add_model_to_list
-      Resources::Models.add self unless abstract_class || instance_methods.include?(:add_model_to_list)
+      Resources::Models.add self unless abstract_class || method_defined?(:add_model_to_list)
     end
 
     # The base string for route

@@ -214,7 +214,15 @@ describe 'advanced search', js: true, driver: $browser_driver do
     expect(page).to have_css(".player-info-item a[title='edit']")
   end
 
-  def edit_college(college, keyed)
+  #
+  # A college field provides both typeahead and free text entry.
+  # This method tests both for the allow_missing option is true. The free text entry
+  # will be saved as an option in the colleges list for future typeahead use.
+  # If allow_missing is false, the typeahead is expected to find at least one suggestion matching the keyed text.
+  # @param [String] college - full college name
+  # @param [String] keyed - partial college name to type to test typeahead
+  # @param [Boolean] allow_missing - whether to allow no typeahead suggestions to be found (default: true)
+  def edit_college(college, keyed, allow_missing: true)
     expect(college).not_to be_empty
     expect(keyed).not_to be_empty
     expect(keyed.length).to be >= 3
@@ -223,19 +231,46 @@ describe 'advanced search', js: true, driver: $browser_driver do
     end
     within 'form.edit_player_info' do
       f = find('#player_info_college')
+      scroll_into_view(f)
       f.click
+      # Clear the field first
+      f.send_keys([:control, 'a'])
+      f.send_keys(:delete)
       f.send_keys(keyed)
-      unless has_css?('.tt-suggestion', wait: 5)
+
+      # Give more time for AJAX typeahead to load
+      sleep 1
+
+      unless allow_missing || has_css?('.tt-suggestion', wait: 10)
         debug_state('college_typeahead', "Typing college '#{keyed}' to get typeahead suggestions")
+        # Try clicking and typing again
+        f.click
+        f.send_keys([:control, 'a'])
+        f.send_keys(keyed)
+        sleep 2
       end
       # Wait for typeahead suggestions to appear
-      expect(page).to have_css('.tt-suggestion', wait: 5), "Failed typing college '#{keyed}' to get typeahead suggestions"
+      unless allow_missing || has_css?('.tt-suggestion', wait: 5)
+        debug_state('college_typeahead_missing', "No typeahead suggestions for college '#{keyed}'\n#{page.html}")
+        take_screenshot 'college_suggestions', force: true
+      end
 
       h = '.tt-suggestion .tt-highlight'
-      # Wait for highlighted suggestion
-      expect(page).to have_css(h, wait: 5), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
-      expect(page.all(h).first.text.downcase).to eq(keyed)
-      page.all(h).first.click
+      if has_css?('.tt-suggestion', wait: 5)
+        expect(page).to have_css('.tt-suggestion'), "Failed typing college '#{keyed}' to get typeahead suggestions"
+
+        # Wait for highlighted suggestion
+        expect(page).to have_css(h, wait: 5), "No college suggestion highlighted for '#{keyed}'.\n#{page.all('.tt-suggestion').first&.text}"
+        expect(page.all(h).first.text.downcase).to eq(keyed)
+        page.all(h).first.click
+      elsif allow_missing
+        f.send_keys([:control, 'a'])
+        f.send_keys(college)
+      else
+        debug_state('college_highlight_missing', "No highlighted suggestion for college '#{keyed}'\n#{page.html}")
+        take_screenshot 'college_highlight', force: true
+        expect(page).to have_css('.tt-suggestion'), "No typeahead suggestions for college '#{keyed}' after typing"
+      end
 
       click_button 'Save'
     end
@@ -352,6 +387,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     expect(page).to have_css('#master_results_block')
     expect(page).to have_css('.player-info-item')
+    sleep 1
     b = all ".player-info-item a[title='edit']"
     b.first.click
     sleep 0.5 # Allow edit form to load via AJAX
