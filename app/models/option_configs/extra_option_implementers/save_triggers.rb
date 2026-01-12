@@ -21,7 +21,8 @@ module OptionConfigs
                              run_batch_trigger
                              log
                              transaction
-                             background].freeze
+                             background
+                             reload_this].freeze
 
       class_methods do
         #
