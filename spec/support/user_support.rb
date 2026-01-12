@@ -10,7 +10,7 @@ module UserSupport
       opt = part
       part = nil
     end
-    part ||= Time.new.to_f.to_s
+    part ||= SecureRandom.hex(10)
     good_email = opt[:email] || gen_username("#{part}-#{extra}-")
     admin, = @admin || create_admin
 
@@ -96,10 +96,8 @@ module UserSupport
 
   def self.create_admin(part = nil, with_matching_user: false)
     a = Admin.order(id: :desc).first
-    unless part
-      part = 1
-      part = a.id + 1 if a
-    end
+
+    part ||= SecureRandom.hex(10)
     good_admin_email = "e-testadmin-tester#{part}@testing.com"
 
     admin = Admin.create! email: good_admin_email
