@@ -59,8 +59,6 @@ RSpec.describe 'Delete stored files', type: :model do
   end
 
   it 'delete a stored zip file but retain its exploded archive files' do
-    setup_nfs_store
-    setup_container_and_al
     al = @activity_log
     expect(al).to be_a ActivityLog::PlayerContactPhone
     expect(@container.parent_item).to eq al

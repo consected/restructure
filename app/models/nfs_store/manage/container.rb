@@ -315,7 +315,7 @@ module NfsStore
 
       # List all the filesystem files in the container directory and sub-directories
       # including files in the mounted archives too.
-      # It excludes .trash paths and hidden (dot) paths and files
+      # It excludes .trash paths, hidden (dot) paths and files, and processing flag files.
       # Iterates through all the roles that the current user has, building a complete, unique set of files based on the
       # appropriate group file permissions for each role.
       # @return [Array(String)] a list of file paths relative to the container directory
@@ -333,6 +333,8 @@ module NfsStore
           all_files += paths.map { |f| f.sub("#{p}/", '').sub(p, '') }
         end
 
+        # Filter out processing flag files
+        all_files.reject! { |f| f.match?(/\.__processing(-index|-archive)?__$/) }
         all_files.uniq
       end
 
