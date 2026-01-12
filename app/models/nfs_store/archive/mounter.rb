@@ -386,7 +386,7 @@ module NfsStore
           msg = "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{mounted_path}"
           puts msg
 
-          unless mounted_path
+          unless mounted_path&.present?
             Rails.logger.warn msg
             Rails.logger.warn "extract_archived_files: mounted_path is nil for #{stored_file}" \
                               "role names: #{stored_file&.current_user_role_names} " \
@@ -403,6 +403,12 @@ module NfsStore
           start_time = Time.now
           iterations = 0
           failures = 0
+
+          # Check if mounted_path exists before attempting to glob
+          unless mounted_path&.present? && File.directory?(mounted_path)
+            Rails.logger.warn "Mounted path is nil or does not exist: #{mounted_path.inspect}"
+            return false
+          end
 
           glob_path = "#{mounted_path}/**/*"
           %w([ ] { } ?).each do |c|
