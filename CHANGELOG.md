@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.41.5] - 2026-01-12
+
 ### From FPHS - PR #827 - 2026-01-12
 
 - [Fixed] incorrect listing of filesystem flag files
