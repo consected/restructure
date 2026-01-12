@@ -10,6 +10,19 @@ _fpa.loaded.preload = function () {
     ev.preventDefault();
   });
 
+  // Delegated handler for show-in-modal elements using data-content-el attribute.
+  // Using event delegation ensures this works for dynamically loaded content
+  // without requiring re-attachment after AJAX updates.
+  $(document).on('click', '.show-in-modal[data-content-el]', function (ev) {
+    ev.preventDefault();
+    var contentSelector = $(this).attr('data-content-el');
+    if (!contentSelector) return;
+
+    var content = $(contentSelector).html();
+    var title = $(this).attr('data-title');
+    _fpa.show_modal(content, title);
+  });
+
 
   window.addEventListener('focus', function () {
     // Check the session timeout

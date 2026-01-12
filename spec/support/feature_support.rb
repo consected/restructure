@@ -601,8 +601,8 @@ module FeatureSupport
     result_target
   end
 
-  def puts_debug(msg)
-    puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true'
+  def puts_debug(msg, force: false)
+    puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true' || force
   end
 
   def save_html_snapshot(filename)
@@ -916,7 +916,7 @@ module FeatureSupport
     name ||= 'screenshot'
     timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
     filename = "#{self.class&.name&.underscore}_#{name}_#{timestamp}.png"
-    filepath = File.join('tmp', 'screenshots', filename)
+    filepath = Rails.root.join('tmp', 'screenshots', filename)
 
     # Ensure directory exists
     FileUtils.mkdir_p(File.dirname(filepath))
@@ -929,11 +929,13 @@ module FeatureSupport
     puts "[Screenshot] #{description}" if description
 
     # Return relative path for documentation
-    "/tmp/screenshots/#{filename}"
+    filepath.to_s
   end
 
-  def debug_state(name = nil, description = nil)
+  def debug_state(name = nil, description = nil, force: false)
     name ||= 'debug_state'
+    original_debug = ENV['FEATURE_DEBUG']
+    ENV['FEATURE_DEBUG'] = 'true' if force
     puts_debug("DEBUG STATE: #{name} - #{description}")
     begin
       filename = "#{self.class&.name&.underscore}_#{name}.html"
@@ -948,9 +950,11 @@ module FeatureSupport
       puts_debug '  - Failed to debug process status'
     end
     begin
-      take_screenshot(name.underscore, "Expected to be in edit_player_info form to edit college '#{college}'", force: true)
+      take_screenshot(name.underscore, description, force:)
     rescue Exception
-      puts_debug '  - Failed to take screenshot'
+      puts_debug '  - Failed to take screenshot', force:
     end
+
+    ENV['FEATURE_DEBUG'] = original_debug
   end
 end

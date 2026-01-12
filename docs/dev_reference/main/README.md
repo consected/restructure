@@ -14,6 +14,7 @@
 
 ## The app UI
 
+- [AJAX Requests and Responses Using Regular Markup](../app-ui/ajax-requests-with-regular-markup.md)
 - [UI templates for Master record search results](../app-ui/ui-templates-for-master-record-search-results.md)
 - [show_if with embedded_item](../app-ui/show_if_embedded_item.md)
 

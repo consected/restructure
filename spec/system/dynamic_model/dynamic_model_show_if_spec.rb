@@ -226,7 +226,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
 
       expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-show-if-fields .new-button-container a.btn'
-      debug_state('test_show_if_fields_3', 'details tab not found') unless has_css?(c)
+      debug_state('test_show_if_fields_3', 'details tab not found', force: true) unless has_css?(c)
       expect(page).to have_css(c)
       b = all(c).first
       expect(b).not_to be nil

@@ -17,7 +17,12 @@ module OptionConfigs
                              change_user_roles
                              pull_external_data
                              set_item_flags
-                             redcap_request].freeze
+                             redcap_request
+                             run_batch_trigger
+                             log
+                             transaction
+                             background
+                             reload_this].freeze
 
       class_methods do
         #

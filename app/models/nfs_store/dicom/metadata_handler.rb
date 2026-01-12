@@ -36,6 +36,7 @@ module NfsStore
         end
 
         container_file.file_metadata = metadata
+        container_file.force_save!
         container_file.save!
       end
 

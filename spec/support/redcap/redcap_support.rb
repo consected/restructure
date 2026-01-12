@@ -87,9 +87,9 @@ module Redcap
       expect(@user.app_type.id).to eq @app_type.id
 
       setup_access 'trackers', user: @user
-      setup_access 'nfs_store__manage__containers', user: @user
-      setup_access 'nfs_store__manage__stored_files', user: @user
-      setup_access 'nfs_store__manage__archived_files', user: @user
+      setup_access 'nfs_store__manage__containers', user: @user, access: :create
+      setup_access 'nfs_store__manage__stored_files', user: @user, access: :create
+      setup_access 'nfs_store__manage__archived_files', user: @user, access: :create
       add_user_to_role Settings.admin_nfs_role, for_user: @user
       add_user_to_role 'admin', for_user: @user
 

@@ -11,9 +11,17 @@ var _fpa_admin = {
 
 _fpa_admin.form_utils = class {
   // Handle Base64 encoding of options field
+  // Ensures CodeMirror content is saved to the textarea before encoding,
+  // which is critical when the user has edited the CodeMirror editor
+  // but the content hasn't been synced back to the underlying textarea
   static encode_options_field($options_field) {
     const EncodingTokenBase64 = "<Base64Encoded>";
     if ($options_field.length > 0) {
+      // Sync CodeMirror content to the textarea before reading
+      var options_el = $options_field.get(0);
+      if (options_el && options_el.CodeMirror) {
+        options_el.CodeMirror.save();
+      }
 
       var options_value = $options_field.val();
       if (options_value) {

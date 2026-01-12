@@ -413,6 +413,21 @@
       - update_this: 
 #!defs(save_triggers_update_this_options_defs.yaml)
 
+      - run_batch_trigger:
+#!defs(save_triggers_run_batch_trigger_options_defs.yaml)
+
+      - log:
+#!defs(save_triggers_log_options_defs.yaml)
+
+      - transaction:
+#!defs(save_triggers_transaction_options_defs.yaml)
+
+      - background:
+#!defs(save_triggers_background_options_defs.yaml)
+
+      - reload_this:
+#!defs(save_triggers_reload_this_options_defs.yaml)
+
       - each:
           value: # list of literal values, triple curly substitution returning a list, or hash conditional result returning a list
           do:
