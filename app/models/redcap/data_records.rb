@@ -550,7 +550,8 @@ module Redcap
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
           failed_files << { record_id:, field_name:, error: e.message }
-          record.update_column(field_name, nil)
+          record[field_name] = nil
+          record.update_columns(field_name => nil)
           # Continue processing other files instead of raising
         ensure
           temp_file&.close

@@ -359,7 +359,7 @@ module Dynamic
         dynamic_model.option_configs(force: true)
         # Set up the _configurations based on the dynamic model's existing configurations
         # removing any that are already in def_configs to avoid duplication
-        existing = dynamic_model.configurations.reject { |k, _v| def_configs.key?(k) }
+        existing = dynamic_model.configurations&.reject { |k, _v| def_configs.key?(k) }
         default_options[:_configurations] = existing
       end
 

@@ -210,6 +210,7 @@ RSpec.configure do |config|
   # The following avoids this needing to be specified in each spec file
   config.before(:each, type: :system, js: true) do
     driven_by $browser_driver
+    Capybara.page.driver.browser.manage.window.maximize
   end
 
   config.before(:each) do

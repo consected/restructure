@@ -467,6 +467,13 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(@user.role_names).to include(Settings.admin_nfs_role)
       puts @user.email
 
+      # Debug: Check what user the data_records will use
+      dr_user = rc.current_user
+      # puts "DataRecords current_user: #{dr_user&.email}"
+      # puts "DataRecords current_user has edit access to stored_files: #{dr_user&.has_access_to?(:edit, :table, 'nfs_store__manage__stored_files')}"
+      # puts "DataRecords current_user app_type: #{dr_user&.app_type&.name}"
+      # puts "@user app_type: #{@user.app_type&.name}"
+
       dd = rc.redcap_data_dictionary
       clean_file_fields_filesystem rc.file_store
 
