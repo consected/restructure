@@ -580,31 +580,42 @@ module OptionConfigs
     end
 
     #
+    # Prepare the options text from the dynamic definition, incorporating standard definitions and libraries
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @return [String] full options text
+    def self.prepare_options_text(config_obj)
+      config_text = config_obj.options_text
+      return unless config_text.present?
+
+      config_text = config_text.gsub(/^---.*\n/, '')
+
+      # Check for redefined standard anchors before processing
+      redefined_anchors = check_for_redefined_anchors(config_obj.options_text)
+      if redefined_anchors.any?
+        anchor_list = redefined_anchors.map { |a| "&#{a}" }.join(', ')
+        error_msg = "Configuration redefines standard anchors that should be referenced with *anchor instead: #{anchor_list}"
+
+        # Find the specific lines with the problematic anchor redefinitions
+        problem_lines = find_anchor_redefinition_lines(config_obj.options_text, redefined_anchors)
+
+        bt = [error_msg] + [problem_lines]
+        raise FphsOptionsParseError, error_msg, bt
+      end
+
+      config_text = prepend_standard_definitions(config_text)
+      config_text = include_libraries(config_text)
+      config_text = config_text.gsub(/^---.*\n/, '')
+    end
+
+    #
     # Parse the options text from the dynamic definition, producing an initial Hash
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Hash] initial configuration hash
     def self.parse_options_text(config_obj)
-      config_text = config_obj.options_text
+      config_text = prepare_options_text(config_obj)
 
       if config_text.present?
-        config_text = config_text.gsub(/^---.*\n/, '')
 
-        # Check for redefined standard anchors before processing
-        redefined_anchors = check_for_redefined_anchors(config_obj.options_text)
-        if redefined_anchors.any?
-          anchor_list = redefined_anchors.map { |a| "&#{a}" }.join(', ')
-          error_msg = "Configuration redefines standard anchors that should be referenced with *anchor instead: #{anchor_list}"
-
-          # Find the specific lines with the problematic anchor redefinitions
-          problem_lines = find_anchor_redefinition_lines(config_obj.options_text, redefined_anchors)
-
-          bt = [error_msg] + [problem_lines]
-          raise FphsOptionsParseError, error_msg, bt
-        end
-
-        config_text = prepend_standard_definitions(config_text)
-        config_text = include_libraries(config_text)
-        config_text = config_text.gsub(/^---.*\n/, '')
         begin
           loaded_config = YAML.safe_load(config_text, permitted_classes: [],
                                                       permitted_symbols: [],
