@@ -108,6 +108,47 @@ RSpec.describe TrackerHistoriesController, type: :controller do
           expect(ids.first).to be > ids.last
         end
       end
+
+      it 'skips the most recent entry when skip_last=true' do
+        master = create_master
+        
+        protocol = Classification::Protocol.create!(name: "Test Protocol #{rand(100_000)}", current_admin: @admin)
+        sub_process = protocol.sub_processes.create!(name: "Test Sub Process #{rand(100_000)}", 
+                                                      disabled: false, 
+                                                      current_admin: @admin)
+        
+        # Create a tracker
+        tracker = master.trackers.create!(
+          protocol_id: protocol.id,
+          sub_process_id: sub_process.id,
+          event_date: DateTime.now,
+          notes: 'Initial tracker'
+        )
+        
+        # Update the tracker multiple times to create history
+        tracker.update!(event_date: 1.day.from_now, notes: 'Updated once')
+        tracker.update!(event_date: 2.days.from_now, notes: 'Updated twice')
+        
+        # Get all tracker histories first
+        get :index, params: { master_id: master.id, tracker_id: tracker.id }
+        all_histories = JSON.parse(response.body)['tracker_histories']
+        most_recent_id = all_histories.first['id']
+        
+        # Now get with skip_last=true
+        get :index, params: { master_id: master.id, tracker_id: tracker.id, skip_last: 'true' }
+        
+        expect(response).to have_http_status(200)
+        
+        json_response = JSON.parse(response.body)
+        tracker_histories = json_response['tracker_histories']
+        
+        # Verify the most recent entry is not included
+        returned_ids = tracker_histories.map { |th| th['id'] }
+        expect(returned_ids).not_to include(most_recent_id)
+        
+        # Verify the remaining entries are still ordered by id descending
+        expect(returned_ids).to eq(returned_ids.sort.reverse)
+      end
     end
   end
 end
