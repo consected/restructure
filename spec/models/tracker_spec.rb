@@ -93,4 +93,45 @@ RSpec.describe Tracker, type: :model do
     res = master.as_json['tracker_completions'].first['sub_process_name']
     expect(res).to eq @sp1_1.name
   end
+
+  describe 'tracker_histories association' do
+    it 'orders tracker histories by id descending' do
+      master = create_master
+      
+      # Create multiple tracker entries with different event dates
+      # The id ordering should take precedence regardless of event_date values
+      tracker1 = master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 3.days.ago,
+        notes: 'Oldest date'
+      )
+      
+      tracker2 = master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 1.day.ago,
+        notes: 'Most recent date'
+      )
+      
+      tracker3 = master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 2.days.ago,
+        notes: 'Middle date'
+      )
+      
+      # Get tracker histories via the association
+      histories = master.tracker_histories.to_a
+      
+      expect(histories.length).to be >= 3
+      
+      # Verify they are ordered by id descending
+      ids = histories.map(&:id)
+      expect(ids).to eq(ids.sort.reverse), "Expected ids to be in descending order, got: #{ids.inspect}"
+      
+      # The highest id should be first
+      expect(ids.first).to be > ids.last
+    end
+  end
 end
