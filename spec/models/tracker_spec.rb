@@ -95,30 +95,34 @@ RSpec.describe Tracker, type: :model do
   end
 
   describe 'tracker_histories association' do
-    it 'orders tracker histories by id descending' do
+    it 'orders tracker histories by event_date::date DESC, then id DESC' do
       master = create_master
       
-      # Create multiple tracker entries with different event dates
-      # The id ordering should take precedence regardless of event_date values
+      # Create multiple tracker entries to test the ordering
+      # Day 1: Two entries on the same date (different times)
+      day1_time1 = 3.days.ago.beginning_of_day + 9.hours
+      day1_time2 = 3.days.ago.beginning_of_day + 14.hours
+      
       tracker1 = master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
-        event_date: 3.days.ago,
-        notes: 'Oldest date'
+        event_date: day1_time1,
+        notes: 'Day 1 - Morning'
       )
       
       tracker2 = master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
-        event_date: 1.day.ago,
-        notes: 'Most recent date'
+        event_date: day1_time2,
+        notes: 'Day 1 - Afternoon'
       )
       
+      # Day 2: One entry (most recent date)
       tracker3 = master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
-        event_date: 2.days.ago,
-        notes: 'Middle date'
+        event_date: 1.day.ago.beginning_of_day + 10.hours,
+        notes: 'Day 2 - Single'
       )
       
       # Get tracker histories via the association
@@ -126,12 +130,21 @@ RSpec.describe Tracker, type: :model do
       
       expect(histories.length).to be >= 3
       
-      # Verify they are ordered by id descending
-      ids = histories.map(&:id)
-      expect(ids).to eq(ids.sort.reverse), "Expected ids to be in descending order, got: #{ids.inspect}"
+      # Find our test histories
+      our_histories = histories.select { |h| h.notes&.start_with?('Day') }
       
-      # The highest id should be first
-      expect(ids.first).to be > ids.last
+      # Day 2 (most recent date) should come first
+      expect(our_histories[0].notes).to eq('Day 2 - Single')
+      
+      # Day 1 entries should follow, ordered by id DESC within the same date
+      # tracker2 was created after tracker1, so it should come first
+      day1_histories = our_histories.select { |h| h.notes&.start_with?('Day 1') }
+      expect(day1_histories.length).to eq(2)
+      expect(day1_histories[0].notes).to eq('Day 1 - Afternoon')
+      expect(day1_histories[1].notes).to eq('Day 1 - Morning')
+      
+      # Verify within same date, higher ID comes first
+      expect(day1_histories[0].id).to be > day1_histories[1].id
     end
   end
 end
