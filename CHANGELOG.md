@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.41.6] - 2026-01-13
+
 ### From FPHS - PR #829 - 2026-01-13
 
 - [Fixed] admin panel editing Activity Log locks up UI due to styling parsed config code - fixes #828
