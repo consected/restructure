@@ -26,8 +26,8 @@
       yaml_output = config_hashes.to_yaml
       lines = yaml_output.split("\n")
 %>
-<pre class="parsed-config-output"><code><% lines.each_with_index do |line, index| %><span class="line-number"><%= sprintf("%4d", index + 1) %></span> <%= ERB::Util.html_escape(line) %>
-<% end %></code></pre>
+<pre class="parsed-config-output"><div><% lines.each_with_index do |line, index| %><span class="line-number"><%= sprintf("%4d", index + 1) %></span> <%= ERB::Util.html_escape(line) %>
+<% end %></div></pre>
 
 <style>
 .parsed-config-output {
