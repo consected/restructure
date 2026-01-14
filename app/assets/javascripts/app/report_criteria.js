@@ -171,6 +171,8 @@ _fpa.report_criteria = class {
       // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
       _fpa.cancel_remote();
     }).on('submit', function () {
+      // Prevent any change handlers from triggering another submit (e.g., when Enter key is pressed)
+      _fpa.state.search_running = true;
       // When we submit the form, give the user a visual spinner so they know what's going on
       // This also clears existing search results to make it clear when a result is complete
       if ($(this).data('remote'))
