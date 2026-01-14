@@ -14,9 +14,10 @@ module Redcap
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
-                  :external_id_fkey_name
+                  :external_id_fkey_name,
+                  :retrieved_from_cache, :using_date_range_filter, :is_manual_pull
 
-    def initialize(project_admin, class_name)
+    def initialize(project_admin, class_name, is_manual_pull: false)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
@@ -39,6 +40,9 @@ module Redcap
       self.external_id_fkey_name = project_admin.associate_master_through_external_id_fkey_name&.to_sym
       self.set_master_id_using_association = project_admin.data_options.set_master_id_using_association
       self.skip_store_if_no_survey_identifier = project_admin.data_options.skip_store_if_no_survey_identifier
+      self.retrieved_from_cache = false
+      self.using_date_range_filter = false
+      self.is_manual_pull = is_manual_pull
     end
 
     #
@@ -60,10 +64,21 @@ module Redcap
     #
     # Immediately retrieve, validate and store the records from REDCap.
     # This is only intended to be called from a background job.
+    # If records are retrieved from cache, skip validate and store steps
+    # since they will have already been processed by the first retrieval.
     def retrieve_validate_store
       self.storage_stage = 'retrieve_validate_store'
       update_job_request(create: true)
       retrieve
+
+      # If records came from cache, skip validation and storage
+      # since they have already been processed
+      if retrieved_from_cache
+        self.storage_stage = 'skipped (from cache)'
+        update_job_request
+        return
+      end
+
       summarize_fields
       handle_survey_identifier
       validate
@@ -73,10 +88,16 @@ module Redcap
     #
     # Immediately retrieve records from REDCap.
     # This is only intended to be called from a background job.
-    # Each record is a Hash, keyed by a symbol
+    # Each record is a Hash, keyed by a symbol.
+    # If export_only_updated_records option is enabled, adds dateRangeBegin
+    # to retrieve only records updated since the last retrieval.
     # @return [Array{Hash}]
     def retrieve
-      self.records = project_admin.api_client.records
+      date_range_begin = calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
+
+      self.records = project_admin.api_client.records(date_range_begin:)
+      self.retrieved_from_cache = project_admin.api_client.last_result_from_cache
       self.storage_stage = 'retrieve'
       update_job_request
       records
@@ -194,6 +215,10 @@ module Redcap
               "additional: #{(actual_fields_minus_timestamps - expected_minus_form_timestamps).sort.join(' ')}"
       end
 
+      # Skip deleted records validation when using date range filter
+      # since we're only retrieving a subset of updated records
+      return if using_date_range_filter
+
       if project_admin.fail_on_deleted_records? && records.length < existing_records_length
         raise FphsException,
               "Redcap::DataRecords retrieved fewer records (#{records.length}) " \
@@ -224,7 +249,9 @@ module Redcap
     # to the value set in #step_count. This is intended to limit the memory consumption
     # from holding record instances in #upserted_records
     def store
-      disable_deleted_records if project_admin.disable_deleted_records?
+      # Skip deleted records handling when using date range filter
+      # since we're only retrieving a subset of updated records
+      disable_deleted_records if project_admin.disable_deleted_records? && !using_date_range_filter
 
       upserts = []
       self.storage_stage = 'store'
@@ -298,6 +325,25 @@ module Redcap
 
     def data_dictionary
       project_admin.redcap_data_dictionary
+    end
+
+    #
+    # Calculate the dateRangeBegin value based on max(created_at, updated_at) from the model table.
+    # Returns nil if export_only_updated_records is not enabled for this pull type.
+    # @return [DateTime | nil]
+    def calculate_date_range_begin
+      export_option = project_admin.data_options.export_only_updated_records
+      return nil if export_option.blank?
+
+      # Check if this is a manual or scheduled pull and if the option applies
+      return nil if export_option == 'manual' && !is_manual_pull
+      return nil if export_option == 'always' && !model.table_exists?
+
+      # Get the max timestamp from both created_at and updated_at
+      max_timestamp = model.maximum(Arel.sql('GREATEST(COALESCE(created_at, updated_at), COALESCE(updated_at, created_at))'))
+      return nil unless max_timestamp
+
+      max_timestamp
     end
 
     #
@@ -621,7 +667,9 @@ module Redcap
         errors:,
         imported_files_count: imported_files&.length,
         failed_files_count: failed_files&.length,
-        job: job&.id
+        job: job&.id,
+        retrieved_from_cache:,
+        using_date_range_filter:
       }
 
       if create

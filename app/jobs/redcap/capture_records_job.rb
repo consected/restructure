@@ -2,7 +2,7 @@
 
 module Redcap
   #
-  # Job to capture the REDCap project's records
+  # Job to capture the REDCap project's records (manual pull)
   class CaptureRecordsJob < RedcapJob
     #
     # Capture the REDCap records for the configured project admin.
@@ -25,7 +25,7 @@ module Redcap
                              "#{project_admin.dynamic_model_table}"
       end
 
-      dr = Redcap::DataRecords.new(project_admin, class_name)
+      dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: true)
       dr.retrieve_validate_store
       project_admin.update_status(:manual_run_successful)
     rescue StandardError => e

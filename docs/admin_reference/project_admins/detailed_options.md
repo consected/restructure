@@ -70,6 +70,35 @@ data_options:
     # access controls that authorize actions performed in background jobs such as retrieving records.
     # This avoids an arbitrary app type being set, especially where the dynamic model being stored to has save triggers
     # specified that may depend on access to specific resources.
+  metadata_export_cache_time: <seconds> | null
+    # Time in seconds to cache REDCap project metadata API responses.
+    # When set, repeated requests for project metadata within this time window
+    # will return cached results instead of making new API calls.
+    # Default: 60 seconds if not specified.
+    # Set to null or leave blank to use the default.
+  record_export_cache_time: <seconds> | null
+    # Time in seconds to cache REDCap record export API responses.
+    # When set, repeated requests for records within this time window
+    # will return cached results instead of making new API calls.
+    # If results are returned from cache, the validate and store steps
+    # are skipped since no new data was retrieved.
+    # Default: 60 seconds if not specified.
+    # Set to null or leave blank to use the default.
+  export_only_updated_records: always | manual | null
+    # Controls whether to use REDCap's dateRangeBegin parameter to only
+    # retrieve records that have been created or updated since the last pull.
+    # The date is calculated as the maximum of created_at and updated_at
+    # from all stored records for this project.
+    #
+    # Values:
+    #   - always: Use date range filtering for both manual and scheduled pulls
+    #   - manual: Use date range filtering only for manual pulls (admin-triggered)
+    #   - null/blank: Never use date range filtering (retrieve all records)
+    #
+    # When date range filtering is active, deleted record detection is disabled
+    # since only updated records are retrieved, not the full dataset.
+    # This can significantly reduce API response times for large projects
+    # where only a few records change between pulls.
 
 data_dictionary_version: random hash
     # do not change - a hash generated internally to 
