@@ -107,8 +107,9 @@ _fpa.loaded.masters = function () {
         if (panel && panel.length == 1) {
             if ($('#search-action').html() != ('MSID') && !$('#simple_m_id').val()) {
                 // Prevent an auto run report if the page is refreshing with a requested master or result set
+                // Also prevent double-running if the AJAX preprocessor (reports_form) already clicked the button
                 if (!$('#master-search-accordion').hasClass('loading-results')) {
-                    panel.find('[type="submit"].auto-run').click();
+                    panel.find('[type="submit"].auto-run').not('.was-auto-run-clicked').addClass('was-auto-run-clicked').click();
                 }
             }
         }
@@ -119,8 +120,10 @@ _fpa.loaded.masters = function () {
             var h = _fpa.templates['search-count-template'](data);
             $('.search_count_reports').html(h);
             // Prevent an auto run report if the page is refreshing with a requested master or result set
+            // Also prevent double-running if the AJAX preprocessor (reports_form) already clicked the button
+            // (indicated by .was-auto-run-clicked class being set)
             if (!$('#master-search-accordion').hasClass('loading-results')) {
-                $(this).find('[type="submit"].auto-run').click();
+                $(this).find('[type="submit"].auto-run').not('.was-auto-run-clicked').addClass('was-auto-run-clicked').click();
             }
         });
 
