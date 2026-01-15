@@ -8,6 +8,12 @@ module Redcap
     # The job request record will be updated every *n* records to provide feedback to the admin
     UpdateJobRequestEvery = 20
 
+    # Marker string used to identify file fields that failed to be captured.
+    # This allows failed file fields to be searched for in the database,
+    # and ensures records with failed file fields are retried on subsequent pulls.
+    # The string is designed to be unlikely to be a valid filename.
+    FailedFileFieldMarker = '<<FAILED-FILE-CAPTURE>>'
+
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
@@ -621,8 +627,11 @@ module Redcap
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
           failed_files << { record_id:, field_name:, error: e.message }
-          record[field_name] = nil
-          record.update_columns(field_name => nil)
+          # Mark the file field with a searchable marker so that:
+          # 1. It can be found in database queries to identify failed captures
+          # 2. Future pulls with export_only_updated_records will retry these records
+          record[field_name] = FailedFileFieldMarker
+          record.update_columns(field_name => FailedFileFieldMarker)
           # Continue processing other files instead of raising
         ensure
           temp_file&.close
