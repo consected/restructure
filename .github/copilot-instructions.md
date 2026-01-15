@@ -18,8 +18,8 @@
 ### Git and GitHub Usage
 - Use `git` and `gh` CLI tools for version control and repository management; DO NOT use GitKraken or other GUI tools.
 - Create branches for features/bug fixes named with lowercase hyphen-separated words.
-- If requested, the AI Agent should create a pull request with a descriptive title and summary of changes.
 - Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixed #123` or ` - resolved #123` to reference related issues.
+- If requested, the AI Agent should create a pull request with a descriptive title and summary of changes. The branch must be rebased onto `up-develop` before creating the pull request.
 - Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Rspec System Spec Best Practices
