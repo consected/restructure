@@ -79,6 +79,15 @@ require './db/table_generators/dynamic_models_table'
 #      - date_range_begin_for_manual_pull returns timestamp when successful store exists
 #      - date_range_begin_for_manual_pull returns nil when option not set
 #
+# 4. Failed File Field Marker and Retry (new, PR #841)
+#    ------------------------------------------------
+#    - Marks failed file field capture with a special marker string (not nil)
+#    - Ensures records with failed file fields are retried on subsequent pulls
+#    - Returns the earliest timestamp of failed file field records for retry logic
+#    - Returns the earlier of failed file field or last successful store timestamp
+#    - Handles edge cases: no failed records, no successful store, both present
+#    - Comprehensive tests for marker, timestamp, and retry scenarios#
+
 # Key Components Being Tested:
 #   - ApiClient cache configuration flows through from data_options
 #   - Cache hit tracking via last_result_from_cache attribute
