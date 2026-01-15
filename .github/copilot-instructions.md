@@ -7,12 +7,20 @@
 2. **Follow [Ruby on Rails Conventions](#ruby-on-rails-conventions)** below for all code you write
 3. **Explain why changes to existing methods in models and other core components are necessary**
 4. **Rspec tests must be written to demonstrate new functionality works as intended** not just to make tests pass
+5. **If requirements are not clear, ask for clarification before proceeding**
 
 ### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
 2. **Always run tests after making changes** to verify functionality
 3. **Never redirect scripts stdout or stderr to /dev/null**
 4. **Never run commands in the background** - all commands exit when complete with success or failure codes
+
+### Git and GitHub Usage
+- Use `git` and `gh` CLI tools for version control and repository management; DO NOT use GitKraken or other GUI tools.
+- Create branches for features/bug fixes named with lowercase hyphen-separated words.
+- If requested, the AI Agent should create a pull request with a descriptive title and summary of changes.
+- Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixed #123` or ` - resolved #123` to reference related issues.
+- Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Rspec System Spec Best Practices
 1. **ALWAYS use helper methods for system specs** from `spec/support/feature_support.rb`

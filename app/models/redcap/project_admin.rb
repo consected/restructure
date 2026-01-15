@@ -658,16 +658,55 @@ module Redcap
     end
 
     #
+    # Get the appropriate timestamp for retrieving updated records.
+    # Returns the earlier of either:
+    # - The earliest timestamp of records with failed file fields (so they will be retried)
+    # - The timestamp of the last successful store operation
+    # @return [DateTime | nil]
+    def last_successful_store_records_at
+      earliest_failed = earliest_failed_file_field_record_timestamp
+      last_store = last_successful_store_records_request_at
+
+      [earliest_failed, last_store].compact.min
+    end
+
+    #
     # Get the created_at timestamp from the last successful 'store records' ClientRequest.
     # A successful store is one where the result has an empty errors array.
     # @return [DateTime | nil]
-    def last_successful_store_records_at
+    def last_successful_store_records_request_at
       redcap_client_requests
         .where(action: 'store records')
         .where("result->>'errors' = '[]'")
         .order(created_at: :desc)
         .limit(1)
         .pick(:created_at)
+    end
+
+    #
+    # Get the earliest (created_at, updated_at) timestamp from records that have
+    # file fields marked with the FailedFileFieldMarker.
+    # This ensures that records with failed file captures will be retried on subsequent pulls.
+    # @return [DateTime | nil]
+    def earliest_failed_file_field_record_timestamp
+      return nil unless dynamic_model_ready?
+
+      file_field_names = redcap_data_dictionary&.all_fields_of_type(:file)&.keys
+      return nil if file_field_names.blank?
+
+      model_class = dynamic_storage.dynamic_model&.implementation_class
+      return nil unless model_class
+
+      # Build a query to find records where any file field has the failed marker
+      marker = Redcap::DataRecords::FailedFileFieldMarker
+      conditions = file_field_names.map { |fn| "#{fn} = ?" }.join(' OR ')
+      values = file_field_names.map { marker }
+
+      records_with_failed_files = model_class.where(conditions, *values)
+      return nil if records_with_failed_files.none?
+
+      # Get the earliest timestamp (minimum of created_at or updated_at) for any failed record
+      records_with_failed_files.minimum(Arel.sql('LEAST(created_at, updated_at)'))
     end
 
     #
