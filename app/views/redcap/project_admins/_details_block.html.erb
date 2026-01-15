@@ -171,10 +171,31 @@ if req&.result
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
-        <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
-              method: :post, 
-              remote: true, 
-              class: 'btn btn-warning btn-sm' %></p>
+        <% if object_instance.export_only_updated_records_for_manual? %>
+          <p><strong>retrieve records</strong></p>
+          <% date_range = object_instance.date_range_begin_for_manual_pull %>
+          <% if date_range %>
+            <p><%= link_to "since #{current_user_date_time(date_range)}", request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% else %>
+            <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% end %>
+          <p><%= link_to 'retrieve all', request_records_redcap_project_admin_path(id: object_instance.id, retrieve_all: true, ignore_cache: true), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% else %>
+          <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% end %>
+        <p><strong>retrieve configurations</strong></p>
         <p><%= link_to 'retrieve latest redcap configuration', request_latest_rc_configs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 

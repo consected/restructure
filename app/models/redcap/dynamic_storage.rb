@@ -38,15 +38,16 @@ module Redcap
     #
     # Request a background job retrieve records and save them to the specified model
     # @see Redcap::CaptureRecordsJob#perform_later
-    # @param [Redcap::ProjectAdmin] project_admin
-    def request_records
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def request_records(ignore_cache: false, retrieve_all: false)
       unless dynamic_model
         raise FphsException,
               'dynamic model has not been set up'
       end
 
       dr = Redcap::DataRecords.new(project_admin, dynamic_model_class_name)
-      dr.request_records
+      dr.request_records(ignore_cache:, retrieve_all:)
     end
 
     #
