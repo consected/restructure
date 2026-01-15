@@ -34,7 +34,10 @@ class Redcap::ProjectAdminsController < AdminController
             'set the dynamic model has not been set up'
     end
 
-    @redcap__project_admin.dynamic_storage.request_records
+    ignore_cache = params[:ignore_cache].to_s == 'true'
+    retrieve_all = params[:retrieve_all].to_s == 'true'
+
+    @redcap__project_admin.dynamic_storage.request_records(ignore_cache:, retrieve_all:)
 
     msg = "Records requested at #{DateTime.now}"
     render json: { message: msg }, status: 200

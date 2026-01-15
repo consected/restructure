@@ -70,6 +70,51 @@ data_options:
     # access controls that authorize actions performed in background jobs such as retrieving records.
     # This avoids an arbitrary app type being set, especially where the dynamic model being stored to has save triggers
     # specified that may depend on access to specific resources.
+  metadata_export_cache_time: <seconds> | null
+    # Time in seconds to cache REDCap project metadata API responses.
+    # When set, repeated requests for project metadata within this time window
+    # will return cached results instead of making new API calls.
+    # Default: 60 seconds if not specified.
+    # Set to null or leave blank to use the default.
+  record_export_cache_time: <seconds> | null
+    # Time in seconds to cache REDCap record export API responses.
+    # When set, repeated requests for records within this time window
+    # will return cached results instead of making new API calls.
+    # If results are returned from cache, the validate and store steps
+    # are skipped since no new data was retrieved.
+    # Default: 60 seconds if not specified.
+    # Set to null or leave blank to use the default.
+  export_only_updated_records: always | manual | scheduled | null
+    # Controls whether to use REDCap's dateRangeBegin parameter to only
+    # retrieve records that have been created or updated since the last pull.
+    # The date is determined by the timestamp of the last successful
+    # 'store records' operation for this project (from the client_requests audit log).
+    # This ensures we capture when REDCap was actually queried, not when records
+    # were stored locally, avoiding gaps if storage is delayed.
+    #
+    # Values:
+    #   - always: Use date range filtering for both manual and scheduled pulls
+    #   - manual: Use date range filtering only for manual pulls (admin-triggered)
+    #   - scheduled: Use date range filtering only for scheduled pulls (automatic)
+    #   - null/blank: Never use date range filtering (retrieve all records)
+    #
+    # When date range filtering is active, deleted record detection is disabled
+    # since only updated records are retrieved, not the full dataset.
+    # This can significantly reduce API response times for large projects
+    # where only a few records change between pulls.
+  server_time_zone: America/New_York
+    # The time zone of the REDCap server. Required when using export_only_updated_records
+    # if the REDCap server is in a different time zone than UTC.
+    # REDCap's dateRangeBegin parameter expects timestamps in the server's local time.
+    # This setting converts the calculated date range from UTC to the server's time zone.
+    #
+    # Use standard IANA time zone identifiers, e.g.:
+    #   - America/New_York
+    #   - America/Los_Angeles
+    #   - Europe/London
+    #   - UTC
+    #
+    # If not set, timestamps are sent as-is (typically UTC).
 
 data_dictionary_version: random hash
     # do not change - a hash generated internally to 
