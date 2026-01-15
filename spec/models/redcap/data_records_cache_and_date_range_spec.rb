@@ -944,6 +944,264 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
     end
   end
 
+  describe 'failed file field handling for export_only_updated_records' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      setup_file_fields
+    end
+
+    before :example do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
+      setup_file_store
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      reset_mocks
+    end
+
+    describe 'FailedFileFieldMarker constant' do
+      it 'defines FailedFileFieldMarker as a searchable string' do
+        marker = Redcap::DataRecords::FailedFileFieldMarker
+        expect(marker).to be_a(String)
+        expect(marker).to eq('<<FAILED-FILE-CAPTURE>>')
+        # Marker should be unlikely to be a valid filename
+        expect(marker).to include('<<')
+        expect(marker).to include('>>')
+      end
+    end
+
+    describe 'earliest_failed_file_field_record_timestamp' do
+      it 'returns nil when dynamic model is not ready' do
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+
+        # Temporarily break the dynamic model setup
+        allow(rc).to receive(:dynamic_model_ready?).and_return(false)
+
+        expect(rc.earliest_failed_file_field_record_timestamp).to be_nil
+      end
+
+      it 'returns nil when there are no file fields in the data dictionary' do
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+
+        # Mock the data dictionary to have no file fields
+        allow(rc.redcap_data_dictionary).to receive(:all_fields_of_type).with(:file).and_return({})
+
+        expect(rc.earliest_failed_file_field_record_timestamp).to be_nil
+      end
+
+      it 'returns nil when no records have failed file fields' do
+        rc = @project_admin
+        rc.current_admin = @admin
+
+        # Ensure the dynamic model is ready
+        expect(rc.dynamic_model_ready?).to be true
+
+        # Get the model class and ensure no records have the marker
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        model_class.update_all(file1: nil, signature: nil)
+
+        expect(rc.earliest_failed_file_field_record_timestamp).to be_nil
+      end
+
+      it 'returns the earliest timestamp when records have failed file fields' do
+        rc = @project_admin
+        rc.current_admin = @admin
+
+        # Ensure the dynamic model is ready
+        expect(rc.dynamic_model_ready?).to be true
+
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        # Clear any existing data
+        model_class.delete_all
+
+        # Create test records with failed file fields at different timestamps
+        old_time = 2.days.ago
+        recent_time = 1.hour.ago
+
+        # Create records without master_id (REDCap dynamic models may not have master associations)
+        record1 = model_class.new(record_id: 100, file1: Redcap::DataRecords::FailedFileFieldMarker)
+        record1.current_user = rc.job_user if record1.respond_to?(:current_user=)
+        record1.force_save! if record1.respond_to?(:force_save!)
+        record1.save!
+        record1.update_columns(created_at: old_time, updated_at: old_time)
+
+        record2 = model_class.new(record_id: 101, file1: Redcap::DataRecords::FailedFileFieldMarker)
+        record2.current_user = rc.job_user if record2.respond_to?(:current_user=)
+        record2.force_save! if record2.respond_to?(:force_save!)
+        record2.save!
+        record2.update_columns(created_at: recent_time, updated_at: recent_time)
+
+        # Should return the earliest timestamp (old_time)
+        result = rc.earliest_failed_file_field_record_timestamp
+        expect(result).to be_present
+        expect(result.to_i).to eq old_time.to_i
+      end
+
+      it 'considers updated_at if it is earlier than created_at' do
+        rc = @project_admin
+        rc.current_admin = @admin
+
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        model_class.delete_all
+
+        created_time = 1.day.ago
+        updated_time = 3.days.ago # Earlier than created_at (edge case)
+
+        record = model_class.new(record_id: 200, signature: Redcap::DataRecords::FailedFileFieldMarker)
+        record.current_user = rc.job_user if record.respond_to?(:current_user=)
+        record.force_save! if record.respond_to?(:force_save!)
+        record.save!
+        record.update_columns(created_at: created_time, updated_at: updated_time)
+
+        result = rc.earliest_failed_file_field_record_timestamp
+        expect(result.to_i).to eq updated_time.to_i
+      end
+    end
+
+    describe 'last_successful_store_records_at with failed file fields' do
+      it 'returns earliest failed timestamp when records have failed file fields' do
+        rc = @project_admin
+        rc.current_admin = @admin
+
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        model_class.delete_all
+
+        # Create a successful store records client request
+        store_time = 1.hour.ago
+        Redcap::ClientRequest.create!(
+          current_admin: @admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          result: { errors: [] },
+          created_at: store_time
+        )
+
+        # Create a record with failed file field from before the store
+        failed_time = 2.days.ago
+        record = model_class.new(record_id: 300, file1: Redcap::DataRecords::FailedFileFieldMarker)
+        record.current_user = rc.job_user if record.respond_to?(:current_user=)
+        record.force_save! if record.respond_to?(:force_save!)
+        record.save!
+        record.update_columns(created_at: failed_time, updated_at: failed_time)
+
+        # Should return the failed record timestamp instead of the store time
+        result = rc.last_successful_store_records_at
+        expect(result.to_i).to eq failed_time.to_i
+      end
+
+      it 'returns client request timestamp when no records have failed file fields' do
+        rc = @project_admin
+        rc.current_admin = @admin
+
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        # Clear any failed file field markers
+        model_class.update_all(file1: nil, signature: nil)
+
+        # Create a successful store records client request
+        store_time = 5.minutes.ago
+        Redcap::ClientRequest.create!(
+          current_admin: @admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          result: { errors: [] },
+          created_at: store_time
+        )
+
+        result = rc.last_successful_store_records_at
+        expect(result).to be_a Time
+        expect(result.to_i).to eq store_time.to_i
+      end
+    end
+
+    describe 'date_range_begin_for_manual_pull with failed file fields' do
+      it 'uses failed file field timestamp for date range calculation' do
+        rc = @project_admin
+        rc.current_admin = @admin
+        rc.data_options.export_only_updated_records = 'always'
+        rc.save!
+
+        model_class = rc.dynamic_storage.dynamic_model.implementation_class
+        model_class.delete_all
+
+        # Create a successful store records client request
+        store_time = 30.minutes.ago
+        Redcap::ClientRequest.create!(
+          current_admin: @admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          result: { errors: [] },
+          created_at: store_time
+        )
+
+        # Create a record with failed file field from earlier
+        failed_time = 3.days.ago
+        record = model_class.new(record_id: 400, file1: Redcap::DataRecords::FailedFileFieldMarker)
+        record.current_user = rc.job_user if record.respond_to?(:current_user=)
+        record.force_save! if record.respond_to?(:force_save!)
+        record.save!
+        record.update_columns(created_at: failed_time, updated_at: failed_time)
+
+        # date_range_begin_for_manual_pull should return the failed record timestamp
+        result = rc.date_range_begin_for_manual_pull
+        expect(result).to be_present
+        expect(result.to_i).to eq failed_time.to_i
+      end
+    end
+
+    describe 'capture_files marks failed fields with marker' do
+      it 'sets file field to FailedFileFieldMarker when import fails' do
+        setup_file_fields
+        rc = @project_admin
+        rc.current_admin = @admin
+        setup_file_store rc.job_admin
+        setup_file_store
+
+        clean_file_fields_filesystem rc.file_store
+        mock_file_field_requests
+
+        # Mock file import to always fail
+        allow(NfsStore::Import).to receive(:import_file).and_raise(Exception.new('Simulated file import failure'))
+
+        dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+        dr.retrieve
+        expect(dr.records.length).to be > 0
+
+        # Create/update records first
+        dr.records.each do |record|
+          dr.send(:create_or_update, record)
+        end
+
+        # Find a record with file fields
+        model_record = dr.upserted_records.find { |r| r[:file1].present? }
+        expect(model_record).to be_present
+
+        dr.send(:capture_files, model_record)
+
+        # Verify the file field was marked with FailedFileFieldMarker
+        model_record.reload
+        expect(model_record.file1).to eq Redcap::DataRecords::FailedFileFieldMarker
+      end
+    end
+  end
+
+  def clean_file_fields_filesystem(container)
+    FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{container.app_type_id}/containers/#{container.id} -- q2_demo/redcap_test.test_file_field_recs/file-fields/"
+  end
+
   # Helper method to stub requests with dateRangeBegin
   # Uses the 'updated_records' fixture which returns a subset of updated records
   def stub_request_records_with_date_range(server_url, api_key)
