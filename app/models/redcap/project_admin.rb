@@ -249,11 +249,12 @@ module Redcap
     #     max(created_at, updated_at) for the table. This exports only records updated since the last retrieval.
     #     - 'always': always export using this rule (both scheduled and manual pulls)
     #     - 'manual': only manual pulls will export the updated records subset
+    #     - 'scheduled': only scheduled pulls will export the updated records subset
     #     - nil/blank: disabled (exports all records)
     #     NOTE: returned subsets must be handled correctly by deleted record handling to avoid incorrectly
     #     marking excluded records as deleted.
 
-    ValidExportOnlyUpdatedRecordsValues = [nil, '', 'always', 'manual'].freeze
+    ValidExportOnlyUpdatedRecordsValues = [nil, '', 'always', 'manual', 'scheduled'].freeze
 
     configure :data_options, with: %i[add_multi_choice_summary_fields
                                       handle_deleted_records
@@ -265,7 +266,8 @@ module Redcap
                                       skip_store_if_no_survey_identifier
                                       metadata_export_cache_time
                                       record_export_cache_time
-                                      export_only_updated_records]
+                                      export_only_updated_records
+                                      server_time_zone]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
@@ -277,6 +279,14 @@ module Redcap
       return if data_options.export_only_updated_records.in?(ValidExportOnlyUpdatedRecordsValues)
 
       errors.add(:data_options, "export_only_updated_records must be one of: #{ValidExportOnlyUpdatedRecordsValues}")
+    }
+
+    validate :data_options, lambda {
+      tz = data_options.server_time_zone
+      return if tz.blank?
+      return if ActiveSupport::TimeZone[tz].present?
+
+      errors.add(:data_options, "server_time_zone '#{tz}' is not a valid time zone identifier")
     }
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
@@ -633,6 +643,39 @@ module Redcap
               current_user.app_type
             end
       @job_app_type = res
+    end
+
+    #
+    # Get the date range begin timestamp for retrieving only updated records.
+    # This is the created_at timestamp from the last successful 'store records' ClientRequest.
+    # Returns nil if the option is not enabled or no successful store operation exists.
+    # @return [DateTime | nil]
+    def date_range_begin_for_manual_pull
+      export_option = data_options.export_only_updated_records
+      return nil unless export_option.in?(%w[always manual])
+
+      last_successful_store_records_at
+    end
+
+    #
+    # Get the created_at timestamp from the last successful 'store records' ClientRequest.
+    # A successful store is one where the result has an empty errors array.
+    # @return [DateTime | nil]
+    def last_successful_store_records_at
+      redcap_client_requests
+        .where(action: 'store records')
+        .where("result->>'errors' = '[]'")
+        .order(created_at: :desc)
+        .limit(1)
+        .pick(:created_at)
+    end
+
+    #
+    # Check if the export_only_updated_records option applies to manual pulls
+    # (either 'manual' or 'always')
+    # @return [Boolean]
+    def export_only_updated_records_for_manual?
+      data_options.export_only_updated_records.in?(%w[always manual])
     end
 
     def invalidate_cache

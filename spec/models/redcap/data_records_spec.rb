@@ -444,7 +444,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                 .where('created_at > :created_at', created_at: start_time)
                                 .last
 
-      expect(cr.result['storage_stage']).to eq 'validate'
+      expect(cr.result['storage_stage']).to eq 'validate (failed)'
 
       cr = Redcap::ClientRequest.where(action: 'capture records job',
                                        server_url: rc.server_url,

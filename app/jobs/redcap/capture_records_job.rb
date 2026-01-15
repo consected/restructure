@@ -10,8 +10,10 @@ module Redcap
     # The result (number of created, updated, matched, error items) is stored to a Redcap::ClientRequest
     # @param [Redcap::ProjectAdmin] project_admin
     # @param [String] class_name
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     # @return [Boolean] success
-    def perform(project_admin, class_name)
+    def perform(project_admin, class_name, ignore_cache: false, retrieve_all: false)
       setup_with project_admin
 
       unless project_admin&.dynamic_model_ready?
@@ -26,7 +28,7 @@ module Redcap
       end
 
       dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: true)
-      dr.retrieve_validate_store
+      dr.retrieve_validate_store(ignore_cache:, retrieve_all:)
       project_admin.update_status(:manual_run_successful)
     rescue StandardError => e
       create_failure_record(e, 'capture records job', project_admin)

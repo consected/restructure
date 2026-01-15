@@ -15,7 +15,8 @@ module Redcap
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
                   :external_id_fkey_name,
-                  :retrieved_from_cache, :using_date_range_filter, :is_manual_pull
+                  :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
+                  :date_range_begin
 
     def initialize(project_admin, class_name, is_manual_pull: false)
       super()
@@ -48,14 +49,14 @@ module Redcap
     #
     # Request a background job retrieve records and save them to the specified model
     # @see Redcap::CaptureRecordsJob#perform_later
-    # @param [Redcap::ProjectAdmin] project_admin
-    # @param [String] class_name - the class name for the model to store to
-    def request_records
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def request_records(ignore_cache: false, retrieve_all: false)
       jobclass = Redcap::CaptureRecordsJob
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
+      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name, ignore_cache:, retrieve_all:)
       return if Rails.application.config.active_job.queue_adapter == :inline
 
       project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
@@ -66,10 +67,18 @@ module Redcap
     # This is only intended to be called from a background job.
     # If records are retrieved from cache, skip validate and store steps
     # since they will have already been processed by the first retrieval.
-    def retrieve_validate_store
+    # If an exception occurs, record it in the job request before re-raising
+    # to ensure the error is captured and this run is not considered successful.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def retrieve_validate_store(ignore_cache: false, retrieve_all: false)
       self.storage_stage = 'retrieve_validate_store'
+      # Calculate date_range_begin BEFORE creating new job request record,
+      # so we get the timestamp from the previous successful run
+      self.date_range_begin = retrieve_all ? nil : calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
       update_job_request(create: true)
-      retrieve
+      retrieve(ignore_cache:, retrieve_all:)
 
       # If records came from cache, skip validation and storage
       # since they have already been processed
@@ -83,6 +92,13 @@ module Redcap
       handle_survey_identifier
       validate
       store
+    rescue StandardError => e
+      self.errors ||= []
+      self.errors << { error: e.to_s, backtrace: e.short_string_backtrace }
+      # Append failure indicator to preserve which stage failed
+      self.storage_stage = "#{storage_stage} (failed)"
+      update_job_request
+      raise
     end
 
     #
@@ -91,12 +107,18 @@ module Redcap
     # Each record is a Hash, keyed by a symbol.
     # If export_only_updated_records option is enabled, adds dateRangeBegin
     # to retrieve only records updated since the last retrieval.
+    # Note: date_range_begin is typically set by retrieve_validate_store before
+    # creating the new job request record, but we support setting it here for
+    # direct calls to retrieve.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     # @return [Array{Hash}]
-    def retrieve
-      date_range_begin = calculate_date_range_begin
+    def retrieve(ignore_cache: false, retrieve_all: false)
+      # Only calculate if not already set (retrieve_validate_store sets it earlier)
+      self.date_range_begin ||= retrieve_all ? nil : calculate_date_range_begin
       self.using_date_range_filter = date_range_begin.present?
 
-      self.records = project_admin.api_client.records(date_range_begin:)
+      self.records = project_admin.api_client.records(date_range_begin:, ignore_cache:)
       self.retrieved_from_cache = project_admin.api_client.last_result_from_cache
       self.storage_stage = 'retrieve'
       update_job_request
@@ -328,7 +350,10 @@ module Redcap
     end
 
     #
-    # Calculate the dateRangeBegin value based on max(created_at, updated_at) from the model table.
+    # Calculate the dateRangeBegin value based on the created_at timestamp of the last
+    # successful 'store records' ClientRequest for this project.
+    # This is more accurate than using record timestamps since it captures when we
+    # actually pulled from REDCap, not when records were stored locally.
     # Returns nil if export_only_updated_records is not enabled for this pull type.
     # @return [DateTime | nil]
     def calculate_date_range_begin
@@ -336,14 +361,14 @@ module Redcap
       return nil if export_option.blank?
 
       # Check if this is a manual or scheduled pull and if the option applies
+      # 'manual' applies only to manual pulls
+      # 'scheduled' applies only to scheduled pulls
+      # 'always' applies to both
       return nil if export_option == 'manual' && !is_manual_pull
-      return nil if export_option == 'always' && !model.table_exists?
+      return nil if export_option == 'scheduled' && is_manual_pull
 
-      # Get the max timestamp from both created_at and updated_at
-      max_timestamp = model.maximum(Arel.sql('GREATEST(COALESCE(created_at, updated_at), COALESCE(updated_at, created_at))'))
-      return nil unless max_timestamp
-
-      max_timestamp
+      # Get the created_at timestamp from the last successful 'store records' ClientRequest
+      project_admin.last_successful_store_records_at
     end
 
     #
@@ -669,7 +694,8 @@ module Redcap
         failed_files_count: failed_files&.length,
         job: job&.id,
         retrieved_from_cache:,
-        using_date_range_filter:
+        using_date_range_filter:,
+        date_range_begin: (date_range_begin if using_date_range_filter)
       }
 
       if create

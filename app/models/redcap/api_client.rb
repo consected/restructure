@@ -118,12 +118,17 @@ module Redcap
     # Get the data records for the project
     # @param [Hash] request_options - options to pass to the REDCap API
     # @param [DateTime | nil] date_range_begin - optional dateRangeBegin filter for retrieving only updated records
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @return [Array{Hash}] hash with symbolized keys
-    def records(request_options: nil, date_range_begin: nil)
+    def records(request_options: nil, date_range_begin: nil, ignore_cache: false)
       request_options ||= records_request_options.dup
       request_options = request_options.dup if request_options.frozen?
-      request_options[:dateRangeBegin] = date_range_begin.strftime('%Y-%m-%d %H:%M:%S') if date_range_begin
-      cache_expires_in = record_export_cache_time
+      if date_range_begin
+        server_tz = project_admin.data_options.server_time_zone
+        date_range_begin = date_range_begin.in_time_zone(server_tz) if server_tz.present?
+        request_options[:dateRangeBegin] = date_range_begin.strftime('%Y-%m-%d %H:%M:%S')
+      end
+      cache_expires_in = ignore_cache ? nil : record_export_cache_time
       request :records, request_options:, cache_expires_in:
     end
 
