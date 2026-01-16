@@ -20,7 +20,11 @@ module Dynamic
         curr_val = YAML.safe_load(saved_value)
         curr_val.to_h
       rescue StandardError
-        curr_val.to_a
+        begin
+          curr_val.to_a
+        rescue StandardError
+          raise FphsException, "col_type_json: cannot parse saved value: (#{saved_value.class.name}) #{saved_value}"
+        end
       end
     end
   end
