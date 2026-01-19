@@ -14,6 +14,57 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #848 - 2026-01-19
+
+- [Added] substitutions within save trigger pull_external_data headers, to support `Authorization: Bearer {{access_token}}` requirements - references #840
+
+## [9.42.0] - 2026-01-19
+
+### From FPHS - PR #39 - 2026-01-19
+
+- [Fixed] batch_trigger not being removed when dynamic definition is disabled - resolves #39
+
+### From FPHS - PR #845 - 2026-01-19
+
+- [Fixed] #216 - Recreate triggers when field types change in dynamic models
+
+### From FPHS - PR #844 - 2026-01-19
+
+- [Added] detailed error logging to reload_this trigger - fixed #838
+
+### From FPHS - PR #843 - 2026-01-19
+
+- [Added] exclude regex field to Rails log admin viewer - fixed #751
+
+### From FPHS - PR #842 - 2026-01-16
+
+- [Added] extra debugging logging and exceptions
+
+### From FPHS - PR #841 - 2026-01-14
+
+- [Added] failed file field marker and retry logic for REDCap pulls - fixed #837
+
+### From FPHS - PR #839 - 2026-01-15
+
+- [Added] Redcap project buttons to retrieve "since" last retrieval or "all", and ensure the date to retrieve from represents the last successful retrieval - resolves #379
+- [Added] Redcap project options for metadata_export_cache_time, record_export_cache_time, export_only_updated_records
+
+### From FPHS - PR #836 - 2026-01-14
+
+Fixed using field default 'current_user_email' fails in a report criteria default when viewed within the admin panel - fixes #620
+
+### From FPHS - PR #835 - 2026-01-14
+
+- [Fixed] master search results being requested from server twice in quick succession - fixes #834
+
+### From FPHS - PR #832 - 2026-01-13
+
+- [Fixed] tracker history ordering to use event_date::date DESC, id DESC so that events are ordered correctly based on event date "date without time" and latest insert - fixes #830
+
+### From FPHS - PR #833 - 2026-01-13
+
+- [Changed] the parsed config functionality for dynamic definitions to just show options text with merged libraries and defaults - resolves #831
+
 ## [9.41.6] - 2026-01-13
 
 ### From FPHS - PR #829 - 2026-01-13

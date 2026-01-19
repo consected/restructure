@@ -114,5 +114,16 @@ class SaveTriggers::SaveTriggersBase
     end
   end
 
+  #
+  # Perform substitutions for all the values in a sub_config hash
+  # The substitutions are performed in place, and returned by value.
+  # @param [Hash] sub_config The configuration hash to perform substitutions on
+  # @return [Hash] The configuration hash with substituted values
+  def substitute_values_in_config(sub_config)
+    sub_config.deep_transform_values! do |v|
+      FieldDefaults.calculate_default @item, v
+    end
+  end
+
   def self.config_def(if_extras: nil); end
 end

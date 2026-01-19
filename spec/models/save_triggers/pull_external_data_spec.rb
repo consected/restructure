@@ -162,7 +162,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       )
       .to_return(status: 200, body: '{"requestId":"6346#87d796ac7","result":[{"id":1081,"name":"Annual Revenue","description":"Run this Campaign at least once as a Batch Campaign, so it can score all the existing leads in your database. Then you can either schedule it to run every night, or you can add the following two triggers: \"Lead is Created\" AND \"Data Value Changes\" in the \"Annual Revenue\" Field.","type":"batch","programName":"OP-Scoring-Demographic","programId":1014,"workspaceName":"Default","createdAt":"2014-06-27T02:58:28Z","updatedAt":"2016-03-24T08:27:50Z","active":false}],"success":true}', headers: {})
 
-    stub_request(:post, "#{api_uri}/rest/v1/leads/push.json?access_token=123123123-ad12-1234-99ce-893645:ab")
+    stub_request(:post, "#{api_uri}/rest/v1/leads/push.json")
       .with(
         body: /\{"programName":"HCI Participant Import","lookupField":"email","source":"HCIQ Zeus","reason":"Changed status","input":\[\{"email":"phil-test12@consected.com","firstName":"Test FN","lastName":"Test LN","hCIStage":"Invitation Email","hCIStageUpdatedAt":".*","hCIQLink":".*"\}\]\}/,
         headers: {
@@ -170,7 +170,8 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           'Accept-Encoding' => /.*/,
           'Host' => /.*/,
           'User-Agent' => /.*/,
-          'Content-Type' => 'application/json'
+          'Content-Type' => 'application/json',
+          'Authorization' => 'Bearer 123123123-ad12-1234-99ce-893645:ab'
         }
       )
       .to_return(
@@ -331,10 +332,11 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           }
         },
         to: {
-          url: "#{api_uri}/rest/v1/leads/push.json?access_token={{save_trigger_results.identity.access_token}}",
+          url: "#{api_uri}/rest/v1/leads/push.json",
           format: 'json',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer {{save_trigger_results.identity.access_token}}'
           }
         },
         post_data: {

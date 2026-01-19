@@ -58,6 +58,9 @@
               format: xml|json|text
               allow_empty_result: true | false (default)
               allow_response_codes: [array of allowable integer codes that are not 200]
+              headers:
+                'Authorization': 'Bearer {{save_trigger_results.identity.access_token}}'
+                'Content-Type': 'application/json'
 
             post_data: |
               For 'post' requests, the string or hash of data to post

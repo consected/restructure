@@ -444,7 +444,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                 .where('created_at > :created_at', created_at: start_time)
                                 .last
 
-      expect(cr.result['storage_stage']).to eq 'validate'
+      expect(cr.result['storage_stage']).to eq 'validate (failed)'
 
       cr = Redcap::ClientRequest.where(action: 'capture records job',
                                        server_url: rc.server_url,
@@ -566,9 +566,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(dr.errors.count).to eq 1
       expect(dr.errors.first[:action]).to eq :capture_files
 
-      # Verify the file field was cleared in the database record
+      # Verify the file field was marked with FailedFileFieldMarker in the database record
       model_record.reload
-      expect(model_record.file1).to be_nil
+      expect(model_record.file1).to eq Redcap::DataRecords::FailedFileFieldMarker
       expect(model_record.signature).to be_present
     end
 

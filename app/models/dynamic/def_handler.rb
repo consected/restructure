@@ -217,9 +217,9 @@ module Dynamic
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
                              .map do |a|
-              mn = imp_class.model_name.to_s.ns_underscore
-              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-              :"#{mn}_#{a}"
+                               mn = imp_class.model_name.to_s.ns_underscore
+                               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+                               :"#{mn}_#{a}"
             end
           end
 
@@ -485,7 +485,13 @@ module Dynamic
     #
     # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
     def handle_batch_schedule
-      def_unschedule = disabled || !persisted? || !active_model_configuration?
+      # If disabled, unschedule and return early to prevent rescheduling
+      if disabled && persisted?
+        RecurringBatchTask.unschedule_task self
+        return
+      end
+
+      def_unschedule = !persisted? || !active_model_configuration?
 
       RecurringBatchTask.unschedule_task self if def_unschedule
 
@@ -496,6 +502,10 @@ module Dynamic
       if frequency.blank? && run_at.blank?
         RecurringBatchTask.unschedule_task self
       elsif frequency == 'once'
+        # Do not schedule one-time tasks during app type import, as they should have already run
+        # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
+        return if Admin::AppTypeImport.import_in_progress?
+
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
@@ -504,7 +514,7 @@ module Dynamic
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: FieldDefaults.duration(frequency),
-                                         run_at:
+                                         run_at: run_at
 
       end
     end

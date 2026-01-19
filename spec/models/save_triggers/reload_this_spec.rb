@@ -149,6 +149,40 @@ RSpec.describe SaveTriggers::ReloadThis, type: :model do
         expect(@activity_log.select_who).to eq('no condition update')
       end
     end
+
+    context 'error handling' do
+      it 'logs detailed error when reload fails due to RecordNotFound' do
+        config = { if: { always: true } }
+        trigger = SaveTriggers::ReloadThis.new(config, @activity_log)
+
+        # Mock reload to raise RecordNotFound error
+        allow(@activity_log).to receive(:reload).and_raise(
+          ActiveRecord::RecordNotFound.new("Couldn't find ActivityLog::PlayerContactPhone with [WHERE \"activity_log_player_contact_phones\".\"id\" = $1]")
+        )
+
+        # Expect the error to be logged with class and id details
+        expected_log = "[SaveTrigger::ReloadThis] Failed to reload ActivityLog::PlayerContactPhone##{@activity_log.id}"
+        expect(Rails.logger).to receive(:error).with(/#{Regexp.escape(expected_log)}/)
+
+        # Expect the original exception to be re-raised
+        expect { trigger.perform }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it 'logs detailed error when reload fails due to unexpected error' do
+        config = { if: { always: true } }
+        trigger = SaveTriggers::ReloadThis.new(config, @activity_log)
+
+        # Mock reload to raise an unexpected error
+        allow(@activity_log).to receive(:reload).and_raise(StandardError.new('Unexpected database error'))
+
+        # Expect the error to be logged with class, id and error details
+        expected_log = "[SaveTrigger::ReloadThis] Unexpected error reloading ActivityLog::PlayerContactPhone##{@activity_log.id}: StandardError - Unexpected database error"
+        expect(Rails.logger).to receive(:error).with(expected_log)
+
+        # Expect the original exception to be re-raised
+        expect { trigger.perform }.to raise_error(StandardError, 'Unexpected database error')
+      end
+    end
   end
 
   describe 'integration with save triggers' do

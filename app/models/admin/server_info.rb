@@ -127,16 +127,29 @@ class Admin::ServerInfo
     'server identifier not available'
   end
 
-  def rails_log(regex, max_count: 2000, tail_length: 10_000, trailing_context: 20)
+  def rails_log(regex, exclude: nil, max_count: 2000, tail_length: 10_000, trailing_context: 20)
     logfilename = LogFilename
     trailing_context = trailing_context.to_i
 
-    cmds = [
-      ['tail', '-n', tail_length.to_s, logfilename.to_s],
-      ['tac'],
-      ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
-      ['tac']
-    ]
+    if exclude.present?
+      # Use awk with -v variables to safely pass patterns without injection risk
+      # Context lines can contain the exclude pattern (per requirement: "must not filter the following context lines")
+      awk_script = '{ lines[NR]=$0 } $0 ~ search && $0 !~ exclude { for(i=(NR-ctx<1?1:NR-ctx); i<NR; i++) if(lines[i]) print lines[i]; print; delete lines; count++; if(count>=max) exit }'
+      cmds = [
+        ['tail', '-n', tail_length.to_s, logfilename.to_s],
+        ['tac'],
+        ['awk', '-v', "search=#{regex}", '-v', "exclude=#{exclude}", '-v', "ctx=#{trailing_context}", '-v',
+         "max=#{max_count}", awk_script],
+        ['tac']
+      ]
+    else
+      cmds = [
+        ['tail', '-n', tail_length.to_s, logfilename.to_s],
+        ['tac'],
+        ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
+        ['tac']
+      ]
+    end
 
     pipe_chain = Utilities::ProcessPipes.new(cmds)
     pipe_chain.run

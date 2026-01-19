@@ -9,22 +9,11 @@
     object_instance.force_option_config_parse if object_instance.respond_to?(:force_option_config_parse)
     configs = object_instance.option_configs
     
-    if configs.present? && !configs.empty?
-      # Convert each config to a hash representation
-      config_hashes = configs.map do |config|
-        if config.respond_to?(:as_json)
-          config.as_json
-        elsif config.respond_to?(:to_h)
-          config.to_h
-        elsif config.is_a?(Hash)
-          config
-        else
-          { config_name: config.class.name, config: config.inspect }
-        end
-      end
+    if configs.present? && !configs.empty?      
+      yaml_output = object_instance.class.options_provider.prepare_options_text(object_instance)
       
-      yaml_output = config_hashes.to_yaml
-      lines = yaml_output.split("\n")
+      if yaml_output.present?
+        lines = yaml_output.split("\n")
 %>
 <pre class="parsed-config-output"><div><% lines.each_with_index do |line, index| %><span class="line-number"><%= sprintf("%4d", index + 1) %></span> <%= ERB::Util.html_escape(line) %>
 <% end %></div></pre>
@@ -58,6 +47,11 @@
 </style>
 
 <% 
+      else
+%>
+<p class="alert alert-warning">No merged configuration text available. This resource may have configurations but no options_text field.</p>
+<% 
+      end
     else
 %>
 <p class="alert alert-warning">No configuration options available.</p>
