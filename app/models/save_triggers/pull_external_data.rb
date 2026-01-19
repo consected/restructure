@@ -186,6 +186,10 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
   def header_config
     sub_config = from_config || to_config
-    sub_config[:headers]&.stringify_keys
+    headers = sub_config[:headers]
+    return unless headers
+
+    substitute_values_in_config(headers)
+    headers.stringify_keys
   end
 end
