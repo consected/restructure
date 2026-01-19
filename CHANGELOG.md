@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.1] - 2026-01-19
+
 ### From FPHS - PR #848 - 2026-01-19
 
 - [Added] substitutions within save trigger pull_external_data headers, to support `Authorization: Bearer {{access_token}}` requirements - references #840
