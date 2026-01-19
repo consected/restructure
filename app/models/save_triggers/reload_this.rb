@@ -49,7 +49,17 @@ class SaveTriggers::ReloadThis < SaveTriggers::SaveTriggersBase
     end
 
     # Reload the item from the database
-    @item.reload
+    begin
+      @item.reload
+    rescue ActiveRecord::RecordNotFound => e
+      error_message = "[SaveTrigger::ReloadThis] Failed to reload #{@item.class.name}##{@item.id}: #{e.message}"
+      Rails.logger.error error_message
+      raise e
+    rescue StandardError => e
+      error_message = "[SaveTrigger::ReloadThis] Unexpected error reloading #{@item.class.name}##{@item.id}: #{e.class.name} - #{e.message}"
+      Rails.logger.error error_message
+      raise e
+    end
 
     # Restore preserved attributes
     @item.current_user = current_user
