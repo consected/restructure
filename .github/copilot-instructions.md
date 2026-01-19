@@ -38,7 +38,8 @@
 
 ### Ruby on Rails Conventions
 
-- Follow the RuboCop Style Guide and use tools like `rubocop`, `standardrb`, or `rufo` for consistent formatting.
+- Follow the RuboCop Style Guide and use `rubocop` for consistent formatting:
+  - Run `bundle exec rubocop --autocorrect [file1, file2, ...]` to auto-fix issues.
 - Use snake_case for variables/methods and CamelCase for classes/modules.
 - Keep methods short and focused; use early returns, guard clauses, and private methods to reduce complexity.
 - Favor meaningful names over short or generic ones.
