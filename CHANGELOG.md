@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.0] - 2026-01-19
+
 ### From FPHS - PR #39 - 2026-01-19
 
 - [Fixed] batch_trigger not being removed when dynamic definition is disabled - resolves #39
