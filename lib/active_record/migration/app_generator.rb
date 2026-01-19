@@ -665,7 +665,20 @@ module ActiveRecord
           changed_history.each do |k, v|
             v = map_migration_type_to_db_type(v)
             change_type = "#{v} using #{k}::#{v}"
-            change_column "#{schema}.#{table_name}", k, change_type
+            change_column "#{schema}.#{history_table_name}", k, change_type
+          end
+        end
+
+        # Recreate the trigger if any field types changed, since the trigger function
+        # needs to reflect the correct types for the fields being copied to history
+        if changed.present? || changed_history.present?
+          case resource_type
+          when :dynamic_model
+            create_dynamic_model_trigger
+          when :activity_log
+            create_activity_log_trigger
+          when :external_identifier
+            create_external_identifier_trigger
           end
         end
 
