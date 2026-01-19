@@ -502,6 +502,10 @@ module Dynamic
       if frequency.blank? && run_at.blank?
         RecurringBatchTask.unschedule_task self
       elsif frequency == 'once'
+        # Do not schedule one-time tasks during app type import, as they should have already run
+        # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
+        return if Admin::AppTypeImport.import_in_progress?
+
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
@@ -510,7 +514,7 @@ module Dynamic
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: FieldDefaults.duration(frequency),
-                                         run_at:
+                                         run_at: run_at
 
       end
     end
