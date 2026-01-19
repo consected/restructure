@@ -43,16 +43,15 @@ RSpec.describe 'Admin Rails Log Viewer', js: true, type: :system do
       'Completed 500 ERROR',
       '',
       'Started GET "/test3" for 127.0.0.1 at 2026-01-19 12:02:00 +0000',
-      'Processing by TestController#show as HTML',
+      'Processing by TestController#show as HTML'
     ]
     File.open(log_path, 'a') { |f| log_lines.each { |l| f.puts l } }
 
     visit '/admin/server_info/rails_log?search=Started&exclude=POST&trailing_context=2'
     finish_page_loading
     log_text = find('#rails-log-listing', visible: true).text
-    if log_text.include?('log not available:')
-      raise "Log command failed: #{log_text}"
-    end
+    raise "Log command failed: #{log_text}" if log_text.include?('log not available:')
+
     # Should include GET lines that match "Started" and don't contain POST
     expect(log_text).to include('Started GET "/test1"')
     expect(log_text).to include('Started GET "/test3"')
@@ -77,7 +76,7 @@ RSpec.describe 'Admin Rails Log Viewer', js: true, type: :system do
     log_path = Rails.root.join('log', 'test.log')
     log_lines = [
       'Normal log line with GET',
-      'Another line',
+      'Another line'
     ]
     File.open(log_path, 'a') { |f| log_lines.each { |l| f.puts l } }
 
@@ -86,7 +85,7 @@ RSpec.describe 'Admin Rails Log Viewer', js: true, type: :system do
     visit "/admin/server_info/rails_log?search=#{CGI.escape(malicious_search)}&exclude=POST"
     finish_page_loading
     log_text = find('#rails-log-listing', visible: true).text
-    
+
     # Should not contain any output from injected command
     expect(log_text).not_to include('HACKED')
     # Should treat the pattern as a literal regex (which won't match anything)

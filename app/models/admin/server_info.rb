@@ -138,7 +138,8 @@ class Admin::ServerInfo
       cmds = [
         ['tail', '-n', tail_length.to_s, logfilename.to_s],
         ['tac'],
-        ['awk', '-v', "search=#{regex}", '-v', "exclude=#{exclude}", '-v', "ctx=#{trailing_context}", '-v', "max=#{max_count}", awk_script],
+        ['awk', '-v', "search=#{regex}", '-v', "exclude=#{exclude}", '-v', "ctx=#{trailing_context}", '-v',
+         "max=#{max_count}", awk_script],
         ['tac']
       ]
     else
