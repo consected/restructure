@@ -154,7 +154,7 @@ class ReportsController < UserBaseController
     return not_authorized unless @report.editable_data?
 
     clean_secure_params
-
+    @report_item.force_save! if current_admin && @report_item.respond_to?(:force_save!)
     @report_item.updated_from_report! if @report_item.respond_to?(:updated_from_report!)
     if @report_item.update!(secure_params)
       refresh_updated_data
@@ -168,6 +168,7 @@ class ReportsController < UserBaseController
   end
 
   def create
+    @report_item.force_save! if current_admin && @report_item.respond_to?(:force_save!)
     if @report_item.save
       refresh_updated_data
       render json: { report_item: @report_item }
@@ -249,7 +250,7 @@ class ReportsController < UserBaseController
       nil
     end
 
-    @report_item = if report_model.respond_to?(:no_master_association) && report_model.no_master_association ||
+    @report_item = if (report_model.respond_to?(:no_master_association) && report_model.no_master_association) ||
                       !report_model.respond_to?(:master)
                      report_model.new(build_with)
                    else

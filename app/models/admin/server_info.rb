@@ -63,6 +63,37 @@ class Admin::ServerInfo
     }
   end
 
+  #
+  # Get the database server version
+  # @return [String]
+  def db_version
+    result = ActiveRecord::Base.connection.execute('select version();')
+    result.first['version']
+  rescue StandardError => e
+    "not available: #{e.message}"
+  end
+
+  #
+  # Get memcached connection stats
+  # @return [Hash]
+  def memcached_stats
+    unless Rails.cache.is_a?(ActiveSupport::Cache::MemCacheStore)
+      return { status: 'not configured', details: 'Cache store is not Dalli' }
+    end
+
+    stats = Rails.cache.stats
+    status =
+      if stats.any?
+        res = stats.find { |server, conn| conn.nil? }
+        res ? 'connection failed' : 'connected'
+      else
+        'no server configured'
+      end
+    { status: status, servers: stats }
+  rescue StandardError => e
+    { status: 'connection failed', error: e.message }
+  end
+
   def passenger_status
     IO.popen('passenger-status').read
   rescue StandardError
@@ -96,16 +127,29 @@ class Admin::ServerInfo
     'server identifier not available'
   end
 
-  def rails_log(regex, max_count: 2000, tail_length: 10_000, trailing_context: 20)
+  def rails_log(regex, exclude: nil, max_count: 2000, tail_length: 10_000, trailing_context: 20)
     logfilename = LogFilename
     trailing_context = trailing_context.to_i
 
-    cmds = [
-      ['tail', '-n', tail_length.to_s, logfilename.to_s],
-      ['tac'],
-      ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
-      ['tac']
-    ]
+    if exclude.present?
+      # Use awk with -v variables to safely pass patterns without injection risk
+      # Context lines can contain the exclude pattern (per requirement: "must not filter the following context lines")
+      awk_script = '{ lines[NR]=$0 } $0 ~ search && $0 !~ exclude { for(i=(NR-ctx<1?1:NR-ctx); i<NR; i++) if(lines[i]) print lines[i]; print; delete lines; count++; if(count>=max) exit }'
+      cmds = [
+        ['tail', '-n', tail_length.to_s, logfilename.to_s],
+        ['tac'],
+        ['awk', '-v', "search=#{regex}", '-v', "exclude=#{exclude}", '-v', "ctx=#{trailing_context}", '-v',
+         "max=#{max_count}", awk_script],
+        ['tac']
+      ]
+    else
+      cmds = [
+        ['tail', '-n', tail_length.to_s, logfilename.to_s],
+        ['tac'],
+        ['grep', '-m', max_count.to_s, "--before-context=#{trailing_context}", '-E', regex],
+        ['tac']
+      ]
+    end
 
     pipe_chain = Utilities::ProcessPipes.new(cmds)
     pipe_chain.run

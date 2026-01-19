@@ -1,26 +1,6 @@
 # frozen_string_literal: true
 
 class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
-  def self.config_def(if_extras: {})
-    # [
-    #   {
-    #     if: if_extras,
-    #     force_create: 'true to force the creation of a reference and referenced object, independent of user access controls',
-    #     move_this: 'true to move the current instance to the new master',
-    #     with: {
-    #       field_name: 'now()',
-    #       field_name_2: 'literal value',
-    #       field_name_3: {
-    #         this: 'field_name'
-    #       },
-    #       field_name_4: {
-    #         reference_name: 'field_name'
-    #       }
-    #     }
-    #   }
-    # ]
-  end
-
   def initialize(config, item)
     super
 
@@ -31,12 +11,9 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
     config = @config
     vals = {}
 
-    @item.save_trigger_results['created_masters'] ||= []
+    created_masters = @item.save_trigger_results['created_masters'] ||= []
 
-    if config[:if]
-      ca = ConditionalActions.new config[:if], @item
-      return unless ca.calc_action_if
-    end
+    return created_masters unless if_evaluates(config[:if])
 
     config[:with]&.each do |fn, def_val|
       if def_val.is_a? Hash
@@ -85,5 +62,7 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
 
       end
     end
+
+    created_masters
   end
 end

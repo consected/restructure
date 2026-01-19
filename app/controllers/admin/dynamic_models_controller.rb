@@ -22,6 +22,45 @@ class Admin::DynamicModelsController < AdminController
     render partial: 'admin/common_templates/def_versions'
   end
 
+  def run_batch_now
+    set_instance_from_id
+    object_instance.current_admin = current_admin
+
+    # Ensure configurations is loaded by parsing option_configs
+    object_instance.option_configs unless object_instance.configurations
+
+    # Get batch trigger configuration
+    bt = object_instance.configurations&.dig(:batch_trigger)
+
+    # Verify batch_trigger is configured
+    unless bt.present?
+      @error_message = 'Batch trigger not configured for this model'
+      render partial: 'admin/dynamic_models/run_batch_now_error'
+      return
+    end
+
+    limit = bt[:limit]
+    user = object_instance.class.user_for_conf_snippet(bt)
+
+    # Run batch processing immediately (not as a background job)
+    # Get the implementation class and ensure its definition cache is up-to-date
+    # This is necessary because the implementation class may have a stale definition_id
+    # from a previous request (especially in test environments)
+    dynamic_def_imp_class = object_instance.implementation_class
+    dynamic_def_imp_class.definition_id = object_instance.id
+    DynamicModel.definition_cache[object_instance.id] = object_instance
+
+    @processed_ids = dynamic_def_imp_class.trigger_batch_now(limit:, alt_user: user)
+    @success_message = "Batch processing completed. Processed #{@processed_ids.length} record(s)."
+
+    render partial: 'admin/dynamic_models/run_batch_now_success'
+  rescue StandardError => e
+    Rails.logger.error "Batch processing failed for #{object_instance}: #{e.message}"
+    Rails.logger.error e.short_string_backtrace
+    @error_message = "Batch processing failed: #{e.message}"
+    render partial: 'admin/dynamic_models/run_batch_now_error'
+  end
+
   protected
 
   def calculate_version_diffs(all_versions)

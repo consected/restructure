@@ -9,6 +9,21 @@ $STARTED_AT = DateTime.now.to_i
 module SetupHelper
   SpecTallyTable = 'rails_spec_db_tally'
 
+  def self.raise_if_stale_instance_variables!(instance_variables)
+    instance_variables.each do |var|
+      # Check if the variable's class has been reloaded since it was assigned
+      var_val = instance_variable_get(var)
+      var_class = var_val.class
+      next if var_class&.name.nil? # Typically if an instance variable is holding a Class object itself
+      # CollectionProxy is just a wrapper, skip it
+      next if var_class.name == 'ActiveRecord::Associations::CollectionProxy'
+      next unless var_class.name =~ /^[A-Z]/ # Skip non-constant class names (e.g., "scantrons")
+      return if var_class == var_class.name.constantize
+
+      raise FphsException, "Class of instance variable #{var} (#{var_class.name}) has been reloaded in #{self}. Please reassign it within the test to avoid stale class issues."
+    end
+  end
+
   def self.auto_admin
     admin, = ::UserSupport.create_admin
     admin
@@ -24,9 +39,100 @@ module SetupHelper
   end
 
   def self.clear_delayed_job
-    puts 'Clear delayed_job'
+    put_now 'Clear delayed_job'
 
     Delayed::Job.delete_all
+  end
+
+  def self.setup_template_user
+    # Do some setup that could impact all tests through the availability of master associations
+    tue = Settings::TemplateUserEmail&.downcase
+    require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
+    tu = User.find_by(email: tue)
+    return if tu
+
+    put_now 'Setup template user'
+    Seeds::BUsers.setup
+    Rails.cache.clear
+  end
+
+  def self.full_app_setup
+    return if spec_tally_done?('app_setup')
+
+    SetupHelper.check_bhs_assignments_table
+
+    put_now 'Setup apps'
+    sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
+    ActiveRecord::Base.connection.execute sql
+    put_now 'Setup ActivityLogPlayerContactPhone'
+    SetupHelper.setup_al_player_contact_phones
+    # Seeds::ActivityLogPlayerContactPhone.setup
+    put_now 'setup_al_player_contact_emails'
+    SetupHelper.setup_al_player_contact_emails
+    put_now 'setup_al_player_contact_embed_tests'
+    SetupHelper.setup_al_player_contact_embed_tests
+    put_now 'Setup ext_identifier'
+    SetupHelper.setup_ext_identifier
+    put_now 'setup_test_app'
+    SetupHelper.setup_test_app
+    SetupHelper.check_bhs_assignments_table true
+
+    raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
+
+    put_now 'setup_ref_data_app'
+    SetupHelper.setup_ref_data_app
+
+    put_now 'Handle zeus_bulk_message'
+    als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
+    als.each do |a|
+      a.update! current_admin: a.admin, disabled: true if a.enabled?
+    end
+
+    SetupHelper.add_to_spec_db('app_setup')
+  end
+
+  def self.clean_app_migrations_dirs
+    put_now 'Clean app migrations dirs'
+    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
+    `mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
+    `rm -f db/app_migrations/test/*test_*.rb`
+  end
+
+  def self.run_test_migrations
+    # Checks for pending migrations before tests are run.
+    # If you are not using ActiveRecord, you can remove this line.
+    put_now 'Enforce migrations'
+    # ActiveRecord::Migration.maintain_test_schema!
+
+    SetupHelper.check_bhs_assignments_table
+
+    sql = <<~END_SQL
+      DROP SCHEMA IF EXISTS redcap_test CASCADE;
+      CREATE SCHEMA redcap_test;
+      DROP SCHEMA IF EXISTS dynamic_test CASCADE;
+      CREATE SCHEMA dynamic_test;
+
+      -- Clean up the migrations that need to be rerun in redcap-test
+      delete from schema_migrations where version in (
+        '20211105105700',
+        '20211105105701',
+        '20211105105702',
+        '20210215184600',
+        '20210215184601',
+        '20210305184601',
+        '20211101051705'
+      );
+    END_SQL
+
+    ActiveRecord::Base.connection.execute sql
+
+    SetupHelper.check_bhs_assignments_table
+    # We need to ensure that dynamic tables are in place before we setup dynamic models
+    # in each example, otherwise the tests lock up.
+    db_migration_dirname = Rails.root.join('spec/migrations')
+    Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
+    SetupHelper.check_bhs_assignments_table
   end
 
   def self.check_bhs_assignments_table(fail = nil)
@@ -405,6 +511,11 @@ module SetupHelper
 
     res = ActiveRecord::Base.connection.execute("select * from ml_app.#{tn};")
     res = res.to_a
+  end
+
+  # Check if a specific setup has been done
+  def self.spec_tally_done?(name)
+    spec_tally_names.include?(name)
   end
 
   # Get the names of items in the spec tally table

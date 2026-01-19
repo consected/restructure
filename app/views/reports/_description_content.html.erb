@@ -1,8 +1,12 @@
 <%
-  content = markdown_to_html @report.description
-  if content.present?
-    d = @report.attributes.merge(@runner.data_reference.substitution_data)
-    content = Formatter::Substitution.substitute(content, data: d, ignore_missing: :show_tag).html_safe
+  begin
+    content = markdown_to_html @report.description
+    if content.present?
+      d = @report.attributes.merge(@runner.data_reference.substitution_data)
+      content = Formatter::Substitution.substitute(content, data: d, ignore_missing: :show_tag).html_safe
+    end
+  rescue StandardError => e
+    content = "<p class='text-danger'>Error processing report description: #{e.message}</p>".html_safe
   end
 %>
 <div class="report-form-content">

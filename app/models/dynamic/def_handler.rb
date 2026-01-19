@@ -217,9 +217,9 @@ module Dynamic
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
                              .map do |a|
-              mn = imp_class.model_name.to_s.ns_underscore
-              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-              :"#{mn}_#{a}"
+                               mn = imp_class.model_name.to_s.ns_underscore
+                               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+                               :"#{mn}_#{a}"
             end
           end
 
@@ -485,7 +485,13 @@ module Dynamic
     #
     # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
     def handle_batch_schedule
-      def_unschedule = disabled || !persisted? || !active_model_configuration?
+      # If disabled, unschedule and return early to prevent rescheduling
+      if disabled && persisted?
+        RecurringBatchTask.unschedule_task self
+        return
+      end
+
+      def_unschedule = !persisted? || !active_model_configuration?
 
       RecurringBatchTask.unschedule_task self if def_unschedule
 

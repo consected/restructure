@@ -3,10 +3,24 @@
 ## 🚨 QUICK REFERENCE FOR AGENTS
 
 ### Most Critical Rules (READ FIRST)
+1. **When implementing new features, ALWAYS write and run corresponding Rspec specs** to cover new functionality
+2. **Follow [Ruby on Rails Conventions](#ruby-on-rails-conventions)** below for all code you write
+3. **Explain why changes to existing methods in models and other core components are necessary**
+4. **Rspec tests must be written to demonstrate new functionality works as intended** not just to make tests pass
+5. **If requirements are not clear, ask for clarification before proceeding**
+
+### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
 2. **Always run tests after making changes** to verify functionality
 3. **Never redirect scripts stdout or stderr to /dev/null**
 4. **Never run commands in the background** - all commands exit when complete with success or failure codes
+
+### Git and GitHub Usage
+- Use `git` and `gh` CLI tools for version control and repository management; DO NOT use GitKraken or other GUI tools.
+- Create branches for features/bug fixes named with lowercase hyphen-separated words.
+- Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixed #123` or ` - resolved #123` to reference related issues.
+- If requested, the AI Agent should create a pull request with a descriptive title and summary of changes. The branch must be rebased onto `up-develop` before creating the pull request.
+- Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Rspec System Spec Best Practices
 1. **ALWAYS use helper methods for system specs** from `spec/support/feature_support.rb`
@@ -49,6 +63,12 @@
 - Cover end-to-end logic with request/system tests.
 - Use background jobs (ActiveJob) for non-blocking operations like sending emails or calling APIs.
 - Document complex code paths and methods with YARD
+
+### Database Conventions
+- Use migrations for all schema changes; avoid direct DB modifications for implementation.
+- Name tables according to Rails conventions (plural snake_case) aligning with model names.
+- Use history tables to allow auditing changes to important models.
+- For user data tables, data will be automatically downcased for storage and titleized for display unless otherwise specified.
 
 ### Helper Methods Quick Reference
 
@@ -99,9 +119,10 @@ grep -E "pattern" /tmp/rspec_output.log | tail -15
 grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
 
 # ✅ Use app-scripts that set environment variables internally
+# NOTE: the arguments after the script are the same as you would pass to the underlying command
 app-scripts/rails_runner_test.sh "puts User.count"
-app-scripts/headless_rspec.sh spec/system/my_spec.rb
-app-scripts/not_headless_rspec.sh spec/system/my_spec.rb
+app-scripts/headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
+app-scripts/not_headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
 ```
 
 #### Why These Rules Exist
@@ -175,6 +196,7 @@ Background to the test framework and conventions:
 - **Model specs** must be produced to cover all new model logic
 - **System specs** (not features specs) should be produced for all new UI functionality
 - **Run `rspec` on new spec tests** after implementing new features to make sure they run
+- **Do not use `skip` or `xit` in spec files**. Instead, fix the underlying issues causing test failures. 
 
 ### Running tests
 Before running tests for the very first time after a reboot, set up the filestore simulation. Tests require Filestore mount setup once only after a system restart: 
@@ -189,7 +211,7 @@ Standard Rspec tests, which exclude environment / app specific tests in
 bundle exec rspec  # Run in headless mode
 ```
 
-For headless (visible browser) system tests, which include the environment / app specific specs:
+For headless (invisible browser) system tests, which include the environment / app specific specs:
 ```bash
 app-scripts/headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
 ```
@@ -197,6 +219,11 @@ app-scripts/headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spe
 For non-headless (visible browser) system tests, which include the environment / app specific specs:
 ```bash
 app-scripts/not_headless_rspec.sh spec/system/apps/grant_aims/grant_aims_process_spec.rb
+```
+
+For javascript tests (in `spec/javascripts/`):
+```bash
+app-scripts/jasmine-serve.sh headless
 ```
 
 AI Agents: to use the Rails runner, use one of the following:
@@ -215,6 +242,11 @@ RAILS_ENV=test bundle exec rails runner "<command to run>"
 If needed, clean the test database:
 ```bash
 app-scripts/clean-test-db.sh
+
+```
+If needed, clean test assets and cache:
+```bash
+app-scripts/clean-test-assets-and-cache.sh
 ```
 ### Parallel test execution
 ```bash
@@ -251,10 +283,30 @@ If an HTML snapshot is needed for debugging, use the helper method:
 save_html_snapshot('/tmp/debug_page.html')
 ```
 
+To capture console logs from the browser, store them to a global array variable during the test run
+and retrieve them later for debugging:
+
+```ruby
+# At the start of the test run
+page.execute_script('window.browserLogs = []; console.log = function(msg) { window.browserLogs.push(msg); };')
+```
+
+```ruby
+# At the end of the test run
+logs = page.evaluate_script('window.browserLogs')
+puts "Browser console logs:\n#{logs.join("\n")}"
+```
+
 
 ## System Specs
 
-System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs.
+System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs. We write system specs to simulate real user/admin interactions through the UI as much as possible. Interacting with underlying Javascript is discouraged; use Jasmine tests for Javascript-specific behavior. 
+
+### Things to Remember
+- Standard string / varchar fields downcase data on storage and titleize on display. Keep this in mind when writing system specs that interact with user data fields.
+- Some fields rely heavily on Javascript for rendering and interaction (e.g., chosen.js dropdowns, big select dialogs, custom rich text editors). Always use the provided helper methods to interact with these fields.
+- Field visibility is controlled by `show_if` rules. Always set prerequisite fields first and allow time for the UI to update.
+- Don't navigate directly to edit URLs; always use the UI flow to reach forms (e.g. </masters/123> then click edit button for the appropriate block).
 
 ### 🔍 Troubleshooting Decision Tree
 
@@ -404,9 +456,9 @@ save_html_snapshot('/tmp/debug.html')  # Save HTML (last resort)
 
 **Enable debug output:**
 ```bash
-app-scripts/headless_rspec.sh spec/system/your_spec.rb
-
+app-scripts/headless_rspec.sh spec/system/your_spec.rb -e 'the example to run'
 ```
+This calls rspec with `FEATURE_DEBUG=true` environment variable.
 
 ### Edit Button AJAX Pattern
 

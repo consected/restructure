@@ -6,6 +6,7 @@ class HandleUserConfirmationNotificationJob < ApplicationJob
 
   def perform(user)
     return if user.do_not_email
+    return if user.disabled
 
     mn = Messaging::MessageNotification.create! user: user,
                                                 recipient_user_ids: [user.id],

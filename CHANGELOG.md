@@ -14,6 +14,149 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #39 - 2026-01-19
+
+- [Fixed] batch_trigger not being removed when dynamic definition is disabled - resolves #39
+
+### From FPHS - PR #845 - 2026-01-19
+
+- [Fixed] #216 - Recreate triggers when field types change in dynamic models
+
+### From FPHS - PR #844 - 2026-01-19
+
+- [Added] detailed error logging to reload_this trigger - fixed #838
+
+### From FPHS - PR #843 - 2026-01-19
+
+- [Added] exclude regex field to Rails log admin viewer - fixed #751
+
+### From FPHS - PR #842 - 2026-01-16
+
+- [Added] extra debugging logging and exceptions
+
+### From FPHS - PR #841 - 2026-01-14
+
+- [Added] failed file field marker and retry logic for REDCap pulls - fixed #837
+
+### From FPHS - PR #839 - 2026-01-15
+
+- [Added] Redcap project buttons to retrieve "since" last retrieval or "all", and ensure the date to retrieve from represents the last successful retrieval - resolves #379
+- [Added] Redcap project options for metadata_export_cache_time, record_export_cache_time, export_only_updated_records
+
+### From FPHS - PR #836 - 2026-01-14
+
+Fixed using field default 'current_user_email' fails in a report criteria default when viewed within the admin panel - fixes #620
+
+### From FPHS - PR #835 - 2026-01-14
+
+- [Fixed] master search results being requested from server twice in quick succession - fixes #834
+
+### From FPHS - PR #832 - 2026-01-13
+
+- [Fixed] tracker history ordering to use event_date::date DESC, id DESC so that events are ordered correctly based on event date "date without time" and latest insert - fixes #830
+
+### From FPHS - PR #833 - 2026-01-13
+
+- [Changed] the parsed config functionality for dynamic definitions to just show options text with merged libraries and defaults - resolves #831
+
+## [9.41.6] - 2026-01-13
+
+### From FPHS - PR #829 - 2026-01-13
+
+- [Fixed] admin panel editing Activity Log locks up UI due to styling parsed config code - fixes #828
+
+## [9.41.5] - 2026-01-12
+
+### From FPHS - PR #827 - 2026-01-12
+
+- [Fixed] incorrect listing of filesystem flag files
+- [Fixed] specs for reliability
+- [Fixed] cleanup of test database to also clean temp filestore test files
+- [Added] save or batch trigger mechanism to reload "this" - resolves #824
+- [Added] save trigger that acts as a transaction block around other save triggers
+- [Added] save trigger that runs all the listed triggers in a single background job
+- [Added] save trigger to add log entry - resolves #823
+- [Added] save trigger to run a batch trigger in another dynamic model - resolves #822
+- [Fixed] "Run Batch Now" button not working after saving a dynamic model definition
+- [Fixed] broken YAML in dynamic model with view_sql prevents changes being saved
+- [Added] developer documentation to show simple implementation of "AJAX Requests and Responses Using Regular Markup"
+- [Added] ability for report row create and edit to operate for admins without explicit user access controls
+- [Fixed] create_master to return a valid value
+- [Added] more information to add_trackers failure if protocol name or id not found
+
+### From Viva
+
+- [Changed] custom editor tests to split out reusable helpers
+- [Fixed] the markdown editor failing to paste multiple paragraphs of text successfully from Word docs - fixes #825
+
+## [9.41.4] - 2026-01-08
+
+### From FPHS - PR #819 - 2026-01-08
+
+- [Fixed] create_reference force_valid: true option not working for standard "player" models - fixes #818
+
+### From FPHS - PR #817 - 2026-01-08
+
+- [Fixed] batch and save triggers not running the full set of triggers - fixes #816
+
+### From FPHS - PR #815 - 2026-01-08
+
+- [Added] feature to run dynamic model batch jobs immediately in the admin panel - resolves #814
+
+### From FPHS - PR #813 - 2026-01-07
+
+- [Added] tests and documentation for valid_if dynamic definition option - resolves #228
+
+### From FPHS - PR #812 - 2026-01-07
+
+- [Fixed] scenario where a user has been disabled but we still attempt to send a password notification, causing an exception - fixes #544
+
+### From FPHS - PR #811 - 2026-01-07
+
+- [Added] documentation for tag formatters Fixed implementation and test differences between Ruby and Javascript tag formatters - resolves #679
+- [Fixed] failure to run DicomMetadataJob when the original user's app type id has changed - fixes #808
+
+### From FPHS - PR #810 - 2026-01-06
+
+- [Fixed] failure to run DicomMetadataJob when the original user's app type id has changed - fixes #808
+
+### From FPHS - PR #809 - 2026-01-06
+
+- [Fixed] user access control admin panel copy or editing item causes drop downs to lose values - fixes #395
+- [Added] AI tools
+
+## [9.41.3] - 2025-12-23
+
+## [9.41.2] - 2025-12-23
+
+Rebuild
+
+## [9.41.2] - 2025-12-23
+
+Rebuild
+
+## [9.41.1] - 2025-12-23
+
+### From FPHS - PR #806 - 2025-12-23
+
+- [Added] memcached connection status, version and stats and DB server info in Server info - resolves #627
+
+### From FPHS - PR #805 - 2025-12-23
+
+- [Added] option to copy roles that also set the target user's disabled roles back to enabled - resolves #672
+
+### From FPHS - PR #804 - 2025-12-23
+
+- [Added] admin info panel to view a "parsed config" of dynamic definitions after the config libraries, cleaned configs and YAML anchors have been applied - resolves #795
+
+### From FPHS - PR  #803 - 2025-12-23
+
+- [Added] multiple repetitions to allow config libraries referenced within config libraries to be successfully imported within an app import - resolves #793
+
+### From FPHS - PR #802 - 2025-12-23
+
+- [Fixed] add_item_button incorrect markup for dynamic models - fixes #798
+
 ## [9.41.0] - 2025-12-22
 
 - [Updated] gems and yarn
@@ -24,7 +167,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Updates] to support improved testing and app import reliability
 
-### From FPHS - #PR 796- 2025-12-22
+### From FPHS - PR #801- 2025-12-22
 
 - [Fixed] NfsStore::Dicom::MetadataHandler bug when guarding against a missing file_path due to user not having appropriate user roles - fixes #796
 
@@ -399,11 +542,13 @@ Fixed reporting multiple failures
 
 - [Changed] Filestore upload multi files - condensed list of uploaded files - resolves #705
 
-## [9.30.7] - 2025-10-28
-
 ### From Viva - PR #703 - 2025-10-23
 
 - [Added] documentation on setting search_path directly on the database user - resolves #577
+
+### From Viva - PR #701 - 2025-10-23
+
+- [Fixed] embedded_record substitution in a placeholder doesn't work (in show mode) - it does above a reference caption - fixes #684
 
 ### From Viva - PR #700 - 2025-10-23
 

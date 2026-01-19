@@ -97,6 +97,8 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
     data = request_data
 
     rc = Redcap::ProjectAdmin.active.find_by(study:, name: project_name)
+    raise FphsException, "save_trigger redcap_request: cannot find REDCap project #{study} / {#{project_name}" unless rc
+
     rc.current_admin = rc.job_admin
     pc = rc.api_client
 

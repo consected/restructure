@@ -1,0 +1,7 @@
+# Save Trigger: Log options
+        - log_1:
+            if: #if_extras
+            message: 'Processing record {{id}} for master {{master_id}}'  # Message to log, supports substitutions
+            severity: info  # 'debug', 'info' (default), 'warn', or 'error'
+          # NOTE: this sets:
+          # - save_trigger_results.log (array of results with message, severity, and logged_at)

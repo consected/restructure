@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'admin sign in process', driver: $browser_driver do
+describe 'admin sign in process', js: true, driver: $browser_driver do
   include ModelSupport
   include AdminActionsSetup
   include FeatureSupport

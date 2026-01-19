@@ -60,29 +60,6 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
-      "fingerprint": "1588ef54c0f3d0a4977e81f54ac92bca4ad83ef96018c51bc9f2923e0d89f929",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 765,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "change_comments"
-      },
-      "user_input": "schema",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -242,29 +219,6 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
-      "fingerprint": "3c5e6a5b7b311bb51b49c35ff669a55b2ac5f277738e7d6ab4db258ed43779f8",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 409,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "update_table_name"
-      },
-      "user_input": "calc_trigger_fn_name(table_name)",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
       "fingerprint": "400bb8ca8aa70318439abf6184505d97492cb3d1709f6acb834ee013df71dbee",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -292,7 +246,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 470,
+      "line": 471,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -372,7 +326,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/admin/server_info.rb",
-      "line": 121,
+      "line": 165,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
       "render_path": null,
@@ -443,29 +397,6 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "5904aa3b0178c3de6f0c7018bde0476bbddd399ba927a893d6b047ba6dd501a3",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 1228,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"SELECT DISTINCT v.oid::regclass AS view\\nFROM pg_depend AS d      -- objects that depend on the table\\n  JOIN pg_rewrite AS r  -- rules depending on the table\\n      ON r.oid = d.objid\\n  JOIN pg_class AS v    -- views for the rules\\n      ON v.oid = r.ev_class\\nWHERE \\n--v.relkind = 'v'    -- only interested in views\\n  --AND \\n  d.classid = 'pg_rewrite'::regclass\\n  AND d.refclassid = 'pg_class'::regclass\\n  AND d.deptype = 'n'    -- normal dependency\\n  AND d.refobjid = '#{schema}.#{table_name}'::regclass;\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "get_dependent_objects"
-      },
-      "user_input": "schema",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "636708f4c9842c831cfbeb696abb245d35c8fe414d9edec6b91f4b016c77fff0",
@@ -529,7 +460,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 459,
+      "line": 460,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -678,7 +609,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 249,
+      "line": 256,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
@@ -758,29 +689,6 @@
       },
       "user_input": "Admin::UserAccessControl.priority_order",
       "confidence": "High",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "b225d0c4d79de98de44ce62d82868d021cfacd1d9a5bb34251cb389078c1bd29",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 78,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute((\"CREATE SCHEMA IF NOT EXISTS #{schema}\" + \" AUTHORIZATION #{owner}\"))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "create_schema"
-      },
-      "user_input": "owner",
-      "confidence": "Medium",
       "cwe_id": [
         89
       ],
@@ -925,7 +833,7 @@
           "type": "controller",
           "class": "Admin::ServerInfoController",
           "method": "index",
-          "line": 20,
+          "line": 22,
           "file": "app/controllers/admin/server_info_controller.rb",
           "rendered": {
             "name": "admin/server_info/index",
@@ -989,29 +897,6 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "e76fa00b707c077dca2724d24b6cfca0685ffc06df826578358d6eccbd8e6f61",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 405,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "update_table_name"
-      },
-      "user_input": "calc_trigger_fn_name(prev_table_name)",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "f027ecfc9397860df7139c0e8e82c88364ae0ab2dc300fdcef882fff74fff6b9",
@@ -1066,5 +951,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "7.1.1"
+  "brakeman_version": "7.1.2"
 }

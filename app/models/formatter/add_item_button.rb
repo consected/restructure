@@ -10,8 +10,8 @@ module Formatter
       model = Resources::Models.find_by(resource_name: resource_name)
       raise FphsException, "add_item_button configured resource name is not found: #{resource_name}" unless model
 
-      path = model[:base_route_segments]
-      hyph_name = model[:hyphenated_name]
+      path = model.base_route_segments
+      hyph_name = model.resource_item_name.to_s.hyphenate
 
       html = <<~END_HTML
         <span class="temp-new-embedded-block">

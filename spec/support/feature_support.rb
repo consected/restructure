@@ -430,6 +430,7 @@ module FeatureSupport
   end
 
   # Helper method to interact with chosen dropdowns (single or multi-select)
+  # To function, this method must be called outside of any within blocks
   def select_from_chosen(field_name, value, is_multi: false, is_report: false)
     field_id = id_for_field(field_name, is_report:)
     chosen_id = "#{field_id}_chosen"
@@ -600,8 +601,8 @@ module FeatureSupport
     result_target
   end
 
-  def puts_debug(msg)
-    puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true'
+  def puts_debug(msg, force: false)
+    puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true' || force
   end
 
   def save_html_snapshot(filename)
@@ -652,14 +653,23 @@ module FeatureSupport
     available_report_tabs
     puts_modals
     current_activity_log = all('.activity-logs-generic-block.in', match: :first).first
-    return unless current_activity_log
-
-    within current_activity_log do
-      available_model_reference_expanders
-      user_instructions_placeholders
-      available_form_fields
-      available_submit_fields
-      available_embedded_model_reference_add_buttons
+    forms = all('form')
+    if current_activity_log
+      within current_activity_log do
+        available_model_reference_expanders
+        user_instructions_placeholders
+        available_form_fields
+        available_submit_fields
+        available_embedded_model_reference_add_buttons
+      end
+    elsif forms.length > 0
+      forms.each do |f|
+        puts_debug "Form ##{f[:id]}:"
+        within f do
+          available_form_fields
+          available_submit_fields
+        end
+      end
     end
   rescue Selenium::WebDriver::Error::StaleElementReferenceError
     puts_debug 'StaleElementReferenceError encountered in debug_process_status - skipping'
@@ -728,6 +738,7 @@ module FeatureSupport
       res = {}
       res[:field_name] = f['data-attr-name']
       res[:tag_name] = f.tag_name
+      res[:type] = f[:type] if f[:type]
       res[:visible] = f.visible?
       res[:value] = f.value
       res[:is_chosen] = f[:class].include?('use-chosen')
@@ -881,8 +892,8 @@ module FeatureSupport
     all('.modal.in', visible: true, wait: 0).each do |m|
       res = {}
       res[:id] = m[:id]
-      res[:title] = res.find('.modal-title')
-      res[:body] = res.find('.modal-body').text[0..100]
+      res[:title] = m.all('.modal-title').first&.text
+      res[:body] = m.all('.modal-body').first&.text
       results << res
     end
     puts String.yaml_dump(results)
@@ -905,7 +916,7 @@ module FeatureSupport
     name ||= 'screenshot'
     timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
     filename = "#{self.class&.name&.underscore}_#{name}_#{timestamp}.png"
-    filepath = File.join('tmp', 'screenshots', filename)
+    filepath = Rails.root.join('tmp', 'screenshots', filename)
 
     # Ensure directory exists
     FileUtils.mkdir_p(File.dirname(filepath))
@@ -918,15 +929,17 @@ module FeatureSupport
     puts "[Screenshot] #{description}" if description
 
     # Return relative path for documentation
-    "/tmp/screenshots/#{filename}"
+    filepath.to_s
   end
 
-  def debug_state(name = nil, description = nil)
+  def debug_state(name = nil, description = nil, force: false)
     name ||= 'debug_state'
+    original_debug = ENV['FEATURE_DEBUG']
+    ENV['FEATURE_DEBUG'] = 'true' if force
     puts_debug("DEBUG STATE: #{name} - #{description}")
     begin
       filename = "#{self.class&.name&.underscore}_#{name}.html"
-      filepath = File.join('tmp', filename)
+      filepath = File.join('/tmp', filename)
       save_html_snapshot(filepath)
     rescue Exception
       puts_debug '  - Failed to save HTML snapshot'
@@ -937,9 +950,11 @@ module FeatureSupport
       puts_debug '  - Failed to debug process status'
     end
     begin
-      take_screenshot('edit_player_info_missing', "Expected to be in edit_player_info form to edit college '#{college}'", force: true)
+      take_screenshot(name.underscore, description, force:)
     rescue Exception
-      puts_debug '  - Failed to take screenshot'
+      puts_debug '  - Failed to take screenshot', force:
     end
+
+    ENV['FEATURE_DEBUG'] = original_debug
   end
 end

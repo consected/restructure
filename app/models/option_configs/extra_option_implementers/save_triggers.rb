@@ -17,7 +17,12 @@ module OptionConfigs
                              change_user_roles
                              pull_external_data
                              set_item_flags
-                             redcap_request].freeze
+                             redcap_request
+                             run_batch_trigger
+                             log
+                             transaction
+                             background
+                             reload_this].freeze
 
       class_methods do
         #
@@ -129,7 +134,8 @@ module OptionConfigs
             all_iter_configs = iter_configs[:do]
             all_iter_configs = [all_iter_configs] unless all_iter_configs.is_a? Array
             all_iter_configs.each do |iter_config|
-              res &&= calc_triggers_for_action(obj, action, iter_config)
+              result = calc_triggers_for_action(obj, action, iter_config)
+              res &&= result
             end
           end
         end

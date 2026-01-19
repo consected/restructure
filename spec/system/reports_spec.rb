@@ -7,6 +7,7 @@ describe 'reports', js: true, driver: $browser_driver do
   include MasterDataSupport
   include ItemFlagSupport
   include FeatureSupport
+  include TestFieldsDmSupport
   include ReportSupport
 
   before(:all) do
@@ -16,18 +17,8 @@ describe 'reports', js: true, driver: $browser_driver do
 
     seed_database
     create_data_set_outside_tx
-
-    @user, @good_password = create_user
-    @good_email = @user.email
-
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :view_reports, current_admin: @admin, user: @user
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user
-
-    expect(@user.can?(:view_reports)).to be_truthy
-    expect(@user.can?(:export_csv)).to be_truthy
-
-    Admin::UserAccessControl.create! user: @user, app_type: @user.app_type, access: :read, resource_type: :report, resource_name: :_all_reports_, current_admin: @admin
-    expect(@user.has_access_to?(:read, :report, :_all_reports_)).to be_truthy
+    setup_report_user
+    setup_fields_dm
 
     rl = Report.where(name: 'Item Flags types')
 
@@ -46,8 +37,23 @@ describe 'reports', js: true, driver: $browser_driver do
     Report.active.where('id != :id', id: r.id).update_all(disabled: true, admin_id: @admin.id)
 
     create_report_with_all_criteria_fields
+    create_report_with_add_item_button
 
     @report = r
+  end
+
+  def setup_report_user
+    @user, @good_password = create_user
+    @good_email = @user.email
+
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :view_reports, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user
+
+    expect(@user.can?(:view_reports)).to be_truthy
+    expect(@user.can?(:export_csv)).to be_truthy
+
+    Admin::UserAccessControl.create! user: @user, app_type: @user.app_type, access: :read, resource_type: :report, resource_name: :_all_reports_, current_admin: @admin
+    expect(@user.has_access_to?(:read, :report, :_all_reports_)).to be_truthy
   end
 
   def create_report_with_all_criteria_fields
@@ -213,7 +219,33 @@ describe 'reports', js: true, driver: $browser_driver do
                                            position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
+  def create_report_with_add_item_button
+    dm = DynamicModel.active.find_by(table_name: 'test_with_id_recs')
+    expect(dm).not_to be nil
+
+    sql = 'select * from test_with_id_recs order by id desc limit 1;'
+    search_attrs = <<~END_CONFIG
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    description = <<~END_DESC
+      This report has an add item button.
+
+      {{add_item_button_to_temporary_master_dynamic_model__test_with_id_recs}}
+    END_DESC
+
+    @add_item_button_report = Report.create(current_admin: @admin,
+                                            name: 'Add Item Button', description:, sql: sql, search_attrs: search_attrs,
+                                            disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                            position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
   before :each do
+    setup_report_user
     validate_setup
 
     login
@@ -331,5 +363,38 @@ describe 'reports', js: true, driver: $browser_driver do
     within '#report_query_form' do
       click_button 'table'
     end
+  end
+
+  it 'shows add item button on report with criteria' do
+    setup_access :dynamic_model__test_with_id_recs, user: @user
+
+    get_list
+
+    open_report @add_item_button_report.id, 'Add Item Button'
+    expect(page).to have_css('.report-criteria')
+    expect(page).to have_css('a.add-item-button')
+    aib = find('a.add-item-button')
+    puts "Add Item Button href: #{aib[:href]}"
+
+    aib.click
+
+    expect(page).to have_css('#primary-modal1.fade.in')
+    expect(page).to have_css('#primary-modal1.fade.in h4.list-group-item-heading', text: 'Test Records With ID')
+
+    debug_process_status
+    within('form.new_dynamic_model_test_with_id_rec') do
+      fill_in_field 'value', 'New Test Value'
+      fill_in_field 'name', 'New Test Name'
+      click_button 'Save'
+    end
+
+    finish_form_formatting
+
+    within '#report_query_form' do
+      click_button 'table'
+    end
+    expect(page).to have_css('.report-results-block table')
+    expect(page).to have_css('.report-results-block table', text: /new test value/)
+    expect(page).to have_css('.report-results-block table', text: /new test name/)
   end
 end

@@ -112,16 +112,28 @@ module Dynamic
       v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
       v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
       if v1
-        v1def = YAML.safe_load(v1, permitted_classes: [],
-                                   permitted_symbols: [],
-                                   aliases: true)
-        v1_sql = v1def.dig('_configurations', 'view_sql')
+        begin
+          v1def = YAML.safe_load(v1, permitted_classes: [],
+                                     permitted_symbols: [],
+                                     aliases: true)
+          v1_sql = v1def.dig('_configurations', 'view_sql')
+        rescue Psych::Exception => e
+          # Previous YAML was broken - treat view_sql as changed so migration can proceed
+          Rails.logger.warn "Error parsing previous YAML in view_sql_changed? for #{table_name}: #{e.message}"
+          v1_sql = nil
+        end
       end
       if v2
-        v2def = YAML.safe_load(v2, permitted_classes: [],
-                                   permitted_symbols: [],
-                                   aliases: true)
-        v2_sql = v2def.dig('_configurations', 'view_sql')
+        begin
+          v2def = YAML.safe_load(v2, permitted_classes: [],
+                                     permitted_symbols: [],
+                                     aliases: true)
+          v2_sql = v2def.dig('_configurations', 'view_sql')
+        rescue Psych::Exception => e
+          # Current YAML is broken - can't determine view_sql, treat as unchanged
+          Rails.logger.warn "Error parsing current YAML in view_sql_changed? for #{table_name}: #{e.message}"
+          v2_sql = nil
+        end
       end
       changed = (v1_sql != v2_sql)
       if changed

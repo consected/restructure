@@ -8,7 +8,20 @@ Simply refreshes the information in the admin panel to match the current state o
 
 ## retrieve records
 
-Schedule an immediate transfer of all records from the REDCap project. After a little time, click the [refresh](#refresh) button then select the **Requests** tab to check that the retrieval has completed.
+Schedule an immediate transfer of records from the REDCap project. After a little time, click the [refresh](#refresh) button then select the **Requests** tab to check that the retrieval has completed.
+
+### Incremental retrieval mode
+
+When the `data_options.export_only_updated_records` option is set to `manual` or `always`, the retrieve records buttons change to provide more control:
+
+- **since \<date/time\>**: Retrieves only records that have been created or updated since the displayed timestamp. This uses REDCap's `dateRangeBegin` parameter to efficiently retrieve only changed records, which is much faster for large projects.
+- **retrieve all**: Bypasses both the date range filter and the cache, performing a complete retrieval of all records from REDCap. Use this when you need to ensure complete synchronization or if you suspect records may have been missed.
+
+The timestamp shown is calculated as the maximum of `created_at` and `updated_at` from all existing records in the local database.
+
+### Standard mode
+
+When `export_only_updated_records` is set to `scheduled` or not set, a single **retrieve records** button appears that retrieves all records from REDCap (subject to normal caching behavior).
 
 ## retrieve user list
 

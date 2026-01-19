@@ -74,6 +74,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
+  gem 'ruby_parser'
   gem 'sassc-embedded'
   gem 'spring'
   # gem 'spring-commands-parallel-tests'

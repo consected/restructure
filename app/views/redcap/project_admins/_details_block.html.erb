@@ -171,10 +171,31 @@ if req&.result
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
-        <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
-              method: :post, 
-              remote: true, 
-              class: 'btn btn-warning btn-sm' %></p>
+        <% if object_instance.export_only_updated_records_for_manual? %>
+          <p><strong>retrieve records</strong></p>
+          <% date_range = object_instance.date_range_begin_for_manual_pull %>
+          <% if date_range %>
+            <p><%= link_to "since #{current_user_date_time(date_range)}", request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% else %>
+            <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% end %>
+          <p><%= link_to 'retrieve all', request_records_redcap_project_admin_path(id: object_instance.id, retrieve_all: true, ignore_cache: true), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% else %>
+          <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% end %>
+        <p><strong>retrieve configurations</strong></p>
         <p><%= link_to 'retrieve latest redcap configuration', request_latest_rc_configs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 
@@ -206,7 +227,7 @@ if req&.result
          data-content-el="#dmdef-update-dm-config-from-table-<%=object_instance.id%>" 
          data-title="Update dynamic model and database">update dynamic model</a>
       <div id="dmdef-update-dm-config-from-table-<%=object_instance.id%>" class="hidden">
-        <h2>This action may be have side-effects</h2>
+        <h2>This action may have side-effects</h2>
         <p>Click to continue if you are sure</p>
         <p>
           <%= link_to 'update dynamic model', update_dynamic_model_redcap_project_admin_path(object_instance), 

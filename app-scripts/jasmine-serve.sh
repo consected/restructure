@@ -24,3 +24,7 @@ $(
 ) &
 
 npx jasmine-browser-runner ${runas}
+echo 'Done'
+if [ "${browserarg}" ]; then
+  killall firefox 2> /dev/null
+fi

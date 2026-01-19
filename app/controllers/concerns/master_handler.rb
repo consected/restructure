@@ -276,7 +276,7 @@ module MasterHandler
   end
 
   def item_type_id
-    "#{item_type_us}_id".to_sym
+    :"#{item_type_us}_id"
   end
 
   def item_type_us
@@ -314,7 +314,7 @@ module MasterHandler
     handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config, true)
     return if current_admin_sample || object_instance.allows_current_user_access_to?(:create)
 
-    Rails.logger.warn "This item is not creatable: #{object_instance.class.name} - #{object_instance&.attributes}"
+    Rails.logger.warn "This item is not creatable by #{current_user&.email || 'unknown user'}: #{object_instance.class.name} - #{object_instance&.attributes}"
     not_creatable
     nil
   end
@@ -693,7 +693,7 @@ module MasterHandler
     obj_params = params[rname]
     unless obj_params
       raise FphsException, "No params sent for #{rname} when creating or updating." \
-        "Expect posted data #{rname}[<field_name>]"
+                           "Expect posted data #{rname}[<field_name>]"
     end
 
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable

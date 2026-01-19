@@ -74,9 +74,8 @@ if ENV['QUICK'] == 'true'
 else
   put_now 'check_spec_db for skips'
   # Use a database table to track creations in the test db
-  spec_tally_names = SetupHelper.spec_tally_names
-  ENV['SKIP_DB_SETUP'] = 'true' if spec_tally_names.include?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if spec_tally_names.include?('app_setup')
+  ENV['SKIP_DB_SETUP'] = 'true' if SetupHelper.spec_tally_done?('db_setup')
+  ENV['SKIP_APP_SETUP'] = 'true' if SetupHelper.spec_tally_done?('app_setup')
 end
 
 put_now 'Require webmock'
@@ -106,11 +105,7 @@ include BrowserHelper
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
 SetupHelper.setup_nfs_directories
-
-`mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
-`mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-`mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
-`rm -f db/app_migrations/test/*test_*.rb`
+SetupHelper.clean_app_migrations_dirs
 
 put_now 'Devise and warden'
 require 'devise'
@@ -139,57 +134,16 @@ unless ENV['SKIP_FS_SETUP']
   end
 end
 
-SetupHelper.check_bhs_assignments_table
-
-put_now 'Require more'
-# The following line is provided for convenience purposes. It has the downside
-# of increasing the boot-up time by auto-requiring all files in the support
-# directory. Alternatively, in the individual `*_spec.rb` files, manually
-# require only the support files necessary.
-#
-require "#{Rails.root}/spec/support/master_support.rb"
-require "#{Rails.root}/spec/support/model_support.rb"
-SetupHelper.check_bhs_assignments_table
+put_now 'Require essential support files'
+require "#{Rails.root}/spec/support/master_support.rb" unless defined? MasterSupport
+require "#{Rails.root}/spec/support/model_support.rb" unless defined? ModelSupport
+put_now 'Require all support files'
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/**/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/apps/*/*.rb')].sort.each { |f| require f }
 SetupHelper.check_bhs_assignments_table
-unless ENV['SKIP_DB_SETUP']
-  # Checks for pending migrations before tests are run.
-  # If you are not using ActiveRecord, you can remove this line.
-  put_now 'Enforce migrations'
-  # ActiveRecord::Migration.maintain_test_schema!
 
-  SetupHelper.check_bhs_assignments_table
-
-  sql = <<~END_SQL
-    DROP SCHEMA IF EXISTS redcap_test CASCADE;
-    CREATE SCHEMA redcap_test;
-    DROP SCHEMA IF EXISTS dynamic_test CASCADE;
-    CREATE SCHEMA dynamic_test;
-
-    -- Clean up the migrations that need to be rerun in redcap-test
-    delete from schema_migrations where version in (
-      '20211105105700',
-      '20211105105701',
-      '20211105105702',
-      '20210215184600',
-      '20210215184601',
-      '20210305184601',
-      '20211101051705'
-    );
-  END_SQL
-
-  ActiveRecord::Base.connection.execute sql
-
-  SetupHelper.check_bhs_assignments_table
-  # We need to ensure that dynamic tables are in place before we setup dynamic models
-  # in each example, otherwise the tests lock up.
-  db_migration_dirname = Rails.root.join('spec/migrations')
-  Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
-  SetupHelper.check_bhs_assignments_table
-  puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
-end
+SetupHelper.run_test_migrations unless ENV['SKIP_DB_SETUP']
 
 if ENV['RUN_APP_SPECS'] == 'true' && !ENV.fetch('SKIP_APP_SETUP', nil)
   put_now 'Run extra app setups'
@@ -201,50 +155,12 @@ put_now 'RSpec configure'
 RSpec.configure do |config|
   config.before(:suite) do
     SetupHelper.check_bhs_assignments_table
-
-    # Do some setup that could impact all tests through the availability of master associations
     SetupHelper.clear_delayed_job
-    tue = Settings::TemplateUserEmail&.downcase
-    require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
-    tu = User.find_by(email: tue)
-    Seeds::BUsers.setup if tu.nil?
-
-    Rails.cache.clear
+    SetupHelper.setup_template_user
     SetupHelper.reload_configs
 
     # Skip app setups with an env variable
-    unless ENV['SKIP_APP_SETUP']
-      SetupHelper.check_bhs_assignments_table
-
-      put_now 'Setup apps'
-      sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
-      ActiveRecord::Base.connection.execute sql
-      put_now 'Setup ActivityLogPlayerContactPhone'
-      SetupHelper.setup_al_player_contact_phones
-      # Seeds::ActivityLogPlayerContactPhone.setup
-      put_now 'setup_al_player_contact_emails'
-      SetupHelper.setup_al_player_contact_emails
-      put_now 'setup_al_player_contact_embed_tests'
-      SetupHelper.setup_al_player_contact_embed_tests
-      put_now 'Setup ext_identifier'
-      SetupHelper.setup_ext_identifier
-      put_now 'setup_test_app'
-      SetupHelper.setup_test_app
-      SetupHelper.check_bhs_assignments_table true
-
-      raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
-
-      put_now 'setup_ref_data_app'
-      SetupHelper.setup_ref_data_app
-
-      put_now 'Handle zeus_bulk_message'
-      als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
-      als.each do |a|
-        a.update! current_admin: a.admin, disabled: true if a.enabled?
-      end
-
-      SetupHelper.add_to_spec_db('app_setup')
-    end
+    SetupHelper.full_app_setup unless ENV['SKIP_APP_SETUP']
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
@@ -294,20 +210,11 @@ RSpec.configure do |config|
   # The following avoids this needing to be specified in each spec file
   config.before(:each, type: :system, js: true) do
     driven_by $browser_driver
+    Capybara.page.driver.browser.manage.window.maximize
   end
 
   config.before(:each) do
-    instance_variables.each do |var|
-      # Check if the variable's class has been reloaded since it was assigned
-      var_val = instance_variable_get(var)
-      var_class = var_val.class
-      next if var_class&.name.nil? # Typically if an instance variable is holding a Class object itself
-      # CollectionProxy is just a wrapper, skip it
-      next if var_class.name == 'ActiveRecord::Associations::CollectionProxy'
-      next unless var_class.name =~ /^[A-Z]/ # Skip non-constant class names (e.g., "scantrons")
-
-      expect(var_class).to eq(var_class.name.constantize), "Class of instance variable #{var} (#{var_class.name}) has been reloaded in #{self}. Please reassign it within the test to avoid stale class issues."
-    end
+    SetupHelper.raise_if_stale_instance_variables!(instance_variables)
   end
 
   Shoulda::Matchers.configure do |config|

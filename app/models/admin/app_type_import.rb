@@ -141,6 +141,15 @@ class Admin
       import_config_sub_items 'associated_general_selections', %w[item_type value],
                               reject: reject_items
 
+      # Import config libraries twice to handle libraries that reference other libraries
+      # First pass: import with skip_fail to allow missing library references
+      # Second pass: respect user's skip_fail setting to catch genuine errors
+      original_skip_fail = skip_fail
+      self.skip_fail = true
+      import_config_sub_items 'associated_config_libraries', %w[name category format]
+
+      # Second pass with original skip_fail setting
+      self.skip_fail = original_skip_fail
       import_config_sub_items 'associated_config_libraries', %w[name category format]
 
       import_config_sub_items 'associated_external_identifiers', ['name']

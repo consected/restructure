@@ -58,6 +58,7 @@ _fpa.tag_formatter = class {
       "iso8601_datetime",
       "join_with_space",
       "join_with_comma",
+      "join_with_csv",
       "join_with_semicolon",
       "join_with_pipe",
       "join_with_dot",
@@ -87,6 +88,7 @@ _fpa.tag_formatter = class {
       "json",
       "ignore_missing",
       "last",
+      "no_html_tag",
       "general_selection_label"
     ]
   }
@@ -325,6 +327,20 @@ _fpa.tag_formatter = class {
       return res.join(', ');
   }
 
+  join_with_csv(res, _orig_val) {
+    if (!Array.isArray(res)) return;
+
+    // Convert array to CSV format with proper escaping
+    return res.map(item => {
+      const str = String(item == null ? '' : item);
+      // Quote fields that contain comma, quote, or newline
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }).join(',');
+  }
+
   join_with_semicolon(res, _orig_val) {
     if (Array.isArray(res))
       return res.join('; ');
@@ -399,7 +415,7 @@ _fpa.tag_formatter = class {
   markdown_list(res, _orig_val) {
 
     if (Array.isArray(res))
-      return `  - ${res.join("\n  - ")}`
+      return `- ${res.join("\n- ")}`
   }
 
   html_list(res, _orig_val) {
@@ -430,8 +446,31 @@ _fpa.tag_formatter = class {
   }
 
   split_csv(res, _orig_val) {
-    // Imperfect implementation. Really should properly parse CSV files
-    return res.split(',')
+    // Parse CSV with proper handling of quoted values
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < res.length; i++) {
+      const char = res[i];
+      const nextChar = res[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current);
+    return result;
   }
 
   split_semicolon(res, _orig_val) {

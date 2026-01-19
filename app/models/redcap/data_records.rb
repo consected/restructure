@@ -8,15 +8,23 @@ module Redcap
     # The job request record will be updated every *n* records to provide feedback to the admin
     UpdateJobRequestEvery = 20
 
+    # Marker string used to identify file fields that failed to be captured.
+    # This allows failed file fields to be searched for in the database,
+    # and ensures records with failed file fields are retried on subsequent pulls.
+    # The string is designed to be unlikely to be a valid filename.
+    FailedFileFieldMarker = '<<FAILED-FILE-CAPTURE>>'
+
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
-                  :external_id_fkey_name
+                  :external_id_fkey_name,
+                  :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
+                  :date_range_begin
 
-    def initialize(project_admin, class_name)
+    def initialize(project_admin, class_name, is_manual_pull: false)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
@@ -39,19 +47,22 @@ module Redcap
       self.external_id_fkey_name = project_admin.associate_master_through_external_id_fkey_name&.to_sym
       self.set_master_id_using_association = project_admin.data_options.set_master_id_using_association
       self.skip_store_if_no_survey_identifier = project_admin.data_options.skip_store_if_no_survey_identifier
+      self.retrieved_from_cache = false
+      self.using_date_range_filter = false
+      self.is_manual_pull = is_manual_pull
     end
 
     #
     # Request a background job retrieve records and save them to the specified model
     # @see Redcap::CaptureRecordsJob#perform_later
-    # @param [Redcap::ProjectAdmin] project_admin
-    # @param [String] class_name - the class name for the model to store to
-    def request_records
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def request_records(ignore_cache: false, retrieve_all: false)
       jobclass = Redcap::CaptureRecordsJob
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
+      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name, ignore_cache:, retrieve_all:)
       return if Rails.application.config.active_job.queue_adapter == :inline
 
       project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
@@ -60,23 +71,61 @@ module Redcap
     #
     # Immediately retrieve, validate and store the records from REDCap.
     # This is only intended to be called from a background job.
-    def retrieve_validate_store
+    # If records are retrieved from cache, skip validate and store steps
+    # since they will have already been processed by the first retrieval.
+    # If an exception occurs, record it in the job request before re-raising
+    # to ensure the error is captured and this run is not considered successful.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def retrieve_validate_store(ignore_cache: false, retrieve_all: false)
       self.storage_stage = 'retrieve_validate_store'
+      # Calculate date_range_begin BEFORE creating new job request record,
+      # so we get the timestamp from the previous successful run
+      self.date_range_begin = retrieve_all ? nil : calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
       update_job_request(create: true)
-      retrieve
+      retrieve(ignore_cache:, retrieve_all:)
+
+      # If records came from cache, skip validation and storage
+      # since they have already been processed
+      if retrieved_from_cache
+        self.storage_stage = 'skipped (from cache)'
+        update_job_request
+        return
+      end
+
       summarize_fields
       handle_survey_identifier
       validate
       store
+    rescue StandardError => e
+      self.errors ||= []
+      self.errors << { error: e.to_s, backtrace: e.short_string_backtrace }
+      # Append failure indicator to preserve which stage failed
+      self.storage_stage = "#{storage_stage} (failed)"
+      update_job_request
+      raise
     end
 
     #
     # Immediately retrieve records from REDCap.
     # This is only intended to be called from a background job.
-    # Each record is a Hash, keyed by a symbol
+    # Each record is a Hash, keyed by a symbol.
+    # If export_only_updated_records option is enabled, adds dateRangeBegin
+    # to retrieve only records updated since the last retrieval.
+    # Note: date_range_begin is typically set by retrieve_validate_store before
+    # creating the new job request record, but we support setting it here for
+    # direct calls to retrieve.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     # @return [Array{Hash}]
-    def retrieve
-      self.records = project_admin.api_client.records
+    def retrieve(ignore_cache: false, retrieve_all: false)
+      # Only calculate if not already set (retrieve_validate_store sets it earlier)
+      self.date_range_begin ||= retrieve_all ? nil : calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
+
+      self.records = project_admin.api_client.records(date_range_begin:, ignore_cache:)
+      self.retrieved_from_cache = project_admin.api_client.last_result_from_cache
       self.storage_stage = 'retrieve'
       update_job_request
       records
@@ -194,6 +243,10 @@ module Redcap
               "additional: #{(actual_fields_minus_timestamps - expected_minus_form_timestamps).sort.join(' ')}"
       end
 
+      # Skip deleted records validation when using date range filter
+      # since we're only retrieving a subset of updated records
+      return if using_date_range_filter
+
       if project_admin.fail_on_deleted_records? && records.length < existing_records_length
         raise FphsException,
               "Redcap::DataRecords retrieved fewer records (#{records.length}) " \
@@ -224,7 +277,9 @@ module Redcap
     # to the value set in #step_count. This is intended to limit the memory consumption
     # from holding record instances in #upserted_records
     def store
-      disable_deleted_records if project_admin.disable_deleted_records?
+      # Skip deleted records handling when using date range filter
+      # since we're only retrieving a subset of updated records
+      disable_deleted_records if project_admin.disable_deleted_records? && !using_date_range_filter
 
       upserts = []
       self.storage_stage = 'store'
@@ -298,6 +353,28 @@ module Redcap
 
     def data_dictionary
       project_admin.redcap_data_dictionary
+    end
+
+    #
+    # Calculate the dateRangeBegin value based on the created_at timestamp of the last
+    # successful 'store records' ClientRequest for this project.
+    # This is more accurate than using record timestamps since it captures when we
+    # actually pulled from REDCap, not when records were stored locally.
+    # Returns nil if export_only_updated_records is not enabled for this pull type.
+    # @return [DateTime | nil]
+    def calculate_date_range_begin
+      export_option = project_admin.data_options.export_only_updated_records
+      return nil if export_option.blank?
+
+      # Check if this is a manual or scheduled pull and if the option applies
+      # 'manual' applies only to manual pulls
+      # 'scheduled' applies only to scheduled pulls
+      # 'always' applies to both
+      return nil if export_option == 'manual' && !is_manual_pull
+      return nil if export_option == 'scheduled' && is_manual_pull
+
+      # Get the created_at timestamp from the last successful 'store records' ClientRequest
+      project_admin.last_successful_store_records_at
     end
 
     #
@@ -550,7 +627,11 @@ module Redcap
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
           failed_files << { record_id:, field_name:, error: e.message }
-          record.update_column(field_name, nil)
+          # Mark the file field with a searchable marker so that:
+          # 1. It can be found in database queries to identify failed captures
+          # 2. Future pulls with export_only_updated_records will retry these records
+          record[field_name] = FailedFileFieldMarker
+          record.update_columns(field_name => FailedFileFieldMarker)
           # Continue processing other files instead of raising
         ensure
           temp_file&.close
@@ -620,7 +701,10 @@ module Redcap
         errors:,
         imported_files_count: imported_files&.length,
         failed_files_count: failed_files&.length,
-        job: job&.id
+        job: job&.id,
+        retrieved_from_cache:,
+        using_date_range_filter:,
+        date_range_begin: (date_range_begin if using_date_range_filter)
       }
 
       if create
