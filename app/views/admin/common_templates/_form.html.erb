@@ -13,7 +13,7 @@
 %>
 <div class="admin-form-block-outer">
 <% if form_info_partial %>
-      <div class="row">
+      <div class="row block-within-flex">
         <div class="col-sm-12" style="text-align: left">
 <% end %>
 <%= form_for(fref, url: url, class: "form-formatted admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result", before_send_processor: before_send_processor}) do |f| %>
