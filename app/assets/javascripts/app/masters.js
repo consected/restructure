@@ -9,20 +9,35 @@ _fpa.masters = {
     max_results: 100,
 
     switch_id_on_click: function (block) {
-        block.find('.switch_id').not('attached-switch-click').click(function (ev) {
+        block.find('.switch_id').not('.attached-switch-click').click(function (ev) {
             ev.preventDefault();
             var p = $(this).parent();
-            var alt_id = p.find('span.alt_id');
-            var master_id = p.find('span.master_id');
-            if (alt_id.is(':visible')) {
-                alt_id.hide();
-                master_id.show();
-                $(this).attr('title', 'switch to Master ID');
-            } else {
-                master_id.hide();
-                alt_id.show();
-                $(this).attr('title', 'switch to alternative ID');
-            }
+            var id_items = p.find('span.alt-id-item');
+
+            if (id_items.length <= 1) return;
+
+            // Find the currently visible item
+            var visible_index = -1;
+            id_items.each(function (i) {
+                if ($(this).is(':visible')) {
+                    visible_index = i;
+                    return false;
+                }
+            });
+
+            // Hide all items
+            id_items.hide();
+
+            // Show the next item (cycling back to first)
+            var next_index = (visible_index + 1) % id_items.length;
+            var next_item = id_items.eq(next_index);
+            next_item.show();
+
+            // Update the switch icon title to indicate the next ID to switch to
+            var after_next_index = (next_index + 1) % id_items.length;
+            var after_next_item = id_items.eq(after_next_index);
+            var next_title = after_next_item.data('idLabel') || 'alternative ID';
+            $(this).attr('title', 'switch to ' + next_title);
         }).addClass('attached-switch-click');
     },
 
