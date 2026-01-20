@@ -28,7 +28,7 @@
 - Check for reusable support methods in `spec/support/` before writing new test code.
 
 ### Rspec System Spec Best Practices
-1. **ALWAYS use helper methods for system specs** from `spec/support/feature_support.rb`
+1. **ALWAYS use helper methods for system specs** - read `spec/support/feature_support.rb` before starting to implement system spec tests
 2. **Run `debug_process_status`** when fields/sections can't be found
 3. **Wait for AJAX** using `finish_page_loading` and `finish_form_formatting` after interactions
 4. **Expand sections before accessing fields** - forms load via AJAX
@@ -277,7 +277,7 @@ change_setting('TwoFactorAuthDisabledForUser', true)
 Never click on elements programmatically using Javascript if they may not be interactable. Instead, use JavaScript to scroll them into view first:
 ```ruby
 edit_link = find('a', text: 'edit tracker record')
-page.execute_script('arguments[0].scrollIntoView(true);', edit_link)
+scroll_into_view(edit_link) # From the FeatureHelper module
 sleep 0.5  # Allow time for scrolling
 ```
 Then click the link:

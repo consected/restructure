@@ -540,10 +540,8 @@ end
 ### Scroll Helper
 
 ```ruby
-def scroll_into_view(element)
-  page.execute_script('arguments[0].scrollIntoView(true);', element)
-  sleep 0.5
-end
+include FeatureSupport
+scroll_into_view(element)
 ```
 
 ## Test Organization

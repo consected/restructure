@@ -33,7 +33,7 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
     # Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: , current_admin: @admin, user: @user
     setup_access resource_name, resource_type: :table, access: :create, user: @user
 
-    bhs = ExternalIdentifier.where(name: resource_name).first
+    bhs = ExternalIdentifier.active.where(name: resource_name).first
     bhs.update! external_id_edit_pattern: '\\d{3} \\d{3} \\d{3}', external_id_view_formatter: 'format_10_digit_external_id', current_admin: @admin
 
     @master.current_user = @user
