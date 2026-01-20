@@ -160,15 +160,19 @@ describe 'admin REDCap project retrieve records buttons', js: true, driver: $bro
     project.create_file_store unless project.file_store
     project.reload
 
-    # Insert a record to establish a date
-    model_class = project.dynamic_storage.dynamic_model.implementation_class
+    # Create a successful ClientRequest for 'store records' to establish a date
     test_time = 5.minutes.ago
-    ActiveRecord::Base.connection.execute(
-      "INSERT INTO #{model_class.table_name} (record_id, created_at, updated_at) VALUES ('test-btn-99999', '#{test_time.to_fs(:db)}', '#{test_time.to_fs(:db)}')"
+    Redcap::ClientRequest.create!(
+      current_admin: @admin,
+      action: 'store records',
+      server_url: project.server_url,
+      name: project.name,
+      redcap_project_admin: project,
+      result: { errors: [] },
+      created_at: test_time
     )
 
-    # Verify the record exists and the date_range is set
-    expect(model_class.count).to be > 0
+    # Verify the date_range is set
     expect(project.date_range_begin_for_manual_pull).to be_a Time
 
     navigate_to_project_edit(project)
