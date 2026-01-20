@@ -121,6 +121,14 @@ report library button label: |
 show ids in master result: |
   Master record results headers show one or more IDs. Provide a comma separated list of IDs to show using 
   alternative ID names, "master_id", or "none" to hide all IDs
+crosswalk field labels: |
+  Labels for crosswalk ID fields on the masters table (e.g. msid, pro_id). Provide a YAML formatted 
+  hash mapping field names to their display labels. For example:
+  
+      msid: MSID
+      pro_id: Pro Football ID
+  
+  If not set, field names will be humanized (e.g., "msid" becomes "Msid")
 tracker order: |
   Tracker records are ordered by "protocol position", "protocol name", or "latest entry date"
 user session timeout: |
