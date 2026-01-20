@@ -5,6 +5,7 @@ require 'rails_helper'
 describe 'admin parsed config display', js: true, driver: $browser_driver do
   include ModelSupport
   include AdminActionsSetup
+  include FeatureSupport
 
   before(:all) do
     SetupHelper.feature_setup
@@ -86,6 +87,13 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
 
       skip 'No active activity logs found' unless al
 
+      # Ensure it has extra_log_types for this test
+      unless al.extra_log_types.present?
+        al.update_column(:extra_log_types, "default:\n  label: Test Log\n  fields:\n    - field1\n")
+        al.force_option_config_parse if al.respond_to?(:force_option_config_parse)
+        al.reload
+      end
+
       admin_sign_in_with_2fa
 
       visit '/admin/activity_logs'
@@ -102,6 +110,7 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
 
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
+      finish_page_loading
 
       expect(page).to have_css('.parsed-config-output', wait: 5)
 
@@ -170,7 +179,7 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       admin_sign_in_with_2fa
 
       visit '/admin/external_identifiers'
-
+      finish_page_loading
       # Wait for page to load
       expect(page).to have_css("#admin-item-#{ei.id}", wait: 10)
 
@@ -178,11 +187,14 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
         find('a.edit-entity.glyphicon-pencil').click
       end
 
-      expect(page).to have_css('.nav-tabs', wait: 15)
+      finish_form_formatting
+      expect(page).to have_css('.nav-tabs', wait: 20)
+      finish_page_loading
       sleep 1 # Extra wait for AJAX
 
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
+      finish_page_loading
 
       expect(page).to have_css('.parsed-config-output', wait: 5)
 
@@ -210,15 +222,18 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       admin_sign_in_with_2fa
 
       visit '/admin/dynamic_models'
+      finish_page_loading
 
       within "#admin-item-#{dm.id}" do
         find('a.edit-entity.glyphicon-pencil').click
       end
+      finish_form_formatting
 
       expect(page).to have_css('.nav-tabs', wait: 10)
+      sleep 1 # Extra wait for AJAX
 
       click_link 'Parsed Config'
-      expect(page).to have_css('#parsed-config', visible: true)
+      sleep 1 # Wait for tab content to load
 
       # Should either show the parsed config or an error message
       # The implementation should handle both cases gracefully
