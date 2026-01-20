@@ -369,12 +369,20 @@ module ApplicationHelper
   end
 
   def remove_empty_error(errors)
-    errors.messages.each do |key, messages|
+    # Handle DoNotDisplayErrorMessage markers
+    # We need to iterate over a copy of keys since we might be deleting some
+    errors.messages.keys.dup.each do |key|
+      messages = errors.messages[key]
       if messages.include?(DoNotDisplayErrorMessage)
         if messages.one?
+          # If the only message is DoNotDisplayErrorMessage, remove the entire key
           errors.delete(key)
         else
-          messages.delete(DoNotDisplayErrorMessage)
+          # If there are multiple messages, filter out DoNotDisplayErrorMessage
+          # We need to delete and re-add to ensure proper modification
+          filtered_messages = messages.reject { |msg| msg == DoNotDisplayErrorMessage }
+          errors.delete(key)
+          filtered_messages.each { |msg| errors.add(key, msg) }
         end
       end
     end

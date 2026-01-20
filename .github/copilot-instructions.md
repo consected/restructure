@@ -22,6 +22,11 @@
 - If requested, the AI Agent should create a pull request with a descriptive title and summary of changes. The branch must be rebased onto `up-develop` before creating the pull request.
 - Only a human user will merge branches after code review; AI agents should not merge branches.
 
+### Testing Conventions
+- When fixing implementation bugs, **always write new Rspec tests** to demonstrate the bug, before fixing it.
+- Always add comments to the top of the spec files explaining the purpose of the tests.
+- Check for reusable support methods in `spec/support/` before writing new test code.
+
 ### Rspec System Spec Best Practices
 1. **ALWAYS use helper methods for system specs** from `spec/support/feature_support.rb`
 2. **Run `debug_process_status`** when fields/sections can't be found
