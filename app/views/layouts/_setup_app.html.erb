@@ -15,6 +15,7 @@
   _fpa.state.current_user_preference = <%= current_user.user_preference.to_json.html_safe %>
   _fpa.state.crosswalk_attrs = <%= Master.crosswalk_attrs.to_json.html_safe %>;
   _fpa.state.alternative_id_fields = <%= Master.alternative_id_fields.to_json.html_safe %>;
+  _fpa.state.alternative_id_labels = <%= Master.alternative_id_labels(access_by: current_user).to_json.html_safe %>;
   _fpa.state.user_can = {
     download_files: <%=!!current_user.can?(:download_files)%>,
     view_files_as_image: <%=!!current_user.can?(:view_files_as_image)%>,

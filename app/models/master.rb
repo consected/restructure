@@ -3,6 +3,41 @@
 class Master < ActiveRecord::Base
   FilteredAssocPrefix = 'filtered__'
 
+  #
+  # Get the labels for crosswalk ID fields on the masters table from AppConfiguration.
+  # The configuration value should be a YAML hash format, e.g.:
+  #   msid: MSID
+  #   pro_id: Pro Football ID
+  # Falls back to humanizing the field name if no configuration is set.
+  # @param [User | nil] access_by - current user for app-type specific configuration
+  # @return [Hash{Symbol => String}] hash of field names to labels
+  def self.crosswalk_field_labels(access_by: nil)
+    if access_by
+      key = "#{access_by.id}-#{access_by.app_type_id}"
+      @crosswalk_field_labels_by_user ||= {}
+      return @crosswalk_field_labels_by_user[key] if @crosswalk_field_labels_by_user.key?(key)
+    elsif @crosswalk_field_labels
+      return @crosswalk_field_labels
+    end
+
+    config_value = Admin::AppConfiguration.hash_for(:crosswalk_field_labels, access_by)
+    labels = config_value.presence || crosswalk_attrs.to_h { |attr| [attr, attr.to_s.humanize] }
+
+    if access_by
+      @crosswalk_field_labels_by_user[key] = labels
+    else
+      @crosswalk_field_labels = labels
+    end
+
+    labels
+  end
+
+  # Clear memoized crosswalk field labels (called when app configuration changes)
+  def self.reset_crosswalk_field_labels!
+    @crosswalk_field_labels = nil
+    @crosswalk_field_labels_by_user = nil
+  end
+
   # Temporary master records can be used with limited(_if_one) user access controls
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table

@@ -63,6 +63,14 @@ class Admin::AppConfiguration < Admin::AdminBase
     res.split(',').map { |i| i.strip.send(to) }
   end
 
+  def self.hash_for(name, user = nil, keys_to: :to_sym)
+    res = value_for(name, user)
+    return {} if res.blank?
+
+    res = YAML.safe_load(res, permitted_classes: [Symbol]) || {}
+    res.transform_keys(&keys_to)
+  end
+
   #
   # Get all the active config values for the specified user.
   # The user's current app type is considered in the evaluation
@@ -181,6 +189,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   # Clear the value_for memo. Called as an after_save callback
   def self.clear_memo!
     @value_for = {}
+    Master.reset_crosswalk_field_labels!
   end
 
   private

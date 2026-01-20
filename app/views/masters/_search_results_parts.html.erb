@@ -96,18 +96,22 @@
 
 <script id="master_id_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 <% id_list = app_config_items(:show_ids_in_master_result, ['master_id']) %>
+<%
+  # Get the alternative ID labels for display
+  id_labels = Master.alternative_id_labels(access_by: current_user)
+%>
 <% unless id_list.first == 'none' %>
 <div class="col-md-2 col-lg-2 result-refs">
-  <% if id_list.length > 1 %>
-  <% end %>
   <%
   first = true
   id_list.each do |i|
+    id_label = id_labels[i.to_sym] || i.to_s.humanize
   %>
     <% if first && id_list.length > 1 %>
-    <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to alternative ID"></a>
+    <% next_label = id_labels[id_list[1].to_sym] || id_list[1].to_s.humanize %>
+    <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to <%= next_label %>"></a>
     <% end %>
-    <span class="alt-id-item <%= first && id_list.length > 1 ? '' : 'alt_id' %> <%=i%>" <% unless first %> style="display: none"<% end %> title="<%= i.humanize %>">{{#if <%= i %>}}{{<%= i %>}}{{else}}no&nbsp;<%= i.humanize %>{{/if}}</span>
+    <span class="alt-id-item<%= first && id_list.length > 1 ? '' : ' alt_id' %> <%=i%>" data-id-label="<%= id_label %>"<% unless first %> style="display: none"<% end %>>{{#if <%= i %>}}<span title="<%= id_label %>">{{<%= i %>}}</span>{{else}}<span title="No <%= id_label %>">(none)</span>{{/if}}</span>
   <%
     first = false
   end
