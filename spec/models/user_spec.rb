@@ -1,5 +1,31 @@
 # frozen_string_literal: true
 
+# User Model Spec
+#
+# Tests core user authentication, validation, and lifecycle management functionality.
+#
+# Test Coverage:
+# - User Creation: Basic user instantiation and persistence
+# - Password Management:
+#   - Password changes and validation
+#   - Prevention of recent password reuse (checks last N passwords)
+#   - Password expiration after configured age limit
+#   - Password expiration reminders
+# - Email Management:
+#   - Users cannot change their own email addresses
+#   - Admins can change user email addresses
+# - Account Security:
+#   - Disabled users cannot authenticate
+#   - Users cannot change their own disabled flag
+# - Error Handling:
+#   - Prevents duplicate error messages from associated models (GitHub #340)
+#   - Validates single, clear error messages for password reuse
+# - User Registration:
+#   - Self-registration when enabled
+#   - Admin-created users when self-registration disabled
+# - Associations:
+#   - user_preference relationship with autosave and inverse_of
+
 require 'rails_helper'
 include SetupHelper
 
@@ -32,7 +58,7 @@ describe User do
   end
 
   it 'allows password change' do
-    @user.password = @good_password + '&&!'
+    @user.password = "#{@good_password}&&!"
     expect(@user.save).to be true
   end
 
@@ -103,6 +129,39 @@ describe User do
 
     @user.password = "#{@good_password} 1"
     expect(@user.save).to be true
+  end
+
+  it 'does not show duplicate error messages when reusing a recent password' do
+    create_admin
+
+    # Generate 7 new passwords - 0 to 6
+    7.times do |n|
+      @user.password = "#{@good_password} #{n}"
+      @user.save!
+    end
+
+    # Try to reuse a recent password
+    @user.password = "#{@good_password} 3"
+    @user.save
+
+    # Get all error messages
+    error_messages = @user.errors.full_messages
+
+    # The issue: when autosave: true is set on user_preference association,
+    # validation errors get duplicated with the association prefix:
+    # - "New password matches a previous password..."
+    # - "User preference user new password matches a previous password..."
+    # This is confusing for users.
+
+    # Check that we only have ONE error about password reuse, not two
+    password_errors = error_messages.grep(/matches a previous password/i)
+
+    expect(password_errors.length).to eq(1),
+                                      "Expected only 1 password reuse error, but got #{password_errors.length}: #{password_errors.inspect}"
+
+    # Verify the error is the direct one, not the prefixed version
+    expect(password_errors.first).to match(/^New password matches a previous password/i)
+    expect(password_errors.first).not_to match(/User preference/i)
 
     @user.password = "#{@good_password} 1"
     expect(@user.save).to be false
