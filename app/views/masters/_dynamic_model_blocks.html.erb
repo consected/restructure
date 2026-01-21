@@ -55,6 +55,7 @@ category_models.each do |m|
 
   if viewable  [m.resource_name.to_sym]
     po = panel&.view_options&.orientation
+    awc = m.default_options&.view_options&.dig(:alt_width_classes)
     hide_sl = panel&.view_options&.hide_sublist_controls
 
     orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
@@ -62,18 +63,24 @@ category_models.each do |m|
     if orientation.in?(['columns'])
     # Just aligns a dynamic model list vertically. Sublist controls must be handled externally 
     # (such as is done in the Master Details panel for participant info, alt info, contact details and address).
+    # Check if alt_width_classes is specified in view_options, otherwise use default
+    width_classes = awc || 'col-md-6'
 %>
-      <div class="masters--dynamic-model-blocks col-md-6 common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="masters--dynamic-model-blocks <%= width_classes %> common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
 <%
     elsif orientation && orientation != 'none'
     # Just aligns a dynamic model list horizontally. Sublist controls must be handled externally.
+    # Check if alt_width_classes is specified in view_options, otherwise use empty (row takes full width)
+    width_classes = awc || ''
 %>
-      <div class="masters--dynamic-model-blocks row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="masters--dynamic-model-blocks row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%> <%=width_classes%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
 <% 
     else # orientation is nil or 'none'
     # Generally used to gernerate full markup for the dynamic model list column with sublist controls
+    # Check if alt_width_classes is specified in view_options, otherwise use default
+    width_classes = awc || layout_item_block_sizes[:regular]
 %>  
-    <div class="masters--dynamic-model-blocks-outer-alt-orientation <%= layout_item_block_sizes[:regular] %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
+    <div class="masters--dynamic-model-blocks-outer-alt-orientation <%= width_classes %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
       <% unless hide_sl %>
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
       <% end %>

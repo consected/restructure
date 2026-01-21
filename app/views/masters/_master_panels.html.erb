@@ -25,7 +25,11 @@
       </div>
       <%  external_id_types.each do |e|%>
         <% if master_viewables[e.plural_name.to_sym] %>
-        <div class="master-panels--external-id-column <%= layout_item_block_sizes[:narrow] %> sublist-column" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+        <% 
+          # Check if alt_width_classes is specified in view_options, otherwise use default narrow width
+          width_classes = e.default_options&.view_options&.dig(:alt_width_classes) || layout_item_block_sizes[:narrow]
+        %>
+        <div class="master-panels--external-id-column <%= width_classes %> sublist-column" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
         <% end %>
       <% end %>
     </div>

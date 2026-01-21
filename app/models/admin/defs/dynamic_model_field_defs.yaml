@@ -12,4 +12,10 @@ Foreign key name: |
   If blank, then there is no connection to master records, but the table can be used for 
   lookups in forms using a field *select_record_from_table_...*
 
+Category: |
+  has two purposes:
 
+  - simple category to organize dynamic model field definitions in the admin interface
+  - allow page layout panels to show all dynamic models of a given category together
+  
+  NOTE: category `details` will show in the default participant info details panel
