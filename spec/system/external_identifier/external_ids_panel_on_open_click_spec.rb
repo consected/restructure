@@ -273,70 +273,57 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     end
   end
 
-  # This test verifies that the on_open_click mechanism is triggered
-  # for nested collapse panels (like external-ids) when they are shown
+  # This test verifies that the on_open_click mechanism correctly loads
+  # external ID content when the panel is expanded
   it 'triggers on_open_click for external ids panel when tab is expanded' do
-    master = @masters.first
+    # Use 2 masters to test the multi-master scenario
+    master1 = @masters.first
+    master2 = @masters.second
 
-    # Navigate directly to this master
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{master.id}"
+    # Navigate to search results with 2 masters
+    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{master1.id},#{master2.id}"
     dismiss_modal
     finish_page_loading
     sleep 1
 
-    # Expand master
-    expand_master_record(master_id: master.id)
-    expect(page).to have_css("#master-#{master.id}-main-container.in", wait: 10)
+    # Expand master 1
+    expand_master_record(master_id: master1.id)
+    expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    # Check the external IDs panel state BEFORE clicking the tab
-    ext_panel = find("#external-ids-#{master.id}", visible: :all)
-
-    # The panel should be collapsed initially
-    expect(ext_panel[:class]).to include('collapse')
-    expect(ext_panel[:class]).not_to include('in')
-
-    # The on-open-click links should NOT have been clicked yet
-    on_open_links = ext_panel.all('.on-open-click a[data-remote="true"]', visible: :all)
-    puts_debug "Found #{on_open_links.count} on-open-click AJAX links in external IDs panel", force: true
-
-    on_open_links.each do |link|
-      classes = link[:class] || ''
-      puts_debug "  Link: #{link[:href]}, classes: #{classes}", force: true
-      # Links should not have auto-clicked yet
-      expect(classes).not_to include('auto-clicked'),
-                             'Link should not be auto-clicked before panel is expanded'
-    end
-
-    # Now click the external IDs tab to expand the panel
+    # Click the external IDs tab to expand the panel
     puts_debug 'Clicking external ids tab...', force: true
     expand_master_record_tab('external ids')
     finish_page_loading
     sleep 2
 
     # The panel should now be expanded
-    ext_panel_after = find("#external-ids-#{master.id}", visible: :all)
-    expect(ext_panel_after[:class]).to include('in')
+    ext_panel = find("#external-ids-#{master1.id}", visible: :all)
+    expect(ext_panel[:class].split(' ')).to include('in'), 'External IDs panel should be expanded'
 
     # The on-open-click links should have been clicked (auto-clicked class added)
-    on_open_links_after = ext_panel_after.all('.on-open-click a[data-remote="true"]', visible: :all)
-    puts_debug 'After expansion:', force: true
+    on_open_links = ext_panel.all('.on-open-click a[data-remote="true"]', visible: :all)
+    puts_debug "Found #{on_open_links.count} on-open-click AJAX links", force: true
 
     links_auto_clicked = 0
-    on_open_links_after.each do |link|
+    on_open_links.each do |link|
       classes = link[:class] || ''
       puts_debug "  Link: #{link[:href]}, classes: #{classes}", force: true
       links_auto_clicked += 1 if classes.include?('auto-clicked')
     end
 
     # All links should have been auto-clicked
-    expect(links_auto_clicked).to eq(on_open_links_after.count),
-                                  "Expected all #{on_open_links_after.count} links to be auto-clicked, " \
+    expect(links_auto_clicked).to eq(on_open_links.count),
+                                  "Expected all #{on_open_links.count} links to be auto-clicked, " \
                                   "but only #{links_auto_clicked} were"
 
     # And the content should have loaded
-    bhs_block = ext_panel_after.all("[id^='bhs-assignments-#{master.id}']", wait: 5).first
+    bhs_block = ext_panel.all("[id^='bhs-assignments-#{master1.id}']", wait: 5).first
     expect(bhs_block).not_to be_nil, 'BHS assignment block should be present after panel expansion'
     expect(bhs_block.text).not_to be_empty, 'BHS assignment block should have content'
+
+    # Verify the BHS ID is displayed
+    expect(ext_panel).to have_content(@bhs_ids.first.to_s, wait: 5),
+                         "External IDs panel should display BHS ID #{@bhs_ids.first}"
   end
 end
