@@ -3,69 +3,103 @@
   <ul class="nav nav-pills details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
   <% # Tabs shown are based on the panels in the page layout.
-    drop_down = nil
-    prev_drop_down = nil
+    # First, filter panels and group them by dropdown parent
+    filtered_panels = []
     tab_panels = panels.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }
     tab_panels.each do |panel|
-
+      # Skip panels with no accessible resources
       if panel.contains&.resources
         next if master_viewables.stringify_keys.slice(*panel.contains&.resources).select{|k,v| v}.length == 0
       end
-
-      drop_down = panel.tab && panel.tab.parent
-      if prev_drop_down && drop_down != prev_drop_down
-        prev_drop_down = false
-      %>
-        </ul>
-      </li>
-      <%
-      end
-
-      if drop_down && drop_down != prev_drop_down
+      filtered_panels << panel
+    end
+    
+    # Group panels by their dropdown parent
+    panels_by_parent = filtered_panels.group_by { |p| p.tab && p.tab.parent }
+    
+    # Render panels, only showing dropdowns if they have content
+    panels_by_parent.each do |drop_down, grouped_panels|
+      # Skip empty groups (shouldn't happen after filtering, but be safe)
+      next if grouped_panels.empty?
+      
+      if drop_down
+        # This is a dropdown group
         dd_label = drop_down.humanize.underscore
         dd_name = drop_down.hyphenate
-        prev_drop_down = drop_down
         %>
         <li role="presentation" class="dropdown">
           <a href="#" class="dropdown-toggle" id="dm-tag-drop-<%=dd_name%>" data-toggle="dropdown" aria-controls="dm-tag-drop-contents-<%=dd_name%>" aria-expanded="false"><span class="caret"></span> <%= dd_label%></a>
           <ul class="dropdown-menu" aria-labelledby="dm-tag-drop-<%=dd_name%>" id="dm-tag-drop-contents-<%=dd_name%>">
-      <% end %>
-    <%= render partial: 'masters/search_results_master_tabs_item', locals: {panel: panel} %>
-  <%
-    end #each
-
-    if drop_down
-    %>
-      </ul>
-    </li>
-    <% end
+      <%
+        grouped_panels.each do |panel|
+      %>
+          <%= render partial: 'masters/search_results_master_tabs_item', locals: {panel: panel} %>
+      <%
+        end
+      %>
+          </ul>
+        </li>
+      <%
+      else
+        # These are standalone tabs (not in a dropdown)
+        grouped_panels.each do |panel|
+      %>
+        <%= render partial: 'masters/search_results_master_tabs_item', locals: {panel: panel} %>
+      <%
+        end
+      end
+    end #each group
 
     extra_tabs = page_layout_panel layout_name: :nav, panel_name: 'master-tabs'
     if extra_tabs
       nav = extra_tabs.nav
       emtab_label = nav.label
+      
+      # Filter nav links based on user access
+      accessible_links = []
+      if nav&.links
+        nav.links.each do |tab|
+          resource_name = tab['resource_name']
+          resource_type = tab['resource_type']&.to_sym || :general
+          
+          # Check if user has access to this resource
+          if resource_name && current_user.has_access_to?(:access, resource_type, resource_name)
+            accessible_links << tab
+          end
+        end
+      end
+      
+      # Only show dropdown if there are accessible links
+      if accessible_links.any?
     %>
     <li role="presentation" class="dropdown">
       <a href="#" class="dropdown-toggle" id="extra-master-tab-drop" data-toggle="dropdown" aria-controls="extra-master-tab-drop-contents" aria-expanded="false"><span class="caret"></span> <%= emtab_label %></a>
       <ul class="dropdown-menu extra-master-tab-dropdown-menu" aria-labelledby="extra-master-tab-drop" id="extra-master-tab-drop-contents">
     <%
-    end
-
-    if nav&.links
-    nav.links&.each do |tab|
+        accessible_links.each do |tab|
+          resource_type = tab['resource_type']&.to_sym || :general
+          
+          if resource_type == :table
+    %>
+    <li role="presentation" class="extra-master-tab">
+      <code>table</code> resources are not supported in <b>Navigation</b> tabs
+    </li>
+    <%
+          else
+            # For other resource types (reports, general), use simple link
     %>
     <li role="presentation" class="extra-master-tab">
       <a href="<%= tab['url'] %>" class="exta-master-tab-link"><%=tab['label']%></a>
     </li>
     <%
-    end
-    end
-
-    if extra_tabs
+          end
+        end
     %>
     </ul>
     </li>
-    <% end %>
+    <%
+      end
+    end %>
 
   </ul>
 </script>
