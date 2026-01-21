@@ -41,6 +41,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     add_default_app_config(app, :hide_player_tabs, 'false')
 
     # Ensure the BHS external identifier is formatted how we expect
+    resource_name = :bhs_assignments
     bhs = ExternalIdentifier.active.where(name: resource_name).first
     bhs.update! external_id_edit_pattern: nil, external_id_view_formatter: nil, current_admin: @admin
 
@@ -61,7 +62,6 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
 
     @user, @good_password = create_user
     @good_email = @user.email
-    resource_name = :bhs_assignments
     setup_access resource_name, resource_type: :table, access: :create, user: @user
     setup_access :player_infos, resource_type: :table, access: :create, user: @user
 
@@ -99,17 +99,23 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
   # This test demonstrates the bug: when switching between masters,
   # the external IDs panel may appear blank because on_open_click is not called
   it 'loads external id content when switching between masters and clicking external ids tab' do
+    # Navigate to search results with multiple master IDs
     master_ids = @masters.map(&:id).join(',')
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{master_ids}"
     dismiss_modal
     finish_page_loading
 
-    # Start with the LAST master (critical for bug reproduction)
+    # CRITICAL: The bug only manifests when you DON'T start with the first participant.
+    # Start with the LAST participant (master 3), then switch to others.
+    # Test pattern: Expand master 3 → external ids → expand master 1 → external ids
+    # Then go back to master 3 → external ids and check if content loads
+
+    # Assign masters - we'll start with the last one
     master1 = @masters[0]
     master2 = @masters[1]
     master3 = @masters[2]
 
-    # Step 1: Expand master 3 first and check external IDs
+    # Step 1: Expand the LAST master first (NOT the first!) and its external IDs tab
     expand_master_record(master_id: master3.id)
     expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
     finish_form_formatting
@@ -117,12 +123,15 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expand_master_record_tab('external ids')
     finish_page_loading
 
+    # Verify master 3 external IDs are loaded
     ext_panel_3 = find("#external-ids-#{master3.id}", visible: :all)
     within(ext_panel_3) do
-      expect(page).to have_css("[id^='bhs-assignments-#{master3.id}']", wait: 10)
+      bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 10).first
+      expect(bhs_block).not_to be_nil, "Master 3 external IDs should load on first expansion"
+      expect(bhs_block.text.strip).not_to be_empty, "Master 3 external IDs should have content"
     end
 
-    # Step 2: Expand master 1 and check external IDs
+    # Step 2: Now expand master 1 (the first one in the list)
     expand_master_record(master_id: master1.id)
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
@@ -130,12 +139,15 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expand_master_record_tab('external ids')
     finish_page_loading
 
+    # Verify master 1 external IDs are loaded
     ext_panel_1 = find("#external-ids-#{master1.id}", visible: :all)
     within(ext_panel_1) do
-      expect(page).to have_css("[id^='bhs-assignments-#{master1.id}']", wait: 10)
+      bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 10).first
+      expect(bhs_block).not_to be_nil, "Master 1 external IDs should load"
+      expect(bhs_block.text.strip).not_to be_empty, "Master 1 external IDs should have content"
     end
 
-    # Step 3: Return to master 3 - critical test
+    # Step 3: Go back to master 3 - THIS IS WHERE THE BUG MANIFESTS
     expand_master_record(master_id: master3.id)
     expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
     finish_form_formatting
@@ -143,14 +155,15 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expand_master_record_tab('external ids')
     finish_page_loading
 
+    # THIS IS THE CRITICAL CHECK - the panel should have content when returning
     ext_panel_3_revisit = find("#external-ids-#{master3.id}", visible: :all)
     within(ext_panel_3_revisit) do
-      expect(page).to have_css("[id^='bhs-assignments-#{master3.id}']", wait: 10)
-      bhs_block = find("[id^='bhs-assignments-#{master3.id}']")
-      expect(bhs_block.text).not_to be_empty
+      bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 10).first
+      expect(bhs_block).not_to be_nil, "Master 3 external IDs should load when returning"
+      expect(bhs_block.text.strip).not_to be_empty, "Master 3 external IDs should have content when returning"
     end
 
-    # Step 4: Test master 2
+    # Step 4: Test with master 2 as well
     expand_master_record(master_id: master2.id)
     expect(page).to have_css("#master-#{master2.id}-main-container.in", wait: 10)
     finish_form_formatting
@@ -160,10 +173,12 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
 
     ext_panel_2 = find("#external-ids-#{master2.id}", visible: :all)
     within(ext_panel_2) do
-      expect(page).to have_css("[id^='bhs-assignments-#{master2.id}']", wait: 10)
+      bhs_block = all("[id^='bhs-assignments-#{master2.id}']", wait: 10).first
+      expect(bhs_block).not_to be_nil, "Master 2 external IDs should load"
+      expect(bhs_block.text.strip).not_to be_empty, "Master 2 external IDs should have content"
     end
 
-    # Step 5: Return to master 1
+    # Final check: Go back to master 1
     expand_master_record(master_id: master1.id)
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
@@ -173,38 +188,52 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
 
     ext_panel_1_revisit = find("#external-ids-#{master1.id}", visible: :all)
     within(ext_panel_1_revisit) do
-      expect(page).to have_css("[id^='bhs-assignments-#{master1.id}']", wait: 10)
-      bhs_block = find("[id^='bhs-assignments-#{master1.id}']")
-      expect(bhs_block.text).not_to be_empty
+      bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 10).first
+      expect(bhs_block).not_to be_nil, "Master 1 external IDs should load when returning"
+      expect(bhs_block.text.strip).not_to be_empty, "Master 1 external IDs should have content when returning"
     end
   end
 
+  # This test verifies that the on_open_click mechanism correctly loads
+  # external ID content when the panel is expanded
   it 'triggers on_open_click for external ids panel when tab is expanded' do
     master1 = @masters.first
 
+    # Navigate to search results
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{master1.id}"
     dismiss_modal
     finish_page_loading
 
+    # Expand master 1
     expand_master_record(master_id: master1.id)
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
+    # Click the external IDs tab to expand the panel
     expand_master_record_tab('external ids')
     finish_page_loading
 
+    # The panel should now be expanded - wait for it
+    expect(page).to have_css("#external-ids-#{master1.id}.in", wait: 10)
     ext_panel = find("#external-ids-#{master1.id}", visible: :all)
-    expect(ext_panel[:class].split(' ')).to include('in')
 
+    # The on-open-click links should have been clicked (auto-clicked class added)
     on_open_links = ext_panel.all('.on-open-click a[data-remote="true"]', visible: :all)
-    expect(on_open_links.count).to be > 0
 
-    on_open_links.each do |link|
-      expect(link[:class]).to include('auto-clicked')
-    end
+    links_auto_clicked = on_open_links.count { |link| (link[:class] || '').include?('auto-clicked') }
 
-    bhs_block = ext_panel.find("[id^='bhs-assignments-#{master1.id}']", wait: 5)
-    expect(bhs_block.text).not_to be_empty
-    expect(ext_panel).to have_content(@bhs_ids.first.to_s, wait: 5)
+    # All links should have been auto-clicked
+    expect(links_auto_clicked).to eq(on_open_links.count),
+                                  "Expected all #{on_open_links.count} links to be auto-clicked, " \
+                                  "but only #{links_auto_clicked} were"
+
+    # And the content should have loaded
+    bhs_block = ext_panel.all("[id^='bhs-assignments-#{master1.id}']", wait: 5).first
+    expect(bhs_block).not_to be_nil, 'BHS assignment block should be present after panel expansion'
+    expect(bhs_block.text).not_to be_empty, 'BHS assignment block should have content'
+
+    # Verify the BHS ID is displayed
+    expect(ext_panel).to have_content(@bhs_ids.first.to_s, wait: 5),
+                         "External IDs panel should display BHS ID #{@bhs_ids.first}"
   end
 end

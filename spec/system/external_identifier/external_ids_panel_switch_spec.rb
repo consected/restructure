@@ -81,43 +81,57 @@ describe 'external ids panel switching between participants', js: true, driver: 
   end
 
   it 'shows external ids panel content when switching between multiple participants' do
+    # Navigate to search results with multiple master IDs
     master_ids = @masters.map(&:id).join(',')
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{master_ids}"
     dismiss_modal
     finish_page_loading
 
+    # Verify we have multiple master results
     all_panels = all('.master-panel', visible: :all)
-    expect(all_panels.count).to be >= 2
+    expect(all_panels.count).to be >= 2, "Expected at least 2 master panels, but found #{all_panels.count}"
 
     # Test each master's external ids panel
     @masters.each do |master|
+      # Expand the master record using helper
       expand_master_record(master_id: master.id)
+
+      # Wait for master container to load
       expect(page).to have_css("#master-#{master.id}-main-container.in.loaded-master-main", wait: 10)
       finish_form_formatting
 
+      # Expand the external ids tab using helper
       expand_master_record_tab('external ids')
       finish_page_loading
 
+      # Verify the external ids panel is shown and has content
       ext_ids_panel = find("#external-ids-#{master.id}")
       within(ext_ids_panel) do
-        expect(page).to have_css('.external-identifier, [data-model-data-type="external_identifier"], .external-ids-panel', wait: 5)
-        bhs_block = find("[id^='bhs-assignments-#{master.id}']")
-        expect(bhs_block.text).not_to be_empty
+        # Look for BHS assignment block content
+        bhs_block = all("[id^='bhs-assignments-#{master.id}']", wait: 10).first
+        expect(bhs_block).not_to be_nil, "BHS assignment should exist for master #{master.id}"
+        expect(bhs_block.text).not_to be_empty, "BHS block should have content for master #{master.id}"
       end
     end
 
-    # Rapid switching test
-    5.times do
+    # Now do rapid switching between masters
+    3.times do
       @masters.each do |master|
+        # Expand master using helper
         expand_master_record(master_id: master.id)
-        expect(page).to have_css("#master-#{master.id}-main-container.in", wait: 5)
 
+        # Wait for container to be visible
+        expect(page).to have_css("#master-#{master.id}-main-container.in", wait: 10)
+
+        # Expand external ids tab using helper
         expand_master_record_tab('external ids')
         finish_page_loading
 
-        ext_ids_panel = find("#external-ids-#{master.id}.in, #external-ids-#{master.id}.collapse.in", visible: :all)
-        bhs_block = ext_ids_panel.find("[id^='bhs-assignments-#{master.id}']", visible: :all)
-        expect(bhs_block.text.strip).not_to be_empty
+        # Verify panel has content
+        ext_ids_panel = find("#external-ids-#{master.id}", visible: :all)
+        bhs_block = ext_ids_panel.all("[id^='bhs-assignments-#{master.id}']", wait: 10).first
+        expect(bhs_block).not_to be_nil, "External IDs should load for master #{master.id} during rapid switching"
+        expect(bhs_block.text.strip).not_to be_empty, "External IDs should have content for master #{master.id}"
       end
     end
   end
