@@ -2094,36 +2094,42 @@ _fpa.form_utils = {
       $outer = $inner;
     }
 
-    window.setTimeout(function () {
-      var heights = [];
-      var cols = $outer.find('.sublist-column');
-      if (cols.length === 0) return;
+    // Process each reorder-sublist-columns container individually to avoid
+    // moving columns between different containers (fixes issue #857)
+    $outer.each(function () {
+      const $container = $(this);
+      window.setTimeout(function () {
+        var heights = [];
+        var cols = $container.find('.sublist-column');
+        if (cols.length === 0) return;
 
-      cols.each(function () {
-        var h = $(this).height();
-        if ($(this).find('[data-sub-item]').length === 0) {
-          // No items in the column
-          h = 0;
+        cols.each(function () {
+          var h = $(this).height();
+          if ($(this).find('[data-sub-item]').length === 0) {
+            // No items in the column
+            h = 0;
+          }
+          heights.push([$(this), h]);
+        });
+
+        heights.sort(function (a, b) {
+          return b[1] - a[1]
+        });
+
+        var prev = null;
+        for (var key in heights) {
+          if (!heights.hasOwnProperty(key)) continue;
+
+          // Use the jQuery element directly instead of looking up by ID
+          // This prevents selecting wrong elements when duplicate IDs exist
+          var $col = heights[key][0];
+          if (prev) {
+            prev.after($col);
+          }
+          prev = $col;
         }
-        heights.push([$(this).prop('id'), h]);
-      });
-
-      heights.sort(function (a, b) {
-        return b[1] - a[1]
-      });
-
-      var prev = null;
-      for (var key in heights) {
-        if (!heights.hasOwnProperty(key)) continue;
-
-        var id = heights[key][0];
-        var $col = $(`#${id}`);
-        if (prev) {
-          prev.after($col);
-        }
-        prev = $col;
-      }
-    }, 200)
+      }, 200)
+    });
 
   },
 

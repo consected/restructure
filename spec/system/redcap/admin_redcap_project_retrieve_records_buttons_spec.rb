@@ -7,6 +7,10 @@ describe 'admin REDCap project retrieve records buttons', js: true, driver: $bro
   include AdminActionsSetup
   include Redcap::RedcapSupport
 
+  before :all do
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
+  end
+
   before(:example) do
     SetupHelper.feature_setup
     change_setting('TwoFactorAuthDisabledForUser', true)
