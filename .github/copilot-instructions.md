@@ -24,8 +24,8 @@
 
 ### Testing Conventions
 - When fixing implementation bugs, **always write new Rspec tests** to demonstrate the bug, before fixing it.
-- Always add comments to the top of the spec files explaining the purpose of the tests.
 - Check for reusable support methods in `spec/support/` before writing new test code.
+- After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.
 
 ### Rspec System Spec Best Practices
 1. **ALWAYS use helper methods for system specs** - read `spec/support/feature_support.rb` before starting to implement system spec tests
