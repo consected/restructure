@@ -19,8 +19,9 @@
 ### Git and GitHub Usage
 - Use `git` and `gh` CLI tools for version control and repository management; DO NOT use GitKraken or other GUI tools.
 - Create branches for features/bug fixes named with lowercase hyphen-separated words.
-- Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixed #123` or ` - resolved #123` to reference related issues.
-- If requested, the AI Agent should create a pull request with a descriptive title and summary of changes. The branch must be rebased onto `up-develop` before creating the pull request.
+- Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixes #123` or ` - resolves #123` to reference related issues.
+- Rebase your branch onto the latest `up-develop` before creating a pull request `git rebase --onto up-develop develop`.
+- If requested, the AI Agent should create a pull request in repo `consected/restructure` based on the `develop` branch, with a descriptive title and summary of changes 
 - Only a human user will merge branches after code review; AI agents should not merge branches.
 
 ### Testing Conventions
