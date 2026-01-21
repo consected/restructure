@@ -204,7 +204,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
         table_name: 'test_history_alt_widths',
         primary_key_name: :id,
         foreign_key_name: :master_id,
-        category: :history,  # 'history' category triggers horizontal orientation
+        category: :history, # 'history' category triggers horizontal orientation
         options: <<~YAML
           _configurations:
             caption_before:
@@ -275,7 +275,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
         table_name: 'test_columns_alt_widths',
         primary_key_name: :id,
         foreign_key_name: :master_id,
-        category: 'test-columns',  # Custom category
+        category: 'test-columns', # Custom category
         options: <<~YAML
           _configurations:
             caption_before:

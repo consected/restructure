@@ -276,12 +276,6 @@ _fpa.postprocessors = {
         ev.preventDefault();
         var id = $(this).attr('data-target');
 
-        // Reset auto-clicked classes on panel hide to allow re-loading content on next expansion
-        // This fixes issue #653 where external IDs panel shows blank when switching between masters
-        $(id).off('hide.bs.collapse.reset-autoclick').on('hide.bs.collapse.reset-autoclick', function () {
-          $(this).find('.on-open-click a.auto-clicked').removeClass('auto-clicked was-autoclicked');
-        });
-
         $(id).on('shown.bs.collapse', function () {
           $('.selected-result').removeClass('selected-result');
 

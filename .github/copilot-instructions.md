@@ -8,6 +8,7 @@
 3. **Explain why changes to existing methods in models and other core components are necessary**
 4. **Rspec tests must be written to demonstrate new functionality works as intended** not just to make tests pass
 5. **If requirements are not clear, ask for clarification before proceeding**
+6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 
 ### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
@@ -464,7 +465,6 @@ save_html_snapshot('/tmp/debug.html')  # Save HTML (last resort)
 ```bash
 app-scripts/headless_rspec.sh spec/system/your_spec.rb -e 'the example to run'
 ```
-This calls rspec with `FEATURE_DEBUG=true` environment variable.
 
 ### Edit Button AJAX Pattern
 
