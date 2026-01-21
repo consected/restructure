@@ -92,22 +92,13 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     login
   end
 
-  # Helper method to click the external IDs tab directly
-  def click_external_ids_tab
-    finish_form_formatting
-    tab_link = all('a[data-panel-tab="external_ids"]').first
+  # Helper to collapse a master record by clicking its header
+  def collapse_master_record(master_id:)
+    master_container = find("#master-#{master_id}-main-container", visible: :all)
+    return unless master_container[:class].include?('in')
 
-    unless tab_link
-      # Debug: show what tabs are available
-      available_tabs = all('a[data-panel-tab]').map { |a| a['data-panel-tab'] }
-      puts_debug "External IDs tab not found. Available tabs: #{available_tabs.join(', ')}", force: true
-      take_screenshot('no_external_ids_tab', 'External IDs tab not found', force: true)
-      save_html_snapshot('/tmp/no_external_ids_tab.html')
-      raise "External IDs tab not found. Available tabs: #{available_tabs.join(', ')}"
-    end
-
-    tab_link.click
-    finish_page_loading
+    puts_debug "  Collapsing master #{master_id}...", force: true
+    expand_master_record(master_id: master_id) # Clicking again toggles collapse
     sleep 1
   end
 
@@ -124,59 +115,113 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     # We'll track which masters show blank panels
     blank_panels_found = []
 
-    # Test pattern: Expand master 1 → external ids → collapse → expand master 2 → external ids
-    # Then go back to master 1 → external ids and check if content loads
+    # CRITICAL: The bug only manifests when you DON'T start with the first participant.
+    # Start with the LAST participant (master 3), then switch to others.
+    # Test pattern: Expand master 3 → external ids → expand master 1 → external ids
+    # Then go back to master 3 → external ids and check if content loads
 
-    # Step 1: Expand first master and its external IDs tab
+    # Assign masters - we'll start with the last one
     master1 = @masters[0]
-    puts_debug "Step 1: Expanding master #{master1.id}", force: true
+    master2 = @masters[1]
+    master3 = @masters[2]
+
+    # Step 1: Expand the LAST master first (NOT the first!) and its external IDs tab
+    puts_debug "Step 1: Expanding master #{master3.id} (the LAST one - critical for bug reproduction)", force: true
+    expand_master_record(master_id: master3.id)
+    expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
+    finish_form_formatting
+
+    puts_debug 'Step 1: Clicking external ids tab on master 3', force: true
+    expand_master_record_tab('external ids')
+    finish_page_loading
+    sleep 1
+
+    # Capture browser console logs for debugging
+    browser_logs = page.driver.browser.logs.get(:browser)
+    browser_logs.each do |log|
+      puts_debug "  [Browser Console] #{log.level}: #{log.message}", force: true if log.level == 'SEVERE' || log.message.include?('on_open_click') || log.message.include?('ajax')
+    end
+
+    # Verify master 3 external IDs are loaded
+    ext_panel_3 = find("#external-ids-#{master3.id}", visible: :all)
+    within(ext_panel_3) do
+      # Wait longer to rule out timing issues
+      sleep 5
+      bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 10).first
+      if bhs_block.nil? || bhs_block.text.strip.empty?
+        puts_debug '  Master 3 external IDs panel is BLANK (first load) - even after 5 second wait!', force: true
+        take_screenshot('bug_857_first_load_blank', 'Master 3 external IDs blank on first load', force: true)
+        save_html_snapshot('/tmp/bug_857_first_load_blank.html')
+        blank_panels_found << { master_id: master3.id, step: 'first_load' }
+      else
+        puts_debug '  ✓ Master 3 external IDs content loaded', force: true
+      end
+    end
+
+    # Step 2: Now expand master 1 (the first one in the list)
+    puts_debug "Step 2: Expanding master #{master1.id} (first in list)", force: true
     expand_master_record(master_id: master1.id)
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    puts_debug 'Step 1: Clicking external ids tab', force: true
-    click_external_ids_tab
+    puts_debug 'Step 2: Clicking external ids tab on master 1', force: true
+    expand_master_record_tab('external ids')
     finish_page_loading
     sleep 1
 
     # Verify master 1 external IDs are loaded
     ext_panel_1 = find("#external-ids-#{master1.id}", visible: :all)
     within(ext_panel_1) do
-      # Wait for AJAX content
       sleep 2
       bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 5).first
       if bhs_block.nil? || bhs_block.text.strip.empty?
-        puts_debug "  Master 1 external IDs panel is BLANK (first load)", force: true
-        blank_panels_found << { master_id: master1.id, step: 'first_load' }
+        puts_debug '  Master 1 external IDs panel is BLANK', force: true
+        blank_panels_found << { master_id: master1.id, step: 'master1_first_load' }
       else
         puts_debug '  ✓ Master 1 external IDs content loaded', force: true
       end
     end
 
-    # Step 2: Expand second master (this should collapse first master)
-    master2 = @masters[1]
-    puts_debug "Step 2: Expanding master #{master2.id} (should collapse master 1)", force: true
+    # Step 3: Go back to master 3 - THIS IS WHERE THE BUG MANIFESTS
+    puts_debug 'Step 3: Going back to master 3 (the critical test)', force: true
+    expand_master_record(master_id: master3.id)
+    expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
+    finish_form_formatting
 
-    # If master 1 doesn't auto-collapse, manually collapse it by clicking its header
-    master1_container = find("#master-#{master1.id}-main-container", visible: :all)
-    if master1_container[:class].include?('in')
-      puts_debug '  Manually collapsing master 1...', force: true
-      master1_header = find("a.master-expander[data-target='#master-#{master1.id}-main-container']")
-      scroll_into_view(master1_header)
-      master1_header.click
-      sleep 1
+    puts_debug 'Step 3: Clicking external ids tab on master 3 again', force: true
+    expand_master_record_tab('external ids')
+    finish_page_loading
+    sleep 2 # Give more time for AJAX
+
+    # THIS IS THE CRITICAL CHECK - the panel should have content
+    ext_panel_3_revisit = find("#external-ids-#{master3.id}", visible: :all)
+
+    within(ext_panel_3_revisit) do
+      sleep 2
+      bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 5).first
+      panel_text = ext_panel_3_revisit.text.strip
+
+      if bhs_block.nil? || panel_text.empty?
+        puts_debug '  !!! BUG REPRODUCED: Master 3 external IDs panel is BLANK after returning!', force: true
+        puts_debug "  Panel text: '#{panel_text.truncate(100)}'", force: true
+        take_screenshot('bug_857_reproduced', 'External IDs panel blank after switching back', force: true)
+        save_html_snapshot('/tmp/bug_857_reproduced.html')
+        blank_panels_found << { master_id: master3.id, step: 'return_visit' }
+      else
+        puts_debug '  ✓ Master 3 external IDs content loaded on return', force: true
+      end
     end
 
+    # Step 4: Test with master 2 as well
+    puts_debug 'Step 4: Testing second master', force: true
     expand_master_record(master_id: master2.id)
     expect(page).to have_css("#master-#{master2.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    puts_debug 'Step 2: Clicking external ids tab on master 2', force: true
-    click_external_ids_tab
+    expand_master_record_tab('external ids')
     finish_page_loading
     sleep 1
 
-    # Verify master 2 external IDs are loaded
     ext_panel_2 = find("#external-ids-#{master2.id}", visible: :all)
     within(ext_panel_2) do
       sleep 2
@@ -189,20 +234,17 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
       end
     end
 
-    # Step 3: Go back to master 1 - THIS IS WHERE THE BUG MANIFESTS
-    puts_debug 'Step 3: Going back to master 1 (the critical test)', force: true
+    # Final check: Go back to master 1
+    puts_debug 'Step 5: Going back to master 1', force: true
     expand_master_record(master_id: master1.id)
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    puts_debug 'Step 3: Clicking external ids tab on master 1 again', force: true
-    click_external_ids_tab
+    expand_master_record_tab('external ids')
     finish_page_loading
-    sleep 2 # Give more time for AJAX
+    sleep 2
 
-    # THIS IS THE CRITICAL CHECK - the panel should have content
     ext_panel_1_revisit = find("#external-ids-#{master1.id}", visible: :all)
-
     within(ext_panel_1_revisit) do
       sleep 2
       bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 5).first
@@ -210,59 +252,9 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
 
       if bhs_block.nil? || panel_text.empty?
         puts_debug '  !!! BUG REPRODUCED: Master 1 external IDs panel is BLANK after returning!', force: true
-        puts_debug "  Panel text: '#{panel_text.truncate(100)}'", force: true
-        take_screenshot('bug_857_reproduced', 'External IDs panel blank after switching back', force: true)
-        save_html_snapshot('/tmp/bug_857_reproduced.html')
         blank_panels_found << { master_id: master1.id, step: 'return_visit' }
       else
         puts_debug '  ✓ Master 1 external IDs content loaded on return', force: true
-      end
-    end
-
-    # Step 4: Do one more cycle to confirm the pattern
-    puts_debug 'Step 4: Testing third master', force: true
-    master3 = @masters[2]
-    expand_master_record(master_id: master3.id)
-    expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
-    finish_form_formatting
-
-    click_external_ids_tab
-    finish_page_loading
-    sleep 1
-
-    ext_panel_3 = find("#external-ids-#{master3.id}", visible: :all)
-    within(ext_panel_3) do
-      sleep 2
-      bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 5).first
-      if bhs_block.nil? || bhs_block.text.strip.empty?
-        puts_debug '  Master 3 external IDs panel is BLANK', force: true
-        blank_panels_found << { master_id: master3.id, step: 'master3_first_load' }
-      else
-        puts_debug '  ✓ Master 3 external IDs content loaded', force: true
-      end
-    end
-
-    # Final check: Go back to master 2
-    puts_debug 'Step 5: Going back to master 2', force: true
-    expand_master_record(master_id: master2.id)
-    expect(page).to have_css("#master-#{master2.id}-main-container.in", wait: 10)
-    finish_form_formatting
-
-    click_external_ids_tab
-    finish_page_loading
-    sleep 2
-
-    ext_panel_2_revisit = find("#external-ids-#{master2.id}", visible: :all)
-    within(ext_panel_2_revisit) do
-      sleep 2
-      bhs_block = all("[id^='bhs-assignments-#{master2.id}']", wait: 5).first
-      panel_text = ext_panel_2_revisit.text.strip
-
-      if bhs_block.nil? || panel_text.empty?
-        puts_debug '  !!! BUG REPRODUCED: Master 2 external IDs panel is BLANK after returning!', force: true
-        blank_panels_found << { master_id: master2.id, step: 'return_visit' }
-      else
-        puts_debug '  ✓ Master 2 external IDs content loaded on return', force: true
       end
     end
 
@@ -318,7 +310,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
 
     # Now click the external IDs tab to expand the panel
     puts_debug 'Clicking external ids tab...', force: true
-    click_external_ids_tab
+    expand_master_record_tab('external ids')
     finish_page_loading
     sleep 2
 
