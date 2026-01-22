@@ -42,9 +42,7 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
 
     # Wait for master content to be fully rendered
     unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
+      expand_master_record(master_id: @master.id)
       finish_page_loading
       sleep 3
     end
