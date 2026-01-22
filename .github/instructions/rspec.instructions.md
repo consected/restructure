@@ -49,7 +49,7 @@ grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
 app-scripts/rails_runner_test.sh "puts User.count"
 app-scripts/headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
 app-scripts/not_headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
-app-scripts/clean-test-db.sh 
+app-scripts/clean-test-db.sh # Clean the test database (creates a fresh one)
 app-scripts/clean-test-assets-and-cache.sh # Clean test assets and cache
 ```
 

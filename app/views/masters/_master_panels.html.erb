@@ -14,10 +14,11 @@
   sort_sublists = (details_view_options&.sort_sublists || {}).with_indifferent_access
 
   # Helper to format active values for Handlebars - converts array to comma-separated string
-  # or returns 'all' for all-active mode
+  # or returns 'all' for all-active mode, or 'none' for no buttons active
   def format_active_values(values)
     return '' if values.nil?
     return 'all' if values == 'all'
+    return 'none' if values.is_a?(Array) && values.empty?
     return values.map(&:to_s).join(',') if values.is_a?(Array)
     values.to_s
   end
