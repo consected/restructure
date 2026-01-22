@@ -37,6 +37,13 @@
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
 
+  <%= render partial: 'admin/common_templates/def_uac_summary', 
+             locals: { 
+               object_instance:, 
+               current_app_type_id: current_admin.matching_user&.app_type_id,
+               current_user: current_admin.matching_user
+             } %>
+
   <% unless object_instance.table_or_view_ready?%>
   <div class="help-block">
   <p>Typically the database table or view associated with an activity log is created when the definition is first created (or prior to this if handled manually.)</p>

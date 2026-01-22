@@ -75,25 +75,6 @@ class ExternalIdentifier < ActiveRecord::Base
     model_association_name
   end
 
-  #
-  # Get IDs of external identifiers that are in a specific app type
-  # @param [Admin::AppType|Integer] app_type - the app type or its ID
-  # @return [Array<Integer>] IDs of external identifiers associated with the app type
-  def self.ids_in_app_type(app_type)
-    app_type = Admin::AppType.find(app_type) if app_type.is_a?(Integer)
-    return [] unless app_type
-
-    app_type.associated_external_identifiers.pluck(:id)
-  end
-
-  #
-  # Check if this external identifier is in a specific app type
-  # @param [Admin::AppType|Integer] app_type - the app type or its ID
-  # @return [Boolean]
-  def in_app_type?(app_type)
-    self.class.ids_in_app_type(app_type).include?(id)
-  end
-
   def self.routes_load
     mn = nil
 
