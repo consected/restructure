@@ -201,6 +201,25 @@ class DynamicModel < ActiveRecord::Base
   end
 
   #
+  # Get IDs of dynamic models that are in a specific app type
+  # @param [Admin::AppType|Integer] app_type - the app type or its ID
+  # @return [Array<Integer>] IDs of dynamic models associated with the app type
+  def self.ids_in_app_type(app_type)
+    app_type = Admin::AppType.find(app_type) if app_type.is_a?(Integer)
+    return [] unless app_type
+
+    app_type.associated_dynamic_models.pluck(:id)
+  end
+
+  #
+  # Check if this dynamic model is in a specific app type
+  # @param [Admin::AppType|Integer] app_type - the app type or its ID
+  # @return [Boolean]
+  def in_app_type?(app_type)
+    self.class.ids_in_app_type(app_type).include?(id)
+  end
+
+  #
   # Generate the protocol / sub process  / protocol event entries that will be
   # used by implementations when updating and creating records, and subsequently tracking
   # those changes in the tracker history.
