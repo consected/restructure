@@ -241,7 +241,7 @@ module AdminControllerHandler
   # so the param readonly=true allows the requester to control this.
   # @return [Boolean]
   def no_edit
-    false || params[:readonly] == 'true'
+    params[:readonly] == 'true'
   end
 
   def no_create
@@ -399,13 +399,13 @@ module AdminControllerHandler
     return pm unless app_type
 
     in_app_ids = primary_model.ids_in_app_type(app_type)
-    pm = if @in_current_app_type_filter == 'yes'
-           pm.where(id: in_app_ids)
-         elsif @in_current_app_type_filter == 'no'
-           pm.where.not(id: in_app_ids)
-         else
-           pm
-         end
+    if @in_current_app_type_filter == 'yes'
+      pm.where(id: in_app_ids)
+    elsif @in_current_app_type_filter == 'no'
+      pm.where.not(id: in_app_ids)
+    else
+      pm
+    end
   end
 
   #
@@ -428,7 +428,7 @@ module AdminControllerHandler
     vals = YAML.safe_load(res)
     vals.transform_values do |v|
       res = if v.is_a?(Hash)
-              v = String.yaml_dump(v)
+              String.yaml_dump(v)
             else
               v
             end
