@@ -15,6 +15,7 @@ System specs are located in `spec/system/`. Follow Best Practices and Developmen
 3. **Wait for AJAX** using `finish_page_loading` and `finish_form_formatting` after interactions
 4. **Expand UI sections before accessing fields** - forms load via AJAX
 5. **Never write raw Capybara selectors in system specs**
+6. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
 
 ## Rspec System Specs Helper Methods Quick Reference
 
@@ -27,7 +28,8 @@ System specs are located in `spec/system/`. Follow Best Practices and Developmen
 | Checkbox | `set_checkbox_field(name, checked)` | `set_checkbox_field('active', true)` |
 | Big select | `select_from_big_select_field(name, value)` | `select_from_big_select_field('grant', 'Title')` |
 | Expand section | `expand_model_reference(name)` | `form = expand_model_reference('Grant Aims')` |
-| Expand master | `expand_master_record(text: title)` | `expand_master_record(text: 'Proposal')` |
+| Expand master by id | `expand_master_record(master_id: id)` | `expand_master_record(master_id: 123)` |
+| Expand master by text | `expand_master_record(text: title)` | `expand_master_record(text: 'Proposal')` |
 | Edit button | `click_edit_button_within_target(elem)` | `form = click_edit_button_within_target(form)` |
 | Wait for AJAX | `finish_page_loading` | `finish_page_loading` |
 | Debug current state | `debug_process_status` | `debug_process_status` |
