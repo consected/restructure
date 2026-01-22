@@ -46,12 +46,48 @@ class Admin::ExternalIdentifiersController < AdminController
   def filters
     {
       category: ExternalIdentifier.pluck(:category).uniq.compact,
-      name: ExternalIdentifier.pluck(:name).uniq.compact
+      name: ExternalIdentifier.pluck(:name).uniq.compact,
+      in_current_app_type: %w[yes no]
     }
   end
 
   def filters_on
-    %i[category name]
+    %i[category name in_current_app_type]
+  end
+
+  #
+  # Override filter_params to extract the custom in_current_app_type filter
+  # before the parent class processes it as a database column
+  # @return [Hash]
+  def filter_params
+    result = super
+    @in_current_app_type_filter = result&.delete(:in_current_app_type)
+    result
+  end
+
+  #
+  # Override to handle the special "in_current_app_type" filter
+  # This filter shows/hides items based on whether they're in the admin's current app type
+  # @return [ActiveRecord::Relation]
+  def filtered_primary_model(pm = nil)
+    pm = super
+
+    # Apply the special "in_current_app_type" filter after standard filtering
+    if @in_current_app_type_filter.present?
+      app_type = current_admin.matching_user&.app_type
+      if app_type
+        in_app_ids = ExternalIdentifier.ids_in_app_type(app_type)
+        pm = if @in_current_app_type_filter == 'yes'
+               pm.where(id: in_app_ids)
+             elsif @in_current_app_type_filter == 'no'
+               pm.where.not(id: in_app_ids)
+             else
+               pm
+             end
+      end
+    end
+
+    pm
   end
 
   def admin_labels
