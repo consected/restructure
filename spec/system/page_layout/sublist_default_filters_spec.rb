@@ -125,7 +125,7 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
       )
     end
 
-    ac = add_app_config(@app_type, 'open panels', 'details', user: @user)
+    add_app_config(@app_type, 'open panels', 'details', user: @user)
   end
 
   after(:all) do
@@ -269,7 +269,7 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
       # No buttons should be active when empty array is configured
       all('button.filter-switch').each do |button|
         expect(button[:class]).not_to include('active'),
-                                       'Expected no filter buttons to be active when active_sublist_values is empty array'
+                                      'Expected no filter buttons to be active when active_sublist_values is empty array'
       end
     end
   end
@@ -306,11 +306,11 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
       buttons = all('button.filter-switch')
       # First button should be active (default behavior when no config)
       expect(buttons.first[:class]).to include('active'),
-                                        'Expected first filter button to be active as fallback when key missing'
+                                       'Expected first filter button to be active as fallback when key missing'
       # Other buttons should not be active
       buttons[1..].each do |button|
         expect(button[:class]).not_to include('active'),
-                                       'Expected non-first buttons to be inactive as fallback when key missing'
+                                      'Expected non-first buttons to be inactive as fallback when key missing'
       end
     end
   end
@@ -346,7 +346,7 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
     within '[data-sub-list="player_contacts"] .sublist-order-selector' do
       order_button = find('button.order-switch')
       expect(order_button['data-order-val']).to eq('desc'),
-                                                 'Expected order button to have data-order-val="desc" based on sort_sublists config'
+                                                'Expected order button to have data-order-val="desc" based on sort_sublists config'
     end
   end
 end
