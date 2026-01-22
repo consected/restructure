@@ -33,6 +33,43 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
   include MasterDataSupport
   include FeatureSupport
 
+  # Helper to navigate to master record and wait for player_contacts to render
+  def navigate_to_master_and_wait_for_contacts
+    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
+    finish_page_loading
+    expect(page).to have_css("#master-#{@master.id}", wait: 10)
+    dismiss_modal
+
+    # Wait for master content to be fully rendered
+    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
+      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
+      scroll_into_view(master_link)
+      master_link.click
+      finish_page_loading
+      sleep 3
+    end
+
+    # Debug if player_contacts still not found
+    return if page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 10)
+
+    puts '=== Checking for JS errors ==='
+    begin
+      logs = page.driver.browser.logs.get(:browser)
+      logs.each { |log| puts "Browser log: #{log.level} - #{log.message}" }
+    rescue StandardError => e
+      puts "Could not get browser logs: #{e.message}"
+    end
+
+    debug_process_status
+    save_html_snapshot('/tmp/sublist_expanded.html')
+    raise 'Could not find player_contacts. Check /tmp/sublist_expanded.html'
+  end
+
+  # Helper to update page layout configuration
+  def update_layout_config(options_yaml)
+    @panel_layout.update!(current_admin: @admin, options: options_yaml)
+  end
+
   before(:all) do
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', true)
@@ -146,90 +183,37 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
   end
 
   it 'activates only filter buttons matching the configured array values - fixes #584' do
-    # Navigate to the master record
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-    finish_page_loading
-
-    # Wait for search results to load (the master-result heading)
-    expect(page).to have_css("#master-#{@master.id}", wait: 10)
-    dismiss_modal
-
-    # Wait for master content to be fully rendered - look for player_contacts with an ID
-    # The ID indicates Handlebars has rendered the template with actual data
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      # The Handlebars templates haven't been rendered yet
-      # Try clicking the master expander to trigger content load
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
-      finish_page_loading
-      sleep 3 # Allow time for AJAX and Handlebars rendering
-    end
-
-    # Debug if player_contacts still not found
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 10)
-      # Check for JavaScript errors
-      puts '=== Checking for JS errors ==='
-      begin
-        logs = page.driver.browser.logs.get(:browser)
-        logs.each { |log| puts "Browser log: #{log.level} - #{log.message}" }
-      rescue StandardError => e
-        puts "Could not get browser logs: #{e.message}"
-      end
-
-      debug_process_status
-      save_html_snapshot('/tmp/sublist_expanded.html')
-      raise 'Could not find player_contacts. Check /tmp/sublist_expanded.html'
-    end
-
+    navigate_to_master_and_wait_for_contacts
     expect(page).not_to have_css('.alert-danger')
 
-    # Find the player_contacts sublist filter buttons
     within '[data-sub-list="player_contacts"] .sublist-filter-selectors' do
-      # Buttons for rank 10 and 5 should be active (in our configuration)
       filter_10 = find('button.filter-switch[data-filter-val="10"]')
       filter_5 = find('button.filter-switch[data-filter-val="5"]')
       filter_other = find('button.filter-switch[data-filter-val="-1"]')
 
       expect(filter_10[:class]).to include('active'),
-                                   'Expected filter button for rank 10 to be active based on active_sublist_values config'
+                                   'Expected filter button for rank 10 to be active'
       expect(filter_5[:class]).to include('active'),
-                                  'Expected filter button for rank 5 to be active based on active_sublist_values config'
+                                  'Expected filter button for rank 5 to be active'
       expect(filter_other[:class]).not_to include('active'),
-                                          'Expected filter button for rank -1 to NOT be active (not in active_sublist_values config)'
+                                          'Expected filter button for rank -1 to NOT be active'
     end
   end
 
   it 'activates all filter buttons when configured with "all" value' do
-    # Update config to use 'all'
-    @panel_layout.update!(
-      current_admin: @admin,
-      options: <<~YAML
-        contains:
-          categories:
-            - details
-        view_options:
-          initial_show: true
-          active_sublist_values:
-            player_contacts: all
-      YAML
-    )
+    update_layout_config(<<~YAML)
+      contains:
+        categories:
+          - details
+      view_options:
+        initial_show: true
+        active_sublist_values:
+          player_contacts: all
+    YAML
 
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-    finish_page_loading
-    expect(page).to have_css("#master-#{@master.id}", wait: 10)
-    dismiss_modal
-
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
-      finish_page_loading
-      sleep 3
-    end
+    navigate_to_master_and_wait_for_contacts
 
     within '[data-sub-list="player_contacts"] .sublist-filter-selectors' do
-      # All buttons should be active when 'all' is configured
       all('button.filter-switch').each do |button|
         expect(button[:class]).to include('active'),
                                   "Expected all filter buttons to be active when active_sublist_values is 'all'"
@@ -238,35 +222,19 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
   end
 
   it 'activates no filter buttons when configured with empty array' do
-    # Update config to use empty array
-    @panel_layout.update!(
-      current_admin: @admin,
-      options: <<~YAML
-        contains:
-          categories:
-            - details
-        view_options:
-          initial_show: true
-          active_sublist_values:
-            player_contacts: []
-      YAML
-    )
+    update_layout_config(<<~YAML)
+      contains:
+        categories:
+          - details
+      view_options:
+        initial_show: true
+        active_sublist_values:
+          player_contacts: []
+    YAML
 
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-    finish_page_loading
-    expect(page).to have_css("#master-#{@master.id}", wait: 10)
-    dismiss_modal
-
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
-      finish_page_loading
-      sleep 3
-    end
+    navigate_to_master_and_wait_for_contacts
 
     within '[data-sub-list="player_contacts"] .sublist-filter-selectors' do
-      # No buttons should be active when empty array is configured
       all('button.filter-switch').each do |button|
         expect(button[:class]).not_to include('active'),
                                       'Expected no filter buttons to be active when active_sublist_values is empty array'
@@ -275,78 +243,83 @@ describe 'sublist default filter configuration', js: true, driver: $browser_driv
   end
 
   it 'falls back to first button active when key is missing from config' do
-    # Update config without player_contacts key
-    @panel_layout.update!(
-      current_admin: @admin,
-      options: <<~YAML
-        contains:
-          categories:
-            - details
-        view_options:
-          initial_show: true
-          active_sublist_values:
-            addresses: all
-      YAML
-    )
+    update_layout_config(<<~YAML)
+      contains:
+        categories:
+          - details
+      view_options:
+        initial_show: true
+        active_sublist_values:
+          addresses: all
+    YAML
 
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-    finish_page_loading
-    expect(page).to have_css("#master-#{@master.id}", wait: 10)
-    dismiss_modal
-
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
-      finish_page_loading
-      sleep 3
-    end
+    navigate_to_master_and_wait_for_contacts
 
     within '[data-sub-list="player_contacts"] .sublist-filter-selectors' do
       buttons = all('button.filter-switch')
-      # First button should be active (default behavior when no config)
       expect(buttons.first[:class]).to include('active'),
-                                       'Expected first filter button to be active as fallback when key missing'
-      # Other buttons should not be active
+                                       'Expected first filter button to be active as fallback'
       buttons[1..].each do |button|
         expect(button[:class]).not_to include('active'),
-                                      'Expected non-first buttons to be inactive as fallback when key missing'
+                                      'Expected non-first buttons to be inactive as fallback'
       end
     end
   end
 
   it 'sets sort order based on sort_sublists configuration' do
-    # Update config to include sort order
-    @panel_layout.update!(
-      current_admin: @admin,
-      options: <<~YAML
-        contains:
-          categories:
-            - details
-        view_options:
-          initial_show: true
-          sort_sublists:
-            player_contacts: desc
-      YAML
-    )
+    update_layout_config(<<~YAML)
+      contains:
+        categories:
+          - details
+      view_options:
+        initial_show: true
+        sort_sublists:
+          player_contacts: desc
+    YAML
 
-    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-    finish_page_loading
-    expect(page).to have_css("#master-#{@master.id}", wait: 10)
-    dismiss_modal
-
-    unless page.has_css?("[id^='player_contacts-#{@master.id}']", wait: 15)
-      master_link = find("#master-#{@master.id} a.master-expander", wait: 5)
-      scroll_into_view(master_link)
-      master_link.click
-      finish_page_loading
-      sleep 3
-    end
+    navigate_to_master_and_wait_for_contacts
 
     within '[data-sub-list="player_contacts"] .sublist-order-selector' do
       order_button = find('button.order-switch')
       expect(order_button['data-order-val']).to eq('desc'),
-                                                'Expected order button to have data-order-val="desc" based on sort_sublists config'
+                                                'Expected order button to have data-order-val="desc"'
+    end
+  end
+
+  it 'applies both active_sublist_values and sort_sublists together' do
+    update_layout_config(<<~YAML)
+      contains:
+        categories:
+          - details
+      view_options:
+        initial_show: true
+        active_sublist_values:
+          player_contacts: [5]
+        sort_sublists:
+          player_contacts: desc
+    YAML
+
+    navigate_to_master_and_wait_for_contacts
+
+    # Verify active filter buttons
+    within '[data-sub-list="player_contacts"] .sublist-filter-selectors' do
+      filter_5 = find('button.filter-switch[data-filter-val="5"]')
+      filter_10 = find('button.filter-switch[data-filter-val="10"]')
+      filter_other = find('button.filter-switch[data-filter-val="-1"]')
+
+      expect(filter_5[:class]).to include('active'),
+                                  'Expected only rank 5 button to be active'
+      expect(filter_10[:class]).not_to include('active'),
+                                       'Expected rank 10 button to NOT be active'
+      expect(filter_other[:class]).not_to include('active'),
+                                          'Expected rank -1 button to NOT be active'
+    end
+
+    # Verify sort order
+    within '[data-sub-list="player_contacts"] .sublist-order-selector' do
+      order_button = find('button.order-switch')
+      expect(order_button['data-order-val']).to eq('desc'),
+                                                'Expected order button to have data-order-val="desc"'
     end
   end
 end

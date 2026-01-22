@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Support the display of page layouts and panels
 module PageLayoutsHelper
   #
@@ -36,5 +38,19 @@ module PageLayoutsHelper
        .reduce([], :concat)
        .uniq
        .compact
+  end
+
+  #
+  # Format active sublist values for Handlebars template rendering.
+  # Converts arrays to comma-separated strings for use with the 'in' operator.
+  # @param [Array|String|nil] values - array of values, 'all' string, or nil
+  # @return [String] formatted value: 'all', 'none', comma-separated string, or empty string
+  def format_active_values(values)
+    return '' if values.nil?
+    return 'all' if values == 'all'
+    return 'none' if values.is_a?(Array) && values.empty?
+    return values.map(&:to_s).join(',') if values.is_a?(Array)
+
+    values.to_s
   end
 end
