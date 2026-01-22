@@ -71,23 +71,11 @@ class Admin::ExternalIdentifiersController < AdminController
   # @return [ActiveRecord::Relation]
   def filtered_primary_model(pm = nil)
     pm = super
+    filtered_in_current_app_type(pm)
+  end
 
-    # Apply the special "in_current_app_type" filter after standard filtering
-    if @in_current_app_type_filter.present?
-      app_type = current_admin.matching_user&.app_type
-      if app_type
-        in_app_ids = ExternalIdentifier.ids_in_app_type(app_type)
-        pm = if @in_current_app_type_filter == 'yes'
-               pm.where(id: in_app_ids)
-             elsif @in_current_app_type_filter == 'no'
-               pm.where.not(id: in_app_ids)
-             else
-               pm
-             end
-      end
-    end
-
-    pm
+  def extra_index_columns
+    { in_current_app_type_result_checkbox: 'In current app type' }
   end
 
   def admin_labels
