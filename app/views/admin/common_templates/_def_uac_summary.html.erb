@@ -15,9 +15,7 @@
   resource_name = object_instance.resource_name&.pluralize
   return unless resource_name.present?
 
-  app_template_role = Settings::AppTemplateRole
-  uacs = Admin::UserAccessControl.active_for(resource_name:).where.not(role_name: app_template_role )
-  
+  uacs = Admin::UserAccessControl.active_for(resource_name:).not_template_role
   no_non_template_uacs = uacs.empty? 
   
   # Check if current user has access to this resource
