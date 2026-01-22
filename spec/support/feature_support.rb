@@ -531,7 +531,7 @@ module FeatureSupport
   end
 
   #
-  # Expand a master record, optionally with matching text
+  # Expand a master record, by id or matching link text
   # @param [String, nil] text The text to match for the master-expander link
   def expand_master_record(text: nil, master_id: nil)
     finish_form_formatting

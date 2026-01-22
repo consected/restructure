@@ -51,12 +51,20 @@ unless defined? orientation
   orientation = nil
 end
 
+# Get active_sublist_values and sort_sublists from panel view_options
+active_sublist_values = (panel&.view_options&.active_sublist_values || {}).with_indifferent_access
+sort_sublists = (panel&.view_options&.sort_sublists || {}).with_indifferent_access
+
 category_models.each do |m|
 
   if viewable  [m.resource_name.to_sym]
     po = panel&.view_options&.orientation
     awc = m.default_options&.view_options&.dig(:alt_width_classes)
     hide_sl = panel&.view_options&.hide_sublist_controls
+    
+    # Get resource-specific active values and sort order
+    resource_active_values = format_active_values(active_sublist_values[m.full_item_types_name])
+    resource_sort_order = sort_sublists[m.full_item_types_name] || 'asc'
 
     orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
 
@@ -82,7 +90,7 @@ category_models.each do |m|
 %>  
     <div class="masters--dynamic-model-blocks-outer-alt-orientation <%= width_classes %> category-<%=category%> orientation-<%=orientation%> sublist-column details-item-type-<%=m.full_item_types_name.id_hyphenate%>">
       <% unless hide_sl %>
-      {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
+      {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='<%= resource_sort_order %>' active_values='<%= resource_active_values %>' }}
       <% end %>
       <div class="masters--dynamic-model-blocks dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     </div>

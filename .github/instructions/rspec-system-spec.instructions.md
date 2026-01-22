@@ -4,6 +4,11 @@ applyTo: 'spec/system/**'
 
 # Rspec System Specs project coding standards
 
+
+## System Specs
+
+System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs. We write system specs to simulate real user/admin interactions through the UI as much as possible. Interacting with underlying Javascript is discouraged; use Jasmine tests for Javascript-specific behavior. 
+
 ## Rspec System Spec Best Practices
 1. **ALWAYS use helper methods for system specs** - read `spec/support/feature_support.rb` before starting to implement system spec tests
 2. **Run `debug_process_status`** when fields/sections can't be found
@@ -72,10 +77,6 @@ page.execute_script('window.browserLogs = []; console.log = function(msg) { wind
 logs = page.evaluate_script('window.browserLogs')
 puts "Browser console logs:\n#{logs.join("\n")}"
 ```
-
-## System Specs
-
-System specs are located in `spec/system/`. Follow Best Practices and Development Patterns below when implementing system specs. We write system specs to simulate real user/admin interactions through the UI as much as possible. Interacting with underlying Javascript is discouraged; use Jasmine tests for Javascript-specific behavior. 
 
 ### Things to Remember
 - Standard string / varchar fields downcase data on storage and titleize on display. Keep this in mind when writing system specs that interact with user data fields.
