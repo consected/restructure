@@ -18,7 +18,6 @@
  *= require codemirror/addon/scroll/simplescrollbars
  *= require admin/admin
  *= require admin/app_import
- *= require admin/common_dynamic_def_panels
  *= require admin/diffy
  *= require admin/activity_list
  *= require admin/admin_options

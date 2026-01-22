@@ -18,7 +18,8 @@
   border-top: 1px solid silver;
 }
 
-ul.activity-list {
+ul.activity-list,
+ul.admin-tag-list {
   padding-left: 0;
   text-align: left;
 
@@ -54,12 +55,6 @@ ul.activity-list {
     }
   }
 
-  ul.common-def-panel--uacs {
-    padding-left: revert;
-    &:before {
-      content: 'access';
-    }
-  }
 }
 
 ul.activity-list {
@@ -108,6 +103,17 @@ ul.activity-list {
       content: 'references';
     }
   }
+
+  ul.activity-list-activity-uacs {
+    &:before {
+      content: 'access';
+    }
+
+    span.activity-log-access-type {
+      font-style: italic;
+      padding: 0 10px 0 20px;
+    }
+  }
 }
 
 
@@ -117,6 +123,10 @@ span.activity-list-name {
   &:hover {
     cursor: pointer;
   }
+}
+
+.admin-tag-list.selectable li:hover {
+  cursor: pointer;
 }
 
 .al-details-section {

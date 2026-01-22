@@ -14,8 +14,7 @@ module AdminControllerHandler
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
                   :help_section, :help_subsection, :title, :sub_title, :no_create, :show_head_info, :view_folder,
-                  :no_options_field, :admin_labels, :filters_prevent_disabled, :before_send_processor, :extra_index_columns,
-                  :in_current_app_type_result_checkbox
+                  :no_options_field, :admin_labels, :filters_prevent_disabled, :before_send_processor
   end
 
   def index
@@ -241,7 +240,7 @@ module AdminControllerHandler
   # so the param readonly=true allows the requester to control this.
   # @return [Boolean]
   def no_edit
-    params[:readonly] == 'true'
+    false || params[:readonly] == 'true'
   end
 
   def no_create
@@ -331,15 +330,6 @@ module AdminControllerHandler
   end
 
   #
-  # Hash of extra columns to display in admin index lists.
-  # The keys are method names in the controller, which will be called on each item in the list.
-  # The values are the humanized column names to display in the header.
-  # @return [Hash {Symbol: String} | nil]
-  def extra_index_columns
-    nil
-  end
-
-  #
   # Allow admin tables to be embedded in other pages by passing the param
   # view_as=embedded or view_as=simple-embedded
   # This returns a partial index, and hides the filter buttons
@@ -378,37 +368,6 @@ module AdminControllerHandler
   end
 
   #
-  # Show index column checkbox if the item is in the current admin's app type
-  # @param [ActiveRecord] list_item
-  # @return [String|nil] HTML for the checkbox or nil if not applicable
-  def in_current_app_type_result_checkbox(list_item)
-    @current_app_type ||= current_admin.matching_user&.app_type
-    return unless @current_app_type
-
-    @in_current_app_ids ||= list_item.class.ids_in_app_type(@current_app_type)
-    list_val = @in_current_app_ids.include?(list_item.id)
-    helpers.index_list_item_boolean_field(list_val)
-  end
-
-  #
-  # Apply the special "in_current_app_type" filter after standard filtering
-  def filtered_in_current_app_type(pm)
-    return pm unless @in_current_app_type_filter.present?
-
-    app_type = current_admin.matching_user&.app_type
-    return pm unless app_type
-
-    in_app_ids = primary_model.ids_in_app_type(app_type)
-    if @in_current_app_type_filter == 'yes'
-      pm.where(id: in_app_ids)
-    elsif @in_current_app_type_filter == 'no'
-      pm.where.not(id: in_app_ids)
-    else
-      pm
-    end
-  end
-
-  #
   # Override to specify attributes to initialize a definition with
   # @return [Hash]
   def init_new_with_attrs
@@ -428,7 +387,7 @@ module AdminControllerHandler
     vals = YAML.safe_load(res)
     vals.transform_values do |v|
       res = if v.is_a?(Hash)
-              String.yaml_dump(v)
+              v = String.yaml_dump(v)
             else
               v
             end

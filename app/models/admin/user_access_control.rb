@@ -21,8 +21,6 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   attr_accessor :allow_bad_resource_name
 
-  scope :not_template_role, -> { where(Arel.sql("coalesce(role_name, '') <> '#{Settings::AppTemplateRole}'")) }
-
   #
   # Valid resource types
   # NOTE: external_id_assignments is deprecated and should not be used
