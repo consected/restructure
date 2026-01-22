@@ -50,6 +50,13 @@ For general Rspec standards refer to: [Rspec project coding standards](instructi
 
 For Rspec System Specs Refer to: [Rspec System Specs project coding standards](instructions/rspec-system-spec.instructions.md)
 
+### Command Line Usage
+- Create a directory `./tmp/agent-tmp` in the workspace root
+- Use `./tmp/agent-tmp` for all temporary files and logs
+- DO NOT set environment variables or prefix commands with `VAR=VALUE`
+- DO NOT run commands that redirect output to `/dev/null` or `/tmp/`
+- DO NOT run commands in the background using `&` or `nohup`
+- DO NOT run commands with `timeout` unless absolutely necessary
 
 ## Project-Specific Conventions
 
@@ -160,14 +167,17 @@ Resource names are used extensively in access control definitions and naming of 
 ## Development Setup
 ```bash
 # Run once after reboot to setup filestore simulation
+# The user will be prompted for sudo access, so avoid running unless necessary
 app-scripts/setup-dev-filestore.sh 
 
-# Database setup
+# Create an admin user
 app-scripts/add_admin.sh <email>
-FPHS_2FA_AUTH_DISABLED=true bundle exec rails s
+
+# Run the development server
+bundle exec rails s
 
 # Set up test database
-app-scripts/create-test-db.sh 1
+app-scripts/clean-test-db.sh
 
 # Run parallel test suite to validate configuration
 app-scripts/parallel_test.sh
