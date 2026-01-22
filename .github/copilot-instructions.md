@@ -23,7 +23,7 @@
 - Before starting work, add a tag `start-<feature-name>-<issue-number>` then create a features/bug branch `<feature-name>-<issue-number>`.
 - Use `git` and `gh` CLI tools for version control and repository management; DO NOT use GitKraken or other GUI tools.
 - Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixes #123` or ` - resolves #123` to reference related issues.
-- Rebase your branch onto the latest local `up-develop` branch before creating a pull request `git checkout up-develop && git pull && git rebase --onto up-develop develop`.
+- Rebase your branch onto the latest local `up-develop` branch before creating a pull request `git checkout up-develop && git pull && git rebase --onto up-develop start-<feature-name>-<issue-number>`.
 - If requested, the AI Agent should create a pull request in repo `consected/restructure` based on the `develop` branch, with a descriptive title and summary of changes 
 - Only a human user will merge branches after code review; AI agents should not merge branches.
 
