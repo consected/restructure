@@ -58,12 +58,39 @@ class Admin::ActivityLogsController < AdminController
   def filters
     {
       category: ActivityLog.pluck(:category).uniq.compact,
-      table_name: ActivityLog.active.pluck(:table_name).uniq
+      table_name: ActivityLog.active.pluck(:table_name).uniq,
+      in_current_app_type: %w[yes no]
     }
   end
 
   def filters_on
-    %i[category table_name]
+    %i[category table_name in_current_app_type]
+  end
+
+  #
+  # Override filter_params to extract the custom in_current_app_type filter
+  # before the parent class processes it as a database column
+  # @return [Hash]
+  def filter_params
+    result = super
+    @in_current_app_type_filter = result&.delete(:in_current_app_type)
+    result
+  end
+
+  #
+  # Override to handle the special "in_current_app_type" filter
+  # This filter shows/hides items based on whether they're in the admin's current app type
+  # @return [ActiveRecord::Relation]
+  def filtered_primary_model(pm = nil)
+    pm = super
+
+    filtered_in_current_app_type(pm)
+  end
+
+  #
+  # Show extra index column indicating if the activity log is in the current app type
+  def extra_index_columns
+    { in_current_app_type_result_checkbox: 'In current app type' }
   end
 
   def set_defaults
