@@ -41,6 +41,7 @@ _fpa.postprocessors_reports = {
     var hyph_name = us_name.hyphenate()
     var id = block.attr('data-id')
     var master_id = block.attr('data-master-id')
+    var edit_mode = block.attr('data-edit-mode') === 'true'
     var target_block = "report-result-embedded-block"
     var html = $(`<div id="${target_block}-outer"><div id="${target_block}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyph_name}-edit-form-${master_id}-${id}" data-template="${hyph_name}-result-template" data-item-class="dynamic_model__${us_name}" data-sub-item="dynamic_model__${us_name}" data-sub-id="${id}" data-item-id="" data-preprocessor="${us_name}_edit_form"></div></div>`)
     if ($(block).contents().length == 0) {
@@ -61,6 +62,22 @@ _fpa.postprocessors_reports = {
         sv_opt.allow_actions = _fpa.state.user_can;
 
         _fpa.secure_view.setup_links($target_block, 'a.redcap-file-use-secure-view', sv_opt);
+
+        // If edit mode, click the edit button to open the form directly
+        if (edit_mode) {
+          var edit_btn = $target_block.find('.edit-entity.glyphicon-pencil').first();
+          if (edit_btn.length) {
+            edit_btn.click();
+          }
+
+          // Set up handler to close modal on successful save
+          $target_block.on('ajax:success', 'form', function (event) {
+            // Close the modal after a successful save
+            window.setTimeout(function () {
+              _fpa.hide_modal(1);
+            }, 300);
+          });
+        }
       }, 500);
     }, 500);
   },

@@ -192,16 +192,25 @@ module ReportResults
         icon = 'glyphicon glyphicon-tasks'
       end
 
-      split_url = url.split('/')
+      # Detect if this is an edit mode URL (ends with /edit)
+      edit_mode = url.end_with?('/edit')
 
+      split_url = url.split('/')
       split_url = split_url.reject(&:blank?)
+
+      # If edit mode, remove 'edit' from the end before extracting id
+      split_url.pop if edit_mode
+
       id = split_url.last
       master_id = split_url[1] if split_url.first == 'masters'
       hyph_name = split_url[-3..-2]&.join('__')&.hyphenate&.singularize || ''
 
+      # Add edit-mode attribute if this is an edit URL
+      edit_mode_attr = edit_mode ? ' data-edit-mode="true"' : ''
+
       html = <<~END_HTML
-        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{a_text}</a>
-        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"></div>
+        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-preprocessor="report_embed_dynamic_block" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{a_text}</a>
+        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"#{edit_mode_attr}></div>
       END_HTML
 
       html.html_safe
