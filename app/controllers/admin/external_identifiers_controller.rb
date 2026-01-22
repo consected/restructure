@@ -46,36 +46,12 @@ class Admin::ExternalIdentifiersController < AdminController
   def filters
     {
       category: ExternalIdentifier.pluck(:category).uniq.compact,
-      name: ExternalIdentifier.pluck(:name).uniq.compact,
-      in_current_app_type: %w[yes no]
+      name: ExternalIdentifier.pluck(:name).uniq.compact
     }
   end
 
   def filters_on
-    %i[category name in_current_app_type]
-  end
-
-  #
-  # Override filter_params to extract the custom in_current_app_type filter
-  # before the parent class processes it as a database column
-  # @return [Hash]
-  def filter_params
-    result = super
-    @in_current_app_type_filter = result&.delete(:in_current_app_type)
-    result
-  end
-
-  #
-  # Override to handle the special "in_current_app_type" filter
-  # This filter shows/hides items based on whether they're in the admin's current app type
-  # @return [ActiveRecord::Relation]
-  def filtered_primary_model(pm = nil)
-    pm = super
-    filtered_in_current_app_type(pm)
-  end
-
-  def extra_index_columns
-    { in_current_app_type_result_checkbox: 'In current app type' }
+    %i[category name]
   end
 
   def admin_labels

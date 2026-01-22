@@ -52,9 +52,7 @@ module AdminHelper
       like_type = title.to_s.end_with?('__%')
       title = title[0..-4] if like_type
       linkres = link_to(title, index_path(filter:),
-                        class: "btn #{(val.blank? && prev_val.blank?) || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{if like_type
-                                                                                                                                               'like-type'
-                                                                                                                                             end}")
+                        class: "btn #{val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}")
       if like_type
         @shown_filter_break = false
         res += "<p class=\"like-type\">#{linkres}</p>".html_safe
@@ -160,13 +158,5 @@ module AdminHelper
     END_HTML
 
     res.html_safe
-  end
-
-  def index_list_item_boolean_field(list_val)
-    if list_val
-      '<span class="glyphicon glyphicon-check val-checked"><span class="hidden">1</span></span>'.html_safe
-    else
-      '<span class="val-unchecked"><span class="hidden">0</span></span>'.html_safe
-    end
   end
 end

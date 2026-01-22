@@ -47,16 +47,16 @@
       <td class="admin-field-<%=p%>"><%= list_val.present? ? '********' : ''  %></td>
     <% elsif p_type == :boolean %>
       <td class="admin-field-<%=p%>">
-        <%= index_list_item_boolean_field(list_val) %>
+        <%= if list_val
+          "<span class=\"glyphicon glyphicon-check val-checked\"><span class=\"hidden\">1</span></span>".html_safe  
+        else
+          "<span class=\"val-unchecked\"><span class=\"hidden\">0</span></span>".html_safe  
+        end
+        %>
       </td>
     <% else %>
       <td class="admin-field-<%=p%>"><%= list_val %></td>
     <% end %>
-    <% end %>
-    <% if extra_index_columns.present? 
-      extra_index_columns.each do |method_name, col_header| %>
-        <td class="admin-item-extra-index-column" data-extra-index-col="<%= col_header %>"><%= send(method_name, list_item) %></td>
-      <% end %>
     <% end %>
 
     <% if admin_links.present? %>
