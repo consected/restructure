@@ -173,7 +173,7 @@
       {{#each (sort (unique (pluck (lookup this (or sub_list_data_name sub_list)) filter_attr filter_name)) 'desc')}}
       {{#is this.[1] 'includes' '{{' }}
       {{else}}
-      <button class="btn btn-default btn-sm filter-switch {{#if ../all_active}}active{{else}}{{#is @key 0}}active{{/is}}{{/if}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{hyphenate ../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
+      <button class="btn btn-default btn-sm filter-switch {{#if ../all_active}}active{{else}}{{#is ../active_values 'all'}}active{{else}}{{#is ../active_values 'none'}}{{else}}{{#if ../active_values}}{{#is this.[0] 'in' ../active_values}}active{{/is}}{{else}}{{#is @key 0}}active{{/is}}{{/if}}{{/is}}{{/is}}{{/if}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{hyphenate ../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
       {{/is}}
       {{/each}}
     </div>

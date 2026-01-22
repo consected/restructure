@@ -5,6 +5,13 @@
   #
   # The view `views/masters/_search_results_template.html.erb` is responsible for
   # rendering the overall master record view and deciding which panels to show.
+
+  # Get page layout configuration for the details panel to access view_options
+  details_panel = page_layout_panel(panel_name: 'details')
+  details_view_options = details_panel&.view_options
+  # Use with_indifferent_access to allow both symbol and string key access
+  active_sublist_values = (details_view_options&.active_sublist_values || {}).with_indifferent_access
+  sort_sublists = (details_view_options&.sort_sublists || {}).with_indifferent_access
 %>
 
 <script id="master_external_links_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -98,8 +105,12 @@
       <% end %>
 
       <% if master_viewables[:addresses] %>
+      <%
+        addresses_active_values = format_active_values(active_sublist_values[:addresses])
+        addresses_sort_order = sort_sublists[:addresses] || 'asc'
+      %>
       <div class="<%= layout_item_block_sizes[:regular] %> sublist-column" id="addresses-{{id}}-" data-sub-list="addresses">
-        {{>sublist_controls sub_list="addresses" filter_attr='rank' filter_name="rank_name" order='asc' }}
+        {{>sublist_controls sub_list="addresses" filter_attr='rank' filter_name="rank_name" order='<%= addresses_sort_order %>' active_values='<%= addresses_active_values %>' }}
 
         {{#each addresses}}
 
@@ -116,8 +127,12 @@
       <% end %>
 
       <% if master_viewables[:player_contacts] %>
+      <%
+        player_contacts_active_values = format_active_values(active_sublist_values[:player_contacts])
+        player_contacts_sort_order = sort_sublists[:player_contacts] || 'asc'
+      %>
       <div class="<%= layout_item_block_sizes[:regular] %> sublist-column" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
-        {{>sublist_controls sub_list="player_contacts" filter_attr='rank' filter_name="rank_name" order='asc' }}
+        {{>sublist_controls sub_list="player_contacts" filter_attr='rank' filter_name="rank_name" order='<%= player_contacts_sort_order %>' active_values='<%= player_contacts_active_values %>' }}
 
         {{#each player_contacts}}
 
