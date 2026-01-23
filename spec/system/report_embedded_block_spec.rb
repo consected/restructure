@@ -301,5 +301,19 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
 
     include_examples 'opens modal with embedded content'
     include_examples 'opens in edit mode'
+
+    it 'allows editing and closes modal on save' do
+      navigate_to_report(report)
+      run_report_and_click_embedded_link
+      wait_for_modal_to_appear
+
+      within '#primary-modal1.fade.in' do
+        expect(page).to have_css(edit_form_selector, wait: 10)
+        # Form is already valid from setup, just save it
+        click_button 'Save'
+      end
+
+      expect(page).not_to have_css('#primary-modal1.fade.in', wait: 10)
+    end
   end
 end
