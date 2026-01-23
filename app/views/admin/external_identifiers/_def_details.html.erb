@@ -45,9 +45,15 @@
                 target: '_blank' %>
   </p>
                 
-  <p><%= link_to link_label_open_in_new('search identifier'), 
+  <p>
+    <% begin %>
+    <%= link_to link_label_open_in_new('search identifier'), 
                 report_path(id: @external_identifier.usage_report('Search', ExternalIdentifier::ReportItemSearchType, as_alt_resource_name: true)),
-                target: '_blank' %></p>
+                target: '_blank' %>
+    <% rescue StandardError => e %>
+    (no report defined)
+    <% end %>
+  </p>
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
 
@@ -68,6 +74,13 @@
   <% end %>
 
 <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
+
+<%= render partial: 'admin/common_templates/def_uac_summary', 
+           locals: { 
+             object_instance:, 
+             current_app_type_id: current_admin.matching_user&.app_type_id,
+             current_user: current_admin.matching_user
+           } %>
 
 </div>
 <div class="dynamic-list-section">

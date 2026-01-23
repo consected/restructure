@@ -275,6 +275,7 @@ _fpa.postprocessors = {
       .click(function (ev) {
         ev.preventDefault();
         var id = $(this).attr('data-target');
+
         $(id).on('shown.bs.collapse', function () {
           $('.selected-result').removeClass('selected-result');
 

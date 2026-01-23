@@ -306,7 +306,7 @@ class ExternalIdentifier < ActiveRecord::Base
   def id_range_correct
     return if max_id.nil? || min_id.nil?
 
-    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || max_id && max_id > min_id
+    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || (max_id && max_id > min_id)
   end
 
   def name_format_correct

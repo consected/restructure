@@ -296,6 +296,23 @@ module Dynamic
 
         user
       end
+
+      #
+      # Get IDs of definitions that are in a specific app type.
+      # Uses the app_type's association method based on the model's table name.
+      # @param [Admin::AppType|Integer] app_type - the app type or its ID
+      # @return [Array<Integer>] IDs of definitions associated with the app type
+      def ids_in_app_type(app_type)
+        app_type = Admin::AppType.find(app_type) if app_type.is_a?(Integer)
+        return [] unless app_type
+
+        # Derive the association method name from the model's table name
+        # e.g., 'dynamic_models' -> :associated_dynamic_models
+        association_method = :"associated_#{table_name}"
+        return [] unless app_type.respond_to?(association_method)
+
+        app_type.send(association_method).pluck(:id)
+      end
       # End of class_methods
     end
 
@@ -649,6 +666,14 @@ module Dynamic
         Rails.logger.warn "Failed to get estimated record count for #{name}"
         nil
       end
+    end
+
+    #
+    # Check if this definition is in a specific app type
+    # @param [Admin::AppType|Integer] app_type - the app type or its ID
+    # @return [Boolean]
+    def in_app_type?(app_type)
+      self.class.ids_in_app_type(app_type).include?(id)
     end
   end
 end

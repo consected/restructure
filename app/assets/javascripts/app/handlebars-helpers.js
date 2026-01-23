@@ -71,13 +71,15 @@
       if (!right) right = '';
       right = right.split(',');
     }
-    return right.indexOf(left) !== -1;
+    // Convert left to string for comparison to handle number/string mismatches
+    return right.indexOf(String(left)) !== -1;
   });
   eR.add('!in', function (left, right) {
     if (!isArray(right)) {
       right = right.split(',');
     }
-    return right.indexOf(left) === -1;
+    // Convert left to string for comparison to handle number/string mismatches
+    return right.indexOf(String(left)) === -1;
   });
   eR.add('includes', function (left, right) {
     return includes(left, right);

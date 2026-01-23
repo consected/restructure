@@ -14,6 +14,60 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #870 - 2026-01-23
+
+- [Changed] embedded_block in report to allow URLs with /edit - fixes #325
+- [Fixed] embedded_block in report to allow activity log URLs
+
+### From FPHS - PR #868 - 2026-01-22
+
+- [Added] activity log access summaries in admin panel - resolves #867
+
+### From FPHS - PR #865 - 2026-01-22
+
+- [Added] `active_sublist_values` option to page layouts `view_options` - fixes #584
+- [Added] `sort_sublists` option to set default sort order (`'asc'` or `'desc'`) to page layouts `view_options`
+
+### From FPHS - PR #864 - 2026-01-22
+
+- [Added] a scope to exclude a role name from a user access controls query (required coalesce to work)
+- [Added] the ability to show extra calculated columns in admin index lists
+- [Added] UAC summary to Dynamic Model and External Identifier admin panels - fixes #859
+
+### From FPHS - PR #860 - 2026-01-21
+
+- [Added] access control filtering for master tabs nav dropdown - fixed #673
+
+- [Fixed] External IDs panel blank when switching participants, resolves original issue #653 incorrectly addresed by PR #855  - fixes #857
+
+### From FPHS - PR #856 - 2026-01-21
+
+- [Fixed] view_options.alt_width_classes not working for external ID or dynamic models displayed in master panels - fixes #389
+
+### From FPHS - PR #855 - 2026-01-20
+
+- [Fixed] external IDs panel not showing content when switching participants  - fixed #653
+
+### From FPHS - PR #854 - 2026-01-20
+
+- [Fixed] error parsing JSON field when the content is an empty string - fixes #853
+
+### From FPHS - PR #852 - 2026-01-20
+
+- [Fixed] issue when users tried to reset their password with a previously used password, they saw confusing duplicate errors - fixes #340
+
+### From FPHS - PR #851 - 2026-01-20
+
+- [Fixed] switch_id_on_click for multiple external IDs - fixed #312
+
+### From FPHS - PR #850 - 2026-01-20
+
+- [Fixed] styling on admin log and long lines in YAML editors
+
+### From FPHS - PR #849 - 2026-01-20
+
+- [Fixed] spec test issues
+
 ## [9.42.1] - 2026-01-19
 
 ### From FPHS - PR #848 - 2026-01-19

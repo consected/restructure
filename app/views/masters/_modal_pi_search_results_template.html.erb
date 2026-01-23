@@ -122,7 +122,11 @@
           <% end %>
           </div>
           <%  external_id_types.each do |e|%>
-          <div class="<%= layout_item_block_sizes[:regular] %>" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+          <% 
+            # Check if alt_width_classes is specified in view_options, otherwise use default regular width
+            width_classes = e.default_options&.view_options&.dig(:alt_width_classes) || layout_item_block_sizes[:regular]
+          %>
+          <div class="<%= width_classes %>" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
 
           <% end %>
 

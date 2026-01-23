@@ -43,6 +43,16 @@ view_options:
                                       # or set a series of hashes (keyed by resource name) representing params
                                       # For example:
                                       # { <resource_name>: { <param_name>: <param_value>, ...}, ... }
+  active_sublist_values:              # hash of resource names to filter values that should be active by default
+                                      # For each resource, specify an array of values or 'all' to activate all buttons
+                                      # Example:
+                                      #   player_contacts: [10, 5]    # activate ranks 10 and 5
+                                      #   addresses: all              # activate all filter buttons
+                                      #   dynamic_model__contacts: [] # no buttons active by default
+  sort_sublists:                      # hash of resource names to default sort order ('asc' or 'desc')
+                                      # Example:
+                                      #   player_contacts: desc
+                                      #   addresses: asc
 
 list_options:
   hide_in_list: false (default) | true

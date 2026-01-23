@@ -29,6 +29,11 @@
             <th><%= p.to_s.humanize %></th>
           <% end %>
         <% end %>
+        <% if extra_index_columns.present? 
+          extra_index_columns.each do |method_name, col_header| %>
+            <th><%= col_header %></th>
+          <% end %>
+        <% end %>
         <% if admin_links.present? %>
           <th>Admin Links</th>
         <% end %>

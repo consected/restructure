@@ -18,7 +18,7 @@ module Dynamic
         return unless saved_value.present?
 
         curr_val = YAML.safe_load(saved_value)
-        curr_val.to_h
+        curr_val.presence.to_h
       rescue StandardError
         begin
           curr_val.to_a

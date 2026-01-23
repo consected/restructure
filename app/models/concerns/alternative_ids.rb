@@ -107,6 +107,42 @@ module AlternativeIds
     def reset_external_id_matching_fields!
       @external_id_definitions_access_by = nil
       @external_id_definitions = nil
+      @alternative_id_labels = nil
+      @alternative_id_labels_access_by = nil
+      reset_crosswalk_field_labels!
+    end
+
+    #
+    # Get a hash of all alternative ID field names to their human-readable labels
+    # This includes both crosswalk fields (from Master.crosswalk_field_labels) and
+    # external identifier fields (from their label attribute)
+    # @param [User | nil] access_by - current user making the request for access control
+    # @return [Hash{Symbol => String}] hash of field names to labels
+    def alternative_id_labels(access_by: nil)
+      if access_by
+        key = access_by_key(access_by)
+        @alternative_id_labels_access_by ||= {}
+        return @alternative_id_labels_access_by[key] if @alternative_id_labels_access_by.key?(key)
+      elsif @alternative_id_labels
+        return @alternative_id_labels
+      end
+
+      labels = {}
+
+      # Add crosswalk field labels from Master.crosswalk_field_labels
+      labels.merge!(crosswalk_field_labels(access_by:))
+
+      # Add external identifier labels
+      ext_defs = access_by ? external_id_definitions_access_by(access_by) : external_id_definitions
+      labels.merge!(ext_defs.transform_values(&:label))
+
+      if access_by
+        @alternative_id_labels_access_by[key] = labels
+      else
+        @alternative_id_labels = labels
+      end
+
+      labels
     end
 
     # Generate an instance method that allow easy access to alternative_id values
@@ -166,7 +202,7 @@ module AlternativeIds
 
       unless alternative_id?(field_name, access_by: current_user)
         raise FphsException, "Can not match on this field (#{field_name}). " \
-          'It is not an accepted alterative ID field for this user.'
+                             'It is not an accepted alterative ID field for this user.'
       end
 
       # Start by attempting to match on a field in the master record

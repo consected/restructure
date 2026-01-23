@@ -36,33 +36,72 @@ _fpa.postprocessors_reports = {
     $('#modal_results_block').prop('id', 'modal_results_block_1')
   },
 
+  /**
+   * Postprocessor for embedded dynamic block links in reports.
+   * Opens a modal dialog displaying a dynamic model or activity log record.
+   * 
+   * Supports two modes:
+   * - Show mode: Displays the record in read-only view
+   * - Edit mode: Opens the edit form directly (GitHub #325)
+   *   When data-edit-mode="true", clicks the edit button and closes modal on save
+   */
   report_embed_dynamic_block: function (block, data) {
-    var us_name = block.attr('data-model-name')
-    var hyph_name = us_name.hyphenate()
-    var id = block.attr('data-id')
-    var master_id = block.attr('data-master-id')
-    var target_block = "report-result-embedded-block"
-    var html = $(`<div id="${target_block}-outer"><div id="${target_block}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyph_name}-edit-form-${master_id}-${id}" data-template="${hyph_name}-result-template" data-item-class="dynamic_model__${us_name}" data-sub-item="dynamic_model__${us_name}" data-sub-id="${id}" data-item-id="" data-preprocessor="${us_name}_edit_form"></div></div>`)
-    if ($(block).contents().length == 0) {
+    var modelName = block.attr('data-model-name');
+    var hyphenatedName = modelName.hyphenate();
+    var recordId = block.attr('data-id');
+    var masterId = block.attr('data-master-id');
+    var isEditMode = block.attr('data-edit-mode') === 'true';
+    var targetBlockId = 'report-result-embedded-block';
+
+    // Build the modal content container
+    var modalContent = $(`<div id="${targetBlockId}-outer"><div id="${targetBlockId}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyphenatedName}-edit-form-${masterId}-${recordId}" data-template="${hyphenatedName}-result-template" data-item-class="dynamic_model__${modelName}" data-sub-item="dynamic_model__${modelName}" data-sub-id="${recordId}" data-item-id="" data-preprocessor="${modelName}_edit_form"></div></div>`);
+
+    // If no content was loaded via AJAX, hide the modal and return
+    if ($(block).contents().length === 0) {
       _fpa.hide_modal(1);
       return;
     }
-    block.removeClass('sv-added-setup-links')
-    _fpa.show_modal(html, null, true, 'embedded-dynamic-block', 1)
+
+    block.removeClass('sv-added-setup-links');
+    _fpa.show_modal(modalContent, null, true, 'embedded-dynamic-block', 1);
+
+    // Move content into modal and set up handlers
     window.setTimeout(function () {
-      $(block).contents().appendTo(`#${target_block}`)
+      $(block).contents().appendTo(`#${targetBlockId}`);
       $(block).html('');
+
       window.setTimeout(function () {
-        const $target_block = $(`#${target_block}`);
-        _fpa.form_utils.resize_labels($target_block, null, true)
+        const $targetBlock = $(`#${targetBlockId}`);
+        _fpa.form_utils.resize_labels($targetBlock, null, true);
 
-        // Ensure that the viewer is set up with the user's capabilities to view and download
-        var sv_opt = { allow_actions: null };
-        sv_opt.allow_actions = _fpa.state.user_can;
+        // Set up secure view links with user capabilities
+        var secureViewOptions = { allow_actions: _fpa.state.user_can };
+        _fpa.secure_view.setup_links($targetBlock, 'a.redcap-file-use-secure-view', secureViewOptions);
 
-        _fpa.secure_view.setup_links($target_block, 'a.redcap-file-use-secure-view', sv_opt);
+        // Handle edit mode: click edit button and set up save handler
+        if (isEditMode) {
+          _fpa.postprocessors_reports.setup_edit_mode($targetBlock);
+        }
       }, 500);
     }, 500);
+  },
+
+  /**
+   * Sets up edit mode behavior for an embedded block.
+   * Clicks the edit button to open the form and closes modal on successful save.
+   */
+  setup_edit_mode: function ($targetBlock) {
+    var editButton = $targetBlock.find('.edit-entity.glyphicon-pencil').first();
+    if (editButton.length) {
+      editButton.click();
+    }
+
+    // Close modal after successful form save
+    $targetBlock.on('ajax:success', 'form', function () {
+      window.setTimeout(function () {
+        _fpa.hide_modal(1);
+      }, 300);
+    });
   },
 
   reports_form: function (block, data) {

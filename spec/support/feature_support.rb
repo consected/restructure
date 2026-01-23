@@ -190,9 +190,7 @@ module FeatureSupport
   end
 
   def dismiss_all_modals
-    all('button[data-dismiss="modal"]', wait: false).each do |m|
-      m.click
-    end
+    all('button[data-dismiss="modal"]', wait: false).each(&:click)
     # wait for the modal to fade out before continuing
     has_no_css?('.modal.fade.in')
     has_css?('.modal[style~="display: none"]')
@@ -533,7 +531,7 @@ module FeatureSupport
   end
 
   #
-  # Expand a master record, optionally with matching text
+  # Expand a master record, by id or matching link text
   # @param [String, nil] text The text to match for the master-expander link
   def expand_master_record(text: nil, master_id: nil)
     finish_form_formatting
@@ -555,7 +553,16 @@ module FeatureSupport
     if link[:class].include?('collapsed')
       puts_debug 'Found collapsed master-expander, clicking to expand master record panel...'
 
-      link.click
+      # Click on the player-info-header child element which has actual dimensions
+      # The master-expander anchor itself may have zero size due to CSS styling
+      player_header = link.all('.player-info-header').first
+      if player_header
+        scroll_into_view(player_header)
+        player_header.click
+      else
+        scroll_into_view(link)
+        link.click
+      end
       finish_form_formatting
       sleep 2 # Extra wait for AJAX to load master record details
       # Check for alerts after expanding master record
@@ -662,7 +669,7 @@ module FeatureSupport
         available_submit_fields
         available_embedded_model_reference_add_buttons
       end
-    elsif forms.length > 0
+    elsif !forms.empty?
       forms.each do |f|
         puts_debug "Form ##{f[:id]}:"
         within f do
@@ -866,9 +873,9 @@ module FeatureSupport
   end
 
   def puts_highlighted(text)
-    puts "\n" + ('=' * 80)
+    puts "\n#{'=' * 80}"
     puts text
-    puts ('=' * 80) + "\n"
+    puts "#{'=' * 80}\n"
   end
 
   def puts_error_page
@@ -904,9 +911,7 @@ module FeatureSupport
   def dismiss_all_alerts
     finish_page_loading
 
-    all('div.alert button.close', wait: 0).each do |btn|
-      btn.click
-    end
+    all('div.alert button.close', wait: 0).each(&:click)
     sleep 0.5
   end
 
