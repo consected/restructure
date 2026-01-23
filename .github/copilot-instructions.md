@@ -10,6 +10,7 @@
 5. **If requirements are not clear, ask for clarification before proceeding**
 6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
+8. **Create new files and edit directly in the editor**; avoid using command line file operations unless absolutely necessary
 
 
 ### Critical Rules for Running Terminal Commands

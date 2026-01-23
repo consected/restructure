@@ -1316,8 +1316,8 @@ _fpa = {
     })
 
     if (modal_index) {
-      // Hide a previously shown modal back
-      $('.modal.in').removeClass('in').addClass('was-in');
+      // Hide a previously shown modal back, but not the one we're currently showing
+      $('.modal.in').not(pm).removeClass('in').addClass('was-in');
 
       pm.on('click.dismiss.bs.modal', `[data-dismiss="modal${modal_index}"]`, function () {
         _fpa.hide_modal(modal_index);
