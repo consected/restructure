@@ -177,44 +177,80 @@ module ReportResults
       html.html_safe
     end
 
+    #
+    # Generate HTML for opening a dynamic model or activity log record in a modal dialog.
+    # Supports both show and edit modes:
+    # - Show mode: URL like /masters/123/dynamic_model/table_name/456
+    # - Edit mode: URL ending with /edit (GitHub #325)
+    #
+    # The content can be either a plain URL or a markdown format link [label](url)
     def cell_content_for_embedded_block
       return cell_content unless cell_content.present?
 
-      url = cell_content
+      parsed = parse_embedded_block_url(cell_content)
+      build_embedded_block_html(parsed)
+    end
 
-      if url.start_with? '['
-        # This is a markdown format link
-        col_url_parts = url&.scan(/^\[(.+)\]\((.+)\)$/)
-        a_text = html_escape col_url_parts&.first&.first
-        url = html_escape col_url_parts&.first&.last
+    private
+
+    #
+    # Parse the URL from embedded_block content.
+    # Returns a hash with parsed components including edit_mode flag.
+    def parse_embedded_block_url(content)
+      url = content
+      link_text = nil
+      icon_class = nil
+
+      if content.start_with?('[')
+        # Markdown format link: [Label](/url/path)
+        url_parts = content.scan(/^\[(.+)\]\((.+)\)$/)
+        link_text = html_escape(url_parts&.first&.first)
+        url = html_escape(url_parts&.first&.last)
       else
-        # This is a plain URL
-        icon = 'glyphicon glyphicon-tasks'
+        # Plain URL - show icon
+        icon_class = 'glyphicon glyphicon-tasks'
       end
 
-      # Detect if this is an edit mode URL (ends with /edit)
       edit_mode = url.end_with?('/edit')
+      url_segments = url.split('/').reject(&:blank?)
 
-      split_url = url.split('/')
-      split_url = split_url.reject(&:blank?)
+      # Remove 'edit' suffix before extracting record id
+      url_segments.pop if edit_mode
 
-      # If edit mode, remove 'edit' from the end before extracting id
-      split_url.pop if edit_mode
+      record_id = url_segments.last
+      master_id = url_segments[1] if url_segments.first == 'masters'
+      # Join the last two path segments to form model name (e.g., dynamic_model__table_name)
+      # rubocop:disable Style/SafeNavigationChainLength
+      model_name_hyphenated = url_segments[-3..-2]&.join('__')&.hyphenate&.singularize || ''
+      # rubocop:enable Style/SafeNavigationChainLength
 
-      id = split_url.last
-      master_id = split_url[1] if split_url.first == 'masters'
-      hyph_name = split_url[-3..-2]&.join('__')&.hyphenate&.singularize || ''
+      {
+        url:,
+        link_text:,
+        icon_class:,
+        edit_mode:,
+        record_id:,
+        master_id:,
+        model_name_hyphenated:
+      }
+    end
 
-      # Add edit-mode attribute if this is an edit URL
-      edit_mode_attr = edit_mode ? ' data-edit-mode="true"' : ''
+    #
+    # Build the HTML for an embedded_block link and target div
+    def build_embedded_block_html(parsed)
+      hyph_name = parsed[:model_name_hyphenated]
+      record_id = parsed[:record_id]
+      edit_mode_attr = parsed[:edit_mode] ? ' data-edit-mode="true"' : ''
 
       html = <<~END_HTML
-        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-preprocessor="report_embed_dynamic_block" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{a_text}</a>
-        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"#{edit_mode_attr}></div>
+        <a class="report-embedded-block-link #{parsed[:icon_class]}" title="open result" href="#{parsed[:url]}" data-remote="true" data-preprocessor="report_embed_dynamic_block" data-#{hyph_name}-id="#{record_id}" data-result-target="#report-result-embedded-block--#{record_id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{parsed[:link_text]}</a>
+        <div id="report-result-embedded-block--#{record_id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{record_id}" data-master-id="#{parsed[:master_id]}"#{edit_mode_attr}></div>
       END_HTML
 
       html.html_safe
     end
+
+    public
 
     def cell_content_for_embedded_report
       return cell_content unless cell_content.present?
