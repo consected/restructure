@@ -6,10 +6,13 @@
 # records in a modal dialog when clicked. This is a UI test that verifies the full interaction.
 #
 # Test Coverage:
-# - Clicking embedded_block link with show URL opens modal in show mode (existing behavior)
-# - Clicking embedded_block link with edit URL (ending in /edit) opens modal in edit mode (GitHub #325)
-# - When edit mode modal is saved, the modal should close automatically
-# - Works for both dynamic models and activity logs
+# - Dynamic Models:
+#   - Show URL opens modal in show mode (uses JSON + client-side Handlebars templates)
+#   - Edit URL (ending in /edit) opens modal in edit mode (GitHub #325)
+#   - When edit mode modal is saved, the modal closes automatically
+# - Activity Logs:
+#   - Edit URL (ending in /edit) opens modal in edit mode (GitHub #325)
+#   - Note: Show mode not tested for activity logs as Handlebars templates aren't loaded on report pages
 
 require 'rails_helper'
 
@@ -39,6 +42,10 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
 
     setup_embedded_block_test_data
     setup_embedded_block_reports
+
+    # Activity log setup
+    setup_activity_log_test_data
+    setup_activity_log_reports
   end
 
   def setup_embedded_block_test_user
@@ -55,6 +62,9 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
     )
 
     setup_access :dynamic_model__test_with_id_recs, user: @user
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     expect(@user.can?(:view_reports)).to be_truthy
   end
@@ -147,6 +157,69 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
     )
   end
 
+  def setup_activity_log_test_data
+    # Create a player contact first (required for activity log)
+    @player_contact = PlayerContact.create!(
+      master: @master,
+      data: '(617)555-1234',
+      rec_type: 'phone',
+      rank: 10,
+      current_user: @user
+    )
+    expect(@player_contact).to be_persisted
+
+    # Create an activity log record
+    @activity_log = ActivityLog::PlayerContactPhone.create!(
+      master: @master,
+      player_contact: @player_contact,
+      select_call_direction: 'from player',
+      select_who: 'user',
+      extra_log_type: 'primary',
+      current_user: @user
+    )
+    expect(@activity_log).to be_persisted
+  end
+
+  def setup_activity_log_reports
+    # Report with embedded_block using edit URL for activity log (GitHub #325)
+    # Note: Show mode is not tested for activity logs because the Handlebars templates
+    # required for rendering JSON responses are not loaded on report pages.
+    sql_al_edit = <<~SQL
+      SELECT
+        '/masters/' || master_id || '/activity_log/player_contact_phones/' || id || '/edit' AS al_edit_link,
+        extra_log_type
+      FROM activity_log_player_contact_phones
+      ORDER BY id DESC
+      LIMIT 1
+    SQL
+
+    options_al_edit = <<~YAML
+      column_options:
+        show_as:
+          al_edit_link: embedded_block
+    YAML
+
+    @report_al_edit = Report.create!(
+      current_admin: @admin,
+      name: "Activity Log Edit Mode #{SecureRandom.hex(4)}",
+      description: 'Test embedded_block with activity log in edit mode (GitHub #325)',
+      sql: sql_al_edit,
+      options: options_al_edit,
+      disabled: false,
+      report_type: 'regular_report',
+      auto: false,
+      searchable: false
+    )
+
+    Admin::UserAccessControl.create!(
+      app_type: @user.app_type,
+      access: :read,
+      resource_type: :report,
+      resource_name: @report_al_edit.alt_resource_name,
+      current_admin: @admin
+    )
+  end
+
   before(:each) do
     login
     # Make sure no modal is open from a previous test
@@ -199,7 +272,7 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
     # Allow time for AJAX and modal animation
     # Sometimes the modal takes a while to appear, so we'll wait longer
     modal_appeared = false
-    5.times do |i|
+    5.times do |_i|
       sleep 2
       if page.has_css?('#primary-modal1.fade.in', visible: true)
         modal_appeared = true
@@ -211,7 +284,7 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
       # Debug: save state to understand why modal didn't appear
       puts_debug 'Modal did not appear - checking for errors'
       puts_debug "Alert danger: #{find('.alert-danger').text}" if page.has_css?('.alert-danger')
-      puts_debug 'Modal exists but not .fade.in' if page.has_css?('#primary-modal1', visible: true)
+      puts_debug 'Modal exists but not .fade.in' if page.has_css?('#primary-modal1', visible: :all)
       save_html_snapshot('/tmp/modal_debug.html')
     end
 
@@ -283,6 +356,27 @@ describe 'report embedded_block', js: true, driver: $browser_driver do
       # Verify the update was saved (Rails downcases user data)
       @test_record.reload
       expect(@test_record.name).to eq('updated record name')
+    end
+  end
+
+  context 'with activity log edit URL ending in /edit (GitHub #325)' do
+    it 'opens the activity log modal in edit mode when clicking embedded_block link with /edit URL' do
+      navigate_to_report(@report_al_edit)
+      run_report
+
+      # Verify the embedded_block link is present
+      expect(page).to have_css('.report-embedded-block-link')
+
+      click_embedded_block_link
+      wait_for_modal
+
+      # In edit mode, we should see an editable form
+      within '#primary-modal1.fade.in' do
+        # Should have an edit form for activity log
+        expect(page).to have_css('form.edit_activity_log_player_contact_phone', wait: 10)
+        # Form should have typical activity log fields
+        expect(page).to have_button('Save')
+      end
     end
   end
 end
