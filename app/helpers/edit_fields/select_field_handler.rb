@@ -100,8 +100,8 @@ module EditFields
       target = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
       if target
         target_class = target[:model]
-        no_assoc ||= (target_class.respond_to?(:no_master_association) && target_class.no_master_association) ||
-                     !target_class.method_defined?(:master)
+        self.no_assoc ||= (target_class.respond_to?(:no_master_association) && target_class.no_master_association) ||
+                          !target_class.method_defined?(:master)
       end
 
       unless no_assoc || !form_object_instance.respond_to?(:master)

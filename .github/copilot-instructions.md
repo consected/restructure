@@ -54,7 +54,7 @@ For Rspec System Specs Refer to: [Rspec System Specs project coding standards](i
 ### Command Line Usage
 - Create a directory `./tmp/agent-tmp` in the workspace root
 - Use `./tmp/agent-tmp` for all temporary files and logs
-- DO NOT set environment variables or prefix commands with `VAR=VALUE`
+- DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead
 - DO NOT run commands that redirect output to `/dev/null` or `/tmp/`
 - DO NOT run commands in the background using `&` or `nohup`
 - DO NOT run commands with `timeout` unless absolutely necessary

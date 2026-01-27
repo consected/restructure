@@ -2,6 +2,22 @@
 
 require 'rails_helper'
 
+# System tests for reports functionality
+#
+# Test Coverage:
+# - Report listing and search with various criteria
+# - Report criteria fields (date ranges, dropdowns, filter_selector)
+# - Report results display and pagination
+# - Report parameter substitution and filtering
+# - filter_selector JavaScript callback: Tests that changing a parent
+#   dropdown (protocol) updates dependent dropdowns (sub_process) via
+#   the select_filtering_changed callback without JavaScript errors
+#
+# Implementation Notes:
+# - Report criteria dropdowns use chosen.js for enhanced selection
+# - Use select_from_dropdown_field with is_report: true for report fields
+# - The filter_selector mechanism updates data-big-select-subtype attributes
+#   on dependent fields when a parent selection changes
 describe 'reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
@@ -38,6 +54,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
     create_report_with_all_criteria_fields
     create_report_with_add_item_button
+    create_report_with_filter_selector
 
     @report = r
   end
@@ -244,6 +261,42 @@ describe 'reports', js: true, driver: $browser_driver do
                                             position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
+  # Creates a report with filter_selector configuration to test the JavaScript
+  # filtering functionality in report_criteria.js. The protocol field filters
+  # the sub_process field's optgroups when changed.
+  def create_report_with_filter_selector
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      protocol_filter:
+        protocol:
+          all: true
+          multiple: single
+          disabled: false
+          filter_selector: sub_process_filter
+
+      sub_process_filter:
+        sub_process:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    @filter_selector_report = Report.create(current_admin: @admin,
+                                            name: 'Filter Selector Test',
+                                            description: 'Tests filter_selector functionality',
+                                            sql: sql,
+                                            search_attrs: search_attrs,
+                                            disabled: false,
+                                            report_type: 'regular_report',
+                                            auto: false,
+                                            searchable: false,
+                                            position: nil,
+                                            edit_model: nil,
+                                            edit_field_names: nil,
+                                            selection_fields: nil,
+                                            item_type: nil)
+  end
+
   before :each do
     setup_report_user
     validate_setup
@@ -396,5 +449,38 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-results-block table')
     expect(page).to have_css('.report-results-block table', text: /new test value/)
     expect(page).to have_css('.report-results-block table', text: /new test name/)
+  end
+
+  # Test that filter_selector configuration in report criteria correctly filters
+  # optgroups in dependent dropdowns. This verifies backward compatibility of
+  # the select_filtering_changed JavaScript function when called from report_criteria.js.
+  it 'filters dependent dropdown when parent selection changes via filter_selector' do
+    protocol = Classification::Protocol.active.first
+    expect(protocol).not_to be_nil, 'No active protocol found for filtering test'
+
+    get_list
+    open_report @filter_selector_report.id, 'Filter Selector Test'
+    finish_page_loading
+    expect(page).to have_css('.report-criteria')
+
+    # Verify the filter_selector attribute is set on the protocol field
+    protocol_select = find('select[name="search_attrs[protocol_filter]"]', visible: :all)
+    expect(protocol_select['data-filter-selector']).to eq('sub_process_filter')
+
+    # Verify sub_process subtype is initially empty
+    sub_process_select = find('select[name="search_attrs[sub_process_filter]"]', visible: :all)
+    expect(sub_process_select['data-big-select-subtype']).to eq(''), 'Initial subtype should be empty'
+
+    # Use helper to select from the dropdown (detects chosen.js automatically for reports)
+    select_from_dropdown_field('protocol_filter', protocol.name, is_report: true)
+    sleep 0.5 # Allow JavaScript filtering to process
+
+    # After selecting a protocol, the sub_process select should have its
+    # data-big-select-subtype attribute updated to the protocol's ID
+    # (This verifies select_filtering_changed was called without errors)
+    sub_process_select = find('select[name="search_attrs[sub_process_filter]"]', visible: :all)
+    updated_subtype = sub_process_select['data-big-select-subtype']
+    expect(updated_subtype).to eq(protocol.id.to_s),
+                               "Expected sub_process subtype to be '#{protocol.id}', got '#{updated_subtype}'"
   end
 end
