@@ -9,6 +9,7 @@ applyTo: 'spec/**'
 - After writing tests, always add comments to the top of the spec files explaining the purpose of the tests.
 - Create new system specs in `spec/system/` - refer to [Rspec System Specs project coding standards](rspec-system-spec.instructions.md)
 - Use schema name `dynamic_test` for test dynamic models, activity logs and external identifiers
+- Be sure to read the Rails logger output in `log/test.log` for errors not shown in Rspec output
 
 ## Running Bash Scripts and Terminal Commands
 
