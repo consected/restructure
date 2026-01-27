@@ -168,3 +168,8 @@
     display: inline-block;
   }
 }
+
+// BEM modifier for initially hidden secure view (shown by JavaScript)
+.secure-view--hidden {
+  display: none;
+}

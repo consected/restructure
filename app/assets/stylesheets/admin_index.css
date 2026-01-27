@@ -26,6 +26,7 @@
  *= require admin/server_info
  *= require admin/sortable
  *= require admin/report_admin
+ *= require admin/parsed_config
  *= require admin/z_admin_overrides
  *= require_self
  */

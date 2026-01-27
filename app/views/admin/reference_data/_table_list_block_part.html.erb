@@ -1,12 +1,12 @@
 <div>
-  <div class="table-list-block" style="text-align: left" data-result="table-list-block">
+  <div class="table-list-block admin-form__left-aligned" data-result="table-list-block">
     <div class="row">
       <div class="form-group col-md-8">
         <%= select_tag 'primary_tables_schema_select', options_for_select(@schemas), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
       </div>
       <div class="form-group col-md-8">
         <label class="">
-          <input type="checkbox" id="primary_tables_filter_out_history" checked style="width: initial; display: inline-block" /> filter out history tables
+          <input type="checkbox" id="primary_tables_filter_out_history" checked class="admin-ref-data__checkbox--inline" /> filter out history tables
         </label>
       </div>
     </div>

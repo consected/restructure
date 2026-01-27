@@ -5,7 +5,7 @@
 %>
 <div id="<%=block_id%>" class="report-chart <%=@view_options&.add_classes&.join(' ')%>"  data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>" data-results-count="<%=@results.count%>">
 </div>
-<script>
+<%= javascript_tag nonce: true do %>
   window.setTimeout(function() {
   
     var $block = $('#<%=block_id%>');
@@ -85,10 +85,10 @@
   
     var new_html = $('<canvas width="'+width+'" height="'+height+'" class="report-chart-canvas"></canvas>');
   
-    $block.html(new_html);
+  $block.html(new_html);
     var ctx = $block.find('canvas');
   
     var myPieChart = new Chart(ctx, opts);
   
     }, 100);
-</script>
+<% end %>

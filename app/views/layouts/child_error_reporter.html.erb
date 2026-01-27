@@ -1,4 +1,4 @@
-<script>
+<%= javascript_tag nonce: true do %>
   if (window.opener != window.top) {
     
   <% flash.each do |key, value| 
@@ -14,4 +14,4 @@
 
   window.close();
   
-</script>
+<% end %>

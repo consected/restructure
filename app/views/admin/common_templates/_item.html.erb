@@ -74,7 +74,7 @@
   <% if found_options %>
     <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
       <td>&nbsp;</td>
-      <td colspan="<%=num_fields%>" class="admin-field-<%=p%>"><strong><%=found_options%>:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.send(found_options) %></pre></td>
+      <td colspan="<%=num_fields%>" class="admin-field-<%=p%>"><strong><%=found_options%>:</strong> <pre class="shrinkable-block admin-form__help-info"><%= list_item.send(found_options) %></pre></td>
     </tr>
   </tbody>
   <% end %>

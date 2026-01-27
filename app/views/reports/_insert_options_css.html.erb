@@ -58,7 +58,5 @@ end
 if res
   res = res.join("\n")
 %>
-<style>
-  <%= res.html_safe %>
-</style>
+<%= csp_style_tag(res) %>
 <% end %>

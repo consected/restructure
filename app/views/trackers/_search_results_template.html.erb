@@ -1,4 +1,4 @@
-<script id="tracker_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_result-partial', css_class: 'hidden handlebars-partial') do %>
 
       <td class="tracker-edit">
       {{#is tracker_history_length '>' 1}}
@@ -24,9 +24,9 @@
       </td>
 
 
-</script>
+<% end %>
 
-<script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('empty_tracker_tree_results-partial', css_class: 'hidden handlebars-partial') do %>
   <table class="table tracker-tree-results from-empty-tracker-tree">
     <thead><tr>
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}-inner" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
@@ -41,9 +41,9 @@
     </tr>
     </tbody>
 </table>
-</script>
+<% end %>
 
-<script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_tree_results-partial', css_class: 'hidden handlebars-partial') do %>
   <table class="table tracker-tree-results from-tracker-tree-results">
     <thead><tr>
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}-inner" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
@@ -73,10 +73,10 @@
     {{/each}}
   </table>
 
-</script>
+<% end %>
 
 
-<script id="tracker_chron_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_chron_results-partial', css_class: 'hidden handlebars-partial') do %>
   <table class="table tablesorter tracker-chron-results">
     <thead><tr>
       <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}-inner" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
@@ -103,11 +103,11 @@
     </tbody>
   </table>
 
-</script>
+<% end %>
 
 
 
-<script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('tracker-result-template') do %>
   {{#with tracker}}
     {{#was _created}}
     <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">
@@ -126,19 +126,19 @@
 
     {{/was}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="tracker-chron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('tracker-chron-result-template') do %>
   {{#with tracker_histories}}
     {{>tracker_chron_results master_id=../master_id}}
   {{else}}
     {{>empty_tracker_tree_results master_id=master_id}}
   {{/with}}
-</script>
-<script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<% end %>
+<%= handlebars_template_tag('tracker-tree-result-template') do %>
   {{#with trackers}}
     {{>tracker_tree_results master_id=../master_id}}
   {{else}}
       {{>empty_tracker_tree_results master_id=master_id}}
   {{/with}}
-</script>
+<% end %>

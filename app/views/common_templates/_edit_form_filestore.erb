@@ -16,13 +16,13 @@ if mr
     to_record_editable: !!mr.to_record_editable
   };
 %>
-<script> 
+<%= javascript_tag nonce: true do %> 
 window.setTimeout(function() {
   var data = <%= data.to_json.html_safe %>;
   var block = $('#edit-filestore-block-<%= object_instance.id %>');
   _fpa.view_template(block, 'filestore-view-template', data); 
 
 }, 500);
-</script>
+<% end %>
 <div id="edit-filestore-block-<%= object_instance.id %>" class="edit-filestore-block"></div>
 <% end %>

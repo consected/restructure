@@ -11,15 +11,15 @@
 
 <%= render partial: 'user_profiles/tabs' %>
 
-<script id="user-profile-container-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('user-profile-container-template') do %>
   <div class="user-profile-container-block" id="user-profile-container">
     {{#with user_profile}}
       {{>user_profile_main}}
     {{/with}}
   </div>
-</script>
+<% end %>
 
-<script id="user_profile_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('user_profile_inner', css_class: 'hidden handlebars-partial') do %>
   {{>user_profile_tabs}}
   <div class="panel-body user-profile-panel">
     <% if @panels.present? %>  
@@ -28,9 +28,9 @@
     <div class="well">no user profile panels defined</div>
     <% end %>
   </div>
-</script>
+<% end %>
 
-<script id="user_profile_main" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('user_profile_main', css_class: 'hidden handlebars-partial') do %>
   <div id="user-{{user.id}}-main-container" 
        class="panel-no-collapse user-profile-panel" 
        data-user-id="{{user.id}}" 
@@ -40,10 +40,10 @@
   >
     {{>user_profile_inner}}
   </div>
-</script>
+<% end %>
 
-<script id="user-profile-main-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('user-profile-main-template') do %>
   {{#with user}}
     {{>user_profile_main}}
   {{/with}}
-</script>
+<% end %>

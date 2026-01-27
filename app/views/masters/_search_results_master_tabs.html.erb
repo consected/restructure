@@ -1,5 +1,5 @@
 
-<script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_tabs', css_class: 'hidden handlebars-partial') do %>
   <ul class="nav nav-pills details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
   <% # Tabs shown are based on the panels in the page layout.
@@ -102,4 +102,4 @@
     end %>
 
   </ul>
-</script>
+<% end %>

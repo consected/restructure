@@ -195,6 +195,25 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
+    // First, process any JSON data elements that store big-select configuration
+    // This approach avoids inline script tags that fail CSP when loaded via AJAX
+    block.find('script.big-select-data[type="application/json"]').each(function() {
+      var $dataEl = $(this);
+      var fieldId = $dataEl.data('field-id');
+      var options = $dataEl.data('options') || {};
+      var hashData = $dataEl.data('hash') || {};
+      
+      var field = document.getElementById(fieldId);
+      if (field) {
+        field.big_select_options = field.big_select_options || options;
+        field.big_select_hash = field.big_select_hash || {};
+        // Merge in the hash data (which contains subtype -> data mapping)
+        Object.assign(field.big_select_hash, hashData);
+      }
+      // Remove the data element after processing
+      $dataEl.remove();
+    });
+
     block
       .find('.use-big-select')
       .not('.big-select-su')

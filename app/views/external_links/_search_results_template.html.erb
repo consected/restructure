@@ -1,4 +1,4 @@
-<script id="external-links-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('external-links-template') do %>
   <div class="row">
     <div class="col-sm-24">
       <% Admin::ExternalLink.selector_name_value_pair_no_downcase.each do |s|%>
@@ -6,4 +6,4 @@
       <% end %>
     </div>
   </div>
-</script>
+<% end %>

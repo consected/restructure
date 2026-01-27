@@ -56,9 +56,9 @@
   <% end %>
 </div>
 </div>
-<script>
+<%= javascript_tag nonce: true do %>
   $('.common-template-index-table .expandable').not('.attached-exp').on('click', function(){
       if($(this).attr('disabled')) return;
       _fpa.form_utils.toggle_expandable($(this));
   }).addClass('attached-exp');
-</script>
+<% end %>

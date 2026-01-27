@@ -14,7 +14,7 @@
 <div class="admin-form-block-outer">
 <% if form_info_partial %>
       <div class="row block-within-flex">
-        <div class="col-sm-12" style="text-align: left">
+        <div class="col-sm-12 admin-form__left-aligned">
 <% end %>
 <%= form_for(fref, url: url, class: "form-formatted admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result", before_send_processor: before_send_processor}) do |f| %>
   <%
@@ -30,10 +30,10 @@
   <div class="admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right", value: "save" %></div>
   <%= render partial: 'admin/common_templates/form/options_block', locals: local_vars %>
   <% if @show_extra_help_info && @show_extra_help_info[:text] %>
-    <div class="form-group" style="vertical-align: top">
+    <div class="form-group admin-form__vertical-top">
       <label><%= @show_extra_help_info[:title] %></label>
       <div class="admin-form-fields-block">
-        <textarea style="font-size: 12px" class="extra-help-info">
+        <textarea class="extra-help-info admin-form__help-info">
             <%= @show_extra_help_info[:text] %>
         </textarea>
       </div>
@@ -48,7 +48,7 @@
 
 <% if form_info_partial %>
         </div>
-        <div class="col-sm-12" style="text-align: left">
+        <div class="col-sm-12 admin-form__left-aligned">
           <div class="admin-options-outer-block">
             <div class="admin-options-ref-block">
               <%= render partial: form_info_partial, locals: {object_instance: object_instance} %>

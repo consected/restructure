@@ -14,13 +14,13 @@
   sort_sublists = (details_view_options&.sort_sublists || {}).with_indifferent_access
 %>
 
-<script id="master_external_links_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_external_links_panel', css_class: 'hidden handlebars-partial') do %>
   <% if current_user && current_user.can?(:view_external_links) %>
   <div class="master-panels--external-links-block external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}" data-panel-name="external-links"></div>
   <% end %>
-</script>
+<% end %>
 
-<script id="master_external_ids_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_external_ids_panel', css_class: 'hidden handlebars-partial') do %>
     <div class="master-panels--external-id-block row panel-body panel-with-sublists external-ids-panel reorder-sublist-columns">
       <div class="on-open-click hidden">
       <%  external_id_types.each do |e|%>
@@ -41,9 +41,9 @@
       <% end %>
     </div>
 
-</script>
+<% end %>
 
-<script id="master_details_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_details_panel', css_class: 'hidden handlebars-partial') do %>
 
    <div class="master-panels--details-block panel-body panel-with-sublists master-details-panel">
     <div class="row">
@@ -151,23 +151,23 @@
     </div>
    </div>
 
-</script>
+<% end %>
 
 
-<script id="tracker_completions" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('tracker_completions') do %>
   {{#with tracker}}
     {{>tracker_completions}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="tracker_completions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_completions-partial', css_class: 'hidden handlebars-partial') do %>
   {{#each tracker_completions}}
     <span class="label label-primary" title="{{protocol_name}} {{sub_process_name}}" data-sub-item="{{sub_process_id}}"><i class="glyphicon glyphicon-ok"></i>&nbsp;{{protocol_name}}</span>
   {{/each}}
-</script>
+<% end %>
 
 
-<script id="master_trackers_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_trackers_panel', css_class: 'hidden handlebars-partial') do %>
   <% unless app_config_set(:hide_tracker_panel) %>
     <div id="trackers-{{id}}" class="master-panels--trackers-block panel panel-default section-panel page-layout-panel contains-categories collapse trackers-block format-block-on-expand">
       <div class="is-header default-header section-panel-header">
@@ -192,4 +192,4 @@
       </div>
     </div>
   <% end %>
-</script>
+<% end %>
