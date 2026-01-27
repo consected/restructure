@@ -346,22 +346,22 @@ module FeatureSupport
     big_select_field = element_for_field(field_name)
     scroll_into_view(big_select_field)
 
-    # Trigger focus event to open big-select dialog
+    field_id = big_select_field[:id]
+    puts_debug "Big-select field ID: #{field_id}"
+
+    # Click the field to open the modal
     big_select_field.click
-    page.execute_script('arguments[0].focus();', big_select_field)
 
-    # Wait for big-select dialog to appear
+    # Wait for modal to become visible
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
 
-    sleep 1
-    page.has_css?('#primary-modal.fade.in')
-
-    # Look for big-select-item elements (clickable items in the dialog)
-    page.has_css?('.big-select-item', wait: 3)
-    all_items = page.all('.big-select-item')
+    # Look for big-select-item elements within the modal (modal is outside form scope)
+    all_items = page.all('#primary-modal .big-select-item')
     puts_debug " - Found #{all_items.count} big-select items in modal"
 
-    # Debug: save HTML to check what's in the dialog
-    File.write('/tmp/big_select_dialog.html', page.html)
+    # Debug: save HTML if no items found
+    save_html_snapshot('/tmp/big_select_dialog.html') if all_items.empty?
 
     list_of_items = []
     list_of_texts = []
@@ -386,7 +386,7 @@ module FeatureSupport
     # Verify the field value was actually set
     unless got_item_key
       puts_debug("big-select #{value} not in keys: #{list_of_items} or texts: #{list_of_texts}")
-      puts_debug('Saved big select dialog HTML to /tmp/big_select_dialog.html')
+      save_html_snapshot('/tmp/big_select_dialog.html')
     end
     expect(got_item_key).not_to be nil
 
@@ -394,6 +394,141 @@ module FeatureSupport
     big_select_field_after = element_for_field(field_name)
     field_value = big_select_field_after.value
     expect(field_value).to eq(got_item_key), '⚠️  WARNING: Field value still empty after clicking item!'
+  end
+
+  # Select from a big-select field that has grouped items (uses group_split_char configuration)
+  # @param [String] field_name - the field name (data-attr-name attribute)
+  # @param [String] value - the value to select
+  # @param [String|nil] group_name - optional group name to expand; if nil, searches all groups
+  def select_from_grouped_big_select_field(field_name, value, group_name: nil)
+    big_select_field = element_for_field(field_name)
+    scroll_into_view(big_select_field)
+
+    field_id = big_select_field[:id]
+
+    # Open the big-select dialog
+    big_select_field.click
+    sleep 1
+
+    # Check if modal opened
+    modal_visible = page.has_css?('#primary-modal.fade.in', wait: 3)
+
+    unless modal_visible
+      # Try triggering focus directly via JS
+      page.execute_script("$('##{field_id}').focus();")
+      sleep 1
+      modal_visible = page.has_css?('#primary-modal.fade.in', wait: 3)
+    end
+
+    unless modal_visible
+      File.write('/tmp/grouped_no_modal.html', page.html)
+      raise "Modal did not open for grouped big-select field '#{field_name}'. HTML saved to /tmp/grouped_no_modal.html"
+    end
+
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+
+    # Check if there are grouped items
+    if page.has_css?('.big-select-group-head', wait: 2)
+      group_headers = page.all('.big-select-group-head')
+
+      if group_name
+        # Find specific group and expand it
+        target_group = group_headers.find { |h| h.text.include?(group_name) }
+        unless target_group
+          available_groups = group_headers.map(&:text)
+          raise "Could not find group '#{group_name}' in big-select. Available: #{available_groups.inspect}"
+        end
+
+        within(target_group) do
+          find('a[data-toggle="collapse"]').click
+        end
+        sleep 0.5
+      else
+        # Expand all groups to search for the item
+        group_headers.each do |header|
+          within(header) do
+            collapse_link = find('a[data-toggle="collapse"]')
+            collapse_link.click if collapse_link['aria-expanded'] != 'true'
+          end
+          sleep 0.3
+        end
+      end
+    end
+
+    # Wait for items and select the matching one (within modal scope)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
+    all_items = page.all('#primary-modal .big-select-item', visible: true)
+
+    # Find matching item by key or text
+    got_item = nil
+    all_items.each do |item|
+      item_key = item['data-bsi-key']
+      item_text = item.text.strip
+
+      # Skip items without a valid key (group headers, clear option, etc.)
+      next if item_key.nil? || item_key == '' || item_key == 'big-select-clear'
+
+      # Match by key or by text
+      if item_key == value || item_text.include?(value)
+        got_item = item
+        break
+      end
+    end
+
+    unless got_item
+      available = all_items.map { |i| "#{i['data-bsi-key']}: #{i.text[0..50]}" }
+      raise "Could not find '#{value}' in grouped big-select. Available: #{available.take(10).inspect}"
+    end
+
+    puts_debug "Grouped big-select: clicking item with key='#{got_item['data-bsi-key']}', text='#{got_item.text[0..30]}'"
+    expected_key = got_item['data-bsi-key'] # Store key BEFORE clicking (element becomes stale after)
+    got_item.click
+
+    expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+    sleep 0.5
+
+    # Verify the field value was set
+    big_select_field_after = element_for_field(field_name)
+    field_value = big_select_field_after.value
+
+    unless field_value == expected_key
+      # Save HTML for debugging
+      File.write('/tmp/grouped_mismatch.html', page.html)
+      puts_debug "Field value mismatch! Expected '#{expected_key}', got '#{field_value}'. HTML saved."
+    end
+
+    expect(field_value).to eq(expected_key),
+                           "⚠️  WARNING: Field value '#{field_value}' doesn't match expected '#{expected_key}'"
+  end
+
+  # Clear the selection in a big-select field by clicking the (none) option
+  # @param [String] field_name - the field name (data-attr-name attribute)
+  def clear_big_select_field(field_name)
+    big_select_field = element_for_field(field_name)
+    scroll_into_view(big_select_field)
+
+    big_select_field.click
+    sleep 1
+
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
+
+    # Find the (none) / clear option within the modal
+    clear_option = page.all('#primary-modal .big-select-item').find do |item|
+      item['data-bsi-key'] == '' || item['id'] == 'big-select-item--big-select-clear' || item.text == '(none)'
+    end
+
+    raise 'Could not find (none) option in big-select dialog' unless clear_option
+
+    clear_option.click
+
+    expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+    sleep 0.5
+
+    # Verify the field was cleared (value is set to 'big-select-clear' marker)
+    big_select_field_after = element_for_field(field_name)
+    expect(big_select_field_after.value).to eq('big-select-clear'),
+                                            "⚠️  WARNING: Field was not cleared, value is '#{big_select_field_after.value}'"
   end
 
   def fill_in_field(field_name, value)
