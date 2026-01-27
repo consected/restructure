@@ -200,8 +200,22 @@ _fpa.form_utils = {
     block.find('script.big-select-data[type="application/json"]').each(function() {
       var $dataEl = $(this);
       var fieldId = $dataEl.data('field-id');
-      var options = $dataEl.data('options') || {};
-      var hashData = $dataEl.data('hash') || {};
+      var optionsAttr = $dataEl.attr('data-options');
+      var hashAttr = $dataEl.attr('data-hash');
+      
+      // Parse JSON from attributes (jQuery .data() may not parse HTML-escaped JSON correctly)
+      var options = {};
+      var hashData = {};
+      try {
+        if (optionsAttr) options = JSON.parse(optionsAttr);
+      } catch (e) {
+        // Ignore parse errors - field will work without options
+      }
+      try {
+        if (hashAttr) hashData = JSON.parse(hashAttr);
+      } catch (e) {
+        // Ignore parse errors - field will be skipped if no hash data
+      }
       
       var field = document.getElementById(fieldId);
       if (field) {
@@ -219,17 +233,23 @@ _fpa.form_utils = {
       .not('.big-select-su')
       .each(function () {
         var label = '';
+        var hash = $(this)[0].big_select_hash;
+        var opts = $(this)[0].big_select_options;
+        // Skip this field if no data available
+        if (!hash || Object.keys(hash).length === 0) {
+          return;
+        }
         $.big_select(
           $(this),
           $('#primary-modal .modal-body'),
-          $(this)[0].big_select_hash,
+          hash,
           function () {
             _fpa.show_modal('', label);
           },
           function () {
             _fpa.hide_modal();
           },
-          $(this)[0].big_select_options
+          opts
         );
       })
       .addClass('big-select-su');
