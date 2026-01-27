@@ -139,7 +139,7 @@ done
 
 echo "========================================================================" >> tmp/working_failing_specs.log
 echo "All Done" >> tmp/working_failing_specs.log
-echo "Runs with Failures: $(grep 'Failures: ' tmp/failing_specs.log | wc -l)" >> tmp/working_failing_specs.log
+echo "Runs with failures: $(grep 'Failures: ' tmp/working_failing_specs.log | wc -l)" >> tmp/working_failing_specs.log
 echo "==>>>> $(date)" >> tmp/working_failing_specs.log
 echo "========================================================================" >> tmp/working_failing_specs.log
 mv tmp/working_failing_specs.log tmp/failing_specs.log

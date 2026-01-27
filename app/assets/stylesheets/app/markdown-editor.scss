@@ -25,3 +25,38 @@
   }
 
 }
+
+// BEM-named classes for markdown editor toolbar buttons
+.markdown-editor-toolbar__btn {
+  &--paragraph {
+    font-weight: normal;
+  }
+
+  &--paragraph-text {
+    font-size: 12px;
+  }
+
+  &--heading {
+    font-weight: bold;
+  }
+
+  &--h2-text {
+    font-size: 14px;
+  }
+
+  &--h3-text {
+    font-size: 12px;
+  }
+
+  &--h4-text {
+    font-size: 10px;
+  }
+
+  &--strikethrough {
+    text-decoration: line-through;
+  }
+
+  &--unlink-icon {
+    text-decoration: line-through;
+  }
+}

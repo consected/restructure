@@ -30,7 +30,7 @@
       <%= render partial: 'reports/criteria/fields' %>
       <%= render partial: 'reports/criteria/inline_search_button_block' %>
     </div>
-    <div class="form-group form-actions clearfix" style="border-color: transparent;">
+    <div class="form-group form-actions clearfix report-criteria__actions">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", '', id: nil%>
       <%= hidden_field_tag  "embed", embedded_report, id: nil%>

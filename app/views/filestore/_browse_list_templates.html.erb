@@ -1,10 +1,10 @@
 <%# Templates to support view type: 'list' browser %>
 
-<script id="nfs-store-browse-list-results" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('nfs-store-browse-list-results') do %>
   {{>nfs_store_browse_list_results_part}}
-</script>
+<% end %>
 
-<script id="nfs_store_browse_list_results_part" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('nfs_store_browse_list_results_part', css_class: 'hidden handlebars-partial') do %>
 
 
   <ul class="container-list-items">
@@ -19,9 +19,9 @@
     </ul>
   
   </ul>
-</script>
+<% end %>
 
-<script id="nfs_store_browse_list_folders" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('nfs_store_browse_list_folders', css_class: 'hidden handlebars-partial') do %>
   
   {{#with @root}}
   
@@ -35,10 +35,10 @@
       {{/with}}
     {{/each}}
   {{/with}} 
-</script>
+<% end %>
 
 
-<script id="nfs_store_browse_list_folder"   type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('nfs_store_browse_list_folder', css_class: 'hidden handlebars-partial') do %>
   
   
     <li class="container-folder container-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive {{#is show_folder_name '===' 'file status'}}is-file-status-folder{{/is}}">
@@ -61,10 +61,10 @@
     <ul class="container-folder-items collapse {{#is folder_name '===' '.'}}in{{/is}} {{#is show_folder_name '===' 'file status'}}is-file-status-folder-items{{/is}}" data-folder-items="{{folder}}" id="{{container_id}}--{{id_hyphenate folder}}">
       {{>nfs_store_browse_list_folders curr_folder=folder}}
     </ul>
-</script>
+<% end %>
 
 
-<script id="nfs_store_browse_list_entry" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('nfs_store_browse_list_entry', css_class: 'hidden handlebars-partial') do %>
   <li class="container-entry" id="container-entry-{{nfs_store_container_id}}-{{id}}-{{retrieval_type}}" data-retrieval-type="{{retrieval_type}}" data-download-id="{{id}}">
     {{#if id}}
       <input type="checkbox" 
@@ -136,4 +136,4 @@
     {{/if}}
   </li>
 
-</script>
+<% end %>

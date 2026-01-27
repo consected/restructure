@@ -14,15 +14,15 @@
       </code></p>
 
   </div>
-  <ul id="gs-list" style=" overflow: auto; background-color: white;">
+  <ul id="gs-list" class="admin-ref-data__list">
 
     <% Classification::GeneralSelection.item_types.each do |p| %>
     <li id="gs-<%=p%>">
-      <a href="#gsblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
+      <a href="#gsblock-<%=p%>" data-toggle="collapse" class="collapsed"><%=p %></a>
     </li>
     <ul id="gsblock-<%=p%>" class="collapse">
       <% Classification::GeneralSelection.where(item_type: p).each do |gs| %>
-      <li style="color: <%= gs.disabled ? '#aaa' : 'auto' %>" data-gs-item-type="<%=p%>" id="general_selection-<%=gs.id%>"><%=gs.value%> - <%= gs.name %></li>
+      <li class="<%= 'admin-ref-data__list-item--disabled' if gs.disabled %>" data-gs-item-type="<%=p%>" id="general_selection-<%=gs.id%>"><%=gs.value%> - <%= gs.name %></li>
       <% end %>
     </ul>
     <% end %>

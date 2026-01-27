@@ -83,10 +83,10 @@
   </div>
 </div>
 
-<script>
+<%= javascript_tag nonce: true do %>
 $('#form-restart-server').on('click', function(){
   window.setTimeout(function(){
     window.location.reload()
   }, 5000)
 })
-</script>
+<% end %>

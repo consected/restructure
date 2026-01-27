@@ -9,18 +9,18 @@
 <%= form.text_area field_name_sym, class: "form-control text-notes hidden use-text-area-for-custom-editor", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}  %>
 <div class="btn-toolbar markdown-editor-toolbar" data-role="editor-toolbar" data-target="#<%=editor_id%>">
   <div class="btn-group">
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <p>" title="Paragraph" style="font-weight: normal"><span style="font-size: 12px;">p</span></a>
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <h1>" title="Heading 1" style="font-weight: bold">h1</a>
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <h2>" title="Heading 2" style="font-weight: bold;"><span style="font-size: 14px;">h2</span> </a>
+    <a class="btn btn-default btn-sm markdown-editor-toolbar__btn--paragraph" data-edit="formatBlock <p>" title="Paragraph"><span class="markdown-editor-toolbar__btn--paragraph-text">p</span></a>
+    <a class="btn btn-default btn-sm markdown-editor-toolbar__btn--heading" data-edit="formatBlock <h1>" title="Heading 1">h1</a>
+    <a class="btn btn-default btn-sm markdown-editor-toolbar__btn--heading" data-edit="formatBlock <h2>" title="Heading 2"><span class="markdown-editor-toolbar__btn--h2-text">h2</span> </a>
 		<% if config[:toolbar_type] == 'advanced' %>
-		<a class="btn btn-default btn-sm" data-edit="formatBlock <h3>" title="Heading 3" style="font-weight: bold;"><span style="font-size: 12px;">h3</span> </a>
-		<a class="btn btn-default btn-sm" data-edit="formatBlock <h4>" title="Heading 4" style="font-weight: bold;"><span style="font-size: 10px;">h4</span> </a>
+		<a class="btn btn-default btn-sm markdown-editor-toolbar__btn--heading" data-edit="formatBlock <h3>" title="Heading 3"><span class="markdown-editor-toolbar__btn--h3-text">h3</span> </a>
+		<a class="btn btn-default btn-sm markdown-editor-toolbar__btn--heading" data-edit="formatBlock <h4>" title="Heading 4"><span class="markdown-editor-toolbar__btn--h4-text">h4</span> </a>
 		<% end %>
   </div>
   <div class="btn-group">
 		<a class="btn btn-default btn-sm" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="glyphicon glyphicon-bold"></i></a>
 		<a class="btn btn-default btn-sm" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="glyphicon glyphicon-italic"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="strikethrough" title="Strikethrough" style="text-decoration: line-through;">S</a>
+		<a class="btn btn-default btn-sm markdown-editor-toolbar__btn--strikethrough" data-edit="strikethrough" title="Strikethrough">S</a>
 		<a class="btn btn-default btn-sm" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="glyphicon glyphicon-text-color"></i></a>
 		<a class="btn btn-default btn-sm" data-edit="subscript" title="Subscript">H<sub>2</sub></a>
 		<a class="btn btn-default btn-sm" data-edit="superscript" title="Superscript">A<sup>1</sup></a>
@@ -59,7 +59,7 @@
 			<input class="span2" placeholder="link URL" type="text" data-edit="createLink" >
 			<button class="btn" type="button">Add</button>
 		</div>
-		<a class="btn btn-default btn-sm" data-edit="unlink" title="" data-original-title="Remove Hyperlink"><i class="glyphicon glyphicon-link" style="text-decoration: line-through"></i></a>
+		<a class="btn btn-default btn-sm" data-edit="unlink" title="" data-original-title="Remove Hyperlink"><i class="glyphicon glyphicon-link markdown-editor-toolbar__btn--unlink-icon"></i></a>
 	</div>
 	<div class="btn-group">
 		<a class="btn btn-default btn-sm dropdown-toggle btn-wysiwyg-tb" data-toggle="dropdown" title="" data-original-title="Picture"><i class="glyphicon glyphicon-picture"></i></a>
