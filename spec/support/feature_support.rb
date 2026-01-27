@@ -1,5 +1,32 @@
 # frozen_string_literal: true
 
+# Helper methods for Capybara system specs
+#
+# This module provides reusable methods for interacting with the application UI
+# in system tests, abstracting common patterns and handling edge cases.
+#
+# Key Method Categories:
+# - Field Interaction: fill_in_field, select_from_dropdown_field, set_yes_no_field,
+#   set_checkbox_field, select_from_big_select_field, select_from_grouped_big_select_field
+# - Navigation: expand_master_record, expand_master_record_tab, expand_model_reference,
+#   click_edit_button_within_target
+# - Debugging: debug_process_status, available_form_fields, puts_alerts
+# - Waiting: finish_page_loading, finish_form_formatting
+#
+# Chosen.js Detection:
+# The select_from_dropdown_field method automatically detects chosen.js via:
+# - 'use-chosen' class (explicit declaration)
+# - 'attached-chosen' class (added after JS initialization)
+# - Presence of #{field_id}_chosen container element
+#
+# Big-Select Fields:
+# - select_from_big_select_field: For standard big-select modal dialogs
+# - select_from_grouped_big_select_field: For big-select with group_split_char grouping
+#
+# Usage Guidelines:
+# - Always use helper methods instead of raw Capybara selectors
+# - Helpers handle scrolling, visibility, and AJAX waits automatically
+# - Modal interactions must happen outside Capybara `within` blocks
 require './spec/support/feature_helper'
 require './spec/support/user_actions_setup'
 module FeatureSupport
@@ -237,6 +264,8 @@ module FeatureSupport
     all(ResultsMasterExpander)
   end
 
+  #
+  # Expand a master record by its index in the results list (0-based)
   def expand_master(index)
     has_css?('.results-panel')
     finish_form_formatting
@@ -247,6 +276,10 @@ module FeatureSupport
     expect(new_panel).to have_css('.master-main-panel')
   end
 
+  #
+  # Expand a master record tab (such as "details", "external ids", etc) by name
+  # This avoids the need to explicitly get `a[data-panel-tab="<name>"]` and click it.
+  # Expectations are also enforced to ensure the tab shows.
   def expand_master_record_tab(name)
     finish_form_formatting
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
@@ -254,6 +287,9 @@ module FeatureSupport
     all('ul.details-tabs').first.click_link name if tab_link['aria-expanded'] != 'true'
   end
 
+  #
+  # Expand a search tab by the name that appears on the button
+  # Expectations are also enforced to ensure the search form shows.
   def expand_search_with_button(name)
     search_btn = all(".advanced-form-selections a[type='button']").select { |b| b.text == name }.first
     expect(search_btn).not_to be nil
@@ -295,6 +331,11 @@ module FeatureSupport
     if is_report
       find("[name='search_attrs[#{field_name}]']", visible: :all, wait: 2)
     else
+      # For big-select fields, there may be both a hidden select and an input element
+      # Prefer the input element if it exists (big-select uses input)
+      inputs = all("input[data-attr-name='#{field_name}']", visible: :all, wait: 2)
+      return inputs.first if inputs.any?
+
       find("[data-attr-name='#{field_name}']", visible: :all, wait: 2)
     end
   rescue Capybara::ElementNotFound => e
@@ -421,7 +462,7 @@ module FeatureSupport
     end
 
     unless modal_visible
-      File.write('/tmp/grouped_no_modal.html', page.html)
+      save_html_snapshot('/tmp/grouped_no_modal.html')
       raise "Modal did not open for grouped big-select field '#{field_name}'. HTML saved to /tmp/grouped_no_modal.html"
     end
 
@@ -492,8 +533,7 @@ module FeatureSupport
     field_value = big_select_field_after.value
 
     unless field_value == expected_key
-      # Save HTML for debugging
-      File.write('/tmp/grouped_mismatch.html', page.html)
+      save_html_snapshot('/tmp/grouped_mismatch.html')
       puts_debug "Field value mismatch! Expected '#{expected_key}', got '#{field_value}'. HTML saved."
     end
 
@@ -539,10 +579,22 @@ module FeatureSupport
     field.fill_in(with: value)
   end
 
+  # Select a value from a dropdown field, automatically detecting chosen.js
+  # Chosen can be attached via:
+  # 1. `use-chosen` class on the element
+  # 2. `attached-chosen` class added after chosen.js initialization
+  # 3. Report criteria fields (always use chosen via .report-criteria-fields-block selector)
   def select_from_dropdown_field(field_name, value, is_report: false)
     element = element_for_field(field_name, is_report:)
     scroll_into_view(element)
-    if element['class'].include?('use-chosen')
+
+    # Detect if chosen.js is attached via multiple fallback checks
+    has_chosen = element['class'].include?('use-chosen') ||
+                 element['class'].include?('attached-chosen') ||
+                 is_report ||
+                 page.has_css?("##{element[:id]}_chosen", visible: :all, wait: 0.5)
+
+    if has_chosen
       select_from_chosen(field_name, value, is_report:)
     else
       element.select value

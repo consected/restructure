@@ -10,12 +10,14 @@ require 'rails_helper'
 #    - Multiple sequential selections
 #    - Clearing selections with (none) option
 # ✅ hide_popover option: Hides info popover and shows overlay with selected value text
+# ✅ hide_key option: Controls visibility of the value key in the selection list
 # ✅ Grouped items (group_split_char):
 #    - Displays items in collapsible groups by category
 #    - Auto-expands group containing currently selected value
-# ⏸️ Filtered option (PENDING - requires implementation):
-#    - Configuration exists but data-select-filtering-target attribute not rendered
-#    - Tests skipped and document expected behavior for future implementation
+# ✅ Filtered option:
+#    - Filters big-select items based on another field's value
+#    - Updates dynamically when filter field changes
+#    - Works with grouped items and category-based filtering
 #
 # The big-select component is a modal dialog for selecting from large lists of options,
 # providing a better UX than standard dropdowns when there are many choices.
@@ -75,11 +77,6 @@ describe 'big-select field component', js: true, driver: $browser_driver do
                               primary_key_name: 'id',
                               foreign_key_name: 'master_id'
 
-    # Debug: Check if the class was created
-    puts 'DEBUG after DynamicModel.create!:'
-    puts "  defined?(DynamicModel::TestBigSelectSource) = #{defined?(DynamicModel::TestBigSelectSource)}"
-    puts "  Resources::Models.find_by(table_name: 'test_big_select_sources')&.dig(:class_name) = #{Resources::Models.find_by(table_name: 'test_big_select_sources')&.dig(:class_name)}"
-
     dm.current_admin = @admin
     dm.update_tracker_events
     setup_access :dynamic_model__test_big_select_sources, user: @user
@@ -90,23 +87,23 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     # Category A items - belong to @master
     # Using exact category names to match filter options
     @source_item1 = ic.create!(current_user: @user, master: @master,
-                               name: 'alpha item', category: 'Category A',
+                               name: 'alpha item', category: 'category a',
                                description: 'First item in Category A')
     @source_item2 = ic.create!(current_user: @user, master: @master,
-                               name: 'beta item', category: 'Category A',
+                               name: 'beta item', category: 'category a',
                                description: 'Second item in Category A')
 
     # Category B items
     @source_item3 = ic.create!(current_user: @user, master: @master,
-                               name: 'gamma item', category: 'Category B',
+                               name: 'gamma item', category: 'category b',
                                description: 'First item in Category B')
     @source_item4 = ic.create!(current_user: @user, master: @master,
-                               name: 'delta item', category: 'Category B',
+                               name: 'delta item', category: 'category b',
                                description: 'Second item in Category B')
 
     # Category C items for filtered tests
     @source_item5 = ic.create!(current_user: @user, master: @master,
-                               name: 'epsilon item', category: 'Category C',
+                               name: 'epsilon item', category: 'category c',
                                description: 'First item in Category C')
 
     dm
@@ -144,10 +141,12 @@ describe 'big-select field component', js: true, driver: $browser_driver do
 
           filter_category:
             edit_as:
+              field_type: select_filter_category
               alt_options:
-                'Category A': Category A
-                'Category B': Category B
-                'Category C': Category C
+                'Category A': category a
+                'Category B': category b
+                'Category C': category c
+              select_filtering_target: 'select_filtered'
 
           select_filtered:
             edit_as:
@@ -160,7 +159,6 @@ describe 'big-select field component', js: true, driver: $browser_driver do
               group_split_char: '|'
               big_select:
                 filtered: true
-              select_filtering_target: filter_category
 
           select_grouped:
             edit_as:
@@ -174,12 +172,36 @@ describe 'big-select field component', js: true, driver: $browser_driver do
               big_select:
                 hide_key: true
 
+          select_with_hide_key:
+            edit_as:
+              field_type: select_record_from_table_test_big_select_sources
+              value_attr: name
+              label_attr:
+                - name
+                - ' >>> '
+                - description
+              big_select:
+                hide_key: true
+
+          select_without_hide_key:
+            edit_as:
+              field_type: select_record_from_table_test_big_select_sources
+              value_attr: name
+              label_attr:
+                - name
+                - ' >>> '
+                - description
+              big_select:
+                hide_key: false
+
         labels:
           select_basic: Basic Selection
           select_hide_popover: Selection With Overlay
           filter_category: Filter By Category
           select_filtered: Filtered Selection
           select_grouped: Grouped Selection
+          select_with_hide_key: Selection With Hide Key
+          select_without_hide_key: Selection Without Hide Key
           notes: Notes
     YAML
 
@@ -189,7 +211,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
                               table_name: 'test_big_select_fields',
                               category: :details,
                               options: dm_options,
-                              field_list: 'select_basic select_hide_popover filter_category select_filtered select_grouped notes',
+                              field_list: 'select_basic select_hide_popover filter_category select_filtered select_grouped select_with_hide_key select_without_hide_key notes',
                               primary_key_name: 'id',
                               foreign_key_name: 'master_id',
                               position: 10
@@ -200,6 +222,29 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     setup_access :dynamic_model__test_big_select_fields, user: @user
 
     dm
+  end
+
+  # Helper method to navigate to the big-select test form
+  # Centralizes navigation logic and adds consistent wait handling
+  def navigate_to_big_select_form
+    visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
+    dismiss_modal
+    finish_page_loading
+
+    expect(page).to have_css("#master-#{@master.id}")
+
+    details_tab = all('a[data-panel-tab="details"]').first
+    details_tab.click
+    finish_page_loading
+
+    new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
+    expect(page).to have_css(new_button_selector, wait: 10)
+    find(new_button_selector).click
+    finish_page_loading
+
+    expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
+    finish_form_formatting
+    sleep 1 # Allow JavaScript to fully initialize
   end
 
   describe 'basic big-select functionality' do
@@ -218,10 +263,6 @@ describe 'big-select field component', js: true, driver: $browser_driver do
 
       DynamicModel.routes_load
       Rails.application.routes_reloader.reload!
-
-      # Debug: Check if Resources::Models has our dynamic model registered
-      source_model = Resources::Models.find_by(table_name: 'test_big_select_sources')
-      puts "DEBUG before(:all): Resources::Models lookup for test_big_select_sources = #{source_model&.dig(:class_name) || 'NOT FOUND'}"
     end
 
     before(:each) do
@@ -229,42 +270,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'opens big-select dialog, selects an item, and sets the field value' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
-
-      expect(page).to have_css("#master-#{@master.id}")
-
-      # Navigate to the details tab
-      details_tab = all('a[data-panel-tab="details"]').first
-      expect(details_tab).not_to be_nil
-      details_tab.click
-      finish_page_loading
-
-      expect(page).to have_css("#details-#{@master.id}")
-
-      # Click the new button for our test dynamic model
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-
-      # Debug if button not found
-      unless page.has_css?(new_button_selector, wait: 5)
-        puts 'DEBUG: Available containers:'
-        all('.details-item-type').each { |c| puts "  #{c[:class]}" }
-        File.write('/tmp/details_page.html', page.html)
-        expect(page).to have_css(new_button_selector)
-      end
-
-      find(new_button_selector).click
-      finish_page_loading
-
-      # Debug: save HTML if form not found
-      unless page.has_css?('form.new_dynamic_model_test_big_select_field', wait: 10)
-        puts 'DEBUG: Form not found after clicking new button'
-        File.write('/tmp/after_new_click.html', page.html)
-        expect(page).to have_css('form.new_dynamic_model_test_big_select_field')
-      end
-      finish_form_formatting
-      sleep 1 # Allow JavaScript to fully initialize
+      navigate_to_big_select_form
 
       # Call helper OUTSIDE the within block to avoid scope issues
       select_from_big_select_field('select_basic', 'alpha item')
@@ -277,71 +283,32 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'opens big-select multiple times in sequence' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
+      navigate_to_big_select_form
 
-      expect(page).to have_css("#master-#{@master.id}")
-
-      # Navigate to the details tab
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
-
-      # Click the new button for our test dynamic model
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector, wait: 5)
-      find(new_button_selector).click
-      finish_page_loading
-      finish_form_formatting
-      sleep 1
-
-      # === First open: select an item ===
-      puts "\n=== First selection: Alpha Item ==="
+      # First open: select an item
       select_from_big_select_field('select_basic', 'alpha item')
 
       # Verify field value
       basic_field = find('form.new_dynamic_model_test_big_select_field input[data-attr-name="select_basic"]', visible: :all)
-      puts "  Field value: '#{basic_field.value}'"
       expect(basic_field.value).to eq('alpha item')
 
-      # === Second open: clear selection ===
-      puts "\n=== Second selection: Clear (none) ==="
+      # Second open: clear selection
       clear_big_select_field('select_basic')
 
       # Verify field cleared
       basic_field = find('form.new_dynamic_model_test_big_select_field input[data-attr-name="select_basic"]', visible: :all)
-      puts "  Field value after clear: '#{basic_field.value}'"
       expect(basic_field.value).to eq('big-select-clear')
 
-      # === Third open: select a different item ===
-      puts "\n=== Third selection: Beta Item ==="
+      # Third open: select a different item
       select_from_big_select_field('select_basic', 'beta item')
 
       # Verify field value
       basic_field = find('form.new_dynamic_model_test_big_select_field input[data-attr-name="select_basic"]', visible: :all)
-      puts "  Field value: '#{basic_field.value}'"
       expect(basic_field.value).to eq('beta item')
     end
 
     it 'clears selection when clicking the (none) option' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
-
-      expect(page).to have_css("#master-#{@master.id}")
-
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
-
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector)
-      find(new_button_selector).click
-
-      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
-      finish_form_formatting
-      sleep 1
+      navigate_to_big_select_form
 
       # Call helpers OUTSIDE within block
       select_from_big_select_field('select_basic', 'beta item')
@@ -376,23 +343,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'displays overlay field showing selected value text instead of popover' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
-
-      expect(page).to have_css("#master-#{@master.id}")
-
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
-
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector)
-      find(new_button_selector).click
-
-      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
-      finish_form_formatting
-      sleep 1
+      navigate_to_big_select_form
 
       within('form.new_dynamic_model_test_big_select_field') do
         # Find the hide_popover big-select field
@@ -421,6 +372,69 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
   end
 
+  describe 'hide_key option' do
+    before(:all) do
+      set_up_feature
+      setup_source_data_table
+      setup_big_select_test_dm
+      Rails.application.routes_reloader.reload!
+    end
+
+    before(:each) do
+      login
+    end
+
+    it 'hides the key/ID when hide_key is true and shows it when false' do
+      navigate_to_big_select_form
+      finish_page_loading
+
+      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
+      # Test field WITH hide_key: true
+      # Both fields have same label_attr: [name, ' >>> ', description]
+      # With hide_key: true, the JavaScript splits on '>>>' separator
+      # The key (first part) goes in .bsi--head, the rest in .bsi--body
+      with_hide_key_field = find('input.use-big-select[data-attr-name="select_with_hide_key"]', visible: :all)
+      scroll_into_view(with_hide_key_field)
+      with_hide_key_field.click
+
+      # Wait for modal to open
+      expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+      expect(page).to have_css('.big-select-item', wait: 3)
+
+      # Find an item - with hide_key: true, it splits on ' >>> ' separator
+      # The key (first part) goes in .bsi--head, the rest in .bsi--body
+
+      # Should have both head and body elements
+      expect(page).to have_css('.big-select-item[data-bsi-key="alpha item"] .bsi--head', text: 'alpha item')
+      expect(page).to have_css('.big-select-item[data-bsi-key="alpha item"] .bsi--body', text: 'First item in Category A')
+
+      # Close modal
+      find('body').click
+      expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+
+      # Test field WITHOUT hide_key (hide_key: false)
+      # Same label_attr: [name, ' >>> ', description]
+      # With hide_key: false, the key is shown in .bsi--head and full label in .bsi--body
+      without_hide_key_field = find('input.use-big-select[data-attr-name="select_without_hide_key"]', visible: :all)
+      scroll_into_view(without_hide_key_field)
+      without_hide_key_field.click
+
+      # Wait for modal to open
+      expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+      expect(page).to have_css('.big-select-item', wait: 3)
+
+      # Find an item - with hide_key: false, key is shown and full label is shown
+
+      # Should have both head (key) and body (full label) elements
+      expect(page).to have_css('.big-select-item[data-bsi-key="gamma item"] .bsi--head', text: 'gamma item')
+      expect(page).to have_css('.big-select-item[data-bsi-key="gamma item"] .bsi--body', text: 'gamma item >>> First item in Category B')
+
+      # Close modal
+      find('body').click
+      expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+    end
+  end
+
   describe 'grouped items with group_split_char' do
     before(:all) do
       set_up_feature
@@ -434,23 +448,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'displays items in collapsible groups based on category' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
-
-      expect(page).to have_css("#master-#{@master.id}")
-
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
-
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector)
-      find(new_button_selector).click
-
-      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
-      finish_form_formatting
-      sleep 1
+      navigate_to_big_select_form
 
       # Use the helper to select from grouped big-select (outside within block, use lowercase group name)
       select_from_grouped_big_select_field('select_grouped', 'alpha item', group_name: 'category a')
@@ -466,8 +464,8 @@ describe 'big-select field component', js: true, driver: $browser_driver do
       # First create a record with a pre-selected value (use lowercase)
       @master.current_user = @user
       ic = DynamicModel::TestBigSelectField
-      record = ic.create!(current_user: @user, master: @master,
-                          select_grouped: 'delta item', notes: 'Test record')
+      ic.create!(current_user: @user, master: @master,
+                 select_grouped: 'delta item', notes: 'Test record')
 
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
@@ -499,7 +497,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
       expect(grouped_field.value).to eq('delta item')
 
       # Click the field to open the modal
-      field_id = grouped_field[:id]
+      grouped_field[:id]
       scroll_into_view(grouped_field)
       grouped_field.click
 
@@ -532,32 +530,29 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'filters available options based on another fields value' do
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
+      navigate_to_big_select_form
 
-      expect(page).to have_css("#master-#{@master.id}")
+      # Verify filter dropdown renders with correct options
+      within('form.new_dynamic_model_test_big_select_field') do
+        filter_field = find('select[data-attr-name="filter_category"]', visible: :all)
+        options = filter_field.all('option', visible: :all).map(&:text)
+        expect(options).to include('Category A', 'Category B', 'Category C')
+      end
 
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
+      # Set the filter category to Category B - this should filter the big-select options
+      select_from_dropdown_field('filter_category', 'Category B')
+      sleep 0.5
 
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector)
-      find(new_button_selector).click
+      # Verify the filter field value was set correctly
+      within('form.new_dynamic_model_test_big_select_field') do
+        filter_field = find('select[data-attr-name="filter_category"]', visible: :all)
+        expect(filter_field.value).to eq('category b')
+      end
 
-      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
-      finish_form_formatting
-      sleep 1
+      # Now the big-select should be filtered to show only Category B items
+      select_from_grouped_big_select_field('select_filtered', 'gamma item', group_name: 'category b')
 
-      # NOTE: The filtered option is not fully implemented in the codebase.
-      # The filter_category field renders as a text input (not select),
-      # and does not have the data-select-filtering-target attribute needed
-      # to trigger the JavaScript filtering functionality.
-      # This test documents the expected behavior for future implementation.
-      skip 'Filtered big-select option requires implementation of data-select-filtering-target attribute rendering'
-
-      # Verify the field value was set (lowercase in database)
+      # Verify the field value was set
       within('form.new_dynamic_model_test_big_select_field') do
         filtered_field = find('input.use-big-select[data-attr-name="select_filtered"]', visible: :all)
         expect(filtered_field.value).to eq('gamma item')
@@ -565,31 +560,17 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     end
 
     it 'updates available options when the filter field changes' do
-      skip 'Filtered big-select option requires implementation of data-select-filtering-target attribute rendering'
+      navigate_to_big_select_form
 
-      visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
-      dismiss_modal
-      finish_page_loading
-
-      expect(page).to have_css("#master-#{@master.id}")
-
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
-      finish_page_loading
-
-      new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
-      expect(page).to have_css(new_button_selector)
-      find(new_button_selector).click
-
-      expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
-      finish_form_formatting
+      # Start with Category A
+      select_from_dropdown_field('filter_category', 'Category A')
       sleep 1
 
-      # Start with Category A (renders as text input, not select)
-      fill_in_field('filter_category', 'Category A')
-      sleep 1
+      # Verify the filter field value was set
+      filter_field = find('form.new_dynamic_model_test_big_select_field select[data-attr-name="filter_category"]', visible: :all)
+      expect(filter_field.value).to eq('category a')
 
-      # Select an item from Category A
+      # Big-select should be filtered to show only Category A items
       select_from_grouped_big_select_field('select_filtered', 'alpha item', group_name: 'category a')
 
       # Verify the field value was set
@@ -597,10 +578,14 @@ describe 'big-select field component', js: true, driver: $browser_driver do
       expect(filtered_field.value).to eq('alpha item')
 
       # Change filter to Category C
-      fill_in_field('filter_category', 'Category C')
+      select_from_dropdown_field('filter_category', 'Category C')
       sleep 1
 
-      # Now select an item from Category C (the filter should have updated the options)
+      # Verify the filter changed
+      filter_field = find('form.new_dynamic_model_test_big_select_field select[data-attr-name="filter_category"]', visible: :all)
+      expect(filter_field.value).to eq('category c')
+
+      # Now big-select should be filtered to show only Category C items
       select_from_grouped_big_select_field('select_filtered', 'epsilon item', group_name: 'category c')
 
       # Verify the new selection
