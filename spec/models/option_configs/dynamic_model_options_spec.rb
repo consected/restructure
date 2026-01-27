@@ -597,7 +597,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
       # Enable migrations for this test suite
       @original_allow_migrations = Settings::AllowDynamicMigrations
-      silence_warnings { Settings.const_set('AllowDynamicMigrations', true) }
+      change_setting('AllowDynamicMigrations', true)
 
       @schema_name = 'dynamic_test'
       @table_name = 'test_field_type_changes'
@@ -641,7 +641,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
       # Clean up
       @dm&.disable!(@admin)
       # Restore original migration setting
-      silence_warnings { Settings.const_set('AllowDynamicMigrations', @original_allow_migrations) }
+      change_setting('AllowDynamicMigrations', @original_allow_migrations)
     end
 
     it 'correctly changes field types in both primary and history tables' do
