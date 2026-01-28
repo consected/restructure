@@ -27,3 +27,14 @@
       }
   }
 }
+
+// BEM-named classes for page layout index
+.page-layout-index {
+  &__label-cell {
+    width: 15%;
+  }
+
+  &__description-cell {
+    width: 30%;
+  }
+}

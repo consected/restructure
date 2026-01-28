@@ -1,7 +1,7 @@
 <%
   Application.refresh_dynamic_defs
 %>
-<script>
+<%= javascript_tag nonce: true do %>
 
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   _fpa.status.session = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
@@ -85,4 +85,4 @@
   <% end %>
 
   _fpa.gdpr_county_codes = <%== Settings::GdprCountryCodes %>;
-</script>
+<% end %>

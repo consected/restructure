@@ -315,3 +315,52 @@ a.link-disabled {
   margin-right: 20px;
   // font-size: 0.9em;
 }
+
+// BEM-named classes for admin views
+.admin-form {
+  &__left-aligned {
+    text-align: left;
+  }
+
+  &__help-info {
+    font-size: 12px;
+  }
+
+  &__vertical-top {
+    vertical-align: top;
+  }
+}
+
+.admin-ref-data {
+  &__list {
+    overflow: auto;
+    background-color: white;
+  }
+
+  &__list-item--disabled {
+    color: #aaa;
+  }
+
+  &__checkbox--inline {
+    width: initial;
+    display: inline-block;
+  }
+}
+
+.admin-version {
+  &__section {
+    margin-bottom: 30px;
+  }
+
+  &__header-cell--attr {
+    width: 20%;
+  }
+
+  &__header-cell--prev {
+    width: 40%;
+  }
+
+  &__header-cell--curr {
+    width: 40%;
+  }
+}

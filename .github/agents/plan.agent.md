@@ -11,6 +11,8 @@ tools:
   - search/searchResults
   - search/usages
   - vscode/vscodeAPI
+  - execute/runInTerminal
+  - read/terminalLastCommand
 ---
 
 # Plan Mode - Strategic Planning & Architecture Assistant

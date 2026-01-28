@@ -1,4 +1,4 @@
-<script id="filestore-classification-<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("filestore-classification-#{name.hyphenate}-result-template") do %>
   {{#with nfs_store__manage__<%=name%>}}
     <span class="bem-class-flags">
       <% if Classification::ItemFlagName.enabled_for?(full_name, current_user) %>
@@ -12,9 +12,9 @@
       {{#if file_metadata}}<i class="glyphicon glyphicon-list" title="has metadata extracted from the file content"></i>{{else}}<i class="empty-glyphicon"></i>{{/if}}
     </span>
   {{/with}}
-</script>
+<% end %>
 
 
-<script id="filestore-classification-<%=name.hyphenate%>-empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("filestore-classification-#{name.hyphenate}-empty-template") do %>
   <div class="container-classifications is-empty"></div>
-</script>
+<% end %>

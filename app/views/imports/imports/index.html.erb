@@ -34,7 +34,7 @@
 
   </div>
 </div>
-<script>
+<%= javascript_tag nonce: true do %>
 
   $('#get_template_for').on('change', function(){
     var tn = $(this).val();
@@ -45,7 +45,7 @@
 
     }
   });
-</script>
+<% end %>
 
 
 <div class="import-table-container">

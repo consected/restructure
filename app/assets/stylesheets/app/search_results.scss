@@ -1166,3 +1166,10 @@ li.list-group-item.is_external_id_item {
     }
   }
 }
+
+// BEM-named classes for search form
+.search-form {
+  &__clear-icon {
+    font-size: 18px;
+  }
+}

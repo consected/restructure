@@ -1,4 +1,4 @@
-<script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_field', css_class: 'hidden handlebars-partial') do %>
 
   {{> common_template_result_field_caption_or_dialog caption_resource_name=(underscore (or name_with_option_type name)) dialog_resource_name=(underscore name) }}
   
@@ -342,9 +342,9 @@
   {{/is}}
   {{/if}}
 
-</script>
+<% end %>
 
-<script id="common_template_result_fields_filter" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_fields_filter', css_class: 'hidden handlebars-partial') do %>
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
   {{#with ../template_config}}
@@ -352,32 +352,32 @@
   {{/with}}
 {{/filter}}
 {{/if}}
-</script>
+<% end %>
 
-<script id="common_template_result_caption_before_all_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_caption_before_all_fields', css_class: 'hidden handlebars-partial') do %>
 {{#is 'all_fields' 'in' template_config.caption_before_keys}}
   <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore (or name_with_option_type name)) vdef_version 'all_fields' 'show_caption'}}}</li>
 {{/is}}
-</script>
+<% end %>
 
 
-<script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_fields', css_class: 'hidden handlebars-partial') do %>
 {{> common_template_result_caption_before_all_fields template_config=(fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version)}}
 {{> common_template_result_fields_filter template_config=(fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version)}}
-</script>
+<% end %>
 
 
 
-<script id="tag_select_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tag_select_container-partial', css_class: 'hidden handlebars-partial') do %>
   <div id="tag-selects-{{master_id}}-{{item_type}}-{{id}}" class="tag-selects-block">
   <div class="" id="tag-select-{{master_id}}-{{item_type}}-{{id}}-" >
   {{>tag_selects_result field_key=field_key}}
   </div>
   </div>
-</script>
+<% end %>
 
 
-<script id="tag_selects_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tag_selects_result-partial', css_class: 'hidden handlebars-partial') do %>
   <div class="">
     <select multiple="true" disabled="disabled" class="form-control for-tag-select" data-nothing-selected-text="{{nothing_selected_text}}">
     {{#each tag_selects}}
@@ -392,10 +392,10 @@
     {{/each}}
     </select>
   </div>
-</script>
+<% end %>
 
-<script id="tag_select_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tag_select_result-partial', css_class: 'hidden handlebars-partial') do %>
    <option selected="true" class="tag-select" value="{{this_value_id}}">
      {{#if (get result_data._general_selections field_key this_value_id 'name')}}{{get result_data._general_selections field_key this_value_id 'name'}}{{else}}{{pretty_string this_value_name return_string="true" capitalize=false}}{{/if}}
    </option>
-</script>
+<% end %>

@@ -195,22 +195,61 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
+    // First, process any JSON data elements that store big-select configuration
+    // This approach avoids inline script tags that fail CSP when loaded via AJAX
+    block.find('script.big-select-data[type="application/json"]').each(function() {
+      var $dataEl = $(this);
+      var fieldId = $dataEl.data('field-id');
+      var optionsAttr = $dataEl.attr('data-options');
+      var hashAttr = $dataEl.attr('data-hash');
+      
+      // Parse JSON from attributes (jQuery .data() may not parse HTML-escaped JSON correctly)
+      var options = {};
+      var hashData = {};
+      try {
+        if (optionsAttr) options = JSON.parse(optionsAttr);
+      } catch (e) {
+        // Ignore parse errors - field will work without options
+      }
+      try {
+        if (hashAttr) hashData = JSON.parse(hashAttr);
+      } catch (e) {
+        // Ignore parse errors - field will be skipped if no hash data
+      }
+      
+      var field = document.getElementById(fieldId);
+      if (field) {
+        field.big_select_options = field.big_select_options || options;
+        field.big_select_hash = field.big_select_hash || {};
+        // Merge in the hash data (which contains subtype -> data mapping)
+        Object.assign(field.big_select_hash, hashData);
+      }
+      // Remove the data element after processing
+      $dataEl.remove();
+    });
+
     block
       .find('.use-big-select')
       .not('.big-select-su')
       .each(function () {
         var label = '';
+        var hash = $(this)[0].big_select_hash;
+        var opts = $(this)[0].big_select_options;
+        // Skip this field if no data available
+        if (!hash || Object.keys(hash).length === 0) {
+          return;
+        }
         $.big_select(
           $(this),
           $('#primary-modal .modal-body'),
-          $(this)[0].big_select_hash,
+          hash,
           function () {
             _fpa.show_modal('', label);
           },
           function () {
             _fpa.hide_modal();
           },
-          $(this)[0].big_select_options
+          opts
         );
       })
       .addClass('big-select-su');

@@ -13,7 +13,7 @@
   # called by model references to view browser within an activity log
   # and admin pages.
 %>
-<script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('filestore-view-template') do %>
   {{# is view_type '===' 'icons'}}
     {{>filestore_simple_template_view}}
   {{else is view_type '===' 'list'}}
@@ -21,10 +21,10 @@
   {{else}}
     {{>filestore_common_template_view}}
   {{/is}}
-</script>
+<% end %>
 
 
-<script id="filestore-browser-form"  type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('filestore-browser-form') do %>
   <div>
   {{#with nfs_store_container}}
     <div data-result="nfs-store-container-list-items-{{id}}"
@@ -83,9 +83,9 @@
     </div>
   {{/with}}
   </div>
-</script>
+<% end %>
 
-<script id="filestore_valid_files"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('filestore_valid_files', css_class: 'hidden handlebars-partial') do %>
 {{#if writable}}
 <div class="nfs-store-valid-files panel">
   <div class="panel-header">
@@ -108,10 +108,10 @@
   </div>
 </div>
 {{/if}}
-</script>
+<% end %>
 
 
-<script id="filestore_browser_outer"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('filestore_browser_outer', css_class: 'hidden handlebars-partial') do %>
   <div class="container-browser-outer prevent-scroll"
        data-sub-item="nfs_store_container"
        data-sub-id="{{container_id}}"
@@ -122,10 +122,10 @@
   >
     <div class="container-browser ajax-running"></div>
   </div>
-</script>
+<% end %>
 
 
-<script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('filestore_common_template_view', css_class: 'hidden handlebars-partial') do %>
   <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
     <%= render partial: 'nfs_store/browse/browser_header', locals: {
           container_id: '{{to_record_id}}',
@@ -182,10 +182,10 @@
       <div class="drop-info">drop files to upload</div>
     </div>
   </div>
-</script>
+<% end %>
 
 
-<script id="filestore_simple_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('filestore_simple_template_view', css_class: 'hidden handlebars-partial') do %>
   <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
       <%= link_to "", "/nfs_store/container_list/{{to_record_id}}/content?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
       <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
@@ -212,4 +212,4 @@
   
     </div>
   </div>
-</script>
+<% end %>

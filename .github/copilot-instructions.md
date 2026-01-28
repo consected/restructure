@@ -37,6 +37,13 @@
 
 For all Ruby on Rails code you write, follow these conventions: [Ruby on Rails Coding Standards](instructions/ruby-on-rails.instructions.md)
 
+### HTML and CSS Conventions
+
+- Avoid adding HTML styles inline; use CSS classes instead.
+- Use BEM (Block, Element, Modifier) naming conventions for CSS classes.
+- If JavaScript is needed for UI behavior, preferably use appropriate postprocessors rather than inline scripts.
+- If inline `<script>` or `<style>` tags are necessary, use Rails `javascript_tag` or `style_tag` helpers with a nonce for CSP compliance.
+
 ### Database Conventions
 - Use migrations for all schema changes; avoid direct DB modifications for implementation.
 - Name tables according to Rails conventions (plural snake_case) aligning with model names.

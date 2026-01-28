@@ -5,3 +5,18 @@
 .devise-links {
   margin-top: 1em;
 }
+
+// BEM-named classes for devise views
+.devise-form {
+  &__terms-of-use {
+    display: none;
+  }
+
+  &__2fa-block {
+    display: none;
+  }
+
+  &__final-submit {
+    margin: 0.8em 0;
+  }
+}
