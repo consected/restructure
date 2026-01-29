@@ -201,6 +201,7 @@ _fpa.postprocessors = {
       _fpa.form_utils.format_block(block);
 
       _fpa.masters.switch_id_on_click(block);
+      _fpa.masters.init_switchable_ids(block);
 
       _fpa.form_utils.on_open_click(block);
     }, 30);
@@ -258,6 +259,7 @@ _fpa.postprocessors = {
 
     // Ensure we format the viewed item on expanding it
     _fpa.masters.switch_id_on_click(block);
+    _fpa.masters.init_switchable_ids(block);
     if (data.masters && data.masters.length < 5) {
       _fpa.form_utils.format_block(block);
       _fpa.postprocessors.show_external_links(block, data);
