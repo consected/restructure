@@ -110,6 +110,7 @@ setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
 SetupHelper.setup_nfs_directories
 SetupHelper.clean_app_migrations_dirs
+SetupHelper.clean_handlebars_dirs
 
 put_now 'Devise and warden'
 require 'devise'

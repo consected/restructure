@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  include HandlebarsPrecompilerHelper
+
   DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
 
   def is_current_admin_sample?
@@ -405,13 +407,44 @@ module ApplicationHelper
   end
 
   #
-  # Generate a Handlebars template script tag with CSP nonce
-  # @param id [String] the id attribute for the script tag
-  # @param css_class [String] the CSS class(es) for the script tag (default: 'hidden handlebars-template')
+  # Generate a precompiled Handlebars template script include
+  # @param id [String] the template identifier
+  # @param css_class [String] CSS class indicating template type (default: 'hidden handlebars-template')
   # @param block [Block] the Handlebars template content
-  # @return [String] HTML safe script tag with nonce and type="text/x-handlebars-template"
+  # @return [String] HTML safe javascript_include_tag for the precompiled template
   def handlebars_template_tag(id, css_class: 'hidden handlebars-template', &)
-    content = capture(&) if block_given?
-    content_tag(:script, content, id:, type: 'text/x-handlebars-template', class: css_class, nonce: true)
+    raise FphsException, 'handlebars_template_tag requires a block' unless block_given?
+
+    is_partial = css_class.include?('handlebars-partial')
+    compiled_file_path = write_handlebars_template(id, is_partial:, &)
+    @requested_handlebars_templates ||= []
+    @requested_handlebars_templates << { id:, is_partial:, compiled_file_path: }
+    # javascript_include_tag(
+    #   compiled_file_path,
+    #   nonce: true,
+    #   data: {
+    #     handlebars_id: id,
+    #     handlebars_type: is_partial ? 'partial' : 'template'
+    #   }
+    # )
+    ''
+  end
+
+  def retrieve_requested_handlebars_templates(from_file_path)
+    return unless @requested_handlebars_templates.present?
+
+    from_file_path = from_file_path.to_s.split('/').last(2).join('-').gsub('.html.erb', '').id_underscore
+    compile_handlebars_templates
+    url, handlebars_template_ids, handlebars_partial_ids = write_multiple_handlebars_templates(@requested_handlebars_templates)
+    @requested_handlebars_template_count = @requested_handlebars_templates.length
+    @retrieved_requested_handlebars_template_count = (handlebars_template_ids + handlebars_partial_ids).length
+    # Clean up before the next set of handlebars templates
+    @requested_handlebars_templates = nil
+    javascript_tag nonce: true do
+      <<~JS
+        _fpa.retrieve_requested_handlebars_templates('#{url}', '#{Rails.env}', '#{from_file_path}');
+      JS
+        .html_safe
+    end
   end
 end
