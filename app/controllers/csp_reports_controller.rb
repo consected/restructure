@@ -5,7 +5,7 @@ class CspReportsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    Rails.logger.warn("CSP Violation: #{request.body.read}")
+    Rails.logger.error("CSP Violation: #{request.body.read}")
     head :no_content
   end
 end

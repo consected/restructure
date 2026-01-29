@@ -40,7 +40,7 @@ module FeatureSupport
   def js_console_log
     nil unless ENV['DEBUG_JS'] == 'true'
 
-    # puts page.driver.browser.logs.get(:browser).select { |l| l.start_with?('console.') }.join("\n")
+    # puts_debug_plain page.driver.browser.logs.get(:browser).select { |l| l.start_with?('console.') }.join("\n")
   end
 
   def login
@@ -799,6 +799,10 @@ module FeatureSupport
     puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true' || force
   end
 
+  def puts_debug_plain(msg, force: false)
+    puts msg if ENV['FEATURE_DEBUG'] == 'true' || force
+  end
+
   def save_html_snapshot(filename)
     File.write(filename, page.html)
     puts_debug "Saved HTML snapshot to #{filename}"
@@ -869,25 +873,25 @@ module FeatureSupport
     logs = page.evaluate_script('window.browserLogs || []')
     violations = page.evaluate_script('window.cspViolations || []')
 
-    puts "\n#{'=' * 80}"
-    puts "CONTEXT: #{context}"
-    puts '-' * 80
-    puts "BROWSER CONSOLE LOGS (#{logs.length} entries):"
-    logs.each { |log| puts "  #{log}" }
+    puts_debug "\n#{'=' * 80}"
+    puts_debug "CONTEXT: #{context}"
+    puts_debug '-' * 80
+    puts_debug "BROWSER CONSOLE LOGS (#{logs.length} entries):"
+    logs.each { |log| puts_debug "  #{log}" }
 
     if violations.any?
-      puts "\nCSP VIOLATIONS CAPTURED (#{violations.length}):"
+      puts_debug "\nCSP VIOLATIONS CAPTURED (#{violations.length}):"
       violations.each_with_index do |v, i|
-        puts "  Violation ##{i + 1}:"
-        puts "    Directive: #{v['violatedDirective']}"
-        puts "    Blocked URI: #{v['blockedURI']}"
-        puts "    Source: #{v['sourceFile']}:#{v['lineNumber']}:#{v['columnNumber']}"
-        puts "    Sample: #{v['sample']}"
+        puts_debug "  Violation ##{i + 1}:"
+        puts_debug "    Directive: #{v['violatedDirective']}"
+        puts_debug "    Blocked URI: #{v['blockedURI']}"
+        puts_debug "    Source: #{v['sourceFile']}:#{v['lineNumber']}:#{v['columnNumber']}"
+        puts_debug "    Sample: #{v['sample']}"
       end
     else
-      puts "\nNo CSP violations captured"
+      puts_debug "\nNo CSP violations captured"
     end
-    puts '=' * 80
+    puts_debug '=' * 80
 
     { logs:, csp_violations: violations }
   end
@@ -988,9 +992,9 @@ module FeatureSupport
       res_html = res_html.gsub("\r", '').gsub(/\n\n+/, "\n")
       res_md = res_html.html_to_markdown
       puts_debug 'Caption for user:'
-      puts '---'
-      puts res_md
-      puts '---'
+      puts_debug_plain '---'
+      puts_debug_plain res_md
+      puts_debug_plain '---'
       results[field_name] = res_md
     end
     results
@@ -1017,8 +1021,8 @@ module FeatureSupport
       res[:is_active] = (tab['aria-expanded'] == 'true')
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1063,8 +1067,8 @@ module FeatureSupport
       res[:is_in_show_mode] = true
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1080,8 +1084,8 @@ module FeatureSupport
       res[:visible] = f.visible?
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1098,8 +1102,8 @@ module FeatureSupport
       res[:data_target] = mr_action['data-target']
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1127,8 +1131,8 @@ module FeatureSupport
       end
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1146,8 +1150,8 @@ module FeatureSupport
 
     if results.present?
       puts_debug '⚠️  Form validation errors:'
-      puts String.yaml_dump(results)
-      puts '---'
+      puts_debug_plain String.yaml_dump(results)
+      puts_debug_plain '---'
     else
       puts_debug 'Form validation errors: none'
     end
@@ -1158,9 +1162,9 @@ module FeatureSupport
   end
 
   def puts_highlighted(text)
-    puts "\n#{'=' * 80}"
-    puts text
-    puts "#{'=' * 80}\n"
+    puts_debug_plain "\n#{'=' * 80}"
+    puts_debug_plain text
+    puts_debug_plain "#{'=' * 80}\n"
   end
 
   def puts_error_page
@@ -1170,8 +1174,8 @@ module FeatureSupport
       return
     end
     puts_debug '⚠️  Error page message:'
-    puts epb.html.html_to_markdown
-    puts '---'
+    puts_debug_plain epb.html.html_to_markdown
+    puts_debug_plain '---'
   end
 
   def puts_alerts
@@ -1188,8 +1192,8 @@ module FeatureSupport
       res[:body] = m.all('.modal-body').first&.text
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -1215,8 +1219,8 @@ module FeatureSupport
     page.save_screenshot(filepath)
 
     # Log the screenshot
-    puts "[Screenshot] #{name}: #{filepath}"
-    puts "[Screenshot] #{description}" if description
+    puts_debug_plain "[Screenshot] #{name}: #{filepath}"
+    puts_debug_plain "[Screenshot] #{description}" if description
 
     # Return relative path for documentation
     filepath.to_s

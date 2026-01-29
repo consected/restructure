@@ -94,3 +94,5 @@ yarn-debug.log*
 
 # Test related NfsStore processing file
 .__processing-index__
+
+public/handlebars*

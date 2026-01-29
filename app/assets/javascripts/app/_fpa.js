@@ -9,6 +9,9 @@ _fpa = {
     template_config_versions: {},
   },
 
+  preprocessors: {},
+  loaded: {},
+
   before_send_processors: {},
   view_handlers: {},
   app_specific: {},
@@ -130,29 +133,13 @@ _fpa = {
   },
   compile_templates: function () {
     $('body').addClass('status-compiling');
-    $('script.handlebars-partial')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        id = id.replace('-partial', '');
 
-        var fnTemplate = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-        Handlebars.registerPartial(id, fnTemplate);
-        _fpa.partials[id] = fnTemplate;
-      });
+    // Alias Handlebars registries to _fpa for compatibility
+    // Precompiled templates auto-register to Handlebars.templates and Handlebars.partials
+    _fpa.templates = Handlebars.templates = Handlebars.templates || {};
+    _fpa.partials = Handlebars.partials = Handlebars.partials || {};
 
-    $('script.handlebars-template')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-      });
+    // Mark compilation complete - precompiled JS files have already registered themselves
     $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
   },
 
@@ -264,7 +251,9 @@ _fpa = {
 
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
-    if (!template) console.log('template for ' + template_name + ' was not found');
+    if (!template) {
+      console.log('Template not found: ' + template_name);
+    }
 
     // Pass the template back in the options for use later
     options.template = template;
@@ -1425,7 +1414,101 @@ _fpa = {
     _fpa.page_transition_callback = null;
     $('body').removeClass('prevent-page-change');
   },
-};
 
-_fpa.preprocessors = {};
-_fpa.loaded = {};
+  load_template_version: function (template_version, rails_env) {
+    $.get({ url: `/pages/${template_version}/template`, cache: true }).done(function (data) {
+      // Inject the template HTML into the page and run any included scripts
+      $('body').append(data);
+
+      window.setTimeout(function () {
+        _fpa.status.loaded_templates = true;
+        _fpa.one_time_setup();
+      }, 1);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+    });
+  },
+
+
+  one_time_setup: function () {
+    if (_fpa.status.one_time_setup_run || !_fpa.status.loaded_templates || !_fpa.status.html_ready) return;
+
+    _fpa.status.one_time_setup_run = true;
+    _fpa.compile_templates();
+    _fpa.reset_page_size();
+    _fpa.loaded.default();
+  },
+
+  retrieve_requested_handlebars_templates: function (url, rails_env, file_id) {
+    // Use $.ajax with dataType 'script' to fetch and execute the precompiled template JavaScript
+    // $.getScript disables caching by default, so we use $.ajax directly
+    $.ajax({
+      url: url,
+      dataType: 'script',
+      cache: true
+    }).done(function () {
+      // Script executed - templates are now registered, just need to compile them
+      _fpa.compile_templates();
+      $('body').addClass(`loaded-templates--${file_id}`);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The requested templates failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+    });
+  },
+
+  initialize_app: function () {
+
+    var current_user = _fpa.state.current_user, current_admin = _fpa.state.current_admin,
+      controller_name = _fpa.state.controller_name, action_name = _fpa.state.action_name;
+
+    if (_fpa.state.current_user) {
+      window.localStorage.setItem('session_app_type_id', _fpa.state.current_user.app_type_id);
+    }
+    _fpa.loaded.preload();
+    _fpa.handle_remotes();
+    if (current_user || current_admin) {
+
+      if (current_user && current_user.app_type_id && !(controller_name == 'app_types' && action_name == 'upload')) {
+        _fpa.load_template_version(_fpa.state.template_version, _fpa.state.rails_env);
+
+
+      }
+      else {
+        _fpa.cache.clean();
+        window.setTimeout(function () {
+          _fpa.status.loaded_templates = true;
+          _fpa.one_time_setup();
+        }, 1);
+
+      }
+
+      $('html').ready(function () {
+        _fpa.status.html_ready = true;
+        _fpa.one_time_setup();
+      });
+    }
+
+    if (controller_name == 'sessions') {
+      $('html').ready(function () {
+        _fpa.loaded.login();
+      });
+    }
+
+    if (controller_name == 'registrations') {
+      $('html').ready(() => {
+        _fpa.loaded.registrations();
+      });
+    }
+
+  }
+
+};

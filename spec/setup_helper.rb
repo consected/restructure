@@ -99,6 +99,13 @@ module SetupHelper
     `rm -f db/app_migrations/test/*test_*.rb`
   end
 
+  def self.clean_handlebars_dirs
+    put_now 'Clean Handlebars precompiled dirs'
+    HandlebarsPrecompiler.setup_directories
+    HandlebarsPrecompiler.cleanup_tmp_dir
+    HandlebarsPrecompiler.cleanup_public_dir
+  end
+
   def self.run_test_migrations
     # Checks for pending migrations before tests are run.
     # If you are not using ActiveRecord, you can remove this line.

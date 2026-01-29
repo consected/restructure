@@ -1,7 +1,12 @@
 ---
 description: "Guide test-first development by writing failing tests that describe desired behaviour from GitHub issue context before implementation exists."
 name: "TDD Red Phase - Write Failing Tests First"
-tools: ["github", "findTestFiles", "edit/editFiles", "runTests", "runCommands", "codebase", "filesystem", "search", "problems", "testFailure", "terminalLastCommand"]
+tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand"]
+handoffs:
+  - label: Start Implementation
+    agent: tdd-green
+    prompt: Now implement the plan outlined above.
+    send: true
 ---
 
 # TDD Red Phase - Write Failing Tests First

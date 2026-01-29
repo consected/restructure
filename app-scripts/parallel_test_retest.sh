@@ -16,7 +16,7 @@ echo "Retesting failed specs"
 old_ifs=$IFS
 IFS=$'\n'
 retest=''
-for line in $(grep -P '\e\[[0-9]+mrspec ' tmp/failing_specs.log) ; do 
+for line in $(grep -P '(\e\[[0-9]+m)?rspec ' tmp/failing_specs.log) ; do 
   [[ $line =~ rspec\ ([a-zA-Z0-9_\./]+) ]]
   retest="${retest}"$'\n'"$(echo ${BASH_REMATCH[1]})"
 done 
@@ -25,6 +25,7 @@ IFS=$old_ifs
 
 if [ -z "${retest}" ]; then
   echo "No failed specs found in tmp/failing_specs.log"
+  echo "No failed specs found in tmp/failing_specs.log" >> tmp/failing_specs.log
   exit 0
 fi
 
