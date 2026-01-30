@@ -87,6 +87,8 @@ _fpa.page_title = class {
   /**
    * Bind event handlers for search tab clicks to update page title dynamically.
    * Uses namespaced events and a guard to prevent multiple bindings.
+   * Only binds to click events (not Bootstrap collapse events) to avoid double-firing
+   * and potential conflicts with Bootstrap transition handling.
    */
   static bind_search_tabs() {
     // Prevent multiple bindings
@@ -101,18 +103,6 @@ _fpa.page_title = class {
       var tab_text = $(this).text().trim();
       if (tab_text) {
         _fpa.page_title.update(tab_text);
-      }
-    });
-
-    // Handle Bootstrap collapse events for search forms
-    $(document).on('show.bs.collapse.fpa_page_title', '#master-search-accordion .panel-collapse', function () {
-      var panel_id = $(this).attr('id');
-      var btn = $('[data-target="#' + panel_id + '"]');
-      if (btn.length) {
-        var tab_text = btn.text().trim();
-        if (tab_text) {
-          _fpa.page_title.update(tab_text);
-        }
       }
     });
   }

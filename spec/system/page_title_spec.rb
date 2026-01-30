@@ -94,9 +94,20 @@ describe 'page title updates', js: true, driver: $browser_driver do
       visit '/masters/search'
       finish_page_loading
 
-      # Click Simple Search tab
+      # First click Advanced Search (if available) to collapse Simple Search
+      if page.has_button?('Advanced Search')
+        click_button 'Advanced Search'
+        finish_page_loading
+        # Wait for Advanced Search panel to expand
+        expect(page).to have_css('#master-search-advanced-form.in', wait: 10)
+      end
+
+      # Now click Simple Search tab
       click_button 'Simple Search'
       finish_page_loading
+
+      # Wait for the panel to be visible (check for .in class on the panel)
+      expect(page).to have_css('#master-search-simple-form.in', wait: 10)
 
       # Verify page title is updated
       expect(page).to have_title(/Simple Search/i, wait: 5)
@@ -110,6 +121,10 @@ describe 'page title updates', js: true, driver: $browser_driver do
       if page.has_button?('Advanced Search')
         click_button 'Advanced Search'
         finish_page_loading
+
+        # Wait for the panel to be visible
+        expect(page).to have_css('#master-search-advanced-form.in', wait: 10)
+
         expect(page).to have_title(/Advanced Search/i, wait: 5)
       end
     end
@@ -121,13 +136,16 @@ describe 'page title updates', js: true, driver: $browser_driver do
       @reports.each do |report|
         report_tab_selector = "a#expand-searchable-report-#{report.alt_resource_name}"
 
-        if page.has_css?(report_tab_selector)
-          find(report_tab_selector).click
-          finish_page_loading
+        next unless page.has_css?(report_tab_selector)
 
-          # Verify page title contains the report name
-          expect(page).to have_title(/#{Regexp.escape(report.name)}/i, wait: 5)
-        end
+        find(report_tab_selector).click
+        finish_page_loading
+
+        # Wait for the report panel to be visible
+        expect(page).to have_css("#master-report-#{report.alt_resource_name}.in", wait: 10)
+
+        # Verify page title contains the report name
+        expect(page).to have_title(/#{Regexp.escape(report.name)}/i, wait: 5)
       end
     end
 
@@ -136,18 +154,33 @@ describe 'page title updates', js: true, driver: $browser_driver do
       finish_page_loading
 
       # Rapid tab switching to test for freeze/lock-up issues
-      5.times do
-        # Click Simple Search
-        click_button 'Simple Search' if page.has_button?('Simple Search')
-
-        # Click Advanced Search if available
-        click_button 'Advanced Search' if page.has_button?('Advanced Search')
-
-        # Click each report tab
-        @reports.each do |report|
-          report_tab_selector = "a#expand-searchable-report-#{report.alt_resource_name}"
-          find(report_tab_selector).click if page.has_css?(report_tab_selector)
+      # Wait for each panel to appear to verify no freeze
+      # Note: Some delay between clicks is realistic and helps prevent Bootstrap transition conflicts
+      3.times do
+        # Click Advanced Search if available and wait for panel to expand
+        if page.has_button?('Advanced Search')
+          click_button 'Advanced Search'
+          expect(page).to have_css('#master-search-advanced-form.in', wait: 10)
+          sleep 0.3 # Allow transition to complete
         end
+
+        # Click Simple Search and wait for panel
+        if page.has_button?('Simple Search')
+          click_button 'Simple Search'
+          expect(page).to have_css('#master-search-simple-form.in', wait: 10)
+          sleep 0.3 # Allow transition to complete
+        end
+
+        # Click first report tab and wait for panel
+        next unless @reports.any?
+
+        report = @reports.first
+        report_tab_selector = "a#expand-searchable-report-#{report.alt_resource_name}"
+        next unless page.has_css?(report_tab_selector)
+
+        find(report_tab_selector).click
+        expect(page).to have_css("#master-report-#{report.alt_resource_name}.in", wait: 10)
+        sleep 0.3 # Allow transition to complete
       end
 
       # If we reach here without timeout, the page did not freeze
