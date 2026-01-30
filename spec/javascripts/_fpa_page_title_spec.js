@@ -1,8 +1,9 @@
 //= require app/_fpa.js
+//= require app/_fpa_page_title.js
 
 /**
- * Tests for the _fpa.page_title module.
- * This module manages the browser tab title to reflect the current UI context.
+ * Tests for the _fpa.page_title class.
+ * This class manages the browser tab title to reflect the current UI context.
  * 
  * Issue: #871 - Change page title to be more descriptive of current state
  * Requirements:
