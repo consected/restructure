@@ -1,5 +1,14 @@
 _fpa.loaded.page_layouts = function () {
   _fpa.page_layouts.load_columns()
+
+  // Update page title with the page layout label
+  var $page = $('#standalone-page');
+  if ($page.length) {
+    var page_title = $page.attr('data-page-title');
+    if (page_title) {
+      _fpa.page_title.for_page_layout(page_title);
+    }
+  }
 }
 
 _fpa.page_layouts = class {

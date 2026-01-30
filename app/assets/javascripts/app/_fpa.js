@@ -1425,6 +1425,207 @@ _fpa = {
     _fpa.page_transition_callback = null;
     $('body').removeClass('prevent-page-change');
   },
+
+  /**
+   * Page title management module.
+   * Updates the browser tab title to reflect the current UI context.
+   */
+  page_title: {
+    // Store the original page title for reset purposes
+    original_title: null,
+    separator: ' - ',
+
+    /**
+     * Initialize the page title module by storing the original title.
+     * Called once during page load.
+     */
+    init: function () {
+      if (!_fpa.page_title.original_title) {
+        _fpa.page_title.original_title = document.title;
+      }
+    },
+
+    /**
+     * Update the browser tab title with context-specific information.
+     * Format: "{context_title} - {env_name}"
+     * @param {string} context_title - The contextual title to display (e.g., "Simple Search", "My Report")
+     */
+    update: function (context_title) {
+      _fpa.page_title.init();
+      if (context_title && context_title.trim()) {
+        document.title = context_title.trim() + _fpa.page_title.separator + _fpa.env_name;
+      }
+    },
+
+    /**
+     * Reset the browser tab title to the original page title.
+     */
+    reset: function () {
+      _fpa.page_title.init();
+      document.title = _fpa.page_title.original_title;
+    },
+
+    /**
+     * Update title for search results context.
+     * @param {string} search_type - Optional search type descriptor (e.g., "Simple Search", "Advanced Search")
+     */
+    for_search_results: function (search_type) {
+      var title = search_type ? search_type + ' results' : 'results';
+      _fpa.page_title.update(title);
+    },
+
+    /**
+     * Update title for a report page.
+     * @param {string} report_name - The name of the report being viewed
+     */
+    for_report: function (report_name) {
+      if (report_name) {
+        _fpa.page_title.update(report_name);
+      }
+    },
+
+    /**
+     * Update title for an admin page.
+     * @param {string} admin_page_name - The name of the admin page being viewed
+     */
+    for_admin: function (admin_page_name) {
+      if (admin_page_name) {
+        _fpa.page_title.update('Admin: ' + admin_page_name);
+      }
+    },
+
+    /**
+     * Update title for a page layout (view/standalone page).
+     * @param {string} page_label - The label of the page layout
+     */
+    for_page_layout: function (page_label) {
+      if (page_label) {
+        _fpa.page_title.update(page_label);
+      }
+    },
+
+    /**
+     * Bind event handlers for search tab clicks to update page title dynamically.
+     */
+    bind_search_tabs: function () {
+      // Handle search selector buttons (Simple Search, Advanced Search, Report tabs)
+      $(document).on('click', '.search-selector-btn', function () {
+        var tab_text = $(this).text().trim();
+        if (tab_text) {
+          _fpa.page_title.update(tab_text);
+        }
+      });
+
+      // Handle Bootstrap collapse events for search forms
+      $(document).on('show.bs.collapse', '#master-search-accordion .panel-collapse', function () {
+        var panel_id = $(this).attr('id');
+        var btn = $('[data-target="#' + panel_id + '"]');
+        if (btn.length) {
+          var tab_text = btn.text().trim();
+          if (tab_text) {
+            _fpa.page_title.update(tab_text);
+          }
+        }
+      });
+    },
+  },
+
+  load_template_version: function (template_version, rails_env) {
+    $.get({ url: `/pages/${template_version}/template`, cache: true }).done(function (data) {
+      // Inject the template HTML into the page and run any included scripts
+      $('body').append(data);
+
+      window.setTimeout(function () {
+        _fpa.status.loaded_templates = true;
+        _fpa.one_time_setup();
+      }, 1);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+    });
+  },
+
+
+  one_time_setup: function () {
+    if (_fpa.status.one_time_setup_run || !_fpa.status.loaded_templates || !_fpa.status.html_ready) return;
+
+    _fpa.status.one_time_setup_run = true;
+    _fpa.compile_templates();
+    _fpa.reset_page_size();
+    _fpa.loaded.default();
+  },
+
+  retrieve_requested_handlebars_templates: function (url, rails_env, file_id) {
+    // Use $.ajax with dataType 'script' to fetch and execute the precompiled template JavaScript
+    // $.getScript disables caching by default, so we use $.ajax directly
+    $.ajax({
+      url: url,
+      dataType: 'script',
+      cache: true
+    }).done(function () {
+      // Script executed - templates are now registered, just need to compile them
+      _fpa.compile_templates();
+      $('body').addClass(`loaded-templates--${file_id}`);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The requested templates failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+    });
+  },
+
+  initialize_app: function () {
+
+    var current_user = _fpa.state.current_user, current_admin = _fpa.state.current_admin,
+      controller_name = _fpa.state.controller_name, action_name = _fpa.state.action_name;
+
+    if (_fpa.state.current_user) {
+      window.localStorage.setItem('session_app_type_id', _fpa.state.current_user.app_type_id);
+    }
+    _fpa.loaded.preload();
+    _fpa.handle_remotes();
+    if (current_user || current_admin) {
+
+      if (current_user && current_user.app_type_id && !(controller_name == 'app_types' && action_name == 'upload')) {
+        _fpa.load_template_version(_fpa.state.template_version, _fpa.state.rails_env);
+
+
+      }
+      else {
+        _fpa.cache.clean();
+        window.setTimeout(function () {
+          _fpa.status.loaded_templates = true;
+          _fpa.one_time_setup();
+        }, 1);
+
+      }
+
+      $('html').ready(function () {
+        _fpa.status.html_ready = true;
+        _fpa.one_time_setup();
+      });
+    }
+
+    if (controller_name == 'sessions') {
+      $('html').ready(function () {
+        _fpa.loaded.login();
+      });
+    }
+
+    if (controller_name == 'registrations') {
+      $('html').ready(() => {
+        _fpa.loaded.registrations();
+      });
+    }
+
+  }
+
 };
 
 _fpa.preprocessors = {};
