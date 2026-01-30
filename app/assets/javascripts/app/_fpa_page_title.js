@@ -13,6 +13,7 @@ _fpa.page_title = class {
   // Store the original page title for reset purposes
   static original_title = null;
   static separator = ' - ';
+  static _search_tabs_bound = false;
 
   /**
    * Initialize the page title module by storing the original title.
@@ -85,10 +86,18 @@ _fpa.page_title = class {
 
   /**
    * Bind event handlers for search tab clicks to update page title dynamically.
+   * Uses namespaced events and a guard to prevent multiple bindings.
    */
   static bind_search_tabs() {
+    // Prevent multiple bindings
+    if (_fpa.page_title._search_tabs_bound) {
+      return;
+    }
+    _fpa.page_title._search_tabs_bound = true;
+
     // Handle search selector buttons (Simple Search, Advanced Search, Report tabs)
-    $(document).on('click', '.search-selector-btn', function () {
+    // Use namespaced event to allow for clean unbinding if needed
+    $(document).on('click.fpa_page_title', '.search-selector-btn', function () {
       var tab_text = $(this).text().trim();
       if (tab_text) {
         _fpa.page_title.update(tab_text);
@@ -96,7 +105,7 @@ _fpa.page_title = class {
     });
 
     // Handle Bootstrap collapse events for search forms
-    $(document).on('show.bs.collapse', '#master-search-accordion .panel-collapse', function () {
+    $(document).on('show.bs.collapse.fpa_page_title', '#master-search-accordion .panel-collapse', function () {
       var panel_id = $(this).attr('id');
       var btn = $('[data-target="#' + panel_id + '"]');
       if (btn.length) {

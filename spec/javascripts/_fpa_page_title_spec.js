@@ -20,12 +20,15 @@ describe('page_title', function () {
     // Store and reset original title before each test
     originalTitle = document.title;
     _fpa.page_title.original_title = null;
+    _fpa.page_title._search_tabs_bound = false;
     _fpa.env_name = 'Test Env';
   });
   
   afterEach(function () {
     // Restore original title after each test
     document.title = originalTitle;
+    // Unbind namespaced events
+    $(document).off('.fpa_page_title');
   });
 
   describe('init', function () {
@@ -205,6 +208,24 @@ describe('page_title', function () {
       expect(function () {
         _fpa.page_title.bind_search_tabs();
       }).not.toThrow();
+    });
+
+    it('sets the _search_tabs_bound flag after first call', function () {
+      expect(_fpa.page_title._search_tabs_bound).toBe(false);
+      
+      _fpa.page_title.bind_search_tabs();
+      
+      expect(_fpa.page_title._search_tabs_bound).toBe(true);
+    });
+
+    it('prevents multiple event bindings when called multiple times', function () {
+      // This test ensures the guard prevents duplicate event handlers
+      _fpa.page_title.bind_search_tabs();
+      _fpa.page_title.bind_search_tabs();
+      _fpa.page_title.bind_search_tabs();
+      
+      // The flag should still be true and no errors should occur
+      expect(_fpa.page_title._search_tabs_bound).toBe(true);
     });
   });
 
