@@ -90,6 +90,29 @@ describe 'master tabs access control filtering', js: true, driver: $browser_driv
       )
     end
 
+    # Create a dummy master panel so that the custom tabs layout is used (otherwise default tabs are shown which don't support custom nav)
+    @dummy_master_panel = Admin::PageLayout.where(
+        layout_name: 'master',
+        panel_name: 'dummy_details',
+        app_type: @app_type
+      ).first
+    
+    unless @dummy_master_panel
+      @dummy_master_panel = Admin::PageLayout.create!(
+        layout_name: 'master',
+        panel_name: 'dummy_details',
+        panel_label: 'Details',
+        panel_position: 10,
+        app_type: @app_type,
+        current_admin: @admin,
+        options: <<~YAML
+          contains:
+            categories:
+              - details
+        YAML
+      )
+    end
+
     # Create three users with different access levels
     @user1, @password1 = create_user
     @user2, @password2 = create_user
@@ -106,6 +129,11 @@ describe 'master tabs access control filtering', js: true, driver: $browser_driv
     end
 
     # User3: No access to any reports (should not see dropdown at all)
+
+    # Give user1 create permissions for setup
+    [:player_infos, :player_contacts].each do |res|
+      setup_access(res, resource_type: :table, access: :create, user: @user1)
+    end
 
     # Create a master record for testing
     @master = Master.create!(current_user: @user1)
@@ -128,6 +156,10 @@ describe 'master tabs access control filtering', js: true, driver: $browser_driv
       @nav_panel&.update(options: @original_options, disabled: @original_disabled, current_admin: @admin)
     else
       @nav_panel&.update(disabled: true, current_admin: @admin)
+    end
+    if @dummy_master_panel
+      ActiveRecord::Base.connection.execute("DELETE FROM page_layout_history WHERE page_layout_id = #{@dummy_master_panel.id}")
+      @dummy_master_panel.destroy
     end
     @reports&.each { |r| r.update!(disabled: true, current_admin: @admin) }
   end
