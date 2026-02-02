@@ -1,6 +1,6 @@
 ---
 description: 'Debug your application to find and fix a bug'
-tools: ['edit/editFiles', 'search', 'execute/getTerminalOutput', 'execute/runInTerminal', 'read/terminalLastCommand', 'read/terminalSelection', 'search/usages', 'read/problems', 'execute/testFailure', 'web/fetch', 'web/githubRepo', 'execute/runTests']
+tools: ['web/fetch', "github", "findTestFiles", "edit/editFiles", "runTests", "runCommands", "codebase", "filesystem", "search", "problems", "testFailure", "terminalLastCommand"]
 ---
 
 # Debug Mode Instructions
