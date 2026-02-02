@@ -190,6 +190,24 @@ module FeatureSupport
     have_no_css('.collapsing')
   end
 
+  # Navigate to a master record by ID
+  def navigate_to_master(master_id)
+    expect(master_id).not_to be nil
+    visit "/masters/search?nav_q_id=#{master_id}"
+    finish_page_loading
+
+    # Debug output
+    puts_debug "Page title: #{page.title}"
+    puts_debug "Page URL: #{page.current_url}"
+    debug_process_status if respond_to?(:debug_process_status)
+
+    expect(page).to have_css('.master-result', wait: 15)
+
+    # Expand the master record to see details
+    expand_master_record(master_id: master_id)
+    finish_page_loading
+  end
+
   def finish_page_loading
     if all('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations').present?
       return
@@ -277,14 +295,14 @@ module FeatureSupport
   end
 
   #
-  # Expand a master record tab (such as "details", "external ids", etc) by name
+  # Expand a master record tab (such as "details", "external ids", "phone log", etc) by name
   # This avoids the need to explicitly get `a[data-panel-tab="<name>"]` and click it.
   # Expectations are also enforced to ensure the tab shows.
   def expand_master_record_tab(name)
     finish_form_formatting
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
-    all('ul.details-tabs').first.click_link name if tab_link['aria-expanded'] != 'true'
+    tab_link.click if tab_link['aria-expanded'] != 'true'
   end
 
   #
