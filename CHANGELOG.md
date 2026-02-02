@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] option to release script to that must be set if we want to merge back from new-master branch after build
+- [Fixed] undefined method 'definition' error when renaming or trashing filestore files - fixes #878
+- [Updated] agent tool access
+
 ## [9.42.1] - 2026-01-19
 
 ### From FPHS - PR #848 - 2026-01-19
