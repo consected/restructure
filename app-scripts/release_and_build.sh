@@ -232,6 +232,9 @@ git checkout new-master
 git pull
 git checkout ${FROM_BRANCH}
 git pull
-git merge new-master
-git push
+if [ "${MERGE_BACK}" ]; then
+  echo "Merging back to ${FROM_BRANCH}"
+  git merge new-master
+  git push
+fi
 echo "Built and setup assets: ${TESTVER}"
