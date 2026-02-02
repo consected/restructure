@@ -69,10 +69,14 @@ module Dynamic
       end
 
       def option_type_attr_name
+        return unless respond_to?(:definition)
+
         definition.option_type_attr_name
       end
 
       def default_option_type_name
+        return unless respond_to?(:definition)
+
         definition.default_option_type_name
       end
     end
@@ -149,6 +153,8 @@ module Dynamic
     end
 
     def default_option_type_name
+      return unless self.class.respond_to?(:definition)
+
       self.class.definition.default_option_type_name
     end
 

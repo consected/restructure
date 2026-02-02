@@ -208,9 +208,11 @@ RSpec.configure do |config|
 
   # For system tests that need javascript, use selenium_chrome
   # The following avoids this needing to be specified in each spec file
-  config.before(:each, type: :system, js: true) do
+  # The js: true metadata is also set to true to ensure proper handling
+  config.before(:each, type: :system, js: true) do |example|
     driven_by $browser_driver
     Capybara.page.driver.browser.manage.window.maximize
+    example.metadata[:js] = true
   end
 
   config.before(:each) do
