@@ -326,11 +326,13 @@ _nfs_store.fs_browser = function ($outer) {
     submit_download_form(target);
     disable_submit(target, true);
     set_submit_download_caption(target, "request submitted");
-  }).on('click', '.container-browse-trash-submit', function () {
+  }).on('click', '.container-browse-trash-submit', function (e) {
+    e.preventDefault();
     var target = $($(this).attr('data-target-browser'));
     submit_action_form(target, 'trash');
     disable_submit(target, true);
-  }).on('click', '.container-browse-trigger-file-action', function () {
+  }).on('click', '.container-browse-trigger-file-action', function (e) {
+    e.preventDefault();
     var target = $($(this).attr('data-target-browser'));
     var action_id = $(this).attr('data-trigger-file-action');
     submit_action_form(target, 'trigger-file-action-' + action_id);
@@ -339,7 +341,8 @@ _nfs_store.fs_browser = function ($outer) {
       refresh_browser($outer, container_id);
     }, 10000)
 
-  }).on('click', '.container-browse-move-files', function () {
+  }).on('click', '.container-browse-move-files', function (e) {
+    e.preventDefault();
     var target = $($(this).attr('data-target-browser'));
     var msg = $('#container-browse-move-files-form-' + container_id).html();
     var title = 'Move Files to a folder';
@@ -422,7 +425,8 @@ _nfs_store.fs_browser = function ($outer) {
     set_move_from();
 
 
-  }).on('click', '.container-browse-rename-file', function () {
+  }).on('click', '.container-browse-rename-file', function (e) {
+    e.preventDefault();
     var target = $($(this).attr('data-target-browser'));
     var msg = $('#container-browse-rename-file-form-' + container_id).html();
     var title = 'Rename file';
