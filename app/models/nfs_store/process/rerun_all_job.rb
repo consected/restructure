@@ -20,11 +20,12 @@ module NfsStore
 
         container_files.each do |container_file|
           container_file.container
-          setup_container_file_current_user(container_file, in_app_type_id)
 
-          if container_file.respond_to? :last_process_name_run
-            container_file.last_process_name_run = nil
-            container_file.save!
+          setup_container_file_current_user(container_file, in_app_type_id) do |_c_user|
+            if container_file.respond_to? :last_process_name_run
+              container_file.last_process_name_run = nil
+              container_file.save!
+            end
           end
         end
       end
