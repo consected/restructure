@@ -150,6 +150,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "2edb9849da815c5c992a7078fb2d38ceb39da72ed7f57d9ceb14aed24c43adaf",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/admin/app_types_controller.rb",
+      "line": 102,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{Admin::AppType::AppExportDirSuffix}.zip\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::AppTypesController",
+        "method": "export_migrations"
+      },
+      "user_input": "Admin::AppType.find(params[:id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "3761727e036f9d74ed02985b4870bda041bd3d041d9c1083b692031e1ae3e9e8",
@@ -649,29 +672,6 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "a471446d5c83e4f289e6c57062e3f7952ef8acf5fcaaeafd6896b42f49a0d2d0",
-      "check_name": "SendFile",
-      "message": "Model attribute used in file name",
-      "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 102,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::AppTypesController",
-        "method": "export_migrations"
-      },
-      "user_input": "Admin::AppType.find(params[:id])",
-      "confidence": "Weak",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
@@ -951,5 +951,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "7.1.2"
+  "brakeman_version": "8.0.1"
 }

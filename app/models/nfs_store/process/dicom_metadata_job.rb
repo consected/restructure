@@ -21,16 +21,17 @@ module NfsStore
 
         container_files.each do |container_file|
           container_file.container.parent_item ||= activity_log
-          c_user = setup_container_file_current_user(container_file, in_app_type_id)
 
-          if container_file.is_archive?
-            afs = container_file.archived_files.all
-            afs.each do |af|
-              af.current_user = c_user
-              NfsStore::Dicom::MetadataHandler.extract_metadata_from af
+          setup_container_file_current_user(container_file, in_app_type_id) do |c_user|
+            if container_file.is_archive?
+              afs = container_file.archived_files.all
+              afs.each do |af|
+                af.current_user = c_user
+                NfsStore::Dicom::MetadataHandler.extract_metadata_from af
+              end
+            else
+              NfsStore::Dicom::MetadataHandler.extract_metadata_from container_file
             end
-          else
-            NfsStore::Dicom::MetadataHandler.extract_metadata_from container_file
           end
         end
       end
