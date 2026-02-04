@@ -41,34 +41,34 @@ module NfsStore
             next
           end
 
-          c_user = setup_container_file_current_user(container_file, in_app_type_id)
+          setup_container_file_current_user(container_file, in_app_type_id) do |c_user|
+            # Run through each config
+            configs.each do |config|
+              # Get scopes that can filter files to be deidentified
+              filters = config[:file_filters]
+              filtered_files = NfsStore::Filter::Filter.evaluate_container_files_as_scopes container, filters: filters
 
-          # Run through each config
-          configs.each do |config|
-            # Get scopes that can filter files to be deidentified
-            filters = config[:file_filters]
-            filtered_files = NfsStore::Filter::Filter.evaluate_container_files_as_scopes container, filters: filters
+              if container_file.is_a? NfsStore::Manage::ArchivedFile
+                # For an archive, get the list of files based on the archived files filter
+                archived_files = filtered_files[:archived_files].where(id: container_file.id)
 
-            if container_file.is_a? NfsStore::Manage::ArchivedFile
-              # For an archive, get the list of files based on the archived files filter
-              archived_files = filtered_files[:archived_files].where(id: container_file.id)
+                # Each file is deidentified in turn
+                archived_files.each do |archived_file|
+                  next if archived_file.content_type.blank?
 
-              # Each file is deidentified in turn
-              archived_files.each do |archived_file|
-                next if archived_file.content_type.blank?
+                  archived_file.current_user = c_user
+                  NfsStore::Dicom::DeidentifyHandler.deidentify_file archived_file, config
+                end
 
-                archived_file.current_user = c_user
-                NfsStore::Dicom::DeidentifyHandler.deidentify_file archived_file, config
+              else
+                # For a single stored file, filter appropriately
+                next if container_file.content_type.blank?
+
+                in_filter = filtered_files[:stored_files].where(id: container_file.id).first
+                next unless in_filter
+
+                NfsStore::Dicom::DeidentifyHandler.deidentify_file container_file, config
               end
-
-            else
-              # For a single stored file, filter appropriately
-              next if container_file.content_type.blank?
-
-              in_filter = filtered_files[:stored_files].where(id: container_file.id).first
-              next unless in_filter
-
-              NfsStore::Dicom::DeidentifyHandler.deidentify_file container_file, config
             end
           end
         end

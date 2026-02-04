@@ -201,6 +201,7 @@ _fpa.postprocessors = {
       _fpa.form_utils.format_block(block);
 
       _fpa.masters.switch_id_on_click(block);
+      _fpa.masters.init_switchable_ids(block);
 
       _fpa.form_utils.on_open_click(block);
     }, 30);
@@ -258,6 +259,7 @@ _fpa.postprocessors = {
 
     // Ensure we format the viewed item on expanding it
     _fpa.masters.switch_id_on_click(block);
+    _fpa.masters.init_switchable_ids(block);
     if (data.masters && data.masters.length < 5) {
       _fpa.form_utils.format_block(block);
       _fpa.postprocessors.show_external_links(block, data);
@@ -316,9 +318,13 @@ _fpa.postprocessors = {
 
     if ($('.no-search-in-master-record').length == 0) {
       const prevent = _fpa.state.app_configs.prevent_reload_master_list;
-      if (master_id_list && master_id_list.replace(/ /g, '').length > 1) {
-        document.title = _fpa.env_name + ' results';
 
+      // Get the active search tab name for the page title
+      var active_search_tab = $('.search-selector-btn[aria-expanded="true"], .search-selector-btn.active, .search-selector-btn:not(.collapsed)').first();
+      var search_type = active_search_tab.length ? active_search_tab.text().trim() : null;
+      _fpa.page_title.for_search_results(search_type);
+
+      if (master_id_list && master_id_list.replace(/ /g, '').length > 1) {
         if (prevent)
           window.history.pushState(
             { html: '/masters/search?utf8=✓&nav_q_id=' + master_id_list, pageTitle: document.title },
@@ -326,7 +332,6 @@ _fpa.postprocessors = {
             '/masters/search?utf8=✓&nav_q_id=' + master_id_list
           );
       } else if (ext_id_field && ext_id_list && ext_id_list.length > 1) {
-        document.title = _fpa.env_name + ' results';
         if (prevent)
           window.history.pushState(
             {
@@ -337,7 +342,6 @@ _fpa.postprocessors = {
             '/masters/search?utf8=✓&external_id[' + ext_id_field + ']=' + ext_id_list
           );
       } else {
-        document.title = _fpa.env_name + ' results';
         if (prevent)
           window.history.pushState({ html: '/masters/search', pageTitle: document.title }, '', '/masters/search');
       }

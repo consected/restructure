@@ -210,6 +210,122 @@
           false | true - optionally specify that no association should be used in select_record_* data lookup
                          select_record_from_table_* automatically sets this to true
                          select_record_from_* defaults to false but this setting overrides the default
+        
+        # configuration options for big-select modal dialog UI (applies to select_record_* fields)
+        big_select:
+        
+          hide_popover: true | false
+            Hides the info popover button and shows an overlay with selected value text instead.
+            Default is false (info popover is shown).
+          
+          hide_key: true | false
+            Controls visibility of the value key in the selection list and enables '>>>' separator processing.
+            When true: 
+              - The database key (id) is hidden from display
+              - If the label contains '>>>' or newline '\n', the label is split:
+                * First part appears as the primary heading (larger text)
+                * Remaining parts appear as secondary description (smaller text below)
+              - Without '>>>' or '\n', the entire label is shown as the heading
+            When false: 
+              - The database key is shown alongside the full label
+              - No special processing of '>>>' or newline separators
+            Default is true (key is hidden).
+            
+            Special separator usage:
+              Use ' >>> ' (with spaces) in label_attr to create two-part displays:
+                label_attr: [name, ' >>> ', description]
+              Results in:
+                name               ← primary heading
+                description        ← secondary description
+              
+              Alternatively, use '\n' (newline) for the same effect:
+                label_attr: [name, '\n', description]
+          
+          filtered: true | false
+            When true, the big-select options are filtered based on another field's value
+            using the select_filtering_target configuration.
+            Default is false (no filtering).
+
+        big select examples: |  
+          Example basic big-select:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr: name
+              big_select:
+                hide_key: true
+          
+          Example with '>>>' separator for two-part display:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - name
+                - ' >>> '
+                - description
+              big_select:
+                hide_key: true
+            # Displays as:
+            #   Item Name          ← primary heading (larger)
+            #   Item description   ← secondary text (smaller)
+          
+          Example grouped big-select:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - category
+                - '|'
+                - name
+              group_split_char: '|'
+              big_select:
+                hide_key: true
+          
+          Example grouped with '>>>' separator:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - category
+                - '|'
+                - name
+                - ' >>> '
+                - description
+              group_split_char: '|'
+              big_select:
+                hide_key: true
+            # Groups by category, then displays each item as:
+            #   Item Name          ← primary heading
+            #   Item description   ← secondary text
+          
+          Example filtered big-select:
+            filter_field:
+              edit_as:
+                field_type: select_filter_values
+                alt_options:
+                  'Type A': type_a
+                  'Type B': type_b
+                select_filtering_target: 'my_select_field'
+            
+            my_select_field:
+              edit_as:
+                field_type: select_record_from_table_some_items
+                value_attr: id
+                label_attr:
+                  - item_type
+                  - '|'
+                  - name
+                group_split_char: '|'
+                big_select:
+                  filtered: true
+              blank_preset_value:
+                table_name:
+                  filter_field_name: "{{filter_field}}"
+        
+        select_filtering_target: field_name
+          # Specifies the target field to be filtered when this field changes.
+          # Used with big_select.filtered configuration to dynamically filter another big-select field.
+          # The filter value from this field is passed via blank_preset_value to constrain the query.
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
+describe 'dynamic models fields and views', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport

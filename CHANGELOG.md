@@ -14,7 +14,57 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-## [9.42.2] - 2026-01-23
+### From FPHS - PR #893 - 2026-02-04
+
+- [Added] dynamic page title updates based on UI context - fixes #871
+
+### From FPHS - PR #892 - 2026-02-04
+
+- [Fixed] switchable ID to show first non-(none) ID on participant header - fixes #872
+
+### From Consected - 2026-02-04
+
+- [Fixed] asset cleaning to limit to test directories
+
+### From Viva (with debugging contributions from FPHS) - PR #891 - 2026-02-04
+
+- [Changed] edit form template to ensure filestore form is not inside the main form - fixes #884
+
+### From Viva - 2026-02-04
+
+- [Added] consistent app settings setup to system specs
+
+### From Viva - PR #889 - 2026-01-04
+
+- [Fixed] add_item_button hyphenated name for activity logs and external identifiers
+
+### From Viva - PR #888 - 2026-02-03
+
+- [Fixed] user NfsStore actions, to prevent them changing the user's app_type id for the UI - fixes 887
+
+### From FPHS - PR #883 - 2026-02-03
+
+- [Fixed] race condition in auto-run report tabs causing 0 results on tab rotation
+
+### From FPHS - PR #882- 2026-02-02
+
+- [Fixed] master tabs access control spec - related to #673
+
+### From Viva - 2026-02-02
+
+- [Added] option to release script to that must be set if we want to merge back from new-master branch after build
+
+### From Viva - 2026-02-02
+
+- [Updated] agent tool access
+
+### From Viva - PR #879 - 2026-02-02
+
+- [Fixed] undefined method 'definition' error when renaming or trashing filestore files - fixes #878
+
+### From FPHS - PR #874 - 2026-01-27
+
+- [Added] big-select field filtering implementation, documentation and full test suite
 
 ### From FPHS - PR #870 - 2026-01-23
 
@@ -35,6 +85,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 - [Added] a scope to exclude a role name from a user access controls query (required coalesce to work)
 - [Added] the ability to show extra calculated columns in admin index lists
 - [Added] UAC summary to Dynamic Model and External Identifier admin panels - fixes #859
+- [Added] copilot agents and instructions to support AI agent workflows.
+- [Split] out instructions into files scoped by applyTo metadata.
+- [Added] agent personas based on <https://github.com/github/awesome-copilot>
 
 ### From FPHS - PR #860 - 2026-01-21
 

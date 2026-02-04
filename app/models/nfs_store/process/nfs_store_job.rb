@@ -4,7 +4,7 @@ module NfsStore
   module Process
     # Superclass for jobs to inherit from
     class NfsStoreJob < ActiveJob::Base
-      attr_accessor :provider_job
+      attr_accessor :provider_job, :orig_cf_user, :orig_cf_user_app_type_id
       attr_writer :job
 
       def log(txt)
@@ -58,8 +58,29 @@ module NfsStore
       # @see ProcessHandler#setup_container_file_current_user
       # @param [NfsStore::Manage::ContainerFile] container_file
       # @param [Integer] in_app_type_id - id of the Admin::AppType for the Batch User if needed
-      def setup_container_file_current_user(container_file, in_app_type_id)
-        ProcessHandler.setup_container_file_current_user(container_file, in_app_type_id)
+      # @return [User] the current_user set on the container_file
+      def setup_container_file_current_user(container_file, in_app_type_id, &)
+        self.orig_cf_user = container_file.user
+        self.orig_cf_user_app_type_id = orig_cf_user&.app_type_id
+        cf_user = ProcessHandler.setup_container_file_current_user(container_file, in_app_type_id)
+        return unless block_given?
+
+        begin
+          yield(cf_user)
+        ensure
+          restore_container_file_current_user(container_file)
+        end
+      end
+
+      #
+      # Restore the original user app_type_id for the container_file user if it was changed
+      # @param [NfsStore::Manage::ContainerFile] container_file
+      def restore_container_file_current_user(container_file)
+        cf_user = container_file.user
+        return unless orig_cf_user == cf_user
+        return if orig_cf_user_app_type_id == cf_user.app_type_id
+
+        cf_user.update!(app_type_id: orig_cf_user_app_type_id)
       end
 
       #

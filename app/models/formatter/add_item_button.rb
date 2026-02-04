@@ -11,7 +11,13 @@ module Formatter
       raise FphsException, "add_item_button configured resource name is not found: #{resource_name}" unless model
 
       path = model.base_route_segments
-      hyph_name = model.resource_item_name.to_s.hyphenate
+      # Dynamic models need prefix added (resource_item_name includes it)
+      # Activity logs already have proper hyphenated_name with activity suffix
+      hyph_name = if resource_name.start_with?('dynamic_model__')
+                    model.resource_item_name.to_s.hyphenate
+                  else
+                    model[:hyphenated_name]
+                  end
 
       html = <<~END_HTML
         <span class="temp-new-embedded-block">

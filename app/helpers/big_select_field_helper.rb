@@ -17,14 +17,13 @@ module BigSelectFieldHelper
     @big_select_field_id = nil
     if options[:filtered]
       not_done = true
-      field_id = big_select_field_id # "#{form.object_name}_#{field}".to_sym
       res = ''
       data.each do |k, v|
         if not_done
           not_done = false
           res = "#{res} #{big_select_field_main(form, field, object_name, v, subtype: k, options: options)}"
         else
-          res = "#{res} #{big_select_field_data(form, field_id, k, v)}"
+          res = "#{res} #{big_select_field_data(k, v, options)}"
         end
       end
       res.html_safe
