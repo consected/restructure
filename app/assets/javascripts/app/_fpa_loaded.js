@@ -51,6 +51,10 @@ _fpa.loaded.default = function () {
   _fpa.timed_flash_fadeout();
   _fpa.form_utils.format_block();
 
+  // Initialize page title module and bind search tab handlers
+  _fpa.page_title.init();
+  _fpa.page_title.bind_search_tabs();
+
   // Setup handler for each crosswalk attr search field in the nav bar
   for (var i in _fpa.state.crosswalk_attrs) {
     var field = _fpa.state.crosswalk_attrs[i];
