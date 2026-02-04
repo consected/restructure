@@ -10,6 +10,52 @@ _fpa.masters = {
     auto_run_init_delay: 300,
     default_search_delay: 500,
 
+    /**
+     * Initialize switchable IDs to show the first non-"(none)" ID.
+     * If all IDs are "(none)", shows the first one.
+     * @param {jQuery} block - The block containing switchable ID elements
+     */
+    init_switchable_ids: function (block) {
+        block.find('.result-refs').not('.initialized-switchable-ids').each(function () {
+            var container = $(this);
+            var switch_btn = container.find('.switch_id');
+            var id_items = container.find('span.alt-id-item');
+
+            if (id_items.length <= 1) return;
+
+            // Find the first ID that is not "(none)"
+            var first_non_none_index = -1;
+            id_items.each(function (i) {
+                var item_text = $(this).text().trim();
+                if (item_text !== '(none)') {
+                    first_non_none_index = i;
+                    return false; // break out of each loop
+                }
+            });
+
+            // If all are "(none)", keep the first one visible (default behavior)
+            if (first_non_none_index <= 0) {
+                container.addClass('initialized-switchable-ids');
+                return;
+            }
+
+            // Hide all items
+            id_items.hide();
+
+            // Show the first non-none item
+            var visible_item = id_items.eq(first_non_none_index);
+            visible_item.show();
+
+            // Update the switch button title to indicate the next ID to switch to
+            var next_index = (first_non_none_index + 1) % id_items.length;
+            var next_item = id_items.eq(next_index);
+            var next_title = next_item.data('idLabel') || 'alternative ID';
+            switch_btn.attr('title', 'switch to ' + next_title);
+
+            container.addClass('initialized-switchable-ids');
+        });
+    },
+
     switch_id_on_click: function (block) {
         block.find('.switch_id').not('.attached-switch-click').click(function (ev) {
             ev.preventDefault();
