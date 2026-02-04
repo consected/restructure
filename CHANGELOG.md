@@ -14,6 +14,16 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #893 - 2026-02-04
+
+- [Added] dynamic page title updates based on UI context - fixes #871
+
+### From FPHS - PR #892 - 2026-02-04
+
+- [Fixed] switchable ID to show first non-(none) ID on participant header - fixes #872
+
+### From Consected - 2026-02-04
+
 - [Fixed] asset cleaning to limit to test directories
 
 ### From Viva (with debugging contributions from FPHS) - PR #891 - 2026-02-04
