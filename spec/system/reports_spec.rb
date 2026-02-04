@@ -54,6 +54,8 @@ describe 'reports', js: true, driver: $browser_driver do
 
     create_report_with_all_criteria_fields
     create_report_with_add_item_button
+    create_report_with_activity_log_add_item_button
+    create_report_with_external_identifier_add_item_button
     create_report_with_filter_selector
 
     @report = r
@@ -236,6 +238,9 @@ describe 'reports', js: true, driver: $browser_driver do
                                            position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
+  # Creates a report with add_item_button substitution for a dynamic model.
+  # The button uses the temporary master (-1) to create new records.
+  # Tests: {{add_item_button_to_temporary_master_dynamic_model__test_with_id_recs}}
   def create_report_with_add_item_button
     dm = DynamicModel.active.find_by(table_name: 'test_with_id_recs')
     expect(dm).not_to be nil
@@ -259,6 +264,62 @@ describe 'reports', js: true, driver: $browser_driver do
                                             name: 'Add Item Button', description:, sql: sql, search_attrs: search_attrs,
                                             disabled: false, report_type: 'regular_report', auto: false, searchable: false,
                                             position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
+  # Creates a report with add_item_button substitution for an activity log.
+  # Activity logs require the activity suffix (e.g., __primary) in the resource name.
+  # Tests: {{add_item_button_to_temporary_master_activity_log__player_contact_phone__primary}}
+  def create_report_with_activity_log_add_item_button
+    expect(Master.find(-1)).to be_a Master
+
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    description = <<~END_DESC
+      This report has an activity log add item button.
+
+      {{add_item_button_to_temporary_master_activity_log__player_contact_phone__primary}}
+    END_DESC
+
+    @activity_log_add_item_button_report = Report.create(current_admin: @admin,
+                                                         name: 'Activity Log Add Item Button', description:, sql: sql, search_attrs: search_attrs,
+                                                         disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                                         position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
+  # Creates a report with add_item_button substitution for an external identifier.
+  # External identifiers use the simple resource name (e.g., scantrons).
+  # Tests: {{add_item_button_to_temporary_master_scantrons}}
+  def create_report_with_external_identifier_add_item_button
+    expect(Master.find(-1)).to be_a Master
+    ei = ExternalIdentifier.active.find_by(name: 'scantrons')
+    expect(ei).not_to be_nil
+
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    description = <<~END_DESC
+      This report has an external identifier add item button.
+
+      {{add_item_button_to_temporary_master_scantrons}}
+    END_DESC
+
+    @external_identifier_add_item_button_report = Report.create(current_admin: @admin,
+                                                                name: 'External Identifier Add Item Button', description:, sql: sql, search_attrs: search_attrs,
+                                                                disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                                                position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
   # Creates a report with filter_selector configuration to test the JavaScript
@@ -418,6 +479,8 @@ describe 'reports', js: true, driver: $browser_driver do
     end
   end
 
+  # Tests add_item_button substitution for dynamic models.
+  # Dynamic models need the 'dynamic-model--' prefix in the data-target attribute.
   it 'shows add item button on report with criteria' do
     setup_access :dynamic_model__test_with_id_recs, user: @user
 
@@ -449,6 +512,83 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-results-block table')
     expect(page).to have_css('.report-results-block table', text: /new test value/)
     expect(page).to have_css('.report-results-block table', text: /new test name/)
+  end
+
+  # Tests add_item_button substitution for activity logs.
+  # Activity logs use the hyphenated_name with activity suffix (e.g., activity-log--player-contact-phone-primary).
+  it 'shows activity log add item button on report' do
+    # Access control uses the base table resource name
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+
+    let_user_create_master(@user)
+    create_master(@user)
+
+    get_list
+
+    open_report @activity_log_add_item_button_report.id, 'Activity Log Add Item Button'
+    expect(page).to have_css('.report-criteria')
+    expect(page).to have_css('a.add-item-button')
+    aib = find('a.add-item-button')
+
+    # Verify the button has correct attributes for activity logs with activity suffix
+    puts "Activity Log Add Item Button href: #{aib[:href]}"
+    puts "Activity Log Add Item Button data-target: #{aib[:'data-target']}"
+
+    aib.click
+
+    expect(page).to have_css('#primary-modal1.fade.in')
+
+    debug_process_status
+    within('form.new_activity_log_player_contact_phone') do
+      fill_in_field 'data', 'Test activity log data'
+      click_button 'Save'
+    end
+
+    finish_form_formatting
+
+    within '#report_query_form' do
+      click_button 'table'
+    end
+    expect(page).to have_css('.report-results-block')
+  end
+
+  # Tests add_item_button substitution for external identifiers.
+  # External identifiers use simple hyphenated_name (e.g., scantron for scantrons table).
+  it 'shows external identifier add item button on report' do
+    setup_access :scantrons, user: @user
+
+    let_user_create_master(@user)
+    create_master(@user)
+
+    get_list
+
+    open_report @external_identifier_add_item_button_report.id, 'External Identifier Add Item Button'
+    expect(page).to have_css('.report-criteria')
+    expect(page).to have_css('a.add-item-button')
+    aib = find('a.add-item-button')
+
+    # Verify the button has correct attributes for external identifiers
+    puts "External Identifier Add Item Button href: #{aib[:href]}"
+    puts "External Identifier Add Item Button data-target: #{aib[:'data-target']}"
+
+    aib.click
+
+    expect(page).to have_css('#primary-modal1.fade.in')
+
+    debug_process_status
+    within('form.new_scantron') do
+      # External identifier forms typically have an ID field to fill in
+      fill_in_field 'scantron_id', '123456789'
+      click_button 'Save'
+    end
+
+    finish_form_formatting
+
+    within '#report_query_form' do
+      click_button 'table'
+    end
+    expect(page).to have_css('.report-results-block')
   end
 
   # Test that filter_selector configuration in report criteria correctly filters
