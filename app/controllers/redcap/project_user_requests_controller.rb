@@ -50,7 +50,11 @@ class Redcap::ProjectUserRequestsController < UserBaseController
   def download_field_file
     record_id = params[:record_id]
     field_name = params[:field_name]
-    tn = "\\.#{params[:id].pluralize}"
+    resource_name = params[:id]
+    m = Resources::Models.find_by(resource_name:)
+    raise FphsException, "download_field_file resource model not found for resource_name: #{resource_name}" unless m
+
+    tn = "\\.#{m.table_name}"
 
     svp = { secure_view: params[:secure_view]&.to_unsafe_h }
 
@@ -60,6 +64,8 @@ class Redcap::ProjectUserRequestsController < UserBaseController
       container = project_admin.file_store
       path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}" if record_id
       sf = container&.stored_files&.find_by(path:, file_name: field_name) if path
+    else
+      Rails.logger.warn "No matching project admin found for download_field_file with resource_name: #{resource_name}, record_id: #{record_id}, field_name: #{field_name}"
     end
     if sf
       url = "/nfs_store/downloads/#{container.id}?activity_log_id=#{container.parent_item&.id}&" \
