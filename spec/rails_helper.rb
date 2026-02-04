@@ -219,6 +219,13 @@ RSpec.configure do |config|
     SetupHelper.raise_if_stale_instance_variables!(instance_variables)
   end
 
+  # Set a default before(:all) for system tests setup consistent app settings.
+  config.before(:all, type: :system) do
+    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('AllowDynamicMigrations', true)
+  end
+
   Shoulda::Matchers.configure do |config|
     config.integrate do |with|
       with.test_framework :rspec
