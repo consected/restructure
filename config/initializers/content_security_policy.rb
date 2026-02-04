@@ -12,7 +12,7 @@ Rails.application.configure do
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data
     policy.object_src  :none
-    policy.script_src  :self, :https, :unsafe_eval, :strict_dynamic
+    policy.script_src  :self, :https, :unsafe_eval # , :strict_dynamic
     policy.style_src   :self, :https, :unsafe_inline
     # Explicit CSP Level 3 directives for inline styles on elements
     policy.style_src_attr  :unsafe_inline
@@ -31,5 +31,5 @@ Rails.application.configure do
 
   # Report violations without enforcing the policy.
   # Set to false to enforce CSP and block violations
-  config.content_security_policy_report_only = false
+  config.content_security_policy_report_only = true
 end
