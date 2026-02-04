@@ -15,10 +15,103 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 ## Unreleased
 
 - [Fixed] asset cleaning to limit to test directories
-- [Fixed] race condition in auto-run report tabs causing 0 results on tab rotation - fixes #835
+
+### From Viva (with debugging contributions from FPHS) - PR #891 - 2026-02-04
+
+- [Changed] edit form template to ensure filestore form is not inside the main form - fixes #884
+
+### From Viva - 2026-02-04
+
+- [Added] consistent app settings setup to system specs
+
+### From Viva - PR #889 - 2026-01-04
+
+- [Fixed] add_item_button hyphenated name for activity logs and external identifiers
+
+### From Viva - PR #888 - 2026-02-03
+
+- [Fixed] user NfsStore actions, to prevent them changing the user's app_type id for the UI - fixes 887
+
+### From FPHS - PR #883 - 2026-02-03
+
+- [Fixed] race condition in auto-run report tabs causing 0 results on tab rotation
+
+### From FPHS - PR #882- 2026-02-02
+
+- [Fixed] master tabs access control spec - related to #673
+
+### From Viva - 2026-02-02
+
 - [Added] option to release script to that must be set if we want to merge back from new-master branch after build
-- [Fixed] undefined method 'definition' error when renaming or trashing filestore files - fixes #878
+
+### From Viva - 2026-02-02
+
 - [Updated] agent tool access
+
+### From Viva - PR #879 - 2026-02-02
+
+- [Fixed] undefined method 'definition' error when renaming or trashing filestore files - fixes #878
+
+### From FPHS - PR #874 - 2026-01-27
+
+- [Added] big-select field filtering implementation, documentation and full test suite
+
+### From FPHS - PR #870 - 2026-01-23
+
+- [Changed] embedded_block in report to allow URLs with /edit - fixes #325
+- [Fixed] embedded_block in report to allow activity log URLs
+
+### From FPHS - PR #868 - 2026-01-22
+
+- [Added] activity log access summaries in admin panel - resolves #867
+
+### From FPHS - PR #865 - 2026-01-22
+
+- [Added] `active_sublist_values` option to page layouts `view_options` - fixes #584
+- [Added] `sort_sublists` option to set default sort order (`'asc'` or `'desc'`) to page layouts `view_options`
+
+### From FPHS - PR #864 - 2026-01-22
+
+- [Added] a scope to exclude a role name from a user access controls query (required coalesce to work)
+- [Added] the ability to show extra calculated columns in admin index lists
+- [Added] UAC summary to Dynamic Model and External Identifier admin panels - fixes #859
+- [Added] copilot agents and instructions to support AI agent workflows.
+- [Split] out instructions into files scoped by applyTo metadata.
+- [Added] agent personas based on <https://github.com/github/awesome-copilot>
+
+### From FPHS - PR #860 - 2026-01-21
+
+- [Added] access control filtering for master tabs nav dropdown - fixed #673
+
+- [Fixed] External IDs panel blank when switching participants, resolves original issue #653 incorrectly addresed by PR #855  - fixes #857
+
+### From FPHS - PR #856 - 2026-01-21
+
+- [Fixed] view_options.alt_width_classes not working for external ID or dynamic models displayed in master panels - fixes #389
+
+### From FPHS - PR #855 - 2026-01-20
+
+- [Fixed] external IDs panel not showing content when switching participants  - fixed #653
+
+### From FPHS - PR #854 - 2026-01-20
+
+- [Fixed] error parsing JSON field when the content is an empty string - fixes #853
+
+### From FPHS - PR #852 - 2026-01-20
+
+- [Fixed] issue when users tried to reset their password with a previously used password, they saw confusing duplicate errors - fixes #340
+
+### From FPHS - PR #851 - 2026-01-20
+
+- [Fixed] switch_id_on_click for multiple external IDs - fixed #312
+
+### From FPHS - PR #850 - 2026-01-20
+
+- [Fixed] styling on admin log and long lines in YAML editors
+
+### From FPHS - PR #849 - 2026-01-20
+
+- [Fixed] spec test issues
 
 ## [9.42.1] - 2026-01-19
 
