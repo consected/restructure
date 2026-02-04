@@ -236,5 +236,11 @@ if [ "${MERGE_BACK}" ]; then
   echo "Merging back to ${FROM_BRANCH}"
   git merge new-master
   git push
+else
+  echo "Not merging back to ${FROM_BRANCH}"
+  git checkout new-master CHANGELOG.md
+  git checkout new-master version.txt
+  git commit -m "Merged release ${NEWVER} back to ${FROM_BRANCH}" CHANGELOG.md version.txt &&
+  git push
 fi
 echo "Built and setup assets: ${TESTVER}"
