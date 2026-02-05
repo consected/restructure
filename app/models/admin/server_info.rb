@@ -160,11 +160,39 @@ class Admin::ServerInfo
   def nfs_store_mount_dirs
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
     group_id_range = NfsStore::Manage::Filesystem.group_id_range
-    return unless dir.present?
+    return [] unless dir.present?
 
-    IO.popen("ls #{dir}/gid#{group_id_range.first}").read
-  rescue StandardError
-    'mount dirs not available'
+    mount_info_list = []
+    
+    # Get mount information for extracting source filesystems
+    mount_output = get_mount_output
+    
+    group_id_range.each do |gid|
+      mount_path = File.join(dir, "gid#{gid}")
+      
+      # Check if the path is a mountpoint using Ruby Pathname
+      pathname = Pathname.new(mount_path)
+      mountpoint_status = pathname.mountpoint? ? :mounted : :failed
+      
+      # Check if directory is accessible
+      directory_status = check_directory_accessible(mount_path)
+      
+      # Extract source filesystem from mount output
+      source_filesystem = extract_source_filesystem(mount_output, mount_path)
+      
+      mount_info_list << {
+        group_id: gid,
+        mount_path: mount_path,
+        source_filesystem: source_filesystem,
+        mountpoint_status: mountpoint_status,
+        directory_status: directory_status
+      }
+    end
+    
+    mount_info_list
+  rescue StandardError => e
+    Rails.logger.error "Error checking NFS mount dirs: #{e.message}"
+    []
   end
 
   def configuration_successful
@@ -182,6 +210,18 @@ class Admin::ServerInfo
 
     @configuration_failed_reason += Settings.configuration_failed_reason unless Settings.configuration_successful?
 
+    # Check NFS mountpoint status
+    mount_dirs_info = nfs_store_mount_dirs
+    if mount_dirs_info.is_a?(Array)
+      mount_dirs_info.each do |mount_info|
+        if mount_info[:mountpoint_status] == :failed
+          @configuration_failed_reason << "NFS mountpoint #{mount_info[:mount_path]} (gid#{mount_info[:group_id]}) is not mounted. See NfsStore Settings for details."
+        elsif mount_info[:directory_status] == :failed
+          @configuration_failed_reason << "NFS directory #{mount_info[:mount_path]} (gid#{mount_info[:group_id]}) is not accessible. See NfsStore Settings for details."
+        end
+      end
+    end
+
     @configuration_failed_reason
   end
 
@@ -193,5 +233,47 @@ class Admin::ServerInfo
     raise FphsException, 'a valid admin is required' unless admin.is_a?(Admin) && admin.enabled?
 
     self.current_admin = admin
+  end
+
+  private
+
+  # Get mount command output for extracting source filesystems
+  # @return [String] output from mount command
+  def get_mount_output
+    `mount 2>/dev/null` || ''
+  rescue StandardError => e
+    Rails.logger.warn "Could not get mount output: #{e.message}"
+    ''
+  end
+
+  # Check if a directory is accessible by attempting to list its entries
+  # @param [String] path - the directory path to check
+  # @return [Symbol] :accessible or :failed
+  def check_directory_accessible(path)
+    Dir.entries(path)
+    :accessible
+  rescue StandardError => e
+    Rails.logger.warn "Directory not accessible #{path}: #{e.message}"
+    :failed
+  end
+
+  # Extract the source filesystem path from mount command output
+  # @param [String] mount_output - output from mount command
+  # @param [String] mount_path - the mount point path to search for
+  # @return [String, nil] the source filesystem path or nil if not found
+  def extract_source_filesystem(mount_output, mount_path)
+    return nil if mount_output.blank?
+
+    # Look for line matching the mount_path
+    # Example: /efs-prod/main on /mnt/fphsfs/gid600 type fuse (...)
+    mount_output.each_line do |line|
+      if line.include?(" on #{mount_path} ")
+        # Extract the first part (source filesystem)
+        source = line.split(' on ').first&.strip
+        return source if source.present?
+      end
+    end
+    
+    nil
   end
 end
