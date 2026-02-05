@@ -75,12 +75,12 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
     expect(page).to have_content('NfsStore Settings')
     expect(page).to have_content('Disk Usage')
     expect(page).to have_content('Processes')
-    
+
     # Verify panels can be expanded
     find('a[href="#collapse-app-settings"]').click
     sleep 0.3
     expect(page).to have_css('#collapse-app-settings.in')
-    
+
     find('a[href="#collapse-disk-usage"]').click
     sleep 0.3
     expect(page).to have_css('#collapse-disk-usage.in')

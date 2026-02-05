@@ -24,6 +24,7 @@ Displays overall server health with status indicators, including:
 - **Configuration Status** - shows alert icons when critical services (database, memcached, NFS) have issues
 
 Status indicators use color-coded icons:
+
 - ✓ Green check - all systems operational
 - ⚠ Red alert - configuration issues detected (hover or click for details)
 
