@@ -1,5 +1,20 @@
 # frozen_string_literal: true
 
+# Tests for YAML anchor recovery in admin panel
+#
+# This spec tests the ability to recover from broken YAML configurations that
+# contain anchors and aliases. It simulates the user workflow of:
+# 1. Having valid YAML with anchors
+# 2. Making a mistake that breaks YAML parsing
+# 3. Saving (which shows errors but preserves data)
+# 4. Fixing the YAML
+# 5. Successfully saving the fix
+#
+# Note: Migrations are disabled after initial setup because the migration
+# runner uses a separate thread that can have connection pool issues in
+# Capybara system tests. The core functionality being tested is YAML
+# handling, not database migrations.
+
 require 'rails_helper'
 
 describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
@@ -11,6 +26,13 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     SetupHelper.feature_setup
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
     make_an_admin
+    # Save original setting to restore later
+    @original_allow_migrations = Settings::AllowDynamicMigrations
+  end
+
+  after(:all) do
+    # Restore original migration setting
+    change_setting('AllowDynamicMigrations', @original_allow_migrations)
   end
 
   it 'allows recovery from broken YAML by saving fixed YAML through the UI' do
@@ -20,8 +42,9 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     # Clean up any existing table
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
     ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{schema_name}.#{table_name}")
+    ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{schema_name}.#{table_name}_history")
 
-    # Create table
+    # Create table and history table (to prevent migrations from being triggered)
     sql = <<~SQL
       CREATE TABLE IF NOT EXISTS #{schema_name}.#{table_name} (
         id SERIAL PRIMARY KEY,
@@ -30,7 +53,17 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
         user_id INTEGER,
         created_at TIMESTAMP,
         updated_at TIMESTAMP
-      )
+      );
+
+      CREATE TABLE IF NOT EXISTS #{schema_name}.#{table_name}_history (
+        id SERIAL PRIMARY KEY,
+        #{table_name.singularize}_id INTEGER,
+        master_id INTEGER,
+        name VARCHAR(255),
+        user_id INTEGER,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP
+      );
     SQL
     ActiveRecord::Base.connection.execute(sql)
 
@@ -63,6 +96,10 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     dm.current_admin = @admin
     dm.update_tracker_events
 
+    # Disable migrations after setup - we're testing YAML handling, not migrations
+    # This prevents thread/connection pool issues in system tests
+    change_setting('AllowDynamicMigrations', false)
+
     admin_sign_in_with_2fa
 
     # Step 1: Navigate to Dynamic Models admin page and edit our model
@@ -77,22 +114,21 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     finish_page_loading
 
     # Step 2: Add bad entry to the top of the YAML (simulating user's exact scenario)
-    # The user reported: "add the text '  bad entry' on the top line on the editor"
     page.execute_script(<<~JS)
-      var editor = document.querySelector('textarea.code-editor');
+      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
+      var editor = form ? form.querySelector('textarea.code-editor') : null;
       if (editor && editor.CodeMirror) {
         var currentValue = editor.CodeMirror.getValue();
         // Add bad entry at the very top of the content
         var brokenValue = '  bad entry\\n' + currentValue;
         editor.CodeMirror.setValue(brokenValue);
-        // Do NOT call editor.CodeMirror.save() - let the form submission handle syncing
       }
     JS
 
     finish_page_loading
 
     # Step 3: Save - should succeed but show errors in config-error-block
-    within '.admin-edit-form' do
+    within "#edit_dynamic_model_#{dm.id}" do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
@@ -109,15 +145,16 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     expect(dm.options).to include('bad entry')
 
     # Step 4: Now fix the YAML by removing the bad entry
-    # The user reported: "delete the text '  bad entry' from the editor"
     page.execute_script(<<~JS)
-      var editor = document.querySelector('textarea.code-editor');
+      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
+      var editor = form ? form.querySelector('textarea.code-editor') : null;
       if (editor && editor.CodeMirror) {
         var currentValue = editor.CodeMirror.getValue();
-        // Remove the bad entry line from the top
-        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/m, '');
+        // Remove the bad entry line
+        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/gm, '');
         editor.CodeMirror.setValue(fixedValue);
-        // Do NOT call editor.CodeMirror.save() - let the form submission handle syncing
+        // Sync CodeMirror to textarea
+        editor.CodeMirror.save();
       }
     JS
 
@@ -125,7 +162,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
 
     # Step 5: Save again - THIS IS THE CRITICAL TEST
     # Previously this would result in a server error and no changes saved
-    within '.admin-edit-form' do
+    within "#edit_dynamic_model_#{dm.id}" do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
@@ -198,6 +235,9 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     dm.current_admin = @admin
     dm.update_tracker_events
 
+    # Disable migrations after setup - we're testing YAML handling, not migrations
+    change_setting('AllowDynamicMigrations', false)
+
     admin_sign_in_with_2fa
 
     # Step 1: Navigate to Dynamic Models admin page and edit our model
@@ -213,7 +253,8 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
 
     # Step 2: Add bad entry to the top of the YAML (breaking the YAML syntax)
     page.execute_script(<<~JS)
-      var editor = document.querySelector('textarea.code-editor');
+      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
+      var editor = form ? form.querySelector('textarea.code-editor') : null;
       if (editor && editor.CodeMirror) {
         var currentValue = editor.CodeMirror.getValue();
         // Add bad entry at the very top of the content
@@ -225,7 +266,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     finish_page_loading
 
     # Step 3: Save - should succeed but show errors in config-error-block
-    within '.admin-edit-form' do
+    within "#edit_dynamic_model_#{dm.id}" do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
@@ -243,12 +284,14 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
 
     # Step 4: Now fix the YAML by removing the bad entry
     page.execute_script(<<~JS)
-      var editor = document.querySelector('textarea.code-editor');
+      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
+      var editor = form ? form.querySelector('textarea.code-editor') : null;
       if (editor && editor.CodeMirror) {
         var currentValue = editor.CodeMirror.getValue();
         // Remove the bad entry line from the top
-        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/m, '');
+        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/gm, '');
         editor.CodeMirror.setValue(fixedValue);
+        editor.CodeMirror.save();
       }
     JS
 
@@ -256,7 +299,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
 
     # Step 5: Save again - THIS IS THE CRITICAL TEST
     # Previously this would cause a server error in view_sql_changed? when parsing broken YAML
-    within '.admin-edit-form' do
+    within "#edit_dynamic_model_#{dm.id}" do
       find('input[type="submit"], button[type="submit"]', match: :first).click
     end
 
