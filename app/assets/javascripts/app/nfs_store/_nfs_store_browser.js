@@ -114,7 +114,9 @@ _nfs_store.fs_browser = function ($outer) {
 
     form.attr('data-remote', 'true');
     form[0].app_callback = function () {
-      refresh_browser($outer, container_id);
+      window.setTimeout(function () {
+        refresh_browser($outer, container_id);
+      }, 1000);
     }
 
     $('body').addClass('prevent-page-transition');
