@@ -18,7 +18,7 @@ DBOWNER=${DBOWNER:=$(whoami)}
 
 function setup() {
 
-  DBNAME=${DB_BASE_NAME}_test${DBNUM}
+  DBNAME=${DB_BASE_NAME}_test${TEST_ENV_SET}${DBNUM}
 
   cd "$(dirname "${BASEDIR}")" || return
 
@@ -57,10 +57,10 @@ else
 fi
 
 if [ -z "${PARALLEL}" ]; then
-  echo "Single setup"
+  echo "Single setup: ${DB_BASE_NAME}_test${TEST_ENV_SET}"
   setup
 else
-  echo "Setup ${PARALLEL} databases"
+  echo "Setup ${PARALLEL} databases: ${DB_BASE_NAME}_test${TEST_ENV_SET}<n>"
   for i in $(seq 1 "${PARALLEL}"); do
     if [ ${i} == 1 ]; then
       DBNUM=''
