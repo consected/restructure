@@ -114,17 +114,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     finish_page_loading
 
     # Step 2: Add bad entry to the top of the YAML (simulating user's exact scenario)
-    page.execute_script(<<~JS)
-      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
-      var editor = form ? form.querySelector('textarea.code-editor') : null;
-      if (editor && editor.CodeMirror) {
-        var currentValue = editor.CodeMirror.getValue();
-        // Add bad entry at the very top of the content
-        var brokenValue = '  bad entry\\n' + currentValue;
-        editor.CodeMirror.setValue(brokenValue);
-      }
-    JS
-
+    codemirror_prepend(form_id: "edit_dynamic_model_#{dm.id}", text: "  bad entry\n")
     finish_page_loading
 
     # Step 3: Save - should succeed but show errors in config-error-block
@@ -145,19 +135,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     expect(dm.options).to include('bad entry')
 
     # Step 4: Now fix the YAML by removing the bad entry
-    page.execute_script(<<~JS)
-      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
-      var editor = form ? form.querySelector('textarea.code-editor') : null;
-      if (editor && editor.CodeMirror) {
-        var currentValue = editor.CodeMirror.getValue();
-        // Remove the bad entry line
-        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/gm, '');
-        editor.CodeMirror.setValue(fixedValue);
-        // Sync CodeMirror to textarea
-        editor.CodeMirror.save();
-      }
-    JS
-
+    codemirror_replace(form_id: "edit_dynamic_model_#{dm.id}", pattern: '^\\s*bad entry\\n', replacement: '')
     finish_page_loading
 
     # Step 5: Save again - THIS IS THE CRITICAL TEST
@@ -252,17 +230,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     finish_page_loading
 
     # Step 2: Add bad entry to the top of the YAML (breaking the YAML syntax)
-    page.execute_script(<<~JS)
-      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
-      var editor = form ? form.querySelector('textarea.code-editor') : null;
-      if (editor && editor.CodeMirror) {
-        var currentValue = editor.CodeMirror.getValue();
-        // Add bad entry at the very top of the content
-        var brokenValue = '  bad entry\\n' + currentValue;
-        editor.CodeMirror.setValue(brokenValue);
-      }
-    JS
-
+    codemirror_prepend(form_id: "edit_dynamic_model_#{dm.id}", text: "  bad entry\n")
     finish_page_loading
 
     # Step 3: Save - should succeed but show errors in config-error-block
@@ -283,18 +251,7 @@ describe 'admin YAML anchor recovery', js: true, driver: $browser_driver do
     expect(dm.options).to include('bad entry')
 
     # Step 4: Now fix the YAML by removing the bad entry
-    page.execute_script(<<~JS)
-      var form = document.getElementById('edit_dynamic_model_#{dm.id}');
-      var editor = form ? form.querySelector('textarea.code-editor') : null;
-      if (editor && editor.CodeMirror) {
-        var currentValue = editor.CodeMirror.getValue();
-        // Remove the bad entry line from the top
-        var fixedValue = currentValue.replace(/^\\s*bad entry\\n/gm, '');
-        editor.CodeMirror.setValue(fixedValue);
-        editor.CodeMirror.save();
-      }
-    JS
-
+    codemirror_replace(form_id: "edit_dynamic_model_#{dm.id}", pattern: '^\\s*bad entry\\n', replacement: '')
     finish_page_loading
 
     # Step 5: Save again - THIS IS THE CRITICAL TEST
