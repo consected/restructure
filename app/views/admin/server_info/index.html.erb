@@ -62,11 +62,11 @@
     <div class="nfs-source-filesystem-info">
       <% if @nfs_source_filesystem_status.present? %>
         <div class="row">
-          <div class="col-sm-3"><strong>Source Filesystem:</strong></div>
+          <div class="col-sm-6"><strong>Source Filesystem:</strong></div>
           <div class="col-sm-9"><%= @nfs_source_filesystem_status[:source_filesystem] %></div>
         </div>
         <div class="row">
-          <div class="col-sm-3"><strong>Status:</strong></div>
+          <div class="col-sm-6"><strong>Status:</strong></div>
           <div class="col-sm-9">
             <% if @nfs_source_filesystem_status[:status] == :mounted %>
               <span class="label label-success">mounted</span>
