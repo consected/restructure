@@ -16,6 +16,7 @@ class Admin::ServerInfoController < AdminController
     @processes = si.processes
     @disk_usage = si.disk_usage
     @instance_id = si.instance_id
+    @nfs_source_filesystem_status = si.nfs_source_filesystem_status
     @nfs_store_mount_dirs = si.nfs_store_mount_dirs
     @configuration_successful = si.configuration_successful
     @configuration_failed_reason = si.configuration_failed_reason

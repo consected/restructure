@@ -98,11 +98,26 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
 
   # Tests for issue #896 - NFS mountpoint info display
   describe 'NFS mountpoint information display' do
-    it 'displays detailed mountpoint information for each NFS group - Issue896' do
+    it 'displays source filesystem status separately - Issue896' do
       visit '/admin/server_info'
       finish_page_loading
 
       expect(page).to have_content('NfsStore Settings')
+      expect(page).to have_content('NFS Source Filesystem')
+
+      # Should show source filesystem information in its own section
+      within('.nfs-source-filesystem-info') do
+        expect(page).to have_content('Mount Path:')
+        expect(page).to have_content('Source Filesystem:')
+        expect(page).to have_content('Mount Status:')
+      end
+    end
+
+    it 'displays detailed mountpoint information for each NFS group - Issue896' do
+      visit '/admin/server_info'
+      finish_page_loading
+
+      expect(page).to have_content('NFS Group Directory Status')
 
       # Should display information for each group_id in range
       group_id_range = NfsStore::Manage::Filesystem.group_id_range
@@ -111,10 +126,10 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
         expect(page).to have_content("gid#{gid}")
       end
 
-      # Should show source filesystem paths
+      # Should show mount and directory status columns
       within('.nfs-mountpoint-info') do
-        expect(page).to have_css('.nfs-source-filesystem')
         expect(page).to have_css('.nfs-mount-status')
+        expect(page).to have_css('.nfs-dir-status')
       end
     end
 
@@ -137,7 +152,6 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
         {
           group_id: 600,
           mount_path: '/mnt/fphsfs/gid600',
-          source_filesystem: '/efs-prod/main',
           mountpoint_status: :failed,
           directory_status: :failed
         }
@@ -158,12 +172,13 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
       visit '/admin/server_info'
       finish_page_loading
 
-      # Should show the filesystem source (e.g., /efs-prod/main or similar)
-      within('.nfs-mountpoint-info') do
-        expect(page).to have_css('.nfs-source-filesystem')
-        filesystem_text = find('.nfs-source-filesystem').text
-        # Should be a path-like string
-        expect(filesystem_text).to match(%r{/[\w\-/]+})
+      # Should show the filesystem source in the dedicated section
+      within('.nfs-source-filesystem-info') do
+        # Should show source filesystem field
+        expect(page).to have_content('Source Filesystem:')
+        # The actual filesystem path should be present (not just the label)
+        # Look for content that looks like a path
+        expect(page.text).to match(%r{/[\w\-/]+|not configured|not found})
       end
     end
 

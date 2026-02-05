@@ -157,15 +157,37 @@ class Admin::ServerInfo
     "log not available: #{e} - #{cmds}"
   end
 
+  # Check the source NFS filesystem mount status
+  # @return [Hash] with keys :path, :source_filesystem, :status
+  def nfs_source_filesystem_status
+    dir = NfsStore::Manage::Filesystem.nfs_store_directory
+    return { path: nil, source_filesystem: nil, status: :not_configured } unless dir.present?
+
+    mount_output = get_mount_output
+    pathname = Pathname.new(dir)
+    
+    # Check if the NFS store directory itself is a mountpoint
+    is_mounted = pathname.mountpoint?
+    
+    # Extract the source filesystem
+    source_filesystem = extract_source_filesystem(mount_output, dir)
+    
+    {
+      path: dir,
+      source_filesystem: source_filesystem || '(not found)',
+      status: is_mounted ? :mounted : :failed
+    }
+  rescue StandardError => e
+    Rails.logger.error "Error checking NFS source filesystem: #{e.message}"
+    { path: dir, source_filesystem: '(error)', status: :error }
+  end
+
   def nfs_store_mount_dirs
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
     group_id_range = NfsStore::Manage::Filesystem.group_id_range
     return [] unless dir.present?
 
     mount_info_list = []
-    
-    # Get mount information for extracting source filesystems
-    mount_output = get_mount_output
     
     group_id_range.each do |gid|
       mount_path = File.join(dir, "gid#{gid}")
@@ -177,13 +199,9 @@ class Admin::ServerInfo
       # Check if directory is accessible
       directory_status = check_directory_accessible(mount_path)
       
-      # Extract source filesystem from mount output
-      source_filesystem = extract_source_filesystem(mount_output, mount_path)
-      
       mount_info_list << {
         group_id: gid,
         mount_path: mount_path,
-        source_filesystem: source_filesystem,
         mountpoint_status: mountpoint_status,
         directory_status: directory_status
       }

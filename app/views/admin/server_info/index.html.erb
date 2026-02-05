@@ -58,7 +58,33 @@
     <h3>NfsStore Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
 
-    <h4>NFS Mountpoint Status</h4>
+    <h4>NFS Source Filesystem</h4>
+    <div class="nfs-source-filesystem-info">
+      <% if @nfs_source_filesystem_status.present? %>
+        <div class="row">
+          <div class="col-sm-3"><strong>Mount Path:</strong></div>
+          <div class="col-sm-9"><%= @nfs_source_filesystem_status[:path] || '(not configured)' %></div>
+        </div>
+        <div class="row">
+          <div class="col-sm-3"><strong>Source Filesystem:</strong></div>
+          <div class="col-sm-9"><%= @nfs_source_filesystem_status[:source_filesystem] %></div>
+        </div>
+        <div class="row">
+          <div class="col-sm-3"><strong>Mount Status:</strong></div>
+          <div class="col-sm-9">
+            <% if @nfs_source_filesystem_status[:status] == :mounted %>
+              <span class="label label-success">mounted</span>
+            <% elsif @nfs_source_filesystem_status[:status] == :not_configured %>
+              <span class="label label-warning">not configured</span>
+            <% else %>
+              <span class="label label-danger">failed</span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <h4>NFS Group Directory Status</h4>
     <div class="nfs-mountpoint-info">
       <% if @nfs_store_mount_dirs.is_a?(Array) && @nfs_store_mount_dirs.any? %>
         <table class="table table-condensed">
@@ -66,7 +92,6 @@
             <tr>
               <th>Group ID</th>
               <th>Mount Path</th>
-              <th>Source Filesystem</th>
               <th>Mountpoint Status</th>
               <th>Directory Status</th>
             </tr>
@@ -76,7 +101,6 @@
               <tr class="<%= mount_info[:mountpoint_status] == :failed || mount_info[:directory_status] == :failed ? 'danger' : '' %>">
                 <td class="nfs-group-id">gid<%= mount_info[:group_id] %></td>
                 <td class="nfs-mount-path"><%= mount_info[:mount_path] %></td>
-                <td class="nfs-source-filesystem"><%= mount_info[:source_filesystem] || '(not found)' %></td>
                 <td class="nfs-mount-status">
                   <% if mount_info[:mountpoint_status] == :mounted %>
                     <span class="label label-success">mounted</span>

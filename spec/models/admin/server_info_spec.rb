@@ -111,7 +111,6 @@ RSpec.describe Admin::ServerInfo, type: :model do
         expect(mount_info).to be_a(Hash)
         expect(mount_info).to have_key(:group_id)
         expect(mount_info).to have_key(:mount_path)
-        expect(mount_info).to have_key(:source_filesystem)
         expect(mount_info).to have_key(:mountpoint_status)
         expect(mount_info).to have_key(:directory_status)
 
@@ -149,27 +148,74 @@ RSpec.describe Admin::ServerInfo, type: :model do
         expect(mount_info[:directory_status]).to be_present
       end
     end
+  end
+
+  describe '#nfs_source_filesystem_status' do
+    it 'returns source filesystem status with mount information - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+      result = si.nfs_source_filesystem_status
+
+      expect(result).to be_a(Hash)
+      expect(result).to have_key(:path)
+      expect(result).to have_key(:source_filesystem)
+      expect(result).to have_key(:status)
+
+      # Status should be one of the valid values
+      expect(result[:status]).to be_in([:mounted, :failed, :not_configured, :error])
+    end
+
+    it 'checks if NFS store directory itself is a mountpoint - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+      nfs_dir = NfsStore::Manage::Filesystem.nfs_store_directory
+
+      # Mock the parent directory as a mountpoint
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == nfs_dir
+          allow(pn).to receive(:mountpoint?).and_return(true)
+        end
+        pn
+      end
+
+      result = si.nfs_source_filesystem_status
+      expect(result[:status]).to eq(:mounted)
+      expect(result[:path]).to eq(nfs_dir)
+    end
 
     it 'extracts source filesystem path from mount command output - Issue896' do
       si = Admin::ServerInfo.new(@admin)
+      nfs_dir = NfsStore::Manage::Filesystem.nfs_store_directory
       
-      # Mock mount output to include test mountpoints
-      mock_mount_output = "/var/tmp/nfs_store_test on /var/tmp/nfs_store_test/gid600 type ext4 (rw)\n"
+      # Mock mount output to include test mountpoint
+      mock_mount_output = "/var/tmp/nfs_store_test on #{nfs_dir} type ext4 (rw)\n"
       allow(si).to receive(:get_mount_output).and_return(mock_mount_output)
       
-      result = si.nfs_store_mount_dirs
+      result = si.nfs_source_filesystem_status
 
-      # At least one entry should have a source_filesystem
-      expect(result.any? { |m| m[:source_filesystem].present? }).to be true
+      # Should have a source_filesystem extracted
+      expect(result[:source_filesystem]).to be_present
+      expect(result[:source_filesystem]).not_to eq('(not found)')
 
-      # Source filesystem should be a path-like string
-      result.each do |mount_info|
-        if mount_info[:source_filesystem].present?
-          # Should look like a filesystem path (e.g., /efs-prod/main, /var/tmp/nfs_store)
-          expect(mount_info[:source_filesystem]).to match(%r{^/[\w\-/]+})
-        end
-      end
+      # Source filesystem should look like a filesystem path
+      expect(result[:source_filesystem]).to match(%r{^/[\w\-/]+})
     end
+
+    it 'handles missing mount command gracefully - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Mock the mount command to fail
+      allow(si).to receive(:get_mount_output).and_raise(Errno::ENOENT, 'mount command not found')
+
+      result = si.nfs_source_filesystem_status
+
+      # Should still return a result
+      expect(result).to be_a(Hash)
+      expect(result[:status]).to eq(:error)
+    end
+  end
+
+  describe '#nfs_store_mount_dirs' do
 
     it 'identifies failed mountpoints correctly - Issue896' do
       si = Admin::ServerInfo.new(@admin)
@@ -221,19 +267,9 @@ RSpec.describe Admin::ServerInfo, type: :model do
       failed_dirs = result.select { |m| m[:directory_status] == :failed || m[:directory_status] == false }
       expect(failed_dirs).not_to be_empty
     end
+  end
 
-    it 'handles missing mount command gracefully - Issue896' do
-      si = Admin::ServerInfo.new(@admin)
-
-      # Mock the mount command to fail
-      allow(si).to receive(:`).with(/mount/).and_raise(Errno::ENOENT, 'mount command not found')
-
-      result = si.nfs_store_mount_dirs
-
-      # Should still return results, possibly with empty source_filesystem
-      expect(result).to be_an(Array)
-      expect(result).not_to be_empty
-    end
+  describe '#nfs_store_mount_dirs edge cases' do
 
     it 'handles partial mountpoint failures (mixed healthy and failed) - Issue896' do
       si = Admin::ServerInfo.new(@admin)
@@ -295,37 +331,6 @@ RSpec.describe Admin::ServerInfo, type: :model do
       expect(result).not_to be_empty
       result.each do |mount_info|
         expect(mount_info[:source_filesystem]).to be_nil
-      end
-    end
-
-    it 'handles mount output with multiple filesystems correctly - Issue896' do
-      si = Admin::ServerInfo.new(@admin)
-
-      group_id_range = NfsStore::Manage::Filesystem.group_id_range
-      first_gid = group_id_range.first
-      second_gid = group_id_range.to_a[1] if group_id_range.count > 1
-
-      # Mock mount output with entries for multiple group IDs
-      mock_mount_output = <<~MOUNT
-        /dev/sda1 on / type ext4 (rw)
-        /efs-prod/main on /var/tmp/nfs_store_test/gid#{first_gid} type fuse (rw,relatime)
-      MOUNT
-
-      if second_gid
-        mock_mount_output += "/efs-prod/secondary on /var/tmp/nfs_store_test/gid#{second_gid} type fuse (rw,relatime)\n"
-      end
-
-      allow(si).to receive(:get_mount_output).and_return(mock_mount_output)
-
-      result = si.nfs_store_mount_dirs
-
-      # Should extract correct source filesystems for each mount
-      first_mount = result.find { |m| m[:group_id] == first_gid }
-      expect(first_mount[:source_filesystem]).to eq('/efs-prod/main')
-
-      if second_gid
-        second_mount = result.find { |m| m[:group_id] == second_gid }
-        expect(second_mount[:source_filesystem]).to eq('/efs-prod/secondary')
       end
     end
 
