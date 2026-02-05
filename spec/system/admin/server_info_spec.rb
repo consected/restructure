@@ -107,9 +107,8 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
 
       # Should show source filesystem information in its own section
       within('.nfs-source-filesystem-info') do
-        expect(page).to have_content('Mount Path:')
         expect(page).to have_content('Source Filesystem:')
-        expect(page).to have_content('Mount Status:')
+        expect(page).to have_content('Status:')
       end
     end
 

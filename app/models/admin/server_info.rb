@@ -158,28 +158,32 @@ class Admin::ServerInfo
   end
 
   # Check the source NFS filesystem mount status
-  # @return [Hash] with keys :path, :source_filesystem, :status
+  # @return [Hash] with keys :source_filesystem, :status
   def nfs_source_filesystem_status
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
-    return { path: nil, source_filesystem: nil, status: :not_configured } unless dir.present?
+    group_id_range = NfsStore::Manage::Filesystem.group_id_range
+    return { source_filesystem: nil, status: :not_configured } unless dir.present? && group_id_range.any?
 
     mount_output = get_mount_output
-    pathname = Pathname.new(dir)
     
-    # Check if the NFS store directory itself is a mountpoint
+    # Check the first gid directory to get source filesystem (they all share the same source)
+    first_gid = group_id_range.first
+    first_mount_path = File.join(dir, "gid#{first_gid}")
+    
+    # Check if any gid directory is mounted
+    pathname = Pathname.new(first_mount_path)
     is_mounted = pathname.mountpoint?
     
-    # Extract the source filesystem
-    source_filesystem = extract_source_filesystem(mount_output, dir)
+    # Extract the source filesystem from the first gid mount
+    source_filesystem = extract_source_filesystem(mount_output, first_mount_path)
     
     {
-      path: dir,
       source_filesystem: source_filesystem || '(not found)',
       status: is_mounted ? :mounted : :failed
     }
   rescue StandardError => e
     Rails.logger.error "Error checking NFS source filesystem: #{e.message}"
-    { path: dir, source_filesystem: '(error)', status: :error }
+    { source_filesystem: '(error)', status: :error }
   end
 
   def nfs_store_mount_dirs

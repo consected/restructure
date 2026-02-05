@@ -156,7 +156,6 @@ RSpec.describe Admin::ServerInfo, type: :model do
       result = si.nfs_source_filesystem_status
 
       expect(result).to be_a(Hash)
-      expect(result).to have_key(:path)
       expect(result).to have_key(:source_filesystem)
       expect(result).to have_key(:status)
 
@@ -164,15 +163,18 @@ RSpec.describe Admin::ServerInfo, type: :model do
       expect(result[:status]).to be_in([:mounted, :failed, :not_configured, :error])
     end
 
-    it 'checks if NFS store directory itself is a mountpoint - Issue896' do
+    it 'checks if first gid directory is a mountpoint - Issue896' do
       si = Admin::ServerInfo.new(@admin)
       nfs_dir = NfsStore::Manage::Filesystem.nfs_store_directory
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(nfs_dir, "gid#{first_gid}")
 
-      # Mock the parent directory as a mountpoint
+      # Mock the first gid directory as a mountpoint
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == nfs_dir
+        if path == first_mount_path
           allow(pn).to receive(:mountpoint?).and_return(true)
         end
         pn
@@ -180,25 +182,23 @@ RSpec.describe Admin::ServerInfo, type: :model do
 
       result = si.nfs_source_filesystem_status
       expect(result[:status]).to eq(:mounted)
-      expect(result[:path]).to eq(nfs_dir)
     end
 
     it 'extracts source filesystem path from mount command output - Issue896' do
       si = Admin::ServerInfo.new(@admin)
       nfs_dir = NfsStore::Manage::Filesystem.nfs_store_directory
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(nfs_dir, "gid#{first_gid}")
       
-      # Mock mount output to include test mountpoint
-      mock_mount_output = "/var/tmp/nfs_store_test on #{nfs_dir} type ext4 (rw)\n"
+      # Mock mount output with actual gid directory mount (as shown in real mount output)
+      mock_mount_output = "/media/test/nfs_store/main on #{first_mount_path} type fuse (rw,nosuid)\n"
       allow(si).to receive(:get_mount_output).and_return(mock_mount_output)
       
       result = si.nfs_source_filesystem_status
 
-      # Should have a source_filesystem extracted
-      expect(result[:source_filesystem]).to be_present
-      expect(result[:source_filesystem]).not_to eq('(not found)')
-
-      # Source filesystem should look like a filesystem path
-      expect(result[:source_filesystem]).to match(%r{^/[\w\-/]+})
+      # Should extract the source filesystem path (first part before ' on ')
+      expect(result[:source_filesystem]).to eq('/media/test/nfs_store/main')
     end
 
     it 'handles missing mount command gracefully - Issue896' do
