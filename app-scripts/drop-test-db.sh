@@ -16,7 +16,7 @@ DB_BASE_NAME=${DB_BASE_NAME:=restr}
 
 function drop() {
 
-  DBNAME=${DB_BASE_NAME}_test${DBNUM}
+  DBNAME=${DB_BASE_NAME}${TEST_ENV_SET}_test${DBNUM}
   APPENV=test
   SCHEMA_NAME=ml_app
   DBOWNER=$(whoami)
@@ -41,10 +41,10 @@ else
 fi
 
 if [ -z ${PARALLEL} ]; then
-  echo "Single drop"
+  echo "Single drop: ${DB_BASE_NAME}_test${TEST_ENV_SET}"
   drop
 else
-  echo "Drop ${PARALLEL} databases"
+  echo "Drop ${PARALLEL} databases: ${DB_BASE_NAME}_test${TEST_ENV_SET}<n>"
   for i in $(seq 1 ${PARALLEL}); do
     if [ ${i} == 1 ]; then
       DBNUM=''

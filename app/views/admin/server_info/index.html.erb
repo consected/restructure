@@ -2,84 +2,262 @@
   <div class="row">
     <%= show_admin_heading 'Server Information' %>
   </div>
-  <div class="well">
-    <p class="si-general-status"><%= render partial: 'pages/admin_status_indicators' %></p>
-    <p class="si-instance-id"><span><%= @instance_id%></span></p>
-    <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
-  </div>
-  <div class="well">
-      <h3>Restart Server, DelayedJob and Clear Memcached</h3>
-      <%= form_tag(admin_app_types_restart_server_url, remote: true, id: 'form-restart-server') do %>
-        <%= submit_tag "Restart server" %>
-      <% end %>
-      <h3>Restart DelayedJob</h3>
-      <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true, id: 'form-restart-dj') do %>
-        <%= submit_tag "Restart DelayedJob" %>
-      <% end %>
-      <h3>Run DB Seeds</h3>
-      <%= form_tag(admin_app_types_run_db_seeds_url, remote: true, id: 'form-run-db-seeds') do %>
-        <%= submit_tag "Run DB Seeds" %>
-      <% end %>
-  </div>
-  <div class="well">
 
-      <h3>View Exception Log</h3>
-      <%= link_to link_label_open_in_new('open log'), "/reports/z_admin__exception_log", target: "exceptionlog" %>
-      <h3>Search Rails Log</h3>
-      <%= link_to link_label_open_in_new('search Rails log'), admin_server_info_rails_log_path, target: "railslog" %>
-  </div>
+  <div class="panel-group" id="server-info-accordion" role="tablist">
+    <!-- General Status Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-general">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-general" aria-expanded="true" aria-controls="collapse-general">
+            General Status
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-general" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-general">
+        <div class="panel-body">
+          <p class="si-general-status"><%= render partial: 'pages/admin_status_indicators' %></p>
+          <p class="si-instance-id"><span><%= @instance_id%></span></p>
+          <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
+        </div>
+      </div>
+    </div>
 
-  <div class="well">  
-    <h3>App Settings</h3>
-    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @app_settings} %>
-  </div>
-  <div class="well">  
-    <h3>Database Settings</h3>
-    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
-    <h4>Database Server Version</h4>
-    <pre class="si-db-version"><%=@db_version%></pre>
-  </div>
-  <div class="well">  
-    <h3>Memcached Connection</h3>
-    <table class="server-info-settings si-memcached-stats">
-      <tr><td class="setting-key">status</td><td class="setting-value si-memcached-status"><%=@memcached_stats[:status]%></td></tr>
-      <% if @memcached_stats[:servers] %>
-        <% @memcached_stats[:servers].each do |server, stats| %>
-          <tr><td class="setting-key"><%=server%></td><td class="setting-value"><pre><%=stats.to_yaml%></pre></td></tr>
-        <% end %>
-      <% elsif @memcached_stats[:details] %>
-        <tr><td class="setting-key">details</td><td class="setting-value"><%=@memcached_stats[:details]%></td></tr>
-      <% elsif @memcached_stats[:error] %>
-        <tr><td class="setting-key">error</td><td class="setting-value si-memcached-error"><%=@memcached_stats[:error]%></td></tr>
-      <% end %>
-    </table>
-  </div>
-  <div class="well">  
-    <h3>NfsStore Settings</h3>
-    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+    <!-- Server Actions Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-actions">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-actions" aria-expanded="false" aria-controls="collapse-actions">
+            Server Actions
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-actions" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-actions">
+        <div class="panel-body">
+          <h4>Restart Server, DelayedJob and Clear Memcached</h4>
+          <%= form_tag(admin_app_types_restart_server_url, remote: true, id: 'form-restart-server') do %>
+            <%= submit_tag "Restart server" %>
+          <% end %>
+          <h4>Restart DelayedJob</h4>
+          <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true, id: 'form-restart-dj') do %>
+            <%= submit_tag "Restart DelayedJob" %>
+          <% end %>
+          <h4>Run DB Seeds</h4>
+          <%= form_tag(admin_app_types_run_db_seeds_url, remote: true, id: 'form-run-db-seeds') do %>
+            <%= submit_tag "Run DB Seeds" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
 
-    <pre><%=@nfs_store_mount_dirs%>
-  </div>  
+    <!-- Logs Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-logs">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-logs" aria-expanded="false" aria-controls="collapse-logs">
+            Logs
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-logs" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-logs">
+        <div class="panel-body">
+          <h4>View Exception Log</h4>
+          <%= link_to link_label_open_in_new('open log'), "/reports/z_admin__exception_log", target: "exceptionlog" %>
+          <h4>Search Rails Log</h4>
+          <%= link_to link_label_open_in_new('search Rails log'), admin_server_info_rails_log_path, target: "railslog" %>
+        </div>
+      </div>
+    </div>
 
-  <% if @server_type == :passenger %>
-  <div class="row">  
-    <h3>Passenger Status</h3>
-    <pre><%=@passenger_status%></pre>
-  </div>
-  <div class="row">  
-    <h3>Passenger Memory Stats</h3>
-    <pre><%=@passenger_memory_stats%></pre>
-  </div>
-  <% end %>
+    <!-- App Settings Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-app-settings">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-app-settings" aria-expanded="false" aria-controls="collapse-app-settings">
+            App Settings
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-app-settings" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-app-settings">
+        <div class="panel-body">
+          <%= render partial: 'admin/server_info/view_settings', locals: {settings: @app_settings} %>
+        </div>
+      </div>
+    </div>
 
-  <div class="row">  
-    <h3>Disk Usage</h3>
-    <pre><%=@disk_usage%></pre>
-  </div>
+    <!-- Database Settings Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-db-settings">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-db-settings" aria-expanded="false" aria-controls="collapse-db-settings">
+            Database Settings
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-db-settings" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-db-settings">
+        <div class="panel-body">
+          <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
+          <h4>Database Server Version</h4>
+          <pre class="si-db-version"><%=@db_version%></pre>
+        </div>
+      </div>
+    </div>
 
-  <div class="row">  
-    <h3>Processes</h3>
-    <pre><%=@processes%></pre>
+    <!-- Memcached Connection Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-memcached">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-memcached" aria-expanded="false" aria-controls="collapse-memcached">
+            Memcached Connection
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-memcached" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-memcached">
+        <div class="panel-body">
+          <table class="server-info-settings si-memcached-stats">
+            <tr><td class="setting-key">status</td><td class="setting-value si-memcached-status"><%=@memcached_stats[:status]%></td></tr>
+            <% if @memcached_stats[:servers] %>
+              <% @memcached_stats[:servers].each do |server, stats| %>
+                <tr><td class="setting-key"><%=server%></td><td class="setting-value"><pre><%=stats.to_yaml%></pre></td></tr>
+              <% end %>
+            <% elsif @memcached_stats[:details] %>
+              <tr><td class="setting-key">details</td><td class="setting-value"><%=@memcached_stats[:details]%></td></tr>
+            <% elsif @memcached_stats[:error] %>
+              <tr><td class="setting-key">error</td><td class="setting-value si-memcached-error"><%=@memcached_stats[:error]%></td></tr>
+            <% end %>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NfsStore Settings Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-nfsstore">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-nfsstore" aria-expanded="false" aria-controls="collapse-nfsstore">
+            NfsStore Settings
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-nfsstore" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-nfsstore">
+        <div class="panel-body">
+          <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+
+          <h4>NFS Source Filesystem</h4>
+          <div class="nfs-source-filesystem-info">
+            <% if @nfs_source_filesystem_status.present? %>
+              <div class="row">
+                <div class="col-sm-4"><strong>Source Filesystem:</strong></div>
+                <div class="col-sm-8"><%= @nfs_source_filesystem_status[:source_filesystem] %></div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4"><strong>Status:</strong></div>
+                <div class="col-sm-8">
+                  <%= nfs_status_label(@nfs_source_filesystem_status[:status]) %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <h4>NFS Group Directory Status</h4>
+          <div class="nfs-mountpoint-info">
+            <% if @nfs_store_mount_dirs.is_a?(Array) && @nfs_store_mount_dirs.any? %>
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Group ID</th>
+                    <th>Mount Path</th>
+                    <th>Mountpoint Status</th>
+                    <th>Directory Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @nfs_store_mount_dirs.each do |mount_info| %>
+                    <tr class="<%= mount_info[:mountpoint_status] == Admin::ServerInfo::NFS_STATUS_FAILED || mount_info[:directory_status] == Admin::ServerInfo::NFS_STATUS_FAILED ? 'danger' : '' %>">
+                      <td class="nfs-group-id">gid<%= mount_info[:group_id] %></td>
+                      <td class="nfs-mount-path"><%= mount_info[:mount_path] %></td>
+                      <td class="nfs-mount-status">
+                        <%= nfs_status_label(mount_info[:mountpoint_status]) %>
+                      </td>
+                      <td class="nfs-dir-status">
+                        <%= nfs_status_label(mount_info[:directory_status]) %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            <% else %>
+              <p class="text-muted">No NFS mountpoint information available</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if @server_type == :passenger %>
+    <!-- Passenger Status Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-passenger-status">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-passenger-status" aria-expanded="false" aria-controls="collapse-passenger-status">
+            Passenger Status
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-passenger-status" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-passenger-status">
+        <div class="panel-body">
+          <pre><%=@passenger_status%></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passenger Memory Stats Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-passenger-memory">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-passenger-memory" aria-expanded="false" aria-controls="collapse-passenger-memory">
+            Passenger Memory Stats
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-passenger-memory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-passenger-memory">
+        <div class="panel-body">
+          <pre><%=@passenger_memory_stats%></pre>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
+    <!-- Disk Usage Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-disk-usage">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-disk-usage" aria-expanded="false" aria-controls="collapse-disk-usage">
+            Disk Usage
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-disk-usage" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-disk-usage">
+        <div class="panel-body">
+          <pre><%=@disk_usage%></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processes Panel -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="heading-processes">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#server-info-accordion" href="#collapse-processes" aria-expanded="false" aria-controls="collapse-processes">
+            Processes
+          </a>
+        </h4>
+      </div>
+      <div id="collapse-processes" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-processes">
+        <div class="panel-body">
+          <pre><%=@processes%></pre>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
