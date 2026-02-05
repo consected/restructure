@@ -259,15 +259,68 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
       # Mock a failed mountpoint
       si = Admin::ServerInfo.new(@admin)
       allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      allow(si).to receive(:configuration_failed_reason).and_return(['NFS mountpoint gid600 is not mounted'])
+      allow(si).to receive(:configuration_failed_reason).and_return(['NFS mountpoint /mnt/fphsfs/gid600 (gid600) is not mounted. See NfsStore Settings for details.'])
       allow(si).to receive(:configuration_successful).and_return(false)
 
       visit '/admin'
       finish_page_loading
 
-      # Main admin page should also show the status indicator
-      # (assuming it has similar status indicators as server info page)
-      expect(page).to have_css('.glyphicon-alert')
+      # Main admin page should show the status indicator in the Status section
+      within('h3', text: /^Status/) do
+        expect(page).to have_css('.glyphicon-alert')
+      end
+    end
+
+    it 'displays mountpoint error details in popover on main admin page - Issue896' do
+      # Mock a failed mountpoint
+      si = Admin::ServerInfo.new(@admin)
+      allow(Admin::ServerInfo).to receive(:new).and_return(si)
+      allow(si).to receive(:configuration_failed_reason).and_return([
+        'NFS mountpoint /mnt/fphsfs/gid600 (gid600) is not mounted. See NfsStore Settings for details.',
+        'NFS directory /mnt/fphsfs/gid601 (gid601) is not accessible. See NfsStore Settings for details.'
+      ])
+      allow(si).to receive(:configuration_successful).and_return(false)
+
+      visit '/admin'
+      finish_page_loading
+
+      # Click the alert icon to show popover
+      within('h3', text: /^Status/) do
+        find('.glyphicon-alert').click
+      end
+
+      # Popover should show both mountpoint failures
+      expect(page).to have_content('NFS mountpoint')
+      expect(page).to have_content('gid600')
+      expect(page).to have_content('gid601')
+      expect(page).to have_content('NfsStore Settings')
+    end
+
+    it 'does not show alert on main admin page when all mountpoints are healthy - Issue896' do
+      # Ensure all mountpoints are healthy
+      si = Admin::ServerInfo.new(@admin)
+      allow(Admin::ServerInfo).to receive(:new).and_return(si)
+      
+      # Mock healthy mountpoints
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path.include?('/gid')
+          allow(pn).to receive(:mountpoint?).and_return(true)
+        end
+        pn
+      end
+      
+      allow(si).to receive(:configuration_failed_reason).and_return([])
+      allow(si).to receive(:configuration_successful).and_return(true)
+
+      visit '/admin'
+      finish_page_loading
+
+      # Should not show error icon in Status section
+      within('h3', text: /^Status/) do
+        expect(page).not_to have_css('.glyphicon-alert')
+      end
     end
   end
 end
