@@ -290,9 +290,9 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
       si = Admin::ServerInfo.new(@admin)
       allow(Admin::ServerInfo).to receive(:new).and_return(si)
       allow(si).to receive(:configuration_failed_reason).and_return([
-        'NFS mountpoint /mnt/fphsfs/gid600 (gid600) is not mounted. See NfsStore Settings for details.',
-        'NFS directory /mnt/fphsfs/gid601 (gid601) is not accessible. See NfsStore Settings for details.'
-      ])
+                                                                      'NFS mountpoint /mnt/fphsfs/gid600 (gid600) is not mounted. See NfsStore Settings for details.',
+                                                                      'NFS directory /mnt/fphsfs/gid601 (gid601) is not accessible. See NfsStore Settings for details.'
+                                                                    ])
       allow(si).to receive(:configuration_successful).and_return(false)
 
       visit '/admin'
@@ -314,17 +314,15 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
       # Ensure all mountpoints are healthy
       si = Admin::ServerInfo.new(@admin)
       allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      
+
       # Mock healthy mountpoints
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path.include?('/gid')
-          allow(pn).to receive(:mountpoint?).and_return(true)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(true) if path.include?('/gid')
         pn
       end
-      
+
       allow(si).to receive(:configuration_failed_reason).and_return([])
       allow(si).to receive(:configuration_successful).and_return(true)
 

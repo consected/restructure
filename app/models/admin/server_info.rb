@@ -157,61 +157,59 @@ class Admin::ServerInfo
     "log not available: #{e} - #{cmds}"
   end
 
+  # NFS mount status constants
+  NFS_STATUS_MOUNTED = :mounted
+  NFS_STATUS_FAILED = :failed
+  NFS_STATUS_ACCESSIBLE = :accessible
+  NFS_STATUS_NOT_CONFIGURED = :not_configured
+  NFS_STATUS_ERROR = :error
+
   # Check the source NFS filesystem mount status
   # @return [Hash] with keys :source_filesystem, :status
   def nfs_source_filesystem_status
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
     group_id_range = NfsStore::Manage::Filesystem.group_id_range
-    return { source_filesystem: nil, status: :not_configured } unless dir.present? && group_id_range.any?
+    return { source_filesystem: nil, status: NFS_STATUS_NOT_CONFIGURED } unless dir.present? && group_id_range.any?
 
     mount_output = get_mount_output
-    
+
     # Check the first gid directory to get source filesystem (they all share the same source)
     first_gid = group_id_range.first
     first_mount_path = File.join(dir, "gid#{first_gid}")
-    
+
     # Check if any gid directory is mounted
-    pathname = Pathname.new(first_mount_path)
-    is_mounted = pathname.mountpoint?
-    
+    is_mounted = Pathname.new(first_mount_path).mountpoint?
+
     # Extract the source filesystem from the first gid mount
     source_filesystem = extract_source_filesystem(mount_output, first_mount_path)
-    
+
     {
       source_filesystem: source_filesystem || '(not found)',
-      status: is_mounted ? :mounted : :failed
+      status: is_mounted ? NFS_STATUS_MOUNTED : NFS_STATUS_FAILED
     }
   rescue StandardError => e
     Rails.logger.error "Error checking NFS source filesystem: #{e.message}"
-    { source_filesystem: '(error)', status: :error }
+    { source_filesystem: '(error)', status: NFS_STATUS_ERROR }
   end
 
+  # Get NFS mount directory information for all group IDs
+  # @return [Array<Hash>] array of mount information hashes
   def nfs_store_mount_dirs
     dir = NfsStore::Manage::Filesystem.nfs_store_directory
     group_id_range = NfsStore::Manage::Filesystem.group_id_range
     return [] unless dir.present?
 
-    mount_info_list = []
-    
-    group_id_range.each do |gid|
+    group_id_range.map do |gid|
       mount_path = File.join(dir, "gid#{gid}")
-      
-      # Check if the path is a mountpoint using Ruby Pathname
       pathname = Pathname.new(mount_path)
-      mountpoint_status = pathname.mountpoint? ? :mounted : :failed
-      
-      # Check if directory is accessible
-      directory_status = check_directory_accessible(mount_path)
-      
-      mount_info_list << {
+
+      {
         group_id: gid,
         mount_path: mount_path,
-        mountpoint_status: mountpoint_status,
-        directory_status: directory_status
+        mountpoint_status: pathname.mountpoint? ? NFS_STATUS_MOUNTED : NFS_STATUS_FAILED,
+        directory_status: check_directory_accessible(mount_path)
       }
     end
-    
-    mount_info_list
   rescue StandardError => e
     Rails.logger.error "Error checking NFS mount dirs: #{e.message}"
     []
@@ -236,9 +234,9 @@ class Admin::ServerInfo
     mount_dirs_info = nfs_store_mount_dirs
     if mount_dirs_info.is_a?(Array)
       mount_dirs_info.each do |mount_info|
-        if mount_info[:mountpoint_status] == :failed
+        if mount_info[:mountpoint_status] == NFS_STATUS_FAILED
           @configuration_failed_reason << "NFS mountpoint #{mount_info[:mount_path]} (gid#{mount_info[:group_id]}) is not mounted. See NfsStore Settings for details."
-        elsif mount_info[:directory_status] == :failed
+        elsif mount_info[:directory_status] == NFS_STATUS_FAILED
           @configuration_failed_reason << "NFS directory #{mount_info[:mount_path]} (gid#{mount_info[:group_id]}) is not accessible. See NfsStore Settings for details."
         end
       end
@@ -272,11 +270,13 @@ class Admin::ServerInfo
   # @param [String] path - the directory path to check
   # @return [Symbol] :accessible or :failed
   def check_directory_accessible(path)
+    return NFS_STATUS_FAILED if path.blank?
+
     Dir.entries(path)
-    :accessible
+    NFS_STATUS_ACCESSIBLE
   rescue StandardError => e
     Rails.logger.warn "Directory not accessible #{path}: #{e.message}"
-    :failed
+    NFS_STATUS_FAILED
   end
 
   # Extract the source filesystem path from mount command output
@@ -289,13 +289,13 @@ class Admin::ServerInfo
     # Look for line matching the mount_path
     # Example: /efs-prod/main on /mnt/fphsfs/gid600 type fuse (...)
     mount_output.each_line do |line|
-      if line.include?(" on #{mount_path} ")
-        # Extract the first part (source filesystem)
-        source = line.split(' on ').first&.strip
-        return source if source.present?
-      end
+      next unless line.include?(" on #{mount_path} ")
+
+      # Extract the first part (source filesystem)
+      source = line.split(' on ').first&.strip
+      return source if source.present?
     end
-    
+
     nil
   end
 end

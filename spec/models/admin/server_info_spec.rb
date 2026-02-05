@@ -160,7 +160,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       expect(result).to have_key(:status)
 
       # Status should be one of the valid values
-      expect(result[:status]).to be_in([:mounted, :failed, :not_configured, :error])
+      expect(result[:status]).to be_in(%i[mounted failed not_configured error])
     end
 
     it 'checks if first gid directory is a mountpoint - Issue896' do
@@ -174,9 +174,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(true)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(true) if path == first_mount_path
         pn
       end
 
@@ -190,11 +188,11 @@ RSpec.describe Admin::ServerInfo, type: :model do
       group_id_range = NfsStore::Manage::Filesystem.group_id_range
       first_gid = group_id_range.first
       first_mount_path = File.join(nfs_dir, "gid#{first_gid}")
-      
+
       # Mock mount output with actual gid directory mount (as shown in real mount output)
       mock_mount_output = "/media/test/nfs_store/main on #{first_mount_path} type fuse (rw,nosuid)\n"
       allow(si).to receive(:get_mount_output).and_return(mock_mount_output)
-      
+
       result = si.nfs_source_filesystem_status
 
       # Should extract the source filesystem path (first part before ' on ')
@@ -216,7 +214,6 @@ RSpec.describe Admin::ServerInfo, type: :model do
   end
 
   describe '#nfs_store_mount_dirs' do
-
     it 'identifies failed mountpoints correctly - Issue896' do
       si = Admin::ServerInfo.new(@admin)
 
@@ -239,7 +236,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       result = si.nfs_store_mount_dirs
 
       # Should have at least one failed mountpoint
-      failed_mounts = result.select { |m| m[:mountpoint_status] == :failed || m[:mountpoint_status] == false }
+      failed_mounts = result.select { |m| [:failed, false].include?(m[:mountpoint_status]) }
       expect(failed_mounts).not_to be_empty
     end
 
@@ -254,23 +251,20 @@ RSpec.describe Admin::ServerInfo, type: :model do
       # Allow Dir.entries to work normally, except for the first mount path
       original_dir_entries = Dir.method(:entries)
       allow(Dir).to receive(:entries) do |path|
-        if path == first_mount_path
-          raise Errno::EACCES, 'Permission denied'
-        else
-          original_dir_entries.call(path)
-        end
+        raise Errno::EACCES, 'Permission denied' if path == first_mount_path
+
+        original_dir_entries.call(path)
       end
 
       result = si.nfs_store_mount_dirs
 
       # Should have at least one failed directory status
-      failed_dirs = result.select { |m| m[:directory_status] == :failed || m[:directory_status] == false }
+      failed_dirs = result.select { |m| [:failed, false].include?(m[:directory_status]) }
       expect(failed_dirs).not_to be_empty
     end
   end
 
   describe '#nfs_store_mount_dirs edge cases' do
-
     it 'handles partial mountpoint failures (mixed healthy and failed) - Issue896' do
       si = Admin::ServerInfo.new(@admin)
 
@@ -288,8 +282,8 @@ RSpec.describe Admin::ServerInfo, type: :model do
         pn = original_pathname_new.call(path)
         if path == first_mount_path
           allow(pn).to receive(:mountpoint?).and_return(false)
-        else
-          allow(pn).to receive(:mountpoint?).and_return(true) if path.include?('/gid')
+        elsif path.include?('/gid')
+          allow(pn).to receive(:mountpoint?).and_return(true)
         end
         pn
       end
@@ -425,9 +419,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path == first_mount_path
         pn
       end
 
@@ -452,20 +444,16 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(true)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(true) if path == first_mount_path
         pn
       end
 
       # Then make the directory check fail
       original_dir_entries = Dir.method(:entries)
       allow(Dir).to receive(:entries) do |path|
-        if path == first_mount_path
-          raise Errno::EACCES, 'Permission denied'
-        else
-          original_dir_entries.call(path)
-        end
+        raise Errno::EACCES, 'Permission denied' if path == first_mount_path
+
+        original_dir_entries.call(path)
       end
 
       # Get configuration failures
@@ -485,9 +473,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
         # Mock all gid paths as mountpoints
-        if path.include?('/gid')
-          allow(pn).to receive(:mountpoint?).and_return(true)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(true) if path.include?('/gid')
         pn
       end
 
@@ -511,9 +497,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path == first_mount_path
         pn
       end
 
@@ -538,9 +522,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path.include?('/gid')
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path.include?('/gid')
         pn
       end
 
@@ -567,9 +549,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path == first_mount_path
         pn
       end
 
@@ -594,9 +574,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path == first_mount_path
         pn
       end
 
@@ -639,9 +617,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
       original_pathname_new = Pathname.method(:new)
       allow(Pathname).to receive(:new) do |path|
         pn = original_pathname_new.call(path)
-        if path == first_mount_path
-          allow(pn).to receive(:mountpoint?).and_return(false)
-        end
+        allow(pn).to receive(:mountpoint?).and_return(false) if path == first_mount_path
         pn
       end
 

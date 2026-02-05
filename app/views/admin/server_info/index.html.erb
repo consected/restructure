@@ -62,19 +62,13 @@
     <div class="nfs-source-filesystem-info">
       <% if @nfs_source_filesystem_status.present? %>
         <div class="row">
-          <div class="col-sm-6"><strong>Source Filesystem:</strong></div>
-          <div class="col-sm-9"><%= @nfs_source_filesystem_status[:source_filesystem] %></div>
+          <div class="col-sm-4"><strong>Source Filesystem:</strong></div>
+          <div class="col-sm-8"><%= @nfs_source_filesystem_status[:source_filesystem] %></div>
         </div>
         <div class="row">
-          <div class="col-sm-6"><strong>Status:</strong></div>
-          <div class="col-sm-9">
-            <% if @nfs_source_filesystem_status[:status] == :mounted %>
-              <span class="label label-success">mounted</span>
-            <% elsif @nfs_source_filesystem_status[:status] == :not_configured %>
-              <span class="label label-warning">not configured</span>
-            <% else %>
-              <span class="label label-danger">failed</span>
-            <% end %>
+          <div class="col-sm-4"><strong>Status:</strong></div>
+          <div class="col-sm-8">
+            <%= nfs_status_label(@nfs_source_filesystem_status[:status]) %>
           </div>
         </div>
       <% end %>
@@ -94,22 +88,14 @@
           </thead>
           <tbody>
             <% @nfs_store_mount_dirs.each do |mount_info| %>
-              <tr class="<%= mount_info[:mountpoint_status] == :failed || mount_info[:directory_status] == :failed ? 'danger' : '' %>">
+              <tr class="<%= mount_info[:mountpoint_status] == Admin::ServerInfo::NFS_STATUS_FAILED || mount_info[:directory_status] == Admin::ServerInfo::NFS_STATUS_FAILED ? 'danger' : '' %>">
                 <td class="nfs-group-id">gid<%= mount_info[:group_id] %></td>
                 <td class="nfs-mount-path"><%= mount_info[:mount_path] %></td>
                 <td class="nfs-mount-status">
-                  <% if mount_info[:mountpoint_status] == :mounted %>
-                    <span class="label label-success">mounted</span>
-                  <% else %>
-                    <span class="label label-danger">failed</span>
-                  <% end %>
+                  <%= nfs_status_label(mount_info[:mountpoint_status]) %>
                 </td>
                 <td class="nfs-dir-status">
-                  <% if mount_info[:directory_status] == :accessible %>
-                    <span class="label label-success">accessible</span>
-                  <% else %>
-                    <span class="label label-danger">failed</span>
-                  <% end %>
+                  <%= nfs_status_label(mount_info[:directory_status]) %>
                 </td>
               </tr>
             <% end %>
