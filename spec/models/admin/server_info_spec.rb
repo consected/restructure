@@ -234,6 +234,177 @@ RSpec.describe Admin::ServerInfo, type: :model do
       expect(result).to be_an(Array)
       expect(result).not_to be_empty
     end
+
+    it 'handles partial mountpoint failures (mixed healthy and failed) - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      # Assume we have at least 2 group IDs
+      return skip('Need at least 2 group IDs for this test') if group_id_range.count < 2
+
+      first_gid = group_id_range.first
+      second_gid = group_id_range.to_a[1]
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Mock first mountpoint as failed, others as healthy
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        else
+          allow(pn).to receive(:mountpoint?).and_return(true) if path.include?('/gid')
+        end
+        pn
+      end
+
+      result = si.nfs_store_mount_dirs
+
+      # Should have exactly one failed mountpoint
+      failed_mounts = result.select { |m| m[:mountpoint_status] == :failed }
+      healthy_mounts = result.select { |m| m[:mountpoint_status] == :mounted }
+
+      expect(failed_mounts.length).to eq(1)
+      expect(healthy_mounts.length).to eq(group_id_range.count - 1)
+      expect(failed_mounts.first[:group_id]).to eq(first_gid)
+    end
+
+    it 'handles empty or blank NFS store directory - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Mock blank directory
+      allow(NfsStore::Manage::Filesystem).to receive(:nfs_store_directory).and_return(nil)
+
+      result = si.nfs_store_mount_dirs
+
+      # Should return empty array when directory is not configured
+      expect(result).to eq([])
+    end
+
+    it 'handles malformed mount output gracefully - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Mock malformed mount output
+      malformed_output = "random text\nno proper format\n"
+      allow(si).to receive(:get_mount_output).and_return(malformed_output)
+
+      result = si.nfs_store_mount_dirs
+
+      # Should still return results, but source_filesystem will be nil
+      expect(result).to be_an(Array)
+      expect(result).not_to be_empty
+      result.each do |mount_info|
+        expect(mount_info[:source_filesystem]).to be_nil
+      end
+    end
+
+    it 'handles mount output with multiple filesystems correctly - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      second_gid = group_id_range.to_a[1] if group_id_range.count > 1
+
+      # Mock mount output with entries for multiple group IDs
+      mock_mount_output = <<~MOUNT
+        /dev/sda1 on / type ext4 (rw)
+        /efs-prod/main on /var/tmp/nfs_store_test/gid#{first_gid} type fuse (rw,relatime)
+      MOUNT
+
+      if second_gid
+        mock_mount_output += "/efs-prod/secondary on /var/tmp/nfs_store_test/gid#{second_gid} type fuse (rw,relatime)\n"
+      end
+
+      allow(si).to receive(:get_mount_output).and_return(mock_mount_output)
+
+      result = si.nfs_store_mount_dirs
+
+      # Should extract correct source filesystems for each mount
+      first_mount = result.find { |m| m[:group_id] == first_gid }
+      expect(first_mount[:source_filesystem]).to eq('/efs-prod/main')
+
+      if second_gid
+        second_mount = result.find { |m| m[:group_id] == second_gid }
+        expect(second_mount[:source_filesystem]).to eq('/efs-prod/secondary')
+      end
+    end
+
+    it 'returns consistent data structure even on exceptions - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Mock multiple failures
+      allow(si).to receive(:get_mount_output).and_raise(StandardError, 'Unexpected error')
+      allow(Pathname).to receive(:new).and_raise(StandardError, 'Path error')
+
+      result = si.nfs_store_mount_dirs
+
+      # Should return empty array on major failure, not raise exception
+      expect(result).to eq([])
+    end
+
+    it 'handles very long mount output efficiently - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Generate large mount output (simulating system with many mounts)
+      large_mount_output = (1..1000).map do |i|
+        "/dev/mapper/vg#{i} on /mnt/volume#{i} type ext4 (rw)"
+      end.join("\n")
+
+      allow(si).to receive(:get_mount_output).and_return(large_mount_output)
+
+      # Should complete without timeout or excessive memory usage
+      expect { si.nfs_store_mount_dirs }.not_to raise_error
+      result = si.nfs_store_mount_dirs
+
+      expect(result).to be_an(Array)
+    end
+
+    it 'correctly identifies mountpoints vs regular directories - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Explicitly check that mountpoint? is being called
+      original_pathname_new = Pathname.method(:new)
+      pathname_spy = nil
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          pathname_spy = instance_spy(Pathname)
+          allow(pathname_spy).to receive(:mountpoint?).and_return(true)
+          pathname_spy
+        else
+          pn
+        end
+      end
+
+      si.nfs_store_mount_dirs
+
+      # Verify mountpoint? was actually called (not just directory existence check)
+      expect(pathname_spy).to have_received(:mountpoint?)
+    end
+
+    it 'reports directory access errors with specific error types - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Test different error types
+      [Errno::EACCES, Errno::ENOENT, Errno::EIO].each do |error_class|
+        # Only stub the specific path we're testing
+        allow(Dir).to receive(:entries).and_call_original
+        allow(Dir).to receive(:entries).with(first_mount_path).and_raise(error_class, "Test error: #{error_class}")
+
+        result = si.nfs_store_mount_dirs
+        failed_dir = result.find { |m| m[:mount_path] == first_mount_path }
+
+        expect(failed_dir[:directory_status]).to eq(:failed)
+      end
+    end
   end
 
   describe '#configuration_failed_reason' do
@@ -322,6 +493,159 @@ RSpec.describe Admin::ServerInfo, type: :model do
       # Filter for only NFS/mountpoint related messages
       mountpoint_failures = failures.select { |msg| msg.include?('mountpoint') && msg.include?('gid') }
       expect(mountpoint_failures).to be_empty
+    end
+
+    it 'prioritizes mountpoint failures over directory failures in error messages - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Mock mountpoint failure (directory check won't happen if mountpoint fails)
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        end
+        pn
+      end
+
+      failures = si.configuration_failed_reason
+
+      # Should have mountpoint failure message
+      mountpoint_failure = failures.find { |msg| msg.include?('mountpoint') && msg.include?(first_mount_path) }
+      expect(mountpoint_failure).to be_present
+
+      # Should not have directory failure for the same path
+      directory_failure = failures.find { |msg| msg.include?('directory') && msg.include?(first_mount_path) }
+      expect(directory_failure).to be_nil
+    end
+
+    it 'reports each failed mountpoint separately in configuration failures - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      return skip('Need at least 2 group IDs for this test') if group_id_range.count < 2
+
+      # Mock multiple mountpoint failures
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path.include?('/gid')
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        end
+        pn
+      end
+
+      failures = si.configuration_failed_reason
+
+      # Should have separate failure message for each group ID
+      mountpoint_failures = failures.select { |msg| msg.include?('mountpoint') && msg.include?('gid') }
+      expect(mountpoint_failures.length).to eq(group_id_range.count)
+
+      # Each group ID should be mentioned
+      group_id_range.each do |gid|
+        expect(mountpoint_failures.any? { |msg| msg.include?("gid#{gid}") }).to be true
+      end
+    end
+
+    it 'includes helpful link to NfsStore Settings in failure messages - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Mock a mountpoint failure
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        end
+        pn
+      end
+
+      failures = si.configuration_failed_reason
+
+      # Mountpoint-specific failures should mention NfsStore Settings
+      mountpoint_failures = failures.select { |msg| msg.include?('mountpoint') || msg.include?('directory') }
+      expect(mountpoint_failures).not_to be_empty
+      mountpoint_failures.each do |failure|
+        expect(failure).to include('NfsStore Settings')
+      end
+    end
+
+    it 'combines NFS failures with other configuration failures - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Mock both NFS failure and other configuration failure
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        end
+        pn
+      end
+
+      # Mock additional configuration failure (e.g., from NfsStore::Manage::Filesystem)
+      allow(NfsStore::Manage::Filesystem).to receive(:configuration_successful).and_return(false)
+      allow(NfsStore::Manage::Filesystem).to receive(:configuration_failed_reason).and_return(['Some other NFS config issue'])
+
+      failures = si.configuration_failed_reason
+
+      # Should include both types of failures
+      expect(failures.any? { |msg| msg.include?('mountpoint') }).to be true
+      expect(failures.any? { |msg| msg.include?('other NFS config') }).to be true
+      expect(failures.length).to be >= 2
+    end
+
+    it 'caches configuration_failed_reason to avoid redundant checks - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      # Call once
+      first_result = si.configuration_failed_reason
+
+      # Mock should only be called once for the mountpoint check
+      expect(si).not_to receive(:nfs_store_mount_dirs)
+
+      # Call again
+      second_result = si.configuration_failed_reason
+
+      # Should return cached result
+      expect(second_result).to equal(first_result)
+    end
+
+    it 'formats failure messages consistently with group ID and path - Issue896' do
+      si = Admin::ServerInfo.new(@admin)
+
+      group_id_range = NfsStore::Manage::Filesystem.group_id_range
+      first_gid = group_id_range.first
+      first_mount_path = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "gid#{first_gid}")
+
+      # Mock a mountpoint failure
+      original_pathname_new = Pathname.method(:new)
+      allow(Pathname).to receive(:new) do |path|
+        pn = original_pathname_new.call(path)
+        if path == first_mount_path
+          allow(pn).to receive(:mountpoint?).and_return(false)
+        end
+        pn
+      end
+
+      failures = si.configuration_failed_reason
+      mountpoint_failure = failures.find { |msg| msg.include?('mountpoint') }
+
+      # Should include both the full path and the gid in parentheses
+      expect(mountpoint_failure).to include(first_mount_path)
+      expect(mountpoint_failure).to include("(gid#{first_gid})")
     end
   end
 end
