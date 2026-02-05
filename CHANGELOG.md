@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.6 back to develop
+
 ## [9.42.6] - 2026-02-05
 
 - [Added] Content-Security-Policy with nonces for inline scripts and Handlebars templates - fixes #279
