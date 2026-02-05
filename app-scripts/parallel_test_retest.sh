@@ -43,13 +43,10 @@ if [ "$QUIETLY" == "true" ]; then
 fi
 
 echo "Retested: ${retest}"
-echo "Retested: ${retest}" >> tmp/failing_specs.log
 if [ $res != 0 ]; then
   echo "Retest of failed specs did not pass"
-  echo "Retest of failed specs did not pass" >> tmp/failing_specs.log
   exit $res
 else
   echo "Retest of failed specs passed."
-  echo "Retest of failed specs passed." >> tmp/failing_specs.log
   exit 0
 fi
