@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] Content-Security-Policy with nonces for inline scripts and Handlebars templates - fixes #279
+- [Fixed] big-select JSON parsing and enabled CSP enforcement
+- [Fixed] CSP reports to avoid unauthenticated entries being accepted
+- [Fixed] CSP to be report only for a while
+- [Merged] release 9.42.5 back to develop
+- [Fixed] missing session variable in app setup
+
 ## [9.42.5] - 2026-02-05
 
 ### From FPHS - PR #893 - 2026-02-04
