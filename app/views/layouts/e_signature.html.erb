@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-US">
   <head>
-    <style>
+    <%= csp_style_tag("
       body {font-family: sans-serif; font-size: 14px;}
       li.e-sign-group-item, li.e-sign-signature-item {list-style: none; padding: 6px; border-bottom: 1px solid rgb(221, 221, 221);}
       li.e-sign-group-item p {margin: 0 0 10px;}
@@ -17,7 +17,7 @@
       .e-sign-record-meta li small, .e-sign-signature-info li small {font-size: 12px;}
       .e-sign-record-meta:before, .e-sign-signature-info:before {padding: 6px; width: auto; display: block; height: 1em; content: 'Record metadata'; background-color: rgb(222, 222, 222); font-size: 12px;}
       .e-sign-signature-info:before {content: 'Signature metadata';}
-    </style>
+    ") %>
   </head>
   <body>
     <div class="signed-document">

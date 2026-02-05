@@ -103,7 +103,7 @@
 %>
   <%= render partial: 'common_templates/search_results_template', locals: mapped_vars %>
 <% end %>
-<script id="sub_list_<%=item_type_name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag("sub_list_#{item_type_name}_result-partial", css_class: 'hidden handlebars-partial') do %>
   {{#was _created}}<div class="panel index-{{_created}} sub-list-item activity-log--<%=item_type_name_hyphenated%>-type" id="activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" data-template="sub-list-<%=item_type_name_hyphenated%>-result-template" data-sub-item="<%=item_type%>" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="<%=item_type%>_edit_form">{{/was}}
   
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
@@ -111,7 +111,7 @@
         <i class="glyphicon glyphicon-phone"></i>
         <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_<%=item_type_name%>_actions_block@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true"}}</a>
         <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-<%=item_type_name_hyphenated%> pull-right glyphicon glyphicon-edit small" href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/edit" data-remote="true" data-<%=item_type_hyphenated%>-id="{{id}}" data-result-target=""></a>
-        <span class="pull-right label label-info general-rank-{{rank}} <%=item_type_hyphenated%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+        <span class="pull-right label label-info general-rank-{{rank}} <%=item_type_hyphenated%>-{{rank}} rank-label--spaced">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
       </li>
       <li class="list-group-item activity-log-actions-holder activity-log-initial-action">
           {{> activity_logs_<%=item_type_name%>_actions item_id=id}}
@@ -119,16 +119,16 @@
     </ul>
   
   {{#was _created}}</div>{{/was}}
-</script>
-<script id="sub-list-<%=item_type_name_hyphenated%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<% end %>
+<%= handlebars_template_tag("sub-list-#{item_type_name_hyphenated}-result-template") do %>
   {{#with <%=item_type%>}}
       {{>sub_list_<%=item_type_name%>_result}}
   {{/with}}
-</script>
-<script id="activity_logs_<%=item_type_name%>_actions_block" type="text/x-handlebars-template" class="hidden handlebars-template">
+<% end %>
+<%= handlebars_template_tag("activity_logs_#{item_type_name}_actions_block") do %>
   {{> activity_logs_<%=item_type_name%>_actions item_id=item_id}}
-</script>
-<script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
+<% end %>
+<%= handlebars_template_tag("activity_logs_#{item_type_name}_actions-partial", css_class: 'hidden handlebars-partial handlebars-template') do %>
   <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:primary).resource_name)%>
   <span id="activity-log-{{master_id}}-initial-action" class="al-initial-action-container" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
@@ -136,11 +136,11 @@
     </span>
    </span>
    <% end %>
-</script>
+<% end %>
 <%
   # Template for page layout resource results. A plain list without activity log controls.
 %>
-<script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-page-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("activity-log--#{item_type_name_hyphenated.pluralize}-page-result-template") do %>
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %> al-page-result-template" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
     <div class="col-md-24">
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
@@ -166,10 +166,10 @@
         </div>
       </div>
   </div>
-</script>
+<% end %>
 
 <%# Activity Log main results including controls %>
-<script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("activity-log--#{item_type_name_hyphenated.pluralize}-main-result-template") do %>
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %> al-main-result-template" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
   
     <div class="is-heading activity-logs-header">
@@ -294,8 +294,8 @@
     </div>
   
   </div>
-</script>
-<script>
+<% end %>
+<%= javascript_tag nonce: true do %>
   <%
     eltcn = []
     option_configs.each do |elt|
@@ -303,5 +303,5 @@
     end
   %>
   _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= eltcn.to_json.html_safe %>)
-</script>
+<% end %>
 <% end %>

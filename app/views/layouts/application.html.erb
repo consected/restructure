@@ -2,6 +2,7 @@
 <html>
 <head>
   <title><%= Settings::PageTitle %></title>
+  <%= csp_meta_tag %>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <%= csrf_meta_tags %>
   <link rel="shortcut icon" type="image/png" href="/favicon.png">
@@ -14,16 +15,16 @@
   <%   end 
      end %>
 
-  <%= javascript_include_tag 'application' %>
+  <%= javascript_include_tag 'application', nonce: true %>
 
   <% if current_user&.app_type&.name
        fn = "app_#{current_user.app_type.name.id_underscore}.js"
        if Rails.root.join("public", "app_specific", fn).exist? %>
-  <script src="/app_specific/<%=fn%>" ></script>
+  <%= javascript_include_tag "/app_specific/#{fn}", nonce: true %>
   <%   end 
      end %>
 
-  <script>
+  <%= javascript_tag nonce: true do %>
   window.onerror = function(message, source, lineno, colno, error) {
     var details;
     if (error) details = error.stack;
@@ -34,10 +35,10 @@
     controller: '<%= controller_name %>',
     action: '<%= action_name %>'
   };
-  </script>
+  <% end %>
   <%= render partial: "layouts/setup_app" %>
-  <style><%= template_block("ui page css - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %></style>
-  <script><%= template_block("ui page js - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %></script>
+  <%= content_tag :style, nonce: true do %><%= template_block("ui page css - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %><% end %>
+  <%= javascript_tag nonce: true do %><%= template_block("ui page js - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %><% end %>
 </head>
 <body <%= body_classes %> id="body-top" data-user-roles="<%= user_roles_for_attr %>" data-user-id="<%= current_user&.id %>" data-admin-id="<%= current_admin&.id %>">
     <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>
@@ -54,19 +55,19 @@
       </p>
     </div>
   </div>
-  <script>
+  <%= javascript_tag nonce: true do %>
     _fpa.translations = <%= YAML.load_file(Rails.root.join('config', 'locales', "#{I18n.locale}.yml")).to_json.html_safe %>;
     _fpa.locale_t = _fpa.translations[_fpa.current_locale];
-  </script>
+  <% end %>
   <%= render partial: 'layouts/bootstrap_modal' %>
   <%= render partial: 'layouts/bootstrap_modal' %>
-  <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
+  <%= handlebars_template_tag('flash_template') do %>
     {{#if message}}
     <div class="alert alert-info" data-severity="info" role="alert">
       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       {{message}}
     </div>
     {{/if}}
-  </script>
+  <% end %>
 </body>
 </html>

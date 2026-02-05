@@ -822,6 +822,104 @@ module FeatureSupport
     puts_debug "Saved HTML snapshot to #{filename}"
   end
 
+  #
+  # Set up browser console log capture. Call this AFTER initial page load but BEFORE
+  # navigating to the page you want to debug. Captures console.log, console.error,
+  # console.warn, and CSP violation events.
+  #
+  # Usage:
+  #   visit '/some/page'
+  #   setup_browser_console_capture
+  #   visit '/page/to/debug'  # Console capture active for this navigation
+  #   finish_page_loading
+  #   print_browser_console_logs('After visiting debug page')
+  #
+  def setup_browser_console_capture
+    page.execute_script(<<~JS)
+      window.browserLogs = [];
+      window.cspViolations = [];
+      if (!window._consoleIntercepted) {
+        window._consoleIntercepted = true;
+        var origLog = console.log;
+        var origError = console.error;
+        var origWarn = console.warn;
+        console.log = function() {
+          window.browserLogs.push('LOG: ' + Array.from(arguments).join(' '));
+          origLog.apply(console, arguments);
+        };
+        console.error = function() {
+          window.browserLogs.push('ERROR: ' + Array.from(arguments).join(' '));
+          origError.apply(console, arguments);
+        };
+        console.warn = function() {
+          window.browserLogs.push('WARN: ' + Array.from(arguments).join(' '));
+          origWarn.apply(console, arguments);
+        };
+
+        // Listen for CSP violation events
+        document.addEventListener('securitypolicyviolation', function(e) {
+          var violation = {
+            blockedURI: e.blockedURI,
+            violatedDirective: e.violatedDirective,
+            sourceFile: e.sourceFile,
+            lineNumber: e.lineNumber,
+            columnNumber: e.columnNumber,
+            sample: e.sample
+          };
+          window.cspViolations.push(violation);
+          window.browserLogs.push('CSP VIOLATION: ' + e.violatedDirective +
+            ' - blocked: ' + e.blockedURI +
+            ' at ' + e.sourceFile + ':' + e.lineNumber + ':' + e.columnNumber +
+            ' sample: ' + e.sample);
+        });
+      }
+    JS
+  end
+
+  #
+  # Retrieve and print captured browser console logs. Call after setup_browser_console_capture
+  # and after performing the actions you want to debug.
+  #
+  # @param context [String] Description of what was being tested (for output header)
+  # @return [Hash] { logs: Array, csp_violations: Array }
+  #
+  def print_browser_console_logs(context = 'Browser Console')
+    logs = page.evaluate_script('window.browserLogs || []')
+    violations = page.evaluate_script('window.cspViolations || []')
+
+    puts "\n#{'=' * 80}"
+    puts "CONTEXT: #{context}"
+    puts '-' * 80
+    puts "BROWSER CONSOLE LOGS (#{logs.length} entries):"
+    logs.each { |log| puts "  #{log}" }
+
+    if violations.any?
+      puts "\nCSP VIOLATIONS CAPTURED (#{violations.length}):"
+      violations.each_with_index do |v, i|
+        puts "  Violation ##{i + 1}:"
+        puts "    Directive: #{v['violatedDirective']}"
+        puts "    Blocked URI: #{v['blockedURI']}"
+        puts "    Source: #{v['sourceFile']}:#{v['lineNumber']}:#{v['columnNumber']}"
+        puts "    Sample: #{v['sample']}"
+      end
+    else
+      puts "\nNo CSP violations captured"
+    end
+    puts '=' * 80
+
+    { logs:, csp_violations: violations }
+  end
+
+  #
+  # Get captured browser console logs without printing.
+  # @return [Hash] { logs: Array, csp_violations: Array }
+  #
+  def get_browser_console_logs
+    logs = page.evaluate_script('window.browserLogs || []')
+    violations = page.evaluate_script('window.cspViolations || []')
+    { logs:, csp_violations: violations }
+  end
+
   # Click a tab in the top report tabs bar
   def click_report_tab(tab_name)
     puts_debug "Clicking report tab: #{tab_name}"

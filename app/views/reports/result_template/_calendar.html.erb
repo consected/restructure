@@ -5,7 +5,7 @@
 %>
 <div id="<%=block_id%>" class="report-calendar <%=@view_options&.add_classes&.join(' ')%>" data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>">
 </div>
-<script>
+<%= javascript_tag nonce: true do %>
   window.setTimeout(function() {
   
     var $block = $('#<%=block_id%>');
@@ -34,4 +34,4 @@
     var calendar = new FullCalendar.Calendar(calendarEl, opts);
     calendar.render();
   }, 100);
-</script>
+<% end %>

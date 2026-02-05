@@ -387,4 +387,31 @@ module ApplicationHelper
       end
     end
   end
+
+  #
+  # Generate a style tag with CSP nonce for inline styles
+  # @param content [String] the CSS content to include
+  # @return [String] HTML safe style tag with nonce
+  def csp_style_tag(content)
+    content_tag(:style, content.html_safe, nonce: true)
+  end
+
+  #
+  # Generate a script tag with CSP nonce for inline JavaScript
+  # @param content [String] the JavaScript content to include
+  # @return [String] HTML safe script tag with nonce
+  def csp_script_tag(&)
+    javascript_tag(nonce: true, &)
+  end
+
+  #
+  # Generate a Handlebars template script tag with CSP nonce
+  # @param id [String] the id attribute for the script tag
+  # @param css_class [String] the CSS class(es) for the script tag (default: 'hidden handlebars-template')
+  # @param block [Block] the Handlebars template content
+  # @return [String] HTML safe script tag with nonce and type="text/x-handlebars-template"
+  def handlebars_template_tag(id, css_class: 'hidden handlebars-template', &)
+    content = capture(&) if block_given?
+    content_tag(:script, content, id:, type: 'text/x-handlebars-template', class: css_class, nonce: true)
+  end
 end

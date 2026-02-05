@@ -5,7 +5,7 @@
   # found in `views/common_templates/_search_results_template.html.erb`
 %>
 
-<script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_list_new_button_container', css_class: 'hidden handlebars-partial') do %>
   <div class="common-template-list--new-button new-button-container">
     <div class="text-center">
       <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{base_route_segments}}/new"
@@ -18,9 +18,9 @@
       </a>
     </div>
   </div>
-</script>
+<% end %>
 
-<script id="common_template_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_list-partial', css_class: 'hidden handlebars-partial') do %>
   {{#with list_template_config}}
     {{#is orientation '===' 'horizontal' }}
 
@@ -100,4 +100,4 @@
     Template Config not available for {{name}}
   </p>
   {{/with}}
-</script>
+<% end %>

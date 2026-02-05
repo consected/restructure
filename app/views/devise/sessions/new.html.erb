@@ -30,7 +30,7 @@
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
 
     <% unless resource.two_factor_auth_disabled %>
-    <div class="login-2fa-block" style="display: none;">
+    <div class="login-2fa-block devise-form__2fa-block">
       <div class="form-group-non full-width">
         <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %>
         <p class="help-block">
@@ -44,7 +44,7 @@
 
     <% end %>
 
-    <div class="login-final-submit" style="margin: 0.8em 0; ">
+    <div class="login-final-submit devise-form__final-submit">
       <%= f.submit "Log in", class: 'btn btn-primary btn-login-final-submit', data: {disable_with: 'checking...', orig_value: 'Log in'} %>
     </div>
 

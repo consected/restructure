@@ -20,7 +20,7 @@ configs.each do |name, config|
       field_res = report_criteria_field name, config, field_val, options 
       next if field_res.blank?
   %>
-  <div class="col-md-8 col-lg-6 <%= config.hidden ? 'hidden' : '' %>" style="padding-bottom: 1em;">
+  <div class="col-md-8 col-lg-6 <%= config.hidden ? 'hidden' : '' %> report-criteria__field-group">
     <%= field_res %>
   </div>
 <% 

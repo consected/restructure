@@ -12,15 +12,15 @@
         select * from player_infos where item_flags.item_id = player_infos.id AND item_flags.item_type = 'PlayerInfo' and item_flag_name_id = :must_have_flag
       </code></p>
   </div>
-  <ul id="if-list" style="overflow: auto; background-color: white;">
+  <ul id="if-list" class="admin-ref-data__list">
 
     <% Classification::ItemFlagName.item_types.each do |p| %>
     <li id="gs-<%=p%>">
-      <a href="#ifblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
+      <a href="#ifblock-<%=p%>" data-toggle="collapse" class="collapsed"><%=p %></a>
     </li>
     <ul id="ifblock-<%=p%>" class="collapse">
       <% Classification::ItemFlagName.where(item_type: p).each do |i| %>
-      <li style="color: <%= i.disabled ? '#aaa' : 'auto' %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
+      <li class="<%= 'admin-ref-data__list-item--disabled' if i.disabled %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
       <% end %>
     </ul>
     <% end %>

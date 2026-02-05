@@ -6,7 +6,7 @@
   no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
 
-<script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('modal-pi-search-results-template') do %>
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion modal-pi-search-results" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel">
@@ -141,4 +141,4 @@
   {{/if}}
 
 
-</script>
+<% end %>

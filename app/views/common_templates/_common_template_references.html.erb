@@ -1,7 +1,7 @@
 <%
   # Handle the display of referenced items in search results.
 %>
-<script id="activity_log_common_template_references_list_item"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('activity_log_common_template_references_list_item', css_class: 'hidden handlebars-partial') do %>
 <li class="list-group-item {{hyphenate name}}-model-references rr-mr in-item-model-references is-full-width {{#if to_record_viewable}}{{#if ../_show_embedded_as_single_item}} single-model-reference model-reference-auto-shown-caption{{/if}}{{/if}} {{#if disabled}}model-reference-disabled{{/if}} "
     data-template="model-references-{{name}}-result-template"
     data-sub-item="model_reference"
@@ -55,4 +55,4 @@
        data-form-container="{{hyphenate to_record_type_us}}_edit_form" ></div>
 </div>
 {{/if}}
-</script>
+<% end %>

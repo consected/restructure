@@ -220,3 +220,17 @@ a.related-tracker-histories-link {
 a.view-item:hover {
   cursor: pointer;
 }
+
+// BEM styles for activity log components
+
+.rank-label {
+  &--spaced {
+    margin-right: 1em;
+  }
+}
+
+.activity-log-entity-link {
+  &--spaced {
+    margin-right: 1em;
+  }
+}

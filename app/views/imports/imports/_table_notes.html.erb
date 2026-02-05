@@ -60,7 +60,7 @@
 </div>
 
 
-<script>
+<%= javascript_tag nonce: true do %>
   _fpa.import_rules = <%= @table_rules.to_json.html_safe %>;
 
   $('#get_template_for').on('change', function(){
@@ -84,4 +84,4 @@
     }
     $('.import-rules-block').removeClass('hidden');
   });
-</script>
+<% end %>

@@ -4,7 +4,7 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-report <% if @updated_with %>saved-item<% end %>">
       <div class="row">
-        <div class="col-sm-12" style="text-align: left">
+        <div class="col-sm-12 admin-form__left-aligned">
         <%= form_for(@report, url: url, remote: true, html: { class: "form-formatted keep-notices", 'data-before-send-processor': "report_admin_form" }) do |f| %>
           <%= render partial: 'admin_handler/form_errors' %>
           <%= render partial: 'admin/reports/form/fields', locals: {f: f} %>
@@ -24,7 +24,7 @@
             <%= link_to "loading...", admin_report_search_attr_definer_path, remote: true, class: 'auto-click-link keep-notices' %>
           </div>
           <div class="col-sm-24 collapse" id="search_attr_definer_config">
-            <div class="" style="text-align: left;">
+            <div class="admin-form__left-aligned">
               <%= f.label :attributes_configuration%>
               <div class="report-admin-search-attr-yaml-editor" >
                 <%= f.text_area  :search_attrs, class: "report-admin-search-attr-final-config code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>

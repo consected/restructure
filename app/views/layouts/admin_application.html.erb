@@ -2,18 +2,19 @@
 <html>
   <head>
     <title><%= Settings::PageTitle %></title>
+    <%= csp_meta_tag %>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
     <%= stylesheet_link_tag    'admin_index', media: 'all' %>
-    <%= javascript_include_tag 'application' %>
-    <%= javascript_include_tag 'admin_index' %>
-    <script>
+    <%= javascript_include_tag 'application', nonce: true %>
+    <%= javascript_include_tag 'admin_index', nonce: true %>
+    <%= javascript_tag nonce: true do %>
       _fpa.status = {
         controller: '<%= controller_name %>',
         action: '<%= action_name %>'
       };
-    </script>
+    <% end %>
     <%= render partial: "layouts/setup_app" if current_user || current_admin %>
     <%= csrf_meta_tags %>
     <link rel="shortcut icon" type="image/png" href="/favicon.png">
@@ -23,7 +24,7 @@
     <%= render partial: 'layouts/flash_alerts' %>
     <%= yield %>
     <%= render partial: 'layouts/help_sidebar' %>
-    <script>
+    <%= javascript_tag nonce: true do %>
       _fpa.translations = <%= YAML.load_file(Rails.root.join('config', 'locales', "#{I18n.locale}.yml")).to_json.html_safe %>;
       _fpa.locale_t = _fpa.translations[_fpa.current_locale];
       _fpa.state.current_user_preference = _fpa.state.current_user_preference || {
@@ -33,15 +34,15 @@
       window.setTimeout(function() {
         _fpa_admin.all.index_page.loaded();
       },10);
-    </script>
+    <% end %>
     <%= render partial: 'layouts/bootstrap_modal' %>
-    <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
+    <%= handlebars_template_tag('flash_template') do %>
       {{#if message}}
       <div class="alert alert-info" data-severity="info" >
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         {{message}}
       </div>
       {{/if}}
-    </script>
+    <% end %>
   </body>
 </html>

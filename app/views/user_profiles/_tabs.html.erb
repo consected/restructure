@@ -1,6 +1,6 @@
 
-<script id="user_profile_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('user_profile_tabs', css_class: 'hidden handlebars-partial') do %>
   <ul class="nav nav-pills details-tabs user-profiles-tabs" id="user-profiles-tabs">
     <%= render partial: 'user_profiles/tabs_item' %>
   </ul>
-</script>
+<% end %>

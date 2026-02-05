@@ -6,20 +6,20 @@
 %>
 
 <% # Produce HTML attributes to help identify the block of fields, applying tag substitutions to each value %>
-<script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
+<%= handlebars_template_tag('custom_block_attrs_html', css_class: 'hidden handlebars-partial') do %>{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}<% end %>
 <% # Get the result heading caption, applying tag substitutions %>
-<script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{run_template ../caption}}}{{/with}}</script>
-<script id="show_result_caption_id_hyphenated" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{id_hyphenate (run_template ../caption)}}}{{/with}}</script>
+<%= handlebars_template_tag('show_result_caption', css_class: 'hidden handlebars-partial') do %>{{#with result_data}}{{{run_template ../caption}}}{{/with}}<% end %>
+<%= handlebars_template_tag('show_result_caption_id_hyphenated', css_class: 'hidden handlebars-partial') do %>{{#with result_data}}{{{id_hyphenate (run_template ../caption)}}}{{/with}}<% end %>
 
 <% 
   # Format extra CSS classes for the result item block. 
   # Adds in the `template_class` value set by the standard mapping. 
   # Will apply tag substitutions to the dynamic definition's `view_options.extra_class` value
 %>
-<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{../template_class}} {{run_template ../extra_class}}{{/with}}</script>
+<%= handlebars_template_tag('result_extra_class', css_class: 'hidden handlebars-partial') do %>{{#with result_data}}{{../template_class}} {{run_template ../extra_class}}{{/with}}<% end %>
 
 
-<script id="result_item_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('result_item_block', css_class: 'hidden handlebars-partial') do %>
 
   <div class="{{hyphenate name}}-{{item_name}} sr-item-block">
     <div class="">
@@ -54,7 +54,7 @@
     </div>
   </div>
 
-</script>
+<% end %>
 
 <%
   # Partial that sets up the template config for the display of a full dynamic result item, such
@@ -62,7 +62,7 @@
   # Then it simply calls the following partial "common_template_result_inner" with appropriate parameters.
   # Logging is included to help diagnose missing template configurations.
 %>
-<script id="common_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result-partial', css_class: 'hidden handlebars-partial') do %>
   {{# with (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version )}}
     {{> common_template_result_inner result_data=../result_data name=../name orig_name=../orig_name activity_log_references_name=../activity_log_references_name name_with_option_type=../name_with_option_type template_config=this _created=../_created vdef_version=../vdef_version}}
   {{else}}
@@ -71,7 +71,7 @@
     {{log (fpa_state_item 'template_config' (underscore name) vdef_version)}}
     {{log this}}
   {{/with}}
-</script>
+<% end %>
 
 <%
   # Partial that renders the full dynamic result item, such
@@ -81,7 +81,7 @@
   # which are actually built by the OptionConfigs::TemplateOptionMapping
   # method for external identifiers, dynamic models and activity logs.
 %>
-<script id="common_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_inner-partial', css_class: 'hidden handlebars-partial') do %>
   {{#was _created}}
   {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" data-orig-name="{{orig_name}}" {{{ data_sort_str }}}> {{/is}}
   <div class="common-templates--result-item common-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" 
@@ -193,6 +193,6 @@
   {{else}}
   </span>
   {{/was}}
-</script>
+<% end %>
 
 
