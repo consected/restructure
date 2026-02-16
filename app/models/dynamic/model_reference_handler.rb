@@ -217,7 +217,7 @@ module Dynamic
                     # No resource_id was specified, so we filter on the target table having a field pointing to this one
                     { dec[:target_fk] => id || -1 }
                   elsif dec.key? :resource_id
-                    { "id": dec[:resource_id] }
+                    { id: dec[:resource_id] }
                   end
       # A resource_id was specified, either based on a field being present, or from the option config
       # If either of these are defined but returned nil, we have already forced the result to be -1
@@ -293,7 +293,13 @@ module Dynamic
                 next
               end
 
-              user_can_create = current_admin_sample || target_object_creatable?(ref_type, ref_config)
+              # When the parent record was force-created (e.g. by a save trigger with
+              # force_create: true), skip the user permission check for the embedded item.
+              # Uses @embed_force_create captured during before_create to avoid false
+              # positives from unrelated force_save! calls during after_create callbacks.
+              user_can_create = current_admin_sample ||
+                                @embed_force_create ||
+                                target_object_creatable?(ref_type, ref_config)
               res = { ref_type:, many: creatable_add_config, ref_config: } if user_can_create
             end
 
@@ -407,7 +413,7 @@ module Dynamic
           }
         )
         res = { ref_type: model_name, many: creatable_add_config, ref_config: elt_ref_config }
-        cre_res["#{ref_type}_#{activity_key}".to_sym] = { ref_type => res }
+        cre_res[:"#{ref_type}_#{activity_key}"] = { ref_type => res }
       end
 
       cre_res
@@ -483,7 +489,7 @@ module Dynamic
       # and no master is already set through the filters, then add it.
       # This ensures that preset values and anything else that relies on associations with the master
       # can operate correctly.
-      if respond_to?(:master) && new_c.instance_methods.include?(:master)
+      if respond_to?(:master) && new_c.method_defined?(:master)
         m_set = optional_params[:master] || optional_params[:master_id]
         optional_params[:master] = master unless m_set
       end
@@ -543,7 +549,7 @@ module Dynamic
         mrs = model_references(force_reload:)
         cmrs = creatable_model_references(only_creatables:, force_reload:, current_admin_sample:)
 
-        if never_embed_item || embed_action_type == :creating && never_embed_creatable_item
+        if never_embed_item || (embed_action_type == :creating && never_embed_creatable_item)
           # Do nothing - we have been told to never embed
         elsif embed_action_type == :creating && always_embed_creatable
           # The current action is to display a new form or to create an item from a submitted form.
@@ -724,7 +730,7 @@ module Dynamic
       raise FphsException,
             'Creatable reference not found or not creatable for always_embed_creatable_reference named ' \
             "#{always_embed_creatable}" \
-            "#{always_embed_creatable != always_embed_creatable.singularize ? ' Try singular version' : ''}"
+            "#{' Try singular version' if always_embed_creatable != always_embed_creatable.singularize}"
     end
 
     #
@@ -884,10 +890,22 @@ module Dynamic
     # the target embedded item, depending on the configuration. We can only do this when
     # either record has been persisted with an id.
     def link_embedded_item
+      # Capture force_save? state during before_create, before other after_create
+      # callbacks (e.g. process_new_file in NFS store) may set force_save! for
+      # unrelated reasons. This ensures we only bypass permission checks when
+      # the record was intentionally force-created (e.g. by a save trigger).
+      @embed_force_create = force_save? unless persisted?
+
       ei = embedded_item(embed_action_type: :creating)
+      # When the parent record was force-created, force reload to clear stale
+      # memos from prior validation callbacks that may have cached nil results
+      # because the user lacked permission (force bypasses that check on reload)
+      ei = embedded_item(embed_action_type: :creating, force_reload: true) if !ei && @embed_force_create
       apply_prepped_embedded_item ei
 
-      link_new_embedded_item(ei) if direct_embed?
+      return unless direct_embed?
+
+      link_new_embedded_item(ei)
     end
 
     #
@@ -934,10 +952,19 @@ module Dynamic
       end
 
       fk_val = new_embedded_item.attributes[target_fk]
-      # Exit if this instance does not have a valid id or if the foreign
-      # key field in the new embedded item is already set
-      return if (!id || id < 0) || (fk_val && fk_val >= 0)
+      # Skip if self has no id yet, or if the FK is already correctly set.
+      # A new (unpersisted) embedded item may have a valid FK value from filter_by
+      # initialization but still needs to be saved when the parent was force-created
+      # (e.g. by a save trigger with force_create: true).
+      # Without @embed_force_create, preserve original behavior and skip.
+      return if (!id || id < 0) || (fk_val && fk_val >= 0 && (new_embedded_item.persisted? || !@embed_force_create))
 
+      # When the parent record was force-created, propagate the force_save to
+      # bypass user access controls on the embedded item
+      if @embed_force_create
+        new_embedded_item.send(:force_write_user)
+        new_embedded_item.force_save!
+      end
       new_embedded_item.update!(target_fk => id)
     end
   end
