@@ -13,7 +13,7 @@ class FailureMailer < ActionMailer::Base
   #                       typically do something like job.to_yaml to avoid calling with types that
   #                       a background job can't handle
   def notify_job_failure(job_id, job_yaml, exception = nil)
-    view_job = "View job at: #{Settings::BaseUrl}/admin/job_reviews?filter[id]=#{job_id}" if job_id
+    view_job = "View job at: #{Settings::BaseUrl}/admin/job_reviews?filter[job_id]=#{job_id}" if job_id
     body = <<~END_TEXT
       A failure occurred running a delayed_job on server #{Settings::EnvironmentName}.
 
