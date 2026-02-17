@@ -71,10 +71,15 @@ module NfsStoreSupport
 
     unless @aldef
       @aldef = ActivityLog.where(name: @al_name).first
+      unless @aldef
+        # Re-run the setup if the activity log was completely removed by other specs
+        SetupHelper.setup_al_gen_tests AlFilterTestName, nil, 'player_contact', rec_type: 'phone'
+        @aldef = ActivityLog.where(name: @al_name).first
+      end
       if @aldef
         ActivityLogSupport.cleanup_matching_activity_logs(@aldef.item_type, @aldef.rec_type, @aldef.process_name, admin: @admin, excluding_id: @aldef.id)
+        @aldef.update(disabled: false, current_admin: @admin)
       end
-      @aldef.update(disabled: false, current_admin: @admin)
       @aldef = ActivityLog.active.where(name: @al_name).first
       puts 'About to fail' unless @aldef
     end
