@@ -45,6 +45,10 @@ bundle exec rspec spec/system/ 2>&1 | tee /tmp/rspec_output.log | tail -100
 grep -E "pattern" /tmp/rspec_output.log | tail -15
 grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
 
+# ✅ Use the rails environment argument
+bundle exec rails runner -e "puts Rails.env"
+# Prints 'test'
+
 # ✅ Use app-scripts that set environment variables internally
 # NOTE: the arguments after the script are the same as you would pass to the underlying command
 app-scripts/rails_runner_test.sh "puts User.count"
