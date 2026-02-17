@@ -10,22 +10,35 @@ if [ $? != 0 ]; then
 fi
 
 FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
+if [ "${TEST_ENV_SET}" ]; then
+  FS_TEST_BASE=${FS_TEST_BASE}/${TEST_ENV_SET}
+fi
+
+if [ "$(whoami)" == 'root' ] && [ -z "${FS_FORCE_ROOT}" ]; then
+  echo Do not run as sudo
+  exit
+else
+  sudo echo "Set up dev filestore" > /dev/null
+fi
 
 mkdir -p ${FS_TEST_BASE}/dev-file-source
 mkdir -p ${FS_TEST_BASE}/dev-filestore
 mkdir -p ${FS_TEST_BASE}/dev-bind-fs
 
 function is_mountpoint() {
-  MOUNTED_VOLUME=$1
-  if which mountpoint; then
-    mountpoint -q "$MOUNTED_VOLUME"
+  if [ "$(which mountpoint)" ]; then
+    mountpoint -q $1
+  elif [ "$(which diskutil)" ]; then
+    diskutil info "$1" > /dev/null
   else
-    echo "mounting... $MOUNTED_VOLUME"
-    [ "$(mount | awk -v MOUNTED_VOLUME="$MOUNTED_VOLUME" '$3 == MOUNTED_VOLUME  {print $3}')" != "" ]
+    echo "Either mountpoint (Linux) or diskutil (macOS) must be installed"
+    exit 7
   fi
 }
 
-bindfs -n "${FS_TEST_BASE}"/dev-file-source "${FS_TEST_BASE}"/dev-filestore
+is_mountpoint "${FS_TEST_BASE}"/dev-filestore && sudo umount "${FS_TEST_BASE}"/dev-filestore
+
+sudo mount --bind "${FS_TEST_BASE}"/dev-file-source "${FS_TEST_BASE}"/dev-filestore
 is_mountpoint "${FS_TEST_BASE}"/dev-filestore
 
 if [ $? != 0 ]; then
