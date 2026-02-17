@@ -223,6 +223,16 @@ To clean all data, including admins and user, run:
     bundle exec rake db:seed
     RAILS_ENV=development app-scripts/add_admin.sh <email address>
 
+### Running multiple dev or test enviroments simultaneously
+
+If you need to run multiple dev or test enviroments simultaneously on the same machine (for example for multiple AI agents alongside a human developer), it may be necessary to seperate out the databases and Filestore filesystems to avoid clashes.
+
+Simply set the environment variable `TEST_ENV_SET` to a unique (short) alphanumeric string. For example:
+
+```
+export TEST_ENV_SET=workspace2
+```
+
 ### Branches for development and release
 
 The project previously used [git-flow](https://skoch.github.io/Git-Workflow/) to organize releases. This is no longer the case, and the [Build for deployment](#build-for-deployment) process handles branching and tagging of releases. Where possible, github Pull Requests should be used to contribute features and fixes back to the primary repo.

@@ -19,13 +19,13 @@ ActiveSupport.on_load(:nfs_store_config) do
     end
 
   elsif Rails.env.test?
-    self.nfs_store_directory = "/var/tmp/nfs_store_test#{ENV['TEST_ENV_NUMBER']}"
-    self.temp_directory = "/var/tmp/nfs_store_tmp#{ENV['TEST_ENV_NUMBER']}"
+    self.nfs_store_directory = "/var/tmp/nfs_store_test#{ENV['TEST_ENV_NUMBER']}#{ENV['TEST_ENV_SET']}"
+    self.temp_directory = "/var/tmp/nfs_store_tmp#{ENV['TEST_ENV_NUMBER']}#{ENV['TEST_ENV_SET']}"
     self.containers_dirname = 'containers'
     FileUtils.mkdir_p temp_directory
     group_id_range.each do |i|
       check_dir = File.join(nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
-      FileUtils.mkdir_p File.join(check_dir) if Rails.env.test?
+      FileUtils.mkdir_p File.join(check_dir)
       raise FsException::Config, "Could not access: #{check_dir}" unless File.exist?(check_dir)
     end
   else
@@ -39,7 +39,6 @@ ActiveSupport.on_load(:nfs_store_config) do
     FileUtils.mkdir_p temp_directory
     group_id_range.each do |i|
       check_dir = File.join(nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
-      FileUtils.mkdir_p File.join(check_dir) if Rails.env.test?
       raise FsException::Config, "Could not access: #{check_dir}" unless File.exist?(check_dir)
     end
   end
