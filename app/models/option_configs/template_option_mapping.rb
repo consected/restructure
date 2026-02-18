@@ -80,7 +80,7 @@ module OptionConfigs
       dfla = def_record.field_list_array
       field_list = dfla.present? ? dfla : def_record.default_field_list_array
 
-      item_list = option_type_config.fields || field_list.dup
+      item_list = option_type_config.fields&.dup || field_list.dup
 
       # For address models, the front-end currently has a naming requirement that doesn't match the field
       # definitions. Change *country* and *state* to *country_name* and *state_name*
