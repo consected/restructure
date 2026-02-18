@@ -18,10 +18,16 @@ module BrowserHelper
     portnum = nil
     100.times do
       portnum = BASE_BROWSER_PORT + test_num
-      is_not_in_use = IO.popen(['lsof', '-i', ":#{portnum}"]).read.blank?
-      break if is_not_in_use
-
-      test_num += 1
+      # Try binding the port directly — more reliable than lsof which may not
+      # be in PATH or may miss sockets in certain states (TIME_WAIT, etc.)
+      begin
+        server = TCPServer.new('127.0.0.1', portnum)
+        server.close
+        is_not_in_use = true
+        break
+      rescue Errno::EADDRINUSE
+        test_num += 1
+      end
     end
 
     if is_not_in_use
