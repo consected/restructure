@@ -308,10 +308,10 @@ module FeatureSupport
 
     # Wait for the target panel to fully expand (Bootstrap collapse animation)
     target = tab_link['data-target']
-    if target.present?
-      target_selector = "#{target}.collapse.in"
-      expect(page).to have_css(target_selector, wait: 15)
-    end
+    return unless target.present?
+
+    target_selector = "#{target}.collapse.in"
+    expect(page).to have_css(target_selector, wait: 15)
   end
 
   #
