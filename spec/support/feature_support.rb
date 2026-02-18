@@ -305,6 +305,13 @@ module FeatureSupport
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
     tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    # Wait for the target panel to fully expand (Bootstrap collapse animation)
+    target = tab_link['data-target']
+    if target.present?
+      target_selector = "#{target}.collapse.in"
+      expect(page).to have_css(target_selector, wait: 15)
+    end
   end
 
   #
