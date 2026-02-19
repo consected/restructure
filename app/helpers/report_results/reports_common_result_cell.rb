@@ -327,7 +327,7 @@ module ReportResults
 
       # Script to load the content into the iframe
       loader_script = javascript_tag(nonce: true) do
-        <<~END_JS
+        <<~END_JS.html_safe
           window.setTimeout(function() {
             var c = $('#report-cell-content-#{block_id}');
             var html = c.html();
