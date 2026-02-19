@@ -45,6 +45,7 @@ module NfsStore
         self.class.resource_name
       end
 
+      #
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
@@ -52,11 +53,15 @@ module NfsStore
 
         setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
         if setting
-          unless setting.value.in?(Master.alternative_id_fields.map(&:to_s))
+          alt_id_field_name = setting.value
+          unless alt_id_field_name.in?(Master.alternative_id_fields.map(&:to_s))
             raise FsException, 'An id name ending with "_id" is expected for "filestore directory id"'
           end
 
-          "#{setting.value.hyphenate}-#{master.send(setting.value)}"
+          # Get the alternative id field value, specifying access_by nil to prevent checking of access controls
+          # for the current user, since the result is user agnostic.
+          alt_id_field_value = master.send(alt_id_field_name, access_by: nil)
+          "#{alt_id_field_name.hyphenate}-#{alt_id_field_value}"
         else
           "master-#{master_id}"
         end
