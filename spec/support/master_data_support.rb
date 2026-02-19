@@ -106,7 +106,7 @@ module MasterDataSupport
     # Check if data set has already been created in this test run
     # Use a cache key that includes the options to ensure different configurations are handled separately
     cache_key = "data_set_#{no_trackers}_#{no_seed}"
-    if SetupHelper.spec_tally_names.include?(cache_key)
+    if SetupHelper.spec_tally_done?(cache_key)
       Rails.logger.info '** Data set already created, skipping **'
       puts '** Data set already created, skipping **'
 

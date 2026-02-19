@@ -58,6 +58,7 @@ bundle exec spring stop
 if [ "${NO_BRAKEMAN}" != 'true' ] && [ "${SKIP_BRAKEMAN}" != 'true' ]; then
   echo "Running brakeman"
   bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
+  BRAKEMAN_EXIT_CODE=$?
   cat /tmp/fphs-brakeman-summary.txt
 fi
 
@@ -105,6 +106,10 @@ echo "========================================================================"
 
 rm -f tmp/parallel_specs_failed.txt
 
+# Clean up the temporary nfs_store directories
+rm -rf /var/tmp/nfs_store_tmp*
+rm -rf /var/tmp/nfs_store_test*
+
 for spec in ${specs}; do
   echo "========================================================================"
   echo "==>>>> Running parallel specs for '${spec}'"
@@ -113,9 +118,6 @@ for spec in ${specs}; do
   echo "==>>>> Running parallel specs for '${spec}'" >> tmp/working_failing_specs.log
   echo "==>>>> $(date)" >> tmp/working_failing_specs.log
   echo "========================================================================" >> tmp/working_failing_specs.log
-  # Clean up the temporary nfs_store directories
-  rm -rf /var/tmp/nfs_store_tmp*
-  rm -rf /var/tmp/nfs_store_test*
 
   RAILS_ENV=test bundle exec rake parallel:spec["${spec}"] || echo 'failed' > tmp/parallel_specs_failed.txt &
   while ! pgrep -f 'ruby bin/rspec' > /dev/null; do
@@ -147,12 +149,17 @@ mv tmp/working_failing_specs.log tmp/failing_specs.log
 echo "Started at  ${start_date}" >> tmp/failing_specs.log
 echo "Finished at $(date)" >> tmp/failing_specs.log
 
+if [ "${BRAKEMAN_EXIT_CODE}" -ne 0 ]; then
+  echo "Brakeman found security issues. Check /tmp/fphs-brakeman-summary.txt for details."
+  cat /tmp/fphs-brakeman-summary.txt
+fi
+
 if [ -f tmp/parallel_specs_failed.txt ]; then
-  $(dirname $0)/clean-test-db.sh
+  $(dirname "$0")/clean-test-db.sh
   cat tmp/failing_specs.log
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
   echo "Running retest for failed specs"
-  $(dirname $0)/parallel_test_retest.sh >> tmp/failing_specs.log 2>&1
+  $(dirname "$0")/parallel_test_retest.sh >> tmp/failing_specs.log 2>&1
 else
   echo "All parallel specs passed."
   echo "All parallel specs passed."  >> tmp/failing_specs.log
