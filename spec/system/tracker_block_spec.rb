@@ -19,6 +19,13 @@ describe 'tracker block', js: true, driver: $browser_driver do
     seed_database
     create_data_set_outside_tx no_trackers: true, no_seed: true
 
+    # Clean any stale tracker records from previous test runs on the reference master,
+    # since the data set was created with no_trackers: true
+    if @master
+      TrackerHistory.where(master_id: @master.id).delete_all
+      Tracker.where(master_id: @master.id).delete_all
+    end
+
     # a blank master to test for empty tracker record sets
     # we have to force a new thread and connection to make this a transaction outside of the normal flow,
     # otherwise the Selenium session may not see it
@@ -183,13 +190,14 @@ describe 'tracker block', js: true, driver: $browser_driver do
     end
 
     have_css "##{h}.tracker-block.collapse.in"
+    expand_tracker_panel
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.captionize
 
     sleep 2.5
     # Now add a new tracker item
     within '.tracker-tree-results' do
-      click_link 'add tracker record'
+      find('a.add-tracker-record').click
     end
 
     # Wait for the new tracker form to show
@@ -216,7 +224,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     # Now add a new item to be merged within the current protocol
     pe = pes[1]
     within '.tracker-tree-results' do
-      click_link 'add tracker record'
+      find('a.add-tracker-record').click
     end
 
     have_css '.tracker-tree-results #new_tracker'
@@ -245,7 +253,7 @@ describe 'tracker block', js: true, driver: $browser_driver do
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] .tracker-event_date', text: %r{0?2/0?2/2030}
     # Now try an earlier item
     within '.tracker-tree-results' do
-      click_link 'add tracker record'
+      find('a.add-tracker-record').click
     end
 
     have_css '.tracker-tree-results #new_tracker'

@@ -80,7 +80,7 @@ module OptionConfigs
       dfla = def_record.field_list_array
       field_list = dfla.present? ? dfla : def_record.default_field_list_array
 
-      item_list = option_type_config.fields || field_list.dup
+      item_list = option_type_config.fields&.dup || field_list.dup
 
       # For address models, the front-end currently has a naming requirement that doesn't match the field
       # definitions. Change *country* and *state* to *country_name* and *state_name*
@@ -184,7 +184,7 @@ module OptionConfigs
             end
 
       full_name = def_record.full_item_type_name
-      data_action_when = "data_#{current_definition.action_when_attribute}".to_sym
+      data_action_when = :"data_#{current_definition.action_when_attribute}"
       can_create = current_user.has_access_to?(:create, :table, def_record.full_item_type_name.pluralize)
       can_edit = can_create || current_user.has_access_to?(:edit, :table, def_record.full_item_type_name.pluralize)
 
@@ -216,7 +216,7 @@ module OptionConfigs
         implementation_class_name: def_record.item_type_name,
         item_blocks: { def_record.item_type.to_sym => def_record.implementation_class.parent_data_names },
         show_created_at: true,
-        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/"\
+        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/" \
                           "{{item_id}}/{{/if}}activity_log/#{def_record.item_type_name.pluralize}/{{id}}/edit",
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,

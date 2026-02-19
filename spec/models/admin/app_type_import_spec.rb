@@ -78,7 +78,10 @@ RSpec.describe 'Import an app configuration', type: :model do
     eis.where('id <> ?', eis.first&.id).update_all(disabled: true) if eis.count != 1
 
     i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
-    i&.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    if i
+      i.force_regenerate = true
+      i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    end
     Master.reset_external_id_matching_fields!
 
     als = ActivityLog.active.where(name: 'BHS Tracker')

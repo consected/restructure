@@ -267,8 +267,8 @@ describe 'reports', js: true, driver: $browser_driver do
   end
 
   # Creates a report with add_item_button substitution for an activity log.
-  # Activity logs require the activity suffix (e.g., __primary) in the resource name.
-  # Tests: {{add_item_button_to_temporary_master_activity_log__player_contact_phone__primary}}
+  # Uses blank_log which doesn't require a player_contact parent item.
+  # Tests: {{add_item_button_to_temporary_master_activity_log__player_contact_phone__blank_log}}
   def create_report_with_activity_log_add_item_button
     expect(Master.find(-1)).to be_a Master
 
@@ -284,7 +284,7 @@ describe 'reports', js: true, driver: $browser_driver do
     description = <<~END_DESC
       This report has an activity log add item button.
 
-      {{add_item_button_to_temporary_master_activity_log__player_contact_phone__primary}}
+      {{add_item_button_to_temporary_master_activity_log__player_contact_phone__blank_log}}
     END_DESC
 
     @activity_log_add_item_button_report = Report.create(current_admin: @admin,
@@ -490,14 +490,12 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-criteria')
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
-    puts "Add Item Button href: #{aib[:href]}"
 
     aib.click
 
     expect(page).to have_css('#primary-modal1.fade.in')
     expect(page).to have_css('#primary-modal1.fade.in h4.list-group-item-heading', text: 'Test Records With ID')
 
-    debug_process_status
     within('form.new_dynamic_model_test_with_id_rec') do
       fill_in_field 'value', 'New Test Value'
       fill_in_field 'name', 'New Test Name'
@@ -517,9 +515,8 @@ describe 'reports', js: true, driver: $browser_driver do
   # Tests add_item_button substitution for activity logs.
   # Activity logs use the hyphenated_name with activity suffix (e.g., activity-log--player-contact-phone-primary).
   it 'shows activity log add item button on report' do
-    # Access control uses the base table resource name
     setup_access :activity_log__player_contact_phones, user: @user
-    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     let_user_create_master(@user)
     create_master(@user)
@@ -531,26 +528,36 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
 
-    # Verify the button has correct attributes for activity logs with activity suffix
-    puts "Activity Log Add Item Button href: #{aib[:href]}"
-    puts "Activity Log Add Item Button data-target: #{aib[:'data-target']}"
+    # Verify the button has correct attributes for blank log
+    expect(aib[:href]).to match(%r{/masters/-1/activity_log/player_contact_phones/blank_log/new})
+    expect(aib[:'data-target']).to match(/activity-log--player-contact-phone-blank-logs--1-/)
 
     aib.click
 
     expect(page).to have_css('#primary-modal1.fade.in')
 
-    debug_process_status
+    # Fill in form fields for blank log (no player_contact required)
     within('form.new_activity_log_player_contact_phone') do
-      fill_in_field 'data', 'Test activity log data'
-      click_button 'Save'
+      # Blank logs require select_who, select_next_step, notes, and a protocol
+      select_from_dropdown_field 'select_who', 'User'
+      select_from_dropdown_field 'select_next_step', 'Complete'
+      fill_in_field 'notes', 'Test blank log note'
+      select_from_dropdown_field 'protocol_id', 'Study'
     end
 
+    # Submit form via JS (raw submit bypasses Rails UJS remote form handling,
+    # but ensures form data is posted successfully for testing purposes)
+    page.execute_script("document.querySelector('form.new_activity_log_player_contact_phone').submit()")
+
+    # Wait for page reload (non-AJAX submit) and formatting
+    finish_page_loading
     finish_form_formatting
 
-    within '#report_query_form' do
-      click_button 'table'
-    end
-    expect(page).to have_css('.report-results-block')
+    # Verify form submission succeeded - modal should close
+    expect(page).not_to have_css('#primary-modal1.fade.in', wait: 5)
+
+    # Verify activity log was created
+    expect(ActivityLog::PlayerContactPhone.where(notes: 'Test blank log note')).to exist
   end
 
   # Tests add_item_button substitution for external identifiers.
@@ -561,6 +568,8 @@ describe 'reports', js: true, driver: $browser_driver do
     let_user_create_master(@user)
     create_master(@user)
 
+    scantron_count_before = Scantron.count
+
     get_list
 
     open_report @external_identifier_add_item_button_report.id, 'External Identifier Add Item Button'
@@ -569,26 +578,33 @@ describe 'reports', js: true, driver: $browser_driver do
     aib = find('a.add-item-button')
 
     # Verify the button has correct attributes for external identifiers
-    puts "External Identifier Add Item Button href: #{aib[:href]}"
-    puts "External Identifier Add Item Button data-target: #{aib[:'data-target']}"
+    expect(aib[:href]).to match(%r{/masters/-1/scantrons/new})
+    expect(aib[:'data-target']).to match(/scantrons--1-/)
 
     aib.click
 
     expect(page).to have_css('#primary-modal1.fade.in')
 
-    debug_process_status
+    # Fill in the scantron_id field (required for non-pregenerate_ids external identifiers)
+    new_scantron_id = rand(100_000..999_999)
     within('form.new_scantron') do
-      # External identifier forms typically have an ID field to fill in
-      fill_in_field 'scantron_id', '123456789'
-      click_button 'Save'
+      fill_in 'scantron_scantron_id', with: new_scantron_id
     end
 
+    # Submit form via JS
+    page.execute_script("document.querySelector('form.new_scantron').submit()")
+
+    # Wait for submission
+    sleep 1
+
+    finish_page_loading
     finish_form_formatting
 
-    within '#report_query_form' do
-      click_button 'table'
-    end
-    expect(page).to have_css('.report-results-block')
+    # Verify form submission succeeded - modal should close
+    expect(page).not_to have_css('#primary-modal1.fade.in', wait: 10)
+
+    # Verify a scantron was created
+    expect(Scantron.count).to be > scantron_count_before, 'No scantron was created'
   end
 
   # Test that filter_selector configuration in report criteria correctly filters

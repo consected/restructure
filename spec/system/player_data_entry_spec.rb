@@ -124,7 +124,12 @@ describe 'advanced search', js: true, driver: $browser_driver do
         f.click
         finish_form_formatting
         sleep 0.5
-        p = Capybara.find(:xpath, '//body').find('.datepicker')
+        # Wait for the datepicker to appear, retry click if needed
+        unless page.has_css?('.datepicker', wait: 3)
+          f.click
+          sleep 1
+        end
+        p = Capybara.find(:xpath, '//body').find('.datepicker', wait: 5)
 
         expect(p).to have_css('.datepicker-years')
 
@@ -304,10 +309,12 @@ describe 'advanced search', js: true, driver: $browser_driver do
     expect(page).to have_css("a[href='/masters/new']")
 
     click_link 'Create Master'
+    expect(page).to have_css('#new_master', wait: 10)
 
     within '#new_master' do
       click_button 'Create'
     end
+    finish_page_loading
 
     # edit player info data
 

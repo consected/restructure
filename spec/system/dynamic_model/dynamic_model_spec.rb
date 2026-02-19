@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+# System specs for dynamic model fields and views.
+# Tests dynamic model creation with various field types, option type views,
+# merge/override configurations, and different option type field names.
+# Each describe block sets up its own user, master record, and dynamic model
+# with specific configuration options, then exercises the UI through the
+# details tab panel.
+
 require 'rails_helper'
 
 describe 'dynamic models fields and views', js: true, driver: $browser_driver do
@@ -58,18 +65,19 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     # Although we don't exercise all the fields for data entry, showing them ensures that
     # there isn't a regression in the UI.
     it 'creates a dynamic model' do
+      # Validate user has expected access before browser interaction
+      expect(@user.has_access_to?(:access, :table, :dynamic_model__test_all_v2_fields)).to be_truthy
+      expect(@user.has_access_to?(:create, :table, :dynamic_model__test_all_v2_fields)).to be_truthy
+
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
 
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      # Find the external ID tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      # Expand the details tab and wait for the panel to fully expand
+      expand_master_record_tab('details')
 
-      expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-all-v2-fields .new-button-container a.btn'
       expect(page).to have_css(c)
       b = all(c).first
@@ -254,18 +262,19 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     # Although we don't exercise all the fields for data entry, showing them ensures that
     # there isn't a regression in the UI.
     it 'creates a dynamic model with option_type views' do
+      # Validate user has expected access before browser interaction
+      expect(@user.has_access_to?(:access, :table, @resource_name)).to be_truthy
+      expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
 
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      # Find the external ID tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      # Expand the details tab and wait for the panel to fully expand
+      expand_master_record_tab('details')
 
-      expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
       expect(page).to have_css(c)
       b = all(c).first
@@ -504,12 +513,9 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      # Find the external ID tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      # Expand the details tab and wait for the panel to fully expand
+      expand_master_record_tab('details')
 
-      expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
       expect(page).to have_css(c)
       b = all(c).first
@@ -642,18 +648,19 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     # Although we don't exercise all the fields for data entry, showing them ensures that
     # there isn't a regression in the UI.
     it 'creates a dynamic model with option type views using a different option type field' do
+      # Validate user has expected access before browser interaction
+      expect(@user.has_access_to?(:access, :table, @resource_name)).to be_truthy
+      expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
 
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      # Find the external ID tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      # Expand the details tab and wait for the panel to fully expand
+      expand_master_record_tab('details')
 
-      expect(page).to have_css("#details-#{@master_id}")
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
       expect(page).to have_css(c)
       b = all(c).first
@@ -897,20 +904,19 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     # Although we don't exercise all the fields for data entry, showing them ensures that
     # there isn't a regression in the UI.
     it 'creates a dynamic model with option type views using a different default option type name' do
+      # Validate user has expected access before browser interaction
+      expect(@user.has_access_to?(:access, :table, @resource_name)).to be_truthy
+      expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
       dismiss_modal
 
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      # Find the external ID tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
-      sleep 1 # Allow tab content to load via AJAX - increased wait
+      # Expand the details tab and wait for the panel to fully expand
+      expand_master_record_tab('details')
 
-      debug_state('details_tab_loaded') unless has_css?("#details-#{@master_id}", wait: 15)
-      expect(page).to have_css("#details-#{@master_id}", wait: 15)
       c = '.details-item-type-dynamic-model--test-multi-options .new-button-container a.btn'
       expect(page).to have_css(c, wait: 10)
       b = all(c).first

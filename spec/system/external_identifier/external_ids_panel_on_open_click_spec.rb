@@ -43,6 +43,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     # Ensure the BHS external identifier is formatted how we expect
     resource_name = :bhs_assignments
     bhs = ExternalIdentifier.active.where(name: resource_name).first
+    bhs.force_regenerate = true
     bhs.update! external_id_edit_pattern: nil, external_id_view_formatter: nil, current_admin: @admin
 
     # Create test data with shared last name for search
@@ -127,8 +128,8 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     ext_panel_3 = find("#external-ids-#{master3.id}", visible: :all)
     within(ext_panel_3) do
       bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 10).first
-      expect(bhs_block).not_to be_nil, "Master 3 external IDs should load on first expansion"
-      expect(bhs_block.text.strip).not_to be_empty, "Master 3 external IDs should have content"
+      expect(bhs_block).not_to be_nil, 'Master 3 external IDs should load on first expansion'
+      expect(bhs_block.text.strip).not_to be_empty, 'Master 3 external IDs should have content'
     end
 
     # Step 2: Now expand master 1 (the first one in the list)
@@ -143,8 +144,8 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     ext_panel_1 = find("#external-ids-#{master1.id}", visible: :all)
     within(ext_panel_1) do
       bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 10).first
-      expect(bhs_block).not_to be_nil, "Master 1 external IDs should load"
-      expect(bhs_block.text.strip).not_to be_empty, "Master 1 external IDs should have content"
+      expect(bhs_block).not_to be_nil, 'Master 1 external IDs should load'
+      expect(bhs_block.text.strip).not_to be_empty, 'Master 1 external IDs should have content'
     end
 
     # Step 3: Go back to master 3 - THIS IS WHERE THE BUG MANIFESTS
@@ -159,8 +160,8 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     ext_panel_3_revisit = find("#external-ids-#{master3.id}", visible: :all)
     within(ext_panel_3_revisit) do
       bhs_block = all("[id^='bhs-assignments-#{master3.id}']", wait: 10).first
-      expect(bhs_block).not_to be_nil, "Master 3 external IDs should load when returning"
-      expect(bhs_block.text.strip).not_to be_empty, "Master 3 external IDs should have content when returning"
+      expect(bhs_block).not_to be_nil, 'Master 3 external IDs should load when returning'
+      expect(bhs_block.text.strip).not_to be_empty, 'Master 3 external IDs should have content when returning'
     end
 
     # Step 4: Test with master 2 as well
@@ -174,8 +175,8 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     ext_panel_2 = find("#external-ids-#{master2.id}", visible: :all)
     within(ext_panel_2) do
       bhs_block = all("[id^='bhs-assignments-#{master2.id}']", wait: 10).first
-      expect(bhs_block).not_to be_nil, "Master 2 external IDs should load"
-      expect(bhs_block.text.strip).not_to be_empty, "Master 2 external IDs should have content"
+      expect(bhs_block).not_to be_nil, 'Master 2 external IDs should load'
+      expect(bhs_block.text.strip).not_to be_empty, 'Master 2 external IDs should have content'
     end
 
     # Final check: Go back to master 1
@@ -189,8 +190,8 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     ext_panel_1_revisit = find("#external-ids-#{master1.id}", visible: :all)
     within(ext_panel_1_revisit) do
       bhs_block = all("[id^='bhs-assignments-#{master1.id}']", wait: 10).first
-      expect(bhs_block).not_to be_nil, "Master 1 external IDs should load when returning"
-      expect(bhs_block.text.strip).not_to be_empty, "Master 1 external IDs should have content when returning"
+      expect(bhs_block).not_to be_nil, 'Master 1 external IDs should load when returning'
+      expect(bhs_block.text.strip).not_to be_empty, 'Master 1 external IDs should have content when returning'
     end
   end
 
