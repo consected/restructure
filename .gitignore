@@ -94,5 +94,6 @@ yarn-debug.log*
 
 # Test related NfsStore processing file
 .__processing-index__
+.__failed-archive__
 
 /public/handlebars*
