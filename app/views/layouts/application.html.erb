@@ -37,8 +37,8 @@
   };
   <% end %>
   <%= render partial: "layouts/setup_app" %>
-  <style><%= template_block("ui page css - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %></style>
-  <script><%= template_block("ui page js - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %></script>
+  <%= content_tag :style, nonce: true do %><%= template_block("ui page css - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %><% end %>
+  <%= javascript_tag nonce: true do %><%= template_block("ui page js - #{current_user&.app_type&.name}", markdown_to_html: false, no_substitutions: true)&.html_safe %><% end %>
 </head>
 <body <%= body_classes %> id="body-top" data-user-roles="<%= user_roles_for_attr %>" data-user-id="<%= current_user&.id %>" data-admin-id="<%= current_admin&.id %>">
     <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>
