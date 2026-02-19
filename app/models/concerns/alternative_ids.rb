@@ -145,11 +145,16 @@ module AlternativeIds
       labels
     end
 
+    #
     # Generate an instance method that allow easy access to alternative_id values
-    # such as #scantron_id
+    # such as `#scantron_id`
+    # The method can optionally be called with the named argument *access_by*
+    # to specify the user for access control checks on external identifiers.
+    # If *access_by* is not supplied, the method will default to using the current_user method for access control checks.
+    # @param [String | Symbol] attr_name is the name of the alternative ID field, such as 'scantron_id'
     def add_alternative_id_method(attr_name)
-      define_method attr_name.to_sym do
-        alternative_id_value attr_name
+      define_method attr_name.to_sym do |access_by: :current_user|
+        alternative_id_value(attr_name, access_by:)
       end
     end
 
@@ -269,31 +274,37 @@ module AlternativeIds
   # Alternatively, the field_name matches the name of an external identifier ID field ending with _id
   # If no matching ID fields are found, return nil
   # @param [String | Symbol] field_name is the name of the external identifier field to get
+  # @param [User] access_by - the user accessing the field.
+  #               By default we specify the symbol :current_user to indicate that the current_user method should be used.
+  #               If nil, no access controls are applied.
   # @return [String | Integer | nil]
-  def alternative_id_value(field_name)
+  def alternative_id_value(field_name, access_by: :current_user)
     field_name = field_name.to_sym
     @alternative_id_value ||= {}
+    access_by = current_user if access_by == :current_user
+
     return @alternative_id_value[field_name] if @alternative_id_value.key? field_name
 
     # Start by attempting to match on a field in the master record
-    unless self.class.alternative_id?(field_name, access_by: current_user)
+    unless self.class.alternative_id?(field_name, access_by:)
       Rails.logger.warn "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
-      Rails.logger.warn "Failed user: #{current_user}"
-      Rails.logger.warn "Can access: #{self.class.alternative_id_fields(access_by: current_user)}"
+      Rails.logger.warn "Failed user: #{access_by}"
+      Rails.logger.warn "Can access: #{self.class.alternative_id_fields(access_by:)}"
 
       raise FphsException, "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
     end
 
     @alternative_id_value[field_name] = attributes[field_name.to_s]
-    return @alternative_id_value[field_name] if self.class.crosswalk_attr?(field_name, access_by: current_user)
+    return @alternative_id_value[field_name] if self.class.crosswalk_attr?(field_name, access_by:)
 
-    ext_id = self.class.external_id_definition(field_name, access_by: current_user)
+    ext_id = self.class.external_id_definition(field_name, access_by:)
     unless ext_id
       raise(FphsException,
-            "External ID definition is not active for #{field_name}. Key: #{self.class.access_by_key(current_user)}")
+            "External ID definition is not active for #{field_name}. " \
+            "Key: #{access_by && self.class.access_by_key(access_by)}")
     end
 
-    @alternative_id_value[field_name] = self.class.external_id?(field_name, access_by: current_user)
+    @alternative_id_value[field_name] = self.class.external_id?(field_name, access_by:)
     return unless @alternative_id_value[field_name]
 
     assoc_name = ext_id.model_association_name
