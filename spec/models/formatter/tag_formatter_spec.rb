@@ -218,6 +218,13 @@ RSpec.describe Formatter::TagFormatter, type: :model do
   end
 
   it 'handles gets general selection labels' do
+    # Ensure the general selection records have distinct name (label) and value
+    # so label lookups return the human-readable name, not the raw value
+    %w[player_contacts_source player_infos_source].each do |item_type|
+      gs = Classification::GeneralSelection.find_by(item_type: item_type, value: 'nflpa2')
+      gs&.update_column(:name, 'NFLPA 2')
+    end
+
     pi = PlayerContact.new(
       data: 'sakdjfhkj@askjdhkdjh.tst',
       rec_type: 'email',
@@ -230,6 +237,8 @@ RSpec.describe Formatter::TagFormatter, type: :model do
       [:general_selection_label, 'nflpa2', 'NFLPA 2', nil, 'source', pi],
       [:general_selection_label, 'email', 'Email', nil, 'rec_type', pi]
     ]
+
+    run tests
 
     pi = PlayerInfo.new(
       last_name: 'test',

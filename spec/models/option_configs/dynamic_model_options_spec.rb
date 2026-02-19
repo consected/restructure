@@ -149,14 +149,18 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'replaces option configurations' do
-    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
+    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
+    table_name = 'test_replace_opts'
+    unless Admin::MigrationGenerator.table_exists? table_name
+      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
     end
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
-    name = 'test created by 2'
+    name = 'test replace opts'
     dm = DynamicModel.create! current_admin: @admin,
                               name:,
-                              table_name: 'test_created_by_recs',
+                              table_name:,
                               schema_name: 'ml_app',
                               category: :test,
                               options: nil

@@ -111,10 +111,12 @@ module MasterDataSupport
       puts '** Data set already created, skipping **'
 
       # Still need to set up instance variables that specs expect
-      ms = Master.no_temporary_masters
-      @master = ms.first if ms.count > 0
+      # Find the reference master by looking for the player_info with rank=12,
+      # which is uniquely set during create_data_set for the reference record
+      ref_pi = PlayerInfo.find_by(rank: 12)
+      @master = ref_pi&.master || Master.no_temporary_masters.first
       @master_id = @master&.id
-      @full_player_info = @master.player_infos.first
+      @full_player_info = ref_pi || @master.player_infos.first
       @full_pro_info = @master.pro_infos.first
       @full_master_record = @master
       @full_trackers = @master.trackers.reload

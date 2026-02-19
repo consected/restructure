@@ -1380,7 +1380,7 @@
     "associated_general_selections": [
       {
         "id": 29,
-        "name": "nflpa",
+        "name": "NFLPA",
         "value": "nflpa",
         "item_type": "player_infos_source",
         "created_at": "2015-08-12T19:43:23.821Z",
@@ -1686,7 +1686,7 @@
       },
       {
         "id": 530,
-        "name": "nflpa4",
+        "name": "NFLPA 4",
         "value": "nflpa4",
         "item_type": "player_infos_source",
         "created_at": "2018-07-13T11:00:17.286Z",
