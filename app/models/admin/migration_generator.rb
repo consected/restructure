@@ -736,6 +736,19 @@ class Admin::MigrationGenerator
         ActiveRecord::Base.connection_pool.with_connection do
           self.class.migration_context(db_migration_dirname).migrate
         end
+      rescue Exception => e
+        FileUtils.mkdir_p db_migration_failed_dirname
+        FileUtils.mv @do_migration, db_migration_failed_dirname
+        msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
+        Rails.logger.warn msg
+        unless Rails.env.production?
+          puts msg
+          puts e
+        end
+        bt = e.backtrace
+              .reject { |m| m.include?('/vendor/bundle/ruby/') }
+              .join("\n")
+        raise FphsException, "#{msg}:\n#{e}\n#{bt}"
       end.join
     end
 
@@ -745,8 +758,12 @@ class Admin::MigrationGenerator
   rescue Exception => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}'"
+    msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
     Rails.logger.warn msg
+    unless Rails.env.production?
+      puts msg
+      puts e
+    end
     bt = e.backtrace
           .reject { |m| m.include?('/vendor/bundle/ruby/') }
           .join("\n")

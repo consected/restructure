@@ -203,7 +203,21 @@ module FeatureSupport
     puts_debug "Page URL: #{page.current_url}"
     debug_process_status if respond_to?(:debug_process_status)
 
-    expect(page).to have_css('.master-result', wait: 15)
+    unless page.has_css?('.master-result', wait: 15)
+      # Capture page state before failing
+      alerts = all('div.alert', visible: true, wait: 0)
+      if alerts.any?
+        puts_debug "ALERTS visible on page (#{alerts.count}):"
+        alerts.each { |a| puts_debug "  Alert: #{a.text.strip.first(300)}" }
+      end
+      flash_msgs = all('.flash .alert', visible: true, wait: 0)
+      if flash_msgs.any?
+        puts_debug "FLASH messages (#{flash_msgs.count}):"
+        flash_msgs.each { |f| puts_debug "  Flash: #{f.text.strip.first(300)}" }
+      end
+      puts_debug "Page body text (first 500 chars): #{page.text.first(500)}"
+      raise "navigate_to_master: .master-result not found for master_id #{master_id}. Check alerts above."
+    end
 
     # Expand the master record to see details
     expand_master_record(master_id: master_id)

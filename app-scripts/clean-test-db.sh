@@ -3,7 +3,9 @@
 
 
 export USE_PG_UNAME=${USE_PG_UNAME:=$(whoami)}
-echo "Cleaning a single test database with user Postgres user: ${USE_PG_UNAME}"
+DBNUM=${DBNUM:=${TEST_ENV_NUMBER}}
+export DBNUM
+echo "Cleaning a single test database (number: ${DBNUM}) with user Postgres user: ${USE_PG_UNAME}"
 app-scripts/drop-test-db.sh 1
 app-scripts/create-test-db.sh 1
 rm -rf /var/tmp/nfs_store_tmp*
