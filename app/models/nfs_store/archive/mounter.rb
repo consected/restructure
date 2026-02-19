@@ -82,6 +82,9 @@ module NfsStore
           mounter.extract_completed!
           mounter.index_completed!
           sf.process_new_file
+        rescue SystemCallError, IOError => e
+          raise_flag_file_error("mount_all for stored file '#{sf&.file_name}' (id: #{sf&.id})",
+                               sf&.retrieval_path, e)
         end
       end
 
@@ -158,6 +161,8 @@ module NfsStore
           # Indicator hasn't timed out yet
           false
         end
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('indicator_timed_out?', archive_path, e)
       end
 
       # Filename of the flag used to indicate an archive extract is in progress
@@ -193,25 +198,35 @@ module NfsStore
         else
           true
         end
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('extract_in_progress?', processing_archive_flag_path, e)
       end
 
       def extract_in_progress!
         FileUtils.touch(processing_archive_flag_path)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('extract_in_progress!', processing_archive_flag_path, e)
       end
 
       def extract_failed!(exception)
         extract_completed!
         File.write(failed_archive_flag_path, exception.message)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('extract_failed!', failed_archive_flag_path, e)
       end
 
       def extract_failure_reason
         return unless File.exist?(archive_path) && archive_path.end_with?(FailedArchiveSuffix)
 
         File.read(archive_path)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('extract_failure_reason', archive_path, e)
       end
 
       def extract_completed!
         FileUtils.rm_f(processing_archive_flag_path)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('extract_completed!', processing_archive_flag_path, e)
       end
 
       def processing_index_flag_path
@@ -221,14 +236,20 @@ module NfsStore
       def index_in_progress?
         File.exist?(processing_index_flag_path) &&
           (Time.now - File.mtime(processing_index_flag_path)) < ProcessingRetryTime
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('index_in_progress?', processing_index_flag_path, e)
       end
 
       def index_in_progress!
         FileUtils.touch(processing_index_flag_path)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('index_in_progress!', processing_index_flag_path, e)
       end
 
       def index_completed!
         FileUtils.rm_f(processing_index_flag_path)
+      rescue SystemCallError, IOError => e
+        raise_flag_file_error('index_completed!', processing_index_flag_path, e)
       end
 
       #
@@ -377,7 +398,31 @@ module NfsStore
         file.move_to to_path
       end
 
+      # Raise a descriptive FsException::Action when a flag file operation fails
+      # due to a filesystem error (e.g. permission denied, I/O error).
+      # The message includes the method name, the flag file path, the original
+      # error details, and a hint about likely causes.
+      # Defined as a class method so both instance and class methods (e.g. mount_all) can use it.
+      # @param method_name [String] the name of the method that failed
+      # @param flag_path [String] the path to the flag file that caused the error
+      # @param original_error [Exception] the original filesystem error
+      # @raise [FsException::Action]
+      def self.raise_flag_file_error(method_name, flag_path, original_error)
+        raise FsException::Action,
+              "#{method_name} failed for flag file '#{flag_path}': " \
+              "#{original_error.class} - #{original_error.message}. " \
+              'This may indicate a filesystem mount/connection issue, or that the current user ' \
+              "does not have access to the container's files through the available roles. " \
+              "Original backtrace: #{original_error.short_string_backtrace}"
+      end
+      private_class_method :raise_flag_file_error
+
       private
+
+      # Instance-level delegate to the class method for convenience
+      def raise_flag_file_error(...)
+        self.class.send(:raise_flag_file_error, ...)
+      end
 
       # Extract files from an archive and add them to the database in a single bulk import
       # @return [Boolean] result true if all the archived files were extracted and stored
