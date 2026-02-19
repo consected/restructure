@@ -208,7 +208,7 @@ RSpec.describe NfsStore::Upload, type: :model do
   it 'fails to notify role after upload' do
     expect(Admin::UserRole.find_by(role_name: 'upload notify role', app_type: @user.app_type)).to be nil
 
-    mn = Messaging::MessageNotification.last&.id || -1
+    initial_notification_count = Messaging::MessageNotification.count
     file_name = 'test-notification.txt'
     ids = []
     upload_set = SecureRandom.hex
@@ -217,13 +217,12 @@ RSpec.describe NfsStore::Upload, type: :model do
 
     res = @container.upload_done(ids)
     expect(res).to be true
-    last_mn = Messaging::MessageNotification.all.reload.last
     exp = { 'iterator_index' => 0,
             'iterator_value' => nil,
             'notify_errors' => ['No recipients based on role: upload notify role, users or specified phones/emails in SaveTriggers::Notify'],
             'notify_results' => [false],
             'notify_messages' => [] }
     expect(@container.save_trigger_results).to eq exp
-    expect(last_mn&.id || -1).to eq mn
+    expect(Messaging::MessageNotification.count).to eq initial_notification_count
   end
 end

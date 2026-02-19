@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seed_support"
-require "#{::Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seed_support"
+require "#{Rails.root}/spec/support/user_support"
 
 module DynamicModelSupport
   #
@@ -20,7 +20,13 @@ module DynamicModelSupport
     @master.current_user = @user
 
     DynamicModel.active.where(table_name: 'test_created_by_recs').reload.each { |dm| dm.disable!(@admin) }
-    DynamicModel.send(:remove_const, :TestCreatedByRec) if defined? TestCreatedByRec
+    # Use const_defined? with inherit=false to only check directly-defined constants,
+    # and rescue in case the constant was removed by a parallel test
+    begin
+      DynamicModel.send(:remove_const, :TestCreatedByRec) if DynamicModel.const_defined?(:TestCreatedByRec, false)
+    rescue NameError
+      # Constant may have been removed by another parallel test
+    end
     dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
     dm.current_admin = @admin
     dm.update_tracker_events

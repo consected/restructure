@@ -29,10 +29,12 @@
 # - Modal interactions must happen outside Capybara `within` blocks
 require './spec/support/feature_helper'
 require './spec/support/user_actions_setup'
+require './spec/support/codemirror_editor_support'
 module FeatureSupport
   include FeatureHelper
   include UserActionsSetup
   include FeatureExpectations
+  include CodemirrorEditorSupport
 
   ResultsMasterPanel = '.results-panel .master-panel'
   ResultsMasterExpander = '.master-expander'
@@ -303,6 +305,13 @@ module FeatureSupport
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
     tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    # Wait for the target panel to fully expand (Bootstrap collapse animation)
+    target = tab_link['data-target']
+    return unless target.present?
+
+    target_selector = "#{target}.collapse.in"
+    expect(page).to have_css(target_selector, wait: 15)
   end
 
   #
