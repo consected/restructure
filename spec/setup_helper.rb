@@ -492,10 +492,29 @@ module SetupHelper
       puts "Running psql: #{sqlfn}"
       host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
       user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
+      `PGOPTIONS='--search_path=ml_app --client-min-messages=warning' psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end
+  end
+
+  # Create a necessary view that is missing from the app config, which is used by the activity log implementation for label handling
+  def self.create_view_activity_labels
+    ActiveRecord::Base.connection.execute <<~'SQL'
+      CREATE SCHEMA IF NOT EXISTS dynamic;
+      CREATE OR REPLACE VIEW "dynamic".view_activity_labels
+      AS SELECT t.id AS activity_log_id,
+          t.disabled,
+          t.table_name,
+          t.matches[1] AS extra_log_type,
+          t.matches[2] AS label
+        FROM ( SELECT activity_logs.id,
+                  activity_logs.disabled,
+                  activity_logs.table_name,
+                  regexp_matches(activity_logs.extra_log_types::text, '[\\A\r\n]+([a-z_]+):[ &a-zA-Z_]*[\r\n]+(?:[\s#]+(?:<<:|#)[^\r\n]+[\r\n]+)*[\s]+label: ([^\r\n]+)'::text, 'g'::text) AS matches
+                FROM ml_app.activity_logs) t
+        ORDER BY t.id;
+    SQL
   end
 
   # Create and check the spec tally table
@@ -503,10 +522,10 @@ module SetupHelper
   def self.check_spec_db
     tn = SpecTallyTable
     unless Admin::MigrationGenerator.table_or_view_exists_in_schema?(tn, 'ml_app')
-      sqlfn = "create table ml_app.#{tn} (name varchar, updated_at timestamp);"
+      sqlfn = "create table if not exists ml_app.#{tn} (name varchar, updated_at timestamp);"
       host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
       user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} -c "#{sqlfn}"`
+      `PGOPTIONS='--search_path=ml_app --client-min-messages=warning' psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} -c "#{sqlfn}"`
     end
 
     res = ActiveRecord::Base.connection.execute("select * from ml_app.#{tn};")
