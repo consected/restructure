@@ -148,15 +148,14 @@ module EditFields
         if cw
           got ||= ''
           got = got.html_safe
-          got += <<~END_SCRIPT
-            <script>
+          got += javascript_tag(nonce: true) do
+            <<~END_JS
               _fpa.calculate_with = _fpa.calculate_with || {};
               var cwdef = _fpa.calculate_with['#{field_name_sym}'] = #{cw.to_json.html_safe};
 
               _fpa.utils.calc_field('#{field_name_sym}', '#{form_object_item_type_us}');
-            </script>
-          END_SCRIPT
-                 .html_safe
+            END_JS
+          end
         end
 
       end

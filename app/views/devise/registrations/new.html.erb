@@ -63,12 +63,12 @@
     </div>
 
     <div class='form-group-non checkbox-inline'>
-      <%= f.check_box :terms_of_use, style: 'display: none;', required: true %>
+      <%= f.check_box :terms_of_use, class: 'devise-form__terms-of-use', required: true %>
       <%= f.label :terms_of_use do %>
-            <span id='terms-of-use-default' style='display: none;'>
+            <span id='terms-of-use-default' class='devise-form__terms-of-use'>
               <%= template_block 'ui new user registration terms default' %>
             </span>
-        <span id='terms-of-use-gdpr' style='display: none;'>
+        <span id='terms-of-use-gdpr' class='devise-form__terms-of-use'>
               <%= template_block 'ui new user registration terms gdpr' %>
             </span>
       <% end %>
@@ -93,10 +93,10 @@
 </div>
 
 <% if Settings::ReCaptchaSiteKey %>
-<script src="https://www.google.com/recaptcha/api.js"></script>
-<script>
+<%= javascript_include_tag "https://www.google.com/recaptcha/api.js", nonce: true %>
+<%= javascript_tag nonce: true do %>
   function onSubmit(token) {
     document.getElementById("new_user").submit();
   }
-</script>
+<% end %>
 <% end %>

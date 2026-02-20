@@ -4,16 +4,16 @@
 <%= render partial: 'common_templates/common_template_references' %>
 <%= render partial: 'common_templates/common_template_list' %>
 
-<script id="ajax_form_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('ajax_form_fields', css_class: 'hidden handlebars-partial') do %>
   <input name="utf8" type="hidden" value="✓">
   <input name="authenticity_token" type="hidden" class="set-auth-token" value="" />
-</script>
+<% end %>
 
-<script id="rank_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<span class="pull-right label label-info general-rank-{{rank}} {{name_h}}-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
-</script>
+<%= handlebars_template_tag('rank_button', css_class: 'hidden handlebars-partial') do %>
+<span class="pull-right label label-info general-rank-{{rank}} {{name_h}}-{{rank}} rank-label--spaced">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+<% end %>
 
-<script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('update_metadata-partial', css_class: 'hidden handlebars-partial') do %>
   {{#if show_created_at}}
     <span class="meta-created-at glyphicon glyphicon-plus-sign"></span>&nbsp;<span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}">{{date_time created_at}}</span>
   {{else}}
@@ -21,15 +21,15 @@
   {{/if}}
   {{#if updated_at}}  &nbsp; {{#is updated_at_ts '===' created_at_ts }}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="not updated"></span>{{else}}<span class="meta-last-updated glyphicon glyphicon-pencil"></span>&nbsp;<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{/is}}{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
   {{#if user_name}} &nbsp; <span class="meta-created-by glyphicon glyphicon-user"></span>&nbsp;<span class="meta-created-by-shown" data-toggle="popover" data-trigger="click hover" data-content="edited by">{{user_name}}</span>{{/if}}
-</script>
+<% end %>
 
-<script id="common_template_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_create_button-partial', css_class: 'hidden handlebars-partial') do %>
   {{#unless prevent_create}}
   <a href="/masters/{{id}}/{{pluralize resource}}/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="{{hyphenate resource}}-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}{{titleize resource}}{{/if}} record</a>
   {{/unless}}
-</script>
+<% end %>
 
-<script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('field_label', css_class: 'hidden handlebars-partial') do %>
   <small class="ctlabel">
     {{#if labels}}
       {{fpa_state_item labels vdef_version @key }}
@@ -41,10 +41,10 @@
       {{humanize (replace @key replace '')}}
     {{/if}}
   </small>
-</script>
+<% end %>
 
 
-<script id="common_template_result_field_caption_or_dialog" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_template_result_field_caption_or_dialog', css_class: 'hidden handlebars-partial') do %>
   {{#if no_caption_before}}
   {{else is field_type 'includes' '^hidden_' }}
   {{else is key 'in' caption_before_keys}}
@@ -63,18 +63,18 @@
       {{log key}}
     {{/if}}
   {{/if}}
-</script>
+<% end %>
 
-<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase')}}fo-no-downcase{{/if}} {{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')}}fo-view-original-case{{/if}}</script>
+<%= handlebars_template_tag('field_result_class', css_class: 'hidden handlebars-partial') do %>list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#if no_caption_before}}force-no-caption-before{{else is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/if}} {{#is key external_id_attr}}is_external_id_item{{/is}} {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase')}}fo-no-downcase{{/if}} {{#if (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version 'field_options' key 'view_original_case')}}fo-view-original-case{{/if}}<% end %>
 
-<script id="edit_item_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('edit_item_button', css_class: 'hidden handlebars-partial') do %>
 {{#unless prevent_edit }}
   <a data-toggle="scrollto-result" data-target="#{{hyphenate resource}}-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-{{hyphenate resource}} pull-right glyphicon glyphicon-edit" href="{{run_template edit_button_href}}" data-remote="true" data-{{hyphenate resource}}-id="{{this.id}}" data-result-target=""></a>
   <a data-remote="true" title="refresh" class="hidden refresh-item" href="{{replace (run_template edit_button_href) '\/edit$' ''}}">&nbsp;</a>
 {{/unless}}
-</script>
+<% end %>
 
-<script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('search_results_notes_block', css_class: 'hidden handlebars-partial') do %>
   <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{key}} notes-block {{#unless value}}notes-empty{{/unless}}" data-field-name="{{key}}">
     {{#if label}}
     <small class="notes-block-label">{{> field_label labels=(concat 'labels_' (underscore name)) }}</small>
@@ -93,22 +93,22 @@
       </div>
     {{/is}}
   </li>
-</script>
+<% end %>
 
-<script id="activity_log_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial">activity-log--{{#if rec_type}}{{hyphenate full_name}}-{{pluralize rec_type}}{{else}}{{hyphenate (pluralize full_name)}}{{/if}}-main-result-template</script>
+<%= handlebars_template_tag('activity_log_data_template_name_partial', css_class: 'hidden handlebars-partial') do %>activity-log--{{#if rec_type}}{{hyphenate full_name}}-{{pluralize rec_type}}{{else}}{{hyphenate (pluralize full_name)}}{{/if}}-main-result-template<% end %>
 
 <%
 # The show button appears at the top of a parent item, such as a player_contact with record type phone
 %>
-<script id="activity_log_common_template_show_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('activity_log_common_template_show_button', css_class: 'hidden handlebars-partial') do %>
 
   {{#if template_config.supports_activity_log }}
     {{#if rec_type}}
 
-    <a data-toggle="uncollapse" data-target="#activity-log--{{hyphenate template_config.full_name}}-{{pluralize rec_type}}-{{master_id}}" title="open {{rec_type}} log" style="margin-right:1em" class="activity-log-entity-link activity-log--{{hyphenate template_config.full_name}}-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/{{pluralize name}}/{{this.id}}/activity_log/{{underscore name}}_{{pluralize rec_type}}" data-remote="true" data-{{hyphenate name}}-id="{{this.id}}" data-result-target="#activity-log--{{hyphenate template_config.full_name}}-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_data_template_name_partial full_name=template_config.full_name }}"></a>
+    <a data-toggle="uncollapse" data-target="#activity-log--{{hyphenate template_config.full_name}}-{{pluralize rec_type}}-{{master_id}}" title="open {{rec_type}} log" class="activity-log-entity-link activity-log-entity-link--spaced activity-log--{{hyphenate template_config.full_name}}-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/{{pluralize name}}/{{this.id}}/activity_log/{{underscore name}}_{{pluralize rec_type}}" data-remote="true" data-{{hyphenate name}}-id="{{this.id}}" data-result-target="#activity-log--{{hyphenate template_config.full_name}}-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_data_template_name_partial full_name=template_config.full_name }}"></a>
     {{else}}
-    <a data-toggle="uncollapse" data-target="#activity-log--{{hyphenate (pluralize template_config.full_name)}}-{{master_id}}" title="open {{run_template template_config.caption}}" style="margin-right:1em" class="activity-log-entity-link {{hyphenate template_config.full_name}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/{{pluralize name}}/{{this.id}}/activity_log/{{underscore (pluralize name)}}" data-remote="true" data-{{hyphenate name}}-id="{{this.id}}" data-result-target="#activity-log--{{hyphenate (pluralize template_config.full_name)}}-{{master_id}}" data-template="{{> activity_log_data_template_name_partial full_name=template_config.full_name }}"></a>
+    <a data-toggle="uncollapse" data-target="#activity-log--{{hyphenate (pluralize template_config.full_name)}}-{{master_id}}" title="open {{run_template template_config.caption}}" class="activity-log-entity-link activity-log-entity-link--spaced {{hyphenate template_config.full_name}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/{{pluralize name}}/{{this.id}}/activity_log/{{underscore (pluralize name)}}" data-remote="true" data-{{hyphenate name}}-id="{{this.id}}" data-result-target="#activity-log--{{hyphenate (pluralize template_config.full_name)}}-{{master_id}}" data-template="{{> activity_log_data_template_name_partial full_name=template_config.full_name }}"></a>
     {{/if}}
   {{/if}}
 
-</script>
+<% end %>

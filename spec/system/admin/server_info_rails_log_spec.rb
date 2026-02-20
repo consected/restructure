@@ -68,8 +68,8 @@ RSpec.describe 'Admin Rails Log Viewer', js: true, type: :system do
     visit '/admin/server_info/rails_log?search=ERROR'
     finish_page_loading
     log_pre = find('#rails-log-listing', visible: true)
-    # The <pre> should have style that doesn't break the container's width
-    expect(log_pre[:style]).to include('width: auto')
+    # The <pre> should have CSS class for proper width styling with horizontal scroll
+    expect(log_pre[:class]).to include('rails-log__listing')
   end
 
   it 'safely handles regex patterns that could contain injection attempts' do

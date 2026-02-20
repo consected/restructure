@@ -84,7 +84,7 @@ if field_configs.present?
  </ul>
 </div>
 
-<script>
+<%= javascript_tag nonce: true do %>
   window.setTimeout(function(){
     if ($('[data-field-configs-option="default"]').hasClass("dfc-processed")) return;
     
@@ -96,6 +96,6 @@ if field_configs.present?
       ftab.append($this.find('.dfc-field-config-block'))
     })
   }, 300);
-</script>
+<% end %>
 
  <% end %>

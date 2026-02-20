@@ -39,7 +39,7 @@
       </div>
       <div class="col-sm-1 text-right">
           <br/>
-          <p style="font-size: 18px;">
+          <p class="search-form__clear-icon">
             <a href="#" class="clear-fields glyphicon glyphicon-erase" title="clear fields"></a>
           </p>
       </div>
@@ -51,11 +51,10 @@
     <span id="search_count_simple" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>
 <%end%>
-<script>
+<%= javascript_tag nonce: true do %>
   _fpa.cache.get_definition('colleges', function(){
     _fpa.form_utils.setup_typeahead('input.simple-college-input', 'colleges', "colleges");
   });
-
-</script>
+<% end %>
 
 </div>

@@ -35,9 +35,9 @@
 
 <% end %>
 
-<script>
+<%= javascript_tag nonce: true do %>
   $('form').on('submit',function(){
       _fpa.ajax_working($(this));
       $(this).find('input[type="submit"]').hide();
   });
-</script>
+<% end %>

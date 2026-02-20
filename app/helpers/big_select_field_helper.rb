@@ -94,12 +94,18 @@ module BigSelectFieldHelper
     options ||= {}
 
     predata = data&.transform_keys { |v| v.to_s.split(' >>>').first }
+
+    # Store data in a hidden element as JSON data attributes
+    # This avoids inline script tags that fail CSP when loaded via AJAX
+    # The JavaScript setup code will read these attributes
+    data_json = { subtype => predata }.to_json
+    options_json = options.to_json
+
     <<~END_HTML
-      <script>
-        var big_select_field = $('##{big_select_field_id}')[0]
-        big_select_field.big_select_options = big_select_field.big_select_options || #{options.to_json.html_safe};
-        big_select_field.big_select_hash = big_select_field.big_select_hash || {};
-        big_select_field.big_select_hash['#{subtype}'] = #{predata.to_json.html_safe};
+      <script type="application/json" class="big-select-data"
+              data-field-id="#{big_select_field_id}"
+              data-options="#{ERB::Util.html_escape(options_json)}"
+              data-hash="#{ERB::Util.html_escape(data_json)}">
       </script>
     END_HTML
       .html_safe

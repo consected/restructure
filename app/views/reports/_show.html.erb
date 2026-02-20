@@ -4,10 +4,10 @@
   extra_classes += " report-rn--#{@report.alt_resource_name}"
 %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
-<script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('edit-report-result') do %>
   <span>
   </span>
-</script>
+<% end %>
 <% if @report.editable_data? %>
   <span id="editable_data"></span>
 <% end %>

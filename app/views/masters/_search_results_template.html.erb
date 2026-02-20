@@ -143,13 +143,13 @@
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
 
-<script id="empty" type="text/x-handlebars-template" class="hidden handlebars-template"></script>
+<%= handlebars_template_tag('empty') do %><% end %>
 
 <% 
   # Display the set of search results in the "master search" format 
   # Is rendered by the AJAX request made by `app/views/masters/search.html.erb`
 %>
-<script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('search-results-template') do %>
   {{#if masters.length}}
   <div class="panel-group search-results-template" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel <%= app_config_text(:master_results_panel_css_class) %>">
@@ -169,19 +169,19 @@
   {{else}}
       <h2 class="no-results-msg">No Results</h2>
   {{/if}}
-</script>
+<% end %>
 
-<script id="master_main" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_main', css_class: 'hidden handlebars-partial') do %>
   <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is num_masters 1}}in loaded-master-main{{/is}} master-panel num-masters-{{num_masters}}" data-master-id="{{id}}" data-template="master-main-template" role="tabpanel" aria-labelledby="master-{{id}}">
     {{>master_main_inner}}
   </div>
-</script>
+<% end %>
 
-<script id="master-main-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('master-main-template') do %>
   {{#with master}}
     {{>master_main_inner}}
   {{/with}}
-</script>
+<% end %>
 
 <%
   # Render the master record tabs and panels.
@@ -189,7 +189,7 @@
   # trackers, details and external IDs are provided.
   # Otherwise the panels defined in the page layout(s) are used.
 %>
-<script id="master_main_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_main_inner', css_class: 'hidden handlebars-partial') do %>
   {{>master_tabs}}
   <div class="panel-body master-main-panel">
     <%
@@ -233,4 +233,4 @@
       <% end %>
     <% end %>
   </div>
-</script>
+<% end %>

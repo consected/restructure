@@ -2,7 +2,7 @@
    # The app configuration "open panels" sets if any of these are opened by default.
 default_panels = app_config_items(:open_panels) %>
 
-<script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_tabs', css_class: 'hidden handlebars-partial') do %>
   <ul class="nav nav-pills default-master-tabs details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
     <% unless app_config_set(:hide_tracker_panel) %>
@@ -73,4 +73,4 @@ default_panels = app_config_items(:open_panels) %>
       <% end %>
     <% end %>
   </ul>
-</script>
+<% end %>

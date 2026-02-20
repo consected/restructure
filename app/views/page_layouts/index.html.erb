@@ -18,9 +18,9 @@
         <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>" data-report-id="<%=list_item.id %>">
 
 
-          <td style="width: 15%"><%= link_to  list_item.panel_label, page_layout_path(list_item.panel_name) %></td>
+          <td class="page-layout-index__label-cell"><%= link_to  list_item.panel_label, page_layout_path(list_item.panel_name) %></td>
 
-          <td style="width: 30%"><%= list_item.description %></td>
+          <td class="page-layout-index__description-cell"><%= list_item.description %></td>
 
         </tr>
       <% end %>

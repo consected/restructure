@@ -154,7 +154,7 @@ filled_items = 0
       <% end %>
     <% end %>
   </div>
-<script>
+<%= javascript_tag nonce: true do %>
   $('#confirm_upload').on('change', function(){
     if($(this).is(':checked')){
       $('#submit_import').prop('disabled', null);
@@ -215,4 +215,4 @@ filled_items = 0
     });
   }, 1000);
 
-</script>
+<% end %>

@@ -142,6 +142,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
   }
 
   var set_hash = function (full_hash) {
+    if (!full_hash) return null;
     var subtype = $field.attr('data-big-select-subtype') || 'big_select_default'
     return full_hash[subtype]
   }

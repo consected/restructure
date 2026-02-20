@@ -315,22 +315,29 @@ module ReportResults
 
       block_id = SecureRandom.hex(10)
 
-      html = <<~END_HTML
+      iframe_html = <<~END_HTML
         <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
-        <script id="report-cell-content-#{block_id}" class="hidden" type="x-html">
-          #{cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe}
-        </script>
-        <script>
+      END_HTML
+
+      # Store the HTML content in a script tag (data container, not executable)
+      content_script = javascript_tag(nonce: true, type: 'x-html', id: "report-cell-content-#{block_id}",
+                                      class: 'hidden') do
+        cell_content.gsub('<head>', '<head><base target="_blank" />')
+      end
+
+      # Script to load the content into the iframe
+      loader_script = javascript_tag(nonce: true) do
+        <<~END_JS
           window.setTimeout(function() {
             var c = $('#report-cell-content-#{block_id}');
             var html = c.html();
 
             $('#report-cell-iframe-#{block_id}').attr('srcdoc', html);
           }, 100);
-        </script>
-      END_HTML
+        END_JS
+      end
 
-      html.html_safe
+      (iframe_html + content_script + loader_script).html_safe
     end
 
     private

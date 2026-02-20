@@ -1,7 +1,7 @@
 
 
 
-<script id="tracker_history_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_history_result-partial', css_class: 'hidden handlebars-partial') do %>
 
       <td class="tracker-history">
 
@@ -20,9 +20,9 @@
       </td>
 
 
-</script>
+<% end %>
 
-<script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('tracker-histories-result-template') do %>
 
   {{#each tracker_histories}}
     <tr class="tracker-history-item" data-tracker-protocol="{{underscore protocol_name}}"  id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
@@ -30,4 +30,4 @@
     </tr>
   {{/each}}
 
-</script>
+<% end %>
