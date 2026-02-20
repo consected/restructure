@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.8] - 2026-02-20
+
 - [Fixed] HTML entity encoding in javascript_tag heredoc blocks
 - [Fixed] application layout
 - [Fixed] CSP to be report only for a while
