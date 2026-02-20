@@ -14,6 +14,54 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Fixed] HTML entity encoding in javascript_tag heredoc blocks
+- [Fixed] application layout
+- [Fixed] CSP to be report only for a while
+- [Fixed] CSP reports to avoid unauthenticated entries being accepted
+- [Fixed] big-select JSON parsing and enabled CSP enforcement
+- [Added] Content-Security-Policy with nonces for inline scripts and Handlebars templates - fixes #279
+- [Fixed] test database setup scripts
+- [Cleanup] small syntax items
+- [Updated] app configs for specs
+- [Fixed] template_option_mapping fields mutation and tag_formatter_spec general selection labels - fixes #901
+- [Fixed] reload_this_spec and dynamic_model_spec test failures - fixes #901
+- [Fixed] timing issues in player_data_entry_spec - fixes #901
+- [Fixed] test isolation issues in tracker, save trigger, and NFS store specs - fixes #901
+- [Fixed] activity log setup in background and transaction save trigger specs - fixes #901
+- [Fixed] test isolation issue in upload_spec notification test - fixes #901
+- [Fixed] test isolation issues in ExternalIdentifier specs - fixes #901
+- [Fixed] parallel test FrozenError by skipping bootsnap for workers - fixes #901
+- [Extracted] CodemirrorEditorSupport module to separate file
+- [Refactored] CodeMirror editor helpers into FeatureSupport module for reusability
+- [Fixed] admin_yaml_anchor_recovery_spec.rb - disable migrations to avoid thread/connection issues
+- [Fixed] parallel test conflict in dynamic_model_options_spec - refs #901
+- [Fixed] parallel test failures in DynamicModelSupport and reports specs
+- [Fixed] issues writing to failing_specs.log file in parallel tests
+- [Updated] copilot instructions to improve PR creation
+- [Updated] gitignore of failed-archive testing flag
+- [Added] descriptive error handling for flag file operations in Mounter - fixes #911
+- [Fixed] MountArchiveJob failing when user app type changes - fixes #910
+- [Updated] agent tool usage
+- [Fixed] the setup of rspec browsers for system tests when checking if the port is in use already
+- [Changed] agents to provide better tool use
+- [Changed] rspec instructions for rails runner
+- [Fixed] force-created parent records not creating embedded items when user lacks create access
+- [Added] the ability to run multiple dev and test servers in multiple workspaces on the same machine, to support AI agents and human developers working simultaneously
+- [Fixed] job reviews URL in job failure emails
+- [Updated] documentation and specs - fixes #896
+- [Added] comprehensive server info documentation for administrators - fixes #896
+- [Converted] server info page to Bootstrap accordion for better usability - fixes #896
+- [Refactored] NFS monitoring code - added constants, extracted helper, fixed Bootstrap grid - fixes #896
+- [Adjusted] column widths for better label alignment in NFS source info - fixes #896
+- [Removed] mount path display and fixed source filesystem extraction from gid mounts - fixes #896
+- [Refactored] to show source filesystem separately with its own status - fixes #896
+- [Fixed] test mocking issues - fixes #896
+- [Enhanced] main admin page mountpoint status indicator tests - fixes #896
+- [Implemented] NFS mountpoint monitoring functionality - fixes #896
+- [Added] failing tests for NFS mountpoint monitoring - fixes #896
+- [Fixed] Filestore actions like "send to trash", "move" and "rename" need to delay before submitting the "refresh" - fixes #899
+- [Fixed] download button in the filestore secure viewer fails with an error when using a file field - fixes #897
+
 ## [9.42.7] - 2026-02-05
 
 - [Rebuild]
