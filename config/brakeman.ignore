@@ -30,7 +30,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/layouts/application.html.erb",
-      "line": 39,
+      "line": 40,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
       "render_path": [
@@ -240,6 +240,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3de79f153616490b025e39ad6ef2724f9a202fcd8eb4612a5ee2e48603b5eff6",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 43,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download_or_view or :download))))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "show"
+      },
+      "user_input": "params[:retrieval_type]",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "400bb8ca8aa70318439abf6184505d97492cb3d1709f6acb834ee013df71dbee",
@@ -292,7 +315,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/layouts/application.html.erb",
-      "line": 40,
+      "line": 41,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
       "render_path": [
@@ -339,29 +362,6 @@
       "confidence": "Weak",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "4cc941f4aa2f087c45d0360910d3b97e7be48ed3b2ed20a053c6728166550b89",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/models/admin/server_info.rb",
-      "line": 165,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::ServerInfo",
-        "method": "nfs_store_mount_dirs"
-      },
-      "user_input": "NfsStore::Manage::Filesystem.group_id_range.first",
-      "confidence": "High",
-      "cwe_id": [
-        77
       ],
       "note": ""
     },
@@ -603,29 +603,6 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "8d13efa20c2c351e4ec6a9a57d90b099bae4ce08cc246e1921c00095c0261dec",
-      "check_name": "SendFile",
-      "message": "Parameter value used in file name",
-      "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 39,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download or :download_or_view))))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::DownloadsController",
-        "method": "show"
-      },
-      "user_input": "params[:retrieval_type]",
-      "confidence": "Weak",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -777,50 +754,6 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "cc839fcc3d042100ab0bb70eceec8f0fd0d467d612241405a0e96380c5dcb7a2",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped parameter value",
-      "file": "app/views/reports/_insert_options_css.html.erb",
-      "line": 62,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + (active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_css.selectors.map do\n next unless v\ncs = c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)) or (([\"#{mk} {\"] + mv.map do\n cs = c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end) << \"}\")).join(\"\\n\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "PageLayoutsController",
-          "method": "show",
-          "line": 28,
-          "file": "app/controllers/page_layouts_controller.rb",
-          "rendered": {
-            "name": "page_layouts/show",
-            "file": "app/views/page_layouts/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "page_layouts/show",
-          "line": 10,
-          "file": "app/views/page_layouts/show.html.erb",
-          "rendered": {
-            "name": "reports/_insert_options_css",
-            "file": "app/views/reports/_insert_options_css.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_insert_options_css"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
       "fingerprint": "cd55ea2ed0e4120c9b0f6a5b0191342ce890fa9eb842e05162e03d095107b10e",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
@@ -833,7 +766,7 @@
           "type": "controller",
           "class": "Admin::ServerInfoController",
           "method": "index",
-          "line": 22,
+          "line": 23,
           "file": "app/controllers/admin/server_info_controller.rb",
           "rendered": {
             "name": "admin/server_info/index",
@@ -843,7 +776,7 @@
         {
           "type": "template",
           "name": "admin/server_info/index",
-          "line": 6,
+          "line": 18,
           "file": "app/views/admin/server_info/index.html.erb",
           "rendered": {
             "name": "pages/_admin_status_indicators",
@@ -951,5 +884,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "8.0.1"
+  "brakeman_version": "8.0.2"
 }
