@@ -149,7 +149,7 @@ module EditFields
           got ||= ''
           got = got.html_safe
           got += javascript_tag(nonce: true) do
-            <<~END_JS
+            <<~END_JS.html_safe
               _fpa.calculate_with = _fpa.calculate_with || {};
               var cwdef = _fpa.calculate_with['#{field_name_sym}'] = #{cw.to_json.html_safe};
 
