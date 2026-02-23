@@ -138,7 +138,6 @@
 <%= render partial: 'common_templates/common_parts' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'filestore/result_templates' if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
-<%= render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
 <%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
@@ -234,3 +233,5 @@
     <% end %>
   </div>
 <% end %>
+
+<%= retrieve_requested_handlebars_templates __FILE__ %>

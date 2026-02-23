@@ -21,6 +21,8 @@ module MasterHandler
     before_action :check_creatable?, only: %i[new create]
     before_action :capture_ref_item, only: %i[create update]
 
+    after_action :check_template_requests unless Rails.env.production?
+
     helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name,
                   :current_admin_sample
   end
@@ -713,5 +715,12 @@ module MasterHandler
       ei.send("#{k}=", v)
       secure_params[:embedded_item].delete k
     end
+  end
+
+  def check_template_requests
+    return unless @requested_handlebars_template_count != @retrieved_requested_handlebars_template_count
+
+    raise FphsException,
+          'Template requests not handled properly'
   end
 end

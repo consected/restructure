@@ -1,13 +1,10 @@
 <%
   part = nil
   if Rails.configuration.action_controller.perform_caching == false
-    # part, _ = render_and_compress_partial('masters/search_results_template')
-    part = render partial: 'masters/search_results_template'
+    part = render(partial: 'masters/search_results_template')
   else
     part = Rails.cache.fetch partial_cache_key(:master__search_results_template) do
-      render partial: 'masters/search_results_template'
-      # part, comp = render_and_compress_partial('masters/search_results_template')
-      # comp
+      render(partial: 'masters/search_results_template')
     end
   end
 %>
