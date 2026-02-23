@@ -37,7 +37,10 @@
           <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%> if-mn-status-<%= list_item.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox">
           </iframe>
 
-          <%= content_tag(:script, list_item.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe, id: "message-content-#{list_item.id}", class: 'hidden', type: 'x-html', nonce: true) %>
+          <%= xhtml_script_tag(id: "message-content-#{list_item.id}", class: 'hidden', nonce: true) do
+                list_item.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe
+              end
+          %>
         </td>
       </tr>
       <% rescue StandardError => e %>
@@ -56,22 +59,6 @@
   </div>
 </div>
 
-<%= javascript_tag nonce: true do %>
-window.setTimeout(function() {
-  const list_item_ids = <%= list_item_ids.to_json %>;
-  for(var i in list_item_ids) {
-    var c = $(`#message-content-${list_item_ids[i]}`);
-    if (c.length === 0) {
-      console.log(`No content found for #message-content-${list_item_ids[i]}`);
-      return;
-    }
-    var html = c.html();
-    if (!html) {
-      console.log(`No html found for #message-content-${list_item_ids[i]}`);
-      return;
-    } 
-    var mif = $(`#message-iframe-${list_item_ids[i]}`);
-    mif.attr('srcdoc', html);
-  }
-}, 1000);
-<% end %>
+<script type="application/json" id="list_item_ids">
+  <%= list_item_ids.to_json.html_safe %>
+</script>
