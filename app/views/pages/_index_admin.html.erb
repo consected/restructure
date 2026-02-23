@@ -26,6 +26,7 @@
     <%= render partial: 'admin/app_types/config_status' %>            
   </div>
   <div class="panel-body">
+    <%= render partial: 'pages/admin_alerts_panel' %>
     <div class="row">
       <div class="col-sm-6">
         <% begin %>        
@@ -96,7 +97,7 @@
       
         <div class="row">
           <div class="col-sm-6">
-            <h3>Status <%= render partial: 'pages/admin_status_indicators' %></h3>
+            <h3>Status</h3>
             <ul class="nav">
               <% got_one = false %>
               <% if current_admin.can_admin?(:message_notifications)%><% got_one ||= true %><li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li><%end%>
@@ -108,7 +109,7 @@
           </div>
           <% if current_admin.can_admin?(:redcap)%>
           <div class="col-sm-6">
-            <h3>REDCap <%= render partial: 'pages/admin_redcap_status_indicators' %></h3>
+            <h3>REDCap</h3>
           <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
             <ul class="nav">
               <li class="nav">

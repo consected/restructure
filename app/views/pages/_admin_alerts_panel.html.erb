@@ -1,0 +1,50 @@
+<%#
+  Collapsed alerts panel for the admin index page (Issue #905).
+  Collects server info configuration failures and REDCap project failures
+  into a single collapsible panel shown only when there are issues.
+%>
+<%
+  alert_items = []
+
+  # Server info configuration failures
+  unless @server_info.configuration_successful
+    @server_info.configuration_failed_reason.each do |reason|
+      alert_items << { category: 'Server', message: reason }
+    end
+  end
+
+  # REDCap project failures
+  if current_admin.can_admin?(:redcap) && current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include?('ref-data')
+    failed_projects = Redcap::ProjectAdmin.failed_scheduled_projects.order(:name)
+    if failed_projects.any?
+      failed_projects.each do |p|
+        alert_items << { category: 'REDCap', message: "#{p.name} (#{p.study}) - failed at #{current_user_date_time(p.failed_at)}" }
+      end
+    end
+  end
+%>
+<% if alert_items.any? %>
+<div id="admin-alerts-panel" class="panel panel-danger admin-alerts-panel">
+  <div class="panel-heading" role="tab" id="admin-alerts-heading">
+    <h4 class="panel-title">
+      <a class="collapsed" role="button" data-toggle="collapse" href="#admin-alerts-collapse" aria-expanded="false" aria-controls="admin-alerts-collapse">
+        <i class="glyphicon glyphicon-alert"></i>
+        Alerts
+        <span class="badge"><%= alert_items.size %></span>
+      </a>
+    </h4>
+  </div>
+  <div id="admin-alerts-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="admin-alerts-heading">
+    <div class="panel-body">
+      <ul class="admin-alerts-list list-unstyled">
+        <% alert_items.each do |item| %>
+          <li class="admin-alerts-list__item">
+            <span class="label label-<%= item[:category] == 'Server' ? 'warning' : 'info' %> admin-alerts-list__category"><%= item[:category] %></span>
+            <span class="admin-alerts-list__message"><%= item[:message] %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+<% end %>
