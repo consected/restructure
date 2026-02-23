@@ -39,6 +39,11 @@ function drop() {
 
 }
 
+# Clean up the temporary nfs_store directories
+rm -rf /var/tmp/nfs_store_tmp*
+rm -rf /var/tmp/nfs_store_test*
+
+
 if [ -z $1 ]; then
   PARALLEL=$(nproc)
 else
@@ -60,6 +65,3 @@ else
   done
 fi
 
-# Clean up the temporary nfs_store directories
-rm -rf /var/tmp/nfs_store_tmp*
-rm -rf /var/tmp/nfs_store_test*
