@@ -16,7 +16,7 @@ class Admin::PageLayout < Admin::AdminBase
 
   validates :layout_name, presence: { scope: :active, message: "can't be blank" }
   validates :panel_name, presence: { scope: :active, message: "can't be blank" },
-                         uniqueness: { scope: %i[app_type_id layout_name], message: "can't be already present" },
+                         uniqueness: { scope: %i[app_type_id layout_name disabled], message: "can't be already present" },
                          if: :enabled?
   validates :panel_label, presence: { scope: :active, message: "can't be blank" }
 
