@@ -24,8 +24,15 @@ Rails.application.configure do
   end
 
   # Generate session nonces for permitted importmap and inline scripts
-  config.content_security_policy_nonce_generator = lambda { |_request|
-    SecureRandom.base64(16)
+  # Generate this based on the session id, rather than request id, to avoid breaking the cache
+  Rails.application.config.content_security_policy_nonce_generator = lambda { |request|
+    unless request
+      Rails.logger.warn "No request set for content_security_policy_nonce_generator\n" \
+                        "#{ExceptionExtensions.short_string_backtrace(caller)}"
+
+      return ''
+    end
+    request.session.id.to_s
   }
   config.content_security_policy_nonce_directives = %w[script-src script-src-elem]
 
