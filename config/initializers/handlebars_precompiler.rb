@@ -5,7 +5,7 @@
 # Provides server-side Handlebars template precompilation using the handlebars CLI.
 # Sets up directories, validates CLI availability, and cleans up compiled files on startup.
 module HandlebarsPrecompiler
-  HANDLEBARS_CLI = ENV.fetch('HANDLEBARS_CLI', 'npx handlebars')
+  HANDLEBARS_CLI = ENV.fetch('HANDLEBARS_CLI', Rails.root.join('node_modules', 'handlebars', 'bin', 'handlebars').to_s)
 
   # Environment-specific directory naming for test isolation
   # In test mode with parallel execution, TEST_ENV_NUMBER provides isolation
@@ -31,9 +31,9 @@ module HandlebarsPrecompiler
     end
 
     def cli_path
-      # For npx, just return the command itself since it's not a direct path
-      @cli_path ||= if HANDLEBARS_CLI.start_with?('npx')
-                      HANDLEBARS_CLI
+      # For a fully specified path or just `npx`, just return the command itself
+      @cli_path ||= if HANDLEBARS_CLI.include?('/') || HANDLEBARS_CLI.start_with?('npx')
+                      HANDLEBARS_CLI.to_s
                     else
                       `which #{HANDLEBARS_CLI}`.strip
                     end

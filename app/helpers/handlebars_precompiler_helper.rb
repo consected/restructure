@@ -248,7 +248,7 @@ module HandlebarsPrecompilerHelper
       Utilities::ProcessPipes.pipe_in_out(nil, handlebars_cmd)
     rescue FphsException, StandardError => e
       # Save a copy of the files for debugging before they might be cleaned up
-      debug_dir = Rails.root.join('tmp', 'agent-tmp', 'failed-templates')
+      debug_dir = Rails.root.join('tmp', 'failed-templates')
       FileUtils.mkdir_p(debug_dir)
       file_list.each do |f|
         FileUtils.cp(f, debug_dir.join(File.basename(f)))
@@ -256,6 +256,7 @@ module HandlebarsPrecompilerHelper
         nil
       end
       Rails.logger.error "Saved failed templates to #{debug_dir}"
+      Rails.logger.error "command line: \n#{handlebars_cmd.join(' ')}"
 
       # Log files for debugging
       Rails.logger.error "Files that failed: #{file_list.map { |f| File.basename(f) }.join(', ')}"
@@ -263,7 +264,7 @@ module HandlebarsPrecompilerHelper
         content = begin
           File.read(f)
         rescue StandardError
-          'UNREADABLE'
+          Rails.logger.warn "UNREADABLE handlebars file: #{f}"
         end
         Rails.logger.error "#{File.basename(f)}: #{content.length} bytes, first 100 chars: #{content[0..99]}"
       end
