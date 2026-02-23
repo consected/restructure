@@ -5,15 +5,16 @@ module ReportResults
   # A non-helper class to superclass for Report*ResultCell to inherit from,
   # and to support report helpers without polluting the global namespace
   class ReportsCommonResultCell
-    attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options
+    attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options, :request
 
-    def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options)
+    def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options, request = nil)
       self.cell_content = cell_content
       self.col_name = col_name
       self.col_tag = col_tag
       self.col_show_as = col_show_as
       self.table_name = table_name
       self.selection_options = selection_options
+      self.request = request
     end
 
     #
@@ -315,18 +316,19 @@ module ReportResults
 
       block_id = SecureRandom.hex(10)
 
-      iframe_html = <<~END_HTML
+      iframe_html = <<~END_HTML.html_safe
         <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
       END_HTML
 
       # Store the HTML content in a script tag (data container, not executable)
-      content_script = javascript_tag(nonce: true, type: 'x-html', id: "report-cell-content-#{block_id}",
-                                      class: 'hidden') do
-        cell_content.gsub('<head>', '<head><base target="_blank" />')
+      nonce = request.content_security_policy_nonce
+      content_script = ActionController::Base.helpers.xhtml_script_tag(nonce: nonce, id: "report-cell-content-#{block_id}",
+                                                                       class: 'hidden') do
+        cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe
       end
 
       # Script to load the content into the iframe
-      loader_script = javascript_tag(nonce: true) do
+      loader_script = ActionController::Base.helpers.javascript_tag(nonce: nonce) do
         <<~END_JS.html_safe
           window.setTimeout(function() {
             var c = $('#report-cell-content-#{block_id}');
@@ -337,7 +339,8 @@ module ReportResults
         END_JS
       end
 
-      (iframe_html + content_script + loader_script).html_safe
+      "#{iframe_html}#{content_script}#{loader_script}".html_safe
+    rescue StandardError => e
     end
 
     private
