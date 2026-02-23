@@ -11,7 +11,7 @@ module HandlebarsPrecompiler
   # In test mode with parallel execution, TEST_ENV_NUMBER provides isolation
   HANDLEBARS_DIR_NAME = begin
     base_name = "handlebars-#{Rails.env}"
-    test_suffix = ENV['TEST_ENV_NUMBER'].to_s.strip
+    test_suffix = "#{ENV['TEST_ENV_SET']}#{ENV['TEST_ENV_NUMBER'].to_s.strip}"
     test_suffix.empty? ? base_name : "#{base_name}-#{test_suffix}"
   end
 
