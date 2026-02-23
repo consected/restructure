@@ -9,6 +9,9 @@ _fpa = {
     template_config_versions: {},
   },
 
+  preprocessors: {},
+  loaded: {},
+
   before_send_processors: {},
   view_handlers: {},
   app_specific: {},
@@ -130,29 +133,13 @@ _fpa = {
   },
   compile_templates: function () {
     $('body').addClass('status-compiling');
-    $('script.handlebars-partial')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        id = id.replace('-partial', '');
 
-        var fnTemplate = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-        Handlebars.registerPartial(id, fnTemplate);
-        _fpa.partials[id] = fnTemplate;
-      });
+    // Alias Handlebars registries to _fpa for compatibility
+    // Precompiled templates auto-register to Handlebars.templates and Handlebars.partials
+    _fpa.templates = Handlebars.templates = Handlebars.templates || {};
+    _fpa.partials = Handlebars.partials = Handlebars.partials || {};
 
-    $('script.handlebars-template')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-      });
+    // Mark compilation complete - precompiled JS files have already registered themselves
     $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
   },
 
@@ -264,7 +251,9 @@ _fpa = {
 
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
-    if (!template) console.log('template for ' + template_name + ' was not found');
+    if (!template) {
+      console.log('Template not found: ' + template_name);
+    }
 
     // Pass the template back in the options for use later
     options.template = template;
@@ -1523,6 +1512,3 @@ _fpa = {
   }
 
 };
-
-_fpa.preprocessors = {};
-_fpa.loaded = {};
