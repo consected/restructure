@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Tests for admin REDCap failure alerts displayed in the collapsed alerts panel
+# on the admin index page (updated for Issue #905 - alerts moved from popovers
+# on h3 headings to a collapsed panel at the top of the page).
+
 require 'rails_helper'
 
 describe 'admin REDCap failure alerts', js: true, driver: $browser_driver do
@@ -14,7 +18,7 @@ describe 'admin REDCap failure alerts', js: true, driver: $browser_driver do
     @projects = setup_redcap_project_admin_configs
   end
 
-  it 'shows no alert indicator when no projects have failed' do
+  it 'shows no REDCap alerts when no projects have failed' do
     # Ensure all projects are successful
     Redcap::ProjectAdmin.active.each do |rc|
       rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_successful])
@@ -26,124 +30,89 @@ describe 'admin REDCap failure alerts', js: true, driver: $browser_driver do
     expect(page).to have_content('Admin')
     expect(page).to have_content('REDCap')
 
-    # Alert indicator should not be present
-    within 'h3', text: 'REDCap' do
-      expect(page).not_to have_selector('.glyphicon-alert.error-mark')
+    # If the alerts panel exists (due to other non-REDCap issues), it should not contain REDCap alerts
+    if page.has_css?('#admin-alerts-panel')
+      find('#admin-alerts-panel .panel-heading a').click
+      sleep 0.5
+      within('#admin-alerts-collapse') do
+        expect(page).not_to have_css('.label', text: 'REDCap')
+      end
     end
   end
 
-  it 'shows alert indicator when projects have failed' do
-    # Create some failed projects
-    rc1 = Redcap::ProjectAdmin.active.first
-    rc1.current_admin = @admin
-    rc1.frequency = '1 hour'
-    rc1.transfer_mode = 'scheduled'
-    rc1.save!
-    rc1.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+  # Mark a REDCap project as failed with the given status
+  # @param project [Redcap::ProjectAdmin] the project to mark as failed
+  # @param frequency [String] the scheduling frequency
+  # @param status_key [Symbol] the failure status key from Redcap::ProjectAdmin::Statuses
+  def mark_project_failed(project, frequency: '1 hour', status_key: :scheduled_run_failed)
+    project.current_admin = @admin
+    project.frequency = frequency
+    project.transfer_mode = 'scheduled'
+    project.save!
+    project.update_columns(status: Redcap::ProjectAdmin::Statuses[status_key])
+  end
 
-    rc2 = Redcap::ProjectAdmin.active.second
-    rc2.current_admin = @admin
-    rc2.frequency = '30 minutes'
-    rc2.transfer_mode = 'scheduled'
-    rc2.save!
-    rc2.update_columns(status: Redcap::ProjectAdmin::Statuses[:manual_run_failed])
+  it 'shows alerts panel when projects have failed' do
+    mark_project_failed(Redcap::ProjectAdmin.active.first)
+    mark_project_failed(Redcap::ProjectAdmin.active.second, frequency: '30 minutes', status_key: :manual_run_failed)
 
     admin_sign_in_with_2fa
 
-    # Should be on admin index page
     expect(page).to have_content('Admin')
-    expect(page).to have_content('REDCap')
-
-    # Alert indicator should be present
-    within 'h3', text: 'REDCap' do
-      expect(page).to have_selector('.glyphicon-alert.error-mark')
+    expect(page).to have_css('#admin-alerts-panel')
+    within('#admin-alerts-panel .panel-heading') do
+      expect(page).to have_css('.glyphicon-alert')
     end
   end
 
-  it 'alert indicator has popover attributes configured' do
-    # Create a failed project with known details
+  it 'alerts panel content includes failed project details when expanded' do
     rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.frequency = '1 hour'
-    rc.transfer_mode = 'scheduled'
-    rc.save!
-    rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+    mark_project_failed(rc)
     rc.reload
 
-    # Store the actual name and study for verification
-    project_name = rc.name
-    project_study = rc.study
-
     admin_sign_in_with_2fa
 
-    # Verify alert indicator has popover data attributes
-    within 'h3', text: 'REDCap' do
-      alert_icon = find('.glyphicon-alert.error-mark')
-      expect(alert_icon['data-toggle']).to eq('popover')
-      expect(alert_icon['data-trigger']).to eq('click hover')
-      expect(alert_icon['data-html']).to eq('true')
-      expect(alert_icon['title']).to eq('REDCap Project Failures')
+    find('#admin-alerts-panel .panel-heading a').click
+    sleep 0.5
 
-      # Verify popover content includes project details
-      data_content = alert_icon['data-content']
-      expect(data_content).to include('Failed scheduled pulls:')
-      expect(data_content).to include(project_name)
-      expect(data_content).to include(project_study)
+    within('#admin-alerts-collapse') do
+      expect(page).to have_content(rc.name)
+      expect(page).to have_content(rc.study)
+      expect(page).to have_content('REDCap')
     end
   end
 
-  it 'popover content lists multiple failed projects' do
-    # Create multiple failed projects
+  it 'alerts panel lists multiple failed projects' do
     rc1 = Redcap::ProjectAdmin.active.first
-    rc1.current_admin = @admin
-    rc1.frequency = '1 hour'
-    rc1.transfer_mode = 'scheduled'
-    rc1.save!
-    rc1.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
-
     rc2 = Redcap::ProjectAdmin.active.second
-    rc2.current_admin = @admin
-    rc2.frequency = '2 hours'
-    rc2.transfer_mode = 'scheduled'
-    rc2.save!
-    rc2.update_columns(status: Redcap::ProjectAdmin::Statuses[:request_failed])
-
-    # Store the actual names and studies for verification
-    project1_name = rc1.name
-    project1_study = rc1.study
-    project2_name = rc2.name
-    project2_study = rc2.study
+    mark_project_failed(rc1)
+    mark_project_failed(rc2, frequency: '2 hours', status_key: :request_failed)
 
     admin_sign_in_with_2fa
 
-    # Verify popover content includes all failed projects
-    within 'h3', text: 'REDCap' do
-      alert_icon = find('.glyphicon-alert.error-mark')
-      data_content = alert_icon['data-content']
+    find('#admin-alerts-panel .panel-heading a').click
+    sleep 0.5
 
-      # Verify both projects are in the popover content
-      expect(data_content).to include(project1_name)
-      expect(data_content).to include(project1_study)
-      expect(data_content).to include(project2_name)
-      expect(data_content).to include(project2_study)
+    within('#admin-alerts-collapse') do
+      expect(page).to have_content(rc1.name)
+      expect(page).to have_content(rc1.study)
+      expect(page).to have_content(rc2.name)
+      expect(page).to have_content(rc2.study)
     end
   end
 
-  it 'only shows alert indicator when admin has REDCap permissions and ref-data access' do
-    # Create a failed project
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.frequency = '1 hour'
-    rc.transfer_mode = 'scheduled'
-    rc.save!
-    rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+  it 'shows REDCap alerts when admin has REDCap permissions and ref-data access' do
+    mark_project_failed(Redcap::ProjectAdmin.active.first)
 
     admin_sign_in_with_2fa
 
-    # With proper permissions, alert should be visible
-    expect(page).to have_selector('h3', text: 'REDCap')
-    within 'h3', text: 'REDCap' do
-      expect(page).to have_selector('.glyphicon-alert.error-mark')
+    expect(page).to have_css('#admin-alerts-panel')
+
+    find('#admin-alerts-panel .panel-heading a').click
+    sleep 0.5
+
+    within('#admin-alerts-collapse') do
+      expect(page).to have_content('REDCap')
     end
   end
 end
