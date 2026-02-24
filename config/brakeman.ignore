@@ -133,7 +133,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/concerns/master_handler.rb",
-      "line": 203,
+      "line": 205,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -207,35 +207,25 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "377f63b8b4bf6e917f2e914bec659d87874fe12f73de8683b03f91e24e8dd4fc",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/pages/_admin_redcap_status_indicators.html.erb",
-      "line": 12,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name).map do\n \"#{p.name} (#{p.study}) - #{current_user_date_time(p.failed_at)}\"\n end.join(\"<li>\")",
-      "render_path": [
-        {
-          "type": "template",
-          "name": "pages/_index_admin",
-          "line": 111,
-          "file": "app/views/pages/_index_admin.html.erb",
-          "rendered": {
-            "name": "pages/_admin_redcap_status_indicators",
-            "file": "app/views/pages/_admin_redcap_status_indicators.html.erb"
-          }
-        }
-      ],
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3de79f153616490b025e39ad6ef2724f9a202fcd8eb4612a5ee2e48603b5eff6",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 43,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download_or_view or :download))))",
+      "render_path": null,
       "location": {
-        "type": "template",
-        "template": "pages/_admin_redcap_status_indicators"
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "show"
       },
-      "user_input": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name)",
+      "user_input": "params[:retrieval_type]",
       "confidence": "Weak",
       "cwe_id": [
-        79
+        22
       ],
       "note": ""
     },
@@ -546,6 +536,25 @@
       "note": ""
     },
     {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "7a0ed01b9b81be32a792c33dc3a6a0b884e4eb0a74e62ddf767f923000465ee0",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "config/initializers/handlebars_precompiler.rb",
+      "line": 38,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`which #{ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)}`",
+      "render_path": null,
+      "location": null,
+      "user_input": "ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
@@ -645,6 +654,25 @@
       "confidence": "Medium",
       "cwe_id": [
         89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "a46c3cb99f9cb7e6b36fae9fd0958a375aab5d01be76be109ac7a37d01ad1a78",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "config/initializers/handlebars_precompiler.rb",
+      "line": 30,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "system(\"#{ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)} --version > /dev/null 2>&1\")",
+      "render_path": null,
+      "location": null,
+      "user_input": "ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
       ],
       "note": ""
     },
