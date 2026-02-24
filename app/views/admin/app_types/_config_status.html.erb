@@ -60,19 +60,42 @@
     Filestore filesystem ready? 
 </p>
 
-<div class="status-extra-info">
-  <% unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id) %>
-      <p>Configure the filestore app filesystem</p>
-      <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></pre>
-    <% end %>
-    <% if Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)  %>
-      <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
-      <pre><code>FPHS_LOAD_APP_TYPES=<%=Settings::OnlyLoadAppTypes.join(',')%>,<%=@app_type.id%></code></pre>
-    <% end %>   
-    <% unless current_search_paths.include?(@app_type.default_schema_name) %>
-      <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
-      <pre><code>FPHS_POSTGRESQL_SCHEMA=<%=ENV['FPHS_POSTGRESQL_SCHEMA']%>,<%=@app_type.default_schema_name%></code></pre>
-    <% end %>
+<%
+  missing_filestore = !NfsStore::Manage::Filesystem.app_type_containers_path_exists?(@app_type.id)
+  missing_load_app_type = Settings::OnlyLoadAppTypes && !Settings::OnlyLoadAppTypes.include?(@app_type.id)
+  missing_schema = !current_search_paths.include?(@app_type.default_schema_name)
+  has_missing_configs = missing_filestore || missing_load_app_type || missing_schema
+%>
+<% if has_missing_configs %>
+<div class="panel panel-warning status-extra-info">
+  <div class="panel-heading" role="tab" id="missing-configs-heading-<%= @app_type.id %>">
+    <h4 class="panel-title">
+      <a class="collapsed" role="button" data-toggle="collapse"
+         href="#missing-configs-collapse-<%= @app_type.id %>" aria-expanded="false"
+         aria-controls="missing-configs-collapse-<%= @app_type.id %>">
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        Missing Configurations
+      </a>
+    </h4>
+  </div>
+  <div id="missing-configs-collapse-<%= @app_type.id %>" class="panel-collapse collapse"
+       role="tabpanel" aria-labelledby="missing-configs-heading-<%= @app_type.id %>">
+    <div class="panel-body">
+      <% if missing_filestore %>
+        <p>Configure the filestore app filesystem</p>
+        <pre><code><%= Rails.env.production? ? 'RAILS_ENV=production ' : 'SUBDIR=test-fphsfs' %> app-scripts/setup_filestore_app.sh <%= @app_type.id %></code></pre>
+      <% end %>
+      <% if missing_load_app_type %>
+        <p>Update the <code>FPHS_LOAD_APP_TYPES</code> environment variable</p>
+        <pre><code>FPHS_LOAD_APP_TYPES=<%= Settings::OnlyLoadAppTypes.join(',') %>,<%= @app_type.id %></code></pre>
+      <% end %>
+      <% if missing_schema %>
+        <p>Add default schema to database search path environment variable <code>FPHS_POSTGRESQL_SCHEMA</code></p>
+        <pre><code>FPHS_POSTGRESQL_SCHEMA=<%= ENV['FPHS_POSTGRESQL_SCHEMA'] %>,<%= @app_type.default_schema_name %></code></pre>
+      <% end %>
+    </div>
+  </div>
 </div>
+<% end %>
 
 </div>
