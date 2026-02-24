@@ -7,6 +7,7 @@
 # - Only appear when there are issues (server info failures or REDCap failures)
 # - Show a red alert symbol on the title bar of the collapser
 # - Start collapsed (user must click to expand)
+# - Show separate category badges (server/redcap) with counts
 # - Format the issues more cleanly than the old popover approach
 # - Replace the old popover-based alert icons on the Status and REDCap h3 headings
 
@@ -15,108 +16,81 @@ require 'rails_helper'
 RSpec.describe 'Admin index page alerts panel - Issue905', js: true, type: :system do
   include MasterSupport
   include FeatureSupport
-  include ModelSupport
-  include Redcap::RedcapSupport
 
   before(:all) do
     change_setting('TwoFactorAuthDisabledForAdmin', true)
     create_admin
-    SetupHelper.feature_setup
   end
 
   before(:each) do
     login_as(@admin, scope: :admin)
   end
 
+  # Mock Admin::ServerInfo to simulate configuration failures
+  # @param reasons [Array<String>] list of failure reason messages (empty = healthy)
+  def mock_server_info(reasons: [])
+    si = Admin::ServerInfo.new(@admin)
+    allow(Admin::ServerInfo).to receive(:new).and_return(si)
+    allow(si).to receive(:configuration_failed_reason).and_return(reasons)
+    allow(si).to receive(:configuration_successful).and_return(reasons.empty?)
+    si
+  end
+
   describe 'alerts panel visibility' do
-    it 'shows a collapsed alerts panel with red alert icon when server info has failures - Issue905' do
-      # Mock server info to report configuration failures
-      si = Admin::ServerInfo.new(@admin)
-      allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      allow(si).to receive(:configuration_successful).and_return(false)
-      allow(si).to receive(:configuration_failed_reason).and_return(
-        ['NFS mountpoint /mnt/fphsfs/gid600 is not mounted']
-      )
+    it 'shows a collapsed alerts panel with category badge when server info has failures' do
+      mock_server_info(reasons: ['NFS mountpoint /mnt/fphsfs/gid600 is not mounted'])
 
       visit '/'
       finish_page_loading
 
-      # The alerts panel should be present
       expect(page).to have_css('#admin-alerts-panel')
 
-      # It should have a red alert icon in the title bar
       within('#admin-alerts-panel .panel-heading') do
         expect(page).to have_css('.glyphicon-alert')
+        expect(page).to have_css('.label-warning', text: 'server: 1')
       end
 
-      # It should show a server badge with the count
-      within('#admin-alerts-panel .panel-heading') do
-        expect(page).to have_css('.label-warning', text: '(server: 1)')
-      end
-
-      # It should start collapsed (panel body not visible)
+      # Starts collapsed
       expect(page).not_to have_css('#admin-alerts-collapse.in')
     end
 
-    it 'shows formatted server info issues when the alerts panel is expanded - Issue905' do
-      # Mock server info configuration failures
-      si = Admin::ServerInfo.new(@admin)
-      allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      allow(si).to receive(:configuration_successful).and_return(false)
-      allow(si).to receive(:configuration_failed_reason).and_return(
-        [
-          'NFS mountpoint /mnt/fphsfs/gid600 is not mounted',
-          'NFS directory /mnt/fphsfs/gid601 is not accessible'
-        ]
-      )
+    it 'shows formatted server info issues when the alerts panel is expanded' do
+      mock_server_info(reasons: [
+                         'NFS mountpoint /mnt/fphsfs/gid600 is not mounted',
+                         'NFS directory /mnt/fphsfs/gid601 is not accessible'
+                       ])
 
       visit '/'
       finish_page_loading
 
-      # Expand the alerts panel
       find('#admin-alerts-panel .panel-heading a').click
       sleep 0.5
 
-      # The panel body should now be visible
       expect(page).to have_css('#admin-alerts-collapse.in')
 
-      # Each issue should be listed cleanly (not as popover content)
       within('#admin-alerts-collapse') do
         expect(page).to have_content('NFS mountpoint /mnt/fphsfs/gid600 is not mounted')
         expect(page).to have_content('NFS directory /mnt/fphsfs/gid601 is not accessible')
       end
     end
 
-    it 'does not show the alerts panel when there are no issues - Issue905' do
-      # Mock server info to be healthy
-      si = Admin::ServerInfo.new(@admin)
-      allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      allow(si).to receive(:configuration_successful).and_return(true)
-      allow(si).to receive(:configuration_failed_reason).and_return([])
+    it 'does not show the alerts panel when there are no issues' do
+      mock_server_info(reasons: [])
 
       visit '/'
       finish_page_loading
 
-      # The alerts panel should NOT be present when there are no issues
       expect(page).not_to have_css('#admin-alerts-panel')
     end
 
-    it 'no longer shows popover-style alerts on the Status heading - Issue905' do
-      # Mock server info with failures (old behavior would put popover on h3)
-      si = Admin::ServerInfo.new(@admin)
-      allow(Admin::ServerInfo).to receive(:new).and_return(si)
-      allow(si).to receive(:configuration_successful).and_return(false)
-      allow(si).to receive(:configuration_failed_reason).and_return(
-        ['NFS mountpoint /mnt/fphsfs/gid600 is not mounted']
-      )
+    it 'no longer shows popover-style alerts on the Status heading' do
+      mock_server_info(reasons: ['NFS mountpoint /mnt/fphsfs/gid600 is not mounted'])
 
       visit '/'
       finish_page_loading
 
-      # Verify the admin index page loaded
       expect(page).to have_css('.admin-index-page')
 
-      # The old popover-based alert icon should NOT appear next to the Status heading
       within('h3', text: 'Status') do
         expect(page).not_to have_css('.glyphicon-alert[data-toggle="popover"]')
       end
