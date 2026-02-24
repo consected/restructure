@@ -5,6 +5,24 @@
 class Admin::UserRolesController < AdminController
   helper_method :admin_links
   #
+  # Handle the request to clear (disable) all user roles for a user in an app type
+  def clear_user_roles
+    user_id = params[:clear_user_id]
+    app_type_id = params[:clear_app_type_id]
+
+    raise FphsException, 'A user must be selected to clear roles' if user_id.blank?
+    raise FphsException, 'An app type must be selected to clear roles' if app_type_id.blank?
+
+    user = User.active.find user_id
+    app_type = Admin::AppType.active.find app_type_id
+
+    res = Admin::UserRole.clear_user_roles(user, app_type, current_admin)
+    resc = res.length
+    flash.now[:notice] = "#{user.email} had #{resc} #{'role'.pluralize(resc)} cleared for app #{app_type.name}"
+    index
+  end
+
+  #
   # Handle the request to copy user roles from one user to another
   def copy_user_roles
     from_user_id = params[:from_user_id]

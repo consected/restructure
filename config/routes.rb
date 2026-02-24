@@ -79,6 +79,7 @@ Rails.application.routes.draw do
     resources :role_descriptions, except: %i[show destroy]
     resources :user_roles, except: %i[show destroy]
     post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'
+    post 'user_roles/clear_user_roles', to: 'user_roles#clear_user_roles'
     resources :page_layouts, except: %i[show destroy]
 
     resources :protocols, except: %i[show destroy] do

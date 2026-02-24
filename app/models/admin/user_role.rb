@@ -186,6 +186,21 @@ class Admin::UserRole < Admin::AdminBase
     to_roles
   end
 
+  # Clear (disable) all active roles for a user in a specific app type.
+  # @param user [User] user whose roles will be disabled
+  # @param app_type [Admin::AppType] the app type to clear roles for
+  # @param current_admin [Admin] admin performing the action
+  # @return [Array] array of Admin::UserRole instances that were disabled
+  def self.clear_user_roles(user, app_type, current_admin)
+    raise FphsException, 'user must be specified and not nil to clear roles' if user.blank?
+    raise FphsException, 'app_type must be specified and not nil to clear roles' if app_type.blank?
+
+    active_app_roles(user, app_type:).each_with_object([]) do |role, disabled|
+      role.with_admin(current_admin).disable!
+      disabled << role
+    end
+  end
+
   # Provide a usable name for viewing
   def name
     "#{role_name} #{user&.email}"
