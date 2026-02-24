@@ -26,7 +26,6 @@
     <%= render partial: 'admin/app_types/config_status' %>            
   </div>
   <div class="panel-body">
-    <%= render partial: 'pages/admin_alerts_panel' %>
     <div class="row">
       <div class="col-sm-6">
         <% begin %>        
@@ -40,6 +39,8 @@
         <% end %>
       </div>
       <div class="col-sm-17 col-sm-offset-1">
+        <%= render partial: 'pages/admin_alerts_panel' %>            
+
         <div class="row">
           <div class="col-sm-6">
             <h3>App Configs</h3>

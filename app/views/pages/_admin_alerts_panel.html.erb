@@ -5,11 +5,14 @@
 %>
 <%
   alert_items = []
+  server_alert_count = 0
+  redcap_alert_count = 0
 
   # Server info configuration failures
   unless @server_info.configuration_successful
     @server_info.configuration_failed_reason.each do |reason|
       alert_items << { category: 'Server', message: reason }
+      server_alert_count += 1
     end
   end
 
@@ -19,6 +22,7 @@
     if failed_projects.any?
       failed_projects.each do |p|
         alert_items << { category: 'REDCap', message: "#{p.name} (#{p.study}) - failed at #{current_user_date_time(p.failed_at)}" }
+        redcap_alert_count += 1
       end
     end
   end
@@ -30,7 +34,12 @@
       <a class="collapsed" role="button" data-toggle="collapse" href="#admin-alerts-collapse" aria-expanded="false" aria-controls="admin-alerts-collapse">
         <i class="glyphicon glyphicon-alert"></i>
         Alerts
-        <span class="badge"><%= alert_items.size %></span>
+        <% if server_alert_count > 0 %>
+          <span class="label label-warning admin-alerts-badge">(server: <%= server_alert_count %>)</span>
+        <% end %>
+        <% if redcap_alert_count > 0 %>
+          <span class="label label-info admin-alerts-badge">(redcap: <%= redcap_alert_count %>)</span>
+        <% end %>
       </a>
     </h4>
   </div>

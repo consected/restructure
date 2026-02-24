@@ -49,6 +49,11 @@ RSpec.describe 'Admin index page alerts panel - Issue905', js: true, type: :syst
         expect(page).to have_css('.glyphicon-alert')
       end
 
+      # It should show a server badge with the count
+      within('#admin-alerts-panel .panel-heading') do
+        expect(page).to have_css('.label-warning', text: '(server: 1)')
+      end
+
       # It should start collapsed (panel body not visible)
       expect(page).not_to have_css('#admin-alerts-collapse.in')
     end
