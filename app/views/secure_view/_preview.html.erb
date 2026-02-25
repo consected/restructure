@@ -37,6 +37,12 @@
         <% @secure_view_zoom_factors.each do |zoom| %>
         <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom.to_s == @secure_view_default_zoom.to_s ? 'focus' : '') %>
         <% end %>
+        <input type="text" id="secure-view-custom-zoom" class="secure-view-custom-zoom" placeholder="%" title="Custom zoom percentage" value="<%= @secure_view_default_zoom == 'fit' ? 'fit' : @secure_view_default_zoom %>">
+      </div>
+
+      <div class="secure-view-rotation-controls sv-control-block">
+        <%= link_to '', '#', id: 'sv-rotate-counterclockwise', class: 'sv-rotate-btn btn btn-default btn-sm glyphicon glyphicon-repeat sv-rotate-ccw', title: 'Rotate counterclockwise' %>
+        <%= link_to '', '#', id: 'sv-rotate-clockwise', class: 'sv-rotate-btn btn btn-default btn-sm glyphicon glyphicon-repeat', title: 'Rotate clockwise' %>
       </div>
 
       <% if @secure_view_extra_controls&.first %>

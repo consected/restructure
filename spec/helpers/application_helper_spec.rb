@@ -50,7 +50,7 @@ describe '#handlebars_template_tag' do
 
   before do
     # Stub write_handlebars_template to avoid actual file writes
-    allow(helper).to receive(:write_handlebars_template).and_return('/handlebars-test/my-template-abc123def4567.js')
+    allow(helper).to receive(:write_handlebars_template).and_return("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}my-template-abc123def4567.js")
   end
 
   context 'with batched precompilation' do
@@ -103,7 +103,7 @@ describe '#handlebars_template_tag' do
       expect(helper).to receive(:write_handlebars_template)
         .with('my-template', is_partial: false)
         .and_yield
-        .and_return('/handlebars-test/my-template-abc123.js')
+        .and_return("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}my-template-abc123.js")
 
       helper.handlebars_template_tag('my-template') do
         '<div>test</div>'.html_safe
@@ -114,7 +114,7 @@ describe '#handlebars_template_tag' do
       expect(helper).to receive(:write_handlebars_template)
         .with('my-partial', is_partial: true)
         .and_yield
-        .and_return('/handlebars-test/my-partial-abc123.js')
+        .and_return("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}my-partial-abc123.js")
 
       helper.handlebars_template_tag('my-partial', css_class: 'hidden handlebars-partial') do
         '<span>partial</span>'.html_safe
