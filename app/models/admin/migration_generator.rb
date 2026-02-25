@@ -742,8 +742,8 @@ class Admin::MigrationGenerator
         msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
         Rails.logger.warn msg
         unless Rails.env.production?
-          puts msg
-          puts e
+          warn msg
+          warn e
         end
         bt = e.backtrace
               .reject { |m| m.include?('/vendor/bundle/ruby/') }
@@ -761,8 +761,8 @@ class Admin::MigrationGenerator
     msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
     Rails.logger.warn msg
     unless Rails.env.production?
-      puts msg
-      puts e
+      warn msg
+      warn e
     end
     bt = e.backtrace
           .reject { |m| m.include?('/vendor/bundle/ruby/') }

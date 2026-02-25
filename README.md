@@ -93,9 +93,13 @@ The design provides a clear separation between external or static data captured 
 
 View the admin documentation directly in the app admin panel, or view the [Admin Guide directly](docs/admin_reference/main/README.md)
 
-### Developer (API) Reference
+### Developer Reference
 
-A separate developer's reference, including API samples, is available in the [Dev Reference](docs/dev_reference/main/README.md)
+A separate developer's reference, is available in the [Dev Reference](docs/dev_reference/main/README.md)
+
+### API Reference
+
+An API reference, including samples, is available in the [API Reference](docs/api_reference/main/README.md)
 
 ### User / Guest References
 

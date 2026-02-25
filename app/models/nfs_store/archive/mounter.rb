@@ -77,14 +77,14 @@ module NfsStore
             next
           end
 
-          puts 'Retrying extract and indexing'
+          STDERR.puts 'Retrying extract and indexing'
           # Remove the existing flags before restarting
           mounter.extract_completed!
           mounter.index_completed!
           sf.process_new_file
         rescue SystemCallError, IOError => e
           raise_flag_file_error("mount_all for stored file '#{sf&.file_name}' (id: #{sf&.id})",
-                               sf&.retrieval_path, e)
+                                sf&.retrieval_path, e)
         end
       end
 
@@ -112,11 +112,11 @@ module NfsStore
           # is a directory and is not the base archive path
           return unless pn.exist? && pn.directory? && !path_is_archive?(file_path)
 
-          puts "Reset file_path to its directory #{file_path}"
+          STDERR.puts "Reset file_path to its directory #{file_path}"
 
           if pn.empty?
             pn.rmdir
-            puts "Removed empty archive directory #{file_path}"
+            STDERR.puts "Removed empty archive directory #{file_path}"
           end
         end
       end
@@ -429,7 +429,7 @@ module NfsStore
       def extract_archived_files
         unless Rails.env.test?
           msg = "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{mounted_path}"
-          puts msg
+          STDERR.puts msg
 
           unless mounted_path&.present?
             Rails.logger.warn msg
@@ -462,7 +462,7 @@ module NfsStore
 
           files = Dir.glob(glob_path)
 
-          puts "Starting extract_archived_files of #{files.length} files" unless Rails.env.test?
+          STDERR.puts "Starting extract_archived_files of #{files.length} files" unless Rails.env.test?
 
           container = stored_file.container
 

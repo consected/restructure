@@ -626,8 +626,8 @@ module OptionConfigs
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
-            puts e
-            puts errtext
+            STDERR.puts e
+            STDERR.puts errtext
           end
 
           bt = ["#{e.class.name} #{e}"] + [errtext]

@@ -114,7 +114,7 @@ module DynamicModelExtension
                               end
                 total += 1
               else
-                puts "Recipient not found: #{r[:message_id]}"
+                STDERR.puts "Recipient not found: #{r[:message_id]}"
               end
             end
             break if total >= limit || !responses[:more_results]

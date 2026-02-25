@@ -17,9 +17,8 @@ module WorksWithItem
       parent_type.to_s.camelize.constantize
     rescue StandardError => e
       msg = "Failed to constantize the parent class #{parent_type} in WorksWithItem #{self}\n#{e}"
-      puts msg
-      puts e
-      # puts e.backtrace.join("\n")
+      STDERR.puts msg
+      STDERR.puts e
       Rails.logger.error msg
       Rails.logger.info e
       Rails.logger.info e.backtrace.join("\n")

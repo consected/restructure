@@ -72,7 +72,7 @@ Rails.application.configure do
 
   case ENV.fetch('FPHS_USE_LOGGER', nil)
   when 'TRUE', 'true', 'default'
-    puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
     # Use default logging formatter so that PID and timestamp are not suppressed.
     config.log_formatter = Logger::Formatter.new
   when 'STDOUT'
@@ -81,14 +81,14 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   when 'syslog'
     # Use a different logger for distributed setups.
-    puts '!!!!!!!!!!!!!!!!!!!!!! syslog enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! syslog enabled !!!!!!!!!!!!!!!!!!!!!!'
     require 'syslog/logger'
     config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new('restructure-app'))
   when 'DoNothing'
-    puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = nil
   else
-    puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :fatal
     config.log_formatter = Logger::Formatter.new
   end
