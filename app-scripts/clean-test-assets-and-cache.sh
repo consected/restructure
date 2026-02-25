@@ -2,4 +2,4 @@
 
 RAILS_ENV=test bundle exec rails assets:clobber
 RAILS_ENV=test bundle exec rails assets:precompile
-rm -rf tmp/cache public/handlebars-*/* tmp/handlebars-*/*
+rm -rf tmp/cache public/handlebars-test*/* tmp/handlebars-test*/*

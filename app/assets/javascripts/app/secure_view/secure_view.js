@@ -47,6 +47,12 @@ var SecureView = function () {
     this.$body = null;
     this.html = null;
 
+    this.current_rotation = 0;
+
+    this.$current_zoom_level = null;
+    this.$custom_zoom_input = null;
+    this.$rotation_controls = null;
+
     this.page_defaults = {
       overflow: 'hidden',
       display: 'block'
@@ -54,6 +60,7 @@ var SecureView = function () {
     this.last_scroll_event_date = 0;
     this.last_keypress_date = 0;
     this.last_scroll_to_date = 0;
+    this._rotation_is_sideways = false;
   };
 
   this.init();
@@ -219,6 +226,8 @@ var SecureView = function () {
     this.$extra_actions = $('.secure-view-extra-actions');
     this.$file_name = $('.secure-view-file-name');
     this.$download_actions = $('.secure-download-actions');
+    this.$custom_zoom_input = $('#secure-view-custom-zoom');
+    this.$rotation_controls = $('.secure-view-rotation-controls');
 
     this.$loading_page_message.show();
     _fpa.catch_page_transition(_this.close)
@@ -269,13 +278,16 @@ var SecureView = function () {
     }).addClass('sv-added-click-ev');
 
     this.$zoom_factor_selector.not('.sv-added-click-ev').on('click', function (ev) {
+      var scroll_pos = _this.save_scroll_position();
 
       _this.$preview_item.css({ transition: 'all 0.7s' });
       _this.set_zoom_for_selector($(this));
 
-      // Reset the zoom transition on current page after zoom has completed
+      // Reset the zoom transition on current page after zoom has completed,
+      // then re-update the display for accurate reading after animation settles
       window.setTimeout(function () {
         _this.$preview_item.css({ transition: '' });
+        _this.update_zoom_level_display();
       }, 1000);
 
       // Run all pages that are not current to zoom in the background, avoiding jarring appearance on next show
@@ -283,6 +295,53 @@ var SecureView = function () {
         _this.set_zoom(null, $('.secure-view-page').not('#' + _this.page_id(_this.current_page)));
       }, 100);
 
+      // Restore scroll position percentage after all pages have been resized
+      window.setTimeout(function () {
+        _this.restore_scroll_position(scroll_pos);
+      }, 200);
+
+      ev.preventDefault();
+    }).addClass('sv-added-click-ev');
+
+    // Custom zoom input handler - debounced on keyup
+    this.$custom_zoom_input.not('.sv-added-keyup-ev').on('keyup', function (ev) {
+      var input = this;
+      if (_this._custom_zoom_timer) clearTimeout(_this._custom_zoom_timer);
+      _this._custom_zoom_timer = setTimeout(function () {
+        var val = parseInt($(input).val());
+        if (val && val >= 10 && val <= 500) {
+          var scroll_pos = _this.save_scroll_position();
+          _this.$preview_item.css({ transition: 'all 0.7s' });
+          _this.set_zoom(val);
+          window.setTimeout(function () {
+            _this.$preview_item.css({ transition: '' });
+          }, 1000);
+          window.setTimeout(function () {
+            _this.set_zoom(null, $('.secure-view-page').not('#' + _this.page_id(_this.current_page)));
+          }, 100);
+          // Restore scroll position percentage after all pages have been resized
+          window.setTimeout(function () {
+            _this.restore_scroll_position(scroll_pos);
+          }, 200);
+        }
+      }, 500);
+    }).addClass('sv-added-keyup-ev');
+
+    // Click on image to zoom to next level
+    this.$pages.not('.sv-added-click-ev').on('click', '.secure-view-page', function (ev) {
+      _this.zoom_to_next_level();
+      ev.preventDefault();
+    }).addClass('sv-added-click-ev');
+
+    // Rotate clockwise
+    $('#sv-rotate-clockwise').not('.sv-added-click-ev').on('click', function (ev) {
+      _this.rotate(90);
+      ev.preventDefault();
+    }).addClass('sv-added-click-ev');
+
+    // Rotate counterclockwise
+    $('#sv-rotate-counterclockwise').not('.sv-added-click-ev').on('click', function (ev) {
+      _this.rotate(-90);
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
@@ -350,11 +409,13 @@ var SecureView = function () {
       this.$zoom_selectors.show();
       this.$page_controls.hide();
       this.$zoom_selector_fit.hide();
+      this.$rotation_controls.hide();
     }
     else {
       this.$zoom_selectors.show();
       this.$page_controls.show();
       this.$zoom_selector_fit.show();
+      this.$rotation_controls.show();
     }
 
     this.set_actions();
@@ -422,8 +483,8 @@ var SecureView = function () {
   };
 
   this.setup_infinite_scroll = function () {
-    _this.$pages_block.on('scroll', function () {
-
+    // Bind scroll on both potential scroll containers
+    var scroll_handler = function () {
       const new_date = Date.now();
       if (new_date - _this.last_scroll_event_date < 1000) return;
 
@@ -431,22 +492,26 @@ var SecureView = function () {
         _this.last_scroll_event_date = new_date;
 
         const $last_img = $('.secure-view-page').last();
-        if (!$last_img) return;
+        if (!$last_img || !$last_img.length) return;
 
-        const outer_scroll_top = _this.$pages_block.scrollTop(),
-          last_img_pos = $last_img.position();
-        if (!last_img_pos) return;
+        const $scroll_el = _this.get_scroll_container();
+        // Use getBoundingClientRect for reliable position detection regardless
+        // of which element is the scroll container (pages_block or its parent).
+        var scroll_rect = $scroll_el[0].getBoundingClientRect();
+        var last_img_rect = $last_img[0].getBoundingClientRect();
+        var last_img_visual_top = last_img_rect.top - scroll_rect.top;
 
-        const last_img_top = $last_img.position().top;
-
-        if (last_img_top - outer_scroll_top < 50) {
+        if (last_img_visual_top < scroll_rect.height + 50) {
           _this.show_next_page(true);
         }
 
         _this.set_current_page_for_scroll()
       }, 1000)
 
-    });
+    };
+
+    _this.$pages_block.on('scroll', scroll_handler);
+    _this.$pages_block.parent().on('scroll.sv-rotation', scroll_handler);
 
     if (_this.page_count > 1) {
       _this.page_defaults.overflow = 'auto';
@@ -456,14 +521,20 @@ var SecureView = function () {
 
   }
 
-  // Based on infinite scroll position, set the current page number
+  // Based on infinite scroll position, set the current page number.
+  // Uses getBoundingClientRect for reliable visual position detection,
+  // which works correctly whether the scroll container is $pages_block
+  // (normal) or its parent (when rotated sideways with overflow:visible).
   this.set_current_page_for_scroll = function () {
 
     window.setTimeout(function () {
+      var $scroll_el = _this.get_scroll_container();
+      var scroll_rect = $scroll_el[0].getBoundingClientRect();
 
       $('.secure-view-page').each(function () {
-        const img_top = $(this).position().top,
-          b_height = _this.$pages_block.height();
+        var img_rect = this.getBoundingClientRect();
+        var img_top = img_rect.top - scroll_rect.top;
+        var b_height = scroll_rect.height;
 
         if (img_top >= -10 && img_top < b_height / 2) {
           _this.set_current_page($(this).attr('data-page-num'));
@@ -494,7 +565,7 @@ var SecureView = function () {
 
     $.ajax({ url: url }).done(function (data) {
       _this.page_count = data.page_count;
-      _this.current_zoom = data.default_zoom;
+      _this.current_zoom = data.default_zoom || 'fit';
       _this.can_preview = data.can_preview;
 
       $('#secure-view-page-count').html(_this.page_count);
@@ -548,11 +619,18 @@ var SecureView = function () {
     }
     else {
 
-      if (_this.current_zoom == 'fit') {
-        _this.$pages_block.css({ overflow: _this.page_defaults.overflow });
-      }
-      else {
-        _this.$pages_block.css({ overflow: 'auto' });
+      // Only change overflow on $pages_block when rotation is NOT sideways.
+      // When rotated sideways, $pages_block must keep overflow:visible to prevent
+      // CSS transform clipping — apply_rotation() manages the overflow in that case.
+      // Changing it here even briefly causes the parent scroll container to lose
+      // its scroll position (jumping back to page 1).
+      if (!_this._rotation_is_sideways) {
+        if (_this.current_zoom == 'fit') {
+          _this.$pages_block.css({ overflow: _this.page_defaults.overflow });
+        }
+        else {
+          _this.$pages_block.css({ overflow: 'auto' });
+        }
       }
 
       $items.each(function () {
@@ -593,6 +671,205 @@ var SecureView = function () {
 
     $('.secure-view-zoom-factor-selector').removeClass('focus');
     $('.secure-view-zoom-factor-selector[data-zoom-factor="' + _this.current_zoom + '"]').addClass('focus');
+
+    // Update the current zoom level indicator
+    _this.update_zoom_level_display();
+
+    // Re-apply rotation adjustments after zoom changes image dimensions
+    if (_this.current_rotation) {
+      _this.apply_rotation();
+    }
+  };
+
+  // Calculate the effective zoom percentage for 'fit' mode.
+  // Returns the rounded percentage that the first page image is scaled to,
+  // based on naturalWidth vs current rendered width.
+  this.get_effective_fit_zoom = function () {
+    var $first = _this.$preview_item || $('.secure-view-page').first();
+    if (!$first || !$first.length) return null;
+    var nw = $first[0].naturalWidth;
+    var cw = $first.width();
+    if (!nw || nw <= 0 || !cw || cw <= 0) return null;
+    return Math.round(cw / nw * 100);
+  };
+
+  // Update the custom zoom input to reflect the current zoom level.
+  // When zoom is 'fit', display the actual effective zoom percentage
+  // so the user sees the real number, not the word "fit".
+  this.update_zoom_level_display = function () {
+    if (!_this.$custom_zoom_input) return;
+    var label;
+    if (_this.current_zoom === 'fit') {
+      var eff = _this.get_effective_fit_zoom();
+      label = eff ? '' + eff : 'fit';
+    } else {
+      label = '' + (_this.current_zoom || '');
+    }
+    _this.$custom_zoom_input.val(label);
+  };
+
+  // Zoom to the next predefined level above the current one,
+  // then continue in 25% increments up to 500%
+  this.zoom_to_next_level = function () {
+    var zoom_factors = [];
+    _this.$zoom_factor_selector.each(function () {
+      zoom_factors.push($(this).attr('data-zoom-factor'));
+    });
+
+    var current_idx = zoom_factors.indexOf('' + _this.current_zoom);
+    var next_zoom;
+
+    if (_this.current_zoom === 'fit') {
+      // From 'fit', find the effective zoom % and jump to the next larger button.
+      // If the effective zoom is beyond all buttons, use +25% increments.
+      var eff = _this.get_effective_fit_zoom() || 0;
+      next_zoom = null;
+      for (var fi = 0; fi < zoom_factors.length; fi++) {
+        var fv = parseInt(zoom_factors[fi]);
+        if (!isNaN(fv) && fv > eff) {
+          next_zoom = zoom_factors[fi];
+          break;
+        }
+      }
+      if (!next_zoom) {
+        // Effective zoom is beyond all buttons — step +25% from the effective value
+        var stepped = Math.ceil(eff / 25) * 25 + 25;
+        next_zoom = stepped <= 500 ? stepped : null;
+      }
+      if (!next_zoom) return; // Already at or beyond max
+    } else if (current_idx >= 0 && current_idx < zoom_factors.length - 1) {
+      // Still within predefined buttons - advance to the next one
+      next_zoom = zoom_factors[current_idx + 1];
+    } else {
+      // Beyond the last button or on a custom value
+      var current_val = parseInt(_this.current_zoom);
+      if (isNaN(current_val)) {
+        next_zoom = zoom_factors.length > 1 ? zoom_factors[1] : zoom_factors[0];
+      } else {
+        // Add 25% to the current value, capped at 500%
+        var next_val = current_val + 25;
+        if (next_val > 500) return; // Already at or beyond max — do nothing
+        next_zoom = next_val;
+      }
+    }
+
+    // Save scroll position percentage before zooming so we can restore it
+    var scroll_pos = _this.save_scroll_position();
+
+    _this.$preview_item.css({ transition: 'all 0.7s' });
+    _this.set_zoom(next_zoom);
+    // Reset transition and re-update display after animation settles
+    window.setTimeout(function () {
+      _this.$preview_item.css({ transition: '' });
+      _this.update_zoom_level_display();
+    }, 1000);
+    window.setTimeout(function () {
+      _this.set_zoom(null, $('.secure-view-page').not('#' + _this.page_id(_this.current_page)));
+    }, 100);
+
+    // Restore scroll position percentage after all pages have been resized
+    window.setTimeout(function () {
+      _this.restore_scroll_position(scroll_pos);
+    }, 200);
+  };
+
+  // Rotate all pages by the given number of degrees (positive=CW, negative=CCW)
+  this.rotate = function (degrees) {
+    _this.current_rotation = (_this.current_rotation + degrees) % 360;
+    if (_this.current_rotation < 0) _this.current_rotation += 360;
+    _this.apply_rotation();
+  };
+
+  // Apply the current rotation to all page images, adjusting layout for 90/270 degree rotations
+  // so that the flow dimensions match the visual dimensions after rotation.
+  // CSS transforms don't affect layout, so we must:
+  //   1. Adjust vertical margins so flow height matches visual height
+  //   2. Set overflow:visible on the pages block to prevent transform clipping
+  //   3. Set min-width on the pages block to match the visual width
+  //   4. Preserve the current scroll position when switching scroll containers
+  this.apply_rotation = function () {
+    var is_sideways = (_this.current_rotation === 90 || _this.current_rotation === 270);
+    var was_sideways = _this._rotation_is_sideways;
+
+    // Capture current scroll position and page before switching containers
+    var $old_scroll_el = _this.get_scroll_container();
+    var saved_page = _this.current_page;
+
+    $('.secure-view-page').each(function () {
+      var $item = $(this);
+
+      if (!is_sideways) {
+        // 0° or 180° rotation: apply simple rotation, clear margin adjustments
+        $item.css({
+          transform: _this.current_rotation ? 'rotate(' + _this.current_rotation + 'deg)' : '',
+          'margin-top': '',
+          'margin-bottom': ''
+        });
+        return;
+      }
+
+      var w = $item.width();
+      var h = $item.height();
+
+      if (w <= 0 || h <= 0) {
+        $item.css({
+          transform: 'rotate(' + _this.current_rotation + 'deg)',
+          'margin-top': '',
+          'margin-bottom': ''
+        });
+        return;
+      }
+
+      // When rotated 90°/270°, visual width = h, visual height = w.
+      // The CSS layout box remains w × h.
+      // Adjust vertical margins so flow height matches visual height:
+      //   margin + h + margin = w  →  margin = (w - h) / 2
+      // This is negative for portrait images (h > w), collapsing excess vertical space.
+      var margin_vertical = (w - h) / 2;
+
+      $item.css({
+        transform: 'rotate(' + _this.current_rotation + 'deg)',
+        'margin-top': margin_vertical + 'px',
+        'margin-bottom': margin_vertical + 'px'
+      });
+    });
+
+    // Track the current state before changing overflow
+    _this._rotation_is_sideways = is_sideways;
+
+    // Adjust the pages block to prevent CSS transform clipping.
+    // CSS transforms don't affect layout so overflow:auto clips the rotated visual content.
+    // Set overflow:visible and force the container width to match the rotated visual width.
+    if (is_sideways) {
+      var max_visual_width = 0;
+      $('.secure-view-page').each(function () {
+        var item_h = $(this).height();
+        if (item_h > max_visual_width) max_visual_width = item_h;
+      });
+      _this.$pages_block.css({
+        'overflow': 'visible',
+        'min-width': max_visual_width + 'px'
+      });
+      // Allow vertical scrolling on the outer container for rotated wide images
+      _this.$pages_block.parent().css({ 'overflow-y': 'auto' });
+    } else {
+      _this.$pages_block.css({
+        'overflow': '',
+        'min-width': ''
+      });
+      _this.$pages_block.parent().css({ 'overflow-y': '' });
+    }
+
+    // If the scroll container changed (sideways state toggled), restore scroll position
+    // by scrolling to the saved current page in the new container
+    if (is_sideways !== was_sideways && saved_page) {
+      var $target = $('#' + _this.page_id(saved_page));
+      if ($target.length) {
+        window.setTimeout(function () {
+          _fpa.utils.scrollTo($target, 0, 0, _this.get_scroll_container());
+        }, 50);
+      }
+    }
   };
 
   this.set_zoom_for_selector = function ($el) {
@@ -601,7 +878,9 @@ var SecureView = function () {
     }
 
     var z = $el.attr('data-zoom-factor');
-    _this.set_zoom(z);
+    if (z) {
+      _this.set_zoom(z);
+    }
   };
 
   this.show_page = function (page, no_scroll) {
@@ -611,6 +890,7 @@ var SecureView = function () {
     _this.get_page(page);
     // $(".secure-view-page").hide();
 
+    _this.set_current_page(page);
     _this.$preview_item = $("#" + _this.page_id(page));
     _this.$preview_item.show();
 
@@ -643,10 +923,44 @@ var SecureView = function () {
     _this.last_scroll_to_date = new_scroll_date;
 
     window.setTimeout(function () {
-      _fpa.utils.scrollTo($preview_item, 0, 0, _this.$pages_block)
+      _fpa.utils.scrollTo($preview_item, 0, 0, _this.get_scroll_container())
       _this.set_current_page_for_scroll()
     }, 10);
   }
+
+  // Get the currently active scroll container.
+  // When rotated sideways, #secure-view-pages has overflow:visible
+  // so the outer .secure-view-pages-container becomes the scroll container.
+  this.get_scroll_container = function () {
+    if (_this._rotation_is_sideways) {
+      return _this.$pages_block.parent();
+    }
+    return _this.$pages_block;
+  }
+
+  // Save the current scroll position as X/Y percentages of the scrollable area.
+  // Returns an object with pctX and pctY (0..1) representing how far through
+  // the document the user has scrolled.
+  this.save_scroll_position = function () {
+    var el = _this.get_scroll_container()[0];
+    var maxY = el.scrollHeight - el.clientHeight;
+    var maxX = el.scrollWidth - el.clientWidth;
+    return {
+      pctY: maxY > 0 ? el.scrollTop / maxY : 0,
+      pctX: maxX > 0 ? el.scrollLeft / maxX : 0
+    };
+  };
+
+  // Restore the scroll position from saved X/Y percentages.
+  // After a zoom changes scrollHeight/scrollWidth, this places the
+  // view at the same proportional position within the document.
+  this.restore_scroll_position = function (pos) {
+    var el = _this.get_scroll_container()[0];
+    var maxY = el.scrollHeight - el.clientHeight;
+    var maxX = el.scrollWidth - el.clientWidth;
+    el.scrollTop = Math.round(pos.pctY * maxY);
+    el.scrollLeft = Math.round(pos.pctX * maxX);
+  };
 
 
   this.show_img_page = function (page) {
@@ -691,6 +1005,13 @@ var SecureView = function () {
     _this.$loading_page_message.hide();
     _this.set_zoom(null, $preview_item);
     $preview_item.removeClass('sv-img-not-loaded');
+
+    // Re-update the zoom display now that naturalWidth is available.
+    // The initial set_zoom('fit') call may have run before the image loaded,
+    // leaving the display showing 'fit' instead of the effective percentage.
+    if (_this.current_zoom === 'fit') {
+      _this.update_zoom_level_display();
+    }
   };
 
   this.got_page = function (page) {
@@ -800,6 +1121,9 @@ var SecureView = function () {
     _this.clear();
     _this.page_count = null;
     _this.preview_as = null;
+    _this.current_rotation = 0;
+    _this._rotation_is_sideways = false;
+    _this.$pages_block.parent().off('scroll.sv-rotation');
     _this.$preview_as_selector.removeClass('focus');
 
     if (_this.app_specific) {

@@ -145,10 +145,12 @@
     }
 
     .secure-view-page {
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: zoom-in;
       display: block;
       margin: 0 auto;
       margin-bottom: 5px;
+      transition: transform 0.3s ease;
     }
 
     .secure-view-page-iframe {
@@ -166,6 +168,21 @@
     text-align: right;
     padding-right: 0.25em;
     display: inline-block;
+  }
+
+  .secure-view-custom-zoom {
+    width: 4em;
+    text-align: right;
+    padding-right: 0.25em;
+    display: inline-block;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .secure-view-rotation-controls {
+    .sv-rotate-ccw {
+      transform: scaleX(-1);
+    }
   }
 }
 
