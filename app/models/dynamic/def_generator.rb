@@ -49,8 +49,8 @@ module Dynamic
           end
         rescue Exception => e
           msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
-          puts msg
-          puts e.short_string_backtrace
+          STDERR.puts msg
+          STDERR.puts e.short_string_backtrace
           Rails.logger.warn msg
         end
       end
@@ -85,14 +85,14 @@ module Dynamic
               dm.add_master_association
             else
               msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. #{disable_on_failure && 'Disabling!'}"
-              puts msg
+              warn msg
               Rails.logger.warn msg
               dm.class.where(id: dm.id).update_all(disabled: true) if disable_on_failure
             end
           end
         else
           msg = "Table doesn't exist yet: #{table_name}"
-          puts msg
+          warn msg
           Rails.logger.warn msg
         end
       rescue StandardError, Psych::Exception => e
@@ -347,7 +347,7 @@ module Dynamic
       alt_target_class ||= model_class_name.pluralize
       alt_target_class = alt_target_class.gsub('::', '')
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
-      return unless klass.constants.include?(assoc_ext_name.to_sym)
+      return unless klass.const_defined?(assoc_ext_name.to_sym)
 
       remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e

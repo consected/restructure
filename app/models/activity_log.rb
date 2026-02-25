@@ -313,7 +313,7 @@ class ActivityLog < ActiveRecord::Base
       # since there is no link to advanced search
       add_parent_item_association
     rescue StandardError => e
-      puts e
+      warn e
       logger.debug e
     end
   end
@@ -322,7 +322,6 @@ class ActivityLog < ActiveRecord::Base
     # Generate the set of activity log associations, for this item type
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
-    # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
     impl_parent_class = implementation_class.parent_class
 
     remove_assoc_class "#{impl_parent_class}::ActivityLog" if item_type_exists
@@ -377,8 +376,7 @@ class ActivityLog < ActiveRecord::Base
     end
   rescue StandardError => e
     # Catch the errors to avoid an issue preventing the system from starting up
-    puts e
-    # puts e.backtrace.join("\n")
+    warn e
     logger.error e
   end
 
@@ -650,7 +648,7 @@ class ActivityLog < ActiveRecord::Base
         add_model_to_list res
       rescue StandardError => e
         failed = true
-        puts "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
+        warn "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
         logger.info <<~END_TEXT
           *************************************************************************************
           Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}
@@ -664,7 +662,7 @@ class ActivityLog < ActiveRecord::Base
     else
       # Check that the implementation has been successful
       unless implementation_class_defined?(klass, fail_without_exception: true)
-        puts 'Failure checking activity log model definition.'
+        warn 'Failure checking activity log model definition.'
         logger.info <<~END_TEXT
           *************************************************************************************
           Failure checking activity log model definition.
