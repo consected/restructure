@@ -26,7 +26,7 @@ module NfsStore
             prevent_next_job!
             break
           end
-          puts "Successful mount: #{res}" unless Rails.env.test?
+          STDERR.puts "Successful mount: #{res}" unless Rails.env.test?
         end
       end
     end

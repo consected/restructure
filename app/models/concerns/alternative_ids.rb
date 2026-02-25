@@ -262,7 +262,7 @@ module AlternativeIds
           end
         end
       else
-        puts 'Master does not respond to alternative_id_fields. Hopefully this is just during seeding'
+        warn 'Master does not respond to alternative_id_fields. Hopefully this is just during seeding'
       end
     end
   end

@@ -29,7 +29,7 @@ class ClientLogsController < ApplicationController
       if Rails.env.production?
         Admin::ExceptionLog.create info
       else
-        puts "CLIENT ERROR\n#{info.to_yaml}"
+        warn "CLIENT ERROR\n#{info.to_yaml}"
       end
     end
     render plain: 'OK', status: 200

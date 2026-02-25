@@ -8,7 +8,7 @@ class AppControl
       pid = spawn('app-scripts/restart_app_server.sh')
       Process.detach(pid)
     else
-      puts '*** Server restart requested ***'
+      STDERR.puts '*** Server restart requested ***'
       FileUtils.touch Rails.root.join('app', 'models', 'dev_server.rb')
       Rails.reload! if Rails.respond_to? :reload!
     end
