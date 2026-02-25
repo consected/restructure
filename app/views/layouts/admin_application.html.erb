@@ -3,6 +3,8 @@
   <head>
     <title><%= Settings::PageTitle %></title>
     <%= csp_meta_tag %>
+    <%= csrf_meta_tags %>
+    <link rel="shortcut icon" type="image/png" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
@@ -16,8 +18,6 @@
       };
     <% end %>
     <%= render partial: "layouts/setup_app" if current_user || current_admin %>
-    <%= csrf_meta_tags %>
-    <link rel="shortcut icon" type="image/png" href="/favicon.png">
   </head>
   <body <%= body_classes %> id="body-top" data-user-id="<%= current_user&.id %>" data-admin-id="<%= current_admin&.id %>">
     <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>

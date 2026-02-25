@@ -10,11 +10,13 @@ Simple authentication uses a shared secret. Set the following URL params in the 
 
 `use_app_type=<app-type name or id>&user_email=<api user email address>&user_token=<shared secret>`
 
-## Endpoint
+## Endpoints
 
 Since new resources may be generated through the configuration of dynamic definitions (dynamic models, external identifiers and activity logs), the API definition is not static.
 
-The available API endpoints may be generated dynamically on the target server using:
+In the admin panel, each of the dynamic definitions and the reports admin has an API tab, detailing us of the API.
+
+Additionally, all the available API endpoints may be listed dynamically on the target server using:
 
 `app-scripts/api-endpoint.sh` to generate a full set of routes
 

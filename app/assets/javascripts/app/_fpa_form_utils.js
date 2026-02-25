@@ -197,12 +197,12 @@ _fpa.form_utils = {
   setup_big_select_fields(block) {
     // First, process any JSON data elements that store big-select configuration
     // This approach avoids inline script tags that fail CSP when loaded via AJAX
-    block.find('script.big-select-data[type="application/json"]').each(function() {
+    block.find('script.big-select-data[type="application/json"]').each(function () {
       var $dataEl = $(this);
       var fieldId = $dataEl.data('field-id');
       var optionsAttr = $dataEl.attr('data-options');
       var hashAttr = $dataEl.attr('data-hash');
-      
+
       // Parse JSON from attributes (jQuery .data() may not parse HTML-escaped JSON correctly)
       var options = {};
       var hashData = {};
@@ -216,7 +216,7 @@ _fpa.form_utils = {
       } catch (e) {
         // Ignore parse errors - field will be skipped if no hash data
       }
-      
+
       var field = document.getElementById(fieldId);
       if (field) {
         field.big_select_options = field.big_select_options || options;
