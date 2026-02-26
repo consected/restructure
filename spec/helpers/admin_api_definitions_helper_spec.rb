@@ -416,10 +416,10 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
   describe '#api_report_save_trigger_example' do
     let(:report_double) { double('Report', alt_resource_name: 'test__api_test_report') }
 
-    it 'generates YAML with pull_external_data get_record structure' do
+    it 'generates YAML with pull_external_data get_report structure' do
       yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=test')
       expect(yaml).to include('pull_external_data')
-      expect(yaml).to include('get_record')
+      expect(yaml).to include('get_report')
       expect(yaml).to include('format: json')
       expect(yaml).to include('allow_empty_result: false')
     end

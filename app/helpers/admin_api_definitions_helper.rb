@@ -173,7 +173,7 @@ module AdminApiDefinitionsHelper
           on_create:
 
             - pull_external_data:
-              - get_record:
+              - get_report:
                   local_data: get_result
                   from:
                     url: "{{base_url}}/reports/#{report.alt_resource_name}.json?#{sa}&use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
