@@ -38,7 +38,9 @@ Rails.application.configure do
     config.action_controller.perform_caching = false
 
     # config.cache_store = :null_store
-    config.cache_store = :mem_cache_store
+    # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
+    # and requires memcached 1.6+
+    config.cache_store = :mem_cache_store, { protocol: :meta }
 
   end
 

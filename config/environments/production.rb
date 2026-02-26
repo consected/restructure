@@ -50,7 +50,9 @@ Rails.application.configure do
   config.log_tags = [:request_id]
 
   # Use a different cache store in production.
-  config.cache_store = :mem_cache_store
+  # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
+  # and requires memcached 1.6+
+  config.cache_store = :mem_cache_store, { protocol: :meta }
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
