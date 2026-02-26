@@ -364,3 +364,26 @@ a.link-disabled {
     width: 40%;
   }
 }
+
+.copy-block-button {
+  cursor: pointer;
+  color: #777;
+  font-size: 14px;
+  margin-left: 5px;
+  vertical-align: middle;
+  display: inline-block;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+  border-radius: 2px;
+  padding: 2px;
+
+  &:hover {
+    color: #337ab7;
+  }
+
+  &.in-block {
+    float: right;
+    margin-top: -25px;
+    margin-right: 3px;
+  }
+}

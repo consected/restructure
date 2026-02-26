@@ -11,11 +11,11 @@ module AdminApiDefinitionsHelper
   #
   # Generate the base API path for a definition instance.
   # @param object_instance [DynamicModel, ActivityLog, ExternalIdentifier] the definition
-  # @return [String] the base path (e.g., "/masters/{master_id}/dynamic_model/contact_infos")
+  # @return [String] the base path (e.g., "/masters/{{master_id}}/dynamic_model/contact_infos")
   def api_base_path(object_instance)
     segments = object_instance.base_route_segments
     if api_master_nested?(object_instance)
-      "/masters/{master_id}/#{segments}"
+      "/masters/{{master_id}}/#{segments}"
     else
       "/#{segments}"
     end

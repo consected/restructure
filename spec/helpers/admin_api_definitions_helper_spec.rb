@@ -22,7 +22,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       next unless dm
 
       path = helper.api_base_path(dm)
-      expect(path).to start_with('/masters/{master_id}/')
+      expect(path).to start_with('/masters/{{master_id}}/')
       expect(path).to include('dynamic_model/')
     end
 
@@ -40,7 +40,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       next unless al
 
       path = helper.api_base_path(al)
-      expect(path).to start_with('/masters/{master_id}/')
+      expect(path).to start_with('/masters/{{master_id}}/')
       expect(path).to include(al.base_route_segments)
     end
 
@@ -49,7 +49,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       next unless ei
 
       path = helper.api_base_path(ei)
-      expect(path).to start_with('/masters/{master_id}/')
+      expect(path).to start_with('/masters/{{master_id}}/')
       expect(path).to include(ei.base_route_segments)
     end
   end
@@ -243,7 +243,7 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
 
   describe '#api_curl_example' do
     it 'generates a curl command with placeholder variables' do
-      curl = helper.api_curl_example(method: 'GET', path: '/masters/{master_id}/test.json')
+      curl = helper.api_curl_example(method: 'GET', path: '/masters/{{master_id}}/test.json')
       expect(curl).to include('curl -XGET')
       expect(curl).to include('{{base_url}}')
       expect(curl).to include('{{app_type_id}}')

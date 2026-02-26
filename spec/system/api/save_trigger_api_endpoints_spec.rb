@@ -124,7 +124,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
   it 'retrieves an existing record via GET using the save trigger URL pattern' do
     # This tests the GET URL pattern from AdminApiDefinitionsHelper#api_save_trigger_example:
-    #   url: "{{base_url}}/masters/{master_id}/dynamic_model/table_name/{{constants.item_id}}.json
+    #   url: "{{base_url}}/masters/{{master_id}}/dynamic_model/table_name/{{constants.item_id}}.json
     #         ?use_app_type={{constants.api_app_type}}
     #         &user_email={{constants.api_user_email}}
     #         &user_token={{constants.api_shared_secret}}"
@@ -166,7 +166,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
   it 'creates a new record via POST using the save trigger URL pattern' do
     # This tests the POST URL pattern from AdminApiDefinitionsHelper#api_save_trigger_example:
-    #   url: "{{base_url}}/masters/{master_id}/dynamic_model/table_name.json
+    #   url: "{{base_url}}/masters/{{master_id}}/dynamic_model/table_name.json
     #         ?use_app_type={{constants.api_app_type}}
     #         &user_email={{constants.api_user_email}}
     #         &user_token={{constants.api_shared_secret}}"
@@ -231,7 +231,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
   it 'retrieves a list of records via GET index using the save trigger URL pattern' do
     # This tests the index GET URL pattern:
-    #   url: "{{base_url}}/masters/{master_id}/dynamic_model/table_name.json?..."
+    #   url: "{{base_url}}/masters/{{master_id}}/dynamic_model/table_name.json?..."
 
     trigger_item = @impl_class.create!(
       current_user: @user,

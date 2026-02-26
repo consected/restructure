@@ -64,7 +64,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
         expect(page).to have_content(dm.base_route_segments)
 
         # Verify paths are correctly nested under /masters/ or not
-        expect(page).to have_content('/masters/{master_id}/') if dm.foreign_key_name.present?
+        expect(page).to have_content('/masters/{{master_id}}/') if dm.foreign_key_name.present?
 
         # Verify HTTP methods are shown
         expect(page).to have_content('GET')
@@ -125,7 +125,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
 
       within '#api-definitions' do
         # Verify master-nested paths appear in curl examples
-        expect(page).to have_content('/masters/{master_id}/')
+        expect(page).to have_content('/masters/{{master_id}}/')
       end
     end
 
@@ -148,8 +148,8 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
       expect(page).to have_css('#api-definitions', visible: true)
 
       within '#api-definitions' do
-        # Non-master-nested paths should not include /masters/{master_id}/
-        expect(page).not_to have_content('/masters/{master_id}/')
+        # Non-master-nested paths should not include /masters/{{master_id}}/
+        expect(page).not_to have_content('/masters/{{master_id}}/')
         # But should still show routes starting with /dynamic_model/
         expect(page).to have_content("/dynamic_model/#{dm.table_name}")
       end
@@ -213,7 +213,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
         expect(page).to have_content('Update')
 
         # Activity logs should always be master-nested
-        expect(page).to have_content('/masters/{master_id}/')
+        expect(page).to have_content('/masters/{{master_id}}/')
         expect(page).to have_content(al.base_route_segments)
 
         # Verify extra_log_type endpoints if present
@@ -273,7 +273,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
         expect(page).to have_content('Update')
 
         # External identifiers are always master-nested
-        expect(page).to have_content('/masters/{master_id}/')
+        expect(page).to have_content('/masters/{{master_id}}/')
         expect(page).to have_content(ei.base_route_segments)
 
         # Verify curl examples with placeholders

@@ -43,7 +43,7 @@
           <p>
             <code><%= endpoint[:method] %></code>
             <code><%= endpoint[:path] %></code>
-            <a class="api-panel__copy-btn glyphicon glyphicon-copy"
+            <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
                title="Copy to clipboard"
                data-copy-text="<%= endpoint[:path] %>"></a>
           </p>
@@ -59,41 +59,41 @@
         <p><strong>Read (Index)</strong></p>
         <% curl_index = api_curl_example(method: 'GET', path: "#{base}.json") %>
         <pre class="api-panel__curl-block"><%= curl_index %></pre>
-        <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="<%= ERB::Util.html_escape(curl_index) %>"></a>
 
         <p><strong>Read (Show)</strong></p>
         <% curl_show = api_curl_example(method: 'GET', path: "#{base}/{id}.json") %>
         <pre class="api-panel__curl-block"><%= curl_show %></pre>
-        <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="<%= ERB::Util.html_escape(curl_show) %>"></a>
 
         <p><strong>Create</strong></p>
         <% curl_create = api_curl_example(method: 'POST', path: "#{base}.json", body: body) %>
         <pre class="api-panel__curl-block"><%= curl_create %></pre>
-        <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="<%= ERB::Util.html_escape(curl_create) %>"></a>
 
         <p><strong>Update</strong></p>
         <% curl_update = api_curl_example(method: 'PUT', path: "#{base}/{id}.json", body: body) %>
         <pre class="api-panel__curl-block"><%= curl_update %></pre>
-        <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="<%= ERB::Util.html_escape(curl_update) %>"></a>
       </div>
 
       <label>fields</label>
       <div class="api-panel__fields-list-block"><%= api_fields_list(object_instance) %></div>
-      <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(api_fields_yaml(object_instance)) %>"></a>
 
       <label>save trigger usage</label>
       <pre class="api-panel__save-trigger-block"><%= ERB::Util.html_escape(api_save_trigger_example(object_instance)) %></pre>
-      <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(api_save_trigger_example(object_instance)) %>"></a>
     </div>
@@ -101,32 +101,4 @@
   <% else %>
     <p>API definitions are not available until the definition is saved and the database table is ready.</p>
   <% end %>
-<% end %>
-
-<%= javascript_tag nonce: true do %>
-  $(document).off('click.apiPanelCopy').on('click.apiPanelCopy', '.api-panel__copy-btn', function(e) {
-    e.preventDefault();
-    var text = $(this).attr('data-copy-text');
-    // Decode HTML entities
-    var textarea = document.createElement('textarea');
-    textarea.innerHTML = text;
-    text = textarea.value;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function() {
-        _fpa.flash_notice('Copied to clipboard');
-      }).catch(function() {
-        _fpa.flash_notice('Failed to copy to clipboard');
-      });
-    } else {
-      // Fallback for older browsers
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      _fpa.flash_notice('Copied to clipboard');
-    }
-  });
 <% end %>

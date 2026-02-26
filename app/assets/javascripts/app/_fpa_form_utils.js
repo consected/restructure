@@ -2085,6 +2085,41 @@ _fpa.form_utils = {
       .addClass('made-sortable');
   },
 
+  // Set up icons to allow copy to clipboard
+  setup_copy_blocks: function (block) {
+
+    $(block).find('.copy-block-button')
+      .not('.added-copy-block-handler')
+      .each(function () {
+        $(this).on('click', function (e) {
+          e.preventDefault();
+          var text = $(this).attr('data-copy-text');
+          // Decode HTML entities
+          var textarea = document.createElement('textarea');
+          textarea.innerHTML = text;
+          text = textarea.value;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              _fpa.flash_notice('Copied to clipboard');
+            }).catch(function () {
+              _fpa.flash_notice('Failed to copy to clipboard');
+            });
+          } else {
+            // Fallback for older browsers
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            _fpa.flash_notice('Copied to clipboard');
+          }
+        })
+      })
+      .addClass('added-copy-block-handler');
+  },
+
   setup_sub_lists: function (block) {
     block
       .find('.sublist-filter-selectors')

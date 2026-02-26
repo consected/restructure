@@ -48,27 +48,4 @@
     word-wrap: break-word;
     margin-bottom: 2px;
   }
-
-  &__copy-btn {
-    cursor: pointer;
-    color: #555;
-    font-size: 14px;
-    margin-left: 5px;
-    vertical-align: middle;
-    display: inline-block;
-    margin-bottom: 10px;
-    border: 1px solid silver;
-    border-radius: 2px;
-    padding: 2px;
-
-    &:hover {
-      color: #337ab7;
-    }
-
-    &.in-block {
-      float: right;
-      margin-top: -25px;
-      margin-right: 3px;
-    }
-  }
 }

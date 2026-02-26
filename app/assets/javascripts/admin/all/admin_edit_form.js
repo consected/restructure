@@ -20,6 +20,7 @@ _fpa_admin.all.admin_edit_form = class {
     _fpa.form_utils.setup_big_select_fields(aef.block)
     _fpa.form_utils.on_open_click(aef.block);
     _fpa.form_utils.setup_drag_and_drop(aef.block);
+    _fpa.form_utils.setup_copy_blocks(aef.block);
 
   }
 

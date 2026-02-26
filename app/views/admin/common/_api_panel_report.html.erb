@@ -33,7 +33,7 @@
       <p>
         <code>GET</code>
         <code>/reports/<%= report.alt_resource_name %>.json</code>
-        <a class="api-panel__copy-btn glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="/reports/<%= report.alt_resource_name %>.json"></a>
       </p>
@@ -43,7 +43,7 @@
       <p>
         <code>GET</code>
         <code>/reports/<%= report.alt_resource_name %>.csv</code>
-        <a class="api-panel__copy-btn glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="/reports/<%= report.alt_resource_name %>.csv"></a>
       </p>
@@ -53,7 +53,7 @@
       <p>
         <code>GET</code>
         <code>/reports/<%= report.alt_resource_name %>.text</code>
-        <a class="api-panel__copy-btn glyphicon glyphicon-copy"
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
            title="Copy to clipboard"
            data-copy-text="/reports/<%= report.alt_resource_name %>.text"></a>
       </p>
@@ -75,7 +75,7 @@
         end
       %>
       <code>?<%= sa %></code>
-      <a class="api-panel__copy-btn glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="?<%= sa %>"></a>
     </p>
@@ -88,7 +88,7 @@
       YAML
     %>
     <pre><%= pa_options %></pre>
-    <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
         title="Copy to clipboard"
         data-copy-text="<%= ERB::Util.html_escape(pa_options) %>"></a>
 
@@ -116,21 +116,21 @@
       <p><strong>JSON</strong></p>
       <% curl_json = api_report_curl_example(report, format: 'json', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_json %></pre>
-      <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(curl_json) %>"></a>
 
       <p><strong>CSV</strong></p>
       <% curl_csv = api_report_curl_example(report, format: 'csv', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_csv %></pre>
-      <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(curl_csv) %>"></a>
 
       <p><strong>text</strong></p>
       <% curl_text = api_report_curl_example(report, format: 'txt', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_text %></pre>
-      <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(curl_text) %>"></a>
 
@@ -139,7 +139,7 @@
     <label>save trigger usage</label>
     <% trigger_yaml = api_report_save_trigger_example(report, sa: sa) %>
     <pre class="api-panel__save-trigger-block"><%= ERB::Util.html_escape(trigger_yaml) %></pre>
-    <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
        title="Copy to clipboard"
        data-copy-text="<%= ERB::Util.html_escape(trigger_yaml) %>"></a>
   </div>
