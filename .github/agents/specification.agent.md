@@ -1,6 +1,6 @@
 ---
 description: 'Generate or update specification documents for new or existing functionality.'
-tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "web/fetch", "read/problems", "read/readFile"]
+tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "execute/awaitTerminal", "web/fetch", "read/problems", "read/readFile"]
 ---
 # Specification mode instructions
 
