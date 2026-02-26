@@ -13,6 +13,10 @@
 # Report tests:
 # 3. Creates a report with a search attribute (last_name) using use_plain_attribute_names
 # 4. Verifies GET report JSON via pull_external_data returns matching results
+#
+# Create master with associations tests (PR #929):
+# 5. POST /masters/create.json with embedded_item and nested associations via pull_external_data
+# 6. Verifies transaction rollback when association validation fails
 
 require 'rails_helper'
 
@@ -395,6 +399,192 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       expect(matching['rank']).to eq 10
       expect(matching['source']).to eq 'nflpa'
       expect(matching['birth_date']).to eq '1980-01-15'
+    end
+  end
+
+  context 'create master with associations API (PR #929)' do
+    before(:all) do
+      # Ensure general selection sources exist for player_infos, player_contacts, and addresses
+      { 'player_infos_source' => { 'CIS' => 'cis' },
+        'player_contacts_source' => { 'CIS' => 'cis' },
+        'addresses_source' => { 'NFL' => 'nfl' } }.each do |item_type, entries|
+        entries.each do |name, value|
+          unless Classification::GeneralSelection.active.exists?(item_type:, value:)
+            Classification::GeneralSelection.create!(item_type:, name:, value:,
+                                                     current_admin: @admin, create_with: true)
+          end
+        end
+      end
+      Rails.cache.clear
+
+      # Grant create_master permission
+      let_user_create_master
+
+      # Grant create access for association record types
+      let_user_create :player_infos
+      let_user_create :player_contacts
+      let_user_create :addresses
+
+      # Grant create access for the dynamic model used in associations
+      let_user_create RESOURCE_NAME
+
+      # Configure create_master_with to allow player_info as the embedded item
+      add_user_config(:create_master_with, 'player_info', for_user: @user)
+    end
+
+    it 'creates a master record with embedded item and associations via POST save trigger' do
+      # This tests the POST /masters/create.json endpoint from PR #929:
+      #   url: "{{base_url}}/masters/create.json
+      #         ?use_app_type={{constants.api_app_type}}
+      #         &user_email={{constants.api_user_email}}
+      #         &user_token={{constants.api_shared_secret}}"
+      #   post_data:
+      #     master:
+      #       embedded_item: { first_name, last_name, source }
+      #       associations:
+      #         player_contacts: { "0": { data, rec_type, rank, source } }
+      #         addresses: { "0": { street, city, state, zip, rank, source } }
+      #         dynamic_model__<table_name>: { "0": { field1, field2 } }
+
+      trigger_item = @impl_class.create!(
+        current_user: @user,
+        master: @master,
+        name: 'trigger item create master',
+        description: 'item that fires the create master save trigger'
+      )
+
+      last_master_id = Master.reorder('').last.id
+
+      config = {
+        create_master: {
+          local_data: 'create_master_result',
+          force_not_editable_save: true,
+          method: 'post',
+          to: {
+            url: "#{server_url}/masters/create.json?#{api_auth_params}",
+            format: 'json',
+            allow_empty_result: false,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          },
+          post_data: {
+            master: {
+              embedded_item: {
+                first_name: 'apifirst',
+                last_name: 'apilast',
+                source: 'cis'
+              },
+              associations: {
+                player_contacts: {
+                  '0' => { data: '(617)555-0100', rec_type: 'phone', rank: 10, source: 'cis' }
+                },
+                addresses: {
+                  '0' => { street: '99 api street', city: 'boston', state: 'ma', zip: '02101',
+                           rank: 10, source: 'nfl' }
+                },
+                RESOURCE_NAME => {
+                  '0' => { name: 'api assoc dm', description: 'created as association' }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      trigger = SaveTriggers::PullExternalData.new(config, trigger_item)
+      trigger.perform
+
+      result = trigger_item.save_trigger_results['create_master_result']
+      expect(result).to be_present
+      expect(trigger.response_code).to eq 200
+
+      # Verify the master record was created
+      expect(result['master']).to be_present, "Expected master in response, got: #{result}"
+      expect(result['master']['id']).to be > last_master_id
+
+      new_master = Master.find(result['master']['id'])
+      new_master.current_user = @user
+
+      # Verify player_info (embedded item) was created
+      player_infos = new_master.player_infos.reload
+      expect(player_infos.count).to eq 1
+      expect(player_infos.first.first_name).to eq 'apifirst'
+      expect(player_infos.first.last_name).to eq 'apilast'
+
+      # Verify player_contact was created
+      player_contacts = new_master.player_contacts.reload
+      expect(player_contacts.count).to eq 1
+      expect(player_contacts.first.data).to eq '(617)555-0100'
+      expect(player_contacts.first.rec_type).to eq 'phone'
+
+      # Verify address was created
+      addresses = new_master.addresses.reload
+      expect(addresses.count).to eq 1
+      expect(addresses.first.street).to eq '99 api street'
+      expect(addresses.first.city).to eq 'boston'
+
+      # Verify dynamic model record was created
+      dm_recs = new_master.send(RESOURCE_NAME.to_s.pluralize).reload
+      expect(dm_recs.count).to eq 1
+      expect(dm_recs.first.name).to eq 'api assoc dm'
+      expect(dm_recs.first.description).to eq 'created as association'
+    end
+
+    it 'rolls back all records when an association fails validation' do
+      # When any association record fails validation, the entire transaction should roll back:
+      # no master, no embedded item, no other associations should be persisted.
+
+      trigger_item = @impl_class.create!(
+        current_user: @user,
+        master: @master,
+        name: 'trigger item rollback',
+        description: 'item that fires a failing create master trigger'
+      )
+
+      master_count_before = Master.count
+
+      config = {
+        create_master_rollback: {
+          local_data: 'rollback_result',
+          force_not_editable_save: true,
+          method: 'post',
+          to: {
+            url: "#{server_url}/masters/create.json?#{api_auth_params}",
+            format: 'json',
+            allow_empty_result: false,
+            allow_response_codes: [400],
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          },
+          post_data: {
+            master: {
+              embedded_item: {
+                first_name: 'rollfirst',
+                last_name: 'rolllast',
+                source: 'cis'
+              },
+              associations: {
+                # Invalid address — rank is required but missing, causing validation failure
+                addresses: {
+                  '0' => { street: '456 bad street', city: 'boston', state: 'ma', zip: '02101' }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      trigger = SaveTriggers::PullExternalData.new(config, trigger_item)
+      trigger.perform
+
+      # When allow_response_codes includes 400, PullExternalData sets response_code
+      # but returns nil data (no body parsed). Verify the error response code.
+      expect(trigger.response_code).to eq 400
+
+      # No new master record should have been created (transaction rolled back)
+      expect(Master.count).to eq master_count_before
     end
   end
 end
