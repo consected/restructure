@@ -114,45 +114,21 @@
     <label>curl examples</label>
     <div class="api-panel__curl-section">
       <p><strong>JSON</strong></p>
-      <%
-        curl_json = <<~CURL.chomp
-          curl -XGET -H "Content-Type: application/json" \\
-            "{{base_url}}" \\
-            "/reports/#{report.alt_resource_name}.json" \\
-            "?#{sa}" \\
-            "&use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
-        CURL
-      %>
+      <% curl_json = api_report_curl_example(report, format: 'json', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_json %></pre>
       <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(curl_json) %>"></a>
 
       <p><strong>CSV</strong></p>
-      <%
-        curl_csv = <<~CURL.chomp
-          curl -XGET -H "Content-Type: application/json" \\
-          "{{base_url}}"\\
-          "/reports/#{report.alt_resource_name}.csv"\\
-          "?#{sa}"\\
-          "&use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
-        CURL
-      %>
+      <% curl_csv = api_report_curl_example(report, format: 'csv', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_csv %></pre>
       <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
          data-copy-text="<%= ERB::Util.html_escape(curl_csv) %>"></a>
 
       <p><strong>text</strong></p>
-      <%
-        curl_text = <<~CURL.chomp
-          curl -XGET -H "Content-Type: application/json" \\
-          "{{base_url}}"\\
-          "/reports/#{report.alt_resource_name}.txt"\\
-          "?#{sa}"\\
-          "&use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
-        CURL
-      %>
+      <% curl_text = api_report_curl_example(report, format: 'txt', sa: sa) %>
       <pre class="api-panel__curl-block"><%= curl_text %></pre>
       <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
          title="Copy to clipboard"
@@ -161,25 +137,7 @@
     </div>
 
     <label>save trigger usage</label>
-    <% trigger_yaml = <<~YAML
-      _constants:
-        api_user_email: {{user_email}}
-        api_app_type: {{app_type_id}}
-        api_shared_secret: {{api_token}}
-
-      default:
-        save_trigger:
-          on_create:
-
-            - pull_external_data:
-              - get_record:
-                  local_data: get_result
-                  from:
-                    url: "{{base_url}}/reports/#{report.alt_resource_name}.json?#{sa}&use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
-                    format: json
-                    allow_empty_result: false
-    YAML
-    %>
+    <% trigger_yaml = api_report_save_trigger_example(report, sa: sa) %>
     <pre class="api-panel__save-trigger-block"><%= ERB::Util.html_escape(trigger_yaml) %></pre>
     <a class="api-panel__copy-btn in-block glyphicon glyphicon-copy"
        title="Copy to clipboard"

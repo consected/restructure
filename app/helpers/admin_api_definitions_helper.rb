@@ -141,6 +141,48 @@ module AdminApiDefinitionsHelper
   end
 
   #
+  # Generate a curl example for a report GET endpoint.
+  # @param report [Report] the report record
+  # @param format [String] the format extension ('json', 'csv', 'txt')
+  # @param sa [String] the search attributes query string (already encoded)
+  # @return [String] the curl command
+  def api_report_curl_example(report, format:, sa:)
+    <<~CURL.chomp
+      curl -XGET -H "Content-Type: application/json" \\\
+      "{{base_url}}"\\\
+      "/reports/#{report.alt_resource_name}.#{format}"\\\
+      "?#{sa}"\\\
+      "&use_app_type={{app_type_id}}&user_email={{user_email}}&user_token={{api_token}}"
+    CURL
+  end
+
+  #
+  # Generate save trigger YAML usage example for a report's pull_external_data GET.
+  # @param report [Report] the report record
+  # @param sa [String] the search attributes query string (already encoded)
+  # @return [String] YAML-formatted save trigger example
+  def api_report_save_trigger_example(report, sa:)
+    <<~YAML
+      _constants:
+        api_user_email: {{user_email}}
+        api_app_type: {{app_type_id}}
+        api_shared_secret: {{api_token}}
+
+      default:
+        save_trigger:
+          on_create:
+
+            - pull_external_data:
+              - get_record:
+                  local_data: get_result
+                  from:
+                    url: "{{base_url}}/reports/#{report.alt_resource_name}.json?#{sa}&use_app_type={{constants.api_app_type}}&user_email={{constants.api_user_email}}&user_token={{constants.api_shared_secret}}"
+                    format: json
+                    allow_empty_result: false
+    YAML
+  end
+
+  #
   # Generate save trigger YAML usage example for pull_external_data.
   # @param object_instance [DynamicModel, ActivityLog, ExternalIdentifier] the definition
   # @return [String] YAML-formatted save trigger example

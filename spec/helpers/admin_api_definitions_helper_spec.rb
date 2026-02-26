@@ -4,8 +4,8 @@
 #
 # Tests helper methods for generating API documentation in admin definition panels.
 # Verifies that the correct REST API endpoints, curl examples, field definitions,
-# and save trigger YAML are generated for dynamic models, activity logs,
-# and external identifiers.
+# save trigger YAML, and report-specific curl/save trigger YAML are generated for
+# dynamic models, activity logs, external identifiers, and reports.
 
 require 'rails_helper'
 
@@ -382,6 +382,64 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       endpoints.each do |ep|
         expect(ep[:path]).to end_with('.json')
       end
+    end
+  end
+
+  describe '#api_report_curl_example' do
+    let(:report_double) { double('Report', alt_resource_name: 'test__api_test_report') }
+
+    it 'generates a curl GET command for the given format' do
+      result = helper.api_report_curl_example(report_double, format: 'json', sa: 'last_name=test')
+      expect(result).to include('curl -XGET')
+      expect(result).to include('/reports/test__api_test_report.json')
+      expect(result).to include('{{base_url}}')
+      expect(result).to include('{{app_type_id}}')
+      expect(result).to include('{{user_email}}')
+      expect(result).to include('{{api_token}}')
+    end
+
+    it 'uses the provided format extension in the path' do
+      csv_result = helper.api_report_curl_example(report_double, format: 'csv', sa: 'q=1')
+      txt_result = helper.api_report_curl_example(report_double, format: 'txt', sa: 'q=1')
+      expect(csv_result).to include('.csv')
+      expect(csv_result).not_to include('.json')
+      expect(txt_result).to include('.txt')
+      expect(txt_result).not_to include('.json')
+    end
+
+    it 'includes the search attributes query string in the output' do
+      result = helper.api_report_curl_example(report_double, format: 'json', sa: 'last_name=foo&year=2024')
+      expect(result).to include('last_name=foo&year=2024')
+    end
+  end
+
+  describe '#api_report_save_trigger_example' do
+    let(:report_double) { double('Report', alt_resource_name: 'test__api_test_report') }
+
+    it 'generates YAML with pull_external_data get_record structure' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=test')
+      expect(yaml).to include('pull_external_data')
+      expect(yaml).to include('get_record')
+      expect(yaml).to include('format: json')
+      expect(yaml).to include('allow_empty_result: false')
+    end
+
+    it 'includes the _constants section with all placeholder keys' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'q=1')
+      expect(yaml).to include('_constants:')
+      expect(yaml).to include('api_user_email: {{user_email}}')
+      expect(yaml).to include('api_app_type: {{app_type_id}}')
+      expect(yaml).to include('api_shared_secret: {{api_token}}')
+    end
+
+    it 'includes the report alt_resource_name in the trigger URL' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=test')
+      expect(yaml).to include('/reports/test__api_test_report.json')
+    end
+
+    it 'includes the search attributes in the trigger URL' do
+      yaml = helper.api_report_save_trigger_example(report_double, sa: 'last_name=smith')
+      expect(yaml).to include('last_name=smith')
     end
   end
 
