@@ -1,0 +1,90 @@
+<%# Details tab for a standard master-associated model (issue #930).
+    Shows: table/resource name, database search link, field listing,
+    and links to model-specific admin pages (Accuracy Scores, Drop Down
+    Selections, Item Flags) where relevant. %>
+
+<div class="master-records-def-details">
+
+  <label>resource name</label>
+  <p class="master-record-resource-name">
+    <code><%= object_instance.resource_name %></code>
+  </p>
+
+  <label>database table</label>
+  <p>
+    <code><%= [object_instance.schema_name, object_instance.table_name].compact.join('.') %></code>
+  </p>
+
+  <p>
+    <%= link_to link_label_open_in_new('search data'),
+                "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}",
+                target: '_blank' %>
+  </p>
+
+  <%# Model-specific admin page links %>
+  <% is_tracker = %w[trackers tracker_histories].include?(object_instance.table_name) %>
+  <% unless is_tracker %>
+    <label>admin pages</label>
+    <p>
+      <% if object_instance.table_name == Settings::DefaultSubjectInfoTableName %>
+        <%= link_to link_label_open_in_new('Accuracy Scores'),
+                    admin_accuracy_scores_path,
+                    target: '_blank',
+                    class: 'btn btn-default btn-xs admin-page-link' %>
+        &nbsp;
+      <% end %>
+
+      <%= link_to link_label_open_in_new('Drop Down Selections'),
+                  admin_general_selections_path(filter: { item_type: object_instance.table_name }),
+                  target: '_blank',
+                  class: 'btn btn-default btn-xs admin-page-link' %>
+      &nbsp;
+
+      <%= link_to link_label_open_in_new('Item Flags'),
+                  admin_item_flag_names_path(filter: { item_type: object_instance.table_name }),
+                  target: '_blank',
+                  class: 'btn btn-default btn-xs admin-page-link' %>
+    </p>
+  <% else %>
+    <p>
+      <%= link_to link_label_open_in_new('Drop Down Selections'),
+                  admin_general_selections_path(filter: { item_type: object_instance.table_name }),
+                  target: '_blank',
+                  class: 'btn btn-default btn-xs admin-page-link' %>
+      &nbsp;
+      <%= link_to link_label_open_in_new('Item Flags'),
+                  admin_item_flag_names_path(filter: { item_type: object_instance.table_name }),
+                  target: '_blank',
+                  class: 'btn btn-default btn-xs admin-page-link' %>
+    </p>
+  <% end %>
+
+  <%# Model field listing %>
+  <% fields = object_instance.fields %>
+  <% if fields.present? %>
+    <label>fields (<%= fields.length %>)</label>
+    <table class="table table-condensed table-striped master-records-def-details__fields-table">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Null</th>
+          <th>Primary Key</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% fields.sort_by(&:name).each do |col| %>
+          <tr>
+            <td><code><%= col.name %></code></td>
+            <td><%= col.sql_type %></td>
+            <td><%= col.null ? 'yes' : 'no' %></td>
+            <td><%= col.name == 'id' ? 'yes' : '' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p><em>No columns found — table may not be available in this environment.</em></p>
+  <% end %>
+
+</div>

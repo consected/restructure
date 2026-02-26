@@ -1,17 +1,38 @@
-<%= form_for(@master) do |f| %>
-  <% if @master.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@master.errors.count, "error") %> prohibited this master from being saved:</h2>
+<%# Partial for master creation form - used both in full page and admin sample contexts %>
+<%= form_for @master, url: url_for(action: :create) do |f| %>
+<%
+  if app_config_set(:create_master_with)
+    Master.each_create_master_with_item(current_user) do |cw|
 
-      <ul>
-      <% @master.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
+      o = @master.assoc_named(cw).first
+      @embedded_item = o
 
-  <div class="actions">
-    <%= f.submit %>
-  </div>
+      unless defined? primary_model
+        def primary_model
+          @embedded_item.class
+        end
+      end
+
+      local_vars = {
+        embedded: true,
+        object_instance: o,
+        form_embed: f,
+        form_object_item_type_us: o.item_type_us,
+        item_type_id: "#{o.item_type_us}_id".to_sym,
+        edit_form_id: nil
+      }
+
+  %>
+  <%= render partial: 'common_templates/edit_form', locals: local_vars %>
+  <%
+      break
+    end %>
+<% end %>
+
+
+  <%= link_to "Cancel", "/", class: "btn btn-danger" %>
+  <%= f.submit "Create", class: "btn btn-primary" %>
+  <% # The following button only exists in the test environment.
+     # It is used by spec tests to test a tracker edge case where there are no tracker items and no player info %>
+  <%= f.submit "Create Empty Master", id: "create_empty_master" if Rails.env.test?%>
 <% end %>
