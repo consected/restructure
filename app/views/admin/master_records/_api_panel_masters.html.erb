@@ -1,0 +1,202 @@
+<%# API Panel for masters table (issue #930).
+    Shows endpoints and curl examples for creating master records
+    both alone and with associations. %>
+
+<h4>API 
+  <%= link_to(
+          '',
+          help_page_path(
+            library: :api_reference,
+            section: 'main',
+            subsection: 'README',
+            display_as: :embedded
+          ),
+          class: 'glyphicon glyphicon-question-sign',
+          data: { remote: true, 
+                  toggle: 'collapse', 
+                  target: '#help-sidebar',
+                  'working-target': '#help-sidebar-body' }
+        ) %>
+</h4>
+
+<div class="api-panel api-panel--masters">
+
+  <label>resource name</label>
+  <p><code>masters</code></p>
+
+  <label>endpoints</label>
+  
+  <div class="api-panel__endpoint">
+    <p><strong>GET /masters/{id}.json</strong></p>
+    <p class="help-block">Read a master record by ID</p>
+  </div>
+
+  <div class="api-panel__endpoint">
+    <p><strong>POST /masters/create.json</strong></p>
+    <p class="help-block">Create a master record (with optional associations)</p>
+  </div>
+
+  <label>authentication</label>
+  <p>All API requests require token authentication via query parameters:</p>
+  <pre class="api-panel__auth-params">use_app_type={{app_type_id}}
+user_email={{user_email}}
+user_token={{user_token}}</pre>
+
+  <label>curl examples</label>
+
+  <div class="api-panel__curl-section">
+    <p><strong>Create master record alone</strong></p>
+    <p class="help-block">
+      Creates a master record with the embedded item (typically <code>player_info</code>)
+      as configured in <code>create_master_with</code>.
+    </p>
+    <% curl_create_alone = <<~CURL.chomp
+      curl -XPOST -H "Content-Type: application/json" \\
+        "https://server.example.com/masters/create.json?\\
+      use_app_type={{app_type_id}}&\\
+      user_email={{user_email}}&\\
+      user_token={{user_token}}" \\
+        -d '{
+        "master": {
+          "embedded_item": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "rank": 10
+          }
+        }
+      }'
+    CURL
+    %>
+    <pre class="api-panel__curl-block"><%= curl_create_alone %></pre>
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+       title="Copy to clipboard"
+       data-copy-text="<%= ERB::Util.html_escape(curl_create_alone) %>"></a>
+
+    <p><strong>Create master with associations</strong></p>
+    <p class="help-block">
+      Creates a master record with the embedded item and multiple associated records
+      (player contacts, addresses, dynamic models, etc.) in a single atomic transaction.
+      See <%= link_to 'API documentation',
+                      help_page_path(
+                        library: :api_reference,
+                        section: :main,
+                        subsection: :api_create_master_with_associations
+                      ),
+                      target: '_blank' %> for details.
+    </p>
+    <% curl_create_with_assoc = <<~CURL.chomp
+      curl -XPOST -H "Content-Type: application/json" \\
+        "https://server.example.com/masters/create.json?\\
+      use_app_type={{app_type_id}}&\\
+      user_email={{user_email}}&\\
+      user_token={{user_token}}" \\
+        -d '{
+        "master": {
+          "embedded_item": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "rank": 10
+          },
+          "associations": {
+            "player_contacts": {
+              "0": {
+                "data": "jane.doe@example.com",
+                "rec_type": "email",
+                "rank": 10
+              }
+            },
+            "addresses": {
+              "0": {
+                "street": "123 Main St",
+                "city": "Boston",
+                "state": "MA",
+                "zip": "02101",
+                "rank": 10
+              }
+            }
+          }
+        }
+      }'
+    CURL
+    %>
+    <pre class="api-panel__curl-block"><%= curl_create_with_assoc %></pre>
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+       title="Copy to clipboard"
+       data-copy-text="<%= ERB::Util.html_escape(curl_create_with_assoc) %>"></a>
+
+    <p><strong>Read master record</strong></p>
+    <% curl_read = <<~CURL.chomp
+      curl -XGET \\
+        "https://server.example.com/masters/{{master_id}}.json?\\
+      use_app_type={{app_type_id}}&\\
+      user_email={{user_email}}&\\
+      user_token={{user_token}}"
+    CURL
+    %>
+    <pre class="api-panel__curl-block"><%= curl_read %></pre>
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+       title="Copy to clipboard"
+       data-copy-text="<%= ERB::Util.html_escape(curl_read) %>"></a>
+  </div>
+
+  <label>available associations</label>
+  <p class="help-block">
+    Associated records can be created using the <code>master[associations]</code> parameter.
+    Common associations include:
+  </p>
+  <ul class="api-panel__associations-list">
+    <li><code>player_contacts</code> — Contact information records</li>
+    <li><code>addresses</code> — Address records</li>
+    <li><code>scantrons</code> — Scantron external identifier records</li>
+    <li><code>dynamic_model__&lt;table_name&gt;</code> — Dynamic model records</li>
+  </ul>
+  <p class="help-block">
+    Use indexed keys (<code>"0"</code>, <code>"1"</code>, <code>"2"</code>, etc.) to create
+    multiple records for each association. All records are created within a single database
+    transaction — if any record fails validation, the entire transaction rolls back.
+  </p>
+
+  <label>transaction behavior</label>
+  <ol class="api-panel__transaction-steps">
+    <li>Master record is created</li>
+    <li>The <code>create_master_with</code> embedded item is created (e.g. <code>player_info</code>)</li>
+    <li>Each association in <code>associations</code> is iterated; records are created</li>
+    <li>If any record fails validation, the transaction rolls back</li>
+    <li>On rollback, the API returns the validation error message with HTTP 400</li>
+  </ol>
+
+  <label>response formats</label>
+  <div class="api-panel__response-section">
+    <p><strong>Success (HTTP 200)</strong></p>
+    <pre>{
+  "master": {
+    "id": 12345,
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}</pre>
+
+    <p><strong>Error (HTTP 400)</strong></p>
+    <pre>{
+  "message": "Error creating Master Record: Validation failed: Rank can't be blank"
+}</pre>
+  </div>
+
+  <label>related documentation</label>
+  <ul>
+    <li>
+      <%= link_to 'API: Create Master with Associations',
+                  help_page_path(
+                    library: :api_reference,
+                    section: :main,
+                    subsection: :api_create_master_with_associations,
+                    display_as: :embedded
+                  ),
+                  data: { remote: true, 
+                    toggle: 'collapse', 
+                    target: '#help-sidebar',
+                    'working-target': '#help-sidebar-body' }
+      %>
+    </li>
+  </ul>
+
+</div>

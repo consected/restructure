@@ -297,3 +297,22 @@ ul.admin-menu-list {
     margin-bottom: 6px;
   }
 }
+
+.master-records-show-panel .panel{
+    // border: 1px solid #eee;
+    background-color: #eee;
+    // padding: 1.4em;
+    margin: 1.4em;
+    border-radius: 8px;
+
+    .form-group {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .nav-tabs>li>a {
+      border-radius: 4px 4px 0 0;
+      border: 1px solid rgb(221, 221, 221);
+    }
+  
+}

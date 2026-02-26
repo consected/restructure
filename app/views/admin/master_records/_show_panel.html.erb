@@ -1,0 +1,18 @@
+<%# Show panel partial rendered by Admin::MasterRecordsController#show (issue #930).
+    The show action responds to AJAX GET requests and the resulting HTML is
+    inserted into the #master-record-show-panel slot on the index page. %>
+
+<div class="master-records-show-panel" data-result-position="replace">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <%= object_instance.name %>
+        <small>(<code><%= object_instance.table_name %></code>)</small>
+        <a href="#" class="pull-right" onclick="$('#master-record-show-panel').empty(); return false;">&times; close</a>
+      </h4>
+    </div>
+    <div class="panel-body">
+      <%= render partial: 'admin/master_records/form_info', locals: { object_instance: object_instance } %>
+    </div>
+  </div>
+</div>

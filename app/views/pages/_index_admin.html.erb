@@ -70,6 +70,7 @@
             <h3>Definitions</h3>
             <ul class="nav">
               <% got_one = false %>
+              <% if current_admin.can_admin?(:master_records)%><% got_one ||= true %><li class="nav"><%= link_to "Master Records", admin_master_records_path %> </li><%end%>
               <% if current_admin.can_admin?(:reports)%><% got_one ||= true %><li class="nav"><%= link_to "Reports", admin_reports_path %> </li><%end%>
               <% if current_admin.can_admin?(:activity_logs)%><% got_one ||= true %><li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li><%end%>
               <% if current_admin.can_admin?(:dynamic_models)%><% got_one ||= true %><li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li><%end%>
