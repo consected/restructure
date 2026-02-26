@@ -84,7 +84,7 @@ module NfsStore
           sf.process_new_file
         rescue SystemCallError, IOError => e
           raise_flag_file_error("mount_all for stored file '#{sf&.file_name}' (id: #{sf&.id})",
-                                sf&.retrieval_path, e)
+                                sf&.retrieval_path, e, stored_file: sf)
         end
       end
 
@@ -401,27 +401,48 @@ module NfsStore
       # Raise a descriptive FsException::Action when a flag file operation fails
       # due to a filesystem error (e.g. permission denied, I/O error).
       # The message includes the method name, the flag file path, the original
-      # error details, and a hint about likely causes.
+      # error details, user context, and a hint about likely causes.
       # Defined as a class method so both instance and class methods (e.g. mount_all) can use it.
       # @param method_name [String] the name of the method that failed
       # @param flag_path [String] the path to the flag file that caused the error
       # @param original_error [Exception] the original filesystem error
+      # @param stored_file [NfsStore::Manage::ContainerFile, nil] the stored file associated with the failure
       # @raise [FsException::Action]
-      def self.raise_flag_file_error(method_name, flag_path, original_error)
+      def self.raise_flag_file_error(method_name, flag_path, original_error, stored_file: nil)
         raise FsException::Action,
               "#{method_name} failed for flag file '#{flag_path}': " \
               "#{original_error.class} - #{original_error.message}. " \
+              "#{stored_file_user_context(stored_file)}" \
               'This may indicate a filesystem mount/connection issue, or that the current user ' \
               "does not have access to the container's files through the available roles. " \
               "Original backtrace: #{original_error.short_string_backtrace}"
       end
       private_class_method :raise_flag_file_error
 
+      # Format user context from a stored file for inclusion in error messages.
+      # Returns an empty string if the stored file is nil or context cannot be retrieved.
+      # @param stored_file [NfsStore::Manage::ContainerFile, nil]
+      # @return [String]
+      def self.stored_file_user_context(stored_file)
+        return '' unless stored_file
+
+        cu = stored_file.container&.current_user
+        'Stored file user context - ' \
+          "role_names: #{stored_file.current_user_role_names}, " \
+          "current_user_id: #{cu&.id}, " \
+          "current_user_email: #{cu&.email}, " \
+          "app_type_id: #{cu&.app_type_id}. "
+      rescue StandardError
+        ''
+      end
+      private_class_method :stored_file_user_context
+
       private
 
-      # Instance-level delegate to the class method for convenience
-      def raise_flag_file_error(...)
-        self.class.send(:raise_flag_file_error, ...)
+      # Instance-level delegate to the class method, automatically injecting the stored_file
+      # so all instance rescue blocks include user context without modification
+      def raise_flag_file_error(method_name, flag_path, original_error)
+        self.class.send(:raise_flag_file_error, method_name, flag_path, original_error, stored_file:)
       end
 
       # Extract files from an archive and add them to the database in a single bulk import

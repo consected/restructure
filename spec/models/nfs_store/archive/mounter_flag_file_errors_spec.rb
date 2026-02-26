@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 # Tests for Issue #911: Improved error handling in NfsStore::Archive::Mounter flag file operations.
+# Updated for Issue #649: Enhanced error messages to include user context (role names,
+# current_user id/email, and app_type_id) from the stored_file associated with the failure.
 #
 # When flag file operations (touch, rm_f, read, write, exist?, mtime) fail due to
 # filesystem errors (e.g. permission denied, I/O errors), the original low-level
@@ -9,6 +11,7 @@
 # - the method name
 # - the flag file path
 # - the original error details
+# - user context (role names, current_user id, email, app_type_id)
 # - a hint about likely causes (filesystem mount issues or role/access problems)
 #
 # These tests use a stubbed stored_file to avoid requiring actual NFS filesystem setup.
@@ -19,11 +22,21 @@ RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911'
   let(:fake_archive_path) { '/nfs_store/gid600/containers/test_archive.zip' }
   let(:fake_file_name) { 'test_archive.zip' }
 
+  let(:fake_current_user) do
+    instance_double('User', id: 99, email: 'testuser@example.com', app_type_id: 1)
+  end
+
+  let(:fake_container) do
+    instance_double('NfsStore::Manage::Container', current_user: fake_current_user)
+  end
+
   let(:stored_file) do
     instance_double(
       'NfsStore::Manage::StoredFile',
       retrieval_path: fake_archive_path,
-      file_name: fake_file_name
+      file_name: fake_file_name,
+      container: fake_container,
+      current_user_role_names: %w[file_store_role]
     )
   end
 
@@ -54,6 +67,13 @@ RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911'
       expect { subject }.to raise_error(
         FsException::Action,
         %r{filesystem mount/connection issue.*does not have access to the container's files}
+      )
+    end
+
+    it 'includes user context with role names, user id, email and app type id' do
+      expect { subject }.to raise_error(
+        FsException::Action,
+        /Stored file user context.*role_names:.*current_user_id:.*current_user_email:.*app_type_id:/
       )
     end
   end
@@ -221,7 +241,9 @@ RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911'
         instance_double(
           'NfsStore::Manage::StoredFile',
           retrieval_path: failed_path,
-          file_name: "#{fake_file_name}#{described_class::FailedArchiveSuffix}"
+          file_name: "#{fake_file_name}#{described_class::FailedArchiveSuffix}",
+          container: fake_container,
+          current_user_role_names: %w[file_store_role]
         )
       end
 
@@ -314,7 +336,9 @@ RSpec.describe NfsStore::Archive::Mounter, 'flag file error handling - Issue911'
         'NfsStore::Manage::StoredFile',
         retrieval_path: fake_archive_path,
         file_name: fake_file_name,
-        id: 42
+        id: 42,
+        container: fake_container,
+        current_user_role_names: %w[file_store_role]
       )
     end
 
