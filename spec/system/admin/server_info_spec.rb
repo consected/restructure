@@ -121,6 +121,57 @@ RSpec.describe 'Admin Server Info', js: true, type: :system do
     expect(page).to have_content('Timeout')
   end
 
+  # Tests for issue #886 - Memcached connection with meta protocol
+  # These tests require TEST_MEM_CACHE_STORE=true and a running memcached 1.6+ instance.
+  # Run with: TEST_MEM_CACHE_STORE=true app-scripts/not_headless_rspec.sh spec/system/admin/server_info_spec.rb -e 'Issue886'
+  describe 'Memcached connection panel with live memcached', memcached: true do
+    before do
+      unless ENV['TEST_MEM_CACHE_STORE'] == 'true'
+        skip 'Set TEST_MEM_CACHE_STORE=true to run live memcached system tests'
+      end
+    end
+
+    it 'shows connected status when memcached is running - Issue886' do
+      visit '/admin/server_info'
+      finish_page_loading
+
+      # Expand Memcached Connection panel
+      find('a[href="#collapse-memcached"]').click
+      sleep 0.5
+
+      expect(page).to have_css('.si-memcached-status', text: 'connected')
+    end
+
+    it 'displays server stats when memcached is connected - Issue886' do
+      visit '/admin/server_info'
+      finish_page_loading
+
+      # Expand Memcached Connection panel
+      find('a[href="#collapse-memcached"]').click
+      sleep 0.5
+
+      # Should show stats table rows beyond the status row
+      within('.si-memcached-stats') do
+        expect(page).to have_css('tr', minimum: 2)
+        # Server stats are rendered as YAML in a <pre> tag
+        expect(page).to have_css('pre')
+      end
+    end
+
+    it 'shows the memcached server address in stats - Issue886' do
+      visit '/admin/server_info'
+      finish_page_loading
+
+      find('a[href="#collapse-memcached"]').click
+      sleep 0.5
+
+      within('.si-memcached-stats') do
+        # Dalli connects to localhost:11211 by default (may resolve to 127.0.0.1)
+        expect(page).to have_content(':11211')
+      end
+    end
+  end
+
   # Tests for issue #896 - NFS mountpoint info display
   describe 'NFS mountpoint information display' do
     it 'displays source filesystem status separately - Issue896' do
