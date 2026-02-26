@@ -1,6 +1,6 @@
 ---
 description: 'Debug your application to find and fix a bug'
-tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "web/fetch", "read/problems", "read/readFile"]
+tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "execute/awaitTerminal", "web/fetch", "read/problems", "read/readFile"]
 ---
 
 # Debug Mode Instructions
