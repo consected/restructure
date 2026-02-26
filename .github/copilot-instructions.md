@@ -171,6 +171,25 @@ Since activity logs are case management workflows, each record in the `activity_
 
 Resource names are used extensively in access control definitions and naming of associations within the code. They are a unique way of referring to specific models or subsets of records within models. The `Resources::Models` module maps resource names to their corresponding runtime classes and acts as a registry for all dynamic definitions. If in doubt, try to look up resources in `Resources::Models` to find the correct class, resource name or actual class itself.
 
+## Dynamic Definition Setup - Automatic Migrations
+
+When an admin or rspec test creates a new dynamic definition (dynamic model, activity log or external identifier), the system may automatically generate a new database table for that definition, with the appropriate columns and types. This is enabled by the `Settings::AllowDynamicMigrations` setting to `true`. This setting is **enabled** by default in *development environments* and for *system spec tests*, but **disabled** in *production environments* by default. 
+
+Other spec tests (models, controllers, requests, helpers, etc) may explicitly enable this setting if they need to create dynamic definitions as part of their tests. Add the following to the top of the spec file to enable automatic migrations for that spec:
+
+```ruby
+before :all do
+   change_setting('AllowDynamicMigrations', true)
+end
+
+after :all do
+   change_setting('AllowDynamicMigrations', false)
+end
+```
+
+*Production environments* can enable dynamic migrations by setting the environment variable `FPHS_ALLOW_DYNAMIC_MIGRATIONS=true` on the app server.
+
+If automatic migrations are disabled, dynamic definitions will need underlying database tables to be created manually before they can be used. These may be created through manual migrations, or using SQL directly on the database. Some *spec tests* have previously generated tables manually using SQL, but the recommended approach is to enable automatic migrations for tests that require dynamic definitions, and allow the system to handle table creation.
 
 ## Development Setup
 ```bash
