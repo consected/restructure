@@ -1,5 +1,13 @@
 require 'rails_helper'
 
+# Tests for SaveTriggers::PullExternalData save trigger.
+# Verifies HTTP requests to external services, including:
+# - GET/POST requests with XML and JSON formats (existing)
+# - All HTTP verbs supported by Net::HTTP (issue #928):
+#   body-sending (put, patch, lock, mkcol, propfind, proppatch, unlock),
+#   no-body (head, delete, options, trace, copy, move)
+# - Response code handling, error whitelisting, local_data storage
+# - send_data config alias for post_data
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
   include ModelSupport
   include ActivityLogSupport
@@ -179,6 +187,35 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         headers: {},
         body: '{"requestId": "71c5#187e7d99f13","result": [{"id": 30412, "status": "updated"}],"success": true}'
       )
+
+    # Stubs for testing all HTTP verbs (issue #928)
+    test_api_url = 'https://rspec-test.example.com/api/resource'
+    test_json_body = ->(method) { { result: 'success', method: }.to_json }
+    test_headers = {
+      'Accept' => /.*/,
+      'Accept-Encoding' => /.*/,
+      'Host' => /.*/,
+      'User-Agent' => /.*/
+    }
+
+    # Body-sending verbs
+    %i[put patch lock mkcol propfind proppatch unlock].each do |method|
+      stub_request(method, test_api_url)
+        .with(headers: test_headers.merge('Content-Type' => 'application/json'))
+        .to_return(status: 200, body: test_json_body.call(method.to_s), headers: {})
+    end
+
+    # No-body verbs that return content
+    %i[delete options trace copy move].each do |method|
+      stub_request(method, test_api_url)
+        .with(headers: test_headers)
+        .to_return(status: 200, body: test_json_body.call(method.to_s), headers: {})
+    end
+
+    # HEAD returns empty body
+    stub_request(:head, test_api_url)
+      .with(headers: test_headers)
+      .to_return(status: 200, body: '', headers: {})
   end
 
   before :example do
@@ -473,5 +510,129 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect do
       @trigger.perform
     end.not_to raise_error
+  end
+
+  # Tests for all HTTP verbs (issue #928)
+  context 'with body-sending HTTP verbs' do
+    %w[put patch lock mkcol propfind proppatch unlock].each do |http_method|
+      it "sends data with #{http_method} method" do
+        config = {
+          this1: {
+            data_field: 'notes',
+            data_field_format: 'json',
+            method: http_method,
+            to: {
+              url: 'https://rspec-test.example.com/api/resource',
+              format: 'json',
+              headers: { 'Content-Type': 'application/json' }
+            },
+            send_data: { key: 'value' }
+          }
+        }
+
+        @trigger = SaveTriggers::PullExternalData.new(config, @al)
+        @trigger.perform
+
+        expect(@al.notes).to be_present
+        dnotes = JSON.parse(@al.notes)
+        expect(dnotes['result']).to eq 'success'
+        expect(dnotes['method']).to eq http_method
+      end
+    end
+  end
+
+  context 'with no-body HTTP verbs' do
+    %w[delete options trace copy move].each do |http_method|
+      it "sends request with #{http_method} method" do
+        config = {
+          this1: {
+            data_field: 'notes',
+            data_field_format: 'json',
+            method: http_method,
+            from: {
+              url: 'https://rspec-test.example.com/api/resource',
+              format: 'json'
+            }
+          }
+        }
+
+        @trigger = SaveTriggers::PullExternalData.new(config, @al)
+        @trigger.perform
+
+        expect(@al.notes).to be_present
+        dnotes = JSON.parse(@al.notes)
+        expect(dnotes['result']).to eq 'success'
+        expect(dnotes['method']).to eq http_method
+      end
+    end
+  end
+
+  context 'with head HTTP verb' do
+    it 'sends a head request and handles empty body' do
+      config = {
+        this1: {
+          method: 'head',
+          response_code_field: 'select_result',
+          from: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json',
+            allow_empty_result: true
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@trigger.response_code).to eq 200
+      expect(@al.select_result).to eq '200'
+    end
+  end
+
+  context 'with body-sending HTTP verbs using local_data' do
+    it 'stores put response in save_trigger_results' do
+      config = {
+        this1: {
+          local_data: 'put_response',
+          data_field: 'notes',
+          data_field_format: 'json',
+          method: 'put',
+          to: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json',
+            headers: { 'Content-Type': 'application/json' }
+          },
+          send_data: { key: 'updated_value' }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['put_response']).to be_present
+      expect(@al.save_trigger_results['put_response']['result']).to eq 'success'
+      expect(@al.save_trigger_results['put_response_http_response_code']).to eq 200
+    end
+  end
+
+  context 'with unsupported HTTP method' do
+    it 'raises an error for an invalid method' do
+      config = {
+        this1: {
+          data_field: 'notes',
+          method: 'invalid_method',
+          from: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect do
+        @trigger.perform
+      end.to raise_error(FphsException, /pull_external_data method 'invalid_method' is not supported/)
+    end
   end
 end
