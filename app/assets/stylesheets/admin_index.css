@@ -22,6 +22,7 @@
  *= require admin/diffy
  *= require admin/activity_list
  *= require admin/admin_options
+ *= require admin/api_panel
  *= require admin/message_notification
  *= require admin/server_info
  *= require admin/sortable

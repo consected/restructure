@@ -8,6 +8,7 @@
     <li role="presentation"><a href="#parsed-config" aria-controls="parsed-config" role="tab" data-toggle="tab">Parsed Config</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
     <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
+    <li role="presentation"><a href="#api-definitions" aria-controls="api-definitions" role="tab" data-toggle="tab">API</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -69,6 +70,10 @@
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="def-versions">
       <%= render partial: 'admin/dynamic_models/versions_panel', locals: {object_instance: object_instance} %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="api-definitions">
+      <%= render partial: 'admin/common/api_panel', locals: { object_instance: object_instance, resource_type: :dynamic_model } %>
     </div>
 
   </div>

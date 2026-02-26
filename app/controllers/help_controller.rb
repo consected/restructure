@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HelpController < ApplicationController
-  ValidLibraries = %w[guest_reference admin_reference user_reference app_reference dev_reference].freeze
+  ValidLibraries = %w[guest_reference admin_reference user_reference app_reference dev_reference api_reference].freeze
   AcceptableImageFormats = %w[png jpg jpeg svg gif].freeze
   DocumentsDirectory = 'docs'
   IndexSection = 'main'

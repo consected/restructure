@@ -7,6 +7,7 @@
     <li role="presentation"><a href="#actions-panel" aria-controls="actions-panel" role="tab" data-toggle="tab">Actions</a></li>
     <li role="presentation"><a href="#parsed-config" aria-controls="parsed-config" role="tab" data-toggle="tab">Parsed Config</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
+    <li role="presentation"><a href="#api-definitions" aria-controls="api-definitions" role="tab" data-toggle="tab">API</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -36,6 +37,10 @@
     <% else %>
     <p>Not authorized to administer user access controls</p>
     <% end %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="api-definitions">
+      <%= render partial: 'admin/common/api_panel', locals: { object_instance: object_instance, resource_type: :external_identifier } %>
     </div>
   </div>
 </div>
