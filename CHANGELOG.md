@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.9] - 2026-02-26
+
 - [Added] a master records admin page - resolves #930
 - [Added] user context to raise_flag_file_error in Mounter - resolves #649
 - [Added] system spec for memcached connection panel with live memcached - fixes #886
