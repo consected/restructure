@@ -14,6 +14,38 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] a master records admin page - resolves #930
+- [Added] user context to raise_flag_file_error in Mounter - resolves #649
+- [Added] system spec for memcached connection panel with live memcached - fixes #886
+- [Refactored] cache store spec and config per rubocop conventions
+- [Changed] Dalli cache store to use meta protocol - fixes #886
+- [Added] support for all HTTP verbs in pull_external_data trigger - fixes #928
+- [Moved] copy-to-clipboard to fpa_form_utils, fixed {{master_id}} curl variable, generalised copy button CSS class
+- [Added] "execute/awaitTerminal" to agent tools
+- [Aligned] report save trigger key to get_report (was get_record)
+- [Moved] report curl and save trigger generation into helper methods
+- [Added] create master with associations API tests via pull_external_data - PR #929
+- [Added] save trigger API endpoint specs for dynamic models and reports - resolves #652
+- [Added] API definitions panel to admin dynamic definition and report views - resolves #652
+- [Added] dynamic definition setup re: automatic migrations to agent instructions
+- [Added] API create master with associations, transactional rollback, and API docs - fixes #924
+- [Added] secure viewer enhancements: zoom display, custom zoom input, click-to-zoom, rotate CW/CCW, scroll position preservation, rotation clipping fixes - fixes #590
+- [Added] documentation for APIs and facilitate clean return of API endpoint routes by ensuring STDERR is written to within the app for CLI messaging
+- [Fixed] Rails log search page formatting
+- [Added] clear all user roles action for admin User Roles page - fixes #671
+- [Removed] dead _admin_redcap_status_indicators partial and brakeman entry, fixed trailing newline - fixes #905
+- [Added] collapsible Missing Configurations panel to config status partial - fixes #905
+- [Refactored] alerts panel: extracted helpers, removed duplication, simplified badge rendering - fixes #905
+- [Changed] alerts panel header to show separate server and redcap badges with category colors - fixes #905
+- [Added] collapsed alerts panel to admin index page, removed old popover alerts - fixes #905
+- [Added] better test separation
+- [Fixed] handlebars CLI call to avoid npx 128KB command line limit
+- [Added] Handlebars CLI precompilation with batched template loading - fixes #873
+- [Added] definition of new handlebars precompilation
+- [Fixed] adding page layouts that have the same name as previously disabled page layouts
+- [Fixed] failing admin message notifications and iframe report cells
+- [Fixed] error handling for test DB setup
+
 ## [9.42.8] - 2026-02-20
 
 - [Fixed] HTML entity encoding in javascript_tag heredoc blocks
