@@ -108,7 +108,13 @@ class MastersController < UserBaseController
 
   def new
     @master = Master.new_master_record current_user
-    render :new
+    
+    # For admin sample forms, render just the form partial without layout
+    if params[:admin_sample] == 'true'
+      render partial: 'form', layout: false
+    else
+      render :new
+    end
   end
 
   #

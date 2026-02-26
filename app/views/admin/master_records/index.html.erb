@@ -1,0 +1,48 @@
+<%# Master Records admin index page (issue #930)
+    Displays an informational header about the masters table and a table
+    of the standard models associated with master records. %>
+
+<div class="admin-result-index master-records-index" data-admin-type="master_records">
+
+  <%= show_admin_heading %>
+
+  <%# Slot where the show panel is loaded via AJAX %>
+  <div id="master-record-show-panel" class="master-records-index__show-panel"></div>
+
+  <%# Table of masters and standard master-associated models %>
+
+  <table class="table tablesorter admin-list master-records-index__models-table">
+    <thead>
+      <tr>
+        <th class="no-sort"></th>
+        <th>Name</th>
+        <th>Table Name</th>
+        <th>Resource Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @admin_objects.each do |record| %>
+        <tr class="admin-list-item" id="admin-item-<%= record.id %>">
+          <td>
+            <%= link_to '',
+                        admin_master_record_path(record),
+                        remote: true,
+                        class: 'glyphicon glyphicon-eye-open',
+                        title: 'Show details',
+                        data: {
+                          target: '#master-record-show-panel',
+                          'result-target': '#master-record-show-panel',
+                          'result-target-force': true
+                        } %>
+          </td>
+          <td><%= record.name %></td>
+          <td><code><%= record.table_name %></code></td>
+          <td><code><%= record.resource_name %></code></td>
+          <td><%= record.description %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

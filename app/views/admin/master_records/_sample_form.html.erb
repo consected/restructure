@@ -1,0 +1,35 @@
+<%# Sample Form tab for a standard master-associated model (issue #930).
+    Adapts the dynamic model sample form pattern for standard models.
+    Renders a live form for the model under the admin temporary master record. %>
+
+<% admin_master = Settings::admin_master %>
+<% url_segment = object_instance.model_class&.to_s&.underscore&.pluralize if object_instance.model_class %>
+<% if admin_master && url_segment %>
+  <p>
+    <% if url_segment == 'masters' %>
+     <%= link_to 'Refresh sample',
+                "/masters/new?admin_sample=true",
+                data: {
+                  remote: true,
+                  result_target: "#mr-sample-form-result-#{object_instance.id}",
+                  result_target_force: true
+                },
+                class: 'btn btn-default btn-sm on-show-auto-click' %>
+    <% else %>
+     <%= link_to 'Refresh sample',
+                "/masters/#{admin_master}/#{url_segment}/new?admin_sample=true",
+                data: {
+                  remote: true,
+                  result_target: "#mr-sample-form-result-#{object_instance.id}",
+                  result_target_force: true
+                },
+                class: 'btn btn-default btn-sm on-show-auto-click' %>
+    <% end %>
+  </p>
+
+  <div id="mr-sample-form-result-<%= object_instance.id %>">
+    loading...
+  </div>
+<% else %>
+  <p><em>Sample form is not available — model class or admin master not configured.</em></p>
+<% end %>

@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   post '/csp-violation-report-endpoint', to: 'csp_reports#create'
 
   namespace :admin do
+    resources :master_records, only: %i[index show]
     resources :external_identifiers, except: %i[show destroy]
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy]
