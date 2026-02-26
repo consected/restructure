@@ -59,14 +59,14 @@ Rails.application.configure do
   # fs_cache_path = Rails.root.join('tmp', 'cache', 'cache-fs', "paralleltests#{ENV['TEST_ENV_NUMBER']}")
   # FileUtils.mkdir_p fs_cache_path
   # config.cache_store = :file_store, fs_cache_path
-  if ENV['TEST_MEM_CACHE_STORE'] == 'true'
-    # Use Dalli memcached store with :meta protocol for cache integration testing.
-    # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
-    # and requires memcached 1.6+
-    config.cache_store = :mem_cache_store, { protocol: :meta }
-  else
-    config.cache_store = :memory_store, { namespace: "paralleltests#{ENV.fetch('TEST_ENV_NUMBER', nil)}" }
-  end
+  config.cache_store = if ENV['TEST_MEM_CACHE_STORE'] == 'true'
+                         # Use Dalli memcached store with :meta protocol for cache integration testing.
+                         # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
+                         # and requires memcached 1.6+
+                         [:mem_cache_store, { protocol: :meta }]
+                       else
+                         [:memory_store, { namespace: "paralleltests#{ENV.fetch('TEST_ENV_NUMBER', nil)}" }]
+                       end
 
   config.active_record.dump_schema_after_migration = false
 
