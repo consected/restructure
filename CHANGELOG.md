@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.9 back to develop
+- [Fixed] session timeout not working due to CSP reports resetting session timer - fixes #925
+
 ## [9.42.9] - 2026-02-26
 
 - [Added] a master records admin page - resolves #930
