@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.10] - 2026-02-27
+
 - [Merged] release 9.42.9 back to develop
 - [Fixed] session timeout not working due to CSP reports resetting session timer - fixes #925
 
