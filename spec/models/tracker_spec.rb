@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
+# Tests for the Tracker model, covering creation, validation, upsert merging,
+# completions, and tracker_histories association ordering.
+# The ordering tests verify that tracker histories are sorted by full event_date
+# timestamp DESC (not date-only), then id DESC, ensuring consistency between
+# the tracker panel view and the DB upsert trigger's ordering. See issue #939.
 require 'rails_helper'
 
 RSpec.describe Tracker, type: :model do
   include MasterSupport
   include ModelSupport
+
   before(:each) do
     create_user
     create_admin
@@ -95,56 +101,100 @@ RSpec.describe Tracker, type: :model do
   end
 
   describe 'tracker_histories association' do
-    it 'orders tracker histories by event_date::date DESC, then id DESC' do
+    it 'orders tracker histories by full event_date timestamp DESC, then id DESC' do
       master = create_master
-      
+
       # Create multiple tracker entries to test the ordering
       # Day 1: Two entries on the same date (different times)
       day1_time1 = 3.days.ago.beginning_of_day + 9.hours
       day1_time2 = 3.days.ago.beginning_of_day + 14.hours
-      
-      tracker1 = master.trackers.create!(
+
+      master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
         event_date: day1_time1,
         notes: 'Day 1 - Morning'
       )
-      
-      tracker2 = master.trackers.create!(
+
+      master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
         event_date: day1_time2,
         notes: 'Day 1 - Afternoon'
       )
-      
+
       # Day 2: One entry (most recent date)
-      tracker3 = master.trackers.create!(
+      master.trackers.create!(
         protocol_id: @p1.id,
         sub_process_id: @sp1_1.id,
         event_date: 1.day.ago.beginning_of_day + 10.hours,
         notes: 'Day 2 - Single'
       )
-      
+
       # Get tracker histories via the association
       histories = master.tracker_histories.to_a
-      
+
       expect(histories.length).to be >= 3
-      
+
       # Find our test histories
       our_histories = histories.select { |h| h.notes&.start_with?('Day') }
-      
+
       # Day 2 (most recent date) should come first
       expect(our_histories[0].notes).to eq('Day 2 - Single')
-      
-      # Day 1 entries should follow, ordered by id DESC within the same date
-      # tracker2 was created after tracker1, so it should come first
+
+      # Day 1 entries should follow, ordered by full timestamp DESC
+      # The Afternoon entry (14:00) has a later timestamp than Morning (09:00), so it comes first
       day1_histories = our_histories.select { |h| h.notes&.start_with?('Day 1') }
       expect(day1_histories.length).to eq(2)
       expect(day1_histories[0].notes).to eq('Day 1 - Afternoon')
       expect(day1_histories[1].notes).to eq('Day 1 - Morning')
-      
-      # Verify within same date, higher ID comes first
-      expect(day1_histories[0].id).to be > day1_histories[1].id
+    end
+
+    it 'orders consistently with the tracker upsert trigger when events share the same date' do
+      # This test verifies issue #939: the tracker panel and full tracker history
+      # should show items in the same order. The upsert trigger determines "latest"
+      # using the full event_date timestamp, so the history ordering must also
+      # use the full timestamp to be consistent.
+      master = create_master
+
+      # Insert an entry with an earlier timestamp first (gets a lower ID)
+      master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 2.days.ago.beginning_of_day + 9.hours,
+        notes: 'Sent, Marketo Email'
+      )
+
+      # Insert an entry with a later timestamp second (gets a higher ID)
+      master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 2.days.ago.beginning_of_day + 15.hours,
+        notes: 'Complete, Redcap'
+      )
+
+      # Insert another entry with a different earlier timestamp (gets a yet higher ID)
+      master.trackers.create!(
+        protocol_id: @p1.id,
+        sub_process_id: @sp1_1.id,
+        event_date: 2.days.ago.beginning_of_day + 8.hours,
+        notes: 'Sent, Invitation Email'
+      )
+
+      histories = master.tracker_histories.to_a
+      our_histories = histories.select { |h| h.notes&.match?(/Sent|Complete/) }
+
+      # The tracker upsert trigger uses full timestamp ordering.
+      # The history should match: 'Complete, Redcap' (15:00) first,
+      # then 'Sent, Marketo Email' (09:00), then 'Sent, Invitation Email' (08:00).
+      expect(our_histories[0].notes).to eq('Complete, Redcap')
+      expect(our_histories[1].notes).to eq('Sent, Marketo Email')
+      expect(our_histories[2].notes).to eq('Sent, Invitation Email')
+
+      # The current top tracker entry (determined by upsert trigger) should be
+      # the same as the first item in the history
+      current_tracker = master.trackers.where(protocol_id: @p1.id).first
+      expect(current_tracker.notes).to eq('Complete, Redcap')
     end
   end
 end
