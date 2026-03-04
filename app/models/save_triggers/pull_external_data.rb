@@ -34,6 +34,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
         end
 
         @this_config = config
+        @submitted_request_data = nil
         data = run_request
         orig_data = data
 
@@ -46,6 +47,11 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
         if local_data_name
           @item.save_trigger_results[local_data_name] = orig_data
           @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
+          @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
+            'data' => @submitted_request_data,
+            'url' => url_from_config,
+            'method' => method_from_config
+          }
         end
 
         # We calculate the conditional if inside each item, rather than relying
@@ -108,6 +114,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     uri = URI.parse(url_from_config)
     form = @this_config[:form] || {}
     form = form.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
+    @submitted_request_data = form.deep_stringify_keys
     response = Net::HTTP.post_form(uri, form)
     handle_response(to_config, response)
   end
@@ -219,9 +226,10 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     if data.is_a? Hash
       data = data.deep_stringify_keys
       data = data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
+      @submitted_request_data = data.dup
       data.to_json
     else
-      FieldDefaults.calculate_default @item, data
+      @submitted_request_data = FieldDefaults.calculate_default(@item, data)
     end
   end
 
