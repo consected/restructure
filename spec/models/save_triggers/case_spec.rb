@@ -107,22 +107,41 @@ RSpec.describe SaveTriggers::Case, type: :model do
     )
   end
 
+  #
+  # Build a when/then branch for a case config.
+  # @param [Symbol] field - the field to match against
+  # @param [String] value - the expected value
+  # @param [Array<Hash>] triggers - trigger configs to execute on match
+  # @return [Hash] a when/then branch hash
+  def when_branch(field, value, triggers)
+    {
+      when: { all: { this: { field => value } } },
+      then: triggers
+    }
+  end
+
+  #
+  # Build an else branch for a case config.
+  # @param [Array<Hash>] triggers - trigger configs to execute
+  # @return [Hash] an else branch hash
+  def else_branch(triggers)
+    { else: triggers }
+  end
+
+  #
+  # Build a log trigger config.
+  # @param [String] message - the log message
+  # @param [String] severity - log severity level (default: 'info')
+  # @return [Hash] a log trigger config
+  def log_trigger(message, severity: 'info')
+    { log: { message:, severity: } }
+  end
+
   describe '#perform' do
     context 'when a when condition matches' do
       it 'executes the then triggers for the first matching when block - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'to player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Matched to player', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'to player', [log_trigger('Matched to player')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -137,19 +156,10 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
       it 'executes multiple triggers in the then block - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'to player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'First then trigger', severity: 'info' } },
-              { log: { message: 'Second then trigger', severity: 'debug' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'to player', [
+                        log_trigger('First then trigger'),
+                        log_trigger('Second then trigger', severity: 'debug')
+                      ])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -164,30 +174,8 @@ RSpec.describe SaveTriggers::Case, type: :model do
     context 'when multiple when conditions could match' do
       it 'executes only the first matching when block - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'to player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'First match', severity: 'info' } }
-            ]
-          },
-          {
-            when: {
-              all: {
-                this: {
-                  select_who: 'user'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Second match should not run', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'to player', [log_trigger('First match')]),
+          when_branch(:select_who, 'user', [log_trigger('Second match should not run')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -201,30 +189,8 @@ RSpec.describe SaveTriggers::Case, type: :model do
     context 'when the first when does not match but the second does' do
       it 'skips the first and executes the second when block - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'from player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'First branch - should not run', severity: 'info' } }
-            ]
-          },
-          {
-            when: {
-              all: {
-                this: {
-                  select_who: 'user'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Second branch matched', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'from player', [log_trigger('First branch - should not run')]),
+          when_branch(:select_who, 'user', [log_trigger('Second branch matched')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -238,23 +204,8 @@ RSpec.describe SaveTriggers::Case, type: :model do
     context 'when no when condition matches and else is present' do
       it 'executes the else triggers - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'from player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Should not match', severity: 'info' } }
-            ]
-          },
-          {
-            else: [
-              { log: { message: 'Fell through to else', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'from player', [log_trigger('Should not match')]),
+          else_branch([log_trigger('Fell through to else')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -266,23 +217,8 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
       it 'does not execute else when a when condition matched - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'to player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Matched branch', severity: 'info' } }
-            ]
-          },
-          {
-            else: [
-              { log: { message: 'Should not reach else', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'to player', [log_trigger('Matched branch')]),
+          else_branch([log_trigger('Should not reach else')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -296,18 +232,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
     context 'when no when condition matches and no else is present' do
       it 'returns empty results - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'from player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Should not run', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'from player', [log_trigger('Should not run')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -319,9 +244,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
     context 'with empty config' do
       it 'handles empty array gracefully - Issue #944' do
-        config = []
-
-        trigger = SaveTriggers::Case.new(config, @activity_log)
+        trigger = SaveTriggers::Case.new([], @activity_log)
         result = trigger.perform
 
         expect(result).to eq([])
@@ -331,18 +254,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
     context 'storing results' do
       it 'stores results in save_trigger_results - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'to player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Stored result test', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'to player', [log_trigger('Stored result test')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
@@ -355,18 +267,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
       it 'stores empty results when no branch matched - Issue #944' do
         config = [
-          {
-            when: {
-              all: {
-                this: {
-                  select_call_direction: 'from player'
-                }
-              }
-            },
-            then: [
-              { log: { message: 'Will not match', severity: 'info' } }
-            ]
-          }
+          when_branch(:select_call_direction, 'from player', [log_trigger('Will not match')])
         ]
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
