@@ -25,11 +25,12 @@
 # table should be used when checking if a status event has occurred against a
 # master record.
 #
-# Note: database triggers are defined that actually ensure the tracker table is
-# managed correctly. Although record inserts or updates can be made directly into
-# trackers or tracker_history tables, the same result will appear in both tables.
-# The app relies on these DB triggers to avoid duplicating functionality that is
-# regularly used outside of the app directly against the database.
+# Note: the trackers "table" is actually a database view derived from tracker_history.
+# Inserts are handled by an INSTEAD OF trigger that redirects to tracker_history.
+# The view derives the latest entry per (master_id, protocol_id) using:
+#   ORDER BY event_date::date DESC NULLS LAST, tracker_history.id DESC
+# This ensures the ordering rule exists in exactly one place.
+# See: https://github.com/consected/restructure/issues/941
 class Tracker < UserBase
   include UserHandler
   include TrackerHandler
