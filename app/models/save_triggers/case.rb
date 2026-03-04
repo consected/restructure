@@ -40,32 +40,10 @@ class SaveTriggers::Case < SaveTriggers::SaveTriggersBase
     branches = @case_configs
     branches = [branches] unless branches.is_a?(Array)
 
-    results = []
-
-    branches.each do |branch|
-      next unless branch.is_a?(Hash)
-
-      if branch.key?(:when)
-        # Evaluate the when condition using ConditionalActions
-        ca = ConditionalActions.new(branch[:when], @item)
-        next unless ca.calc_action_if
-
-        # Condition matched — execute the then triggers
-        results = execute_triggers(branch[:then])
-        break
-      elsif branch.key?(:else)
-        # No when matched before this — execute else triggers
-        results = execute_triggers(branch[:else])
-        break
-      end
-    end
+    results = evaluate_branches(branches)
 
     Rails.logger.info "[SaveTrigger::Case] Completed with #{results.length} trigger results"
-
-    # Store results for potential use by subsequent triggers
-    if @item.respond_to?(:save_trigger_results) && @item.save_trigger_results
-      @item.save_trigger_results['case'] = results
-    end
+    store_trigger_results('case', results)
 
     results
   end
@@ -73,27 +51,23 @@ class SaveTriggers::Case < SaveTriggers::SaveTriggersBase
   private
 
   #
-  # Execute an array of trigger configurations
-  # @param [Array<Hash>] trigger_list - list of trigger configs to execute
-  # @return [Array<Hash>] results from each trigger
-  def execute_triggers(trigger_list)
-    return [] unless trigger_list
+  # Iterate through branches, evaluating when conditions and executing
+  # the first matching branch's then triggers, or the else triggers.
+  # @param [Array<Hash>] branches - ordered list of when/then or else branches
+  # @return [Array<Hash>] results from the executed triggers
+  def evaluate_branches(branches)
+    branches.each do |branch|
+      next unless branch.is_a?(Hash)
 
-    trigger_list = [trigger_list] unless trigger_list.is_a?(Array)
-    results = []
+      if branch.key?(:when)
+        next unless if_evaluates(branch[:when])
 
-    trigger_list.each do |trigger_config|
-      next unless trigger_config.is_a?(Hash)
-
-      trigger_config.each do |trigger_name, config|
-        trigger_name = trigger_name.to_sym
-        klass = ::SaveTriggers.const_get(trigger_name.to_s.camelize)
-        trigger = klass.new(config, @item)
-        result = trigger.perform
-        results << { trigger: trigger_name, result: }
+        return execute_trigger_list(branch[:then])
+      elsif branch.key?(:else)
+        return execute_trigger_list(branch[:else])
       end
     end
 
-    results
+    []
   end
 end

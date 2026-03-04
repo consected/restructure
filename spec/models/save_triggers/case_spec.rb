@@ -66,6 +66,47 @@ RSpec.describe SaveTriggers::Case, type: :model do
     @activity_log.save_trigger_results ||= {}
   end
 
+  #
+  # Helper to reconfigure the activity log definition with a new extra_log_types YAML,
+  # set up access, and return the definition for integration tests.
+  # @param [String] extra_log_type_name - the extra log type name (e.g. 'case_test')
+  # @param [String] yaml_config - the YAML configuration string
+  def configure_al_with_save_trigger(extra_log_type_name, yaml_config)
+    al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
+
+    al_def.extra_log_types = yaml_config
+    al_def.current_admin = @admin
+    al_def.force_regenerate = true
+    al_def.updated_at = DateTime.now
+    al_def.save!
+    ActivityLog.refresh_outdated
+    al_def.reload
+    al_def.force_option_config_parse
+
+    setup_access :"activity_log__player_contact_phone__#{extra_log_type_name}",
+                 resource_type: :activity_log_type, access: :create, user: @user
+
+    al_def.add_master_association
+    al_def
+  end
+
+  #
+  # Helper to create an activity log record for integration tests.
+  # @param [String] extra_log_type - the extra log type
+  # @param [String] direction - the select_call_direction value
+  # @param [String] who - the select_who value
+  # @return [ActivityLog::PlayerContactPhone] the created activity log record
+  def create_al_record(extra_log_type:, direction: 'to player', who: 'original')
+    @master.activity_log__player_contact_phones.create!(
+      select_call_direction: direction,
+      select_who: who,
+      extra_log_type:,
+      player_contact: @player_contact,
+      master: @master,
+      current_user: @user
+    )
+  end
+
   describe '#perform' do
     context 'when a when condition matches' do
       it 'executes the then triggers for the first matching when block - Issue #944' do
@@ -338,9 +379,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
   describe 'integration with save_trigger config' do
     it 'runs case trigger as part of on_create save_trigger - Issue #944' do
-      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
-
-      al_def.extra_log_types = <<~END_DEF
+      configure_al_with_save_trigger('case_test', <<~END_DEF)
         case_test:
           label: Case Test
           fields:
@@ -374,35 +413,12 @@ RSpec.describe SaveTriggers::Case, type: :model do
                             select_who: 'no match - else'
       END_DEF
 
-      al_def.current_admin = @admin
-      al_def.force_regenerate = true
-      al_def.updated_at = DateTime.now
-      al_def.save!
-      ActivityLog.refresh_outdated
-      al_def.reload
-      al_def.force_option_config_parse
-
-      setup_access :activity_log__player_contact_phone__case_test,
-                   resource_type: :activity_log_type, access: :create, user: @user
-
-      al_def.add_master_association
-
-      al = @master.activity_log__player_contact_phones.create!(
-        select_call_direction: 'to player',
-        select_who: 'original',
-        extra_log_type: 'case_test',
-        player_contact: @player_contact,
-        master: @master,
-        current_user: @user
-      )
-
+      al = create_al_record(extra_log_type: 'case_test', direction: 'to player')
       expect(al.select_who).to eq 'matched to player'
     end
 
     it 'runs else branch when no when matches in save_trigger - Issue #944' do
-      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
-
-      al_def.extra_log_types = <<~END_DEF
+      configure_al_with_save_trigger('case_else_test', <<~END_DEF)
         case_else_test:
           label: Case Else Test
           fields:
@@ -427,35 +443,12 @@ RSpec.describe SaveTriggers::Case, type: :model do
                             select_who: 'fell through to else'
       END_DEF
 
-      al_def.current_admin = @admin
-      al_def.force_regenerate = true
-      al_def.updated_at = DateTime.now
-      al_def.save!
-      ActivityLog.refresh_outdated
-      al_def.reload
-      al_def.force_option_config_parse
-
-      setup_access :activity_log__player_contact_phone__case_else_test,
-                   resource_type: :activity_log_type, access: :create, user: @user
-
-      al_def.add_master_association
-
-      al = @master.activity_log__player_contact_phones.create!(
-        select_call_direction: 'to player',
-        select_who: 'original',
-        extra_log_type: 'case_else_test',
-        player_contact: @player_contact,
-        master: @master,
-        current_user: @user
-      )
-
+      al = create_al_record(extra_log_type: 'case_else_test', direction: 'to player')
       expect(al.select_who).to eq 'fell through to else'
     end
 
     it 'runs second when branch in save_trigger - Issue #944' do
-      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
-
-      al_def.extra_log_types = <<~END_DEF
+      configure_al_with_save_trigger('case_second_test', <<~END_DEF)
         case_second_test:
           label: Case Second Test
           fields:
@@ -484,28 +477,7 @@ RSpec.describe SaveTriggers::Case, type: :model do
                             select_who: 'second branch matched'
       END_DEF
 
-      al_def.current_admin = @admin
-      al_def.force_regenerate = true
-      al_def.updated_at = DateTime.now
-      al_def.save!
-      ActivityLog.refresh_outdated
-      al_def.reload
-      al_def.force_option_config_parse
-
-      setup_access :activity_log__player_contact_phone__case_second_test,
-                   resource_type: :activity_log_type, access: :create, user: @user
-
-      al_def.add_master_association
-
-      al = @master.activity_log__player_contact_phones.create!(
-        select_call_direction: 'from player',
-        select_who: 'original',
-        extra_log_type: 'case_second_test',
-        player_contact: @player_contact,
-        master: @master,
-        current_user: @user
-      )
-
+      al = create_al_record(extra_log_type: 'case_second_test', direction: 'from player')
       expect(al.select_who).to eq 'second branch matched'
     end
   end
