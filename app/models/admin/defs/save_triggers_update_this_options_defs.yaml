@@ -33,19 +33,4 @@
                 attributes:
                   a_value: value_from_result
 
-            with:
-              field_name: 'now()'
-              field_name_2: 'literal value'
-              field_name_3: 
-                this: 
-                  field_name: return_value
-              field_name_4: 
-                reference_name:
-                  field_name: return_value
-              field_name_5: '\{\{curly_tag\}\} - \{\{curly_tag2\}\}'
-              field_name_6: '\{\{\{data.data_structure\}\}\}' # Get a data structure as original object, for JSON fields etc
-              embedded_item:
-                field_name: 'literal value'
-                field_name_2: 
-                  reference_name:
-                    field_name: return_value
+#!defs(save_triggers_with_attribute_values_defs.yaml)
