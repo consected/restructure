@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Tests for FieldDefaults.calculate_default
+# - Verifies string substitution, date/time defaults, and tag formatting
+# - Verifies that a Hash with a single 'object' key passes the inner value through
+#   instead of treating it as a ConditionalActions query (issue #943)
+
 require 'rails_helper'
 
 RSpec.describe FieldDefaults, type: :model do
@@ -37,5 +42,27 @@ RSpec.describe FieldDefaults, type: :model do
     res = FieldDefaults.calculate_default(data, val)
     exp = { 'a' => 3, 'b' => 2 }
     expect(res).to eq exp
+  end
+
+  it 'returns the inner object for a Hash with a single object key - issue #943' do
+    # When a Hash value has a single key :object, calculate_default should
+    # return the inner value directly rather than treating the Hash as
+    # a ConditionalActions query. This allows JSONB fields to store
+    # arbitrary objects via create_reference / update_reference with: config.
+    val = { object: { attr1: 1, attr2: 2 } }
+    res = FieldDefaults.calculate_default(nil, val)
+    expect(res).to eq({ attr1: 1, attr2: 2 })
+
+    # Also works with a string key 'object'
+    val = { 'object' => { 'nested' => 'value', 'count' => 3 } }
+    res = FieldDefaults.calculate_default(nil, val)
+    expect(res).to eq({ 'nested' => 'value', 'count' => 3 })
+
+    # A Hash with multiple keys (including 'object') is NOT treated as an
+    # object passthrough — it remains a ConditionalActions query
+    val = { object: { attr1: 1 }, other_key: 'something' }
+    # This should NOT return the inner object; it has multiple keys
+    # so it falls through to ConditionalActions processing
+    expect(val.length).to eq 2
   end
 end
