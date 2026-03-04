@@ -89,6 +89,7 @@ if [ "${RAILS_ENV}" != 'test' ]; then
   sudo getent passwd 600 || sudo useradd --user-group --uid 600 nfsuser
   sudo usermod -a --groups=599,600,601 "$WEBAPP_USER"
   mkdir -p "$FS_ROOT/$FS_DIR"
+  mkdir -p "$MOUNT_ROOT" || sudo mkdir -p "$MOUNT_ROOT" && sudo chmod 777 "$MOUNT_ROOT"
   mkdir -p "$MOUNT_ROOT/gid600"
   mkdir -p "$MOUNT_ROOT/gid601"
 fi
