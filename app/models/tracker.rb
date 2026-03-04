@@ -34,6 +34,10 @@ class Tracker < UserBase
   include UserHandler
   include TrackerHandler
 
+  # Explicitly set primary key since trackers is now a view
+  # and Rails cannot auto-detect the primary key from views
+  self.primary_key = 'id'
+
   has_many :tracker_histories, inverse_of: :tracker
   belongs_to :item, polymorphic: true, optional: true
 
