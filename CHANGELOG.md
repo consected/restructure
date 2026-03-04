@@ -14,6 +14,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.10 back to develop
+- [Fixed] test database setup naming
+- [Fixed] test setup
+- [Added] object key passthrough in FieldDefaults.calculate_default for JSONB fields - fixes #943
+- [Added] integration test for create_reference with JSONB object storage - fixes #943
+- [Refactored] YARD docs and restored test cleanup guards for JSONB object passthrough - fixes #943
+- [Added] shared defs for with: attribute values documenting object: wrapper for JSONB fields - fixes #943
+- [Added] comprehensive specs for SaveTriggers::Case including integration tests - fixes #944
+- [Refactored] save triggers to extract shared execute_trigger_list and store_trigger_results to base class - fixes #944
+- [Refactored] case spec with helper methods to reduce config boilerplate - fixes #944
+
 ## [9.42.10] - 2026-02-27
 
 - [Merged] release 9.42.9 back to develop
