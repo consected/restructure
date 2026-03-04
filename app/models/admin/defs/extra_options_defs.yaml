@@ -529,6 +529,9 @@
       - reload_this:
 #!defs(save_triggers_reload_this_options_defs.yaml)
 
+      - case:
+#!defs(save_triggers_case_options_defs.yaml)
+
       - each:
           value: # list of literal values, triple curly substitution returning a list, or hash conditional result returning a list
           do:

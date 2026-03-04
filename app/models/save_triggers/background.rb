@@ -54,10 +54,7 @@ class SaveTriggers::Background < SaveTriggers::SaveTriggersBase
       queued_at: Time.current
     }
 
-    # Store results for potential use by subsequent triggers
-    if @item.respond_to?(:save_trigger_results) && @item.save_trigger_results
-      @item.save_trigger_results['background'] = result
-    end
+    store_trigger_results('background', result)
 
     result
   end

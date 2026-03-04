@@ -125,5 +125,45 @@ class SaveTriggers::SaveTriggersBase
     end
   end
 
+  #
+  # Execute an array of trigger configurations sequentially.
+  # Each trigger config is a Hash like { trigger_name: config_hash }.
+  # Trigger names are validated through the central ValidSaveTriggers registry.
+  # @param [Array<Hash>] trigger_list - list of trigger configs to execute
+  # @param [Array<Symbol>] skip_keys - keys to skip (e.g. :if)
+  # @return [Array<Hash>] results from each trigger as { trigger:, result: }
+  def execute_trigger_list(trigger_list, skip_keys: [])
+    return [] unless trigger_list
+
+    trigger_list = [trigger_list] unless trigger_list.is_a?(Array)
+    results = []
+
+    trigger_list.each do |trigger_config|
+      next unless trigger_config.is_a?(Hash)
+
+      trigger_config.each do |trigger_name, config|
+        trigger_name = trigger_name.to_sym
+        next if skip_keys.include?(trigger_name)
+
+        klass = OptionConfigs::ExtraOptions.trigger_class(trigger_name)
+        trigger = klass.new(config, @item)
+        result = trigger.perform
+        results << { trigger: trigger_name, result: }
+      end
+    end
+
+    results
+  end
+
+  #
+  # Store trigger results on the item for use by subsequent triggers
+  # @param [String] key - the result key (e.g. 'case', 'transaction')
+  # @param [Object] results - the results to store
+  def store_trigger_results(key, results)
+    return unless @item.respond_to?(:save_trigger_results) && @item.save_trigger_results
+
+    @item.save_trigger_results[key] = results
+  end
+
   def self.config_def(if_extras: nil); end
 end

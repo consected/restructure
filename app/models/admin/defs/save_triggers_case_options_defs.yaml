@@ -1,0 +1,56 @@
+#
+# YAML definition for case save trigger options
+# Used by admin panel to display configuration options
+#
+_save_triggers_case_options:
+  case: &st_case
+    - array of when/then/else branches for conditional trigger execution
+    - evaluates when conditions in order, executes the first matching then block
+    - e.g. |-
+        save_trigger:
+          on_create:
+            case:
+              - when:
+                  all:
+                    this:
+                      field1: value 1
+                then:
+                  - log:
+                      message: Matched value 1
+                  - create_reference:
+                      model_name:
+                        in: master
+              - when:
+                  all:
+                    this:
+                      field1: value 2
+                then:
+                  - update_reference:
+                      model_name:
+                        in: master
+                  - log:
+                      message: Matched value 2
+              - else:
+                  - notify:
+                      type: email
+                      role: data_coordinator
+                      subject: "No condition matched"
+    - |
+      Implements conditional branching for save triggers, similar to a
+      case/switch statement in programming.
+
+      Each branch is evaluated in order:
+      - **when:** contains a conditional expression (same format as
+        showable_if, editable_if, etc.) that is evaluated against the
+        current item
+      - **then:** contains an array of save triggers to execute if the
+        when condition is true
+      - **else:** (optional, must be last) contains an array of save triggers
+        to execute if no when condition matched
+
+      Only the first matching branch executes. If no when condition matches
+      and no else branch is provided, no triggers run.
+
+      This is useful when different actions should be taken based on field
+      values, avoiding the need for multiple identical `if:` conditions on
+      individual triggers.

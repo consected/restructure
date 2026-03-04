@@ -27,36 +27,17 @@ class SaveTriggers::Transaction < SaveTriggers::SaveTriggersBase
   end
 
   def perform
-    # The config should be an array of trigger configurations
     triggers = @trigger_configs
     triggers = [triggers] unless triggers.is_a?(Array)
 
     results = []
 
     @item.transaction do
-      triggers.each do |trigger_config|
-        next unless trigger_config.is_a?(Hash)
-
-        trigger_config.each do |trigger_name, config|
-          trigger_name = trigger_name.to_sym
-          # Skip non-trigger keys like 'if'
-          next if trigger_name == :if
-
-          # Get the trigger class and execute it
-          klass = ::SaveTriggers.const_get(trigger_name.to_s.camelize)
-          trigger = klass.new(config, @item)
-          result = trigger.perform
-          results << { trigger: trigger_name, result: }
-        end
-      end
+      results = execute_trigger_list(triggers, skip_keys: [:if])
     end
 
     Rails.logger.info "[SaveTrigger::Transaction] Completed #{results.length} triggers successfully"
-
-    # Store results for potential use by subsequent triggers
-    if @item.respond_to?(:save_trigger_results) && @item.save_trigger_results
-      @item.save_trigger_results['transaction'] = results
-    end
+    store_trigger_results('transaction', results)
 
     results
   rescue StandardError => e
