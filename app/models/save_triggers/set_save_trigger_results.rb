@@ -43,10 +43,7 @@ class SaveTriggers::SetSaveTriggerResults < SaveTriggers::SaveTriggersBase
       config = extract_config(model_def)
 
       # Evaluate conditional if
-      if config[:if]
-        ca = ConditionalActions.new config[:if], @item
-        next unless ca.calc_action_if
-      end
+      next unless if_evaluates(config[:if])
 
       element = config[:element]
       raise FphsException, 'set_save_trigger_results requires element to be specified' if element.blank?

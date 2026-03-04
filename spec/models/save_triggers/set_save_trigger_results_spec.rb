@@ -309,19 +309,24 @@ RSpec.describe SaveTriggers::SetSaveTriggerResults, type: :model do
   end
 
   describe 'integration with subsequent triggers' do
-    it 'makes set values available for substitution in later triggers' do
-      # First, set a value
-      set_config = {
-        element: 'my_ref_id',
+    it 'allows a second trigger to reference values set by the first' do
+      # First trigger sets a value
+      first_config = {
+        element: 'step_one_result',
         value: '{{master_id}}'
       }
 
-      trigger = SaveTriggers::SetSaveTriggerResults.new(set_config, @al)
-      trigger.perform
+      SaveTriggers::SetSaveTriggerResults.new(first_config, @al).perform
+      expect(@al.save_trigger_results['step_one_result']).to eq @al.master_id.to_s
 
-      # Verify that the value is available in save_trigger_results
-      # and can be used in substitutions
-      expect(@al.save_trigger_results['my_ref_id']).to eq @al.master_id.to_s
+      # Second trigger reads the value set by the first via substitution
+      second_config = {
+        element: 'step_two_result',
+        value: '{{save_trigger_results.step_one_result}}'
+      }
+
+      SaveTriggers::SetSaveTriggerResults.new(second_config, @al).perform
+      expect(@al.save_trigger_results['step_two_result']).to eq @al.master_id.to_s
     end
   end
 end
