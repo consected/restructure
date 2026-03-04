@@ -93,6 +93,31 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
         expect(result).to be_present
       end
+
+      it 'executes multiple triggers in the then block - Issue #944' do
+        config = [
+          {
+            when: {
+              all: {
+                this: {
+                  select_call_direction: 'to player'
+                }
+              }
+            },
+            then: [
+              { log: { message: 'First then trigger', severity: 'info' } },
+              { log: { message: 'Second then trigger', severity: 'debug' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+        result = trigger.perform
+
+        expect(result.length).to eq(2)
+        expect(result[0][:trigger]).to eq(:log)
+        expect(result[1][:trigger]).to eq(:log)
+      end
     end
 
     context 'when multiple when conditions could match' do
@@ -120,6 +145,43 @@ RSpec.describe SaveTriggers::Case, type: :model do
             },
             then: [
               { log: { message: 'Second match should not run', severity: 'info' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+        result = trigger.perform
+
+        expect(result.length).to eq(1)
+        expect(result.first[:trigger]).to eq(:log)
+      end
+    end
+
+    context 'when the first when does not match but the second does' do
+      it 'skips the first and executes the second when block - Issue #944' do
+        config = [
+          {
+            when: {
+              all: {
+                this: {
+                  select_call_direction: 'from player'
+                }
+              }
+            },
+            then: [
+              { log: { message: 'First branch - should not run', severity: 'info' } }
+            ]
+          },
+          {
+            when: {
+              all: {
+                this: {
+                  select_who: 'user'
+                }
+              }
+            },
+            then: [
+              { log: { message: 'Second branch matched', severity: 'info' } }
             ]
           }
         ]
@@ -160,6 +222,34 @@ RSpec.describe SaveTriggers::Case, type: :model do
         expect(result.length).to eq(1)
         expect(result.first[:trigger]).to eq(:log)
       end
+
+      it 'does not execute else when a when condition matched - Issue #944' do
+        config = [
+          {
+            when: {
+              all: {
+                this: {
+                  select_call_direction: 'to player'
+                }
+              }
+            },
+            then: [
+              { log: { message: 'Matched branch', severity: 'info' } }
+            ]
+          },
+          {
+            else: [
+              { log: { message: 'Should not reach else', severity: 'info' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+        result = trigger.perform
+
+        # Only one trigger result from the matched when, not from else
+        expect(result.length).to eq(1)
+      end
     end
 
     context 'when no when condition matches and no else is present' do
@@ -178,6 +268,17 @@ RSpec.describe SaveTriggers::Case, type: :model do
             ]
           }
         ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+        result = trigger.perform
+
+        expect(result).to eq([])
+      end
+    end
+
+    context 'with empty config' do
+      it 'handles empty array gracefully - Issue #944' do
+        config = []
 
         trigger = SaveTriggers::Case.new(config, @activity_log)
         result = trigger.perform
@@ -210,6 +311,202 @@ RSpec.describe SaveTriggers::Case, type: :model do
         expect(@activity_log.save_trigger_results['case'].length).to eq(1)
         expect(@activity_log.save_trigger_results['case'].first[:trigger]).to eq(:log)
       end
+
+      it 'stores empty results when no branch matched - Issue #944' do
+        config = [
+          {
+            when: {
+              all: {
+                this: {
+                  select_call_direction: 'from player'
+                }
+              }
+            },
+            then: [
+              { log: { message: 'Will not match', severity: 'info' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(config, @activity_log)
+        trigger.perform
+
+        expect(@activity_log.save_trigger_results['case']).to eq([])
+      end
+    end
+  end
+
+  describe 'integration with save_trigger config' do
+    it 'runs case trigger as part of on_create save_trigger - Issue #944' do
+      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
+
+      al_def.extra_log_types = <<~END_DEF
+        case_test:
+          label: Case Test
+          fields:
+            - select_call_direction
+            - select_who
+          save_trigger:
+            on_create:
+              case:
+                - when:
+                    all:
+                      this:
+                        select_call_direction: 'to player'
+                  then:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'matched to player'
+                - when:
+                    all:
+                      this:
+                        select_call_direction: 'from player'
+                  then:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'matched from player'
+                - else:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'no match - else'
+      END_DEF
+
+      al_def.current_admin = @admin
+      al_def.force_regenerate = true
+      al_def.updated_at = DateTime.now
+      al_def.save!
+      ActivityLog.refresh_outdated
+      al_def.reload
+      al_def.force_option_config_parse
+
+      setup_access :activity_log__player_contact_phone__case_test,
+                   resource_type: :activity_log_type, access: :create, user: @user
+
+      al_def.add_master_association
+
+      al = @master.activity_log__player_contact_phones.create!(
+        select_call_direction: 'to player',
+        select_who: 'original',
+        extra_log_type: 'case_test',
+        player_contact: @player_contact,
+        master: @master,
+        current_user: @user
+      )
+
+      expect(al.select_who).to eq 'matched to player'
+    end
+
+    it 'runs else branch when no when matches in save_trigger - Issue #944' do
+      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
+
+      al_def.extra_log_types = <<~END_DEF
+        case_else_test:
+          label: Case Else Test
+          fields:
+            - select_call_direction
+            - select_who
+          save_trigger:
+            on_create:
+              case:
+                - when:
+                    all:
+                      this:
+                        select_call_direction: 'something else'
+                  then:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'should not match'
+                - else:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'fell through to else'
+      END_DEF
+
+      al_def.current_admin = @admin
+      al_def.force_regenerate = true
+      al_def.updated_at = DateTime.now
+      al_def.save!
+      ActivityLog.refresh_outdated
+      al_def.reload
+      al_def.force_option_config_parse
+
+      setup_access :activity_log__player_contact_phone__case_else_test,
+                   resource_type: :activity_log_type, access: :create, user: @user
+
+      al_def.add_master_association
+
+      al = @master.activity_log__player_contact_phones.create!(
+        select_call_direction: 'to player',
+        select_who: 'original',
+        extra_log_type: 'case_else_test',
+        player_contact: @player_contact,
+        master: @master,
+        current_user: @user
+      )
+
+      expect(al.select_who).to eq 'fell through to else'
+    end
+
+    it 'runs second when branch in save_trigger - Issue #944' do
+      al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
+
+      al_def.extra_log_types = <<~END_DEF
+        case_second_test:
+          label: Case Second Test
+          fields:
+            - select_call_direction
+            - select_who
+          save_trigger:
+            on_create:
+              case:
+                - when:
+                    all:
+                      this:
+                        select_call_direction: 'something else'
+                  then:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'first branch'
+                - when:
+                    all:
+                      this:
+                        select_call_direction: 'from player'
+                  then:
+                    - update_this:
+                        one:
+                          with:
+                            select_who: 'second branch matched'
+      END_DEF
+
+      al_def.current_admin = @admin
+      al_def.force_regenerate = true
+      al_def.updated_at = DateTime.now
+      al_def.save!
+      ActivityLog.refresh_outdated
+      al_def.reload
+      al_def.force_option_config_parse
+
+      setup_access :activity_log__player_contact_phone__case_second_test,
+                   resource_type: :activity_log_type, access: :create, user: @user
+
+      al_def.add_master_association
+
+      al = @master.activity_log__player_contact_phones.create!(
+        select_call_direction: 'from player',
+        select_who: 'original',
+        extra_log_type: 'case_second_test',
+        player_contact: @player_contact,
+        master: @master,
+        current_user: @user
+      )
+
+      expect(al.select_who).to eq 'second branch matched'
     end
   end
 
