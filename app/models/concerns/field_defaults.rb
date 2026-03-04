@@ -5,13 +5,14 @@ module FieldDefaults
   # Calculate the value for field defaults and simple
   # data attribute substitutions.
   # Strings with {{tags}} are substituted using the Formatter::Substitution class
-  # If the value is a Hash, use ConditionalActions#get_this_value
+  # If the value is a Hash with a single key 'object', return the inner value directly
+  # to allow storing objects to JSONB fields. Otherwise, use ConditionalActions#get_this_val
   # @param [UserBase] obj - the instance to use data from
   # @param [String|Number|Hash|nil] value - the value to perform substitutions on
   # @param [Symbol|nil] type - optionally specify a specific date or datetime type
   # @param [DateTime] from_when - a DateTime to use instead of now
   # @param [Boolean] allow_nil - by default, return empty string instead of nil. Set true to allow nils
-  # @return [String|Number|nil] the result after substitutions
+  # @return [String|Number|Hash|nil] the result after substitutions
   def self.calculate_default(obj, value, type = nil, from_when: nil, allow_nil: false, ignore_missing: false)
     value = '' if value.nil? && !allow_nil
 

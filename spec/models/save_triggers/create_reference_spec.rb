@@ -21,7 +21,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       @player_contact_prev = @master.player_contacts.create! data: '(617)123-1234 prev', rec_type: :phone, rank: 5, source: 'nflpa2'
       @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
       @al = create_item master: @master
-      add_reference_def_to(@al, [player_contacts: { from: 'this', add: 'many' }])
+      add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
       expect(@al.master_id).to eq @master.id
       setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
     end
@@ -157,10 +157,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
     it 'creates a reference in a specific record' do
       pn = random_phone_number
 
-      config = {
-        if: { always: true }
-      }
-
       al_alt = create_item master: @master
 
       config = {
@@ -192,10 +188,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates a reference in a specific record with other item attributes' do
       pn = @player_contact.data
-
-      config = {
-        if: { always: true }
-      }
 
       al_alt = create_item master: @master
 
@@ -240,11 +232,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates a reference in a specific record with attributes from multiple items' do
       pn = @player_contact.data
-      pn_prev = @player_contact_prev.data
-
-      config = {
-        if: { always: true }
-      }
+      @player_contact_prev.data
 
       al_alt = create_item master: @master
 
@@ -418,7 +406,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates an embedded_item when creating another record' do
       pn = random_phone_number
-      pn2 = random_phone_number
+      random_phone_number
 
       pc_hash = {
         rec_type: :phone,
@@ -509,9 +497,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
       # Clean up any existing test tables and model
       DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
-      if defined?(DynamicModel::TestJsonUpdateRec)
-        DynamicModel.send(:remove_const, :TestJsonUpdateRec)
-      end
+      DynamicModel.send(:remove_const, :TestJsonUpdateRec) if defined?(DynamicModel::TestJsonUpdateRec)
 
       conn = ActiveRecord::Base.connection
       conn.execute("DROP TABLE IF EXISTS #{@schema_name}.test_json_update_rec_history CASCADE")
@@ -552,9 +538,11 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       @al = create_item master: @master
       setup_access :dynamic_model__test_json_update_recs, user: @user
       add_reference_def_to(@al, [
-        player_contacts: { from: 'this', add: 'many' },
-        dynamic_model__test_json_update_recs: { from: 'this', add: 'many' }
-      ])
+                             {
+                               player_contacts: { from: 'this', add: 'many' },
+                               dynamic_model__test_json_update_recs: { from: 'this', add: 'many' }
+                             }
+                           ])
       setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
     end
 
