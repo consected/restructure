@@ -49,8 +49,14 @@ module FieldDefaults
         res = Formatter::Substitution.substitute(value, data: obj, tag_subs: nil, ignore_missing:)
       end
     elsif value.is_a? Hash
-      ca = ConditionalActions.new value, obj
-      res = ca.get_this_val
+      if value.length == 1 && (value.key?(:object) || value.key?('object'))
+        # A Hash with a single 'object' key passes the inner value through directly,
+        # allowing JSONB fields to store arbitrary objects (issue #943)
+        res = value[:object] || value['object']
+      else
+        ca = ConditionalActions.new value, obj
+        res = ca.get_this_val
+      end
     end
 
     parse_date_and_time(res, type)
