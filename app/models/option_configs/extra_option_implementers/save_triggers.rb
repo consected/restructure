@@ -22,7 +22,8 @@ module OptionConfigs
                              log
                              transaction
                              background
-                             reload_this].freeze
+                             reload_this
+                             case].freeze
 
       class_methods do
         #
