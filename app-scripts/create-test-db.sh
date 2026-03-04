@@ -16,6 +16,7 @@ BASEDIR=$0
 DB_BASE_NAME=${DB_BASE_NAME:=restr}
 DBNUM=${DBNUM:=${TEST_ENV_NUMBER}}
 DBOWNER=${DBOWNER:=$(whoami)}
+DB_NAME_PREFIX="${DB_BASE_NAME}${TEST_ENV_SET}_test"
 
 export PGOPTIONS='--client-min-messages=warning'
 
@@ -60,10 +61,10 @@ else
 fi
 
 if [ -z "${PARALLEL}" ] || [ "${PARALLEL}" == '1' ]; then
-  echo "Single setup: ${DB_BASE_NAME}${TEST_ENV_SET}_test${DBNUM}"
+  echo "Single setup: ${DB_NAME_PREFIX}${DBNUM}"
   setup
 else
-  echo "Setup ${PARALLEL} databases: ${DB_BASE_NAME}${TEST_ENV_SET}_test<n>"
+  echo "Setup ${PARALLEL} databases: ${DB_NAME_PREFIX}<n>"
   for i in $(seq 1 "${PARALLEL}"); do
     if [ ${i} == 1 ]; then
       DBNUM=''
