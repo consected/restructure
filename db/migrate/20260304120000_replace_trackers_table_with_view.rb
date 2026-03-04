@@ -108,7 +108,54 @@ class ReplaceTrackersTableWithView < ActiveRecord::Migration[7.1]
         FOR EACH ROW EXECUTE FUNCTION trackers_instead_of_insert();
     SQL
 
-    # Step 8: Drop old trigger functions (no longer needed)
+    # Step 8: Create INSTEAD OF UPDATE trigger to route updates to tracker_history
+    # When a tracker is "updated" via the view (e.g., track_record_update),
+    # we insert a new tracker_history row with the updated values.
+    # This maintains backward compatibility with code that calls tracker.save
+    # on a persisted record.
+    execute <<~SQL
+      CREATE OR REPLACE FUNCTION trackers_instead_of_update() RETURNS trigger AS $$
+      BEGIN
+        -- Insert a new tracker_history row with the updated values
+        INSERT INTO tracker_history
+          (tracker_id, master_id, protocol_id,
+           protocol_event_id, event_date, sub_process_id, notes,
+           item_id, item_type,
+           created_at, updated_at, user_id)
+        VALUES
+          (OLD.id, NEW.master_id, NEW.protocol_id,
+           NEW.protocol_event_id, NEW.event_date, NEW.sub_process_id, NEW.notes,
+           NEW.item_id, NEW.item_type,
+           COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id);
+
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER trackers_update_trigger
+        INSTEAD OF UPDATE ON trackers
+        FOR EACH ROW EXECUTE FUNCTION trackers_instead_of_update();
+    SQL
+
+    # Step 9: Create INSTEAD OF DELETE trigger to route deletes to tracker_history
+    # Deleting a row from the view means deleting all tracker_history rows
+    # for the same tracker group (identified by tracker_id).
+    execute <<~SQL
+      CREATE OR REPLACE FUNCTION trackers_instead_of_delete() RETURNS trigger AS $$
+      BEGIN
+        DELETE FROM tracker_history
+        WHERE tracker_id = OLD.id;
+
+        RETURN OLD;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER trackers_delete_trigger
+        INSTEAD OF DELETE ON trackers
+        FOR EACH ROW EXECUTE FUNCTION trackers_instead_of_delete();
+    SQL
+
+    # Step 10: Drop old trigger functions (no longer needed)
     execute <<~SQL
       DROP FUNCTION IF EXISTS tracker_upsert();
       DROP FUNCTION IF EXISTS log_tracker_update();
@@ -118,10 +165,14 @@ class ReplaceTrackersTableWithView < ActiveRecord::Migration[7.1]
   end
 
   def down
-    # Drop the view and its trigger
+    # Drop the view and its triggers
     execute <<~SQL
+      DROP TRIGGER IF EXISTS trackers_delete_trigger ON trackers;
+      DROP TRIGGER IF EXISTS trackers_update_trigger ON trackers;
       DROP TRIGGER IF EXISTS trackers_insert_trigger ON trackers;
       DROP VIEW IF EXISTS trackers;
+      DROP FUNCTION IF EXISTS trackers_instead_of_delete();
+      DROP FUNCTION IF EXISTS trackers_instead_of_update();
       DROP FUNCTION IF EXISTS trackers_instead_of_insert();
     SQL
 

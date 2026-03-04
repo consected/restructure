@@ -13521,6 +13521,22 @@ $$;
 
 
 --
+-- Name: trackers_instead_of_delete(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.trackers_instead_of_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  DELETE FROM tracker_history
+  WHERE tracker_id = OLD.id;
+
+  RETURN OLD;
+END;
+$$;
+
+
+--
 -- Name: trackers_instead_of_insert(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -13555,6 +13571,31 @@ BEGIN
 
   -- Set the id on NEW so Rails gets it back via RETURNING
   NEW.id := existing_tracker_id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: trackers_instead_of_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.trackers_instead_of_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  -- Insert a new tracker_history row with the updated values
+  INSERT INTO tracker_history
+    (tracker_id, master_id, protocol_id,
+     protocol_event_id, event_date, sub_process_id, notes,
+     item_id, item_type,
+     created_at, updated_at, user_id)
+  VALUES
+    (OLD.id, NEW.master_id, NEW.protocol_id,
+     NEW.protocol_event_id, NEW.event_date, NEW.sub_process_id, NEW.notes,
+     NEW.item_id, NEW.item_type,
+     COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id);
+
   RETURN NEW;
 END;
 $$;
@@ -150793,10 +150834,24 @@ CREATE TRIGGER test_ext_history_update AFTER UPDATE ON ml_app.test_exts FOR EACH
 
 
 --
+-- Name: trackers trackers_delete_trigger; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER trackers_delete_trigger INSTEAD OF DELETE ON ml_app.trackers FOR EACH ROW EXECUTE FUNCTION ml_app.trackers_instead_of_delete();
+
+
+--
 -- Name: trackers trackers_insert_trigger; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER trackers_insert_trigger INSTEAD OF INSERT ON ml_app.trackers FOR EACH ROW EXECUTE FUNCTION ml_app.trackers_instead_of_insert();
+
+
+--
+-- Name: trackers trackers_update_trigger; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER trackers_update_trigger INSTEAD OF UPDATE ON ml_app.trackers FOR EACH ROW EXECUTE FUNCTION ml_app.trackers_instead_of_update();
 
 
 --

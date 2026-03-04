@@ -290,7 +290,8 @@ RSpec.describe Tracker, type: :model do
       expect(t['sub_process_id']).to eq @sp2_1.id
       expect(t['user_id']).to eq @user_id_2
 
-      res = execute "SELECT * FROM tracker_history WHERE master_id = #{@master.id} AND protocol_id = #{@p2.id} ORDER BY id DESC;"
+      # Verify the updated tracker_history row by finding it via notes
+      res = execute "SELECT * FROM tracker_history WHERE master_id = #{@master.id} AND protocol_id = #{@p2.id} ORDER BY event_date::date DESC NULLS LAST, id DESC;"
       expect(res.count).to eq 3
       t = res.first
       expect(t['sub_process_id']).to eq @sp2_1.id
