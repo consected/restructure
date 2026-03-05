@@ -25,12 +25,16 @@
 # table should be used when checking if a status event has occurred against a
 # master record.
 #
-# Note: database triggers are defined that actually ensure the tracker table is
-# managed correctly. Although record inserts or updates can be made directly into
-# trackers or tracker_history tables, the same result will appear in both tables.
-# The app relies on these DB triggers to avoid duplicating functionality that is
-# regularly used outside of the app directly against the database.
+# Note: the trackers "table" is actually a database view derived from tracker_history.
+# Inserts are handled by an INSTEAD OF trigger that redirects to tracker_history.
+# The view derives the latest entry per (master_id, protocol_id) using:
+#   ORDER BY event_date::date DESC NULLS LAST, tracker_history.id DESC
+# This ensures the ordering rule exists in exactly one place.
+# See: https://github.com/consected/restructure/issues/941
 class Tracker < UserBase
+  # Explicitly set primary key since Rails can't auto-detect it from a view
+  self.primary_key = 'id'
+
   include UserHandler
   include TrackerHandler
 
@@ -137,7 +141,7 @@ class Tracker < UserBase
       # Exclude where both to and from are blank (since a form update will cause a switch of nil and "") which is meaningless
       next if v.first.blank? && v.last.blank?
 
-      kname = "#{k}_name".to_sym
+      kname = :"#{k}_name"
 
       get_name = "get_#{k}_name"
       if record.respond_to?(kname) && record.class.respond_to?(get_name)
@@ -150,7 +154,7 @@ class Tracker < UserBase
       fromv = '-' if fromv.blank?
       tov = '-' if tov.blank?
 
-      cp += "#{k.humanize} #{new_rec ? '' : "from #{fromv}"} #{new_rec ? '' : 'to '}#{tov}; "
+      cp += "#{k.humanize} #{"from #{fromv}" unless new_rec} #{'to ' unless new_rec}#{tov}; "
     end
 
     # If there were no changes, discard this item. Otherwise, save it.
@@ -292,7 +296,7 @@ class Tracker < UserBase
     end
 
     puts "Bad Protocol Event: #{rec_type}: #{record.attributes}" if Rails.env.test?
-    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, "\
+    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, " \
           'check double spacing is correct in the definition for namespaced classes.'
   end
 
@@ -360,6 +364,6 @@ class Tracker < UserBase
 
     extras[:methods] << :tracker_completions
 
-    super(extras)
+    super
   end
 end
