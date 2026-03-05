@@ -53,7 +53,9 @@ module FieldDefaults
       if value.length == 1 && (value.key?(:object) || value.key?('object'))
         # A Hash with a single 'object' key passes the inner value through directly,
         # allowing JSONB fields to store arbitrary objects (issue #943)
-        res = value[:object] || value['object']
+        # Recursively substitute string values within the inner object (issue #956)
+        inner = value[:object] || value['object']
+        res = substitute_value_recurse(obj, inner, allow_nil:, ignore_missing:)
       else
         ca = ConditionalActions.new value, obj
         res = ca.get_this_val
@@ -61,6 +63,28 @@ module FieldDefaults
     end
 
     parse_date_and_time(res, type)
+  end
+
+  #
+  # Recursively substitute string values within a nested structure of
+  # hashes and arrays, applying calculate_default to each string value.
+  # Non-string, non-hash, non-array values are returned as-is.
+  # @param [UserBase] obj - the instance to use data from
+  # @param [Object] value - the value to recursively substitute
+  # @param [Boolean] allow_nil - pass through to calculate_default
+  # @param [Boolean] ignore_missing - pass through to calculate_default
+  # @return [Object] the value with all string values substituted
+  def self.substitute_value_recurse(obj, value, allow_nil: false, ignore_missing: false)
+    case value
+    when Hash
+      value.transform_values { |v| substitute_value_recurse(obj, v, allow_nil:, ignore_missing:) }
+    when Array
+      value.map { |v| substitute_value_recurse(obj, v, allow_nil:, ignore_missing:) }
+    when String
+      calculate_default(obj, value, allow_nil:, ignore_missing:)
+    else
+      value
+    end
   end
 
   #

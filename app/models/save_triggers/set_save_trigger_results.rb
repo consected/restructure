@@ -52,9 +52,9 @@ class SaveTriggers::SetSaveTriggerResults < SaveTriggers::SaveTriggersBase
 
       # Calculate the value using FieldDefaults, supporting substitutions,
       # conditional actions, and object values.
-      # For object: hashes, also perform substitutions on the inner values.
+      # FieldDefaults.calculate_default handles recursive substitution within
+      # object: hashes internally (issue #956).
       calculated_value = FieldDefaults.calculate_default(@item, value, allow_nil: true)
-      calculated_value = substitute_object_values(calculated_value) if calculated_value.is_a?(Hash)
 
       # Set the value in save_trigger_results, supporting dot-notation for nested keys
       set_nested_value(element.to_s, calculated_value)
@@ -87,17 +87,6 @@ class SaveTriggers::SetSaveTriggerResults < SaveTriggers::SaveTriggersBase
         target = target[key]
       end
       target[parts.last] = value
-    end
-  end
-
-  #
-  # Recursively perform substitutions on all string values within a hash.
-  # This enables the object: key pattern to include {{substitutions}}.
-  # @param [Hash] hash_value - the hash whose values should be substituted
-  # @return [Hash] the hash with substituted string values
-  def substitute_object_values(hash_value)
-    hash_value.deep_transform_values do |v|
-      FieldDefaults.calculate_default(@item, v, allow_nil: true)
     end
   end
 
