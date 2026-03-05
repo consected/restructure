@@ -1,5 +1,6 @@
 # Save Trigger: Run Batch Trigger options
-        - run_batch_1:
+        run_batch_trigger:
+          - run_batch_1:
             if: #if_extras
             resource_name: dynamic_model__view_handle_recs  # Resource name of the dynamic model to run batch trigger for
             mode: foreground  # 'foreground' (default) runs synchronously, 'background' queues as a job

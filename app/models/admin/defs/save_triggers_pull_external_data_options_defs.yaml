@@ -1,6 +1,6 @@
-
 # Save Trigger: Pull External Data options
-        - this_1:
+        pull_external_data:
+          - this_1:
             if: if_extras
             force_not_editable_save: true allows the update to succeed even if this item is set as not_editable
             local_data: |

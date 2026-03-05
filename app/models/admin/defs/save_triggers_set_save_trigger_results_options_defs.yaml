@@ -1,5 +1,6 @@
 # Save Trigger: Set Save Trigger Results options
-        - set_1:
+        set_save_trigger_results:
+          - set_1:
             if: #if_extras
             element: variable_name  # Name of the element to set in save_trigger_results, supports dot-notation (e.g. 'hash_var.key1')
             value: literal_or_substitution  # Value to set - can be a literal, substitution string like '{{field}}', or object hash

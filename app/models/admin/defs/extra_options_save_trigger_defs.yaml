@@ -1,0 +1,28 @@
+# save_trigger options
+  save_trigger:
+    # Each trigger definition is run in order within the list
+    # simpler definitions may not use a list, and just specify a hash of key value pairs, run in order
+    # noting that this only allows a single configuration of each type of trigger
+    on_create: &trigger_tasks
+      - <trigger type>: 
+      - <trigger type>:       
+
+    on_update:
+      - <trigger type>: 
+    
+    on_save:
+      # on_save provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.
+      - <trigger type>: 
+    
+    on_disable:
+      # on_disable is triggered for any item that has a field named disabled that is switched to true
+      - <trigger type>: 
+    
+    on_upload:
+      - <trigger type>: 
+
+    before_save:
+      # Run specified triggers before the current item has saved, allowing output to be reflected 
+      # in the UI update, but before reference updates are available
+      # Typically used for update_this, although can be applied to the other triggers if necessary
+      - <trigger type>: 

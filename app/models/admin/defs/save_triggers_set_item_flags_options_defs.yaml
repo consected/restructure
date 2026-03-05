@@ -1,6 +1,6 @@
-
 # Save Trigger: Set Item Flags options
-        - first: 'set flags on the first matching reference with this configuration, specifying {update: return_result}',
+        set_item_flags:
+          - first: 'set flags on the first matching reference with this configuration, specifying {update: return_result}',
           if: if_extras
           force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
           flags: 'list of flag-name ids or names, or exclude if the existing set of flags should be used to add or remove items from'

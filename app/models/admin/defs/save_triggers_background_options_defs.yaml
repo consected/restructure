@@ -1,52 +1,48 @@
-# frozen_string_literal: true
-
-#
 # YAML definition for background save trigger options
 # Used by admin panel to display configuration options
 #
-_save_triggers_background_options:
-  background: &st_background
-    - array of save triggers to execute in a background job
-    - returns immediately, triggers run asynchronously
-    - e.g. |-
-        save_trigger:
-          on_create:
-            background:
-              - create_reference:
-                  model_name:
-                    in: master
-              - notify:
-                  type: email
-                  role: data_coordinator
-                  subject: "Processing complete"
-              - update_this:
-                  one:
-                    with:
-                      status: processing
-    - |
-      All listed save triggers will be queued to run in a single background job.
-      The save operation returns immediately without waiting for the triggers
-      to complete.
 
-      This is useful for long-running operations like sending notifications,
-      processing large datasets, or calling external APIs that shouldn't block
-      the main request.
+      background: &st_background
+        - array of save triggers to execute in a background job
+        - returns immediately, triggers run asynchronously
+        - e.g. |-
+            save_trigger:
+              on_create:
+                background:
+                  - create_reference:
+                      model_name:
+                        in: master
+                  - notify:
+                      type: email
+                      role: data_coordinator
+                      subject: "Processing complete"
+                  - update_this:
+                      one:
+                        with:
+                          status: processing
+        - |
+          All listed save triggers will be queued to run in a single background job.
+          The save operation returns immediately without waiting for the triggers
+          to complete.
 
-      The trigger accepts an array of save trigger configurations, where each
-      item is a standard save trigger definition (create_master, create_reference,
-      update_this, notify, etc.).
+          This is useful for long-running operations like sending notifications,
+          processing large datasets, or calling external APIs that shouldn't block
+          the main request.
 
-      Results from the queue operation are stored in save_trigger_results['background']
-      with the following structure:
-        {
-          status: 'queued',
-          item_class: 'DynamicModel::ClassName',
-          item_id: 123,
-          trigger_count: 3,
-          queued_at: <timestamp>
-        }
+          The trigger accepts an array of save trigger configurations, where each
+          item is a standard save trigger definition (create_master, create_reference,
+          update_this, notify, etc.).
 
-      Note: The current_user context is preserved in the background job,
-      allowing triggers that depend on user context to function correctly.
+          Results from the queue operation are stored in save_trigger_results['background']
+          with the following structure:
+            {
+              status: 'queued',
+              item_class: 'DynamicModel::ClassName',
+              item_id: 123,
+              trigger_count: 3,
+              queued_at: <timestamp>
+            }
 
-save_triggers_background_options: *st_background
+          Note: The current_user context is preserved in the background job,
+          allowing triggers that depend on user context to function correctly.
+

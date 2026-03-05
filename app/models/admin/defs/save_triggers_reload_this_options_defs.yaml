@@ -1,53 +1,48 @@
-# frozen_string_literal: true
-
-#
 # YAML definition for reload_this save trigger options
 # Used by admin panel to display configuration options
 #
-_save_triggers_reload_this_options:
-  reload_this: &st_reload_this
-    - reloads the current item from the database
-    - allows subsequent triggers to see updated data
-    - e.g. |-
-        save_trigger:
-          on_create:
-            - update_reference:
-                - pi:
-                    first:
-                      player_infos:
-                        last_name: new name
-            - reload_this:
-                if:
-                  always: true
-            - update_reference:
-                - pi:
-                    first:
-                      player_infos:
-                        last_name: 'updated - {{last_name}}'
-    - |
-      Reloads the current item from the database, refreshing all attribute
-      values. This is particularly useful when:
+      reload_this: &st_reload_this
+        - reloads the current item from the database
+        - allows subsequent triggers to see updated data
+        - e.g. |-
+            save_trigger:
+              on_create:
+                - update_reference:
+                    - pi:
+                        first:
+                          player_infos:
+                            last_name: new name
+                - reload_this:
+                    if:
+                      always: true
+                - update_reference:
+                    - pi:
+                        first:
+                          player_infos:
+                            last_name: 'updated - {{last_name}}'
+        - |
+          Reloads the current item from the database, refreshing all attribute
+          values. This is particularly useful when:
 
-      1. Working with views where the view_sql includes joins to other tables
-         that may have been updated by previous triggers
+          1. Working with views where the view_sql includes joins to other tables
+            that may have been updated by previous triggers
 
-      2. After create_reference or update_reference triggers that modify
-         related data which affects the current item's attributes
+          2. After create_reference or update_reference triggers that modify
+            related data which affects the current item's attributes
 
-      3. When subsequent triggers need to use `this.attribute` conditions
-         or `{{attribute}}` substitutions that reflect recent changes
+          3. When subsequent triggers need to use `this.attribute` conditions
+            or `{{attribute}}` substitutions that reflect recent changes
 
-      Without reload_this, the `{{attribute}}` substitutions and
-      `this.attribute` conditions would show the original values from when
-      the trigger pipeline started.
+          Without reload_this, the `{{attribute}}` substitutions and
+          `this.attribute` conditions would show the original values from when
+          the trigger pipeline started.
 
-      The trigger preserves the current_user and save_trigger_results
-      across the reload.
+          The trigger preserves the current_user and save_trigger_results
+          across the reload.
 
-      Configuration options:
-        if: # optional condition to control when reload occurs
-          always: true  # always reload
-          never: true   # never reload (useful for testing)
-          # or any other valid condition
+          Configuration options:
+            if: # optional condition to control when reload occurs
+              always: true  # always reload
+              never: true   # never reload (useful for testing)
+              # or any other valid condition
 
-save_triggers_reload_this_options: *st_reload_this

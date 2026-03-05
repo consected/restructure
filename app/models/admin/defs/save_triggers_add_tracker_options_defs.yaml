@@ -1,5 +1,6 @@
 # Save Trigger: Add Tracker options
-        - protocol_name:
+        add_tracker:
+          - protocol_name:
             # The protocol_name: key should be a valid Protocol name (not label) for the tracker item to add
             # Optionally, a key may be used that is not a protocol name, and instead specify *protocol_name* or
             # *protocol_id* in the *with:* structure
