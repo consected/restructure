@@ -420,9 +420,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
   end
 
-  it 'uses template reference for content_template_text with existing field' do
-    # Use the data field (phone number) in content_template_text
-    # This should be substituted and preserved as a template for later rendering
+  it 'uses conditional reference for content_template_text with existing field' do
+    # Use a conditional hash reference to retrieve the notes field value.
+    # This should be substituted and preserved as a template for later rendering.
     @al.notes = 'Custom message for {{select_who}}'
     @al.select_who = 'notify test person'
     @al.current_user = @user
@@ -808,7 +808,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep2_last_sent_msg.item_id).to eq alstep2.id
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 1\n</div></body></html>"
-    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p>"
+    ctt = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p>"
     expect(alstep1_first_sent_msg.item_id).to eq alstep1.id
     expect(alstep1_first_sent_msg.status).to eq 'complete'
     expect(alstep1_first_sent_msg.role_name).to eq 'test'
@@ -825,7 +825,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep1_last_sent_msg.generated_content).to eq tsub
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 1\n</div></body></html>"
-    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p>"
+    ctt = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p>"
 
     expect(alstep2_first_sent_msg.item_id).to eq alstep2.id
     expect(alstep2_first_sent_msg.status).to eq 'complete'
@@ -882,6 +882,42 @@ RSpec.describe SaveTriggers::Notify, type: :model do
         expect do
           notify.send(:calc_field_or_return, hash_config)
         end.not_to raise_error
+      end
+    end
+
+    context 'with calendar_invite config (issue #953)' do
+      it 'parses calendar_invite config, resolves substitutions, and merges into extra_substitutions' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Meeting Invite',
+          calendar_invite: {
+            method: 'REQUEST',
+            summary: 'Review Meeting for {{master_id}}',
+            description: 'Notes about {{select_who}}',
+            location: 'Room 101',
+            dtstart: '2026-04-01 10:00:00',
+            dtend: '2026-04-01 11:00:00',
+            organizer: 'organizer@example.com',
+            uid: '{{id}}-{{master_id}}@restructure',
+            sequence: 0
+          }
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        ci_data = new_mn.calendar_invite_data
+        expect(ci_data).to be_a(Hash)
+        expect(ci_data['method']).to eq('REQUEST')
+        expect(ci_data['summary']).to eq("Review Meeting for #{@al.master_id}")
+        expect(ci_data['description']).to eq("Notes about #{@al.select_who}")
+        expect(ci_data['location']).to eq('Room 101')
+        expect(ci_data['organizer']).to eq('organizer@example.com')
+        expect(ci_data['uid']).to eq("#{@al.id}-#{@al.master_id}@restructure")
       end
     end
   end

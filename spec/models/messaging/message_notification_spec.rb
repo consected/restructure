@@ -23,7 +23,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     @rec_user, = create_user
     create_user
     seed_database
-    ::ActivityLog.define_models
+    ActivityLog.define_models
     setup_access :player_contacts
     create_item(data: rand(10_000_000_000_000_000), rank: 10)
     @player_contact.master.current_user = @user
@@ -162,7 +162,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       mn.reload
       res = mn.generated_text
-      expected_name = @activity_log.select_who
+      @activity_log.select_who
 
       expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to a dynamic model #{dm.data}. This is the info: #{dm.info}.</p></div></body></html>"
 
@@ -182,7 +182,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     it 'sets up a notification to be sent, where substitution data is a hash' do
       t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}.</p>'
 
-      master = @activity_log.master
+      @activity_log.master
       layout = @layout
 
       # NOTE: do not specify app_type when using data rather than setting an item
@@ -197,7 +197,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       mn.reload
       res = mn.generated_text
-      expected_name = @activity_log.select_who
+      @activity_log.select_who
 
       expected_text = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id 1234. This is a name: henry anderson.</p></div></body></html>'
 
@@ -358,9 +358,9 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
       sleep 1
 
-      res = nil
+      nil
       10.times.each do
-        break if Delayed::Job.count == 0
+        break if Delayed::Job.none?
 
         sleep 2
         # puts "Waiting again"
@@ -369,6 +369,112 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       # This doesn't work in test environment since delayed job doesn't run. Need to mock to test this
       # res = testcnx.exec_query "select status, id from  ml_app.message_notifications order by id desc limit 1;"
       # expect(res.rows.first[0]).to eq 'complete'
+    end
+  end
+
+  # Shared calendar invite test data for issue #953 specs
+  let(:calendar_invite_data) do
+    {
+      'method' => 'REQUEST',
+      'summary' => 'Study Review Meeting',
+      'description' => 'Discuss study progress',
+      'location' => 'Conference Room A',
+      'dtstart' => '2026-04-01 10:00:00',
+      'dtend' => '2026-04-01 11:00:00',
+      'organizer' => 'organizer@example.com',
+      'uid' => 'test-123@restructure',
+      'sequence' => 0
+    }
+  end
+
+  # Helper to create a message notification with optional calendar invite
+  def create_test_notification(with_calendar_invite: false)
+    attrs = {
+      app_type: @user.app_type,
+      user: @user,
+      recipient_user_ids: [@rec_user],
+      layout_template_name: @layout.name,
+      content_template_name: @content.name,
+      item_type: @activity_log.class.name,
+      item_id: @activity_log.id,
+      master: @activity_log.master,
+      message_type: :email
+    }
+    attrs[:extra_substitutions] = { calendar_invite: calendar_invite_data } if with_calendar_invite
+    Messaging::MessageNotification.create!(attrs)
+  end
+
+  describe 'resolve_attachments with calendar_invite (issue #953)' do
+    before :example do
+      setup_messaging_test
+      mock_notification_mailer
+    end
+
+    after :example do
+      unmock_notification_mailer
+    end
+
+    it 'reads calendar_invite from extra_substitutions, generates .ics content, and stores it back' do
+      mn = create_test_notification(with_calendar_invite: true)
+
+      mn.resolve_attachments
+      resolved = mn.resolved_attachments
+
+      expect(resolved).to be_a(Array)
+      expect(resolved.length).to eq(1)
+      attachment = resolved.first
+      expect(attachment[:filename]).to eq('calendar.ics')
+      expect(attachment[:mime_type]).to eq('text/calendar; method=REQUEST')
+      expect(attachment[:content]).to include('BEGIN:VCALENDAR')
+      expect(attachment[:content]).to include('METHOD:REQUEST')
+      expect(attachment[:content]).to include('SUMMARY:Study Review Meeting')
+      expect(attachment[:content]).to include('END:VCALENDAR')
+
+      # Verify generated content is stored back in extra_substitutions
+      mn.reload
+      expect(mn.calendar_invite_data['generated_content']).to include('BEGIN:VCALENDAR')
+    end
+  end
+
+  describe 'NotificationMailer attachment support (issue #953)' do
+    before :example do
+      setup_messaging_test
+      change_setting('TestMail', true)
+    end
+
+    after :example do
+      change_setting('TestMail', false)
+    end
+
+    it 'includes .ics attachment in the email when resolved_attachments is present' do
+      mn = create_test_notification(with_calendar_invite: true)
+
+      mn.generate
+      mn.resolve_attachments
+
+      # Build the mail message using the real mailer
+      mail = NotificationMailer.send_message_notification(mn)
+
+      # Verify the mail has an attachment
+      expect(mail.attachments.size).to eq(1)
+      attachment = mail.attachments['calendar.ics']
+      expect(attachment).not_to be_nil
+      expect(attachment.content_type).to include('text/calendar')
+      expect(attachment.body.decoded).to include('BEGIN:VCALENDAR')
+      expect(attachment.body.decoded).to include('METHOD:REQUEST')
+    end
+
+    it 'sends email without attachments when no resolved_attachments present (backward compatibility)' do
+      mn = create_test_notification(with_calendar_invite: false)
+
+      mn.generate
+
+      # Build the mail message using the real mailer
+      mail = NotificationMailer.send_message_notification(mn)
+
+      # Verify the mail has no attachments
+      expect(mail.attachments.size).to eq(0)
+      expect(mail.body.to_s).to include('This is some content')
     end
   end
 end
