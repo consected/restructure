@@ -58,7 +58,7 @@ class Master < ActiveRecord::Base
          not_trackers not_tracker_histories].freeze
 
   TrackerEventOrderClause =
-    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
+    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.id DESC'
   TrackerHistoryEventOrderClause = Arel.sql 'event_date::date DESC NULLS last, tracker_history.id DESC'
   SubjectInfoRankOrderClause = Arel.sql 'rank desc nulls last '
 
