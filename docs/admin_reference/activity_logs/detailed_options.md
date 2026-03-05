@@ -35,6 +35,7 @@ These options appear outside any `default:` or extra log type key.
 - [save_action](../general/save_action.md) — post-save UI actions
 - [field_options](../general/field_options.md) — per-field configuration (values, validators, edit_as, big-select)
 - [preset_fields](../general/preset_fields.md) — preset multiple fields from related items on initialisation
+- [set_variables](../general/set_variables.md) — runtime variables with conditional logic and substitutions
 - [dialog_before](../general/dialog_before.md) — confirmation dialogs before submit
 
 ## Conditional Access Options

@@ -351,6 +351,7 @@ module Formatter
       setup_data_for_item_user(data, item)
       setup_data_for_current_user(data, master, item)
       setup_methods_as_attributes(data)
+      setup_set_variables(data, item)
       data
     end
 
@@ -442,6 +443,46 @@ module Formatter
       ValidMethodsAsAttributes[rn].each do |tag_name|
         data[tag_name] = orig_obj.send(tag_name) if orig_obj.respond_to?(tag_name)
       end
+    end
+
+    #
+    # Evaluate set_variables from the item's option_type_config and add them to data[:variables].
+    # Variables are processed in array order. Each entry has :name, :value, and optional :if condition.
+    # Later entries with the same name override earlier ones.
+    # Values may contain {{substitution}} tags resolved against the current data.
+    # Hash values with :object key are used directly as hash values.
+    # @param [Hash] data - the substitution data hash
+    # @param [Object] item - the original item instance
+    def self.setup_set_variables(data, item)
+      return unless data.is_a?(Hash) && item.respond_to?(:option_type_config)
+
+      config = item.option_type_config
+      return unless config&.respond_to?(:set_variables) && config.set_variables.present?
+
+      variables = {}
+
+      config.set_variables.each do |entry|
+        # Evaluate the if condition when present
+        if entry[:if].present?
+          ca = ConditionalActions.new(entry[:if], item)
+          next unless ca.calc_action_if
+        end
+
+        value = entry[:value]
+
+        # Handle hash values with :object key
+        if value.is_a?(Hash) && value.key?(:object)
+          value = value[:object]
+          value = value.deep_symbolize_keys if value.respond_to?(:deep_symbolize_keys)
+        elsif value.is_a?(String) && value.include?('{{')
+          # Substitute tags in the value string
+          value = substitute(value, data:, ignore_missing: true)
+        end
+
+        variables[entry[:name].to_sym] = value
+      end
+
+      data[:variables] = variables if variables.present?
     end
 
     #
@@ -651,6 +692,9 @@ module Formatter
       elsif name == 'constants'
         # Options constants
         item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
+      elsif name == 'variables'
+        # Set variables from option type config
+        data[:variables] if data.is_a?(Hash)
       elsif name.in?(allowable_associations(item.class))
         item.send(name)
       elsif item_reference
