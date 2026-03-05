@@ -1,0 +1,6 @@
+# editable_if options
+  editable_if: |
+    'ref: ** conditions reference **'
+
+    NOTE: if not defined, the default is to only allow an item to be editable if it is the most recently created or
+    item in the list. If you want items to be always editable, use *always: true*

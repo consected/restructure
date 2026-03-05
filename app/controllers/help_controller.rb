@@ -9,7 +9,7 @@ class HelpController < ApplicationController
   ImagesSubdirectory = 'images'
   IntroductionDocument = '0_introduction'
 
-  helper_method :library, :section, :subsection
+  helper_method :library, :section, :subsection, :display_embedded?
 
   include HelpHelper
 

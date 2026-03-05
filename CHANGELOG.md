@@ -14,6 +14,124 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.12] - 2026-03-05
+
+## [9.42.11] - 2026-03-04
+
+- [Merged] release 9.42.10 back to develop
+- [Fixed] test database setup naming
+- [Fixed] test setup
+- [Added] object key passthrough in FieldDefaults.calculate_default for JSONB fields - fixes #943
+- [Added] integration test for create_reference with JSONB object storage - fixes #943
+- [Refactored] YARD docs and restored test cleanup guards for JSONB object passthrough - fixes #943
+- [Added] shared defs for with: attribute values documenting object: wrapper for JSONB fields - fixes #943
+- [Added] comprehensive specs for SaveTriggers::Case including integration tests - fixes #944
+- [Refactored] save triggers to extract shared execute_trigger_list and store_trigger_results to base class - fixes #944
+- [Refactored] case spec with helper methods to reduce config boilerplate - fixes #944
+
+## [9.42.10] - 2026-02-27
+
+- [Merged] release 9.42.9 back to develop
+- [Fixed] session timeout not working due to CSP reports resetting session timer - fixes #925
+
+## [9.42.9] - 2026-02-26
+
+- [Added] a master records admin page - resolves #930
+- [Added] user context to raise_flag_file_error in Mounter - resolves #649
+- [Added] system spec for memcached connection panel with live memcached - fixes #886
+- [Refactored] cache store spec and config per rubocop conventions
+- [Changed] Dalli cache store to use meta protocol - fixes #886
+- [Added] support for all HTTP verbs in pull_external_data trigger - fixes #928
+- [Moved] copy-to-clipboard to fpa_form_utils, fixed {{master_id}} curl variable, generalised copy button CSS class
+- [Added] "execute/awaitTerminal" to agent tools
+- [Aligned] report save trigger key to get_report (was get_record)
+- [Moved] report curl and save trigger generation into helper methods
+- [Added] create master with associations API tests via pull_external_data - PR #929
+- [Added] save trigger API endpoint specs for dynamic models and reports - resolves #652
+- [Added] API definitions panel to admin dynamic definition and report views - resolves #652
+- [Added] dynamic definition setup re: automatic migrations to agent instructions
+- [Added] API create master with associations, transactional rollback, and API docs - fixes #924
+- [Added] secure viewer enhancements: zoom display, custom zoom input, click-to-zoom, rotate CW/CCW, scroll position preservation, rotation clipping fixes - fixes #590
+- [Added] documentation for APIs and facilitate clean return of API endpoint routes by ensuring STDERR is written to within the app for CLI messaging
+- [Fixed] Rails log search page formatting
+- [Added] clear all user roles action for admin User Roles page - fixes #671
+- [Removed] dead _admin_redcap_status_indicators partial and brakeman entry, fixed trailing newline - fixes #905
+- [Added] collapsible Missing Configurations panel to config status partial - fixes #905
+- [Refactored] alerts panel: extracted helpers, removed duplication, simplified badge rendering - fixes #905
+- [Changed] alerts panel header to show separate server and redcap badges with category colors - fixes #905
+- [Added] collapsed alerts panel to admin index page, removed old popover alerts - fixes #905
+- [Added] better test separation
+- [Fixed] handlebars CLI call to avoid npx 128KB command line limit
+- [Added] Handlebars CLI precompilation with batched template loading - fixes #873
+- [Added] definition of new handlebars precompilation
+- [Fixed] adding page layouts that have the same name as previously disabled page layouts
+- [Fixed] failing admin message notifications and iframe report cells
+- [Fixed] error handling for test DB setup
+
+## [9.42.8] - 2026-02-20
+
+- [Fixed] HTML entity encoding in javascript_tag heredoc blocks
+- [Fixed] application layout
+- [Fixed] CSP to be report only for a while
+- [Fixed] CSP reports to avoid unauthenticated entries being accepted
+- [Fixed] big-select JSON parsing and enabled CSP enforcement
+- [Added] Content-Security-Policy with nonces for inline scripts and Handlebars templates - fixes #279
+- [Fixed] test database setup scripts
+- [Cleanup] small syntax items
+- [Updated] app configs for specs
+- [Fixed] template_option_mapping fields mutation and tag_formatter_spec general selection labels - fixes #901
+- [Fixed] reload_this_spec and dynamic_model_spec test failures - fixes #901
+- [Fixed] timing issues in player_data_entry_spec - fixes #901
+- [Fixed] test isolation issues in tracker, save trigger, and NFS store specs - fixes #901
+- [Fixed] activity log setup in background and transaction save trigger specs - fixes #901
+- [Fixed] test isolation issue in upload_spec notification test - fixes #901
+- [Fixed] test isolation issues in ExternalIdentifier specs - fixes #901
+- [Fixed] parallel test FrozenError by skipping bootsnap for workers - fixes #901
+- [Extracted] CodemirrorEditorSupport module to separate file
+- [Refactored] CodeMirror editor helpers into FeatureSupport module for reusability
+- [Fixed] admin_yaml_anchor_recovery_spec.rb - disable migrations to avoid thread/connection issues
+- [Fixed] parallel test conflict in dynamic_model_options_spec - refs #901
+- [Fixed] parallel test failures in DynamicModelSupport and reports specs
+- [Fixed] issues writing to failing_specs.log file in parallel tests
+- [Updated] copilot instructions to improve PR creation
+- [Updated] gitignore of failed-archive testing flag
+- [Added] descriptive error handling for flag file operations in Mounter - fixes #911
+- [Fixed] MountArchiveJob failing when user app type changes - fixes #910
+- [Updated] agent tool usage
+- [Fixed] the setup of rspec browsers for system tests when checking if the port is in use already
+- [Changed] agents to provide better tool use
+- [Changed] rspec instructions for rails runner
+- [Fixed] force-created parent records not creating embedded items when user lacks create access
+- [Added] the ability to run multiple dev and test servers in multiple workspaces on the same machine, to support AI agents and human developers working simultaneously
+- [Fixed] job reviews URL in job failure emails
+- [Updated] documentation and specs - fixes #896
+- [Added] comprehensive server info documentation for administrators - fixes #896
+- [Converted] server info page to Bootstrap accordion for better usability - fixes #896
+- [Refactored] NFS monitoring code - added constants, extracted helper, fixed Bootstrap grid - fixes #896
+- [Adjusted] column widths for better label alignment in NFS source info - fixes #896
+- [Removed] mount path display and fixed source filesystem extraction from gid mounts - fixes #896
+- [Refactored] to show source filesystem separately with its own status - fixes #896
+- [Fixed] test mocking issues - fixes #896
+- [Enhanced] main admin page mountpoint status indicator tests - fixes #896
+- [Implemented] NFS mountpoint monitoring functionality - fixes #896
+- [Added] failing tests for NFS mountpoint monitoring - fixes #896
+- [Fixed] Filestore actions like "send to trash", "move" and "rename" need to delay before submitting the "refresh" - fixes #899
+- [Fixed] download button in the filestore secure viewer fails with an error when using a file field - fixes #897
+
+## [9.42.7] - 2026-02-05
+
+- [Rebuild]
+
+## [9.42.6] - 2026-02-05
+
+- [Added] Content-Security-Policy with nonces for inline scripts and Handlebars templates - fixes #279
+- [Fixed] big-select JSON parsing and enabled CSP enforcement
+- [Fixed] CSP reports to avoid unauthenticated entries being accepted
+- [Fixed] CSP to be report only for a while
+- [Fixed] missing session variable in app setup
+
+## [9.42.5] - 2026-02-05
+
 ### From FPHS - PR #893 - 2026-02-04
 
 - [Added] dynamic page title updates based on UI context - fixes #871

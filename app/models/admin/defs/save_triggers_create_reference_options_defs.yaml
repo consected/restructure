@@ -1,6 +1,6 @@
-
 # Save Trigger: Create Reference options
-        - model_name:
+        create_reference:
+          - model_name:
             if: if_extras
             in: |
               one of:

@@ -1,0 +1,34 @@
+# save_action options
+  save_action:
+    label: button label 
+    # May also use an array of labels for multiple alternative buttons, in combination with show_if control of the one shown
+    on_update:
+      create_next_creatable:
+        if: 'ref: ** conditions reference **'
+      show_panel:
+        value: panel / category name
+        if: 'ref: ** conditions reference **'
+      hide_panel:
+        value: panel / category name
+        if: 'ref: ** conditions reference **'
+      refresh_panel:
+        - value: panel / category name
+          if: 'ref: ** conditions reference **'
+      expand_reference:
+        - value: reference with caption - the option *if:* means the first matched item will be used as the value
+          if: 'ref: ** conditions reference **'
+        - value: next - this literal value tells the action to open the next available reference tab
+          if: 'ref: ** conditions reference **'
+      go_to_master: true
+        # Reloads the page using the master id of the item.
+        # This is often used when a new activity is created in the temporary master record and is subsequently
+        # moved to a new master id.
+      redirect_to_url:
+        value: relative or absolute URL
+        if: 'ref: ** conditions reference **'
+
+    on_create: {}
+    on_save:
+      notes: |
+        on_save: provides a shorthand for on_create and on_update. on_create
+        and on_update override on_save configurations.

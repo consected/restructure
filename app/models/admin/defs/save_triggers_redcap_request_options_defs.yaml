@@ -1,6 +1,6 @@
-
-# Save Trigger: Redcap Request options        
-        - request_1:
+# Save Trigger: Redcap Request options
+        redcap_request:
+          - request_1:
             # Import a record into the project and store the result in the local data.
             # The response should be a single element array (or more if extra data: array items are specified)
             # with the record id of the stored record.

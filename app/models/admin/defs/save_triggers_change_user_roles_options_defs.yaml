@@ -1,7 +1,6 @@
-
 # Save Trigger: Change User Roles options
-
-        if: if_extras
+        change_user_roles:
+          if: if_extras
         add_role_names:
           - app_type: study info
             role_name: viewer-has-agreement

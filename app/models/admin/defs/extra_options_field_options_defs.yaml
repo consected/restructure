@@ -1,0 +1,185 @@
+# field_options options
+  field_options:
+    field_name:
+      include_blank: |
+        true or false to force a drop down field to include a selectable
+        blank
+      pattern: '.+\\d{3}-\\D{1-4}.*'
+        # provide a mask for a text field using basic regex
+        # This example accepts one or more characters of any type, 3 digits, a hyphen, 1 to 4 letters and any number of final characters
+      value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
+        It is not set before building the instances, so will not be available for data conditions.
+      blank_value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
+        It is not set before building the instances, so will not be available for data conditions.
+      preset_value: |
+        default value | now() | today() | \{\{substitutions\}\}
+        
+        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field.
+        It is not applied to persisted instances.
+      blank_preset_value: |
+        default value | now() | today() | \{\{substitutions\}\}
+        
+        NOTE this is set only if the attribute is blank when building the instances 
+        and may be used to drive logic like an embed_resource_name field.
+        It is not applied to persisted instances.
+      active_value: |
+        default value | now() | today() | \{\{substitutions\}\}
+        
+        NOTE this is set whenever an instance is initialized. It allows for live UI substitutions that wouldn't otherwise
+        have access to attributes in other models. The data generated will be persisted to the database whenever the item is saved.
+        On re-accessing the item, the value will be re-evaluated. If not saved, the live value will be lost and will be
+        re-evaluated on the next access.
+      no_downcase: true - to prevent downcasing of the attribute when stored to the database
+      view_original_case: true - to prevent the UI capitalizing downcased fields
+      view_with_formats: |
+        list of formatters to apply to a string field when being viewed
+      format: plain | markdown - for free text editor fields such as notes and description
+      config:
+        _comment: additional configurations for editor fields
+        toolbar_type: advanced - adds in additional editor toolbar controls
+      edit_as:
+        field_type: alternative field name to use for selection of edit field
+        alt_options: |
+          optional specification of options for a select_ type field to
+          use instead of general selection specified list. {Label: value, ...} or [Label,...].
+          For the latter the Label is downcased automatically to generate the value
+        
+        # For select_record_* fields:
+        general_selection: |
+          use a general selection definition with an alternative name, or belonging to a
+          different prefix name
+        value_attr: attribute_name to use for selection value in select_record_* fields
+        label_attr: attribute_name to use for selection label in select_record_* fields
+        group_split_char: optional character to split on when grouping selections in select_record_* fields
+        no_assoc: | 
+          false | true - optionally specify that no association should be used in select_record_* data lookup
+                         select_record_from_table_* automatically sets this to true
+                         select_record_from_* defaults to false but this setting overrides the default
+        
+        # configuration options for big-select modal dialog UI (applies to select_record_* fields)
+        big_select:
+        
+          hide_popover: true | false
+            Hides the info popover button and shows an overlay with selected value text instead.
+            Default is false (info popover is shown).
+          
+          hide_key: true | false
+            Controls visibility of the value key in the selection list and enables '>>>' separator processing.
+            When true: 
+              - The database key (id) is hidden from display
+              - If the label contains '>>>' or newline '\n', the label is split:
+                * First part appears as the primary heading (larger text)
+                * Remaining parts appear as secondary description (smaller text below)
+              - Without '>>>' or '\n', the entire label is shown as the heading
+            When false: 
+              - The database key is shown alongside the full label
+              - No special processing of '>>>' or newline separators
+            Default is true (key is hidden).
+            
+            Special separator usage:
+              Use ' >>> ' (with spaces) in label_attr to create two-part displays:
+                label_attr: [name, ' >>> ', description]
+              Results in:
+                name               ← primary heading
+                description        ← secondary description
+              
+              Alternatively, use '\n' (newline) for the same effect:
+                label_attr: [name, '\n', description]
+          
+          filtered: true | false
+            When true, the big-select options are filtered based on another field's value
+            using the select_filtering_target configuration.
+            Default is false (no filtering).
+
+        big select examples: |  
+          Example basic big-select:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr: name
+              big_select:
+                hide_key: true
+          
+          Example with '>>>' separator for two-part display:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - name
+                - ' >>> '
+                - description
+              big_select:
+                hide_key: true
+            # Displays as:
+            #   Item Name          ← primary heading (larger)
+            #   Item description   ← secondary text (smaller)
+          
+          Example grouped big-select:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - category
+                - '|'
+                - name
+              group_split_char: '|'
+              big_select:
+                hide_key: true
+          
+          Example grouped with '>>>' separator:
+            edit_as:
+              field_type: select_record_from_table_some_items
+              value_attr: id
+              label_attr:
+                - category
+                - '|'
+                - name
+                - ' >>> '
+                - description
+              group_split_char: '|'
+              big_select:
+                hide_key: true
+            # Groups by category, then displays each item as:
+            #   Item Name          ← primary heading
+            #   Item description   ← secondary text
+          
+          Example filtered big-select:
+            filter_field:
+              edit_as:
+                field_type: select_filter_values
+                alt_options:
+                  'Type A': type_a
+                  'Type B': type_b
+                select_filtering_target: 'my_select_field'
+            
+            my_select_field:
+              edit_as:
+                field_type: select_record_from_table_some_items
+                value_attr: id
+                label_attr:
+                  - item_type
+                  - '|'
+                  - name
+                group_split_char: '|'
+                big_select:
+                  filtered: true
+              blank_preset_value:
+                table_name:
+                  filter_field_name: "{{filter_field}}"
+        
+        select_filtering_target: field_name
+          # Specifies the target field to be filtered when this field changes.
+          # Used with big_select.filtered configuration to dynamically filter another big-select field.
+          # The filter value from this field is passed via blank_preset_value to constrain the query.
+      calculate_with:
+        sum: []
+      prompt: used by some select fields for the placeholder prompt text
+      use_app_type: |
+        use the specified app type id or name instead of the user's current app type
+        to filter protocol (and in the future other) selections

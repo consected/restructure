@@ -1,0 +1,18 @@
+#
+# Filestore containers are set up with several activity log entries
+#   - a reference to the container
+#   - a save_trigger to create the container (and its reference)
+#   - optionally an nfs_store entry to define how the container responds to new uploads and user file actions
+#
+# Typically the references and save_trigger will be saved one time in the Config Library to be reusable
+#
+  references (for filestore):
+    nfs_store__manage__container:
+      from: this
+      add: one_to_this
+      view_as:
+        edit: filestore|hide
+        show: filestore
+        new: not_embedded
+      creatable_if:
+        never: true

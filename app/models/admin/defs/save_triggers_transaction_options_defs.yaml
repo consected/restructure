@@ -1,40 +1,36 @@
-# frozen_string_literal: true
-
-#
 # YAML definition for transaction save trigger options
 # Used by admin panel to display configuration options
 #
-_save_triggers_transaction_options:
-  transaction: &st_transaction
-    - array of save triggers to execute within a transaction block
-    - all triggers succeed or all are rolled back
-    - e.g. |-
-        save_trigger:
-          on_create:
-            transaction:
-              - create_master:
-                  with:
-                    field_name: value
-              - create_reference:
-                  model_name:
-                    in: master
-              - update_this:
-                  one:
-                    with:
-                      status: completed
-    - |
-      All listed save triggers will be executed within a single database
-      transaction. If any trigger raises an exception, the entire transaction
-      is rolled back and no changes are persisted to the database.
 
-      This is useful when multiple related records must be created atomically,
-      ensuring data consistency.
+      transaction: &st_transaction
+        - array of save triggers to execute within a transaction block
+        - all triggers succeed or all are rolled back
+        - e.g. |-
+            save_trigger:
+              on_create:
+                transaction:
+                  - create_master:
+                      with:
+                        field_name: value
+                  - create_reference:
+                      model_name:
+                        in: master
+                  - update_this:
+                      one:
+                        with:
+                          status: completed
+        - |
+          All listed save triggers will be executed within a single database
+          transaction. If any trigger raises an exception, the entire transaction
+          is rolled back and no changes are persisted to the database.
 
-      The trigger accepts an array of save trigger configurations, where each
-      item is a standard save trigger definition (create_master, create_reference,
-      update_this, notify, etc.).
+          This is useful when multiple related records must be created atomically,
+          ensuring data consistency.
 
-      Results from all executed triggers are stored in save_trigger_results['transaction']
-      as an array of {trigger:, result:} hashes.
+          The trigger accepts an array of save trigger configurations, where each
+          item is a standard save trigger definition (create_master, create_reference,
+          update_this, notify, etc.).
 
-save_triggers_transaction_options: *st_transaction
+          Results from all executed triggers are stored in save_trigger_results['transaction']
+          as an array of {trigger:, result:} hashes.
+
