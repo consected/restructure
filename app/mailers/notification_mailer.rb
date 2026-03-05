@@ -18,7 +18,7 @@ class NotificationMailer < ActionMailer::Base
 
     emails = notify.recipient_emails.select do |email|
       email ||= ''
-      res = email_has_fqdn(email)
+      res = fully_qualified_domain_name?(email)
 
       if res
         # Lookup the user email
@@ -30,7 +30,7 @@ class NotificationMailer < ActionMailer::Base
 
         unless res
           msg = "send_message_notification email #{email} - " \
-            "can not send disabled: #{user&.disabled} or do not email: #{user&.do_not_email}"
+                "can not send disabled: #{user&.disabled} or do not email: #{user&.do_not_email}"
           Rails.logger.info msg
           messages << msg
         end
@@ -38,7 +38,7 @@ class NotificationMailer < ActionMailer::Base
         res
       else
         msg = "send_message_notification email #{email} - " \
-          'can not send due to no FQDN'
+              'can not send due to no FQDN'
         Rails.logger.info msg
         messages << msg
       end
@@ -58,15 +58,23 @@ class NotificationMailer < ActionMailer::Base
     options = {
       to: emails,
       from: notify.from_user_email,
-      body: notify.generated_text,
-      content_type: 'text/html',
       subject: notify.subject
     }
 
     logger.info "Sending email options: #{options}"
     return if Rails.env.test? && !Settings::TestMail
 
-    mail(options)
+    # Add any resolved attachments (e.g. calendar .ics files)
+    notify.resolved_attachments.each do |att|
+      attachments[att[:filename]] = {
+        mime_type: att[:mime_type],
+        content: att[:content]
+      }
+    end
+
+    mail(options) do |format|
+      format.html { render html: notify.generated_text.html_safe }
+    end
   end
 
   #
@@ -75,7 +83,7 @@ class NotificationMailer < ActionMailer::Base
   # This removes '@test' and '@template'
   # @param [String] email
   # @return [Boolean]
-  def email_has_fqdn(email)
+  def fully_qualified_domain_name?(email)
     domain = email.split('@', 2)
     domain.last&.include?('.')
   end

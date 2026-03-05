@@ -69,7 +69,7 @@ module Messaging
       value = value.to_s.capitalize
       raise FphsException, "Incorrect importance: #{value}" unless value.in?(ValidImportance)
 
-      super(value)
+      super
     end
 
     #
@@ -177,7 +177,7 @@ module Messaging
     def recipient_data=(data)
       data = data.map(&:to_json) if data.is_a?(Array) && data.first.is_a?(Hash)
       @recipient_hash_from_data = nil
-      super(data)
+      super
     end
 
     #
@@ -191,7 +191,7 @@ module Messaging
         data = data.to_yaml
       end
 
-      super(data)
+      super
     end
 
     #
@@ -205,7 +205,7 @@ module Messaging
         email = formatted.format
       end
 
-      super(email)
+      super
     end
 
     #
@@ -249,6 +249,7 @@ module Messaging
     # @param [Array | nil] recipient_sms_numbers - optionally override numbers to send to
     def generate_and_send(recipient_sms_numbers: nil)
       generate
+      resolve_attachments if email?
 
       if email?
         NotificationMailer.send_message_notification(self).deliver_now
@@ -259,6 +260,28 @@ module Messaging
       else
         raise FphsException, "No recognized message type for message notification: #{message_type}"
       end
+    end
+
+    #
+    # Resolve any attachments configured in extra_substitutions.
+    # Currently handles calendar_invite (.ics) attachments.
+    # Generates .ics content via Messaging::CalendarInvite, stores the generated content
+    # back into extra_substitutions_data for admin retrieval, and persists the record.
+    # @return [void]
+    def resolve_attachments
+      @resolved_attachments = []
+
+      resolve_calendar_invite_attachment
+
+      save! if @resolved_attachments.any?
+    end
+
+    #
+    # Returns the resolved attachments for the mailer to use.
+    # Each attachment is a Hash with :filename, :mime_type, and :content keys.
+    # @return [Array<Hash>]
+    def resolved_attachments
+      @resolved_attachments || []
     end
 
     #
@@ -320,6 +343,13 @@ module Messaging
       rescue StandardError
         nil
       end
+    end
+
+    #
+    # The calendar invite data from extra_substitutions, if present.
+    # @return [HashWithIndifferentAccess | nil]
+    def calendar_invite_data
+      extra_substitutions_data&.dig(:calendar_invite)
     end
 
     private
@@ -428,12 +458,37 @@ module Messaging
 
     #
     # The hash data representation of #extra_substitutions
-    # @return [Hash]
+    # @return [HashWithIndifferentAccess | nil]
     def extra_substitutions_data
       return @extra_substitutions_data if @extra_substitutions_data
       return unless extra_substitutions
 
       @extra_substitutions_data = YAML.safe_load(extra_substitutions, permitted_classes: [Symbol])
+                                      &.with_indifferent_access
+    end
+
+    #
+    # Resolve the calendar_invite from extra_substitutions_data.
+    # Generates RFC 5545 .ics content via Messaging::CalendarInvite,
+    # stores the generated content back in extra_substitutions for admin retrieval.
+    # @return [void]
+    def resolve_calendar_invite_attachment
+      ci_data = extra_substitutions_data&.dig(:calendar_invite)
+      return unless ci_data
+
+      invite = Messaging::CalendarInvite.new(ci_data)
+      ics_content = invite.generate
+
+      # Store generated content back for admin retrieval
+      ci_data['generated_content'] = ics_content
+      self.extra_substitutions = extra_substitutions_data.to_hash.to_yaml
+
+      ical_method = ci_data['method']&.upcase || 'REQUEST'
+      @resolved_attachments << {
+        filename: 'calendar.ics',
+        mime_type: "text/calendar; method=#{ical_method}",
+        content: ics_content
+      }
     end
 
     #

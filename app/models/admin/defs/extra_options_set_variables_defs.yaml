@@ -1,0 +1,24 @@
+# set_variables options
+  # Define an ordered list of variables that are evaluated at runtime and accessible via
+  # {{variables.varname}} substitutions, or `element: variables.varname` in conditional calculations.
+  # Each entry has a `name`, a `value` (which may include {{substitutions}}), and an optional
+  # `if` condition (using standard conditional syntax).
+  # Later entries with the same name override earlier ones, allowing conditional defaulting.
+  set_variables:
+    - name: varname
+      value: some default value
+    - name: varname
+      value: "some other value with {{substitution}}"
+      if:
+        all:
+          this:
+            field_name: expected_value
+    - name: hashvar
+      value:
+        object:
+          key1: value1
+          key2: "value2 {{with_substitution}}"
+      if:
+        all:
+          this:
+            field_name: expected_value

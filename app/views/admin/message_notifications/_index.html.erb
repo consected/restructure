@@ -34,6 +34,12 @@
             <tr><td><%= i.humanize %>:</td><td><%= list_item.send(i) %></td></tr>
             <% end %>
           </table>
+          <% ci_data = list_item.calendar_invite_data %>
+          <% if ci_data&.dig('generated_content').present? %>
+            <p><strong>Attachments:</strong>
+              <%= link_to 'calendar.ics', attachment_admin_message_notification_path(list_item), class: 'btn btn-sm btn-default' %>
+            </p>
+          <% end %>
           <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%> if-mn-status-<%= list_item.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox">
           </iframe>
 
