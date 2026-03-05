@@ -58,7 +58,11 @@ Rails.application.routes.draw do
     end
     resources :app_configurations, except: %i[show destroy]
     resources :message_templates, except: %i[show destroy]
-    resources :message_notifications, except: %i[show destroy]
+    resources :message_notifications, except: %i[show destroy] do
+      member do
+        get :attachment
+      end
+    end
 
     resources :job_reviews, except: %i[show destroy]
     post 'job_reviews/restart_failed_jobs', to: 'job_reviews#restart_failed_jobs'

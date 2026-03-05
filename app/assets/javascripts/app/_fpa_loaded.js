@@ -205,7 +205,16 @@ _fpa.loaded.default = function () {
     var href = $(this).attr('href');
     var data_remote = $(this).attr('data-remote');
     if (!href || data_remote) return;
-    if (href.indexOf('/nfs_store/downloads/') >= 0) {
+
+    // Prevent the page-transition overlay for links that trigger file downloads
+    // (NFS store downloads, CSV exports, admin attachment downloads, or any link with download attribute)
+    var is_download = href.indexOf('/nfs_store/downloads/') >= 0 ||
+      href.match(/\.(csv|ics)(\?|$)/) ||
+      href.indexOf('/attachment') >= 0 ||
+      $(this).attr('download') !== undefined ||
+      $(this).hasClass('export-csv');
+
+    if (is_download) {
       $('body').addClass('prevent-page-transition');
     }
   });

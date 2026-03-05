@@ -49,7 +49,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @emails
         setup_emails
       else
-        raise FphsException, 'role, users or phones must be specified in save_trigger: notify: role: ...'
+        raise FphsException, 'role, users, emails or phones must be specified in save_trigger: notify: role: ...'
       end
 
       if !@receiving_user_ids&.present? && !@force_phones && !@force_emails && !@force_recip_recs
@@ -283,15 +283,47 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # to be substituted into the message using substitutions like {{extra_substitutions.data1}}
   # Data within the extra substitutions is substituted from the item, so may also contain its own
   # {{curly}} substitutions, set at the time the notification is created, not at the time it is sent.
+  # If a calendar_invite config is present, its values are resolved and merged into
+  # extra_substitutions[:calendar_invite] for storage on the MessageNotification record.
   # @return [Hash | nil]
   def extra_substitutions
     return @extra_substitutions if @extra_substitutions
 
-    @extra_substitutions = config[:extra_substitutions]
+    @extra_substitutions = config[:extra_substitutions] || {}
 
-    @extra_substitutions&.each do |k, v|
-      @extra_substitutions[k] = Formatter::Substitution.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
+    @extra_substitutions.each do |k, v|
+      next unless v.is_a?(String)
+
+      @extra_substitutions[k] = substitute_from_item(v)
     end
+
+    merge_calendar_invite_into_extra_substitutions
+
+    @extra_substitutions = nil if @extra_substitutions.blank?
+    @extra_substitutions
+  end
+
+  #
+  # Parse the calendar_invite config option, resolve {{curly}} substitutions in all string values,
+  # and merge the resolved hash into extra_substitutions[:calendar_invite].
+  # @return [void]
+  def merge_calendar_invite_into_extra_substitutions
+    cal_config = config[:calendar_invite]
+    return unless cal_config
+
+    resolved = cal_config.to_h do |k, v|
+      [k.to_s, v.is_a?(String) ? substitute_from_item(v) : v]
+    end
+
+    @extra_substitutions[:calendar_invite] = resolved
+  end
+
+  #
+  # Substitute {{curly}} template values from the current item
+  # @param [String] value - string containing {{curly}} substitutions
+  # @return [String] resolved string
+  def substitute_from_item(value)
+    Formatter::Substitution.substitute(value, data: @item, tag_subs: nil, ignore_missing: true)
   end
 
   #
