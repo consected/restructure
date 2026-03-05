@@ -19,6 +19,19 @@
               If *success_if:* condition is set, the following will also be set
                   \{\{save_trigger_results.identity_success_if_res\}\}
 
+              Details of the submitted request (for POST/PUT/PATCH body requests or POST form requests) will be stored as a hash in:
+                  save_trigger_results.identity_submitted_request
+
+              The submitted request hash contains:
+                  data   - the request body as a Hash (for body/form requests), or nil for requests with no body (GET, HEAD, etc.)
+                  url    - the resolved URL the request was sent to (with substitutions applied)
+                  method - the HTTP method used (e.g. 'get', 'post', 'put')
+
+              Individual elements can be accessed via substitutions, for example:
+                  \{\{save_trigger_results.identity_submitted_request.url\}\}
+                  \{\{save_trigger_results.identity_submitted_request.method\}\}
+                  \{\{save_trigger_results.identity_submitted_request.data.programName\}\}
+
               These values are also available in if conditions like:
                   if:
                     this:
@@ -37,6 +50,12 @@
                       save_trigger_results:
                         element: identity_success_if_res
                         value: true
+
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity_submitted_request.url
+                        value: https://example.com/api/endpoint
 
             data_field: (optional) name of text or json field to update
             data_field_format: |
