@@ -1,0 +1,14 @@
+# Keys to be applied to all dynamic definitions. The actual
+# definitions will take precedence by replacing the full key definition.
+_default:
+  key1: applied to all dynamic definitions
+  key2: applied to all dynamic definitions
+
+# It is also possible to specify additional _default... options. This is primarily to support
+# automated model generation (such as REDCap), but may be useful elsewhere.
+# The additional _default... items will override keys at the top level before any of the later
+# _merge... or _override options are applied. For example, the following will give us the original
+# `key1`, overridden `key2` and new `key3`
+_default_additions:
+  key2: overrides `key2` from the `_default:`
+  key3: applied to all dynamic definitions

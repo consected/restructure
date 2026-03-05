@@ -1,8 +1,8 @@
-
 # Save Trigger: Notify options
         # An array of definitions allowing multiple notifications to be specified
         # for a single trigger.  
-        - type: 'email|sms'
+        notify:
+          - type: 'email|sms'
           role: |
             (optional) role name(s) to notify. Supports:
             - literal string: 'admin'

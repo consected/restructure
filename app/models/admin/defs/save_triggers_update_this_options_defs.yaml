@@ -1,6 +1,6 @@
-
 # Save Trigger: Update This options
-        - this_1: 
+        update_this:
+          - this_1: 
             if: if_extras
             force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable'
             force_not_valid: 'true to allow valid_if checks to be ignored'

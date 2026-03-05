@@ -1,40 +1,4 @@
-#
-# Filestore Options definitions
-
-#
-# Filestore containers are set up with several activity log entries
-#   - a reference to the container
-#   - a save_triegger to create the container (and its reference)
-#   - optionally an nfs_store entry to define how the container responds to new uploads and user file actions
-#
-# Typically the references and save_trigger will be saved one time in the Config Library to be reusable
-#
-  references (for filestore):
-    nfs_store__manage__container:
-      from: this
-      add: one_to_this
-      view_as:
-        edit: filestore|hide
-        show: filestore
-        new: not_embedded
-      creatable_if:
-        never: true
-        
-  save_trigger (for filestore):
-    on_create_filestore_container:
-      create_filestore_container: 
-        name: general files 
-              # If an Array, in which case current item attributes will be substituted, separated by ' -- '
-              # If a String then standard curly substitutions will be applied
-              # If a Hash, then a reference lookup with return_value will be used
-        label: General Files
-        create_with_role: nfs_store group 600
-                          # or any number in the available group range
-        skip_if_exists: user_is_creator | master 
-                        # skip if container with matching name attribute exists in specified reference
-
-
-
+# nfs_store options
   nfs_store:
     always_use_this_for_access_control: false(default) | true 
                                         # use this activity log to enforce access control, 

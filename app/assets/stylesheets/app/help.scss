@@ -153,6 +153,12 @@ div.help-view-doc,
     h4 {
       font-size: 18px;
     }
+
+    h1+h2 {
+      margin-top: -18px;
+      font-size: 20px;
+      color: gray;
+    }
   }
 
   .default-layout-rows,
@@ -255,6 +261,17 @@ div.help-view-doc,
     padding: 15px;
     background-color: rgb(221, 221, 221);
     text-align: center;
+
+    .help-open-in-new-tab {
+      font-size: 1.1em;
+      vertical-align: middle;
+      opacity: 0.6;
+      float: right;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   pre {
@@ -289,6 +306,13 @@ div.help-view-doc,
 
   .footer {
     display: none;
+  }
+
+  h1 code {
+    color: #444;
+    background-color: transparent;
+    font-weight: bold;
+    padding-left: 0;
   }
 }
 

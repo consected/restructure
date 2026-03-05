@@ -1,0 +1,11 @@
+# dialog_before options
+  dialog_before:
+    field_name:
+      name: message template name
+      label: show dialog button label
+    all_fields:
+      name: message template name
+      label: show dialog button label
+    submit:
+      name: message template name
+      label: show dialog button label

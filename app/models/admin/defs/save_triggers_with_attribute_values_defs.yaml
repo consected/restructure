@@ -1,4 +1,3 @@
-
 # Save Trigger: `with:` attribute value types
 # These value types apply to `with:` in create_reference, update_reference, update_this,
 # and preset_fields triggers. Each field value can be set using one of the following formats:
