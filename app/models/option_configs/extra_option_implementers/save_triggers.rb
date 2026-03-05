@@ -23,7 +23,8 @@ module OptionConfigs
                              transaction
                              background
                              reload_this
-                             case].freeze
+                             case
+                             set_save_trigger_results].freeze
 
       class_methods do
         #
