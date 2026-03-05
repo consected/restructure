@@ -19,6 +19,7 @@ module OptionConfigs
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
         show_if_condition_strings batch_trigger config_trigger preset_fields field_configs raw_field_configs
+        set_variables
       ]
     end
 
@@ -82,6 +83,7 @@ module OptionConfigs
         clean_batch_triggers
         clean_config_triggers
         clean_preset_fields
+        clean_set_variables_def
 
         # Add the cleaned values back into field_configs - save a raw version for use elsewhere
         # This needs to be "deep cloned", to avoid a simple clone just copying references
@@ -361,7 +363,7 @@ module OptionConfigs
             refitem[mn][:to_model_name_us] = to_class.to_s&.ns_underscore
             refitem[mn][:to_model_class_name] = to_class.to_s
             refitem[mn][:to_table_name] = to_class.table_name
-            tsn = nil
+            nil
 
             if to_class.respond_to?(:definition)
               cd = to_class.definition
@@ -450,6 +452,29 @@ module OptionConfigs
     def clean_preset_fields
       self.preset_fields ||= {}
       self.preset_fields = self.preset_fields.symbolize_keys
+    end
+
+    #
+    # Validate and clean the set_variables definition.
+    # set_variables accepts an ordered array of variable definitions,
+    # each with :name, :value, and optional :if condition.
+    def clean_set_variables_def
+      return if set_variables.blank?
+
+      unless set_variables.is_a?(Array)
+        failed_config :set_variables, 'must be an array of variable definitions'
+        self.set_variables = []
+        return
+      end
+
+      self.set_variables = set_variables.map do |entry|
+        entry = entry.symbolize_keys if entry.is_a?(Hash)
+        unless entry.is_a?(Hash) && entry[:name].present? && entry.key?(:value)
+          failed_config :set_variables, "each entry must have 'name' and 'value' keys"
+          next nil
+        end
+        entry
+      end.compact
     end
 
     def clean_field_configs
@@ -604,7 +629,7 @@ module OptionConfigs
 
       config_text = prepend_standard_definitions(config_text)
       config_text = include_libraries(config_text)
-      config_text = config_text.gsub(/^---.*\n/, '')
+      config_text.gsub(/^---.*\n/, '')
     end
 
     #
