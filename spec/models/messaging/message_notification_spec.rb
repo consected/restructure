@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Tests for Messaging::MessageNotification
+# Covers message generation, template rendering, recipient handling (email/SMS/records),
+# calendar invite attachment resolution (#953), NfsStore file attachment resolution (#954),
+# and NotificationMailer integration with attachment support.
+
 require 'rails_helper'
 
 RSpec.describe Messaging::MessageNotification, type: :model do
@@ -475,6 +480,159 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       # Verify the mail has no attachments
       expect(mail.attachments.size).to eq(0)
       expect(mail.body.to_s).to include('This is some content')
+    end
+  end
+
+  describe 'resolve_attachments with NfsStore file attachments (issue #954)' do
+    before :example do
+      setup_messaging_test
+      mock_notification_mailer
+    end
+
+    after :example do
+      unmock_notification_mailer
+    end
+
+    it 'resolves NfsStore file attachments from extra_substitutions, reads file content, and builds attachment hash' do
+      # Create a mock stored file
+      stored_file = instance_double(
+        NfsStore::Manage::StoredFile,
+        id: 101,
+        file_name: 'report.pdf',
+        content_type: 'application/pdf',
+        retrieval_path: Rails.root.join('tmp/agent-tmp/test_report.pdf').to_s
+      )
+
+      # Create a temporary file to read
+      FileUtils.mkdir_p(Rails.root.join('tmp/agent-tmp'))
+      File.write(Rails.root.join('tmp/agent-tmp/test_report.pdf'), 'PDF file content here')
+
+      allow(NfsStore::Manage::StoredFile).to receive(:find_by)
+        .with(nfs_store_container_id: 42, path: 'reports', file_name: 'report.pdf')
+        .and_return(stored_file)
+      allow(stored_file).to receive(:current_user=)
+      allow(stored_file).to receive(:container).and_return(
+        instance_double(NfsStore::Manage::Container, current_user: nil, 'current_user=' => nil)
+      )
+
+      mn = create_test_notification(with_calendar_invite: false)
+      mn.extra_substitutions = {
+        attachments: [
+          { 'container_id' => 42, 'path' => 'reports', 'file_name' => 'report.pdf' }
+        ]
+      }.to_yaml
+      mn.save!
+
+      mn.resolve_attachments
+      resolved = mn.resolved_attachments
+
+      expect(resolved).to be_a(Array)
+      # Find the NfsStore attachment (not calendar)
+      nfs_attachment = resolved.find { |a| a[:filename] == 'report.pdf' }
+      expect(nfs_attachment).not_to be_nil
+      expect(nfs_attachment[:mime_type]).to eq('application/pdf')
+      expect(nfs_attachment[:content]).to eq('PDF file content here')
+
+      # Verify reference (not content) is stored back in extra_substitutions
+      mn.reload
+      es_data = YAML.safe_load(mn.extra_substitutions, permitted_classes: [Symbol])
+      att_ref = es_data['attachments'].first
+      expect(att_ref['stored_file_id']).to eq(101)
+      expect(att_ref['content_type']).to eq('application/pdf')
+      # File content should NOT be stored in DB
+      expect(att_ref).not_to have_key('content')
+    ensure
+      FileUtils.rm_f(Rails.root.join('tmp/agent-tmp/test_report.pdf'))
+    end
+
+    it 'handles NfsStore attachment alongside calendar_invite attachment' do
+      stored_file = instance_double(
+        NfsStore::Manage::StoredFile,
+        id: 202,
+        file_name: 'data.csv',
+        content_type: 'text/csv',
+        retrieval_path: Rails.root.join('tmp/agent-tmp/test_data.csv').to_s
+      )
+
+      FileUtils.mkdir_p(Rails.root.join('tmp/agent-tmp'))
+      File.write(Rails.root.join('tmp/agent-tmp/test_data.csv'), 'col1,col2\nval1,val2')
+
+      allow(NfsStore::Manage::StoredFile).to receive(:find_by)
+        .with(nfs_store_container_id: 10, path: '', file_name: 'data.csv')
+        .and_return(stored_file)
+      allow(stored_file).to receive(:current_user=)
+      allow(stored_file).to receive(:container).and_return(
+        instance_double(NfsStore::Manage::Container, current_user: nil, 'current_user=' => nil)
+      )
+
+      mn = create_test_notification(with_calendar_invite: true)
+      # Merge NfsStore attachments into the existing extra_substitutions
+      es_data = YAML.safe_load(mn.extra_substitutions, permitted_classes: [Symbol])
+      es_data['attachments'] = [
+        { 'container_id' => 10, 'path' => '', 'file_name' => 'data.csv' }
+      ]
+      mn.extra_substitutions = es_data.to_yaml
+      mn.save!
+
+      # Clear memoized extra_substitutions_data so resolve_attachments sees updated data
+      mn.extra_substitutions_data = nil
+
+      mn.resolve_attachments
+      resolved = mn.resolved_attachments
+
+      # Should have both calendar invite and NfsStore file attachments
+      expect(resolved.length).to eq(2)
+      calendar_att = resolved.find { |a| a[:filename] == 'calendar.ics' }
+      nfs_att = resolved.find { |a| a[:filename] == 'data.csv' }
+      expect(calendar_att).not_to be_nil
+      expect(nfs_att).not_to be_nil
+      expect(nfs_att[:mime_type]).to eq('text/csv')
+    ensure
+      FileUtils.rm_f(Rails.root.join('tmp/agent-tmp/test_data.csv'))
+    end
+
+    it 'raises an error when NfsStore file is not found' do
+      allow(NfsStore::Manage::StoredFile).to receive(:find_by)
+        .with(nfs_store_container_id: 999, path: '', file_name: 'missing.pdf')
+        .and_return(nil)
+
+      mn = create_test_notification(with_calendar_invite: false)
+      mn.extra_substitutions = {
+        attachments: [
+          { 'container_id' => 999, 'path' => '', 'file_name' => 'missing.pdf' }
+        ]
+      }.to_yaml
+      mn.save!
+
+      expect { mn.resolve_attachments }.to raise_error(FphsException, /NfsStore file not found/)
+    end
+
+    it 'raises an error when NfsStore file has no retrieval_path' do
+      stored_file = instance_double(
+        NfsStore::Manage::StoredFile,
+        id: 303,
+        file_name: 'no_access.pdf',
+        content_type: 'application/pdf',
+        retrieval_path: nil
+      )
+
+      allow(NfsStore::Manage::StoredFile).to receive(:find_by)
+        .with(nfs_store_container_id: 50, path: '', file_name: 'no_access.pdf')
+        .and_return(stored_file)
+      allow(stored_file).to receive(:current_user=)
+      allow(stored_file).to receive(:container).and_return(
+        instance_double(NfsStore::Manage::Container, current_user: nil, 'current_user=' => nil)
+      )
+
+      mn = create_test_notification(with_calendar_invite: false)
+      mn.extra_substitutions = {
+        attachments: [
+          { 'container_id' => 50, 'path' => '', 'file_name' => 'no_access.pdf' }
+        ]
+      }.to_yaml
+      mn.save!
+
+      expect { mn.resolve_attachments }.to raise_error(FphsException, /could not be retrieved/)
     end
   end
 end
