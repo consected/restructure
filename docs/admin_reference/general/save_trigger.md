@@ -1,4 +1,5 @@
 # `save_trigger`
+
 ## Save Trigger Actions
 
 Define actions to perform automatically when a record is created, updated, saved, disabled, uploaded, or before saving. Each event key (`on_create`, `on_update`, `on_save`, `on_disable`, `on_upload`, `before_save`) takes an ordered list of trigger tasks.
@@ -18,6 +19,7 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [create_reference](save_trigger_create_reference.md) | Create a reference to another model |
 | [change_user_roles](save_trigger_change_user_roles.md) | Add or remove user roles |
 | [create_filestore_container](save_trigger_create_filestore_container.md) | Create an NFS filestore container |
+| [generate_document](save_trigger_generate_document.md) | Generate a document from a template and store in a filestore container |
 | [notify](save_trigger_notify.md) | Send a notification |
 | [pull_external_data](save_trigger_pull_external_data.md) | Pull data from an external source |
 | [redcap_request](save_trigger_redcap_request.md) | Make a REDCap API request |
