@@ -272,6 +272,7 @@ module Messaging
       @resolved_attachments = []
 
       resolve_calendar_invite_attachment
+      resolve_nfsstore_attachments
 
       save! if @resolved_attachments.any?
     end
@@ -350,6 +351,18 @@ module Messaging
     # @return [HashWithIndifferentAccess | nil]
     def calendar_invite_data
       extra_substitutions_data&.dig(:calendar_invite)
+    end
+
+    #
+    # Returns NfsStore attachment references from extra_substitutions_data.
+    # Each reference is a hash with container_id, path, file_name, stored_file_id, content_type.
+    # File content is NOT included — only metadata references.
+    # @return [Array<Hash>]
+    def nfsstore_attachment_references
+      atts = extra_substitutions_data&.dig(:attachments)
+      return [] unless atts.is_a?(Array)
+
+      atts.select { |att| att['stored_file_id'].present? }
     end
 
     private
@@ -489,6 +502,58 @@ module Messaging
         mime_type: "text/calendar; method=#{ical_method}",
         content: ics_content
       }
+    end
+
+    #
+    # Resolve NfsStore file attachments from extra_substitutions_data["attachments"].
+    # For each entry, looks up the StoredFile by container_id, path, and file_name,
+    # reads the file content from retrieval_path, builds an attachment hash for the mailer,
+    # and stores a reference (not content) back into extra_substitutions.
+    # @return [void]
+    def resolve_nfsstore_attachments
+      att_data = extra_substitutions_data&.dig(:attachments)
+      return unless att_data.is_a?(Array)
+
+      att_data.each do |entry|
+        container_id = entry['container_id']
+        path = entry['path'].to_s
+        file_name = entry['file_name']
+
+        stored_file = NfsStore::Manage::StoredFile.find_by(
+          nfs_store_container_id: container_id,
+          path: path,
+          file_name: file_name
+        )
+
+        unless stored_file
+          raise FphsException,
+                "NfsStore file not found: container_id=#{container_id}, path=#{path}, file_name=#{file_name}"
+        end
+
+        # Set current user context for file access via role-based permissions
+        stored_file.container.current_user = user
+
+        rp = stored_file.retrieval_path
+        unless rp
+          raise FphsException,
+                'NfsStore file could not be retrieved (no access): ' \
+                "container_id=#{container_id}, path=#{path}, file_name=#{file_name}"
+        end
+
+        content = File.read(rp)
+
+        @resolved_attachments << {
+          filename: stored_file.file_name,
+          mime_type: stored_file.content_type,
+          content: content
+        }
+
+        # Store reference (not content) back into extra_substitutions
+        entry['stored_file_id'] = stored_file.id
+        entry['content_type'] = stored_file.content_type
+      end
+
+      self.extra_substitutions = extra_substitutions_data.to_hash.to_yaml
     end
 
     #

@@ -35,9 +35,15 @@
             <% end %>
           </table>
           <% ci_data = list_item.calendar_invite_data %>
-          <% if ci_data&.dig('generated_content').present? %>
+          <% nfs_attachments = list_item.nfsstore_attachment_references %>
+          <% if ci_data&.dig('generated_content').present? || nfs_attachments.any? %>
             <p><strong>Attachments:</strong>
-              <%= link_to 'calendar.ics', attachment_admin_message_notification_path(list_item), class: 'btn btn-sm btn-default' %>
+              <% if ci_data&.dig('generated_content').present? %>
+                <%= link_to 'calendar.ics', attachment_admin_message_notification_path(list_item), class: 'btn btn-sm btn-default' %>
+              <% end %>
+              <% nfs_attachments.each do |att| %>
+                <%= link_to att['file_name'], attachment_admin_message_notification_path(list_item, stored_file_id: att['stored_file_id']), class: 'btn btn-sm btn-default' %>
+              <% end %>
             </p>
           <% end %>
           <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%> if-mn-status-<%= list_item.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox">
