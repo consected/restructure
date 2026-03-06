@@ -447,6 +447,7 @@ module Formatter
 
     #
     # Evaluate set_variables from the item's option_type_config and add them to data[:variables].
+    # Also merges in any trigger_variables set by the set_variables save trigger.
     # Variables are processed in array order. Each entry has :name, :value, and optional :if condition.
     # Later entries with the same name override earlier ones.
     # Values may contain {{substitution}} tags resolved against the current data.
@@ -454,32 +455,40 @@ module Formatter
     # @param [Hash] data - the substitution data hash
     # @param [Object] item - the original item instance
     def self.setup_set_variables(data, item)
-      return unless data.is_a?(Hash) && item.respond_to?(:option_type_config)
-
-      config = item.option_type_config
-      return unless config&.respond_to?(:set_variables) && config.set_variables.present?
+      return unless data.is_a?(Hash)
 
       variables = {}
 
-      config.set_variables.each do |entry|
-        # Evaluate the if condition when present
-        if entry[:if].present?
-          ca = ConditionalActions.new(entry[:if], item)
-          next unless ca.calc_action_if
+      # Include trigger_variables set by the set_variables save trigger (issue #964)
+      if item.respond_to?(:trigger_variables) && item.trigger_variables.present?
+        variables.merge!(item.trigger_variables)
+      end
+
+      # Include config-level set_variables from option_type_config
+      if item.respond_to?(:option_type_config)
+        config = item.option_type_config
+        if config&.respond_to?(:set_variables) && config.set_variables.present?
+          config.set_variables.each do |entry|
+            # Evaluate the if condition when present
+            if entry[:if].present?
+              ca = ConditionalActions.new(entry[:if], item)
+              next unless ca.calc_action_if
+            end
+
+            value = entry[:value]
+
+            # Handle hash values with :object key
+            if value.is_a?(Hash) && value.key?(:object)
+              value = value[:object]
+              value = value.deep_symbolize_keys if value.respond_to?(:deep_symbolize_keys)
+            elsif value.is_a?(String) && value.include?('{{')
+              # Substitute tags in the value string
+              value = substitute(value, data:, ignore_missing: true)
+            end
+
+            variables[entry[:name].to_sym] = value
+          end
         end
-
-        value = entry[:value]
-
-        # Handle hash values with :object key
-        if value.is_a?(Hash) && value.key?(:object)
-          value = value[:object]
-          value = value.deep_symbolize_keys if value.respond_to?(:deep_symbolize_keys)
-        elsif value.is_a?(String) && value.include?('{{')
-          # Substitute tags in the value string
-          value = substitute(value, data:, ignore_missing: true)
-        end
-
-        variables[entry[:name].to_sym] = value
       end
 
       data[:variables] = variables if variables.present?
