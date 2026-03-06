@@ -303,7 +303,7 @@ module Dynamic
       Rails.logger.info 'Refreshing item types'
       begin
         Classification::GeneralSelection.item_types refresh: true
-      rescue NameError => e
+      rescue NameError
         Rails.logger.info "Failed to clear general selections for #{model_class_name}"
       end
 
@@ -311,6 +311,24 @@ module Dynamic
       remove_assoc_class 'Master'
       remove_implementation_class
       remove_implementation_controller_class
+    end
+
+    #
+    # Apply Rails `encrypts` declarations to the implementation class for any fields
+    # marked with `encrypted: true` in the _db_columns configuration.
+    # This enables transparent encryption/decryption of field values using
+    # ActiveRecord::Encryption.
+    # @param [Class] impl_class - the generated implementation class
+    def apply_encrypted_attributes(impl_class)
+      return unless db_columns.is_a?(Hash)
+
+      encrypted_fields = db_columns.select { |_field, config| config.is_a?(Hash) && config[:encrypted] }
+      return if encrypted_fields.empty?
+
+      encrypted_fields.each_key do |field_name|
+        impl_class.encrypts field_name
+        Rails.logger.info "Applied encryption to field #{field_name} on #{impl_class.name}"
+      end
     end
 
     # A list of model names and definitions is stored in the class so we can

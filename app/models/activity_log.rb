@@ -640,6 +640,7 @@ class ActivityLog < ActiveRecord::Base
         res.include Dynamic::RelatedModelHandler
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
+        apply_encrypted_attributes(res)
 
         remove_implementation_controller_class
         res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
