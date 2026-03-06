@@ -185,7 +185,7 @@ fi
 # git push --set-upstream origin release/${NEWVER}
 # git flow release finish -m 'Release' ${NEWVER}
 # git push origin --tags
-git merge --no-ff ${FROM_BRANCH}
+git merge --no-ff -Xtheirs ${FROM_BRANCH}
 if [ $? != 0 ]; then
   echo "Failed to merge ${FROM_BRANCH}. Will not continue."
   exit 102
