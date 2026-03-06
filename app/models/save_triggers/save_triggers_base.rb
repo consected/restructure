@@ -13,6 +13,7 @@ class SaveTriggers::SaveTriggersBase
     self.item = item
     self.master = item.master if item.respond_to? :master
     item.save_trigger_results ||= {} if item.respond_to? :save_trigger_results
+    item.trigger_variables ||= {} if item.respond_to? :trigger_variables
 
     if item.respond_to? :current_user
       cu = item.current_user
