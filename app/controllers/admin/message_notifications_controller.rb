@@ -1,9 +1,19 @@
 class Admin::MessageNotificationsController < AdminController
   #
-  # Download a generated attachment (e.g. calendar .ics file) from a message notification.
-  # The attachment content is stored in extra_substitutions YAML column.
+  # Download a generated attachment (e.g. calendar .ics file or NfsStore file) from a message notification.
+  # Calendar invite content is stored in extra_substitutions YAML column.
+  # NfsStore attachments redirect to the NfsStore download path by stored_file_id.
   def attachment
     mn = Messaging::MessageNotification.find(params[:id])
+
+    # Handle NfsStore file attachment download by stored_file_id
+    if params[:stored_file_id].present?
+      stored_file_id = params[:stored_file_id].to_i
+      redirect_to nfs_store_download_path(stored_file_id)
+      return
+    end
+
+    # Handle calendar invite attachment download
     ci_data = mn.calendar_invite_data
 
     if ci_data&.dig('generated_content').present?

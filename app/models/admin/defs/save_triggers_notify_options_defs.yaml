@@ -95,6 +95,17 @@
               uid: '(optional, default: auto-generated UUID) unique event identifier - supports {{curly}} substitutions'
               sequence: '(optional, default: 0) event revision sequence number'
 
+            attachments:
+              - container_id: |
+                  NfsStore container ID containing the file to attach.
+                  Supports {{curly}} substitutions resolved at trigger time.
+                path: |
+                  (optional) path within the container (empty string for root).
+                  Supports {{curly}} substitutions resolved at trigger time.
+                file_name: |
+                  filename of the NfsStore stored file to attach.
+                  Supports {{curly}} substitutions resolved at trigger time.
+
             extra_substitutions:
               data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
             

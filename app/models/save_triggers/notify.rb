@@ -298,32 +298,56 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     end
 
     merge_calendar_invite_into_extra_substitutions
+    merge_attachments_into_extra_substitutions
 
     @extra_substitutions = nil if @extra_substitutions.blank?
     @extra_substitutions
   end
 
   #
-  # Parse the calendar_invite config option, resolve {{curly}} substitutions in all string values,
+  # Parse the calendar_invite config option, resolve substitutions in all values,
   # and merge the resolved hash into extra_substitutions[:calendar_invite].
+  # Values support {{curly}} substitutions and conditional action hashes.
   # @return [void]
   def merge_calendar_invite_into_extra_substitutions
     cal_config = config[:calendar_invite]
     return unless cal_config
 
     resolved = cal_config.to_h do |k, v|
-      [k.to_s, v.is_a?(String) ? substitute_from_item(v) : v]
+      [k.to_s, substitute_from_item(v)]
     end
 
     @extra_substitutions[:calendar_invite] = resolved
   end
 
   #
-  # Substitute {{curly}} template values from the current item
-  # @param [String] value - string containing {{curly}} substitutions
-  # @return [String] resolved string
+  # Parse the attachments config option, resolve substitutions in all values,
+  # and merge the resolved array into extra_substitutions[:attachments].
+  # Each attachment entry is a hash with container_id, path, and file_name keys.
+  # Values support {{curly}} substitutions and conditional action hashes
+  # (e.g. {this: {field: return_value}}).
+  # @return [void]
+  def merge_attachments_into_extra_substitutions
+    att_config = config[:attachments]
+    return unless att_config
+
+    resolved = att_config.map do |entry|
+      entry.to_h do |k, v|
+        [k.to_s, substitute_from_item(v)]
+      end
+    end
+
+    @extra_substitutions[:attachments] = resolved
+  end
+
+  #
+  # Resolve a config value from the current item using FieldDefaults.calculate_default.
+  # Supports {{curly}} substitutions, {{{raw}}} substitutions, conditional action hashes
+  # (e.g. {this: {field: return_value}}), and literal values passed through unchanged.
+  # @param [String | Hash | Object] value - value to resolve
+  # @return [Object] resolved value
   def substitute_from_item(value)
-    Formatter::Substitution.substitute(value, data: @item, tag_subs: nil, ignore_missing: true)
+    FieldDefaults.calculate_default(@item, value, allow_nil: true, ignore_missing: true)
   end
 
   #

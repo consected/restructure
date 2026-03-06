@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Tests for SaveTriggers::Notify
+# Covers notification trigger configuration parsing, role/user setup, message creation,
+# template substitutions, conditional actions, return_value_list references,
+# calendar invite integration (#953), and NfsStore file attachment config parsing (#954).
+
 require 'rails_helper'
 
 AlNameGenTestN = 'Gen Test ELT 2'
@@ -918,6 +923,94 @@ RSpec.describe SaveTriggers::Notify, type: :model do
         expect(ci_data['location']).to eq('Room 101')
         expect(ci_data['organizer']).to eq('organizer@example.com')
         expect(ci_data['uid']).to eq("#{@al.id}-#{@al.master_id}@restructure")
+      end
+    end
+
+    context 'with attachments config (issue #954)' do
+      before :example do
+        # Mock NfsStore file resolution so the inline job doesn't fail
+        # (the actual resolution is tested in message_notification_spec)
+        allow_any_instance_of(Messaging::MessageNotification).to receive(:resolve_nfsstore_attachments)
+      end
+
+      it 'parses attachments config, resolves substitutions, and merges into extra_substitutions' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Report Delivery',
+          attachments: [
+            {
+              container_id: '{{master_id}}',
+              path: 'reports',
+              file_name: 'summary.pdf'
+            },
+            {
+              container_id: 42,
+              path: '',
+              file_name: 'static_file.txt'
+            }
+          ]
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        es_data = YAML.safe_load(new_mn.extra_substitutions, permitted_classes: [Symbol])
+                      &.with_indifferent_access
+        attachments_data = es_data['attachments']
+
+        expect(attachments_data).to be_a(Array)
+        expect(attachments_data.length).to eq(2)
+
+        # First attachment should have {{master_id}} resolved
+        expect(attachments_data[0]['container_id']).to eq(@al.master_id.to_s)
+        expect(attachments_data[0]['path']).to eq('reports')
+        expect(attachments_data[0]['file_name']).to eq('summary.pdf')
+
+        # Second attachment should have literal values preserved
+        expect(attachments_data[1]['container_id']).to eq(42)
+        expect(attachments_data[1]['path']).to eq('')
+        expect(attachments_data[1]['file_name']).to eq('static_file.txt')
+      end
+
+      it 'works with both attachments and calendar_invite in the same config' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Combined Notification',
+          calendar_invite: {
+            method: 'REQUEST',
+            summary: 'Meeting',
+            dtstart: '2026-04-01 10:00:00',
+            dtend: '2026-04-01 11:00:00',
+            organizer: 'org@example.com'
+          },
+          attachments: [
+            {
+              container_id: 99,
+              path: '',
+              file_name: 'report.pdf'
+            }
+          ]
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        es_data = YAML.safe_load(new_mn.extra_substitutions, permitted_classes: [Symbol])
+                      &.with_indifferent_access
+
+        # Both should be present
+        expect(es_data['calendar_invite']).to be_a(Hash)
+        expect(es_data['attachments']).to be_a(Array)
+        expect(es_data['attachments'].length).to eq(1)
+        expect(es_data['attachments'][0]['file_name']).to eq('report.pdf')
       end
     end
   end
