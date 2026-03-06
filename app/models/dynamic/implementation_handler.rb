@@ -16,7 +16,8 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results, :option_type
+      # trigger_variables: Variables set by the set_variables save trigger
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type
     end
 
     class_methods do
