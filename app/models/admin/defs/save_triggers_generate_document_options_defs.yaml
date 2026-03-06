@@ -1,0 +1,33 @@
+# Save Trigger: Generate Document options
+        generate_document:
+          # --- Content Generation (c.f. notify trigger) ---
+          content_template_name: template_name  # Named content template (Admin::MessageTemplate)
+          content_template_text: inline template text with {{curly}} substitutions  # OR inline template text
+          layout_template: layout_name  # Optional layout template to wrap content (replaces {{main_content}})
+          extra_substitutions:  # Optional extra data for {{extra_substitutions.*}} tag substitutions
+            key1: value1
+            key2: '{{field_name}}'  # Supports {{curly}} substitutions resolved from the triggering item
+
+          # --- File Storage ---
+          container:  # Hash defining how to locate the target NFS container
+            # Option A: resolve from item's model references (e.g. container created by create_filestore_container)
+            from_this: model_reference
+            # Option B: lookup by name in master
+            name: container-name  # Supports {{curly}} substitutions
+            # Option C: lookup by database id
+            id: 123  # Supports {{curly}} substitutions
+
+          filename: generated-report-{{id}}.html  # Filename with {{curly}} substitution support
+          content_type: text/html  # MIME type of the generated file
+          path: reports  # Optional subdirectory path within the container
+
+          # --- Duplicate File Handling ---
+          skip_existing: true  # Optional: skip if a file with the same name and path already exists
+          replace: true  # Optional: replace existing file if content has changed
+
+          # --- User/Access Context ---
+          store_as_user: user@example.com  # User to perform the file store operation
+          store_in_app_type: app_type_name  # App type context for access control
+
+          # --- Standard Trigger Options ---
+          if: #if_extras  # Optional conditional to control when trigger fires
