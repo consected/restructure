@@ -14,6 +14,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.11 back to develop
+- [Added] navigable help doc indexes, back navigation, open-in-new-tab, and fixed YAML option doc rendering
+- [Updated] tdd agent and instructions
+- [Added] recursive substitution for object key values in FieldDefaults.calculate_default - fixes #956
+- [Added] calendar invite (.ics) attachment support to email notifications - fixes #953
+- [Added] NfsStore file attachment support to email notifications - fixes #954
+- [Added] generate_document save trigger - fixes #961
+- [Added] set_variables save trigger - resolves #964
+- [Try] fixing release_and_build.sh merge
+- [Added] encrypted attribute support for dynamic definition db_columns - fixes #966
+
 ## [9.42.12] - 2026-03-05
 
 ## [9.42.11] - 2026-03-04
