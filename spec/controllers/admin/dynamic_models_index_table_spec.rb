@@ -4,7 +4,8 @@ require 'rails_helper'
 
 # Tests for the DynamicModelsController admin panel index table changes (issue #968):
 # - Removed columns: schema_name, table_key_name, primary_key_name, foreign_key_name, result_order
-# - Added extra index columns: resource_name, batch_jobs status, view? boolean
+# - Added resource_name to index_params as a regular column
+# - Added extra index columns: batch_jobs status, "Is a view?" boolean
 # - These new columns use the existing extra_index_columns mechanism
 RSpec.describe Admin::DynamicModelsController, type: :controller do
   include ModelSupport
@@ -33,8 +34,8 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       end
     end
 
-    it 'includes id, name, table_name, category, position, and admin_id' do
-      required_columns = %i[id name table_name category position admin_id]
+    it 'includes id, category, name, table_name, resource_name, position, and admin_id' do
+      required_columns = %i[id category name table_name resource_name position admin_id]
       result = controller.send(:index_params)
       required_columns.each do |col|
         expect(result).to include(col), "Expected index_params to include #{col}"
@@ -43,10 +44,9 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
   end
 
   describe 'extra_index_columns' do
-    it 'includes resource_name column' do
+    it 'does not include resource_name (it is a regular index_params column)' do
       result = controller.send(:extra_index_columns)
-      expect(result).to have_key(:resource_name_column)
-      expect(result[:resource_name_column]).to eq('Resource name')
+      expect(result.keys.map(&:to_s)).not_to include('resource_name_column')
     end
 
     it 'includes batch_jobs column' do
@@ -55,26 +55,16 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       expect(result[:batch_jobs_column]).to eq('Batch jobs')
     end
 
-    it 'includes view? column' do
+    it 'includes "Is a view?" column' do
       result = controller.send(:extra_index_columns)
       expect(result).to have_key(:view_sql_column)
-      expect(result[:view_sql_column]).to eq('View?')
+      expect(result[:view_sql_column]).to eq('Is a view?')
     end
 
     it 'still includes in_current_app_type column' do
       result = controller.send(:extra_index_columns)
       expect(result).to have_key(:in_current_app_type_result_checkbox)
       expect(result[:in_current_app_type_result_checkbox]).to eq('In current app type')
-    end
-  end
-
-  describe 'resource_name_column' do
-    it 'returns the resource name for a dynamic model' do
-      dm = DynamicModel.active.first
-      next unless dm
-
-      result = controller.send(:resource_name_column, dm)
-      expect(result).to eq(dm.resource_name)
     end
   end
 

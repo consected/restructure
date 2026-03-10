@@ -155,21 +155,10 @@ class Admin::DynamicModelsController < AdminController
   # and whether the dynamic model is in the current app type
   def extra_index_columns
     {
-      resource_name_column: 'Resource name',
       batch_jobs_column: 'Batch jobs',
-      view_sql_column: 'View?',
+      view_sql_column: 'Is a view?',
       in_current_app_type_result_checkbox: 'In current app type'
     }
-  end
-
-  #
-  # Show the full resource name for the dynamic model
-  # @param [DynamicModel] list_item
-  # @return [String]
-  def resource_name_column(list_item)
-    return '' unless list_item.persisted?
-
-    list_item.resource_name.to_s
   end
 
   #
@@ -218,7 +207,7 @@ class Admin::DynamicModelsController < AdminController
   end
 
   def index_params
-    %i[id name table_name category position admin_id]
+    %i[id category name table_name resource_name position admin_id]
   end
 
   #
