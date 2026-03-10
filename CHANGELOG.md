@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.13] - 2026-03-10
+
 - [Merged] release 9.42.11 back to develop
 - [Added] navigable help doc indexes, back navigation, open-in-new-tab, and fixed YAML option doc rendering
 - [Updated] tdd agent and instructions
