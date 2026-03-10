@@ -81,6 +81,29 @@
       "note": ""
     },
     {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "21ff6d3b4153987a315b6cd13958dbe4b718007c837ac5982fbfd2a6175a302e",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/models/messaging/message_notification.rb",
+      "line": 543,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "File.read(NfsStore::Manage::StoredFile.find_by(:nfs_store_container_id => entry[\"container_id\"], :path => entry[\"path\"].to_s, :file_name => entry[\"file_name\"]).retrieval_path)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Messaging::MessageNotification",
+        "method": "resolve_nfsstore_attachments"
+      },
+      "user_input": "NfsStore::Manage::StoredFile.find_by(:nfs_store_container_id => entry[\"container_id\"], :path => entry[\"path\"].to_s, :file_name => entry[\"file_name\"]).retrieval_path",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Remote Code Execution",
       "warning_code": 24,
       "fingerprint": "22417eb6c875cd9eadf0eb1a64141f0a9f82a6314a77fa90d9faca986f30aaf8",
@@ -416,7 +439,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/masters_controller.rb",
-      "line": 157,
+      "line": 194,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.except(:utf8, :controller, :action).permit!",
       "render_path": null,
@@ -763,7 +786,7 @@
       "check_name": "Deserialize",
       "message": "Use of `Marshal.load` may be dangerous",
       "file": "app/models/option_configs/extra_options.rb",
-      "line": 89,
+      "line": 91,
       "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
       "code": "Marshal.load(Marshal.dump(field_configs))",
       "render_path": null,
@@ -912,5 +935,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "8.0.2"
+  "brakeman_version": "8.0.4"
 }
