@@ -14,6 +14,17 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.13 back to develop
+- [Changed] dynamic models admin index table columns - fixes #968
+- [Updated] specs for revised index table columns - fixes #968
+- [Added] squash commits requirement to createpr
+- [Added] 'Referenced by' section to config library admin details - fixes #970
+- [Changed] filter buttons to chosen select boxes in admin and reports pages - fixes #969
+- [Added] password expiry days to user menu label - fixes #317
+- [Updated] `createpr` agent prompt
+- [Added] example for storing encrypted secrets
+- [Fixed] save trigger admin documentation issues - fixes #976
+
 ## [9.42.13] - 2026-03-10
 
 - [Merged] release 9.42.11 back to develop
