@@ -291,6 +291,7 @@ class DynamicModel < ActiveRecord::Base
         add_handlers(res)
 
         res.final_setup
+        apply_encrypted_attributes(res)
 
         # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")

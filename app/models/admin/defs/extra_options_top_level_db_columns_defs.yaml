@@ -5,5 +5,6 @@ _db_columns:
     type: force the field type (string, datetime, date, integer, float, decimal)
     array: false (default) | true - optional flag to indicate if this is an array type column
     index: false (default) | true - add an index
+    encrypted: false (default) | true - use Rails encrypted attribute for transparent encryption/decryption
   field_name2:
     type: ...

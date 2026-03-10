@@ -244,6 +244,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res.include UserHandler
         res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
+        apply_encrypted_attributes(res)
 
         remove_implementation_controller_class
         res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
