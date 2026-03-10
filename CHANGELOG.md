@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.14] - 2026-03-10
+
 - [Merged] release 9.42.13 back to develop
 - [Changed] dynamic models admin index table columns - fixes #968
 - [Updated] specs for revised index table columns - fixes #968
