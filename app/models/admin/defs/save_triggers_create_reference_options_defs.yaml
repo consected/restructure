@@ -8,7 +8,10 @@
                 - referring_record
                 - master (creates no reference, just uses master_id)
                 - master_with_reference (creates a reference to the master, not the item)
-                - specific_record
+                - specific_record:
+                    resource_name:
+                      criteria_field: criteria_value
+                      id: return_value
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
