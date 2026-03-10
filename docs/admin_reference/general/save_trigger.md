@@ -34,4 +34,3 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [case](save_trigger_case.md) | Conditionally branch trigger execution |
 | [each](save_trigger_each.md) | Iterate over a list and apply triggers |
 | [set_save_trigger_results](save_trigger_set_save_trigger_results.md) | Set save trigger result values |
-| [with_attribute_values](save_trigger_with_attribute_values.md) | Map attribute values in trigger context |
