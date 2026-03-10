@@ -5,6 +5,7 @@ Samples are provided for API development and platform development / customizatio
 - [Create tracker items for a master](add-tracker-items-to-master.md)
 - [Filestore Script Job for OCR](scripted_job_ocr_setup.md)
 - [Marketo Webhook](marketo_webhook.md)
+- [Storing encrypted secrets](storing-encrypted-secrets.md)
 
 ## API samples
 
