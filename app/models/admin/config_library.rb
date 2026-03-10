@@ -66,11 +66,73 @@ class Admin::ConfigLibrary < Admin::AdminBase
   end
 
   def parsed
-    res = if content.present? && is_yaml?
-            YAML.safe_load(c)
-          else
-            {}
-          end
+    if content.present? && is_yaml?
+      YAML.safe_load(c)
+    else
+      {}
+    end
+  end
+
+  # Find all active definitions that reference this config library
+  # via `# @library category name` in their options text.
+  # Searches ActivityLog, DynamicModel, ExternalIdentifier, and ConfigLibrary definitions.
+  # @return [Array<Hash>] array of hashes with :type, :id, :name, :admin_path keys
+  def referenced_by
+    refs = []
+    library_ref = "# @library #{category} #{name}"
+
+    ActivityLog.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'ActivityLog',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/activity_logs?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    DynamicModel.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'DynamicModel',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/dynamic_models?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    ExternalIdentifier.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'ExternalIdentifier',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/external_identifiers?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    Admin::ConfigLibrary.active.where.not(id:).each do |item|
+      next unless item.options&.include?(library_ref)
+
+      refs << {
+        type: 'ConfigLibrary',
+        id: item.id,
+        name: "#{item.category} - #{item.name}",
+        resource_name: nil,
+        admin_path: "/admin/config_libraries?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    refs
   end
 
   private

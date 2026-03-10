@@ -387,3 +387,11 @@ a.link-disabled {
     margin-right: 3px;
   }
 }
+
+.config-library-referenced-by-list {
+  padding-inline-start: 0;
+  li{
+    margin-bottom: 8px;
+    list-style: none;
+  }
+}

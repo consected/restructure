@@ -2,5 +2,23 @@
 <% if object_instance.persisted? %>
   <h4>Include with</h4>
   <pre><code># @library <%=object_instance.category%> <%=object_instance.name%></code></pre>
+
+  <% refs = object_instance.referenced_by %>
+  <% if refs.present? %>
+  <h4>Referenced by</h4>
+  <ul class="config-library-referenced-by-list">
+    <% refs.each do |ref| %>
+    <li>
+      <span class="badge"><%= ref[:type].underscore.humanize %></span>
+      <%= link_to link_label_open_in_new(ref[:name]), ref[:admin_path], target: "_blank" %>
+      <% if ref[:resource_name].present? %>
+        <br/><code><%= ref[:resource_name] %></code>
+      <% end %>
+    </li>
+    <% end %>
+  </ul>
+  <% else %>
+  <p class="text-muted">Not referenced by any definitions</p>
+  <% end %>
 <% end %>
 </div>
