@@ -36,35 +36,40 @@ module AdminHelper
     ['', controller_path, object_instance.id].join('/')
   end
 
-  def filter_btn(title, filter_on, val)
-    res = ''
+  #
+  # Generate a select element for a single filter field, replacing the previous button-based filter UI.
+  # The select uses the "chosen" plugin class for typed filtering of options.
+  # @param [Symbol] filter_on - the filter parameter name
+  # @param [Hash, Array] values - the available filter options
+  #   Hash: { value => label } pairs
+  #   Array: simple list of values (used as both value and label)
+  # @return [String] HTML safe string containing the select element
+  def filter_select(filter_on, values)
+    current_filter = (filter_params || {}).dup
+    current_val = current_filter[filter_on].to_s
 
-    filter = (filter_params || {}).dup
-    prev_val = filter[filter_on].to_s
-    filter[filter_on] = val.to_s
+    options = []
+    options << content_tag(:option, 'All', value: '')
+    options << content_tag(:option, 'Not set', value: 'IS NULL', selected: current_val == 'IS NULL' ? 'selected' : nil)
 
-    unless title == 'all' || title.to_s.include?('__') || @shown_filter_break
-      @shown_filter_break = true
-      res = '<p class="filter-small-gap">&nbsp;</p>'.html_safe
-    end
-
-    if val.present? || title == 'all'
-      like_type = title.to_s.end_with?('__%')
-      title = title[0..-4] if like_type
-      linkres = link_to(title, index_path(filter:),
-                        class: "btn #{(val.blank? && prev_val.blank?) || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{if like_type
-                                                                                                                                               'like-type'
-                                                                                                                                             end}")
-      if like_type
-        @shown_filter_break = false
-        res += "<p class=\"like-type\">#{linkres}</p>".html_safe
-      else
-        res += linkres.html_safe
+    if values.is_a?(Hash)
+      values.each do |val, label|
+        selected = val.to_s == current_val ? 'selected' : nil
+        like_type = label.to_s.end_with?('__%')
+        display_label = like_type ? label.to_s[0..-4] : label.to_s
+        options << content_tag(:option, display_label, value: val, selected:)
       end
-      res.html_safe
-    else
-      ''
+    elsif values.is_a?(Array)
+      values.each do |val|
+        selected = val.to_s == current_val ? 'selected' : nil
+        options << content_tag(:option, val.to_s.humanize, value: val, selected:)
+      end
     end
+
+    content_tag(:select,
+                safe_join(options),
+                class: 'use-chosen filter-select',
+                data: { filter_on: filter_on.to_s, nothing_selected_text: 'select filter' })
   end
 
   def show_filters
@@ -75,15 +80,11 @@ module AdminHelper
 
     these_filters = filters.dup
 
-    filters_on_multiple = false
-    res = ''
-
-    if filters_on.is_a? Symbol
-      fo = [filters_on]
-    else
-      fo = filters_on
-      filters_on_multiple = true
-    end
+    fo = if filters_on.is_a? Symbol
+           [filters_on]
+         else
+           filters_on
+         end
 
     these_filters = { filters_on => these_filters } if these_filters.is_a? Array
 
@@ -92,8 +93,9 @@ module AdminHelper
       fo << :disabled
     end
 
+    res = ''
     res += render(partial: 'admin_handler/filters',
-                  locals: { fo:, filters_on_multiple:, these_filters: })
+                  locals: { fo:, these_filters: })
 
     res.html_safe
   end
