@@ -5,6 +5,7 @@ description: Create a new pull request using our workspace workflow
 
 If requested to create a PR, follow these steps:
 
+- Squash commits into a single commit with a clear message describing the change and referencing the related issue number (e.g. "Added feature X - fixes #123").
 - Rebase your branch onto the latest local `up-develop` branch before creating a pull request:
   `git checkout up-develop && git pull && git rebase --onto up-develop start-<feature-name>-<issue-number>`
 - Create a (cross fork) pull request on repo `consected/restructure` based on the `develop` branch, with a descriptive title and summary of changes. "head" should refer to the local branch created for the feature.
