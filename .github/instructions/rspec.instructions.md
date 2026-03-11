@@ -45,17 +45,24 @@ bundle exec rspec spec/system/ 2>&1 | tee /tmp/rspec_output.log | tail -100
 grep -E "pattern" /tmp/rspec_output.log | tail -15
 grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
 
-# ✅ Use the rails environment argument
-bundle exec rails runner -e "puts Rails.env"
-# Prints 'test'
-
 # ✅ Use app-scripts that set environment variables internally
 # NOTE: the arguments after the script are the same as you would pass to the underlying command
+# Replace `RAILS_ENV=test bundle exec rails runner ...` with: 
 app-scripts/rails_runner_test.sh "puts User.count"
+# or use the rails environment argument
+bundle exec rails runner -e test "puts Rails.env"
+
+# Replace `RUN_APP_SPECS=true FEATURE_DEBUG=true bundle exec rspec ...` with:
 app-scripts/headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
+
+# Replace `NOT_HEADLESS=true RUN_APP_SPECS=true FEATURE_DEBUG=true bundle exec rspec ...` with:
 app-scripts/not_headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
-app-scripts/clean-test-db.sh # Clean the test database (creates a fresh one)
-app-scripts/clean-test-assets-and-cache.sh # Clean test assets and cache
+
+# Clean the test database (creates a fresh one)
+app-scripts/clean-test-db.sh 
+
+# Clean test assets and cache
+app-scripts/clean-test-assets-and-cache.sh
 ```
 
 #### Why These Rules Exist
