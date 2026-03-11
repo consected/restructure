@@ -1,5 +1,22 @@
 # frozen_string_literal: true
 
+# Test Summary: Redcap::DataRecords
+# =================================
+#
+# Tests for retrieving, validating and storing REDCap records into dynamic models.
+# Covers:
+#   - Record retrieval, validation and storage (create, update, unchanged)
+#   - File field downloads and failed file tracking
+#   - Background job retrieval
+#   - Handling of deleted records with all handle_deleted_records options:
+#     - nil/false (default): raises error when records are missing
+#     - 'ignore': silently skips missing records
+#     - 'disable': sets disabled=true for missing records (does NOT re-enable on reappearance)
+#     - 'disable unless re-entered': disables missing records AND re-enables them when they reappear
+#   - Validation of handle_deleted_records option values (accepts valid, rejects invalid)
+#   - Summary choice array fields for multi-choice checkboxes
+#   - External ID association and master_id field setting
+
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
@@ -820,6 +837,150 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(dr.disabled_ids.map { |r| r }.sort).to eq %w[4]
 
       expect(dm.implementation_class.find_by(record_id: 4)&.disabled).to be true
+    end
+
+    it 'disables then re-enables records when handle_deleted_records = disable unless re-entered' do
+      dm = create_dynamic_model_for_sample_response(disable: true)
+
+      expect(dm.implementation_class.attribute_names).to include 'disabled'
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.data_options.handle_deleted_records = 'disable unless re-entered'
+      rc.save!
+      expect(rc.data_options.handle_deleted_records).to eq 'disable unless re-entered'
+      expect(rc.disable_unless_reentered_deleted_records?).to be true
+
+      # Step 1: Store the initial set of records (record_ids: 1, 4, 14, 19, 32)
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      # Verify record 4 is enabled
+      expect(dm.implementation_class.find_by(record_id: '4')&.disabled).not_to be true
+
+      # Step 2: Simulate record 4 being "deleted" from REDCap (missing_record fixture)
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.disabled_ids).to include('4')
+      expect(dm.implementation_class.find_by(record_id: '4')&.disabled).to be true
+
+      # Step 3: Simulate record 4 "reappearing" in REDCap (back to original narrow fixture)
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      # Record 4 should be re-enabled
+      expect(dm.implementation_class.find_by(record_id: '4')&.disabled).to be false
+      expect(dr.reenabled_ids).to include('4')
+      expect(dr.reenabled_ids.length).to eq 1
+    end
+
+    it 'does NOT re-enable records when handle_deleted_records = disable (plain)' do
+      dm = create_dynamic_model_for_sample_response(disable: true)
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.data_options.handle_deleted_records = 'disable'
+      rc.save!
+      expect(rc.disable_deleted_records?).to be true
+
+      # Step 1: Store initial records
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      dr.store
+
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+
+      # Step 2: Simulate record 4 being deleted
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      dr.store
+
+      expect(dm.implementation_class.find_by(record_id: '4')&.disabled).to be true
+
+      # Step 3: Simulate record 4 "reappearing" — should stay disabled with plain 'disable'
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      dr.store
+
+      # With plain 'disable', record 4 should remain disabled
+      expect(dm.implementation_class.find_by(record_id: '4')&.disabled).to be true
+    end
+
+    it 'accepts all valid handle_deleted_records option values and rejects invalid ones' do
+      # Test each valid value on a freshly loaded record to avoid
+      # config_text / update_options state interference between valid? calls
+      [nil, false, 'disable', 'ignore', 'disable unless re-entered'].each do |value|
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+        rc.data_options.handle_deleted_records = value
+        expect(rc).to be_valid, "expected handle_deleted_records=#{value.inspect} to be valid, got errors: #{rc.errors.full_messages}"
+      end
+
+      # Invalid values should fail validation
+      ['delete', 'remove', 'true', 'disabled', 'enable'].each do |value|
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+        rc.data_options.handle_deleted_records = value
+        expect(rc).not_to be_valid, "expected handle_deleted_records=#{value.inspect} to be invalid"
+        expect(rc.errors[:data_options].first).to include('handle_deleted_records must be one of')
+      end
     end
   end
 

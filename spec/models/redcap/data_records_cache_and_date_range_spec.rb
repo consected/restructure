@@ -60,6 +60,7 @@ require './db/table_generators/dynamic_models_table'
 #    deleted records handling with date range:
 #      - skips deleted records validation when using date range filter
 #      - does not disable records when using date range filter
+#      - does not disable or re-enable records with 'disable unless re-entered' when using date range filter
 #
 # 3. Ignore Cache and Retrieve All Parameters (8 tests)
 #    --------------------------------------------------
@@ -754,6 +755,67 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
         # No records should have been disabled since we're using date range filter
         expect(dr2.disabled_ids.length).to eq 0
         expect(dm.implementation_class.where(disabled: true).count).to eq 0
+      end
+
+      it 'does not disable or re-enable records with disable unless re-entered when using date range filter' do
+        dm = create_dynamic_model_for_sample_response(disable: true)
+
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+        rc.data_options.export_only_updated_records = 'always'
+        rc.data_options.handle_deleted_records = 'disable unless re-entered'
+        rc.save!
+
+        expect(rc.disable_unless_reentered_deleted_records?).to be true
+
+        # Step 1: Store all records initially
+        stub_request_records @project[:server_url], @project[:api_key]
+        dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        dr.retrieve
+        dr.summarize_fields
+        dr.handle_survey_identifier
+        dr.validate
+        dr.store
+
+        expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+        expect(dm.implementation_class.where(disabled: true).count).to eq 0
+
+        # Manually disable record 4 to simulate a previous deletion
+        rec4 = dm.implementation_class.find_by(record_id: '4')
+        rec4.update_columns(disabled: true)
+        expect(dm.implementation_class.find_by(record_id: '4').disabled).to be true
+
+        # Create a successful ClientRequest to enable date range calculation
+        Redcap::ClientRequest.create!(
+          current_admin: @admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          result: { errors: [] },
+          created_at: 5.minutes.ago
+        )
+
+        # Clear cache
+        rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+        # Retrieve with date range (returns all 5 records via 'updated_records' fixture)
+        stub_request_records_with_date_range @project[:server_url], @project[:api_key]
+
+        dr2 = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+        dr2.retrieve
+        dr2.summarize_fields
+        dr2.handle_survey_identifier
+        dr2.validate
+        dr2.store
+
+        expect(dr2.using_date_range_filter).to be true
+
+        # Neither disable nor re-enable should have run during date range filter
+        expect(dr2.disabled_ids.length).to eq 0
+        expect(dr2.reenabled_ids.length).to eq 0
+        # Record 4 should still be disabled (not re-enabled by date range pull)
+        expect(dm.implementation_class.find_by(record_id: '4').disabled).to be true
       end
     end
   end

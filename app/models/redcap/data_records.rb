@@ -15,7 +15,7 @@ module Redcap
     FailedFileFieldMarker = '<<FAILED-FILE-CAPTURE>>'
 
     attr_accessor :project_admin, :records, :class_name, :errors,
-                  :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
+                  :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :reenabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
@@ -33,6 +33,7 @@ module Redcap
       self.created_ids = []
       self.unchanged_ids = []
       self.disabled_ids = []
+      self.reenabled_ids = []
       self.skipped_ids = []
       self.errors = []
       self.current_admin = project_admin.admin
@@ -258,7 +259,7 @@ module Redcap
       end
 
       return if existing_not_in_retrieved_ids.empty? ||
-                project_admin.ignore_deleted_records? || project_admin.disable_deleted_records?
+                project_admin.ignore_deleted_records? || project_admin.disables_deleted_records?
 
       raise FphsException,
             'Redcap::DataRecords existing records were not in the retrieved records: ' \
@@ -279,7 +280,10 @@ module Redcap
     def store
       # Skip deleted records handling when using date range filter
       # since we're only retrieving a subset of updated records
-      disable_deleted_records if project_admin.disable_deleted_records? && !using_date_range_filter
+      unless using_date_range_filter
+        disable_deleted_records if project_admin.disables_deleted_records?
+        reenable_reentered_records if project_admin.disable_unless_reentered_deleted_records?
+      end
 
       upserts = []
       self.storage_stage = 'store'
@@ -451,16 +455,51 @@ module Redcap
         next if record.disabled?
 
         record.disabled = true
-        attrs = record.attributes
-                      .reject { |k, _v| k.in?(%w[id created_at updated_at user_id]) }
-                      .symbolize_keys
-
-        res = create_or_update(attrs, keep_results: false)
+        res = upsert_record_attrs(record)
         disabled_ids << res[record_id_field] if res
       end
 
       self.storage_stage = 'disable_deleted_records complete'
       update_job_request
+    end
+
+    #
+    # Re-enable records that were previously disabled but have reappeared in the
+    # retrieved REDCap data. This handles the case where a record was deleted
+    # from REDCap (causing it to be disabled locally) and then re-entered.
+    # Runs before the main upsert loop so that record_matches_retrieved
+    # encounters disabled = false and can detect actual data changes.
+    def reenable_reentered_records
+      self.storage_stage = 'reenable_reentered_records'
+      update_job_request
+
+      self.done = 0
+      existing_records.where(disabled: true).find_each do |record|
+        rec_id_attrs = record_identifier_fields.map { |f| [f, record[f].to_s] }.to_h
+        next unless retrieved_rec_ids.include?(rec_id_attrs)
+
+        self.done += 1
+        update_job_request if done % step_count == 0
+
+        record.disabled = false
+        res = upsert_record_attrs(record)
+        reenabled_ids << res[record_id_field] if res
+      end
+
+      self.storage_stage = 'reenable_reentered_records complete'
+      update_job_request
+    end
+
+    #
+    # Build upsert-ready attributes from a record and persist via create_or_update.
+    # Excludes system-managed columns (id, timestamps, user_id).
+    # @param record [ActiveRecord::Base] the record to upsert
+    # @return [Hash, nil] the upserted record attributes, or nil on failure
+    def upsert_record_attrs(record)
+      attrs = record.attributes
+                    .reject { |k, _v| k.in?(%w[id created_at updated_at user_id]) }
+                    .symbolize_keys
+      create_or_update(attrs, keep_results: false)
     end
 
     #
@@ -695,6 +734,7 @@ module Redcap
         count_updated_ids: updated_ids&.length,
         count_unchanged_ids: unchanged_ids&.length,
         count_disabled_ids: disabled_ids&.length,
+        count_reenabled_ids: reenabled_ids&.length,
         count_skipped_ids: skipped_ids&.length,
         count_processed: done,
         table: project_admin.dynamic_model_table,

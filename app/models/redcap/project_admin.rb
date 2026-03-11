@@ -49,7 +49,7 @@ module Redcap
 
     JobQueue = 'redcap'
     RedcapSurveyIdentifierField = 'redcap_survey_identifier'
-    ValidHandleDeletedRecordsValues = [nil, false, 'disable', 'ignore'].freeze
+    ValidHandleDeletedRecordsValues = [nil, false, 'disable', 'ignore', 'disable unless re-entered'].freeze
 
     has_one :redcap_data_dictionary,
             class_name: 'Redcap::DataDictionary',
@@ -209,8 +209,8 @@ module Redcap
     #                         - false/null: (default) to prevent a request with deleted records
     #                         - disable: set the disabled attribute for deleted records
     #                         - ignore: skip any deleted records
-    #                         NOTE: with the *disabled* option, if a record subsequently "reappears" in Redcap
-    #                         then the existing DB record will be set to disabled = false and updated appropriately
+    #                         - disable unless re-entered: set disabled = true for deleted records AND
+    #                           set disabled = false when records reappear in REDCap
     # prefix_dynamic_model_config_library: category name
     #                      The "<category> <name>" string identifier for a
     #                      config library to be prefixed to the dynamic
@@ -561,6 +561,16 @@ module Redcap
 
     def disable_deleted_records?
       data_options.handle_deleted_records == 'disable'
+    end
+
+    def disable_unless_reentered_deleted_records?
+      data_options.handle_deleted_records == 'disable unless re-entered'
+    end
+
+    # Returns true when deleted records should be marked as disabled,
+    # regardless of whether re-enabling is also configured
+    def disables_deleted_records?
+      disable_deleted_records? || disable_unless_reentered_deleted_records?
     end
 
     def ignore_deleted_records?
