@@ -41,6 +41,10 @@ module StandardAuthentication
   end
 
   class_methods do
+    def sign_in_after_change_password
+      true
+    end
+
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
