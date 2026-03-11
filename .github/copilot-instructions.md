@@ -73,6 +73,39 @@ For Rspec System Specs Refer to: [Rspec System Specs project coding standards](i
 - DO NOT run commands in the background using `&` or `nohup`
 - DO NOT run commands with `timeout` unless absolutely necessary
 
+```bash
+# Let test output stream, then analyze the saved log
+bundle exec rspec spec/system/ 2>&1 | tee /tmp/rspec_output.log | tail -100
+grep -E "pattern" /tmp/rspec_output.log | tail -15
+grep -E --after-context=100 "other pattern" /tmp/rspec_output.log | tail -200
+
+# NOTE: the arguments after the script are the same as you would pass to the underlying command
+# Replace `RAILS_ENV=test bundle exec rails runner ...` with: 
+app-scripts/rails_runner_test.sh "puts User.count"
+# or use the rails environment argument
+bundle exec rails runner -e test "puts Rails.env"
+
+# Replace `RUN_APP_SPECS=true FEATURE_DEBUG=true bundle exec rspec ...` with:
+app-scripts/headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
+
+# Replace `NOT_HEADLESS=true RUN_APP_SPECS=true FEATURE_DEBUG=true bundle exec rspec ...` with:
+app-scripts/not_headless_rspec.sh spec/system/my_spec.rb -e 'the example to test'
+
+# Clean the test database (creates a fresh one)
+app-scripts/clean-test-db.sh 
+
+# Clean test assets and cache
+app-scripts/clean-test-assets-and-cache.sh
+```
+
+#### Why These Rules Exist
+
+- **Terminal tools can lose output** if commands pipe before completion
+- **Background processes hide errors** and completion status from the agent
+- **Environment variables must be consistent** - app-scripts ensure this
+- **Tee allows both viewing and analyzing** output without losing information
+- **Agents need full output** to diagnose failures accurately
+
 ## Project-Specific Conventions
 
 ### File Structure
