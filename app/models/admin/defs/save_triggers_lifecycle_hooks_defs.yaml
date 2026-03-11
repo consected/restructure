@@ -1,0 +1,49 @@
+# Save Trigger: Lifecycle Hooks (on_complete / on_failure)
+# These options are automatically available on ALL save trigger types.
+# They are implemented in the base class and applied to all current and future triggers.
+# For triggers that accept multiple entries (e.g. add_tracker, update_this,
+# create_reference), these options can be placed inside each named entry
+# to run hooks per-entry.
+
+            on_complete: |
+              (optional) triggers to run after successful completion.
+              Accepts a single trigger hash or an array of trigger configurations.
+              Can be placed at the top level of the trigger config, or inside
+              each named entry for triggers that iterate multiple entries
+              (e.g. add_tracker, create_reference, update_this).
+              
+              Example (top-level):
+                on_complete:
+                  - log:
+                      message: 'Trigger completed successfully'
+                      severity: info
+
+              Example (per-entry, inside a named entry):
+                add_tracker:
+                  - Q1:
+                      with:
+                        sub_process_name: Review
+                        protocol_event_name: Done
+                      on_complete:
+                        - log:
+                            message: 'Tracker added successfully'
+                            severity: info
+
+            on_failure: |
+              (optional) triggers to run if an exception is raised.
+              Accepts a single trigger hash or an array of trigger configurations.
+              The original exception is re-raised after on_failure triggers execute.
+              Errors within on_failure triggers are logged but do not suppress
+              the original exception.
+              Can be placed at the top level or inside each named entry,
+              matching on_complete placement.
+              
+              Example:
+                on_failure:
+                  - log:
+                      message: 'Trigger failed'
+                      severity: error
+                  - update_this:
+                      one:
+                        with:
+                          status: failed

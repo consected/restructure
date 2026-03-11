@@ -31,3 +31,4 @@
 
           # --- Standard Trigger Options ---
           if: #if_extras  # Optional conditional to control when trigger fires
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

@@ -29,45 +29,46 @@ class SaveTriggers::RunBatchTrigger < SaveTriggers::SaveTriggersBase
       # Handle both simple format { resource_name: 'x', mode: 'y' }
       # and named format { batch_1: { resource_name: 'x', mode: 'y' } }
       config = extract_config(model_def)
+      with_entry_lifecycle(config) do
+        # Evaluate conditional if
+        if config[:if]
+          ca = ConditionalActions.new config[:if], @item
+          next unless ca.calc_action_if
+        end
 
-      # Evaluate conditional if
-      if config[:if]
-        ca = ConditionalActions.new config[:if], @item
-        next unless ca.calc_action_if
-      end
+        resource_name = config[:resource_name]
+        raise FphsException, 'run_batch_trigger requires resource_name to be specified' if resource_name.blank?
 
-      resource_name = config[:resource_name]
-      raise FphsException, 'run_batch_trigger requires resource_name to be specified' if resource_name.blank?
+        mode = config[:mode] || 'foreground'
+        limit = config[:limit]
 
-      mode = config[:mode] || 'foreground'
-      limit = config[:limit]
+        # Resolve the resource to get the model class
+        resource = Resources::Models.find_by(resource_name: resource_name.to_sym)
+        raise FphsException, "run_batch_trigger could not find resource: #{resource_name}" unless resource
 
-      # Resolve the resource to get the model class
-      resource = Resources::Models.find_by(resource_name: resource_name.to_sym)
-      raise FphsException, "run_batch_trigger could not find resource: #{resource_name}" unless resource
+        model_class = resource.model
+        raise FphsException, "run_batch_trigger resource has no model class: #{resource_name}" unless model_class
 
-      model_class = resource.model
-      raise FphsException, "run_batch_trigger resource has no model class: #{resource_name}" unless model_class
+        # Verify the model supports batch triggers
+        unless model_class.respond_to?(:trigger_batch) && model_class.respond_to?(:trigger_batch_now)
+          raise FphsException,
+                "run_batch_trigger resource does not support batch triggers: #{resource_name}"
+        end
 
-      # Verify the model supports batch triggers
-      unless model_class.respond_to?(:trigger_batch) && model_class.respond_to?(:trigger_batch_now)
-        raise FphsException,
-              "run_batch_trigger resource does not support batch triggers: #{resource_name}"
-      end
+        alt_user = @item.current_user
 
-      alt_user = @item.current_user
+        Rails.logger.info "run_batch_trigger: #{mode} batch for #{resource_name} with limit #{limit}"
 
-      Rails.logger.info "run_batch_trigger: #{mode} batch for #{resource_name} with limit #{limit}"
-
-      case mode.to_s
-      when 'background'
-        model_class.trigger_batch(limit:, alt_user:)
-        results << { resource_name:, mode:, status: 'queued' }
-      when 'foreground'
-        ids = model_class.trigger_batch_now(limit:, alt_user:)
-        results << { resource_name:, mode:, status: 'completed', processed_ids: ids }
-      else
-        raise FphsException, "run_batch_trigger mode must be 'foreground' or 'background', got: #{mode}"
+        case mode.to_s
+        when 'background'
+          model_class.trigger_batch(limit:, alt_user:)
+          results << { resource_name:, mode:, status: 'queued' }
+        when 'foreground'
+          ids = model_class.trigger_batch_now(limit:, alt_user:)
+          results << { resource_name:, mode:, status: 'completed', processed_ids: ids }
+        else
+          raise FphsException, "run_batch_trigger mode must be 'foreground' or 'background', got: #{mode}"
+        end
       end
     end
 

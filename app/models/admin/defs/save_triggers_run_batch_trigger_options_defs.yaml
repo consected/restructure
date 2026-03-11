@@ -7,3 +7,4 @@
             limit: 100  # Optional limit on number of records to process
           # NOTE: this sets:
           # - save_trigger_results.run_batch_trigger (array of results with resource_name, mode, status, and processed_ids for foreground mode)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

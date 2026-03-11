@@ -34,3 +34,4 @@
                   a_value: value_from_result
 
 #!defs(save_triggers_with_attribute_values_defs.yaml)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

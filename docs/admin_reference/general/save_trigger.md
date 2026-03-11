@@ -34,3 +34,58 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [case](save_trigger_case.md) | Conditionally branch trigger execution |
 | [each](save_trigger_each.md) | Iterate over a list and apply triggers |
 | [set_save_trigger_results](save_trigger_set_save_trigger_results.md) | Set save trigger result values |
+
+## Lifecycle Hooks
+
+All save trigger types support `on_complete` and `on_failure` lifecycle hooks. These fire additional triggers after the main trigger succeeds or fails.
+
+- **`on_complete`**: triggers to run after successful completion
+- **`on_failure`**: triggers to run when an exception is raised (the original exception is re-raised afterwards)
+
+Both accept a single trigger hash or an array of trigger configurations.
+
+### Top-level usage
+
+Place `on_complete` / `on_failure` alongside the trigger's own configuration keys:
+
+```yaml
+save_trigger:
+  on_create:
+    log:
+      message: 'Processing record'
+      severity: info
+      on_complete:
+        - log:
+            message: 'Processing completed'
+            severity: info
+      on_failure:
+        - log:
+            message: 'Processing failed'
+            severity: error
+```
+
+### Per-entry usage
+
+For triggers that accept multiple named entries (e.g. `add_tracker`, `create_reference`, `update_this`), place `on_complete` / `on_failure` inside each entry:
+
+```yaml
+save_trigger:
+  on_create:
+    add_tracker:
+      - Q1:
+          with:
+            sub_process_name: Review
+            protocol_event_name: Done
+          on_complete:
+            - log:
+                message: 'Tracker Q1 added'
+                severity: info
+      - Q2:
+          with:
+            sub_process_name: Review
+            protocol_event_name: Pending
+          on_failure:
+            - log:
+                message: 'Tracker Q2 failed'
+                severity: error
+```

@@ -4,5 +4,6 @@
             if: #if_extras
             message: 'Processing record {{id}} for master {{master_id}}'  # Message to log, supports substitutions
             severity: info  # 'debug', 'info' (default), 'warn', or 'error'
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
           # NOTE: this sets:
           # - save_trigger_results.log (array of results with message, severity, and logged_at)
