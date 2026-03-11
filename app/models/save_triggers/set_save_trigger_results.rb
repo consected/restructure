@@ -41,25 +41,26 @@ class SaveTriggers::SetSaveTriggerResults < SaveTriggers::SaveTriggersBase
     results = []
     @model_defs.each do |model_def|
       config = extract_config(model_def)
+      with_entry_lifecycle(config) do
+        # Evaluate conditional if
+        next unless if_evaluates(config[:if])
 
-      # Evaluate conditional if
-      next unless if_evaluates(config[:if])
+        element = config[:element]
+        raise FphsException, 'set_save_trigger_results requires element to be specified' if element.blank?
 
-      element = config[:element]
-      raise FphsException, 'set_save_trigger_results requires element to be specified' if element.blank?
+        value = config[:value]
 
-      value = config[:value]
+        # Calculate the value using FieldDefaults, supporting substitutions,
+        # conditional actions, and object values.
+        # FieldDefaults.calculate_default handles recursive substitution within
+        # object: hashes internally (issue #956).
+        calculated_value = FieldDefaults.calculate_default(@item, value, allow_nil: true)
 
-      # Calculate the value using FieldDefaults, supporting substitutions,
-      # conditional actions, and object values.
-      # FieldDefaults.calculate_default handles recursive substitution within
-      # object: hashes internally (issue #956).
-      calculated_value = FieldDefaults.calculate_default(@item, value, allow_nil: true)
+        # Set the value in save_trigger_results, supporting dot-notation for nested keys
+        set_nested_value(element.to_s, calculated_value)
 
-      # Set the value in save_trigger_results, supporting dot-notation for nested keys
-      set_nested_value(element.to_s, calculated_value)
-
-      results << { element: element.to_s, value: calculated_value }
+        results << { element: element.to_s, value: calculated_value }
+      end
     end
 
     results

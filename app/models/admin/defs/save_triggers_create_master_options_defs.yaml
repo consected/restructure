@@ -14,3 +14,4 @@
                   field_name: return_value
           # NOTE: this sets:
           # - save_trigger_results.created_masters (with the master record created, if it was created)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

@@ -41,8 +41,9 @@ module OptionConfigs
           # Get a list of results from the triggers
           results = configs.map do |perform, config|
             o = trigger_class(perform).new(config, obj)
-            # Add the trigger result to the list
-            o.perform
+            # Add the trigger result to the list, using lifecycle hooks
+            # to automatically fire on_complete/on_failure
+            o.perform_with_lifecycle
           end
 
           # If we had any results then check if they were all true. If they were then return true.

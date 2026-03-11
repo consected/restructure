@@ -19,3 +19,4 @@
           #       - set_save_trigger_results:
           #           element: hash_var.key1
           #           value: hello
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

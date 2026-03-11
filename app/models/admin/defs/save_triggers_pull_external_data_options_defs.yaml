@@ -92,3 +92,4 @@
                       save_trigger_results:
                         element: 'post_response.success'
                         value: true              
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

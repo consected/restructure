@@ -1,6 +1,7 @@
 # Save Trigger: Change User Roles options
         change_user_roles:
           if: if_extras
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
         add_role_names:
           - app_type: study info
             role_name: viewer-has-agreement

@@ -48,4 +48,5 @@
                     element: link_response
                     condition: "<> LENGTH"
                     value: 0
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
                     

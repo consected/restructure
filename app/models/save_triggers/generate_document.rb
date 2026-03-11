@@ -38,24 +38,25 @@ class SaveTriggers::GenerateDocument < SaveTriggers::SaveTriggersBase
 
     @model_defs.each do |config|
       @config = config.is_a?(Hash) ? config : {}
+      with_entry_lifecycle(@config) do
+        # Evaluate conditional if
+        next unless if_evaluates(@config[:if])
 
-      # Evaluate conditional if
-      next unless if_evaluates(@config[:if])
+        rendered_content = render_content
+        resolved_filename = resolve_filename
+        resolved_container = resolve_container
+        store_user = resolve_user
 
-      rendered_content = render_content
-      resolved_filename = resolve_filename
-      resolved_container = resolve_container
-      store_user = resolve_user
+        stored_file = store_file(resolved_container, resolved_filename, rendered_content, store_user)
 
-      stored_file = store_file(resolved_container, resolved_filename, rendered_content, store_user)
-
-      store_trigger_results('generate_document', {
-                              container_id: resolved_container.id,
-                              filename: resolved_filename,
-                              stored_file_id: stored_file&.id,
-                              path: @config[:path],
-                              content_type: @config[:content_type]
-                            })
+        store_trigger_results('generate_document', {
+                                container_id: resolved_container.id,
+                                filename: resolved_filename,
+                                stored_file_id: stored_file&.id,
+                                path: @config[:path],
+                                content_type: @config[:content_type]
+                              })
+      end
     end
   end
 

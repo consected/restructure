@@ -34,3 +34,6 @@
           Results from all executed triggers are stored in save_trigger_results['transaction']
           as an array of {trigger:, result:} hashes.
 
+          Individual triggers within the transaction support on_complete and on_failure
+          lifecycle hooks. See on_complete / on_failure documentation for details.
+
