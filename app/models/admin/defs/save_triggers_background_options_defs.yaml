@@ -46,3 +46,6 @@
           Note: The current_user context is preserved in the background job,
           allowing triggers that depend on user context to function correctly.
 
+          Individual triggers within the background job support on_complete and on_failure
+          lifecycle hooks. See on_complete / on_failure documentation for details.
+

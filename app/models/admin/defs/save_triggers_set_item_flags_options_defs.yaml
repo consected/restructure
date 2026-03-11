@@ -6,3 +6,4 @@
           flags: 'list of flag-name ids or names, or exclude if the existing set of flags should be used to add or remove items from'
           add_flags: 'list of flag-name ids or names to add to the list'
           remove_flags: 'list of flag-name ids or names to remove from the list'
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

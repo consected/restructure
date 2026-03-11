@@ -53,3 +53,6 @@
           This is useful when different actions should be taken based on field
           values, avoiding the need for multiple identical `if:` conditions on
           individual triggers.
+
+          Individual triggers within case branches support on_complete and on_failure
+          lifecycle hooks. See on_complete / on_failure documentation for details.

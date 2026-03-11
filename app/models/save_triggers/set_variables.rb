@@ -44,23 +44,24 @@ class SaveTriggers::SetVariables < SaveTriggers::SaveTriggersBase
     @model_defs.each do |model_def|
       config = model_def
       config = config.symbolize_keys if config.is_a?(Hash)
+      with_entry_lifecycle(config) do
+        # Evaluate conditional if
+        next unless if_evaluates(config[:if])
 
-      # Evaluate conditional if
-      next unless if_evaluates(config[:if])
+        name = config[:name]
+        raise FphsException, 'set_variables requires name to be specified' if name.blank?
 
-      name = config[:name]
-      raise FphsException, 'set_variables requires name to be specified' if name.blank?
+        value = config[:value]
 
-      value = config[:value]
+        # Calculate the value using FieldDefaults, supporting substitutions,
+        # conditional actions, and object values.
+        calculated_value = FieldDefaults.calculate_default(@item, value, allow_nil: true)
 
-      # Calculate the value using FieldDefaults, supporting substitutions,
-      # conditional actions, and object values.
-      calculated_value = FieldDefaults.calculate_default(@item, value, allow_nil: true)
+        # Set the value in trigger_variables, supporting dot-notation for nested keys
+        set_nested_value(name.to_s, calculated_value)
 
-      # Set the value in trigger_variables, supporting dot-notation for nested keys
-      set_nested_value(name.to_s, calculated_value)
-
-      results << { name: name.to_s, value: calculated_value }
+        results << { name: name.to_s, value: calculated_value }
+      end
     end
 
     results

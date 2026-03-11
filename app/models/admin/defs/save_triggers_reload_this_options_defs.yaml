@@ -45,4 +45,5 @@
               always: true  # always reload
               never: true   # never reload (useful for testing)
               # or any other valid condition
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
 

@@ -18,76 +18,78 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
 
     @model_defs.each do |model_def|
-      model_def.each do |_model_name, config|
-        data_field = config[:data_field]
-        response_code_field = config[:response_code_field]
-        data_field_format = config[:data_field_format]
-        local_data_name = config[:local_data]
-        success_if = config[:success_if]
-        vals = {}
+      model_def.each_value do |config|
+        with_entry_lifecycle(config) do
+          data_field = config[:data_field]
+          response_code_field = config[:response_code_field]
+          data_field_format = config[:data_field_format]
+          local_data_name = config[:local_data]
+          success_if = config[:success_if]
+          vals = {}
 
-        # We calculate the conditional if inside each item, rather than relying
-        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
-        if config[:if]
-          ca = ConditionalActions.new config[:if], @item
-          next unless ca.calc_action_if
+          # We calculate the conditional if inside each item, rather than relying
+          # on the outer processing in ActivityLogOptions#calc_save_trigger_if
+          if config[:if]
+            ca = ConditionalActions.new config[:if], @item
+            next unless ca.calc_action_if
+          end
+
+          @this_config = config
+          @submitted_request_data = nil
+          data = run_request
+          orig_data = data
+
+          if data_field
+            data = data&.to_json if data_field_format == 'json'
+            vals[data_field] = data
+          end
+
+          vals[response_code_field] = response_code if response_code_field
+          if local_data_name
+            @item.save_trigger_results[local_data_name] = orig_data
+            @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
+            @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
+              'data' => @submitted_request_data,
+              'url' => url_from_config,
+              'method' => method_from_config
+            }
+          end
+
+          # We calculate the conditional if inside each item, rather than relying
+          # on the outer processing in ActivityLogOptions#calc_save_trigger_if
+          success_if_res = nil
+          if success_if
+            ca = ConditionalActions.new success_if, @item
+            success_if_res = !!ca.calc_action_if
+            @item.save_trigger_results["#{local_data_name}_success_if_res"] = success_if_res if local_data_name
+          end
+
+          uri = url_from_config.split('?').first
+          logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
+                   "&& success_if_res #{success_if_res}"
+          if response_code == 200 && success_if_res != false
+            Rails.logger.info logmsg
+          else
+            Rails.logger.warn logmsg
+          end
+
+          next unless vals.present?
+
+          # Retain the flags so that the #update! doesn't change
+          # what we need to report through the API
+          res = @item
+          created = res._created
+          updated = res._updated
+          disabled = res._disabled
+          @item.transaction do
+            res.ignore_configurable_valid_if = true if config[:force_not_valid]
+            res.force_save! if config[:force_not_editable_save]
+            res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
+          end
+          res._created = created
+          res._updated = updated
+          res._disabled = disabled
         end
-
-        @this_config = config
-        @submitted_request_data = nil
-        data = run_request
-        orig_data = data
-
-        if data_field
-          data = data&.to_json if data_field_format == 'json'
-          vals[data_field] = data
-        end
-
-        vals[response_code_field] = response_code if response_code_field
-        if local_data_name
-          @item.save_trigger_results[local_data_name] = orig_data
-          @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
-          @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
-            'data' => @submitted_request_data,
-            'url' => url_from_config,
-            'method' => method_from_config
-          }
-        end
-
-        # We calculate the conditional if inside each item, rather than relying
-        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
-        success_if_res = nil
-        if success_if
-          ca = ConditionalActions.new success_if, @item
-          success_if_res = !!ca.calc_action_if
-          @item.save_trigger_results["#{local_data_name}_success_if_res"] = success_if_res if local_data_name
-        end
-
-        uri = url_from_config.split('?').first
-        logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
-                 "&& success_if_res #{success_if_res}"
-        if response_code == 200 && success_if_res != false
-          Rails.logger.info logmsg
-        else
-          Rails.logger.warn logmsg
-        end
-
-        next unless vals.present?
-
-        # Retain the flags so that the #update! doesn't change
-        # what we need to report through the API
-        res = @item
-        created = res._created
-        updated = res._updated
-        disabled = res._disabled
-        @item.transaction do
-          res.ignore_configurable_valid_if = true if config[:force_not_valid]
-          res.force_save! if config[:force_not_editable_save]
-          res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
-        end
-        res._created = created
-        res._updated = updated
-        res._disabled = disabled
       end
     end
   end

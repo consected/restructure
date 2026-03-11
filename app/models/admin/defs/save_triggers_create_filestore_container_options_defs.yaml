@@ -4,3 +4,4 @@
         label: 'human name'
         create_with_role: 'role name'
         if: if_extras
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

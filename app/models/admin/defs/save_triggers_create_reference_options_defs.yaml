@@ -45,6 +45,7 @@
                   a_value: value_from_result
 
 #!defs(save_triggers_with_attribute_values_defs.yaml)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
 
             to_existing_record: # use an existing record of type "model_name", rather than creating a new one
               record_id: 'Hash with return_value, such as {model_name: {match: value, id: "return_value"\}\}'
