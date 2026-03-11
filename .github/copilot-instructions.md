@@ -10,13 +10,13 @@
 5. **If requirements are not clear, ask for clarification before proceeding**
 6. **Never commit directly to `up-develop` or `develop` branches** - always create feature branches and pull requests
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
-8. **Create new files and edit directly in the editor**; avoid using command line file operations unless absolutely necessary
+8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 
 
 ### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
-2. **Always run tests after making changes** to verify functionality
-3. **Never redirect scripts stdout or stderr to /dev/null**
+2. **Always wait for commands to complete before proceeding** - use `awaitTerminal` if needed
+3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. **Never run commands in the background** - all commands exit when complete with success or failure codes
 
 ### Git and GitHub Usage
