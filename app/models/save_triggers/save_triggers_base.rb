@@ -155,6 +155,8 @@ class SaveTriggers::SaveTriggersBase
         trigger = klass.new(config, @item)
         result = trigger.perform_with_lifecycle
         results << { trigger: trigger_name, result: }
+      rescue FphsException => e
+        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_list)}"
       end
     end
 
@@ -269,6 +271,8 @@ class SaveTriggers::SaveTriggersBase
         klass = OptionConfigs::ExtraOptions.trigger_class(trigger_name)
         trigger = klass.new(config, @item)
         trigger.perform_with_lifecycle
+      rescue FphsException => e
+        raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(trigger_configs)}"
       end
     end
   end
