@@ -1,7 +1,7 @@
 ---
 description: 'Implement minimal code to satisfy GitHub issue requirements and make failing tests pass without over-engineering.'
 name: 'TDD Green Phase - Make Tests Pass Quickly'
-tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "execute/awaitTerminal", "web/fetch", "read/problems", "read/readFile"]
+tools: [vscode/openSimpleBrowser, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/awaitTerminal, execute/runInTerminal, read/problems, read/readFile, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, todo]
 handoffs:
   - label: Return to TDD RED Phase
     agent: tdd-red

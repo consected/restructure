@@ -1,7 +1,7 @@
 ---
 description: 'Implement code to satisfy GitHub issue requirements and make failing tests pass.'
 name: 'TDD Implementation'
-tools: ["vscode/*", "findTestFiles", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "search/codebase", "filesystem", "search", "read/problems", "execute/testFailure", "read/terminalLastCommand", "execute/getTerminalOutput", "execute/awaitTerminal", "web/fetch", "read/problems", "read/readFile", "agent/runSubagent"]
+tools: [vscode/openSimpleBrowser, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/awaitTerminal, execute/runInTerminal, read/problems, read/readFile, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, todo]
 agents: ['TDD Red Phase - Write Failing Tests First', 'TDD Green Phase - Make Tests Pass Quickly', 'TDD Refactor Phase - Improve Quality & Security']
 ---
 # General Implementation
