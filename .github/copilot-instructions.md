@@ -15,7 +15,7 @@
 
 ### Critical Rules for Running Terminal Commands
 1. **Never set environment variables** - use app-scripts instead
-2. **Always wait for commands to complete before proceeding** - use `awaitTerminal` if needed
+2. **Always wait for commands to complete before proceeding** - load the `execute/awaitTerminal` tool first
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. **Never run commands in the background** - all commands exit when complete with success or failure codes
 
