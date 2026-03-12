@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.14 back to develop
+- [Fixed] error after changing admin password - fixes #979
+- [Updated] agent instructions
+- [Fixed] admin password change issue - fixes #979 Changed short backtraces to show a full backtrace if the filtered version is empty
+- [Updated] agent instructions
+- [Added] on_complete and on_failure lifecycle hooks to all save triggers - fixes #982
+- [Added] full config to save trigger error messages for debugging - fixes #984
+
 ## [9.42.14] - 2026-03-10
 
 - [Merged] release 9.42.13 back to develop
