@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
-# Tests for SaveTriggers::Case - Issue #944
+# Tests for SaveTriggers::Case - Issue #944, Issue #984
 # Implements a case/when/else save trigger block that evaluates conditions
 # and executes the triggers associated with the first matching condition,
 # or an else block if no conditions match.
 # This is similar to the transaction save trigger block but adds
 # conditional branching logic.
+#
+# Issue #984: Tests that invalid trigger configurations within case branches
+# produce error messages that include the full case configuration for debugging.
 
 require 'rails_helper'
 
@@ -380,6 +383,76 @@ RSpec.describe SaveTriggers::Case, type: :model do
 
       al = create_al_record(extra_log_type: 'case_second_test', direction: 'from player')
       expect(al.select_who).to eq 'second branch matched'
+    end
+  end
+
+  describe 'error reporting for invalid configuration' do
+    context 'when a then block contains an invalid trigger name' do
+      it 'raises an error that includes the full trigger list configuration - Issue #984' do
+        invalid_config = [
+          {
+            when: { always: true },
+            then: [
+              { bad_trigger_name: { message: 'this should fail' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(invalid_config, @activity_log)
+
+        expect { trigger.perform }.to raise_error(FphsException) do |error|
+          expect(error.message).to include('bad_trigger_name')
+          expect(error.message).to include('Full config')
+          # The full config should be present in the error so admins can debug
+          expect(error.message).to include('this should fail')
+        end
+      end
+    end
+
+    context 'when a YAML anchor merge produces an invalid config' do
+      it 'includes the full config in the error for debugging - Issue #984' do
+        # Simulates the scenario where <<: *embed_something resolves to bad keys
+        invalid_config = [
+          {
+            when: { always: true },
+            then: [
+              { some_nonexistent_trigger: { key: 'value' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(invalid_config, @activity_log)
+
+        expect { trigger.perform }.to raise_error(FphsException) do |error|
+          expect(error.message).to include('some_nonexistent_trigger')
+          expect(error.message).to include('Configuration is not valid')
+          expect(error.message).to include('value')
+        end
+      end
+    end
+
+    context 'when an else block contains an invalid trigger' do
+      it 'includes full config in the error - Issue #984' do
+        invalid_config = [
+          {
+            when: { all: { this: { select_call_direction: 'no match' } } },
+            then: [log_trigger('OK')]
+          },
+          {
+            else: [
+              { invalid_else_trigger: { data: 'test' } }
+            ]
+          }
+        ]
+
+        trigger = SaveTriggers::Case.new(invalid_config, @activity_log)
+
+        expect { trigger.perform }.to raise_error(FphsException) do |error|
+          expect(error.message).to include('invalid_else_trigger')
+          expect(error.message).to include('Full config')
+          expect(error.message).to include('test')
+        end
+      end
     end
   end
 
