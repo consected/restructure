@@ -44,6 +44,8 @@ module OptionConfigs
             # Add the trigger result to the list, using lifecycle hooks
             # to automatically fire on_complete/on_failure
             o.perform_with_lifecycle
+          rescue FphsException => e
+            raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(configs)}"
           end
 
           # If we had any results then check if they were all true. If they were then return true.
@@ -62,7 +64,7 @@ module OptionConfigs
         # Validate name
         # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
         # @param [Symbol] name
-        # @return [<Type>] <description>
+        # @return [Symbol] validated trigger name
         def valid_save_trigger_named(name)
           trigger = ValidSaveTriggers.select { |vt| vt == name }.first
           raise FphsException, "Configuration is not valid when attempting to perform #{name}" unless trigger
