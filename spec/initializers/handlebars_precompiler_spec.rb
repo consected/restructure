@@ -103,4 +103,23 @@ RSpec.describe HandlebarsPrecompiler do
       expect(js_files).to be_empty
     end
   end
+
+  describe 'after_initialize callback' do
+    it 'invalidates server_cache_version after cleaning up public dir' do
+      # Write a known server_cache_version to cache
+      Rails.cache.write('server_cache_version', 'old-version-123')
+      expect(Rails.cache.read('server_cache_version')).to eq('old-version-123')
+
+      # Simulate what the after_initialize block does
+      described_class.cleanup_public_dir
+      Rails.cache.delete('server_cache_version')
+
+      # The old value should no longer be in cache
+      expect(Rails.cache.read('server_cache_version')).to be_nil
+
+      # A new call to server_cache_version should generate a fresh value
+      new_version = Application.server_cache_version
+      expect(new_version).not_to eq('old-version-123')
+    end
+  end
 end

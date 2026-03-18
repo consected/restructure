@@ -441,4 +441,31 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       end
     end
   end
+
+  describe '#write_multiple_handlebars_templates' do
+    let(:cache_key) { 'multi123456789' }
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      allow(helper).to receive(:current_user).and_return(Struct.new(:id, :current_sign_in_at, :app_type_id).new(1, Time.at(1000000), 2))
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+    end
+
+    it 'generates multi file URL without double slashes' do
+      # Create a compiled template file so read_handlebars_template can find it
+      FileUtils.mkdir_p(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR)
+      compiled_file = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("test_template-#{cache_key}.js")
+      File.write(compiled_file, '(function() { var template = Handlebars.template; })();')
+
+      templates = [{ id: 'test_template', is_partial: false, compiled_file_path: 'irrelevant' }]
+      url, = helper.write_multiple_handlebars_templates(templates)
+
+      expect(url).not_to include('//')
+      expect(url).to start_with(HandlebarsPrecompiler::URL_RELATIVE_PATH)
+      expect(url).to include('/multi/')
+    end
+  end
 end
