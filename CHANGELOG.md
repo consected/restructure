@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.15 back to develop
+- [Fixed] tool usage instructions for agents
+- [Fixed] memcached clear breaking UI template retrieval for logged in users - fixes #987
+- [Fixed] template loading race condition causing JS error on early search click - fixes #987
+
 ## [9.42.15] - 2026-03-12
 
 - [Merged] release 9.42.14 back to develop
