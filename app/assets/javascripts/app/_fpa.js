@@ -139,8 +139,7 @@ _fpa = {
     _fpa.templates = Handlebars.templates = Handlebars.templates || {};
     _fpa.partials = Handlebars.partials = Handlebars.partials || {};
 
-    // Mark compilation complete - precompiled JS files have already registered themselves
-    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
+    // Note: status-compiled is set by one_time_setup after all templates are loaded
   },
 
   send_ajax_request: function (url, options) {
@@ -407,7 +406,7 @@ _fpa = {
         }
 
         new_block = html;
-        var id = new_block.attr('id');
+        var id = new_block ? new_block.attr('id') : undefined;
         // If the results has a root element with an id that exist in the DOM already,
         // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
         // replace it rather than placing the result before the specified block
@@ -427,7 +426,7 @@ _fpa = {
         }
 
         new_block = html;
-        var id = new_block.attr('id');
+        var id = new_block ? new_block.attr('id') : undefined;
         var existing = $('#' + id);
         // If the results has a root element with an id that exist in the DOM already,
         // replace it rather than placing the result after the specified block
@@ -443,7 +442,7 @@ _fpa = {
 
         // If the results has a root element with an id that matches the existing block,
         // replace it rather than placing the result inside the current item
-        if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
+        if (new_block && block.attr('id') && block.attr('id') == new_block.attr('id')) {
           block.replaceWith(new_block);
         } else {
           // Just replace the content of the specified block
@@ -1417,13 +1416,23 @@ _fpa = {
 
   load_template_version: function (template_version, rails_env) {
     $.get({ url: `/pages/${template_version}/template`, cache: true }).done(function (data) {
-      // Inject the template HTML into the page and run any included scripts
+      // Inject the template HTML into the page and run any included scripts.
+      // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
+      // which increments pending_template_retrieves before starting async AJAX.
       $('body').append(data);
 
-      window.setTimeout(function () {
-        _fpa.status.loaded_templates = true;
-        _fpa.one_time_setup();
-      }, 1);
+      // Wait for all pending multi file AJAX requests to complete before
+      // marking templates as loaded. This prevents the splash guard from
+      // being removed before templates are available for rendering.
+      function waitForPendingRetrieves() {
+        if (_fpa.status.pending_template_retrieves > 0) {
+          window.setTimeout(waitForPendingRetrieves, 10);
+        } else {
+          _fpa.status.loaded_templates = true;
+          _fpa.one_time_setup();
+        }
+      }
+      window.setTimeout(waitForPendingRetrieves, 1);
     }).fail(function (jqXHR, textStatus, errorThrown) {
       console.log(jqXHR, textStatus, errorThrown);
       if (rails_env != 'test') {
@@ -1440,11 +1449,17 @@ _fpa = {
 
     _fpa.status.one_time_setup_run = true;
     _fpa.compile_templates();
+    // Mark compilation complete - splash guard is removed only after all templates are loaded
+    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
     _fpa.reset_page_size();
     _fpa.loaded.default();
   },
 
   retrieve_requested_handlebars_templates: function (url, rails_env, file_id) {
+    // Track pending multi file AJAX requests so load_template_version knows
+    // when all templates have been fetched before removing the splash guard.
+    _fpa.status.pending_template_retrieves = (_fpa.status.pending_template_retrieves || 0) + 1;
+
     // Use $.ajax with dataType 'script' to fetch and execute the precompiled template JavaScript
     // $.getScript disables caching by default, so we use $.ajax directly
     $.ajax({
@@ -1455,6 +1470,7 @@ _fpa = {
       // Script executed - templates are now registered, just need to compile them
       _fpa.compile_templates();
       $('body').addClass(`loaded-templates--${file_id}`);
+      _fpa.status.pending_template_retrieves--;
     }).fail(function (jqXHR, textStatus, errorThrown) {
       console.log(jqXHR, textStatus, errorThrown);
       if (rails_env != 'test') {
@@ -1462,6 +1478,7 @@ _fpa = {
         $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
       }
       _fpa.cache.clean();
+      _fpa.status.pending_template_retrieves--;
     });
   },
 

@@ -71,6 +71,11 @@ Rails.application.config.after_initialize do
   HandlebarsPrecompiler.cleanup_tmp_dir
   HandlebarsPrecompiler.cleanup_public_dir
 
+  # Invalidate server_cache_version since compiled files were cleaned up.
+  # This forces browsers and fragment caches to use fresh template URLs,
+  # preventing 404s when multi files are deleted but stale URLs remain cached.
+  Rails.cache.delete('server_cache_version')
+
   unless HandlebarsPrecompiler.cli_available?
     msg = 'Handlebars CLI not found. Install with: npm install --global handlebars'
     Rails.logger.error msg
