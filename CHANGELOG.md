@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.16] - 2026-03-18
+
 - [Security] updated gems to address Devise security issue: <https://github.com/heartcombo/devise/security/advisories/GHSA-57hq-95w6-v4fc>
 
 ## [9.42.12] - 2026-03-05
