@@ -14,46 +14,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
-- [Merged] release 9.42.15 back to develop
-- [Fixed] tool usage instructions for agents
-- [Fixed] memcached clear breaking UI template retrieval for logged in users - fixes #987
-- [Fixed] template loading race condition causing JS error on early search click - fixes #987
-
-## [9.42.15] - 2026-03-12
-
-- [Merged] release 9.42.14 back to develop
-- [Fixed] error after changing admin password - fixes #979
-- [Updated] agent instructions
-- [Fixed] admin password change issue - fixes #979 Changed short backtraces to show a full backtrace if the filtered version is empty
-- [Updated] agent instructions
-- [Added] on_complete and on_failure lifecycle hooks to all save triggers - fixes #982
-- [Added] full config to save trigger error messages for debugging - fixes #984
-
-## [9.42.14] - 2026-03-10
-
-- [Merged] release 9.42.13 back to develop
-- [Changed] dynamic models admin index table columns - fixes #968
-- [Updated] specs for revised index table columns - fixes #968
-- [Added] squash commits requirement to createpr
-- [Added] 'Referenced by' section to config library admin details - fixes #970
-- [Changed] filter buttons to chosen select boxes in admin and reports pages - fixes #969
-- [Added] password expiry days to user menu label - fixes #317
-- [Updated] `createpr` agent prompt
-- [Added] example for storing encrypted secrets
-- [Fixed] save trigger admin documentation issues - fixes #976
-
-## [9.42.13] - 2026-03-10
-
-- [Merged] release 9.42.11 back to develop
-- [Added] navigable help doc indexes, back navigation, open-in-new-tab, and fixed YAML option doc rendering
-- [Updated] tdd agent and instructions
-- [Added] recursive substitution for object key values in FieldDefaults.calculate_default - fixes #956
-- [Added] calendar invite (.ics) attachment support to email notifications - fixes #953
-- [Added] NfsStore file attachment support to email notifications - fixes #954
-- [Added] generate_document save trigger - fixes #961
-- [Added] set_variables save trigger - resolves #964
-- [Try] fixing release_and_build.sh merge
-- [Added] encrypted attribute support for dynamic definition db_columns - fixes #966
+- [Security] updated gems to address Devise security issue: <https://github.com/heartcombo/devise/security/advisories/GHSA-57hq-95w6-v4fc>
 
 ## [9.42.12] - 2026-03-05
 
