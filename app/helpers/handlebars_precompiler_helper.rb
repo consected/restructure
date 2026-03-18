@@ -203,7 +203,7 @@ module HandlebarsPrecompilerHelper
     File.write(dir, (init_header + template_html.join("\n")).html_safe)
 
     url_path = HandlebarsPrecompiler::URL_RELATIVE_PATH
-    ["#{url_path}/multi/#{filename}", handlebars_template_ids, handlebars_partial_ids]
+    ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids]
   end
 
   # Compile all templates from temp directories in a single CLI call per type.
