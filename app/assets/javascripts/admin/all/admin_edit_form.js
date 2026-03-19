@@ -284,7 +284,13 @@ _fpa_admin.all.admin_edit_form = class {
 
       var ehi = tar.find('.extra-help-info').not('.code-extra-help-info-formatted-in-tab');
       if (ehi.length) {
-        CodeMirror.fromTextArea(ehi[0]).refresh();
+        ehi.each(function () {
+          if (this.CodeMirror) {
+            this.CodeMirror.refresh();
+          } else {
+            _this.setup_yaml_viewer($(this));
+          }
+        });
         ehi.addClass('code-extra-help-info-formatted-in-tab')
       }
     })

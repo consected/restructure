@@ -38,22 +38,18 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
 
-      # Wait for content to render
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      # Wait for CodeMirror to render
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
 
-      # Verify merged YAML content is displayed (content depends on the model)
-      within '.parsed-config-output' do
-        # Verify we have some YAML-like content (not empty)
+      # Verify merged YAML content is displayed with CodeMirror
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers are present
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
-      expect(line_numbers.first.text.strip).to match(/^\d+$/)
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
 
     it 'handles dynamic models with no config options' do
@@ -75,8 +71,8 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
 
-      # Should show either empty config or warning message
-      expect(page).to have_css('.parsed-config-output, .alert-warning', wait: 5)
+      # Should show either CodeMirror config or warning message
+      expect(page).to have_css('#parsed-config .CodeMirror, .alert-warning', wait: 5)
     end
   end
 
@@ -112,19 +108,16 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       expect(page).to have_css('#parsed-config', visible: true)
       finish_page_loading
 
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
 
-      within '.parsed-config-output' do
-        # Verify we have merged YAML content
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
   end
 
@@ -196,19 +189,16 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       expect(page).to have_css('#parsed-config', visible: true)
       finish_page_loading
 
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
 
-      within '.parsed-config-output' do
-        # Verify we have merged YAML content
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
   end
 
@@ -235,9 +225,8 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       sleep 1 # Wait for tab content to load
 
-      # Should either show the parsed config or an error message
-      # The implementation should handle both cases gracefully
-      expect(page).to have_css('.parsed-config-output, .alert-danger, .alert-warning', wait: 5)
+      # Should either show the CodeMirror parsed config or an error/warning message
+      expect(page).to have_css('#parsed-config .CodeMirror, .alert-danger, .alert-warning', wait: 5)
     end
   end
 end

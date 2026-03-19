@@ -10,13 +10,11 @@
     configs = object_instance.option_configs
     
     if configs.present? && !configs.empty?      
-      yaml_output = object_instance.class.options_provider.prepare_options_text(object_instance)
+      yaml_output = object_instance.class.options_provider.parsed_options_text(object_instance)
       
       if yaml_output.present?
-        lines = yaml_output.split("\n")
 %>
-<pre class="parsed-config-output"><div><% lines.each_with_index do |line, index| %><span class="line-number"><%= sprintf("%4d", index + 1) %></span> <%= ERB::Util.html_escape(line) %>
-<% end %></div></pre>
+<textarea class="extra-help-info" data-code-editor-type="yaml"><%= ERB::Util.html_escape(yaml_output) %></textarea>
 
 <% 
       else
