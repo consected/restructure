@@ -10,7 +10,7 @@
     configs = object_instance.option_configs
     
     if configs.present? && !configs.empty?      
-      yaml_output = object_instance.class.options_provider.prepare_options_text(object_instance)
+      yaml_output = object_instance.class.options_provider.parsed_options_text(object_instance)
       
       if yaml_output.present?
         lines = yaml_output.split("\n")

@@ -633,6 +633,21 @@ module OptionConfigs
     end
 
     #
+    # Parse the options text then dump it back to clean YAML with anchors resolved
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @return [String | nil] clean YAML string with anchors resolved, or nil if blank
+    def self.parsed_options_text(config_obj)
+      loaded_config = parse_options_text(config_obj)
+      return nil unless loaded_config.is_a?(Hash) && loaded_config.present?
+
+      # Remove internal/system keys (prefixed with _) to check for user-provided config
+      loaded_config = loaded_config.reject { |k, _| k.to_s.start_with?('_') && k.to_s != '_default' }
+      return nil if loaded_config.blank?
+
+      String.yaml_dump(loaded_config)
+    end
+
+    #
     # Parse the options text from the dynamic definition, producing an initial Hash
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Hash] initial configuration hash
