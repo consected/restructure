@@ -165,6 +165,11 @@ class Imports::Import < ActiveRecord::Base
 
         new_obj.current_user ||= user if new_obj.respond_to? :current_user
         new_obj[:user_id] ||= user_id if new_obj.respond_to? :user_id
+
+        csv_headers = row.to_h.keys
+        now = Time.now
+        new_obj.created_at = now if new_obj.respond_to?(:created_at=) && !csv_headers.include?(:created_at)
+        new_obj.updated_at = now if new_obj.respond_to?(:updated_at=) && !csv_headers.include?(:updated_at)
       rescue FphsException => e
         errors.add 'import error', e.message
       rescue StandardError => e
@@ -198,10 +203,10 @@ class Imports::Import < ActiveRecord::Base
     return true unless csv_rows
 
     keys = csv_rows.first.to_h.keys
-    excess = keys - permitted_params_for_primary_table.map(&:to_sym)
+    excess = keys - permitted_params_for_primary_table.map(&:to_sym) - %i[id created_at updated_at]
     if excess.present?
       errors.add 'some columns', 'in the CSV file do not match the table columns. ' \
-        "Unexpected columns in the CSV file are: #{excess.join(', ')}"
+                                 "Unexpected columns in the CSV file are: #{excess.join(', ')}"
       return false
     end
     true
