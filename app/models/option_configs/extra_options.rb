@@ -633,6 +633,28 @@ module OptionConfigs
     end
 
     #
+    # Parse the options text then dump it back to clean YAML with anchors resolved
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @return [String | nil] clean YAML string with anchors resolved, or nil if blank
+    def self.parsed_options_text(config_obj)
+      loaded_config = parse_options_text(config_obj)
+      return nil unless loaded_config.is_a?(Hash) && loaded_config.present?
+
+      # Remove internal keys that are not part of the option type configurations,
+      # matching the cleanup in parse_config. Keys like _default, _merge_default,
+      # _merge_override and _override are retained for handle_defaults_merges_overrides.
+      %i[_comments _db_columns _data_dictionary _constants].each { |k| loaded_config.delete(k) }
+      loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
+      options_based_on_keys_stating_with('_configurations', loaded_config)
+
+      hash_results = {}
+      handle_defaults_merges_overrides(config_obj, loaded_config, hash_results:)
+      return nil if hash_results.blank?
+
+      String.yaml_dump(hash_results)
+    end
+
+    #
     # Parse the options text from the dynamic definition, producing an initial Hash
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Hash] initial configuration hash
@@ -677,7 +699,7 @@ module OptionConfigs
     # @param [ActiveRecord::Base] config_obj dynamic definition record
     # @param [Hash] loaded_config configuration hash
     # @return [Array] configuration instances
-    def self.handle_defaults_merges_overrides(config_obj, loaded_config)
+    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {})
       configs = []
 
       # Handle any entry starting with "_default"
@@ -706,6 +728,7 @@ module OptionConfigs
           # If defined, use the optional _override entry to replace individual options.
           value = value.deep_dup.merge(opt_override) if opt_override
         end
+        hash_results[name] = value
         i = new name, value, config_obj
         configs << i
       end
