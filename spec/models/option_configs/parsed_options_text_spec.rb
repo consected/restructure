@@ -4,12 +4,13 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 # Tests for the parsed_options_text class method on option provider classes.
-# This method uses parse_options_text to parse the YAML (resolving anchors/aliases),
-# then dumps it back to clean YAML using String.yaml_dump.
+# This method parses YAML (resolving anchors/aliases), applies _default,
+# _merge_default, _merge_override, and _override processing via
+# handle_defaults_merges_overrides, then dumps the final config to clean YAML.
 #
-# These tests verify that YAML anchors are resolved in the output,
-# nil is returned when no options text is present, the output is
-# valid re-parseable YAML, and malformed YAML raises FphsOptionsParseError.
+# These tests verify that YAML anchors are resolved, defaults/merges/overrides
+# are applied, nil is returned for blank options, the output is valid
+# re-parseable YAML, and malformed YAML raises FphsOptionsParseError.
 #
 # Related to GitHub issue #992: "Parsed Config" tab should resolve YAML anchors.
 
@@ -142,6 +143,43 @@ RSpec.describe OptionConfigs::ExtraOptions, '.parsed_options_text', type: :model
     end
   end
 
+  describe 'defaults and merges processing' do
+    it 'applies _default entries to all option types' do
+      yaml_with_defaults = <<~YAML
+        _default:
+          labels:
+            field_1: Default Label
+          view_options:
+            data_attribute: field_1
+
+        default:
+          labels:
+            field_2: Custom Label
+
+        secondary:
+          labels:
+            field_1: Secondary Label
+      YAML
+
+      dm = generate_dm_with_options(yaml_with_defaults)
+      provider = dm.class.options_provider
+
+      result = provider.parsed_options_text(dm)
+
+      expect(result).to be_present
+      parsed = YAML.safe_load(result, permitted_classes: [], permitted_symbols: [], aliases: true)
+
+      # _default uses shallow merge, so default's labels replaces _default's labels entirely
+      expect(parsed.dig('default', 'labels', 'field_2')).to eq 'Custom Label'
+      # But view_options from _default is preserved since default doesn't define it
+      expect(parsed.dig('default', 'view_options', 'data_attribute')).to eq 'field_1'
+
+      # secondary also gets _default's view_options
+      expect(parsed.dig('secondary', 'view_options', 'data_attribute')).to eq 'field_1'
+      expect(parsed.dig('secondary', 'labels', 'field_1')).to eq 'Secondary Label'
+    end
+  end
+
   describe 'error handling' do
     it 'raises FphsOptionsParseError for malformed YAML' do
       malformed_yaml = <<~YAML
@@ -156,6 +194,30 @@ RSpec.describe OptionConfigs::ExtraOptions, '.parsed_options_text', type: :model
       provider = dm.class.options_provider
 
       expect { provider.parsed_options_text(dm) }.to raise_error(FphsOptionsParseError)
+    end
+
+    it 'handles _configurations without error' do
+      yaml_with_configurations = <<~YAML
+        _configurations:
+          use_current_version: true
+
+        default:
+          labels:
+            field_1: Test Field
+          view_options:
+            data_attribute: field_1
+      YAML
+
+      dm = generate_dm_with_options(yaml_with_configurations)
+      provider = dm.class.options_provider
+
+      result = provider.parsed_options_text(dm)
+
+      expect(result).to be_present
+      parsed = YAML.safe_load(result, permitted_classes: [], permitted_symbols: [], aliases: true)
+      # _configurations should be stripped from output (consumed internally)
+      expect(parsed).not_to have_key('_configurations')
+      expect(parsed.dig('default', 'labels', 'field_1')).to eq 'Test Field'
     end
   end
 
