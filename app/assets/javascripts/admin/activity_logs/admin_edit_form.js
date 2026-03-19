@@ -15,7 +15,7 @@ _fpa_admin.activity_logs.admin_edit_form = class {
 
   setup_find_activity() {
     const $block = this.block;
-    $block.find('li.activity-list-name, span.activity-list-name').on('click', function () {
+    $block.find('li.activity-list-name, span.activity-list-name').on('click', function (event) {
       var $this = $(this);
       const $span = $this.find('span.activity-list-name');
       if ($span.length) {
@@ -42,7 +42,7 @@ _fpa_admin.activity_logs.admin_edit_form = class {
       $block.find('.activity-list-item-block.in').collapse('hide');
       $block.find(alib).collapse('show');
 
-      $(this).stopPropagation();
+      event.stopPropagation();
     })
 
   }
