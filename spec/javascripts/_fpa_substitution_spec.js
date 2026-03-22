@@ -2,6 +2,18 @@
 //= require app/_fpa_substitution.js
 describe('substitutions', function () {
 
+  beforeEach(function () {
+    // Mock UserPreferences    
+    _fpa.state.current_user_preference = {
+      date_format: 'mm/dd/yyyy',
+      date_time_format: 'mm/dd/yyyy hh:mm am/pm',
+      time_format: 'hh:mm am/pm',
+      timezone_iana: 'America/New_York',
+      timezone: 'Eastern Time (US & Canada)'
+    }
+
+  });
+
 
   it("substitutes and format simple attributes in caption_before blocks", function () {
 
@@ -16,17 +28,18 @@ describe('substitutions', function () {
   });
 
   it("substitutes and formats more complex expressions", function () {
-    const text = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}. Split {{piped::split_pipe::1}}. Is data {{hash.key2}}. Is array {{array::2}} or {{array.1.key}} or {{array.3}}. JSON {{json.json_parse.jkey3.1}}. Array 0 {{array.0}}</p>'
+    const text = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}. Split {{piped::split_pipe::1}}. Is data {{hash.key2}}. Is array {{array::2}} or {{array.1.key}} or {{array.3}}. JSON {{json.json_parse.jkey3.1}}. Array 0 {{array.0}}. Date Time {{date_time::date_time_show_zone}}</p>'
     const use_data = {
       master_id: 5541,
       name: 'test name bob',
       piped: 'data 1|data 2|data 3',
       hash: { key1: 123, key2: 456, key3: 789 },
       array: ['55', { key: '66' }, '77', '88'],
-      json: '{"jkey1": 22, "jkey2": "abc", "jkey3": [1230,4560]}'
+      json: '{"jkey1": 22, "jkey2": "abc", "jkey3": [1230,4560]}',
+      date_time: '1989-12-10T02:43:01Z'
     };
 
-    const expected_text = '<p>This is some content.</p><p>Related to master_id 5541. This is a name: TEST. Split data 2. Is data 456. Is array 77 or 66 or 88. JSON 4560. Array 0 55</p>'
+    const expected_text = '<p>This is some content.</p><p>Related to master_id 5541. This is a name: TEST. Split data 2. Is data 456. Is array 77 or 66 or 88. JSON 4560. Array 0 55. Date Time 12/09/1989 9:43 pm Eastern Time (US & Canada)</p>'
     const res = _fpa.substitution.substitute(text, use_data);
     expect(res).toEqual(expected_text)
 

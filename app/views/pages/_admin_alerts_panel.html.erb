@@ -1,0 +1,62 @@
+<%#
+  Collapsed alerts panel for the admin index page (Issue #905).
+  Collects server info configuration failures and REDCap project failures
+  into a single collapsible panel shown only when there are issues.
+  Shows separate category badges in the header with matching label colors.
+%>
+<%
+  # Map each alert category to its Bootstrap label style
+  category_styles = { 'Server' => 'warning', 'REDCap' => 'info' }
+
+  alert_items = []
+
+  # Server info configuration failures
+  unless @server_info.configuration_successful
+    @server_info.configuration_failed_reason.each do |reason|
+      alert_items << { category: 'Server', message: reason }
+    end
+  end
+
+  # REDCap project failures (only if the admin has access)
+  if current_admin.can_admin?(:redcap) &&
+     current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include?('ref-data')
+    Redcap::ProjectAdmin.failed_scheduled_projects.order(:name).each do |p|
+      alert_items << {
+        category: 'REDCap',
+        message: "#{p.name} (#{p.study}) - failed at #{current_user_date_time(p.failed_at)}"
+      }
+    end
+  end
+
+  # Group counts by category for the header badges
+  category_counts = alert_items.group_by { |item| item[:category] }
+                               .transform_values(&:count)
+%>
+<% if alert_items.any? %>
+<div id="admin-alerts-panel" class="panel panel-danger admin-alerts-panel">
+  <div class="panel-heading" role="tab" id="admin-alerts-heading">
+    <h4 class="panel-title">
+      <a class="collapsed" role="button" data-toggle="collapse"
+         href="#admin-alerts-collapse" aria-expanded="false" aria-controls="admin-alerts-collapse">
+        <i class="glyphicon glyphicon-alert"></i>
+        Alerts
+        <% category_counts.each do |category, count| %>
+          <span class="label label-<%= category_styles[category] %> admin-alerts-badge"><%= category.downcase %>: <%= count %></span>
+        <% end %>
+      </a>
+    </h4>
+  </div>
+  <div id="admin-alerts-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="admin-alerts-heading">
+    <div class="panel-body">
+      <ul class="admin-alerts-list list-unstyled">
+        <% alert_items.each do |item| %>
+          <li class="admin-alerts-list__item">
+            <span class="label label-<%= category_styles[item[:category]] %> admin-alerts-list__category"><%= item[:category] %></span>
+            <span class="admin-alerts-list__message"><%= item[:message] %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+<% end %>

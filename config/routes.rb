@@ -22,15 +22,25 @@ Rails.application.routes.draw do
 
   resources :client_logs, only: [:create]
 
+  post '/csp-violation-report-endpoint', to: 'csp_reports#create'
+
   namespace :admin do
+    resources :master_records, only: %i[index show]
     resources :external_identifiers, except: %i[show destroy]
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy]
-    resources :config_libraries, except: %i[show destroy]
+    get :report_search_attr_definer, to: 'reports#search_attr_definer'
+    resources :config_libraries, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: %i[show destroy] do
       member do
         post :update_config_from_table
+        post :run_batch_now
+        get :versions
       end
     end
     resources :user_access_controls, except: %i[show destroy]
@@ -41,10 +51,18 @@ Rails.application.routes.draw do
     resources :manage_users, except: %i[show destroy]
     resources :manage_admins, except: %i[show destroy]
     resources :accuracy_scores, except: %i[show destroy]
-    resources :activity_logs, except: %i[show destroy]
+    resources :activity_logs, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :app_configurations, except: %i[show destroy]
     resources :message_templates, except: %i[show destroy]
-    resources :message_notifications, except: %i[show destroy]
+    resources :message_notifications, except: %i[show destroy] do
+      member do
+        get :attachment
+      end
+    end
 
     resources :job_reviews, except: %i[show destroy]
     post 'job_reviews/restart_failed_jobs', to: 'job_reviews#restart_failed_jobs'
@@ -66,6 +84,7 @@ Rails.application.routes.draw do
     resources :role_descriptions, except: %i[show destroy]
     resources :user_roles, except: %i[show destroy]
     post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'
+    post 'user_roles/clear_user_roles', to: 'user_roles#clear_user_roles'
     resources :page_layouts, except: %i[show destroy]
 
     resources :protocols, except: %i[show destroy] do
@@ -73,6 +92,8 @@ Rails.application.routes.draw do
         resources :protocol_events, except: %i[show destroy]
       end
     end
+    post 'protocols/copy_sub_processes', to: 'protocols#copy_sub_processes'
+
     resources :protocol_events, except: %i[show destroy]
     resources :sub_processes, except: %i[show destroy]
 
@@ -107,10 +128,12 @@ Rails.application.routes.draw do
   namespace :redcap do
     resources :project_admins, except: %i[show destroy] do
       member do
+        post :request_latest_rc_configs
         post :request_records
         post :request_archive
         post :request_users
         post :request_data_collection_instruments
+        post :request_logs
         post :force_reconfig
         post :update_dynamic_model
       end
@@ -123,6 +146,7 @@ Rails.application.routes.draw do
         post :request_records
         post :request_archive
         post :request_users
+        get 'download_field_file/:field_name/:record_id', to: 'download_field_file'
       end
     end
   end

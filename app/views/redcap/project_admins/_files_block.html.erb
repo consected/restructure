@@ -1,8 +1,19 @@
 <h4>Files</h4>
 <div id="admin-filestore-block-<%= object_instance.id %>">
 </div>
-<% if object_instance&.file_store&.id %>
-<script> 
+<%  cuat = current_user&.app_type || current_admin&.matching_user_app_type
+    if cuat&.name != 'ref-data' %>
+<p>The user must 
+  <%= link_to "switch to the <b>Ref Data</b>".html_safe, 
+              redcap_project_admins_path(
+                no_redirect: true, 
+                use_app_type: 'ref-data',
+                filter: {id: object_instance.id},
+                perform_action: 'edit'
+              ) %>
+  project to view the stored REDCap files</p>
+<% elsif object_instance&.file_store&.id %>
+<%= javascript_tag nonce: true do %> 
 window.setTimeout(function() {
   var data = {
     to_record_id: <%= object_instance.file_store.id %>,
@@ -17,7 +28,7 @@ window.setTimeout(function() {
   _fpa.view_template(block, 'filestore-view-template', data); 
 
 }, 500);
-</script>
+<% end %>
 <% else %>
 <p>File store not configured</p>
 <% end %>

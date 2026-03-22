@@ -67,10 +67,16 @@ cd "$FS_ROOT"/$FS_DIR || exit 1
 
 mkdir -p "$APPTYPE_DIR"/containers
 
-echo "become sudo to setup file ownership"
-sudo echo "in: $APPTYPE_DIR/containers"
+STAT=$(stat -c %a-%U:%G "$APPTYPE_DIR")
+STATC=$(stat -c %a-%U:%G "$APPTYPE_DIR"/containers)
 
-sudo chmod 770 "$APPTYPE_DIR"
-sudo chmod 770 "$APPTYPE_DIR"/containers
-sudo chown nfsuser:nfs_store_all_access "$APPTYPE_DIR"
-sudo chown nfsuser:${OWNER_GROUP} "$APPTYPE_DIR"/containers
+if [ "${STAT}" != "770-nfsuser:nfs_store_all_access" ] || [ "${STATC}" != "770-nfsuser:${OWNER_GROUP}" ]; then
+  echo "become sudo to setup file ownership and permissions"
+  sudo echo "in: $APPTYPE_DIR/containers"
+  sudo chmod 770 "$APPTYPE_DIR"
+  sudo chmod 770 "$APPTYPE_DIR"/containers
+  sudo chown nfsuser:nfs_store_all_access "$APPTYPE_DIR"
+  sudo chown nfsuser:${OWNER_GROUP} "$APPTYPE_DIR"/containers
+fi
+
+exit 0

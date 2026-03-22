@@ -41,7 +41,7 @@ module UserAndRoles
         where_conditions << user.id
       end
 
-      app_type = alt_app_type || user&.app_type
+      app_type = alt_app_type || user&.app_type_id
       app_type_id = if app_type.is_a? Admin::AppType
                       app_type.id
                     else
@@ -53,9 +53,7 @@ module UserAndRoles
         rn = [rn] unless rn.is_a? Array
         app_type_role_names = rn.map { |v| [app_type_id, v] }
       elsif user
-        app_type_role_names = Admin::UserRole.active_app_roles(user, app_type: [app_type_id, nil])
-                                             .select('app_type_id, role_name').distinct.order(app_type_id: :asc)
-                                             .pluck(:app_type_id, :role_name)
+        app_type_role_names = user.app_type_role_names(app_type_id: app_type)
       end
 
       if app_type_role_names&.present?
@@ -77,7 +75,6 @@ module UserAndRoles
       conditions = [where_clause] + where_conditions
 
       active.where(app_type_id: [app_type_id, nil]).where(conditions)
-
     end
 
     def order_user_and_role

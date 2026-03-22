@@ -30,7 +30,7 @@ module Redcap
       jobs = Redcap::ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      jobclass.perform_later(project_admin, current_admin)
+      jobclass.perform_later(project_admin)
       project_admin.record_job_request('setup job: list project users')
     end
 
@@ -94,14 +94,14 @@ module Redcap
       end
 
       result = {
-        created_usernames: created_usernames,
-        updated_usernames: updated_usernames,
-        unchanged_usernames: unchanged_usernames,
-        disabled_usernames: disabled_usernames,
-        errors: errors
+        created_usernames:,
+        updated_usernames:,
+        unchanged_usernames:,
+        disabled_usernames:,
+        errors:
       }
 
-      project_admin.record_job_request('store project users', result: result)
+      project_admin.record_job_request('store project users', result:)
     end
 
     #
@@ -116,7 +116,7 @@ module Redcap
     # @return [Integer | false | nil]
     def create_or_update(record)
       username = record[:username]
-      existing_record = project_admin.redcap_project_users.active.where(username: username).first
+      existing_record = project_admin.redcap_project_users.active.where(username:).first
 
       if existing_record
         # Check if there is an exact match for the record. If so, we are done
@@ -131,7 +131,7 @@ module Redcap
           upserted_records << existing_record
           username
         else
-          errors << { username: username, errors: existing_record.errors, action: :update }
+          errors << { username:, errors: existing_record.errors, action: :update }
         end
       else
         new_record = ProjectUser.new(record.slice(*all_expected_field_names))

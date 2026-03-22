@@ -39,7 +39,7 @@ module Messaging
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 50 }
 
-    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients
     attr_writer :extra_substitutions_data, :batch_user
 
     #
@@ -69,7 +69,7 @@ module Messaging
       value = value.to_s.capitalize
       raise FphsException, "Incorrect importance: #{value}" unless value.in?(ValidImportance)
 
-      super(value)
+      super
     end
 
     #
@@ -78,12 +78,14 @@ module Messaging
     def generate(ignore_missing: false)
       data = self.data
       if data.blank?
-        raise FphsException, 'Data is blank and item_type / item_id does not return an item' unless item
-
-        data = Formatter::Substitution.setup_data item, for_item
+        if item
+          data = Formatter::Substitution.setup_data item, for_item
+        else
+          Rails.logger.warn 'MessageNotification#generate data is blank and item_type / item_id does not return an item'
+          data = {}
+        end
         data[:_subject] = subject
         data[:extra_substitutions] = extra_substitutions_data
-
       end
 
       raise FphsException, "Layout template #{layout_template_name} was not found" unless layout_template
@@ -94,10 +96,18 @@ module Messaging
         raise FphsException, 'Content template name or text must be set'
       end
 
-      self.generated_text = layout_template.generate content_template_name: content_template_name,
-                                                     content_template_text: content_template_text,
-                                                     data: data,
-                                                     ignore_missing: ignore_missing
+      # We need to prevent conversion to html for all SMS
+      markdown_to_html = if sms?
+                           false
+                         else
+                           :force_markdown_to_html
+                         end
+
+      self.generated_text = layout_template.generate(content_template_name:,
+                                                     content_template_text:,
+                                                     data:,
+                                                     ignore_missing:,
+                                                     markdown_to_html:)
 
       self.generated_content = generated_text
       save!
@@ -112,7 +122,7 @@ module Messaging
     def generate_view(ignore_missing: false)
       return generated_content if generated_content.present?
 
-      generate(ignore_missing: ignore_missing)
+      generate(ignore_missing:)
     rescue FphsException => e
       "EXCEPTION: #{e}"
     end
@@ -167,7 +177,7 @@ module Messaging
     def recipient_data=(data)
       data = data.map(&:to_json) if data.is_a?(Array) && data.first.is_a?(Hash)
       @recipient_hash_from_data = nil
-      super(data)
+      super
     end
 
     #
@@ -181,7 +191,7 @@ module Messaging
         data = data.to_yaml
       end
 
-      super(data)
+      super
     end
 
     #
@@ -195,7 +205,7 @@ module Messaging
         email = formatted.format
       end
 
-      super(email)
+      super
     end
 
     #
@@ -205,10 +215,12 @@ module Messaging
     # @param [Logger] logger - logger to use from the background job, or the default Rails logger
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
-    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil)
-      logger.info "Handling item #{id}"
+    def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
+                                ignore_no_recipients: nil)
+      logger.info "MessageNotification: handling item #{id}"
       update! status: StatusInProgress
 
+      self.ignore_no_recipients ||= ignore_no_recipients
       self.for_item ||= for_item
       self.on_complete_config ||= on_complete_config
       self.batch_user ||= alt_batch_user
@@ -224,10 +236,10 @@ module Messaging
 
       update! status: StatusComplete
       fire_item_on_complete_triggers
-      logger.info "Handled item #{id}"
+      logger.info "MessageNotification: handled item #{id}"
     rescue StandardError => e
       update! status: StatusFailed
-      raise FphsException, "Exception captured in handle_notification_now: #{e}"
+      raise FphsException, "Exception captured in handle_notification_now: #{e}", e.backtrace
     end
 
     #
@@ -237,16 +249,40 @@ module Messaging
     # @param [Array | nil] recipient_sms_numbers - optionally override numbers to send to
     def generate_and_send(recipient_sms_numbers: nil)
       generate
+      resolve_attachments if email?
 
       if email?
         NotificationMailer.send_message_notification(self).deliver_now
       elsif sms?
         sms = Messaging::NotificationSms.new
-        sms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text,
-                           importance: importance, logger: logger)
+        sms.send_now(self, recipient_sms_numbers:, generated_text:, ignore_no_recipients:,
+                           importance:, logger:)
       else
         raise FphsException, "No recognized message type for message notification: #{message_type}"
       end
+    end
+
+    #
+    # Resolve any attachments configured in extra_substitutions.
+    # Currently handles calendar_invite (.ics) attachments.
+    # Generates .ics content via Messaging::CalendarInvite, stores the generated content
+    # back into extra_substitutions_data for admin retrieval, and persists the record.
+    # @return [void]
+    def resolve_attachments
+      @resolved_attachments = []
+
+      resolve_calendar_invite_attachment
+      resolve_nfsstore_attachments
+
+      save! if @resolved_attachments.any?
+    end
+
+    #
+    # Returns the resolved attachments for the mailer to use.
+    # Each attachment is a Hash with :filename, :mime_type, and :content keys.
+    # @return [Array<Hash>]
+    def resolved_attachments
+      @resolved_attachments || []
     end
 
     #
@@ -310,6 +346,25 @@ module Messaging
       end
     end
 
+    #
+    # The calendar invite data from extra_substitutions, if present.
+    # @return [HashWithIndifferentAccess | nil]
+    def calendar_invite_data
+      extra_substitutions_data&.dig(:calendar_invite)
+    end
+
+    #
+    # Returns NfsStore attachment references from extra_substitutions_data.
+    # Each reference is a hash with container_id, path, file_name, stored_file_id, content_type.
+    # File content is NOT included — only metadata references.
+    # @return [Array<Hash>]
+    def nfsstore_attachment_references
+      atts = extra_substitutions_data&.dig(:attachments)
+      return [] unless atts.is_a?(Array)
+
+      atts.select { |att| att['stored_file_id'].present? }
+    end
+
     private
 
     #
@@ -335,7 +390,7 @@ module Messaging
                                        default_country_code: rec[:default_country_code]
           recipient_sms_numbers = [pn]
           # Generate and send to this specific phone number with the data for this item
-          resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
+          resp = generate_and_send(recipient_sms_numbers:)
 
           list_item.set_response list_item.user, resp
           # Add the phone number to the recipient data hash
@@ -416,12 +471,89 @@ module Messaging
 
     #
     # The hash data representation of #extra_substitutions
-    # @return [Hash]
+    # @return [HashWithIndifferentAccess | nil]
     def extra_substitutions_data
       return @extra_substitutions_data if @extra_substitutions_data
       return unless extra_substitutions
 
       @extra_substitutions_data = YAML.safe_load(extra_substitutions, permitted_classes: [Symbol])
+                                      &.with_indifferent_access
+    end
+
+    #
+    # Resolve the calendar_invite from extra_substitutions_data.
+    # Generates RFC 5545 .ics content via Messaging::CalendarInvite,
+    # stores the generated content back in extra_substitutions for admin retrieval.
+    # @return [void]
+    def resolve_calendar_invite_attachment
+      ci_data = extra_substitutions_data&.dig(:calendar_invite)
+      return unless ci_data
+
+      invite = Messaging::CalendarInvite.new(ci_data)
+      ics_content = invite.generate
+
+      # Store generated content back for admin retrieval
+      ci_data['generated_content'] = ics_content
+      self.extra_substitutions = extra_substitutions_data.to_hash.to_yaml
+
+      ical_method = ci_data['method']&.upcase || 'REQUEST'
+      @resolved_attachments << {
+        filename: 'calendar.ics',
+        mime_type: "text/calendar; method=#{ical_method}",
+        content: ics_content
+      }
+    end
+
+    #
+    # Resolve NfsStore file attachments from extra_substitutions_data["attachments"].
+    # For each entry, looks up the StoredFile by container_id, path, and file_name,
+    # reads the file content from retrieval_path, builds an attachment hash for the mailer,
+    # and stores a reference (not content) back into extra_substitutions.
+    # @return [void]
+    def resolve_nfsstore_attachments
+      att_data = extra_substitutions_data&.dig(:attachments)
+      return unless att_data.is_a?(Array)
+
+      att_data.each do |entry|
+        container_id = entry['container_id']
+        path = entry['path'].to_s
+        file_name = entry['file_name']
+
+        stored_file = NfsStore::Manage::StoredFile.find_by(
+          nfs_store_container_id: container_id,
+          path: path,
+          file_name: file_name
+        )
+
+        unless stored_file
+          raise FphsException,
+                "NfsStore file not found: container_id=#{container_id}, path=#{path}, file_name=#{file_name}"
+        end
+
+        # Set current user context for file access via role-based permissions
+        stored_file.container.current_user = user
+
+        rp = stored_file.retrieval_path
+        unless rp
+          raise FphsException,
+                'NfsStore file could not be retrieved (no access): ' \
+                "container_id=#{container_id}, path=#{path}, file_name=#{file_name}"
+        end
+
+        content = File.read(rp)
+
+        @resolved_attachments << {
+          filename: stored_file.file_name,
+          mime_type: stored_file.content_type,
+          content: content
+        }
+
+        # Store reference (not content) back into extra_substitutions
+        entry['stored_file_id'] = stored_file.id
+        entry['content_type'] = stored_file.content_type
+      end
+
+      self.extra_substitutions = extra_substitutions_data.to_hash.to_yaml
     end
 
     #

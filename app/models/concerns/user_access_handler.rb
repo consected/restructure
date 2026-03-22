@@ -6,6 +6,9 @@ module UserAccessHandler
   extend ActiveSupport::Concern
 
   included do
+    # Flag to enable logging of access checks for this user request
+    attr_accessor :log_access
+
     has_many :user_access_controls, autosave: true, class_name: 'Admin::UserAccessControl'
     before_save :set_access_levels
   end
@@ -19,8 +22,11 @@ module UserAccessHandler
   # example: user.can? :create_master
   # @param [Symbol] auth - the resource name to check against
   # @param [Symbol] resource_type - defaults to :general - one of Admin::UserAccessControl.resource_types
-  def can?(auth, resource_type = :general)
-    has_access_to? :access, resource_type, auth
+  # @param [True | nil] log - enable logging of access checks
+  # @return [Admin::UserAccessControl | nil]
+  def can?(auth, resource_type = :general, log: false)
+    log ||= log_access
+    has_access_to? :access, resource_type, auth, log: log
   end
 
   #
@@ -35,23 +41,43 @@ module UserAccessHandler
   # @param [Admin::AppType | Integer] alt_app_type_id - by default check against user's current app type,
   #                                   otherwise use this alternative
   # @param [True | nil] force_reset - force reset of memoization to reevaluate
+  # @param [True | nil] log - enable logging of access checks
   # @return [Admin::UserAccessControl | nil]
-  def has_access_to?(perform, resource_type, named, with_options = nil, alt_app_type_id: nil, force_reset: nil)
+  def has_access_to?(perform, resource_type, named, with_options = nil,
+                     alt_app_type_id: nil, force_reset: nil, log: false)
     @has_access_to ||= {}
+    log ||= log_access
 
-    clear_has_access_to! if user_access_controls_updated?
-    clear_role_names! if user_roles_updated?
+    if user_access_controls_updated?
+      clear_has_access_to!
+      force_reset = true
+    end
 
-    key = "#{perform}-#{resource_type}-#{named}-#{with_options}-#{alt_app_type_id || app_type_id}"
-    return @has_access_to[key] if @has_access_to.key?(key) && !force_reset
+    if user_roles_updated?
+      clear_role_names!
+      force_reset = true
+    end
 
-    @has_access_to[key] =
-      Admin::UserAccessControl.access_for? self,
+    ckey = "has_access_to--#{perform}-#{resource_type}-#{named}-#{with_options}-#{alt_app_type_id || app_type_id}-#{Settings::OnlyLoadAppTypes}"
+    if @has_access_to.key?(ckey) && !force_reset
+      res = @has_access_to[ckey]
+      if log
+        Rails.logger.info "UserAccessHandler.has_access_to? returning memo value results: #{res}" \
+                          "for user #{id} " \
+                          "app_type_id #{alt_app_type_id || app_type_id} resource_type #{resource_type} " \
+                          "resource_name #{named} can_perform #{perform} with_options #{with_options}"
+      end
+      return res
+    end
+
+    @has_access_to[ckey] =
+      Admin::UserAccessControl.access_for?(self,
                                            perform,
                                            resource_type,
                                            named,
                                            with_options,
-                                           alt_app_type_id: alt_app_type_id
+                                           alt_app_type_id:,
+                                           log:)
   end
 
   #
@@ -68,11 +94,7 @@ module UserAccessHandler
   # the one we last saw within this instance. Handles automatic memo clearing to
   # support changes to user access controls in spec tests
   def user_access_controls_updated?
-    if @latest_user_access_control != Admin::UserAccessControl.latest_update
-      @latest_user_access_control = Admin::UserAccessControl.latest_update
-    else
-      false
-    end
+    @latest_user_access_control != Admin::UserAccessControl.latest_update
   end
 
   #
@@ -91,6 +113,7 @@ module UserAccessHandler
   def clear_role_names!
     @latest_user_role = Admin::UserRole.latest_update(force: true)
     @role_names = nil
+    @app_type_role_names = {}
     # Updated roles also lead to has_access_to evaluations requiring refresh
     clear_has_access_to!
   end

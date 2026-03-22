@@ -1,6 +1,6 @@
-
 # Save Trigger: Pull External Data options
-        - this_1:
+        pull_external_data:
+          - this_1:
             if: if_extras
             force_not_editable_save: true allows the update to succeed even if this item is set as not_editable
             local_data: |
@@ -18,6 +18,19 @@
 
               If *success_if:* condition is set, the following will also be set
                   \{\{save_trigger_results.identity_success_if_res\}\}
+
+              Details of the submitted request (for POST/PUT/PATCH body requests or POST form requests) will be stored as a hash in:
+                  save_trigger_results.identity_submitted_request
+
+              The submitted request hash contains:
+                  data   - the request body as a Hash (for body/form requests), or nil for requests with no body (GET, HEAD, etc.)
+                  url    - the resolved URL the request was sent to (with substitutions applied)
+                  method - the HTTP method used (e.g. 'get', 'post', 'put')
+
+              Individual elements can be accessed via substitutions, for example:
+                  \{\{save_trigger_results.identity_submitted_request.url\}\}
+                  \{\{save_trigger_results.identity_submitted_request.method\}\}
+                  \{\{save_trigger_results.identity_submitted_request.data.programName\}\}
 
               These values are also available in if conditions like:
                   if:
@@ -37,6 +50,12 @@
                       save_trigger_results:
                         element: identity_success_if_res
                         value: true
+
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity_submitted_request.url
+                        value: https://example.com/api/endpoint
 
             data_field: (optional) name of text or json field to update
             data_field_format: |
@@ -58,6 +77,9 @@
               format: xml|json|text
               allow_empty_result: true | false (default)
               allow_response_codes: [array of allowable integer codes that are not 200]
+              headers:
+                'Authorization': 'Bearer {{save_trigger_results.identity.access_token}}'
+                'Content-Type': 'application/json'
 
             post_data: |
               For 'post' requests, the string or hash of data to post
@@ -70,3 +92,4 @@
                       save_trigger_results:
                         element: 'post_response.success'
                         value: true              
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

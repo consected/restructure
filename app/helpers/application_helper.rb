@@ -1,12 +1,37 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  include HandlebarsPrecompilerHelper
+
   DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
+
+  def is_current_admin_sample?
+    return @is_current_admin_sample unless @is_current_admin_sample.nil?
+
+    if defined? current_admin_sample
+      res = current_admin_sample
+    end
+
+    @is_current_admin_sample = !!res
+  end
 
   #
   # Hyphenated name (singular) of the current controller
   def hyphenated_name
     controller_name.singularize.hyphenate
+  end
+
+  def full_hyphenated_name
+    return hyphenated_name unless object_instance.class.respond_to? :definition
+
+    object_instance.class.definition.full_item_type_name.hyphenate
+  end
+
+  # For dynamic models using option types, add a URL marker for substitution on the front end
+  def option_type_url_marker
+    return unless object_instance.class.respond_to? :definition
+
+    'OPTION_TYPE-' if object_instance.class.definition.option_type_attr_name
   end
 
   #
@@ -34,7 +59,7 @@ module ApplicationHelper
   #
   # class name for the body class attribute
   def current_app_type_id_class
-    "app-type-id-#{current_user.app_type_id}" if current_user
+    "app-type-id-#{current_user.app_type_id} app-type-name-#{current_user.app_type&.name&.id_hyphenate}" if current_user
   end
 
   def user_roles_for_attr
@@ -47,7 +72,7 @@ module ApplicationHelper
   # 'class=""' attribute to add to the main body tag
   def body_classes
     class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} " \
-    "#{Rails.env.test? ? 'rails-env-test' : ''}"
+                 "#{'rails-env-test' if Rails.env.test?}"
 
     " class=\"#{class_list} initial-compiling \"".html_safe
   end
@@ -67,7 +92,9 @@ module ApplicationHelper
     class_extras ||= 'pull-right' unless link_text
 
     <<~END_HTML
-      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
+      <a class="show-entity is-cancel-btn show-#{hyphenated_name} #{class_extras} #{unless link_text
+                                                                                      button_class
+                                                                                    end}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{full_hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{full_hyphenated_name}-#{option_type_url_marker}result-template" >#{link_text}</a>
     END_HTML
       .html_safe
   end
@@ -75,7 +102,7 @@ module ApplicationHelper
   #
   # Generate the edit form id for a common template
   def common_edit_form_id
-    "#{hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
+    "#{full_hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
   end
 
   #
@@ -86,9 +113,9 @@ module ApplicationHelper
     res[:remote] = true
     res[:html] ||= {}
     res[:html].merge!(
-      'data-result-target' => "##{hyphenated_name}-#{@master&.id}-#{@id}, " \
-                              "[form-res-id='#{hyphenated_name}-#{@master&.id}-#{@id}']",
-      'data-template' => "#{hyphenated_name}-result-template"
+      'data-result-target' => "##{full_hyphenated_name}-#{@master&.id}-#{@id}, " \
+                              "[form-res-id='#{full_hyphenated_name}-#{@master&.id}-#{@id}']",
+      'data-template' => "#{full_hyphenated_name}-#{option_type_url_marker}result-template"
     )
     res
   end
@@ -140,16 +167,22 @@ module ApplicationHelper
     dlabel = dialogs[key][:label]
     dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
     id = "dialog-#{dname}-#{dlabel}".id_hyphenate
-    if strip_tags(dmsg).length <= 100 || dlabel.blank?
+
+    admin_sample_markup = "<div class=\"admin-sample-field-info\"><span>#{key}</span></div>" if is_current_admin_sample?
+
+    stripped = strip_tags(dmsg)
+    if stripped.length <= 100 || dlabel.blank?
       <<~END_HTML
+        #{admin_sample_markup}#{'      '}
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div><div class="dialog-btn-container"><p>#{dmsg}</p></div>
       END_HTML
         .html_safe
     else
       <<~END_HTML
+        #{admin_sample_markup}
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div>
         <div class="dialog-btn-container">
-          <p>#{strip_tags dmsg[0..100]}...</p>
+          <p>#{stripped[0..100]}...</p>
           <a class="btn btn-default in-form-dialog-btn"
              onclick="$('.in-form-dialog').collapse('hide'); $('.dialog-btn-container').show(); $('##{id}').collapse('show'); $(this).parents('.dialog-btn-container').hide();"
           >#{dlabel}</a></div>
@@ -181,13 +214,18 @@ module ApplicationHelper
 
     mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
-    caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
+    caption = caption[:"#{mode}_caption"] || caption[:caption] || '' if caption.is_a?(Hash)
     if @form_object_instance && !no_sub
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing:)
     end
 
     caption = caption.gsub('{{', '{^{').gsub('}}', '}^}') if no_sub == :escape
+    if is_current_admin_sample?
+      admin_sample_markup = "<div class=\"admin-sample-field-info\"><span>#{key}</span></div>"
+      caption = "#{admin_sample_markup}\n#{caption}"
+    end
+
     caption.html_safe
   end
 
@@ -215,10 +253,32 @@ module ApplicationHelper
     }
   end
 
+  def edit_field_label(form, field_name_sym, labels, options_or_remove = nil, options = {})
+    if options_or_remove.is_a? Hash
+      options = options_or_remove
+    else
+      remove = options_or_remove
+    end
+
+    force_default = options.delete(:force_default)
+    label = label_for(field_name_sym, labels, remove, force_default:)
+    return if label == ''
+
+    form.label field_name_sym, label, options
+  end
+
   #
   # Cache key for pregenerated partials
-  def partial_cache_key(partial)
-    u = current_user || current_admin
+  def partial_cache_key(partial, force_user_or_admin: nil)
+    raise FphsException, 'Unable to generate partial cache key for blank partial' if partial.blank?
+
+    begin
+      u = force_user_or_admin || current_user || current_admin
+    rescue StandardError => e
+      Rails.logger.error "Error generating partial cache key for #{partial}: #{e.message}"
+      u = User.batch_user
+    end
+
     auth_type = u.class.name
     if u.is_a? User
       apptype = u.app_type_id
@@ -250,13 +310,14 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{u&.updated_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    prev_key = "#{partial}-#{auth_type}-#{u&.id}"
     @@prev_partial_cache_key ||= {}
-    prev = @@prev_partial_cache_key[partial]
+    prev = @@prev_partial_cache_key[prev_key]
     changed = prev != res
     if changed
-      Rails.logger.warn "Partial cache key changed (#{partial}): \nfrom:#{prev}\nto:  #{res}"
-      @@prev_partial_cache_key[partial] = res
+      Rails.logger.warn "Partial cache key changed (#{prev_key}): \nfrom:#{prev}\nto:  #{res}"
+      @@prev_partial_cache_key[prev_key] = res
     end
     res
   end
@@ -310,14 +371,80 @@ module ApplicationHelper
   end
 
   def remove_empty_error(errors)
-    errors.messages.each do |key, messages|
+    # Handle DoNotDisplayErrorMessage markers
+    # We need to iterate over a copy of keys since we might be deleting some
+    errors.messages.keys.dup.each do |key|
+      messages = errors.messages[key]
       if messages.include?(DoNotDisplayErrorMessage)
         if messages.one?
+          # If the only message is DoNotDisplayErrorMessage, remove the entire key
           errors.delete(key)
         else
-          messages.delete(DoNotDisplayErrorMessage)
+          # If there are multiple messages, filter out DoNotDisplayErrorMessage
+          # We need to delete and re-add to ensure proper modification
+          filtered_messages = messages.reject { |msg| msg == DoNotDisplayErrorMessage }
+          errors.delete(key)
+          filtered_messages.each { |msg| errors.add(key, msg) }
         end
       end
+    end
+  end
+
+  #
+  # Generate a style tag with CSP nonce for inline styles
+  # @param content [String] the CSS content to include
+  # @return [String] HTML safe style tag with nonce
+  def csp_style_tag(content)
+    content_tag(:style, content.html_safe, nonce: true)
+  end
+
+  #
+  # Generate a script tag with CSP nonce for inline JavaScript
+  # @param content [String] the JavaScript content to include
+  # @return [String] HTML safe script tag with nonce
+  def csp_script_tag(&)
+    javascript_tag(nonce: true, &)
+  end
+
+  #
+  # Generate a precompiled Handlebars template script include
+  # @param id [String] the template identifier
+  # @param css_class [String] CSS class indicating template type (default: 'hidden handlebars-template')
+  # @param block [Block] the Handlebars template content
+  # @return [String] HTML safe javascript_include_tag for the precompiled template
+  def handlebars_template_tag(id, css_class: 'hidden handlebars-template', &)
+    raise FphsException, 'handlebars_template_tag requires a block' unless block_given?
+
+    is_partial = css_class.include?('handlebars-partial')
+    compiled_file_path = write_handlebars_template(id, is_partial:, &)
+    @requested_handlebars_templates ||= []
+    @requested_handlebars_templates << { id:, is_partial:, compiled_file_path: }
+    # javascript_include_tag(
+    #   compiled_file_path,
+    #   nonce: true,
+    #   data: {
+    #     handlebars_id: id,
+    #     handlebars_type: is_partial ? 'partial' : 'template'
+    #   }
+    # )
+    ''
+  end
+
+  def retrieve_requested_handlebars_templates(from_file_path)
+    return unless @requested_handlebars_templates.present?
+
+    from_file_path = from_file_path.to_s.split('/').last(2).join('-').gsub('.html.erb', '').id_underscore
+    compile_handlebars_templates
+    url, handlebars_template_ids, handlebars_partial_ids = write_multiple_handlebars_templates(@requested_handlebars_templates)
+    @requested_handlebars_template_count = @requested_handlebars_templates.length
+    @retrieved_requested_handlebars_template_count = (handlebars_template_ids + handlebars_partial_ids).length
+    # Clean up before the next set of handlebars templates
+    @requested_handlebars_templates = nil
+    javascript_tag nonce: true do
+      <<~JS
+        _fpa.retrieve_requested_handlebars_templates('#{url}', '#{Rails.env}', '#{from_file_path}');
+      JS
+        .html_safe
     end
   end
 end

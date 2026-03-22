@@ -19,7 +19,8 @@ _fpa.form_utils = {
     for (var p in obj) {
       if (obj.hasOwnProperty(p)) {
         var v = obj[p];
-        var $field = block.find("[data-attr-name='" + p.underscore() + "']").parent().filter(':visible');
+        var p_underscore = p.underscore();
+        var $field = block.find(`[data-attr-name="${p_underscore}"]`).parent().filter(':visible');
 
         // In certain cases there may be more than one matching item (such as for radio buttons)
         // If so, try to jump to the main .list-group-item container
@@ -45,7 +46,7 @@ _fpa.form_utils = {
             fn = fn || '';
             v = fn + ' ' + v;
           }
-          var el = $('<p class="help-block error-help">' + v + '</p>');
+          var el = $(`<p class="help-block error-help error-for-${p_underscore}" data-error-key="${p_underscore}">${v}</p>`);
           $field.append(el);
           delete obj[p];
           obj.Form = 'has errors. Check the highlighted fields.';
@@ -189,29 +190,66 @@ _fpa.form_utils = {
   locale_datetime_to_iso(v) {
     if (!v) return;
 
-    var d = Date.parse(v);
-    var d2 = new Date(d);
-    return d2.toISOString();
+    return _fpa.utils.parseLocaleDateTime(v).toISOString();
   },
 
   // Handle big-select fields
   setup_big_select_fields(block) {
+    // First, process any JSON data elements that store big-select configuration
+    // This approach avoids inline script tags that fail CSP when loaded via AJAX
+    block.find('script.big-select-data[type="application/json"]').each(function () {
+      var $dataEl = $(this);
+      var fieldId = $dataEl.data('field-id');
+      var optionsAttr = $dataEl.attr('data-options');
+      var hashAttr = $dataEl.attr('data-hash');
+
+      // Parse JSON from attributes (jQuery .data() may not parse HTML-escaped JSON correctly)
+      var options = {};
+      var hashData = {};
+      try {
+        if (optionsAttr) options = JSON.parse(optionsAttr);
+      } catch (e) {
+        // Ignore parse errors - field will work without options
+      }
+      try {
+        if (hashAttr) hashData = JSON.parse(hashAttr);
+      } catch (e) {
+        // Ignore parse errors - field will be skipped if no hash data
+      }
+
+      var field = document.getElementById(fieldId);
+      if (field) {
+        field.big_select_options = field.big_select_options || options;
+        field.big_select_hash = field.big_select_hash || {};
+        // Merge in the hash data (which contains subtype -> data mapping)
+        Object.assign(field.big_select_hash, hashData);
+      }
+      // Remove the data element after processing
+      $dataEl.remove();
+    });
+
     block
       .find('.use-big-select')
       .not('.big-select-su')
       .each(function () {
         var label = '';
+        var hash = $(this)[0].big_select_hash;
+        var opts = $(this)[0].big_select_options;
+        // Skip this field if no data available
+        if (!hash || Object.keys(hash).length === 0) {
+          return;
+        }
         $.big_select(
           $(this),
           $('#primary-modal .modal-body'),
-          $(this)[0].big_select_hash,
+          hash,
           function () {
             _fpa.show_modal('', label);
           },
           function () {
             _fpa.hide_modal();
           },
-          $(this)[0].big_select_options
+          opts
         );
       })
       .addClass('big-select-su');
@@ -228,25 +266,124 @@ _fpa.form_utils = {
         var curr_el = $(this);
         var val = curr_el.val();
 
-        // If an element id has not been specified, assume it is a field name and generate the element id
-        if (sf[0] != '#') sf = `#${fn}_${sf}`;
+        // Store the target field name for use in change handler
+        // The change handler will look for the target element dynamically
+        var target_field_name = sf;
+        var standard_id_selector = sf[0] === '#' ? sf : `#${fn}_${sf}`;
 
-        _fpa.form_utils.select_filtering_changed(val, sf);
+        // Initial call - try to find and update the target
+        _fpa.form_utils.select_filtering_changed(val, target_field_name, standard_id_selector);
+
         curr_el.on('change', function () {
-          _fpa.form_utils.select_filtering_changed($(this).val(), sf);
+          var newVal = $(this).val();
+          _fpa.form_utils.select_filtering_changed(newVal, target_field_name, standard_id_selector);
         });
       })
       .addClass('done-select-filtering');
   },
+  setup_select_as_radio_buttons(block) {
+    const $els = block.find('select.as-radio-buttons').not('.attached-radio-buttons');
+    $els.each(function () {
+      // Get the select element
+      var uid = Math.random().toString().id_underscore();
+      var $selectElement = $(this);
+      var name = $selectElement.attr('name');
+      var sel_id = `${$selectElement.attr('id')}--${uid}`;
+      var attr_name = $(this).attr('data-attr-name');
+      var object_name = $(this).attr('data-object-name');
 
-  select_filtering_changed(val, el) {
-    $(el).attr('data-big-select-subtype', val);
-    $(`${el} optgroup[label]`).hide().attr('disabled', 'disabled');
+      // Get the options from the select element
+      var $options = $selectElement.find('option');
+
+      // Create a container for the radio buttons
+      var $radioContainer = $(`<div class="select-as-radio-buttons button-radio" id="${sel_id}"></div>`);
+
+      // Iterate over the options and create radio buttons
+      $options.each(function () {
+        var value = $(this).attr('value');
+        var text = $(this).html();
+        if (!text || text == '') text = '(not set)'
+        var id = `${sel_id}_${value.id_underscore()}`;
+        var checked = $(this).is(':selected') ? 'checked' : '';
+        var data = `data-attr-name="${attr_name}" data-object-name="${object_name}"`;
+        // Create a radio button and label
+        var $radio = $(`<div class="sarb-item"><input ${checked} ${data} type="radio" name="${name}" id="${id}" value="${value}"/><label for="${id}" class="radio-label">${text}</label></div>`);
+
+        // Append the radio button and label to the container
+        $radioContainer.append($radio);
+      });
+
+      // Replace the select element with the radio buttons
+      $selectElement.replaceWith($radioContainer);
+    }).addClass('attached-radio-buttons');
+
+    if ($els.length) {
+      // If any radio buttons replaced select fields, initialize them to trigger show_if items
+      // Don't pass form_data, since the initial value will be used in the on "change" function,
+      // which won't reflect field changes made by the user subsequently.
+      _fpa.form_utils.init_edit_form_show_if_triggers(block);
+    }
+  },
+
+  // Setup change triggers on form fields to handle show_if conditions in edit forms
+  // This previously accepted form_data, but the closure held the initial value of the form fields
+  // causing incorrect behaviour. Now form_data is initialized from the form fields on each change event.
+  init_edit_form_show_if_triggers: function (block) {
+    const form_els = block.find('[data-attr-name][data-object-name]').not('.attached-show-if-triggers');
+    form_els.on('change click keyup', function () {
+      const $el = $(this);
+      const obj_name = $el.attr('data-object-name');
+      const a_name = $el.attr('data-attr-name');
+      // Initialize form_data from the form fields.
+      var form_data = _fpa.form_utils.data_from_form(block);
+      if (a_name != 'e_signed_how' && form_data[obj_name]) {
+        if ($el.attr('type') == 'checkbox') {
+          form_data[obj_name][a_name] = $el.is(':checked');
+        } else {
+          form_data[obj_name][a_name] = $el.val();
+        }
+        form_data[obj_name].current_mode = 'edit';
+        _fpa.show_if.methods.show_items(block, form_data[obj_name]);
+      }
+    }).addClass('attached-show-if-triggers');
+  },
+
+  select_filtering_changed(val, target_field_name, standard_id_selector) {
+    // Try to find the target element - first by big-select data-attr-name, then by standard ID
+    // Supports backward compatibility: when called with only 2 args (from report_criteria.js),
+    // the second arg is a CSS selector, not a field name.
+    var $target;
+
+    // If no standard_id_selector provided, treat target_field_name as the selector (backward compat)
+    if (!standard_id_selector) {
+      standard_id_selector = target_field_name;
+      target_field_name = null;
+    }
+
+    // First try to find a big-select input with matching data-attr-name
+    if (target_field_name && target_field_name[0] !== '#' && target_field_name[0] !== '[') {
+      $target = $(`input.use-big-select[data-attr-name="${target_field_name}"]`);
+    }
+
+    // If not found, fall back to standard ID/CSS selector
+    if (!$target || $target.length === 0) {
+      $target = $(standard_id_selector);
+    }
+
+    if ($target.length === 0) {
+      return;
+    }
+
+    // Set the subtype attribute for big-select filtering
+    $target.attr('data-big-select-subtype', val);
+
+    // Also handle optgroup filtering for regular select elements
+    $(`${standard_id_selector} optgroup[label]`).hide().attr('disabled', 'disabled');
     // Case insensitive filtering
-    $(`${el} optgroup[label="${val}" i]`).show().attr('disabled', null);
-    if ($(el).hasClass('attached-chosen')) {
+    $(`${standard_id_selector} optgroup[label="${val}" i]`).show().attr('disabled', null);
+    if ($target.hasClass('attached-chosen')) {
       // Refresh the associate chosen.js values if chosen is attached to this field
-      $(el).trigger('chosen:updated');
+      $target.trigger('chosen:updated');
     }
   },
 
@@ -341,6 +478,30 @@ _fpa.form_utils = {
     _fpa.form_utils.sort_blocks($targets, order_alt);
   },
 
+  handle_sub_list_expander: function ($control, init) {
+    var $a = $control;
+    var sl = $a.attr('data-expander-sub-list');
+    var $targets = $('[data-sub-list="' + sl + '"]');
+
+    if (!init) {
+      var expander_alt = $a.hasClass('active');
+      if (expander_alt) {
+        $a.removeClass('active');
+        // Shrink and make expandable
+        $targets.find('.list-group').addClass('expandable expandable-target').attr('data-toggle', 'expandable');
+
+      } else {
+        // Expand and remove expandable
+        $a.addClass('active');
+        $targets.find('.list-group').removeClass('expandable expandable-target').attr('data-toggle', null);
+      }
+    }
+
+    expander_alt = $a.hasClass('active');
+    _fpa.form_utils.setup_data_toggles($targets.parent())
+    _fpa.form_utils.format_block($targets.parent());
+  },
+
   handle_sub_list_layout: function ($control, init) {
     var $a = $control;
     var sl = $a.attr('data-layout-sub-list');
@@ -360,12 +521,11 @@ _fpa.form_utils = {
     if (val == 'wide-block') {
       $targets.removeClass('card-block').addClass('wide-block');
       $targets.find('.list-group').addClass('expandable').attr('data-toggle', 'expandable');
-      _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
     } else {
       $targets.addClass('card-block').removeClass('wide-block');
       $targets.find('.list-group').removeClass('expandable').attr('data-toggle', null);
-      _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
     }
+    _fpa.form_utils.format_block($targets.parents('[data-sub-list="' + sl + '"]').parent());
   },
 
   // Setup the typeahead prediction for a specific text input element
@@ -483,7 +643,7 @@ _fpa.form_utils = {
         var all = lgi.find('small, label').not('.radio-label');
         all
           .addClass('label-resizer')
-          .css({ whiteSpace: 'nowrap', width: 'auto', minWidth: 'none', marginLeft: 'inherit' });
+          .css({ whiteSpace: 'nowrap', width: 'auto', minWidth: 'inherit', marginLeft: 'inherit' });
 
         var block_width = lgi.first().parent().width();
 
@@ -577,7 +737,7 @@ _fpa.form_utils = {
           var no_sel_text = 'no tags selected';
           var alt_nst = sel.attr('data-nothing-selected-text');
           if (alt_nst) no_sel_text = alt_nst;
-          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false, display_disabled_options: false });
+          sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false, display_disabled_options: false, allow_single_deselect: true });
 
           sel.on('chosen:showing_dropdown', function (evt, params) {
 
@@ -627,8 +787,9 @@ _fpa.form_utils = {
       })
       .addClass('attached-chosen');
 
-    var $dfs = sels.filter('[data-filter-selector]');
+    var $dfs = sels.filter('[data-filter-selector], [data-filters-select]');
     _fpa.form_utils.setup_chosen_groups($dfs);
+    _fpa.form_utils.setup_form_filtered_select(block);
   },
 
   setup_chosen_groups: function ($data_filter_selectors) {
@@ -709,8 +870,9 @@ _fpa.form_utils = {
     var sv_opt = { allow_actions: null };
     sv_opt.allow_actions = _fpa.state.user_can;
 
-    _fpa.secure_view.setup_links(block, 'a.use-secure-view', sv_opt);
-    block.on('click', 'a.use-secure-view', function (ev) {
+    var sv_sel = 'a.use-secure-view, a.redcap-file-use-secure-view';
+    _fpa.secure_view.setup_links(block, sv_sel, sv_opt);
+    block.on('click', sv_sel, function (ev) {
       ev.preventDefault();
     });
   },
@@ -813,12 +975,26 @@ _fpa.form_utils = {
               $(this).attr('data-group-num', ls[first]);
             }
           })
-          .hide().attr('disabled', 'disabled');
-        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null);
+          .hide().attr('disabled', 'disabled').attr('data-disabled', 'disabled');
+        $(`${filter_sel} optgroup[data-group-num="${val}"]`).show().attr('disabled', null).attr('data-disabled', null);
+        // Clear any of the options that are in a disabled group
+        $(`${filter_sel} optgroup[disabled] option[selected="selected"]`).attr('selected', null)
         if ($(filter_sel).hasClass('attached-chosen')) {
           // Refresh the associate chosen.js values if chosen is attached to this field
           $(filter_sel).trigger('chosen:updated');
         }
+        var new_val = $(`${filter_sel} option[selected="selected"]`).val();
+
+        // Allow the value to be set - this is a necessary hack
+        $(`${filter_sel} optgroup[label][data-disabled="disabled"]`).attr('disabled', null)
+        $(filter_sel).val(new_val);
+        $(filter_sel).parent().find('.chosen-container .chosen-single span').html('tracker').removeClass('chosen-default')
+        console.log(`set filtered select ${filter_sel} to val: ${new_val} == ${$(filter_sel).val()}`)
+        // end of hack
+
+        window.setTimeout(function () {
+          $($el).change()
+        }, 1)
 
       })
       .addClass('filters-select-attached');
@@ -853,15 +1029,19 @@ _fpa.form_utils = {
 
   setup_bootstrap_items: function (block) {
     if (!block) block = $(document);
-    block.find('[data-toggle~="tooltip"]').not('.attached_bs').tooltip().addClass('attached_bs');
-    block.find('[data-toggle~="popover"]').not('.attached_bs').popover().addClass('attached_bs');
-    block.find('[data-show-popover="auto"]').not('.attached_bs').popover('show').addClass('attached_bs');
-    block.find('.dropdown-toggle').not('.attached_bs').dropdown().addClass('attached_bs');
+    // In long admin indexes, this can be slow. Attempt to take it
+    // out of the usual flow.
+    window.setTimeout(function () {
+      block.find('[data-toggle~="tooltip"]').not('.attached_bs').tooltip().addClass('attached_bs');
+      block.find('[data-toggle~="popover"]').not('.attached_bs').popover().addClass('attached_bs');
+      block.find('[data-show-popover="auto"]').not('.attached_bs').popover('show').addClass('attached_bs');
+      block.find('.dropdown-toggle').not('.attached_bs').dropdown().addClass('attached_bs');
 
-    block.find('table').each(function () {
-      var c = $(this).attr('class');
-      if (c == null || c === '') $(this).addClass('table');
-    });
+      block.find('table').not('.table').each(function () {
+        var c = $(this).attr('class');
+        if (c == null || c === '') $(this).addClass('table');
+      });
+    }, 600);
   },
 
   setup_data_toggles: function (block) {
@@ -974,8 +1154,38 @@ _fpa.form_utils = {
         // Only click the target if the caret is marked as collapsed currently
         if ($target.filter('.caret-target-collapsed').length) {
           $target.click();
+
+          $target.parents('.expandable-target').first().not('.expanded').click();
         }
       }).addClass('attached-hash-caret-target');
+
+    block
+      .find('a[href*="add-activity-button-"]')
+      .not('.attached-add-activity-button')
+      .each(function () {
+        var _this = this;
+        var $this = $(this);
+        const href = $(this).attr('href');
+        const re = new RegExp('add-activity-button-([^:]+)');
+        const matches = href.match(re);
+        if (!matches) return;
+
+        let target = matches[1];
+        if (!target) return;
+
+        target = `.activity-logs-header a.add-item-button[data-extra-log-type="${target}"]`;
+
+        window.setTimeout(function () {
+          var $target = $this.parents('.activity-logs-generic-block').find(target);
+          var disabled = $target.length === 0 || !$target.is(':visible');
+          $this.attr('disabled', disabled);
+          _this.add_activity_button = $target;
+        }, 1000)
+      })
+      .on('click', function () {
+        const $target = this.add_activity_button;
+        if ($target.is(':visible')) $target.click();
+      }).addClass('attached-add-activity-button');
 
     block
       .find('[data-toggle~="clear"]')
@@ -1158,10 +1368,10 @@ _fpa.form_utils = {
           var $a = $(a);
           if (last) $a = $a.last();
           var rect = $a.get(0);
+          if (attempt_count > 10) {
+            return;
+          }
           if (!rect) {
-            if (attempt_count > 10) {
-              return;
-            }
             attempt_count++;
             window.setTimeout(function () {
               doscroll();
@@ -1331,7 +1541,8 @@ _fpa.form_utils = {
       .find('input.time-entry')
       .not('is-time-masked')
       .each(function () {
-        $(this).timepicker({
+        const $field = $(this);
+        $field.timepicker({
           timeFormat: 'h:mm p',
           interval: 15,
           minTime: '12:00am',
@@ -1340,6 +1551,12 @@ _fpa.form_utils = {
           dynamic: true,
           dropdown: true,
           scrollbar: true,
+          default: 'now',
+          change: function (time) {
+            window.setTimeout(function () {
+              $field.change()
+            }, 10);
+          }
         });
       });
   },
@@ -1436,9 +1653,10 @@ _fpa.form_utils = {
           tres = te.val();
           dres = de.val();
 
-          if (dres) {
-            var text = `${dres} ${tres || ''}`;
-            text = _fpa.form_utils.locale_datetime_to_iso(text);
+          if (dres && tres) {
+            var text = `${dres} ${tres} UTC`;
+          } else if (dres) {
+            var text = `${dres}`;
           } else {
             var text = '';
           }
@@ -1538,7 +1756,7 @@ _fpa.form_utils = {
   setup_extra_actions: function (block) {
     block
       .find('.collapse')
-      .not('.attached-force-collapse')
+      .not('.attached-force-collapse, .no-force-collapse')
       .each(function () {
         var el = $(this);
         el.on('show.bs.collapse', function () {
@@ -1683,7 +1901,7 @@ _fpa.form_utils = {
 
         if (href.indexOf('display_as=embedded') < 0) {
           let sym = href.indexOf('?') > 0 ? '&' : '?';
-          $(this).attr('href', `${href}${sym}display_as=embedded#open-in-sidebar`);
+          $(this).attr('href', `${href}${sym}display_as=embedded&display_embed_where=sidebar&#open-in-sidebar`);
         }
 
         $(this).click(function (ev) {
@@ -1799,7 +2017,7 @@ _fpa.form_utils = {
           var $get_data_from = $(get_data_from);
 
           var add_item = function (item) {
-            var $new_item = $(`<${items_as} data-field-name="${item}">${item}</${items_as}>`);
+            var $new_item = $(`<${items_as} data-field-name="${item}">${item}<div class="sb-subitem"></div></${items_as}>`);
             $sortable_block.append($new_item);
           };
 
@@ -1824,7 +2042,7 @@ _fpa.form_utils = {
           var texts = [];
           $sortable_block.find(items_as).each(function () {
             // Get the first text element only
-            texts.push($(this).contents().first().text());
+            texts.push($(this).attr('data-field-name'));
           });
           $get_data_from.val(texts.join(items_splitter));
         };
@@ -1867,6 +2085,41 @@ _fpa.form_utils = {
       .addClass('made-sortable');
   },
 
+  // Set up icons to allow copy to clipboard
+  setup_copy_blocks: function (block) {
+
+    $(block).find('.copy-block-button')
+      .not('.added-copy-block-handler')
+      .each(function () {
+        $(this).on('click', function (e) {
+          e.preventDefault();
+          var text = $(this).attr('data-copy-text');
+          // Decode HTML entities
+          var textarea = document.createElement('textarea');
+          textarea.innerHTML = text;
+          text = textarea.value;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              _fpa.flash_notice('Copied to clipboard');
+            }).catch(function () {
+              _fpa.flash_notice('Failed to copy to clipboard');
+            });
+          } else {
+            // Fallback for older browsers
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            _fpa.flash_notice('Copied to clipboard');
+          }
+        })
+      })
+      .addClass('added-copy-block-handler');
+  },
+
   setup_sub_lists: function (block) {
     block
       .find('.sublist-filter-selectors')
@@ -1906,6 +2159,24 @@ _fpa.form_utils = {
         $(this).on('click', '.order-switch', function (ev) {
           ev.preventDefault();
           _fpa.form_utils.handle_sub_list_order($(this));
+          var sl = $(this).attr('data-order-sub-list');
+          var $targets = $('[data-sub-list="' + sl + '"] .common-template-item, [data-sub-list="' + sl + '"] .new-block');
+          _fpa.form_utils.resize_children($targets.parents('[data-sub-list="' + sl + '"]').parent());
+        });
+      })
+      .addClass('formatted-slfs');
+
+
+    block
+      .find('.sublist-expander-selector')
+      .not('.formatted-slfs')
+      .each(function () {
+        $(this).on('click', '.expander-switch', function (ev) {
+          ev.preventDefault();
+          _fpa.form_utils.handle_sub_list_expander($(this));
+          var sl = $(this).attr('data-order-sub-list');
+          var $targets = $('[data-sub-list="' + sl + '"] .common-template-item, [data-sub-list="' + sl + '"] .new-block');
+          _fpa.form_utils.resize_children($targets.parents('[data-sub-list="' + sl + '"]').parent());
         });
       })
       .addClass('formatted-slfs');
@@ -1920,6 +2191,53 @@ _fpa.form_utils = {
         });
       })
       .addClass('formatted-slfs');
+  },
+
+  reorder_sub_list_columns: function (block) {
+    var $outer = block.parents('.reorder-sublist-columns');
+    if ($outer.length === 0) {
+      const $inner = block.find('.reorder-sublist-columns');
+      if ($inner.length === 0) return;
+      $outer = $inner;
+    }
+
+    // Process each reorder-sublist-columns container individually to avoid
+    // moving columns between different containers (fixes issue #857)
+    $outer.each(function () {
+      const $container = $(this);
+      window.setTimeout(function () {
+        var heights = [];
+        var cols = $container.find('.sublist-column');
+        if (cols.length === 0) return;
+
+        cols.each(function () {
+          var h = $(this).height();
+          if ($(this).find('[data-sub-item]').length === 0) {
+            // No items in the column
+            h = 0;
+          }
+          heights.push([$(this), h]);
+        });
+
+        heights.sort(function (a, b) {
+          return b[1] - a[1]
+        });
+
+        var prev = null;
+        for (var key in heights) {
+          if (!heights.hasOwnProperty(key)) continue;
+
+          // Use the jQuery element directly instead of looking up by ID
+          // This prevents selecting wrong elements when duplicate IDs exist
+          var $col = heights[key][0];
+          if (prev) {
+            prev.after($col);
+          }
+          prev = $col;
+        }
+      }, 200)
+    });
+
   },
 
   setup_contact_field_mask: function (block) {
@@ -2263,6 +2581,7 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_error_clear(block);
     _fpa.form_utils.resize_children(block);
     _fpa.form_utils.setup_sub_lists(block);
+    _fpa.form_utils.reorder_sub_list_columns(block);
     _fpa.form_utils.apply_view_handlers(block);
     _fpa.form_utils.setup_secure_view_links(block);
 
@@ -2272,6 +2591,7 @@ _fpa.form_utils = {
     _fpa.form_utils.set_image_classes(block);
     _fpa.form_utils.setup_big_select_fields(block);
     _fpa.form_utils.setup_select_filtering(block);
+    _fpa.form_utils.setup_select_as_radio_buttons(block);
     _fpa.form_utils.setup_change_handling(block);
 
     block.removeClass('formatting-block');

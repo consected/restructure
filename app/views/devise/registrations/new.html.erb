@@ -9,7 +9,7 @@
     <% if Settings::InvitationCode.blank? %>
     <% elsif params[:invitation_code].blank? %>
       <div class="form-group-non">
-        <%= f.label :invitation_code %><br/>
+        <%= label_tag :invitation_code %><br/>
         <%= text_field_tag :invitation_code, '', class: "form-control", autofocus: true, required: true %>
         <% af = false %>
       </div>
@@ -63,12 +63,12 @@
     </div>
 
     <div class='form-group-non checkbox-inline'>
-      <%= f.check_box :terms_of_use, style: 'display: none;', required: true %>
+      <%= f.check_box :terms_of_use, class: 'devise-form__terms-of-use', required: true %>
       <%= f.label :terms_of_use do %>
-            <span id='terms-of-use-default' style='display: none;'>
+            <span id='terms-of-use-default' class='devise-form__terms-of-use'>
               <%= template_block 'ui new user registration terms default' %>
             </span>
-        <span id='terms-of-use-gdpr' style='display: none;'>
+        <span id='terms-of-use-gdpr' class='devise-form__terms-of-use'>
               <%= template_block 'ui new user registration terms gdpr' %>
             </span>
       <% end %>
@@ -77,9 +77,26 @@
     <%=  f.hidden_field :client_localized %>
 
     <div class="actions">
-      <%= f.submit "Sign up", class: "btn btn-primary" %>
+      <% if Settings::ReCaptchaSiteKey %>
+      <%= f.submit "Sign up", class: "btn btn-primary g-recaptcha", data: { 
+        sitekey: Settings::ReCaptchaSiteKey,
+        callback: 'onSubmit',
+        action: 'registration' 
+        }
+      %>
+      <% else %>
+      <%= f.submit "Sign up", class: "btn btn-primary", data: {disable_with: 'submitting...', orig_value: 'Sign up'} %>
+      <% end %>
     </div>
     <%= render "devise/shared/links" %>
   <% end %>
 </div>
 
+<% if Settings::ReCaptchaSiteKey %>
+<%= javascript_include_tag "https://www.google.com/recaptcha/api.js", nonce: true %>
+<%= javascript_tag nonce: true do %>
+  function onSubmit(token) {
+    document.getElementById("new_user").submit();
+  }
+<% end %>
+<% end %>

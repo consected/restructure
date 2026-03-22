@@ -1,0 +1,15 @@
+<div>
+  <div class="help-view-doc" data-result="help-doc-content-result">
+    <div class="help-doc-header">
+      <%#= render partial: 'help/home_link' %>
+    </div>
+    <div class="help-embedded-content">
+      <div class="info-page reset-row">
+        <div id="help-doc-content" class="md-formatted-block">
+          <%= @content.html_safe %>
+        </div>
+      </div>
+    </div>
+    <%= render partial: 'help/footer' %>
+  </div>
+</div>

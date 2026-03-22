@@ -7,10 +7,25 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignatureSupport
   include ESignImportConfig
 
-  before :example do
+  before :all do
+    change_setting('TwoFactorAuthDisabledForUser', false)
+    expect(ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')).to be true
     ESignImportConfig.import_config
     setup_config
+    aldef = ActivityLog::PlayerInfoESign.definition
+    aldef.current_admin = @admin
+    aldef.update_tracker_events
 
+    aldef = IpaInexChecklist.definition
+    aldef.current_admin = @admin
+    aldef.update_tracker_events
+  end
+
+  after :all do
+    change_setting('TwoFactorAuthDisabledForUser', true)
+  end
+
+  before :each do
     @user_0, @good_password_0 = create_user
     @user, @good_password = create_user
 
@@ -20,7 +35,6 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     create_master
 
     setup_access_as :user
-
     setup_access_as :user, for_user: @user_0
 
     add_user_to_role 'nfs_store group 600'
@@ -49,6 +63,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe 'creation of a document to sign when a user creates the signature activity' do
     before :each do
+      @player_info = nil
       @al = create_item(no_model_to_sign: true, alt_elt: 'auto_create')
 
       @auto_al = @al.class.find_by(extra_log_type: 'auto_create_and_sign', master_id: @al.master_id)

@@ -65,6 +65,26 @@ module StringExtensions
     end
     res
   end
+
+  def html_to_markdown
+    html = self
+    return '' unless html.present?
+
+    # We don't want extraneous line breaks
+    html = html.gsub(%r{</?br\s*/?>}, "\n")
+    # But double line breaks should be kept
+    html = html.gsub(/\r?\n\r?\n/, '<br /><br />')
+    html = Kramdown::Document.new(html, input: 'html').to_kramdown
+    html_to_plain_text(html)
+  end
+
+  def html_to_plain_text(html)
+    html = self
+    return '' unless html.present?
+
+    html = html.gsub(%r{<br\s*/?>}, "\n")
+    ActionController::Base.helpers.strip_tags(html).gsub('&nbsp;', ' ')
+  end
 end
 
 class String

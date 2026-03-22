@@ -11,6 +11,8 @@ module Users
 
     before_action :verify_invitation_code, only: [:create]
 
+    before_action :verify_recaptcha, only: [:create], if: :recaptcha_required?
+
     private
 
     def sign_up(resource_name, resource)
@@ -26,7 +28,8 @@ module Users
     end
 
     def devise_registration_params
-      devise_parameter_sanitizer.permit(:sign_up, keys: %i[country_code first_name last_name terms_of_use client_localized])
+      devise_parameter_sanitizer.permit(:sign_up,
+                                        keys: %i[country_code first_name last_name terms_of_use client_localized])
     end
 
     def authorize_resource
@@ -38,6 +41,21 @@ module Users
       return unless inv
 
       raise FphsGeneralError, 'Incorrect invitation code' unless params[:invitation_code] == inv
+    end
+
+    def verify_recaptcha
+      rec_resp = params['g-recaptcha-response']
+      raise FphsGeneralError, 'reCAPTCHA sent no response. Can\'t continue' if rec_resp.blank?
+
+      result = Utilities::ReCaptcha.new(response: rec_resp).success?
+      unless result
+        Rails.logger.warn 'reCAPTCHA rejected the request'
+        code = 401
+        render 'recaptcha_error_page', status: code
+        return
+      end
+
+      true
     end
 
     def gdpr_country?(country_code)
@@ -71,6 +89,10 @@ module Users
       else
         terms_of_use_accepted_default
       end
+    end
+
+    def recaptcha_required?
+      Settings::ReCaptchaSecret
     end
   end
 end

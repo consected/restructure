@@ -257,7 +257,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
                     sub_process_name: #{sp1_name}
                     protocol_event_name: #{pe1_name}
                     notes: #{text1}
-                    event_date: '-5 days'
+                    event_date: '{{{called_when}}}'
               - Q1:
                   with:
                     sub_process_name: non-existent
@@ -288,7 +288,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     alstep1.save!
     expect(alstep1).to be_persisted
 
-    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1')
+    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1', called_when: Date.today - 15.days)
     alstep2.save!
 
     tracker = TrackerHistory.reorder('').last
@@ -299,7 +299,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     expect(tracker.sub_process.name).to eq sp1_name
     expect(tracker.protocol_event.name).to eq pe1_name
     expect(tracker.notes).to eq text1.gsub('{{master_id}}', alstep2.master_id.to_s)
-    expect(tracker.event_date).to eq (Date.today - 5.days).strftime('%Y-%m-%d')
+    expect(tracker.event_date).to eq (Date.today - 15.days).strftime('%Y-%m-%d')
     expect(tracker.item).to eq alstep2
     expect(tracker.master_id).to eq alstep2.master.id
   end
@@ -329,5 +329,58 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     @trigger = SaveTriggers::AddTracker.new(config, @al)
 
     expect { @trigger.perform }.to raise_error(FphsException, 'no master record set to add the tracker to')
+  end
+
+  it 'provides detailed error information when tracker creation fails' do
+    sp_name = 'REDCap'
+    pe_name = 'bounced email'
+    text = "This is a test.\nIt works!"
+
+    config = {
+      Q1: {
+        with: {
+          sub_process_name: sp_name,
+          protocol_event_name: pe_name,
+          notes: text
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::AddTracker.new(config, @al)
+
+    # Mock the tracker creation to fail by intercepting the association's create! method
+    tracker_association = @master.trackers
+    allow(@master).to receive(:trackers).and_return(tracker_association)
+    allow(tracker_association).to receive(:create!).and_raise(
+      FphsException.new('This item can not be created (Tracker)')
+    )
+
+    # Capture the logger output
+    expect(Rails.logger).to receive(:error) do |message|
+      expect(message).to include('AddTracker failed:')
+      expect(message).to include("Master ID: #{@master.id}")
+      expect(message).to include("Current User ID: #{@user.id}")
+      expect(message).to include("App Type ID: #{@user.app_type_id}")
+      expect(message).to include("Item ID: #{@al.id}")
+      expect(message).to include("Item Type: #{@al.class.name}")
+      expect(message).to include('Protocol ID:')
+      expect(message).to include('Sub Process ID:')
+      expect(message).to include("Triggering Object: #{@al.class.name}")
+      expect(message).to include("Extra Log Type: #{@al.extra_log_type}") if @al.respond_to?(:extra_log_type)
+    end
+
+    # Expect the enhanced error message
+    expect { @trigger.perform }.to raise_error(FphsException) do |error|
+      expect(error.message).to include('AddTracker failed with error')
+      expect(error.message).to include('This item can not be created (Tracker)')
+      expect(error.message).to include("Master ID: #{@master.id}")
+      expect(error.message).to include("Current User ID: #{@user.id}")
+      expect(error.message).to include("App Type ID: #{@user.app_type_id}")
+      expect(error.message).to include("Item ID: #{@al.id}")
+      expect(error.message).to include("Item Type: #{@al.class.name}")
+      expect(error.message).to include('Protocol ID:')
+      expect(error.message).to include('Sub Process ID:')
+      expect(error.message).to include("Triggering Object: #{@al.class.name}")
+    end
   end
 end

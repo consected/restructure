@@ -1,5 +1,6 @@
 # Save Trigger: Add Tracker options
-        - protocol_name:
+        add_tracker:
+          - protocol_name:
             # The protocol_name: key should be a valid Protocol name (not label) for the tracker item to add
             # Optionally, a key may be used that is not a protocol name, and instead specify *protocol_name* or
             # *protocol_id* in the *with:* structure
@@ -30,3 +31,4 @@
               # an alternative master_id is optional, and if specified the tracker will be tied to it
               # Otherwise the default master is that the calling item belongs to (unless item_type / item_id specified)
               master_id: alternative master_id
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

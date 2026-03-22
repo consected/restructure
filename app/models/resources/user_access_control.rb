@@ -121,6 +121,7 @@ module Resources
 
     def self.resource_descriptions_for_activity_log_type
       ActivityLog.reset_all_option_configs_resource_names!
+      ActivityLog.reset_active_model_configurations!
       ActivityLog.all_option_configs_grouped_resources
     end
 

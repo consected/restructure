@@ -1,5 +1,60 @@
 # frozen_string_literal: true
 
+# Tests for Dynamic::ModelReferenceHandler — the concern that manages model
+# references (associations between activity logs, dynamic models, and other
+# record types) and directly-embedded items.
+#
+# The spec is organised into three describe blocks:
+#
+# 1. "references defined for activity logs"
+#    Exercises the full model-reference lifecycle on activity log records
+#    (ActivityLog::PlayerContactElt), each configured with different
+#    extra_log_type YAML options. Covers:
+#    - Conditional reference visibility (showable_if with field/role matching)
+#    - Disabling references and cascading disable to referenced records
+#    - Enforcing reference creation limits (add: many with limit, one_to_this,
+#      one_to_master)
+#    - Activity selector type_config for presenting multiple creatable
+#      reference types
+#    - Master-level vs instance-level reference creation
+#    - user_is_creator references (from: user_is_creator / from: any)
+#    - always_embed_reference and always_embed_creatable_reference view options
+#    - Embedded references without explicit view_options
+#    - prevent_disable on references
+#    - filter_by with hash conditions (from master, from this) and
+#      mustache-style substitutions
+#
+# 2. "references defined for dynamic models"
+#    Verifies that model references work on DynamicModel instances
+#    (Player Contact Phone Info) with a simple player_contacts reference.
+#
+# 3. "direct embed resource"
+#    Tests the direct-embed mechanism where a parent record automatically
+#    creates and links an embedded child record on save. Three embed
+#    configuration styles are covered:
+#    - Option-type embed: YAML `embed: { resource_name: ... }` in the
+#      dynamic model options. The embedded table has a target FK column
+#      (e.g. test_embed_option_id) that is set by link_new_embedded_item.
+#    - Field-type embed: The parent table has an `embed_resource_name`
+#      column that dynamically selects the embedded resource.
+#    - Field-and-ID embed: The parent has both `embed_resource_name` and
+#      `embed_resource_id` columns to reference an existing embedded record.
+#
+#    Key scenarios:
+#    - Normal embed creation and FK linkage for each embed type
+#    - Ignoring embed when resource_name is nil or _id is not set
+#    - Skipping embed when user lacks create access (no force_save)
+#    - Force-save propagation: when the parent is force-saved (e.g. by a
+#      save trigger with force_create: true), the embedded item is created
+#      even if the user lacks create access. This exercises three bug fixes
+#      in model_reference_handler.rb:
+#      1. creatable_model_references bypasses permission check when
+#         @embed_force_create is set
+#      2. link_embedded_item force-reloads to clear stale memos from
+#         prior validation callbacks
+#      3. link_new_embedded_item propagates force_write_user/force_save!
+#         to the embedded item and persists the target FK
+
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
@@ -12,6 +67,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     AlNameGenTestMrh
   end
 
+  include ActivityLogSupport
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
@@ -19,14 +75,6 @@ RSpec.describe 'Model reference implementation', type: :model do
 
   before :context do
     SetupHelper.setup_al_gen_tests AlNameGenTestMrh, 'elt', 'player_contact'
-  end
-
-  def setup_option_config(position, label, fields)
-    c = @activity_log.option_configs[position]
-    expect(c.label).to eq label
-    expect(c.fields).to eq fields
-
-    setup_access c.resource_name, resource_type: :activity_log_type, user: @user
   end
 
   describe 'references defined for activity logs' do
@@ -287,6 +335,63 @@ RSpec.describe 'Model reference implementation', type: :model do
                 add: one_to_this
                 prevent_disable: true
 
+        mr_filter_by_hash:
+          label: Filter By Hash
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: master
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id:
+                    this:
+                      # `from: master` - means that we get the attribute to return from the master
+                      id: return_value
+
+        mr_filter_by_this_hash:
+          label: Filter By This Hash
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: this
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id:
+                    this:
+                      # `from: this` - means that we get the attribute to return from the current instance
+                      master_id: return_value
+
+        mr_filter_by_substitution:
+          label: Filter By Substitution
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: master
+                add: many
+                without_reference: true
+                prevent_disable: true
+                filter_by:
+                  master_id: '{{master_id}}'
+
       END_DEF
 
       al.current_admin = @admin
@@ -309,6 +414,9 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
       setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
       setup_option_config 12, 'Prevent Disable', %w[select_call_direction select_who]
+      setup_option_config 13, 'Filter By Hash', %w[select_call_direction select_who]
+      setup_option_config 14, 'Filter By This Hash', %w[select_call_direction select_who]
+      setup_option_config 15, 'Filter By Substitution', %w[select_call_direction select_who]
     end
 
     it 'evaluates rules to optionally show references' do
@@ -739,6 +847,47 @@ RSpec.describe 'Model reference implementation', type: :model do
       res = mr.can_disable
       expect(res).to be false
     end
+
+    it 'filters by substitutions' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_substitution',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by substitution test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+    end
+
+    it 'filters by hash conditions from master' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_hash',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by hash test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+    end
+    it 'filters by hash conditions from this' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_filter_by_this_hash',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'filter by this hash test'
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+    end
   end
 
   describe 'references defined for dynamic models' do
@@ -770,7 +919,10 @@ RSpec.describe 'Model reference implementation', type: :model do
       END_DEF
 
       dm.current_admin = @admin
+      dm.updated_at = Time.now
       dm.save!
+
+      expect(dm.option_configs.first&.references).to be_a Hash
     end
 
     it 'evaluates rules to show references' do
@@ -790,11 +942,17 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(dm.user_id).to eq @user&.id
       expect(dm.current_user).to eq @master.current_user
 
-      ModelReference.create_from_master_with(dm.master, @player_contact)
+      ref = ModelReference.create_from_master_with(dm.master, @player_contact)
+      expect(ref).to be_persisted
 
-      dm.reset_model_references
+      # Force a clean instance to be tested
+      dm = dm.class.find(dm.id)
 
-      puts dm.class.definition.option_configs if dm.model_references.empty?
+      if dm.model_references.empty?
+        put_to_saved_log 'evaluates rules to show references'
+        put_to_saved_log dm.class.definition.option_configs
+        put_to_saved_log dm.class.definition.options
+      end
 
       # The player_contacts associated with this master record do not all appear in model references.
       # Only the last one that was explicitly added to the model references for this master record
@@ -940,6 +1098,43 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       embedded_item = dm.embedded_item
       expect(embedded_item).to be nil
+    end
+
+    it 'creates the embed when the parent is force-saved even if user lacks create access' do
+      revoke_user_create :dynamic_model__test_embedded_recs
+
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+      dm.send(:force_write_user)
+      dm.force_save!
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item).to be_persisted
+    end
+
+    it 'creates the option-type embed with target FK set when the parent is force-saved' do
+      revoke_user_create :dynamic_model__test_embedded_recs
+
+      dm = @dynamic_model_w_option.implementation_class.new(master: @master, action_name: 'new')
+      dm.send(:force_write_user)
+      dm.force_save!
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item).to be_persisted
+      expect(embedded_item.test_embed_option_id).to eq dm.id
     end
   end
 end

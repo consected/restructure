@@ -1,7 +1,6 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form">
 <%
-
   if object_has_admin_parent?
     fref = object_instance
     url = admin_form_url
@@ -9,114 +8,37 @@
     fref = [:admin, object_instance]
     url = url_for([:admin, object_instance])
   end
-  has_options = false
+  has_options = object_instance.attribute_names.find { |a| a.start_with?('options') }
+  form_info_partial = @show_extra_help_info && @show_extra_help_info[:form_info_partial]
 %>
 <div class="admin-form-block-outer">
-<%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
-  <%= render partial: 'admin_handler/form_errors' %>
-
-  <% (permitted_params - [:id]).each do |p| %>
-      <%
-        col = object_instance.class.columns_hash[p.to_s]
-        next unless col
-        col_type = col.type
-
-        next if respond_to?(:hide_edit_fields) && hide_edit_fields.include?(p.to_sym)
-      %>
-      <div class="form-group" data-out-attr-name="<%= p %>" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
-      <% if col_type == :boolean %>
-        <%= form_field_label(f, p) %>
-        <%= f.check_box p %>
-      <% elsif p == :description || p == :notes || respond_to?("#{p}_editor") %>
-        <%= form_field_label(f, p) %>
-        <% if respond_to?("#{p}_editor") && send("#{p}_editor") == :markdown %>        
-        <div class="common-admin-markdown-editor">
-          <%= render partial: 'common_templates/markdown_editor/show_editor', locals: { editor_format: 'markdown', 
-                                                                          editor_id: "#{object_instance.class.name.ns_underscore}-admin-description--#{object_instance.id}",
-                                                                          form: f,
-                                                                          field_options: {},
-                                                                          form_object_instance: object_instance, 
-                                                                          field_name_sym: p,
-                                                                          form_object_item_type_us: object_instance.class.name.ns_underscore } %>
-        </div>
-        <% else %>
-        <div class="form-text-area-group">
-        <%= f.text_area p %>
-        </div>
-        <% end %>
-      <% elsif respond_to?("#{p}_options") %>
-        <%= form_field_label(f, p) %>
-        <%
-          select_item_type = {}
-          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == p.to_s
-          select_item_type[:include_blank] = true
-
-          options = send("#{p}_options")
-        %>
-        <%= f.select p, options, select_item_type %>
-      <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template')
-          has_options = p
-      %>
-      <% elsif respond_to?("#{p}_big_select") %>
-        <%= form_field_label(f, p) %>
-        <%= big_select_field(f, p, send("#{p}_big_select")) %>
-      <% elsif p == :disabled %>
-        <%= f.check_box p %>
-        <%= form_field_label(f, p) %>
-      <% elsif p == :item_type %>
-        <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
-        <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
-      <% elsif p == :app_type_id %>
-          <%= form_field_label(f, p) %>
-          <%
-            oc = object_instance.class
-            ib = {}
-            if oc.respond_to?(:app_type_not_required) && oc.app_type_not_required
-              ib = {include_blank: '(all)'}
-            end
-          %>
-          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), ib, extra_field_attributes[p.to_sym]||{} %>
-      <% elsif p == :user_id %>
-          <%
-            default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id'
-          %>
-          <%= form_field_label(f, p) %>
-          <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true } %>
-      <% elsif p == :api_key %>
-        <%= form_field_label(f, p) %>
-        <% begin %>
-        <%= f.password_field p, value: object_instance.api_key %>
-        <% rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveSupport::MessageEncryptor::InvalidMessage %>
-        <%= f.password_field p, value: nil %>
-        <div class="info-danger">password was invalid</div>
-        <% end %>
-      <% else %>
-        <%= form_field_label(f, p) %>
-        <%= f.text_field p %>
-      <% end %>
-      </div>
-
-  <% end %>
-  <% if has_options %>
-    <div></div>
-  <div class="form-group" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
-    <label><%= has_options.to_s.humanize %></label>
-    <div class="admin-form-fields-block">
-      <%= f.text_area has_options, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type}%>
-    </div>
-  </div>
-  <% end %>
-
-<% if @show_extra_help_info && @show_extra_help_info[:text] %>
-  <div class="form-group" style="vertical-align: top">
-    <label><%= @show_extra_help_info[:title] %></label>
-    <div class="admin-form-fields-block">
-      <textarea style="font-size: 12px" class="extra-help-info">
-          <%= @show_extra_help_info[:text] %>
-      </textarea>
-    </div>
-  </div>
+<% if form_info_partial %>
+      <div class="row block-within-flex">
+        <div class="col-sm-12 admin-form__left-aligned">
 <% end %>
+<%= form_for(fref, url: url, class: "form-formatted admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result", before_send_processor: before_send_processor}) do |f| %>
+  <%
+    local_vars = local_assigns.merge  f: f,
+                                      object_instance: object_instance,
+                                      has_options: has_options,
+                                      editor_code_type: editor_code_type,
+                                      form_info_partial: form_info_partial
+
+  %>
+  <%= render partial: 'admin_handler/form_errors' %>
+  <%= render partial: 'admin/common_templates/form/fields', locals: local_vars %>  
+  <div class="admin-inline-update-report"><%= f.submit class: "btn btn-primary pull-right", value: "save" %></div>
+  <%= render partial: 'admin/common_templates/form/options_block', locals: local_vars %>
+  <% if @show_extra_help_info && @show_extra_help_info[:text] %>
+    <div class="form-group admin-form__vertical-top">
+      <label><%= @show_extra_help_info[:title] %></label>
+      <div class="admin-form-fields-block">
+        <textarea class="extra-help-info admin-form__help-info">
+            <%= @show_extra_help_info[:text] %>
+        </textarea>
+      </div>
+    </div>
+  <% end %>
 
   <div class="admin-buttons-block">
     <%= hidden_filter_fields %>
@@ -124,12 +46,16 @@
   </div>
 <% end %>
 
-<% if @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
-    <div class="admin-options-outer-block">
-      <div class="admin-options-ref-block">
-        <%= render partial: @show_extra_help_info[:form_info_partial], locals: {object_instance: object_instance} %>
+<% if form_info_partial %>
+        </div>
+        <div class="col-sm-12 admin-form__left-aligned">
+          <div class="admin-options-outer-block">
+            <div class="admin-options-ref-block">
+              <%= render partial: form_info_partial, locals: {object_instance: object_instance} %>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 <% end %>
     </div>
   </div>

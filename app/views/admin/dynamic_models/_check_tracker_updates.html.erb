@@ -1,0 +1,27 @@
+  <% if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? 
+       failed = false
+       begin
+          ts = Tracker.add_record_update_entries( object_instance.tracker_name, current_admin, 'record', no_create: true)
+          failed = !ts.uniq.first
+          pe = Tracker.sub_process_for('record')
+       rescue => e
+         failed = true
+       end
+       if failed
+  %>
+  <label>tracker protocol updates have not been created</label>
+  <div class="help-block">
+  <p>
+    The <%=link_to link_label_open_in_new("tracker updates protocol / sub process"), admin_protocol_sub_process_protocol_events_path(pe.protocol, pe), target: '_blank'%>
+    has not had records added for this dynamic definition.
+  </p>
+  <p> 
+    <code>created <%=object_instance.tracker_name.humanize%></code> and <code>updated <%=object_instance.tracker_name.humanize%></code> should exist
+  </p>
+  <p>
+     To correct this, try disabling then re-enabling the definition.
+  </p>
+  </div>
+  <%   end
+     end 
+  %>

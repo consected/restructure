@@ -51,6 +51,8 @@ module NfsStore
           return unless replace
 
           # We have been told to replace existing files that are not identical
+          # Ensure the current_user is set on the stored file for access checks
+          already_in.current_user = current_user
           already_in.replace_file!(file_path)
           already_in
         else # does not exist

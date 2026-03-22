@@ -63,7 +63,11 @@ class Admin::ManageAdminsController < AdminController
 
     @admin.current_admin = current_admin
     if @admin.update(secure_params)
-      @admins = Admin.all
+      pm = filtered_primary_model
+      pm = pm.limited_index
+      pm = pm.reorder('').order(default_index_order) if default_index_order.present?
+
+      @admins = pm
       @updated_with = @admin
       render partial: 'index'
     else

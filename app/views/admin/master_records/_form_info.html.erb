@@ -1,0 +1,87 @@
+<%# Tabbed detail panel for a standard master-associated model (issue #930).
+    Mirrors the structure of admin/dynamic_models/_form_info.html.erb but
+    adapted for read-only standard models (no edit / batch / versions tabs).
+    
+    The masters table entry (table_name == 'masters') shows:
+      - Details tab (masters-specific)
+      - Sample Form tab
+      - API tab (masters-specific, no UAC)
+    
+    Other standard models show:
+      - Details tab (model-specific admin pages)
+      - Sample Form tab (except tracker_histories)
+      - User Access Controls tab
+      - API tab %>
+
+<% is_masters_table = object_instance.table_name == 'masters' %>
+
+<div class="master-records-form-info">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+      <a href="#mr-details-block-<%= object_instance.id %>"
+         aria-controls="mr-details-block-<%= object_instance.id %>"
+         role="tab" data-toggle="tab">Details</a>
+    </li>
+    <% unless object_instance.table_name == 'tracker_histories' || object_instance.table_name == 'pro_infos' %>
+      <li role="presentation">
+        <a href="#mr-sample-form-<%= object_instance.id %>"
+           aria-controls="mr-sample-form-<%= object_instance.id %>"
+           role="tab" data-toggle="tab">Sample Form</a>
+      </li>
+    <% end %>
+    <% unless is_masters_table %>
+      <li role="presentation">
+        <a href="#mr-user-access-controls-<%= object_instance.id %>"
+           aria-controls="mr-user-access-controls-<%= object_instance.id %>"
+           role="tab" data-toggle="tab">User Access Controls</a>
+      </li>
+    <% end %>
+    <li role="presentation">
+      <a href="#mr-api-definitions-<%= object_instance.id %>"
+         aria-controls="mr-api-definitions-<%= object_instance.id %>"
+         role="tab" data-toggle="tab">API</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div role="tabpanel" class="tab-pane active" id="mr-details-block-<%= object_instance.id %>">
+      <h4>Details</h4>
+      <% if is_masters_table %>
+        <%= render partial: 'admin/master_records/def_details_masters', locals: { object_instance: object_instance } %>
+      <% else %>
+        <%= render partial: 'admin/master_records/def_details', locals: { object_instance: object_instance } %>
+      <% end %>
+    </div>
+
+    <% unless object_instance.table_name == 'tracker_histories' %>
+      <div role="tabpanel" class="tab-pane" id="mr-sample-form-<%= object_instance.id %>">
+        <h4>Sample Form</h4>
+        <%= render partial: 'admin/master_records/sample_form', locals: { object_instance: object_instance } %>
+      </div>
+    <% end %>
+
+    <% unless is_masters_table %>
+      <div role="tabpanel" class="tab-pane on-open-click" id="mr-user-access-controls-<%= object_instance.id %>">
+        <% if current_admin.can_admin?(:user_access_controls) %>
+          <%= render partial: 'admin/master_records/uac_panel', locals: { object_instance: object_instance } %>
+        <% else %>
+          <p>Not authorized to administer user access controls</p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div role="tabpanel" class="tab-pane" id="mr-api-definitions-<%= object_instance.id %>">
+      <% if is_masters_table %>
+        <%= render partial: 'admin/master_records/api_panel_masters', locals: { object_instance: object_instance } %>
+      <% else %>
+        <%= render partial: 'admin/common/api_panel',
+                   locals: { object_instance: object_instance, resource_type: :master_record } %>
+      <% end %>
+    </div>
+
+  </div>
+</div>

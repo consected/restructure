@@ -17,7 +17,7 @@ module Dynamic
         ro = result_order
         return unless primary_key.present?
 
-        use_key = primary_key
+        use_key = primary_key || attribute_names.first
 
         ro = { use_key => :desc } if result_order.blank?
         default_scope -> { order ro }
@@ -48,16 +48,9 @@ module Dynamic
         true
       end
 
+      # TODO: check if this is always overridden by UserHandler
       def assoc_inverse
         @assoc_inverse = definition.model_association_name
-      end
-
-      def foreign_key_name
-        @foreign_key_name = definition.foreign_key_name.blank? ? nil : definition.foreign_key_name.to_sym
-      end
-
-      def primary_key_name
-        @primary_key_name = definition.primary_key_name.to_sym
       end
 
       # Override the primary_key definition for a model, to ensure
@@ -105,9 +98,31 @@ module Dynamic
       :dynamic_model
     end
 
-    # The dynamic model option type is always 'default'
+    # The dynamic model option type value is always 'default' unless
+    # a field to persist it is set in the _configurations.option_type_attr_name
     def option_type
-      'default'
+      option_type_attr_name = self.class.option_type_attr_name
+      if option_type_attr_name == :option_type
+        res = read_attribute(option_type_attr_name) if attribute_names.include?(option_type_attr_name.to_s)
+
+        res = res.presence || @option_type
+        res.presence || default_option_type_name
+      else
+        send(option_type_attr_name) || default_option_type_name
+      end
+    end
+
+    def option_type=(value)
+      option_type_attr_name = self.class.option_type_attr_name
+      return unless option_type_attr_name
+
+      if option_type_attr_name == :option_type
+        return write_attribute(option_type_attr_name, value) if attribute_names.include?(option_type_attr_name.to_s)
+
+        @option_type = value
+      else
+        send("#{option_type_attr_name}=", value)
+      end
     end
 
     def id

@@ -17,19 +17,20 @@ class User < ActiveRecord::Base
   if two_factor_auth_disabled
     supported_modules << :database_authenticatable
   else
-    supported_modules += [:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }]
+    supported_modules += [:two_factor_authenticatable]
   end
 
   devise(*supported_modules)
 
+  include StandardAuthenticationLegacyOtp
+
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
-  has_one :user_preference, autosave: true, inverse_of: :user
+  has_one :user_preference, autosave: true, inverse_of: :user, validate: false
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
-  attr_accessor :terms_of_use
-  attr_accessor :client_localized
+  attr_accessor :terms_of_use, :client_localized
 
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
@@ -59,7 +60,7 @@ class User < ActiveRecord::Base
   # country_code and terms_of_use are enforced if user self registration is enabled
   validates :country_code,
             presence: {
-              if: -> { required_for_self_registration? },
+              if: -> { required_for_self_registration? && !disabled && not_self_registration? },
               message: 'must be selected'
             },
             length: {
@@ -70,14 +71,14 @@ class User < ActiveRecord::Base
 
   validates :terms_of_use,
             acceptance: {
-              if: -> { required_for_self_registration? }
+              if: -> { required_for_self_registration? && !disabled && not_self_registration? }
             }
 
   # The validations error is not shown to the user since the terms_of_use acceptance error is sufficient.
   # See notes app/views/devise/shared/_error_messages.html.erb
   validates :terms_of_use_accepted,
             presence: {
-              if: -> { required_for_self_registration? },
+              if: -> { required_for_self_registration? && !disabled && not_self_registration? },
               message: ApplicationHelper::DoNotDisplayErrorMessage
             }
 
@@ -87,16 +88,17 @@ class User < ActiveRecord::Base
   # The template user is assigned to newly created roles to ensure they are exported
   # in an app type export, even if there are no other matching users on the target server
   def self.template_user
-    res = find_by(email: Settings::TemplateUserEmail)
+    tue = Settings::TemplateUserEmail.downcase
+    res = find_by(email: tue)
 
-    Rails.logger.error "template_user #{Settings::TemplateUserEmail} does not exist" unless res
+    Rails.logger.error "template_user #{tue} does not exist" unless res
     res
   end
 
   # Get the admin that corresponds to this user
   # @return [Admin | nil]
   def matching_admin
-    Admin.active.where(email: email).first
+    Admin.active.where(email: email.downcase).first
   end
 
   #
@@ -104,7 +106,7 @@ class User < ActiveRecord::Base
   def self.batch_user
     e = Settings::BatchUserEmail
     # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
-    find_by(email: e)
+    find_by(email: e.downcase)
   end
 
   #
@@ -143,7 +145,7 @@ class User < ActiveRecord::Base
       res = all
     end
 
-    res.map { |u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id] }
+    res.map { |u| ["#{u.email} #{'[disabled]' if u.disabled}", u.id] }
   end
 
   #
@@ -168,7 +170,7 @@ class User < ActiveRecord::Base
 
   # Standard Devise callback to tell user that an account has been disabled
   def inactive_message
-    !disabled ? super : :account_has_been_disabled
+    disabled ? :account_has_been_disabled : super
   end
 
   # By default, the user is redirected to the login page after registration.
@@ -204,6 +206,28 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  #
+  # Get the role names for the user in the current app type, or if
+  # conditions specifies :app_type_id, use that instead
+  # @param [<Type>] conditions <description>
+  # @option conditions [<Type>] :<key> <description>
+  # @option conditions [<Type>] :<key> <description>
+  # @option conditions [<Type>] :<key> <description>
+  # @return [<Type>] <description>
+  def app_type_role_names(conditions = {})
+    @app_type_role_names = {} if user_roles_updated? || user_access_controls_updated?
+    @app_type_role_names ||= {}
+
+    alt_app_type_id = conditions[:app_type_id] || app_type_id
+
+    got = @app_type_role_names[conditions]
+    return got if got
+
+    @app_type_role_names[conditions] = Admin::UserRole.active_app_roles(self, app_type: [alt_app_type_id, nil])
+                                                      .select('app_type_id, role_name').distinct.order(app_type_id: :asc)
+                                                      .pluck(:app_type_id, :role_name)
+  end
+
   # Send user confirmation email if self registering
   # method provided by devise confirmable module; Override so job notifications can be executed
   def send_on_create_confirmation_instructions
@@ -216,6 +240,11 @@ class User < ActiveRecord::Base
   # method provided by devise recoverable module; Override so job notifications can be executed
   def send_reset_password_instructions
     return if a_template_or_batch_user? || !allow_users_to_register?
+
+    if disabled
+      raise FphsGeneralError,
+            'User profile does not exist or was disabled - contact an administrator to reset the password'
+    end
 
     if do_not_email
       raise FphsGeneralError,

@@ -7,11 +7,12 @@ _fpa.reports_custom_handling.add_handler_implementation('expand_all_tree', funct
     $a.text('...');
 
     window.setTimeout(function () {
-      $('td[data-col-type="id0"] img[id="state"], td[data-col-type="id1"] img[id="state"]').click()
       if (orig_text == 'expand all') {
+        $('tr[data-tt-id]').each(function () { $(this)[0].trExpand(true) })
         $a.text('shrink all')
       }
       else {
+        $('tr[data-tt-id]').each(function () { $(this)[0].trCollapse(true) })
         $a.text('expand all')
       }
     });

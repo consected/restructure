@@ -38,7 +38,9 @@ module Redcap
         form_complete: 'redcap status', # This is not a real REDCap type, but is used as a lookup
         form_timestamp: 'redcap completion timestamp', # This is not a real REDCap type, but is used as a lookup
         survey_identifier: 'survey identifier', # This is not a real REDCap type, but is used as a lookup
-        repeat: 'repeat instrument' # This is not a real REDCap type, but is used as a lookup
+        integer_survey_identifier: 'integer survey identifier', # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat instrument', # This is not a real REDCap type, but is used as a lookup
+        event_name: 'event name' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {
@@ -81,7 +83,9 @@ module Redcap
         form_complete: 'status', # This is not a real REDCap type, but is used as a lookup
         form_timestamp: 'completion_timestamp', # This is not a real REDCap type, but is used as a lookup
         survey_identifier: 'survey_identifier', # This is not a real REDCap type, but is used as a lookup
-        repeat: 'repeat_instrument' # This is not a real REDCap type, but is used as a lookup
+        integer_survey_identifier: 'integer_survey_identifier', # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat_instrument', # This is not a real REDCap type, but is used as a lookup
+        event_name: 'event_name' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToModelTypes = {
@@ -117,7 +121,8 @@ module Redcap
         'date time' => :to_datetime,
         'time' => :to_time,
         'redcap status' => :to_i,
-        'redcap completion timestamp' => :to_datetime_or_null
+        'redcap completion timestamp' => :to_datetime_or_null,
+        'integer survey identifier' => :to_i
       }.freeze
 
       # Non-string database types
@@ -131,7 +136,8 @@ module Redcap
         'date time' => :timestamp,
         'time' => :time,
         'redcap status' => :integer,
-        'redcap completion timestamp' => :timestamp
+        'redcap completion timestamp' => :timestamp,
+        'integer survey identifier' => :integer
       }.freeze
 
       # Types that are array fields

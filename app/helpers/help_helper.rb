@@ -53,7 +53,7 @@ module HelpHelper
     ipath = help_doc_path(library, section)
     text = text.gsub(' src="images/', " src=\"#{ipath}/images/")
 
-    Formatter::Substitution.substitute(text, data: (current_admin || current_user), ignore_missing: :show_tag).html_safe
+    Formatter::Substitution.substitute(text, data: current_admin || current_user, ignore_missing: :show_tag).html_safe
   end
 
   #
@@ -82,14 +82,14 @@ module HelpHelper
                     begin
                       defs_content(defs_yaml)
                     rescue StandardError => e
-                      "\`substitution Error (#{item.join('/')}): #{e}\`\n"
+                      "`substitution Error (#{item.join('/')}): #{e}`\n"
                     end
 
                   end
 
         content = embed_defs(content)
       else
-        content = "\`embed definition not found (#{item})\`"
+        content = "`embed definition not found (#{item})`"
       end
 
       text = text.gsub("!defs(#{item[0]})", content)
@@ -146,7 +146,19 @@ module HelpHelper
   end
 
   def main_section
-    (section == HelpController::IndexSection ? HelpController::IndexSubsection : HelpController::IntroductionDocument)
+    if section == HelpController::IndexSection
+      HelpController::IndexSubsection
+    elsif section == 'general'
+      back = params[:back_path].to_s
+      # Validate: must be a /help/ path using only safe characters (no traversal)
+      if back.match?(%r{\A/help(/[a-zA-Z0-9\-_]+){2,3}\z})
+        back
+      else
+        HelpController::IntroductionDocument
+      end
+    else
+      HelpController::IntroductionDocument
+    end
   end
 
   #

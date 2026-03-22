@@ -28,8 +28,8 @@
   <div class="panel-body">
     <div class="row">
       <div class="col-sm-6">
-        <% begin %>
-        <%= render partial: 'admin/app_types/components' %>
+        <% begin %>        
+        <%= Rails.cache.fetch(partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) { render partial: 'admin/app_types/components' } %>
         <% rescue StandardError => e
             logger.warn 'Failed to load admin components panel'
             logger.warn e
@@ -39,6 +39,8 @@
         <% end %>
       </div>
       <div class="col-sm-17 col-sm-offset-1">
+        <%= render partial: 'pages/admin_alerts_panel' %>            
+
         <div class="row">
           <div class="col-sm-6">
             <h3>App Configs</h3>
@@ -59,7 +61,7 @@
               <% if current_admin.can_admin?(:general_selections)%><% got_one ||= true %><li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li><%end%>
               <% if current_admin.can_admin?(:item_flag_names)%><% got_one ||= true %><li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li><%end%>
               <% if current_admin.can_admin?(:external_links)%><% got_one ||= true %><li class="nav"><%= link_to "External Links", admin_external_links_path %> </li><%end%>
-              <% if current_admin.can_admin?(:protocols)%><% got_one ||= true %><li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li><%end%>
+              <% if current_admin.can_admin?(:protocols)%><% got_one ||= true %><li class="nav"><%= link_to "Protocol / Sub Process / Event", admin_protocols_path %> </li><%end%>
               <% if current_admin.can_admin?(:colleges)%><% got_one ||= true %><li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li><%end%>
               <% unless got_one %><li class="nav nothing-admin-authed">Nothing authorized</li><% end %>
             </ul>
@@ -68,6 +70,7 @@
             <h3>Definitions</h3>
             <ul class="nav">
               <% got_one = false %>
+              <% if current_admin.can_admin?(:master_records)%><% got_one ||= true %><li class="nav"><%= link_to "Master Records", admin_master_records_path %> </li><%end%>
               <% if current_admin.can_admin?(:reports)%><% got_one ||= true %><li class="nav"><%= link_to "Reports", admin_reports_path %> </li><%end%>
               <% if current_admin.can_admin?(:activity_logs)%><% got_one ||= true %><li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li><%end%>
               <% if current_admin.can_admin?(:dynamic_models)%><% got_one ||= true %><li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li><%end%>
@@ -96,7 +99,7 @@
       
         <div class="row">
           <div class="col-sm-6">
-            <h3>Status <%= render partial: 'pages/admin_status_indicators' %></h3>
+            <h3>Status</h3>
             <ul class="nav">
               <% got_one = false %>
               <% if current_admin.can_admin?(:message_notifications)%><% got_one ||= true %><li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li><%end%>
@@ -111,11 +114,10 @@
             <h3>REDCap</h3>
           <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
             <ul class="nav">
-              <li class="nav"><%= link_to "Projects", 
-                                          redcap_project_admins_path(
-                                            no_redirect: true, 
-                                            use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
-                                          ) %> </li>
+              <li class="nav">
+                <%= link_to "Projects", 
+                            redcap_project_admins_path(no_redirect: true) %>
+              </li>
               <li class="nav"><%= link_to "Request Log", redcap_client_requests_path %> </li>
             </ul>
           <% elsif !Admin::AppType.where(name: 'ref-data').first&.active_on_server? %>

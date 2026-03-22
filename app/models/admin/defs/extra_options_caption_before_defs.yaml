@@ -1,0 +1,18 @@
+# caption_before options
+  caption_before:
+    field_name: |
+      String caption to appear before field. Use markdown formatting if needed.
+
+      [Substitutions](../general/substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
+    all_fields: caption to appear before all fields
+    submit: caption to appear before submit button
+    field_to_retain_label:
+      keep_label: true
+      caption: caption to appear before label
+    field_with_different_views:
+      show_caption: caption in show mode
+      edit_caption: caption in edit mode
+      new_caption: caption in new mode
+    reference_with_reference_name: |
+      add caption above a reference action / list where
+      the reference is named reference_<reference name>

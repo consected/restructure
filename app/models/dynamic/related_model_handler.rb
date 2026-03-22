@@ -20,54 +20,115 @@ module Dynamic
       attr_accessor :embedded_items
     end
 
+    def protocol
+      return super if defined?(super)
+      return unless respond_to?(:protocol_id) && protocol_id
+
+      @protocol ||= Classification::Protocol.find(protocol_id)
+    end
+
+    def sub_process
+      return super if defined?(super)
+      return @sub_process if @sub_process
+
+      # if we are not already passing through sub_process based on a user selection then
+      # look up what the Activity name is for protocol sub processes
+      if attribute_names.include? 'sub_process_id'
+        @sub_process = Classification::SubProcess.find(sub_process_id)
+      elsif protocol
+        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
+        @sub_process = protocol.sub_processes.find_by(name: ActivityLog.sub_process_name)
+      end
+    end
+    
+    def sub_process_id
+      return super if defined?(super)
+      return @sub_process_id if @sub_process_id
+
+      if attribute_names.include? 'sub_process_id'
+        @sub_process_id = attributes['sub_process_id']
+      else
+        @sub_process_id = sub_process&.id
+      end
+    end
+
+    def protocol_event
+      return super if defined?(super)
+      return @protocol_event if @protocol_event
+      return unless sub_process
+
+      if attribute_names.include?('protocol_event_id')
+        @protocol_event = sub_process.protocol_events.find(protocol_event_id)
+      else
+        unless self.class.activity_log_name
+          raise "activity_log_name not set for #{self.class}. Can't get the protocol event without it"
+        end
+        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)        
+        @protocol_event = sub_process.protocol_events.find_by(name: self.class.activity_log_name)
+        unless @protocol_event
+          raise "Could not find a protocol event (#{self.class.activity_log_name}) " \
+                "for sub process #{sub_process_id} #{sub_process_name} in sync_tracker (#{self.class}). " \
+                "There are these: #{sub_process.protocol_events.map(&:name).join(', ')}."
+        end
+      end
+
+      @protocol_event
+    end
+
+    def protocol_event_id
+      return super if defined?(super)
+      return @protocol_event_id if @protocol_event_id
+
+      if attribute_names.include? 'protocol_event_id'
+        @protocol_event_id = attributes['protocol_event_id']
+      elsif sub_process
+        @protocol_event_id = protocol_event&.id
+      end
+    end
+
+
+    def protocol_name
+      return nil unless protocol
+
+      protocol.name
+    end
+
+    def sub_process_name
+      return nil unless sub_process
+
+      sub_process.name
+    end
+
+    def event_name
+      return nil unless protocol_event
+
+      protocol_event.name
+    end
+
+    def protocol_event_name
+      event_name
+    end
+
     # Sync the tracker by adding a record to the protocol if it is set
     # This should only happen one time, since in the case of edit / update, a duplicate
     # item could be created otherwise.
     def sync_tracker
       return unless respond_to?(:protocol_id) && protocol_id
-
       return unless @allow_tracker_sync
-
-      protocol = Classification::Protocol.find(protocol_id)
-
-      # if we are not already passing through sub_process based on a user selection then
-      # look up what the Activity name is for protocol sub processes
-      if attribute_names.include? 'sub_process_id'
-        sub_process_id = self.sub_process_id
-        sub_process = Classification::SubProcess.find(sub_process_id)
-      else
-        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
-        sub_process = protocol.sub_processes.where(name: ActivityLog.sub_process_name).first
-        sub_process_id = sub_process.id
-      end
-      # if we are not already passing through protocol_event based on a user selection then
-      # then use the protocol event name matching the admin activity log definition for this model
-      if attribute_names.include? 'protocol_event_id'
-        protocol_event_id = self.protocol_event_id
-      elsif sub_process
-        unless self.class.activity_log_name
-          raise "activity_log_name not set for #{self.class}. Can't get the protocol event without it"
-        end
-
-        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
-        pe = sub_process.protocol_events.where(name: self.class.activity_log_name).first
-        if pe
-          protocol_event_id = pe.id
-        else
-          raise "Could not find a protocol event for sub process #{sub_process_id} in sync_tracker (#{self.class}). There are these: #{sub_process.protocol_events.map(&:name).join(', ')}."
-        end
-      end
 
       # be sure about the user being set, to avoid hidden errors
       raise 'no user set when syncing tracker' unless master.current_user
 
-      t = master.trackers.create(protocol_id: protocol_id,
-                                 sub_process_id: sub_process_id,
-                                 protocol_event_id: protocol_event_id,
-                                 item_id: id,
-                                 item_type: self.class.name,
-                                 event_date: action_when,
-                                 notes: data)
+      attrs = {
+        protocol_id: protocol_id,
+        sub_process_id: sub_process_id,
+        protocol_event_id: protocol_event_id,
+        item_id: id,
+        item_type: self.class.name,
+        event_date: action_when,
+        notes: data
+      }
+      t = master.trackers.create(attrs)
 
       # check and raise error that is usable by a user if there was a problem (for example, a required field not set)
       raise FphsException, "could not create tracker record: #{t.errors.full_messages.join('; ')}" unless t&.valid?

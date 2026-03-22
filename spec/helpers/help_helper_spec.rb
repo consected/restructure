@@ -1,0 +1,102 @@
+# frozen_string_literal: true
+
+# HelpHelper Spec
+#
+# Tests helper methods used by the Help system for documentation rendering and navigation.
+#
+# Test Coverage:
+# - #main_section: Returns the appropriate navigation target for the "back to main section" link
+#   - Returns IndexSubsection when viewing the index section
+#   - When viewing the shared `general` section:
+#     - Returns the validated back_path param so users are returned to the
+#       detailed_options page that linked them here (passed as a URL param by the JS)
+#     - Rejects back_path values that don't conform to /help/<segment>/<segment>[/<segment>]
+#     - Falls back to IntroductionDocument when no valid back_path is present
+#   - Returns IntroductionDocument for all other sections
+
+require 'rails_helper'
+
+RSpec.describe HelpHelper, type: :helper do
+  describe '#main_section' do
+    # `section` is a HelpController helper_method delegated to the controller,
+    # so it is not defined on ActionView::Base. We define it on the singleton class.
+    def stub_section(value)
+      helper.singleton_class.define_method(:section) { value }
+    end
+
+    context 'when viewing the index section' do
+      before { stub_section(HelpController::IndexSection) }
+
+      it 'returns the IndexSubsection' do
+        expect(helper.main_section).to eq(HelpController::IndexSubsection)
+      end
+    end
+
+    context 'when viewing the general section' do
+      before { stub_section('general') }
+
+      context 'with a valid activity_logs back_path param' do
+        before { controller.params[:back_path] = '/help/admin_reference/activity_logs/detailed_options' }
+
+        it 'returns the back_path' do
+          expect(helper.main_section).to eq('/help/admin_reference/activity_logs/detailed_options')
+        end
+      end
+
+      context 'with a valid dynamic_models back_path param' do
+        before { controller.params[:back_path] = '/help/admin_reference/dynamic_models/detailed_options' }
+
+        it 'returns the back_path' do
+          expect(helper.main_section).to eq('/help/admin_reference/dynamic_models/detailed_options')
+        end
+      end
+
+      context 'with a two-segment back_path' do
+        before { controller.params[:back_path] = '/help/admin_reference/activity_logs' }
+
+        it 'returns the back_path' do
+          expect(helper.main_section).to eq('/help/admin_reference/activity_logs')
+        end
+      end
+
+      context 'with no back_path param' do
+        it 'falls back to IntroductionDocument' do
+          expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+        end
+      end
+
+      context 'with a back_path containing path traversal' do
+        before { controller.params[:back_path] = '/help/admin_reference/../../../etc/passwd' }
+
+        it 'falls back to IntroductionDocument' do
+          expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+        end
+      end
+
+      context 'with a back_path not starting with /help/' do
+        before { controller.params[:back_path] = '/admin/users/1' }
+
+        it 'falls back to IntroductionDocument' do
+          expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+        end
+      end
+
+      context 'with a back_path that has too many segments' do
+        before { controller.params[:back_path] = '/help/a/b/c/d/e' }
+
+        it 'falls back to IntroductionDocument' do
+          expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+        end
+      end
+    end
+
+    context 'when viewing a non-general, non-index section' do
+      before { stub_section('activity_logs') }
+
+      it 'returns IntroductionDocument regardless of params' do
+        controller.params[:back_path] = '/help/admin_reference/general/save_trigger'
+        expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+      end
+    end
+  end
+end

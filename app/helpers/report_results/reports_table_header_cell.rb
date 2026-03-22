@@ -19,6 +19,15 @@ module ReportResults
       ERB::Util.html_escape str
     end
 
+    def column_comment_hash
+      return @column_comment_hash if @column_comment_hash
+
+      @tab_col_comments ||= Admin::MigrationGenerator.column_comments
+      @column_comment_hash = @tab_col_comments.map do |tc|
+        ["#{tc['schema_name']}.#{tc['table_name']}.#{tc['column_name']}", tc['column_comment']]
+      end.to_h
+    end
+
     def column_comment
       return unless show_col_comments_tables
 
@@ -28,12 +37,11 @@ module ReportResults
         schema_tables = ["#{schema_name}.#{table_name}"]
       end
 
-      tab_col_comments = Admin::MigrationGenerator.column_comments
-      comment_config = tab_col_comments.find do |tc|
-        "#{tc['schema_name']}.#{tc['table_name']}".in?(schema_tables) && tc['column_name'] == header_content
-      end
-      comment = comment_config['column_comment'] if comment_config
+      comment_config = schema_tables.map do |st|
+        column_comment_hash["#{st}.#{header_content}"]
+      end.first
 
+      comment = comment_config if comment_config
       comment
     end
 

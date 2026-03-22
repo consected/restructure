@@ -1,4 +1,4 @@
-@import "../app_vars";
+@use "../app_vars" as *;
 
 html {
   min-height: 100%;
@@ -297,7 +297,8 @@ a.add-icon[data-show-modal] {
 .glyphicon-edit,
 a.glyphicon.show-entity,
 a.glyphicon.edit-entity,
-a.close-entity {
+a.close-entity,
+a.glyphicon-eye-open {
   color: white;
   background-color: rgb(227, 141, 19);
   display: inline-block;
@@ -352,6 +353,14 @@ a.glyphicon.glyphicon-remove-sign {
   }
 }
 
+a.glyphicon.glyphicon-eye-open {
+  background-color: #5050c9;
+  border: 1px solid #8a8af7;
+
+  &:hover {
+    background-color: #8a8af7;
+  }
+}
 .close {
   color: #900;
   filter: none;
@@ -366,6 +375,12 @@ a.glyphicon.glyphicon-remove-sign {
 .caret.up {
   visibility: visible;
   transform: rotate(180deg);
+}
+
+.caret.caret-large {
+      border-top: 8px dashed;      
+      border-right: 8px solid transparent;
+      border-left: 8px solid transparent;
 }
 
 .nav.nav-pills {
@@ -597,6 +612,10 @@ div.popover {
   min-width: 150px;
 }
 
+.popover-content p:last-child {
+  margin-bottom: 0;
+}
+
 .invisible {
   visibility: hidden;
   height: 1px;
@@ -619,6 +638,12 @@ div.popover {
   }
 }
 
+.modal-footer-caption-before-button {
+  display: inline-block;
+  margin-right: 1.6em;
+  color: gray;
+}
+
 .form-inline textarea.form-control {
   width: 97.5%;
   height: 40px;
@@ -631,12 +656,16 @@ div.popover {
   min-height: 2em;
 }
 
-.common-template-item {
+.common-template-item, .admin-edit-form {
   .expandable {
     max-height: 174px;
     // padding-bottom: 20px;
     margin-bottom: 0px;
-    border-bottom: 2px dotted gray;
+    
+    &:not(.expanded) {
+      border-bottom: 2px dotted gray;
+    }
+    
     display: block;
     overflow: hidden;
 
@@ -659,7 +688,8 @@ div.popover {
   }
   .expanded {
     max-height: none;
-    border-bottom: 0;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
 
     &.expandable-target:hover,
     .expandable-target:hover {

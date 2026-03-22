@@ -1,18 +1,21 @@
 # frozen_string_literal: true
 
 module AdminControllerHandler
+  EncodingToken = { base64: '<Base64Encoded>' }.freeze
   extend ActiveSupport::Concern
 
   included do
     before_action :init_vars_admin_controller_handler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: %i[edit update destroy]
+    before_action :handle_options_encoding, only: %i[create update]
 
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder,
-                  :no_options_field, :admin_labels, :filters_prevent_disabled
+                  :help_section, :help_subsection, :title, :sub_title, :no_create, :show_head_info, :view_folder,
+                  :no_options_field, :admin_labels, :filters_prevent_disabled, :before_send_processor, :extra_index_columns,
+                  :in_current_app_type_result_checkbox
   end
 
   def index
@@ -46,6 +49,8 @@ module AdminControllerHandler
     unless @copy_with
       # Add initialization of class specific attributes, if not set previously
       init_attrs ||= {}
+
+      init_attrs.merge! params.require(:init_with).permit(*permitted_params) if params[:init_with]
       init_attrs = init_new_with_attrs.merge(init_attrs)
     end
 
@@ -95,6 +100,12 @@ module AdminControllerHandler
 
   def update
     object_instance.current_admin = current_admin
+
+    # Check if the user is attempting to update with an older record
+    sent_ua = params[:updated_at]
+    prev_ua = object_instance.updated_at&.to_s
+    return update_out_of_date(prev_ua, sent_ua) if sent_ua.present? && prev_ua && prev_ua != sent_ua
+
     if object_instance.update(secure_params)
       flash.now[:notice] = "#{human_name} updated successfully"
       @updated_with = object_instance
@@ -136,6 +147,13 @@ module AdminControllerHandler
   # Override to prevent filters showing "disabled" option
   def filters_prevent_disabled
     false
+  end
+
+  #
+  # Override to specify _fpa.before_send_processors.<method name>
+  # if processing of the admin form is required before sending to the client.
+  def before_send_processor
+    nil
   end
 
   #
@@ -186,7 +204,7 @@ module AdminControllerHandler
         res_a = []
         res_a << objects_instance.attribute_names.to_csv
         objects_instance.each do |row|
-          res_a << (row.attributes.map { |_k, val| val || '' }).to_csv
+          res_a << row.attributes.map { |_k, val| val || '' }.to_csv
         end
         send_data res_a.join(''), filename: 'admin.csv'
       end
@@ -214,6 +232,10 @@ module AdminControllerHandler
     object_name.pluralize.split('__').map { |t| t.humanize.captionize }.join(': ')
   end
 
+  def sub_title
+    nil
+  end
+
   #
   # Make index lists appear without edit buttons
   # By default, (although the method may be overridden for certain controllers),
@@ -221,7 +243,7 @@ module AdminControllerHandler
   # so the param readonly=true allows the requester to control this.
   # @return [Boolean]
   def no_edit
-    false || params[:readonly] == 'true'
+    params[:readonly] == 'true'
   end
 
   def no_create
@@ -311,6 +333,15 @@ module AdminControllerHandler
   end
 
   #
+  # Hash of extra columns to display in admin index lists.
+  # The keys are method names in the controller, which will be called on each item in the list.
+  # The values are the humanized column names to display in the header.
+  # @return [Hash {Symbol: String} | nil]
+  def extra_index_columns
+    nil
+  end
+
+  #
   # Allow admin tables to be embedded in other pages by passing the param
   # view_as=embedded or view_as=simple-embedded
   # This returns a partial index, and hides the filter buttons
@@ -349,9 +380,100 @@ module AdminControllerHandler
   end
 
   #
+  # Show index column checkbox if the item is in the current admin's app type
+  # @param [ActiveRecord] list_item
+  # @return [String|nil] HTML for the checkbox or nil if not applicable
+  def in_current_app_type_result_checkbox(list_item)
+    @current_app_type ||= current_admin.matching_user&.app_type
+    return unless @current_app_type
+
+    @in_current_app_ids ||= list_item.class.ids_in_app_type(@current_app_type)
+    list_val = @in_current_app_ids.include?(list_item.id)
+    helpers.index_list_item_boolean_field(list_val)
+  end
+
+  #
+  # Apply the special "in_current_app_type" filter after standard filtering
+  def filtered_in_current_app_type(pm)
+    return pm unless @in_current_app_type_filter.present?
+
+    app_type = current_admin.matching_user&.app_type
+    return pm unless app_type
+
+    in_app_ids = primary_model.ids_in_app_type(app_type)
+    if @in_current_app_type_filter == 'yes'
+      pm.where(id: in_app_ids)
+    elsif @in_current_app_type_filter == 'no'
+      pm.where.not(id: in_app_ids)
+    else
+      pm
+    end
+  end
+
+  #
   # Override to specify attributes to initialize a definition with
   # @return [Hash]
   def init_new_with_attrs
     {}
+  end
+
+  def initial_attrs_config_for(key)
+    res = app_config_text(key, '')
+    return {} if res.strip.blank?
+
+    app_type = current_admin.matching_user&.app_type
+    subs = {
+      default_schema_name: primary_model.default_schema_name(app_type:),
+      default_category: primary_model.default_category(app_type:)
+    }
+
+    vals = YAML.safe_load(res)
+    vals.transform_values do |v|
+      res = if v.is_a?(Hash)
+              String.yaml_dump(v)
+            else
+              v
+            end
+      Formatter::Substitution.substitute(res, data: subs, ignore_missing: true)
+    end
+  end
+
+  #
+  # Return a hash of fields to be encoded - override in individual admin controllers
+  # Use the value for each to specify the encoding type, for example:
+  #     { options: :base64, sql: :base64 }
+  # @return [nil|Hash]
+  def encode_options_fields
+    nil
+  end
+
+  #
+  # On update or creates, check if the SQL field has been base64 encoded on the front end.
+  # The EncodingToken[encoding_type] token will be prepended if this is the case.
+  # The SQL field is then decoded and the token is removed, so that the report definition
+  # can be saved in the original plain text format.
+  # The rationale for this is to avoid WAFs blocking requests that appear to be SQL injection.
+  def handle_options_encoding
+    return unless encode_options_fields
+
+    encode_options_fields.each do |field, encoding_type|
+      next unless secure_params[field].present?
+
+      encoding_token = EncodingToken[encoding_type]
+      options = secure_params[field]
+      next unless options&.start_with?(encoding_token)
+
+      b64options = options.sub(encoding_token, '')
+
+      case encoding_type
+      when :base64
+        decoded = Base64.decode64(b64options).force_encoding('UTF-8')
+        raise FphsException, "Invalid UTF-8 encoding in base64 data for field: #{field}" unless decoded.valid_encoding?
+
+        secure_params[field].sub!(/.*/, decoded)
+      else
+        raise FphsException, "Unknown encoding type: #{encoding_type} for field: #{field}"
+      end
+    end
   end
 end

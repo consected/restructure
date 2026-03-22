@@ -23,7 +23,6 @@ module ActivityLogSupport
       TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
     end
 
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
@@ -138,7 +137,7 @@ module ActivityLogSupport
 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     @activity_log = @player_contact.activity_log__player_contact_phones.create! att
   end
@@ -154,7 +153,7 @@ module ActivityLogSupport
 
     setup_access resource_name, user: @user
     setup_access "#{resource_name.singularize}__primary".to_sym, resource_type: :activity_log_type, user: @user
-    setup_access "#{resource_name.singularize}__blank".to_sym, resource_type: :activity_log_type, user: @user
+    setup_access "#{resource_name.singularize}__blank_log".to_sym, resource_type: :activity_log_type, user: @user
 
     @activity_log = @player_contact.send(resource_name).create! att
   end
@@ -185,5 +184,13 @@ module ActivityLogSupport
     end
 
     others
+  end
+
+  def setup_option_config(position, label, fields)
+    c = @activity_log.option_configs[position]
+    expect(c.label).to eq label
+    expect(c.fields).to eq fields
+
+    setup_access c.resource_name, resource_type: :activity_log_type, user: @user
   end
 end

@@ -25,7 +25,7 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
   catch (e) {
     var h = null;
   }
-  if (!h || h.length == 0) {
+  if (!isj && (!h || h.length == 0)) {
     var tparts = target.split('-');
     var l = tparts.length;
     var dii = tparts[l - 1];
@@ -252,16 +252,24 @@ _fpa.utils.get_data_attribs = function (block) {
   return attrs;
 };
 
-_fpa.utils.capitalize = function (str) {
+//  Capitalize the first letter of each word unless the format is an email address
+// Use first_only to only capitalize the first word, to match the way Rails does it
+_fpa.utils.capitalize = function (str, first_only) {
   var res = '';
   if (str != null && str.replace) {
     var email_address_test = /.+@.+\..+/;
     var email_address = email_address_test.test(str);
-    if (!email_address)
-      res = str.replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      });
-    else res = str;
+    if (!email_address) {
+      if (first_only) {
+        res = str.replace(/\w*/, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      } else {
+        res = str.replace(/\w\S*/g, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      }
+    } else res = str;
   } else {
     res = str;
   }
@@ -271,12 +279,12 @@ _fpa.utils.capitalize = function (str) {
 _fpa.utils.nl2br = function (text) {
   text = Handlebars.Utils.escapeExpression(text);
   var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
-  return new Handlebars.SafeString(nl2br);
+  return nl2br;
 };
 
 _fpa.utils.remove_tags = function (text) {
   var stre = (text + '').replace(/(\<[a-zA-Z0-9\s-=_"']+\/?\>)/g, '');
-  return new Handlebars.SafeString(stre);
+  return stre;
 };
 
 String.prototype.capitalize = function () {
@@ -405,6 +413,13 @@ _fpa.utils.parseLocaleDate = function (stre) {
   return new Date(isoDate);
 };
 
+// Returns a JS object.
+_fpa.utils.parseLocaleDateTime = function (stre) {
+  const format = UserPreferences.date_time_format();
+  const isoDate = _fpa.utils.DateTime.fromFormat(stre, format).toISO();
+  return new Date(isoDate);
+};
+
 // Take yyyy-mm-dd... and make it mm/dd/yyyy
 _fpa.utils.isoDateStringToLocale = function (stre) {
   if (_fpa.utils.is_blank(stre)) return stre;
@@ -483,17 +498,20 @@ _fpa.utils.pretty_print = function (stre, options_hash) {
           //stre = Handlebars.Utils.escapeExpression(stre);
           stre = _fpa.utils.capitalize(stre);
           if (options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
-          return stre;
         } else {
           stre = _fpa.utils.nl2br(stre);
           if (options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
-          return stre;
         }
       } else {
         stre = _fpa.utils.nl2br(stre);
         if (options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
-        return stre;
       }
+
+      if (options_hash.view_with_formats) {
+        var formatters = options_hash.view_with_formats
+        stre = _fpa.tag_formatter.format_all(stre, formatters, '', {})
+      }
+      return stre;
     } else {
       return null;
     }
@@ -545,7 +563,19 @@ _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
 // Pass the html as {html: '<markup>...'} so it can be updated
 // The function returns the text markdown
 _fpa.utils.html_to_markdown = function (obj) {
-  var $html = $('<div>' + obj.html + '</div>');
+  // Pre-process HTML to remove Microsoft Office namespace elements (o:p, w:*, etc.)
+  // These namespaced tags can cause parsing issues in browsers since they're not valid HTML5
+  var cleanedHtml = obj.html
+    .replace(/<o:p[^>]*>[\s\S]*?<\/o:p>/gi, '') // Remove o:p elements and their content
+    .replace(/<\/?o:[^>]*>/gi, '')  // Remove any remaining o: namespace tags
+    .replace(/<\/?w:[^>]*>/gi, '')  // Remove w: namespace tags (Word)
+    .replace(/<\/?m:[^>]*>/gi, '')  // Remove m: namespace tags (Math)
+    .replace(/<\/?v:[^>]*>/gi, ''); // Remove v: namespace tags (VML)
+
+  var $html = $('<div>' + cleanedHtml + '</div>');
+
+  // Remove dangerous/unwanted elements completely (these should not have their content preserved)
+  $html.find('script, style, meta, link, noscript, object, embed, applet').remove();
 
   $html.find('*').removeAttr('style').removeAttr('class');
 
@@ -557,14 +587,14 @@ _fpa.utils.html_to_markdown = function (obj) {
     .find('p p')
     .contents().unwrap();
 
+  // Remove elements not in the allowed list, but preserve their text content
+  // The allowed elements are structural/formatting elements that markdown can represent
+  const allowedTags = 'div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub';
   $html
     .find('*')
-    .not(
-      'div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub'
-    )
+    .not(allowedTags)
     .contents()
-    .unwrap()
-    .wrap('');
+    .unwrap();
 
   $html.find('*').each(function () {
     if ($(this)[0].tagName === 'PRE' || $(this)[0].tagName === 'CODE') return;
@@ -673,8 +703,21 @@ _fpa.utils.html_to_markdown = function (obj) {
     $(this).find('p, h1, h2, h3, h4').contents().unwrap().append('<br/>');
   });
 
-  $html.find('p, h1, h2, h3, h4, span').has(':empty').remove();
-  $html.find('p, h1, h2, h3, h4, span').has(':empty').remove();
+  // Remove truly empty elements (elements with no meaningful content)
+  // Do this twice to handle nested empty elements
+  for (let i = 0; i < 2; i++) {
+    $html.find('div, p, h1, h2, h3, h4, span, u, b, i, em, strong').each(
+      function () {
+        const $el = $(this);
+        // Check if this element itself is empty (no text content, ignoring whitespace)
+        // Also check it doesn't contain images or hr
+        if ($el.text().trim() === '' && $el.find('img, hr').length === 0) {
+          $el.addClass('cleanup-remove');
+        }
+      }
+    );
+    $html.find('.cleanup-remove').remove();
+  }
 
   obj.html = $html.html();
 
@@ -720,4 +763,83 @@ _fpa.utils.beep = function () {
   window.localStorage.setItem('beep_last_reset', String(time_now));
   const snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");
   snd.play();
+}
+
+// Return a hash of params, from the Rails format (or a literal value if a simple param requested)
+// If there are no matching items, an empty hash is returned.
+// ?key1=va11 - call with key1 only returns a simple result: val1
+// ?key1[key2]=val12 - call with key1 only returns {key2 => val12}
+// ?key1[key2]=val12 - call with key1 and key2 returns {}
+// ?key1[key2][others]=val100 - call with key1 and key2 returns {others => val100}
+// Use `full_key` if a full Rails style param is to be returned
+// ?key1[key2]=val12 - call with key1 only returns {key1[key2] => val12}
+_fpa.utils.get_params = function (key1, key2, full_key) {
+  const params = new URLSearchParams(window.location.search);
+  var data = {};
+
+  var r;
+  var get_match_i;
+  if (key1 && !key2) {
+    const got_simple_param = params.get(key1);
+    if (got_simple_param) return got_simple_param;
+
+    r = new RegExp(`^${key1}\\[(.+)\\]`)
+    get_match_i = 2;
+  }
+  else if (key1 && key2) {
+    r = new RegExp(`^${key1}\\[${key2}\\]\\[(.+)\\]`)
+    get_match_i = 3;
+  }
+
+  if (full_key)
+    var retkeyi = 0
+  else
+    retkeyi = get_match_i - 1;
+
+  for (const pair of params) {
+    const key = pair[0];
+    const val = pair[1];
+
+    res = key.match(r);
+    if (!res) continue;
+
+    var retkey = res[retkeyi];
+    data[retkey] = val;
+  }
+
+  if (Object.keys(data).length === 0) return;
+
+  return data;
+}
+
+// Generate the embedded report HTML for a given report name and optional alt_data
+// alt_data is used when the report is to be generated for a different record than 'this',
+// which is typically used by handlebars
+_fpa.utils.embedded_report = function (repname, alt_data) {
+  const referring_record = this.referenced_from && this.referenced_from[0];
+  alt_data = alt_data || this;
+  // Get the appropriate id, master_id and type for the report call params
+  if (referring_record) {
+    var list_id = referring_record.from_record_id;
+    var list_master_id = referring_record.from_record_master_id;
+    var list_type = referring_record.from_record_type_us;
+  }
+  else {
+    var list_id = alt_data.id;
+    var list_master_id = alt_data.master_id;
+    var list_type = alt_data.item_type;
+  }
+
+  console.debug(`rhembedded: ${repname}`);
+  const search_attrs = `search_attrs[master_id]=${list_master_id}&search_attrs[list_id]=${list_id}&search_attrs[list_type]=${list_type}`
+  const divid = `tag_embedded_report_results-${repname}-${list_master_id}-${list_id}-${list_type}`
+  const htags = `data-remote="true" data-result-target="#${divid}" data-target="#${divid}" data-target-force="true"`;
+
+  if (!list_id || !list_master_id || !list_type) {
+    console.error(`rhembedded: missing data for ${repname} - list_id: ${list_id}, list_master_id: ${list_master_id}, list_type: ${list_type}`);
+    console.error(referring_record);
+    return `<div class="tag-embedded-report--error" id="tag_embedded_report_results-${divid}-missing-data">Cannot load report - missing data</div>`;
+  }
+  var res = `<div class="tag-embedded-report tag_embedded_report_results-${repname}" id="${divid}"><a ${htags} href="/reports/${repname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
+  return res;
 }

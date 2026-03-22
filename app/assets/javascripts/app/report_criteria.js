@@ -60,7 +60,7 @@ _fpa.report_criteria = class {
       return false;
     }).addClass('attached-click-listener');
 
-    if (!show_fob) block.find('[type="submit"].auto-run').click();
+    if (!show_fob) block.find('[type="submit"].auto-run').not('.was-auto-run-clicked').addClass('was-auto-run-clicked').click();
 
   };
 
@@ -136,6 +136,9 @@ _fpa.report_criteria = class {
       $dfs.on('change', function () {
         var fts = $(this).attr('data-filter-selector')
         _fpa.form_utils.select_filtering_changed($(this).val(), `[name="search_attrs[${fts}]"]`)
+      }).each(function () {
+        var fts = $(this).attr('data-filter-selector')
+        _fpa.form_utils.select_filtering_changed($(this).val(), `[name="search_attrs[${fts}]"]`)
       });
 
       _fpa.form_utils.setup_chosen_groups($dfs);
@@ -168,6 +171,8 @@ _fpa.report_criteria = class {
       // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
       _fpa.cancel_remote();
     }).on('submit', function () {
+      // Prevent any change handlers from triggering another submit (e.g., when Enter key is pressed)
+      _fpa.state.search_running = true;
       // When we submit the form, give the user a visual spinner so they know what's going on
       // This also clears existing search results to make it clear when a result is complete
       if ($(this).data('remote'))

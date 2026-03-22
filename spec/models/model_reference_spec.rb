@@ -11,19 +11,12 @@ RSpec.describe 'Model references', type: :model do
     AlNameGenTestMr
   end
 
+  include ActivityLogSupport
   include ModelSupport
   include PlayerContactSupport
 
   before :context do
     SetupHelper.setup_al_gen_tests AlNameGenTestMr, 'elt', 'player_contact'
-  end
-
-  def setup_option_config(position, label, fields)
-    c = @activity_log.option_configs[position]
-    expect(c.label).to eq label
-    expect(c.fields).to eq fields
-
-    setup_access c.resource_name, resource_type: :activity_log_type, user: @user
   end
 
   before :each do

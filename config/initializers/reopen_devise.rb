@@ -92,7 +92,12 @@ Rails.application.config.to_prepare do
     if record.respond_to?(:need_change_password?) && record.need_change_password?
       scope = options[:scope]
       warden.logout(scope)
-      throw(:warden, scope: scope, reason: 'Your password has expired.', message: 'Your password has expired. Contact the administrator to reset your account.')
+      msg = if Settings::AllowUsersToRegister
+              'Click the "Forgotten password or trouble logging in?" link on the login page to reset your account login.'
+            else
+              'Your password has expired. Contact the administrator to reset your account.'
+            end
+      throw(:warden, scope:, reason: 'Your password has expired.', message: msg)
     end
   end
 end

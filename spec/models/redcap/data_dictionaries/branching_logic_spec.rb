@@ -60,6 +60,21 @@ RSpec.describe 'Redcap::DataDictionaries::BranchingLogic', type: :model do
       expect(@bl.condition_string).to eq exp
 
       test = <<~ENDSTR.strip
+        [some_var]='sadf' and [complex(abc_DEF_1)] = "1"
+      ENDSTR
+
+      exp = <<~ENDSTR.strip
+        %%VAR0%%='sadf' and %%VAR1%% = "1"
+      ENDSTR
+
+      @bl = Redcap::DataDictionaries::BranchingLogic.new(test)
+
+      @bl.tokenize_vars
+      expect(@bl.vars).to eq ['some_var', 'complex___abc_def_1']
+
+      expect(@bl.condition_string).to eq exp
+
+      test = <<~ENDSTR.strip
         [test] <> "" and [test2] = "hello"
       ENDSTR
 
@@ -496,6 +511,22 @@ RSpec.describe 'Redcap::DataDictionaries::BranchingLogic', type: :model do
       expect(final_res).to eq final_exp
 
       test = <<~ENDSTR.strip
+        [smoketime(ANFL)] = '1'
+      ENDSTR
+
+      final_exp = {
+        all_no_op_0: {
+          all_nonblock_0: {
+            smoketime___anfl: '1'
+          }
+        }
+      }
+
+      @bl = Redcap::DataDictionaries::BranchingLogic.new(test)
+      final_res = @bl.generate_show_if
+      expect(final_res).to eq final_exp
+
+      test = <<~ENDSTR.strip
         [smoketime(pnfl)] = '1'
       ENDSTR
 
@@ -559,7 +590,7 @@ RSpec.describe 'Redcap::DataDictionaries::BranchingLogic', type: :model do
       expect(final_res).to eq final_exp
 
       test = <<~ENDSTR.strip
-        ([aaa] = 1 or [bbb] >= 3) and (([yesno(1)] = "1" and [test_var] <> "some (other) 'value'" and [test_var] <> "this value" or [other] = "other1") or [ants] = 'many')
+        ([aaa] = 1 or [bbb] >= 3) and (([complex(abc_DEF_1)] = "1" and [test_var] <> "some (other) 'value'" and [test_var] <> "this value" or [other] = "other1") or [ants] = 'many')
       ENDSTR
 
       final_exp = {
@@ -581,7 +612,7 @@ RSpec.describe 'Redcap::DataDictionaries::BranchingLogic', type: :model do
               all_sub_block_2: {
                 any_2: {
                   all_1: {
-                    yesno___1: '1',
+                    complex___abc_def_1: '1',
                     test_var: {
                       condition: '<>',
                       value: "some (other) 'value'"

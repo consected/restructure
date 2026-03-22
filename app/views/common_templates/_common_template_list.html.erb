@@ -1,7 +1,14 @@
-<script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div class="new-button-container">
+<%
+  # Templates for generating a list of result items for named dynamic definitions.
+  # These templates are rendered exclusively by
+  # `[pluralized name]-list-template` and `[pluralized name]-compact-list-template`
+  # found in `views/common_templates/_search_results_template.html.erb`
+%>
+
+<%= handlebars_template_tag('common_template_list_new_button_container', css_class: 'hidden handlebars-partial') do %>
+  <div class="common-template-list--new-button new-button-container">
     <div class="text-center">
-      <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{pluralize name}}/new"
+      <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{base_route_segments}}/new"
           data-toggle="scrollto-result"
           data-target="#{{hyphenate name}}-{{../master_id}}-" 
           data-remote="true"
@@ -11,15 +18,15 @@
       </a>
     </div>
   </div>
-</script>
+<% end %>
 
-<script id="common_template_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#with template_config}}
+<%= handlebars_template_tag('common_template_list-partial', css_class: 'hidden handlebars-partial') do %>
+  {{#with list_template_config}}
     {{#is orientation '===' 'horizontal' }}
 
       {{#unless prevent_create}}
         {{#unless view_options.only_create_as_reference}}
-          {{>common_template_list_new_button_container master_id=../master_id}}
+          {{>common_template_list_new_button_container master_id=../master_id base_route_segments=base_route_segments}}
         {{/unless}}
       {{/unless}}
 
@@ -34,13 +41,17 @@
     {{/is}}
 
     {{#each (lookup .. (pluralize full_name))}}
-      {{> common_template_result name=../name result_data=this _created=@index compact=../compact}}
+      {{#if option_type}}      
+        {{> common_template_result name=../../name name_with_option_type=(concat (hyphenate ../full_name) '_' option_type) orig_name=../orig_name activity_log_references_name=../../activity_log_references_name result_data=this _created=@index compact=../compact}}      
+      {{else}}
+        {{> common_template_result name=../../name name_with_option_type=../name_with_option_type orig_name=../orig_name activity_log_references_name=../../activity_log_references_name result_data=this _created=@index compact=../compact}}
+      {{/if}}
     {{/each}}
 
     {{#is name '!==' full_name }}<div id="{{hyphenate full_name}}-{{../master_id}}-{{../id}}"> {{/is}}
     {{! If the orientation is vertical or blank}}
     {{#is (or orientation 'vertical') '===' 'vertical'}}
-      <div class="col-md-24 new-block{{#is name '!==' full_name }} new-before-parent{{/is}}" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">
+      <div class="col-md-24 new-block{{#is name '!==' full_name }} new-before-parent{{/is}}" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-" data-name="{{name}}" data-full-name="{{full_name}}">
         {{#unless (pluralize full_name)}}
         <ul class="list-group">
           <li class="list-group-item is-heading">
@@ -89,4 +100,4 @@
     Template Config not available for {{name}}
   </p>
   {{/with}}
-</script>
+<% end %>

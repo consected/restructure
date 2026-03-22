@@ -91,3 +91,9 @@ yarn-debug.log*
 
 # Assets will be added to the repository for production deployment. We override this ignore with `git add --force public/assets`
 /public/assets
+
+# Test related NfsStore processing file
+.__processing-index__
+.__failed-archive__
+
+/public/handlebars*

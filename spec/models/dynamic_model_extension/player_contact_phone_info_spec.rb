@@ -38,7 +38,7 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
     allow(User).to receive(:batch_user) { @user }
     @batch_user = User.use_batch_user(Settings.bulk_msg_app)
 
-    setup_access :tracker
+    setup_access :trackers
     let_user_create :trackers
     let_user_create :tracker_histories
     let_user_create :player_contacts
@@ -112,9 +112,9 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
     res = DynamicModel::PlayerContactPhoneInfo.update_opt_outs 1
     expect(res).to be > 0
 
-    study = Classification::Protocol.active.where(name: 'Study').first
+    study = Classification::Protocol.active.where(name: 'Study').reload.first
 
-    tracker = TrackerHistory.where(protocol_id: study.id).reorder('').last
+    tracker = TrackerHistory.where(protocol_id: study.id).reorder('').reload.last
 
     expect(old_tracker&.id || 0).to be < tracker.id
 

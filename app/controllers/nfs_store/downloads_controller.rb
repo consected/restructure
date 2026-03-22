@@ -23,8 +23,12 @@ module NfsStore
     # Request download of a single file for download or view
     # Specify either a download_id & retrieval_type or download_path
     def show
-      for_action = :download
-      for_action = :download_or_view if params.dig(:secure_view, :preview_as).present?
+      # We have to check the secure_view responds to dig, because it may be an empty string
+      for_action = if params[:secure_view].respond_to?(:dig) && params.dig(:secure_view, :preview_as).present?
+                     :download_or_view
+                   else
+                     :download
+                   end
 
       raise FsException::NotFound, 'Requested file ID or path not found' unless @download_id
 

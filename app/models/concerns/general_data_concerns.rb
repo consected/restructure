@@ -17,8 +17,10 @@ module GeneralDataConcerns
   end
 
   def hide_tracker_panel
+    return @hide_tracker_panel if @hide_tracker_panel
+
     val = Admin::AppConfiguration.value_for(:hide_tracker_panel, current_user)
-    !val.blank? && val != 'false'
+    @hide_tracker_panel = !val.blank? && val != 'false'
   end
 
   def _created
@@ -62,9 +64,9 @@ module GeneralDataConcerns
   end
 
   def user_name
-    return nil unless user
+    return unless respond_to?(:user_id) && user_id
 
-    user.email
+    User.emails_by_id[user_id]
   end
 
   def user_email
@@ -109,7 +111,7 @@ module GeneralDataConcerns
   def tracker_histories
     return @memo_tracker_histories if @memo_tracker_histories
 
-    return unless respond_to? :master_id
+    return unless respond_to?(:master_id) && !allow_no_master_and_not_set?
 
     # Check for the existence of tracker_histories in the super class. If it
     # already exists, it is an association that we should not be overriding
@@ -117,9 +119,10 @@ module GeneralDataConcerns
                                 super
                               else
                                 TrackerHistory
+                                  .eager_load(:user)
                                   .where(item_id: id,
                                          item_type: self.class.name,
-                                         master_id: master_id)
+                                         master_id:)
                                   .order(id: :asc)
                               end
   end
@@ -164,7 +167,7 @@ module GeneralDataConcerns
   # Returns a simple hash alternative ids accessible by the current user
   # @return [Hash]
   def ids
-    master.alternative_ids
+    master&.alternative_ids
   end
 
   #
@@ -226,7 +229,9 @@ module GeneralDataConcerns
 
   def as_json(extras = {})
     self.current_user ||= extras[:current_user] if extras[:current_user]
-    if allows_current_user_access_to?(:access)
+    if extras[:force_plain_json]
+      extras = {}
+    elsif allows_current_user_access_to?(:access)
 
       extras[:include] ||= {}
       extras[:methods] ||= []
@@ -250,6 +255,7 @@ module GeneralDataConcerns
         extras[:methods] << :tracker_histories if respond_to? :tracker_histories
       end
       extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score_name
+      extras[:methods] << :subject_age if respond_to? :subject_age
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
       extras[:methods] << :created_by_user if respond_to? :created_by_user
@@ -279,6 +285,7 @@ module GeneralDataConcerns
       extras[:methods] << :prevent_add_reference if respond_to? :prevent_add_reference
       extras[:methods] << :can_download? if respond_to? :can_download?
       extras[:methods] << :option_type if respond_to? :option_type
+      extras[:methods] << :default_option_type_name if respond_to? :default_option_type_name
       extras[:methods] << :alt_order if respond_to? :alt_order
       extras[:methods] << :user_preference if respond_to? :user_preference
 
@@ -290,7 +297,9 @@ module GeneralDataConcerns
       extras[:methods] << :def_version
       extras[:methods] << :vdef_version
 
-      extras[:methods] << :ids if respond_to?(:master) && !self.class.no_master_association
+      if respond_to?(:master) && !allow_no_master_and_not_set? && !is_a?(TrackerHistory) && !is_a?(Tracker)
+        extras[:methods] << :ids
+      end
 
       extras[:methods] << :_general_selections
     elsif allows_current_user_access_to?(:see_presence_or_access)

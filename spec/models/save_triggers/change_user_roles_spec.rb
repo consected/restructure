@@ -53,7 +53,7 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   it 'changes the roles of the current user in another app' do
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types.last
+    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
@@ -105,7 +105,7 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
 
   it 'changes the roles of the specified user' do
     @orig_app_type = @user.app_type
-    @alt_app_type = Admin::AppType.active_app_types.last
+    @alt_app_type = Admin::AppType.active_app_types(force: true).last
     expect(@alt_app_type.id).not_to eq @user.app_type_id
 
     Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin

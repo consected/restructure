@@ -10,11 +10,13 @@ The philosophy of the application is to provide an application layer on top of a
 
 ## Development and contributing
 
-**ReStructure** was built by Harvard Medical School to support the Football Players Health Study. The research team uses multiple applications built on the **ReStructure** platform (known internally as Athena and Zeus) on a daily basis, to manage highly sensitive study and project processes, personally identifiable information (PII), protected health information (PHI), documents and medical imaging files. Development has been running since 2015.
+**ReStructure** was built by Harvard Medical School to support the _Football Players Health Study_. The research team uses multiple applications built on the **ReStructure** platform (known internally as Athena and Zeus) on a daily basis, to manage highly sensitive study and project processes, personally identifiable information (PII), protected health information (PHI), documents and medical imaging files. Development has been running since 2015.
 
 The platform has been generously open-sourced by Harvard in the hope that other research studies can benefit from a modern end-user focused application. There are no restrictions on who can download, fork or use the project.
 
 The **ReStructure** open-source project is maintained by [Consected](https://www.consected.com), incorporating new features from the Harvard codebase into the project and vice versa.
+
+Other organizations contributing to the project are listed in [Contributors](#contributors).
 
 If you find a bug, please add an issue with details of how to reproduce it. If you find a **security issue**, please add an issue indicating that there is a security issue (but don't share the full details) and also email <admin@consected.com> with a clear subject line that this is a security issue related to the ReStructure project, and full details of the issue.
 
@@ -85,13 +87,31 @@ up relational database tables and maintain a central data dictionary.
 
 The design provides a clear separation between external or static data captured by third-parties, and live data from internal operations that may change and be added routinely. Data transfers can be automated through customization, or directly by uploads through the web interface.
 
+## Documentation and Reference Guides
+
+### Admin Documentation
+
+View the admin documentation directly in the app admin panel, or view the [Admin Guide directly](docs/admin_reference/main/README.md)
+
+### Developer Reference
+
+A separate developer's reference, is available in the [Dev Reference](docs/dev_reference/main/README.md)
+
+### API Reference
+
+An API reference, including samples, is available in the [API Reference](docs/api_reference/main/README.md)
+
+### User / Guest References
+
+Directly view the the documents targeted at [authenticated users](docs/user_reference/main/README.md) and [guests](docs/guest_reference/main/README.md) (for users not yet authenticated).
+
 ## Technology
 
-The **ReStructure** application is a complete _Ruby on Rails_ 6 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
+The **ReStructure** application is a complete _Ruby on Rails_ 7 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
 
 The database design follows common Rails conventions, with an easily understandable relational database model. As new configurations are made, new database table migrations are generated automatically, allowing rapid development, and clean deployment to production. PostgreSQL is the only supported database.
 
-The default application server is _Passenger_, although _Puma_ is used in development and may be selected for production.
+The default application server is _Puma_, although _Passenger_ has been used in the past and may be selected for production.
 
 _Memcached_ provides caching of performance and to relieve the load on the application server and database. Central or individual app-server caches may be used.
 
@@ -115,12 +135,12 @@ Then set up the database.
     git clone https://github.com/consected/restructure-apps.git
     git clone https://github.com/consected/restructure-docs.git
 
-### Setup the database
+### Set up the database
 
 It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
-To ensure `psql` and all `rake db:structure:dump` works as expected, set the path to Postgres 12 binaries explicitly.
+To ensure `psql` and all `rails db:schema:dump` works as expected, set the path to Postgres 12 binaries explicitly.
 
-    export PATH=/usr/lib/postgresql/12/bin:${PATH}
+    export PATH=/usr/lib/postgresql/15/bin:${PATH}
 
 Now create a development environment database
 
@@ -144,7 +164,7 @@ Seed the database (even if you have populated demo data):
 
     bundle exec rake db:seed
 
-### Setup a simulated Filestore filesystem
+### Set up a simulated Filestore filesystem
 
 File storage in production is typically on an NFS filesystem. In development without NFS we simulate
 a separate filesystem with some internal mounts. Some directories will be created in the user's home directory
@@ -158,7 +178,7 @@ A Fuse filesystem can also be used as external storage rather than
 the home directories, and will be used if there is a Fuse filesystem mounted at `/media/$USER/Data` by skipping
 `app-scripts/setup-init-mounts.sh`
 
-### Setup a new admin user
+### Set up a new admin user
 
 Set up a new admin user:
 
@@ -207,6 +227,16 @@ To clean all data, including admins and user, run:
     bundle exec rake db:seed
     RAILS_ENV=development app-scripts/add_admin.sh <email address>
 
+### Running multiple dev or test enviroments simultaneously
+
+If you need to run multiple dev or test enviroments simultaneously on the same machine (for example for multiple AI agents alongside a human developer), it may be necessary to seperate out the databases and Filestore filesystems to avoid clashes.
+
+Simply set the environment variable `TEST_ENV_SET` to a unique (short) alphanumeric string. For example:
+
+```
+export TEST_ENV_SET=workspace2
+```
+
 ### Branches for development and release
 
 The project previously used [git-flow](https://skoch.github.io/Git-Workflow/) to organize releases. This is no longer the case, and the [Build for deployment](#build-for-deployment) process handles branching and tagging of releases. Where possible, github Pull Requests should be used to contribute features and fixes back to the primary repo.
@@ -231,70 +261,90 @@ If changes are ever made to any of the _restructure-build_ scripts, the Docker c
 
      app-scripts/release_and_build.sh clean <optional: minor>
 
+### Merge commits and the CHANGELOG
+
+The upstream ReStructure repo is the canonical source of the CHANGELOG. The downstream projects are obviously welcome to maintain their own CHANGELOG files although if maintained in the root directory they shouldn't be sent upstream.
+
+Merge commits, the result of PRs should contain the full content of the associated CHANGELOG entry. This allows upstream to simply run:
+
+```sh
+git log --format=%b new-master..HEAD
+```
+
+The results of this are added to the _Unreleased_ section of the CHANGELOG before building.
+
+Downstream repos may use a helper script to get their commits into a format suitable for the CHANGELOG entries:
+
+```sh
+app-scripts/get_changelog_entries_from_git.sh
+```
+
+If building with the environment variable `ALLOW_EMPTY_UNRELEASED` set to any value, these entries will automatically added into the _Unreleased_ section.
+
 ## Testing
 
 Rspec tests are available. To set up a test database, first get a dump of the current
 development database structure (if you have made migrations)
 
-    export PATH=/usr/lib/postgresql/12/bin:${PATH}
-    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rake db:structure:dump
+    export PATH=/usr/lib/postgresql/15/bin:${PATH}
+    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 
 To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
 to enable automatic authentication with your DB password, such as:
 
     localhost:5432:restr_test:username:mysecretpw
 
-To create a single test database for running rspec directly:
+To create a single test database for running rspec directly. First, ensure your postgres user has the appropriate privileges:
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+    ALTER USER <username> WITH CREATEDB CREATEROLE LOGIN;
+
+On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
+The run:
     app-scripts/create-test-db.sh 1
 
-Make sure the Filestore mounts are in place:
-
+Make sure the Filestore mounts are in place (this requires sudo privileges) once after a reboot:
     app-scripts/setup-dev-filestore.sh
 
-Ensure you have Firefox and the most appropriate geckodriver installed:
+We no longer use features specs for UI testing. These have all been moved to system specs.
+By default, browser system tests use Chrome. Firefox is another option, although Chrome may be faster and simpler to set up.
 
-- On Ubuntu 22.04 and above, Firefox is a Snap package. After installing, run `sudo ln -s /snap/bin/geckodriver /usr/local/bin` to link to the snap geckodriver
-- On Flatpak installed Firefox, see: <https://firefox-source-docs.mozilla.org/testing/geckodriver/Usage.html#Running-Firefox-in-an-container-based-package>
-- On locally installed Firefox, install geckodriver from the standard releases: <https://github.com/mozilla/geckodriver/releases> - then run the script below
+To use Firefox:
 
-    GECKODRIVER='<https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz>'
-    wget -O geckodriver.tar.gz ${GECKODRIVER}
-    tar -xvf geckodriver.tar.gz
-    mv geckodriver /usr/local/bin/
-    chmod 777 /usr/local/bin/geckodriver
+    export BROWSER=firefox
+
+Also, complete the following to ensure you have Firefox and the most appropriate geckodriver installed:
+[installing Firefox for testing](docs/dev_reference/main/installing_firefox_for_testing.md)
 
 Run the test suite:
 
-    IGNORE_MFA=true bundle exec rspec
+    bundle exec rspec
 
 Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 
-    bundle exec rspec
+    AWS_PROFILE=<profile> bundle exec rspec
 
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+NOTE: On Mac, between Docker containers, or just when connecting the  DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
-    app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1
+Clean a single test database:
+
+    app-scripts/clean-test-db.sh
 
 ### Running tests against AWS APIs
 
 There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out,
 although at least one should run an SMS notification as an integration test, and to allow a comparison against
-CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
+CloudWatch results. Set up your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
 
     export AWS_PROFILE=<profile name in ~/.aws/config>
 
-On well secured AWS accounts, you may have MFA configured. Either setup your credentials file to include the appropriate
+On well secured AWS accounts, you may have MFA configured. Either set up your credentials file to include the appropriate
 `aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
 
 The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
@@ -305,9 +355,10 @@ For faster testing, _parallel_tests_ provides parallelization of Rspec, although
 
 The following will create a set of test databases for the number of processor cores on your machine:
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+ On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
+
+Create drop and create the databasees:
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
@@ -327,13 +378,23 @@ To review failed results:
 
     less -r tmp/failing_specs.log
 
+This will also list a set of rerun tests, which may subsequently pass. To rerun them again:
+
+  app-script/retest_failed_parallel_test.sh
+
 The easiest way to deal with migrations is to drop the test database and recreate.
 
-    # On Mac, between Docker containers, or just when connecting the # DB over IP rather than Linux sockets:
+On Mac, between Docker containers, or just when connecting the DB over IP rather than Linux sockets:
+
     export USE_PG_HOST=localhost
-    export USE_PG_UNAME=postgres
 
     app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
+
+Parallel testing will attempt to retry any failed tests using a regular non-parallel _rspec_ test, allowing for a clean test run to be performed without manual intervention. If there are no errors at the end of this, then a return code 0 will be the result, allowing to test and build in a single action.
+
+```sh
+app-scripts/parallel_test.sh && app-scripts/release_and_build.sh
+```
 
 ## Pull Requests
 
@@ -346,16 +407,77 @@ PR will a feature branch might lead to junk that the upstream repo doesn't want.
 the state of the upstream/develop branch that will be receiving the PR commits.
 
 ```sh
-git checkout -b up-develop upstream/develop
+feature_branch="$(git branch --show-current)"
+git checkout up-develop || git checkout -b up-develop upstream/develop
 git branch --set-upstream-to=origin
-git checkout ${feature-branch}
-git rebase --interactive up-develop
-git push # --force may be required if your feature branch is already published
+git pull
+git checkout ${feature_branch}
+git rebase --onto up-develop ${commit-prior-to-first-in-feature-branch}
+git push --force
 ```
+
+Then update the CHANGELOG using git commit entries:
+
+```sh
+app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
+```
+
+Check the updates and commit
+
+```sh
+git commit CHANGELOG.md -m 'Updated CHANGELOG' && git push
+```
+
+## Getting the latest version from upstream
+
+To pull the latest version from the upstream ReStructure Github repo, ensure you have committed any changes in the _develop_ branch then run the following to merge the latest version. Where there might be merge conflicts, the merge shows a preference for changes coming from upstream.
+
+```sh
+git remote show upstream > /dev/null || git remote add upstream https://github.com/consected/restructure.git
+git fetch upstream && git checkout develop && git pull && \
+git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit --allow-empty -a -m "Commit" && git push
+```
+
+## Database connections
+
+The database must allow IP port connections. It is recommended that a database user is created for each app server (or group of servers behind a load balancer), so that access permission specific to the ReStructure apps can be set even when sharing a single database.
+
+The database connection is set by the following environment variables:
+
+```
+FPHS_POSTGRESQL_USERNAME=<database username>
+FPHS_POSTGRESQL_PASSWORD=<complex password>
+FPHS_POSTGRESQL_HOSTNAME=<database hostname>
+FPHS_POSTGRESQL_PORT=<database port>
+FPHS_POSTGRESQL_DATABASE=<database name>
+FPHS_POSTGRESQL_SCHEMA=<schema search path>
+```
+
+### Schema search_path
+
+The PostgreSQL `search_path` setting states the order that schemas are checked for database objects such as tables when a query doesn't explicitly qualify which schema is required.
+
+As a minimum, when using the default database definition, the search path should be `ml_app,ref_data,redcap,dynamic`. Additional schemas should be added on the end as they are created.
+
+Schemas can be placed at the front of the list to contain tables, triggers, functions and views that override the defaults. One example might be for the `delayed_job` table when there is a need to share configurations across multiple app servers that have very different background job processing requirements.
+
+It is also possible to set the search_path value directly on the user, so that it is set automatically when connecting. This may be preferable in a production environment, since user permissions limit the schemas available to the user and setting the search_path on the user provides the database control over adding or removing schemas and setting the search path ordering without having to rely on changes to the environment variables.
+
+For example:
+
+```
+create user app_user password 'devdbpassword1';
+-- if necessary set the role to inherit from
+grant common_app_role to app_user with inherit true;
+-- now set the search_path
+alter role app_user in database app_database set search_path to ml_app,ref_data,redcap,dynamic,organization,projects,data_requests;
+```
+
+For this to function, ensure that the app server is started with the environment variable: `FPHS_POSTGRESQL_SCHEMA=` or `FPHS_POSTGRESQL_SCHEMA=null`. This prevents Rails attempting to override the search_path when it connects.
 
 ## Future development themes
 
-Upgrade to Rails 7.
+Upgrade to Rails 8.
 
 The Javascript UI is a custom reactive front end. Near the beginning of development a simple platform was developed, which is tightly bound to the operation of the backend. Although completely functional without changes (except obviously for addition of new features), a long term vision is to replace the UI with Vue.js or React running against the existing API.
 
@@ -366,6 +488,9 @@ Provide more structured admin panel configuration, especially around case manage
 Refactor and comment code to provide a better future development environment.
 
 Provide better test coverage.
+
+NOTE: Proposed enhancements related or unrelated to these themes may be found as GitHub issues, tagged as **enhancement**:
+<https://github.com/consected/restructure/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement>
 
 ## Support
 
@@ -386,7 +511,7 @@ and made available as open source under the
 BSD-3 license
 (<https://opensource.org/licenses/BSD-3-Clause>).
 
-Copyright 2020 Harvard University
+Copyright 2025 Harvard University
 
 Redistribution and use in source and binary
 forms, with or without modification, are

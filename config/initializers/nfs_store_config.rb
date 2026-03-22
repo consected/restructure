@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+NFS_APPS_LIST_FILE = File.join(Rails.root, 'tmp', 'nfs_apps_list.txt')
+
 ActiveSupport.on_load(:nfs_store_config) do
   max_group_id = ENV['FILESTORE_MAX_GRP_ID']
   max_group_id = max_group_id ? max_group_id.to_i : 601
@@ -17,14 +19,14 @@ ActiveSupport.on_load(:nfs_store_config) do
     end
 
   elsif Rails.env.test?
-    self.nfs_store_directory = "/var/tmp/nfs_store_test#{ENV['TEST_ENV_NUMBER']}"
-    self.temp_directory = "/var/tmp/nfs_store_tmp#{ENV['TEST_ENV_NUMBER']}"
+    self.nfs_store_directory = "/var/tmp/nfs_store_test#{ENV['TEST_ENV_NUMBER']}#{ENV['TEST_ENV_SET']}"
+    self.temp_directory = "/var/tmp/nfs_store_tmp#{ENV['TEST_ENV_NUMBER']}#{ENV['TEST_ENV_SET']}"
     self.containers_dirname = 'containers'
     FileUtils.mkdir_p temp_directory
     group_id_range.each do |i|
       check_dir = File.join(nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
-      FileUtils.mkdir_p File.join(check_dir) if Rails.env.test?
-      FsException::Config.new "Could not access: #{check_dir}" unless File.exist?(check_dir)
+      FileUtils.mkdir_p File.join(check_dir)
+      raise FsException::Config, "Could not access: #{check_dir}" unless File.exist?(check_dir)
     end
   else
     self.nfs_store_directory = '/mnt/fphsfs'
@@ -37,8 +39,7 @@ ActiveSupport.on_load(:nfs_store_config) do
     FileUtils.mkdir_p temp_directory
     group_id_range.each do |i|
       check_dir = File.join(nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
-      FileUtils.mkdir_p File.join(check_dir) if Rails.env.test?
-      FsException::Config.new "Could not access: #{check_dir}" unless File.exist?(check_dir)
+      raise FsException::Config, "Could not access: #{check_dir}" unless File.exist?(check_dir)
     end
   end
 
@@ -54,13 +55,25 @@ ActiveSupport.on_load(:nfs_store_config) do
     ares = Kernel.system 'which unzip'
     configuration_failed_reason << 'unzip not in the path' unless ares
 
-    app_type = Admin::AppType.active_app_types.first
-    if app_type
-      unless NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
-        configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
+    begin
+      File.open(NFS_APPS_LIST_FILE, 'w') do |nfs_apps_list_file|
+        app_types = Admin::AppType.active_app_types
+        app_types.each do |app_type|
+          exists = NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
+          subdir = Rails.env.production? || Rails.env.development? ? '' : 'test-fphsfs'
+          nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir}"
+          next if exists
+
+          configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
+        end
+        configuration_failed_reason << 'No App Type available' if app_types.empty?
       end
-    else
-      configuration_failed_reason << 'No App Type available'
+      unless File.exist?(NFS_APPS_LIST_FILE)
+        Rails.logger.error "NFS apps list file not written to #{NFS_APPS_LIST_FILE}"
+      end
+    rescue Exception => e
+      # Catch any exception, since we don't want the server to crash just because of some background file error.
+      Rails.logger.error "Error writing NFS apps list file: #{e}\n#{e.short_string_backtrace}"
     end
   end
 

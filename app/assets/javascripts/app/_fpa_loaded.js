@@ -3,11 +3,24 @@ _fpa.loaded.preload = function () {
   $('body').addClass('page-loading');
 
   $(document).on('change', '#use_app_type_select', function () {
-    window.location.href = '/masters/search?use_app_type=' + $(this).val()
+    window.location.href = '/pages/home?use_app_type=' + $(this).val()
   });
 
   $(document).on('click', 'a[disabled], btn[disabled]', function (ev) {
     ev.preventDefault();
+  });
+
+  // Delegated handler for show-in-modal elements using data-content-el attribute.
+  // Using event delegation ensures this works for dynamically loaded content
+  // without requiring re-attachment after AJAX updates.
+  $(document).on('click', '.show-in-modal[data-content-el]', function (ev) {
+    ev.preventDefault();
+    var contentSelector = $(this).attr('data-content-el');
+    if (!contentSelector) return;
+
+    var content = $(contentSelector).html();
+    var title = $(this).attr('data-title');
+    _fpa.show_modal(content, title);
   });
 
 
@@ -37,6 +50,10 @@ _fpa.loaded.default = function () {
 
   _fpa.timed_flash_fadeout();
   _fpa.form_utils.format_block();
+
+  // Initialize page title module and bind search tab handlers
+  _fpa.page_title.init();
+  _fpa.page_title.bind_search_tabs();
 
   // Setup handler for each crosswalk attr search field in the nav bar
   for (var i in _fpa.state.crosswalk_attrs) {
@@ -97,7 +114,7 @@ _fpa.loaded.default = function () {
     _fpa.printing.appPrintHandler();
   });
 
-  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0 && _fpa.status.controller !== 'registrations') {
+  if (_fpa.state.current_user && _fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0 && _fpa.status.controller !== 'registrations') {
     const key_viewed_intro = `viewed-introduction-${_fpa.state.current_user.email}`;
     var viewed = localStorage.getItem(key_viewed_intro);
     if (!viewed) {
@@ -188,11 +205,44 @@ _fpa.loaded.default = function () {
     var href = $(this).attr('href');
     var data_remote = $(this).attr('data-remote');
     if (!href || data_remote) return;
-    if (href.indexOf('/nfs_store/downloads/') >= 0) {
+
+    // Prevent the page-transition overlay for links that trigger file downloads
+    // (NFS store downloads, CSV exports, admin attachment downloads, or any link with download attribute)
+    var is_download = href.indexOf('/nfs_store/downloads/') >= 0 ||
+      href.match(/\.(csv|ics)(\?|$)/) ||
+      href.indexOf('/attachment') >= 0 ||
+      $(this).attr('download') !== undefined ||
+      $(this).hasClass('export-csv');
+
+    if (is_download) {
       $('body').addClass('prevent-page-transition');
     }
   });
 
+  // Allow a link to request a new or edit action to be called on an admin page
+  const $perform_action_item = $('[data-perform-action]');
+  const perform_action = $perform_action_item.attr('data-perform-action');
+  const init_params = $perform_action_item.attr('data-init-params');
+  if (perform_action) {
+    window.setTimeout(function () {
+      if (perform_action == 'new') {
+        const $button = $('.add-item-button')
+        const prev_url = $button.attr('href');
+        $button.attr('href', `${prev_url}?${init_params}`);
+        $button.click();
+        $button.attr('href', prev_url);
+      }
+      else if (perform_action == 'edit') {
+        const $button = $('.simple-admin-edit:visible')
+        if ($button.length !== 1) {
+          console.error('Error: expected exactly one button to be found for edit action');
+          return;
+        }
+
+        $button.click();
+      }
+    })
+  }
   window.onbeforeunload = function (ev) {
 
     if ($('body').hasClass('prevent-page-transition')) {

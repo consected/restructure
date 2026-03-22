@@ -5,7 +5,7 @@ module Seeds
     def self.add_values(values, item_type)
       values.each do |v|
         res = Classification::GeneralSelection.find_or_initialize_by(v.merge(item_type: item_type))
-        res.update(current_admin: auto_admin) unless res.admin
+        res.update(current_admin: Seeds.auto_admin) unless res.admin
       end
     end
 
@@ -19,7 +19,7 @@ module Seeds
         GeneralSelections.setup
 
         # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
-        res.update!(current_admin: auto_admin) unless res.admin
+        res.update!(current_admin: Seeds.auto_admin) unless res.admin
         tu = User.template_user
         app_type = Admin::AppType.active.first
         # Ensure there is at least one user access control, otherwise we won't re-enable the process on future loads
@@ -87,14 +87,14 @@ module Seeds
 
       return unless Rails.env.test?
 
-      res.update(current_admin: auto_admin, disabled: false)
+      res.update(current_admin: Seeds.auto_admin, disabled: false)
 
       app_type = Admin::AppType.where(name: :zeus).first
       uac = Admin::UserAccessControl.where(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones').first
       if uac
-        uac.update(disabled: false, current_admin: auto_admin, access: :create)
+        uac.update(disabled: false, current_admin: Seeds.auto_admin, access: :create)
       else
-        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones', access: :create, current_admin: auto_admin)
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones', access: :create, current_admin: Seeds.auto_admin)
       end
     end
   end

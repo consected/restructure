@@ -1,10 +1,37 @@
 # frozen_string_literal: true
 
+# User Model Spec
+#
+# Tests core user authentication, validation, and lifecycle management functionality.
+#
+# Test Coverage:
+# - User Creation: Basic user instantiation and persistence
+# - Password Management:
+#   - Password changes and validation
+#   - Prevention of recent password reuse (checks last N passwords)
+#   - Password expiration after configured age limit
+#   - Password expiration reminders
+# - Email Management:
+#   - Users cannot change their own email addresses
+#   - Admins can change user email addresses
+# - Account Security:
+#   - Disabled users cannot authenticate
+#   - Users cannot change their own disabled flag
+# - Error Handling:
+#   - Prevents duplicate error messages from associated models (GitHub #340)
+#   - Validates single, clear error messages for password reuse
+# - User Registration:
+#   - Self-registration when enabled
+#   - Admin-created users when self-registration disabled
+# - Associations:
+#   - user_preference relationship with autosave and inverse_of
+
 require 'rails_helper'
 include SetupHelper
 
 describe User do
   include ModelSupport
+
   before(:each) do
     @user, @good_password = create_user
     @good_email = @user.email
@@ -31,7 +58,7 @@ describe User do
   end
 
   it 'allows password change' do
-    @user.password = @good_password + '&&!'
+    @user.password = "#{@good_password}&&!"
     expect(@user.save).to be true
   end
 
@@ -102,6 +129,39 @@ describe User do
 
     @user.password = "#{@good_password} 1"
     expect(@user.save).to be true
+  end
+
+  it 'does not show duplicate error messages when reusing a recent password' do
+    create_admin
+
+    # Generate 7 new passwords - 0 to 6
+    7.times do |n|
+      @user.password = "#{@good_password} #{n}"
+      @user.save!
+    end
+
+    # Try to reuse a recent password
+    @user.password = "#{@good_password} 3"
+    @user.save
+
+    # Get all error messages
+    error_messages = @user.errors.full_messages
+
+    # The issue: when autosave: true is set on user_preference association,
+    # validation errors get duplicated with the association prefix:
+    # - "New password matches a previous password..."
+    # - "User preference user new password matches a previous password..."
+    # This is confusing for users.
+
+    # Check that we only have ONE error about password reuse, not two
+    password_errors = error_messages.grep(/matches a previous password/i)
+
+    expect(password_errors.length).to eq(1),
+                                      "Expected only 1 password reuse error, but got #{password_errors.length}: #{password_errors.inspect}"
+
+    # Verify the error is the direct one, not the prefixed version
+    expect(password_errors.first).to match(/^New password matches a previous password/i)
+    expect(password_errors.first).not_to match(/User preference/i)
 
     @user.password = "#{@good_password} 1"
     expect(@user.save).to be false
@@ -245,8 +305,53 @@ describe User do
     Delayed::Worker.delay_jobs = false
   end
 
+  it 'does not send password expiration notification to disabled users' do
+    Delayed::Worker.delay_jobs = false
+    Messaging::MessageNotification.delete_all
+    expect(Messaging::MessageNotification.layout_template(Users::Reminders.password_expiration_defaults[:layout])).to be_a Admin::MessageTemplate
+
+    create_admin
+
+    @user = User.new email: "#{@user.email}-disabled-allow-test-email", current_admin: @admin, first_name: 'fn', last_name: 'ln'
+    @user.otp_required_for_login = false
+
+    # Set the password to be expiring soon
+    unless @user.class.method_defined?(:orig_password_updated_at)
+      @user.class.send :alias_method, :orig_password_updated_at, :password_updated_at
+    end
+    @user.class.send(:define_method, :password_updated_at) do
+      Time.now - (Settings::PasswordAgeLimit - 2.9).days
+    end
+
+    @user.save!
+    reset_expiration_user
+
+    # Verify that a notification was sent for the active user
+    initial_message_count = Messaging::MessageNotification.count
+    expect(initial_message_count).to be > 0
+
+    # Now disable the user
+    @user.disabled = true
+    @user.current_admin = @admin
+    @user.save!
+
+    # Clear previous notifications for this test
+    Messaging::MessageNotification.delete_all
+
+    # Try to perform the job - it should not create a notification
+    HandlePasswordExpirationReminderJob.new.perform(@user)
+
+    # Verify no new notification was created for the disabled user
+    expect(Messaging::MessageNotification.count).to eq 0
+
+    # Verify the job returns early without raising an exception
+    expect { HandlePasswordExpirationReminderJob.new.perform(@user) }.not_to raise_error
+  ensure
+    Delayed::Worker.delay_jobs = false
+  end
+
   after :all do
-    if User.new.respond_to? :orig_password_updated_at
+    if User.method_defined? :orig_password_updated_at
       User.send :alias_method, :password_updated_at, :orig_password_updated_at
     end
   end

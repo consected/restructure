@@ -69,7 +69,7 @@ class ActivityLog < ActiveRecord::Base
   def self.all_valid_item_and_rec_types
     Classification::GeneralSelection
       .selector_collection(['item_type like ?', '%_type'])
-      .map { |i| [i[:item_type].sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } +
+      .map { |i| [i[:item_type].sub(/(_rec)?_type$/, '').singularize, i[:value]].join('_') } +
       use_with_class_names
   end
 
@@ -277,7 +277,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   # Set up an association to this class on the Master
-  def add_master_association(&association_block)
+  def add_master_association(&)
     return if disabled || !errors.empty?
 
     begin
@@ -287,11 +287,11 @@ class ActivityLog < ActiveRecord::Base
       logger.debug "Associated master: has_many #{model_association_name} with class_name: #{full_implementation_class_name}"
       awa = action_when_attribute.to_sym
       awa = :created_at if awa == :alt_order
-      Master.has_many model_association_name,
+      Master.has_many(model_association_name,
                       -> { order(awa => :desc, id: :desc) },
                       inverse_of: :master,
                       class_name: full_implementation_class_name,
-                      &association_block
+                      &)
 
       # Add an association for each extra log type
       rns = self.class.all_option_configs_resource_names do |e|
@@ -313,7 +313,7 @@ class ActivityLog < ActiveRecord::Base
       # since there is no link to advanced search
       add_parent_item_association
     rescue StandardError => e
-      puts e
+      warn e
       logger.debug e
     end
   end
@@ -322,7 +322,6 @@ class ActivityLog < ActiveRecord::Base
     # Generate the set of activity log associations, for this item type
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
-    # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
     impl_parent_class = implementation_class.parent_class
 
     remove_assoc_class "#{impl_parent_class}::ActivityLog" if item_type_exists
@@ -330,17 +329,17 @@ class ActivityLog < ActiveRecord::Base
     impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
 
       def create(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
 
       def create!(att = nil)
         att[:master] ||= proxy_association.owner.master
-        super(att)
+        super
       end
     end
 
@@ -361,24 +360,23 @@ class ActivityLog < ActiveRecord::Base
                                  class_name: full_implementation_class_name do
         def build(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
 
         def create(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
 
         def create!(att = nil)
           att[:master] ||= proxy_association.owner.master
-          super(att)
+          super
         end
       end
     end
   rescue StandardError => e
     # Catch the errors to avoid an issue preventing the system from starting up
-    puts e
-    # puts e.backtrace.join("\n")
+    warn e
     logger.error e
   end
 
@@ -386,72 +384,96 @@ class ActivityLog < ActiveRecord::Base
     "activity_log/#{implementation_model_name.pluralize.to_sym}"
   end
 
+  def base_route_short_name
+    implementation_model_name.pluralize.to_sym
+  end
+
   # set up a route for each available activity log definition
   def self.routes_load
     mn = nil
-    begin
-      m = enabled
-      return if m.empty?
 
-      Rails.application.routes.draw do
-        resources :masters, only: %i[show index new create] do
-          m.each do |pg|
-            brn = pg.base_route_segments
-            mn = pg.implementation_model_name.pluralize.to_sym
-            Rails.logger.info "Setting up routes for #{mn}"
+    m = active
+    return if m.empty?
 
-            ic = pg.item_type.pluralize
-            get "#{ic}/:item_id/#{brn}/new", to: "#{brn}#new"
-            get "#{ic}/:item_id/#{brn}/", to: "#{brn}#index"
-            post "#{ic}/:item_id/#{brn}", to: "#{brn}#create"
-            get "#{ic}/:item_id/#{brn}/:id/edit", to: "#{brn}#edit"
-            patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
-            get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
-            get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
-            get "#{ic}/:item_id/#{brn}/:extra_log_type/:id", to: "#{brn}#show"
-            post "#{ic}/:item_id/#{brn}/:extra_log_type", to: "#{brn}#create"
-            # These must go last to ensure secondary_key lookup (where id is a string)
-            # doesn't override other routes
-            put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
-            get "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#show"
-
-            # used by links to get to activity logs without having to use parent item
-            # (such as a player contact with phone logs)
-            get "#{brn}/new", to: "#{brn}#new"
-            get "#{brn}/", to: "#{brn}#index"
-            get "#{brn}/:id/edit", to: "#{brn}#edit"
-            post brn, to: "#{brn}#create"
-            get "#{brn}/:id/template_config", to: "#{brn}#template_config"
-            get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
-            get "#{brn}/:extra_log_type/:id", to: "#{brn}#show"
-            post "#{brn}/:extra_log_type", to: "#{brn}#create"
-            # These must go last to ensure secondary_key lookup (where id is a string)
-            # doesn't override other routes
-            patch "#{brn}/:id", to: "#{brn}#update"
-            get "#{brn}/:id", to: "#{brn}#show"
-
-            # used by item flags to generate appropriate URLs
-            begin
-              get "activity_log__#{mn}/:id", to: "#{brn}#show",
-                                             as: "activity_log_#{pg.implementation_model_name}"
-            rescue StandardError
-              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id " \
-                                "since activity_log_#{pg.implementation_model_name} already exists?"
-            end
-          end
-        end
-
-        # Provide a simplified path to retrieve a single activity log without a master_id
-        # something like: /activity_log/test_processes/8 or /activity_log/test_processes/item-slug
-        # The final segment of the path may be either the numeric id or the secondary key if not numeric
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw do
+      resources :masters, only: %i[show index new create] do
         m.each do |pg|
           brn = pg.base_route_segments
+          mn = pg.implementation_model_name.pluralize.to_sym
+          ic = pg.item_type.pluralize
+          ic_brn = "#{ic}/:item_id/#{brn}"
+          next if routes.url_helpers.respond_to?("master_#{brn.gsub('/', '_')}_path")
+
+          Rails.logger.info "Setting up routes for activity log: #{mn}"
+
+          get "#{ic_brn}/new", to: "#{brn}#new"
+          get "#{ic_brn}/", to: "#{brn}#index"
+          post "#{ic_brn}", to: "#{brn}#create"
+          get "#{ic_brn}/:id/edit", to: "#{brn}#edit"
+          patch "#{ic_brn}/:id", to: "#{brn}#update"
+          get "#{ic_brn}/:id/template_config", to: "#{brn}#template_config"
+          get "#{ic_brn}/:extra_log_type/new", to: "#{brn}#new"
+          get "#{ic_brn}/:extra_log_type/:id", to: "#{brn}#show"
+          post "#{ic_brn}/:extra_log_type", to: "#{brn}#create"
+          # These must go last to ensure secondary_key lookup (where id is a string)
+          # doesn't override other routes
+          put "#{ic_brn}/:id", to: "#{brn}#update"
+          get "#{ic_brn}/:id", to: "#{brn}#show"
+
+          # used by links to get to activity logs without having to use parent item
+          # (such as a player contact with phone logs)
+          get "#{brn}/new", to: "#{brn}#new"
+          get "#{brn}/", to: "#{brn}#index"
+          get "#{brn}/:id/edit", to: "#{brn}#edit"
+          post brn, to: "#{brn}#create"
+          get "#{brn}/:id/template_config", to: "#{brn}#template_config"
+          get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
+          get "#{brn}/:extra_log_type/:id", to: "#{brn}#show"
+          post "#{brn}/:extra_log_type", to: "#{brn}#create"
+          # These must go last to ensure secondary_key lookup (where id is a string)
+          # doesn't override other routes
+          patch "#{brn}/:id", to: "#{brn}#update"
           get "#{brn}/:id", to: "#{brn}#show"
+
+          # used by item flags to generate appropriate URLs
+          begin
+            get "activity_log__#{mn}/:id", to: "#{brn}#show",
+                                           as: "activity_log_#{pg.implementation_model_name}"
+          rescue StandardError => e
+            Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id " \
+                              "since activity_log_#{pg.implementation_model_name} already exists?"
+
+            Rails.logger.warn e.short_string_backtrace
+          end
         end
       end
-    rescue ActiveRecord::StatementInvalid => e
-      logger.warn "Not loading activity log routes for #{mn}. The table has probably not been created yet. \n#{e}\n#{e.backtrace.join("\n")}"
+
+      # Provide a simplified path to retrieve a single activity log without a master_id
+      # something like: /activity_log/test_processes/8 or /activity_log/test_processes/item-slug
+      # The final segment of the path may be either the numeric id or the secondary key if not numeric
+      m.each do |pg|
+        brn = pg.base_route_segments
+        next if routes.url_helpers.respond_to?("#{brn.gsub('/', '_').singularize}_path")
+
+        Rails.logger.info "Setting up routes for activity log simplified: #{brn}"
+        begin
+          get "#{brn}/:id", to: "#{brn}#show"
+        rescue StandardError => e
+          Rails.logger.warn "Skipped creating route #{brn}/:id " \
+                            "since activity_log_#{pg.implementation_model_name} already exists?"
+
+          Rails.logger.warn e.short_string_backtrace
+        end
+      end
     end
+  rescue StandardError => e
+    Rails.logger.error "Failed to set up routes for dynamic model #{mn}: #{e}"
+    Rails.logger.error e.short_string_backtrace
+  ensure
+    routes ||= Rails.application.routes
+    routes.disable_clear_and_finalize = false
   end
 
   # Generate the protocol / sub process  / protocol event entries that will be
@@ -467,9 +489,7 @@ class ActivityLog < ActiveRecord::Base
     end
 
     # generate the basic activity log create / update records
-    track_name = full_item_type_name.singularize.humanize.downcase
-
-    Tracker.add_record_update_entries track_name, admin, 'record'
+    Tracker.add_record_update_entries tracker_name, admin, 'record'
 
     Classification::Protocol.enabled.each do |p|
       # logger.info "For protocol: #{p.id} #{p.name}"
@@ -490,7 +510,16 @@ class ActivityLog < ActiveRecord::Base
         logger.info "Adding a new Activity protocol event #{pe.id}"
       end
     end
+
+    Classification::Protocol.reset_memos
+
     true
+  end
+
+  #
+  # name for generating the basic activity log create / update records
+  def tracker_name
+    full_item_type_name.singularize.humanize.downcase
   end
 
   def check_item_type_and_rec_type
@@ -603,7 +632,7 @@ class ActivityLog < ActiveRecord::Base
 
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
-        res.include TrackerHandler
+        # res.include TrackerHandler
         res.include WorksWithItem
         res.include UserHandler
         res.include Dynamic::ActivityLogImplementer
@@ -611,6 +640,7 @@ class ActivityLog < ActiveRecord::Base
         res.include Dynamic::RelatedModelHandler
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
+        apply_encrypted_attributes(res)
 
         remove_implementation_controller_class
         res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
@@ -619,7 +649,7 @@ class ActivityLog < ActiveRecord::Base
         add_model_to_list res
       rescue StandardError => e
         failed = true
-        puts "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
+        warn "Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}"
         logger.info <<~END_TEXT
           *************************************************************************************
           Failure creating activity log model definition. #{e.inspect}\n#{e.short_string_backtrace}
@@ -633,7 +663,7 @@ class ActivityLog < ActiveRecord::Base
     else
       # Check that the implementation has been successful
       unless implementation_class_defined?(klass, fail_without_exception: true)
-        puts 'Failure checking activity log model definition.'
+        warn 'Failure checking activity log model definition.'
         logger.info <<~END_TEXT
           *************************************************************************************
           Failure checking activity log model definition.
@@ -650,7 +680,7 @@ class ActivityLog < ActiveRecord::Base
 
     begin
       implementation_class
-    rescue StandardError => e
+    rescue StandardError
       # logger.debug e
       return false
     end
@@ -713,7 +743,7 @@ class ActivityLog < ActiveRecord::Base
   # @return [Array]
   def all_reference_views
     all_referenced_tables
-      .map { |t| reference_view_name(t[:to_table_name]) unless t[:without_reference] }
+      .map { |t| reference_view_name(t[:to_table_name]) unless t[:without_reference] || t[:to_table_name].nil? }
       .compact
       .uniq
       .map { |v| v[0..(MaxLengthViewName - 1)] }
@@ -724,9 +754,7 @@ class ActivityLog < ActiveRecord::Base
   # @param [String] to_table_name
   # @return [String]
   def reference_view_name(to_table_name)
-    tn = table_name.sub('activity_log_', 'al_')
-    ttn = to_table_name.sub('activity_log_', 'al_')
-    "#{ttn}_from_#{tn}"
+    Admin::MigrationGenerator.reference_view_name(table_name, to_table_name)
   end
 
   # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
@@ -734,25 +762,34 @@ class ActivityLog < ActiveRecord::Base
     full_item_type_name.ns_hyphenate
   end
 
+  def default_embed_table_name(extra_log_type)
+    sname = process_name || [item_type, rec_type].compact.join('_')
+    [category&.id_underscore, sname, extra_log_type, 'recs'].compact.join('_')
+  end
+
+  def default_embed_resource_name(extra_log_type)
+    "dynamic_model__#{default_embed_table_name(extra_log_type)}"
+  end
+
   # Override to enable extra log types to also be added to Resouces::Models
-  def add_model_to_list(m)
+  def add_model_to_list(model)
     # Clean up before re-adding
     remove_model_from_list
 
     super
-
-    rns = option_configs.map(&:resource_name)
+    ocs = option_configs(raise_bad_configs: false)
+    rns = ocs.map(&:resource_name)
 
     rns.each do |rn|
       elt = rn.split('__').last
       hyph_name = "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
       Resources::Models.add(
-        m,
+        model,
         resource_name: rn,
         resource_item_name: rn,
         type: :activity_log_type,
         base_route_name: nil,
-        base_route_segments: "#{m.base_route_segments}/#{elt}",
+        base_route_segments: "#{model.base_route_segments}/#{elt}",
         hyphenated_name: hyph_name,
         hyphenated_item_name: hyph_name,
         option_type: elt

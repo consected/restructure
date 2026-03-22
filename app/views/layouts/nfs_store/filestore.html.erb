@@ -5,7 +5,7 @@
     <%= csrf_meta_tags %>
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
-    <%= javascript_include_tag 'application' %>
+    <%= javascript_include_tag 'application', nonce: true %>
 
 <!-- <%#= javascript_pack_tag 'application' %> -->
 
@@ -13,21 +13,21 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-<script src="/js/vendor/jquery.ui.widget.js"></script>
+<%= javascript_include_tag "/js/vendor/jquery.ui.widget.js", nonce: true %>
 <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+<%= javascript_include_tag "https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js", nonce: true %>
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+<%= javascript_include_tag "https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js", nonce: true %>
 <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<%= javascript_include_tag "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", nonce: true %>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="/js/jquery.iframe-transport.js"></script>
+<%= javascript_include_tag "/js/jquery.iframe-transport.js", nonce: true %>
 <!-- The basic File Upload plugin -->
-<script src="/js/jquery.fileupload.js"></script>
+<%= javascript_include_tag "/js/jquery.fileupload.js", nonce: true %>
 
 
 
-<script>
+<%= javascript_tag nonce: true do %>
     _fpa.session = function(timeout) {
     };
     _fpa.status = {
@@ -38,7 +38,7 @@
     $(document).ready(function(){
       _fpa.handle_remotes();
     });
-</script>
+<% end %>
 
   </head>
 

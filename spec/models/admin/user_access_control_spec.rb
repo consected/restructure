@@ -17,10 +17,10 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       @implementation_table_name = 'test_external_uac_identifiers'
       @implementation_attr_name = 'uac_identifier_id'
     end
-    SetupHelper.setup_ext_identifier implementation_table_name: @implementation_table_name,
+    SetupHelper.setup_ext_identifier(implementation_table_name: @implementation_table_name,
                                      implementation_attr_name: @implementation_attr_name,
-                                     assign_access: assign_access,
-                                     add_disabled: add_disabled
+                                     assign_access:,
+                                     add_disabled:)
 
     vals = {
       name: @implementation_table_name,
@@ -51,12 +51,12 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     app_type_id = Admin::AppType.active.first.id
     3.times do
       create_user
-      Admin::UserAccessControl.create user: @user, resource_type: :table, resource_name: 'player_infos',
-                                      current_admin: @admin, app_type_id: app_type_id
+      Admin::UserAccessControl.create(user: @user, resource_type: :table, resource_name: 'player_infos',
+                                      current_admin: @admin, app_type_id:)
 
       expect do
         Admin::UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos',
-                                         current_admin: @admin, app_type_id: app_type_id
+                                         current_admin: @admin, app_type_id:
       end.to raise_error ActiveRecord::RecordInvalid
     end
   end
@@ -115,7 +115,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     id = @player_info.id
 
-    res = @master.player_infos.where id: id
+    res = @master.player_infos.where(id:)
 
     expect(res.first).not_to be nil
     expect(res.first.id).to eq id
@@ -158,6 +158,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     # by default, a user is granted access to all tables
 
     original_acl = res = @user.has_access_to? :access, :table, :player_infos
+    original_acl = res = Admin::UserAccessControl.find(res.id)
     res.access = nil
     res.current_admin = @admin
     res.save!
@@ -227,6 +228,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res['latest_tracker_history']).not_to be nil
 
     res = @user.has_access_to? :access, :table, :tracker_histories
+    res = Admin::UserAccessControl.find(res.id)
     res.access = nil
     res.current_admin = @admin
     res.save!
@@ -252,6 +254,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     @player_info.update!(first_name: 'oldaaabbbccc')
 
     res = @user.has_access_to? :access, :table, :player_infos
+    res = Admin::UserAccessControl.find(res.id)
     res.access = :read
     res.current_admin = @admin
     res.save!
@@ -270,6 +273,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     @master.current_user = @user
     res = @user.has_access_to? :access, :table, :player_infos
+    res = Admin::UserAccessControl.find(res.id)
     res.access = :read
     res.current_admin = @admin
     res.save!
@@ -291,6 +295,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     @player_info.update!(first_name: 'oldaaabbbccc')
 
     res = @user.has_access_to? :access, :table, :player_infos
+    res = Admin::UserAccessControl.find(res.id)
     res.access = :read
     res.current_admin = @admin
     res.save!
@@ -306,7 +311,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     res = @user.has_access_to? :update, :table, :player_infos
     # expect(res.id).to eq uac.id
-
+    res = Admin::UserAccessControl.find(res.id)
     expect(@player_info.update(first_name: 'aaabbbccc')).to be_truthy
 
     res.access = nil

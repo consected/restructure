@@ -11,12 +11,13 @@ _fpa_admin.all.index_page = class {
     var il = new _fpa_admin.all.index_page(block)
     il.setup_shrinkable_blocks()
     il.handle_filter_selections();
+    il.update_page_title();
   }
 
   setup_shrinkable_blocks() {
 
     window.setTimeout(function () {
-      var blocks = $('.shrinkable-block')
+      var blocks = $('.shrinkable-block, .config-error-block')
       _fpa.utils.make_readable_notes_expandable(blocks, 100);
 
       $(document).on('change click', '#config', function () {
@@ -39,6 +40,18 @@ _fpa_admin.all.index_page = class {
 
       headspace.html(selected);
     })
+  }
+
+  // Update the page title with the admin page name
+  update_page_title() {
+    var $admin_title = $('h1.admin-title').first();
+    if ($admin_title.length) {
+      // Get just the main title text (excluding <small> tags)
+      var admin_page_name = $admin_title.clone().children().remove().end().text().trim();
+      if (admin_page_name) {
+        _fpa.page_title.for_admin(admin_page_name);
+      }
+    }
   }
 
 }

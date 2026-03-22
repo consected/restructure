@@ -5,12 +5,15 @@ module CalcActions
   class NonQueryCondition
     include Common
 
-    NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name reference].freeze
+    NonQueryTableNames = %i[this user parent referring_record top_referring_record embedded_item role_name
+                            reference].freeze
 
-    NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
+    NonQueryNestedKeyNames = %i[this referring_record top_referring_record embedded_item this_references parent_references
                                 parent_or_this_references reference validate].freeze
 
-    SimpleConditions = ['==', '=', '<', '>', '<>', '!=', '<=', '>=', '~*', '~'].freeze
+    SimpleConditions = ['==', '=', '<', '>', '<>', '!=', '<=', '>=', '~*', '~', 'in?', 'include?'].freeze
+
+    ValidCalculateFunctions = %i[sum min max count_not_null mean].freeze
 
     attr_accessor :table, :field_name, :condition_def, :current_instance, :return_failures,
                   :conditions, :condition_config
@@ -18,7 +21,8 @@ module CalcActions
     #
     # @return [true | false]
     def initialize(current_instance: nil, table: nil, field_name: nil, condition_def: nil,
-                   return_failures: nil, return_this: nil, condition_config: nil)
+                   return_failures: nil, return_this: nil, condition_config: nil,
+                   top_level_error: nil, top_level_error_above: nil)
       self.current_instance = current_instance
       self.table = table
       self.field_name = field_name
@@ -26,6 +30,8 @@ module CalcActions
       self.return_failures = return_failures
       self.return_this = return_this
       self.condition_config = condition_config
+      self.top_level_error = top_level_error
+      self.top_level_error_above = top_level_error_above
 
       self.conditions = {}
     end
@@ -40,6 +46,8 @@ module CalcActions
 
       # Requesting a return constant in any circumstance requires a non query condition
       non_query_condition = true if field_name == :return_constant
+
+      non_query_condition = true if field_name == :calculate
 
       # If there is a nested condition, the key may represent a non query table name
       val_item_key = definition.is_a?(Hash) && definition.first.is_a?(Hash) && definition.first.first
@@ -151,8 +159,12 @@ module CalcActions
           elsif !in_instance
             # We failed to find the instance we need to continue.
             raise FphsException, "Instance not found for #{table}"
+
+          elsif field_name == :calculate
+            res = eval_calculation(calculate: expected_val)
+            self.this_val = res
           elsif expected_val.is_a?(Hash) && !(
-            expected_val.key?(:element) ||
+            expected_val.key?(:element) || expected_val.key?(:calculate) ||
             expected_val.key?(:condition) && table == :this
           )
             res &&= non_query_expected_val_hash(expected_val)
@@ -182,30 +194,56 @@ module CalcActions
         self.field_name = :all
       end
 
-      if selection_type? field_name
+      if selection_type?(field_name)
         #### Handle a Nested Condition
         # If we have the field name key being all, any, etc, then run the nested conditions
         # with the current condition scope
+        # We set top_level_error_above since the all/any/not... indicates we are at a new level
         ca = ConditionalActions.new({ field_name => expected_val },
                                     in_instance,
                                     current_scope: @condition_scope,
-                                    return_failures: return_failures,
-                                    return_this: return_this)
+                                    return_failures:,
+                                    return_this:,
+                                    top_level_error:,
+                                    top_level_error_above: top_level_error)
         res = ca.calc_action_if
-        @skip_merge = true
 
       elsif expected_val.keys.first == :validate
         #### Handle validate
         # take the validate definition and calculate the result
         res = calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
 
-      else
-        #### Something was wrong in the definition
-        raise FphsException, <<~ERROR_MSG
-          calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
+      elsif !selection_type?(field_name) &&
+            expected_val.values.find { |f| f.is_a?(Hash) && f.values.include?('return_value') }
 
-          #{@condition_config.to_yaml}
-        ERROR_MSG
+        ca = ConditionalActions.new({ all: expected_val },
+                                    in_instance,
+                                    current_scope: @condition_scope,
+                                    return_failures:,
+                                    return_this:,
+                                    top_level_error:,
+                                    top_level_error_above:)
+        returned_value = ca.get_this_val
+        @skip_merge = true
+        res = in_instance.attributes[field_name.to_s] == returned_value
+      else
+        #### Handle a previously unhandled nested condition
+        ca = ConditionalActions.new({ all: { field_name => expected_val } },
+                                    in_instance,
+                                    current_scope: @condition_scope,
+                                    return_failures:,
+                                    return_this:,
+                                    top_level_error:,
+                                    top_level_error_above:)
+        res = ca.calc_action_if
+        @skip_merge = true
+
+        #### Something was wrong in the definition
+        # raise FphsException, <<~ERROR_MSG
+        #   calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
+
+        #   #{@condition_config.to_yaml}
+        # ERROR_MSG
       end
       res
     end
@@ -216,6 +254,9 @@ module CalcActions
     # Also set a value or result instance if requested
     def non_query_expected_val_not_a_hash(expected_val)
       # Get the value
+
+      expected_val = eval_calculation(expected_val)
+
       loc_this_val = attribute_from_instance(in_instance, field_name)
 
       res = if expected_val.is_a?(Hash) && expected_val[:element] && loc_this_val.is_a?(Hash)
@@ -274,6 +315,8 @@ module CalcActions
                                current_instance.top_referring_record
                              when :reference
                                current_instance.reference
+                             when :embedded_item
+                               current_instance.embedded_item(embed_action_type: :viewing)
                              end
     end
 
@@ -281,30 +324,47 @@ module CalcActions
     def eval_simple_condition(test_val, expected_val)
       if expected_val.is_a? Array
         # Since we have expected value as an array, simply see if it includes the value we found
-        return expected_val.include?(test_val)
-      end
-
-      if expected_val.is_a?(Hash) || expected_val.is_a?(Array)
+        expected_val.include?(test_val)
+      elsif expected_val.is_a?(Hash) || expected_val.is_a?(Array)
         condition = expected_val[:condition] || '=='
         exp_val = dynamic_value(expected_val[:value])
-        if condition.in?(SimpleConditions)
-          test_simple_conditions condition, test_val, exp_val
-        elsif condition.in?(UnaryConditions)
-          test_unary_conditions condition, test_val, exp_val
-        elsif condition.in?(ValidExtraConditionsArrays)
-          test_array_conditions condition, test_val, exp_val
-        else
-          raise FphsException, "calc_action this condition is not recognized: #{condition}"
-        end
+        res = if condition.in?(SimpleConditions)
+                test_simple_conditions condition, test_val, exp_val
+              elsif condition.in?(UnaryConditions)
+                test_unary_conditions condition, test_val, exp_val
+              elsif condition.in?(ValidExtraConditionsArrays)
+                test_array_conditions condition, test_val, exp_val
+              else
+                raise FphsException, "calc_action this condition is not recognized: #{condition}"
+              end
+        # Optionally negate the result
+        res = !res if expected_val[:not]
+        res
       else
         test_val == dynamic_value(expected_val)
       end
     end
 
+    def eval_calculation(expected_val)
+      calc = expected_val[:calculate] if expected_val.is_a? Hash
+      return expected_val unless calc
+
+      fn = calc.first.first
+      valid_fn = ValidCalculateFunctions.find { |f| f == fn }
+      raise FphsException, "Invalid calculate function: #{fn}" unless valid_fn
+
+      vals = calc.first.last
+      vals[:attributes].map { |a| in_instance.attributes[a] }.send(valid_fn)
+    end
+
     def test_simple_conditions(condition, test_val, exp_val)
       case condition
       when '=', '=='
-        test_val == exp_val
+        if exp_val.is_a?(Array) && !test_val.is_a?(Array)
+          test_val.in?(exp_val)
+        else
+          test_val == exp_val
+        end
       when '<>'
         test_val != exp_val
       when '~'
@@ -381,7 +441,14 @@ module CalcActions
         if value_here.is_a?(Hash)
           value_here = value_here.stringify_keys[seg]
         elsif value_here.is_a?(Array)
-          seg = 0 if seg == 'first'
+          seg = case seg
+                when 'first'
+                  0
+                when 'last'
+                  -1
+                else
+                  seg
+                end
           seg = seg.to_i
           value_here = value_here[seg]
         end
@@ -394,7 +461,7 @@ module CalcActions
     # @param key [Symbol]
     # @return [True | False]
     def non_query_nested_key_name?(key)
-      (key.in?(NonQueryNestedKeyNames) || selection_type?(key))
+      key.in?(NonQueryNestedKeyNames) || selection_type?(key)
     end
   end
 end

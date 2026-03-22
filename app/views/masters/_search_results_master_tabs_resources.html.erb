@@ -1,0 +1,32 @@
+  <% 
+    resources.each do |resource|
+      template_postfix = ''
+      template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
+
+      if default_panels.length > 0 && initial_show.nil?
+      # The "default" overrides the value set in the panel definition only if the panel definition was not set
+        initial_show = resource.to_s.in?(default_panels)
+      end
+
+      path = resource.gsub('__', '/').pluralize
+      extra_params = ''
+      using_params = ''
+      if filter_items
+        rparams = filter_items[resource.pluralize]
+        if rparams.is_a? Hash
+          rparams = rparams.to_unsafe_h if rparams.respond_to? :to_unsafe_h
+          extra_params = "&#{rparams.to_query}"
+          using_params = 'page-layout'
+        elsif rparams == 'using params'
+          using_params = 'page'
+        end
+      end
+
+      extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click-initial-show' : ''}"
+  %>
+  {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%=resource.pluralize%>')) }}
+  <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(resource, default_panels.length) %>" data-open-panels="{{open_panels}}">
+    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= path %>?limit=<%=limit%><%extra_params%>&{{params_to_query 'filter' '<%=resource.pluralize%>'}}" data-using-params="<%= using_params %>" data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><%= panel_label %></a>
+  </li>
+  {{/if}}
+  <% end %>

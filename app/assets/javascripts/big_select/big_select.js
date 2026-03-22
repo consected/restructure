@@ -117,7 +117,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     $desc.attr('data-content', val);
 
     val = val || ''
-    $field_overlay.val(val.replace(/\n/g, ' '));
+    $field_overlay.val(val.replace(/\n/g, ' ')).change();
   }
 
 
@@ -142,6 +142,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
   }
 
   var set_hash = function (full_hash) {
+    if (!full_hash) return null;
     var subtype = $field.attr('data-big-select-subtype') || 'big_select_default'
     return full_hash[subtype]
   }

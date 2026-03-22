@@ -1,6 +1,7 @@
 <%
   resources = panel.contains.resources
   init_visible = panel.view_options.initial_show || nil if panel.view_options
+  default_expander = panel.view_options&.default_expander
   hide_sl_class = 'hide-sublist-controls' if panel.view_options&.hide_sublist_controls
   hide_al_header_class = 'hide-activity-logs-header' if panel.view_options&.hide_activity_logs_header
   resources.each do |resource|
@@ -22,6 +23,7 @@
          data-sub-id="{{id}}"
          data-sub-item="<%= resource %>"
          data-template="<%= resource.hyphenate %>-main-result-template"
+         data-default-expander="<%= default_expander %>"
     >
         <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= resource_type %>-inner-block">
         </div>

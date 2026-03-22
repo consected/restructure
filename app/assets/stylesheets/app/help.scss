@@ -1,30 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400");
-// @import url("/fonts/roboto/Roboto-Regular.ttf");
-
-@font-face {
-  font-family: "Roboto";
-  src: url("/fonts/roboto/Roboto-Regular.ttf");
-}
-
-@font-face {
-  font-family: "Roboto-Bold";
-  src: url("/fonts/roboto/Roboto-Bold.ttf");
-}
-
-@font-face {
-  font-family: "Roboto-Italic";
-  src: url("/fonts/roboto/Roboto-Italic.ttf");
-}
-
-@font-face {
-  font-family: "Roboto-BoldItalic";
-  src: url("/fonts/roboto/Roboto-BoldItalic.ttf");
-}
-
 div.help-view-doc,
 .common-help-item,
 .md-formatted-block,
-#help-sidebar-body div.standalone-page-col.reset-row {
+#help-sidebar-body div.standalone-page-col.reset-row,
+#help-sidebar-body div.info-page.reset-row {
   font-family: Roboto, sans-serif;
 
   .common-help-item {
@@ -175,6 +153,12 @@ div.help-view-doc,
     h4 {
       font-size: 18px;
     }
+
+    h1+h2 {
+      margin-top: -18px;
+      font-size: 20px;
+      color: gray;
+    }
   }
 
   .default-layout-rows,
@@ -239,6 +223,11 @@ div.help-view-doc,
     overflow: visible;
   }
 
+  ul > li > ul {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
   li.list-group-item {
     list-style-position: outside;
     list-style-type: none;
@@ -272,6 +261,17 @@ div.help-view-doc,
     padding: 15px;
     background-color: rgb(221, 221, 221);
     text-align: center;
+
+    .help-open-in-new-tab {
+      font-size: 1.1em;
+      vertical-align: middle;
+      opacity: 0.6;
+      float: right;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   pre {
@@ -306,6 +306,13 @@ div.help-view-doc,
 
   .footer {
     display: none;
+  }
+
+  h1 code {
+    color: #444;
+    background-color: transparent;
+    font-weight: bold;
+    padding-left: 0;
   }
 }
 

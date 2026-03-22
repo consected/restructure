@@ -1,12 +1,16 @@
 class Admin::AppConfigurationsController < AdminController
-  helper_method :role_name_options, :value_editor
+  helper_method :role_name_options, :value_editor, :name_big_select
 
   protected
+
+  def view_folder
+    'admin/common_templates'
+  end
 
   def filters
     {
       name: Admin::AppConfiguration.configurations,
-      app_type_id: Admin::AppType.all_by_name
+      app_type_id: Admin::AppType.all_by_name.merge('IS NULL': '(default)')
     }
   end
 
@@ -32,6 +36,10 @@ class Admin::AppConfigurationsController < AdminController
 
   def value_editor
     :plain_text
+  end
+
+  def name_big_select
+    Admin::AppConfiguration.configuation_meanings
   end
 
   private

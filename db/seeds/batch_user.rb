@@ -8,7 +8,7 @@ module Seeds
       log "In #{self}.setup"
       return if User.batch_user
 
-      User.create! email: Settings::BatchUserEmail, first_name: 'auto', last_name: 'batch user', current_admin: auto_admin
+      User.create! email: Settings::BatchUserEmail, first_name: 'auto', last_name: 'batch user', current_admin: Seeds.auto_admin
       log "Ran #{self}.setup"
     end
   end

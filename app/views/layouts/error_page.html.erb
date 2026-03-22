@@ -1,11 +1,14 @@
 <%
- text = '&nbsp;'.html_safe unless defined?( text) && text.present?
+ text = '&nbsp;'.html_safe unless defined?(text) && text.present?
+
+ tag = 'p'
+ tag='pre' if text.include?("\n")
 %>
-<div class="container well">
+<div class="container well error-page-block">
   <h1><%= @error_title || 'Unexpected Error' %></h1>
-  <p class="">
+  <<%= tag %> class="">
     <%= text %>
-  </p>
+  </<%= tag %>>
   <p class="text-center">
     <%=link_to 'Go Back', :back, class: 'btn btn-default' %>
   </p>

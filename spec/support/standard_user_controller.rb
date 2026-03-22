@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
 shared_examples 'a standard user controller' do
   include ::UserSupport
 
@@ -23,7 +22,7 @@ shared_examples 'a standard user controller' do
     setup_access :addresses
     setup_access :scantrons
     setup_access :player_contacts
-    setup_access :player_infos, access: :edit
+    setup_access :player_infos, access: :update
 
     unless @user.has_access_to? :read, :general, :app_type
       setup_access :app_type, access: :read, resource_type: :general

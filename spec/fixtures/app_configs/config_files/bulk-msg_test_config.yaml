@@ -1021,7 +1021,7 @@ app_type:
       lock: true
       user_email:
     - id: 128
-      name: nflpa
+      name: NFLPA
       value: nflpa
       item_type: player_contacts_source
       created_at: "2015-10-14T10:08:48.863Z"
@@ -1036,7 +1036,7 @@ app_type:
       lock: true
       user_email:
     - id: 129
-      name: nflpa2
+      name: NFLPA 2
       value: nflpa2
       item_type: player_contacts_source
       created_at: "2015-10-14T10:08:48.863Z"

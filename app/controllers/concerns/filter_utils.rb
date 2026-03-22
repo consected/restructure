@@ -37,7 +37,7 @@ module FilterUtils
         if v&.end_with?('%')
           likes[0] += ' AND ' if likes.length > 1
           likes[0] += "#{k} LIKE ?"
-          likes << v
+          likes << v.gsub('_', '\\_')
           p.delete(k)
         elsif v&.index(/is (not )?null/)
           likes[0] += "#{k} #{v}"
@@ -86,13 +86,13 @@ module FilterUtils
   #
   # Does the primary model have a *disabled* field in the database?
   def has_disabled_field
-    primary_model.attribute_names.include?('disabled') && current_admin
+    primary_model.attribute_names.include?('disabled') && current_admin if primary_model.respond_to? :attribute_names
   end
 
   #
   # Is the primary model tied directly to an app type with an app_type_id field?
   def primary_model_uses_app_type?
-    primary_model.attribute_names.include?('app_type_id')
+    primary_model.attribute_names.include?('app_type_id') if primary_model.respond_to? :attribute_names
   end
 
   #

@@ -1,7 +1,8 @@
-<div class="report-admin-search-attr-block form-inline">
+<div>
+<div class="report-admin-search-attr-block form-inline" data-result="search_attr_definer_block">
   <div class="row" id="search_attr_definer">
-    <div class="col-sm-24" style="text-align: left;" id="search_attr_definer_form">
-      <%= f.label :search_attributes%>
+    <div class="col-sm-24 admin-form__left-aligned" id="search_attr_definer_form">
+      <%= label_tag :search_attributes, 'search attributes' %>
       <ul class="admin-tag-list selectable" id="search_attr_item_list"></ul>
       <div id="report-admin-search-attr-add-block" class="collapse well">
         <div class="report-admin-subblock">
@@ -37,7 +38,7 @@
           <div class="report-admin-subblock">
             <div class="report-admin-sb-item">filter dropdown</div>
             <div class="report-admin-sb-field-block">
-              <select id="search_attrs_filter" data-attr-el="filter">
+              <select id="search_attrs_filter" data-attr-el="filter" class="use-chosen">
                 <option value="all">all</option>
                 <% Classification::GeneralSelection.item_types.dup.each do |i|%>
                   <option value="item_type: <%=i%>">item_type: <%=i%></option>
@@ -56,10 +57,14 @@
           <div class="report-admin-subblock">
             <div class="report-admin-sb-item">defined selectors</div>
             <div class="report-admin-sb-field-block">
-              <select id="search_attrs_defined_selector" data-attr-el="defined_selector">
+              <select id="search_attrs_defined_selector" data-attr-el="defined_selector" class="use-chosen">
                 <% 
-                Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
+                begin
+                  Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
                   <option value="<%=i%>"><%=i%></option>
+                <% end %>
+                <% rescue StandardError => e %>
+                  <option value="error">Error loading defined selectors</option>
                 <% end %>
               </select>
             </div>
@@ -86,7 +91,7 @@
             <div class="report-admin-sb-item">model resource name</div>
             <p class="help-block">The model to select from.</p>
             <div class="report-admin-sb-field-block">
-              <%= select_tag :search_attrs_resource_name, select_from_model_resource_name_options, include_blank:true, data: { attr_el: 'resource_name' } %>  
+              <%= select_tag :search_attrs_resource_name, select_from_model_resource_name_options, include_blank:true, data: { attr_el: 'resource_name' }, class: 'use-chosen' %>  
             </div>
           </div>
         </div>        
@@ -154,6 +159,16 @@ field2 (any of):
             <p class="help-block">For multiple values, enter each value on a new line.</p>
           </div>
         </div>
+
+        <div class="report-admin-subblock">
+          <div class="report-admin-sb-item">show if</div>
+          <p class="help-block">Use {{substitutions}} to return a value based on a condition. If nothing is set, the field is always shown. Otherwise, if the substitutions return any non-blank value then the field is shown.</p>
+          <div class="report-admin-sb-field-block">
+            <textarea id="search_attrs_show_if" data-attr-el="show_if"></textarea>
+            <p class="help-block">For example <code>{{#is col_names "includes" "master_id"}}true{{/is}}</code></p>
+          </div>
+        </div>
+
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item"></div>
           <div class="report-admin-sb-item-submit">
@@ -163,13 +178,6 @@ field2 (any of):
         </div>
       </div>
     </div>
-    <div class="col-sm-24 collapse" id="search_attr_definer_config">
-      <div class="" style="text-align: left;">
-        <%= f.label :attributes_configuration%>
-        <div class="report-admin-search-attr-yaml-editor" >
-          <%= f.text_area  :search_attrs, class: "report-admin-search-attr-final-config code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>
-        </div>
-      </div>
-    </div>
   </div>
+</div>
 </div>

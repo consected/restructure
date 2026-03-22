@@ -28,17 +28,39 @@ module AppExceptionHandler
 
   protected
 
+  def exceptions_logger
+    @@exceptions_logger ||= Logger.new("#{Rails.root}/log/#{Rails.env}-exceptions.log")
+  end
+
+  def log_exception(error)
+    return if Rails.env.production?
+
+    exceptions_logger.error(error)
+    exceptions_logger.error(error.short_string_backtrace) if error.backtrace
+  end
+
+  #
+  # Consistent flash handling, to avoid long messages from
+  # overloading the header length passed to the client.
+  # @param [String] message The message to display
+  # @param [Symbol] level The flash level (e.g. :info, :warning, :danger)
+  def flash_this_now(message, level = :info)
+    flash.now[level] = message.to_s[0..2000]
+  end
+
   #
   # General method for showing errors, either as plain text or as an error page
   def show_error(title, status, text: nil, flash_level: nil)
+    flash_level ||= :danger
+    Rails.logger.warn("AppExceptionHandler.show_error (#{flash_level}): #{title} (#{status})\n#{text}")
+    Rails.logger.warn(short_string_backtrace(caller))
     text = text.to_s[0..2000] if text
 
-    flash_level ||= :danger
     if request.format == :html
       @error_title = title
       render 'layouts/error_page', status:, locals: { text: }
     else
-      flash.now[flash_level] = title
+      flash_this_now(title, flash_level)
       msg = title
       msg = "#{title} - #{text}" if text
       render plain: msg, status:
@@ -58,12 +80,17 @@ module AppExceptionHandler
   end
 
   def not_found
-    flash.now[:danger] = 'Requested information not found'
+    flash_this_now('Requested information not found', :danger)
     routing_error_handler ActionController::RoutingError.new('Not Found')
   end
 
   def bad_request
     show_error 'The request failed to validate', 422
+  end
+
+  def update_out_of_date(prev_at, submitted_at)
+    dates = "stored record: #{prev_at} <> submitted record #{submitted_at}"
+    show_error "The submitted record doesn't match the latest one - will not update (#{dates})", 422
   end
 
   def unexpected_error(msg)
@@ -82,7 +109,7 @@ module AppExceptionHandler
   end
 
   def unhandled_exception_handler(error)
-    msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
+    msg = "An unexpected error occurred. Contact the administrator if this condition persists.\n#{error.message}"
     code = 500
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end
@@ -145,7 +172,8 @@ module AppExceptionHandler
   def return_and_log_error(error, msg, code, log_level: nil)
     log_level ||= :error
     logger.send(log_level, error.inspect)
-    logger.send(log_level, error.backtrace.join("\n")) if error.backtrace
+    logger.send(log_level, error.short_string_backtrace) if error.backtrace
+    log_exception(error)
 
     if code.in? [400, 500]
       user_id = current_user&.id
@@ -153,14 +181,14 @@ module AppExceptionHandler
       if Rails.env.production?
         Admin::ExceptionLog.create message: msg || 'error',
                                    main: error.inspect,
-                                   backtrace: error.backtrace.join("\n"),
+                                   backtrace: error.short_string_backtrace,
                                    user_id:,
                                    admin_id:
       end
     end
 
     if performed?
-      flash.now[:danger] = msg[0..2000]
+      flash_this_now(msg[0..2000], :danger)
       return true
     end
     errors = { error: [msg] }
@@ -181,7 +209,7 @@ module AppExceptionHandler
       end
       # special handling for CSV failures as they open new windows
       type.csv do
-        flash[:danger] = msg[0..2000]
+        flash_this_now(msg, :danger)
         redirect_to child_error_reporter_path
       end
       type.all do
@@ -189,5 +217,14 @@ module AppExceptionHandler
       end
     end
     true
+  rescue ActionController::RespondToMismatchError => e
+    # This error is raised when the response format does not match any of the requested formats.
+    # Catch it so we can send a useful response.
+    render plain: msg, status: code, content_type: 'text/plain'
+    true
+  end
+
+  def short_string_backtrace(from_caller)
+    ExceptionExtensions.short_string_backtrace(from_caller)
   end
 end

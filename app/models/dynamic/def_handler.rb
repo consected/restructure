@@ -5,9 +5,11 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
-      after_save :force_option_config_parse
+      before_save :clean_options_yaml
+      after_save :force_option_config_parse_no_raise
       after_save :handle_batch_schedule
-      attr_accessor :configurations, :data_dictionary, :options_constants
+      attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id,
+                    :failed_option_configs
     end
 
     class_methods do
@@ -68,10 +70,14 @@ module Dynamic
       # This is typically used to improve load times and ensure we only generate
       # templates for models that will actually be used.
       # @return [ActiveRecord::Relation] scoped results
-      def active_model_configurations
-        # return @active_model_configurations if @active_model_configurations
+      def active_model_configurations(force_update: nil)
+        @active_model_configurations ||= {}
+        ckey = "active_model_configurations--#{name}-#{table_name}"
+        got = @active_model_configurations[ckey]
+        force_update ||= Admin::AppType.active_app_types_changed?
+        return got if got && !force_update
 
-        olat = Admin::AppType.active_app_types
+        olat = Admin::AppType.active_app_types force: force_update
 
         # List of names that the associated_* items have already returned
         # to avoid building huge lists of repetitive joined queries
@@ -84,13 +90,14 @@ module Dynamic
             # Compare against string class names, to avoid autoload errors
             case name
             when 'ActivityLog'
-              res = app_type.associated_activity_logs(not_resource_names: got_names)
+              res = app_type.associated_activity_logs(not_resource_names: got_names, force_update:)
               resnames = app_type.associated_activity_log_names
             when 'DynamicModel'
-              res = app_type.associated_dynamic_models(valid_resources_only: false, not_resource_names: got_names)
+              res = app_type.associated_dynamic_models(valid_resources_only: false, not_resource_names: got_names,
+                                                       force_update:)
               resnames = app_type.associated_dynamic_model_names
             when 'ExternalIdentifier'
-              res = app_type.associated_external_identifiers(not_resource_names: got_names)
+              res = app_type.associated_external_identifiers(not_resource_names: got_names, force_update:)
               resnames = app_type.associated_external_identifier_names
             end
             if resnames.present? && (resnames - got_names).present?
@@ -115,11 +122,7 @@ module Dynamic
           dma = dma.where(schema_name: schemas) if has_schema_name
         end
 
-        @active_model_configurations = dma
-      end
-
-      def reset_active_model_configurations!
-        @active_model_configurations = nil
+        @active_model_configurations[ckey] = dma
       end
 
       # Get all the resource names for options configs in all active dynamic definitions
@@ -129,14 +132,14 @@ module Dynamic
       #   for example:
       #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
       # @return [Array] array of string names
-      def all_option_configs_resource_names(&block)
+      def all_option_configs_resource_names(&)
         res = []
 
         @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
-                   a.select(&block)
+                   a.select(&)
                  else
                    a
                  end
@@ -154,17 +157,19 @@ module Dynamic
       #   for example:
       #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
       # @return [Array] array of string names
-      def all_option_configs_grouped_resources(&block)
+      def all_option_configs_grouped_resources(&)
         res = {}
 
         @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
-                   a.select(&block)
+                   a.select(&)
                  else
                    a
                  end
+
+          next unless a.first
 
           group_name = [a.first.def_item.category, a.first.def_item.name].select(&:present?).join(': ')
           res[group_name] = elts.map { |r| [r.resource_name, r.label] }.to_h
@@ -212,9 +217,9 @@ module Dynamic
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
                              .map do |a|
-              mn = imp_class.model_name.to_s.ns_underscore
-              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-              "#{mn}_#{a}".to_sym
+                               mn = imp_class.model_name.to_s.ns_underscore
+                               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+                               :"#{mn}_#{a}"
             end
           end
 
@@ -232,8 +237,9 @@ module Dynamic
       #
       # Get the timestamp for the latest definition stored in the DB.
       # @return [DateTime]
-      def latest_stored_update
-        active_model_configurations
+      def latest_stored_update(using: nil)
+        using ||= active_model_configurations
+        using
           .select(:updated_at)
           .reorder('')
           .order('updated_at desc nulls last')
@@ -278,17 +284,51 @@ module Dynamic
       # Look up user based on a snippet of the configuration
       def user_for_conf_snippet(config)
         user = config[:user]
-        if user.to_i > 0
-          user = User.active.find(user)
-        elsif user.is_a? String
-          user = User.active.find_by_email(user)
+        app_type = config[:app_type]
+        app_type = Admin::AppType.find_active_by_name_or_id(app_type) if app_type
+        if user
+          user = User.find_active_by_email_or_id(user)
+          user.app_type = app_type if app_type
+          user.save
+        elsif app_type
+          user = User.use_batch_user(app_type)
         end
 
-        app_type = config[:app_type]
-        user = User.use_batch_user(app_type) if user.nil? && app_type
         user
       end
+
+      #
+      # Get IDs of definitions that are in a specific app type.
+      # Uses the app_type's association method based on the model's table name.
+      # @param [Admin::AppType|Integer] app_type - the app type or its ID
+      # @return [Array<Integer>] IDs of definitions associated with the app type
+      def ids_in_app_type(app_type)
+        app_type = Admin::AppType.find(app_type) if app_type.is_a?(Integer)
+        return [] unless app_type
+
+        # Derive the association method name from the model's table name
+        # e.g., 'dynamic_models' -> :associated_dynamic_models
+        association_method = :"associated_#{table_name}"
+        return [] unless app_type.respond_to?(association_method)
+
+        app_type.send(association_method).pluck(:id)
+      end
       # End of class_methods
+    end
+
+    # The instance attribute that will hold the current option_type value
+    # Use the _configurations.option_type_attr_name value or :option_type if not set
+    # If set in the configurations, this should be a persisted field
+    def option_type_attr_name
+      @option_type_attr_name = configurations&.dig(:option_type_attr_name)&.to_sym.presence || :option_type
+    end
+
+    # The default option type value to use for the default view.
+    # The default view is used for new item forms and common options such as
+    # `view_options` and `showable_if`.
+    # By default name is :default if not specified in the configurations
+    def default_option_type_name
+      @default_option_type_name = configurations&.dig(:default_option_type_name)&.to_sym.presence || :default
     end
 
     def secondary_key
@@ -298,6 +338,12 @@ module Dynamic
       # Parse option configs if necessary
       option_configs
       @secondary_key = configurations && configurations[:secondary_key]
+    end
+
+    #
+    # name for generating the basic activity log create / update records
+    def tracker_name
+      table_name.singularize
     end
 
     def use_current_version
@@ -328,7 +374,7 @@ module Dynamic
     # At this time dynamic models only use one config definition, under the 'default' key
     # Simplify access to the default options configuration
     def default_options
-      option_type_config_for :default
+      option_type_config_for default_option_type_name
     end
 
     #
@@ -347,16 +393,37 @@ module Dynamic
     #
     # Parse option configs
     # @param [Boolean] force forces the memoized version to be updated
-    # @param [<Type>] raise_bad_configs ensures bad configurations are checked and
-    #    exceptions raised to halt execution
+    # @param [nil|true|StandardError|Array[StandardError]] raise_bad_configs ensures bad configurations are checked and
+    #    exceptions raised to halt execution - true catches all exceptions,
+    #    or specify a particular error class or array of classes
     # @return [Array] configurations
-    def option_configs(force: false, raise_bad_configs: false)
+    def option_configs(force: false, raise_bad_configs: nil, return_value_on_error: [])
       return if disabled?
 
+      raise_bad_configs = nil if raise_bad_configs == false
+      @failed_option_configs = nil
       @option_configs = nil if force
       @option_configs ||= self.class.options_provider.parse_config(self, force)
-      self.class.options_provider.raise_bad_configs @option_configs if raise_bad_configs
+      if raise_bad_configs
+        self.class.options_provider.raise_bad_configs @option_configs
+      else
+        @failed_option_configs = self.class.options_provider.bad_configs?(@option_configs)
+      end
+
       @option_configs
+    rescue FphsOptionsBadConfig, FphsOptionsParseError, FphsOptionsGeneralError, FphsException => e
+      Rails.logger.error "Error retrieving option_configs for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      @failed_option_configs = true
+      raise if raise_bad_configs == true || raise_bad_configs == e.class || (
+        raise_bad_configs.is_a?(Array) && raise_bad_configs&.include?(e.class)
+      )
+
+      @option_configs || return_value_on_error
+    end
+
+    def failed_option_configs?
+      @failed_option_configs
     end
 
     #
@@ -364,6 +431,10 @@ module Dynamic
     # @return [Array{Symbol}]
     def option_configs_names
       option_configs&.map(&:name)
+    rescue StandardError => e
+      Rails.logger.error "Error retrieving option_configs_names for #{self.class.name}/#{id}: #{e}"
+      Rails.logger.error e.short_string_backtrace
+      nil
     end
 
     #
@@ -375,9 +446,10 @@ module Dynamic
     #      - :first_config - get the first item in the option_configs array
     #      - generates an empty configuration with the name specified in result_if_empty
     # @return [Class] options provider instance
-    def option_type_config_for(name, result_if_empty: :default)
+    def option_type_config_for(name, result_if_empty: nil)
       return unless option_configs
 
+      result_if_empty ||= default_option_type_name
       res = option_configs.find { |s| s.name == name.to_s.underscore.to_sym }
 
       if !res && self.class.allow_empty_options
@@ -401,7 +473,7 @@ module Dynamic
     #
     # Simply parse option configs, forcing the memoized version to be updated
     # @return [Array] parsed configs
-    def force_option_config_parse
+    def force_option_config_parse(raise_bad_configs: true)
       return if disabled?
 
       @secondary_key_set = false
@@ -409,13 +481,34 @@ module Dynamic
       @use_current_version_set = false
       @use_current_version = nil
 
-      option_configs force: true, raise_bad_configs: true
+      option_configs force: true, raise_bad_configs:
+    end
+
+    def force_option_config_parse_no_raise
+      force_option_config_parse(raise_bad_configs: false)
+    end
+
+    def clean_options_yaml
+      alt_option_config_attr ||= self.class.option_configs_attr
+      return unless alt_option_config_attr && respond_to?(alt_option_config_attr)
+
+      val = send(alt_option_config_attr)
+      return if val.blank?
+
+      val = val.dup&.gsub("\r\n", "\n")
+      send("#{alt_option_config_attr}=", val)
     end
 
     #
     # If batch_trigger specifies a schedule, set it up now. Called by after_save callback
     def handle_batch_schedule
-      def_unschedule = disabled || !persisted? || !active_model_configuration?
+      # If disabled, unschedule and return early to prevent rescheduling
+      if disabled && persisted?
+        RecurringBatchTask.unschedule_task self
+        return
+      end
+
+      def_unschedule = !persisted? || !active_model_configuration?
 
       RecurringBatchTask.unschedule_task self if def_unschedule
 
@@ -426,6 +519,10 @@ module Dynamic
       if frequency.blank? && run_at.blank?
         RecurringBatchTask.unschedule_task self
       elsif frequency == 'once'
+        # Do not schedule one-time tasks during app type import, as they should have already run
+        # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
+        return if Admin::AppTypeImport.import_in_progress?
+
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
@@ -434,7 +531,7 @@ module Dynamic
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: FieldDefaults.duration(frequency),
-                                         run_at:
+                                         run_at: run_at
 
       end
     end
@@ -466,6 +563,11 @@ module Dynamic
     # The name of the association within the Master class
     def model_association_name
       full_implementation_class_name.pluralize.ns_underscore.to_sym
+    end
+
+    # Association name where for a parent has one of this type
+    def one_of_this_association_name
+      model_association_name.to_s.singularize.to_sym
     end
 
     # Full namespaced item type name, underscored with double underscores
@@ -514,6 +616,10 @@ module Dynamic
       defined?(foreign_key_name) && foreign_key_name.blank?
     end
 
+    def implementation_no_user_id
+      configurations && configurations[:no_user_id]
+    end
+
     def prefix_class
       klass = Object
       klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
@@ -530,6 +636,44 @@ module Dynamic
       return :table if Admin::MigrationGenerator.table_exists? table_name
 
       :view
+    end
+
+    #
+    # Get the schema name for the current table_name
+    # Particularly useful if the schema_name is not set
+    # @return [String|nil]
+    def schema_name_in_db
+      Admin::MigrationGenerator.tables_and_views_reset!
+      Admin::MigrationGenerator.table_schema_hash[table_name]
+    end
+
+    def estimated_record_count_ckey
+      "estimated_record_count--#{self.class.name}-#{id}-#{created_at}-#{updated_at}"
+    end
+
+    def reset_estimated_record_count!
+      Rails.cache.delete(estimated_record_count_ckey)
+    end
+
+    #
+    # Get an estimated count of records in the table. Cached for 15 minutes
+    # @return [Integer]
+    def estimated_record_count
+      ckey = estimated_record_count_ckey
+      Rails.cache.fetch(ckey, expires_in: 15.minutes) do
+        implementation_class.count
+      rescue StandardError => e
+        Rails.logger.warn "Failed to get estimated record count for #{name}"
+        nil
+      end
+    end
+
+    #
+    # Check if this definition is in a specific app type
+    # @param [Admin::AppType|Integer] app_type - the app type or its ID
+    # @return [Boolean]
+    def in_app_type?(app_type)
+      self.class.ids_in_app_type(app_type).include?(id)
     end
   end
 end

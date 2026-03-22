@@ -1,18 +1,28 @@
 <h4><%= object_instance.name %></h4>
+<% if object_instance.persisted? %>
+  <p><%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
+  data: {
+    remote: true, 
+    target: "##{object_instance.resource_name.hyphenate}--",
+    'result-target': "##{object_instance.resource_name.hyphenate}--",
+    'result-target-force': "true"
+  },
+  class: 'btn btn-primary btn-sm' %>
+  </p>
+<% end %>
 <% if current_admin&.matching_user_app_type&.name != 'ref-data' %>
-  <h4>Important - switch to app ref-data to review and update Redcap information</h4>
+  <h4>Important - 
+    <%= link_to "switch to the <b>Ref Data</b> app".html_safe, 
+              redcap_project_admins_path(
+                no_redirect: true, 
+                use_app_type: 'ref-data',
+                filter: {id: object_instance.id},
+                perform_action: 'edit'
+              ) %> 
+    to review and update Redcap information</h4>
 <% end%>
-<p><label>status</label> <span><%= object_instance.status %></span>&nbsp;
-  <% if object_instance.persisted? %>
-        <%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
-        data: {
-          remote: true, 
-          target: "##{object_instance.resource_name.hyphenate}--",
-          'result-target': "##{object_instance.resource_name.hyphenate}--",
-          'result-target-force': "true"
-        },
-        class: 'btn btn-primary btn-sm' %>
-  <% else %>
+<p><label>record retrieval status</label> <span><%= object_instance.status %></span>&nbsp;
+  <% unless object_instance.persisted? %>        
   new
   <% end %>
 </p>
@@ -23,11 +33,22 @@ if req&.result
   if !got_error && req.result['errors']&.present?
     got_error = req.result['errors'].join(' | ')
   end
-end
-%>
+  %>
 <p><label>latest request</label>
-  <pre><%= got_error || 'no error' %></pre>
+<i>at <%=current_user_date_time req.created_at%></i>
+  <% if got_error %>
+    <pre><%= got_error %></pre>
+  <% else %>
+    <span>no error</span>
+  <% end %>
 </p>
+<% end %>
+<% if got_error&.include?('Redcap::DataRecords::ModelMissingFields') || got_error&.include?('Redcap::DataRecords::MismatchFields') %>
+<div class="help-block">
+  <p>To get more information, click the <strong>retrieve latest redcap configuration</strong> button below. 
+  When it has completed (may take several seconds) click the <strong>refresh</strong> button.</p>
+</div>
+<% end %>
 <% if object_instance.captured_project_info.present?%>
   <p><label>project info</label> metadata available</p>
 <% else %>
@@ -37,7 +58,7 @@ end
 <%
   if object_instance.dynamic_model_ready?
     dm = object_instance.dynamic_storage&.dynamic_model
-    dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled } )
+    dm_path = admin_dynamic_models_path(filter: { table_name: dm.table_name, disabled: :enabled }, perform_action: 'edit' )
 %>
   <span>(id: <%=dm.id%>) <%= link_to link_label_open_in_new(dm.name), dm_path, target: '_blank' %> </span>
 <% else %>
@@ -49,6 +70,7 @@ end
     <p><label>database table</label>
     <%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{dm.table_name}", 
       target: '_blank' %></p>
+    <p><%= render partial: 'admin/dynamic_models/est_record_count', locals: {object_instance: dm} %></p>
   <% end %>
 <% end %>  
 
@@ -62,12 +84,12 @@ end
     %>
     <p class="info-danger">Failed to compare REDCap and table fields</p>
     <% end %>
-<p><label>metadata and table fields</label></p>
+<p><label>metadata and table fields</label>
 <span>
   <% if !dmfla&.present? || !fla&.present? %>
-  <p class="info-danger">REDCap or table fields not set up</p>
+  <span class="info-danger">REDCap or table fields not set up</span>
   <% elsif object_instance.model_has_all_fields_for_storage? %>
-  <p>REDCap fields match dynamic model table</p>
+  <span>REDCap fields match dynamic model table</span>
   <% else %>
   <p>REDCap fields don't match table</p>
   <ul>
@@ -77,42 +99,116 @@ end
       if efs.present? %><li class="info-danger"><b>Options</b> specifies <code>data_options:</code> requiring extra fields <b>(pull will fail)</b>: <%= "[#{efs.join(" ")}]" %></li><% end %>
   <%  fs = (dmfla - fla)
       if fs.present? %><li><b>Dynamic model</b> table has additional fields <b>(pull will ignore them)</b>: <%= "[#{fs.join(" ")}]" %></li><% end %>
+  <%  if rfs.present? || efs.present? %>
+        <div class="help-block">
+          <p>To add the additional fields to the dynamic model database table, click the <strong>update dynamic model</strong> button.</p>
+          <p><i>NOTE:</i> Updating the dynamic model can have side-effects. If changes have been made to the dynamic model options directly, these
+          will be overwritten. Also, the next time records are retrieved from REDCap, and save triggers defined on the dynamic model will be fired.
+          </p>
+        </div>
+    <% end %>
   <% end %>
   </ul>
 </span>
-<% unless object_instance.dynamic_model_config_library_valid? %>
-<p class="info-danger">Dynamic model config library has not been added</p>
-<% end %>
+</p>
+  <% unless object_instance.dynamic_model_config_library_valid? %>
+  <p class="info-danger">Dynamic model config library has not been added</p>
+  <% end %>
+  <% unless object_instance.associate_master_through_external_id_valid? %>
+  <p class="info-danger">Dynamic model _configurations.foreign_key_through_external_id has not been added</p>
+  <% end %>
+  <% unless object_instance.set_master_id_using_association_valid? %>
+  <p class="info-danger">Option set_master_id_using_association requires associate_master_through_external_identifer to be set</p>
+  <% end %>  
 <p><label>pull schedule</label>
   <span>
-    <% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>
-      every <%= object_instance.frequency %> - next run at 
-      <%= current_user_date_time(object_instance.task_schedule&.run_at) || '(no task scheduled)' %>
-    <% elsif object_instance.transfer_mode == 'manual' %>manual
-    <% else %>none
-    <% end %>
+  <% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>
+    every <%= object_instance.frequency %> - next run at 
+    <%= current_user_date_time(object_instance.task_schedule&.run_at) || '(no task scheduled)' %>
+  <% elsif object_instance.transfer_mode == 'manual' %>manual
+  <% else %>none
+  <% end %>
   </span>
+</p>
+
+<p><label>run requests as</label>
+  <% if object_instance.job_user %>
+  <%= link_to link_label_open_in_new(object_instance.job_user&.email), admin_manage_users_path(filter: {id: object_instance.job_user&.id}), target: '_blank' %> 
+  in app type <%= link_to link_label_open_in_new(object_instance.job_app_type&.name), admin_app_types_path(filter: {id: object_instance.job_app_type&.id}), target: '_blank' %>
+    <% if !object_instance.job_app_type %>
+    <p class="info-danger"><code>run_jobs_as_app_type</code> configuration is not set to an active app type</p>
+    <% elsif !object_instance.job_user.accessible_app_type_ids.include?(object_instance.job_app_type&.id) %>
+    <p class="info-danger"><code>run_jobs_as_user</code> is not permitted to access app type <code><%=object_instance.job_app_type&.name%> (<%= object_instance.job_app_type&.id %>)</code></p>
+    <% end %>
+    <% am = object_instance.associate_master_through_external_id_resource_name
+       if am && !object_instance.job_user&.has_access_to?(:access, :table, am, alt_app_type_id: object_instance.job_app_type&.id, force_reset: true ) %>
+    <p class="info-danger"><code><%=object_instance.job_user&.email%></code> is not permitted to access external identifier <code><%=am%></code> in <code><%=object_instance.job_app_type&.name%></code>
+    <br/><%= link_to link_label_open_in_new('open User Access Controls'), admin_user_access_controls_path(filter: {app_type_id: object_instance.job_app_type&.id}), target: '_blank' %> and add this permission
+    </p>    
+    <% end %>
+  <% else %>
+  <span>bad configuration</span>
+  <p class="info-danger"><code>run_jobs_as_user</code> configuration is not set to a real user</p>
+  <% end %>
 </p>
 <% end %>
 <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
+  <div class="help-block">
+  <p>To allow users access to the field files, they must have </p>
+  <ul>
+    <li>user role <%= link_to link_label_open_in_new(object_instance.send :nfs_role),  admin_user_roles_path(filter: { role_name: object_instance.send(:nfs_role) }), target: '_blank' %> 
+    <li>file filter on resource <%= link_to link_label_open_in_new("redcap__project_admins"), admin_nfs_store_filter_filters_path(filter: { resource_name: 'redcap__project_admins' }), target: '_blank' %> with filter <code>.*/file-fields/.*</code>
+  </ul>
+  </div>
+  
 <% else %>
   <p><label>filestore</label> not set up</p>
 <% end %>
 <p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
-<% if object_instance.persisted? && object_instance.enabled? %>
+<% if object_instance.persisted? && object_instance.enabled? && !object_instance.transfer_mode_none? %>
+<div class="project-admin-actions-block">
   <div style="display: flex;">
     <div class="admin-info-col">
       <% if object_instance.dynamic_model_ready? %>
-        <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+        <% if object_instance.export_only_updated_records_for_manual? %>
+          <p><strong>retrieve records</strong></p>
+          <% date_range = object_instance.date_range_begin_for_manual_pull %>
+          <% if date_range %>
+            <p><%= link_to "since #{current_user_date_time(date_range)}", request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% else %>
+            <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                  method: :post, 
+                  remote: true, 
+                  class: 'btn btn-warning btn-sm' %></p>
+          <% end %>
+          <p><%= link_to 'retrieve all', request_records_redcap_project_admin_path(id: object_instance.id, retrieve_all: true, ignore_cache: true), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% else %>
+          <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+                method: :post, 
+                remote: true, 
+                class: 'btn btn-warning btn-sm' %></p>
+        <% end %>
+        <p><strong>retrieve configurations</strong></p>
+        <p><%= link_to 'retrieve latest redcap configuration', request_latest_rc_configs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 
-              class: 'btn btn-warning btn-sm' %></p>
+              class: 'btn btn-warning btn-sm' %></p>              
         <p><%= link_to 'retrieve user list', request_users_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
         <p><%= link_to 'retrieve data collection instruments list', request_data_collection_instruments_redcap_project_admin_path(id: object_instance.id), 
+              method: :post, 
+              remote: true, 
+              class: 'btn btn-warning btn-sm' %></p>
+        <p><%= link_to 'retrieve event logs', request_logs_redcap_project_admin_path(id: object_instance.id), 
               method: :post, 
               remote: true, 
               class: 'btn btn-warning btn-sm' %></p>
@@ -127,13 +223,22 @@ end
     <div class="admin-info-col">
 
       <p>
-        <%= link_to 'update dynamic model', update_dynamic_model_redcap_project_admin_path(object_instance), 
-        remote: true,
-        class: 'btn btn-danger btn-sm',
-        method: :post %>
-      </p>  
-      <p>
+      <a class="btn btn-danger btn-sm show-in-modal" 
+         data-content-el="#dmdef-update-dm-config-from-table-<%=object_instance.id%>" 
+         data-title="Update dynamic model and database">update dynamic model</a>
+      <div id="dmdef-update-dm-config-from-table-<%=object_instance.id%>" class="hidden">
+        <h2>This action may have side-effects</h2>
+        <p>Click to continue if you are sure</p>
+        <p>
+          <%= link_to 'update dynamic model', update_dynamic_model_redcap_project_admin_path(object_instance), 
+          remote: true,
+          class: 'btn btn-danger btn-sm',
+          method: :post %>
+        </p>  
+      </div>      
+      </p>
 
+      <p>
       <a class="btn btn-danger btn-sm show-in-modal" 
          data-content-el="#dmdef-update-config-from-table-<%=object_instance.id%>" 
          data-title="Force full reconfiguration">force reconfiguration</a>
@@ -150,4 +255,5 @@ end
       </p>
     </div>
   </div>
+</div>
 <% end %>

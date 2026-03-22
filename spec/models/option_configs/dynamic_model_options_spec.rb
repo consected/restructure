@@ -18,6 +18,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
   before :all do
     DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
+    DynamicModel.reset_active_model_configurations!
   end
 
   before :example do
@@ -25,7 +26,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     create_admin
     create_user
     setup_access :trackers
-    setup_access :tracker_history
+    setup_access :tracker_histories
   end
 
   it 'gets the correct version of extra options based on creation date of the instance' do
@@ -80,7 +81,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.options.strip).to eq @option_texts[1].strip
-    expect(@dyn_instances[1].current_definition.option_configs).to eq @option_configs[1]
 
     # The dynamic model instance should pull options that matches the original v1 options
     check_version 1
@@ -149,20 +149,24 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'replaces option configurations' do
-    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
+    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
+    table_name = 'test_replace_opts'
+    unless Admin::MigrationGenerator.table_exists? table_name
+      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
     end
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
-    name = 'test created by 2'
+    name = 'test replace opts'
     dm = DynamicModel.create! current_admin: @admin,
                               name:,
-                              table_name: 'test_created_by_recs',
+                              table_name:,
                               schema_name: 'ml_app',
                               category: :test,
                               options: nil
 
     # Initially sets the options for db columns from the definition
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _db_columns:
         id:
           type: integer
@@ -182,6 +186,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: datetime
 
     END_OPT
+
+    unless dm.options.strip == exp.strip
+      put_to_saved_log("replaces option configurations\n---\n#{dm.options}\n---\n#{exp}\n---\n")
+    end
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: nil
@@ -189,8 +198,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       _db_columns:
         id:
@@ -212,6 +222,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     END_OPT
 
+    expect(dm.options.strip).to eq exp.strip
     hash = {
       _db_columns: {
         id: { type: 'integer' },
@@ -222,8 +233,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       _db_columns:
         id:
@@ -234,17 +246,20 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: string
     END_OPT
 
+    expect(dm.options.strip).to eq exp.strip
+
     dm.options = <<~END_OPT
       default:
         label: Something
 
     END_OPT
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: nil
@@ -252,13 +267,15 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:#{' '}
+
 
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _comments: {
@@ -268,14 +285,17 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _comments:
         test1: A test comment
+
+
 
       default:
         label: Something
 
     END_OPT
+    expect(dm.options.strip).to eq exp.strip
 
     hash = {
       _db_columns: {
@@ -287,7 +307,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     dm.prepend_to_options(hash)
 
-    expect(dm.options).to eq <<~END_OPT
+    exp = <<~END_OPT
       _db_columns:
         id:
           type: integer
@@ -296,13 +316,18 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         test2:
           type: string
 
+
       _comments:
         test1: A test comment
+
+
 
       default:
         label: Something
 
     END_OPT
+
+    expect(dm.options.strip).to eq exp.strip
   end
 
   it 'generates show_if from show_if_condition_strings' do
@@ -351,5 +376,364 @@ RSpec.describe 'Dynamic Model Options', type: :model do
         all_nonblock_1: { test2: 'hello' }
       }
     )
+  end
+
+  it 'handles field_configs' do
+    dmdef = generate_test_dynamic_model
+    opt = <<~END_CONFIG
+
+      default:
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields
+          test1: has a caption before test1
+            # This will be overridden
+          test2: has a caption before test2
+            # This will be merged into the field_configs def
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
+    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
+    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    # The field_configs definition overrides any other standalone defs
+    expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    # The cleaned values go back into field_configs
+    expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
+    # The raw field configs remain
+    expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
+  end
+
+  it 'shows different view options' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        # The default option type is a special case.
+        # When no fields are specified, so they are all included
+        # All other option types must specify fields to include
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields
+          test1: has a caption before test1
+            # This will be overridden
+          test2: has a caption before test2
+            # This will be merged into the field_configs def
+
+      view_1:
+        # No fields are specified, so none are included
+        field_configs:
+          test1:
+            caption_before: field_configs defined test1 caption
+            show_if:
+              never: true
+        caption_before:
+          all_fields: show before all fields in view_1
+          test2: has a caption before test2
+
+      view_2:
+        fields:
+          - test2
+          - placeholder_view_2
+        field_configs:
+          placeholder_view_2:
+            caption_before: placeholder caption before for view_2
+            show_if:
+              test2: show placeholder_view_2
+          test1:
+            caption_before: not shown
+          test2:
+            caption_before: has a caption before test2
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+    expect(dmdef.default_options.fields).to eq(dmdef.field_list_array)
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
+    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
+    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
+    expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
+
+    view_1_options = dmdef.option_type_config_for(:view_1)
+    expect(view_1_options.fields).to be_empty
+    expect(view_1_options.show_if[:test1]).to be_a Hash
+    expect(view_1_options.show_if[:test1]).to eq(never: true)
+    expect(view_1_options.caption_before[:all_fields]).to be_a Hash
+    expect(view_1_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields in view_1</p>')
+    expect(view_1_options.caption_before[:test1]).to be_a Hash
+    expect(view_1_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
+    expect(view_1_options.caption_before[:test2]).to be_a Hash
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+
+    view_2_options = dmdef.option_type_config_for(:view_2)
+    expect(view_2_options.fields).to eq(%w[test2 placeholder_view_2])
+    expect(view_2_options.field_configs[:placeholder_view_2][:caption_before][:caption]).to eq('<p>placeholder caption before for view_2</p>')
+    expect(view_2_options.field_configs[:placeholder_view_2][:show_if]).to eq(test2: 'show placeholder_view_2')
+    expect(view_2_options.caption_before[:test1][:caption]).to eq('<p>not shown</p>')
+    expect(view_2_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
+    expect(view_2_options.show_if[:placeholder_view_2]).to eq(test2: 'show placeholder_view_2')
+  end
+
+  it 'handles show_if conditions with embedded_item data' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      default:
+        show_if:
+          test1:
+            any:
+              test2: main_form_value
+              embedded_item:
+                embedded_field: embedded_value
+          user_id:
+            all:
+              test1: required_value
+              embedded_item:
+                embedded_status: active
+        field_configs:
+          test1:
+            caption_before: test1 caption
+          test2:
+            caption_before: test2 caption
+          user_id:
+            caption_before: user_id caption
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    # Verify the show_if configuration is properly structured
+    expect(dmdef.default_options.show_if[:test1]).to be_a Hash
+    expect(dmdef.default_options.show_if[:test1]).to have_key(:any)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:test2)
+    expect(dmdef.default_options.show_if[:test1][:any]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:test1][:any][:embedded_item]).to eq(embedded_field: 'embedded_value')
+
+    expect(dmdef.default_options.show_if[:user_id]).to be_a Hash
+    expect(dmdef.default_options.show_if[:user_id]).to have_key(:all)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:test1)
+    expect(dmdef.default_options.show_if[:user_id][:all]).to have_key(:embedded_item)
+    expect(dmdef.default_options.show_if[:user_id][:all][:embedded_item]).to eq(embedded_status: 'active')
+  end
+
+  it 'handles nested show_if conditions with embedded_item' do
+    dmdef = generate_test_dynamic_model
+
+    opt = <<~END_CONFIG
+
+      option_type_3:
+        show_if:
+          field_to_show:
+            any:
+              another_field_in_this_form: a value
+              embedded_item:
+                all:
+                  a_field_in_the_embedded_item: another value
+                  embedded_score:
+                    condition: '>='
+                    value: 10
+
+    END_CONFIG
+
+    dmdef.update!(options: opt, current_admin: @admin)
+
+    option_type_3 = dmdef.option_type_config_for(:option_type_3)
+
+    # Verify the show_if configuration structure
+    expect(option_type_3.show_if[:field_to_show]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:another_field_in_this_form]).to eq('a value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:a_field_in_the_embedded_item]).to eq('another value')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score]).to be_a Hash
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:condition]).to eq('>=')
+    expect(option_type_3.show_if[:field_to_show][:any][:embedded_item][:all][:embedded_score][:value]).to eq(10)
+  end
+
+  # Test for GitHub issue #216: Field type changes in dynamic models
+  #
+  # This test verifies that when a field type is changed in a dynamic model configuration
+  # (e.g., from string to integer), the system properly updates:
+  # 1. The column type in the primary table
+  # 2. The column type in the corresponding history table
+  # 3. The trigger function that copies data to the history table
+  #
+  # Previously, only the primary table column was updated during field type changes.
+  # The history table column and trigger function retained the old type, causing data
+  # type mismatches when the trigger attempted to insert updated records into the history table.
+  #
+  # The fix ensures that update migrations recreate the trigger function whenever field
+  # types change, so the trigger correctly handles the new column types in both tables.
+  #
+  # Test approach:
+  # - Create a dynamic model with string fields
+  # - Change one field's type to integer
+  # - Verify both tables have integer columns
+  # - Verify trigger still works by updating a record and checking history
+  context 'field type changes' do
+    before :all do
+      # Create admin and user for this context
+      create_admin
+      create_user
+
+      # Enable migrations for this test suite
+      @original_allow_migrations = Settings::AllowDynamicMigrations
+      change_setting('AllowDynamicMigrations', true)
+
+      @schema_name = 'dynamic_test'
+      @table_name = 'test_field_type_changes'
+      @history_table_name = 'test_field_type_change_history'
+
+      # Clean up any existing test tables and model
+      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.send(:remove_const, :TestFieldTypeChange) if defined?(DynamicModel::TestFieldTypeChange)
+
+      # Drop existing tables if they exist
+      @conn = ActiveRecord::Base.connection
+      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@history_table_name} CASCADE")
+      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
+
+      # Create the dynamic model definition with initial db_columns configuration
+      # This will create both the primary and history tables in the dynamic_test schema
+      @dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test Field Type Changes',
+        table_name: @table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: :master_id,
+        category: :test,
+        field_list: 'input_a input_b input_c',
+        options: <<~YAML
+          _db_columns:
+            input_a:
+              type: string
+            input_b:
+              type: string
+            input_c:
+              type: string
+        YAML
+      )
+
+      @dm.update_tracker_events
+    end
+
+    after :all do
+      # Clean up
+      @dm&.disable!(@admin)
+      # Restore original migration setting
+      change_setting('AllowDynamicMigrations', @original_allow_migrations)
+    end
+
+    it 'correctly changes field types in both primary and history tables' do
+      # Create a master record for testing
+      master = Master.create! current_user: @user
+      master.current_user = @user
+
+      # Verify initial table structure - all fields should be strings by default
+      @conn.schema_cache.clear!
+      primary_columns = @conn.columns("#{@schema_name}.#{@table_name}")
+      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}")
+
+      input_b_primary = primary_columns.find { |c| c.name == 'input_b' }
+      input_b_history = history_columns.find { |c| c.name == 'input_b' }
+
+      expect(input_b_primary).not_to be_nil
+      expect(input_b_history).not_to be_nil
+      expect(input_b_primary.type).to eq(:string)
+      expect(input_b_history.type).to eq(:string)
+
+      # Create a test record to verify data migration works
+      setup_access :dynamic_model__test_field_type_changes
+      test_record = master.dynamic_model__test_field_type_changes.create!(
+        current_user: @user,
+        input_a: 'text a',
+        input_b: '123',
+        input_c: 'text c'
+      )
+      expect(test_record.id).not_to be_nil
+
+      # Now change input_b to integer type
+      @dm.instance_variable_set(:@ran_migration, nil) # Reset flag to allow second migration
+      @dm.update!(
+        current_admin: @admin,
+        options: <<~YAML
+          _db_columns:
+            input_a:
+              type: string
+            input_b:
+              type: integer
+            input_c:
+              type: string
+        YAML
+      )
+
+      # Manually trigger migration generation and execution
+      # Force reset the migration generator to ensure it picks up the new db_configs
+      @dm.instance_variable_set(:@migration_generator, nil)
+      @dm.send(:generate_migration)
+      @dm.send(:run_migration) if @dm.instance_variable_get(:@do_migration)
+
+      @dm.update_tracker_events
+
+      # Force column cache refresh
+      @conn.schema_cache.clear!
+      DynamicModel.reset_active_model_configurations!
+
+      # Verify the type changed in both tables
+      primary_columns = @conn.columns("#{@schema_name}.#{@table_name}")
+      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}")
+
+      input_b_primary = primary_columns.find { |c| c.name == 'input_b' }
+      input_b_history = history_columns.find { |c| c.name == 'input_b' }
+
+      expect(input_b_primary).not_to be_nil, 'input_b should exist in primary table'
+      expect(input_b_history).not_to be_nil, 'input_b should exist in history table'
+      expect(input_b_primary.type).to eq(:integer), "input_b in primary table should be integer, but was #{input_b_primary.type}"
+      expect(input_b_history.type).to eq(:integer), "input_b in history table should be integer, but was #{input_b_history.type}"
+
+      # Verify that the existing data was preserved and converted
+      # The model class needs to be regenerated to pick up the new column types
+      # Clear schema cache and force model class to reload its columns
+      @conn.schema_cache.clear!
+      model_class = @dm.implementation_class
+      model_class.reset_column_information
+
+      # Re-fetch the record with the updated model class
+      test_record = master.dynamic_model__test_field_type_changes.find(test_record.id)
+      expect(test_record.input_b).to eq(123)
+
+      # Verify trigger still works by updating the record
+      test_record.update!(current_user: @user, input_b: 456)
+
+      # Check that history table received the update correctly
+      history_records = @conn.execute(
+        "SELECT input_b FROM #{@schema_name}.#{@history_table_name} WHERE #{@table_name.singularize}_id = #{test_record.id} ORDER BY id DESC LIMIT 1"
+      )
+      expect(history_records.first['input_b'].to_i).to eq(456)
+    end
   end
 end

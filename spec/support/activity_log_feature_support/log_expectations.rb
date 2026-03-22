@@ -54,11 +54,11 @@ module LogExpectations
   end
 
   def expect_log_player_contact_to(values)
-    if values[:have_rank]
-      have_css("#{PhoneListActions::PhoneItemsCss}.selected-item")
-      rank_text = find("#{PhoneListActions::PhoneItemsCss}.selected-item span.label-info").text
-      expect(rank_text).to eq values[:have_rank]
-    end
+    return unless values[:have_rank]
+
+    have_css("#{PhoneListActions::PhoneItemsCss}.selected-item")
+    rank_text = find("#{PhoneListActions::PhoneItemsCss}.selected-item span.label-info").text
+    expect(rank_text).to eq values[:have_rank]
   end
 
   def expect_tracker_event_to_include(date, protocol, sp, pe = nil, index = 0)

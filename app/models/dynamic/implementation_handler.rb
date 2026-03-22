@@ -4,7 +4,11 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      after_find :set_option_type_attr_name
+      after_initialize :set_option_type_attr_name
+      after_initialize :preset_fields, unless: :persisted?
       after_initialize :force_preset_values, unless: :persisted?
+      after_initialize :evaluate_active_values
 
       before_save :handle_before_save_triggers
       after_commit :handle_save_triggers
@@ -12,7 +16,8 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results
+      # trigger_variables: Variables set by the set_variables save trigger
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type
     end
 
     class_methods do
@@ -26,7 +31,7 @@ module Dynamic
       def trigger_batch(limit: nil, alt_user: nil, alt_app_type: nil)
         Rails.logger.info "trigger batch job for #{self} - " \
                           "limit: #{limit}, alt_user: #{alt_user}, alt_app_type: #{alt_app_type}"
-        HandleBatchJob.perform_later(to_s, limit: limit, user: alt_user, app_type: alt_app_type)
+        HandleBatchJob.perform_later(to_s, limit:, user: alt_user, app_type: alt_app_type)
       end
 
       #
@@ -59,9 +64,21 @@ module Dynamic
         end
 
         batch.map do |obj|
-          obj.handle_record_batch_trigger alt_user: alt_user
+          obj.handle_record_batch_trigger(alt_user:)
           obj.id
         end
+      end
+
+      def option_type_attr_name
+        return unless respond_to?(:definition)
+
+        definition.option_type_attr_name
+      end
+
+      def default_option_type_name
+        return unless respond_to?(:definition)
+
+        definition.default_option_type_name
       end
     end
 
@@ -71,7 +88,7 @@ module Dynamic
     # @return [Array{Symbol}]
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
-      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type]&.include?('notes') }
+      res = fo&.filter { |_k, v| v[:no_downcase] || (v[:edit_as] && v[:edit_as][:field_type]&.include?('notes')) }
 
       res&.keys
     end
@@ -134,6 +151,12 @@ module Dynamic
       return if @processing_data
 
       dopt.view_options[:data_attribute]
+    end
+
+    def default_option_type_name
+      return unless self.class.respond_to?(:definition)
+
+      self.class.definition.default_option_type_name
     end
 
     # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
@@ -224,23 +247,84 @@ module Dynamic
     def handle_record_batch_trigger(alt_user: nil)
       as_user = alt_user || user
       self.current_user = as_user
+      self.save_trigger_results ||= {}
       option_type_config&.calc_batch_trigger self
+    end
+
+    def skip_presets_for(method_name)
+      return skip_presets unless skip_presets.is_a?(String)
+
+      skip_presets.split(',').include?(method_name.to_s)
+    end
+
+    def preset_fields
+      return if skip_presets_for(:preset_fields) || !current_user
+
+      config = option_type_config&.preset_fields
+      return unless config&.present?
+
+      st = SaveTriggers::PresetFields.new(config, self)
+      st.perform
     end
 
     #
     # Force fields to be preset before initialization has been completed.
     # This uses the option config {field_options: <field_name>: preset_value:}
     # rather than default: (which only sets the value in the initial form).
+    # preset_value: sets the value regardless of what was previously set, so will override values in #create! methods
+    # blank_preset_value: only sets the value if it was previously blank, so won't override values in #create! methods
     # By setting ahead of time, things like embed_resource_name can operate.
     def force_preset_values
+      return if skip_presets_for(:force_preset_values)
+
       fo = option_type_config&.field_options
       return unless fo
 
       fo.each do |name, config|
-        next unless config.key? :preset_value
+        next unless config.key?(:preset_value) || config.key?(:blank_preset_value)
 
-        send "#{name}=", config[:preset_value]
+        next unless attribute_names.include?(name.to_s)
+
+        init_value = config[:preset_value]
+        if init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+          send "#{name}=", res
+        end
+
+        init_value = config[:blank_preset_value]
+        if init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+          send "#{name}=", res if attributes[name.to_s].blank?
+        end
       end
+    end
+
+    #
+    # Evaluate active values for fields, much like preset_value does, but repeats evaluation
+    # even if the instance has been persisted.
+    def evaluate_active_values
+      return if skip_presets_for(:force_preset_values)
+
+      fo = option_type_config&.field_options
+      return unless fo
+
+      fo.each do |name, config|
+        next unless config.key?(:active_value)
+
+        next unless attribute_names.include?(name.to_s) || @option_type_attr_name.to_s == name.to_s
+
+        init_value = config[:active_value]
+        if init_value
+          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+          send "#{name}=", res
+        end
+      end
+    end
+
+    def set_option_type_attr_name
+      return unless self.class.respond_to? :definition
+
+      @option_type_attr_name = self.class.definition.option_type_attr_name
     end
   end
 end

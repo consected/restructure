@@ -17,7 +17,30 @@ module ActiveRecord
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
                       :requested_action, :resource_type, :prev_table_name, :view_sql, :all_referenced_tables,
-                      :class_name, :view_sql_changed
+                      :class_name, :view_sql_changed, :no_user_id, :al_reference_views
+      end
+
+      #
+      # Define whether history table fields that reference different tables should
+      # have database referential integrity enforced through foreign keys. The fields
+      # themselves will still be created and populated.
+      # This allows history records to still be maintained, even if the DBA has to
+      # remove a primary table's record.
+      # The types of reference from the history table are:
+      #   - master (master_id -> masters.id)
+      #   - parent (<primary table (singular)>_id -> <primary table>.id )
+      #   - user (user_id -> users.id)
+      #   - admin (admin_id -> admin.id - for external identifiers )
+      #
+      # NOTE: For activity logs, the "parent" setting is used to set creation of foreign key to both
+      # the parent activity log table and the "item type" table if one is specified.
+      def add_history_foreign_keys
+        {
+          master: false,
+          parent: false,
+          user: true,
+          admin: true
+        }.freeze
       end
 
       def force_rollback
@@ -51,8 +74,8 @@ module ActiveRecord
         return if schema_exists?(schema)
 
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
-        sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
-        ActiveRecord::Base.connection.execute sql
+        sql += " AUTHORIZATION #{owner}" if owner.present? && Rails.env.production?
+        execute sql
       end
 
       def add_fields_to_tables
@@ -107,7 +130,9 @@ module ActiveRecord
 
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
+            t.belongs_to :master,
+                         index: { name: "#{rand_id}_master_id_h_idx" },
+                         foreign_key: add_history_foreign_keys[:master]
 
             # Views can not be referenced by foreign keys
             if parent_model_is_view
@@ -115,15 +140,19 @@ module ActiveRecord
             else
               t.belongs_to belongs_to_model,
                            index: { name: "#{rand_id}_id_h_idx" },
-                           foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+                           foreign_key:
+                             add_history_foreign_keys[:parent] && { to_table: belongs_to_model.pluralize.to_s }
             end
             create_fields t, true
             t.string :extra_log_type
-            t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
+            t.references :user,
+                         index: { name: "#{rand_id}_user_id_h_idx" },
+                         foreign_key: add_history_foreign_keys[:user]
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" },
-                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize,
+                         index: { name: "#{rand_id}_b_id_h_idx" },
+                         foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -136,7 +165,7 @@ module ActiveRecord
           dir.up do
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
-              next if to_table_name.in? done
+              next if to_table_name.nil? || to_table_name.in?(done)
 
               done << to_table_name
               puts "-- create or replace reference view #{ref_view_name(to_table_name)}"
@@ -146,7 +175,7 @@ module ActiveRecord
                 next
               end
 
-              ActiveRecord::Base.connection.execute refsql
+              execute refsql
             end
           end
           dir.down do
@@ -159,7 +188,7 @@ module ActiveRecord
               refsql = reverse_reference_view_sql(ref_config)
               next unless refsql
 
-              ActiveRecord::Base.connection.execute refsql
+              execute refsql
             end
           end
         end
@@ -171,11 +200,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute activity_log_trigger_sql
+            execute activity_log_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_activity_log_trigger_sql
+            execute reverse_activity_log_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -198,31 +227,43 @@ module ActiveRecord
 
         unless table_exists
           create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-            unless no_master_association
+            unless no_master_association || fields.include?(:master_id)
+
               t.belongs_to :master, index: {
                 name: "dmbt_#{rand_id}_id_idx"
               }, foreign_key: true
             end
             create_fields t
-            t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
+            t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true unless no_user_id
             t.timestamps null: false
           end
 
         end
+
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            unless no_master_association
-              t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
+            unless no_master_association || fields.include?(:master_id)
+              t.belongs_to :master,
+                           index: { name: "#{rand_id}_history_master_id" },
+                           foreign_key: add_history_foreign_keys[:master]
             end
             create_fields t, true
-            t.references :user, index: { name: "#{rand_id}_hist_user_idx" }, foreign_key: true
+
+            unless no_user_id
+              t.belongs_to :user,
+                           index: { name: "#{rand_id}_hist_user_idx" },
+                           foreign_key: add_history_foreign_keys[:user]
+            end
+
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" },
-                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize,
+                         index: { name: "#{rand_id}_id_idx" },
+                         foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
+        puts e
         raise e unless force_rollback
       end
 
@@ -234,11 +275,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute dynamic_model_trigger_sql
+            execute dynamic_model_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_dynamic_model_trigger_sql
+            execute reverse_dynamic_model_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -254,9 +295,15 @@ module ActiveRecord
       end
 
       def create_dynamic_model_view
-        return unless view_sql_changed
+        miv = model_is_view
+        # There is no need to recreate the view if the SQL has not changed
+        # and the view actually exists in the database.
+        if !view_sql_changed && miv
+          Rails.logger.warn "Skipping view creation for #{schema}.#{table_name} as the SQL has not changed"
+          return
+        end
 
-        if model_is_view
+        if miv
           deps = get_dependent_objects(schema, table_name)
           extra = "\ndependent objects:\n#{deps.to_yaml}\n\n"
         end
@@ -264,15 +311,17 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace view #{schema}.#{table_name}"
-            ActiveRecord::Base.connection.execute dynamic_model_view_sql
+            execute dynamic_model_view_sql
           end
           dir.down do
             puts "-- drop view #{schema}.#{table_name}"
-            ActiveRecord::Base.connection.execute reverse_dynamic_model_view_sql
+            execute reverse_dynamic_model_view_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
-        raise "#{e}\n#{extra}" unless force_rollback
+        Rails.logger.warn "Failed to create or update dynamic model view #{schema}.#{table_name}:\n#{e}\n#{e.backtrace.join("\n")}"
+        Rails.logger.warn "Dependent objects:\n#{extra}" if extra.present?
+        raise e, "#{extra}\n#{e}\n#{e.short_string_backtrace}" unless force_rollback
       end
 
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -305,14 +354,18 @@ module ActiveRecord
         end
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            t.belongs_to :master, index: { name: "eih#{rand_id}_id_idx" }, foreign_key: true
+            t.belongs_to :master,
+                         index: { name: "eih#{rand_id}_id_idx" },
+                         foreign_key: add_history_foreign_keys[:master]
+
             create_fields t, true
-            t.references :user, index: true, foreign_key: true
-            t.references :admin, index: true, foreign_key: true
+            t.references :user, index: true, foreign_key: add_history_foreign_keys[:user]
+            t.references :admin, index: true, foreign_key: add_history_foreign_keys[:admin]
             t.timestamps null: false
 
-            t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" },
-                                                            foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to "#{table_name.singularize}_table",
+                         index: { name: "#{table_name.singularize}_id_idx" },
+                         foreign_key: add_history_foreign_keys[:parent] && { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -320,7 +373,7 @@ module ActiveRecord
       end
 
       def create_external_identifier_trigger(_id_field)
-        return if history_table_exists || model_is_view
+        return unless history_table_exists && !model_is_view
 
         self.fields ||= []
         # self.fields.unshift id_field
@@ -330,11 +383,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- create or replace function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute external_identifier_trigger_sql
+            execute external_identifier_trigger_sql
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
+            execute reverse_external_identifier_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -350,11 +403,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
+            execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
+            execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -402,7 +455,7 @@ module ActiveRecord
           current_type = cols.find { |c| c.name == k.to_s }&.type
           next unless v[:type] && current_type
 
-          expected_type = (v[:type]&.to_sym || :string)
+          expected_type = v[:type]&.to_sym || :string
           current_type = :timestamp if current_type == :datetime
           expected_type = :timestamp if expected_type == :datetime
           puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
@@ -422,7 +475,7 @@ module ActiveRecord
             current_type = history_cols.find { |c| c.name == k.to_s }&.type
             next unless v[:type] && current_type
 
-            expected_type = (v[:type]&.to_sym || :string)
+            expected_type = v[:type]&.to_sym || :string
             current_type = :timestamp if current_type == :datetime
             expected_type = :timestamp if expected_type == :datetime
             puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
@@ -466,6 +519,8 @@ module ActiveRecord
           removed_history = []
         end
 
+        field_changes = added.present? || removed.present? || changed.present?
+
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
         setup_fields(full_field_list)
 
@@ -478,15 +533,8 @@ module ActiveRecord
           removed_history = []
         end
 
-        # If there was an activity log referencing this table, drop it, then recreate it at the end
-        view_tn = table_name.sub(/^activity_log_/, 'al_')
-        view_name = "#{view_tn}_from_al_%"
-        reference_views = Admin::MigrationGenerator.view_definitions(schema, view_name)
-        reference_views&.each do |view|
-          execute <<~END_SQL
-            DROP VIEW #{view['schemaname']}.#{view['viewname']};
-          END_SQL
-        end
+        drop_activity_log_views(schema, table_name)
+        dropped_reference_views = drop_reference_views(schema, table_name) if field_changes
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           begin
@@ -524,7 +572,7 @@ module ActiveRecord
 
           # If we are rolling back, skip this one unless the col name exists in the table
           # or if migrating up, skip this one unless the col name does not exist in the table
-          next unless reverting? && c.in?(col_names) || !reverting? && !c.in?(col_names)
+          next unless (reverting? && c.in?(col_names)) || (!reverting? && !c.in?(col_names))
 
           if fdef == :references
             begin
@@ -547,7 +595,7 @@ module ActiveRecord
 
           # If we are rolling back, skip this one unless the col name does not exist in the table
           # or if migrating up, skip this one unless the col name exists in the table
-          next unless reverting? && !c.in?(col_names) || !reverting? && c.in?(col_names)
+          next unless (reverting? && !c.in?(col_names)) || (!reverting? && c.in?(col_names))
 
           # Special case
 
@@ -570,7 +618,7 @@ module ActiveRecord
 
             # If we are rolling back, skip this one unless the col name exists in the table
             # or if migrating up, skip this one unless the col name does not exist in the table
-            next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
+            next unless (reverting? && c.in?(history_col_names)) || (!reverting? && !c.in?(history_col_names))
 
             if fdef == :references
               options[:index][:name] += '_hist'
@@ -592,7 +640,7 @@ module ActiveRecord
 
             # If we are rolling back, skip this one unless the col name does not exist in the table
             # or if migrating up, skip this one unless the col name exists in the table
-            next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
+            next unless (reverting? && !c.in?(history_col_names)) || (!reverting? && c.in?(history_col_names))
 
             if fdef == :references
               options[:index][:name] += '_hist'
@@ -617,12 +665,95 @@ module ActiveRecord
           changed_history.each do |k, v|
             v = map_migration_type_to_db_type(v)
             change_type = "#{v} using #{k}::#{v}"
-            change_column "#{schema}.#{table_name}", k, change_type
+            change_column "#{schema}.#{history_table_name}", k, change_type
           end
         end
 
-        # Recreate the activity log reference views
+        # Recreate the trigger if any field types changed, since the trigger function
+        # needs to reflect the correct types for the fields being copied to history
+        if changed.present? || changed_history.present?
+          case resource_type
+          when :dynamic_model
+            create_dynamic_model_trigger
+          when :activity_log
+            create_activity_log_trigger
+          when :external_identifier
+            create_external_identifier_trigger
+          end
+        end
+
+        recreate_reference_views(dropped_reference_views, schema, table_name) if field_changes
+        recreate_activity_log_views
+
+        change_comments
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
+      #
+      # Drops all activity log related views referencing the specified table
+      # @param [String] schema for the table
+      # @param [String] table_name to check for references
+      # @return [Array{Hash}] all dropped views
+      def drop_activity_log_views(schema, table_name)
+        # If there was an activity log referencing this table, drop it, then recreate it at the end
+        view_tn = table_name.sub(/^activity_log_/, 'al_')
+        view_name = "#{view_tn}_from_al_%"
+        reference_views = Admin::MigrationGenerator.view_definitions(schema, view_name)
         reference_views&.each do |view|
+          Rails.logger.warn "Dropping AL dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name} via activity log"
+          execute <<~END_SQL
+            DROP VIEW #{view['schemaname']}.#{view['viewname']} CASCADE;
+          END_SQL
+        end
+
+        self.al_reference_views = reference_views
+      end
+
+      #
+      # Drop all views referencing the specified table, only if they
+      # have a dynamic model definition (view matches dynamic model "table_name"),
+      # so that we don't inadvertently drop any views created in the DB outside of ReStructure
+      # @param [String] schema for the table
+      # @param [String] table_name to check for references
+      # @return [Array{Hash}] array of view definitions that were dropped
+      def drop_reference_views(schema, table_name)
+        other_ref_views = Admin::MigrationGenerator.views_referencing_table(schema, table_name)
+        other_ref_views = other_ref_views.select do |v|
+          DynamicModel.active.find_by table_name: v['viewname']
+        end
+
+        other_ref_views&.each do |view|
+          Rails.logger.warn "Dropping dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema}.#{table_name}\n" \
+                            "view_definition: \n#{view['view_definition']}"
+          execute <<~END_SQL
+            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+          END_SQL
+        end
+
+        other_ref_views
+      end
+
+      #
+      # Recreate views related to dynamic models, that were previously dropped
+      # @param [Array{Hash}] dropped_reference_views array of view definitions that were dropped
+      # @param [String] schema_name for the table that caused the view to be dropped
+      # @param [String] table_name for the table that caused the view to be dropped
+      def recreate_reference_views(dropped_reference_views, schema_name, table_name)
+        dropped_reference_views&.each do |view|
+          Rails.logger.warn "Recreate dependent view #{view['schemaname']}.#{view['viewname']} which references #{schema_name}.#{table_name}\n" \
+                            "view_definition: \n#{view['view_definition']}"
+          execute <<~END_SQL
+            create view #{view['schemaname']}.#{view['viewname']} as
+            #{view['view_definition']}
+          END_SQL
+        end
+      end
+
+      #
+      # Recreate the activity log reference views previously dropped in #drop_activity_log_views
+      def recreate_activity_log_views
+        al_reference_views&.each do |view|
           new_view_sql = view['definition'].dup
           new_view_sql = new_view_sql.gsub(/dest\..+,\n/, "--removed-col\n")
           new_view_sql = new_view_sql.sub('--removed-col', 'dest.*,')
@@ -632,10 +763,6 @@ module ActiveRecord
             #{new_view_sql}
           END_SQL
         end
-
-        change_comments
-      rescue StandardError, ActiveRecord::StatementInvalid => e
-        raise e unless force_rollback
       end
 
       def change_comments
@@ -648,7 +775,7 @@ module ActiveRecord
         if old_table_comment != table_comment
           if model_is_view
             puts "Adding view comment: #{old_table_comment} != #{table_comment}"
-            ActiveRecord::Base.connection.execute <<~END_SQL
+            execute <<~END_SQL
               COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';
             END_SQL
           else
@@ -701,7 +828,8 @@ module ActiveRecord
       end
 
       def standard_columns
-        pset = %w[id created_at updated_at contactid user_id tracker_history_id]
+        pset = %w[id created_at updated_at contactid tracker_history_id]
+        pset += %w[user_id] unless no_user_id
         pset += %w[master_id extra_log_type] if resource_type == :activity_log
         pset += %w[master_id admin_id] if resource_type == :external_identifier
         pset += %w[master_id] if resource_type == :dynamic_model && !no_master_association
@@ -827,9 +955,9 @@ module ActiveRecord
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
           curr_field = {
-            attr_name: attr_name,
+            attr_name:,
             config: f,
-            fopts: fopts
+            fopts:
           }
           if fopts && fopts[:index]
             fopts[:index][:name] += '_hist' if history
@@ -870,6 +998,8 @@ module ActiveRecord
 
       def activity_log_trigger_sql
         base_name_id = "#{belongs_to_model.to_s.underscore.gsub(%r{__|/}, '_')}_id"
+        log_al_prefix = "log_#{history_table_name}"
+        short_al_prefix = log_al_prefix.sub('activity_log_', 'al_')
         <<~DO_TEXT
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -899,15 +1029,17 @@ module ActiveRecord
           $$;
 
           DROP FUNCTION IF EXISTS #{schema}.log_#{table_name.singularize}_update () CASCADE;
-          DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
-          DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{log_al_prefix}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{log_al_prefix}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{short_al_prefix}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS #{short_al_prefix}_update ON #{schema}.#{table_name};
 
-          CREATE TRIGGER log_#{history_table_name}_insert
+          CREATE TRIGGER #{short_al_prefix}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-          CREATE TRIGGER log_#{history_table_name}_update
+          CREATE TRIGGER #{short_al_prefix}_update
             AFTER UPDATE ON #{schema}.#{table_name}
             FOR EACH ROW
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
@@ -920,14 +1052,12 @@ module ActiveRecord
         if updating?
           activity_log_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION IF EXISTS #{trigger_fn_name}() CASCADE"
         end
       end
 
       def ref_view_name(to_table_name)
-        tn = table_name.sub('activity_log_', 'al_')
-        ttn = to_table_name.sub('activity_log_', 'al_')
-        "#{ttn}_from_#{tn}"
+        Admin::MigrationGenerator.reference_view_name(table_name, to_table_name)
       end
 
       def reference_view_sql(ref_config)
@@ -954,9 +1084,9 @@ module ActiveRecord
           from #{to_schema_table} dest
           inner join model_references mr on
             dest.id = mr.to_record_id and
-            #{to_no_master ? '' : 'dest.master_id = mr.to_record_master_id and'}
+            #{'dest.master_id = mr.to_record_master_id and' unless to_no_master}
             not coalesce (mr.disabled, false) and
-            #{from_what == 'this' ? "mr.from_record_type = '#{class_name}' and" : ''}
+            #{"mr.from_record_type = '#{class_name}' and" if from_what == 'this'}
             mr.to_record_type = '#{to_model_class_name}'
           ;
 
@@ -968,15 +1098,13 @@ module ActiveRecord
         if updating?
           reference_view_sql(ref_config)
         else
-          "DROP VIEW #{schema}.#{ref_view_name(to_table_name)};"
+          "DROP VIEW if exists #{schema}.#{ref_view_name(to_table_name)};"
         end
       end
 
       def dynamic_model_view_sql
-        return unless view_sql&.strip&.present? && view_sql_changed
-
         <<~DO_TEXT
-          DROP VIEW if exists #{schema}.#{table_name};
+          DROP VIEW if exists #{schema}.#{table_name} CASCADE;
           CREATE VIEW #{schema}.#{table_name} AS
           #{view_sql};
         DO_TEXT
@@ -986,11 +1114,12 @@ module ActiveRecord
         if updating?
           dynamic_model_view_sql
         else
-          "DROP VIEW #{schema}.#{table_name};"
+          "DROP VIEW if exists #{schema}.#{table_name} CASCADE;"
         end
       end
 
       def dynamic_model_trigger_sql
+        no_master_id_as_fkey = no_master_association || fields.map(&:to_sym).include?(:master_id)
         <<~DO_TEXT
 
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
@@ -999,16 +1128,16 @@ module ActiveRecord
             AS $$
           BEGIN
             INSERT INTO #{history_table_name} (
-              #{no_master_association ? '' : 'master_id,'}
+              #{'master_id,' unless no_master_id_as_fkey}
               #{"#{fields.join(', ')}," if fields.present?}
-              user_id,
+              #{'user_id,' unless no_user_id}
               created_at,
               updated_at,
               #{history_table_id_attr})
             SELECT
-              #{no_master_association ? '' : 'NEW.master_id,'}
+              #{'NEW.master_id,' unless no_master_id_as_fkey}
               #{"#{new_fields.join(', ')}," if fields.present?}
-              NEW.user_id,
+              #{'NEW.user_id,' unless no_user_id}
               NEW.created_at,
               NEW.updated_at,
               NEW.id;
@@ -1018,13 +1147,15 @@ module ActiveRecord
 
           DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
           DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_history_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_history_update ON #{schema}.#{table_name};
 
-          CREATE TRIGGER log_#{history_table_name}_insert
+          CREATE TRIGGER log_history_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-          CREATE TRIGGER log_#{history_table_name}_update
+          CREATE TRIGGER log_history_update
             AFTER UPDATE ON #{schema}.#{table_name}
             FOR EACH ROW
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
@@ -1037,7 +1168,7 @@ module ActiveRecord
         if updating?
           dynamic_model_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION if exists #{trigger_fn_name}() CASCADE"
         end
       end
 
@@ -1090,12 +1221,12 @@ module ActiveRecord
         if updating?
           external_identifier_trigger_sql
         else
-          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+          "DROP FUNCTION if exists #{trigger_fn_name}() CASCADE"
         end
       end
 
       def get_dependent_objects(schema, table_name)
-        res = ActiveRecord::Base.connection.execute <<~END_SQL
+        res = execute <<~END_SQL
           SELECT DISTINCT v.oid::regclass AS view
           FROM pg_depend AS d      -- objects that depend on the table
             JOIN pg_rewrite AS r  -- rules depending on the table

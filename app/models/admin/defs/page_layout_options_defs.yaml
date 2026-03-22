@@ -33,8 +33,26 @@ view_options:
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
   hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
+  default_expander:                   # set to "shrunk" to initially shrink activity log items
   hide_activity_logs_header:          # hide the activity logs header including + buttons
   close_others:                       # when clicked to expand this tab, others will be closed
+  show_for_single_master_only:        # Only show panel if a single master result is presented
+  show_for_multi_master_only:         # Only show panel if a multiple master results are presented
+  filter_items:                       # set to 'using params' to use URL params passed to the page within
+                                      # filter[<resource_name>][<param_name>]=<param_value>&...
+                                      # or set a series of hashes (keyed by resource name) representing params
+                                      # For example:
+                                      # { <resource_name>: { <param_name>: <param_value>, ...}, ... }
+  active_sublist_values:              # hash of resource names to filter values that should be active by default
+                                      # For each resource, specify an array of values or 'all' to activate all buttons
+                                      # Example:
+                                      #   player_contacts: [10, 5]    # activate ranks 10 and 5
+                                      #   addresses: all              # activate all filter buttons
+                                      #   dynamic_model__contacts: [] # no buttons active by default
+  sort_sublists:                      # hash of resource names to default sort order ('asc' or 'desc')
+                                      # Example:
+                                      #   player_contacts: desc
+                                      #   addresses: asc
 
 list_options:
   hide_in_list: false (default) | true

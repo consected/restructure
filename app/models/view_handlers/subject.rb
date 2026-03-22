@@ -7,14 +7,14 @@ module ViewHandlers
     BestAccuracyScore = Settings::BestAccuracyScore
 
     included do
-      validate :dates_sensible
+      validate :dates_sensible, unless: :ignore_configurable_valid_if
       validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?
 
       # If the class is a dynamic definition, add a singular association, allowing a single
       # subject info to be requested for a Master. Substitutions for example use this to get
       # subject_info.last_name as opposed to subject_infos.last_name
       if respond_to? :definition
-        Master.has_one definition.model_association_name.to_s.singularize.to_sym,
+        Master.has_one definition.one_of_this_association_name,
                        -> { order(Master.subject_info_rank_order_clause) },
                        class_name: "DynamicModel::#{definition.model_class_name}",
                        foreign_key: definition.foreign_key_name,
@@ -71,6 +71,14 @@ module ViewHandlers
         errors.add('birth date', 'and death date are not sensible')
       end
       errors.add('birth date', 'is after today') if birth_date && birth_date > DateTime.now
+    end
+
+    def subject_age
+      return unless respond_to?(:birth_date) && birth_date
+
+      @subject_age = Date.today.year - birth_date.year
+      @subject_age -= 1 if Date.today < birth_date + @subject_age.years
+      @subject_age
     end
   end
 end

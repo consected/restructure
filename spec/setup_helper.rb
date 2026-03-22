@@ -1,12 +1,28 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seeds"
+require "#{Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seeds"
 require './db/table_generators/external_identifiers_table'
 
 $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
   SpecTallyTable = 'rails_spec_db_tally'
+
+  def self.raise_if_stale_instance_variables!(instance_variables)
+    instance_variables.each do |var|
+      # Check if the variable's class has been reloaded since it was assigned
+      var_val = instance_variable_get(var)
+      var_class = var_val.class
+      next if var_class&.name.nil? # Typically if an instance variable is holding a Class object itself
+      # CollectionProxy is just a wrapper, skip it
+      next if var_class.name == 'ActiveRecord::Associations::CollectionProxy'
+      next unless var_class.name =~ /^[A-Z]/ # Skip non-constant class names (e.g., "scantrons")
+      return if var_class == var_class.name.constantize
+
+      raise FphsException, "Class of instance variable #{var} (#{var_class.name}) has been reloaded in #{self}. Please reassign it within the test to avoid stale class issues."
+    end
+  end
 
   def self.auto_admin
     admin, = ::UserSupport.create_admin
@@ -23,9 +39,107 @@ module SetupHelper
   end
 
   def self.clear_delayed_job
-    puts 'Clear delayed_job'
+    put_now 'Clear delayed_job'
 
     Delayed::Job.delete_all
+  end
+
+  def self.setup_template_user
+    # Do some setup that could impact all tests through the availability of master associations
+    tue = Settings::TemplateUserEmail&.downcase
+    require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
+    tu = User.find_by(email: tue)
+    return if tu
+
+    put_now 'Setup template user'
+    Seeds::BUsers.setup
+    Rails.cache.clear
+  end
+
+  def self.full_app_setup
+    return if spec_tally_done?('app_setup')
+
+    SetupHelper.check_bhs_assignments_table
+
+    put_now 'Setup apps'
+    sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
+    ActiveRecord::Base.connection.execute sql
+    put_now 'Setup ActivityLogPlayerContactPhone'
+    SetupHelper.setup_al_player_contact_phones
+    # Seeds::ActivityLogPlayerContactPhone.setup
+    put_now 'setup_al_player_contact_emails'
+    SetupHelper.setup_al_player_contact_emails
+    put_now 'setup_al_player_contact_embed_tests'
+    SetupHelper.setup_al_player_contact_embed_tests
+    put_now 'Setup ext_identifier'
+    SetupHelper.setup_ext_identifier
+    put_now 'setup_test_app'
+    SetupHelper.setup_test_app
+    SetupHelper.check_bhs_assignments_table true
+
+    raise FphsException, 'bhs_assignment not set up' unless Resources::Models.find_by resource_name: 'bhs_assignments'
+
+    put_now 'setup_ref_data_app'
+    SetupHelper.setup_ref_data_app
+
+    put_now 'Handle zeus_bulk_message'
+    als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
+    als.each do |a|
+      a.update! current_admin: a.admin, disabled: true if a.enabled?
+    end
+
+    SetupHelper.add_to_spec_db('app_setup')
+  end
+
+  def self.clean_app_migrations_dirs
+    put_now 'Clean app migrations dirs'
+    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
+    `mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
+    `rm -f db/app_migrations/test/*test_*.rb`
+  end
+
+  def self.clean_handlebars_dirs
+    put_now 'Clean Handlebars precompiled dirs'
+    HandlebarsPrecompiler.setup_directories
+    HandlebarsPrecompiler.cleanup_tmp_dir
+    HandlebarsPrecompiler.cleanup_public_dir
+  end
+
+  def self.run_test_migrations
+    # Checks for pending migrations before tests are run.
+    # If you are not using ActiveRecord, you can remove this line.
+    put_now 'Enforce migrations'
+    # ActiveRecord::Migration.maintain_test_schema!
+
+    SetupHelper.check_bhs_assignments_table
+
+    sql = <<~END_SQL
+      DROP SCHEMA IF EXISTS redcap_test CASCADE;
+      CREATE SCHEMA redcap_test;
+      DROP SCHEMA IF EXISTS dynamic_test CASCADE;
+      CREATE SCHEMA dynamic_test;
+
+      -- Clean up the migrations that need to be rerun in redcap-test
+      delete from schema_migrations where version in (
+        '20211105105700',
+        '20211105105701',
+        '20211105105702',
+        '20210215184600',
+        '20210215184601',
+        '20210305184601',
+        '20211101051705'
+      );
+    END_SQL
+
+    ActiveRecord::Base.connection.execute sql
+
+    SetupHelper.check_bhs_assignments_table
+    # We need to ensure that dynamic tables are in place before we setup dynamic models
+    # in each example, otherwise the tests lock up.
+    db_migration_dirname = Rails.root.join('spec/migrations')
+    Admin::MigrationGenerator.migration_context(db_migration_dirname).migrate
+    SetupHelper.check_bhs_assignments_table
   end
 
   def self.check_bhs_assignments_table(fail = nil)
@@ -118,7 +232,7 @@ module SetupHelper
     puts 'DB validation'
 
     # Ensure we are set up for this test
-    pgpass = File.read("#{ENV['HOME']}/.pgpass")
+    pgpass = File.read("#{ENV.fetch('HOME', nil)}/.pgpass")
     res = pgpass.include?(db_name) || pgpass.include?('localhost:5432:*')
     raise ".pgpass does not contain entry for database #{db_name}" unless res
 
@@ -145,6 +259,7 @@ module SetupHelper
 
   def self.reload_configs
     Rails.logger.info 'Reload configs'
+    Admin::AppType.reset_memo_associated_items!
     AppControl.define_models
     DynamicModel.enable_active_configurations disable_on_failure: true
     ItemFlag.enable_active_configurations
@@ -185,6 +300,19 @@ module SetupHelper
     return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
 
     TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
+                                        'data', 'select_email_direction', 'select_who',
+                                        'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
+                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
+    Rails.cache.clear
+  end
+
+  def self.setup_al_player_contact_embed_tests
+    Rails.logger.info 'Setting up al player contact embed tests'
+    ActiveRecord::Base.connection.schema_cache.clear!
+
+    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_embed_tests'
+
+    TableGenerators.activity_logs_table('activity_log_player_contact_embed_tests', 'player_contacts', true,
                                         'data', 'select_email_direction', 'select_who',
                                         'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
                                         'protocol_id', 'notes', 'set_related_player_contact_rank')
@@ -247,7 +375,7 @@ module SetupHelper
       process_name:,
       disabled: false,
       action_when_attribute: 'called_when',
-      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,'\
+      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,' \
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
@@ -279,7 +407,7 @@ module SetupHelper
     cname.constantize
   rescue StandardError, FphsException => e
     raise "Failed to setup gen test (#{name}, #{process_name}, #{item_type}, #{rec_type}) " \
-      "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
+          "=> #{res} - was_active: #{was_active} - cleaned: #{cleaned&.map(&:id)} - #{e}\n#{e.backtrace.join("\n")}"
   end
 
   def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil, created_by: nil, assign_access: nil, add_disabled: nil)
@@ -294,7 +422,9 @@ module SetupHelper
 
   def self.setup_test_app
     MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
-    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+    ata = Admin::AppType.active
+    admin = Admin.active.first
+    ata.where(label: 'Brain Health Study').or(ata.where(name: 'bhs')).each { |a| a.update!(disabled: true, label: 'BHS OLD', name: "bhs-old-#{a.id}", current_admin: admin) }
     reload_configs
 
     check_activity_logs
@@ -359,40 +489,67 @@ module SetupHelper
     setup_ref_data_app_nfs
   end
 
-  # Setup an app from an import configuration (json or yaml)
+  # Setup an app database structure
   #
-  # @param [String] name the name of the app to be set
   # @param [String] sql_source_dir location of the SQL files to be run
   # @param [String] sql_files list of SQL files to be run through PSQL
-  # @param [String] config_dir location of the configuration file
-  # @param [String] config_fn filename of the configuration file (must have file extension .json or .yaml)
-  # @return [Array(Admin::AppType, Hash)] returns the results from Admin::AppTypeImport.import_config
-  #
   def self.setup_app_db(sql_source_dir, sql_files)
     sql_files.each do |fn|
       sqlfn = Rails.root.join(sql_source_dir, fn)
       puts "Running psql: #{sqlfn}"
       host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
       user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
+      `PGOPTIONS='--search_path=ml_app --client-min-messages=warning' psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} < "#{sqlfn}"`
     rescue ActiveRecord::StatementInvalid => e
       puts "Exception due to PG error?... #{e}"
     end
   end
 
+  # Create a necessary view that is missing from the app config, which is used by the activity log implementation for label handling
+  def self.create_view_activity_labels
+    ActiveRecord::Base.connection.execute <<~'SQL'
+      CREATE SCHEMA IF NOT EXISTS dynamic;
+      CREATE OR REPLACE VIEW "dynamic".view_activity_labels
+      AS SELECT t.id AS activity_log_id,
+          t.disabled,
+          t.table_name,
+          t.matches[1] AS extra_log_type,
+          t.matches[2] AS label
+        FROM ( SELECT activity_logs.id,
+                  activity_logs.disabled,
+                  activity_logs.table_name,
+                  regexp_matches(activity_logs.extra_log_types::text, '[\\A\r\n]+([a-z_]+):[ &a-zA-Z_]*[\r\n]+(?:[\s#]+(?:<<:|#)[^\r\n]+[\r\n]+)*[\s]+label: ([^\r\n]+)'::text, 'g'::text) AS matches
+                FROM ml_app.activity_logs) t
+        ORDER BY t.id;
+    SQL
+  end
+
+  # Create and check the spec tally table
+  # to flag if global setups have been run
   def self.check_spec_db
     tn = SpecTallyTable
     unless Admin::MigrationGenerator.table_or_view_exists_in_schema?(tn, 'ml_app')
-      sqlfn = "create table ml_app.#{tn} (name varchar, updated_at timestamp);"
+      sqlfn = "create table if not exists ml_app.#{tn} (name varchar, updated_at timestamp);"
       host_arg = '-h "${USE_PG_HOST}"' if ENV['USE_PG_HOST']
       user_arg = '-U ${USE_PG_UNAME}' if ENV['USE_PG_UNAME']
-      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} -c "#{sqlfn}"`
+      `PGOPTIONS='--search_path=ml_app --client-min-messages=warning' psql -v ON_ERROR_STOP=ON -d #{db_name} #{user_arg} #{host_arg} -c "#{sqlfn}"`
     end
 
     res = ActiveRecord::Base.connection.execute("select * from ml_app.#{tn};")
     res = res.to_a
   end
 
+  # Check if a specific setup has been done
+  def self.spec_tally_done?(name)
+    spec_tally_names.include?(name)
+  end
+
+  # Get the names of items in the spec tally table
+  def self.spec_tally_names
+    check_spec_db.map { |r| r['name'] }
+  end
+
+  # Add an entry to the spec tally table when global setups are done
   def self.add_to_spec_db(name, updated_at: Time.now)
     res = ActiveRecord::Base.connection.execute("insert into #{SpecTallyTable} (name, updated_at) values ('#{name}', '#{updated_at}');")
   end
@@ -402,13 +559,14 @@ module SetupHelper
 
     als = ActivityLog.active.where(name:)
     als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
-
+    reload_configs
     format = config_fn.split('.').last.to_sym
 
     res = Admin::AppTypeImport.import_config(File.read(Rails.root.join(config_dir, config_fn)),
                                              admin,
                                              name:,
-                                             format:)
+                                             format:,
+                                             force_update: true)
 
     reload_configs
 
@@ -443,5 +601,24 @@ module SetupHelper
       puts '=============================================='
       puts
     end
+  end
+
+  #
+  # Run extra setups in environment specific "sourced" specs
+  # @return [<Type>] <description>
+  def self.run_extra_setups
+    @@extra_setups ||= []
+    @@extra_setups.each do |setup_proc|
+      puts 'Running extra setup...'
+      setup_proc.call
+    end
+  end
+
+  #
+  # Add a block to be run as part of extra setups from environment specific "sourced" specs
+  # @param [Lambda] block - to be run later
+  def self.add_to_extra_setups(block)
+    @@extra_setups ||= []
+    @@extra_setups << block
   end
 end

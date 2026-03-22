@@ -2,14 +2,18 @@
 
 class ConditionalActions
   include CalcActions::Calculate
+
   attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config
 
-  def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil, return_this: nil)
+  def initialize(action_conf, current_instance, return_failures: nil, current_scope: nil, return_this: nil,
+                 top_level_error: nil, top_level_error_above: nil)
     action_conf = action_conf.symbolize_keys if action_conf.is_a?(Hash)
     @action_conf = action_conf
     @current_instance = current_instance
     @return_failures = return_failures
     @return_this ||= return_this || { value: nil }
+    @top_level_error = top_level_error
+    @top_level_error_above = top_level_error_above
 
     # For the lowest level, setup the query with the master record
     # If current_scope is specified, then we are at a sub condition level, and the
@@ -18,7 +22,7 @@ class ConditionalActions
                         current_instance.class.no_master_association
                        current_instance.class
                      else
-                       current_scope || Master.select(:id).where(id: current_instance.master.id)
+                       current_scope || Master.select(:id).where(id: current_instance.master_id)
                      end
   end
 
@@ -34,20 +38,6 @@ class ConditionalActions
     @action_conf = { all: @action_conf }
     do_calc_action_if
     this_val
-  end
-
-  # If the condition supplied is a Hash, attempt to calculate the result_value
-  # Otherwise just return the provided value
-  # @param cond [Hash | Class] A condition definition with a result_value defined, or just a literal value
-  # @param item [UserBase] An object to test against
-  def self.calc_field_or_return(cond, item)
-    if cond.is_a? Hash
-      action_conf = cond
-      ca = ConditionalActions.new action_conf, item
-      ca.get_this_val
-    else
-      cond
-    end
   end
 
   #
@@ -82,12 +72,14 @@ class ConditionalActions
   #    then true will be returned for the action if any conditions match
   #
   # @param [true | nil] check_action_if - default not set
+  # @params [Array{Symbol} | nil] reject_keys - reject the specified keys from the result
   # @return [Hash | nil | Object] - returns:
   #                                   Hash of results for {on_save:, on_create:, on_update:}
   #                                   nil if the Hash has no entries
   #                                   the original configuration if not a Hash
-  def calc_save_option_if(check_action_if: nil)
+  def calc_save_option_if(check_action_if: nil, reject_keys: nil)
     sa = @action_conf
+    sa = sa.except(*reject_keys) if reject_keys
     res = {}
 
     return sa unless sa.is_a? Hash

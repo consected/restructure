@@ -3,7 +3,9 @@
 class Settings
   LogLevel = DefaultSettings::LogLevel
   DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
-  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || DefaultSettings::DefaultSchemaOwner
+  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'].presence || DefaultSettings::DefaultSchemaOwner
+  MigrationTimeoutSec = 120
+  MaxPostgresIdentifierLength = 63
 
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = DefaultSettings::GlobalIdPrefix
@@ -18,8 +20,8 @@ class Settings
   YearFieldPattern = '\\d{4,4}'
 
   # Inactivity timeouts for user / admin sessions
-  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
-  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).to_i.minutes.freeze
+  UserTimeout = (ENV['USER_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
+  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
@@ -34,11 +36,11 @@ class Settings
     extra_dictionary_words: :word_list,
     use_dictionary: !Rails.env.test?,
     min_length: (ENV['PW_MIN_LEN'] || 10).to_i,
-    regex: ENV['PW_REGEX'],
-    regex_requirements: ENV['PW_REGEX_REQ']
+    regex: ENV.fetch('PW_REGEX', nil),
+    regex_requirements: ENV.fetch('PW_REGEX_REQ', nil)
   }.freeze
 
-  PasswordUnlockTimeMins = (ENV['PW_UNLOCK_TIME_MINS'] || 60).to_i.freeze
+  PasswordUnlockTimeMins = (ENV['PW_UNLOCK_TIME_MINS'].presence || 60).to_i.freeze
 
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
@@ -50,13 +52,15 @@ class Settings
   # which may fail on some email servers if the domain name does not match
   # a verified domain name.
   # This must be set if user self registration is enabled.
-  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || ENV['FROM_EMAIL'] || DefaultSettings::NotificationsFromEmail
+  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'].presence || ENV['FROM_EMAIL'].presence || DefaultSettings::NotificationsFromEmail.presence
   # Email address for admin contact
-  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || DefaultSettings::AdminEmail
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'].presence || DefaultSettings::AdminEmail.presence
   # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
-  BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
+  BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'].presence || AdminEmail.presence
+  # Email address that identifies the Redcap job user profile. Defaults to the BatchUserEmail
+  RedcapJobUserEmail = ENV['FPHS_RC_JOB_USER_EMAIL'].presence || BatchUserEmail.presence
   # Provide an email address for a technical admin to receive failure notifications
-  FailureNotificationsToEmail = ENV['FAIL_TO_EMAIL'] || ENV['FAIL_FROM_EMAIL'] || DefaultSettings::FailureNotificationsToEmail || Settings::AdminEmail
+  FailureNotificationsToEmail = ENV['FAIL_TO_EMAIL'].presence || ENV['FAIL_FROM_EMAIL'].presence || DefaultSettings::FailureNotificationsToEmail.presence || Settings::AdminEmail.presence
 
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
@@ -66,54 +70,57 @@ class Settings
   TwoFactorAuthDisabledForAdmin = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'admin'])
 
   # App name that appears within 2FA authenticator app
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || DefaultSettings::TwoFactorAuthIssuer
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'].presence || DefaultSettings::TwoFactorAuthIssuer
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
-  TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
+  TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'].presence || 30).to_i
 
   # Check number of previous passwords back to check for new password repeating an old one
-  CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.development? ? 0 : 5)).to_i
+  CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'].presence || (Rails.env.development? ? 0 : 5)).to_i
   # Expire the password after a number of days
-  PasswordAgeLimit = (ENV['FPHS_PASSWORD_AGE_LIMIT'] || 90).to_i
+  PasswordAgeLimit = (ENV['FPHS_PASSWORD_AGE_LIMIT'].presence || 90).to_i
   # Number of days before a password expires to remind a user by email
-  PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'] || 15).to_i
+  PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'].presence || 15).to_i
   # Repeat the reminder every number of days until the password is updated or it expires
-  PasswordReminderRepeatDays = (ENV['FPHS_PASSWORD_REMINDER_REPEAT_DAYS'] || 4).to_i
+  PasswordReminderRepeatDays = (ENV['FPHS_PASSWORD_REMINDER_REPEAT_DAYS'].presence || 4).to_i
   # Maximum password attempts before account is locked
-  PasswordMaxAttempts = (ENV['FPHS_PASSWORD_MAX_ATTEMPTS'] || 3).to_i
+  PasswordMaxAttempts = (ENV['FPHS_PASSWORD_MAX_ATTEMPTS'].presence || 3).to_i
 
   # email = Sends an unlock link to the user email
   # time  = Re-enables login after a certain amount of time (see :unlock_in below)
   # both  = Enables both strategies
   # none  = No unlock strategy. You should handle unlocking by yourself.
-  PasswordUnlockStrategy = (ENV['FPHS_PASSWORD_UNLOCK_STRATEGY'] || 'time').to_sym
+  PasswordUnlockStrategy = (ENV['FPHS_PASSWORD_UNLOCK_STRATEGY'].presence || 'time').to_sym
 
   # Used to identify the environment this application server belongs to. Also available in
   # text substitution as curly substitution {{environment_name}}
-  EnvironmentName = ENV['FPHS_ENV_NAME'] || 'App'
+  EnvironmentName = ENV['FPHS_ENV_NAME'].presence || 'App'
   # Allow text substitutions for messages, etc to provide a base URL for the app, accessible
   # using the curly substitution {{base_url}}
-  BaseUrl = ENV['BASE_URL'] || DefaultSettings::BaseUrl
+  BaseUrl = ENV['BASE_URL'].presence || DefaultSettings::BaseUrl
   # title tag page title, appears in tab or browser heading
-  PageTitle = ENV['PAGE_TITLE'] || DefaultSettings::PageTitle
+  PageTitle = ENV['PAGE_TITLE'].presence || DefaultSettings::PageTitle
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
-  # For feature tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
+  # For system tests, set AllowUsersToRegister to true. Change it to false during testing where necessary.
   AllowUsersToRegister = Rails.env.test? || (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
   # Admin assigned to newly created user through the user registration feature
-  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
+  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'].presence || AdminEmail.presence
   # Template user for creating new users. The roles from this user are copied to the new user.
-  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'].presence || 'registration@template'
   # Require an invitation code to be used to register
-  InvitationCode = ENV['INVITATION_CODE']
-
+  InvitationCode = ENV['INVITATION_CODE'].presence
+  # Add a reCAPTCHA v3 to the registration form - if not added, no reCAPTCHA will be used
+  ReCaptchaSiteKey = ENV['RECAPTCHA_SITE_KEY'].presence
+  ReCaptchaSecret = ENV['RECAPTCHA_SECRET'].presence
+  ReCaptchaMinScore = ENV['RECAPTCHA_MIN_SCORE'].presence&.to_f
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
   # Notify the NotifyEmailOnRegistration when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
-  NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
-  NotifyEmailOnRegistration = ENV['NOTIFY_EMAIL_ON_REGISTRATION'] || RegistrationAdminEmail
+  NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION'].presence
+  NotifyEmailOnRegistration = ENV['NOTIFY_EMAIL_ON_REGISTRATION'].presence || RegistrationAdminEmail.presence
 
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
@@ -124,14 +131,14 @@ class Settings
   DidntReceiveConfirmationInstructionsUrl = AllowUsersToRegister ? '/users/confirmation/new' : LoginIssuesUrl
 
   # Block to appear at top of login page as a user message
-  LoginMessage = ENV['LOGIN_MESSAGE']
+  LoginMessage = ENV.fetch('LOGIN_MESSAGE', nil)
   # Maximum limit on master search results
-  SearchResultsLimit = ENV['FPHS_RESULT_LIMIT']
+  SearchResultsLimit = ENV['FPHS_RESULT_LIMIT'].presence
 
   #
   # Limit the app types an application server delivers.
   # A comma separated list, where all entries must be active app types in app_types table
-  olat = ENV['FPHS_LOAD_APP_TYPES']
+  olat = ENV.fetch('FPHS_LOAD_APP_TYPES', nil)
   prev_olat = Rails.cache.read('Settings::FPHS_LOAD_APP_TYPES')
   # Check if the environment variable requested different app types in dev.
   # If so, clean the cache to avoid unexpected errors
@@ -161,7 +168,7 @@ class Settings
 
   # Initial configurations for the bulk messaging app
   def self.bulk_msg_app
-    Admin::AppType.active_app_types.where(name: 'bulk-msg').first
+    Admin::AppType.active_app_types.find_by(name: 'bulk-msg')
   end
 
   def self.bulk_msg_master
@@ -170,12 +177,17 @@ class Settings
 
   # Master record to use for admin features that need an underlying master, such as file store
   def self.admin_master
+    @admin_master = nil if Rails.env.development?
     @admin_master ||= Master.find(-2)
   end
 
   # nfs_store role for admin features that provide file store containers
   def self.admin_nfs_role
     'nfs_store group 601'
+  end
+
+  def self.nfs_store_default_app_type_id
+    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
   end
 
   # A list of resource names for admin classes that us filestore for file storage
@@ -186,9 +198,9 @@ class Settings
   # Length of a short code
   ShortcodeLength = 6
   # Website enabled public bucket for shortlink files
-  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || DefaultSettings::DefaultShortLinkS3Bucket
+  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'].presence || DefaultSettings::DefaultShortLinkS3Bucket
   # Log bucket for link clicks to be recorded and retrieved for analytics
-  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || DefaultSettings::DefaultShortLinkLogS3Bucket
+  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'].presence || DefaultSettings::DefaultShortLinkLogS3Bucket
   LogBucketPrefix = 'access/'
 
   # Default table names (and associated configs) for the primary CRM (Zeus) app
@@ -203,8 +215,11 @@ class Settings
 
   # Encryption key and salt for attribute encryption
   # @see Utilities::Encryption
-  EncryptionSecretKeyBase = ENV['FPHS_ENC_SECRET_KEY_BASE'] || (Rails.env.production? ? nil : 'test')
-  EncryptionSalt = ENV['FPHS_ENC_SALT'] || (Rails.env.production? ? nil : 'test-salt')
+  EncryptionSecretKeyBase = ENV['FPHS_ENC_SECRET_KEY_BASE'].presence || (Rails.env.production? ? nil : 'test')
+  EncryptionSalt = ENV['FPHS_ENC_SALT'].presence || (Rails.env.production? ? nil : 'test-salt')
+
+  # From ENV['SECRET_KEY_BASE'] in production, or the default config/credentials.yml file
+  SecretKeyBase = Rails.application.config.secret_key_base
 
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
@@ -220,6 +235,10 @@ class Settings
   # }
   RedcapRecordsRequestOptions = Rails.env.test? ? nil : { exportSurveyFields: true }
   RedcapMetadataRequestOptions = nil
+  RedcapDataOptions = {
+    run_jobs_as_user: RedcapJobUserEmail,
+    run_jobs_in_app_type: 'ref-data'
+  }.freeze
 
   # Alternative to blindly using inflector acronyms.
   # This array of acronyms will be enforced for titleize only, avoiding
@@ -234,30 +253,31 @@ class Settings
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   # If setting more than one country, separate them with a blank-space.
   # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
-  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %w[us ie gb de gr au nz]).freeze
+  DefaultCountryCodesForTimezones = %w[us ie gb de gr au nz]
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'].presence&.split || DefaultCountryCodesForTimezones).freeze
 
   # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
   # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
   # For example, ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
-  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'].presence || 'Eastern Time (US & Canada)').freeze
 
   # Date, Time and DateTime formats
   #
   # Set DEFAULT_DATE_FORMAT to mm/dd/yyyy or dd/mm/yyyy.
-  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'].presence || 'mm/dd/yyyy').freeze
 
   # Set DEFAULT_DATE_TIME_FORMAT to:
   #   mm/dd/yyyy hh:mm am/pm
   #   mm/dd/yyyy 24h:mm
   #   dd/mm/yyyy hh:mm am/pm
   #   dd/mm/yyyy 24h:mm
-  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm am/pm').freeze
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'].presence || 'mm/dd/yyyy hh:mm am/pm').freeze
 
   # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
-  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'].presence || 'hh:mm am/pm').freeze
 
   # Set the priority listing for the country select
-  DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT']&.split || %w[US CA DE]).freeze
+  DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT'].presence&.split || %w[US CA DE]).freeze
 
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
@@ -270,7 +290,7 @@ class Settings
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
-    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail
+    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail
     TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage
@@ -280,9 +300,10 @@ class Settings
     ScriptedJobDirectory
     DisableVDef AllowDynamicMigrations
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
-    InvitationCode
+    InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
+    NfsStoreJobDefaultAppTypeId
     DefaultCountrySelect GdprCountryCodes
   ].freeze
 end

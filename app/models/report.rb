@@ -65,11 +65,20 @@ class Report < ActiveRecord::Base
     if user.has_access_to?(:read, :report, :_all_reports_)
       all
     else
+
+      names = all.map { |r| [r.alt_resource_name, r.id] } + all.map { |r| [r.name, r.id] }
+      names = names.to_h
+
+      accesses = Admin::UserAccessControl.access_for_list?(user, :read, :report, names.keys)
+
       ns = []
-      all.each do |r|
-        ns << r.id if report_available_to_user r, user
+      ns = accesses.map do |rn, uac|
+        next unless uac
+
+        names[rn.to_s]
       end
 
+      ns.compact!
       where(id: ns)
     end
   end
@@ -102,9 +111,9 @@ class Report < ActiveRecord::Base
   # @param name [String] full name of the report
   # @return [String] short_name for the report
   def self.resource_name_for_named_report(name, item_type = nil)
-    res = Report.active.where(name: name)
+    res = Report.active.where(name:)
 
-    res = res.where(item_type: item_type) if item_type
+    res = res.where(item_type:) if item_type
 
     res.order(updated_at: :desc).first&.alt_resource_name
   end
@@ -226,6 +235,10 @@ class Report < ActiveRecord::Base
     :report
   end
 
+  def returns_master_results_list
+    searchable || report_type == 'search'
+  end
+
   private
 
   def search_attributes_config_valid
@@ -247,7 +260,7 @@ class Report < ActiveRecord::Base
 
   # Validate the generated resource_name is not a duplicate
   def valid_resource_name?
-    test = { short_name: short_name, item_type: item_type }
+    test = { short_name:, item_type: }
 
     res = self.class.active.where(test)
     return if (res.pluck(:id) - [id]).empty?
@@ -273,7 +286,7 @@ class Report < ActiveRecord::Base
   end
 
   def invalidate_cache
-    logger.info 'Not invalidating cache for report'
+    logger.debug "Not invalidating cache (#{self.class.name})"
   end
 
   def options_valid?

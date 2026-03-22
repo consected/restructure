@@ -1,11 +1,11 @@
  
-<script id="model-references-<%=name%>-result-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("model-references-#{name}-result-template") do %>
 {{#with model_reference}}
   {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show to_elt=to_record_options_config.add_with.extra_log_type}}
 {{/with}}
-</script>
+<% end %>
 
-<script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial references_def_block">
+<%= handlebars_template_tag("activity_log_#{name}_references", css_class: 'hidden handlebars-partial references_def_block') do %>
 <%
   unless defined? embed
     embed = nil
@@ -26,7 +26,7 @@
         {{#is to_record_options_config.view_as.show '!==' 'hide'}}
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
-              <% mr_name = '../to_record_template' #ModelReference.record_type_to_ns_table_name references&.first&.first %>
+              <% mr_name = '../to_record_resource_name' %>
               {{> common_template_result_fields result_data=this name=<%=mr_name%> template_config=(fpa_state_item 'template_config' (underscore <%=mr_name%>) vdef_version)}}
             {{/with}}
           {{/is}}
@@ -60,4 +60,4 @@
     {{/each}}
   {{/if}}
 
-</script>
+<% end %>

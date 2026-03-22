@@ -12,6 +12,12 @@ default report tab: |
   The default report category (tab) to display when listing reports. A report category
 file browser default view: |
   Initial view on a filestore brower. One of "no details", "file info", "classifications"
+secure view default zoom: |
+  Initial zoom setting for a secure view preview of an image. Must be one of the default values, or match
+  one of the items in the list set by `secure view zoom factors`
+secure view zoom factors: |
+  Comma separated list of zoom factors for the secure view preview. By default these are:
+      fit,35,50,66,75,100,125,150
 header no subject details label: |
   Text to display in a master record header if no participant details are available. 
   By default "(no subject details)". Will be presented as blank if the value is "none"
@@ -60,10 +66,18 @@ app home url: |
 hide master heading: |
   Hide the master heading, including id, prefix and title
 master header prefix: |
-  Prefix to display on the master header. May include curly `{{substitutions}}`
+  Prefix to display on the master header. May include curly `\{\{substitutions}}`
 master header title: |
   Alternative text  appear instead of participant info names on the master header. 
-  May include curly `\{\{substitutions}}`
+  May include curly `\{\{substitutions}}`. For example:
+
+  ```
+  ## \{\{activity_log__project_assignments.last.title}}
+
+  ### Investigator: 
+  \{\{#if dynamic_model__project_imports.investigator_name}}**\{\{dynamic_model__project_imports.investigator_name::strip}}**\{\{else}}**\{\{activity_log__project_assignments.last.created_by_user.first_name::strip}} \{\{activity_log__project_assignments.last.created_by_user.last_name::strip}}** (\{\{activity_log__project_assignments.last.created_by_user_email}})\{\{/if}}
+  ```
+
 master results panel css class: |
   Space separated list of additional classes to add to the results-panel
 menu research label: |
@@ -77,13 +91,21 @@ notes field caption: |
 notes field format: |
   Default notes field format for this app. Defaults to plain text. Set value "markdown" for rich text editor
 no search in master record: |
-  Do not show search tabs or a search panel when linked followed to a single master record
+  Do not show search tabs or a search panel when link followed to a single master record
 open panels: |
   List of panels to open automatically when the master record is displayed. 
-  Comma separated list of default panel names or resource names for 
-  activity logs matching the Page Layout panels.
+  Newline (or comma) separated list of default panel names or resource names for 
+  categories and activity logs matching the Page Layout panels.
   Default panels are: trackers (the regular trackers panel), details (the participant name / contact panel), 
-  external_ids (all available external identifiers), external_links (master record links to websites)
+  external_ids (all available external identifiers), external_links (master record links to websites.)
+  For newline separated items, conditions may be specified with `\{\{#if}}` and `\{\{#is}}` substitutions. For example:
+
+      \{\{#is activity_log__project_assignments.last.status '===' "analysis plan approved"}}activity_log__data_request_assignments
+      \{\{else is activity_log__project_assignments.last.status '!==' "analysis plan proposal submitted"}}activity_log__project_assignments
+      \{\{/is}}
+
+  NOTE: this option will override a master panel's `view_options.initial_show` in page layouts 
+  if they have value nil, true or false
 prevent reload master list: |
   If the user refreshes a page showing master records from a search, the list of previous master records 
   will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value
@@ -99,6 +121,14 @@ report library button label: |
 show ids in master result: |
   Master record results headers show one or more IDs. Provide a comma separated list of IDs to show using 
   alternative ID names, "master_id", or "none" to hide all IDs
+crosswalk field labels: |
+  Labels for crosswalk ID fields on the masters table (e.g. msid, pro_id). Provide a YAML formatted 
+  hash mapping field names to their display labels. For example:
+  
+      msid: MSID
+      pro_id: Pro Football ID
+  
+  If not set, field names will be humanized (e.g., "msid" becomes "Msid")
 tracker order: |
   Tracker records are ordered by "protocol position", "protocol name", or "latest entry date"
 user session timeout: |
@@ -107,3 +137,28 @@ show search form on single result: |
   (not used)
 show activity log panel: |
   (deprecated) Display a specific activity log panel when master record loads. Use "open panels" instead'
+default options activity log: |
+  Default options for activity log definitions, keyed by the field to set. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      extra_log_types: |
+        _configurations:
+          use_current_version: true
+default options external identifier: |
+  Default options for external identifier definitions. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      options: |
+        _configurations:
+          use_current_version: true
+default options dynamic model: |
+  Default options for dynamic model definitions. A YAML snippet such as:
+
+      schema_name: {{default_schema_name}}
+      category: {{default_category}}
+      options: |
+        _configurations:
+          use_current_version: true
+          

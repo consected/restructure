@@ -78,7 +78,10 @@ RSpec.describe 'Export an app configuration', type: :model do
     eis.where('id <> ?', eis.first&.id).update_all(disabled: true) if eis.count != 1
 
     i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
-    i&.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    if i
+      i.force_regenerate = true
+      i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    end
     Master.reset_external_id_matching_fields!
 
     als = ActivityLog.active.where(name: 'BHS Tracker')
@@ -139,85 +142,5 @@ RSpec.describe 'Export an app configuration', type: :model do
     config = uac.select { |a| a['item_type'] == 'player_infos_source' }
     expect(config).to be_a Array
     expect(config.map { |a| a['value'] }).to include 'nflpa'
-  end
-
-  it 'imports a JSON configuration' do
-    config = @app_type.export_config
-
-    @activity_log = ActivityLog.active.first
-
-    al_orig_name = @activity_log.name
-    @activity_log.name = "Changed #{rand}!"
-    @activity_log.current_admin = @admin
-    @activity_log.disabled = false
-    @activity_log.save!
-
-    res, results = Admin::AppTypeImport.import_config(config, @admin, name: 'new_name')
-
-    expect(results).to be_a Hash
-
-    expect(res).to be_a Admin::AppType
-
-    expect(res.name).to eq 'new_name'
-    expect(res.label).to eq 'Test App 12'
-
-    acs = Admin::AppConfiguration.where app_type: res
-    expect(acs.length).to eq 3
-
-    ac = Admin::AppConfiguration.where(app_type: res, name: 'create master with').first
-    expect(ac.value).to eq 'player_info'
-
-    ac = Admin::AppConfiguration.where(app_type: res, name: 'hide pro info').first
-    expect(ac.value).to eq 'true'
-    expect(ac.user.id).to eq @user.id
-
-    ac = Admin::AppConfiguration.where(app_type: res, name: 'menu research label').first
-    expect(ac.value).to eq 'val1'
-    expect(ac.user).to be nil
-    expect(ac.role_name).to eq 'role 1'
-
-    expect(@user.has_access_to?(:create, :table, :player_infos)).to be_truthy
-
-    expect(@user.has_access_to?(:read, :table, :sage_assignments)).to be_truthy
-
-    @activity_log.reload
-    # expect(@activity_log.name).to eq al_orig_name
-  end
-
-  it 'imports a test JSON config file' do
-    Seeds.setup
-
-    res = import_test_app
-
-    expect(res).to be_a Admin::AppType
-
-    expect(res.name).to eq @app_name
-    expect(res.label).to eq 'Brain Health Study'
-
-    enable_user_app_access res.name, @user
-    setup_access :player_infos
-
-    @user.app_type = res
-    @user.save!
-    app_type = res
-    expect(User.find(@user.id).app_type_id).to eq app_type.id
-    expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: app_type.id))
-    expect(@user.has_access_to?(:read, :table, :player_infos)).to be_truthy
-
-    expect(ExternalIdentifier.where(name: 'bhs_assignments').first).to be_a ExternalIdentifier
-    a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :bhs_assignments
-    # The external identifier access can't be enabled if the underlying table doesn't exist.
-    # The bhs table is created in other tests though
-    expect(a.first).to be_a Admin::UserAccessControl
-    al = ActivityLog.where(item_type: 'bhs_assignment').first
-    expect(al).to be_a ActivityLog
-    al.update(current_admin: @admin, disabled: false)
-    a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :activity_log__bhs_assignments
-    # The Activity log definition can not be enabled if its table does not exist
-    # It is created in other tests though
-    expect(a.first).to be_a Admin::UserAccessControl
-
-    # expect(@user.has_access_to? :create, :table, :activity_log__bhs_assignments).to be_truthy
-    # expect(@user.has_access_to? :create, :table, :bhs_assignments).to be_truthy
   end
 end

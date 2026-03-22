@@ -10,14 +10,14 @@ class ApplicationJob < ActiveJob::Base
   around_perform do |job, block|
     Rails.logger.info "Run job - #{job}"
     block.call
-  rescue StandardError, FsException, FphsException => e
+  rescue StandardError, FsException, FphsException, RuntimeError, IOError => e
     begin
       msg = "Job failed - #{e} : #{job}"
       puts msg unless Rails.env.test?
       Rails.logger.warn msg
-      Rails.logger.warn e.backtrace.join("\n")
+      Rails.logger.warn e.short_string_backtrace
       ApplicationJob.notify_failure job, e
-    rescue StandardError, FsException, FphsException => e2
+    rescue StandardError, FsException, FphsException, RuntimeError, IOError => e2
       msg = "Job failed in rescue: #{e2} : #{job}"
       puts msg
       Rails.logger.error msg
@@ -35,7 +35,14 @@ class ApplicationJob < ActiveJob::Base
   def self.notify_failure(job, exception = nil)
     Rails.cache.fetch('delayed_job-failure-notification', expires_in: 1.hour) do
       job_id = job.id if job.respond_to? :id
-      nj = FailureMailer.notify_job_failure(job_id, JSON.parse(job.to_json).to_yaml, exception.to_s)
+      job_id = job.job_id if job_id.nil? && job.respond_to?(:job_id)
+
+      nj = FailureMailer.notify_job_failure(
+        job_id,
+        job.inspect.gsub(' @', "\n@"),
+        exception.to_s
+      )
+
       if Rails.env.test?
         nj.deliver_now
       else
@@ -43,7 +50,9 @@ class ApplicationJob < ActiveJob::Base
       end
       DateTime.now.to_s
     end
-  rescue StandardError => e
+  rescue Exception => e
+    puts e
+    puts e.backtrace.join("\n")
     Rails.logger.error "Failed to send notify_failure: #{e}"
     Rails.logger.error e.backtrace.join("\n")
   end

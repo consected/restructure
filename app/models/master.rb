@@ -3,11 +3,50 @@
 class Master < ActiveRecord::Base
   FilteredAssocPrefix = 'filtered__'
 
+  #
+  # Get the labels for crosswalk ID fields on the masters table from AppConfiguration.
+  # The configuration value should be a YAML hash format, e.g.:
+  #   msid: MSID
+  #   pro_id: Pro Football ID
+  # Falls back to humanizing the field name if no configuration is set.
+  # @param [User | nil] access_by - current user for app-type specific configuration
+  # @return [Hash{Symbol => String}] hash of field names to labels
+  def self.crosswalk_field_labels(access_by: nil)
+    if access_by
+      key = "#{access_by.id}-#{access_by.app_type_id}"
+      @crosswalk_field_labels_by_user ||= {}
+      return @crosswalk_field_labels_by_user[key] if @crosswalk_field_labels_by_user.key?(key)
+    elsif @crosswalk_field_labels
+      return @crosswalk_field_labels
+    end
+
+    config_value = Admin::AppConfiguration.hash_for(:crosswalk_field_labels, access_by)
+    labels = config_value.presence || crosswalk_attrs.to_h { |attr| [attr, attr.to_s.humanize] }
+
+    if access_by
+      @crosswalk_field_labels_by_user[key] = labels
+    else
+      @crosswalk_field_labels = labels
+    end
+
+    labels
+  end
+
+  # Clear memoized crosswalk field labels (called when app configuration changes)
+  def self.reset_crosswalk_field_labels!
+    @crosswalk_field_labels = nil
+    @crosswalk_field_labels_by_user = nil
+  end
+
   # Temporary master records can be used with limited(_if_one) user access controls
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table
   TemporaryMasterIds = [-1, -2].freeze
+
+  scope :no_temporary_masters, -> { where.not(id: TemporaryMasterIds) }
+
   Resources::Models.add(Master, resource_name: :temporary_master)
+  Resources::Models.add(Master, resource_name: :masters)
   has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'
 
   MasterNestedAttribs = [
@@ -19,8 +58,8 @@ class Master < ActiveRecord::Base
          not_trackers not_tracker_histories].freeze
 
   TrackerEventOrderClause =
-    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
-  TrackerHistoryEventOrderClause = Arel.sql 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
+    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.id DESC'
+  TrackerHistoryEventOrderClause = Arel.sql 'event_date::date DESC NULLS last, tracker_history.id DESC'
   SubjectInfoRankOrderClause = Arel.sql 'rank desc nulls last '
 
   #
@@ -46,35 +85,58 @@ class Master < ActiveRecord::Base
   def self.set_associations_for_subject_searches
     # inverse_of required to ensure the current_user propagates between associated models correctly
     has_many Settings::DefaultSubjectInfoTableName.to_sym,
-             -> { order(Master.subject_info_rank_order_clause) },
+             lambda {
+               eager_load(:user)
+                 .order(Master.subject_info_rank_order_clause)
+             },
              inverse_of: :master
 
     has_one Settings::DefaultSubjectInfoTableName.singularize.to_sym,
-            -> { order(Master.subject_info_rank_order_clause) },
+            lambda {
+              eager_load(:user)
+                .order(Master.subject_info_rank_order_clause)
+            },
             inverse_of: :master
 
     has_many Settings::DefaultSecondaryInfoTableName.to_sym,
+             -> { eager_load(:user) },
              inverse_of: :master
 
     has_many Settings::DefaultContactInfoTableName.to_sym,
-             -> { order(RankNotNullClause) },
+             lambda {
+               eager_load(:user)
+                 .order(RankNotNullClause)
+             },
              inverse_of: :master
 
     has_many Settings::DefaultAddressInfoTableName.to_sym,
-             -> { order(RankNotNullClause) },
+             lambda {
+               eager_load(:user)
+                 .order(RankNotNullClause)
+             },
              inverse_of: :master
 
     # Associations to allow advanced searches for NOT
     has_many :not_tracker_histories,
-             -> { order(TrackerHistoryEventOrderClause) },
+             lambda {
+               eager_load(:user)
+                 .order(TrackerHistoryEventOrderClause)
+             },
              class_name: 'TrackerHistory'
 
     has_many :not_trackers,
-             -> { order(TrackerEventOrderClause) },
+             lambda {
+               eager_load(:user)
+                 .order(TrackerEventOrderClause)
+             },
              class_name: 'Tracker'
 
     # This association is provided to allow 'simple' search on names in player_infos OR pro_infos
     has_many :general_infos,
+             lambda {
+               eager_load(:user)
+                 .order(Master.subject_info_rank_order_clause)
+             },
              class_name: Settings::DefaultSubjectInfoTableName.singularize.camelize
   end
 
@@ -96,14 +158,14 @@ class Master < ActiveRecord::Base
   has_many :trackers,
            lambda {
              includes(:protocol)
-               .preload(:protocol, :sub_process, :protocol_event, :user)
+               .eager_load(:protocol, :sub_process, :protocol_event, user: [:user_preference])
                .order(TrackerEventOrderClause)
            },
            inverse_of: :master
 
   has_many :tracker_histories,
            lambda {
-             preload(:protocol, :sub_process, :protocol_event, :user)
+             eager_load(:protocol, :sub_process, :protocol_event, user: [:user_preference])
                .order(TrackerHistoryEventOrderClause)
            },
            inverse_of: :master
@@ -111,13 +173,16 @@ class Master < ActiveRecord::Base
   # Allow calc actions and substitutions to work correctly
   has_many :tracker_history,
            lambda {
-             preload(:protocol, :sub_process, :protocol_event, :user)
+             eager_load(:protocol, :sub_process, :protocol_event, user: [:user_preference])
                .order(TrackerHistoryEventOrderClause)
            },
            inverse_of: :master
 
   has_many :latest_tracker_history,
-           -> { order(id: :desc).limit(1) },
+           lambda {
+             eager_load(:protocol, :sub_process, :protocol_event, user: [:user_preference])
+               .order(id: :desc).limit(1)
+           },
            class_name: 'TrackerHistory',
            inverse_of: :master
 
@@ -159,6 +224,14 @@ class Master < ActiveRecord::Base
   # The main set of has_many associations that represents the primary data objects that can belong to a master record
   PrimaryAssociations = get_all_associations
 
+  # ExternalIdentifier associations take the form:
+  #    master.scantrons
+  # i.e. the underscored pluralized name
+  # This is placed here, since there is a dependency on MasterSearchHandler
+  # It also precedes the DynamicModel activation, since "has may through" associations made later
+  # may rely on the ExternalIdentifier associations.
+  ExternalIdentifier.enable_active_configurations
+
   # DynamicModel associations take the form:
   #     master.player_contact_histories
   # i.e. the pluralized table name
@@ -172,12 +245,6 @@ class Master < ActiveRecord::Base
   #   master.activity_log__player_contact_phones
   # Notice the double underscore which represents the Module::Class delimiter
   ActivityLog.enable_active_configurations
-
-  # ExternalIdentifier associations take the form:
-  #    master.scantrons
-  # i.e. the underscored pluralized name
-  # This is placed here, since there is a dependency on MasterSearchHandler
-  ExternalIdentifier.enable_active_configurations
 
   if attribute_names.include? 'created_by_user_id'
     # NOTE: a belongs_to association can't include a scope definition and be used in a join
@@ -217,11 +284,11 @@ class Master < ActiveRecord::Base
   def self.find_with(params, access_by: nil)
     req_type = params[:type]
 
-    if req_type && crosswalk_attr?(req_type, access_by: access_by) && params[:id]
+    if req_type && crosswalk_attr?(req_type, access_by:) && params[:id]
       # The requested type is a master crosswalk attribute.
       # Find the master and retrieve the value
       Master.send("find_by_#{req_type}", params[:id])
-    elsif req_type && alternative_id?(req_type, access_by: access_by) && params[:id]
+    elsif req_type && alternative_id?(req_type, access_by:) && params[:id]
       # The requested type is a master crosswalk attribute.
       # Find the master and retrieve the value
       Master.find_with_alternative_id(req_type, params[:id], access_by)
@@ -311,9 +378,11 @@ class Master < ActiveRecord::Base
       @current_user = user
     elsif user.is_a?(Integer)
       @current_user = User.find(user)
+    elsif user.nil?
+      raise 'Setting current_user to nil is not allowed'
     else
       raise 'Attempting to set current_user with non user: ' \
-             "#{user} #{user.class.name} #{user.class.__id__} #{User.__id__}"
+            "#{user} #{user.class.name} #{user.class.__id__} #{User.__id__}"
     end
   end
 
@@ -369,38 +438,76 @@ class Master < ActiveRecord::Base
   #
   # Create a fully hydrated master record, potentially including
   # embedded parameters to create associated records and external identifiers.
-  # Embed items listed in app configuration item :create_master_with for the user/role
+  # Embed items listed in app configuration item :create_master_with for the user/role.
+  # Additional associated records (player_contacts, addresses, external identifiers,
+  # dynamic models, etc.) can be created in the same transaction via with_associated_params.
+  # If any record fails validation, the entire transaction rolls back.
   # @param [User] user - current user
   # @param [Boolean] empty - create an empty master, independent of :create_master_with
   # @param [ActionController::StrongParameters] with_embedded_params - associated parameters
-  #   permitted to create instances
+  #   permitted to create the first :create_master_with item
   # @param [Hash] extra_ids - hash representing extra identifier id field => value pairs
+  # @param [Hash] with_associated_params - hash of association_name => indexed record attributes
+  #   e.g. { "player_contacts" => { "0" => { data: "...", rank: 10 }, "1" => { ... } } }
   # @return [Master] resulting persisted Master instance
-  def self.create_master_record(user, empty: nil, with_embedded_params: nil, extra_ids: nil)
+  def self.create_master_record(user, empty: nil, with_embedded_params: nil, extra_ids: nil,
+                                with_associated_params: nil)
     raise 'no user specified' unless user
 
-    vals = { current_user: user, creating_master: true }
-    vals = vals.merge(extra_ids) if extra_ids
-    m = Master.create!(vals)
+    transaction do
+      vals = { current_user: user, creating_master: true }
+      vals = vals.merge(extra_ids) if extra_ids
+      m = Master.create!(vals)
 
-    unless empty
-      i = 0
-      each_create_master_with_item(user) do |cw|
-        with_embedded_params = nil if i > 0
+      unless empty
+        i = 0
+        each_create_master_with_item(user) do |cw|
+          with_embedded_params = nil if i > 0
 
-        init_data = { creating_master: true }
-        assoc = m.assoc_named(cw)
+          init_data = { creating_master: true }
+          assoc = m.assoc_named(cw)
 
-        init_data.merge! with_embedded_params.permit(assoc.permitted_params) if with_embedded_params
+          init_data.merge! with_embedded_params.permit(assoc.permitted_params) if with_embedded_params
 
-        assoc.create! init_data
+          assoc.create! init_data
 
-        i += 1
+          i += 1
+        end
+
+        # Create additional associated records passed via the API
+        create_associated_records(m, with_associated_params) if with_associated_params.present?
+      end
+
+      m.creating_master = false
+      m
+    end
+  end
+
+  #
+  # Create additional associated records for a master from nested params.
+  # Called within the transaction opened by {.create_master_record}.
+  #
+  # Each key in +assoc_params+ is a pluralized association name (matching a
+  # +has_many+ on Master), and the value is a hash of indexed record attribute
+  # hashes. Attributes are filtered through each association's +permitted_params+
+  # before creation, and +create!+ is used so that validation failures raise
+  # +ActiveRecord::RecordInvalid+, triggering a full transaction rollback.
+  #
+  # @param master [Master] persisted master record to attach associations to
+  # @param assoc_params [Hash{String => Hash}] e.g.
+  #   { "player_contacts" => { "0" => { data: "...", rank: 10 }, "1" => { ... } } }
+  # @raise [ActiveRecord::RecordInvalid] if any record fails validation
+  # @return [void]
+  def self.create_associated_records(master, assoc_params)
+    assoc_params.each do |assoc_name, records_params|
+      assoc = master.assoc_named(assoc_name)
+      permitted = assoc.permitted_params
+
+      records_params.each_value do |record_attrs|
+        record_data = record_attrs.permit(permitted)
+        assoc.create!(record_data)
       end
     end
-
-    m.creating_master = false
-    m
   end
 
   #
@@ -661,13 +768,14 @@ class Master < ActiveRecord::Base
     extras.merge!(include: included_tables)
     extras[:methods] << :header_prefix
     extras[:methods] << :header_title
+    extras[:methods] << :open_panels
     extras[:methods] << :trackers_length
 
     show_ids_in_results.each do |id_attr|
       extras[:methods] << id_attr
     end
 
-    res = super(extras)
+    res = super
 
     # Handled the filtered lists, changing their names back to match the original expected objects names
     res.transform_keys! do |k|
@@ -713,6 +821,14 @@ class Master < ActiveRecord::Base
   def header_title
     template = Admin::AppConfiguration.value_for(:master_header_title, current_user)
     header_substitutions template
+  end
+
+  def open_panels
+    res = Admin::AppConfiguration.value_for(:open_panels, current_user)
+    res = Formatter::Substitution.substitute res, data: self, tag_subs: nil, ignore_missing: true
+    return unless res
+
+    res.gsub(',', "\n").gsub("\r\n", "\n").gsub("\n\n", "\n").strip
   end
 
   #

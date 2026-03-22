@@ -70,9 +70,12 @@ module GeneralSelectionsHelper
     implementation_classes = DynamicModel.implementation_classes
     implementation_classes.select! { |ic| ic.definition.ready_to_generate? }
     cnames = []
+
+    full_names = implementation_classes.map { |itc| "dynamic_model__#{itc.definition.implementation_model_name}" }
+    res = Admin::UserAccessControl.access_for_list?(current_user, :access, :table, full_names)
     implementation_classes.each do |itc|
       full_name = "dynamic_model__#{itc.definition.implementation_model_name}"
-      next unless current_user.has_access_to?(:access, :table, full_name.pluralize)
+      next unless res[full_name.to_sym]
 
       ito = itc.new
       cnames.push("general_selections-item_type+#{ito.item_type}")

@@ -18,6 +18,8 @@ module AdminHandler
     before_create :setup_values
     after_save :invalidate_cache
 
+    attr_reader :updated_from_report
+
     add_model_to_list
   end
 
@@ -75,11 +77,23 @@ module AdminHandler
       "admin/#{table_name}"
     end
 
+    def base_route_short_name
+      table_name
+    end
+
     # The base string for route names
     # For example `send("new_#{base_route_name}_path")` returns the path
     # to the "new" controller action
     def base_route_name
       base_route_segments.singularize.gsub('/', '_')
+    end
+
+    unless respond_to? :no_master_association
+      # In case we are attempting to use the admin models in references or
+      # other dynamic definition configurations, ensure they know there is no master association defined
+      def no_master_association
+        true
+      end
     end
   end
 
@@ -109,10 +123,18 @@ module AdminHandler
     save!
   end
 
-  def admin_name
-    return unless admin
+  def updated_from_report!
+    @updated_from_report = true
+  end
 
-    admin.email
+  def admin_name
+    return unless admin_id
+
+    Admin.emails_by_id[admin_id]
+  end
+
+  def admin_email
+    admin_name
   end
 
   def admin=(_new_admin)
@@ -158,7 +180,9 @@ module AdminHandler
 
   # user email to allow simplified exports
   def user_email
-    user.email if respond_to?(:user) && user
+    return unless respond_to?(:user_id) && user_id
+
+    User.emails_by_id[user_id]
   end
 
   def _class_name
@@ -170,6 +194,11 @@ module AdminHandler
 
     options[:methods] << :_class_name
     options[:methods] << :user_email
+
+    # If the record has been updated from a report, ensure that we override
+    # any except options to ensure all fields are included in the results.
+    # Devise will apply a very restrictive set of fields otherwise
+    options[:force_except] = [] if updated_from_report
 
     super(options)
   end
@@ -230,10 +259,25 @@ module AdminHandler
   end
 
   #
+  # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+  # otherwise it returns just the basic name
+  def admin_item_type
+    self.class.name.singularize.ns_underscore
+  end
+
+  def admin_item_type_us
+    admin_item_type.ns_underscore
+  end
+
+  def model_data_type
+    :admin_model
+  end
+
+  #
   # Invalidate the cache and latest update value
   # @return [<Type>] <description>
   def invalidate_cache
-    logger.info "User Access Control added or updated (#{self.class.name}). Invalidating cache."
+    logger.info "Admin record added or updated (#{self.class.name}). Invalidating cache"
 
     # Allows caching in other classes to reset
     self.class.reset_latest_update

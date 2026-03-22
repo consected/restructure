@@ -8,10 +8,9 @@ module Redcap
     # Download the full XML project archive, and store it to the file_store container.
     # The stored file record is returned if successful.
     # @param [Redcap::ProjectAdmin] project_admin
-    # @param [User] current_user
     # @return [NfsStore::Manage::StoredFile]
-    def perform(project_admin, current_admin)
-      setup_with project_admin, current_admin: current_admin
+    def perform(project_admin)
+      setup_with project_admin
 
       container = project_admin.file_store
       raise FphsException, 'Project archive not downloaded - no file store set up' unless container
@@ -25,8 +24,8 @@ module Redcap
       NfsStore::Import.import_file(container.id,
                                    filename,
                                    temp_file.path,
-                                   project_admin.current_user,
-                                   path: path,
+                                   project_admin.job_user,
+                                   path:,
                                    replace: true)
     rescue StandardError => e
       create_failure_record(e, 'capture project archive job', project_admin)

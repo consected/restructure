@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seed_support"
+require "#{Rails.root}/spec/support/seed_support"
 
 module ControllerMacros
   def self.create_user(opt = {})
@@ -50,13 +50,21 @@ module ControllerMacros
     # Save a new password, as required to handle temp passwords
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password
-    admin.otp_secret = Admin.generate_otp_secret
-    admin.otp_required_for_login = true
-    admin.new_two_factor_auth_code = false
+
+    # Only set up 2FA if it's not disabled
+    unless Admin.two_factor_auth_disabled
+      admin.otp_secret = Admin.generate_otp_secret
+      admin.otp_required_for_login = true
+      admin.new_two_factor_auth_code = false
+    end
+
     admin.save!
 
     # # Can't reload, as that doesn't clear non-db attributes
     admin = Admin.find(admin.id)
+
+    # Only check otp_secret if 2FA is not disabled
+    raise 'Failed to store otp_secret' unless Admin.two_factor_auth_disabled || admin.otp_secret
 
     [admin, good_admin_password]
   end

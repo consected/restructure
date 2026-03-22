@@ -9,10 +9,10 @@
 %>
 <div class="report-criteria container-fluid <%=extra_classes%>" id="<%= @criteria_block_id %>-block">
   <div class="report-description">
-    <%= Formatter::Substitution.substitute(markdown_to_html(description), data: current_user)&.html_safe %>
+    <%= Formatter::Substitution.substitute(markdown_to_html(description), data: @runner.data_reference, ignore_missing: :show_tag)&.html_safe %>
   </div>
   <%= render partial: 'reports/criteria' %>
 </div>
 <%= render partial: 'reports/criteria_view_css' %>
-<% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
+<% if @report.returns_master_results_list %><%= render partial: 'reports/master_results_css' %><% end %>
 </div>

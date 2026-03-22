@@ -32,12 +32,13 @@ module FieldMeaningsHelper
     meaning = field_meaning_for_key(key)
     return res unless meaning
 
-    meaning = h(meaning).gsub("\n", ' ')
+    meaning = markdown_to_html(h(meaning))
     info_sign = <<~END_HTML
       <i class="glyphicon glyphicon-question-sign label-help-icon"
           data-toggle="popover"
           data-trigger="click hover"
-          data-content="#{meaning}"
+          data-content="#{CGI.escape_html(meaning.gsub('"', '&quot;'))}"
+          data-html="true"
       ></i>
     END_HTML
                 .html_safe

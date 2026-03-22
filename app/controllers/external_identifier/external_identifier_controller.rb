@@ -31,7 +31,11 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
     field_list = [:master_id] + defn.field_list_array
 
     res = params.require(controller_name.singularize.to_sym).permit(field_list)
-    res[implementation_class.external_id_attribute.to_sym] = nil if implementation_class.allow_to_generate_ids?
+    attr_ext_id = implementation_class.external_id_attribute
+    attr_ext_id_val = res[attr_ext_id.to_sym]
+    if implementation_class.allow_to_generate_ids? && object_instance.id && object_instance[attr_ext_id].to_s != attr_ext_id_val.to_s
+      res[attr_ext_id] = nil
+    end
     @secure_params = res
   end
 

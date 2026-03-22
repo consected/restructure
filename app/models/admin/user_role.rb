@@ -78,6 +78,8 @@ class Admin::UserRole < Admin::AdminBase
   end
 
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
+  # Note that the results are sorted by app type id (string rather than integer sort)
+  # to ensure consistent ordering, especially for testing.
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name(conditions: nil)
     res = select(:role_name, :app_type_id).distinct.includes(:app_type).order(role_name: :asc)
@@ -85,16 +87,16 @@ class Admin::UserRole < Admin::AdminBase
 
     items = {}
     res.each do |role|
-      m = role.app_type
-      n = if m
-            "#{m.id}/#{m.name}"
+      app_type = role.app_type
+      n = if app_type
+            "#{app_type.id}/#{app_type.name}"
           else
             '/'
           end
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end
-    items
+    items.sort.to_h
   end
 
   def self.users
@@ -104,7 +106,7 @@ class Admin::UserRole < Admin::AdminBase
 
   # conditions must include app_type and role_name, and may include other conditions
   def self.active_user_ids(conditions = nil, app_type:, role_name:)
-    condsql = '(user_roles.disabled is null or user_roles.disabled = false) AND '\
+    condsql = '(user_roles.disabled is null or user_roles.disabled = false) AND ' \
               '(users.disabled is null or users.disabled = false)'
     res = select('user_id').joins(:user).where(condsql)
 
@@ -114,15 +116,22 @@ class Admin::UserRole < Admin::AdminBase
     res.distinct.pluck(:user_id)
   end
 
-  def self.find_user_role_for_user(user, app_type, role_name)
-    user.user_roles.where(app_type: app_type, role_name: role_name).first
+  def self.find_user_role_for_user(user, app_type, role_name, active: false)
+    ur = user.user_roles
+    ur = ur.active if active
+    ur.find_by(app_type: app_type, role_name: role_name)
   end
 
+  #
+  # Add the user role, or enable an existing matching role if one exists that was disabled
   def self.add_to_role(user, app_type, role_name, admin)
-    res = find_user_role_for_user user, app_type, role_name
+    res = find_user_role_for_user(user, app_type, role_name)
+    res_active = find_user_role_for_user(user, app_type, role_name, active: true)
     if res
-      res.with_admin(admin).enable! if res.disabled?
+      # Enable the role that was found, if it is disabled and there is not already a matching active role for the user
+      res.with_admin(admin).enable! if res.disabled? && !res_active
     else
+      # No role was found, so just create it
       user.user_roles.create!(app_type: app_type, role_name: role_name, disabled: false, current_admin: admin)
     end
   end
@@ -136,12 +145,14 @@ class Admin::UserRole < Admin::AdminBase
   # @param from_user [User] user to copy roles from
   # @param to_user [User] user to copy roles to
   # @param app_types [Admin::AppType | Array{Admin::AppType}] the app type(s) the roles belong to.
-  # @return [Array] array of Admin::UserRole instances created in the to_user
-  def self.copy_user_roles(from_user, to_user, app_types, current_admin)
+  # @param force_not_empty [true | nil] - force copying to users that already have roles in this app type
+  # @param reenable_disabled [true | nil] - re-enable disabled roles in target user that match source roles
+  # @return [Array] array of Admin::UserRole instances created or re-enabled in the to_user
+  def self.copy_user_roles(from_user, to_user, app_types, current_admin, force_not_empty: nil, reenable_disabled: nil)
     raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?
 
     has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_types
-    unless has_roles.empty?
+    unless has_roles.empty? || force_not_empty
       message = app_types.is_a?(Array) ? "#{'s' unless app_types.one?}: #{app_types.join(', ')}" : ": #{app_types}"
       raise FphsException, "can not copy roles to a user with roles in the following app#{message}"
     end
@@ -151,15 +162,45 @@ class Admin::UserRole < Admin::AdminBase
     to_roles = []
     from_roles.each do |r|
       new_role = {
-        current_admin: current_admin,
         role_name: r.role_name,
         app_type: r.app_type,
         user: to_user
       }
+
+      # Check if this role already exists (enabled or disabled)
+      existing_role = find_by(new_role)
+
+      if existing_role
+        # If the role exists and is disabled, re-enable it if requested
+        if existing_role.disabled? && reenable_disabled
+          existing_role.update!(disabled: false, current_admin: current_admin)
+          to_roles << existing_role
+        end
+        # Otherwise skip this role (it already exists and is active, or we're not re-enabling)
+        next
+      end
+
+      # No existing role found, so create it
+      new_role[:current_admin] = current_admin
       to_roles << create!(new_role)
     end
 
     to_roles
+  end
+
+  # Clear (disable) all active roles for a user in a specific app type.
+  # @param user [User] user whose roles will be disabled
+  # @param app_type [Admin::AppType] the app type to clear roles for
+  # @param current_admin [Admin] admin performing the action
+  # @return [Array] array of Admin::UserRole instances that were disabled
+  def self.clear_user_roles(user, app_type, current_admin)
+    raise FphsException, 'user must be specified and not nil to clear roles' if user.blank?
+    raise FphsException, 'app_type must be specified and not nil to clear roles' if app_type.blank?
+
+    active_app_roles(user, app_type:).each_with_object([]) do |role, disabled|
+      role.with_admin(current_admin).disable!
+      disabled << role
+    end
   end
 
   # Provide a usable name for viewing

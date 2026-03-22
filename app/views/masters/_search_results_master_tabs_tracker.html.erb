@@ -1,0 +1,12 @@
+<% # A panel was defined with category "trackers" - initially show it if it appears in the "open panels" app configuation
+  if default_panels.length > 0 && initial_show.nil?
+    # The "default" overrides the value set in the panel definition only if the panel definition was not set
+    initial_show = 'trackers'.in?(default_panels)
+  end  
+  extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click-initial-show' : ''}"
+%>
+{{#if (or (not (params 'only_tabs')) (params 'only_tabs' 'trackers')) }}
+  <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels('trackers', default_panels.length) %>">
+    <a href="/masters/{{id}}/trackers" data-panel-tab="trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" aria-expanded="false" class="scroll-to-expanded open-tracker collapsed">tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
+  </li>
+{{/if}}

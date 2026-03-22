@@ -1,0 +1,18 @@
+<%
+  unless defined? def_version
+    def_version = nil
+  end
+
+  unless defined? force
+    force = false
+  end
+
+  current_definition = implementation_class.definition
+%>
+<% if current_user.has_access_to?(:access, :table, full_name.pluralize) || force %>
+  <% option_configs.each do |option_type_config|
+    mapped_vars = OptionConfigs::TemplateOptionMapping.dynamic_model_mapping(def_record, option_type_config, current_user)
+%>
+  <%= render partial: 'common_templates/search_results_template', locals: mapped_vars %>
+  <% end %>
+<% end %>

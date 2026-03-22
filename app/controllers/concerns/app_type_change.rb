@@ -115,7 +115,7 @@ module AppTypeChange
   end
 
   def all_user_app_type_ids
-    @all_user_app_type_ids ||= Admin::AppType.all_ids_available_to(current_user)
+    Admin::AppType.all_ids_available_to(current_user)
   end
 
   #

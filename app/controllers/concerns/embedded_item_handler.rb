@@ -28,10 +28,12 @@ module EmbeddedItemHandler
 
     oi.current_user = current_user
     oi.action_name = action_name
-    @embedded_item = oi.embedded_item
+    @embedded_item = oi.embedded_item(current_admin_sample:)
 
     return unless @embedded_item
 
+    @embedded_item.force_preset_values if @embedded_item.respond_to?(:force_preset_values)
+    @embedded_item.evaluate_active_values if @embedded_item.respond_to?(:evaluate_active_values)
     case action_name
     when 'new'
       set_embedded_item_optional_params

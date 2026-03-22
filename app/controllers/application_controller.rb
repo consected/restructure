@@ -8,9 +8,14 @@ class ApplicationController < ActionController::Base
   include NavHandler
   include UserActionLogging
 
+  # Only allow modern browsers supporting webp images, web push,
+  # badges, import maps, CSS nesting, and CSS :has.
+  allow_browser versions: :modern
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
+  before_action :log_access_for_current_user
   before_action :check_temp_passwords
   before_action :prevent_cache
   before_action :setup_navs
@@ -33,6 +38,10 @@ class ApplicationController < ActionController::Base
     true
   end
 
+  def log_access_for_current_user
+    current_user.log_access = true if current_user && log_access?
+  end
+
   # If either user or admin has a temp password, force them to change it
   def check_temp_passwords
     return true if request.xhr?
@@ -51,6 +60,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def log_access?
+    params[:_log_access] == 'true'
+  end
 
   def no_action_log
     false

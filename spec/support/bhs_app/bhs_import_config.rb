@@ -13,20 +13,36 @@ module BhsImportConfig
     @bhs_app_name
   end
 
-  def self.import_config
+  def self.import_config(name: nil)
+    admin = Admin.active.first
     MasterSupport.disable_existing_records(nil, external_id_attribute: 'bhs_id')
-    Admin::AppType.active.where(name: 'Brain Health Study').each { |a| a.update!(disabled: true, name: 'BHS OLD', current_admin: Admin.active.first) }
+
+    # # By default, an app with no page layouts should show everything. Clear everything before the import
+    # Admin::PageLayout.active.where(app_type_id: app.id).each do |p|
+    #   p.disable! admin
+    # end
+
+    # If we don't enable existing activity log definition it will remain disabled after the import
+    ActivityLog.active.each { |a| a.update!(disabled: true, name: 'AL BHS OLD', current_admin: admin) }
+    al = ActivityLog.all.find { |a| a.resource_name == 'activity_log__bhs_assignments' }
+    al.update(disabled: false, current_admin: admin) if al.disabled?
+
+    ata = Admin::AppType.active
+    ata.where(label: 'Brain Health Study').or(ata.where(name: 'bhs')).each { |a| a.update!(disabled: true, label: 'BHS OLD', name: "bhs-old-#{a.id}", current_admin: admin) }
     ExternalIdentifier.define_models
 
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_config.json'
-    app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
-    # app = SetupHelper.setup_test_app
+    app, exception = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
 
-    # If we don't enable existing activity log definition it will remain disabled after the import
-    ActivityLog.active.each { |a| a.update!(disabled: true, name: 'AL BHS OLD', current_admin: Admin.active.first) }
-    al = ActivityLog.all.find { |a| a.resource_name == 'activity_log__bhs_assignments' }
-    al.update!(disabled: false, current_admin: al.admin) if al.disabled?
+    raise exception if exception.is_a?(Exception)
+
+    app.name = name if name
+    app.current_admin = admin
+    app.disabled = false
+    app.save! if app.changed?
+
+    puts "Imported BHS app type #{app.name} (id: #{app.id}) - app.attributes: #{app.attributes}"
 
     @bhs_app_name = app.name
     app
@@ -78,7 +94,7 @@ module BhsImportConfig
   end
 
   def validate_bhs_setup
-    user = User.active.find_by(email: @good_email)
+    user = User.active.find_by(email: @good_email&.downcase)
     raise "#{user} (#{@good_email}) is not a User" unless user.is_a? User
     raise "#{user.id} (#{user.email}) is not #{@user.id} (#{@user.email})" unless user.id == @user.id
 

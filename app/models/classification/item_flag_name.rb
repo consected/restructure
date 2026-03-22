@@ -79,5 +79,6 @@ class Classification::ItemFlagName < ActiveRecord::Base
 
     item_type = self.item_type.to_s.sub('dynamic_model__', '')
     Tracker.add_record_update_entries item_type, current_admin, 'flag'
+    Classification::Protocol.reset_memos
   end
 end

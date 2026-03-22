@@ -48,13 +48,17 @@ _fpa.tag_formatter = class {
       "date_time_with_zone",
       "date_time_show_zone",
       "time",
+      "time_ignore_zone",
       "time_with_zone",
       "time_show_zone",
       "time_sec",
       "dicom_datetime",
       "dicom_date",
+      "redcap_date",
+      "iso8601_datetime",
       "join_with_space",
       "join_with_comma",
+      "join_with_csv",
       "join_with_semicolon",
       "join_with_pipe",
       "join_with_dot",
@@ -70,6 +74,7 @@ _fpa.tag_formatter = class {
       "html_list",
       "plaintext",
       "strip",
+      "split_space",
       "split_lines",
       "split_comma",
       "split_csv",
@@ -83,6 +88,7 @@ _fpa.tag_formatter = class {
       "json",
       "ignore_missing",
       "last",
+      "no_html_tag",
       "general_selection_label"
     ]
   }
@@ -106,7 +112,7 @@ _fpa.tag_formatter = class {
 
 
   capitalize(res, _orig_val) {
-    return res.capitalize();
+    return _fpa.utils.capitalize(res, true);
   }
 
   titleize(res, _orig_val) {
@@ -164,39 +170,54 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.date_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      if (d.isValid) {
+        orig_val = d.toFormat(dtf).toLowerCase();
+      }
+      else {
+        console.log(`Date is invalid: ${orig_val}`)
+      }
+    }
+    else {
+      console.log('User preferences don\'t include date format');
     }
     return orig_val;
   }
 
+
+  // Show the date and time as it was set(as if no timezone was specified)
+  // without adjusting to the user's timezone.  
   date_time(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.setZone('UTC').toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
   }
 
-  // Date and time only including hours:minutes and timezone of displayed time
-  // TODO: this does not return the timezone
+  // Forces the stored timezone to the user's timezone preference, without changing the date.
+  // A stored date time intended to not have a timezone
+  // will be returned as a new date time based on the user's timezone.
   date_time_with_zone(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.setZone(dtz).toFormat(dtf).toLowerCase() : orig_val;
     }
 
     return orig_val;
   }
 
   // Date and time only including hours:minutes and timezone of displayed time
-  // TODO: this does not return the timezone
   date_time_show_zone(_res, orig_val) {
     let dtf = UserPreferences.date_time_format();
+    let dtz = UserPreferences.timezone();
+    let dtzh = UserPreferences.timezone_human();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
+      orig_val = `${orig_val} ${dtzh}`;
     }
 
     return orig_val;
@@ -205,11 +226,12 @@ _fpa.tag_formatter = class {
   // Time only including hours: minutes
   time(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours: minutes
@@ -217,31 +239,35 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.time_format();
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours:minutes and timezone of displayed time
   // TODO: this does not return the timezone
   time_with_zone(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
-    return time;
+    return orig_val;
   }
 
   // Time only including hours:minutes and timezone of displayed time
   // TODO: this does not return the timezone
   time_show_zone(_res, orig_val) {
     let dtf = UserPreferences.time_format();
+    let dtz = UserPreferences.timezone();
+    let dtzh = UserPreferences.timezone_human();
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: dtz }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
+      orig_val = `${orig_val} ${dtzh}`;
     }
-    return time;
+    return orig_val;
   }
 
   // Time for hours: minutes: seconds
@@ -249,26 +275,44 @@ _fpa.tag_formatter = class {
     let dtf = UserPreferences.time_format(true);
     if (dtf) {
       let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
-      res = (d.isValid) ? d.toFormat(dtf) : orig_val;
+      orig_val = (d.isValid) ? d.toFormat(dtf).toLowerCase() : orig_val;
     }
     return orig_val;
 
   }
 
   dicom_datetime(_res, orig_val) {
-    if (typeof orig_val == 'date') {
-      orig_val = orig_val.toISOString();
+    let dtf = 'yyyyMMddHHmmss+0000';
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
     }
-    orig_val = orig_val.split('.')[0].replace(/[\:\-T]/g, '');
     return orig_val;
   }
 
   dicom_date(_res, orig_val) {
 
-    let dtf = '%Y%m%d';
+    let dtf = 'yyyyMMdd';
     if (dtf) {
-      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: UserPreferences.timezone() }) : _fpa.utils.DateTime.now();
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val, { zone: 'UTC' }) : _fpa.utils.DateTime.now();
       orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+    return orig_val;
+  }
+
+  redcap_date(_res, orig_val) {
+
+    let dtf = 'yyyy-MM-dd';
+    if (dtf) {
+      let d = (orig_val) ? _fpa.utils.DateTime.fromISO(orig_val) : _fpa.utils.DateTime.now();
+      orig_val = (d.isValid) ? d.toFormat(dtf) : orig_val;
+    }
+    return orig_val;
+  }
+
+  iso8601_datetime(_res, orig_val) {
+    if (typeof orig_val == 'date') {
+      orig_val = orig_val.toISOString();
     }
     return orig_val;
   }
@@ -281,6 +325,20 @@ _fpa.tag_formatter = class {
   join_with_comma(res, _orig_val) {
     if (Array.isArray(res))
       return res.join(', ');
+  }
+
+  join_with_csv(res, _orig_val) {
+    if (!Array.isArray(res)) return;
+
+    // Convert array to CSV format with proper escaping
+    return res.map(item => {
+      const str = String(item == null ? '' : item);
+      // Quote fields that contain comma, quote, or newline
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }).join(',');
   }
 
   join_with_semicolon(res, _orig_val) {
@@ -315,12 +373,12 @@ _fpa.tag_formatter = class {
 
   join_with_2newlines(res, _orig_val) {
     if (Array.isArray(res))
-      return res.join('\n');
+      return res.join('\n\n');
   }
 
   compact(res, _orig_val) {
     if (Array.isArray(res))
-      res.filter(item => (item));
+      return res.filter(item => (item));
   }
 
   sort(res, _orig_val) {
@@ -351,12 +409,13 @@ _fpa.tag_formatter = class {
         done.push(strItem);
       }
     }
+    return newres;
   }
 
   markdown_list(res, _orig_val) {
 
     if (Array.isArray(res))
-      return `  - ${res.join("\n  - ")}`
+      return `- ${res.join("\n- ")}`
   }
 
   html_list(res, _orig_val) {
@@ -374,6 +433,10 @@ _fpa.tag_formatter = class {
     return res.trim()
   }
 
+  split_space(res, _orig_val) {
+    return res.split(" ")
+  }
+
   split_lines(res, _orig_val) {
     return res.split("\n")
   }
@@ -383,8 +446,31 @@ _fpa.tag_formatter = class {
   }
 
   split_csv(res, _orig_val) {
-    // Imperfect implementation. Really should properly parse CSV files
-    return res.split(',')
+    // Parse CSV with proper handling of quoted values
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < res.length; i++) {
+      const char = res[i];
+      const nextChar = res[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current);
+    return result;
   }
 
   split_semicolon(res, _orig_val) {

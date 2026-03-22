@@ -25,13 +25,16 @@ module NfsStore
 
         container ||= NfsStore::Manage::Container.find(cid)
         container.current_user = user
-        unless container.allows_current_user_access_to? :access
+
+        can_access = container.can_access_if_admin_master? || container.allows_current_user_access_to?(:access)
+        unless can_access
           cp = container.parent_item || container.find_creator_parent_item
           cpm = cp&.master&.id if cp.respond_to?(:master)
 
           raise FsException::NoAccess,
-                'user does not have access to this container ' \
-                "(master #{container.master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
+                'open_container? user does not have access to this container ' \
+                "(user #{container&.current_user&.email} - master #{container.master&.id} - #{container.class} " \
+                "- parent #{cp.class} id: #{cp&.id} master: #{cpm})"
         end
 
         container
@@ -43,7 +46,7 @@ module NfsStore
     end
 
     def current_user
-      master.current_user
+      master&.current_user
     end
 
     def master_id=(master_id)

@@ -7,10 +7,9 @@ module Redcap
     #
     # Download the list of data collection instruments.
     # @param [Redcap::ProjectAdmin] project_admin
-    # @param [Admin] current_admin
     # @return [Boolean] success
-    def perform(project_admin, current_admin)
-      setup_with project_admin, current_admin: current_admin
+    def perform(project_admin)
+      setup_with project_admin
 
       Redcap::DataCollectionInstrument.retrieve_and_store project_admin
     rescue StandardError => e

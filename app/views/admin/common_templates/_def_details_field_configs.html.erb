@@ -1,0 +1,101 @@
+<% if object_instance.persisted? && object_instance.options_text && !object_instance.disabled
+     field_configs = object_instance.option_configs.map { |oc| [oc.name, oc.raw_field_configs] }.to_h %>
+<div class="activity-list-field-configs">
+  <label>field configs</label>
+<% 
+if field_configs.present?
+%>
+  <p><a href="#full-field-configs" class="collapsed btn btn-default" data-toggle="collapse">show all field configs</a></p>
+  <div id="full-field-configs" class="collapse">
+<%
+    field_configs.each do |k, v|
+       next unless v&.present?
+
+       v = { field_configs: v } 
+  %>
+    <p><code><%= k %></code></p>
+    <pre><code><%= v.deep_stringify_keys.to_yaml.sub("---\n",'') %></code></pre>
+    
+  <%          
+      end
+  %>
+  </div>
+  <%
+    end    
+%>  
+
+  <ul class="al-reference-list hidden">  
+  <% 
+  if field_configs.present? %>
+  <% field_configs.each do |k, v|
+       next unless v&.present?
+
+       v = { field_configs: v } 
+       fcs = v[:field_configs].deep_stringify_keys
+  %>
+    <div data-field-configs-option="<%= k %>">
+    <!-- <p><code><strong><%= k %></strong></code></p>-->
+    <% fcs.each do |f, fc| %>
+      <div data-field-configs-field="<%= f %>">
+      <!-- <p class="dfc-field-name"><code><%= f %></code></p> -->
+      <div class="dfc-field-config-block">
+        <ul class="nav nav-tabs" role="tablist">
+          <% fc.keys.each do |k| %>
+          <li role="presentation"><a class="dfc-config-name" href="#dfc-field-config-<%= "#{f}--#{k}" %>" aria-controls="dfc-field-config-<%= "#{f}--#{k}" %>" role="tab" data-toggle="tab"><%=k%></a></li>
+          <% end %>
+        </ul>
+        <div class="tab-content">  
+        <% fc.each do |opt, config| 
+             dfc_block = 'pre'
+             dfc_tag = 'code'
+             if opt == 'dialog_before'
+               val = "#{link_to_dialog(config)}".html_safe
+               dtext = find_dialog_by_config_or_name(config)&.template
+               if dtext
+                 dtext = markdown_to_html(dtext) 
+                 val = "<div>#{dtext}</div><hr>#{val}".html_safe
+               end
+
+               dfc_class = 'dfc-dialog-text'
+               dfc_tag = 'span'
+               dfc_block = 'div'
+             elsif config.is_a?(String)
+               val = config
+               dfc_tag = 'span'
+               dfc_block = 'div'
+               dfc_class = 'dfc-text'
+             else 
+               dfc_class = 'hlyaml'
+               val = config.to_yaml.sub("---\n",'')
+             end
+        %>
+          <<%=dfc_block%> role="tabpanel" class="tab-pane " id="dfc-field-config-<%= "#{f}--#{opt}" %>" class="dfc-config-yaml-block"><<%=dfc_tag%> class="<%=dfc_class%>"><%= val %></<%= dfc_tag %>></<%=dfc_block%>>
+        <% end %>
+        </div>
+      </div>
+      </div>
+    <% end %>
+    </div>
+  <%
+          
+      end
+    end    
+%>    
+ </ul>
+</div>
+
+<%= javascript_tag nonce: true do %>
+  window.setTimeout(function(){
+    if ($('[data-field-configs-option="default"]').hasClass("dfc-processed")) return;
+    
+    $('[data-field-configs-option="default"]').addClass("dfc-processed");
+    $('[data-field-configs-option="default"] [data-field-configs-field]').each(function(){
+      var $this = $(this);
+      var fn = $this.attr('data-field-configs-field');
+      var ftab = $(`.dynamic-field-list [data-field-name="${fn}"] .sb-subitem`);
+      ftab.append($this.find('.dfc-field-config-block'))
+    })
+  }, 300);
+<% end %>
+
+ <% end %>

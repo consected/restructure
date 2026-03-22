@@ -6,12 +6,6 @@ RSpec.describe SaveTriggers::SetItemFlags, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  def random_phone_number
-    pn = "(617)123-1234 c#{rand 1_000_000_000}"
-    pn = random_phone_number while PlayerContact.where(data: pn).count > 0
-    pn
-  end
-
   before :example do
     SetupHelper.setup_al_player_contact_phones
     SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
@@ -24,6 +18,7 @@ RSpec.describe SaveTriggers::SetItemFlags, type: :model do
     add_reference_def_to(@al, [player_contacts: { from: 'this', add: 'many' }])
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    Classification::Protocol.reset_record_updates_protocol!
   end
 
   it 'sets flags on an item using a list of ids' do

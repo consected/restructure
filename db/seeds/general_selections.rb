@@ -5,7 +5,7 @@ module Seeds
       values.each do |v|
         res = Classification::GeneralSelection.find_or_initialize_by( v.merge(item_type: item_type))
         # Fails quietly if the item_type / value is a duplicate, independent of other attributes (name, lock, edit_always, etc)
-        res.update(current_admin: auto_admin) unless res.admin
+        res.update(current_admin: Seeds.auto_admin) unless res.admin
       end
 
     end

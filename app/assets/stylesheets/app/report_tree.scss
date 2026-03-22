@@ -2,10 +2,32 @@ table.table.tree-table {
 
   border: 1px solid gray;
   margin: 0 auto;
-  opacity: 0.10;
+  tbody, thead {
+    opacity: 0.30;
+  }
 
-  &.jsTT {
-    opacity: 1
+  &:before {
+    content: "loading...";
+    opacity: 1;
+    color: black;
+    text-align: left;
+    margin: 0 auto;
+    width: auto;
+    position: absolute;
+    left: 46%;
+    font-size: 41px;
+    font-weight: bold;
+    display: block;
+  }
+
+  &.jsTT, &[data-results-count="0"] {
+    tbody, thead {
+      opacity: 1
+    }
+  }
+
+  &.jsTT:before, &[data-results-count="0"]:before {
+    display: none;
   }
 
   thead tr th.is-parent-col {

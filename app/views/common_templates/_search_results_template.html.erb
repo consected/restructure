@@ -1,4 +1,30 @@
 <%
+  # Render the templates used for the display of results in participant Details panel and
+  # all other dynamic model definitions:
+  # - common_template_result
+  # - common_template_list
+  #
+  # It also generates inline scripts for state, show_if, caption_before, labels and
+  # template_config for each dynamic model definition.
+  #
+  # This partial is called by a range of specific views
+
+  unless defined?  base_route_segments
+    base_route_segments = nil
+  end
+
+  unless defined? base_route_short_name
+    base_route_short_name = nil
+  end
+
+  unless defined? option_type_config_name
+    option_type_config_name = nil
+  end
+
+  unless defined? default_option_type_name
+    default_option_type_name = :default
+  end
+  default_option_type_name ||= :default
 
   unless defined? resource_name
     resource_name = nil
@@ -91,6 +117,10 @@
     full_name = name
   end
 
+  unless defined? template_name
+    template_name = "#{full_name}-OPTION_TYPE"
+  end
+
   unless defined? item_class_name
     item_class_name = full_name
   end
@@ -109,8 +139,10 @@
   end
 
   unless defined? edit_button_href
-    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{name.pluralize}/{{this.id}}/edit"
+    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{base_route_segments}/{{this.id}}/edit"
   end
+
+  edit_button_href = edit_button_href&.html_safe
 
   # with_data provides an alternatively named set of data for a template to use, rather than just the name
   # this is useful when providing multiple templates that should use the same set of data on a single page
@@ -180,6 +212,18 @@
   unless defined? embed
     embed = nil
   end
+
+  unless defined? name_with_option_type
+    name_with_option_type = nil
+  end
+  name_with_option_type ||= name
+
+  unless defined? pluralize_name_with_option_type
+    pluralize_name_with_option_type = nil
+  end
+  pluralize_name_with_option_type ||= name.pluralize
+
+  activity_log_references_name = "activity_log_#{name.underscore}_references"
   
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
@@ -257,19 +301,19 @@
   end
 %>
 
-<script id="fpa_state_config--<%=name.underscore%>--v<%=def_version%>">
+<%= javascript_tag id: "fpa_state_config--#{name_with_option_type.underscore}--v#{def_version}", nonce: true do %>
+  _fpa.state.caption_before.<%=name_with_option_type.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%> || {};
+  _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name_with_option_type.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%> || {};
+  _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
 
-  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name.underscore%> || {};
-  _fpa.state.caption_before.<%=name.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
-  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name.underscore%> || {};
-  _fpa.state.labels_<%=name.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
-
-  _fpa.state.template_config.<%=name.underscore%> = _fpa.state.template_config.<%=name.underscore%> || {};
-  _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>  = {
+  _fpa.state.template_config.<%=name_with_option_type.underscore%> = _fpa.state.template_config.<%=name_with_option_type.underscore%> || {};
+  _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>  = {
     def_version: <%= def_version || 'null' %>,
     vdef_version: '<%= vdef_version %>',
     name: '<%=name%>',
     full_name: '<%=full_name%>',
+    name_with_option_type: '<%= name_with_option_type %>',
     caption: Handlebars.compile('<%=caption%>'),
     button_label: Handlebars.compile('<%=button_label || caption%>'),
     item_class_name: '<%=item_class_name%>',
@@ -309,31 +353,46 @@
     field_options: <%= field_options.to_json&.html_safe %>,
     field_edit_as_types: <%= field_edit_as_types.to_json&.html_safe %>, 
     field_types: <%= field_types.to_json&.html_safe %>,
-    user_file_actions: <%= user_file_actions.to_json&.html_safe %>
+    user_file_actions: <%= user_file_actions.to_json&.html_safe %>,
+    base_route_segments: '<%= base_route_segments %>',
+    base_route_short_name: '<%= base_route_short_name %>',
+    <% if default_option_type_name %> default_option_type_name: '<%= default_option_type_name %>',<% end %>
+    <% if option_type_config_name %>option_type_config_name: '<%= option_type_config_name %>',
+    use_option_type: true<% end %>
   }
 
-<% unless full_name.underscore.to_s == name.underscore.to_s %>
+<% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
-  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> || _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=def_version%>;
 <% end %>
 
-<% if resource_name && resource_name != name.underscore.to_s && resource_name != full_name.underscore.to_s %>
+<% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
   _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name.underscore%> || {};
   _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
 <% end %>
 
-  _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
+  _fpa.show_if.forms['<%=name_with_option_type%>'] = _fpa.show_if.forms['<%=name_with_option_type%>'] || {};
+  _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+
   <% if full_name.to_s.end_with?('_primary') %>
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
-  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>;
   <% end %>
-  _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
-  <% if full_name.to_s.start_with?('dynamic_model__') %>
-  _fpa.show_if.forms['<%=full_name%>_default'] = _fpa.show_if.forms['<%=full_name%>'];
-  _fpa.show_if.forms['<%=full_name%>_default'].<%=vdef_version%> = _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%>;
+
+  <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
+  _fpa.show_if.forms.<%=full_name.underscore%> = _fpa.show_if.forms.<%=full_name.underscore%> || {};
+  _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
+  <% end %>
+
+  <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
+  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%>;
+  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%>;
+  _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=name.underscore.pluralize%> = _fpa.state.template_config.<%=name.underscore.pluralize%> || _fpa.state.template_config.<%=name.underscore%>;
+  _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> = _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> || _fpa.state.template_config.<%=name.underscore%>
   <% end %>
   
-</script>
+<% end %>
 
 
 <% 
@@ -367,18 +426,30 @@
     } %>
 
 
-<script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{name.underscore.gsub('dynamic_model__', '').hyphenate}-result-template") do %>
   {{#with <%=with_data || full_name%>}}
-    {{> common_template_result name='<%=name%>' result_data=this}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
-</script>
+<%= handlebars_template_tag("#{name.underscore.hyphenate}-result-template") do %>
+  {{#with <%=with_data || full_name%>}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
+  {{/with}}
+<% end %>
 
-<script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
-</script>
+<%= handlebars_template_tag("#{name_with_option_type.hyphenate}-result-template") do %>
+  {{#with <%=with_data || full_name%>}}
+    {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
+  {{/with}}
+<% end %>
+
+<%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-list-template") do %>
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
+<% end %>
+
+<%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-compact-list-template") do %>
+  {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v') compact=true prevent_create=true }}
+<% end %>
 
 <% end %>

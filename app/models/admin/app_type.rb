@@ -19,6 +19,7 @@ class Admin
     validate :name_not_already_taken
     validates :label, presence: true
 
+    after_save :reset_active_app_types!
     after_create :add_template_access
     after_create :setup_migrations
     after_create :add_admin_user_access
@@ -37,13 +38,25 @@ class Admin
       name
     end
 
-    def self.active_app_types
+    #
+    # Has the active_app_types list of definitions changed since it was last queried?
+    def self.active_app_types_changed?
       olat = Settings::OnlyLoadAppTypes
-      if olat
-        Admin::AppType.active.where(id: olat).reload
-      else
-        active.reload
-      end
+      res = @old_olat != olat
+      Rails.logger.warn "active_app_types_changed since last query: #{@old_olat} => #{olat}" if res
+      res
+    end
+
+    def self.active_app_types(force: nil)
+      olat = Settings::OnlyLoadAppTypes
+      return @active_app_types if @old_olat == olat && @active_app_types && !force
+
+      @old_olat = olat
+      @active_app_types = if olat
+                            Admin::AppType.active.where(id: olat).reload
+                          else
+                            active.reload
+                          end
     end
 
     def self.all_ids_available_to(user)
@@ -59,7 +72,11 @@ class Admin
 
       atavail = []
       olat = Settings::OnlyLoadAppTypes
-      active.each do |a|
+
+      use_ats = active
+      use_ats = use_ats.where(id: olat) if olat.present?
+
+      use_ats.each do |a|
         hat = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: a.id)
         atavail << hat.app_type if hat && (!olat || hat.app_type_id.in?(olat))
       end
@@ -86,84 +103,123 @@ class Admin
       user
     end
 
+    def self.find_active_by_name_or_id(name_or_id)
+      return if name_or_id.to_s.blank?
+
+      if name_or_id.is_a?(Integer) || name_or_id.to_i.to_s == name_or_id
+        Admin::AppType.active.find(name_or_id)
+      else
+        Admin::AppType.active.find_by_name(name_or_id)
+      end
+    end
+
     def active_on_server?
       self.class.active_app_types.include?(self) &&
         Admin::MigrationGenerator.current_search_paths.include?(default_schema_name)
     end
 
     def valid_user_access_controls
-      user_access_controls.valid_resources.reorder('').order(id: :asc)
+      @valid_user_access_controls ||= user_access_controls.valid_resources.reorder('').order(id: :asc)
     end
 
     # Select any tables that have some kind of access
     def associated_table_names
-      user_access_controls.valid_resources([:table]).where(resource_type: :table).select(&:access).map(&:resource_name).uniq
+      @associated_table_names ||= user_access_controls
+                                  .valid_resources([:table]).where(resource_type: :table)
+                                  .select(&:access)
+                                  .map(&:resource_name)
+                                  .uniq
     end
 
     def valid_associated_activity_logs
       associated_activity_logs valid_resources_only: true
     end
 
-    # Select activity logs that have some kind of access, typically scoped to a specific app type
-    # @return [ActiveRecord::Relation]
-    def associated_activity_logs(valid_resources_only: false, not_resource_names: nil)
-      nrn = not_resource_names
+    def memoize_associated_items(type, ckey, force_update: nil, &block)
+      memo = self.class.memo_associated_items(type)
+      memokey = "associated_items--#{id}--#{type}--#{ckey}"
+      return memo[memokey] if memo.key?(memokey) && !force_update
 
-      uacs = if valid_resources_only
-               user_access_controls.valid_resources([:table])
-             else
-               user_access_controls.active
-             end
-
-      get_names =
-        uacs.where(resource_type: :table)
-            .select { |a| a.access && a.resource_name.start_with?('activity_log__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
-      names = get_names.map { |n| n.resource_name.singularize.sub('activity_log__', '') }.uniq
-      names += get_names.map { |n| n.resource_name.sub('activity_log__', '') }.uniq
-      self.associated_activity_log_names = names
-
-      ActivityLog.active.where("
-        (rec_type is NULL OR rec_type = '') AND (process_name IS NULL OR process_name = '') AND item_type in (?)
-    OR (process_name IS NULL OR process_name = '') AND (item_type || '_' || rec_type) in (?)
-    OR (rec_type IS NULL OR rec_type = '') AND (item_type || '_' || process_name) in (?)
-    ", names, names, names).reorder('').order(id: :asc)
+      memo[memokey] = block.call
     end
 
-    def associated_dynamic_models(valid_resources_only: true, not_resource_names: nil)
-      nrn = not_resource_names
+    def self.memo_associated_items(type)
+      @memo_associated_items ||= {}
+      @memo_associated_items[type] ||= {}
+    end
 
-      uacs = if valid_resources_only
-               user_access_controls.valid_resources([:table])
-             else
-               user_access_controls.active
-             end
+    def self.reset_memo_associated_items!
+      @memo_associated_items = {}
+    end
 
-      self.associated_dynamic_model_names =
-        uacs.where(resource_type: :table)
-            .select { |a| a.access && a.resource_name.start_with?('dynamic_model__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
-            .map { |n| n.resource_name.sub('dynamic_model__', '') }
-            .uniq
+    # Select activity logs that have some kind of access, typically scoped to a specific app type
+    # @return [ActiveRecord::Relation]
+    def associated_activity_logs(valid_resources_only: false, not_resource_names: nil, force_update: nil)
+      memoize_associated_items(:activity_logs, [valid_resources_only, not_resource_names], force_update:) do
+        nrn = not_resource_names
 
-      DynamicModel.active.where(table_name: associated_dynamic_model_names).reorder('').order(id: :asc)
+        uacs = if valid_resources_only
+                 user_access_controls.valid_resources([:table])
+               else
+                 user_access_controls.active
+               end
+
+        get_names =
+          uacs.where(resource_type: :table)
+              .select { |a| a.access && a.resource_name.start_with?('activity_log__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
+        names = get_names.map { |n| n.resource_name.singularize.sub('activity_log__', '') }.uniq
+        names += get_names.map { |n| n.resource_name.sub('activity_log__', '') }.uniq
+        self.associated_activity_log_names = names
+
+        sql = <<~END_SQL
+          (rec_type is NULL OR rec_type = '') AND (process_name IS NULL OR process_name = '') AND item_type in (?)
+          OR (process_name IS NULL OR process_name = '') AND (item_type || '_' || rec_type) in (?)
+          OR (rec_type IS NULL OR rec_type = '') AND (item_type || '_' || process_name) in (?)
+        END_SQL
+        ActivityLog.active.where(sql, names, names, names).reorder('').order(id: :asc)
+      end
+    end
+
+    def associated_dynamic_models(valid_resources_only: true, not_resource_names: nil, force_update: nil)
+      memoize_associated_items(:dynamic_models, [valid_resources_only, not_resource_names], force_update:) do
+        nrn = not_resource_names
+
+        uacs = if valid_resources_only
+                 user_access_controls.valid_resources([:table])
+               else
+                 user_access_controls.active
+               end
+
+        self.associated_dynamic_model_names =
+          uacs.where(resource_type: :table)
+              .select { |a| a.access && a.resource_name.start_with?('dynamic_model__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
+              .map { |n| n.resource_name.sub('dynamic_model__', '') }
+              .uniq
+
+        DynamicModel.active.where(table_name: associated_dynamic_model_names).reorder('').order(id: :asc)
+      end
     end
 
     #
     # Get external identifiers that are active and associated with this app type
     # though user access controls being assigned to them
     # @return [ActiveRecord::Relation] external identifiers returned
-    def associated_external_identifiers(not_resource_names: nil)
-      nrn = not_resource_names
-      eids = ExternalIdentifier.active.pluck(:name)
+    def associated_external_identifiers(_valid_resources_only: true, not_resource_names: nil, force_update: nil)
+      memoize_associated_items(:external_identifiers, [_valid_resources_only, not_resource_names],
+                               force_update:) do
+        nrn = not_resource_names
+        eids = ExternalIdentifier.active.pluck(:name)
 
-      self.associated_external_identifier_names =
-        user_access_controls
-        .valid_resources([:table])
-        .where(resource_type: :table)
-        .select { |a| a.access && a.resource_name.in?(eids) && (nrn.nil? || !a.resource_name.in?(nrn)) }
-        .map(&:resource_name)
-        .uniq
+        self.associated_external_identifier_names =
+          user_access_controls
+          .valid_resources([:table])
+          .where(resource_type: :table)
+          .select { |a| a.access && a.resource_name.in?(eids) && (nrn.nil? || !a.resource_name.in?(nrn)) }
+          .map(&:resource_name)
+          .uniq
 
-      ExternalIdentifier.active.where(name: associated_external_identifier_names).reorder('').order(id: :asc)
+        ExternalIdentifier.active.where(name: associated_external_identifier_names).reorder('').order(id: :asc)
+      end
     end
 
     def associated_reports
@@ -179,21 +235,13 @@ class Admin
     end
 
     def associated_general_selections
-      gs = []
+      rset =
+        associated_table_names.map do |tn|
+          "#{tn.singularize}_|#{tn}_"
+        end
 
-      associated_table_names.each do |tn|
-        tnlike = "#{tn.singularize}_%"
-        tnplurallike = "#{tn}_%"
-        res = Classification::GeneralSelection
-              .active
-              .where('item_type LIKE ? or item_type LIKE ?',
-                     tnlike,
-                     tnplurallike)
-              .order(id: :asc)
-        gs += res
-      end
-
-      gs.sort { |a, b| a.id <=> b.id }
+      rall = "^(#{rset.join('|')})"
+      Classification::GeneralSelection.active.where("item_type ~ '#{rall}'").order(id: :asc)
     end
 
     def associated_protocols
@@ -224,60 +272,65 @@ class Admin
 
     def associated_message_templates
       ms = []
+      active_mts = Admin::MessageTemplate.active
       associated_activity_logs.all.each do |a|
         a.option_configs.each do |c|
-          c.dialog_before.each do |_d, v|
-            res = Admin::MessageTemplate
-                  .active
-                  .find_by(
-                    name: v[:name],
-                    message_type: 'dialog',
-                    template_type: 'content'
-                  )
+          c.dialog_before.each_value do |v|
+            res = active_mts.find do |b|
+              b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content'
+            end
             ms << res if res
           end
-          c.save_trigger.each do |_d, st|
-            ns = st[:notify] || []
-            ns = [ns] if ns.is_a? Hash
+          c.save_trigger.each_value do |sts|
+            sts = [sts] unless sts.is_a? Array
+            sts.each do |stconfig|
+              stsconfigs = stconfig.dig(:each, :do) || stconfig
+              stsconfigs = [stsconfigs] unless stsconfigs.is_a? Array
 
-            ns.each do |v|
-              lt = v[:layout_template]
-              ct = v[:content_template]
-              mt = v[:type]
+              stsconfigs.each do |st|
+                ns = st[:notify] || []
+                ns = [ns] if ns.is_a? Hash
 
-              res = Admin::MessageTemplate.active.find_by(name: lt, message_type: mt, template_type: 'layout')
-              ms << res if res
-              res = Admin::MessageTemplate.active.find_by(name: ct, message_type: mt, template_type: 'content')
-              ms << res if res
+                ns.each do |v|
+                  lt = v[:layout_template]
+                  ct = v[:content_template]
+                  mt = v[:type]
+
+                  res = active_mts.find { |b| b.name == lt && b.message_type == mt && b.template_type == 'layout' }
+                  ms << res if res
+                  res = active_mts.find { |b| b.name == ct && b.message_type == mt && b.template_type == 'content' }
+                  ms << res if res
+                end
+              end
             end
           end
         end
       end
       associated_dynamic_models.all.each do |a|
         a.option_configs.each do |c|
-          c.dialog_before.each do |_d, v|
-            res = Admin::MessageTemplate
-                  .active
-                  .find_by(
-                    name: v[:name],
-                    message_type: 'dialog',
-                    template_type: 'content'
-                  )
+          c.dialog_before.each_value do |v|
+            res = active_mts
+                  .find { |b| b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content' }
             ms << res if res
           end
         end
       end
 
-      Admin::MessageTemplate
-        .active
-        .where(
-          name: ["ui page css - #{name}", "ui page js - #{name}"],
-          message_type: 'plain',
-          template_type: 'content'
-        )
-        .each do |res|
-        ms << res if res
+      associated_reports.all.each do |a|
+        rex = Regexp.new('{{template\\\\_block\\\\_(.+?)}}')
+        a.description&.scan(rex) do |t|
+          res = active_mts.find { |b| b.name == t[0]&.gsub('\\_', ' ') && b.template_type == 'content' }
+          ms << res if res
+        end
       end
+
+      ms +=
+        active_mts.select do |a|
+          a.name.in?(["ui page css - #{name}",
+                      "ui page js - #{name}"]) &&
+            a.message_type == 'plain' &&
+            a.template_type == 'content'
+        end.compact
 
       ms.compact!
       ms.sort { |a, b| a.id <=> b.id }.uniq
@@ -318,16 +371,16 @@ class Admin
       Admin::UserAccessControl.create!(role_name: Settings::AppTemplateRole, app_type: self,
                                        resource_type: :general, resource_name: :app_type,
                                        access: :read,
-                                       user: User.template_user, current_admin: current_admin)
+                                       user: User.template_user, current_admin:)
     end
 
     def setup_migrations
       return true unless Settings::AllowDynamicMigrations
 
-      return true if self.class.active.where(default_schema_name: default_schema_name).count > 1
+      return true if self.class.active.where(default_schema_name:).count > 1
 
       migration_generator = Admin::MigrationGenerator.new(default_schema_name)
-      migration_generator.add_schema
+      migration_generator.add_schema unless Admin::MigrationGenerator.schemas_in_db.include?(default_schema_name)
     end
 
     #
@@ -341,8 +394,8 @@ class Admin
                                       access: :read,
                                       resource_type: :general,
                                       resource_name: :app_type,
-                                      user: user,
-                                      current_admin: current_admin
+                                      user:,
+                                      current_admin:
     end
 
     #
@@ -351,21 +404,31 @@ class Admin
     def check_option_configs
       res = []
       valid_associated_activity_logs.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 
       associated_dynamic_models.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 
       associated_external_identifiers.each do |object_instance|
-        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
+        ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance)
         res += ces if ces
       end
 
       res
+    end
+
+    def self.reset_active_app_types!
+      @active_app_types = nil
+    end
+
+    private
+
+    def reset_active_app_types!
+      self.class.reset_active_app_types!
     end
   end
 end

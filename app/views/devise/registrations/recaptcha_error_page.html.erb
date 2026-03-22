@@ -1,0 +1,21 @@
+<%
+  block = template_block 'ui new user registration recaptcha error'
+%>
+<div class="container well">
+  <% if block.present? %>
+  <%= block %>
+  <%else%>
+  <h1>reCAPTCHA didn't validate your request as being human</h1>
+  <p class="">
+    <a href="https://www.google.com/recaptcha/about/" target="_blank">reCAPTCHA</a> has been enabled on this registration page to reduce the impact of bots from attempting fake registrations.<br><br>
+    An algorithm was used to calculate a score that rates how likely it was that a human user submitted the information on a form.
+    Unfortunately your submission was ranked low. Sometimes browser plugins that autofill your information may cause issues.
+    In this case, attempt to key in more of your details by hand.<br><br>
+    Feel free to attempt your registration again. If you continue to have issues, contact the site administrator: <%= Settings::AdminEmail %>
+  </p>
+  <% end %>
+  <p class="text-center">
+    <%=link_to 'Go Back', :back, class: 'btn btn-default' %>
+  </p>
+</div>
+<% flash.discard %>

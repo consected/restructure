@@ -20,10 +20,10 @@ module CalcActions
 
     BoolTypeString = '__!BOOL__'
     UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
-    BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', 'ILIKE', '~*', '~'].freeze
+    BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', 'ILIKE', '~*', '~', 'in?', 'include?'].freeze
     ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
 
-    attr_accessor :return_this
+    attr_accessor :return_this, :top_level_error, :top_level_error_above, :skip_merge
 
     #
     # Get an attribute from an instance, and ensure that a blank is
@@ -96,18 +96,29 @@ module CalcActions
       # Make sure we don't overwrite the actual results passed in, since these
       # can be the actual @condition_config or other objects that shouldn't be changed
       res_changes = {}
+      tl_changes = {}
       res_key = results.first.first
       res_conds = results.first.last.dup
+      return if res_conds.empty?
+
+      cond_changes = res_conds.dup
 
       res_conds.each do |t, res|
+        next unless res.is_a?(Hash) && res.present?
+
         field = res.first.first
         conf = @condition_config.first.last
         val_msg = conf[field] if conf.is_a?(Hash)
         msg = val_msg[:invalid_error_message] if val_msg.is_a?(Hash)
         msg ||= condition_error_message
-        if msg
+        if @top_level_error
+          res = tl_changes[t] = { top_level_error: { invalid_error_message: @top_level_error } }
+          cond_changes.delete(t)
+          next
+        elsif msg.present?
           msg = { invalid_error_message: msg }
           res = res_changes[t] = { field => msg }
+          cond_changes.delete(t)
           next
         end
 
@@ -117,7 +128,14 @@ module CalcActions
           { field => new_validator(res_changes[:validate].first.first, nil, options: {}).message }
         next
       end
-      return_failures.deep_merge!(res_key => res_conds.merge(res_changes))
+
+      return if @top_level_error_above && @top_level_error_above == @top_level_error
+
+      return_failures.deep_merge!(res_key => tl_changes) if tl_changes.present?
+      return if @top_level_error_above
+
+      return_failures.deep_merge!(res_key => cond_changes) if cond_changes.present?
+      return_failures.deep_merge!(res_key => res_conds.merge(res_changes)) unless res_changes.empty?
     end
 
     #
@@ -126,8 +144,15 @@ module CalcActions
       return @condition_error_message if @got_condition_error_message
 
       @got_condition_error_message = true
-      @condition_error_message = @condition_config.respond_to?(:key?) &&
-                                 @condition_config.first.last[:invalid_error_message]
+      @top_level_error ||= false
+      return unless @condition_config.respond_to?(:key?)
+
+      @condition_error_message = if @condition_config.first.last.is_a?(Hash)
+                                   @condition_config.first.last[:invalid_error_message]
+                                 else
+                                   @top_level_error = true
+                                   @condition_config.first.last
+                                 end
     end
 
     #

@@ -8,6 +8,8 @@
 class Classification::SelectionOptionsHandler
   attr_accessor :user_base_object, :table_name
 
+  CacheKeySelectorWithConfigOverrides = 'selector_with_config_overrides'
+
   #
   # Get the selection option label for a field value in a user base object, if there is one
   # This does not benefit from memoization, so it is generally recommended to instantiate
@@ -216,8 +218,8 @@ class Classification::SelectionOptionsHandler
         value_attr = if alt_fn.index(/^(tag_)?select_record_id_/)
                        :id
                      elsif alt_fn.index(/^(tag_)?select_user_with_role_/)
-                       label_attr = :email
-                       :email
+                       label_attr = edit_as[:label_attr] || :email
+                       edit_as[:value_attr] || :email
                      else
                        edit_as[:value_attr] || :data
                      end
@@ -239,6 +241,13 @@ class Classification::SelectionOptionsHandler
     return if fndefs.empty?
 
     fndefs
+  end
+
+  def self.selector_with_config_overrides(conditions = nil)
+    cname = "#{CacheKeySelectorWithConfigOverrides}--#{conditions}"
+    @cache_keys_list ||= []
+    @cache_keys_list << cname
+    Rails.cache.fetch(cname) { selector_with_config_overrides_processing(conditions) }
   end
 
   #
@@ -272,7 +281,7 @@ class Classification::SelectionOptionsHandler
   #
   # @param [Hash] conditions any conditions to be passed to retrieve the appropriate general selections
   # @return [Array{Hash}] serializable array of general_selection and alt_options overrides
-  def self.selector_with_config_overrides(conditions = nil)
+  def self.selector_with_config_overrides_processing(conditions = nil)
     if conditions.is_a? Hash
       extra_log_type = conditions[:extra_log_type]
       item_type = conditions[:item_type]
@@ -294,7 +303,7 @@ class Classification::SelectionOptionsHandler
     impl_classes.select! { |ic| !ic.respond_to?(:definition) || ic.definition.ready_to_generate? }
 
     impl_classes.each do |impl_class|
-      dyn_object = impl_class.new
+      dyn_object = impl_class.new(skip_presets: true)
 
       # If an extra log type was specified, use it, since the alt_options are specified at that level
       dyn_object.extra_log_type = extra_log_type if extra_log_type && dyn_object.respond_to?(:extra_log_type)
@@ -311,7 +320,7 @@ class Classification::SelectionOptionsHandler
       end
 
       res.each do |r|
-        if r[:item_type].start_with?(prefix)
+        if r[:item_type]&.start_with?(prefix)
           r.merge!(base_item_type: prefix,
                    field_name: r[:item_type].sub("#{prefix}_", '').to_sym)
         end
@@ -358,7 +367,7 @@ class Classification::SelectionOptionsHandler
       end
     rescue StandardError => e
       raise FphsException, "Failure getting selector_with_config_overrides(#{conditions}) for implementation: " \
-      "#{impl_class}\n#{e}\n#{e.backtrace.join("\n")}"
+                           "#{impl_class}\n#{e}\n#{e.short_string_backtrace}"
     end
 
     res
@@ -367,6 +376,10 @@ class Classification::SelectionOptionsHandler
   #
   # Reset memoized items
   def self.reset!
+    @cache_keys_list&.each do |cname|
+      Rails.cache.delete(cname)
+    end
+    @cache_keys_list = []
     @implementation_classes = nil
   end
 

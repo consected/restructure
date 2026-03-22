@@ -2,10 +2,14 @@
 
 module ReportsHelper
   def editable?
+    return if @embedded_report
+
     @editable = @report.editable_data? && (current_admin || current_user&.can?(:edit_report_data))
   end
 
   def creatable?
+    return if @embedded_report
+
     @creatable = @report.creatable_data? &&
                  (current_admin || current_user&.can?(:create_report_data)) &&
                  !@view_options&.prevent_adding_items
@@ -14,11 +18,34 @@ module ReportsHelper
   def report_edit_btn(id)
     return unless id
 
-    rp = edit_report_path(id, report_id: @report.id, filter: filter_params_permitted)
+    rp = edit_report_path(id, report_id: @report.id, filter: filter_params_permitted, table_name: params[:table_name],
+                              runner_hash: @report.runner.runner_hash)
     link_to '',
             rp,
             remote: true,
             class: 'edit-entity glyphicon glyphicon-pencil'
+  end
+
+  #
+  # Get the id field value for the current report result row
+  # Will attempt to use the id field from the report runner. If this is not
+  # set (which is unlikely), it will use the first field in the results.
+  # If the runner specifies a field name, but it is not in the results,
+  # then we raise an exception.
+  # @param [Array] list_item
+  # @return [Objec] the result value
+  def id_field_value(list_item)
+    # Find the column number for the id field, if not already set
+    # Returns 0 if the runner doesn't return an id field, which is unlikely
+    @col_num ||= if @runner&.data_reference&.id_field
+                   fn = @runner.data_reference.id_field
+                   @results.fields.index(fn)
+                 else
+                   0
+                 end
+    raise FphsException, "No id field #{fn} in results" unless @col_num
+
+    list_item[@col_num]
   end
 
   def report_edit_cancel
@@ -37,8 +64,10 @@ module ReportsHelper
       raise FphsException, "Bad report field config configured: #{config}"
     end
 
+    return unless report_criteria_show_if(name, config, value, options)
+
     value ||= report_field_default config
-    main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize)
+    main_field = label_tag("search_attrs_#{name}", config.label || name.to_s.humanize(keep_id_suffix: true).captionize)
     main_field += report_criteria_multiple_field(name, config, value, options) ||
                   report_criteria_dropdown_field(name, config, value, options) ||
                   report_criteria_text_field(name, config, value, options)
@@ -93,7 +122,7 @@ module ReportsHelper
       def_value = value
       resource_name = config.resource_name
       res = Resources::Models.find_by(resource_name:) if resource_name
-      raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
+      raise FphsException, "No resource matches resource_name in report criteria: #{resource_name}" unless res
 
       # Use the configuration of selections to define which fields to pull as the options
       # The selections configuration is "<label field>: <value field>"
@@ -154,7 +183,7 @@ module ReportsHelper
   # @param [Hash] options - field options
   # @return [String | nil]
   def report_criteria_multiple_field(name, config, value, options)
-    return unless config.multiple == 'multiple' || config.multiple == 'multiple-regex'
+    return unless ['multiple', 'multiple-regex'].include?(config.multiple)
 
     use_dropdown = report_criteria_use_dropdown_options(config, value)
     if use_dropdown
@@ -213,10 +242,22 @@ module ReportsHelper
   # Options for select for a "select from model" resource names drop down
   # @return [options_for_select]
   def select_from_model_resource_name_options
-    res = Resources::Models.all.values
-                           .reject { |r| r.option_type }
-                           .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
-                           .uniq
-    options_for_select res
+    Rails.cache.fetch("select_from_model_resource_name_options-#{Resources::Models.updated_at}") do
+      res = Resources::Models.all.values
+                             .reject { |r| r.option_type }
+                             .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+                             .uniq
+      options_for_select res
+    end
+  end
+
+  def report_criteria_show_if(name, config, value, options)
+    return true unless config.show_if
+
+    d = @report.attributes
+               .merge(@runner.data_reference.substitution_data)
+               .merge(criteria_field: name, criteria_value: value, criteria_options: options)
+    res = Formatter::Substitution.substitute(config.show_if, data: d, ignore_missing: :show_tag)
+    res&.strip&.present?
   end
 end

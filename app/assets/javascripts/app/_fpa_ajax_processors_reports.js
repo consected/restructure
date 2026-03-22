@@ -31,30 +31,77 @@ _fpa.postprocessors_reports = {
 
   embedded_report: function (block, data) {
     _fpa.report_criteria.reports_form(block, data);
-    block.find('[type="submit"].auto-run').click();
+    block.find('[type="submit"].auto-run').not('.was-auto-run-clicked').addClass('was-auto-run-clicked').click();
     // Change the id, so that embedded report links inside the embedded report will function
     $('#modal_results_block').prop('id', 'modal_results_block_1')
   },
 
+  /**
+   * Postprocessor for embedded dynamic block links in reports.
+   * Opens a modal dialog displaying a dynamic model or activity log record.
+   * 
+   * Supports two modes:
+   * - Show mode: Displays the record in read-only view
+   * - Edit mode: Opens the edit form directly (GitHub #325)
+   *   When data-edit-mode="true", clicks the edit button and closes modal on save
+   */
   report_embed_dynamic_block: function (block, data) {
-    var us_name = block.attr('data-model-name')
-    var hyph_name = us_name.hyphenate()
-    var id = block.attr('data-id')
-    var master_id = block.attr('data-master-id')
-    var target_block = "report-result-embedded-block"
-    var html = $(`<div id="${target_block}-outer"><div id="${target_block}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyph_name}-edit-form-${master_id}-${id}" data-template="${hyph_name}-result-template" data-item-class="dynamic_model__${us_name}" data-sub-item="dynamic_model__${us_name}" data-sub-id="${id}" data-item-id="" data-preprocessor="${us_name}_edit_form"></div></div>`)
-    if ($(block).contents().length == 0) {
+    var modelName = block.attr('data-model-name');
+    var hyphenatedName = modelName.hyphenate();
+    var recordId = block.attr('data-id');
+    var masterId = block.attr('data-master-id');
+    var isEditMode = block.attr('data-edit-mode') === 'true';
+    var targetBlockId = 'report-result-embedded-block';
+
+    // Build the modal content container
+    var modalContent = $(`<div id="${targetBlockId}-outer"><div id="${targetBlockId}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyphenatedName}-edit-form-${masterId}-${recordId}" data-template="${hyphenatedName}-result-template" data-item-class="dynamic_model__${modelName}" data-sub-item="dynamic_model__${modelName}" data-sub-id="${recordId}" data-item-id="" data-preprocessor="${modelName}_edit_form"></div></div>`);
+
+    // If no content was loaded via AJAX, hide the modal and return
+    if ($(block).contents().length === 0) {
       _fpa.hide_modal(1);
       return;
     }
-    _fpa.show_modal(html, null, true, 'embedded-dynamic-block', 1)
+
+    block.removeClass('sv-added-setup-links');
+    _fpa.show_modal(modalContent, null, true, 'embedded-dynamic-block', 1);
+
+    // Move content into modal and set up handlers
     window.setTimeout(function () {
-      $(block).contents().appendTo(`#${target_block}`)
+      $(block).contents().appendTo(`#${targetBlockId}`);
       $(block).html('');
+
       window.setTimeout(function () {
-        _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
+        const $targetBlock = $(`#${targetBlockId}`);
+        _fpa.form_utils.resize_labels($targetBlock, null, true);
+
+        // Set up secure view links with user capabilities
+        var secureViewOptions = { allow_actions: _fpa.state.user_can };
+        _fpa.secure_view.setup_links($targetBlock, 'a.redcap-file-use-secure-view', secureViewOptions);
+
+        // Handle edit mode: click edit button and set up save handler
+        if (isEditMode) {
+          _fpa.postprocessors_reports.setup_edit_mode($targetBlock);
+        }
       }, 500);
     }, 500);
+  },
+
+  /**
+   * Sets up edit mode behavior for an embedded block.
+   * Clicks the edit button to open the form and closes modal on successful save.
+   */
+  setup_edit_mode: function ($targetBlock) {
+    var editButton = $targetBlock.find('.edit-entity.glyphicon-pencil').first();
+    if (editButton.length) {
+      editButton.click();
+    }
+
+    // Close modal after successful form save
+    $targetBlock.on('ajax:success', 'form', function () {
+      window.setTimeout(function () {
+        _fpa.hide_modal(1);
+      }, 300);
+    });
   },
 
   reports_form: function (block, data) {
@@ -64,8 +111,8 @@ _fpa.postprocessors_reports = {
     block.removeClass('use-secure-view-on-links-setup');
     if (data) {
       // Update the search form results count bar manually
-      var c = $('.result-count').html();
-      var table_count = $('.count-only td[data-col-type="result_count"]').not('.report-el-was-from-new');
+      var c = block.find('.result-count').html();
+      var table_count = block.find('.count-only td[data-col-type="result_count"]').not('.report-el-was-from-new');
       var h;
       if (table_count.length === 1) {
         c = table_count.html();
@@ -75,7 +122,7 @@ _fpa.postprocessors_reports = {
 
       if (_fpa.templates['search-count-template']) {
         var h = _fpa.templates['search-count-template'](data);
-        $('.search_count_reports').html(h);
+        $('[data-report-count]').html(h);
       }
     }
 
@@ -96,23 +143,23 @@ _fpa.postprocessors_reports = {
         if (!by_auto_search) return;
       }
 
-      $('td a.edit-entity').click(function () {
-        $('.item-selected').removeClass('item-selected');
-        $(this).parents('tr').first().addClass('item-selected');
+      block.find('td a.edit-entity').click(function () {
+        block.find('.item-selected').removeClass('item-selected');
+        block.find(this).parents('tr').first().addClass('item-selected');
       });
-      $('td[data-col-type="master_id"]').on('click', function () {
+      block.find('td[data-col-type="master_id"]').on('click', function () {
         window.open('/masters/' + $(this).html().trim(), "_blank");
-        $('.item-selected').removeClass('item-selected');
+        block.find('.item-selected').removeClass('item-selected');
         $(this).addClass('item-selected');
       }).addClass('hover-link');
 
       for (var i in _fpa.state.alternative_id_fields) {
         var field = _fpa.state.alternative_id_fields[i];
 
-        $('td[data-col-type="' + field + '"]').on('click', function () {
+        block.find('td[data-col-type="' + field + '"]').on('click', function () {
           window.open('/masters/' + $(this).html().trim() + '?type=' + $(this).attr('data-col-type'), "_blank");
-          $('.item-selected').removeClass('item-selected');
-          $(this).addClass('item-selected');
+          block.find('.item-selected').removeClass('item-selected');
+          block.find(this).addClass('item-selected');
         }).addClass('hover-link');
       }
 
@@ -120,7 +167,7 @@ _fpa.postprocessors_reports = {
         if (table_cell_types.hasOwnProperty(t)) {
           var table = table_cell_types[t];
 
-          if ($('td[data-col-table="' + t + '"]').length > 0) {
+          if (block.find('td[data-col-table="' + t + '"]').length > 0) {
             for (var i in table) {
 
               if (table.hasOwnProperty(i)) {
@@ -129,7 +176,7 @@ _fpa.postprocessors_reports = {
                 var idname = col_types[i];
                 _fpa.cache.get_definition(i, function () {
                   var pe = _fpa.cache.fetch(i);
-                  var cells = $('td[data-col-table="' + t + '"][data-col-type="' + idname + '"]');
+                  var cells = block.find('td[data-col-table="' + t + '"][data-col-type="' + idname + '"]');
                   cells.each(function () {
                     var cell = $(this);
                     var d = cell.html();
@@ -270,7 +317,9 @@ _fpa.postprocessors_reports = {
         if ($edit_cell.length) return;
 
         const $newel = $this.clone();
-        $newel.appendTo($edit_row);
+
+        var $replace_cell = $edit_row.find(`td.report-el-edit-disabled-cell-${dct}`)
+        $replace_cell.replaceWith($newel);
 
         // If the field contains a canvas element, make sure it is set up
         const $canvas = $newel.find('canvas');

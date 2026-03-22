@@ -17,8 +17,11 @@ class Admin::UserAccessControl < Admin::AdminBase
   validate :correct_access_valid?
 
   after_save :clear_user_access_cache
+  after_save :reset_associated_items!
 
   attr_accessor :allow_bad_resource_name
+
+  scope :not_template_role, -> { where(Arel.sql("coalesce(role_name, '') <> '#{Settings::AppTemplateRole}'")) }
 
   #
   # Valid resource types
@@ -119,6 +122,19 @@ class Admin::UserAccessControl < Admin::AdminBase
   end
 
   #
+  # Get a list of user access controls that are active for the specified
+  # app type and resource name
+  # @param [Integer] app_type_id
+  # @param [Symbol|String] resource_name
+  # @return [Array]
+  def self.active_for(app_type_id: nil, resource_name: nil)
+    res = active
+    res = res.where(app_type_id:) if app_type_id
+    res = res.where(resource_name:) if resource_name
+    res.order(access: :asc)
+  end
+
+  #
   # Is the combination access level valid for the resource type?
   # @param [String | Symbol] on_resource_type
   # @param [String | Symbol | Array] can_perform - will exit immediately with an Array
@@ -158,7 +174,7 @@ class Admin::UserAccessControl < Admin::AdminBase
   # If it is necessary to check for access to a resource on an app type that is not the user's current one,
   # or the user is nil, specify the alt_app_type_id
   # Similarly, an alt_role_name can be specified
-  # @param [User] user
+  # @param [User] user - optional
   # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
   # @param [Symbol | String] on_resource_type - valid resource type
   # @param [Symbol | String] named - resource name
@@ -167,38 +183,106 @@ class Admin::UserAccessControl < Admin::AdminBase
   #                                                     apply to if the user does not have a current app_type set
   # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
   # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @param [True | nil] log - enable logging of access checks
   # @return [Admin::UserAccessControl | nil]
   def self.access_for?(user, can_perform, on_resource_type, named, with_options = nil,
-                       alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
+                       alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil, log: false)
     raise FphsException, 'Options can not be added to access_for?' if with_options
 
+    user = User.find(user) if user.is_a?(Integer)
     app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
     app_type_id ||= user&.app_type_id
-    cache_key =
-      "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
+
+    cache_key = cache_key_for_access_for(user&.id, user&.current_sign_in_at&.to_i, can_perform, on_resource_type, named, app_type_id, alt_role_name,
+                                         add_conditions)
+
+    from_cache = true
     res = Rails.cache.fetch(cache_key) do
-      evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
-                          alt_role_name:,
-                          add_conditions:)
+      from_cache = false
+      rns = evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
+                                alt_role_name:,
+                                add_conditions:,
+                                log:)
+      rns[named.to_sym]
     end
 
-    return unless res
+    if log
+      Rails.logger.info "UserAccessControl.access_for? result: #{res} " \
+                        "fetched from cache: #{from_cache} for user #{user&.id} " \
+                        "app_type_id #{app_type_id} resource_type #{on_resource_type} resource_name #{named} " \
+                        "can_perform #{can_perform} alt_role_name #{alt_role_name} add_conditions #{add_conditions}"
+    end
+    remake_from_attributes(res)
+  end
 
-    find(res)
+  def self.remake_from_attributes(attribs)
+    return unless attribs
+
+    current_admin_id = attribs.delete('admin_id')
+    Admin::UserAccessControl.new(attribs)
+  end
+
+  def self.cache_key_for_access_for(*args)
+    "access-for--#{args.join('-')}-#{latest_update}-#{Settings::OnlyLoadAppTypes}"
+  end
+
+  #
+  # Find out if the user can perform a specific action on a list of named resource type in his current app type
+  # Optionally provide can_perform=nil to find a record for any access level or
+  # an array to check for multiple possible options
+  # If it is necessary to check for access to a resource on an app type that is not the user's current one,
+  # or the user is nil, specify the alt_app_type_id
+  # Similarly, an alt_role_name can be specified
+  # @param [User] user
+  # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
+  # @param [Symbol | String] on_resource_type - valid resource type
+  # @param [Array{Symbol | String}] list_named - resource names
+  # @param [nil] with_options - not used - will raise an exception if set
+  # @param [Admin::AppType | Integer] alt_app_type_id - app type or ID for the app type to
+  #                                                     apply to if the user does not have a current app_type set
+  # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
+  # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @return [Hash{Symbol, Admin::UserAccessControl | nil}] - hash of results, with resource_name as key
+  def self.access_for_list?(user, can_perform, on_resource_type, list_named, with_options = nil,
+                            alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
+    raise FphsException, 'Options can not be added to access_for?' if with_options
+
+    user = User.find(user) if user.is_a?(Integer)
+    app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
+    app_type_id ||= user&.app_type_id
+
+    cache_key = cache_key_for_access_for('access-for-list', user&.id, user&.current_sign_in_at&.to_i, can_perform,
+                                         on_resource_type, list_named, app_type_id, alt_role_name, add_conditions)
+
+    Rails.cache.fetch(cache_key) do
+      res = evaluate_access_for(user, can_perform, on_resource_type, list_named, app_type_id,
+                                alt_role_name:,
+                                add_conditions:)
+
+      # Store the individual results so they can be reused
+      res.each do |named, v|
+        # The cache key must match that in #access_for?
+        ck = cache_key_for_access_for(user&.id, user&.current_sign_in_at&.to_i, can_perform, on_resource_type, named, app_type_id, alt_role_name,
+                                      add_conditions)
+        Rails.cache.write(cache_key, v)
+      end
+
+      res
+    end
   end
 
   # @param [User] user
   # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
   # @param [Symbol | String] on_resource_type - valid resource type
-  # @param [Symbol | String] named - resource name
+  # @param [Symbol | String | Array{Symbol | String}] named - resource name or array of resource names
   # @param [Admin::AppType | Integer] alt_app_type_id - app type or ID for the app type to
   #                                                     apply to if the user does not have a current app_type set
   # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
   # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
-  # @return [id | nil] - id of the UserAccessControl
+  # @param [True | nil] log - enable logging of access checks
+  # @return [Hash{String => UserAccessControl} | nil] - Hash of { resource_name => UserAccessControl }
   def self.evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
-                               alt_role_name: nil, add_conditions: nil)
-
+                               alt_role_name: nil, add_conditions: nil, log: false)
     if can_perform
       unless can_perform.is_a?(Array) ||
              valid_access_level?(on_resource_type, can_perform) ||
@@ -216,19 +300,35 @@ class Admin::UserAccessControl < Admin::AdminBase
     # Get the user's own access first, roles next, and the fallback of null last. If the
     # user does not have her own access, then if she is a member of role_name, that'll be used and finally
     # the default for the app type will return instead,
-    # so that .first is always the most appropriate value
-    res = where(primary_conditions).scope_user_and_role(user, app_type_id, alt_role_name)
-    res = res.where(add_conditions) if add_conditions
-    res = res.first
+    # so that first result is always the most appropriate value
+    accesses = where(primary_conditions).scope_user_and_role(user, app_type_id, alt_role_name)
+    accesses = accesses.where(add_conditions) if add_conditions
 
-    if res && can_perform
-      can_perform = [can_perform] unless can_perform.is_a? Array
-      res_access = nil
-      res_access = res.access.to_sym if res.access
-      return nil unless res_access.in?(can_perform)
+    results = {}
+    accesses.each do |res|
+      next unless res
+
+      rn = res.resource_name.to_sym
+      # Skip if a result has already been found. We only want the first one, even if it was nil
+      next if results.key?(rn)
+
+      if can_perform
+        can_perform = [can_perform] unless can_perform.is_a? Array
+        res_access = res.access&.to_sym
+        res = nil unless res_access.in?(can_perform)
+      end
+
+      results[rn] = res&.attributes
     end
 
-    res&.id
+    if log
+      Rails.logger.info "evaluate_access_for user #{user&.id} results: #{results}" \
+                        "app_type_id #{app_type_id} " \
+                        "resource_type #{on_resource_type} resource_name #{named} " \
+                        "can_perform #{can_perform} alt_role_name #{alt_role_name} " \
+                        "add_conditions #{add_conditions} found #{accesses.length} access records"
+    end
+    results
   end
 
   #
@@ -257,12 +357,13 @@ class Admin::UserAccessControl < Admin::AdminBase
   #
   # Check which tables a user can view in the current app type, or an alternative app type if specified
   def self.viewable_tables(user, alt_app_type_id: nil)
-    view = {}
-    resource_names_for(:table).each do |r|
-      view[r.to_sym] = !!access_for?(user, :access, :table, r, alt_app_type_id:)
+    ckey = cache_key_for_access_for('viewable_tables--', user.id, user.current_sign_in_at&.to_i, alt_app_type_id)
+    Rails.cache.fetch(ckey) do
+      allow = {}
+      names = resource_names_for(:table)
+      res = access_for_list?(user, :access, :table, names, alt_app_type_id:)
+      res.transform_values { |r| remake_from_attributes(r)&.resource_name }
     end
-
-    view
   end
 
   #
@@ -353,16 +454,27 @@ class Admin::UserAccessControl < Admin::AdminBase
     elsif !disabled && !persisted?
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
                                                                             alt_app_type_id: app_type_id
+      # NOTE: this will return an access record for nil app_type if the user.app_type_id or alt_app_type_id
+      # wasn't matched. This is because access can be set to be independent of app, with individual apps
+      # potentially overriding the general access if required. If a record exists for the specified app_type_id
+      # then this will always be returned, even if there is a more general one that's been overridden.
+      # The following conditions need to check that an additional user access control is being added
+      # to a matching app_type_id (either set or not set), otherwise it's not possible to override general
+      # (not set) controls at the level of an app.
+
       if res && res.id != id # If we have a result and it is not this record
         show_at_name = app_type ? app_type.name : ''
-        if user_id && user_id == res.user_id # If the user has the authorization set
+        if user_id && user_id == res.user_id && app_type_id == res.app_type_id
+          # If the user has the authorization set
           errors.add :user,
                      "already has the access control #{access} on #{resource_type} #{resource_name} " \
                      "#{show_at_name} #{options}"
-        elsif !user_id && res.user_id.nil? && role_name == res.role_name
+        elsif !user_id && res.user_id.nil? &&
+              (role_name || '') == (res.role_name || '') &&
+              app_type_id == res.app_type_id
           # If the new record has no user set and has a matching role_name
           errors.add :user_access_control,
-                     "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} " \
+                     "already exists for #{access} role '#{role_name}' on #{resource_type} #{resource_name} " \
                      "#{show_at_name} #{options}"
         end
       end
@@ -381,5 +493,9 @@ class Admin::UserAccessControl < Admin::AdminBase
   # are cleared when a user access control changes
   def clear_user_access_cache
     user&.clear_has_access_to!
+  end
+
+  def reset_associated_items!
+    Admin::AppType.reset_memo_associated_items!
   end
 end

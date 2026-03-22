@@ -48,4 +48,8 @@ module CommonTemplatesHelper
   def general_selection_source_name(form_object_instance)
     "#{general_selection_prefix_name(form_object_instance)}_source"
   end
+
+  def class_for_open_panels(resource, default_panels_length)
+    "{{# is (split_lines open_panels) 'includes' '#{resource}'}}on-open-click initial_show_value-true-{{else}}initial_show_value-false-{{/is}}#{default_panels_length}".html_safe
+  end
 end

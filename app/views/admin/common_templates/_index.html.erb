@@ -1,5 +1,5 @@
 <div class="data-results" data-subscription="admin-list" >
-  <div data-result="admin-list">
+  <div data-result="admin-list" data-perform-action="<%= perform_action %>" data-init-params="<%= perform_action_init_params %>">
     <%= show_admin_heading %>
     <p>
       <%= show_filters %>
@@ -12,7 +12,7 @@
         <%= render partial: "#{p_pre}form"%>
       <% end %>
     </div>
-    <table class="table tablesorter admin-list">
+    <table class="table tablesorter admin-list common-template-index-table">
       <thead>
         <tr>
           <th class="no-sort"></th>
@@ -27,6 +27,11 @@
           %>
           <% unless is_options_field %>
             <th><%= p.to_s.humanize %></th>
+          <% end %>
+        <% end %>
+        <% if extra_index_columns.present? 
+          extra_index_columns.each do |method_name, col_header| %>
+            <th><%= col_header %></th>
           <% end %>
         <% end %>
         <% if admin_links.present? %>
@@ -45,15 +50,15 @@
   <div class="container">
     <%= @help_description %>
   </div>
-  <% if @extra_part %>
-    <%=  render partial: @extra_part  %>
-  <% end %>
   <%=  render partial: 'admin_handler/index_actions'  %>
+  <% if defined? extra_part %>
+    <%=  render partial: extra_part  %>
+  <% end %>
 </div>
 </div>
-<script>
-  $('.expandable').not('.attached-exp').on('click', function(){
+<%= javascript_tag nonce: true do %>
+  $('.common-template-index-table .expandable').not('.attached-exp').on('click', function(){
       if($(this).attr('disabled')) return;
       _fpa.form_utils.toggle_expandable($(this));
   }).addClass('attached-exp');
-</script>
+<% end %>

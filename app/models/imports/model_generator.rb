@@ -6,10 +6,9 @@ module Imports
   # create DynamicModels from them, including the underlying database table
   # matching the retrieved data.
   class ModelGenerator < ActiveRecord::Base
+    self.table_name = 'imports_model_generators'
     include AdminHandler
     include Dynamic::ModelGenerator
-
-    self.table_name = 'imports_model_generators'
 
     belongs_to :admin
 
@@ -154,10 +153,12 @@ module Imports
       res = true
       field_types.each do |k, v|
         v = :integer if v == :references
-        unless dynamic_model_columns.find { |c| c.name == k.to_s }.type == v
-          res = false
-          break
-        end
+        got_type = dynamic_model_columns.find { |c| c.name == k.to_s }.type
+        next if got_type == v
+
+        res = false
+        Rails.logger.warn "Dynamic model column #{k} has type #{got_type}. Expected it to be #{v}"
+        break
       end
 
       return res unless res

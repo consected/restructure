@@ -2,7 +2,8 @@
   "srcDir": "public/assets",
   "cssDir": "app/assets/stylesheets",
   "srcFiles": [
-    "application-*.js"
+    "application-*.js",
+    "admin_index-*.js"
   ],
   "specDir": "spec/javascripts",
   "helpers": [

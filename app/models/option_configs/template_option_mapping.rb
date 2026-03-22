@@ -14,32 +14,42 @@ module OptionConfigs
       formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"' if formatter.blank? && !pattern.blank?
 
       field_list = def_record.field_list_array
-      view_options = option_type_config.view_options
+      view_options = option_type_config.view_options || {}
 
       plural_name = external_id_type.plural_name
 
+      can_create = current_user.has_access_to?(:create, :table, plural_name)
+      can_edit = can_create || current_user.has_access_to?(:edit, :table, plural_name)
+
+      full_name = def_record.item_type_name
+      item_list = option_type_config.fields || field_list.dup
+
+      default_options = option_type_config
+      view_options = default_options.view_options
       {
-        def_record: def_record,
+        def_record:,
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || external_id_type.label,
         button_label: option_type_config.button_label || external_id_type.label,
-        name: external_id_type.name.underscore,
-        full_name: external_id_type.name.underscore,
+        name_with_option_type: "#{full_name}_#{option_type_config.name}",
+        plural_name_with_option_type: "#{full_name.pluralize}_#{option_type_config.name}",
+        name: full_name,
+        full_name: full_name,
         resource_name: def_record.resource_name,
+        option_type_config_name: option_type_config.name,
+        default_option_type_name: def_record.default_option_type_name,
         implementation_class: def_record.implementation_class,
         model_data_type: :external_identifier,
-        prevent_edit: external_id_type.prevent_edit? ||
-          !(current_user.has_access_to? :edit, :table, plural_name),
-        prevent_create: external_id_type.prevent_create? ||
-          !(current_user.has_access_to? :create, :table, plural_name),
-        item_list: field_list,
+        prevent_edit: external_id_type.prevent_edit? || can_edit,
+        prevent_create: external_id_type.prevent_create? || !can_create,
+        item_list:,
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,
         labels: option_type_config.labels,
         show_if: option_type_config.show_if,
         data_sort: [:desc, 'data-updated-at-ts'],
         category: def_record.category,
-        view_options: view_options,
+        view_options:,
         extra_class: view_options[:extra_class],
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
@@ -47,13 +57,15 @@ module OptionConfigs
         embed: direct_embed_type(def_record, option_type_config),
         extra_options_config: option_type_config,
         external_id_options: {
-          label: external_id_type.label,
-          formatter: formatter,
+          label: default_options.label || external_id_type.label,
+          formatter:,
           attribute: external_id_type.external_id_attribute.to_s
         },
         orientation: 'vertical',
-        add_item_label: external_id_type.label,
-        column_defs: def_record.model_class&.columns_hash
+        add_item_label: default_options.button_label || external_id_type.label,
+        column_defs: def_record.model_class&.columns_hash,
+        base_route_segments: def_record.base_route_segments,
+        base_route_short_name: def_record.base_route_short_name
       }
     end
 
@@ -68,7 +80,7 @@ module OptionConfigs
       dfla = def_record.field_list_array
       field_list = dfla.present? ? dfla : def_record.default_field_list_array
 
-      item_list = field_list.dup
+      item_list = option_type_config.fields&.dup || field_list.dup
 
       # For address models, the front-end currently has a naming requirement that doesn't match the field
       # definitions. Change *country* and *state* to *country_name* and *state_name*
@@ -79,35 +91,74 @@ module OptionConfigs
 
       data_sort = [:desc, 'data-rank'] if def_record.model_class&.attribute_names&.include? 'rank'
       default_options = option_type_config
-      view_options = default_options.view_options
+      view_options = option_type_config.view_options || {}
+      can_create = current_user.has_access_to?(:create, :table, def_record.full_item_type_name.pluralize)
+      can_edit = can_create || current_user.has_access_to?(:edit, :table, def_record.full_item_type_name.pluralize)
+
+      full_name = def_record.item_type_name
 
       {
-        def_record: def_record,
+        def_record:,
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || def_record.name,
         button_label: default_options.button_label,
-        name: def_record.implementation_model_name,
-        full_name: "dynamic_model__#{def_record.implementation_model_name}",
-        resource_name: def_record.resource_name,
+        name_with_option_type: "#{full_name}_#{option_type_config.name}",
+        plural_name_with_option_type: "#{full_name.pluralize}_#{option_type_config.name}",
+        name: full_name,
+        full_name:, # "#{full_name}_#{option_type_config.name}",
+        resource_name: "#{def_record.resource_name}__#{option_type_config.name}",
+        option_type_config_name: option_type_config.name,
+        default_option_type_name: def_record.default_option_type_name,
         implementation_class: def_record.implementation_class,
         model_data_type: :dynamic_model,
-        prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
-        prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
-        item_list: item_list,
-        caption_before: default_options.caption_before,
-        dialog_before: default_options.dialog_before,
-        labels: default_options.labels,
-        show_if: default_options.show_if,
-        data_sort: data_sort,
+        prevent_edit: !can_edit,
+        prevent_create: !can_create,
+        item_list:,
+        caption_before: option_type_config.caption_before,
+        dialog_before: option_type_config.dialog_before,
+        labels: option_type_config.labels,
+        show_if: option_type_config.show_if,
+        data_sort:,
         category: def_record.category,
-        view_options: view_options,
+        view_options:,
         references: option_type_config.references,
         embed: direct_embed_type(def_record, option_type_config),
         extra_class: view_options[:extra_class],
         template_class: nil,
-        extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
-        extra_options_config: default_options,
-        column_defs: def_record.implementation_class&.columns_hash
+        extra_data_attribs: field_list.include?('rec_type') ? %i[rec_type option_type] : [:option_type],
+        extra_options_config: option_type_config,
+        column_defs: def_record.implementation_class&.columns_hash,
+        option_configs: def_record.option_configs,
+        base_route_segments: def_record.base_route_segments,
+        base_route_short_name: def_record.base_route_short_name
+      }
+    end
+
+    def self.dynamic_model_all_configs_mapping(def_record, current_user)
+      current_definition = def_record.current_definition || def_record
+
+      can_create = current_user.has_access_to?(:create, :table, def_record.resource_name)
+      can_edit = can_create || current_user.has_access_to?(:edit, :table, def_record.resource_name)
+
+      {
+        def_record:,
+        def_version: def_record.def_version,
+        caption: def_record.name,
+        name: def_record.implementation_model_name,
+        prevent_edit: !can_edit,
+        prevent_create: !can_create,
+        item_list: def_record.field_list_array,
+        implementation_class: def_record.implementation_class,
+        implementation_class_name: def_record.item_type_name,
+        option_configs: def_record.option_configs,
+        al_name: def_record.name,
+        # rec_type: def_record.rec_type,
+        # item_type: def_record.item_type,
+        item_type_name: def_record.item_type_name,
+        full_name: def_record.full_item_type_name,
+        template_class: nil,
+        base_route_segments: def_record.base_route_segments,
+        base_route_short_name: def_record.base_route_short_name
       }
     end
 
@@ -133,10 +184,12 @@ module OptionConfigs
             end
 
       full_name = def_record.full_item_type_name
-      data_action_when = "data_#{current_definition.action_when_attribute}".to_sym
+      data_action_when = :"data_#{current_definition.action_when_attribute}"
+      can_create = current_user.has_access_to?(:create, :table, def_record.full_item_type_name.pluralize)
+      can_edit = can_create || current_user.has_access_to?(:edit, :table, def_record.full_item_type_name.pluralize)
 
       {
-        def_record: def_record,
+        def_record:,
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || option_type_config.label,
         name: "#{full_name}_#{option_type_config.name}",
@@ -146,8 +199,8 @@ module OptionConfigs
         resource_name: "#{full_name}__#{option_type_config.name}",
 
         button_label: option_type_config.button_label,
-        prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
-        prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
+        prevent_edit: !can_edit,
+        prevent_create: !can_create,
         only_see_presence: current_user.has_access_to?(
           :see_presence,
           :activity_log_type,
@@ -163,7 +216,7 @@ module OptionConfigs
         implementation_class_name: def_record.item_type_name,
         item_blocks: { def_record.item_type.to_sym => def_record.implementation_class.parent_data_names },
         show_created_at: true,
-        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/"\
+        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/" \
                           "{{item_id}}/{{/if}}activity_log/#{def_record.item_type_name.pluralize}/{{id}}/edit",
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,
@@ -174,22 +227,27 @@ module OptionConfigs
         references: option_type_config.references,
         embed: direct_embed_type(def_record, option_type_config),
         show_if: option_type_config.show_if,
-        view_options: view_options,
+        view_options:,
         extra_data_attribs: [:extra_log_type],
-        extra_options_config: option_type_config
+        extra_options_config: option_type_config,
+        base_route_segments: def_record.base_route_segments,
+        base_route_short_name: def_record.base_route_short_name
       }
     end
 
     def self.activity_log_all_configs_mapping(def_record, current_user)
       current_definition = def_record.current_definition || def_record
 
+      can_create = current_user.has_access_to?(:create, :table, def_record.full_item_type_name.pluralize)
+      can_edit = can_create || current_user.has_access_to?(:edit, :table, def_record.full_item_type_name.pluralize)
+
       {
-        def_record: def_record,
+        def_record:,
         def_version: def_record.def_version,
         caption: def_record.name,
         name: def_record.item_type_name,
-        prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
-        prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
+        prevent_edit: !can_edit,
+        prevent_create: !can_create,
         item_list: def_record.implementation_class.view_attribute_list,
         implementation_class: def_record.implementation_class,
         implementation_class_name: def_record.item_type_name,
@@ -204,7 +262,9 @@ module OptionConfigs
         blank_log_label: (def_record.blank_log_name.blank? ? 'General Log' : def_record.blank_log_name),
         main_log_label: (def_record.main_log_name.blank? ? 'Add Log' : def_record.main_log_name),
         hide_item_list_panel: !!def_record.hide_item_list_panel,
-        template_class: nil
+        template_class: nil,
+        base_route_segments: def_record.base_route_segments,
+        base_route_short_name: def_record.base_route_short_name
       }
     end
 

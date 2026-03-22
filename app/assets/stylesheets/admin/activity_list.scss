@@ -1,13 +1,24 @@
 .activity-list-section,
 .activity-list-references,
+.activity-list-embeds,
 .activity-list-libraries,
 .activity-list-file-filters,
-.activity-list-dialogs {
-  padding: 0 10px;
+.activity-list-dialogs,
+.activity-list-all-fields,
+.activity-list-view-refs {
+  padding: 10px 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid silver;
+  background-color: #f3f3f3;
 }
 
-ul.activity-list,
-ul.admin-tag-list {
+.activity-list-section {
+  padding: 14px 10px;
+  border-top: 1px solid silver;
+}
+
+ul.activity-list {
   padding-left: 0;
   text-align: left;
 
@@ -24,14 +35,81 @@ ul.admin-tag-list {
     font-size: 12px;
   }
 
+  ul.activity-list-activity-references li {
+    border: 0;
+    display: block;
+
+    em.al-ref-this {
+      color: gray;
+    }
+  }
+
   li.activity-list-name {
     background-color: rgb(221, 221, 221);
     &:hover {
       cursor: pointer;
     }
+    &.al-name-selected {      
+      background-color: #f4f498 !important; 
+    }
   }
 
+  ul.common-def-panel--uacs {
+    padding-left: revert;
+    &:before {
+      content: 'access';
+    }
+  }
 }
+
+ul.activity-list {
+  li.activity-list-name {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .activity-list-activity-label {
+    margin-left: 8px;
+    font-style: italic;
+  }
+
+  & > ul {
+    text-indent: -75px;
+    padding-left: 84px;
+
+    &:before {
+      
+      min-width: 70px;
+      display: inline-block;
+      text-indent: 0;
+      color: gray;
+    }
+
+    li {
+      text-indent: 0;
+    }
+  }
+
+  ul.activity-list-activity-fields {
+    &:before {
+      content: 'fields';
+    }
+  }
+  
+  ul.activity-list-activity-embed {
+    &:before {
+      content: 'embed';
+    }
+  }
+
+  ul.activity-list-activity-references {
+    &:before {
+      content: 'references';
+    }
+  }
+}
+
 
 span.activity-list-name {
   color: black;
@@ -39,10 +117,6 @@ span.activity-list-name {
   &:hover {
     cursor: pointer;
   }
-}
-
-.admin-tag-list.selectable li:hover {
-  cursor: pointer;
 }
 
 .al-details-section {
@@ -54,12 +128,12 @@ span.activity-list-name {
 }
 
 .al-options-editor-block {
-  width: 800px;
+  // width: 800px;
   height: 80vh;
 }
 
 .al-options-ref-block {
-  width: 800px;
+  width: auto;
   height: auto;
 }
 
@@ -89,7 +163,8 @@ span.activity-list-name {
 }
 
 .al-form-info {
-  max-height: 111vh;
+  min-height: 128vh;
+  height: auto;
   overflow-y: auto;
   width: auto;
   flex-shrink: 0;

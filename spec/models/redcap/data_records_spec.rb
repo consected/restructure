@@ -4,464 +4,634 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 RSpec.describe Redcap::DataRecords, type: :model do
+  include MasterSupport
   include ModelSupport
   include Redcap::RedcapSupport
+
+  def request_admin
+    res = Admin.find_active_by_email_or_id Settings::RedcapJobUserEmail
+    expect(res).to be_a Admin
+    res
+  end
+
+  def create_sid_scantrons
+    @record_ids = %w[1 4 14 19 32]
+    @int_survey_ids = @record_ids.map { |i| "12#{i}".to_i } + @record_ids.map { |i| "2#{i}".to_i }
+    @int_survey_ids.each do |sid|
+      master = create_master(@user)
+      master.current_user = @user
+      master.scantrons.create!(scantron_id: sid)
+    end
+  end
 
   def clean_file_fields_filesystem(container)
     FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{container.app_type_id}/containers/#{container.id} -- q2_demo/redcap_test.test_file_field_recs/file-fields/"
   end
+  describe 'retrieving records and files' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
+      setup_file_fields
+    end
+
+    before :example do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
+      setup_file_store
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      reset_mocks
+    end
+
+    it 'has a valid model to store records to, which must be a subclass of Dynamic::DynamicModelBase' do
+      setup_file_fields
+
+      dmrec = DynamicModel.active.find_by(category: 'redcap')
+      dmrec.force_regenerate = true
+      dmrec.generate_model
+      DynamicModel.reset_active_model_configurations!
+
+      dm = dmrec.implementation_class
+      expect(dm < Dynamic::DynamicModelBase).to be true
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      class_name = dm.name
+      dr = Redcap::DataRecords.new(rc, class_name)
+
+      expect { dr.send :model }.not_to raise_error
+
+      dr = Redcap::DataRecords.new(rc, 'Class')
+
+      expect { dr.send :model }.to raise_error(FphsException, 'Redcap::DataRecords model is not a valid type: Class')
+    end
+
+    it 'retrieves records from REDCap immediately' do
+      dm = create_dynamic_model_for_sample_response
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      res = dr.retrieve
+
+      expect(res).to be_a Array
+      expect(res.length).to eq 5
+      expect(res.first).to be_a Hash
+      expect(res.first.keys.first).to eq :record_id
+    end
+
+    it 'validates retrieved records' do
+      dm = create_dynamic_model_for_sample_response
+
+      # data_sample_response_fields
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+    end
+
+    it 'raises errors if retrieved records id is missing' do
+      dm = create_dynamic_model_for_sample_response
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      stub_request_records @project[:server_url], @project[:api_key], 'fail_record_id_nil'
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      expect { dr.validate }.to raise_error(FphsException, 'Redcap::DataRecords retrieved data that has a nil record id')
+    end
+
+    it 'raises errors if retrieved records have missing fields' do
+      dm = create_dynamic_model_for_sample_response
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+
+      stub_request_records @project[:server_url], @project[:api_key], 'mismatch_fields'
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      expect do
+        dr.validate
+      end.to raise_error(FphsException,
+                         "Redcap::DataRecords::ModelMissingFields retrieved record fields are not present in the model:\nmismatch_field")
+    end
 
-  before :all do
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
-    @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
-    setup_file_fields
-  end
-
-  before :example do
-    @bad_admin, = create_admin
-    @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
-    reset_mocks
-  end
+    it 'stores retrieved records' do
+      dm = create_dynamic_model_for_sample_response
 
-  it 'has a valid model to store records to, which must be a subclass of Dynamic::DynamicModelBase' do
-    setup_file_fields
-    dm = DynamicModel.active.where(category: 'redcap').first.implementation_class
-    expect(dm < Dynamic::DynamicModelBase).to be true
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
 
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    class_name = dm.name
-    dr = Redcap::DataRecords.new(rc, class_name)
-
-    expect { dr.send :model }.not_to raise_error
-
-    dr = Redcap::DataRecords.new(rc, 'Class')
-
-    expect { dr.send :model }.to raise_error(FphsException, 'Redcap::DataRecords model is not a valid type: Class')
-  end
-
-  it 'retrieves records from REDCap immediately' do
-    dm = create_dynamic_model_for_sample_response
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
 
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      expect { dr.validate }.not_to raise_error
 
-    res = dr.retrieve
-
-    expect(res).to be_a Array
-    expect(res.length).to eq 5
-    expect(res.first).to be_a Hash
-    expect(res.first.keys.first).to eq :record_id
-  end
-
-  it 'validates retrieved records' do
-    dm = create_dynamic_model_for_sample_response
-
-    # data_sample_response_fields
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-
-    dr.retrieve
-    dr.summarize_fields
-
-    expect { dr.validate }.not_to raise_error
-  end
-
-  it 'raises errors if retrieved records id is missing' do
-    dm = create_dynamic_model_for_sample_response
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
+      dr.store
 
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    stub_request_records @project[:server_url], @project[:api_key], 'fail_record_id_nil'
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.to raise_error(FphsException, 'Redcap::DataRecords retrieved data that has a nil record id')
-  end
-
-  it 'raises errors if retrieved records have missing fields' do
-    dm = create_dynamic_model_for_sample_response
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-
-    stub_request_records @project[:server_url], @project[:api_key], 'mismatch_fields'
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect do
-      dr.validate
-    end.to raise_error(FphsException,
-                       "Redcap::DataRecords retrieved record fields are not present in the model:\nmismatch_field")
-  end
-
-  it 'stores retrieved records' do
-    dm = create_dynamic_model_for_sample_response
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+    end
 
-    stub_request_records @project[:server_url], @project[:api_key]
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
+    it "fails if survey fields are requested and the dynamic model doesn't expect them" do
+      dm = create_dynamic_model_for_sample_response
 
-    expect { dr.validate }.not_to raise_error
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.records_request_options.exportSurveyFields = true
 
-    dr.store
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      expect { dr.validate }.to raise_error FphsException,
+                                            "Redcap::DataRecords::ModelMissingFields retrieved record fields are not present in the model:\n" \
+                                            'redcap_survey_identifier q2_survey_timestamp test_timestamp'
+    end
 
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
-    expect(dr.updated_ids).to be_empty
-  end
+    it 'stores retrieved records even if the target has additional fields' do
+      dm = create_dynamic_model_for_sample_response
 
-  it "fails if survey fields are requested and the dynamic model doesn't expect them" do
-    dm = create_dynamic_model_for_sample_response
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
 
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.records_request_options.exportSurveyFields = true
+      WebMock.reset!
 
-    stub_request_records @project[:server_url], @project[:api_key]
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    expect { dr.validate }.to raise_error FphsException,
-                                          "Redcap::DataRecords retrieved record fields are not present in the model:\n" \
-                                          'redcap_survey_identifier q2_survey_timestamp test_timestamp'
-  end
+      mock_limited_requests
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
-  it 'stores retrieved records even if the target has additional fields' do
-    dm = create_dynamic_model_for_sample_response
+      api_key = rc.api_key
+      rc.update! current_admin: @admin, disabled: true
+      rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                        study: 'Q2',
+                                        name: 'q2_demo',
+                                        api_key:,
+                                        server_url: rc.server_url
 
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
 
-    WebMock.reset!
+      expect { dr.validate }.not_to raise_error
 
-    mock_limited_requests
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+      dr.store
 
-    api_key = rc.api_key
-    rc.update! current_admin: @admin, disabled: true
-    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
-                                      study: 'Q2',
-                                      name: 'q2_demo',
-                                      api_key:,
-                                      server_url: rc.server_url
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 19 32 4 5].sort
+      expect(dr.updated_ids).to be_empty
+    end
 
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
+    it 'raises an error if the retrieved fields are different from the expect fields' do
+    end
 
-    dr.store
+    it 'does nothing if the records all match' do
+      dm = create_dynamic_model_for_sample_response
 
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 19 32 4 5].sort
-    expect(dr.updated_ids).to be_empty
-  end
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
 
-  it 'raises an error if the retrieved fields are different from the expect fields' do
-  end
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
 
-  it 'does nothing if the records all match' do
-    dm = create_dynamic_model_for_sample_response
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.sort).to be_empty
+      expect(dr.updated_ids).to be_empty
+    end
+
+    it 'does updates on records that have changed' do
+      dm = create_dynamic_model_for_sample_response(survey_fields: true)
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.records_request_options.exportSurveyFields = true
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
 
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-
-    stub_request_records @project[:server_url], @project[:api_key]
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
-
-    dr.store
-
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
-    expect(dr.updated_ids).to be_empty
-
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
-
-    dr.store
-
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to be_empty
-    expect(dr.updated_ids).to be_empty
-  end
+      dr.store
 
-  it 'does updates on records that have changed' do
-    dm = create_dynamic_model_for_sample_response(survey_fields: true)
-
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.records_request_options.exportSurveyFields = true
-
-    stub_request_records @project[:server_url], @project[:api_key]
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
-
-    dr.store
-
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
-    expect(dr.updated_ids).to be_empty
-
-    WebMock.reset!
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
-
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
-
-    stub_request_records @project[:server_url], @project[:api_key], 'updated_records'
-
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-    dr.retrieve
-    dr.summarize_fields
-    expect { dr.validate }.not_to raise_error
-    dr.store
-
-    expect(dr.errors).to be_empty
-    expect(dr.created_ids).to be_empty
-    expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19].sort
-  end
-
-  it 'retrieves all records in the background' do
-    dm = create_dynamic_model_for_sample_response
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
-    rc.save # to ensure the background job works
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-
-    start_time = DateTime.now
-    expect(dm.implementation_class_defined?)
-
-    expect(dr.existing_records_length).to eq 0
-
-    dr.request_records
-
-    expect(dr.existing_records_length).to be > 0
-
-    cr = Redcap::ClientRequest.where(admin: @admin,
-                                     action: 'store records',
-                                     server_url: rc.server_url,
-                                     name: rc.name,
-                                     redcap_project_admin: rc)
-                              .where('created_at > :created_at', created_at: start_time)
-                              .last
-
-    expect(cr.result).to be_a Hash
-    expect(cr.result['count_created_ids']).to be > 0
-    expect(cr.result['count_updated_ids']).to eq 0
-    expect(cr.result['count_unchanged_ids']).to eq 0
-    expect(cr.result['errors']).to be_empty
-  end
-
-  it 'retrieves all records in the background if there are more model than storage fields' do
-    dm = create_dynamic_model_for_sample_response
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
-    rc.save # to ensure the background job works
-
-    WebMock.reset!
-
-    mock_limited_requests
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
-    api_key = rc.api_key
-    rc.update! current_admin: @admin, disabled: true
-    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
-                                      study: 'Q2',
-                                      name: 'q2_demo',
-                                      api_key:,
-                                      server_url: rc.server_url
-
-    rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
-
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-
-    start_time = DateTime.now
-    expect(dm.implementation_class_defined?)
-
-    expect(dr.existing_records_length).to eq 0
-
-    dr.request_records
-
-    expect(dr.existing_records_length).to be > 0
-
-    cr = Redcap::ClientRequest.where(admin: @admin,
-                                     action: 'store records',
-                                     server_url: rc.server_url,
-                                     name: rc.name,
-                                     redcap_project_admin: rc)
-                              .where('created_at > :created_at', created_at: start_time)
-                              .last
-
-    expect(cr.result).to be_a Hash
-    expect(cr.result['count_created_ids']).to be > 0
-    expect(cr.result['count_updated_ids']).to eq 0
-    expect(cr.result['count_unchanged_ids']).to eq 0
-    expect(cr.result['errors']).to be_empty
-  end
-
-  it 'fails to start background request if model has missing fields' do
-    dm = create_dynamic_model_for_sample_response
-    rc = Redcap::ProjectAdmin.active.first
-    rc.current_admin = @admin
-    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
-    rc.save # to ensure the background job works
-
-    WebMock.reset!
-
-    WebMock.reset!
-    mock_limited_requests
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
-    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
-    stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
-
-    api_key = rc.api_key
-    rc.update! current_admin: @admin, disabled: true
-    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
-                                      study: 'Q2',
-                                      name: 'q2_demo',
-                                      api_key:,
-                                      server_url: rc.server_url
-
-    rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
-
-    cr = Redcap::ClientRequest.where(admin: @admin,
-                                     action: 'store records',
-                                     server_url: rc.server_url,
-                                     name: rc.name,
-                                     redcap_project_admin: rc)
-                              .last
-
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
-
-    start_time = Time.now
-    expect(dm.implementation_class_defined?)
-
-    expect(dr.existing_records_length).to eq 0
-
-    expect { dr.request_records }.to raise_error FphsException, /Redcap::DataRecords retrieved record fields don't match the data dictionary:/
-
-    expect(dr.existing_records_length).to eq 0
-
-    cr = Redcap::ClientRequest.where(admin: @admin,
-                                     action: 'store records',
-                                     server_url: rc.server_url,
-                                     name: rc.name,
-                                     redcap_project_admin: rc)
-                              .where('created_at > :created_at', created_at: start_time)
-                              .last
-
-    expect(cr.result['storage_stage']).to eq 'validate'
-
-    cr = Redcap::ClientRequest.where(admin: @admin,
-                                     action: 'capture records job',
-                                     server_url: rc.server_url,
-                                     name: rc.name,
-                                     redcap_project_admin: rc)
-                              .where('created_at > :created_at', created_at: start_time)
-                              .last
-    expect(cr.result['error']).to include "Redcap::DataRecords retrieved record fields don't match the data dictionary"
-  end
-
-  it 'downloads files' do
-    setup_file_fields
-    rc = @project_admin
-    rc.current_admin = @admin
-
-    dd = rc.redcap_data_dictionary
-    clean_file_fields_filesystem rc.file_store
-
-    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
-
-    expect(dr.send(:file_fields)).to eq %i[file1 signature]
-
-    dr.retrieve
-    expect(dr.records.length).to be > 0
-    puts dr.errors if dr.errors.present?
-    expect(dr.errors).not_to be_present
-
-    dr.send(:capture_files, dr.records[1])
-    puts dr.errors if dr.errors.present?
-    expect(dr.errors).not_to be_present
-
-    files = dr.imported_files
-    expect(files.count).to eq 2
-    expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort).to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature"]
-
-    # Repeat - should not update the files
-    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
-    dr.retrieve
-    dr.send(:capture_files, dr.records[1])
-    expect(dr.errors).not_to be_present
-    files = dr.imported_files
-    expect(files.count).to eq 0
-
-    # Reset with new file content
-    mock_file_field_requests
-    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
-    dr.retrieve
-    dr.send(:capture_files, dr.records[1])
-    expect(dr.errors).not_to be_present
-    files = dr.imported_files
-    expect(files.count).to eq 2
-  end
-
-  it 'downloads files in background' do
-    setup_file_fields
-    rc = @project_admin
-    rc.current_admin = @admin
-
-    expect(rc.dynamic_model_ready?).to be true
-
-    files = rc.file_store.stored_files
-    expect(files.count).to eq 0
-    clean_file_fields_filesystem rc.file_store
-
-    dd = rc.redcap_data_dictionary
-
-    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
-
-    dm = DynamicModel.active.find_by(table_name: 'test_file_field_recs')
-    puts rc.dynamic_storage.dynamic_model.implementation_class.table_name
-    puts DynamicModel.find_by(table_name: 'test_file_field_recs')&.attributes || 'no test_file_field_recs' unless dm
-    puts DynamicModel.active.to_a unless dm
-    expect(dm).to be_a DynamicModel
-
-    expect(dr.existing_records_length).to eq 0
-    dr.request_records
-    expect(dr.existing_records_length).to be > 0
-
-    puts dr.errors if dr.errors.present?
-    expect(dr.errors).not_to be_present
-
-    files = rc.file_store.stored_files.reload
-
-    expect(files.count).to eq 4
-    expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
-      .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      WebMock.reset!
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+      stub_request_records @project[:server_url], @project[:api_key], 'updated_records'
+
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect { dr.validate }.not_to raise_error
+      dr.store
+
+      expect(dr.errors).to be_empty
+      expect(dr.created_ids).to be_empty
+      expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19].sort
+    end
+
+    it 'retrieves all records in the background' do
+      dm = create_dynamic_model_for_sample_response
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+      rc.save # to ensure the background job works
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      start_time = DateTime.now
+      expect(dm.implementation_class_defined?)
+
+      expect(dr.existing_records_length).to eq 0
+
+      dr.request_records
+
+      expect(dr.existing_records_length).to be > 0
+
+      cr = Redcap::ClientRequest.where(admin: @admin,
+                                       action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+
+      expect(cr.result).to be_a Hash
+      expect(cr.result['storage_stage']).to be_present
+      expect(cr.result['count_retrieved']).to be > 0
+      expect(cr.result['count_created_ids']).to be > 0
+      expect(cr.result['count_updated_ids']).to eq 0
+      expect(cr.result['count_unchanged_ids']).to eq 0
+      expect(cr.result['count_disabled_ids']).to eq 0
+      expect(cr.result['count_skipped_ids']).to eq 0
+      expect(cr.result['count_processed']).to be > 0
+      expect(cr.result['table']).to eq dm.table_name
+      expect(cr.result['errors']).to be_empty
+      expect(cr.result['imported_files_count']).to eq 0
+      expect(cr.result['failed_files_count']).to eq 0
+      expect(cr.result).to have_key('job')
+    end
+
+    it 'retrieves all records in the background if there are more model than storage fields' do
+      dm = create_dynamic_model_for_sample_response
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+      rc.save # to ensure the background job works
+
+      WebMock.reset!
+
+      mock_limited_requests
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+      api_key = rc.api_key
+      rc.update! current_admin: @admin, disabled: true
+      rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                        study: 'Q2',
+                                        name: 'q2_demo',
+                                        api_key:,
+                                        server_url: rc.server_url
+
+      rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
+
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      start_time = DateTime.now
+      expect(dm.implementation_class_defined?)
+
+      expect(dr.existing_records_length).to eq 0
+
+      dr.request_records
+
+      expect(dr.existing_records_length).to be > 0
+
+      cr = Redcap::ClientRequest.where(action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+
+      if cr.nil?
+        req = {
+          admin: request_admin,
+          action: 'store records',
+          server_url: rc.server_url,
+          name: rc.name,
+          redcap_project_admin: rc,
+          created_at: start_time
+        }
+        puts "About to fail - no ClientRequest found for #{req}"
+        Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).each do |r|
+          puts "  Found ClientRequest #{r.attributes}"
+        end
+      end
+      expect(cr).to be_present, "No ClientRequest found. Available: #{Redcap::ClientRequest.where(redcap_project_admin: rc).where('created_at > :created_at', created_at: start_time).pluck(:action).join(', ')}"
+      expect(cr.result).to be_a Hash
+      expect(cr.result['storage_stage']).to be_present
+      expect(cr.result['count_retrieved']).to be > 0
+      expect(cr.result['count_created_ids']).to be > 0
+      expect(cr.result['count_updated_ids']).to eq 0
+      expect(cr.result['count_unchanged_ids']).to eq 0
+      expect(cr.result['count_disabled_ids']).to eq 0
+      expect(cr.result['count_skipped_ids']).to eq 0
+      expect(cr.result['count_processed']).to be > 0
+      expect(cr.result['table']).to be_present
+      expect(cr.result['errors']).to be_empty
+      expect(cr.result['imported_files_count']).to eq 0
+      expect(cr.result['failed_files_count']).to eq 0
+      expect(cr.result).to have_key('job')
+    end
+
+    it 'fails to start background request if model has missing fields' do
+      dm = create_dynamic_model_for_sample_response
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+      rc.save # to ensure the background job works
+
+      WebMock.reset!
+
+      WebMock.reset!
+      mock_limited_requests
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+      rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+      stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+
+      api_key = rc.api_key
+      rc.update! current_admin: @admin, disabled: true
+      rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                        study: 'Q2',
+                                        name: 'q2_demo',
+                                        api_key:,
+                                        server_url: rc.server_url
+
+      rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
+
+      cr = Redcap::ClientRequest.where(action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .last
+
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      start_time = Time.now
+      expect(dm.implementation_class_defined?)
+
+      expect(dr.existing_records_length).to eq 0
+
+      expect { dr.request_records }.to raise_error FphsException, /Redcap::DataRecords::MismatchFields retrieved record fields don't match the data dictionary:/
+
+      expect(dr.existing_records_length).to eq 0
+
+      cr = Redcap::ClientRequest.where(action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+
+      expect(cr.result['storage_stage']).to eq 'validate (failed)'
+
+      cr = Redcap::ClientRequest.where(action: 'capture records job',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+      expect(cr.result['error']).to include "Redcap::DataRecords::MismatchFields retrieved record fields don't match the data dictionary"
+    end
+
+    it 'downloads files' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      # expect(@admin.matching_user).to eq @user
+      expect(@user.has_access_to?(:edit, :table, rc.dynamic_storage.dynamic_model.resource_name))
+      expect(@user.role_names).to include(Settings.admin_nfs_role)
+      puts @user.email
+
+      # Debug: Check what user the data_records will use
+      dr_user = rc.current_user
+      # puts "DataRecords current_user: #{dr_user&.email}"
+      # puts "DataRecords current_user has edit access to stored_files: #{dr_user&.has_access_to?(:edit, :table, 'nfs_store__manage__stored_files')}"
+      # puts "DataRecords current_user app_type: #{dr_user&.app_type&.name}"
+      # puts "@user app_type: #{@user.app_type&.name}"
+
+      dd = rc.redcap_data_dictionary
+      clean_file_fields_filesystem rc.file_store
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+
+      expect(dr.send(:file_fields)).to eq %i[file1 signature]
+
+      dr.retrieve
+      expect(dr.records.length).to be > 0
+      puts dr.errors if dr.errors.present?
+      expect(dr.errors).not_to be_present
+
+      dr.send(:capture_files, dr.records[1])
+      puts dr.errors if dr.errors.present?
+      expect(dr.errors).not_to be_present
+
+      files = dr.imported_files
+      expect(files.count).to eq 2
+      expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort).to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature"]
+
+      # Repeat - should not update the files
+      Rails.cache.clear
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      dr.send(:capture_files, dr.records[1])
+      expect(dr.errors).not_to be_present
+      files = dr.imported_files
+      expect(files.count).to eq 0
+
+      # Reset with new file content
+      Rails.cache.clear
+      mock_file_field_requests
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      dr.send(:capture_files, dr.records[1])
+      expect(dr.errors).not_to be_present
+      files = dr.imported_files
+      expect(files.count).to eq 2
+    end
+
+    it 'tracks failed file imports' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      expect(@user.has_access_to?(:edit, :table, rc.dynamic_storage.dynamic_model.resource_name))
+      expect(@user.role_names).to include(Settings.admin_nfs_role)
+
+      clean_file_fields_filesystem rc.file_store
+
+      # Mock REDCap API file retrieval
+      mock_file_field_requests
+
+      # Mock file import to fail for file1 but succeed for signature
+      call_count = 0
+      allow(NfsStore::Import).to receive(:import_file).and_wrap_original do |method, *args, **kwargs|
+        call_count += 1
+        filename_str = args[1].to_s
+        raise Exception.new("Simulated file import failure for #{filename_str}") if filename_str == 'file1'
+
+        # Simulate a file import failure
+
+        # Call original method with all arguments
+        result = method.call(*args, **kwargs)
+        result
+      end
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      expect(dr.records.length).to be > 0
+
+      # Create/update records first so we have ActiveRecord instances
+      dr.records.each do |record|
+        dr.send(:create_or_update, record)
+      end
+
+      # Find a record that has both file1 and signature fields
+      model_record = dr.upserted_records.find { |r| r[:file1].present? && r[:signature].present? }
+      expect(model_record).to be_present
+
+      dr.send(:capture_files, model_record)
+
+      # Check that we have both successful and failed files
+      expect(dr.imported_files.count).to eq 1 # signature succeeded
+      expect(dr.failed_files.count).to eq 1 # file1 failed
+      expect(dr.failed_files.first[:field_name]).to eq :file1
+      expect(dr.failed_files.first[:error]).to include 'Simulated file import failure'
+      expect(dr.errors.count).to eq 1
+      expect(dr.errors.first[:action]).to eq :capture_files
+
+      # Verify the file field was marked with FailedFileFieldMarker in the database record
+      model_record.reload
+      expect(model_record.file1).to eq Redcap::DataRecords::FailedFileFieldMarker
+      expect(model_record.signature).to be_present
+    end
+
+    it 'downloads files in background' do
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      # expect(@admin.matching_user).to eq @user
+      expect(rc.job_user.has_access_to?(:edit, :table, rc.dynamic_storage.dynamic_model.resource_name)).to be_truthy
+      expect(@user.role_names).to include(Settings.admin_nfs_role)
+      expect(@user.has_access_to?(:create, :table, :nfs_store__manage__containers)).to be_truthy
+
+      expect(rc.job_user.has_access_to?(:create, :table, :nfs_store__manage__containers)).to be_truthy
+
+      puts @user.email
+
+      expect(rc.dynamic_model_ready?).to be true
+
+      files = rc.file_store.stored_files
+      expect(files.count).to eq 0
+      clean_file_fields_filesystem rc.file_store
+
+      mock_file_field_requests
+
+      rc.in_background_job = true
+      dd = rc.redcap_data_dictionary
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+
+      dm = DynamicModel.active.find_by(table_name: 'test_file_field_recs')
+      puts rc.dynamic_storage.dynamic_model.implementation_class.table_name
+      puts DynamicModel.find_by(table_name: 'test_file_field_recs')&.attributes || 'no test_file_field_recs' unless dm
+      puts DynamicModel.active.to_a unless dm
+      expect(dm).to be_a DynamicModel
+
+      expect(dr.existing_records_length).to eq 0
+      dr.request_records
+      expect(dr.existing_records_length).to be > 0
+
+      puts dr.errors if dr.errors.present?
+      expect(dr.errors).not_to be_present
+
+      files = rc.file_store.stored_files.reload
+
+      expect(files.count).to eq 4
+      expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
+        .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
+
+      # Verify job result includes file counts
+      start_time = DateTime.now - 1.minute
+      cr = Redcap::ClientRequest.where(action: 'store records',
+                                       server_url: rc.server_url,
+                                       name: rc.name,
+                                       redcap_project_admin: rc)
+                                .where('created_at > :created_at', created_at: start_time)
+                                .last
+
+      expect(cr.result).to be_a Hash
+      expect(cr.result['imported_files_count']).to eq 4
+      expect(cr.result['failed_files_count']).to eq 0
+    end
   end
 
   describe 'handling of deleted records prevents transfer' do
@@ -484,6 +654,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
+    before :example do
+      create_admin
+      setup_file_store
+      reset_mocks
+    end
+
     it 'complains if records are missing and handle_deleted_records = nil' do
       dm = create_dynamic_model_for_sample_response
 
@@ -498,6 +674,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect { dr.validate }.not_to raise_error
 
       dr.store
@@ -511,12 +689,15 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
       stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      Rails.cache.clear
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect do
         dr.validate
-      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: {:record_id=>"4"}')
+      end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: {record_id: "4"}')
     end
   end
 
@@ -539,6 +720,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
+    before :example do
+      create_admin
+      setup_file_store
+      reset_mocks
+    end
+
     it 'ignores records if records are missing and handle_deleted_records = ignore' do
       dm = create_dynamic_model_for_sample_response
 
@@ -553,6 +740,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect { dr.validate }.not_to raise_error
 
       dr.store
@@ -566,9 +755,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
       stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      Rails.cache.clear
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect do
         dr.validate
       end.not_to raise_error
@@ -595,6 +787,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect { dr.validate }.not_to raise_error
 
       dr.store
@@ -608,9 +802,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
       stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+      Rails.cache.clear
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
       dr.retrieve
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect do
         dr.validate
       end.not_to raise_error
@@ -664,11 +861,13 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(all_rf_summ[:smoketime_chosen_array].field_type.name).to eq :checkbox_chosen_array
 
       stub_request_records @project[:server_url], @project[:api_key]
+
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
       dr.retrieve
-
       dr.summarize_fields
+      dr.handle_survey_identifier
+
       expect(dr.records.first.keys).to include(:smoketime_chosen_array)
 
       expect { dr.validate }.not_to raise_error
@@ -684,10 +883,263 @@ RSpec.describe Redcap::DataRecords, type: :model do
         sa = r.smoketime_chosen_array
 
         # Get the actual choices
-        exp_array = %w[pnfl dnfl anfl].map { |choice| r["smoketime___#{choice}"] && choice }.select { |item| item }
-
+        exp_array = %w[pnfl dnfl ANFL].map { |choice| r["smoketime___#{choice.downcase}"] && choice }.select { |item| item }
         expect(sa).to eq exp_array
       end
+
+      dmic = dr.send :model
+      #  Check we have a record that will exercise the uppercase choice
+      res = dmic.where(smoketime___anfl: 1)
+      expect(res.count).to be > 0
+
+      # Now test all records to ensure choices in the summary array and the columns match
+      # paying extra attention to those where the choice is uppercase in the definition
+      # and therefore would have a column name (always downcased) that doesn't simply match the
+      # uppercase value retrieved from Redcap and subsequently stored to the summary array field.
+      res = dmic.all
+      all_choices = %w[pnfl dnfl ANFL]
+      matched = 0
+      res.each do |r|
+        all_choices.each do |choice|
+          colval = r["smoketime___#{choice.downcase}"]
+          expect(colval).not_to be_nil, "Column smoketime___#{choice.downcase} should not be nil for record #{r.record_id}"
+          if colval
+            expect(r.smoketime_chosen_array).to include choice
+            matched += 1
+          end
+        end
+      end
+
+      expect(matched).to be > 0
+    end
+  end
+
+  describe 'project associating foreign key with external id' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+
+      # Create the first DM with integer survey identifier field
+      rc = Redcap::ProjectAdmin.active.first
+      rc.records_request_options.exportSurveyFields = true
+      rc.data_options.associate_master_through_external_identifer = 'scantrons'
+      rc.study = 'external-id-test'
+      rc.current_admin = @admin
+      rc.save!
+
+      rc.reload
+      expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
+      puts "rc.id: #{rc.id}"
+
+      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      ds.category = 'redcap-test-env'
+      @dm = ds.create_dynamic_model
+      expect(ds.dynamic_model_ready?).to be_truthy
+    end
+
+    before :example do
+      create_admin
+      setup_file_store
+      reset_mocks
+
+      # Set up scantrons to match to redcap_survey_identifiers
+      setup_access :scantrons unless @user.has_access_to? :create, :table, :scantrons
+
+      create_sid_scantrons
+    end
+
+    it 'saves records with integer survey identifiers' do
+      dm = @dm
+
+      rc = Redcap::ProjectAdmin.active.find_by(study: 'external-id-test')
+      rc.current_admin = @admin
+      rc.save!
+      expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
+      dd = rc.redcap_data_dictionary
+      all_rf = dd.all_retrievable_fields
+      expect(all_rf[:redcap_survey_identifier_id].field_type.name).to eq :integer_survey_identifier
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect(dr.records.first.keys).to include(:redcap_survey_identifier_id)
+
+      expect { dr.validate }.not_to raise_error
+      dr.store
+
+      expect(dr.errors).to be_empty
+      created_record_ids = dr.created_ids.map { |r| r[:record_id] }.sort
+      expect(created_record_ids).to eq @record_ids.sort
+      expect(dr.updated_ids).to be_empty
+
+      stored_recs = dm.implementation_class.where(record_id: created_record_ids)
+      stored_recs.each do |r|
+        sa = r.redcap_survey_identifier_id
+
+        expect(sa).to eq r.redcap_survey_identifier.to_i
+      end
+    end
+  end
+
+  describe 'project associating foreign key with external id and setting master_id field' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+
+      # Create the first DM with master_id
+      rc = Redcap::ProjectAdmin.active.first
+      rc.records_request_options.exportSurveyFields = true
+      rc.data_options.associate_master_through_external_identifer = 'scantrons'
+      rc.data_options.set_master_id_using_association = true
+      rc.study = 'external-id-test'
+      rc.current_admin = @admin
+      rc.save!
+
+      rc.reload
+      expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
+      puts "rc.id: #{rc.id}"
+
+      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      ds.category = 'redcap-test-env'
+      @dm = ds.create_dynamic_model
+      expect(ds.dynamic_model_ready?).to be_truthy
+      expect(@dm.field_list).to include('master_id')
+    end
+
+    before :example do
+      create_admin
+      setup_file_store
+      reset_mocks
+
+      # Set up scantrons to match to redcap_survey_identifiers
+      setup_access :scantrons unless @user.has_access_to? :create, :table, :scantrons
+
+      create_sid_scantrons
+    end
+
+    it 'saves records with integer survey identifiers and associated master_id' do
+      dm = @dm
+
+      rc = Redcap::ProjectAdmin.active.find_by(study: 'external-id-test')
+      rc.current_admin = @admin
+      rc.save!
+      expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
+      dd = rc.redcap_data_dictionary
+      all_rf = dd.all_retrievable_fields
+      expect(all_rf[:redcap_survey_identifier_id].field_type.name).to eq :integer_survey_identifier
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+
+      expect(dr.records.first.keys).to include(:redcap_survey_identifier_id)
+
+      expect { dr.validate }.not_to raise_error
+      dr.store
+
+      expect(dr.errors).to be_empty
+      created_record_ids = dr.created_ids.map { |r| r[:record_id] }.sort
+      expect(created_record_ids).to eq @record_ids.sort
+      expect(dr.updated_ids).to be_empty
+
+      stored_recs = dm.implementation_class.where(record_id: created_record_ids)
+      stored_recs.each do |r|
+        sa = r.redcap_survey_identifier_id
+
+        expect(sa).to eq r.redcap_survey_identifier.to_i
+        expect(r['master_id']).to eq r.master.id
+      end
+
+      # Retrieving again makes no changes
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      dr.store
+
+      expect(dr.updated_ids).to be_empty
+      expect(dr.created_ids).to be_empty
+
+      # Force a change in a master_id
+      stored_recs = dm.implementation_class.where(record_id: created_record_ids)
+      rec = stored_recs.first
+      rec.force_save!
+      rec.update!(current_user: @user, master_id: nil)
+
+      # Retrieving again makes the changes
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      dr.store
+
+      expect(dr.updated_ids.length).to eq 1
+      expect(dr.created_ids).to be_empty
+
+      # Now check an error is raised if no survey identifier is provided
+      # Retrieving again - no changes yet
+
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+      dr.retrieve
+      # Force a change to the retrieved records
+      orig_rcsid = dr.records.first[:redcap_survey_identifier]
+      dr.records.first[:redcap_survey_identifier] = ''
+
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      expect { dr.store }.to raise_error(FphsException, /Integer survey identifier field is empty, can't set master id, for record 1/)
+
+      expect(dr.updated_ids.length).to eq 0
+      expect(dr.created_ids).to be_empty
+
+      # Now try with a survey identifier that doesn't match any external ids
+      dr.records.first[:redcap_survey_identifier] = -999
+
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      expect { dr.store }.to raise_error(FphsException, /Redcap pull failed to get master id through association, for record 1 with survey identifier -999/)
+
+      expect(dr.updated_ids.length).to eq 0
+      expect(dr.created_ids).to be_empty
+
+      # Now check no error is raised if no survey identifier is provided when a default master is provided
+      # Retrieving again makes the changes
+      expect(Master.find(-1)).to be_a Master
+
+      rc.data_options.skip_store_if_no_survey_identifier = -1
+      rc.save!
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+      dr.records.first[:redcap_survey_identifier] = ''
+
+      dr.summarize_fields
+      dr.handle_survey_identifier
+      expect { dr.store }.not_to raise_error
+      expect(dr.updated_ids.length).to eq 0
+      expect(dr.skipped_ids.length).to eq 1
+      expect(dr.created_ids).to be_empty
+
+      get_rid = dr.skipped_ids.first[:record_id]
+      expect(get_rid).to eq '1'
+      res = dm.implementation_class.where(record_id: get_rid).reload
+      expect(res.count).to eq 1
+      expect(res.first.redcap_survey_identifier).to eq orig_rcsid
     end
   end
 end

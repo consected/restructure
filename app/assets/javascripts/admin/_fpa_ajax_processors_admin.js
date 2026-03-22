@@ -1,15 +1,3 @@
-// Provide a namespace for admin classes
-var _fpa_admin = {
-  all: {},
-  activity_logs: {},
-  dynamic_models: {},
-  external_identifiers: {},
-  reports: {},
-  user_access_controls: {},
-  user_roles: {}
-}
-
-
 _fpa.postprocessors_admin = {
 
   // When an edit form is shown
@@ -49,6 +37,15 @@ _fpa.postprocessors_admin = {
     }, 200);
 
 
+  },
+
+  search_attr_definer_setup: function (block, data) {
+    console.log('search_attr_definer_setup')
+    // Run at next step to avoid UI lock ups
+    window.setTimeout(function () {
+      var aef = new _fpa_admin.reports.admin_edit_form(block, data)
+      aef.setup_search_attr_config();
+    })
   }
 
 };

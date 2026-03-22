@@ -22,6 +22,25 @@ table.admin-list tbody {
   background-color: #fff6bf;
 }
 
+.config-error-block {
+  background-color: #fff6bf;
+  padding: 14px 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  .config-error-def-config-type {
+    padding-left: 20px;
+  }
+  .config-error-list-name {
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .config-error-list-type {
+    font-family: 'Courier New', Courier, monospace;
+  }
+}
+
 .error-mark, .error-mark-in-circle {
   color: #aa0000;
 }
@@ -31,6 +50,41 @@ table.admin-list tbody {
   border: 1px solid #b4b4b4;
   padding: 0.05em;
   font-size: 110%;
+}
+
+.admin-alerts-panel {
+  margin-bottom: 15px;
+
+  .panel-heading {
+    .panel-title a {
+      text-decoration: none;
+      display: block;
+
+      .glyphicon-alert {
+        color: #a94442;
+        margin-right: 5px;
+      }
+
+      .admin-alerts-badge {
+        margin-left: 5px;
+        font-size: 85%;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .admin-alerts-list__item {
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .admin-alerts-list__category {
+    margin-right: 8px;
+  }
 }
 
 .admin-edit-form {
@@ -65,7 +119,17 @@ table.admin-list tbody {
 }
 
 #admin_user_role_role_name {
-  width: 300px;
+  width: 100%;
+}
+
+input.form-control.tt-hint {
+  width: 100%;
+}
+
+input.form-control[type="checkbox"] {
+  width: 1em;
+  display: inline-block;
+  margin-left: 1em;
 }
 
 .form-inline [data-out-attr-name="options"] textarea.form-control,
@@ -194,4 +258,61 @@ ul.admin-menu-list {
 .admin-menu-list > li > a {
   padding-left: 0;
   list-style: none;
+}
+
+.dfc-field-config-block ul.nav li {
+  font-family: var(--button-font-family);
+  padding: 0;
+  border-radius: 0;
+
+  a {
+    padding: 0 4px;
+  }
+}
+
+.admin-options-ref-block 
+.dfc-field-config-block .tab-content {
+    padding: 0;
+    padding-left: 4px;
+    border: none;
+    background: transparent;
+
+    ul li {
+      list-style: normal;
+      border: none;
+      background: transparent
+    }
+}
+
+.dfc-text {
+  padding: 4px 0;
+  display: block;
+}
+
+.dfc-dialog-text {
+  padding: 4px 0;
+  display: block;
+  hr  {
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+.master-records-show-panel .panel{
+    // border: 1px solid #eee;
+    background-color: #eee;
+    // padding: 1.4em;
+    margin: 1.4em;
+    border-radius: 8px;
+
+    .form-group {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .nav-tabs>li>a {
+      border-radius: 4px 4px 0 0;
+      border: 1px solid rgb(221, 221, 221);
+    }
+  
 }

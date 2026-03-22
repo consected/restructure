@@ -8,7 +8,7 @@ module NavHandler
   def setup_navs
     return true if request.xhr?
 
-    admin_view = current_admin && (is_a?(AdminController) || controller_name == 'pages' && action_name == 'index')
+    admin_view = current_admin && (is_a?(AdminController) || (controller_name == 'pages' && action_name == 'index'))
 
     @primary_navs = []
     @app_type_switches = nil
@@ -155,10 +155,24 @@ module NavHandler
 
     user_sub << { label: 'user profile', url: '/user_profile' }
     user_sub << { label: 'notifications', url: '/reports/user__my_notifications' }
-    user_sub << { label: "#{current_admin ? 'user ' : ''}password", url: '/users/edit',
+    user_sub << { label: "change password#{password_expiry_label}", url: '/users/edit',
                   extras: { 'data-do-action' => 'user-change-password' } }
     user_sub << { label: 'logout', url: '/users/sign_out',
                   extras: { method: :delete, 'data-do-action' => 'user-logout' } }
+  end
+
+  #
+  # Build the password expiry label suffix for the user menu.
+  # Shows "(expires in N days)", "(expires in 1 day)", or "(expires today)"
+  # @return [String]
+  def password_expiry_label
+    days = current_user.expires_in
+    expiry_text = if days <= 0
+                    'expires today'
+                  else
+                    "expires in #{days} #{'day'.pluralize(days)}"
+                  end
+    " <i>(#{expiry_text})</i>".html_safe
   end
 
   def standalone_layouts?

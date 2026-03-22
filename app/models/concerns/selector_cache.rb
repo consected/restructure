@@ -115,7 +115,7 @@ module SelectorCache
       ckey = "#{collection_cache_key}#{conditions}"
 
       Rails.cache.fetch(ckey) do
-        enabled.where(conditions).map(&:attributes)
+        enabled.where(conditions).map { |i| i.attributes.with_indifferent_access }
       end
     end
 

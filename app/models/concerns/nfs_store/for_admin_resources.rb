@@ -22,7 +22,7 @@ module NfsStore
       container = NfsStore::Manage::Container.create_in_current_app user: file_store_user,
                                                                     name: safe_name,
                                                                     extra_params: {
-                                                                      master: master,
+                                                                      master:,
                                                                       create_with_role: nfs_role
                                                                     }
       container.current_user = file_store_user
@@ -35,18 +35,22 @@ module NfsStore
     # Retrieve the file store container
     # @return [NfsStore::Manage::Container]
     def file_store
-      @file_store ||= NfsStore::Manage::Container.referenced_container self
+      @file_store ||= file_store_container
       return unless @file_store
 
       @file_store.current_user ||= file_store_user
       @file_store
     end
 
+    def file_store_container
+      @file_store_container ||= NfsStore::Manage::Container.referenced_container self
+    end
+
     #
     # Master record to be used to contain filestore containers
     # @return [Master]
     def master
-      Settings.admin_master
+      @master ||= Settings.admin_master
     end
 
     def master_id

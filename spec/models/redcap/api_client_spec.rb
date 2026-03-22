@@ -111,4 +111,38 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res.first.keys.first).to be_a Symbol
     expect(res[0][:username]).to eq 'd20'
   end
+
+  it 'imports a record' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    pc = rc.api_client
+
+    data = [
+      {'record_id' => 101, 'redcap_survey_identifier' => "651237"}
+    ]
+
+    json_data = data.to_json
+
+    stub_requests_import_records @project[:server_url], @project[:api_key], data: json_data
+
+    res = pc.import_records(data:)
+    expect(res).to be_a Array
+    expect(res.first).to be_a String
+    expect(res[0]).to eq '101'
+
+  end
+
+  it 'gets a survey link for instrument and record' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    pc = rc.api_client
+
+    instrument = 'test_api'
+    record_id = 101
+
+    stub_requests_survey_link @project[:server_url], @project[:api_key], instrument: instrument, record_id: record_id
+    res = pc.survey_link(instrument:, record_id:)
+    expect(res).to be_a String
+    expect(res).to eq 'https://redcap.server/redcap/surveys/?s=nQpny44G2vwTMoeF'
+  end
 end

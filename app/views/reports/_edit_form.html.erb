@@ -9,6 +9,7 @@
   end
   labels ||= {}
 
+  id_field = @runner.data_reference.id_field
 %>
     <table>
       <%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create, report_id: @report.id) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result",  'data-object-id' => object_instance.id }) do |f| %>
@@ -16,54 +17,74 @@
           <%= render partial: 'form_errors' %>
           <td class="report-el report-edit-btn-cell report-edit-btn-cell-editing">
             <%= hidden_filter_fields %>
+            <%= params[:table_name].present? ? hidden_field_tag(:table_name, params[:table_name]) : '' %>
             <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
           </td>
-          <% if object_instance.respond_to?(:id) %>
-            <td class="report-el report-el-object-id"><%= object_instance.id %></td>
-          <% end %>
-          <% (@report.all_configured_edit_fields - [:id]).each do |field_name_sym| %>
-            <%
-          form_object_instance = object_instance
-          form_object_item_type_us = form_object_instance.item_type_us
-          label_redefined = false
+          <%             
+            cached_result_fields = Reports::Runner.cached_fields(params[:runner_hash])
+            raise FphsException, "Results are out of date. Re-run the report before attempting to edit it."  unless cached_result_fields
 
-          field_name = field_name_sym.to_s
-          col = form_object_instance.class.columns_hash[field_name]
-          # raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
-          # External IDs and master crosswalk ids (msid) do not feature in the item. Ignore if they appear
-          column_type = :string
-          column_type = col.type if col
+            cached_result_fields = cached_result_fields #- [:id]
 
-          local_vars = {
-            form: f,
-            field_name_sym: field_name_sym,
-            field_name: field_name,
-            column_type: column_type,
-            general_selection_name: general_selection_prefix_name(form_object_instance),
-            form_object_instance: form_object_instance,
-            form_object_item_type_us: form_object_item_type_us,
-            caption_before: {},
-            labels: labels
-          }
-          local_vars[:locals] = local_vars
+            edit_fields = @report.edit_fields
+            cached_result_fields.each do |field_name_sym| 
+              field_name = field_name_sym.to_s
+              is_pk = field_name == id_field
+            %>
 
-          # One time only, redefine the label method for this specific form fields instance
-          unless label_redefined
-            def f.label *args
-              return super if args.last.is_a?(Hash) && args.last[:force_show]
-              ""
+            <% if edit_fields.include?(field_name_sym)  %>
+              <%
+            form_object_instance = object_instance
+            if form_object_instance.respond_to?(:item_type_us)
+              form_object_item_type_us = form_object_instance.item_type_us
+            elsif form_object_instance.respond_to?(:admin_item_type_us)
+              form_object_item_type_us = form_object_instance.admin_item_type_us
+            else
+              raise FphsException.new "This type of object can't be edited in reports"
             end
-            label_redefined = true
-          end
-        %>
-            <% if @report.edit_fields.include?(field_name_sym) %>
+            label_redefined = false
+
+            col = form_object_instance.class.columns_hash[field_name]
+            # raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+            # External IDs and master crosswalk ids (msid) do not feature in the item. Ignore if they appear
+            column_type = :string
+            column_type = col.type if col
+
+            local_vars = {
+              form: f,
+              field_name_sym: field_name_sym,
+              field_name: field_name,
+              column_type: column_type,
+              general_selection_name: general_selection_prefix_name(form_object_instance),
+              form_object_instance: form_object_instance,
+              form_object_item_type_us: form_object_item_type_us,
+              caption_before: {},
+              labels: labels
+            }
+            local_vars[:locals] = local_vars
+
+            # One time only, redefine the label method for this specific form fields instance
+            unless label_redefined
+              def f.label *args
+                return super if args.last.is_a?(Hash) && args.last[:force_show]
+                ""
+              end
+              label_redefined = true
+            end
+          %>
               <td class="report-el report-el-edit-cell report-el-edit-<%=field_name_sym%> report-el-edit-type-<%=column_type%>" data-col-type="<%=field_name_sym%>" data-col-var-type="<%=column_type%>">
                 <%= edit_form_field(**local_vars) %>
               </td>
             <% else%>
-              <td class="report-el report-el-edit-cell report-el-disabled">
-                &nbsp;
-              </td>
+                <% if is_pk %>
+                  <td class="report-el report-el-edit-cell report-el-edit-id-field-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
+                    <%= object_instance[field_name] %>
+                  </td>
+                <% else %>
+                  <td class="report-el report-el-edit-cell report-el-disabled report-el-edit-disabled-cell-<%=field_name_sym%>">
+                    &nbsp;
+                  </td>
+                <% end %>
             <% end %>
           <% end %>
         </tr>

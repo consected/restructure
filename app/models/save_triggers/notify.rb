@@ -27,9 +27,18 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # Setup the notification from the configuration and schedule it to run
   # in the background, either immediately or in the future
   def perform
+    @item.save_trigger_results['notify_messages'] ||= []
+    @item.save_trigger_results['notify_results'] ||= []
+    @item.save_trigger_results['notify_errors'] ||= []
+
     @model_defs.each do |config|
       init_attribs config
-      next unless run_this?
+
+      unless run_this?
+        @item.save_trigger_results['notify_errors'] << nil
+        @item.save_trigger_results['notify_results'] << false
+        next
+      end
 
       if @role || @users
         setup_role_and_users
@@ -40,21 +49,30 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @emails
         setup_emails
       else
-        raise FphsException, 'role, users or phones must be specified in save_trigger: notify: role: ...'
+        raise FphsException, 'role, users, emails or phones must be specified in save_trigger: notify: role: ...'
       end
 
       if !@receiving_user_ids&.present? && !@force_phones && !@force_emails && !@force_recip_recs
-        Rails.logger.warn "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name}"
+        msg = "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name}"
+        Rails.logger.warn msg
+        @item.save_trigger_results['notify_results'] << false
+        @item.save_trigger_results['notify_errors'] << msg
         next
       end
 
       if filter_notifications && @receiving_user_ids.empty?
-        Rails.logger.info 'No recipients after filtering'
+        msg = 'No recipients after filtering'
+        Rails.logger.info msg
+        @item.save_trigger_results['notify_results'] << false
+        @item.save_trigger_results['notify_errors'] << msg
         next
       end
 
-      create_message_notification
+      new_mn = create_message_notification
       res = queue_job
+      @item.save_trigger_results['notify_messages'] << new_mn
+      @item.save_trigger_results['notify_results'] << true
+      @item.save_trigger_results['notify_errors'] << nil
 
       next unless @item.respond_to?(:background_job_ref) && res&.provider_job
 
@@ -77,6 +95,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @layout_template = config[:layout_template]
     @on_complete = config[:on_complete]
     @from_user_email = config[:from_user_email]
+    @ignore_no_recipients = config[:ignore_no_recipients]
 
     @message_type = config[:type]
     @run_if = config[:if]
@@ -233,10 +252,18 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   #
   # The full content template text to use for the message,
   # specified by config[:content_template_text]
-  # If a hash is specified then the text will be retreived using a conditional action
+  # If a hash is specified then the text will be retreived using a conditional action.
+  # If the value is a string, substitutions will be performed. When the message is sent,
+  # further substitutions will be performed to render the final message.
   # @return [String | nil]
   def content_template_text
     @content_template_text ||= calc_field_or_return(@config[:content_template_text])
+    # return @content_template_text if @content_template_text
+
+    # cond = @config[:content_template_text]
+    # cond = ConditionalActions.new(cond, item).get_this_val if cond.is_a? Hash
+
+    # @content_template_text = cond
   end
 
   #
@@ -256,15 +283,71 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # to be substituted into the message using substitutions like {{extra_substitutions.data1}}
   # Data within the extra substitutions is substituted from the item, so may also contain its own
   # {{curly}} substitutions, set at the time the notification is created, not at the time it is sent.
+  # If a calendar_invite config is present, its values are resolved and merged into
+  # extra_substitutions[:calendar_invite] for storage on the MessageNotification record.
   # @return [Hash | nil]
   def extra_substitutions
     return @extra_substitutions if @extra_substitutions
 
-    @extra_substitutions = config[:extra_substitutions]
+    @extra_substitutions = config[:extra_substitutions] || {}
 
-    @extra_substitutions&.each do |k, v|
-      @extra_substitutions[k] = Formatter::Substitution.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
+    @extra_substitutions.each do |k, v|
+      next unless v.is_a?(String)
+
+      @extra_substitutions[k] = substitute_from_item(v)
     end
+
+    merge_calendar_invite_into_extra_substitutions
+    merge_attachments_into_extra_substitutions
+
+    @extra_substitutions = nil if @extra_substitutions.blank?
+    @extra_substitutions
+  end
+
+  #
+  # Parse the calendar_invite config option, resolve substitutions in all values,
+  # and merge the resolved hash into extra_substitutions[:calendar_invite].
+  # Values support {{curly}} substitutions and conditional action hashes.
+  # @return [void]
+  def merge_calendar_invite_into_extra_substitutions
+    cal_config = config[:calendar_invite]
+    return unless cal_config
+
+    resolved = cal_config.to_h do |k, v|
+      [k.to_s, substitute_from_item(v)]
+    end
+
+    @extra_substitutions[:calendar_invite] = resolved
+  end
+
+  #
+  # Parse the attachments config option, resolve substitutions in all values,
+  # and merge the resolved array into extra_substitutions[:attachments].
+  # Each attachment entry is a hash with container_id, path, and file_name keys.
+  # Values support {{curly}} substitutions and conditional action hashes
+  # (e.g. {this: {field: return_value}}).
+  # @return [void]
+  def merge_attachments_into_extra_substitutions
+    att_config = config[:attachments]
+    return unless att_config
+
+    resolved = att_config.map do |entry|
+      entry.to_h do |k, v|
+        [k.to_s, substitute_from_item(v)]
+      end
+    end
+
+    @extra_substitutions[:attachments] = resolved
+  end
+
+  #
+  # Resolve a config value from the current item using FieldDefaults.calculate_default.
+  # Supports {{curly}} substitutions, {{{raw}}} substitutions, conditional action hashes
+  # (e.g. {this: {field: return_value}}), and literal values passed through unchanged.
+  # @param [String | Hash | Object] value - value to resolve
+  # @return [Object] resolved value
+  def substitute_from_item(value)
+    FieldDefaults.calculate_default(@item, value, allow_nil: true, ignore_missing: true)
   end
 
   #
@@ -282,14 +365,14 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       user: @user,
       layout_template_name: @layout_template,
       content_template_name: content_template,
-      content_template_text: content_template_text,
+      content_template_text:,
       item_type: @item.class.name,
       item_id: @item.id,
       master_id: @item.master_id,
       message_type: @message_type,
-      subject: subject,
+      subject:,
       role_name: @role_name,
-      extra_substitutions: extra_substitutions
+      extra_substitutions:
     }
 
     setup_data[:recipient_user_ids] = @receiving_user_ids if @receiving_user_ids
@@ -298,6 +381,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     setup_data[:recipient_data] = @force_recip_recs if @force_recip_recs
     setup_data[:importance] = importance if importance
     setup_data[:from_user_email] = from_user_email if from_user_email
+    setup_data[:ignore_no_recipients] = @ignore_no_recipients if @ignore_no_recipients
 
     @message_notification = Messaging::MessageNotification.create! setup_data
   end
@@ -312,10 +396,16 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     # Also pass the on_complete configuration to follow up after the main job processing completes
     job.perform_later(@message_notification, for_item: @item,
                                              on_complete_config: @on_complete,
-                                             alt_batch_user: @alt_batch_user)
+                                             alt_batch_user: @alt_batch_user,
+                                             ignore_no_recipients: @ignore_no_recipients)
   end
 
   def calc_field_or_return(cond)
-    ConditionalActions.calc_field_or_return cond, item
+    # Delegate to ConditionalActions which now handles:
+    # - Hash conditions
+    # - {{template}} substitutions via FieldDefaults
+    # - Arrays (treated as array of literal values)
+    # - Literal values
+    FieldDefaults.calculate_default(item, cond, allow_nil: true, ignore_missing: true)
   end
 end

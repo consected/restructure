@@ -7,11 +7,12 @@
                           view_as: 'simple-embedded', readonly: true), 
                           'data-remote': true,
                           'data-target-force': true,
-                          'data-target': '#embedded-dynamic-uac-embedded'
+                          'data-target': '#embedded-dynamic-uac-embedded',
+                          class: 'keep-notices'
                           %>
     </div>
     <p>
-      <%= link_to "View all", admin_user_access_controls_path(filter: { resource_name: "#{object_instance.alt_resource_name}", resource_type: "report", app_type_id: '' }), target: '_blank' %>
+      <%= link_to link_label_open_in_new("View all"), admin_user_access_controls_path(filter: { resource_name: "#{object_instance.alt_resource_name}", resource_type: "report", app_type_id: '' }), target: '_blank' %>
     </p>
   <% end %>
 </div>

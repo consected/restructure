@@ -63,33 +63,47 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  def item_type_name
+    implementation_model_name
+  end
+
   def base_route_segments
     model_association_name.to_s
   end
 
+  def base_route_short_name
+    model_association_name
+  end
+
   def self.routes_load
     mn = nil
-    begin
-      m = active_model_configurations
-      return if m.empty?
 
-      Rails.application.routes.draw do
-        resources :masters, only: %i[show index new create] do
-          m.each do |pg|
-            mn = pg
-            pg_name = mn.base_route_segments
+    m = active_model_configurations
+    return if m.empty?
 
-            Rails.logger.info "Setting up routes for #{mn}"
-            resources pg_name, except: [:destroy]
-            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
-          end
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw do
+      resources :masters, only: %i[show index new create] do
+        m.each do |pg|
+          mn = pg
+          pg_name = mn.base_route_segments
+
+          next if routes.url_helpers.respond_to?("master_#{pg_name}_path")
+
+          Rails.logger.info "Setting up routes for external identifer: #{pg_name}"
+
+          resources pg_name, except: [:destroy]
+          get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
         end
       end
-    rescue ActiveRecord::StatementInvalid => e
-      logger.warn "Not loading activity log routes. The table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
-    rescue FphsException => e
-      logger.warn "Not loading activity log routes. There is possibly an error in an extra log type configuration. Table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
+  rescue StandardError => e
+    Rails.logger.error "Failed to set up routes for external identifier #{mn}: #{e}"
+    Rails.logger.error e.short_string_backtrace
+  ensure
+    routes ||= Rails.application.routes
+    routes.disable_clear_and_finalize = false
   end
 
   def external_id_range
@@ -105,11 +119,14 @@ class ExternalIdentifier < ActiveRecord::Base
   # @param [String] rep_type - one of the possible external ID report types
   # @param [String] item_type - optional item_type to find
   # @return [Report | nil]
-  def usage_report(rep_type, item_type = ReportItemType)
+  def usage_report(rep_type, item_type = ReportItemType, as_alt_resource_name: nil)
     rep_name = usage_report_name(rep_type)
     short_name = Report.gen_short_name(rep_name)
     arn = Report.alt_resource_name(item_type, short_name)
-    Report.active.find_by_alt_resource_name(arn, true)
+    res = Report.active.find_by_alt_resource_name(arn, true)
+    return res unless as_alt_resource_name
+
+    res&.alt_resource_name
   end
 
   def usage_report_name(rep_type)
@@ -227,6 +244,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res.include UserHandler
         res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
+        apply_encrypted_attributes(res)
 
         remove_implementation_controller_class
         res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
@@ -234,7 +252,7 @@ class ExternalIdentifier < ActiveRecord::Base
       rescue StandardError => e
         failed = true
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        puts "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        warn "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
       end
     end
     if failed || !ready_to_generate?
@@ -252,7 +270,8 @@ class ExternalIdentifier < ActiveRecord::Base
   def update_tracker_events
     return unless label && !disabled
 
-    Tracker.add_record_update_entries name.singularize, current_admin, 'record'
+    Tracker.add_record_update_entries tracker_name, current_admin, 'record'
+    Classification::Protocol.reset_memos
     # flag items are added when item flag names are added to the list
     # Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
   end
@@ -288,18 +307,18 @@ class ExternalIdentifier < ActiveRecord::Base
   def id_range_correct
     return if max_id.nil? || min_id.nil?
 
-    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || max_id && max_id > min_id
+    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || (max_id && max_id > min_id)
   end
 
   def name_format_correct
-    errors.add :name, "must not be #{name}" if name.downcase == 'externals' || name.downcase == 'exts'
+    errors.add :name, "must not be #{name}" if ['externals', 'exts'].include?(name.downcase)
     errors.add :name, 'must be a lowercase, underscored, DB table name' unless name.downcase.ns_underscore == name
     unless name.to_sym == model_association_name
       errors.add :name, 'not acceptable - must be plural and avoid numbers after underscores in names'
     end
 
     # Unfortunately we have clash in the existing scantrons naming. Ignore this case and work around as necessary.
-    if (external_id_attribute == "#{name.singularize}_id" || external_id_attribute == 'external_id') &&
+    if ["#{name.singularize}_id", 'external_id'].include?(external_id_attribute) &&
        name.downcase != 'scantrons'
       errors.add :external_id_attribute,
                  "must not be named #{external_id_attribute} or external_id. " \
@@ -312,9 +331,9 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def config_uniqueness
-    res = self.class.active.where(name: name.downcase).where.not(id: id)
+    res = self.class.active.where(name: name.downcase).where.not(id:)
     errors.add :name, 'must be unique' if !disabled && !res.empty?
-    res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id: id)
+    res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id:)
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
   end
 
@@ -334,7 +353,7 @@ class ExternalIdentifier < ActiveRecord::Base
                      searchable: false,
                      current_admin: admin,
                      position: 100,
-                     sql: sql
+                     sql:
     end
 
     r = usage_report('Search', ReportItemSearchType)
@@ -358,7 +377,7 @@ class ExternalIdentifier < ActiveRecord::Base
                      searchable: true,
                      current_admin: admin,
                      position: 100,
-                     sql: sql,
+                     sql:,
                      search_attrs: sa
     end
 
@@ -378,6 +397,6 @@ class ExternalIdentifier < ActiveRecord::Base
                    searchable: false,
                    current_admin: admin,
                    position: 100,
-                   sql: sql
+                   sql:
   end
 end

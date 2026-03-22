@@ -7,10 +7,9 @@ module Redcap
     #
     # Download the list of project users.
     # @param [Redcap::ProjectAdmin] project_admin
-    # @param [Admin] current_admin
     # @return [Boolean] success
-    def perform(project_admin, current_admin)
-      setup_with project_admin, current_admin: current_admin
+    def perform(project_admin)
+      setup_with project_admin
 
       pu = Redcap::ProjectUsers.new project_admin
       pu.retrieve_validate_store

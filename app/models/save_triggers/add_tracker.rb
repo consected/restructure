@@ -26,29 +26,37 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
   def perform
     model_defs.each do |model_def|
       model_def.each do |pn, c|
-        self.this_config = c
-        self.protocol_name = pn
-        unless if_evaluates(this_config[:if])
-          trackers << { protocol_name => nil }
-          next
+        with_entry_lifecycle(c) do
+          self.this_config = c
+          self.protocol_name = pn
+          unless if_evaluates(this_config[:if])
+            trackers << { protocol_name => nil }
+            next
+          end
+
+          setup_with_config
+
+          # be sure about the master and the current_user being set, to avoid hidden errors
+          raise FphsException, 'no master record set to add the tracker to' unless use_master
+          raise FphsException, 'no user set when adding tracker' unless use_master.current_user
+
+          begin
+            t = use_master.trackers.create!(
+              protocol_id: protocol.id,
+              sub_process_id: sub_process.id,
+              protocol_event_id: protocol_event&.id,
+              notes: config_values[:notes],
+              item: use_item,
+              event_date: event_date
+            )
+          rescue StandardError => e
+            error_details = build_error_details(e)
+            Rails.logger.error "AddTracker failed: #{error_details}"
+            raise FphsException, "AddTracker failed with error: #{e.message}\n#{error_details}"
+          end
+
+          trackers << { protocol_name => t }
         end
-
-        setup_with_config
-
-        # be sure about the master and the current_user being set, to avoid hidden errors
-        raise FphsException, 'no master record set to add the tracker to' unless use_master
-        raise FphsException, 'no user set when adding tracker' unless use_master.current_user
-
-        t = use_master.trackers.create!(
-          protocol_id: protocol.id,
-          sub_process_id: sub_process.id,
-          protocol_event_id: protocol_event&.id,
-          notes: config_values[:notes],
-          item: use_item,
-          event_date: event_date
-        )
-
-        trackers << { protocol_name => t }
       end
     end
     trackers
@@ -191,5 +199,27 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
     d = config_values[:event_date]
     d = FieldDefaults.calculate_default @item, d, :date if d
     d || DateTime.now
+  end
+
+  #
+  # Build detailed error information for debugging tracker creation failures
+  # @param [StandardError] error - the original error
+  # @return [String] formatted error details
+  def build_error_details(error)
+    details = []
+    details << "Original error: #{error.message}"
+    details << "Master ID: #{use_master&.id || 'nil'}"
+    details << "Current User ID: #{use_master&.current_user&.id || 'nil'}"
+    details << "App Type ID: #{use_master&.current_user&.app_type_id || 'nil'}"
+    details << "Item ID: #{use_item&.id || 'nil'}"
+    details << "Item Type: #{use_item&.class&.name || 'nil'}"
+    details << "Protocol ID: #{protocol&.id || 'nil'}"
+    details << "Sub Process ID: #{sub_process&.id || 'nil'}"
+    details << "Protocol Event ID: #{protocol_event&.id || 'nil'}"
+    details << "Triggering Object: #{@item&.class&.name || 'nil'}"
+
+    details << "Extra Log Type: #{@item.extra_log_type || 'nil'}" if @item.respond_to?(:extra_log_type)
+
+    details.join("\n")
   end
 end

@@ -15,68 +15,68 @@ module ScriptedJobSupport
     end
     expect(@aldef).not_to be nil
 
-    @aldef.extra_log_types = <<ENDDEF
-    scripted_test:
-      label: Scripted Test
-      fields:
-        - select_call_direction
-        - select_who
+    @aldef.extra_log_types = <<~ENDDEF
+      scripted_test:
+        label: Scripted Test
+        fields:
+          - select_call_direction
+          - select_who
 
-      save_trigger:
-        on_create:
-          create_filestore_container:
-            name:
-              - session files
-              - select_scanner
-            label: Session Files
-            create_with_role: nfs_store group 600
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+              label: Session Files
+              create_with_role: nfs_store group 600
 
-        on_upload:
-          notify:
-            type: email
-            role: upload notify role
-            layout_template: test email layout upload
-            content_template: test email content upload
-            subject: Send test
+          on_upload:
+            notify:
+              type: email
+              role: upload notify role
+              layout_template: test email layout upload
+              content_template: test email content upload
+              subject: Send test
 
-      references:
-        nfs_store__manage__container:
-          label: Files
-          from: this
-          add: one_to_this
-          view_as:
-            edit: hide
-            show: filestore
-            new: not_embedded
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
 
-      nfs_store:
+        nfs_store:
 
-        user_file_actions:
-          - name: Re-Identify
-            pipeline:
-              - scripted:
-                  - file_filters: .*
-                    recursive: true
-                    set_tags:
-                      '0010,0010': '{{master_id}}'
-                      '0010,0020': '{{player_contacts.data}}'
+          user_file_actions:
+            - name: Re-Identify
+              pipeline:
+                - scripted:
+                    - file_filters: .*
+                      recursive: true
+                      set_tags:
+                        '0010,0010': '{{master_id}}'
+                        '0010,0020': '{{player_contacts.data}}'
 
-        pipeline:
-          - mount_archive:
-          - index_files:
+          pipeline:
+            - mount_archive:
+            - index_files:
 
-          - scripted:
-              - file_filters: 00000.?.dcm
-                script_filename: simple_job_script.sh
-                args:
-                  - container_file_path
-              - file_filters: 000003.dcm
-                script_filename: dicom_job_script.sh
-                args:
-                  - container_file_path
+            - scripted:
+                - file_filters: 00000.?.dcm
+                  script_filename: simple_job_script.sh
+                  args:
+                    - container_file_path
+                - file_filters: 000003.dcm
+                  script_filename: dicom_job_script.sh
+                  args:
+                    - container_file_path
 
 
-ENDDEF
+    ENDDEF
 
     @aldef.current_admin = @admin
     @aldef.save!

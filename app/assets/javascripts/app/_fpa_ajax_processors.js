@@ -7,8 +7,9 @@ _fpa.preprocessors = {
     _fpa.form_utils.on_form_submit(block);
 
     // Mark the block a form was within, to make scrolling more reliable
+    // Allow class force-form-block to be specified to handle specific embedded forms
     if (block.is('form')) {
-      var b = block.parents('.common-template-item, .new-block').not('.no-processed-scroll').first();
+      var b = block.parents('.common-template-item, .new-block, .force-form-block').not('.no-processed-scroll').first();
       if (b.hasClass('new-block')) {
         var cti = b.parents('.common-template-item').first();
         if (cti.length) {
@@ -129,21 +130,8 @@ _fpa.postprocessors = {
     // Handle conditional form fields
     if (data.form_data) {
       var form_data = data.form_data;
-      var form_els = block.find('[data-attr-name][data-object-name]');
-      form_els.on('change click keyup', function () {
-        var e = $(this);
-        var obj_name = e.attr('data-object-name');
-        var a_name = e.attr('data-attr-name');
-        if (a_name != 'e_signed_how' && form_data[obj_name]) {
-          if (e.attr('type') == 'checkbox') {
-            form_data[obj_name][a_name] = e.is(':checked');
-          } else {
-            form_data[obj_name][a_name] = e.val();
-          }
-          form_data[obj_name].current_mode = 'edit';
-          _fpa.show_if.methods.show_items(block, form_data[obj_name]);
-        }
-      });
+      _fpa.form_utils.init_edit_form_show_if_triggers(block);
+
       for (var fe in form_data) {
         if (form_data.hasOwnProperty(fe)) {
           form_data[fe].current_mode = 'edit';
@@ -203,19 +191,8 @@ _fpa.postprocessors = {
       hljs.highlightBlock($(this)[0]);
     });
 
-
-    block.find('.show-in-modal').not('.attached-show-in-modal').each(function () {
-      var el = $(this).attr('data-content-el');
-      if (!el) return;
-
-      var content = $(el).html()
-      var title = $(this).attr('data-title');
-
-      $(this).on('click', function (ev) {
-        ev.preventDefault();
-        _fpa.show_modal(content, title);
-      })
-    }).addClass('attached-show-in-modal');
+    // Note: .show-in-modal[data-content-el] elements are handled by a delegated
+    // event handler in _fpa_loaded.js to ensure they work after AJAX updates.
 
   },
 
@@ -224,6 +201,7 @@ _fpa.postprocessors = {
       _fpa.form_utils.format_block(block);
 
       _fpa.masters.switch_id_on_click(block);
+      _fpa.masters.init_switchable_ids(block);
 
       _fpa.form_utils.on_open_click(block);
     }, 30);
@@ -276,8 +254,12 @@ _fpa.postprocessors = {
 
   // On load of the full list of master records
   search_results_template: function (block, data) {
+
+    _fpa.postprocessors.setup_masters_state(data);
+
     // Ensure we format the viewed item on expanding it
     _fpa.masters.switch_id_on_click(block);
+    _fpa.masters.init_switchable_ids(block);
     if (data.masters && data.masters.length < 5) {
       _fpa.form_utils.format_block(block);
       _fpa.postprocessors.show_external_links(block, data);
@@ -291,26 +273,11 @@ _fpa.postprocessors = {
       _fpa.postprocessors.configure_master_tabs(block);
     }
 
-    // Capture the master data into state for later use around the application
-    // The layout of data is modelled partially on that provided by MessageTemplate.setup_data
-    // allowing caption-before to function in 'show' mode
-    if (data.masters && data.masters.length > 0) {
-      _fpa.state.masters = {};
-      data.masters.forEach(function (master) {
-        if (master && master.id) {
-          _fpa.state.masters[master.id] = Object.assign({}, master);
-          if (_fpa.state.masters[master.id].player_infos) {
-            _fpa.state.masters[master.id].player_info = _fpa.state.masters[master.id].player_infos[0];
-            _fpa.state.masters[master.id].item = _fpa.state.masters[master.id].embedded_item;
-          }
-        }
-      });
-    }
-
     $('a.master-expander')
       .click(function (ev) {
         ev.preventDefault();
         var id = $(this).attr('data-target');
+
         $(id).on('shown.bs.collapse', function () {
           $('.selected-result').removeClass('selected-result');
 
@@ -350,32 +317,39 @@ _fpa.postprocessors = {
     var master_id_list = $('#master_id_list').html();
 
     if ($('.no-search-in-master-record').length == 0) {
+      const prevent = _fpa.state.app_configs.prevent_reload_master_list;
+
+      // Get the active search tab name for the page title
+      var active_search_tab = $('.search-selector-btn[aria-expanded="true"], .search-selector-btn.active, .search-selector-btn:not(.collapsed)').first();
+      var search_type = active_search_tab.length ? active_search_tab.text().trim() : null;
+      _fpa.page_title.for_search_results(search_type);
+
       if (master_id_list && master_id_list.replace(/ /g, '').length > 1) {
-        document.title = _fpa.env_name + ' results';
-        window.history.pushState(
-          { html: '/masters/search?utf8=✓&nav_q_id=' + master_id_list, pageTitle: document.title },
-          '',
-          '/masters/search?utf8=✓&nav_q_id=' + master_id_list
-        );
+        if (prevent)
+          window.history.pushState(
+            { html: '/masters/search?utf8=✓&nav_q_id=' + master_id_list, pageTitle: document.title },
+            '',
+            '/masters/search?utf8=✓&nav_q_id=' + master_id_list
+          );
       } else if (ext_id_field && ext_id_list && ext_id_list.length > 1) {
-        document.title = _fpa.env_name + ' results';
-        window.history.pushState(
-          {
-            html: '/masters/search?utf8=✓&external_id[' + ext_id_field + ']=' + ext_id_list,
-            pageTitle: document.title,
-          },
-          '',
-          '/masters/search?utf8=✓&external_id[' + ext_id_field + ']=' + ext_id_list
-        );
+        if (prevent)
+          window.history.pushState(
+            {
+              html: '/masters/search?utf8=✓&external_id[' + ext_id_field + ']=' + ext_id_list,
+              pageTitle: document.title,
+            },
+            '',
+            '/masters/search?utf8=✓&external_id[' + ext_id_field + ']=' + ext_id_list
+          );
       } else {
-        document.title = _fpa.env_name + ' results';
-        window.history.pushState({ html: '/masters/search', pageTitle: document.title }, '', '/masters/search');
+        if (prevent)
+          window.history.pushState({ html: '/masters/search', pageTitle: document.title }, '', '/masters/search');
       }
     }
   },
 
   show_external_links: function (block, data) {
-    block.find('.external-links').each(function () {
+    block.find('.external-links').not('.handled-elinks').each(function () {
       var id = $(this).attr('data-master-id');
       var master;
       if (data.player_info) master = { player_infos: [data.player_info] };
@@ -384,8 +358,9 @@ _fpa.postprocessors = {
         var pi = master.player_infos[0];
         var html = _fpa.templates['external-links-template'](pi);
         $(this).html(html);
+        $(this).addClass('in');
       }
-    });
+    }).addClass('handled-elinks');
   },
 
   extras_panel_handler: function (block) {
@@ -454,6 +429,25 @@ _fpa.postprocessors = {
   //   _fpa.form_utils.format_block(block);
 
   // },
+
+  // Capture the master data into state for later use around the application
+  // The layout of data is modelled partially on that provided by MessageTemplate.setup_data
+  // allowing caption-before to function in 'show' mode
+  setup_masters_state: function (data) {
+    if (!data.masters || data.masters.length <= 0) return;
+
+    _fpa.state.masters = {};
+    data.masters.forEach(function (master) {
+      if (master && master.id) {
+        _fpa.state.masters[master.id] = Object.assign({}, master);
+        if (_fpa.state.masters[master.id].player_infos) {
+          _fpa.state.masters[master.id].player_info = _fpa.state.masters[master.id].player_infos[0];
+          _fpa.state.masters[master.id].item = _fpa.state.masters[master.id].embedded_item;
+        }
+      }
+    });
+  },
+
 
   flash_template: function (block, data) {
     _fpa.timed_flash_fadeout();

@@ -10,9 +10,11 @@
 <table class="table tablesorter admin-list">
 
   <tbody>
-    <% objects_instance.each do |list_item| %>
-     <% begin %>
-     <% list_item.item&.current_user ||= current_user  if list_item.item&.respond_to? :current_user %>
+    <% list_item_ids = []
+       objects_instance.each do |list_item|
+         begin 
+         list_item_ids << list_item.id
+         list_item.item&.current_user ||= current_user  if list_item.item&.respond_to? :current_user %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td>
           <table>
@@ -32,21 +34,25 @@
             <tr><td><%= i.humanize %>:</td><td><%= list_item.send(i) %></td></tr>
             <% end %>
           </table>
+          <% ci_data = list_item.calendar_invite_data %>
+          <% nfs_attachments = list_item.nfsstore_attachment_references %>
+          <% if ci_data&.dig('generated_content').present? || nfs_attachments.any? %>
+            <p><strong>Attachments:</strong>
+              <% if ci_data&.dig('generated_content').present? %>
+                <%= link_to 'calendar.ics', attachment_admin_message_notification_path(list_item), class: 'btn btn-sm btn-default' %>
+              <% end %>
+              <% nfs_attachments.each do |att| %>
+                <%= link_to att['file_name'], attachment_admin_message_notification_path(list_item, stored_file_id: att['stored_file_id']), class: 'btn btn-sm btn-default' %>
+              <% end %>
+            </p>
+          <% end %>
           <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%> if-mn-status-<%= list_item.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox">
           </iframe>
 
-          <script id="message-content-<%= list_item.id %>" class="hidden" type="x-html">
-            <%= list_item.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe %>
-          </script>
-          <script>
-          window.setTimeout(function() {
-            var c = $('#message-content-<%=list_item.id%>');
-            var html = c.html();
-
-            $('#message-iframe-<%=list_item.id%>').attr('srcdoc', html);
-          }, 100);
-          </script>
-
+          <%= xhtml_script_tag(id: "message-content-#{list_item.id}", class: 'hidden', nonce: true) do
+                list_item.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe
+              end
+          %>
         </td>
       </tr>
       <% rescue StandardError => e %>
@@ -64,3 +70,7 @@
 <%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>
+
+<script type="application/json" id="list_item_ids">
+  <%= list_item_ids.to_json.html_safe %>
+</script>

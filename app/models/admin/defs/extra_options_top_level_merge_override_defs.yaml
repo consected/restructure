@@ -1,0 +1,8 @@
+# Keys to be "deep merged" in to all dynamic definitions. These inner items 
+# will take precedence over the later inner items. The rest of the key
+# definition will remain untouched.
+_merge_override:
+  key1: 
+    inner: will be merged into key1 within all dynamic definitions
+  key2:
+    inner: will be merged into key2 within all dynamic definitions

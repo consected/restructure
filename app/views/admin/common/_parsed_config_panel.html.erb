@@ -1,0 +1,44 @@
+<h4>Parsed Configuration</h4>
+<p class="text-muted">
+  This shows the final configuration after processing all config libraries, merges, and YAML anchors.
+</p>
+
+<% 
+  begin
+    # Force reparse to ensure we have the latest
+    object_instance.force_option_config_parse if object_instance.respond_to?(:force_option_config_parse)
+    configs = object_instance.option_configs
+    
+    if configs.present? && !configs.empty?      
+      yaml_output = object_instance.class.options_provider.parsed_options_text(object_instance)
+      
+      if yaml_output.present?
+%>
+<textarea class="extra-help-info" data-code-editor-type="yaml"><%= ERB::Util.html_escape(yaml_output) %></textarea>
+
+<% 
+      else
+%>
+<p class="alert alert-warning">No merged configuration text available. This resource may have configurations but no options_text field.</p>
+<% 
+      end
+    else
+%>
+<p class="alert alert-warning">No configuration options available.</p>
+<% 
+    end
+  rescue => e
+%>
+<div class="alert alert-danger">
+  <strong>Error parsing configuration:</strong>
+  <pre><%= ERB::Util.html_escape(e.message) %></pre>
+  <% if e.backtrace %>
+  <details>
+    <summary>Stack trace</summary>
+    <pre><%= ERB::Util.html_escape(e.backtrace.first(10).join("\n")) %></pre>
+  </details>
+  <% end %>
+</div>
+<% 
+  end
+%>

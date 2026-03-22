@@ -1,0 +1,28 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+    <% if @version_diffs.blank? %>
+      <p class="text-muted">No version changes to display.</p>
+    <% else %>
+      <% @version_diffs.each_with_index do |diff_data, idx| %>
+        <div class="version-diff-section admin-version__section">
+          <h4>
+            Version Change <%= idx + 1 %>
+            <small class="text-muted">
+              <%= Time.parse(diff_data[:current]['updated_at'] || diff_data[:current]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+              →
+              <%= Time.parse(diff_data[:previous]['updated_at'] || diff_data[:previous]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+            </small>
+          </h4>
+          
+          <table class="app-import-upload-results table table-bordered">
+            <%= render partial: 'admin/common_templates/def_version_head_identifiers', 
+                       locals: { current_version: diff_data[:current], previous_version: diff_data[:previous] } %>
+            <%= render partial: 'admin/common_templates/def_version_diff_changes', 
+                       locals: { changes: diff_data[:changes] } %>
+          </table>
+        </div>
+      <% end %>
+    <% end %>
+
+  </div>
+</div>

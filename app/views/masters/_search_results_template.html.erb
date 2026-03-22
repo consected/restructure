@@ -1,4 +1,18 @@
 <%
+  # Render templates for a standard master record. This is loaded by the
+  # pages controller action `template`, allowing a cached result to be used.
+  # This is auto-loaded in the view `/app/views/layouts/_setup_app.html.erb`
+  # which is rendered by the main `application.html.erb` layout.
+  #
+  # Sets up the templates that render each of the panels, and ensures the templates
+  # for everything contained within those panels are also rendered, ready for them to be
+  # displayed based on results from an AJAX request made by `app/views/masters/search.html.erb`
+  # This primary view renders the data-template `search-results-template`, defined below.
+
+  # The script template #master_main_inner is responsible for deciding which panels to show,
+  # based on the page layout panel definitions for the "master" page layout.
+
+  # Get the "master" page layout panels
   panels = page_layout_panels
 
   @prevent_creates = {}
@@ -8,12 +22,19 @@
     @prevent_edits[res] = !(current_user.has_access_to? :create, :table, res)
   end
 
-  external_id_types = ExternalIdentifier.implementation_classes
+  external_id_types = ExternalIdentifier.implementation_classes.sort_by(&:human_name)
   viewable_external_ids = external_id_types.select{|e| master_viewables[e.plural_name.to_sym] }.map(&:plural_name)
   all_cnames = general_selection_cache_names
 %>
 
-<% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
+<% 
+  # Set up the handlebars templates for the main data blocks: 
+  # - player_infos
+  # - pro_infos
+  # - addresses
+  # - player_contacts
+  # standard panels and any other dynamic definitions
+%>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'player_info',
     caption: 'person',
@@ -23,7 +44,9 @@
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
     data_sort: [:desc, "data-item-id"],
     hide_rank_badge: (app_config_set(:hide_player_accuracy) || app_config_set(:hide_participant_accuracy)),
-    implementation_class: PlayerInfo
+    implementation_class: PlayerInfo,
+    base_route_segments: PlayerInfo.base_route_segments,
+    base_route_short_name: PlayerInfo.base_route_short_name
   } if current_user.has_access_to?(:access, :table, :player_infos) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -34,7 +57,10 @@
     item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
     data_sort: [:desc, "data-item-id"],
     exclude_metadata: true,
-    implementation_class: ProInfo
+    implementation_class: ProInfo,
+    base_route_segments: ProInfo.base_route_segments,
+    base_route_short_name: ProInfo.base_route_short_name
+
   } if current_user.has_access_to?(:access, :table, :pro_infos) %>
 
 
@@ -49,7 +75,9 @@
     extra_class: '{{rec_type}}-type',
     extra_data_attribs: [:rec_type],
     view_options: { view_handlers: ['contact'] },
-    implementation_class: PlayerContact
+    implementation_class: PlayerContact,
+    base_route_segments: PlayerContact.base_route_segments,
+    base_route_short_name: PlayerContact.base_route_short_name
   } if current_user.has_access_to?(:access, :table, :player_contacts) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -62,7 +90,9 @@
     # add custom markup data attribute to allow country to be processed in Javascript formatting
     custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"},
     view_options: { view_handlers: ['address'] },
-    implementation_class: Address
+    implementation_class: Address,
+    base_route_segments: Address.base_route_segments,
+    base_route_short_name: Address.base_route_short_name
   } if current_user.has_access_to?(:access, :table, :addresses) %>
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc) %>
@@ -108,15 +138,17 @@
 <%= render partial: 'common_templates/common_parts' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'filestore/result_templates' if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
-<%= render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
 <%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
 
-<% # Display the set of search results in the "master search" format %>
-<script id="empty" type="text/x-handlebars-template" class="hidden handlebars-template"></script>
+<%= handlebars_template_tag('empty') do %><% end %>
 
-<script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<% 
+  # Display the set of search results in the "master search" format 
+  # Is rendered by the AJAX request made by `app/views/masters/search.html.erb`
+%>
+<%= handlebars_template_tag('search-results-template') do %>
   {{#if masters.length}}
   <div class="panel-group search-results-template" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel <%= app_config_text(:master_results_panel_css_class) %>">
@@ -136,9 +168,27 @@
   {{else}}
       <h2 class="no-results-msg">No Results</h2>
   {{/if}}
-</script>
+<% end %>
 
-<script id="master_main_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_main', css_class: 'hidden handlebars-partial') do %>
+  <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is num_masters 1}}in loaded-master-main{{/is}} master-panel num-masters-{{num_masters}}" data-master-id="{{id}}" data-template="master-main-template" role="tabpanel" aria-labelledby="master-{{id}}">
+    {{>master_main_inner}}
+  </div>
+<% end %>
+
+<%= handlebars_template_tag('master-main-template') do %>
+  {{#with master}}
+    {{>master_main_inner}}
+  {{/with}}
+<% end %>
+
+<%
+  # Render the master record tabs and panels.
+  # If no page layout "master panel" definitions exist, default panels for
+  # trackers, details and external IDs are provided.
+  # Otherwise the panels defined in the page layout(s) are used.
+%>
+<%= handlebars_template_tag('master_main_inner', css_class: 'hidden handlebars-partial') do %>
   {{>master_tabs}}
   <div class="panel-body master-main-panel">
     <%
@@ -164,7 +214,7 @@
 
       <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
 
-      <% ActivityLog.enabled.each do |a| %>
+      <% ActivityLog.active.each do |a| %>
         <% if master_viewables[a.full_item_types_name.to_sym] %>
         <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"  >
             <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
@@ -182,16 +232,6 @@
       <% end %>
     <% end %>
   </div>
-</script>
+<% end %>
 
-<script id="master_main" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is num_masters 1}}in loaded-master-main{{/is}} master-panel num-masters-{{num_masters}}" data-master-id="{{id}}" data-template="master-main-template" role="tabpanel" aria-labelledby="master-{{id}}">
-    {{>master_main_inner}}
-  </div>
-</script>
-
-<script id="master-main-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with master}}
-    {{>master_main_inner}}
-  {{/with}}
-</script>
+<%= retrieve_requested_handlebars_templates __FILE__ %>

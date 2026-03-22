@@ -31,15 +31,18 @@
       <% unless no_results_scroll %>
         <div class="text-center back-to-search-form">
           <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
-          <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn" style="display: none;"><i class="caret"></i> show all results</a>
+          <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn report-results__show-btn--hidden"><i class="caret"></i> show all results</a>
         </div>
       <% end %>
       <div class="report-results-inner">
         <%
-          render_as = @report.report_options.view_options.view_as || 'table'
+          render_as = @force_view_as || @report.report_options.view_options.view_as || 'table'
           render_as = render_as.gsub(/[^a-z_]/, '')
+          filename = "_#{render_as}.html.erb"
+          loc = Rails.root.join('app', 'views', 'reports', 'result_template', filename)
+          raise FphsException, "Bad report view_as option: #{render_as}" unless File.exist?(loc)
         %>
-        <%= render partial: "reports/result_template/#{render_as}", locals: {result_tables: result_tables} %>
+        <%= render partial: "reports/result_template/#{render_as}", locals: {result_tables: result_tables} %>        
       </div>
     </div>
   </div>

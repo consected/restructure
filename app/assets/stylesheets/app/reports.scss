@@ -196,6 +196,24 @@ textarea.admin-clean-sql {
   }
 }
 
+#protocols-list span {
+  font-size: 80%;
+}
+
+#protocols-list {
+  .protocols-list--protocol span:before {
+    content: 'protocol: '
+  }
+  
+  .protocols-list--sub-process span:before {
+    content: 'sub process: '
+  }
+  
+  .protocols-list--event span:before {
+    content: 'event: '
+  }
+}
+
 .ref-table-item {
   list-style: none;
   a {
@@ -255,6 +273,12 @@ textarea.admin-clean-sql {
 
 th.has-comment {
   min-width: 185px;
+}
+
+.admin-report-info-block {
+  text-align: left;
+  height: auto;
+  min-height: 80vh;
 }
 
 .admin-report-info-block .tab-content {
@@ -337,5 +361,44 @@ table .report-cb-inner {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     white-space: nowrap;
+  }
+}
+
+// BEM-named classes for report index and criteria
+.report-index {
+  &__type-cell {
+    width: 5%;
+  }
+
+  &__name-cell {
+    width: 15%;
+  }
+
+  &__description-cell {
+    width: 30%;
+  }
+
+  &__search-attr-cell {
+    width: 25%;
+  }
+
+  &__measure-cell {
+    width: 25%;
+  }
+}
+
+.report-criteria {
+  &__actions {
+    border-color: transparent;
+  }
+
+  &__field-group {
+    padding-bottom: 1em;
+  }
+}
+
+.report-results {
+  &__show-btn--hidden {
+    display: none;
   }
 }

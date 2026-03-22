@@ -64,7 +64,7 @@ module Dynamic
         # a master_id = ? condition automatically, based on the underlying association.
         # Not sure when this requirement was introduced, but it is necessary.
         item = unscoped.unassigned.first
-        raise NoUnassignedAvailable unless item
+        raise NoUnassignedAvailable, 'No available IDs for assignment' unless item
 
         logger.info "Got next available external id #{item.id}"
         item.assigned_by = 'fphsapp' if item.respond_to? :assigned_by=
@@ -122,6 +122,12 @@ module Dynamic
         @label ||= definition.label || name.underscore.humanize.captionize
       end
 
+      # External identifers only use one config definition, under the 'default' key
+      # Simplify access to the default options configuration
+      def default_options
+        @default_options = definition.default_options
+      end
+
       # For external ID models that require an auto-generated or auto-assigned (from an existing list) ID,
       # the master association build method will use this method.
       # By default, the next available ID will be generated randomly.
@@ -153,7 +159,12 @@ module Dynamic
       # in order to pluck the next available pre-generated ID from a list.
       def master_build_with_next_id(owner, att = nil)
         # For the case when we are building one for edit form, no attributes are provided
-        return new master: owner unless att
+        unless att
+          att = assign_next_available_id(owner)
+          return new(master: owner) unless att
+
+          return att if att
+        end
 
         # If attributes are provided, ensure they don't attempt to do anything bad
         att = att.to_h.symbolize_keys
@@ -278,6 +289,7 @@ module Dynamic
         self.updated_at = existing_item_updated.updated_at
         self.id = existing_item_updated.id
       else
+        self.just_assigned = master_id_changed?
         super
       end
     end
@@ -314,7 +326,7 @@ module Dynamic
         next_item.send("#{k}=", v) unless v.blank? || k.in?(%w[user_id master_id])
       end
 
-      next_item.current_user = c_user
+      next_item.current_user = c_user if c_user
       self.existing_item_updated = next_item
 
       next_item.attributes
@@ -403,6 +415,21 @@ module Dynamic
       self.external_id = self.class.external_id_range.min
     end
 
+    #
+    # Check if an external id, or a set of uniqueness fields, has already been added to the database.
+    # If it has, return the ActiveRecord that has it. If not, return nil
+    # @return [ActiveRecord | nil]
+    def already_taken
+      uniqueness_fields = self.class.definition.configurations&.dig(:uniqueness_fields) || [self.class.external_id_attribute]
+
+      cond = uniqueness_fields.map { |f| [f, attributes[f.to_s]] }.to_h
+      self.class.where.not(id:).find_by(cond)
+    end
+
+    def can_change_master?
+      changeable = self.class.definition.configurations&.dig(:can_change_master)
+    end
+
     def external_id_tests
       errors.add self.class.external_id_attribute, 'can not be blank' if external_id.blank?
 
@@ -410,17 +437,17 @@ module Dynamic
         errors.add self.class.external_id_attribute, 'can not be changed'
       end
 
-      if persisted? && master_id_changed? && !master_id_was.nil?
+      if persisted? && master_id_changed? && !master_id_was.nil? && !can_change_master?
         errors.add :master, "record this #{self.class.label} is associated with can not be changed"
       end
 
-      if master_id.nil? && (!respond_to?(:admin_id) || admin_id.nil?)
+      if master_id.nil? && (!respond_to?(:admin_id) || admin_id.nil?) && master_id_changed?
         errors.add :master_id, "must be set when adding #{self.class.external_id_attribute}"
       end
 
-      return unless external_id_changed? || !persisted?
+      return if persisted? && !external_id_changed? && !master_id_changed?
 
-      s = self.class.find_by_external_id(external_id)
+      s = already_taken
       return unless s
 
       errors.add self.class.external_id_attribute, 'already exists in this master record' if s.master_id == master_id

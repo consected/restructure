@@ -1,0 +1,117 @@
+<%# Details tab for the masters table entry (issue #930).
+    Shows crosswalk fields, temp IDs, search link, and field listing. %>
+
+<div class="master-records-def-details master-records-def-details--masters">
+
+  <% begin %>
+    <% masters_info = {
+      crosswalk_attrs: Master.crosswalk_attrs,
+      readonly_attrs: Master.readonly_attrs,
+      temporary_master_ids: Master::TemporaryMasterIds
+    } %>
+  <% rescue StandardError => e %>
+    <p class="text-danger">Error loading masters metadata: <%= e.message %></p>
+    <% masters_info = { crosswalk_attrs: [], readonly_attrs: [], temporary_master_ids: [] } %>
+  <% end %>
+
+  <label>resource name</label>
+  <p class="master-record-resource-name">
+    <code><%= object_instance.resource_name %></code>
+  </p>
+
+  <label>database table</label>
+  <p>
+    <code><%= [object_instance.schema_name, object_instance.table_name].compact.join('.') %></code>
+  </p>
+
+  <p>
+    <%= link_to link_label_open_in_new('search data'),
+                "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}",
+                target: '_blank' %>
+  </p>
+
+  <div>
+    <div>
+      <label>crosswalk fields</label>
+      <ul class="list-unstyled">
+        <% masters_info[:crosswalk_attrs].each do |attr| %>
+          <li>
+            <code><%= attr %></code>
+            <% if attr.in?(masters_info[:readonly_attrs]) %>
+              <span class="label label-info" title="Read-only in UI">readonly</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+
+      <div>
+        <label>crosswalk field labels</label>
+        <%= link_to link_label_open_in_new('app configuration'),
+                    admin_app_configurations_path(filter: { name: 'crosswalk field labels' }),
+                    target: '_blank',
+                    class: 'admin-page-link' %>
+        <pre><code><%= app_config_text(:crosswalk_field_labels, alt_user: current_admin.matching_user).presence || 'not set' %></code></pre>
+      </div>
+    </div>
+    <div>
+      <label>temporary master IDs</label>
+      <p>
+        <code><%= masters_info[:temporary_master_ids].join(', ') %></code>
+      </p>
+      <p class="help-block">
+        These master IDs are reserved for temporary / anonymous sessions with
+        limited user access controls.
+      </p>
+
+      <label>estimated record count</label>
+      <p>
+        <% begin %>
+          <%= number_with_delimiter(Master.count) %>
+        <% rescue StandardError => e %>
+          <em>Unable to get count: <%= e.message %></em>
+        <% end %>
+      </p>
+    </div>
+    <div>
+      <label>create master with resource</label>
+      <p>
+        <%= link_to link_label_open_in_new('app configuration'),
+                    admin_app_configurations_path(filter: { name: 'create master with' }),
+                    target: '_blank',
+                    class: 'admin-page-link' %>
+        sets new master block to show 
+        <code><%= app_config_text(:create_master_with, alt_user: current_admin.matching_user).presence || 'no resource' %></code>
+        form when create master link clicked
+      </p>
+    </div>
+  </div>
+
+  <%# Model field listing %>
+  <% fields = object_instance.fields %>
+  <% if fields.present? %>
+    <label>fields (<%= fields.length %>)</label>
+    <table class="table table-condensed table-striped master-records-def-details__fields-table">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Null</th>
+          <th>Primary Key</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% fields.sort_by(&:name).each do |col| %>
+          <tr>
+            <td><code><%= col.name %></code></td>
+            <td><%= col.sql_type %></td>
+            <td><%= col.null ? 'yes' : 'no' %></td>
+            <td><%= col.name == 'id' ? 'yes' : '' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p><em>No columns found — table may not be available in this environment.</em></p>
+  <% end %>
+
+</div>

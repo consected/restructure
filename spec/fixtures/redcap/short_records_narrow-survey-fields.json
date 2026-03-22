@@ -1,7 +1,7 @@
 [
   {
     "record_id": "1",
-    "redcap_survey_identifier": "",
+    "redcap_survey_identifier": "121",
     "q2_survey_timestamp": "[not completed]",
     "dob": "",
     "current_weight": "",
@@ -33,11 +33,11 @@
     "f57": "",
     "dd": "",
     "yes_or_no": "",
-    "test_complete": "0"
+    "test_complete": "2"
   },
   {
     "record_id": "4",
-    "redcap_survey_identifier": "",
+    "redcap_survey_identifier": "124",
     "q2_survey_timestamp": "[not completed]",
     "dob": "1998-04-16",
     "current_weight": "",
@@ -73,13 +73,13 @@
   },
   {
     "record_id": "14",
-    "redcap_survey_identifier": "",
+    "redcap_survey_identifier": "1214",
     "q2_survey_timestamp": "[not completed]",
     "dob": "2019-08-02",
     "current_weight": "234",
     "smoketime___pnfl": "0",
     "smoketime___dnfl": "0",
-    "smoketime___anfl": "0",
+    "smoketime___anfl": "1",
     "smoke_start": "",
     "smoke_stop": "",
     "smoke_curr": "",
@@ -109,7 +109,7 @@
   },
   {
     "record_id": "19",
-    "redcap_survey_identifier": "",
+    "redcap_survey_identifier": "1219",
     "q2_survey_timestamp": "[not completed]",
     "dob": "1971-02-17",
     "current_weight": "300",
@@ -145,7 +145,7 @@
   },
   {
     "record_id": "32",
-    "redcap_survey_identifier": "",
+    "redcap_survey_identifier": "1232",
     "q2_survey_timestamp": "[not completed]",
     "dob": "",
     "current_weight": "",

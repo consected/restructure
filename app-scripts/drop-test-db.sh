@@ -13,22 +13,37 @@
 # USE_PG_UNAME - If USE_PG_HOST is set, optionally specify the database user (default: postgres)
 
 DB_BASE_NAME=${DB_BASE_NAME:=restr}
+DBNUM=${DBNUM:=${TEST_ENV_NUMBER}}
+DB_NAME_PREFIX="${DB_BASE_NAME}${TEST_ENV_SET}_test"
+
+export PGOPTIONS='--client-min-messages=warning'
 
 function drop() {
 
-  DBNAME=${DB_BASE_NAME}_test${DBNUM}
+  DBNAME=${DB_NAME_PREFIX}${DBNUM}
+  echo "Dropping: ${DBNAME}"
+
   APPENV=test
   SCHEMA_NAME=ml_app
   DBOWNER=$(whoami)
 
-  if [ "${USE_PG_HOST}" ]; then
-    USE_PG_UNAME=${USE_PG_UNAME:=postgres}
-    psql -c "drop database $DBNAME" -U ${USE_PG_UNAME} -h "${USE_PG_HOST}"
+  if [ "${USE_PG_HOST}" ] || [ "${USE_PG_UNAME}" ]; then
+    export USE_PG_UNAME=${USE_PG_UNAME:=postgres}
+    PSQL_ARGS="-U ${USE_PG_UNAME}"
+    if [ "${USE_PG_HOST}" ]; then
+      PSQL_ARGS="${PSQL_ARGS} -h ${USE_PG_HOST}"
+    fi
+    psql -c "drop database $DBNAME" $PSQL_ARGS > /dev/null
   else
-    sudo -u postgres psql -c "drop database $DBNAME;"
+    sudo -u postgres psql -c "drop database $DBNAME;" > /dev/null
   fi
 
 }
+
+# Clean up the temporary nfs_store directories
+rm -rf /var/tmp/nfs_store_tmp*
+rm -rf /var/tmp/nfs_store_test*
+
 
 if [ -z $1 ]; then
   PARALLEL=$(nproc)
@@ -36,11 +51,11 @@ else
   PARALLEL=$1
 fi
 
-if [ -z ${PARALLEL} ]; then
-  echo "Single drop"
+if [ -z "${PARALLEL}" ] || [ "${PARALLEL}" == '1' ]; then
+  echo "Single drop: ${DB_NAME_PREFIX}"
   drop
 else
-  echo "Drop ${PARALLEL} databases"
+  echo "Drop ${PARALLEL} databases: ${DB_NAME_PREFIX}<n>"
   for i in $(seq 1 ${PARALLEL}); do
     if [ ${i} == 1 ]; then
       DBNUM=''
@@ -50,3 +65,4 @@ else
     drop
   done
 fi
+

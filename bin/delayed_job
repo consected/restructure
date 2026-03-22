@@ -1,5 +1,22 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environment'))
+# Ensure daemons gem doesn't break IO such as Dalli
+# From https://github.com/collectiveidea/delayed_job/issues/1133#issuecomment-1710282863
+
+require 'delayed_job'
+require 'delayed_job_active_record'
 require 'delayed/command'
+
+module LoadRailsAfterRunProc
+  def self.included(base)
+    after_fork_method = base.method(:after_fork)
+    base.define_singleton_method :after_fork do |*args|
+      # after Daemons.run_proc method
+      require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environment'))
+      after_fork_method.call(*args)
+    end
+  end
+end
+
+Delayed::Worker.include(LoadRailsAfterRunProc)
 Delayed::Command.new(ARGV).daemonize

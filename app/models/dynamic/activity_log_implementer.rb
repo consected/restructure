@@ -163,13 +163,19 @@ module Dynamic
       def creatables(current_user, def_record: nil, current_activity: nil, include_references: true)
         def_record ||= definition
         res = {}
+        orig_elt = current_activity['extra_log_type']
 
         def_record.option_configs.each do |c|
           result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name)
-          result &&= c.calc_if(:creatable_if, current_activity) if current_activity
+          if current_activity
+            current_activity['extra_log_type'] = c.name&.to_s
+            result &&= c.calc_if(:creatable_if, current_activity)
+          end
           result &&= !(c.view_options && c.view_options[:only_create_as_reference]) unless include_references
           res[c.name] = result ? c.resource_name : nil
         end
+
+        current_activity['extra_log_type'] = orig_elt
 
         res
       end
@@ -183,7 +189,7 @@ module Dynamic
     # This method represents the resource_name for the extra_log_type
     # The resource name for the total process is the class method {resource_name}
     def resource_name
-      extra_log_type_config.resource_name
+      extra_log_type_config&.resource_name
     end
 
     def human_name
@@ -319,7 +325,7 @@ module Dynamic
       self.class.creatables master.current_user,
                             def_record: current_definition,
                             current_activity: self,
-                            include_references: include_references
+                            include_references:
     end
 
     def update_action
@@ -348,7 +354,7 @@ module Dynamic
 
       elsif res.nil?
         @latest_item ||= master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
-        res = (user_id == master.current_user.id && @latest_item.id == id)
+        res = user_id == master.current_user.id && @latest_item.id == id
         unless res
           Rails.logger.info "Can not edit activity_log_type #{resname} since it has been overridden by a later item"
           return
@@ -363,7 +369,7 @@ module Dynamic
       return @can_create unless @can_create.nil?
 
       unless extra_log_type_config
-        msg = "can_create? does not have an extra_log_type_config for #{self}"
+        msg = "can_create? does not have an extra_log_type_config for #{self} -- #{extra_log_type}"
         Rails.logger.warn msg
         Rails.logger.warn "extra_log_type: #{extra_log_type}"
         Rails.logger.warn "option_configs_names: #{self.class.definition.option_configs_names}"
@@ -406,7 +412,7 @@ module Dynamic
     end
 
     def current_user
-      master.current_user
+      master&.current_user
     end
 
     def current_user=(cu)

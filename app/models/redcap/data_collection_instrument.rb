@@ -20,7 +20,7 @@ module Redcap
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      Redcap::CaptureDataCollectionInstrumentsJob.perform_later(project_admin, project_admin.current_admin)
+      Redcap::CaptureDataCollectionInstrumentsJob.perform_later(project_admin)
       project_admin.record_job_request('setup job: instruments')
     end
 
@@ -39,8 +39,8 @@ module Redcap
           name = record[:instrument_name]
           label = record[:instrument_label]
 
-          res = project_admin.redcap_data_collection_instruments.active.find_or_create_by(name: name)
-          res.update!(label: label, current_admin: project_admin.current_admin) if res.label != label
+          res = project_admin.redcap_data_collection_instruments.active.find_or_create_by(name:)
+          res.update!(label:, current_admin: project_admin.current_admin) if res.label != label
           item_ids << res.id
         end
 

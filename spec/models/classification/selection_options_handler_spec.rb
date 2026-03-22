@@ -24,7 +24,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     config0 = Classification::SelectionOptionsHandler.selector_with_config_overrides
 
     ::ActivityLog.define_models
-    @activity_log = al = ActivityLog.enabled.first
+    @activity_log = al = ActivityLog::PlayerContactPhone.definition
 
     cleanup_matching_activity_logs(al.item_type, al.rec_type, al.process_name, excluding_id: al.id)
 
@@ -82,7 +82,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   end
 
   it 'substitutes labels into data attributes for dynamic defintions' do
-    ::ActivityLog.define_models
+    ActivityLog.define_models
 
     @master.current_user = @user
     player_contact = @master.player_contacts.create(rec_type: :phone, data: '(123) 456-7890')
@@ -115,7 +115,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al_def.force_regenerate = true
     al_def.updated_at = DateTime.now # force a save
     al_def.save!
-    ::ActivityLog.refresh_outdated
+    ActivityLog.refresh_outdated
     al_def.reload
     al_def.force_option_config_parse
 
@@ -125,7 +125,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create, user: @user
-    ::ActivityLog.refresh_outdated
+    ActivityLog.refresh_outdated
 
     sleep 2
     al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'one',
@@ -143,7 +143,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   end
 
   it 'gets labels for specific model, field name and value' do
-    ::ActivityLog.define_models
+    ActivityLog.define_models
 
     @master.current_user = @user
     player_contact = @master.player_contacts.create(rec_type: :phone, data: '(123) 456-7890')
@@ -186,7 +186,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
 
-    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
 
@@ -208,7 +208,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   end
 
   it 'gets labels for select_from field' do
-    ::ActivityLog.define_models
+    ActivityLog.define_models
 
     @master.current_user = @user
     setup_access :player_contacts, user: @user
@@ -274,6 +274,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     setup_access :activity_log__player_contact_elt__step_3, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
+    expect(player_contact.current_user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_elt__step_3))
     sleep 2
     al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
                                                                   select_who: 'user',
@@ -282,7 +283,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                                                                   tag_select_allowed: ['def', 'ghi'],
                                                                   tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id])
 
-    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
 
@@ -302,7 +303,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     algs = {
       'select_call_direction' => {
-        'one' => { "name": 'This is one' }
+        'one' => { name: 'This is one' }
       },
       'select_next_step' => {},
       'select_who' => {
@@ -327,7 +328,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   end
 
   it 'gets labels for redcap select fields' do
-    ::ActivityLog.define_models
+    ActivityLog.define_models
 
     @master.current_user = @user
     setup_access :player_contacts, user: @user
@@ -411,7 +412,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                                                                   tag_select_record_id_from_player_contacts: [player_contact.id, player_contact3.id],
                                                                   select_result: 'r-two')
 
-    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
 
@@ -431,7 +432,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     algs = {
       'select_call_direction' => {
-        'rcone' => { "name": 'This is rcone' }
+        'rcone' => { name: 'This is rcone' }
       },
       'select_next_step' => {},
       'select_who' => {

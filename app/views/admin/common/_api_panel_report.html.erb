@@ -1,0 +1,148 @@
+<%#
+  API Panel for Reports
+  Displays the report API endpoint paths, search attributes, and curl examples.
+
+  Locals:
+    object_instance - the Report record (same as @report in the report admin context)
+%>
+<h4>API 
+  <%= link_to(
+          '',
+          help_page_path(
+            library: :api_reference,
+            section: 'main',
+            subsection: 'README',
+            display_as: :embedded
+          ),
+          class: 'glyphicon glyphicon-question-sign',
+          data: { remote: true, 
+                  toggle: 'collapse', 
+                  target: '#help-sidebar',
+                  'working-target': '#help-sidebar-body' }
+        ) %>
+</h4>
+<% report = object_instance %>
+<% if report.persisted? %>
+  <div class="api-panel">
+    <label>resource name</label>
+    <p><code><%= report.alt_resource_name %></code></p>
+
+    <label>endpoints</label>
+    <div class="api-panel__endpoint">
+      <p><strong>JSON</strong></p>
+      <p>
+        <code>GET</code>
+        <code>/reports/<%= report.alt_resource_name %>.json</code>
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
+           title="Copy to clipboard"
+           data-copy-text="/reports/<%= report.alt_resource_name %>.json"></a>
+      </p>
+    </div>
+    <div class="api-panel__endpoint">
+      <p><strong>CSV</strong></p>
+      <p>
+        <code>GET</code>
+        <code>/reports/<%= report.alt_resource_name %>.csv</code>
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
+           title="Copy to clipboard"
+           data-copy-text="/reports/<%= report.alt_resource_name %>.csv"></a>
+      </p>
+    </div>
+    <div class="api-panel__endpoint">
+      <p><strong>Text</strong></p>
+      <p>
+        <code>GET</code>
+        <code>/reports/<%= report.alt_resource_name %>.text</code>
+        <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
+           title="Copy to clipboard"
+           data-copy-text="/reports/<%= report.alt_resource_name %>.text"></a>
+      </p>
+    </div>
+
+    <label>url search attributes</label>
+    <p class="report-item-url-search-attrs">
+      <%
+        configs = report.search_attributes_config.configurations
+        sa = configs.keys.map { |k| [k, ''] }
+        sa << ['_report_id_', ''] if sa.empty?
+        sa = sa.to_h
+
+        plain_attrs = report.report_options.view_options.use_plain_attribute_names
+        unless plain_attrs
+          sa = sa.to_query('search_attrs')
+        else
+          sa = sa.to_query
+        end
+      %>
+      <code>?<%= sa %></code>
+      <a class="api-panel__copy-btn copy-block-button glyphicon glyphicon-copy"
+         title="Copy to clipboard"
+         data-copy-text="?<%= sa %>"></a>
+    </p>
+    <p><label>use plain attributes</label> <%= !!plain_attrs %></p>
+    <p class="help-block">based on options configuration:</p>
+    <%
+      pa_options = <<~YAML
+        view_options:
+          use_plain_attribute_names: #{!!plain_attrs}
+      YAML
+    %>
+    <pre><%= pa_options %></pre>
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+        title="Copy to clipboard"
+        data-copy-text="<%= ERB::Util.html_escape(pa_options) %>"></a>
+
+    <p><label>return formats</label></p>
+    <p class="help-block">Return JSON, CSV, or plain text based on the endpoint path extension (<code>.json</code>, <code>.csv</code>, <code>.txt</code>).
+      See the *options* help
+      <%= link_to(
+          '',
+          help_page_path(
+            library: :admin_reference,
+            section: 'reports',
+            subsection: 'detailed_options',
+            display_as: :embedded
+          ),
+          class: 'glyphicon glyphicon-question-sign',
+          data: { remote: true, 
+                  toggle: 'collapse', 
+                  target: '#help-sidebar',
+                  'working-target': '#help-sidebar-body' }
+        ) %>
+       for specific formatting related to <b>plain_text_options</b> and <b>json_options</b>.</p>
+
+    <label>curl examples</label>
+    <div class="api-panel__curl-section">
+      <p><strong>JSON</strong></p>
+      <% curl_json = api_report_curl_example(report, format: 'json', sa: sa) %>
+      <pre class="api-panel__curl-block"><%= curl_json %></pre>
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+         title="Copy to clipboard"
+         data-copy-text="<%= ERB::Util.html_escape(curl_json) %>"></a>
+
+      <p><strong>CSV</strong></p>
+      <% curl_csv = api_report_curl_example(report, format: 'csv', sa: sa) %>
+      <pre class="api-panel__curl-block"><%= curl_csv %></pre>
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+         title="Copy to clipboard"
+         data-copy-text="<%= ERB::Util.html_escape(curl_csv) %>"></a>
+
+      <p><strong>text</strong></p>
+      <% curl_text = api_report_curl_example(report, format: 'txt', sa: sa) %>
+      <pre class="api-panel__curl-block"><%= curl_text %></pre>
+      <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+         title="Copy to clipboard"
+         data-copy-text="<%= ERB::Util.html_escape(curl_text) %>"></a>
+
+    </div>
+
+    <label>save trigger usage</label>
+    <% trigger_yaml = api_report_save_trigger_example(report, sa: sa) %>
+    <pre class="api-panel__save-trigger-block"><%= ERB::Util.html_escape(trigger_yaml) %></pre>
+    <a class="api-panel__copy-btn copy-block-button in-block glyphicon glyphicon-copy"
+       title="Copy to clipboard"
+       data-copy-text="<%= ERB::Util.html_escape(trigger_yaml) %>"></a>
+  </div>
+<% else %>
+  <p>API definitions are not available until the report is saved.</p>
+<% end %>

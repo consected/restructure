@@ -1,6 +1,11 @@
 <%
-  dm = DynamicModel.active_model_configurations.where(category: category)
-  dm = dm.select {|m| m.resource_name.to_sym.in? true_master_viewables}
+  @memo_categories ||= {}
+  dm = @memo_categories[category]
+  unless dm
+    dm = DynamicModel.active_model_configurations.where(category: category)
+    dm = dm.select {|m| m.resource_name.to_sym.in? true_master_viewables}
+    @memo_categories[category] = dm
+  end
 %>
 <div class="row panel-body panel-with-sublists dynamic-models-panel">
   <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: master_viewables, category: category, force_load: true, panel: panel } %>

@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seeds"
-require "#{::Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seeds"
+require "#{Rails.root}/spec/support/user_support"
 
 module MasterSupport
   include ::UserSupport
 
   def seed_database
+    return if @seed_database_done
+
     Rails.logger.info 'Starting seed setup in Master Support'
     # puts "#{Time.now} Starting seed setup in Master Support"
     SeedSupport.setup
+    @seed_database_done = true
   end
 
   def add_default_app_config(app_type, config_name, config_value)
@@ -25,6 +28,8 @@ module MasterSupport
   end
 
   def objects_symbol
+    return unless defined? object_class
+
     object_class.to_s.ns_underscore.pluralize.to_sym
   end
 
@@ -95,7 +100,7 @@ module MasterSupport
     master.current_user = user
     master.save!
 
-    setup_access
+    setup_access objects_symbol unless objects_symbol.nil? || objects_symbol == :activity_logs
     setup_access :trackers unless user.has_access_to? :create, :table, :trackers
 
     @master_id = master.id
@@ -193,10 +198,10 @@ module MasterSupport
     ext = opt[:external_id_attribute]
     admin = opt[:current_admin] || Admin.active.first
 
-    r = if name != :all
-          ExternalIdentifier.where('name=? or external_id_attribute=?', name, ext)
-        else
+    r = if name == :all
           ExternalIdentifier.active
+        else
+          ExternalIdentifier.where('name=? or external_id_attribute=?', name, ext)
         end
     r.each do |a|
       # Also clean up any associated activity logs

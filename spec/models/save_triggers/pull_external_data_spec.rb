@@ -1,5 +1,14 @@
 require 'rails_helper'
 
+# Tests for SaveTriggers::PullExternalData save trigger.
+# Verifies HTTP requests to external services, including:
+# - GET/POST requests with XML and JSON formats (existing)
+# - All HTTP verbs supported by Net::HTTP (issue #928):
+#   body-sending (put, patch, lock, mkcol, propfind, proppatch, unlock),
+#   no-body (head, delete, options, trace, copy, move)
+# - Response code handling, error whitelisting, local_data storage
+# - send_data config alias for post_data
+# - Submitted request data (data, url, method) saved to save_trigger_results (issue #950)
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
   include ModelSupport
   include ActivityLogSupport
@@ -162,7 +171,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       )
       .to_return(status: 200, body: '{"requestId":"6346#87d796ac7","result":[{"id":1081,"name":"Annual Revenue","description":"Run this Campaign at least once as a Batch Campaign, so it can score all the existing leads in your database. Then you can either schedule it to run every night, or you can add the following two triggers: \"Lead is Created\" AND \"Data Value Changes\" in the \"Annual Revenue\" Field.","type":"batch","programName":"OP-Scoring-Demographic","programId":1014,"workspaceName":"Default","createdAt":"2014-06-27T02:58:28Z","updatedAt":"2016-03-24T08:27:50Z","active":false}],"success":true}', headers: {})
 
-    stub_request(:post, "#{api_uri}/rest/v1/leads/push.json?access_token=123123123-ad12-1234-99ce-893645:ab")
+    stub_request(:post, "#{api_uri}/rest/v1/leads/push.json")
       .with(
         body: /\{"programName":"HCI Participant Import","lookupField":"email","source":"HCIQ Zeus","reason":"Changed status","input":\[\{"email":"phil-test12@consected.com","firstName":"Test FN","lastName":"Test LN","hCIStage":"Invitation Email","hCIStageUpdatedAt":".*","hCIQLink":".*"\}\]\}/,
         headers: {
@@ -170,7 +179,8 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           'Accept-Encoding' => /.*/,
           'Host' => /.*/,
           'User-Agent' => /.*/,
-          'Content-Type' => 'application/json'
+          'Content-Type' => 'application/json',
+          'Authorization' => 'Bearer 123123123-ad12-1234-99ce-893645:ab'
         }
       )
       .to_return(
@@ -178,6 +188,35 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         headers: {},
         body: '{"requestId": "71c5#187e7d99f13","result": [{"id": 30412, "status": "updated"}],"success": true}'
       )
+
+    # Stubs for testing all HTTP verbs (issue #928)
+    test_api_url = 'https://rspec-test.example.com/api/resource'
+    test_json_body = ->(method) { { result: 'success', method: }.to_json }
+    test_headers = {
+      'Accept' => /.*/,
+      'Accept-Encoding' => /.*/,
+      'Host' => /.*/,
+      'User-Agent' => /.*/
+    }
+
+    # Body-sending verbs
+    %i[put patch lock mkcol propfind proppatch unlock].each do |method|
+      stub_request(method, test_api_url)
+        .with(headers: test_headers.merge('Content-Type' => 'application/json'))
+        .to_return(status: 200, body: test_json_body.call(method.to_s), headers: {})
+    end
+
+    # No-body verbs that return content
+    %i[delete options trace copy move].each do |method|
+      stub_request(method, test_api_url)
+        .with(headers: test_headers)
+        .to_return(status: 200, body: test_json_body.call(method.to_s), headers: {})
+    end
+
+    # HEAD returns empty body
+    stub_request(:head, test_api_url)
+      .with(headers: test_headers)
+      .to_return(status: 200, body: '', headers: {})
   end
 
   before :example do
@@ -206,7 +245,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     @trigger.perform
 
     expect(@al.notes).to be_present
-    expect(@al.notes).to start_with('{"PubmedArticleSet"=>{"PubmedArticle"=>')
+    expect(@al.notes).to start_with('{"PubmedArticleSet" => {"PubmedArticle" =>')
   end
 
   it 'pulls xml from a url and saves to a JSON field' do
@@ -242,7 +281,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     @trigger.perform
 
     expect(@al.notes).to be_present
-    expect(@al.notes).to start_with('{"header"=>{"type"=>')
+    expect(@al.notes).to start_with('{"header" => {"type" =>')
   end
 
   it 'posts query string to a url' do
@@ -331,10 +370,11 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
           }
         },
         to: {
-          url: "#{api_uri}/rest/v1/leads/push.json?access_token={{save_trigger_results.identity.access_token}}",
+          url: "#{api_uri}/rest/v1/leads/push.json",
           format: 'json',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer {{save_trigger_results.identity.access_token}}'
           }
         },
         post_data: {
@@ -471,5 +511,315 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect do
       @trigger.perform
     end.not_to raise_error
+  end
+
+  # Tests for all HTTP verbs (issue #928)
+  context 'with body-sending HTTP verbs' do
+    %w[put patch lock mkcol propfind proppatch unlock].each do |http_method|
+      it "sends data with #{http_method} method" do
+        config = {
+          this1: {
+            data_field: 'notes',
+            data_field_format: 'json',
+            method: http_method,
+            to: {
+              url: 'https://rspec-test.example.com/api/resource',
+              format: 'json',
+              headers: { 'Content-Type': 'application/json' }
+            },
+            send_data: { key: 'value' }
+          }
+        }
+
+        @trigger = SaveTriggers::PullExternalData.new(config, @al)
+        @trigger.perform
+
+        expect(@al.notes).to be_present
+        dnotes = JSON.parse(@al.notes)
+        expect(dnotes['result']).to eq 'success'
+        expect(dnotes['method']).to eq http_method
+      end
+    end
+  end
+
+  context 'with no-body HTTP verbs' do
+    %w[delete options trace copy move].each do |http_method|
+      it "sends request with #{http_method} method" do
+        config = {
+          this1: {
+            data_field: 'notes',
+            data_field_format: 'json',
+            method: http_method,
+            from: {
+              url: 'https://rspec-test.example.com/api/resource',
+              format: 'json'
+            }
+          }
+        }
+
+        @trigger = SaveTriggers::PullExternalData.new(config, @al)
+        @trigger.perform
+
+        expect(@al.notes).to be_present
+        dnotes = JSON.parse(@al.notes)
+        expect(dnotes['result']).to eq 'success'
+        expect(dnotes['method']).to eq http_method
+      end
+    end
+  end
+
+  context 'with head HTTP verb' do
+    it 'sends a head request and handles empty body' do
+      config = {
+        this1: {
+          method: 'head',
+          response_code_field: 'select_result',
+          from: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json',
+            allow_empty_result: true
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@trigger.response_code).to eq 200
+      expect(@al.select_result).to eq '200'
+    end
+  end
+
+  context 'with body-sending HTTP verbs using local_data' do
+    it 'stores put response in save_trigger_results' do
+      config = {
+        this1: {
+          local_data: 'put_response',
+          data_field: 'notes',
+          data_field_format: 'json',
+          method: 'put',
+          to: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json',
+            headers: { 'Content-Type': 'application/json' }
+          },
+          send_data: { key: 'updated_value' }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['put_response']).to be_present
+      expect(@al.save_trigger_results['put_response']['result']).to eq 'success'
+      expect(@al.save_trigger_results['put_response_http_response_code']).to eq 200
+    end
+  end
+
+  context 'with unsupported HTTP method' do
+    it 'raises an error for an invalid method' do
+      config = {
+        this1: {
+          data_field: 'notes',
+          method: 'invalid_method',
+          from: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect do
+        @trigger.perform
+      end.to raise_error(FphsException, /pull_external_data method 'invalid_method' is not supported/)
+    end
+  end
+
+  # Tests for submitted request data saved to save_trigger_results (issue #950)
+  context 'with submitted_request saved to save_trigger_results' do
+    it 'saves submitted request data, url, and method for a POST with send_data' do
+      config = {
+        this1: {
+          local_data: 'post_result',
+          data_field: 'notes',
+          data_field_format: 'json',
+          method: 'post',
+          to: {
+            url: "#{api_uri}/rest/v1/leads/push.json",
+            format: 'json',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer 123123123-ad12-1234-99ce-893645:ab'
+            }
+          },
+          send_data: {
+            programName: 'HCI Participant Import',
+            lookupField: 'email',
+            source: 'HCIQ Zeus',
+            reason: 'Changed status',
+            input: [
+              {
+                email: 'phil-test12@consected.com',
+                firstName: 'Test FN',
+                lastName: 'Test LN',
+                hCIStage: 'Invitation Email',
+                hCIStageUpdatedAt: 'now()',
+                hCIQLink: 'https://consected.com'
+              }
+            ]
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      submitted = @al.save_trigger_results['post_result_submitted_request']
+      expect(submitted).to be_present
+      expect(submitted['method']).to eq 'post'
+      expect(submitted['url']).to eq "#{api_uri}/rest/v1/leads/push.json"
+      expect(submitted['data']).to be_a Hash
+      expect(submitted['data']['programName']).to eq 'HCI Participant Import'
+      expect(submitted['data']['lookupField']).to eq 'email'
+      expect(submitted['data']['input'].first['email']).to eq 'phil-test12@consected.com'
+    end
+
+    it 'saves submitted request data for a PUT with send_data' do
+      config = {
+        this1: {
+          local_data: 'put_result',
+          data_field: 'notes',
+          data_field_format: 'json',
+          method: 'put',
+          to: {
+            url: 'https://rspec-test.example.com/api/resource',
+            format: 'json',
+            headers: { 'Content-Type': 'application/json' }
+          },
+          send_data: { key: 'updated_value' }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      submitted = @al.save_trigger_results['put_result_submitted_request']
+      expect(submitted).to be_present
+      expect(submitted['method']).to eq 'put'
+      expect(submitted['url']).to eq 'https://rspec-test.example.com/api/resource'
+      expect(submitted['data']).to eq({ 'key' => 'updated_value' })
+    end
+
+    it 'saves submitted request with nil data for a GET request' do
+      config = {
+        this1: {
+          local_data: 'get_result',
+          data_field: 'notes',
+          from: {
+            url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=14760269&retmode=json',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      submitted = @al.save_trigger_results['get_result_submitted_request']
+      expect(submitted).to be_present
+      expect(submitted['method']).to eq 'get'
+      expect(submitted['url']).to eq 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=14760269&retmode=json'
+      expect(submitted['data']).to be_nil
+    end
+
+    it 'saves submitted request form data for a POST form request' do
+      config = {
+        this1: {
+          local_data: 'auth_result',
+          method: 'post',
+          to: {
+            url: "#{api_uri}#{client_auth_url}",
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      submitted = @al.save_trigger_results['auth_result_submitted_request']
+      expect(submitted).to be_present
+      expect(submitted['method']).to eq 'post'
+      expect(submitted['url']).to eq "#{api_uri}#{client_auth_url}"
+      # post_form with no form config sends empty form data
+      expect(submitted['data']).to eq({})
+    end
+
+    it 'saves submitted request for each step in a multi-step request' do
+      config = {
+        this1: {
+          local_data: 'identity',
+          method: 'post',
+          to: {
+            url: "#{api_uri}#{client_auth_url}",
+            format: 'json'
+          }
+        },
+        this2: {
+          local_data: 'campaign_result',
+          data_field: 'notes',
+          data_field_format: 'json',
+          if: {
+            all: {
+              this: {
+                save_trigger_results: {
+                  element: 'identity_http_response_code',
+                  value: 200
+                }
+              }
+            }
+          },
+          from: {
+            url: "#{api_uri}/rest/v1/campaigns/1081.json?access_token={{save_trigger_results.identity.access_token}}",
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      # First step - POST form
+      submitted1 = @al.save_trigger_results['identity_submitted_request']
+      expect(submitted1).to be_present
+      expect(submitted1['method']).to eq 'post'
+      expect(submitted1['url']).to eq "#{api_uri}#{client_auth_url}"
+
+      # Second step - GET request
+      submitted2 = @al.save_trigger_results['campaign_result_submitted_request']
+      expect(submitted2).to be_present
+      expect(submitted2['method']).to eq 'get'
+      expect(submitted2['url']).to eq "#{api_uri}/rest/v1/campaigns/1081.json?access_token=123123123-ad12-1234-99ce-893645:ab"
+      expect(submitted2['data']).to be_nil
+    end
+
+    it 'does not save submitted request when local_data is not configured' do
+      config = {
+        this1: {
+          data_field: 'notes',
+          from: {
+            url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=14760269&retmode=json',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results).not_to have_key('_submitted_request')
+    end
   end
 end

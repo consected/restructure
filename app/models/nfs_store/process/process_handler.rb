@@ -132,7 +132,6 @@ module NfsStore
       #
       # Set the status of #last_process_name_run to *name*
       # for all container files
-      # rubocop:disable Style/AccessorMethodName
       def set_container_file_statuses(name)
         self.class.set_container_file_statuses(name, container_files)
       end
@@ -147,7 +146,6 @@ module NfsStore
           container_file.save!
         end
       end
-      # rubocop:enable Style/AccessorMethodName
 
       def self.job_class(name)
         classname = "#{name}_job".camelize
@@ -213,6 +211,14 @@ module NfsStore
         (cf.current_user || cf.user)&.app_type_id
       end
 
+      #
+      # The current app_type_id of a user for a persisted container file may change over time. Rather than relying on
+      # the value set at some arbitrary time, we use the default app_type_id for the current context.
+      # @return [Integer] app_type_id
+      def self.default_app_type_id
+        Settings.nfs_store_default_app_type_id
+      end
+
       # @see ProcessHandler#setup_container_file_current_user
       def setup_container_file_current_user(container_file)
         self.class.setup_container_file_current_user(container_file, app_type_id_for_file_user)
@@ -226,6 +232,7 @@ module NfsStore
       def self.setup_container_file_current_user(container_file, in_app_type_id)
         user = container_file.user
         if user.disabled
+          Rails.logger.warn "Job container file user (#{user.id}) is disabled, using batch user instead for app type: #{in_app_type_id}"
           orig_user = user
           user = User.use_batch_user(in_app_type_id)
           has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
@@ -234,8 +241,18 @@ module NfsStore
                   "Job container file user (#{orig_user.id}) is disabled and batch user (#{User.batch_user}) does not have an " \
                   "nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
           end
+        elsif user.app_type_id != default_app_type_id
+          Rails.logger.warn "ProcessHandler - setting user #{user.id} app_type_id from #{user.app_type_id} to #{default_app_type_id}"
+          user.update!(app_type_id: default_app_type_id)
         end
+
         container_file.current_user = user
+        return user if container_file.current_role_name
+
+        Rails.logger.info "Setting current role name for user #{user.id} in app type #{in_app_type_id}"
+        file_path, role_name = container_file.file_path_and_role_name
+        container_file.current_role_name = role_name
+        user
       end
     end
   end

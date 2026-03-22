@@ -30,11 +30,11 @@ module CalcActions
     include Common
 
     # We won't use a query join when referring to tables based on these keys
-    NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
+    NonJoinTableNames = %i[this parent embedded_item referring_record top_referring_record this_references parent_references
                            parent_or_this_references user master condition value hide_error invalid_error_message
-                           role_name reference].freeze
+                           role_name reference ids_referencing and_latest_matches].freeze
 
-    ReturnTypes = %w[return_value return_value_list return_result].freeze
+    ReturnTypes = %w[return_value return_value_list return_result return_all_results].freeze
 
     included do
       attr_accessor :condition_scope
@@ -59,6 +59,9 @@ module CalcActions
       #     table_name: ...
 
       action_conf.each do |condition_type, condition_config_array|
+        # Handle shortcuts
+        condition_type, condition_config_array = handle_shortcuts(condition_type, condition_config_array)
+
         # If the condition definition is not an array, make it one
         condition_config_array = [condition_config_array] unless condition_config_array.is_a? Array
 
@@ -100,6 +103,9 @@ module CalcActions
 
           # We can end the loop, unless the last result was a success
           break unless @loop_res
+        rescue StandardError => e
+          details = log_results(log_level: nil)
+          raise e, "Error in do_calc_action_if: #{e}\nDetails:\n#{details&.join("\n")}", e.backtrace
         end
 
         final_res &&= @loop_res
@@ -133,17 +139,24 @@ module CalcActions
       # For extra_conditions related to non query conditions, apply them directly
       if extra_conditions.present? && extra_conditions[0]&.strip&.present?
         # Handle replacement of AND or OR into the generated query conditions SQL
-        extra_conditions[0].gsub(BoolTypeString, bool)
+        extra_conditions[0].gsub!(BoolTypeString, bool)
         @condition_scope = @condition_scope.where(extra_conditions)
       end
 
-      @condition_scope = @condition_scope.order(id: :desc).limit(1) unless @this_val_where
+      if @and_latest_matches
+        tname = @and_latest_matches.first.first
+        latest_id = @condition_scope.select("#{tname}.id and_match_res_id").order(and_match_res_id: :desc).first&.and_match_res_id
+        @and_latest_matches[tname][:id] = latest_id
+        @condition_scope = @base_query.where(@and_latest_matches)
+      else
+        @condition_scope = @condition_scope.order(id: :desc).limit(1) unless @this_val_where
+      end
 
       # Return the usable @condition_scope
       @condition_scope
     end
 
-    # Get any requested return_value, return_value_list or return_result
+    # Get any requested return_value, return_value_list, return_result or return_all_results
     # The results are set in the instance attribute #this_val
     # The instance variable @this_val_where defines the return requirements, or may be
     # nil if there is no requirement to return anything
@@ -155,7 +168,11 @@ module CalcActions
       # The condition scope must be ordered in reverse, as always, and if we
       # only are requesting a single result then limit 1, otherwise get all results for the list
       cs = @condition_scope.order(id: :desc)
-      cs = cs.limit(1) if return_value_from_query? || return_result_from_query?
+      if return_value_from_query? || return_result_from_query?
+        cs = cs.limit(1)
+        # Clean up the current value to avoid issues
+        self.this_val = nil
+      end
       first_cond_res = cs.first
 
       # If a result was found process the returns, otherwise continue
@@ -197,6 +214,13 @@ module CalcActions
         # by id to get a clean result
         rquery = rquery.select("#{tv_tn}.*")
         self.this_val = first_res.class.find(rquery.first.id)
+      elsif return_all_results_from_query?
+        raise "return_result clean table name is blank for (#{@this_val_where[:table_name]})" if tv_tn.blank?
+
+        # Get the return_result instance by getting the first result from the query, then finding the instance
+        # by id to get a clean result
+        rquery = rquery.select("#{tv_tn}.*").reload
+        self.this_val = first_res.class.where(id: rquery.pluck(:id)).reload
       else
         # Run the results query and get either a single result or a list
         rvals = rquery.pluck("#{tn}.#{fn}")
@@ -243,6 +267,9 @@ module CalcActions
 
         val = attribute_from_instance(from_instance, val_item_value)
 
+      elsif val_item_key == :embedded_item
+        from_instance = @current_instance.embedded_item
+        val = from_instance && attribute_from_instance(from_instance, val_item_value)
       elsif val_item_key == :referring_record && !val_item_value.is_a?(Hash)
         # Get a literal value from the current instance's referring_record.
         # This is a record referring to the current instance.
@@ -272,6 +299,38 @@ module CalcActions
         from_instance = @current_instance.reference
         val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
+      elsif val_item_key == :ids_referencing
+        # Get an array of ids for a specified set of "from" items
+        # where the items reference a "target" item, based on a filter
+        # This is different from `this_references` since "from" is unrelated
+        # to the current instance
+        # id:
+        #   ids_referencing:
+        #     target:
+        #       external_items:
+        #         rec_type: val
+        #     from:
+        #       activity_log_items:
+        #         extra_log_type: act1
+        #         return: return_all_results
+        to_record_type = val_item_value[:target].first.first.to_s.singularize
+        filter_by = val_item_value[:target].first.last
+        from_item_def = val_item_value[:from]
+
+        ca = ConditionalActions.new from_item_def, @current_instance
+        from_items = ca.get_this_val
+        unless from_items.present?
+          raise FphsException,
+                'ids_referencing from items was not found - '\
+                'ensure return: return_all_results is specified and at least one result is returned'
+        end
+
+        refs = from_items.map do |item|
+          item.save_trigger_results = current_instance.save_trigger_results
+          item.current_user = current_instance.current_user
+          ModelReference.find_references(item, to_record_type:, filter_by:, active: true).pluck(:from_record_id)
+        end
+        val = refs.flatten.compact
       elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
         val = references_values(val_item_key, val_item_value, ref_table_name)
       elsif val_item_key == :user
@@ -392,9 +451,7 @@ module CalcActions
 
         # Get the specified attribute's value from each of the model references
         # Generate an array, allowing the conditions to be IN any of these
-        model_refs.each do |mr|
-          val << mr.to_record.attributes[att]
-        end
+        val = model_refs.map { |mr| mr.to_record.attributes[att] }
       end
       val
     end
@@ -406,10 +463,20 @@ module CalcActions
     def generate_query_condition_values(val, table_name, field_name)
       return if val.in?(ReturnTypes)
       return if handle_condition_tag(val, table_name, field_name)
+      return if handle_and_matches(val, table_name, field_name)
 
       @condition_values[table_name] ||= {}
       val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
       @condition_values[table_name][field_name] = dynamic_value(val)
+    end
+
+    def handle_and_matches(val, table_name, field_name)
+      return unless field_name == :and_latest_matches
+
+      table_name = table_name.id_underscore
+
+      vals = val.transform_values { |v| dynamic_value(v) }
+      @and_latest_matches = { table_name => vals }
     end
 
     #
@@ -419,6 +486,10 @@ module CalcActions
 
       condition = val[:condition]
       return unless condition
+
+      # Special cases
+      condition = '= ANY' if condition == 'in?'
+      condition = '= ANY REV' if condition == 'include?'
 
       # If we have a non-equals condition specified, generate the extra conditions
       if condition.in?(ValidExtraConditions)
@@ -504,6 +575,8 @@ module CalcActions
         mode = 'return_result'
       elsif expected_value_requests_return? :value_list, val
         mode = 'return_value_list'
+      elsif expected_value_requests_return? :all_results, val
+        mode = 'return_all_results'
       end
 
       # If a return mode was specified, set this up to be used in the query
@@ -511,9 +584,9 @@ module CalcActions
 
       @this_val_where = {
         assoc: join_table_name,
-        field_name: field_name,
+        field_name:,
         table_name: ModelReference.record_type_to_ns_table_name(join_table_name).to_sym,
-        mode: mode
+        mode:
       }
     end
 
@@ -540,15 +613,40 @@ module CalcActions
     # Setup the condition config for this loop's condition
     # @param [Hash] condition_config
     def setup_condition_config(condition_config)
-      @condition_config = condition_config
+      extras = {}
+      condition_config.each do |orig_condition_type, condition_config_array|
+        condition_type = orig_condition_type
+        condition_type, condition_config_array, changed = handle_shortcuts(condition_type, condition_config_array)
+        next unless changed
+
+        condition_config.delete(orig_condition_type)
+        extras[condition_type] = condition_config_array
+      end
+      condition_config.merge!(extras) if extras.present?
+
+      @condition_config = condition_config.dup
+
+      iem = @condition_config.delete(:invalid_error_message)
       # Check if the first key is a selection type. If it is, wrap it in a
       # {this: original hash} to make it easier to process consistently
-      @condition_config = { this: @condition_config } if selection_type?(@condition_config.first.first)
+      this_condition_config = if selection_type?(@condition_config.first.first)
+                                self.top_level_error_above = top_level_error
+                                add_this = true
+                                { this: @condition_config }
+                              else
+                                @condition_config
+                              end
+      self.top_level_error = iem || top_level_error
 
-      @non_query_conditions = NonQueryCondition.new(current_instance: current_instance,
-                                                    condition_config: @condition_config,
-                                                    return_failures: return_failures,
-                                                    return_this: return_this)
+      @non_query_conditions = NonQueryCondition.new(current_instance:,
+                                                    condition_config: this_condition_config,
+                                                    return_failures:,
+                                                    return_this:,
+                                                    top_level_error:,
+                                                    top_level_error_above:)
+
+      @condition_config[:invalid_error_message] = iem if iem
+      @condition_config = this_condition_config if add_this
       @condition_config
     end
 
@@ -566,19 +664,30 @@ module CalcActions
       @sub_conditions = {}
 
       @condition_config.each do |c_table, t_conds|
+        c_table = @current_instance.class.definition.resource_name if c_table == :definition_resources
         join_table_name = c_table.to_sym
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         if selection_type?(table_name)
           # Nested conditions are ignored, since they are
           # handled directly in the condition processing logic
-
+        elsif c_table == :invalid_error_message
+          self.top_level_error_above ||= top_level_error
+          self.top_level_error ||= t_conds
+          @non_query_conditions.top_level_error = top_level_error
+          @non_query_conditions.top_level_error_above = top_level_error_above
         else
           @non_query_conditions.table = table_name
           t_conds.each do |field_name, val|
-            next if field_name == :invalid_error_message
+            if field_name == :invalid_error_message
+              # self.top_level_error_above = top_level_error
+              # self.top_level_error = val
+              # @non_query_conditions.top_level_error = top_level_error
+              # @non_query_conditions.top_level_error_above = top_level_error_above
+              next
+            end
 
-            if val.is_a?(Hash) && !val.key?(:element)
+            if val.is_a?(Hash) && !val.key?(:element) && !val.key?(:calculate)
               # Since the conditional value is actually a hash, we need to
               # get the value to be matched from another referenced record (or this)
               # Generate the query condition to do this
@@ -735,6 +844,7 @@ module CalcActions
       merge_failures(@condition_type => @condition_values) unless @res_q
 
       @res_q ||= @non_query_conditions.condition_type_any
+      @skip_merge ||= @non_query_conditions.skip_merge
       merge_failures(@condition_type => @non_query_conditions.conditions) unless @res_q
 
       @cond_res = @res_q
@@ -818,8 +928,10 @@ module CalcActions
         next unless st
 
         ca = ConditionalActions.new({ c_type => t_conds }, current_instance, current_scope: @condition_scope,
-                                                                             return_failures: return_failures,
-                                                                             return_this: return_this)
+                                                                             return_failures:,
+                                                                             return_this:,
+                                                                             top_level_error:,
+                                                                             top_level_error_above:)
         res_a = ca.calc_action_if
 
         if return_first_false
@@ -857,29 +969,103 @@ module CalcActions
       @this_val_where[:mode] == 'return_result'
     end
 
-    # Logging of results to aid debugging
-    def log_results
-      return if Rails.env.production?
+    # Does the condition request the return of the instance as a result?
+    def return_all_results_from_query?
+      @this_val_where[:mode] == 'return_all_results'
+    end
 
-      begin
-        Rails.logger.debug "**#{@orig_cond_type}***********************************************************************"
-        Rails.logger.debug "this instance: #{@current_instance.id}"
-        Rails.logger.debug "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
-                           " - @orig_loop_res: #{@orig_loop_res}"
-        Rails.logger.debug @condition_config
-        Rails.logger.debug @non_query_conditions&.conditions
-        Rails.logger.debug @base_query.to_sql if @base_query
-        Rails.logger.debug @condition_scope.to_sql if @condition_scope
-        Rails.logger.debug '*******************************************************************************************'
-      rescue StandardError => e
-        Rails.logger.warn "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
-                          " - @orig_loop_res: #{@orig_loop_res}"
-        Rails.logger.warn @condition_config
-        Rails.logger.warn @join_tables
-        Rails.logger.warn JSON.pretty_generate(@action_conf)
-        Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
-        raise e
+    # Allow special shortcut markup to simplify common conditions.
+    # Simply replace these with the full condition definition ahead of processing
+    def handle_shortcuts(condition_type, condition_config_array)
+      return condition_type, condition_config_array unless condition_type && condition_config_array
+
+      changed = true
+      case condition_type
+      when :has_created_activity
+        condition_type = :all_completed_activity
+        condition_config_array = [
+          definition_resources: {
+            extra_log_type: condition_config_array
+          }
+        ]
+      when :has_not_created_activity
+        condition_type = :not_any_completed_activity
+        condition_config_array = [
+          definition_resources: {
+            extra_log_type: condition_config_array
+          }
+        ]
+      else
+        changed = false
       end
+
+      [condition_type, condition_config_array, changed]
+    end
+
+    #
+    # Get the current user for the current instance.
+    # @return [User|nil]
+    def current_user
+      @current_instance&.current_user
+    end
+
+    #
+    # Logging of results to aid debugging
+    # @param [Symbol|nil] log_level to use for regular logging, or nil to just return the details
+    # @return [Array] of message details
+    def log_results(log_level: :debug)
+      return if Rails.env.production? && log_level == :debug
+
+      details = []
+      begin
+        details << '*************************************************************************'
+        details << "original condition type: #{@orig_cond_type}"
+        details << "this instance class: #{@current_instance.class.name}"
+        details << "this instance: #{@current_instance.id}"
+        if @current_instance.respond_to?(:extra_log_type)
+          details << "extra log type: #{@current_instance.extra_log_type}"
+        end
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
+                           " - @orig_loop_res: #{@orig_loop_res}"
+        details << "current user: #{current_user&.email} - " \
+                   "in app type: #{current_user&.app_type&.name}"
+        details << 'condition_config:'
+        details << String.yaml_dump(@condition_config)
+        details << 'non_query_conditions:'
+        begin
+          details << String.yaml_dump(@non_query_conditions&.conditions)
+        rescue StandardError
+          nil
+        end
+        if @base_query
+          begin
+            details << @base_query.to_sql
+          rescue StandardError => e
+            details << "Base query to_sql causes error: #{e}"
+          end
+        end
+        if @condition_scope
+          begin
+            details << @condition_scope.to_sql
+          rescue StandardError => e
+            details << "Condition scope to_sql causes error: #{e}"
+          end
+        end
+        details << 'full conditions:'
+        details << String.yaml_dump(@action_conf)
+        details << '*******************************************************************************************'
+        Rails.logger.send log_level, details.join("\n") if log_level
+      rescue StandardError => e
+        details << "@condition_type: #{@condition_type} - @loop_res: #{@loop_res} - @cond_res: #{@cond_res}" \
+                          " - @orig_loop_res: #{@orig_loop_res}"
+        details << @condition_config
+        details << @join_tables
+        details << JSON.pretty_generate(@action_conf)
+        details << "Failure in calc_actions: #{e}\n#{e.short_string_backtrace}"
+        Rails.logger.warn details.join("\n")
+        raise e, "Failure in log_results: #{e}", e.backtrace
+      end
+      details
     end
   end
 end

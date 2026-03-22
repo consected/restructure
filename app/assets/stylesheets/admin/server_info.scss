@@ -12,3 +12,29 @@
     font-family: monospace;
   }
 }
+
+// BEM-named classes for rails log viewer
+.rails-log { 
+
+  &__row {
+    margin: 0;
+  }
+
+  &__code-container {
+    width: auto;
+    display: block;
+    margin: 20px;
+    font-family: monospace;
+    font-size: 94%;
+  }
+
+  &__listing {
+    width: auto;
+    white-space: pre-wrap;
+    margin-bottom: 0;
+  }
+
+  &__common-searches {
+    margin-top: 1em;
+  }
+}

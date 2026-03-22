@@ -1,0 +1,10 @@
+# Save Trigger: Each options
+          each:
+            value: # list of literal values, triple curly substitution returning a list, or hash conditional result returning a list
+          do:
+            - <trigger 1> # a trigger configuration such as update_this:
+            - <trigger 2>
+          if: # optionally specify a condition to skip a whole iteration. Individual trigger ifs are still available.
+          # The iterator index and value can be accessed inside the triggers with:
+          # - {{save_trigger_results.iterator_index}}
+          # - {{save_trigger_results.iterator_value}}

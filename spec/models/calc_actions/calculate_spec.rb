@@ -10,6 +10,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
   def setup_config(confy)
     config = YAML.safe_load(confy).deep_symbolize_keys
     @al.reset_model_references
+    @al2.reset_model_references
     config
   end
 
@@ -22,12 +23,12 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     setup_access :activity_log__player_contact_phones
     setup_access :addresses
-    setup_access :activity_log__player_contact_phone__primary
-    setup_access :activity_log__player_contact_phone__blank
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type
 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
 
     @al2 = create_item
     @al0 = create_item
@@ -420,6 +421,116 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res.calc_action_if).to be false
   end
 
+  it 'uses definition_resource as an identifier for an association' do
+    m = @al.master
+    m.current_user = @user
+
+    conf = {
+      all: {
+        definition_resources: {
+          extra_log_type: @al.extra_log_type
+        }
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+  end
+
+  it 'uses has_created_activity to check for an extra_log_type in this activity log having been done' do
+    m = @al.master
+    m.current_user = @user
+
+    conf = {
+      has_created_activity: @al.extra_log_type
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      has_created_activity: '_does_not_exist_'
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        this: {
+          id: @al.id
+        },
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        has_created_activity: '_does_not_exist_'
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    val = res.calc_action_if
+    expect(val).to be false
+
+    conf = {
+      not_any: {
+        has_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+  end
+
+  it 'uses has_not_created_activity to check for an extra_log_type in this activity log not having been done' do
+    m = @al.master
+    m.current_user = @user
+
+    conf = {
+      has_not_created_activity: @al.extra_log_type
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      has_not_created_activity: '_does_not_exist_'
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        has_not_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        has_not_created_activity: '_does_not_exist_'
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    val = res.calc_action_if
+    expect(val).to be true
+
+    conf = {
+      not_any: {
+        has_not_created_activity: @al.extra_log_type
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+  end
+
   it 'checks if nested conditions work' do
     m = @al.master
     m.current_user = @user
@@ -738,7 +849,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-    # Need all: before named table
+    # Automatically add all: before named table
     conf = {
       # Negate the nested result
       not_all_dms: {
@@ -765,11 +876,14 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     }
 
     res = ConditionalActions.new conf, @al
+    fin = nil
     expect do
-      res.calc_action_if
-    end.to raise_error FphsException
+      fin = res.calc_action_if
+    end.not_to raise_error
 
-    # Need all: before named table
+    expect(fin).to be_falsey
+
+    # Automatically add all: before named table
     conf = {
       # Negate the nested result
       not_all_dms: {
@@ -797,9 +911,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     res = ConditionalActions.new conf, @al
     expect do
-      res.calc_action_if
-    end.to raise_error FphsException
+      fin = res.calc_action_if
+    end.not_to raise_error
 
+    expect(fin).to be_falsey
     # Check that calc_query_conditions handles nested any conditions OK
     conf = {
 
@@ -1265,10 +1380,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     conf = setup_config(confy)
 
     return_failures = {}
-    res = ConditionalActions.new conf, @al, return_failures: return_failures
+    res = ConditionalActions.new(conf, @al, return_failures:)
     cai = res.calc_action_if
-    expect(cai).to be(true), "calc_action_if failed #{ { return_failures: return_failures,
-                                                         confy: confy,
+    expect(cai).to be(true), "calc_action_if failed #{ { return_failures:,
+                                                         confy:,
                                                          al: @al,
                                                          al1: @al1,
                                                          zip: "#{a1.zip} for #{a1}" } }"
@@ -1507,7 +1622,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     a = res.calc_action_if
     expect(a).to be(false),
-                 "calc_action_if failed - #{{ confy: confy, city: @al.master.addresses.first.city, data: @al.master.player_contacts.first.data }}"
+                 "calc_action_if failed - #{{ confy:, city: @al.master.addresses.first.city, data: @al.master.player_contacts.first.data }}"
   end
 
   it 'handles deep references' do
@@ -1608,6 +1723,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     EOF_YAML
 
     conf = setup_config(confy)
+    @alnor.reset_model_references
 
     # We have two references
     expect(@alnor.model_references.count).to eq 3 # two addresses and one activity log
@@ -1678,6 +1794,116 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     res_if = res.calc_action_if
 
     expect(res_if).to be true
+  end
+
+  it 'allows references between arbitrary instances to be checked' do
+    m = @al.master
+
+    m.current_user = @user
+
+    a1 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 0,
+                             rec_type: 'home',
+                             source: 'nflpa'
+
+    a2 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 10,
+                             rec_type: 'home',
+                             source: 'nflpa'
+
+    a3 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 10,
+                             rec_type: 'home',
+                             source: 'nflpa'
+
+    @al.extra_log_type_config.references = {
+      address: {
+        address: {
+          from: 'this',
+          add: 'many'
+        }
+      },
+      player_contact: {
+        player_contact: {
+          from: 'master',
+          add: 'many'
+        }
+      }
+    }
+
+    @al2.extra_log_type_config.references = {
+      address: {
+        address: {
+          from: 'this',
+          add: 'many'
+        }
+      },
+      player_contact: {
+        player_contact: {
+          from: 'master',
+          add: 'many'
+        }
+      }
+    }
+
+    ModelReference.create_with @al, a1, force_create: true
+    ModelReference.create_with @al2, a2, force_create: true
+    ModelReference.create_with @al, a3, force_create: true
+
+    expect(@al.model_references.length).to eq 2
+    expect(@al2.model_references.length).to eq 1
+    expect(ActivityLog::PlayerContactPhone.find_by(select_who: @al.select_who)).to eq @al
+    expect(@al.master_id).to eq @al2.master_id
+    expect(@al0.master_id).to eq @al2.master_id
+    # Does the referenced item work correctly?
+
+    confy = <<~EOF_YAML
+
+      activity_log__player_contact_phones:
+        id:
+          ids_referencing:
+            target:
+              addresses:
+                city: 'portland'
+                zip: '#{a2.zip}'
+            from:
+              activity_log__player_contact_phones:
+                select_who: #{@al2.select_who}
+                return: return_all_results
+        return: return_result
+    EOF_YAML
+
+    conf = setup_config(confy)
+
+    res = ConditionalActions.new conf, @al0
+    expect(res.get_this_val).to eq @al2
+
+    confy = <<~EOF_YAML
+
+      activity_log__player_contact_phones:
+        id:
+          ids_referencing:
+            target:
+              addresses:
+                city: 'portland'
+                zip: '#{a3.zip}'
+            from:
+              activity_log__player_contact_phones:
+                select_who: #{@al.select_who}
+                return: return_all_results
+        return: return_result
+    EOF_YAML
+
+    conf = setup_config(confy)
+
+    res = ConditionalActions.new conf, @al0
+    expect(res.get_this_val).to eq @al
   end
 
   it 'checks IS (NOT) NULL conditions' do
@@ -2076,6 +2302,47 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res.calc_action_if).to be true
   end
 
+  describe 'calculate functions' do
+    it 'calculates the sum of several attributes' do
+      al = create_item
+      al.update! select_who: '2', current_user: @user, master_id: al.master_id
+
+      conf = {
+        all: {
+          this: {
+            dummy: {
+              calculate: {
+                sum: {
+                  attributes: %w[id user_id]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, al
+      result = ca.calc_action_if
+      expect(result).to be false
+
+      conf = {
+        all: {
+          this: {
+            calculate: {
+              sum: {
+                attributes: %w[id user_id]
+              }
+            }
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, al
+      result = ca.get_this_val
+      expect(result).to eq(@user.id + al.id)
+    end
+  end
+
   describe 'hash elements' do
     it 'compares a hash element' do
       al = create_item
@@ -2333,9 +2600,57 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       ca = ConditionalActions.new conf, @al
       res = ca.get_this_val
       expect(res).to eq @al.select_who
+
+      conf = {
+        all: {
+          this: {
+            select_who: 'return_value'
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
+
+      conf = {
+        all: {
+          this: {
+            id: @al.id,
+            select_who: 'return_value'
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
     end
 
     it 'returns the return_value attribute from whichever subcondition is matched first' do
+      # Alternatively return one value or another
+      conf = {
+
+        any: {
+          all_1: {
+            activity_log__player_contact_phones: {
+              id: @al2.id + 100,
+              select_who: 'return_value'
+            }
+          },
+          all_2: {
+            activity_log__player_contact_phones: {
+              id: @al.id,
+              select_who: 'return_value'
+            }
+          }
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.get_this_val
+      expect(res).to eq @al.select_who
+
       # Alternatively return one value or another
       conf = {
 
@@ -2530,12 +2845,103 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     end
   end
 
+  describe 'result based on an attribute used to form the query resulting in it matching a value' do
+    before :example do
+      @al_elt = []
+      4.times do |i|
+        @al_elt << create_item(select_who: "who_#{i}", select_call_direction: "dir_#{i}")
+      end
+    end
+
+    it 'is matched in a simple reference and the last record matched has a specified attribute value' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be true
+    end
+
+    it 'is fails match on a simple reference and the last record matched has a specified attribute value' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_2
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be false
+    end
+
+    it 'is matched in a simple reference and the last record matched has specified attribute values' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+              select_call_direction: dir_3
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be true
+    end
+
+    it 'is fails to match a simple reference and the last record matched has specified attribute values' do
+      confy = <<~END_YAML
+        all:
+          activity_log__player_contact_phones:
+            select_who:
+              - who_0
+              - who_1
+              - who_2
+              - who_3
+            and_latest_matches:
+              select_who: who_3
+              select_call_direction: dir_2
+      END_YAML
+
+      conf = setup_config(confy)
+
+      ca = ConditionalActions.new conf, @al
+      res = ca.calc_action_if
+      expect(res).to be false
+    end
+  end
+
   describe 'getting referring record attributes and checking existence' do
     before :each do
       create_user
       setup_access :activity_log__player_contact_phones
       setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
-      setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+      setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type
 
       # create_master
 
@@ -2658,6 +3064,49 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(res).to eq @alref
     end
 
+    it 'checks a condition based on finding a table ignoring masters' do
+      conf = {
+        all: {
+          no_masters: {},
+          player_contacts: {
+            data: @alref2.master.player_contacts.first.data
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @alref2
+      res.calc_action_if
+      expect(res.calc_action_if).to be true
+
+      conf = {
+        all: {
+          no_masters: {},
+          player_contacts: {
+            data: 'bad data'
+          }
+        }
+      }
+      res = ConditionalActions.new conf, @alref2
+      res.calc_action_if
+      expect(res.calc_action_if).to be false
+    end
+
+    it 'returns a master.id when looking up MSID in the crosswalk' do
+      msid = (Master.all.order(msid: :desc).first&.msid || 10) + 1
+      new_master = Master.create!(msid: msid, current_user: @alref2.user)
+      conf = {
+        masters: {
+          msid: msid,
+          id: 'return_value'
+        },
+        no_masters: {}
+      }
+
+      ca = ConditionalActions.new conf, @alref2
+
+      res = ca.get_this_val
+      expect(res).to eq new_master.id
+    end
+
     it 'returns the first record referring to this one' do
       conf = {
         referring_record: {
@@ -2683,6 +3132,53 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       res = ca.get_this_val
       expect(res).to eq @alref
+    end
+
+    it 'returns the embedded item' do
+      m = @al.master
+      m.current_user = @user
+
+      a1 = m.addresses.create! city: 'Portland',
+                               state: 'OR',
+                               zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                               rank: 0,
+                               rec_type: 'home',
+                               source: 'nflpa'
+
+      @al.extra_log_type_config.references = {
+        address: {
+          address: {
+            from: 'master',
+            add: 'one_to_master'
+          }
+        }
+      }
+
+      ModelReference.create_with @al, a1, force_create: true
+
+      expect(@al.model_references.length).to eq 1
+
+      conf = {
+        embedded_item: {
+          update: 'return_result'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq a1
+
+      conf = {
+        embedded_item: {
+          zip: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq a1.zip
     end
   end
 
@@ -2726,7 +3222,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       m.current_user = @user
       data = "(516)123-7612-#{DateTime.now.to_f}"
       @pc = m.player_contacts.first
-      @pc.update! data: data, rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc.update! data:, rec_type: 'phone', rank: 10, source: 'nflpa'
 
       expect(@new_al.extra_log_type).not_to be nil
       expect(m.activity_log__player_contact_phones.where(extra_log_type: 'primary').count).to be > 0
@@ -3028,7 +3524,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       m.current_user = @user
       data = "(516)123-7612-#{DateTime.now.to_f}"
       @pc = m.player_contacts.first
-      @pc.update! data: data, rec_type: 'phone', rank: 10, source: 'nflpa'
+      @pc.update! data:, rec_type: 'phone', rank: 10, source: 'nflpa'
       @pc.master.player_contacts.where.not(id: @pc.id).update_all(master_id: @junk_master)
 
       expect(@new_al.extra_log_type).not_to be nil
@@ -3392,7 +3888,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     end
 
     it 'finds the user' do
-      expect(User.find_by(email: @alt_user.email)).to be_a User
+      expect(User.find_by(email: @alt_user.email&.downcase)).to be_a User
 
       conf = {
         all: {
@@ -3688,6 +4184,28 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       expect(res).to eq @m2.id
     end
 
+    it 'finds a master record from a crosswalk field' do
+      ms = Master.where.not(msid: nil).limit(3)
+      msid = ms[1].msid
+      mid = ms[1].id
+
+      expect(ms.length).to eq 3
+      expect(msid).not_to be nil
+      expect(ms.pluck(:msid).uniq.length).to eq 3
+
+      conf = {
+        masters: {
+          msid:,
+          id: 'return_value'
+        }
+      }
+
+      ca = ConditionalActions.new conf, @al
+
+      res = ca.get_this_val
+      expect(res).to eq mid
+    end
+
     it 'returns a player record from another master record' do
       conf = {
         masters: {},
@@ -3749,7 +4267,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       expect(res.calc_action_if).to be true
       expect(return_failures).to be_empty
     end
@@ -3764,7 +4282,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       expect(res.calc_action_if).to be false
       expect(return_failures).to eq({ all: { this: { user_id: -999 } } })
     end
@@ -3782,7 +4300,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       expect(res.calc_action_if).to be true
 
       conf = {
@@ -3799,7 +4317,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       expect(res.calc_action_if).to be true
     end
 
@@ -3816,7 +4334,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be false
       expect(return_failures.dig(:all, :this, :user_id)).to eq(invalid_error_message: 'The user had a bad ID')
@@ -3836,7 +4354,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       return_failures = {}
 
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be false
       expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' } } } })
@@ -3855,10 +4373,95 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be false
       expect(return_failures).to eq({ all: { this: { id: { invalid_error_message: 'Something was bad' }, user_id: { invalid_error_message: 'The user had a bad ID' } } } })
+    end
+
+    it 'returns a top level error, overriding those further down the tree' do
+      # Without a top level error it returns the individual results
+      conf = {
+        all: {
+          any: {
+            all_creator: {
+              all: {
+                this: {
+                  user_id: {
+                    user: 'BAD id'
+                  }
+                }
+              },
+              not_any: {
+                this: {
+                  id: @al.id
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new(conf, @al, return_failures:)
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures).to eq({
+                                      all: { this: { all: { this: { user_id: { user: 'BAD id' } } }, any: { this: { all_creator: { all: { this: { user_id: { user: 'BAD id' } } }, not_any: { this: { id: @al.id } } } } }, not_any: { this: { id: @al.id } }, user_id: nil } },
+                                      any: { this: { all_creator: { this: { all: { this: { user_id: { user: 'BAD id' } } }, not_any: { this: { id: @al.id } } } } } },
+                                      not_any: { this: { id: @al.id } }
+                                    })
+
+      # # With a top level error it just returns that
+      # conf = {
+      #   all: {
+      #     any: {
+      #       all_creator: {
+      #         invalid_error_message: 'Top error!',
+      #         all: {
+      #           this: {
+      #             user_id: {
+      #               user: 'BAD id'
+      #             }
+      #           }
+      #         },
+      #         not_any: {
+      #           this: {
+      #             id: @al.id
+      #           }
+      #         }
+      #       }
+      #     }
+      #   }
+      # }
+
+      # return_failures = {}
+      # res = ConditionalActions.new(conf, @al, return_failures:)
+      # b = res.calc_action_if
+      # expect(b).to be false
+      # expect(return_failures).to eq({
+      #                                 all: { this: { top_level_error: { invalid_error_message: 'Top error!' } } },
+      #                                 not_any: { this: { top_level_error: { invalid_error_message: 'Top error!' } } }
+      #                               })
+    end
+
+    it 'returns no error if custom error is set to blank' do
+      conf = {
+        all_creator: {
+          this: {
+            user_id: {
+              user: 'BAD id',
+              invalid_error_message: ''
+            }
+          }
+        }
+      }
+
+      return_failures = {}
+      res = ConditionalActions.new(conf, @al, return_failures:)
+      b = res.calc_action_if
+      expect(b).to be false
+      expect(return_failures.dig(:all, :this, :user_id)).to be nil
     end
 
     it 'returns no custom error if valid (any must match)' do
@@ -3874,7 +4477,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be true
 
@@ -3892,7 +4495,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       }
 
       return_failures = {}
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be true
     end
@@ -3912,7 +4515,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       return_failures = {}
 
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be false
       expect(return_failures).to eq({ any: { this: { id: { invalid_error_message: 'All were bad' } } } })
@@ -3932,7 +4535,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
       return_failures = {}
 
-      res = ConditionalActions.new conf, @al, return_failures: return_failures
+      res = ConditionalActions.new(conf, @al, return_failures:)
       b = res.calc_action_if
       expect(b).to be false
       expect(return_failures).to eq({ any: { this: { user_id: { invalid_error_message: 'The user had a bad ID' } } } })

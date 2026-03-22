@@ -1,5 +1,10 @@
 <div class="dynamic-details-section">
 <% if object_instance.persisted? %>
+  <% unless object_instance.implementation_class_defined?(::DynamicModel, fail_without_exception: true) %>
+    <label>implementation class not ready</label>
+    <p>Using this definition will fail</p>
+  <% end %>
+
   <label>item type name</label>
   <p class="dynamic-item-type">
   <%= object_instance.full_item_type_name %>
@@ -11,13 +16,96 @@
   </p>
 
   <label>database <%= object_instance.table_or_view || '<span class="info-danger">not defined</span>'.html_safe %></label>
+  <%
+    schema_name = object_instance.schema_name.presence || object_instance.schema_name_in_db
+  %>
   <p>
-    <code><%= [object_instance.schema_name, object_instance.table_name].compact.join('.') %></code>
+    <code><%= [schema_name, object_instance.table_name].compact.join('.') %></code>
   </p>
+  
+  <% if object_instance.schema_name.blank? %>
+    <p>The schema name is not specified in the definition.</p>
+    <p>The assumed schema name from the database is: <code><%= object_instance.schema_name_in_db %></code>
+  <% elsif object_instance.table_or_view && object_instance.schema_name != object_instance.schema_name_in_db %>
+  <div class="config-error-block">
+    <p>The schema name in the definition <code><%=object_instance.schema_name%></code> does not match the schema the database is using for the table <code><%= object_instance.schema_name_in_db %></code></p>
+  </div>
+  <div class="help-block">
+    <p>You should consider correcting the schema name in the definition, or checking and moving the table in the database.</p>
+  </div>
+  <% end %>
   <p>
-    <%= link_to link_label_open_in_new('search data'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+    <%= link_to link_label_open_in_new('search data'), "/reports/reference_data__table_data?schema_name=#{schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
                 target: '_blank' %>
   </p>
+  <p>
+    <%= link_to link_label_open_in_new('search data history'), "/reports/reference_data__table_data?schema_name=#{schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.history_table_name}", 
+                target: '_blank' %>
+  </p>
+
+  <%= render partial: 'admin/dynamic_models/est_record_count' %>
+  <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
+
+  <% 
+    # Ensure configurations is loaded
+    object_instance.option_configs unless object_instance.configurations
+    if object_instance.configurations&.dig(:batch_trigger).present?
+  %>
+  <label>batch jobs</label>
+  <p>
+    <% 
+      gid = object_instance.to_global_id.to_s
+      job = Delayed::Job.where('handler LIKE ?', "%#{gid}%").where(queue: 'batch').first
+    %>
+    
+    <% if job.present? %>
+      <span class="job-summary help-block">
+        <strong>next run:</strong> 
+        <span data-format-datetime-local="true"><%= job.run_at&.iso8601 %></span>
+        &nbsp;&nbsp;
+        <strong>status:</strong> 
+        <% if job.failed_at.present? %>
+          <span class="text-danger">Failed at <span data-format-datetime-local="true"><%= job.failed_at&.iso8601 %></span></span>
+        <% else %>
+          <span class="text-success">Active</span>
+        <% end %>
+        &nbsp;&nbsp;
+        <strong>last updated:</strong> 
+        <span data-format-datetime-local="true"><%= job.updated_at&.iso8601 %></span>
+        &nbsp;&nbsp;
+        <%= link_to link_label_open_in_new('view job'), 
+                    admin_job_reviews_path(filter: { queue: 'batch' }, search_attrs: { handler: gid }), 
+                    target: '_blank',
+                    class: 'batch-jobs-link' %>
+      </span>
+    <% end %>
+  </p>
+  <p>
+    <p>
+    <a class="btn btn-primary btn-sm show-in-modal" 
+        data-content-el="#dmdef-run-batch-now-<%=object_instance.id%>" 
+        data-title=""><span class="glyphicon glyphicon-play"></span> Run Batch Now</a>
+        </p>
+    <div id="dmdef-run-batch-now-<%=object_instance.id%>" class="hidden">
+      <h2>This will run immediately on the server and may take some time to complete.</h2>
+      <p>Click Run if you are sure</p>
+      <p>
+        <%= link_to run_batch_now_admin_dynamic_model_path(object_instance), 
+            remote: true,
+            class: 'btn btn-danger btn-sm',
+            method: :post,
+            data: { disable_with: "<span class='glyphicon glyphicon-refresh spinning'></span> Processing..." } do %>
+          <span class="glyphicon glyphicon-play"></span> Run
+        <% end %>
+      </p>
+      <div class="dynamic-model--run-batch-result-container"
+        id="dynamic-model--run-batch-result-container" 
+        data-subscription="dynamic-model--run-batch-result">
+      </div>
+    </div>
+  </p>
+  <% end %>
+
   <% unless object_instance.table_or_view_ready?%>
   <div class="help-block">
   <p>Typically the database table or view associated with a dynamic model is created when the definition is first created (or prior to this if handled manually.)</p>
@@ -27,22 +115,14 @@
   </div>
   <% end %>
 
-  <% 
-  ces = OptionConfigs::ExtraOptions.all_option_configs_notices(object_instance.option_configs)
-  if ces %>
-  <label>configuration errors</label>
-    <div class="config-error-block">
+  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
 
-      <% ces.each do |ce| %>
-          <div>
-            <h4><span class="activity-list-name"><%= ce[:name] %></span> - <%= ce[:type] %></h4>
-            <p><%= ce[:message] %></p>
-            <pre><%= ce[:config_def].to_yaml.sub("---\n",'') %></pre>
-          </div>
-      <% end %>
-    </div>
-  <% end %>
-
+  <%= render partial: 'admin/common_templates/def_uac_summary', 
+             locals: { 
+               object_instance:, 
+               current_app_type_id: current_admin.matching_user&.app_type_id,
+               current_user: current_admin.matching_user
+             } %>
 <% else %>
   <p>
   <label>not yet saved</label>
@@ -62,7 +142,13 @@
   <p><%= "definition : table: +[#{(fields - table_cols).join(" ")}] -[#{(table_cols - fields).join(" ")}]" %><p>
   <% end %>  
 <% end %>
-  <ul class="activity-list">
+
+<label>field definitions</label>
+<p>
+<a href="#field-list-outer-block" id="expand-captions-dialogs">show all dialogs and captions</a>
+</p>
+
+  <ul class="activity-list" id="field-list-outer-block">
     <%= sortable_block "#dynamic_model_field_list", "li" %>
   </ul>
 
@@ -87,5 +173,18 @@
 <% end %>
 <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
 <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
+<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
+<%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
 
+<% # Load the appropriate configurations for showing the form correctly
+   if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? %>
+<%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: object_instance, force: true } %>
+<% end %>
+<%= javascript_tag nonce: true do %>
+  window.setTimeout(function(){
 
+    $('a#expand-captions-dialogs').not('.added-ecs-click-handler').on('click', function() {
+      $('.dfc-field-config-block .dfc-config-name[href$="--labels"], .dfc-field-config-block .dfc-config-name[href$="--caption_before"], .dfc-field-config-block .dfc-config-name[href$="--dialog_before"]').not('[aria-expanded="true"]').click()    
+    }).addClass('added-ecs-click-handler');
+  }, 400);
+<% end %>

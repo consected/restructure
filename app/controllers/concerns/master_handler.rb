@@ -21,7 +21,10 @@ module MasterHandler
     before_action :check_creatable?, only: %i[new create]
     before_action :capture_ref_item, only: %i[create update]
 
-    helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name
+    after_action :check_template_requests unless Rails.env.production?
+
+    helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name,
+                  :current_admin_sample
   end
 
   # Get the index JSON results from cache if the :cache_result param is set,
@@ -30,11 +33,15 @@ module MasterHandler
   # so simply add a parameter like :cache_version => current timestamp to force new data
   def index
     index_res = if params[:cache_result].present?
+                  response.headers['Cache-Control'] = 'max-age=30'
+                  response.headers.delete 'Expires'
+                  return unless stale?(etag: index_cache_key)
+
                   Rails.cache.fetch(index_cache_key) do
-                    retrieve_index
+                    retrieve_index.as_json
                   end
                 else
-                  retrieve_index
+                  retrieve_index.as_json
                 end
 
     render json: index_res
@@ -100,7 +107,7 @@ module MasterHandler
       if object_instance.update(secure_params)
         reload_objects
         handle_additional_updates :update
-        if object_instance.has_multiple_results
+        if object_instance.has_multiple_results && !@assigning_master_to_existing_instance
           @master_objects = object_instance.multiple_results
           index
         else
@@ -145,7 +152,7 @@ module MasterHandler
   # Retrieve the index action JSON from master objects and extended data
   # @return [String] JSON
   def retrieve_index
-    s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
+    s = { objects_name => filter_records.as_json(current_user:), multiple_results: objects_name }
 
     set_objects_instance(@master_objects) # re add_trackers collection
     s.merge!(extend_result)
@@ -195,9 +202,9 @@ module MasterHandler
     end
     upd_ver = Digest::SHA256.hexdigest upd_all.join('>')
 
-    @index_cache_key = params.permit!.to_h
-    @index_cache_key[:_upd_ver] = upd_ver
-    @index_cache_key
+    res = params.permit!.to_h
+    res[:_upd_ver] = upd_ver
+    @index_cache_key = Digest::SHA256.hexdigest(res.to_json)
   end
 
   # Before update and before insert triggers can lead update and create actions to return incorrect
@@ -226,16 +233,24 @@ module MasterHandler
   # The method may be overridden by actual controllers
   # @return [Hash]
   def edit_form_extras
-    dopt = object_instance.class.default_options
+    dopt = @option_type_config || object_instance.class.default_options
     if dopt
       cb = dopt.caption_before
       l = dopt.labels
+      db = dopt.dialog_before
+      vo = dopt.view_options
+      item_list = object_instance.edit_form_field_list
+      sa = dopt.save_action
     end
 
     {
       caption: object_instance.human_name,
       caption_before: cb,
-      labels: l
+      labels: l,
+      dialog_before: db,
+      view_options: vo,
+      item_list:,
+      save_action: sa
     }
   end
 
@@ -263,7 +278,7 @@ module MasterHandler
   end
 
   def item_type_id
-    "#{item_type_us}_id".to_sym
+    :"#{item_type_us}_id"
   end
 
   def item_type_us
@@ -299,8 +314,9 @@ module MasterHandler
 
   def check_creatable?
     handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config, true)
-    return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
+    return if current_admin_sample || object_instance.allows_current_user_access_to?(:create)
 
+    Rails.logger.warn "This item is not creatable by #{current_user&.email || 'unknown user'}: #{object_instance.class.name} - #{object_instance&.attributes}"
     not_creatable
     nil
   end
@@ -337,9 +353,13 @@ module MasterHandler
   # is not used repetitively (potentially breaking the current_user functionality and poor performance)
   def set_me_and_master
     if UseMasterParam.include?(action_name)
-      @master = Master.find(params[:master_id]) unless primary_model.no_master_association
+      @master = Master.find(params[:master_id]) unless primary_model.no_master_association && !params[:master_id]
     else
       object = primary_model.find(params[:id])
+      unless primary_model.no_master_association || object.master_id
+        @assigning_master_to_existing_instance = true
+        object.master = Master.find(params[:master_id])
+      end
       set_object_instance object
       @master = object.master unless primary_model.no_master_association
       @id = object.id
@@ -390,7 +410,16 @@ module MasterHandler
     id = params[:id]
     found_inst = primary_model.find_by_id_or_secondary_key(id)
     set_object_instance found_inst
-    object_instance.master.current_user = current_user unless primary_model.no_master_association
+
+    handle_option_type_config if respond_to?(:handle_option_type_config, true)
+
+    if primary_model.no_master_association
+      object_instance.current_user = current_user
+    elsif object_instance.master.nil?
+      raise FphsException, 'No master set for item'
+    else
+      object_instance.master.current_user = current_user
+    end
     @id = object_instance.id
   end
 
@@ -429,12 +458,32 @@ module MasterHandler
     set_item if defined? set_item
     build_with = nil
 
+    if defined?(setup_default_build_params)
+      # We may need to set default parameters before the build
+      # to ensure we have associations back the the master record set up correctly,
+      # or to set other attributes required for validation.
+      setup_default_build_params
+      set_master_on_build = !!params[:master_id]
+    end
+
     begin
       build_with = secure_params
     rescue StandardError => e
       logger.warn("set_instance_from_build: #{e}")
+      build_with = {}
+    end
+    build_with[:skip_presets] = 'preset_fields' if action_name != 'new'
+    build_with[:current_admin_sample] = true if current_admin_sample
+    unless @is_activity_log_option_type || !respond_to?(:handle_option_type_config, true)
+      handle_option_type_config
+      build_with[:option_type] = @option_type_name if @option_type_name
     end
     set_object_instance @master_objects.build(build_with)
+
+    if set_master_on_build
+      object_instance.master = @master
+      object_instance.current_user = current_user
+    end
 
     object_instance.item_id = @item_id if @item && object_instance.respond_to?(:item_id) && !object_instance.item_id
   end
@@ -559,11 +608,14 @@ module MasterHandler
 
     requested_filtered_ids = pfilter[:resource_id]
     secondary_key_filtered_ids = pfilter[:secondary_key]
+    attr_filter = pfilter[@master_objects.klass.resource_name.to_sym]
     if requested_filtered_ids.present?
       requested_filtered_ids = requested_filtered_ids.split(',').map { |i| i.strip.to_i }
       @master_objects = @master_objects.where(id: requested_filtered_ids)
     elsif secondary_key_filtered_ids.present?
       @master_objects = @master_objects.find_all_by_secondary_key(secondary_key_filtered_ids)
+    elsif attr_filter.present?
+      @master_objects = @master_objects.where(@master_objects.klass.table_name => attr_filter.to_unsafe_h)
     else
       @master_objects
     end
@@ -643,7 +695,7 @@ module MasterHandler
     obj_params = params[rname]
     unless obj_params
       raise FphsException, "No params sent for #{rname} when creating or updating." \
-        "Expect posted data #{rname}[<field_name>]"
+                           "Expect posted data #{rname}[<field_name>]"
     end
 
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable
@@ -663,5 +715,12 @@ module MasterHandler
       ei.send("#{k}=", v)
       secure_params[:embedded_item].delete k
     end
+  end
+
+  def check_template_requests
+    return unless @requested_handlebars_template_count != @retrieved_requested_handlebars_template_count
+
+    raise FphsException,
+          'Template requests not handled properly'
   end
 end

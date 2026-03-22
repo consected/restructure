@@ -3,7 +3,8 @@
 @btn_class = !@click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
 @view_options = @report.report_options.view_options
 @hidden_class = !@report_criteria && @report.auto && !@view_options&.force_show_search_button ? 'hidden' : ''
-@auto_submitter_class = !@report_page ? 'auto-submitter' : ''
+@mrl_search_hidden_class = !@report_criteria && @report.auto && !@view_options&.force_show_search_button || @view_options&.hide_master_results_list_search_button ? 'hidden' : ''
+@auto_submitter_class = (!@report_page || @view_options&.report_auto_submit_on_change) && @view_options&.report_auto_submit_on_change != false ? 'auto-submitter' : ''
 @auto_run_class = !@report_page && @report.auto || @force_run ? 'auto-run' : nil
 %>
 <div class="report-criteria-fields-block">
@@ -11,7 +12,12 @@
         method: :get, 
         class: 'form-formatted search_report', 
         id: "report_query_form", 
-        data: { result_target: "##{@results_target}", preprocessor: 'reports_result' }, 
+        data: { 
+          result_target: "##{@results_target}", 
+          preprocessor: 'reports_result',
+          report_resource_name: @report.resource_name,
+          report_name: @report.name
+        },        
         remote: true do 
   %>
     <% if @report.uses_table_subs? %>
@@ -24,7 +30,7 @@
       <%= render partial: 'reports/criteria/fields' %>
       <%= render partial: 'reports/criteria/inline_search_button_block' %>
     </div>
-    <div class="form-group form-actions clearfix" style="border-color: transparent;">
+    <div class="form-group form-actions clearfix report-criteria__actions">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", '', id: nil%>
       <%= hidden_field_tag  "embed", embedded_report, id: nil%>

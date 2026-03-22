@@ -1,4 +1,4 @@
 module FsException
-  class Action < Exception
+  class Action < StandardError
   end
 end

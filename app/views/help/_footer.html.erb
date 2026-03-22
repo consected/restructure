@@ -4,6 +4,16 @@
       toggle: 'scrollto-target'
     }, 
     class: 'help-scrollto-top' %>
-    &nbsp; 
+    &nbsp;
   <%= render partial: 'help/home_link' %>
+  <% if display_embedded? %>
+    &nbsp;
+    <%
+      new_tab_params = { library: library, section: section, subsection: subsection }
+      new_tab_params[:back_path] = params[:back_path] if params[:back_path].present?
+    %>
+    <%= link_to help_page_path(new_tab_params) + '#open-in-new-tab',
+          title: 'open in new tab',
+          class: 'help-open-in-new-tab' do %><% end %>
+  <% end %>
 </div>

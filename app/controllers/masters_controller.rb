@@ -108,21 +108,58 @@ class MastersController < UserBaseController
 
   def new
     @master = Master.new_master_record current_user
-    render :new
+    
+    # For admin sample forms, render just the form partial without layout
+    if params[:admin_sample] == 'true'
+      render partial: 'form', layout: false
+    else
+      render :new
+    end
   end
 
+  #
+  # Create a master record, optionally with an embedded item and additional
+  # associated records. All records are created within a single database
+  # transaction — if any record fails validation the entire operation rolls back.
+  #
+  # For API (JSON) requests, the request body should be structured as:
+  #
+  #   {
+  #     "master": {
+  #       "embedded_item": { <first create_master_with item attributes> },
+  #       "associations": {
+  #         "<association_name>": {
+  #           "0": { <record attributes> },
+  #           "1": { <record attributes> }
+  #         }
+  #       }
+  #     }
+  #   }
+  #
+  # Association names must match valid Master has_many associations
+  # (e.g. player_contacts, addresses, scantrons, dynamic_model__<table_name>).
+  #
+  # On success returns JSON: { "master": { ... } }
+  # On failure returns JSON: { "message": "Error creating Master Record: ..." }
   def create
-    if Rails.env.test? && params[:commit] == 'Create Empty Master'
-      # Test an edge case that requires a completely empty master record to be created, without Player Info
-      @master = Master.create_master_record current_user, empty: true
-    else
-      # Unfortunately there is no easy way to force the create request to fail for the purposes of testing
-      # Therefore we provide a way to force an apparent failure in the test environment.
-      # This is necessary in order to allow testing of what appears to be a false positive for this action in Brakeman
-      unless Rails.env.test? && params[:testfail] == 'testfail'
-        wep = params[:master].require(:embedded_item) if params[:master]
-        @master = Master.create_master_record current_user, with_embedded_params: wep
+    begin
+      if Rails.env.test? && params[:commit] == 'Create Empty Master'
+        # Test an edge case that requires a completely empty master record to be created, without Player Info
+        @master = Master.create_master_record current_user, empty: true
+      else
+        # Unfortunately there is no easy way to force the create request to fail for the purposes of testing
+        # Therefore we provide a way to force an apparent failure in the test environment.
+        # This is necessary in order to allow testing of what appears to be a false positive for this action in Brakeman
+        unless Rails.env.test? && params[:testfail] == 'testfail'
+          mp = params[:master]
+          wep = mp[:embedded_item] if mp&.key?(:embedded_item)
+          associated = extract_association_params(mp)
+          @master = Master.create_master_record current_user, with_embedded_params: wep,
+                                                              with_associated_params: associated
+        end
       end
+    rescue ActiveRecord::RecordInvalid => e
+      @master_create_error = e.message
     end
 
     respond_to do |format|
@@ -130,16 +167,16 @@ class MastersController < UserBaseController
         if @master&.id
           redirect_to master_path(@master.id), notice: "Created Master Record with ID #{@master.id}"
         else
-          redirect_to new_master_url,
-                      notice: "Error creating Master Record: #{Application.record_error_message @master}"
+          error_msg = @master_create_error || Application.record_error_message(@master)
+          redirect_to new_master_url, notice: "Error creating Master Record: #{error_msg}"
         end
       end
       format.json do
         if @master&.id
           render json: { master: @master }
         else
-          render json: { message: "Error creating Master Record: #{Application.record_error_message @master}" },
-                 status: 400
+          error_msg = @master_create_error || Application.record_error_message(@master)
+          render json: { message: "Error creating Master Record: #{error_msg}" }, status: 400
         end
       end
     end
@@ -165,5 +202,31 @@ class MastersController < UserBaseController
     return true if current_user.can? :create_master
 
     not_authorized
+  end
+
+  #
+  # Extract association params from the master params hash.
+  # Reads from the `associations` key, which namespaces all associated record
+  # params clearly separate from master-level params.
+  # Each key within `associations` must be a valid Master association name.
+  # @param [ActionController::Parameters] master_params - the params[:master] hash
+  # @return [Hash] association_name => nested record params
+  def extract_association_params(master_params)
+    return {} unless master_params&.key?(:associations)
+
+    associations = master_params[:associations]
+    return {} unless associations
+
+    assoc_params = {}
+    all_assocs = Master.get_all_associations
+
+    associations.each_key do |key|
+      key_s = key.to_s
+      next unless all_assocs.include?(key_s)
+
+      assoc_params[key_s] = associations[key]
+    end
+
+    assoc_params
   end
 end

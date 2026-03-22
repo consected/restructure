@@ -12,24 +12,17 @@ class Admin::UserAccessControlsController < AdminController
   end
 
   def filters
-    rns = Admin::UserAccessControl.resource_names_by_type.clone
-    rns.each do |rnt, v|
-      rnl = v.map { |rn| rn.split('__')[0..-2].join('__') + '__%' }.uniq.reject { |rn| rn == '__%' }
-      rns[rnt] += rnl
-      s = rns[rnt]
-      rns[rnt] = s.reject { |r| r.include?('__') }.sort + s.select { |r| r.include?('__') }.sort
-    end
-
     {
       app_type_id: Admin::AppType.all_by_name,
-      resource_name: rns,
+      resource_name: resource_names_filters,
+      resource_type: Admin::UserAccessControl.resource_types.map(&:to_s),
       user_id: User.active.pluck(:id, :email).to_h,
       role_name: Admin::UserRole.active.role_names.sort
     }
   end
 
   def filters_on
-    %i[app_type_id resource_name user_id role_name]
+    %i[app_type_id resource_name resource_type user_id role_name]
   end
 
   def has_access_levels
@@ -48,6 +41,9 @@ class Admin::UserAccessControlsController < AdminController
     {
       app_type_id: {
         'data-filters-select': '#admin_user_access_control_role_name'
+      },
+      resource_type: {
+        'data-filters-select': '#admin_user_access_control_access'
       }
     }
   end
@@ -64,5 +60,19 @@ class Admin::UserAccessControlsController < AdminController
       object_instance.resource_name = Report.resource_name_for_named_report(rn) if rn.present? && !(rn.include? '_')
     end
     true
+  end
+
+  def resource_names_filters
+    ckey = "admin_user_access_control_resource_names-#{Admin::UserAccessControl.latest_update}"
+    Rails.cache.fetch(ckey) do
+      rns = Admin::UserAccessControl.resource_names_by_type.clone
+      rns.each do |rnt, v|
+        rnl = v.map { |rn| rn.split('__')[0..-2].join('__') + '__%' }.uniq.reject { |rn| rn == '__%' }
+        rns[rnt] += rnl
+        s = rns[rnt]
+        rns[rnt] = s.reject { |r| r.include?('__') }.sort + s.select { |r| r.include?('__') }.sort
+      end
+      rns
+    end
   end
 end

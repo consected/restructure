@@ -1,26 +1,6 @@
 # frozen_string_literal: true
 
 class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
-  def self.config_def(if_extras: {})
-    # [
-    #   {
-    #     if: if_extras,
-    #     force_create: 'true to force the creation of a reference and referenced object, independent of user access controls',
-    #     move_this: 'true to move the current instance to the new master',
-    #     with: {
-    #       field_name: 'now()',
-    #       field_name_2: 'literal value',
-    #       field_name_3: {
-    #         this: 'field_name'
-    #       },
-    #       field_name_4: {
-    #         reference_name: 'field_name'
-    #       }
-    #     }
-    #   }
-    # ]
-  end
-
   def initialize(config, item)
     super
 
@@ -31,10 +11,9 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
     config = @config
     vals = {}
 
-    if config[:if]
-      ca = ConditionalActions.new config[:if], @item
-      return unless ca.calc_action_if
-    end
+    created_masters = @item.save_trigger_results['created_masters'] ||= []
+
+    return created_masters unless if_evaluates(config[:if])
 
     config[:with]&.each do |fn, def_val|
       if def_val.is_a? Hash
@@ -55,6 +34,8 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
         @new_master =
           Master.create_master_record @item.current_user, empty: true, extra_ids: vals
 
+      @item.save_trigger_results['created_masters'] << @new_master
+
       if move_this
         new_master_id = @new_master.id
 
@@ -66,7 +47,9 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
         @item.action_name = 'show'
 
         ei = @item.embedded_item
-        if ei
+        if ei &&
+           !(ei.class.respond_to?(:no_master_association) && ei.class.no_master_association) &&
+           ei.respond_to?(:master_id) && ei.respond_to?(:master)
           ei.master = @new_master
           ei.update_columns(master_id: new_master_id)
           mr = @item.model_references.select do |mra|
@@ -79,5 +62,7 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
 
       end
     end
+
+    created_masters
   end
 end

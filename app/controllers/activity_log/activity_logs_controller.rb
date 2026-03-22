@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ActivityLog::ActivityLogsController < UserBaseController
+  before_action :set_extra_type_in_secure_params, only: :new
+
   include MasterHandler
   include ParentHandler
   include EmbeddedItemHandler
@@ -14,6 +16,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   def template_config
     Application.refresh_dynamic_defs
+
+    cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key("activity-log-template-config-#{@item_type}-#{@id_list}"))
+    response.headers['Cache-Control'] = 'max-age=30'
+    response.headers.delete 'Expires'
+    return unless stale?(etag: cache_key)
 
     refresh_embedded_item_for @instance_list
 
@@ -61,11 +68,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     cb.merge! extras_caption_before
 
     {
-      caption: caption,
+      caption:,
       caption_before: cb,
       labels: l,
       view_options: vo,
-      item_list: item_list,
+      item_list:,
       item_flags_after: :notes,
       save_action: sa
     }
@@ -143,10 +150,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
       al_type: params_namespace,
       item_type: item_type_us,
       item_types_name: @item_type,
-      item_id: item_id,
-      item_data: item_data,
+      item_id:,
+      item_data:,
       @item_type => items,
-      creatables: creatables
+      creatables:
     }
   end
 
@@ -168,6 +175,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def set_item
     return @item if @item && @implementation_class
 
+    @master ||= object_instance.master
     raise 'Failed to get @master' unless @master
 
     if params[:item_id].blank?
@@ -197,7 +205,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     @item_id = @item.id
     #  return if the Activity Log does not work with this item_type / rec_type combo
     @implementation_class = ActivityLog.implementation_class_for @item
-    return not_found unless @implementation_class
+    not_found unless @implementation_class
   end
 
   #
@@ -230,7 +238,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def handle_option_type_config
     etp = params[:extra_type]
     etp = params[:extra_log_type] if etp.blank?
-    etp = object_instance.extra_log_type if etp.blank?
+    etp = object_instance&.extra_log_type if etp.blank?
+    @is_activity_log_option_type = true
 
     etp = if etp.blank?
             object_instance ? :primary : :blank_log
@@ -247,13 +256,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
     @option_type_name = etp
     # Get the options that were current when the form was originally created, or the current
     # options if this is a new instance
-    @option_type_config = if object_instance.persisted?
+    @option_type_config = if object_instance&.persisted?
                             object_instance.option_type_config
                           else
                             @implementation_class.definition.option_type_config_for(etp)
                           end
     @option_type_attr_name = :extra_log_type
-    object_instance.extra_log_type = @option_type_name unless object_instance.persisted?
+    object_instance.extra_log_type = @option_type_name unless object_instance.nil? || object_instance.persisted?
   end
 
   #
@@ -262,5 +271,14 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # too many times.
   def check_authentication_still_valid
     sign_out(current_user) if current_user.access_locked?
+  end
+
+  def set_extra_type_in_secure_params
+    pname = params_namespace.singularize.to_sym
+
+    return if params[pname]
+
+    et = params[:extra_type]
+    params[pname] = { extra_log_type: et }
   end
 end

@@ -1,5 +1,5 @@
 <div>
-  <div class="help-view-doc" data-result="help-doc-content-result">
+  <div class="help-view-doc" data-result="help-doc-content-result" data-help-path="<%= request.path.sub(/\.md$/, '') %>">
     <div class="help-doc-header">
       <%= render partial: 'help/home_link' %>
     </div>

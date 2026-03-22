@@ -8,12 +8,23 @@ module Redcap
     # The job request record will be updated every *n* records to provide feedback to the admin
     UpdateJobRequestEvery = 20
 
+    # Marker string used to identify file fields that failed to be captured.
+    # This allows failed file fields to be searched for in the database,
+    # and ensures records with failed file fields are retried on subsequent pulls.
+    # The string is designed to be unlikely to be a valid filename.
+    FailedFileFieldMarker = '<<FAILED-FILE-CAPTURE>>'
+
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
-                  :current_admin, :retrieved_files, :upserted_records, :imported_files,
-                  :step_count, :job, :done
+                  :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
+                  :step_count, :job, :done,
+                  :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
+                  :skip_store_if_no_survey_identifier, :skipped_ids,
+                  :external_id_fkey_name,
+                  :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
+                  :date_range_begin
 
-    def initialize(project_admin, class_name)
+    def initialize(project_admin, class_name, is_manual_pull: false)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
@@ -22,26 +33,36 @@ module Redcap
       self.created_ids = []
       self.unchanged_ids = []
       self.disabled_ids = []
+      self.skipped_ids = []
       self.errors = []
       self.current_admin = project_admin.admin
       self.project_admin.current_admin = current_admin
       self.retrieved_files = {}
       self.upserted_records = []
       self.imported_files = []
+      self.failed_files = []
       self.step_count = UpdateJobRequestEvery
+      self.survey_identifier_field_name = project_admin.survey_identifier_field.to_sym
+      self.integer_survey_identifier_field_name = project_admin.integer_survey_identifier_field.to_sym
+      self.external_id_fkey_name = project_admin.associate_master_through_external_id_fkey_name&.to_sym
+      self.set_master_id_using_association = project_admin.data_options.set_master_id_using_association
+      self.skip_store_if_no_survey_identifier = project_admin.data_options.skip_store_if_no_survey_identifier
+      self.retrieved_from_cache = false
+      self.using_date_range_filter = false
+      self.is_manual_pull = is_manual_pull
     end
 
     #
     # Request a background job retrieve records and save them to the specified model
     # @see Redcap::CaptureRecordsJob#perform_later
-    # @param [Redcap::ProjectAdmin] project_admin
-    # @param [String] class_name - the class name for the model to store to
-    def request_records
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def request_records(ignore_cache: false, retrieve_all: false)
       jobclass = Redcap::CaptureRecordsJob
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
-      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
+      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name, ignore_cache:, retrieve_all:)
       return if Rails.application.config.active_job.queue_adapter == :inline
 
       project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
@@ -50,22 +71,61 @@ module Redcap
     #
     # Immediately retrieve, validate and store the records from REDCap.
     # This is only intended to be called from a background job.
-    def retrieve_validate_store
+    # If records are retrieved from cache, skip validate and store steps
+    # since they will have already been processed by the first retrieval.
+    # If an exception occurs, record it in the job request before re-raising
+    # to ensure the error is captured and this run is not considered successful.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    def retrieve_validate_store(ignore_cache: false, retrieve_all: false)
       self.storage_stage = 'retrieve_validate_store'
+      # Calculate date_range_begin BEFORE creating new job request record,
+      # so we get the timestamp from the previous successful run
+      self.date_range_begin = retrieve_all ? nil : calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
       update_job_request(create: true)
-      retrieve
+      retrieve(ignore_cache:, retrieve_all:)
+
+      # If records came from cache, skip validation and storage
+      # since they have already been processed
+      if retrieved_from_cache
+        self.storage_stage = 'skipped (from cache)'
+        update_job_request
+        return
+      end
+
       summarize_fields
+      handle_survey_identifier
       validate
       store
+    rescue StandardError => e
+      self.errors ||= []
+      self.errors << { error: e.to_s, backtrace: e.short_string_backtrace }
+      # Append failure indicator to preserve which stage failed
+      self.storage_stage = "#{storage_stage} (failed)"
+      update_job_request
+      raise
     end
 
     #
     # Immediately retrieve records from REDCap.
     # This is only intended to be called from a background job.
-    # Each record is a Hash, keyed by a symbol
+    # Each record is a Hash, keyed by a symbol.
+    # If export_only_updated_records option is enabled, adds dateRangeBegin
+    # to retrieve only records updated since the last retrieval.
+    # Note: date_range_begin is typically set by retrieve_validate_store before
+    # creating the new job request record, but we support setting it here for
+    # direct calls to retrieve.
+    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
+    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     # @return [Array{Hash}]
-    def retrieve
-      self.records = project_admin.api_client.records
+    def retrieve(ignore_cache: false, retrieve_all: false)
+      # Only calculate if not already set (retrieve_validate_store sets it earlier)
+      self.date_range_begin ||= retrieve_all ? nil : calculate_date_range_begin
+      self.using_date_range_filter = date_range_begin.present?
+
+      self.records = project_admin.api_client.records(date_range_begin:, ignore_cache:)
+      self.retrieved_from_cache = project_admin.api_client.last_result_from_cache
       self.storage_stage = 'retrieve'
       update_job_request
       records
@@ -99,10 +159,35 @@ module Redcap
 
         cf_name = field.chosen_array_field_name
         records.each do |rec|
-          vals = ccfs.map { |ccf| rec[ccf.to_sym] == '1' && DataDictionaries::Field.choice_field_value(ccf) }
+          vals = ccfs.map { |ccf| rec[ccf.to_sym] == '1' && field.choice_field_value(ccf) }
                      .select { |item| item }
           rec[cf_name] = vals
         end
+      end
+    end
+
+    #
+    # The redcap_survey_identifier string field will be returned if the project option exportSurveyFields is true.
+    # Other options require it to be processed for storage in other forms.
+    def handle_survey_identifier
+      records_request_options = project_admin.records_request_options
+      return unless records_request_options.exportSurveyFields
+
+      am = project_admin.data_options.associate_master_through_external_identifer
+      return unless am
+
+      @has_integer_survey_identifier = true
+      return unless external_id_fkey_name == integer_survey_identifier_field_name
+
+      si_name = survey_identifier_field_name
+      integer_si_name = integer_survey_identifier_field_name
+
+      return unless records.first.has_key?(si_name)
+
+      records.each do |rec|
+        val = rec[si_name]
+        val = nil if val.blank?
+        rec[integer_si_name] = val&.to_i
       end
     end
 
@@ -111,8 +196,8 @@ module Redcap
     # specific record. The most recent request is stored to the
     # retrieved_files Hash.
     # @return [Hash{Symbol => File}] <description>
-    def retrieve_file(record_id, field_name)
-      retrieved_files[field_name] = project_admin.api_client.file record_id, field_name
+    def retrieve_file(record_id, field_name, event: nil)
+      retrieved_files[field_name] = project_admin.api_client.file record_id, field_name, event:
     end
 
     #
@@ -138,7 +223,7 @@ module Redcap
       overlapping_fields = records.first.keys & model.attribute_names.map(&:to_sym)
       unless overlapping_fields.length == records.first.keys.length
         missing_fields = records.first.keys - model.attribute_names.map(&:to_sym)
-        raise FphsException, "Redcap::DataRecords retrieved record fields are not present in the model:\n" \
+        raise FphsException, "Redcap::DataRecords::ModelMissingFields retrieved record fields are not present in the model:\n" \
                              "#{missing_fields.join(' ')}"
       end
 
@@ -146,17 +231,21 @@ module Redcap
       # for completeness of the retrieved records, since the API offers
       # no way of recognizing which forms have surveys available and would
       # therefore return a _timestamp field when completed.
-      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| "#{f}_timestamp".to_sym }
+      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| :"#{f}_timestamp" }
       expected_minus_form_timestamps = all_data_dictionary_fields.keys - timestamp_fields
       records.each do |r|
         actual_fields_minus_timestamps = r.keys - timestamp_fields
         next if actual_fields_minus_timestamps.sort == expected_minus_form_timestamps.sort
 
         raise FphsException,
-              "Redcap::DataRecords retrieved record fields don't match the data dictionary:\n" \
+              "Redcap::DataRecords::MismatchFields retrieved record fields don't match the data dictionary:\n" \
               "missing: #{(expected_minus_form_timestamps - actual_fields_minus_timestamps).sort.join(' ')}\n" \
               "additional: #{(actual_fields_minus_timestamps - expected_minus_form_timestamps).sort.join(' ')}"
       end
+
+      # Skip deleted records validation when using date range filter
+      # since we're only retrieving a subset of updated records
+      return if using_date_range_filter
 
       if project_admin.fail_on_deleted_records? && records.length < existing_records_length
         raise FphsException,
@@ -188,7 +277,9 @@ module Redcap
     # to the value set in #step_count. This is intended to limit the memory consumption
     # from holding record instances in #upserted_records
     def store
-      disable_deleted_records if project_admin.disable_deleted_records?
+      # Skip deleted records handling when using date range filter
+      # since we're only retrieving a subset of updated records
+      disable_deleted_records if project_admin.disable_deleted_records? && !using_date_range_filter
 
       upserts = []
       self.storage_stage = 'store'
@@ -198,7 +289,7 @@ module Redcap
       from = 0
       step = step_count
 
-      (records.length / step + 1).times do
+      ((records.length / step) + 1).times do
         subset = records[from, step]
         self.upserted_records = []
         subset.each do |record|
@@ -262,6 +353,28 @@ module Redcap
 
     def data_dictionary
       project_admin.redcap_data_dictionary
+    end
+
+    #
+    # Calculate the dateRangeBegin value based on the created_at timestamp of the last
+    # successful 'store records' ClientRequest for this project.
+    # This is more accurate than using record timestamps since it captures when we
+    # actually pulled from REDCap, not when records were stored locally.
+    # Returns nil if export_only_updated_records is not enabled for this pull type.
+    # @return [DateTime | nil]
+    def calculate_date_range_begin
+      export_option = project_admin.data_options.export_only_updated_records
+      return nil if export_option.blank?
+
+      # Check if this is a manual or scheduled pull and if the option applies
+      # 'manual' applies only to manual pulls
+      # 'scheduled' applies only to scheduled pulls
+      # 'always' applies to both
+      return nil if export_option == 'manual' && !is_manual_pull
+      return nil if export_option == 'scheduled' && is_manual_pull
+
+      # Get the created_at timestamp from the last successful 'store records' ClientRequest
+      project_admin.last_successful_store_records_at
     end
 
     #
@@ -351,6 +464,50 @@ module Redcap
     end
 
     #
+    # Should we handle setting the master_id on a record?
+    def do_handle_setting_master_id
+      return @do_handle_setting_master_id unless @do_handle_setting_master_id.nil?
+
+      @do_handle_setting_master_id = !!(@has_integer_survey_identifier && set_master_id_using_association)
+    end
+
+    #
+    # If the project has the option set_master_id_using_association, update
+    # the new/update record master_id value with the master_id returned from the
+    # external id association.
+    # @return [Integer | nil] - master_id if it was set, -1 if we don't handle setting the master id,
+    #                           or nil if the record is to be skipped
+    def handle_setting_master_id(update_record, retrieved_record)
+      return -1 unless do_handle_setting_master_id
+
+      isi = retrieved_record[external_id_fkey_name]
+      recid = retrieved_record.first.last
+      if !isi && !skip_store_if_no_survey_identifier
+        raise FphsException,
+              "Integer survey identifier field is empty, can't set master id, for record #{recid}"
+      elsif isi
+        # Start by setting the integer survey identifier field, so the association can get the master with the new value
+        update_record[external_id_fkey_name] = isi
+      elsif skip_store_if_no_survey_identifier
+        # No survey identifier is returned and the project option skip_store_if_no_survey_identifier is set, so
+        # just return with no result, indicating a skip.
+        return
+      end
+
+      # Retrieve the master_id from the record (which goes through the association), then set the value returned
+      # on the actual underlying attribute. Although this looks like it is assigning the same value, this is not
+      # actually what is happening.
+      res = update_record.master_id = update_record.master_id
+
+      unless res
+        raise FphsException,
+              "Redcap pull failed to get master id through association, for record #{recid} with survey identifier #{isi}"
+      end
+
+      res
+    end
+
+    #
     # Handle creation of new record if the record does not already exist based on its
     # record_id_field matching, update if it does exist and has new information, or
     # do nothing if it exists and is unchanged.
@@ -362,20 +519,32 @@ module Redcap
     # @param [Hash] record
     # @param [true | false] keep_results - save each existing or new record to @upserted_records
     # @return [Integer | false | nil]
-    def create_or_update(record, keep_results: true)
-      rec_ids = record_identifiers(record)
+    def create_or_update(retrieved_record, keep_results: true)
+      rec_ids = record_identifiers(retrieved_record)
       existing_record = model.where(rec_ids).first
       if existing_record
-        existing_record.current_user = current_user if existing_record.respond_to? :current_user=
+        existing_record.no_track = true if existing_record.respond_to? :no_track
+        if existing_record.respond_to? :current_user=
+          existing_record.current_user = current_user
+        else
+          Rails.logger.warn "Redcap::DataRecords#create_or_update: existing record #{model} doesn't respond to current_user"
+        end
 
         # Check if there is an exact match for the record. If so, we are done
-        if record_matches_retrieved(existing_record, record)
+        if record_matches_retrieved(existing_record, retrieved_record)
           unchanged_ids << rec_ids
           return false
         end
 
+        res = handle_setting_master_id(existing_record, retrieved_record)
+        # No valid result, but no exception, so just skip this one
+        unless res
+          skipped_ids << rec_ids
+          return
+        end
+
         existing_record.force_save!
-        if existing_record.update(record)
+        if existing_record.update(retrieved_record)
           if keep_results
             updated_ids << rec_ids
             upserted_records << existing_record
@@ -385,8 +554,20 @@ module Redcap
           errors << { id: rec_ids, errors: existing_record.errors, action: :update }
         end
       else
-        new_record = model.new(record)
-        new_record.current_user = current_user if new_record.respond_to? :current_user=
+        new_record = model.new(retrieved_record)
+        new_record.no_track = true if new_record.respond_to? :no_track
+        if new_record.respond_to? :current_user=
+          new_record.current_user = current_user
+        else
+          Rails.logger.warn "Redcap::DataRecords#create_or_update: new record #{model} doesn't respond to current_user"
+        end
+
+        res = handle_setting_master_id(new_record, retrieved_record)
+        unless res
+          skipped_ids << rec_ids
+          return
+        end
+
         new_record.force_save!
         if new_record.save
           if keep_results
@@ -421,7 +602,12 @@ module Redcap
 
         record_id = record[record_id_field]
         begin
-          temp_file = retrieve_file(record_id, field_name)
+          # In order to retrieve files from longitudinal records (within events),
+          # we need to pass the event name as well.
+          # This is not required for classic instruments, since they do not have events, and will just be ignored.
+          event = record[:redcap_event_name]
+
+          temp_file = retrieve_file(record_id, field_name, event:)
           # We must change the permissions now, since the final NFS store
           # requires the group to have read-write.
           path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}"
@@ -432,14 +618,21 @@ module Redcap
                                              filename,
                                              temp_file.path,
                                              current_user,
-                                             path: path,
+                                             path:,
                                              replace: true)
           imported_files << res if res
-        rescue Exception => e # rubocop:disable Lint/RescueException
+        rescue Exception => e
           # We rescue Exception rather than StandardError, since file errors inherit from Exception
-          msg = "Failed to retrieve or import REDCap file #{record_id} #{field_name}. #{e}"
+          msg = "Failed to retrieve or import REDCap file for record: #{record_id} - field name: #{field_name} - with user: #{current_user.email}.\n#{e}"
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
+          failed_files << { record_id:, field_name:, error: e.message }
+          # Mark the file field with a searchable marker so that:
+          # 1. It can be found in database queries to identify failed captures
+          # 2. Future pulls with export_only_updated_records will retry these records
+          record[field_name] = FailedFileFieldMarker
+          record.update_columns(field_name => FailedFileFieldMarker)
+          # Continue processing other files instead of raising
         ensure
           temp_file&.close
           temp_file&.unlink
@@ -477,6 +670,10 @@ module Redcap
         all_data_dictionary_fields[field_name]&.field_type&.values_match?(new_value, existing_attrs[field_name])
       end
 
+      # Handle special case - if the option to set_master_id_using_association && the current master_id is not set
+      # This will allow the lookup of the master to run by treating it as having changed.
+      res[:master_id] = true if set_master_id_using_association && existing_record['master_id'].nil?
+
       res.empty?
     end
 
@@ -492,23 +689,28 @@ module Redcap
     # @param [true | nil] create - optional - create a new record for this request
     def update_job_request(create: nil)
       result = {
-        storage_stage: storage_stage,
+        storage_stage:,
         count_retrieved: records&.length,
         count_created_ids: created_ids&.length,
         count_updated_ids: updated_ids&.length,
         count_unchanged_ids: unchanged_ids&.length,
         count_disabled_ids: disabled_ids&.length,
+        count_skipped_ids: skipped_ids&.length,
         count_processed: done,
         table: project_admin.dynamic_model_table,
-        errors: errors,
+        errors:,
         imported_files_count: imported_files&.length,
-        job: job&.id
+        failed_files_count: failed_files&.length,
+        job: job&.id,
+        retrieved_from_cache:,
+        using_date_range_filter:,
+        date_range_begin: (date_range_begin if using_date_range_filter)
       }
 
       if create
-        project_admin.record_job_request('store records', result: result)
+        project_admin.record_job_request('store records', result:)
       else
-        project_admin.update_job_request('store records', result: result)
+        project_admin.update_job_request('store records', result:)
       end
     end
   end

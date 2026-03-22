@@ -7,6 +7,7 @@ module TrackerHandler
     belongs_to :protocol, class_name: 'Classification::Protocol', optional: true
     belongs_to :sub_process, class_name: 'Classification::SubProcess', optional: true
     belongs_to :protocol_event, class_name: 'Classification::ProtocolEvent', optional: true
+    default_scope -> { eager_load(:protocol_event, :sub_process, :protocol) }
   end
 
   def protocol_name

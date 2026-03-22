@@ -10,13 +10,19 @@ module Dynamic
 
       after_save :add_master_association, if: -> { @regenerate }
       after_save :add_user_access_controls, if: -> { @regenerate }
-      after_save :reset_active_model_configurations!
+      after_save :routes_load, if: -> { @regenerate }
+      after_save :reset_active_model_configurations!, if: -> { @regenerate || disabled }
+      after_save :handle_config_triggers
+
+      # This double reset is intentional
+      after_commit :reset_active_model_configurations!, if: -> { @regenerate || disabled }
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
-
+      after_update_commit -> { self.class.routes_reload }, if: -> { saved_change_to_disabled? }
+      after_create_commit -> { self.class.routes_reload }
       attr_accessor :force_regenerate
     end
 
@@ -29,7 +35,7 @@ module Dynamic
         preload
 
         begin
-          dma = active_model_configurations
+          dma = active_model_configurations force_update: true
 
           logger.info "Generating models #{name} #{dma.length}"
 
@@ -39,21 +45,19 @@ module Dynamic
             # It is expected that this is mostly when originally seeding the database
             dm.current_admin ||= dm.admin
 
-            dm.update_tracker_events
+            # dm.update_tracker_events
           end
         rescue Exception => e
           msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
-          puts msg
-          puts e.backtrace.join("\n")
+          STDERR.puts msg
+          STDERR.puts e.short_string_backtrace
           Rails.logger.warn msg
         end
       end
 
       # Reload routes when a definition is regenerated
       def routes_reload
-        return unless @regenerate
-
-        Rails.application.reload_routes!
+        Rails.logger.info 'Reloading routes based on dynamic def generator'
         Rails.application.routes_reloader.reload!
       end
 
@@ -81,16 +85,19 @@ module Dynamic
               dm.add_master_association
             else
               msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. #{disable_on_failure && 'Disabling!'}"
-              puts msg
+              warn msg
               Rails.logger.warn msg
               dm.class.where(id: dm.id).update_all(disabled: true) if disable_on_failure
             end
           end
         else
           msg = "Table doesn't exist yet: #{table_name}"
-          puts msg
+          warn msg
           Rails.logger.warn msg
         end
+      rescue StandardError, Psych::Exception => e
+        Rails.logger.error "Error enabling active configurations: #{e.message}"
+        Rails.logger.error e.short_string_backtrace
       end
 
       #
@@ -104,7 +111,7 @@ module Dynamic
         return if utd || utd.nil?
 
         Rails.logger.warn "Refreshing outdated #{name}"
-
+        reset_active_model_configurations!
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
         defs.each do |d|
@@ -149,7 +156,18 @@ module Dynamic
         @definition_cache ||= {}
       end
 
+      def reset_active_model_configurations!
+        Admin::AppType.reset_memo_associated_items!
+        @active_model_configurations = nil
+      end
+
       # End of class_methods
+    end
+
+    #
+    # Handle reloading of routes on regeneration
+    def routes_load
+      self.class.routes_load
     end
 
     #
@@ -191,10 +209,11 @@ module Dynamic
 
         # Check if it can be instantiated correctly - if it can't, allow it to raise an exception
         # since this is seriously unexpected
-        klass.new
+        klass.new(skip_presets: true)
       rescue Exception => e
         err = "Failed to instantiate the class #{icn} in parent #{parent_class}: #{e}"
         logger.warn err
+        logger.warn e.short_string_backtrace
         raise FphsException, err unless opt[:fail_without_exception]
 
         # By default, return false if an error occurred attempting the initialization.
@@ -203,7 +222,8 @@ module Dynamic
         opt[:fail_without_exception_newable_result]
       end
     rescue NameError => e
-      logger.warn e
+      err = "Failed to get the class #{icn} in parent #{parent_class}: #{e}"
+      logger.warn err
       false
     end
 
@@ -283,7 +303,7 @@ module Dynamic
       Rails.logger.info 'Refreshing item types'
       begin
         Classification::GeneralSelection.item_types refresh: true
-      rescue NameError => e
+      rescue NameError
         Rails.logger.info "Failed to clear general selections for #{model_class_name}"
       end
 
@@ -291,6 +311,24 @@ module Dynamic
       remove_assoc_class 'Master'
       remove_implementation_class
       remove_implementation_controller_class
+    end
+
+    #
+    # Apply Rails `encrypts` declarations to the implementation class for any fields
+    # marked with `encrypted: true` in the _db_columns configuration.
+    # This enables transparent encryption/decryption of field values using
+    # ActiveRecord::Encryption.
+    # @param [Class] impl_class - the generated implementation class
+    def apply_encrypted_attributes(impl_class)
+      return unless db_columns.is_a?(Hash)
+
+      encrypted_fields = db_columns.select { |_field, config| config.is_a?(Hash) && config[:encrypted] }
+      return if encrypted_fields.empty?
+
+      encrypted_fields.each_key do |field_name|
+        impl_class.encrypts field_name
+        Rails.logger.info "Applied encryption to field #{field_name} on #{impl_class.name}"
+      end
     end
 
     # A list of model names and definitions is stored in the class so we can
@@ -327,9 +365,9 @@ module Dynamic
       alt_target_class ||= model_class_name.pluralize
       alt_target_class = alt_target_class.gsub('::', '')
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
-      return unless klass.constants.include?(assoc_ext_name.to_sym)
+      return unless klass.const_defined?(assoc_ext_name.to_sym)
 
-      klass.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
+      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
@@ -341,7 +379,7 @@ module Dynamic
       return unless implementation_class_defined?(klass, fail_without_exception: true,
                                                          fail_without_exception_newable_result: true)
 
-      klass.send(:remove_const, model_class_name)
+      remove_const_for(klass, model_class_name)
     rescue StandardError => e
       logger.info <<~END_TEXT
         *************************************************************************************
@@ -356,13 +394,19 @@ module Dynamic
 
       # This may fail if an underlying dependent class (parent class) has been redefined by
       # another dynamic implementation, such as external identifier
-      klass.send(:remove_const, full_implementation_controller_name)
+      remove_const_for(klass, full_implementation_controller_name)
     rescue StandardError => e
       logger.info <<~END_TEXT
         *************************************************************************************
         Failed to remove the old definition of #{full_implementation_controller_name}. #{e.inspect}
         *************************************************************************************
       END_TEXT
+    end
+
+    def remove_const_for(klass, constant_name)
+      raise 'Bad attempt to remove a constant' if constant_name.in?(%w[User Admin UsersController AdminsController])
+
+      klass.send(:remove_const, constant_name)
     end
 
     #
@@ -378,13 +422,7 @@ module Dynamic
     # @param [Admin::AppType] app_type to add the user access control to
     # @return [Admin::UserAccessControl] the created or updated user access control
     def add_user_access_controls(force: false, app_type: nil)
-      changed_name = if respond_to? :table_name
-                       saved_change_to_table_name?
-                     elsif respond_to? :name
-                       saved_change_to_name?
-                     end
-
-      return unless !persisted? || saved_change_to_disabled? || changed_name || force
+      return unless !persisted? || saved_change_to_disabled? || changed_def_name? || force
 
       begin
         if ready_to_generate? || disabled? || force
@@ -398,6 +436,28 @@ module Dynamic
       rescue StandardError => e
         raise FphsException,
               "A failure occurred creating user access control for app with: #{model_association_name}.\n#{e}"
+      end
+    end
+
+    def handle_config_triggers
+      # doit = !persisted? || saved_change_to_disabled? || changed_def_name?
+      # return unless doit
+
+      Dynamic::DefConfigTriggers.process(self)
+    end
+
+    def foreign_key_field_name
+      "#{table_name.singularize}_id"
+    end
+
+    #
+    # Has the model had its name changed in the latest saved definition?
+    # @return [true|false]
+    def changed_def_name?
+      if respond_to? :table_name
+        saved_change_to_table_name?
+      elsif respond_to? :name
+        saved_change_to_name?
       end
     end
 
@@ -432,6 +492,7 @@ module Dynamic
       rescue StandardError => e
         err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
         logger.warn err
+        logger.warn e.short_string_backtrace
         errors.add :name, err
         # Force exit of callbacks
         raise FphsException, err
@@ -440,8 +501,8 @@ module Dynamic
       # For some reason the underlying table exists but the class doesn't. Inform the admin
       return if res
 
-      err = "The implementation of #{model_class_name} was not completed. " \
-            "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
+      err = "The implementation of #{self.class.name}::#{model_class_name} was not completed. " \
+            "The DB table #{table_name} has #{'NOT ' unless table_or_view_ready?}been created"
       logger.warn err
       errors.add :name, err
       # Force exit of callbacks
@@ -462,20 +523,20 @@ module Dynamic
       ActiveRecord::Base.connection.schema_cache.clear!
     end
 
+    # Get a complete set of all tables to be accessed by embed configurations
+    def all_direct_embed_tables
+      option_configs.map(&:embed).compact.map do |oc|
+        oc.dup
+      end
+    end
+
     # Get a complete set of all tables to be accessed by model reference configurations,
     # with a value representing what they are associated from.
     def all_referenced_tables
       res = []
 
       option_configs.map(&:references).compact.each do |act_refs|
-        act_refs.each do |ref_name, outer_config|
-          outer_config.each do |full_name, ref_config|
-            details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
-                                       :from, :without_reference, :no_master_association)
-            details.merge! reference_name: ref_name, full_ref_name: full_name
-            res << details
-          end
-        end
+        res += referenced_table_def(act_refs)
       end
 
       res
@@ -484,6 +545,19 @@ module Dynamic
         Failed to use the extra log options. It is likely that the 'references:' attribute of one of
         activities is not formatted as expected, or a @library inclusion has an error. #{e}
       END_TEXT
+    end
+
+    def referenced_table_def(act_refs)
+      res = []
+      act_refs.each do |ref_name, outer_config|
+        outer_config.each do |full_name, ref_config|
+          details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
+                                     :from, :without_reference, :no_master_association, :label)
+          details.merge! reference_name: ref_name, full_ref_name: full_name
+          res << details
+        end
+      end
+      res
     end
   end
 end

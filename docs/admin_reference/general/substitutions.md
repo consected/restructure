@@ -152,6 +152,14 @@ In addition to the attributes within the current record, the following are avail
   - data (data attribute)
   - class_name
   - save_trigger_results
+  - resource_name
+  - item_type_name
+  - table_name
+
+- Item definition details
+  - definition_resource_name
+  - definition_item_type_name
+  - default_embed_resource_name
 
 ### Server constants
 
@@ -211,61 +219,145 @@ The options are one of:
 
 Use the following structure `\{\{some_attribute::formatter\}\}`, where formatter is one of:
 
-- capitalize
-- titleize
-- uppercase
-- lowercase
-- underscore
-- hyphenate
-- id_hyphenate
-- id_underscore
-- initial
-- first
-- age
-- date
-- date_time
-- date_time_with_zone
-- date_time_show_zone
-- time
-- time_utc
-- time_with_zone
-- time_show_zone
-- time_sec
-- dicom_datetime
-- dicom_date
-- join_with_space
-- join_with_comma
-- join_with_semicolon
-- join_with_pipe
-- join_with_dot
-- join_with_at
-- join_with_slash
-- join_with_newline
-- join_with_2newlines
-- compact
-- sort
-- sort_reverse
-- uniq
-- markdown_list
-- html_list
-- plaintext
-- strip
-- split_lines
-- split_comma
-- split_csv
-- split_semicolon
-- split_pipe
-- split_dot
-- split_at
-- split_slash
-- markup
-- yaml
-- json
-- ignore_missing
-- last
-- general_selection_label
+### Text formatting
+
+- **capitalize** - Converts the first character to uppercase and the rest to lowercase
+  - Example: `"hello WORLD"` → `"Hello world"`
+- **titleize** - Converts each word's first character to uppercase (title case)
+  - Example: `"hello world testing"` → `"Hello World Testing"`
+- **uppercase** - Converts all characters to uppercase
+  - Example: `"Hello World"` → `"HELLO WORLD"`
+- **lowercase** - Converts all characters to lowercase
+  - Example: `"Hello WORLD"` → `"hello world"`
+- **underscore** - Converts camelCase or spaces to snake_case format
+  - Example: `"firstName"` → `"first_name"`, `"First Name"` → `"first name"`
+- **hyphenate** - Converts spaces to hyphens
+  - Example: `"hello world test"` → `"hello-world-test"`
+- **id_hyphenate** - Converts to a hyphenated identifier (alphanumeric with hyphens, ending with hyphen)
+  - Example: `"Hello World!"` → `"hello-world-"`
+- **id_underscore** - Converts to an underscored identifier (alphanumeric with underscores, ending with underscore)
+  - Example: `"Hello World!"` → `"hello_world_"`
+- **initial** - Returns the first character in uppercase
+  - Example: `"john"` → `"J"`
+- **first** - Returns the first character as-is
+  - Example: `"hello"` → `"h"`
+- **last** - Returns the last character of string or last element of array
+  - Example: `"hello"` → `"o"`, `["a", "b", "c"]` → `"c"`
+- **strip** - Removes leading and trailing whitespace
+  - Example: `"  hello world  "` → `"hello world"`
+- **plaintext** - Converts newlines to `<br>` tags (HTML may be sanitized in some contexts)
+  - Example: `"Line 1\nLine 2"` → `"Line 1<br>Line 2"`
+- **markup** - Converts Markdown text to HTML
+  - Example: `"# Title\n\n**Bold**"` → `"<h1>Title</h1>\n\n<p><strong>Bold</strong></p>"`
+- **ignore_missing** - Returns the value or empty string if nil/missing
+  - Example: `nil` → `""`, `"present"` → `"present"`
+- **no_html_tag** - Pass-through formatter that returns the value unchanged
+  - Example: `"any value"` → `"any value"`
+
+### Date and time formatting
+
+- **age** - Calculates age in years from a date value
+  - Example: Birth date `1990-03-15` (for someone born March 15, 1990) → `34` (current age)
+- **date** - Formats a date according to user's date format preference (e.g., mm/dd/yyyy or dd/mm/yyyy)
+  - Example: `2023-12-25` → `12/25/2023` (US format) or `25/12/2023` (UK format)
+- **date_time** - Shows date and time as it was set without adjusting to user's timezone, using user's date/time format
+  - Example: `2023-12-25 14:30:00 UTC` → `12/25/2023 2:30 pm` (US) or `25/12/2023 14:30` (24-hour)
+- **date_time_with_zone** - Forces the stored timezone to user's timezone preference without changing the date
+  - Example: `2023-12-25 14:30:00 UTC` → `25/12/2023 2:30 pm` (keeps same date/time, adds user's timezone)
+- **date_time_show_zone** - Adjusts date/time to user's timezone and displays the timezone at the end
+  - Example: `2023-12-25 14:30:00 UTC` → `25/12/2023 9:30 am Eastern Time (US & Canada)`
+- **time** - Time only including hours:minutes in the user's timezone
+  - Example: `2023-12-25 14:30:00 UTC` → `9:30 am` (EST) or `14:30` (24-hour format)
+- **time_ignore_zone** - Time only including hours:minutes without timezone adjustment
+  - Example: `2023-12-25 14:30:00 UTC` → `2:30 pm` or `14:30`
+- **time_with_zone** - Forces the time to the user's preferred timezone
+  - Example: `2023-12-25 14:30:00 UTC` → `9:30 am` (converted to user's timezone)
+- **time_show_zone** - Adjusts time to user's timezone and displays the timezone at the end
+  - Example: `2023-12-25 14:30:00 UTC` → `9:30 am Eastern Time (US & Canada)`
+- **time_sec** - Time for hours:minutes:seconds
+  - Example: `2023-12-25 14:30:45 UTC` → `9:30:45 am` or `14:30:45`
+- **dicom_datetime** - Formats date/time in DICOM format (YYYYMMDDHHMMSS+0000)
+  - Example: `2023-12-25 14:30:45 UTC` → `20231225143045+0000`
+- **dicom_date** - Formats date in DICOM format (YYYYMMDD)
+  - Example: `2023-12-25` → `20231225`
+- **redcap_date** - Formats date in REDCap format (YYYY-MM-DD)
+  - Example: `December 25, 2023` → `2023-12-25`
+- **iso8601_datetime** - Formats date/time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS+00:00)
+  - Example: `2023-12-25 14:30:45 UTC` → `2023-12-25T14:30:45+00:00`
+
+### Array processing
+
+- **compact** - Removes blank/empty elements from array
+  - Example: `["apple", "", "banana", nil, "cherry"]` → `["apple", "banana", "cherry"]`
+- **sort** - Sorts array elements in ascending order
+  - Example: `["cherry", "apple", "banana"]` → `["apple", "banana", "cherry"]`
+- **sort_reverse** - Sorts array elements in descending order
+  - Example: `["apple", "banana", "cherry"]` → `["cherry", "banana", "apple"]`
+- **uniq** - Removes duplicate elements from array
+  - Example: `["apple", "banana", "apple", "cherry"]` → `["apple", "banana", "cherry"]`
+- **markdown_list** - Converts array to Markdown unordered list format
+  - Example: `["apple", "banana", "cherry"]` → `"- apple\n- banana\n- cherry"`
+- **html_list** - Converts array to HTML unordered list format
+  - Example: `["apple", "banana", "cherry"]` → `"<ul><li>apple</li>\n  <li>banana</li>\n  <li>cherry</li></ul>"`
+
+### Array joining
+
+- **join_with_space** - Joins array elements with spaces
+  - Example: `["hello", "world", "test"]` → `"hello world test"`
+- **join_with_comma** - Joins array elements with commas and spaces
+  - Example: `["apple", "banana", "cherry"]` → `"apple, banana, cherry"`
+- **join_with_csv** - Joins array elements in CSV format with proper escaping for commas and quotes
+  - Example: `["John", "Doe, Jr.", "Manager"]` → `"John,\"Doe, Jr.\",Manager"`
+- **join_with_semicolon** - Joins array elements with semicolons and spaces
+  - Example: `["item1", "item2", "item3"]` → `"item1; item2; item3"`
+- **join_with_pipe** - Joins array elements with pipe characters
+  - Example: `["field1", "field2", "field3"]` → `"field1|field2|field3"`
+- **join_with_dot** - Joins array elements with dots
+  - Example: `["www", "example", "com"]` → `"www.example.com"`
+- **join_with_at** - Joins array elements with @ symbols (useful for email addresses)
+  - Example: `["user", "example.com"]` → `"user@example.com"`
+- **join_with_slash** - Joins array elements with forward slashes
+  - Example: `["home", "user", "documents"]` → `"home/user/documents"`
+- **join_with_newline** - Joins array elements with newlines
+  - Example: `["line1", "line2", "line3"]` → `"line1\nline2\nline3"`
+- **join_with_2newlines** - Joins array elements with double newlines
+  - Example: `["paragraph1", "paragraph2"]` → `"paragraph1\n\nparagraph2"`
+
+### String splitting
+
+- **split_space** - Splits string into array by spaces
+  - Example: `"hello world test"` → `["hello", "world", "test"]`
+- **split_lines** - Splits string into array by newlines
+  - Example: `"line1\nline2\nline3"` → `["line1", "line2", "line3"]`
+- **split_comma** - Splits string into array by commas
+  - Example: `"apple,banana,cherry"` → `["apple", "banana", "cherry"]`
+- **split_csv** - Parses CSV string into array with proper handling of quoted values
+  - Example: `"John,\"Doe, Jr.\",Manager"` → `["John", "Doe, Jr.", "Manager"]`
+- **split_semicolon** - Splits string into array by semicolons
+  - Example: `"item1;item2;item3"` → `["item1", "item2", "item3"]`
+- **split_pipe** - Splits string into array by pipe characters
+  - Example: `"field1|field2|field3"` → `["field1", "field2", "field3"]`
+- **split_dot** - Splits string into array by dots
+  - Example: `"www.example.com"` → `["www", "example", "com"]`
+- **split_at** - Splits string into array by @ symbols
+  - Example: `"user@example.com"` → `["user", "example.com"]`
+- **split_slash** - Splits string into array by forward slashes
+  - Example: `"home/user/documents"` → `["home", "user", "documents"]`
+
+### Data conversion
+
+- **yaml** - Converts object to YAML format (without document separator)
+  - Example: `{"name": "John", "age": 30}` → `"name: John\nage: 30"`
+- **json** - Converts object to pretty-formatted JSON
+  - Example: `{"name": "John", "age": 30}` → `"{\n  \"name\": \"John\",\n  \"age\": 30\n}"`
+- **general_selection_label** - Returns the general selection label in place of the field value, if one exists
+  - Example: For a status field with value `"active"` → `"Active"` (shows the display label instead of the code)
+
+### Numeric indexing
 
 Additionally, if the formatter is an integer number the following rules apply:
 
-- if the attribute being applied to is a string, take the left-most characters up to the number specified (zero based)
-- if the attribute being applied to is an array, take the specified item (zero based)
+- if the attribute being applied to is a string, take the left-most characters from position 0 up to and including the number specified (0-based inclusive range)
+  - Example: `"Hello World"` with formatter `4` → `"Hello"` (characters 0 through 4)
+- if the attribute being applied to is an array, take the specified item (zero based index)
+  - Example: `["first", "second", "third"]` with formatter `1` → `"second"` (index 1)

@@ -15,6 +15,13 @@ class ReportsController < UserBaseController
                 :search_attrs_params_hash, :embedded_report, :object_instance
   ResultsLimit = Master.results_limit
 
+  NotPermittedParams = %i[user_id created_at updated_at tracker_id tracker_history_id admin_id].freeze
+  # "params" used to control forms and not to be used as search attributes
+  ControlParams = %i[get_filter_previous add_to_list update_list remove_from_list id table_name
+                     schema_name table_fields part report_id search_attrs embed no_run csv_blank
+                     view_context commit force_run ids_filter_previous
+                     controller action id format].freeze
+
   attr_accessor :failed
 
   # List of available reports
@@ -57,7 +64,10 @@ class ReportsController < UserBaseController
       return
     end
 
-    if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
+    set_search_attrs
+    @force_view_as = params[:force_view_as] if current_admin && params[:force_view_as].present?
+
+    if params[:search_attrs].present? && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -91,6 +101,9 @@ class ReportsController < UserBaseController
         end
         format.csv do
           send_csv
+        end
+        format.text do
+          render_text
         end
       end
 
@@ -140,17 +153,22 @@ class ReportsController < UserBaseController
   def update
     return not_authorized unless @report.editable_data?
 
-    if @report_item.update(secure_params)
+    clean_secure_params
+    @report_item.force_save! if current_admin && @report_item.respond_to?(:force_save!)
+    @report_item.updated_from_report! if @report_item.respond_to?(:updated_from_report!)
+    if @report_item.update!(secure_params)
       refresh_updated_data
       render json: { report_item: @report_item }
     else
       logger.warn "Error updating #{@report_item}: #{@report_item.errors.inspect}"
       flash.now[:warning] = "Error updating #{@report_item}: #{error_message}"
-      edit
+      # edit form will continue to be displayed - return the error for JS flash
+      render json: object_instance.errors, status: :unprocessable_entity
     end
   end
 
   def create
+    @report_item.force_save! if current_admin && @report_item.respond_to?(:force_save!)
     if @report_item.save
       refresh_updated_data
       render json: { report_item: @report_item }
@@ -207,6 +225,14 @@ class ReportsController < UserBaseController
 
     if @report_item.respond_to?(:master) && !@report_item.class.no_master_association
       @master = @report_item.master
+
+      # Specifically, if an edited report item did not previously have a master_id set, but now will have,
+      # ensure the current user can be set appropriately.
+      if !@master && secure_params[:master_id].present?
+        @report_item.master_id = secure_params[:master_id]
+        @master = @report_item.master
+      end
+
       @master.current_user = current_user if @master
     elsif @report_item.respond_to? :current_user
       @report_item.current_user = current_user
@@ -224,7 +250,7 @@ class ReportsController < UserBaseController
       nil
     end
 
-    @report_item = if report_model.respond_to?(:no_master_association) && report_model.no_master_association ||
+    @report_item = if (report_model.respond_to?(:no_master_association) && report_model.no_master_association) ||
                       !report_model.respond_to?(:master)
                      report_model.new(build_with)
                    else
@@ -256,9 +282,9 @@ class ReportsController < UserBaseController
       return
     end
 
-    @runner.data_reference.init(table_name: table_name,
-                                schema_name: schema_name,
-                                table_fields: table_fields)
+    @runner.data_reference.init(table_name:,
+                                schema_name:,
+                                table_fields:)
   end
 
   def show_report
@@ -401,6 +427,8 @@ class ReportsController < UserBaseController
     id = params[:report_id]
     setup_report id
 
+    @report.substitute_table_name_and_fields(params)
+
     return if params[:id] == 'cancel' || params[:id].blank?
 
     id = params[:id]
@@ -418,10 +446,25 @@ class ReportsController < UserBaseController
   end
 
   #
+  # If the report options view_options.use_plain_attribute_names = true
+  # then we use plain, top level attributes as search attributes.
+  # Push these into the params to allow everything to function normally.
+  def set_search_attrs
+    return unless @report.report_options.view_options.use_plain_attribute_names
+
+    if params[:search_attrs]
+      Rails.logger.info 'search_attrs were received and used overriding view_options.use_plain_attribute_names'
+      return
+    end
+
+    params[:search_attrs] = params.permit!.to_h.except(*ControlParams)
+  end
+
+  #
   # Permit everything, since this is not used for assignment.
   # If the search_attrs param is a string, just return it
   def search_attrs_params_hash
-    @search_attrs_params_hash ||= if params[:search_attrs].nil? || params[:search_attrs] == '_use_defaults_'
+    @search_attrs_params_hash ||= if params[:search_attrs].blank? || params[:search_attrs] == '_use_defaults_'
                                     @runner.using_defaults = true
                                     { _use_defaults_: '_use_defaults_' }
                                   else
@@ -488,15 +531,76 @@ class ReportsController < UserBaseController
     if @results
       res_a << @results.fields.to_csv
       @results.each_row do |row|
-        res_a << (row.collect { |val| val || blank_value }).to_csv
+        res_a << row.collect { |val| val || blank_value }.to_csv
       end
     end
 
     send_data res_a.join(''), filename: 'report.csv'
   end
 
-  def render_json
-    render json: { results: @results,
-                   search_attributes: @runner.search_attr_values }
+  def render_json(show_as: nil)
+    pto = @report.report_options.json_options
+    show_as ||= pto.show_as || 'results_and_attributes'
+    single_res = pto.single_result
+    template = pto.template
+    key_column = pto.key_column
+
+    show_results = if show_as == 'results_and_attributes'
+                     {
+                       results: @results,
+                       search_attributes: @runner.search_attr_values
+                     }
+                   elsif show_as == 'results_only'
+                     @results
+                   elsif show_as == 'row_template'
+                     @results.map do |r|
+                       Formatter::Substitution.substitute_into_template(template, r.to_h)
+                     end
+                   elsif show_as == 'key_template'
+                     @results.map do |r|
+                       [r[key_column], Formatter::Substitution.substitute_into_template(template, r.to_h)]
+                     end.to_h
+                   end
+
+    show_results = show_results.first if single_res && show_results.is_a?(Array) && show_results.length <= 1
+
+    render json: show_results
+  end
+
+  def render_text
+    pto = @report.report_options.plain_text_options
+    ct = pto.return_content_type || 'text/plain'
+    linejoin = pto.line_join_string || "\n"
+    line_pre = pto.line_prefix || ''
+    line_suf = pto.line_suffix || ''
+    coljoin = pto.column_join_string || '|'
+    col_pre = pto.column_prefix || ''
+    col_suf = pto.column_suffix || ''
+    ht = pto.header_text || ''
+    ft = pto.footer_text || ''
+    template = pto.template
+
+    resa = if template
+             @results.map { |r| Formatter::Substitution.substitute(template, data: r) }
+           elsif pto.results_column
+             @results.map { |r| "#{col_pre}#{r[pto.results_column]}#{col_suf}" }
+           else
+             @results.map { |r| r.values.map { |c| "#{col_pre}#{c}#{col_suf}" }.join(coljoin) }
+           end
+    res = resa.map { |s| "#{line_pre}#{s}#{line_suf}" }.join(linejoin)
+    res = "#{ht}#{res}#{ft}"
+    render plain: res, status: 200, content_type: ct
+  end
+
+  #
+  # Clean the secure params being used to create or update a record
+  # by removing any params we don't want to be updated (NotPermittedParams)
+  # and setting any fields that are an empty string to be null
+  def clean_secure_params
+    NotPermittedParams.each do |k|
+      secure_params.delete(k)
+    end
+
+    secure_params.transform_values! { |v| v.is_a?(String) && v.empty? ? nil : v }
   end
 end

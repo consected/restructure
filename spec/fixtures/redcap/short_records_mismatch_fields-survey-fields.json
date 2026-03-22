@@ -33,7 +33,7 @@
     "f57": "",
     "dd": "",
     "yes_or_no": "",
-    "test_complete": "0"
+    "test_complete": "2"
   },
   {
     "record_id": "4",
@@ -79,7 +79,7 @@
     "current_weight": "234",
     "smoketime___pnfl": "0",
     "smoketime___dnfl": "0",
-    "smoketime___anfl": "0",
+    "smoketime___anfl": "1",
     "smoke_start": "",
     "smoke_stop": "",
     "smoke_curr": "",

@@ -37,11 +37,31 @@ module Dynamic
       attr_writer :allow_migrations
 
       before_validation :init_schema_name
-
+      validate :schema_name_ok
+      validate :table_name_ok
       after_create :generate_create_migration, if: -> { !disabled }
 
       after_save :generate_migration, if: -> { !disabled }
       after_save :run_migration, if: -> { @do_migration }
+    end
+
+    class_methods do
+      def default_schema_name(app_type: nil, category: nil)
+        dsn = app_type&.default_schema_name
+        return dsn if dsn.present?
+
+        res = category.split('-').first if category.present?
+        res = nil unless Admin::MigrationGenerator.current_search_paths.include?(res)
+        res ||= Settings::DefaultMigrationSchema
+        return res if res.present?
+
+        # Default to the first in the search path if nothing else works
+        Admin::MigrationGenerator.current_search_paths.first
+      end
+
+      def default_category(app_type: nil)
+        app_type&.name&.id_underscore
+      end
     end
 
     #
@@ -49,20 +69,29 @@ module Dynamic
     # can allow this on servers running in Rails production that are used for
     # app development.
     def allow_migrations
-      return @allow_migrations unless @allow_migrations.nil?
+      unless @allow_migrations.nil?
+        Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+        return @allow_migrations
+      end
 
       @allow_migrations = Settings::AllowDynamicMigrations && !prevent_migrations
+      Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      @allow_migrations
+    end
+
+    def app_import_prevents_migrations?
+      Admin::AppTypeImport.prevent_migrations?
     end
 
     #
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      return if @ran_migration || table_or_view_ready? || !allow_migrations
+      return if @ran_migration || table_or_view_ready? || !allow_migrations || app_import_prevents_migrations?
 
       raise FphsException, "Use a plural table name: #{table_name}" if table_name.singularize == table_name
 
       gs = migration_generator.generator_script(self.class)
-      migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
+      migration_generator.write_db_migration(gs, table_name)
       run_migration
     end
 
@@ -74,26 +103,42 @@ module Dynamic
       return true if saved_change_to_disabled? && !disabled
 
       options_attr_name = self.class.option_configs_attr.to_s
-      v1 = attribute_before_last_save(options_attr_name)
-      v2 = attributes[options_attr_name]
+      v1 = attribute_before_last_save(options_attr_name) || ''
+      v2 = attributes[options_attr_name] || ''
+      v1 = v1.sub("---\n", '')
+      v2 = v2.sub("---\n", '')
+      v1 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v1)
+      v2 = OptionConfigs::ExtraOptions.prepend_standard_definitions(v2)
       v1 = OptionConfigs::ExtraOptions.include_libraries(v1)
       v2 = OptionConfigs::ExtraOptions.include_libraries(v2)
       if v1
-        v1def = YAML.safe_load(v1, permitted_classes: [],
-                                   permitted_symbols: [],
-                                   aliases: true)
-        v1_sql = v1def.dig('_configurations', 'view_sql')
+        begin
+          v1def = YAML.safe_load(v1, permitted_classes: [],
+                                     permitted_symbols: [],
+                                     aliases: true)
+          v1_sql = v1def.dig('_configurations', 'view_sql')
+        rescue Psych::Exception => e
+          # Previous YAML was broken - treat view_sql as changed so migration can proceed
+          Rails.logger.warn "Error parsing previous YAML in view_sql_changed? for #{table_name}: #{e.message}"
+          v1_sql = nil
+        end
       end
       if v2
-        v2def = YAML.safe_load(v2, permitted_classes: [],
-                                   permitted_symbols: [],
-                                   aliases: true)
-        v2_sql = v2def.dig('_configurations', 'view_sql')
+        begin
+          v2def = YAML.safe_load(v2, permitted_classes: [],
+                                     permitted_symbols: [],
+                                     aliases: true)
+          v2_sql = v2def.dig('_configurations', 'view_sql')
+        rescue Psych::Exception => e
+          # Current YAML is broken - can't determine view_sql, treat as unchanged
+          Rails.logger.warn "Error parsing current YAML in view_sql_changed? for #{table_name}: #{e.message}"
+          v2_sql = nil
+        end
       end
       changed = (v1_sql != v2_sql)
       if changed
         Rails.logger.info "In migration, the view_sql for #{table_name} is going to change (from/to):\n" \
-        "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
+                          "\n-------#{v1_sql}\n-------\n#{v2_sql}\n-------"
       end
       !!changed
     end
@@ -119,7 +164,8 @@ module Dynamic
       return if @ran_migration || !allow_migrations
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
-      option_configs(force: true)
+      result = option_configs(force: true, return_value_on_error: nil)
+      return unless result
 
       # Return if there is nothing to update
       return unless (!config_view_sql && migration_generator.migration_update_table) ||
@@ -135,7 +181,7 @@ module Dynamic
 
       mode = 'update'
       gs = migration_generator.generator_script(self.class, mode)
-      fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: mode
+      fn = migration_generator.write_db_migration(gs, table_name, mode:)
       @do_migration = fn
     end
 
@@ -150,12 +196,14 @@ module Dynamic
       mg.app_type_name = app_type_name
       mode = 'create_or_update'
       gs = mg.generator_script(self.class, mode)
-      mg.write_db_migration(gs, table_name, mg.migration_version, mode: mode, export_type: export_type)
+      mg.write_db_migration(gs, table_name, mode:, export_type:)
     end
 
     #
     # Run a generated migration triggered after_save
     def run_migration
+      return if @ran_migration
+
       @ran_migration = true
       migration_generator.run_migration
     end
@@ -168,15 +216,14 @@ module Dynamic
       return schema_name if respond_to?(:schema_name) && schema_name.present?
 
       current_user_app_type = current_admin.matching_user_app_type
-      dsn = current_user_app_type&.default_schema_name
-      return dsn if dsn
 
-      res = category.split('-').first if category.present?
-      res ||= Settings::DefaultMigrationSchema
-      return res if res.present?
+      unless current_user_app_type
+        Rails.logger.warn "#{self.class.human_name} migration doesn't specify a schema_name and there is no matching user " \
+                          "for the current admin '#{current_admin.email}' or no app type is set '#{current_user_app_type}'"
+      end
 
-      # Default to the first in the search path if nothing else works
-      Admin::MigrationGenerator.current_search_paths.first
+      Rails.logger.warn "#{self.class.human_name} doesn't specify a schema_name - using the app type default, category or first in search path"
+      self.class.default_schema_name(app_type: current_user_app_type, category:)
     end
 
     #
@@ -211,12 +258,13 @@ module Dynamic
       @migration_generator =
         Admin::MigrationGenerator.new(
           db_migration_schema,
-          table_name: table_name,
+          table_name:,
           class_name: full_implementation_class_name,
           dynamic_def: self,
           all_implementation_fields: all_implementation_fields(ignore_errors: false),
-          table_comments: table_comments,
+          table_comments:,
           no_master_association: implementation_no_master_association,
+          no_user_id: implementation_no_user_id,
           prev_table_name: table_name_before_last_save,
           belongs_to_model: btm,
           db_configs: db_columns,
@@ -224,7 +272,7 @@ module Dynamic
           view_sql_changed: view_sql_changed?,
           all_referenced_tables: art,
           resource_type: self.class.name.underscore.to_sym,
-          allow_migrations: allow_migrations
+          allow_migrations:
         )
     end
 
@@ -233,9 +281,26 @@ module Dynamic
     # or the default for server
     # @return [String] new schema_name
     def init_schema_name
-      return if disabled?
+      return if disabled? || schema_name.present?
 
-      self.schema_name = db_migration_schema
+      self.schema_name = if persisted?
+                           schema_name_in_db
+                         else
+                           db_migration_schema
+                         end
+    end
+
+    def table_name_ok
+      return true if disabled? || table_name.blank? || table_name.id_underscore == table_name
+
+      errors.add :table_name, "must only include characters acceptable to the database: #{table_name}"
+    end
+
+    def schema_name_ok
+      return true if disabled? || Admin::MigrationGenerator.current_search_paths.include?(schema_name)
+
+      errors.add :schema_name, "(#{schema_name}) not in current search_path for #{table_name} - " \
+                               "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
     end
   end
 end

@@ -14,14 +14,19 @@ module ReportResults
 
       table_name = @result_tables[field_num]
 
-      cell = ReportResults::ReportsListResultCell.new(table_name, col_content, col_name, @col_tags[col_name], @show_as[col_name],
-                                                      selection_options_handler_for(table_name))
+      cell = ReportResults::ReportsListResultCell.new(table_name,
+                                                      col_content,
+                                                      col_name,
+                                                      @col_tags[col_name],
+                                                      @show_as[col_name],
+                                                      selection_options_handler_for(table_name),
+                                                      request)
       col_tag = cell.html_tag
       col_content = cell.view_content
 
       col_tag = 'rldata' unless col_tag.present?
 
-      col_tag_start = "<#{col_tag} class=\"#{cell.expandable? ? 'expandable' : ''}\">"
+      col_tag_start = "<#{col_tag} class=\"#{'expandable' if cell.expandable?}\">"
       col_tag_end = "</#{col_tag}>"
 
       extra_classes = ''
@@ -35,7 +40,7 @@ module ReportResults
       end
 
       header_content = alt_column_header(field_num) || @results.fields[field_num]
-      header_content = @view_options&.humanize_column_names ? header_content.humanize : header_content
+      header_content = header_content.humanize if @view_options&.humanize_column_names
       if header_content.present? && !(@view_options&.hide_list_labels_for_empty_content && !orig_col_content.present?)
         header_markup = <<~END_HTML
           <span class="report-list-header-item">#{header_content}</span>

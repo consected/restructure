@@ -5,6 +5,7 @@ class HandlePasswordRecoveryNotificationJob < ApplicationJob
 
   def perform(user, options)
     return if user.do_not_email
+    return if user.disabled
 
     mn = Messaging::MessageNotification.create! user: user,
                                                 recipient_user_ids: [user.id],

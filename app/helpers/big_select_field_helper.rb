@@ -6,39 +6,42 @@ module BigSelectFieldHelper
   # *options* include:
   #   hide_popover: true (show the selected value with an overlay field)
   #   filtered: true (filter the options shown based on the value of another selection field)
-  # @param [Form] form
+  # @param [Form] form - Rails form instance
+  # @param [Symbol] field - the field name
+  # @param [String] object_name - the object name (typically form_object_item_type_us)
   # @param [Hash] data - key value definitions
   # @param [Symbol] subtype - use an alterative subtype as the default
   # @param [Hash] options
   # @return [String] - html result
-  def big_select_field(form, field, data, subtype: nil, options: {})
+  def big_select_field(form, field, object_name, data, subtype: nil, options: {})
     @big_select_field_id = nil
     if options[:filtered]
       not_done = true
-      field_id = big_select_field_id # "#{form.object_name}_#{field}".to_sym
       res = ''
       data.each do |k, v|
         if not_done
           not_done = false
-          res = "#{res} #{big_select_field_main(form, field, v, subtype: k, options: options)}"
+          res = "#{res} #{big_select_field_main(form, field, object_name, v, subtype: k, options: options)}"
         else
-          res = "#{res} #{big_select_field_data(form, field_id, k, v)}"
+          res = "#{res} #{big_select_field_data(k, v, options)}"
         end
       end
       res.html_safe
     else
-      big_select_field_main(form, field, data, subtype: subtype, options: options)
+      big_select_field_main(form, field, object_name, data, subtype: subtype, options: options)
     end
   end
 
   #
   # Show initial components of big-select field
   # @param [Form] form
+  # @param [Symbol] field
+  # @param [String] object_name
   # @param [Hash] data - key value definitions
   # @param [Symbol] subtype - use an alterative subtype as the default
   # @param [Hash] options
   # @return [String] - html result
-  def big_select_field_main(form, field, data, subtype: nil, options: {})
+  def big_select_field_main(form, field, object_name, data, subtype: nil, options: {})
     field_id = big_select_field_id # "#{form.object_name}_#{field}"
 
     hide_popover = options[:hide_popover]
@@ -48,7 +51,11 @@ module BigSelectFieldHelper
       class: "use-big-select #{extra_class}",
       readonly: 'readonly',
       id: field_id,
-      data: { 'big-select-subtype': subtype, attr_name: field }
+      data: {
+        'big-select-subtype': subtype,
+        attr_name: field,
+        object_name:
+      }
     }
 
     field_html = if options[:no_instance]
@@ -87,12 +94,18 @@ module BigSelectFieldHelper
     options ||= {}
 
     predata = data&.transform_keys { |v| v.to_s.split(' >>>').first }
+
+    # Store data in a hidden element as JSON data attributes
+    # This avoids inline script tags that fail CSP when loaded via AJAX
+    # The JavaScript setup code will read these attributes
+    data_json = { subtype => predata }.to_json
+    options_json = options.to_json
+
     <<~END_HTML
-      <script>
-        var big_select_field = $('##{big_select_field_id}')[0]
-        big_select_field.big_select_options = big_select_field.big_select_options || #{options.to_json.html_safe};
-        big_select_field.big_select_hash = big_select_field.big_select_hash || {};
-        big_select_field.big_select_hash['#{subtype}'] = #{predata.to_json.html_safe};
+      <script type="application/json" class="big-select-data"
+              data-field-id="#{big_select_field_id}"
+              data-options="#{ERB::Util.html_escape(options_json)}"
+              data-hash="#{ERB::Util.html_escape(data_json)}">
       </script>
     END_HTML
       .html_safe

@@ -2,6 +2,10 @@ _fpa.postprocessors_help = {
   help_sidebar: function (block, data) {
     // Setup the relative path for the links
     var data_doc_path = block.find('[data-doc-path]').attr('data-doc-path');
+    // The path of the page that contained these links (the source page), used as the
+    // back_path param when navigating into the shared `general` section so the
+    // "back to main section" link can return here.
+    var source_path = block.find('[data-help-path]').attr('data-help-path') || '';
     // Extend each anchor tag to be a remote request, to use the relative path
     // rather than the window path, and to request embedded pages.
     block.find('a')
@@ -29,6 +33,10 @@ _fpa.postprocessors_help = {
             }
             else {
               href = `${href}?display_as=embedded`;
+            }
+            // If navigating into the shared `general` section, tell it where to go back to
+            if (source_path && href.indexOf('/general/') > 0 && href.indexOf('back_path=') < 0) {
+              href = `${href}&back_path=${encodeURIComponent(source_path)}`;
             }
             $(this).attr('href', href);
           }
@@ -85,6 +93,24 @@ _fpa.postprocessors_help = {
         $(target).removeClass('expanded');
       });
 
+
+    const $a_cl = block.find('a:contains("CONTENTS_LIST")')
+    if ($a_cl.length) {
+      var ul = '';
+      const tagtype = $a_cl.attr('href');
+      block.find(`#help-doc-content ${tagtype}, .help-embedded-content ${tagtype}`).each(function () {
+        const orighash = `#${$(this).attr('id')}`;
+        const tagname = $(this)[0].tagName;
+        ul = `${ul}<li class="sidebar-contents-list-item--${tagname}"><a href="${orighash}" data-orig-href="${orighash}">${$(this).text()}</a></li>`;
+      });
+
+      ul = `<ul class="sidebar-contents-list">${ul}</ul>`;
+
+      const scroll_loc = '.help-embedded-content'
+      // ul = `${ul}<span id="sidebar-contents-scroll-to-top"><a href="#help-doc-content" data-orig-href="${scroll_loc}" class="btn btn-primary help-sb-scroll-to-top">back to top</a></span>`
+      $a_cl.replaceWith(ul)
+    }
+
     const to_url = $('#help-sidebar').attr('data-to-url');
     if (to_url) {
       var hash_pos = to_url.indexOf('#');
@@ -123,7 +149,7 @@ _fpa.postprocessors_help = {
           var changed = true;
         }
 
-        if (href.indexOf('./') == 0 || href.indexOf('../') == 0 || href.indexOf('/') < 0) {
+        if ((href.indexOf('./') == 0 || href.indexOf('../') == 0 || href.indexOf('/') < 0) && href.indexOf('mailto:') != 0) {
           href = href.replace(/^\.\//, '');
           href = `${orig_subpath}/${href}#open-in-sidebar`;
           var changed = true;

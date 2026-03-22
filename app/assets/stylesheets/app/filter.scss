@@ -1,16 +1,29 @@
-#filter-accordion {
-  padding: 0 15px;
-  .panel-default {
-    margin-top: 6px;
-  }
+#filter-selects {
+  padding: 8px 15px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 
-  .filter-small-gap {
-    height: 6px;
-    margin: 0;
-  }
-
-  .btn-sm {
+  .filter-select-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     margin-bottom: 4px;
+    margin-left: 6px;
+    margin-right: 6px;
+    min-width: 240px;
+
+    .filter-select-label {
+      font-weight: bold;
+      white-space: nowrap;
+      margin-bottom: 0;
+    }
+
+    select.filter-select {
+      min-width: 150px;
+      max-width: 350px;
+    }
   }
 }
 

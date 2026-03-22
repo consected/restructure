@@ -4,12 +4,22 @@ _fpa.loaded.reports = function () {
   _fpa.report_criteria.reports_form($criteria_form);
   $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
+  // Update page title with report name
+  var $report_title = $criteria_form.find('.report-criteria-block h1').first();
+  if ($report_title.length) {
+    // Get just the report name text (excluding any <small> tags)
+    var report_name = $report_title.clone().children().remove().end().text().trim();
+    if (report_name) {
+      _fpa.page_title.for_report(report_name);
+    }
+  }
+
   // If this an editable data form, automatically submit it if there are no criteria fields to enter
   if ($('#editable_data').length == 1 && $('.report-criteria-fields').length >= 1)
     $('input[type="submit"][value="table"]').click();
 
-
   // Substitute list_id param into links in the report criteria containing :list_id
+  // This only functions for full page reports, not embedded reports
   const $a_to_list = $criteria_form.find('a[href*=":list_id"]');
   const param_list_match = location.href.match(/\[list_id\]=(\d+)/);
   if ($a_to_list.length && param_list_match) {
@@ -136,7 +146,11 @@ _fpa.reports = {
       $(this).html(new_html);
 
       if (orig_action.trim() == 'view file') {
-        _fpa.secure_view.setup_links($(this), 'a.' + dctaus);
+        // Ensure that the viewer is set up with the user's capabilities to view and download
+        var sv_opt = { allow_actions: null };
+        sv_opt.allow_actions = _fpa.state.user_can;
+
+        _fpa.secure_view.setup_links($(this), 'a.' + dctaus, sv_opt);
         $('a.' + dctaus).on('click', function (ev) {
           ev.preventDefault();
         });
@@ -178,6 +192,8 @@ _fpa.reports = {
 
     var dct;
     var dct_parts;
+
+    var $outer = block.parents('.modal-body, body').first().parent();
 
     block.find('td[data-col-type^="chart:"]').not('.attached_report_chart').each(function () {
 
@@ -235,7 +251,7 @@ _fpa.reports = {
       var ctx = $(this).find('canvas');
       var myPieChart = new Chart(ctx, value);
 
-      var head = $('th[data-col-type="' + chart_dct + '"]').not('.added-chart-legend');
+      var head = $outer.find('th[data-col-type="' + chart_dct + '"]').not('.added-chart-legend');
       if (head.length > 0) {
         var headp = head.find('p.table-header-col-type');
         headp.html(name);
@@ -274,7 +290,8 @@ _fpa.reports = {
         var name = act_config.field_name;
         var value = act_config.value;
         var checked = act_config.value.init_value ? 'checked="checked"' : ''
-        var h = `<input type="checkbox" class="report-file-selector" id="seicb-${cb_id}" name="${name}" ${checked}/>`;
+        var dis = act_config.disabled ? 'disabled="disabled"' : ''
+        var h = `<input type="checkbox" class="report-file-selector" id="seicb-${cb_id}" name="${name}" ${checked} ${dis}/>`;
         var $h = $(h);
         $h.val(JSON.stringify(value));
         var $eldiv = $('<div class="report-sel-item-ind"></div>').appendTo($el);
@@ -295,7 +312,7 @@ _fpa.reports = {
       var extra_val = dct_parts[2].trim();
     }
 
-    var report_id = $('.report-container').attr('data-report-id');
+    var report_id = $outer.find('.report-container').first().attr('data-report-id');
 
 
     if (dct_action == 'download files') {
@@ -311,7 +328,7 @@ _fpa.reports = {
     else if (dct_action == 'remove from list') {
       var $f = $(`<form id="itemselection-for-report" method="post" action="/reports/${report_id}/remove_from_list.json" class="report-remove-from-list" data-remote="true"><input type="hidden" name="remove_from_list[list_name]" value="${extra_val}"></form>`);
 
-      var cblock = $('[data-result="#report-embedded"]');
+      var cblock = $outer.find('[data-result="#report-embedded"]').first();
       if (cblock.length == 0) cblock = $('body');
 
       cblock.find('#report_query_form').addClass('keep-notices');
@@ -320,15 +337,15 @@ _fpa.reports = {
       });
 
     }
-    var $fsels = $('.report-file-selector');
+    var $fsels = $outer.find('.report-file-selector');
     var all_selected = ($fsels.filter(':checked').length > 0);
     var checked_attr = all_selected ? 'checked' : '';
     var init_label = all_selected ? 'unselect all' : 'select all'
 
     var b = `<span class="report-files-actions"><a id="report-select-all-files" data-select-all="select">select all</a> / <a id="report-unselect-all-files" data-select-all="unselect">unselect all</a></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="${dct_action}" class="btn btn-primary rep-sel-action-${dct_action.replace(' ', '-')}"/></span>`;
-    var $t = $('table.report-table, .report-list[data-results-count]');
+    var $t = $outer.find('table.report-table, .report-list[data-results-count]');
     $f.insertBefore($t);
-    $t.appendTo($('#itemselection-for-report'));
+    $t.appendTo($outer.find('#itemselection-for-report'));
 
     // On select all / unselect all
     // check or uncheck all the entries.
@@ -379,17 +396,22 @@ _fpa.reports = {
 
     // Add a default item that will allow all items to be removed if needed. Without this, there must always be at least one
     // result sent.
-    var $el = $('#seicb-0').clone();
+    var $el = $outer.find('#seicb-0').clone();
+    var jel = $el.val();
+    //  If no results were returned, or all the fields were blank, return
+    if (!jel) return;
+
     $el.prop('id', 'seicb-default');
-    var defval = JSON.parse($el.val());
+    var defval = JSON.parse(jel);
     defval.id = null;
     defval.init_value = true;
     $el.val(JSON.stringify(defval));
     $el.attr('checked', true)
+    $el.attr('disabled', null)
     $el.attr('class', 'report-file-selector-default')
     $el.hide();
     console.log($el);
-    $('.report-files-actions').append($el);
+    $outer.find('.report-files-actions').append($el);
 
 
   },
@@ -406,6 +428,17 @@ _fpa.reports = {
     }
 
     $submit[0].click();
+
+    var $modal = $form.parents('.modal').first();
+    if ($modal.length) {
+
+      $modal.not('.has-mfcbb-clear').on('hidden.bs.modal', function () {
+        $modal.find('.modal-footer .modal-footer-caption-before-button').html('');
+      }).addClass('has-mfcbb-clear');
+
+      $modal.find('.modal-footer .modal-footer-caption-before-button').html('selected items automatically saved')
+    }
+
   },
 
   run_autos: function (sel) {

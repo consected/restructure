@@ -1,0 +1,9 @@
+# To include Config Library content anywhere within the configuration,
+# add the following line (including the comment # symbol)
+# The category and name must match one of the Config Library entries
+# @library category name
+
+# Any key: value pairs set here will be included in the object for use within
+# runtime `\{\{constants.constant_name\}\}` substitutions
+_constants:
+  constant_name: a value

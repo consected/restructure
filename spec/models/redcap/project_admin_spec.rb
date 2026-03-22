@@ -107,11 +107,219 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc.dynamic_model_table = 'test.test_file_field_sf_recs'
     rc.server_url = server_url('file_field')
     rc.records_request_options.exportSurveyFields = true
+    rc.data_options.run_jobs_as_user = @user.email
     puts "Project Name: #{rc.name}"
     rc.save
+    expect(rc.job_user).to eq @user
+    expect(rc.job_app_type).to eq @user.app_type
 
     rc.dump_archive
 
     expect(rc.file_store.stored_files.where(path: 'test.test_file_field_sf_recs/project').count).not_to eq 0
+  end
+
+  describe 'failed project detection' do
+    it 'identifies projects with scheduled_run_failed status as failed' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      # Update status after save to avoid callback overwriting it
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+      rc.reload
+
+      expect(rc.failed?).to be true
+    end
+
+    it 'identifies projects with manual_run_failed status as failed' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:manual_run_failed])
+      rc.reload
+
+      expect(rc.failed?).to be true
+    end
+
+    it 'identifies projects with request_failed status as failed' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:request_failed])
+      rc.reload
+
+      expect(rc.failed?).to be true
+    end
+
+    it 'does not identify projects without frequency as failed even with failed status' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = nil
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+      rc.reload
+
+      expect(rc.failed?).to be false
+    end
+
+    it 'does not identify projects with successful status as failed' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_successful])
+      rc.reload
+
+      expect(rc.failed?).to be false
+    end
+
+    it 'returns the failed_at timestamp' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+      rc.reload
+
+      expect(rc.failed_at).to be_present
+      expect(rc.failed_at).to be_a(Time)
+    end
+
+    it 'finds all failed scheduled projects' do
+      # Set up some failed projects
+      rc1 = Redcap::ProjectAdmin.active.first
+      rc1.current_admin = @admin
+      rc1.frequency = '1 hour'
+      rc1.transfer_mode = 'scheduled'
+      rc1.save!
+      rc1.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+
+      rc2 = Redcap::ProjectAdmin.active.second
+      rc2.current_admin = @admin
+      rc2.frequency = '30 minutes'
+      rc2.transfer_mode = 'scheduled'
+      rc2.save!
+      rc2.update_columns(status: Redcap::ProjectAdmin::Statuses[:manual_run_failed])
+
+      failed_projects = Redcap::ProjectAdmin.failed_scheduled_projects
+      expect(failed_projects.count).to be >= 2
+      expect(failed_projects).to include(rc1)
+      expect(failed_projects).to include(rc2)
+    end
+
+    it 'detects if any failed scheduled projects exist' do
+      # Initially, no failures - update all to successful
+      Redcap::ProjectAdmin.active.each do |rc|
+        rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_successful])
+      end
+      expect(Redcap::ProjectAdmin.any_failed_scheduled_projects?).to be false
+
+      # Create a failure
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+
+      expect(Redcap::ProjectAdmin.any_failed_scheduled_projects?).to be true
+    end
+  end
+
+  describe 'transfer mode "none" enforcement' do
+    it 'sets frequency to nil when transfer_mode is set to "none"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.frequency).to be_nil
+    end
+
+    it 'sets frequency to nil when transfer_mode changes to "none"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '30 minutes'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.frequency).to eq '30 minutes'
+
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.frequency).to be_nil
+    end
+
+    it 'does not clear frequency when transfer_mode is "scheduled"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.frequency).to eq '1 hour'
+    end
+
+    it 'does not clear frequency when transfer_mode is "manual"' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '2 hours'
+      rc.transfer_mode = 'manual'
+      rc.save!
+
+      expect(rc.frequency).to eq '2 hours'
+    end
+
+    it 'identifies transfer_mode_none? correctly' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.transfer_mode = 'none'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be true
+    end
+
+    it 'identifies transfer_mode_none? as false for other modes' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be false
+
+      rc.transfer_mode = 'manual'
+      rc.save!
+
+      expect(rc.transfer_mode_none?).to be false
+    end
+
+    it 'clears frequency immediately on update to none' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.update!(frequency: '1 hour', transfer_mode: 'scheduled')
+      expect(rc.frequency).to eq '1 hour'
+
+      rc.update!(transfer_mode: 'none')
+      expect(rc.frequency).to be_nil
+
+      # Verify it persisted
+      rc.reload
+      expect(rc.frequency).to be_nil
+    end
   end
 end

@@ -24,7 +24,14 @@ module OptionListHelper
   end
 
   def active_user_options(default_user_id: nil)
-    default_user_id ||= object_instance.user_id if defined?(object_instance) && object_instance
+    default_user_id ||= object_instance.user_id if defined?(object_instance) &&
+                                                   object_instance.respond_to?(:user_id)
     options_from_collection_for_select(User.active, 'id', 'email', default_user_id)
+  end
+
+  def active_protocol_options(default_protocol_id: nil)
+    default_protocol_id ||= object_instance.protocol_id if defined?(object_instance) &&
+                                                           object_instance.respond_to?(:protocol_id)
+    options_from_collection_for_select(Classification::Protocol.active, 'id', 'name', default_protocol_id)
   end
 end

@@ -1,5 +1,5 @@
 <% if @report.editable_data? || !@report_criteria  %>
-  <div class="col-md-2 col-lg-2 inline-search-button <%= @hidden_class %>" style="padding-bottom: 1em;">
+  <div class="col-md-2 col-lg-2 inline-search-button <%= @hidden_class %> report-criteria__field-group">
     <label>&nbsp;</label>
     <div>
       <% 
@@ -9,7 +9,7 @@
               name: 'commit', 
               value: 'search', 
               type: 'submit', 
-              class: "btn btn-default #{@hidden_class} #{@auto_submitter_class} #{@auto_run_class}" %>
+              class: "btn btn-default #{@mrl_search_hidden_class} #{@auto_submitter_class} #{@auto_run_class}" %>
       <% end %>
     </div>
   </div>

@@ -18,6 +18,8 @@ controls to be evaluated to define if the link is shown to a specific user.
 
 Provide additional master tabs that link to pages specific to the currently viewed master record.
 
+**NOTE:** This needs the panel name to be set to: `master-tabs`
+
     nav:
       label: actions
       links:

@@ -45,16 +45,33 @@ A *dialog* only ever has the *content* template type - *layout* types are ignore
 Formatting of the *dialog* content is typically markdown, but will be treated as HTML if one of the following HTML tags
 (including appropriate attributes) is present in the text: `p br div ul hr`
 
-### Public Info Pages
+### Public and Private Info Pages
 
-The *dialog* message type also provides a mechanism for defining content to be displayed as public information pages, to
-users whether they are logged in or not.
+The *dialog* message type also provides a mechanism for defining content to be displayed as a public or private information page.
+
+#### Public Info Pages
+
+Public information pages may be viewed by users whether they are logged in or not. Private information pages may only be viewed by
+authenticated users.
 
 A public info page is defined by selecting the message type *dialog*, template type *content* and category *public*
 
 The name should be underscored or hyphenated, and represents the page *slug* for URLs used to access the page content:
 
 `{{base_url}}/info_pages/<slug>`
+
+#### Private Info Pages
+
+A private info page is defined by selecting the message type *dialog*, template type *content* and any category, suffixed with
+the the string `- info page`.
+
+For example `study-category - info-page`.
+
+The name should be underscored or hyphenated, and represents the page *slug* for URLs used to access the page content:
+
+`{{base_url}}/info_pages/<study-category>__<slug>`
+
+For example: `/info_pages/ipa_screening__intro_call_faq`
 
 ### UI Templates
 
@@ -71,6 +88,7 @@ used in the following forms / pages:
 - `ui user login` - user login form
 - `ui admin login` - administrator login form
 - `ui new user registration` - user self-registration form
+- `ui new user registration recaptcha error` - error block for user self-registration failure due to reCAPTCHA
 - `ui resend confirmation code` - form to request a registration confirmation code to be resent
 - `ui user change password` - password change form
 - `ui user forgot password` - forgot password form

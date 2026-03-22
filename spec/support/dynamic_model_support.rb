@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/seed_support"
-require "#{::Rails.root}/spec/support/user_support"
+require "#{Rails.root}/spec/support/seed_support"
+require "#{Rails.root}/spec/support/user_support"
 
 module DynamicModelSupport
   #
@@ -16,26 +16,33 @@ module DynamicModelSupport
       TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id', 'use_def_version_time', 'text_array')
     end
 
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
-    DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
-
+    DynamicModel.active.where(table_name: 'test_created_by_recs').reload.each { |dm| dm.disable!(@admin) }
+    # Use const_defined? with inherit=false to only check directly-defined constants,
+    # and rescue in case the constant was removed by a parallel test
+    begin
+      DynamicModel.send(:remove_const, :TestCreatedByRec) if DynamicModel.const_defined?(:TestCreatedByRec, false)
+    rescue NameError
+      # Constant may have been removed by another parallel test
+    end
     dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
     dm.current_admin = @admin
     dm.update_tracker_events
 
     expect(dm).to be_a ::DynamicModel
+    active_count = DynamicModel.active.where(table_name: 'test_created_by_recs').reload.count
+    expect(active_count).to eq 1
 
     setup_access :dynamic_model__test_created_by_recs, user: @user
     setup_access :dynamic_model__test_created_by_recs, user: @user0
+    dm.send :reset_all_versions
     dm
   end
 
   def generate_test_dynamic_view
     create_user
-    setup_access :masters, user: @user
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
@@ -82,7 +89,7 @@ module DynamicModelSupport
     dm = DynamicModel.create! current_admin: @admin,
                               name: 'test embed fields',
                               table_name: 'test_embed_fields',
-                              schema_name: 'dynamic',
+                              schema_name: 'dynamic_test',
                               category: :test
 
     dm.update_tracker_events
@@ -90,7 +97,7 @@ module DynamicModelSupport
     dm = DynamicModel.create! current_admin: @admin,
                               name: 'test embed field and ids',
                               table_name: 'test_embed_field_and_ids',
-                              schema_name: 'dynamic',
+                              schema_name: 'dynamic_test',
                               category: :test
 
     dm.update_tracker_events
@@ -105,7 +112,7 @@ module DynamicModelSupport
     dm = DynamicModel.create!(current_admin: @admin,
                               name: 'test embed options',
                               table_name: 'test_embed_options',
-                              schema_name: 'dynamic',
+                              schema_name: 'dynamic_test',
                               category: :test,
                               options:)
 
@@ -114,7 +121,7 @@ module DynamicModelSupport
     dm = DynamicModel.create! current_admin: @admin,
                               name: 'test embedded recs',
                               table_name: 'test_embedded_recs',
-                              schema_name: 'dynamic',
+                              schema_name: 'dynamic_test',
                               category: :test
 
     dm.update_tracker_events

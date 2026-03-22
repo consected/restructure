@@ -1,6 +1,6 @@
-
 # Save Trigger: Create Reference options
-        - model_name:
+        create_reference:
+          - model_name:
             if: if_extras
             in: |
               one of:
@@ -8,20 +8,48 @@
                 - referring_record
                 - master (creates no reference, just uses master_id)
                 - master_with_reference (creates a reference to the master, not the item)
-                - specific_record
+                - specific_record:
+                    resource_name:
+                      criteria_field: criteria_value
+                      id: return_value
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
-            with: 
-              field_name: 'now()'
-              field_name_2: 'literal value'
-              field_name_3: 
-                this: 
-                  field_name: return_value
-              field_name_4: 
-                reference_name:
-                  field_name: return_value
+
+            with_result: 
+            # Map attributes from a related item to the target item.
+            # A list of models to retrieve from and attributes to assign allow multiple sources to
+            # be used.
+            # NOTE: with: fields override any specified here
+            # from: may also just take a simple String such as `from: embedded_item` to
+            # as shorthand for the following full calculation
+              - from:
+                  embedded_item:
+                    return: return_result
+                attributes:
+                  receipt_date: event_date
+                  receipt_time: event_time
+                  received_by: received_by
+                  select_facility: 'Lab: {{select_lab}}'
+                  # Substitutions use data only from the "from:" item
+
+                  # Also set attributes in the embedded item
+                  embedded_item:
+                    rank: rank
+                    rec_type: rec_type
+                    data: '{{select_lab}}'
+              - from: 
+                  dynamic_model__some_recs:
+                    return: return_result
+                attributes:
+                  a_value: value_from_result
+
+#!defs(save_triggers_with_attribute_values_defs.yaml)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
 
             to_existing_record: # use an existing record of type "model_name", rather than creating a new one
               record_id: 'Hash with return_value, such as {model_name: {match: value, id: "return_value"\}\}'
-    
+          # NOTE: this sets:
+          # - save_trigger_results.created_references (list of model_reference items created - skipped if an item wasn't created)
+          # - save_trigger_results.created_items (list of created items - skipped if an item wasn't created)
+          # - save_trigger_results.created_results (list of results indicating if an item was created based on "if:" conditions)

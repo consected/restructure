@@ -24,7 +24,7 @@ In ReStructure repo:
 ```sh
 bundle ; yarn
 FPHS_LOAD_APP_TYPES=1 bundle exec rails db:migrate
-FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
+FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 # Login for sudo if required
 app-scripts/parallel_test.sh
@@ -54,7 +54,7 @@ In Private repo:
 ```sh
 bundle ; yarn
 FPHS_LOAD_APP_TYPES=1 bundle exec rails db:migrate
-FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
+FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 # Login for sudo if required
 app-scripts/parallel_test.sh

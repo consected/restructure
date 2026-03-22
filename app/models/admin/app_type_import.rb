@@ -15,7 +15,7 @@ class Admin
     # @param [String] config_text - YAML or JSON text
     # @param [Admin] admin - admin profile performing import
     # @param [String] name - optionally override the name of the app type at import
-    # @param [Symbol] format - :json (default) or :yaml
+    # @param [Symbol] format - :json (default), :yaml, :raw (a hash)
     # @param [:force|:changed|nil] force_update - optionally force updated configuration items to current timestamp
     #                                  allowing previously failed imports to be overwritten
     #                                  or set to :changed to update changes, regardless of updated_at timestamp
@@ -23,8 +23,10 @@ class Admin
     #                             end. A restart of the server should be forced to ensure consistency of state and DB
     # @return [Array] an array on [app_type, results]
     def self.import_config(config_text, admin,
-                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil)
-
+                           name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
+                           prevent_migrations: false)
+      @@import_config_in_progress = true
+      @@prevent_migrations = prevent_migrations
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -35,6 +37,19 @@ class Admin
       importer.do_import_config
     rescue StandardError, FphsException => e
       [importer, e]
+    ensure
+      @@import_config_in_progress = false
+      @@prevent_migrations = false
+    end
+
+    def self.import_in_progress?
+      @@import_config_in_progress ||= nil
+      @@import_config_in_progress == true
+    end
+
+    def self.prevent_migrations?
+      @@prevent_migrations ||= nil
+      @@prevent_migrations == true
     end
 
     #
@@ -67,10 +82,26 @@ class Admin
       results = { 'failures' => import_failures, 'updates / creations' => import_results }
 
       begin
-        if skip_fail
-          import_set
+        find_or_create
+
+        if skip_fail && !dry_run
+          # We can't skip failures if a dry run has been requested, since a transaction is
+          # required for the dry run rollback.
+
+          # Run this skip-fail import in a transaction so the lock can be held.
+          # Just ignore any exceptions raised, committing the transaction.
+          # requires_new ensures that any outer transactions are not rolled back.
+          Admin::AppType.transaction(requires_new: true) do
+            lock_app_types_table
+            import_set
+          rescue StandardError, ActiveRecord::Rollback => e
+            # Log error but continue
+            Rails.logger.warn("App type import error - skip fail and not dry run - : #{e.message}")
+          end
         else
+          # Fail on first error and rollback, or if a dry run always rollback
           Admin::AppType.transaction do
+            lock_app_types_table
             import_set
           end
         end
@@ -86,28 +117,17 @@ class Admin
       # If it wasn't present, the result was nil and we should skip this, since it
       # indicates we don't want to make any changes
       clean_user_access_controls if import_results['user_access_controls']
+      Admin::AppType.reset_memo_associated_items!
       app_type&.reload
 
       [app_type, results]
     end
 
     def import_set
-      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
-
-      # override the name if specified
-      a_conf[:current_admin] = admin
-      a_conf['name'] = name if name
-
-      dsn = a_conf['default_schema_name']
-      unless dsn.nil? || Admin::MigrationGenerator.current_search_paths&.include?(dsn)
-        raise FphsException, 'Import of the app requires the FPHS_POSTGRESQL_SCHEMA environment variable ' \
-                             "to include the default schema name of the app: #{dsn}"
-      end
-
-      self.app_type = find_or_create_with_config(a_conf)
-
       # set the app type to allow automatic migrations to work
       admin.matching_user_app_type = app_type
+      # Save, to ensure the default _app_ user access controls are created in the correct app
+      admin.matching_user&.save!
       app_type.setup_migrations
       force_report_short_names
 
@@ -121,6 +141,15 @@ class Admin
       import_config_sub_items 'associated_general_selections', %w[item_type value],
                               reject: reject_items
 
+      # Import config libraries twice to handle libraries that reference other libraries
+      # First pass: import with skip_fail to allow missing library references
+      # Second pass: respect user's skip_fail setting to catch genuine errors
+      original_skip_fail = skip_fail
+      self.skip_fail = true
+      import_config_sub_items 'associated_config_libraries', %w[name category format]
+
+      # Second pass with original skip_fail setting
+      self.skip_fail = original_skip_fail
       import_config_sub_items 'associated_config_libraries', %w[name category format]
 
       import_config_sub_items 'associated_external_identifiers', ['name']
@@ -159,13 +188,12 @@ class Admin
 
       import_config_sub_items 'valid_user_access_controls',
                               %w[resource_type resource_name role_name],
-                              add_vals: { allow_bad_resource_name: true }
+                              add_vals: { allow_bad_resource_name: true },
+                              compare_blanks_on: ['role_name'],
+                              disable_if_disabled_user: true
 
       app_type.reload
       self.new_id = app_type.id
-
-      # Reset the app type to allow the actual value to be used
-      admin.matching_user_app_type = nil
 
       # Rollback if a dry run was requested
       raise ActiveRecord::Rollback if dry_run
@@ -179,10 +207,13 @@ class Admin
     def app_type_config
       return @app_type_config if @app_type_config
 
-      if format == :json
+      case format
+      when :json
         config = JSON.parse(config_text)
-      elsif format == :yaml
+      when :yaml
         config = YAML.safe_load(config_text)
+      when :raw
+        config = config_text.deep_stringify_keys
       else
         raise FphsException, 'specify app type import format as one of :json or :yaml'
       end
@@ -205,10 +236,44 @@ class Admin
     end
 
     #
+    # Use within a transation to add an exclusive update lock on the app_types table.
+    # Will return immediately with an exception if another transaction has locked the table.
+    def lock_app_types_table
+      Admin::AppType.connection.execute('LOCK TABLE app_types IN SHARE UPDATE EXCLUSIVE MODE NOWAIT')
+    rescue ActiveRecord::LockWaitTimeout
+      raise FphsException, 'Cannot import app type - another import is currently in progress'
+    end
+
+    #
     # Find or create an app type based on a configuration,
     # matching on the name
     def find_or_create_with_config(a_conf)
       Admin::AppType.find_by(name: a_conf['name']) || Admin::AppType.create!(a_conf)
+    end
+
+    def find_or_create
+      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
+
+      # override the name if specified
+      a_conf[:current_admin] = admin
+      a_conf['name'] = name if name
+
+      dsn = a_conf['default_schema_name']
+      unless dsn.nil? || Admin::MigrationGenerator.current_search_paths&.include?(dsn)
+        raise FphsException, 'Import of the app requires the FPHS_POSTGRESQL_SCHEMA environment variable ' \
+                             "to include the default schema name of the app: #{dsn}"
+      end
+
+      self.app_type = find_or_create_with_config(a_conf)
+
+      olat = Settings::OnlyLoadAppTypes
+      if olat && !olat.include?(app_type.id)
+        raise FphsException, 'Import of the app requires the FPHS_LOAD_APP_TYPES environment variable ' \
+                             "to include the new app type ID: #{app_type.id}: " \
+                             "FPHS_LOAD_APP_TYPES=#{Settings::OnlyLoadAppTypes.join(',')},#{app_type.id}"
+      end
+
+      app_type
     end
 
     #
@@ -228,9 +293,14 @@ class Admin
     # @param [Hash] add_vals - a hash representing attribute / values to add to every imported item
     # @param [Array[String]] filter_on - list attributes to compare between new and existing items to identify matches
     #                                  - these do not need to exist in the database, and can be methods
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
+    # @param [true|false] disable_if_disabled_user - if true, and the sub item has a user that is disabled then
+    #                                                the item will be disabled too
     # @return [Array{Object}] returns an array of the objects representing new and updated sub items
     def import_config_sub_items(key, lookup_existing_with_fields,
-                                reject: nil, add_vals: {}, filter_on: nil)
+                                reject: nil, add_vals: {}, filter_on: nil, compare_blanks_on: nil,
+                                disable_if_disabled_user: false)
       results = []
       failures = []
       self.current_key = key
@@ -238,6 +308,8 @@ class Admin
       return unless acs
 
       acs = acs.reject(&reject) if reject
+      # Fix missing updated_at values to the epoch so they are always older
+      acs.each { |v| v['updated_at'] ||= '1970-01-01T00:00:00Z' }
       # Ensure we apply them in the correct order (although this doesn't account for other types of resource)
       acs.sort! { |a, b| a['updated_at'] <=> b['updated_at'] }
       acs.each do |ci|
@@ -248,16 +320,20 @@ class Admin
         user = app_type_item_user(config_item['user_email'])
         next if user == :unknown
 
-        app_type_item = find_app_type_item(lookup_existing_with_fields, filter_on)
+        app_type_item = find_app_type_item(lookup_existing_with_fields, filter_on:, compare_blanks_on:)
         new_vals = new_values_from_config(lookup_existing_with_fields, add_vals)
         new_vals[:user] = user if user
+
+        new_vals[:disabled] = true if disable_if_disabled_user && (user&.disabled? || app_type_item&.user&.disabled?)
+
         begin
           app_type_item, item_changes = create_or_update(app_type_item, new_vals)
         rescue StandardError, FphsException => e
-          raise unless skip_fail
-
           fres = identifier_hash(app_type_item, found_with_conditions)
           fres['exception!'] = self.class.clean_exception(e)
+          Rails.logger.warn fres
+          raise unless skip_fail
+
           failures << fres
         end
 
@@ -320,10 +396,16 @@ class Admin
     #
     # Conditions used to lookup existing items
     # @param [Array] lookup_existing_with_fields - fields used to identify existing items
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
     # @return [Hash] conditions for #where
-    def app_type_item_conditions(lookup_existing_with_fields)
+    def app_type_item_conditions(lookup_existing_with_fields, compare_blanks_on = nil)
       cond = config_item.slice(*lookup_existing_with_fields)
-      cond.each { |k, v| cond[k] = nil if v.blank? }
+      cond.each do |k, v|
+        cmp = nil
+        cmp = [nil, ''] if compare_blanks_on&.include?(k)
+        cond[k] = cmp if v.blank?
+      end
       user = app_type_item_user(config_item['user_email'])
       cond[:user] = user if user
       cond
@@ -357,9 +439,11 @@ class Admin
     # specified in the config item
     # @param [Array] lookup_existing_with_fields - fields used to identify existing items
     # @param [Array] filter_on - optional list of attributes/methods from the config item to refine the filter
+    # @param [Array|nil] compare_blanks_on - list fields to compare with (f IS NULL or f = '') as opposed
+    #                                        to a direct comparison
     # @return [ActiveRecord::Model]
-    def find_app_type_item(lookup_existing_with_fields, filter_on = nil)
-      self.found_with_conditions = cond = app_type_item_conditions(lookup_existing_with_fields)
+    def find_app_type_item(lookup_existing_with_fields, filter_on: nil, compare_blanks_on: nil)
+      self.found_with_conditions = cond = app_type_item_conditions(lookup_existing_with_fields, compare_blanks_on)
       app_type_item = dyn_cname.where(cond).reorder('').order('disabled asc nulls first, id desc')
 
       filter = config_item.slice(*filter_on) if filter_on
@@ -437,11 +521,11 @@ class Admin
     # @param [Hash] item_identifiers
     # @return [Hash] of changes
     def updated_hash(orig_obj, item_identifiers)
-      # If we have saved any changes, and either we changed more than one attribute or
-      # the attribute changed wasn't just update_at,
+      # If we have saved any changes, and
+      # the attributes changed weren't just updated_at and admin_id,
       # then return the details.
       unless orig_obj.saved_changes? &&
-             (orig_obj.previous_changes.length > 1 || orig_obj.previous_changes['updated_at'])
+             (orig_obj.previous_changes.keys - %w[updated_at admin_id]).present?
         # Nothing was saved or we only changed the updated_at attribute, so just return
         return
       end

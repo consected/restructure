@@ -1,17 +1,13 @@
 <%
-  content = markdown_to_html @report.description
-  if content.present?
-    content = Formatter::Substitution.substitute( content, data: @report).html_safe
-  end
   @criteria_block_id = "report-criteria-container-#{SecureRandom.hex}"
   extra_classes = @report.report_options.view_options.hide_criteria_panel ? 'hidden' : ''
   extra_classes += " report-rn--#{@report.alt_resource_name}"
 %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
-<script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('edit-report-result') do %>
   <span>
   </span>
-</script>
+<% end %>
 <% if @report.editable_data? %>
   <span id="editable_data"></span>
 <% end %>
@@ -37,16 +33,14 @@
         %>
         <%= table_comment %>
         <% end %>
-        <div class="report-form-content">
-        <%= content %>
-        </div>      
+        <%= render partial: 'description_content' %>
         <%= render partial: 'criteria' %>
       </div>
     </div>
   </div>
 </div>
 <%= render partial: 'criteria_view_css' %>
-<% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
+<% if @report.returns_master_results_list %><%= render partial: 'reports/master_results_css' %><% end %>
 <div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" class="report-results-outer is-<%= embedded_report ? '' : 'not-' %>embedded-report">
   <% if @results %>
     <%= render partial: 'results' %>

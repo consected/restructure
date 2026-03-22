@@ -21,7 +21,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param [String|Symbol|nil] type optionally the type to find
   # @return [Admin::MessageTemplate|nil] matching instance
   def self.named(name, type: nil)
-    res = where(name: name)
+    res = where(name:)
     res = res.where(message_type: type) if type
     res.first
   end
@@ -50,7 +50,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
   # Simply calls {Formatter::Substitution.substitute}
   def substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
-    Formatter::Substitution.substitute all_content, data: data, tag_subs: tag_subs, ignore_missing: ignore_missing
+    Formatter::Substitution.substitute all_content, data:, tag_subs:, ignore_missing:
   end
 
   #
@@ -65,20 +65,22 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param [String] content_template_text raw text to use a template
   # @param [Hash] data simple Hash to pass to #substitute
   # @param [Boolean] ignore_missing defaults to false
+  # @param [Symbol|true|false] markdown_to_html - method to call to decide if markdown should be converted to html or literal value
   # @return [String] resulting text
-  def generate(content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false)
+  def generate(content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false,
+               markdown_to_html: :force_markdown_to_html)
     raise FphsException, 'Must use a layout template to generate from' unless layout_template?
 
     # Generate the content to be embedded, forcing the result to be converted from markdown to HTML
     # if the content template indicates that this is required by calling #force_markdown_to_html on itself
-    text = self.class.generate_content(content_template_name: content_template_name,
-                                       content_template_text: content_template_text,
-                                       data: data,
-                                       ignore_missing: ignore_missing,
+    text = self.class.generate_content(content_template_name:,
+                                       content_template_text:,
+                                       data:,
+                                       ignore_missing:,
                                        no_substitutions: true,
-                                       markdown_to_html: :force_markdown_to_html)
+                                       markdown_to_html:)
     all_content = template.sub('{{main_content}}', text)
-    substitute all_content, data: data, ignore_missing: ignore_missing
+    substitute all_content, data:, ignore_missing:
   end
 
   #

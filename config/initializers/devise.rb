@@ -196,6 +196,10 @@ Devise.setup do |config|
   # Allow a longer drift on two-factor authentication codes
   config.otp_allowed_drift = Settings::TwoFactorAuthDrift
 
+  # Ensure a long enough secret length to cover against advisory
+  # https://github.com/devise-two-factor/devise-two-factor/security/advisories/GHSA-qjxf-mc72-wjr2
+  config.otp_secret_length = 26
+
   # Warn on the last attempt before the account is locked.
   config.last_attempt_warning = true
 
@@ -280,4 +284,8 @@ Devise.setup do |config|
   # When using OmniAuth, Devise cannot automatically set OmniAuth path,
   # so you need to do it manually. For the users scope, it would be:
   # config.omniauth_path_prefix = '/my_engine/users/auth'
+
+  # When set to false, does not sign a user in automatically after their password is
+  # changed. Defaults to true, so a user is signed in automatically after changing a password.
+  config.sign_in_after_change_password = true
 end

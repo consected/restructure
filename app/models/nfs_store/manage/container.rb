@@ -16,7 +16,8 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
+      attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids,
+                    :save_trigger_results
 
       alias_attribute :container_id, :nfs_store_container_id
 
@@ -44,6 +45,7 @@ module NfsStore
         self.class.resource_name
       end
 
+      #
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
@@ -51,11 +53,15 @@ module NfsStore
 
         setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
         if setting
-          unless setting.value.in?(Master.alternative_id_fields.map(&:to_s))
+          alt_id_field_name = setting.value
+          unless alt_id_field_name.in?(Master.alternative_id_fields.map(&:to_s))
             raise FsException, 'An id name ending with "_id" is expected for "filestore directory id"'
           end
 
-          "#{setting.value.hyphenate}-#{master.send(setting.value)}"
+          # Get the alternative id field value, specifying access_by nil to prevent checking of access controls
+          # for the current user, since the result is user agnostic.
+          alt_id_field_value = master.send(alt_id_field_name, access_by: nil)
+          "#{alt_id_field_name.hyphenate}-#{alt_id_field_value}"
         else
           "master-#{master_id}"
         end
@@ -74,7 +80,7 @@ module NfsStore
         app_type = user.app_type
         raise FsException::NoAccess, "User has no access to this container's app-type" unless user.app_type_valid?
 
-        where app_type: app_type
+        where app_type:
       end
 
       # Create a container record in the current app. After creation, #create_in_nfs_store is called by a callback
@@ -86,10 +92,11 @@ module NfsStore
       def self.create_in_current_app(user: nil, name: nil, extra_params: {})
         app_type_id = user&.app_type_id
         unless app_type_id && user && name.present?
-          FsException::Action.new "Cannot create a container with app_type: #{app_type_id}, user: #{user&.id}, name: #{name}"
+          raise FsException::Action.new 'Cannot create a container with app_type: ' \
+                                        "#{app_type_id}, user: #{user&.id}, name: #{name}, extras: #{extra_params}"
         end
 
-        create! extra_params.merge(app_type_id: app_type_id, name: name, current_user: user)
+        create! extra_params.merge(app_type_id:, name:, current_user: user)
       end
 
       #
@@ -137,6 +144,7 @@ module NfsStore
 
         return unless parent_item&.can_edit?
 
+        self.save_trigger_results ||= {}
         extra_options_config.calc_save_trigger_if self, alt_on: :upload
       end
 
@@ -175,7 +183,7 @@ module NfsStore
         res = nil
         Group.role_names_for(user).each do |role_name|
           if Filesystem.test_dir role_name, self, :read
-            res = File.stat(path_for(role_name: role_name)).gid
+            res = File.stat(path_for(role_name:)).gid
             break if res
           end
         end
@@ -196,7 +204,7 @@ module NfsStore
       # parent_sub_dir has not been overridden
       # @return [String]
       def path_to_parent_dir_for(role_name: nil)
-        parts = path_for(role_name: role_name).split('/')
+        parts = path_for(role_name:).split('/')
         parts.pop if parent_sub_dir.present?
         File.join parts
       end
@@ -251,7 +259,6 @@ module NfsStore
       def can_download_or_view?
         return @can_download_or_view unless @can_download_or_view.nil?
 
-        cu = current_user
         @can_download_or_view = can_download? || can_view?
       end
 
@@ -313,7 +320,7 @@ module NfsStore
 
       # List all the filesystem files in the container directory and sub-directories
       # including files in the mounted archives too.
-      # It excludes .trash paths and hidden (dot) paths and files
+      # It excludes .trash paths, hidden (dot) paths and files, and processing flag files.
       # Iterates through all the roles that the current user has, building a complete, unique set of files based on the
       # appropriate group file permissions for each role.
       # @return [Array(String)] a list of file paths relative to the container directory
@@ -322,7 +329,7 @@ module NfsStore
         current_user_role_names.each do |role_name|
           next unless Filesystem.test_dir role_name, self, :read
 
-          p = path_for role_name: role_name
+          p = path_for(role_name:)
           # Don't use Regex - it breaks if there are special characters
           paths = Dir.glob("#{p}/**/*").reject do |f|
             Pathname.new(f).directory?
@@ -331,6 +338,8 @@ module NfsStore
           all_files += paths.map { |f| f.sub("#{p}/", '').sub(p, '') }
         end
 
+        # Filter out processing flag files
+        all_files.reject! { |f| f.match?(/\.__processing(-index|-archive)?__$/) }
         all_files.uniq
       end
 
@@ -368,15 +377,21 @@ module NfsStore
         @can_perform_if[perform] = ca.calc_action_if
       end
 
+      def can_access_if_admin_master?
+        is_admin_container = Settings.admin_master&.id == master&.id
+        is_admin_container && current_user.role_names.include?(Settings.admin_nfs_role)
+      end
+
       def raise_if_no_access!
-        return if allows_current_user_access_to? :access
+        return if can_access_if_admin_master? || allows_current_user_access_to?(:access)
 
         cp = parent_item
         cpm = cp&.master&.id if cp.respond_to?(:master)
 
         raise FsException::NoAccess,
               'User does not have access to this container ' \
-              "(master #{master&.id} - parent #{cp.class} id: #{cp&.id} master: #{cpm})"
+              "(user #{current_user&.email} - master #{master&.id} - class #{self.class} " \
+              "- parent #{cp.class} id: #{cp&.id} master: #{cpm})"
       end
 
       def raise_if_action_not_authorized!(for_action)
@@ -407,7 +422,7 @@ module NfsStore
         perform = perform.to_sym
         cu = current_user
         !!(cu.can?(perform) && (
-            can_perform_if?(perform) == :no_config && can_edit? ||
+            (can_perform_if?(perform) == :no_config && can_edit?) ||
             can_perform_if?(perform)
           ))
       end
@@ -418,7 +433,7 @@ module NfsStore
       # @param [String|Symbol] perform - the action to test
       # @return [Object]
       def can_perform_if_config(perform)
-        perform = "#{perform}_if".to_sym
+        perform = :"#{perform}_if"
         nfs_store_config_for(:can)&.dig(perform)
       end
 
@@ -453,10 +468,10 @@ module NfsStore
         end
 
         unless res
-          raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. "\
-                                          "App type: #{user.app_type.name} (#{user.app_type.id}). "\
-                                          "Name: #{name}. "\
-                                          "Roles: #{roles.join(', ')}"
+          raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. " \
+                                     "App type: #{user.app_type.name} (#{user.app_type.id}). " \
+                                     "Name: #{name}. " \
+                                     "Roles: #{roles.join(', ')}"
         end
 
         true

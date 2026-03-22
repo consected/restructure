@@ -45,6 +45,7 @@
           refitem.each do |ref_type, ref_config|
           shown_embedded = true
           %>
+          <% if is_current_admin_sample? %><div class="admin-sample-form-info"><label>referenced item:</label> <span><%=ref_type%></span></div><% end %>
           <%= render partial: 'common_templates/reference_actions',  locals: {
                 name: "#{object_instance.class.name.ns_underscore}", 
                 ref_type: ref_type, 
@@ -95,9 +96,16 @@
                   unless action_name.in? ['new', 'edit']
                     # Do we ever get here?
                %>
-                  <a id="" href="/masters/<%= model_reference.to_record_master_id %>/<%= model_reference.to_record_type_us.ns_pathify.pluralize %>/<%= model_reference.to_record_id %>" data-template="<%= model_reference.to_record_short_type_us.hyphenate %>-result-template" data-result-target-force="true" data-result-target="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id %>" data-remote="true" class="glyphicon glyphicon-triangle-right caret-target-collapsed view-item mr-expander"></a>
+                  <a id="" 
+                     href="/masters/<%= model_reference.to_record_master_id %>/<%= model_reference.to_record_type_us.ns_pathify.pluralize %>/<%= model_reference.to_record_id %>" 
+                     data-template="<%= model_reference.to_record_short_type_us.hyphenate %>-result-template" 
+                     data-result-target-force="true" 
+                     data-result-target="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id %>" 
+                     data-remote="true" 
+                     class="glyphicon glyphicon-triangle-right caret-target-collapsed view-item mr-expander"
+                     data-label-for="<%= model_reference.to_record_label.ns_hyphenate %>"></a>
                 <% end %>
-                <i><%= model_reference.to_record_label %></i>
+                <i id="<%= model_reference.to_record_label.ns_hyphenate %>"><%= model_reference.to_record_label %></i>
                 <% unless action_name.in?(['new', 'edit']) %><%= model_reference.to_record_data %><% end %>
               <% else %>
                 <span class="glyphicon glyphicon-ban-circle"></span>
@@ -110,8 +118,14 @@
        end # unless @embedded_item
        if model_reference.to_record_viewable
      %>
-        <div class="model-reference-result <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %> is-in-edit-form" >
-          <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
+        <div class="model-reference-result common-template-references--edit-form-references <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %> is-in-edit-form" >
+          <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" 
+               class="model-reference-result common-template-references--edit-form-references--inner" 
+               data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  
+               data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" 
+               data-subscription="<%= model_reference.to_record_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" 
+               data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" 
+               data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
             <%
               if @embedded_item && !shown_embedded
                 r = @option_type_config&.model_reference_config(model_reference)

@@ -25,10 +25,11 @@ reslist = reslist.compact.to_h
 
 unless big_select
 reslist = options_for_select(reslist)
-options.merge!({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}})
+data = { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}
+options.merge!(data)
 %>
-<%= select_tag field_name_sym, reslist %>
+<%= select_tag field_name_sym, reslist, {}, data %>
 <% else %>
 <% reslist = big_select_list_from_options(reslist, group_split_char) %>
-<%= big_select_field(form, field_name_sym, reslist, options: big_select) %>
+<%= big_select_field(form, field_name_sym, form_object_item_type_us, reslist, options: big_select) %>
 <% end %>

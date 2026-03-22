@@ -12,6 +12,18 @@
     return Object.prototype.toString.call(value) === '[object Array]';
   };
 
+  var includes = function (obj, inc) {
+    if (!obj) return;
+
+    if (isArray(obj)) {
+      var res = obj.indexOf(inc);
+      return (res !== -1);
+    }
+
+    var re = new RegExp(inc);
+    return obj.search(re) !== -1;
+  }
+
   var ExpressionRegistry = function () {
     this.expressions = [];
   };
@@ -59,18 +71,21 @@
       if (!right) right = '';
       right = right.split(',');
     }
-    return right.indexOf(left) !== -1;
+    // Convert left to string for comparison to handle number/string mismatches
+    return right.indexOf(String(left)) !== -1;
   });
   eR.add('!in', function (left, right) {
     if (!isArray(right)) {
       right = right.split(',');
     }
-    return right.indexOf(left) === -1;
+    // Convert left to string for comparison to handle number/string mismatches
+    return right.indexOf(String(left)) === -1;
   });
   eR.add('includes', function (left, right) {
-    if (!left) return;
-    var re = new RegExp(right);
-    return left.search(right) !== -1;
+    return includes(left, right);
+  });
+  eR.add('!includes', function (left, right) {
+    return !includes(left, right);
   });
   eR.add('typeof', function (left, right) {
     if (!right) return;
@@ -127,6 +142,14 @@
     for (var i in obj) {
       res += '<' + el + '>' + obj[i] + '</' + el + '>';
     }
+    return res;
+  });
+
+  Handlebars.registerHelper('split_lines', function (obj) {
+    var res = '';
+    if (!obj) return res;
+
+    res = obj.replaceAll("\r\n", "\n").split("\n");
     return res;
   });
 
@@ -243,9 +266,7 @@
 
 
   Handlebars.registerHelper('includes', function (obj, inc) {
-    if (!obj) return;
-    var re = new RegExp(inc);
-    return obj.search(inc) !== -1;
+    return includes(obj, inc);
   });
 
   Handlebars.registerHelper('with_content', function (name, type, context, options) {
@@ -265,7 +286,8 @@
   });
 
   Handlebars.registerHelper('nl2br', function (text) {
-    return _fpa.utils.nl2br(text);
+    var nl2br = _fpa.utils.nl2br(text);
+    return new Handlebars.SafeString(nl2br)
   });
 
   Handlebars.registerHelper('quoteattr', function (text) {
@@ -328,18 +350,53 @@
 
   Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2, sub_key3, sub_key4, sub_key5) {
     var res = _fpa.state[name];
-    if (res && key && !key.hash)
+    if (!res) {
+      console.log(`fpa_state_item: could not find ${name}`);
+      return;
+    }
+    if (res && key && !key.hash) {
       res = res[key];
-    if (res && sub_key && !sub_key.hash)
+      if (!res) {
+        var level = sub_key ? 'log' : 'debug';
+        console[level](`fpa_state_item: could not find ${name} ${key}`);
+        return;
+      }
+    }
+    if (res && sub_key && !sub_key.hash) {
       res = res[sub_key];
-    if (res && sub_key2 && !sub_key2.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key}`);
+        return;
+      }
+    }
+    if (res && sub_key2 && !sub_key2.hash) {
       res = res[sub_key2];
-    if (res && sub_key3 && !sub_key3.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2}`);
+        return;
+      }
+    }
+    if (res && sub_key3 && !sub_key3.hash) {
       res = res[sub_key3];
-    if (res && sub_key4 && !sub_key4.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3}`);
+        return;
+      }
+    }
+    if (res && sub_key4 && !sub_key4.hash) {
       res = res[sub_key4];
-    if (res && sub_key5 && !sub_key5.hash)
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3} ${sub_key4}`);
+        return;
+      }
+    }
+    if (res && sub_key5 && !sub_key5.hash) {
       res = res[sub_key5];
+      if (!res) {
+        console.debug(`fpa_state_item: could not find ${name} ${key} ${sub_key} ${sub_key2} ${sub_key3} ${sub_key4} ${sub_key5}`);
+        return;
+      }
+    }
     return res;
   });
 
@@ -457,7 +514,8 @@
 
   Handlebars.registerHelper('pretty_string', function (stre, options) {
     if (options && !options.hash) options.hash = {};
-    return _fpa.utils.pretty_print(stre, options.hash);
+    stre = _fpa.utils.pretty_print(stre, options.hash);
+    return new Handlebars.SafeString(stre)
   });
 
 
@@ -595,25 +653,7 @@
   Handlebars.registerHelper('embedded_report', function (resname, t, opt) {
     if (!resname) return;
     if (typeof resname !== 'string') return resname;
-    const referring_record = this.referenced_from && this.referenced_from[0];
-
-    // Get the appropriate id, master_id and type for the report call params
-    if (referring_record) {
-      var list_id = referring_record.from_record_id;
-      var list_master_id = referring_record.from_record_master_id;
-      var list_type = referring_record.from_record_type_us;
-    }
-    else {
-      var list_id = this.id;
-      var list_master_id = this.master_id;
-      var list_type = this.item_type;
-    }
-
-    console.log('rhembedded');
-    const search_attrs = `search_attrs[master_id]=${list_master_id}&search_attrs[list_id]=${list_id}&search_attrs[list_type]=${list_type}`
-    const divid = `tag_embedded_report_results-${resname}-${list_master_id}-${list_id}-${list_type}`
-    const htags = `data-remote="true" data-result-target="#${divid}" data-target="#${divid}" data-target-force="true"`;
-    var res = `<div class="tag-embedded-report" id="${divid}"><a ${htags} href="/reports/${resname}?embed=true&part=results&${search_attrs}&commit=table" class="on-postprocess-click">loading...</a></div>`;
+    var res = _fpa.utils.embedded_report(resname, this);
     return new Handlebars.SafeString(res);
   });
 
@@ -638,6 +678,45 @@
     }
     return res;
   });
+
+  Handlebars.registerHelper('length', function (val) {
+    if (!val) return;
+
+    return Object.keys(val).length;
+  });
+
+  Handlebars.registerHelper('params', function (key1, key2, key3) {
+    if (key2 && key2.hash) key2 = null;
+    if (key3 && key3.hash) key3 = null;
+
+    if (key1 && !key2) {
+      var data = _fpa.utils.get_params(key1);
+
+      return data;
+    }
+    if (key2 && !key3) {
+      var data = _fpa.utils.get_params(key1);
+      return data && data[key2];
+    }
+    else if (key3) {
+      var data = _fpa.utils.get_params(key1, key2);
+      return data && data[key3];
+    }
+  });
+
+  Handlebars.registerHelper('params_to_hash', function (key1, key2) {
+    if (key2 && key2.hash) key2 = null;
+    return _fpa.utils.get_params(key1, key2);
+  });
+
+  Handlebars.registerHelper('params_to_query', function (key1, key2) {
+    if (key2 && key2.hash) key2 = null;
+    const data = _fpa.utils.get_params(key1, key2, true);
+    if (!data) return;
+
+    return $.param(data);
+  });
+
 
   Handlebars.registerHelper('in', function (context, key, items, options) {
 

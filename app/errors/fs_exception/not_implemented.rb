@@ -1,4 +1,4 @@
 module FsException
-  class NotImplemented < Exception
+  class NotImplemented < StandardError
   end
 end

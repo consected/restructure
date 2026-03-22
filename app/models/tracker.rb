@@ -25,14 +25,22 @@
 # table should be used when checking if a status event has occurred against a
 # master record.
 #
-# Note: database triggers are defined that actually ensure the tracker table is
-# managed correctly. Although record inserts or updates can be made directly into
-# trackers or tracker_history tables, the same result will appear in both tables.
-# The app relies on these DB triggers to avoid duplicating functionality that is
-# regularly used outside of the app directly against the database.
+# Note: the trackers "table" is actually a database view derived from tracker_history.
+# Inserts are handled by an INSTEAD OF trigger that redirects to tracker_history.
+# The view derives the latest entry per (master_id, protocol_id) using:
+#   ORDER BY event_date::date DESC NULLS LAST, tracker_history.id DESC
+# This ensures the ordering rule exists in exactly one place.
+# See: https://github.com/consected/restructure/issues/941
 class Tracker < UserBase
+  # Explicitly set primary key since Rails can't auto-detect it from a view
+  self.primary_key = 'id'
+
   include UserHandler
   include TrackerHandler
+
+  # Explicitly set primary key since trackers is now a view
+  # and Rails cannot auto-detect the primary key from views
+  self.primary_key = 'id'
 
   has_many :tracker_histories, inverse_of: :tracker
   belongs_to :item, polymorphic: true, optional: true
@@ -70,7 +78,7 @@ class Tracker < UserBase
     # Get the existing tracker item for the master / protocol pair in the new record (self)
     # If it exists then we handle saving the new record and getting the appropriate response.
     # If it doesn't exist, we return nil
-    existing_tracker = master.trackers.where(protocol_id: protocol_id).take(1)
+    existing_tracker = master.trackers.where(protocol_id:).take(1)
     if existing_tracker.first
       logger.info 'An existing master / protocol pair exists when attempting to merge tracker entry'
 
@@ -80,7 +88,7 @@ class Tracker < UserBase
       if res
 
         # get the latest tracker item after saving to the database, based on triggered results
-        t1 = master.trackers.where(protocol_id: protocol_id).take(1)
+        t1 = master.trackers.where(protocol_id:).take(1)
         new_top_tracker = t1.first
 
         # Indicate that the result should be displayed as a merged item
@@ -133,7 +141,7 @@ class Tracker < UserBase
       # Exclude where both to and from are blank (since a form update will cause a switch of nil and "") which is meaningless
       next if v.first.blank? && v.last.blank?
 
-      kname = "#{k}_name".to_sym
+      kname = :"#{k}_name"
 
       get_name = "get_#{k}_name"
       if record.respond_to?(kname) && record.class.respond_to?(get_name)
@@ -146,7 +154,7 @@ class Tracker < UserBase
       fromv = '-' if fromv.blank?
       tov = '-' if tov.blank?
 
-      cp += "#{k.humanize} #{new_rec ? '' : "from #{fromv}"} #{new_rec ? '' : 'to '}#{tov}; "
+      cp += "#{k.humanize} #{"from #{fromv}" unless new_rec} #{'to ' unless new_rec}#{tov}; "
     end
 
     # If there were no changes, discard this item. Otherwise, save it.
@@ -228,10 +236,20 @@ class Tracker < UserBase
   # Generate the protocol / sub process  / protocol event entries that will be
   # used by implementations when updating and creating records, and subsequently tracking
   # those changes in the tracker history.
-  def self.add_record_update_entries(name, admin, update_type = 'record')
+  # @param [String] name - to be humanized and downcased for tracker name
+  # @param [Admin] admin - current admin
+  # @param [String] update_type - type of update tracker to add: 'record' or 'flag'
+  # @param [nil|true] no_create - default: nil - set to true to avoid creating new entries
+  #                               and just check if entries already existed or were created
+  # @return [Array{true|false, ...}] a true|false array for created.., updated... entries already existing
+  def self.add_record_update_entries(name, admin, update_type = 'record', no_create: nil)
     begin
-      protocol = Classification::Protocol.updates.first
-      sp = protocol.sub_processes.find_by_name("#{update_type} updates")
+      protocol = Classification::Protocol.updates.reload.first
+      raise FphsException, 'No "Updates" protocol found' unless protocol
+
+      sp = protocol.sub_processes.active.reload.find_by_name("#{update_type} updates")&.reload
+      raise FphsException, "No sub_process found for 'Updates/#{update_type} updates'" unless sp
+
       values = []
 
       name = name.humanize.downcase
@@ -243,41 +261,54 @@ class Tracker < UserBase
     values << { name: "created #{name.downcase}", sub_process_id: sp.id }
     values << { name: "updated #{name.downcase}", sub_process_id: sp.id }
 
-    values.each do |v|
-      res = sp.protocol_events.find_or_initialize_by(v)
-      if res.admin
+    values.map do |v|
+      res = sp.protocol_events.active.find_or_initialize_by(v)
+      if res.admin_id
         # logger.info "Did not add protocol event #{v} in #{protocol.id} / #{sp.id}"
+        true
       else
-        res.update!(current_admin: admin)
+        res.update!(current_admin: admin) unless no_create
         logger.info "Added protocol event #{v} in #{protocol.id} / #{sp.id}"
+        false
       end
     end
   end
 
   # Find the protocol_events record that matches the rec_type and set the protocol_event attribute in this tracker
-  def set_record_updates_event(record)
+  def set_record_updates_event(record, first_attempt: true)
     # Decide if this is a new or updated record. Check both id_changed? and save_change_to_id? since we can't be sure
     # if we'll be in an after_save or after_commit callback
     new_rec = record.id_changed? || record.saved_change_to_id?
     rec_type = "#{new_rec ? 'created' : 'updated'} #{ModelReference.record_type_to_ns_table_name(record.class).humanize.downcase}"
 
-    self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{sub_process.id}_#{rec_type}" do
-      sub_process.protocol_events.where(name: rec_type).first
-    end
+    self.protocol_event = sub_process.protocol_events.find_by_name(rec_type)
 
     return if protocol_event
 
-    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, "\
+    # Stop things breaking unnecessarily
+    if first_attempt
+      msg = 'Tracker needs to retry getting create/update protocol events'
+      logger.warn msg
+      puts msg if Rails.env.test?
+      Classification::Protocol.reset_memos
+      sub_process.reload.protocol_events.reload
+      return set_record_updates_event(record, first_attempt: false)
+    end
+
+    puts "Bad Protocol Event: #{rec_type}: #{record.attributes}" if Rails.env.test?
+    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, " \
           'check double spacing is correct in the definition for namespaced classes.'
+  end
+
+  def self.sub_process_for(type)
+    Classification::Protocol.record_updates_protocol.sub_processes.find_by_name("#{type} updates")
   end
 
   #
   # The sub_process attribute is set from the cache where possible to avoid unnecessary lookups
   # to find the Updates / flag or Updates / record subprocess to be assigned to a new tracker entry
   def set_record_updates_sub_process(type)
-    self.sub_process = Rails.cache.fetch "record_updates_sub_process_#{type}" do
-      Classification::Protocol.record_updates_protocol.sub_processes.where(name: "#{type} updates").first
-    end
+    self.sub_process = self.class.sub_process_for(type)
 
     raise "Bad sub_process for tracker (#{type})" unless sub_process
   end
@@ -333,6 +364,6 @@ class Tracker < UserBase
 
     extras[:methods] << :tracker_completions
 
-    super(extras)
+    super
   end
 end

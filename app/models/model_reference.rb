@@ -46,12 +46,19 @@ class ModelReference < ActiveRecord::Base
   # Create an item referenced from a specific from_item
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with(from_item, to_item, force_create: false)
+    if to_item.respond_to?(:master_id)
+      to_record_master_id = to_item.master_id
+      master_user = to_item.master_user
+    end
+
+    master_user ||= from_item.current_user
+
     m = ModelReference.where from_record_type: from_item.class.name,
                              from_record_id: from_item.id,
                              from_record_master_id: from_item.master_id,
                              to_record_type: to_item.class.name,
                              to_record_id: to_item.id,
-                             to_record_master_id: to_item.master_id
+                             to_record_master_id: to_record_master_id
 
     return unless m.limit(1).empty?
 
@@ -61,23 +68,30 @@ class ModelReference < ActiveRecord::Base
                            from_record_master_id: from_item.master_id,
                            to_record_type: to_item.class.name,
                            to_record_id: to_item.id,
-                           to_record_master_id: to_item.master_id,
-                           user: to_item.master_user,
-                           current_user: to_item.master_user,
-                           force_create: force_create
+                           to_record_master_id: to_record_master_id,
+                           user: master_user,
+                           current_user: master_user,
+                           force_create:
   end
 
   # Create a reference from a master only, not an individual item.
   def self.create_from_master_with(from_master, to_item, force_create: false)
+    if to_item.respond_to?(:master_id)
+      to_record_master_id = to_item.master_id
+      master_user = to_item.master_user
+    end
+
+    master_user ||= from_master.current_user
+
     ModelReference.create! from_record_type: nil,
                            from_record_id: nil,
                            from_record_master_id: from_master.id,
                            to_record_type: to_item.class.name,
                            to_record_id: to_item.id,
-                           to_record_master_id: to_item.master_id,
-                           user: to_item.master_user,
-                           current_user: to_item.master_user,
-                           force_create: force_create
+                           to_record_master_id: to_record_master_id,
+                           user: master_user,
+                           current_user: master_user,
+                           force_create:
   end
 
   # Find the configuration of the creatable reference for the pair of records representing a ModelReference
@@ -164,7 +178,6 @@ class ModelReference < ActiveRecord::Base
                            active: nil,
                            order_by: nil,
                            ref_created_by_user: nil)
-
     ref_order ||= default_ref_order
     filter_by = substitute_filter(filter_by, from_item_or_master)
 
@@ -185,9 +198,9 @@ class ModelReference < ActiveRecord::Base
     end
 
     if without_reference
-      if to_record_type_class.respond_to?(:master) && from_item_or_master &&
+      if to_record_type_class.method_defined?(:master) && from_item_or_master &&
          !ref_created_by_user && without_reference != 'outside_master'
-        cond = { master: from_item_or_master }
+        cond = { master_id: from_item_or_master }
       end
       cond ||= {}
       cond.merge!(filter_by) if filter_by
@@ -196,8 +209,8 @@ class ModelReference < ActiveRecord::Base
       recs = recs.active if active
       res = []
       recs.each do |r|
-        res << ModelReference.new(from_record_type: from_record_type,
-                                  from_record_id: from_record_id,
+        res << ModelReference.new(from_record_type:,
+                                  from_record_id:,
                                   from_record_master_id: from_item_or_master.id,
                                   to_record_type: r.class.name,
                                   to_record_id: r.id,
@@ -205,10 +218,10 @@ class ModelReference < ActiveRecord::Base
                                   current_user: from_item_or_master.current_user)
       end
     elsif from_item_or_master.is_a? Master
-      res = ModelReference.find_records_in_master to_record_type: to_record_type,
+      res = ModelReference.find_records_in_master(to_record_type:,
                                                   master: from_item_or_master,
-                                                  filter_by: filter_by,
-                                                  active: active
+                                                  filter_by:,
+                                                  active:)
     else
       cond = { from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id }
       cond[:to_record_type] = to_record_type if to_record_type
@@ -251,13 +264,13 @@ class ModelReference < ActiveRecord::Base
   def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil,
                                   ref_order: default_ref_order, active: nil)
     res = []
-    cond = { master: master }
+    cond = { master: }
     filter_by = substitute_filter(filter_by, master)
     cond.merge! filter_by if filter_by
 
     to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|
       recs = ModelReference.where from_record_master_id: master.id,
-                                  to_record_type: to_record_type,
+                                  to_record_type:,
                                   to_record_id: i.id,
                                   to_record_master_id: i.master_id
       recs = recs.active if active
@@ -307,9 +320,7 @@ class ModelReference < ActiveRecord::Base
     filter = filter.dup
     if filter.is_a? Hash
       filter.each do |k, v|
-        if v.is_a?(String) && v.include?('{{')
-          filter[k] = Formatter::Substitution.substitute(v, data: data, ignore_missing: true)
-        end
+        filter[k] = FieldDefaults.calculate_default(data, v, allow_nil: true, ignore_missing: true)
       end
     end
     filter
@@ -323,8 +334,8 @@ class ModelReference < ActiveRecord::Base
   def self.to_record_class_for_type(rec_type)
     rec_type.ns_camelize.constantize
   rescue NameError => e
-    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n"\
-                        "#{e.backtrace[0..20].join("\n")}"
+    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n" \
+                       "#{e}\n#{e.short_string_backtrace}"
     nil
   end
 
@@ -400,7 +411,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_label
-    to_record_options_config && to_record_options_config[:result_label] || to_record.human_name
+    (to_record_options_config && to_record_options_config[:result_label]) || to_record.human_name
   end
 
   def to_record_type_us
@@ -500,7 +511,7 @@ class ModelReference < ActiveRecord::Base
       raise FphsException, "Model Reference (#{id}) 'to record' not found: #{to_record_class} #{to_record_id}"
     end
 
-    @to_record.current_user ||= current_user
+    @to_record.current_user ||= current_user if @to_record.respond_to?(:current_user=)
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
   end
@@ -517,6 +528,7 @@ class ModelReference < ActiveRecord::Base
   # Helps the front end identify which template should be used to render this result
   def to_record_template
     return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
+    return to_record_type_us if to_record_type.start_with?('DynamicModel::')
 
     to_record_short_type_us
   end
@@ -557,15 +569,15 @@ class ModelReference < ActiveRecord::Base
       ane = false
     end
 
-    @can_disable = (!pd && (!from_record || ane || from_record.can_edit?))
+    @can_disable = !pd && (!from_record || ane || from_record.can_edit?)
   end
 
   # Ensures that parent records are updated in the UI if a change has been made to the reference, such as disabling it
   def referenced_from
     [{
-      from_record_master_id: from_record_master_id,
-      from_record_type_us: from_record_type_us,
-      from_record_id: from_record_id
+      from_record_master_id:,
+      from_record_type_us:,
+      from_record_id:
     }]
   end
 
@@ -605,7 +617,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :_created
 
     # Don't return the full referenced object
-    super(extras)
+    super
   end
 
   private
@@ -635,12 +647,12 @@ class ModelReference < ActiveRecord::Base
 
     unless force_create? || from_record.can_edit? || from_record.can_add_reference?
       errors.add :reference,
-                 'can not be created from a read-only parent '\
-                 "(from: #{from_record_type} "\
-                 "id: #{from_record_id} "\
-                 "to: #{to_record_type}) => ("\
-                 "force? #{!!force_create?} || "\
-                 "edit? #{!!from_record.can_edit?} || "\
+                 'can not be created from a read-only parent ' \
+                 "(from: #{from_record_type} " \
+                 "id: #{from_record_id} " \
+                 "to: #{to_record_type}) => (" \
+                 "force? #{!!force_create?} || " \
+                 "edit? #{!!from_record.can_edit?} || " \
                  "add reference? #{!!from_record.can_add_reference?})"
     end
     true

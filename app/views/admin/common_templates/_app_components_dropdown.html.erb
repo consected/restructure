@@ -1,0 +1,15 @@
+<a class="glyphicon glyphicon-th-large btn btn-default" id="components-menu-button" data-toggle="collapse" aria-controls="admin-panel-components" aria-expanded="false" href="#components-menu"></a>
+<div class="components-menu-block">
+  <div id="components-menu" class="components-menu collapse" aria-labelledby="components-menu-button">
+  <% begin %>        
+          <%= Rails.cache.fetch(partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) { render partial: 'admin/app_types/components' } %>
+          <% rescue StandardError => e
+              logger.warn 'Failed to load admin components panel'
+              logger.warn e
+              logger.warn e.backtrace.join("\n")
+          %>
+          <p>Failed to load components</p>
+          <p><%=e%></p>
+          <% end %>
+  </div>
+</div>

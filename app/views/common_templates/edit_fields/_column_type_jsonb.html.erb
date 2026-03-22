@@ -19,7 +19,7 @@ rescue StandardError
 end
 data ||= ''
 
-gs = YAML.dump(data).gsub(/^---.*\n/, '') if data
+gs = String.yaml_dump(data) if data
 options = field_options_for(form_object_instance, field_name_sym)
 
 html_options = {
@@ -28,5 +28,5 @@ html_options = {
   value: gs
 }.merge(options)
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
+<%= edit_field_label(form, field_name_sym, labels, opt) %>
 <%= form.text_area field_name_sym, html_options %>

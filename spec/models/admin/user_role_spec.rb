@@ -2,6 +2,9 @@
 
 require 'rails_helper'
 
+# Model tests for Admin::UserRole, covering role assignment, querying,
+# copying roles between users, and clearing all roles for a user
+# in a specific app type (issue #671).
 RSpec.describe Admin::UserRole, type: :model do
   include ModelSupport
   include PlayerInfoSupport
@@ -182,5 +185,125 @@ RSpec.describe Admin::UserRole, type: :model do
     expect do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
     end.to raise_error FphsException
+
+    # Can't copy roles if the target user has roles in the specified app
+    expect do
+      Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
+    end.to raise_error FphsException
+
+    # Can copy roles if the target user has roles in the specified app and we say to force it
+    expect do
+      Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true
+    end.not_to raise_error
+  end
+
+  it 're-enables disabled roles when copying with reenable_disabled option' do
+    create_admin
+    app_type_0 = create_app_type name: 'apptype0', label: 'apptype0'
+    user0, = create_user
+    user1, = create_user
+
+    # Create roles in source user
+    r1 = create_user_role 'source_role_1', user: user0, app_type: app_type_0
+    r2 = create_user_role 'source_role_2', user: user0, app_type: app_type_0
+    r3 = create_user_role 'source_role_3', user: user0, app_type: app_type_0
+
+    # Create matching roles in target user, but disable some of them
+    t1 = create_user_role 'source_role_1', user: user1, app_type: app_type_0
+    t2 = create_user_role 'source_role_2', user: user1, app_type: app_type_0
+    t2.update!(disabled: true, current_admin: @admin)
+    t3 = create_user_role 'source_role_3', user: user1, app_type: app_type_0
+    t3.update!(disabled: true, current_admin: @admin)
+
+    # Copy without reenable_disabled - should return empty array (all roles already exist)
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true
+    expect(res.length).to eq 0
+
+    # Verify disabled roles are still disabled
+    t2.reload
+    t3.reload
+    expect(t2.disabled?).to be true
+    expect(t3.disabled?).to be true
+
+    # Copy with reenable_disabled - should re-enable the disabled roles
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin, force_not_empty: true, reenable_disabled: true
+    expect(res.length).to eq 2 # Two roles were re-enabled
+
+    # Verify disabled roles are now enabled
+    t2.reload
+    t3.reload
+    expect(t2.disabled?).to be false
+    expect(t3.disabled?).to be false
+    expect(t1.disabled?).to be false # Was never disabled
+
+    # Verify all roles are now active
+    active_roles = Admin::UserRole.active.where(app_type: app_type_0, user: user1).role_names.sort
+    expect(active_roles).to eq ['source_role_1', 'source_role_2', 'source_role_3']
+  end
+
+  it 'clears all roles for a user in a specific app type - issue #671' do
+    create_admin
+    app_type_a = create_app_type name: 'clear_test_app_a', label: 'Clear Test App A'
+    app_type_b = create_app_type name: 'clear_test_app_b', label: 'Clear Test App B'
+    user_to_clear, = create_user
+
+    # Create roles in app_type_a
+    create_user_role 'role_alpha', user: user_to_clear, app_type: app_type_a
+    create_user_role 'role_beta', user: user_to_clear, app_type: app_type_a
+    create_user_role 'role_gamma', user: user_to_clear, app_type: app_type_a
+
+    # Create roles in app_type_b (should NOT be affected)
+    create_user_role 'role_delta', user: user_to_clear, app_type: app_type_b
+
+    # Verify active roles exist before clearing
+    active_a = Admin::UserRole.active.where(user: user_to_clear, app_type: app_type_a)
+    expect(active_a.count).to eq 3
+
+    active_b = Admin::UserRole.active.where(user: user_to_clear, app_type: app_type_b)
+    expect(active_b.count).to eq 1
+
+    # Clear all roles for app_type_a
+    result = Admin::UserRole.clear_user_roles(user_to_clear, app_type_a, @admin)
+
+    # Should return the roles that were disabled
+    expect(result.length).to eq 3
+    expect(result.map(&:role_name).sort).to eq %w[role_alpha role_beta role_gamma]
+
+    # All roles in app_type_a should now be disabled
+    active_a_after = Admin::UserRole.active.where(user: user_to_clear, app_type: app_type_a)
+    expect(active_a_after.count).to eq 0
+
+    # Roles in app_type_b should be untouched
+    active_b_after = Admin::UserRole.active.where(user: user_to_clear, app_type: app_type_b)
+    expect(active_b_after.count).to eq 1
+  end
+
+  context 'clear_user_roles guard clauses - issue #671' do
+    it 'raises an error when app_type is blank' do
+      create_admin
+      user_to_clear, = create_user
+
+      expect do
+        Admin::UserRole.clear_user_roles(user_to_clear, nil, @admin)
+      end.to raise_error(FphsException, /app_type must be specified/)
+    end
+
+    it 'raises an error when user is blank' do
+      create_admin
+      app_type_a = create_app_type name: 'clear_no_user_app', label: 'Clear No User App'
+
+      expect do
+        Admin::UserRole.clear_user_roles(nil, app_type_a, @admin)
+      end.to raise_error(FphsException, /user must be specified/)
+    end
+
+    it 'returns empty array when user has no active roles to clear' do
+      create_admin
+      app_type_empty = create_app_type name: 'clear_empty_app', label: 'Clear Empty App'
+      user_no_roles, = create_user
+
+      result = Admin::UserRole.clear_user_roles(user_no_roles, app_type_empty, @admin)
+      expect(result).to eq []
+    end
   end
 end

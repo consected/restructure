@@ -26,7 +26,7 @@ module Admin::AppTypeExport
     when :json
       JSON.pretty_generate(JSON.parse(to_json))
     when :yaml
-      YAML.dump(JSON.parse(to_json))
+      String.yaml_dump(self)
     end
   end
 
@@ -39,25 +39,37 @@ module Admin::AppTypeExport
       options.delete :main_components
     end
 
+    excl = if options[:exclude_components]
+             options.delete :exclude_components
+           else
+             []
+           end
+
     options[:root] = true
     options[:methods] ||= []
     options[:include] ||= {}
 
     options[:methods] << :app_configurations
-    options[:methods] << :valid_user_access_controls unless main_components
+    unless main_components || excl.include?(:valid_user_access_controls)
+      options[:methods] << :valid_user_access_controls
+    end
     options[:methods] << :valid_associated_activity_logs
     options[:methods] << :associated_dynamic_models
     options[:methods] << :associated_external_identifiers
     options[:methods] << :associated_reports
-    options[:methods] << :associated_general_selections unless main_components
+    unless main_components || excl.include?(:associated_general_selections)
+      options[:methods] << :associated_general_selections
+    end
     options[:methods] << :page_layouts
-    options[:methods] << :user_roles unless main_components
+    options[:methods] << :user_roles unless main_components || excl.include?(:user_roles)
     options[:methods] << :role_descriptions
     options[:methods] << :associated_message_templates
     options[:methods] << :associated_config_libraries
     options[:methods] << :associated_protocols
-    options[:methods] << :associated_sub_processes unless main_components
-    options[:methods] << :associated_protocol_events unless main_components
+    options[:methods] << :associated_sub_processes unless main_components || excl.include?(:associated_sub_processes)
+    unless main_components || excl.include?(:associated_protocol_events)
+      options[:methods] << :associated_protocol_events
+    end
     options[:methods] << :associated_item_flag_names
     options[:methods] << :nfs_store_filters
 

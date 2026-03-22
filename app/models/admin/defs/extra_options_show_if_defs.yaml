@@ -1,0 +1,37 @@
+# show_if options
+  show_if:
+    field_name:
+      depends_on_field_name: conditional value
+      current_mode: show | edit
+    field_depends_on_embedded_item:
+      # Condition referencing data from an embedded item defined via embed: configuration
+      # The embedded_item key allows access to fields in a separate model that is 
+      # embedded in the current model through the embed: option
+      depends_on_field_name: conditional value
+      embedded_item:
+        field_name: conditional value
+        field_name_2: conditional value
+    field_name_2:
+      all:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+      all_with_any_prefix_description:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+      any:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+      not_all:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+      not_any:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+    # Use regex to match multiple fields to control using the same condition
+    # For example: `/^.+_complete/` or `field_[0-9]` or `/^status_.*$/`
+    /field_name_regex/:
+      depends_on_field_name: conditional value
+      current_mode: show | edit
+    submit_buttons_<button_id>: |
+      Controls the display of a display button, identified by <button_id> being
+      the underscored id representing the button label

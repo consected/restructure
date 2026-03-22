@@ -32,9 +32,14 @@
   overflow-x: scroll;
 }
 
-.embedded-report-block .report-results-table-block {
-  height: auto;
-  overflow: auto;
+.embedded-report-block, .tag-embedded-report {
+  .report-results-table-block {
+    height: auto;
+    overflow: auto;
+  }
+    .report-results-block {
+      margin: 0;
+    }
 }
 
 #embed_results_block {
@@ -71,7 +76,7 @@
 }
 
 table.table.report-table {
-  margin: 0;
+  margin: 0 auto;
 }
 
 table.import-grid,
@@ -232,6 +237,10 @@ table.table.report-table {
   .report-item-edit {
     .report-el-edit-cell {
       padding: 0px 4px;
+    }
+
+    .report-el-edit-id-field-cell {
+      padding: 8px 6px;
     }
   }
 

@@ -1,7 +1,8 @@
 .admin-index-page,
 .admin-user-index-page {
   border-color: silver;
-  .nav > li > a {
+
+  .nav>li>a {
     padding: 10px 1px;
   }
 }
@@ -25,12 +26,12 @@
   background: rgb(245, 245, 245);
 }
 
-a > .caret {
+a>.caret {
   visibility: visible;
   transform: rotate(180deg);
 }
 
-a.collapsed > .caret {
+a.collapsed>.caret {
   visibility: visible;
   transform: none;
 }
@@ -53,6 +54,7 @@ a.collapsed > .caret {
 .admin-title {
   padding-left: 15px;
   padding-right: 15px;
+  margin-left: 47px;
 }
 
 .admin-help-icon {
@@ -68,6 +70,7 @@ a.collapsed > .caret {
 }
 
 .admin-result-index {
+
   td,
   th {
     min-width: 60px;
@@ -76,23 +79,59 @@ a.collapsed > .caret {
 
 .admin-edit-form .form-group,
 .admin-edit-form .form-text-area-group {
+  margin: 0 0 8px;
+  width: 400px;
+
   label {
     display: block;
   }
 
-  input[type='checkbox'] + label,
-  input[type='radio'] + label {
+  input[type='checkbox']+label,
+  input[type='radio']+label {
     display: inline-block;
   }
 }
 
-.admin-edit-form .form-text-area-group {
-  margin: 0 10px 8px;
-  min-width: 400px;
+
+.admin-edit-form .form-group.form-group-wide {
+  width: 800px;
+  .form-text-area-group {
+    width: 800px;
+  }
+}
+
+// Batch processing result container
+.dynamic-model--run-batch-result-container {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  
+  .dynamic-model--run-batch-result {
+    padding: 12px 15px;
+    border-radius: 3px;
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    color: #31708f;
+    
+    // Error state styling
+    &:has(*:contains('failed')),
+    &:has(*:contains('error')) {
+      background-color: #f2dede;
+      border-color: #ebccd1;
+      color: #a94442;
+    }
+  }
 }
 
 .admin-edit-form .form-group[data-out-attr-name='description'] {
   display: block;
+}
+
+.admin-edit-form .form-group {
+  width: 400px;
+  input[type="text"], input[type="email"] {
+    width: 100%;
+  }
 }
 
 .admin-flex-block {
@@ -142,19 +181,28 @@ div#creddocframe {
     list-style: none;
     padding-left: 0.3em;
   }
-} 
+
+  ul.app-components-for-loc {
+    padding-left: 1.8em;
+  }
+
+  li.app-component-loc {
+    font-weight: bold;
+    padding-top: 6px;
+  }
+}
 
 .tall-admin-editor {
   width: 800px;
   height: 73vh;
-  
+
   .custom-editor-container {
     height: 73vh;
-  
+
     .custom-editor {
       height: 73vh;
     }
-}
+  }
 }
 
 .admin-item-admin-links a {
@@ -170,4 +218,184 @@ div#creddocframe {
   color: gray;
   font-style: italic;
 
+}
+
+a.link-disabled {
+  color: gray;
+}
+
+
+.admin-action-page {
+  position: relative;
+  overflow: visible;
+}
+
+#components-menu-button {
+  top: 30px;
+  position: absolute;
+}
+
+.components-menu-block {
+  top: 103px;
+  position: absolute;
+  left: 0;
+}
+
+.components-menu {
+  max-width: 90vw;
+  background: white;
+  padding: 4px;
+  position: absolute;
+  z-index: 2000;
+  width: 600px;
+  box-shadow: 0 4px 6px 4px rgba(0, 0, 0, 0.15);
+}
+
+.admin-sample-field-info,
+.admin-sample-form-info {
+  color: gray;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: right;
+}
+
+.admin-sample-form-info {
+  padding-left: 8px;
+  padding-top: 3px;
+  text-align: left;
+  background-color: #f1f1f1;
+}
+
+.caption-before .admin-sample-field-info {
+  font-size: 96%;
+}
+
+.dialog-before .admin-sample-field-info {
+  font-size: 90%;
+}
+
+.form-group .chosen-container {
+  min-width: 200px;
+}
+
+.chosen-container.chosen-container-single .chosen-drop {
+  width: auto;
+}
+
+[data-out-attr-name="user_id"] .chosen-container {
+  min-width: 300px;
+}
+
+.admin-protocol-tree-list {
+  background-color: white;
+  margin-top: 14px;
+  border-top: 1px solid silver;
+  border-bottom: 1px solid silver;
+  padding: 10px;
+}
+
+.admin-inline-update-report {
+  height: 18px;
+
+  .btn-primary {
+    margin-right: 10px;
+  }
+}
+
+.dynamic-field-list {
+  .sb-subitem {
+    margin-top: 8px;
+  }
+}
+
+.admin_page .navbar-form {
+  display: none;
+}
+
+.admin_page .job-summary {
+  margin-right: 20px;
+  // font-size: 0.9em;
+}
+
+// BEM-named classes for admin views
+.admin-form {
+  &__left-aligned {
+    text-align: left;
+  }
+
+  &__help-info {
+    font-size: 12px;
+  }
+
+  &__vertical-top {
+    vertical-align: top;
+  }
+}
+
+.admin-ref-data {
+  &__list {
+    overflow: auto;
+    background-color: white;
+  }
+
+  &__list-item--disabled {
+    color: #aaa;
+  }
+
+  &__checkbox--inline {
+    width: initial;
+    display: inline-block;
+  }
+}
+
+.admin-version {
+  &__section {
+    margin-bottom: 30px;
+  }
+
+  &__header-cell--attr {
+    width: 20%;
+  }
+
+  &__header-cell--prev {
+    width: 40%;
+  }
+
+  &__header-cell--curr {
+    width: 40%;
+  }
+}
+
+.copy-block-button {
+  cursor: pointer;
+  color: #777;
+  font-size: 14px;
+  margin-left: 5px;
+  vertical-align: middle;
+  display: inline-block;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+  border-radius: 2px;
+  padding: 2px;
+
+  &:hover {
+    color: #337ab7;
+  }
+
+  &.in-block {
+    float: right;
+    margin-top: -25px;
+    margin-right: 3px;
+  }
+}
+
+.config-library-referenced-by-list {
+  padding-inline-start: 0;
+  li{
+    margin-bottom: 8px;
+    list-style: none;
+  }
+}
+
+.model_generators.index .col-sm-12.admin-form__left-aligned {
+  min-width: 800px;
 }

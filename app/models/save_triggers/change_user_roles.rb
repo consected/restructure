@@ -18,8 +18,8 @@ class SaveTriggers::ChangeUserRoles < SaveTriggers::SaveTriggersBase
       role_name, app_type_id, for_user = handle_role_def(role_def)
 
       for_user.user_roles.create(
-        app_type_id: app_type_id,
-        role_name: role_name,
+        app_type_id:,
+        role_name:,
         current_admin: use_admin
       )
     end
@@ -28,8 +28,8 @@ class SaveTriggers::ChangeUserRoles < SaveTriggers::SaveTriggersBase
       role_name, app_type_id, for_user = handle_role_def(role_def)
 
       for_user.user_roles.active.find_by(
-        app_type_id: app_type_id,
-        role_name: role_name
+        app_type_id:,
+        role_name:
       )&.disable!(use_admin)
     end
   end
@@ -71,7 +71,7 @@ class SaveTriggers::ChangeUserRoles < SaveTriggers::SaveTriggersBase
                     when Integer
                       User.active.find_by(id: for_user)
                     when String
-                      User.active.find_by(email: for_user)
+                      User.active.find_by(email: for_user&.downcase)
                     else
                       for_user
                     end

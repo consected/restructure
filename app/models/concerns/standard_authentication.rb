@@ -24,8 +24,8 @@ module StandardAuthentication
                 maximum: 100
               }
 
-    validate :new_password_changed?, if: :password
-    validate :no_matching_prev_passwords, if: :password
+    validate :new_password_changed?, if: :password_present?
+    validate :no_matching_prev_passwords, if: :password_present?
     validates :password, password_strength: password_config, if: :password_changed?
     validate :password_like_email, if: :password_changed?
     validate :check_strength, if: :password_changed?
@@ -33,6 +33,7 @@ module StandardAuthentication
     before_save :handle_password_change
     after_save :handle_password_reminder_setup, if: :set_reminder
     after_save :clear_plaintext_password
+    after_save :clean_memos
     after_create :notify_admin
     attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password, :set_reminder
 
@@ -40,11 +41,17 @@ module StandardAuthentication
   end
 
   class_methods do
+    def sign_in_after_change_password
+      true
+    end
+
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
-      return Settings::TwoFactorAuthDisabledForUser if self == User
-      return Settings::TwoFactorAuthDisabledForAdmin if self == Admin
+      # Compare class names rather than actual classes, to avoid issues
+      # during testing or server resets when class identities seem to change
+      return Settings::TwoFactorAuthDisabledForUser if name == 'User'
+      return Settings::TwoFactorAuthDisabledForAdmin if name == 'Admin'
 
       nil
     end
@@ -73,7 +80,7 @@ module StandardAuthentication
       res = (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
       if !res || res.length < 32
         raise FphsException, "otp_enc_key is either nil or less than 32 characters (#{res&.length})" \
-          'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
+                             'Make sure that environment variable FPHS_RAILS_DEVISE_SECRET_KEY is set'
       end
       res
     end
@@ -169,6 +176,24 @@ module StandardAuthentication
 
       words
     end
+
+    def emails_by_id
+      @emails_by_id_memo ||= all.pluck(:id, :email).to_h
+    end
+
+    def clean_memos
+      @emails_by_id_memo = nil
+    end
+
+    def find_active_by_email_or_id(email_or_id)
+      return if email_or_id.to_s.blank?
+
+      if email_or_id.is_a?(Integer) || email_or_id.to_i.to_s == email_or_id
+        active.find_by_id(email_or_id)
+      else
+        active.find_by_email(email_or_id)
+      end
+    end
   end
 
   def expires_in
@@ -236,7 +261,7 @@ module StandardAuthentication
   def two_factor_auth_uri
     issuer = Settings::TwoFactorAuthIssuer
     label = "#{issuer} (#{self.class.name.downcase}) #{email}"
-    otp_provisioning_uri(label, issuer: issuer)
+    otp_provisioning_uri(label, issuer:)
   end
 
   #
@@ -288,10 +313,7 @@ module StandardAuthentication
       i += 1
     end
 
-    if i > 1
-      Rails.logger.info "Took #{i} times to make password"
-      # puts "Took #{i} times to make password"
-    end
+    Rails.logger.info "Took #{i} times to make password" if i > 1
 
     @new_token = Devise.friendly_token(30)
     self.authentication_token = @new_token
@@ -341,6 +363,10 @@ module StandardAuthentication
     errors.add :password, 'must be changed' unless password_changed?
   end
 
+  def password_present?
+    password.present?
+  end
+
   #
   # A direct comparison of encrypted_password against what is saved in the DB is not possible, since
   # bcrypt generates a new salt every time.
@@ -353,7 +379,7 @@ module StandardAuthentication
   # true if the password has actually changed
   def password_changed?(prev_password_hash: nil)
     prev_password_hash ||= encrypted_password_was
-    return false unless password
+    return false unless password.present?
     return true if prev_password_hash.blank? && password.present?
 
     # Get salt from saved encrypted_password
@@ -373,6 +399,15 @@ module StandardAuthentication
 
     # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
     self.otp_required_for_login = false
+    #
+    # NOTE: if this fails, it is usually because the otp_enc_key has changed compared to the value stored in this record.
+    # This may have been set by FPHS_RAILS_DEVISE_SECRET_KEY or SECRET_KEY_BASE as a fallback.
+    # If you absolutely must change the value in this field, in the database set:
+    # encrypted_otp_secret = null, encrypted_otp_secret_iv = null, encrypted_otp_secret_salt = null
+    #
+    # We might consider doing `self.class.where(id: id).update_all(encrypted_otp_secret: nil, encrypted_otp_secret_iv: nil, encrypted_otp_secret_salt: nil)`
+    # but since this error represent a big change to the security settings somewhere, keeping this as a DBA controlled change seems reasonable.
+    #
     self.otp_secret = self.class.generate_otp_secret
     self.new_two_factor_auth_code = true
   end
@@ -493,6 +528,14 @@ module StandardAuthentication
     return unless notify.present?
 
     Users::NewUserAdded.notify(self) if is_a?(Admin) && notify.include?('admin')
-    Users::NewUserAdded.notify(self) if is_a?(User) && notify.include?('user')
+
+    # Only send a notification about a user if the email does not match the @template pattern
+    return unless is_a?(User) && notify.include?('user') && !email.end_with?(Settings::TemplateUserEmailPattern)
+
+    Users::NewUserAdded.notify(self)
+  end
+
+  def clean_memos
+    self.class.clean_memos
   end
 end

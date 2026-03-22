@@ -71,10 +71,15 @@ module NfsStoreSupport
 
     unless @aldef
       @aldef = ActivityLog.where(name: @al_name).first
+      unless @aldef
+        # Re-run the setup if the activity log was completely removed by other specs
+        SetupHelper.setup_al_gen_tests AlFilterTestName, nil, 'player_contact', rec_type: 'phone'
+        @aldef = ActivityLog.where(name: @al_name).first
+      end
       if @aldef
         ActivityLogSupport.cleanup_matching_activity_logs(@aldef.item_type, @aldef.rec_type, @aldef.process_name, admin: @admin, excluding_id: @aldef.id)
+        @aldef.update(disabled: false, current_admin: @admin)
       end
-      @aldef.update(disabled: false, current_admin: @admin)
       @aldef = ActivityLog.active.where(name: @al_name).first
       puts 'About to fail' unless @aldef
     end
@@ -83,7 +88,7 @@ module NfsStoreSupport
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
-    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{user.first_name}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     @aldef.extra_log_types = <<~ENDDEF
@@ -301,6 +306,8 @@ module NfsStoreSupport
     @aldef.save!
     @aldef.option_configs(force: true)
     ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:step_1)
+    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('step_1') is nil after configuration"
 
     finalize_al_setup user: @user
     finalize_al_setup user: batch_user, skip_al_setup: true
@@ -309,7 +316,9 @@ module NfsStoreSupport
   def finalize_al_setup(activity: nil, user: nil, skip_al_setup: nil)
     user ||= @user
     activity ||= :step_1
-    @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity).resource_name
+    otc = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity)
+    expect(otc).not_to be(nil), "PlayerContactPhone.option_type_config_for('#{activity}') is nil - available: #{ActivityLog::PlayerContactPhone.definition.option_configs_names}"
+    @resource_name = otc.resource_name
 
     setup_access 'activity_log__player_contact_phones', user: user
     setup_access @resource_name, resource_type: :activity_log_type, user: user
@@ -373,9 +382,9 @@ module NfsStoreSupport
     create_filter('.*', resource_name: "activity_log__player_contact_phone__#{activity}", role_name: nil)
   end
 
-  def upload_file(filename = 'test-name.txt', content = nil)
+  def upload_file(filename = 'test-name.txt', content = nil, upload_set: nil)
     content ||= SecureRandom.hex
-    upload_set = SecureRandom.hex
+    upload_set ||= SecureRandom.hex
     md5tot = Digest::MD5.hexdigest(content)
     ioupload = StringIO.new(content)
 

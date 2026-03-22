@@ -60,7 +60,7 @@ RSpec.describe ConditionalActions, type: :model do
       end
 
       it 'passes responsibility for conditional if checks for each action back to the caller' do
-        test_object = double(user_id: -1)
+        test_object = double(current_user: @user, user_id: -1)
         ca = ConditionalActions.new @config, test_object
         res = ca.calc_save_option_if
 
@@ -73,7 +73,7 @@ RSpec.describe ConditionalActions, type: :model do
           }
         )
 
-        test_object = double(user_id: -10)
+        test_object = double(current_user: @user, user_id: -10)
         ca = ConditionalActions.new @config, test_object
         res = ca.calc_save_option_if
 
@@ -119,7 +119,7 @@ RSpec.describe ConditionalActions, type: :model do
       end
 
       it 'passes responsibility for conditional if checks for each action back to the caller' do
-        test_object = double(user_id: -1)
+        test_object = double(current_user: @user, user_id: -1)
         ca = ConditionalActions.new @config, test_object
         res = ca.calc_save_option_if
 
@@ -132,7 +132,7 @@ RSpec.describe ConditionalActions, type: :model do
           }
         )
 
-        test_object = double(user_id: -10)
+        test_object = double(current_user: @user, user_id: -10)
         ca = ConditionalActions.new @config, test_object
         res = ca.calc_save_option_if
 
@@ -153,7 +153,7 @@ RSpec.describe ConditionalActions, type: :model do
         @user1 = User.create!(email: 'conditional-actions1@test', first_name: 'fn', last_name: 'ln', disabled: false, current_admin: @admin)
         @user2 = User.create!(email: 'conditional-actions2@test', first_name: 'fn', last_name: 'ln', disabled: false, current_admin: @admin)
 
-        @test_object = double(id: 1)
+        @test_object = double(current_user: @user, id: 1)
 
         @config = {
           on_create: {
@@ -259,7 +259,7 @@ RSpec.describe ConditionalActions, type: :model do
         @user2 = User.create!(email: 'conditional-actions2@test', first_name: 'fn', last_name: 'ln', disabled: false, current_admin: @admin)
         @user3 = User.create!(email: 'conditional-actions3@test', first_name: 'fn', last_name: 'ln', disabled: true, current_admin: @admin)
 
-        @test_object = double(id: 1)
+        @test_object = double(current_user: @user, id: 1)
 
         @config = {
           on_create: {
@@ -408,7 +408,7 @@ RSpec.describe ConditionalActions, type: :model do
         @user1 = User.create!(email: 'conditional-actions1@test', first_name: 'fn', last_name: 'ln', disabled: false, current_admin: @admin)
         @user2 = User.create!(email: 'conditional-actions2@test', first_name: 'fn', last_name: 'ln', disabled: false, current_admin: @admin)
 
-        @test_object = double(id: 1)
+        @test_object = double(current_user: @user, id: 1)
 
         @config = {
           on_create: {

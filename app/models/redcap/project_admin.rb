@@ -30,11 +30,10 @@ module Redcap
   #   "has_repeating_instruments_or_events": 0
   # }
   class ProjectAdmin < Admin::AdminBase
+    self.table_name = 'redcap_project_admins'
     include AdminHandler
     include NfsStore::ForAdminResources
     include OptionsHandler
-
-    self.table_name = 'redcap_project_admins'
 
     Statuses = {
       schedule_run_set_configured: 'scheduled run configured',
@@ -49,8 +48,8 @@ module Redcap
     }.freeze
 
     JobQueue = 'redcap'
-
-    ValidHandleDeletedRecordsValues = [nil, false, 'disable', 'ignore']
+    RedcapSurveyIdentifierField = 'redcap_survey_identifier'
+    ValidHandleDeletedRecordsValues = [nil, false, 'disable', 'ignore'].freeze
 
     has_one :redcap_data_dictionary,
             class_name: 'Redcap::DataDictionary',
@@ -86,6 +85,8 @@ module Redcap
 
     before_save :empty_disabled_api_key
 
+    before_save :clear_frequency_if_none
+
     before_save :set_schedule_status, if: lambda {
                                             frequency_changed? ||
                                               transfer_mode_changed? ||
@@ -107,7 +108,7 @@ module Redcap
     after_save :capture_current_project_info, if: lambda {
                                                     return false if disabled
 
-                                                    force_refresh ||
+                                                    force_refresh || request_latest_config ||
                                                       (
                                                         !saved_change_to_captured_project_info? &&
                                                         api_key.present? &&
@@ -130,7 +131,8 @@ module Redcap
                                                     saved_change_to_api_key? ||
                                                     saved_change_to_name? ||
                                                     !data_dictionary_ready? ||
-                                                    force_refresh
+                                                    force_refresh ||
+                                                    request_latest_config
                                                   )
                                              }
 
@@ -142,7 +144,8 @@ module Redcap
                                                  saved_change_to_server_url? ||
                                                  saved_change_to_api_key? ||
                                                  saved_change_to_name? ||
-                                                 force_refresh
+                                                 force_refresh ||
+                                                 request_latest_config
                                                )
                                            }
 
@@ -154,7 +157,8 @@ module Redcap
                                                                saved_change_to_server_url? ||
                                                                saved_change_to_api_key? ||
                                                                saved_change_to_name? ||
-                                                               force_refresh
+                                                               force_refresh ||
+                                                               request_latest_config
                                                              )
                                                          }
 
@@ -178,9 +182,9 @@ module Redcap
                                         force_refresh
                                     }
 
-    after_save :reset_force_refresh
+    after_save :reset_refresh_flags
 
-    attr_accessor :force_refresh, :use_hash_config
+    attr_accessor :force_refresh, :request_latest_config, :use_hash_config, :in_background_job
 
     #
     # Override Redcap records request with additional options, by default
@@ -212,14 +216,77 @@ module Redcap
     #                      config library to be prefixed to the dynamic
     #                      model definition whenever it is updated.
     #                      For example: "redcap test_library"
+    # associate_master_through_external_identifer: <external identifier> (optional: foreign key name)
+    #                      Specify an external identifier resource name to use to look up the master record each
+    #                      stored record is associated with. By default, "redcap_survey_identifier_id" is used as the
+    #                      foreign key field used to look up the the external id. Optionally specify an alternative field name.
+    # set_master_id_using_association: true|false
+    #     If option `associate_master_through_external_identifer` is set, the ability to retrieve the master record
+    #     can be used to set a `master_id` field directly on the dynamic model. Setting this option to *true* will
+    #     add a `master_id` field automatically, and ensure it is set when records are retrieved from REDCap.
+    #     NOTE: for large datasets that change regularly, this may slow down record retrieval significantly.
+    # skip_store_if_no_survey_identifier: <Integer id> | nil
+    #                      If we are using an association to match a redcap survey identifier to a master record
+    #                      it won't be found if the public survey link was used and no survey identifier was populated.
+    #                      This option allows the record to be skipped when pulling, allowing other records to be retrieved
+    # run_jobs_as_user: <username>
+    #     Sets the admin and matching user that will be used to run background jobs,
+    #     such as getting project metadata or retrieving records from REDCap.
+    #     New projects set this to the email address or id in settings `RedcapJobUserEmail`, which may be set by
+    #     the environment variable `FPHS_RC_JOB_USER_EMAIL` or will default to the setting `BatchUserEmail`.
+    #     If left blank in earlier projects or explicitly set to blank, the user matching the project's current admin will be used.
+    # run_jobs_in_app_type: <app type name or id>
+    #     Sets the app type that will be set on the `run_as_jobs_user`, effectively setting the
+    #     access controls that authorize actions performed in background jobs such as retrieving records.
+    #     This avoids an arbitrary app type being set, especially where the dynamic model being stored to has save triggers
+    #     specified that may depend on access to specific resources.
+    # metadata_export_cache_time: <Integer seconds>
+    #     Time in seconds to cache metadata requests. Default is 60 seconds. Set to 0 to disable caching.
+    # record_export_cache_time: <Integer seconds>
+    #     Time in seconds to cache record requests. Default is 60 seconds. Set to 0 to disable caching.
+    # export_only_updated_records: always | manual | nil
+    #     If set, override the setting `dateRangeBegin` passed to the REDCap API and set it with the
+    #     max(created_at, updated_at) for the table. This exports only records updated since the last retrieval.
+    #     - 'always': always export using this rule (both scheduled and manual pulls)
+    #     - 'manual': only manual pulls will export the updated records subset
+    #     - 'scheduled': only scheduled pulls will export the updated records subset
+    #     - nil/blank: disabled (exports all records)
+    #     NOTE: returned subsets must be handled correctly by deleted record handling to avoid incorrectly
+    #     marking excluded records as deleted.
+
+    ValidExportOnlyUpdatedRecordsValues = [nil, '', 'always', 'manual', 'scheduled'].freeze
+
     configure :data_options, with: %i[add_multi_choice_summary_fields
                                       handle_deleted_records
-                                      prefix_dynamic_model_config_library]
+                                      prefix_dynamic_model_config_library
+                                      associate_master_through_external_identifer
+                                      set_master_id_using_association
+                                      run_jobs_as_user
+                                      run_jobs_in_app_type
+                                      skip_store_if_no_survey_identifier
+                                      metadata_export_cache_time
+                                      record_export_cache_time
+                                      export_only_updated_records
+                                      server_time_zone]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
 
       errors.add(:data_options, "handle_deleted_records must be one of: #{ValidHandleDeletedRecordsValues}")
+    }
+
+    validate :data_options, lambda {
+      return if data_options.export_only_updated_records.in?(ValidExportOnlyUpdatedRecordsValues)
+
+      errors.add(:data_options, "export_only_updated_records must be one of: #{ValidExportOnlyUpdatedRecordsValues}")
+    }
+
+    validate :data_options, lambda {
+      tz = data_options.server_time_zone
+      return if tz.blank?
+      return if ActiveSupport::TimeZone[tz].present?
+
+      errors.add(:data_options, "server_time_zone '#{tz}' is not a valid time zone identifier")
     }
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
@@ -232,8 +299,21 @@ module Redcap
       attrs[:use_hash_config] ||= {}
       attrs[:use_hash_config][:records_request_options] ||= Settings::RedcapRecordsRequestOptions
       attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
+      attrs[:use_hash_config][:data_options] ||= Settings::RedcapDataOptions
 
-      super(attrs)
+      super
+    end
+
+    #
+    # Overrides method in NfsStore::ForAdminResources, ensuring the specified
+    # job user is used if the file store has been created, or the current admin user if it
+    # is in the process of being created
+    def file_store_user
+      if in_background_job
+        job_user
+      else
+        current_admin&.matching_user
+      end
     end
 
     #
@@ -296,7 +376,7 @@ module Redcap
       jobs = self.class.existing_jobs(jobclass, self)
       return if jobs.count > 0
 
-      jobclass.perform_later(self, current_admin)
+      jobclass.perform_later(self)
       record_job_request('setup job: project_xml')
     end
 
@@ -315,6 +395,21 @@ module Redcap
     end
 
     #
+    # Request the event log from Redcap
+    # Calls a delayed job to actually do the work
+    def request_logs
+      Redcap::ExportLogs.export_logs(self)
+    end
+
+    #
+    # Store the arms and events metadata from Redcap for future reference
+    # Calls a delayed job to actually do the work
+    def request_arms_and_events
+      # Redcap::Arm.capture_arms(self)
+      # Redcap::Event.capture_events(self)
+    end
+
+    #
     # Check if the dynamic model for storage is ready to use,
     # both the DB table has been created and the class is defined
     # @return [true | nil]
@@ -324,6 +419,20 @@ module Redcap
 
     def data_dictionary_ready?
       redcap_data_dictionary&.all_retrievable_fields&.present?
+    end
+
+    #
+    # The name of the field representing a survey identifier.
+    # Although this is most common, there may be future reasons to change it.
+    def survey_identifier_field
+      RedcapSurveyIdentifierField
+    end
+
+    #
+    # The name of the field representing an integer version of the survey identifier.
+    # Although this is most common, there may be future reasons to change it.
+    def integer_survey_identifier_field
+      "#{RedcapSurveyIdentifierField}_id"
     end
 
     #
@@ -377,8 +486,8 @@ module Redcap
     # @param [Admin::AdminBase] ref_record
     # @return [ActiveRecord::Relation]
     def self.existing_jobs(job_class, ref_record)
-      Delayed::Job.lookup_jobs_by job_class: job_class,
-                                  ref_record: ref_record,
+      Delayed::Job.lookup_jobs_by job_class:,
+                                  ref_record:,
                                   queue: ProjectAdmin::JobQueue,
                                   failed: false
     end
@@ -393,12 +502,12 @@ module Redcap
       result ||= { requested: true }
 
       curr_job_requests[action] =
-        Redcap::ClientRequest.create current_admin: current_admin || admin,
-                                     action: action,
-                                     server_url: server_url,
-                                     name: name,
+        Redcap::ClientRequest.create(current_admin: current_admin || admin,
+                                     action:,
+                                     server_url:,
+                                     name:,
                                      redcap_project_admin: self,
-                                     result: result
+                                     result:)
     end
 
     #
@@ -413,7 +522,7 @@ module Redcap
       return unless res
 
       res.update current_admin: current_admin || admin,
-                 result: result
+                 result:
     end
 
     #
@@ -423,6 +532,15 @@ module Redcap
     def repeating_instruments?
       captured_project_info &&
         captured_project_info[:has_repeating_instruments_or_events] == 1
+    end
+
+    #
+    # Does the project have longitudinal defined events, based on the
+    # project metadata returned?
+    # @return [true|false]
+    def is_longitudinal?
+      captured_project_info &&
+        captured_project_info[:is_longitudinal] == 1
     end
 
     #
@@ -454,11 +572,200 @@ module Redcap
     end
 
     #
+    # Check if transfer mode is set to 'none'
+    # @return [Boolean]
+    def transfer_mode_none?
+      transfer_mode == 'none'
+    end
+
+    #
     # Returns true if the data_options.prefix_dynamic_model_config_library setting is blank
     # or if the dynamic model has the specified library in its options
     # @return [true|false]
     def dynamic_model_config_library_valid?
       data_options.prefix_dynamic_model_config_library.blank? || dynamic_storage&.dynamic_model_config_library_added?
+    end
+
+    def associate_master_through_external_id_valid?
+      data_options.associate_master_through_external_identifer.blank? || dynamic_storage.dynamic_model_master_external_id_added?
+    end
+
+    def set_master_id_using_association_valid?
+      !data_options.set_master_id_using_association || data_options.associate_master_through_external_identifer.present?
+    end
+
+    #
+    # Specifies the external identifier resource name from associate_master_through_external_identifer
+    def associate_master_through_external_id_resource_name
+      res = data_options.associate_master_through_external_identifer
+      return unless res.present?
+
+      res.split(' ')[0]
+    end
+
+    #
+    # Specifies the foreign key name from associate_master_through_external_identifer
+    def associate_master_through_external_id_fkey_name
+      res = data_options.associate_master_through_external_identifer
+      return unless res.present?
+
+      res.split(' ')[1] || integer_survey_identifier_field
+    end
+
+    def job_user
+      return @job_user if @job_user
+
+      ju = data_options.run_jobs_as_user
+      res = User.find_active_by_email_or_id(ju) unless ju.blank?
+      res ||= job_admin&.matching_user
+      raise FphsException, "No user or matching admin found for job user '#{ju}'" unless res
+
+      res.app_type = job_app_type if job_app_type
+      @job_user = res
+    end
+
+    def job_admin
+      return @job_admin if @job_admin
+
+      ju = data_options.run_jobs_as_user
+      res = Admin.find_active_by_email_or_id(ju) unless ju.blank?
+
+      @job_admin = res || current_admin || admin
+    end
+
+    def job_app_type
+      return @job_app_type if @job_app_type
+
+      ja = data_options.run_jobs_in_app_type
+      res = if ja
+              Admin::AppType.find_active_by_name_or_id(ja)
+            else
+              current_user.app_type
+            end
+      @job_app_type = res
+    end
+
+    #
+    # Get the date range begin timestamp for retrieving only updated records.
+    # This is the created_at timestamp from the last successful 'store records' ClientRequest.
+    # Returns nil if the option is not enabled or no successful store operation exists.
+    # @return [DateTime | nil]
+    def date_range_begin_for_manual_pull
+      export_option = data_options.export_only_updated_records
+      return nil unless export_option.in?(%w[always manual])
+
+      last_successful_store_records_at
+    end
+
+    #
+    # Get the appropriate timestamp for retrieving updated records.
+    # Returns the earlier of either:
+    # - The earliest timestamp of records with failed file fields (so they will be retried)
+    # - The timestamp of the last successful store operation
+    # @return [DateTime | nil]
+    def last_successful_store_records_at
+      earliest_failed = earliest_failed_file_field_record_timestamp
+      last_store = last_successful_store_records_request_at
+
+      [earliest_failed, last_store].compact.min
+    end
+
+    #
+    # Get the created_at timestamp from the last successful 'store records' ClientRequest.
+    # A successful store is one where the result has an empty errors array.
+    # @return [DateTime | nil]
+    def last_successful_store_records_request_at
+      redcap_client_requests
+        .where(action: 'store records')
+        .where("result->>'errors' = '[]'")
+        .order(created_at: :desc)
+        .limit(1)
+        .pick(:created_at)
+    end
+
+    #
+    # Get the earliest (created_at, updated_at) timestamp from records that have
+    # file fields marked with the FailedFileFieldMarker.
+    # This ensures that records with failed file captures will be retried on subsequent pulls.
+    # @return [DateTime | nil]
+    def earliest_failed_file_field_record_timestamp
+      return nil unless dynamic_model_ready?
+
+      file_field_names = redcap_data_dictionary&.all_fields_of_type(:file)&.keys
+      return nil if file_field_names.blank?
+
+      model_class = dynamic_storage.dynamic_model&.implementation_class
+      return nil unless model_class
+
+      # Build a query to find records where any file field has the failed marker
+      marker = Redcap::DataRecords::FailedFileFieldMarker
+      conditions = file_field_names.map { |fn| "#{fn} = ?" }.join(' OR ')
+      values = file_field_names.map { marker }
+
+      records_with_failed_files = model_class.where(conditions, *values)
+      return nil if records_with_failed_files.none?
+
+      # Get the earliest timestamp (minimum of created_at or updated_at) for any failed record
+      records_with_failed_files.minimum(Arel.sql('LEAST(created_at, updated_at)'))
+    end
+
+    #
+    # Check if the export_only_updated_records option applies to manual pulls
+    # (either 'manual' or 'always')
+    # @return [Boolean]
+    def export_only_updated_records_for_manual?
+      data_options.export_only_updated_records.in?(%w[always manual])
+    end
+
+    def invalidate_cache
+      logger.debug "Not invalidating cache (#{self.class.name})"
+    end
+
+    #
+    # Check if this project has a failed status
+    # @return [Boolean]
+    def failed?
+      return false unless frequency.present?
+
+      status.in?([
+                   Statuses[:scheduled_run_failed],
+                   Statuses[:manual_run_failed],
+                   Statuses[:request_failed]
+                 ])
+    end
+
+    #
+    # Get the timestamp of the most recent failure
+    # @return [DateTime | nil]
+    def failed_at
+      return nil unless failed?
+
+      # Get the most recent client request that might indicate when the failure occurred
+      latest_request = redcap_client_requests
+                       .order(updated_at: :desc, id: :desc)
+                       .first
+
+      latest_request&.updated_at || updated_at
+    end
+
+    #
+    # Get all projects that are scheduled and have failed
+    # @return [ActiveRecord::Relation]
+    def self.failed_scheduled_projects
+      active
+        .where.not(frequency: [nil, ''])
+        .where(status: [
+                 Statuses[:scheduled_run_failed],
+                 Statuses[:manual_run_failed],
+                 Statuses[:request_failed]
+               ])
+    end
+
+    #
+    # Check if there are any failed scheduled projects
+    # @return [Boolean]
+    def self.any_failed_scheduled_projects?
+      failed_scheduled_projects.exists?
     end
 
     private
@@ -469,6 +776,14 @@ module Redcap
       return unless disabled?
 
       self.api_key = nil
+    end
+
+    #
+    # Called before save to clear frequency if transfer mode is 'none'
+    def clear_frequency_if_none
+      return unless transfer_mode == 'none'
+
+      self.frequency = nil
     end
 
     #
@@ -483,21 +798,22 @@ module Redcap
     end
 
     def reset_field_metadata
-      redcap_data_dictionary&.update!(captured_metadata: nil, field_count: nil, current_admin: current_admin)
+      redcap_data_dictionary&.update!(captured_metadata: nil, field_count: nil, current_admin:)
     end
 
     #
     # Capture the data dictionary metadata from REDCap and store to table
     def capture_data_dictionary
-      dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin: current_admin)
+      dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin:)
 
       res = dd.capture_data_dictionary
       dd.reload
       res
     end
 
-    def reset_force_refresh
+    def reset_refresh_flags
       self.force_refresh = nil
+      self.request_latest_config = nil
     end
 
     def ready_to_setup_dynamic_model?
@@ -561,7 +877,7 @@ module Redcap
     def set_data_dictionary_version
       self.data_dictionary_version = redcap_data_dictionary.captured_metadata_digest
       save_options
-      update_columns(options: options)
+      update_columns(options:)
     end
 
     #
@@ -581,9 +897,9 @@ module Redcap
       curr_job_requests[action] ||=
         Redcap::ClientRequest
         .where(
-          action: action,
-          server_url: server_url,
-          name: name,
+          action:,
+          server_url:,
+          name:,
           redcap_project_admin_id: id
         )
         .order(

@@ -11,6 +11,10 @@
 class Admin::AppConfiguration < Admin::AdminBase
   self.table_name = 'app_configurations'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include SelectorCache
   include AppTyped
@@ -57,6 +61,14 @@ class Admin::AppConfiguration < Admin::AdminBase
     res = value_for(name, user)
     res = '' if res.blank?
     res.split(',').map { |i| i.strip.send(to) }
+  end
+
+  def self.hash_for(name, user = nil, keys_to: :to_sym)
+    res = value_for(name, user)
+    return {} if res.blank?
+
+    res = YAML.safe_load(res, permitted_classes: [Symbol]) || {}
+    res.transform_keys(&keys_to)
   end
 
   #
@@ -177,6 +189,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   # Clear the value_for memo. Called as an after_save callback
   def self.clear_memo!
     @value_for = {}
+    Master.reset_crosswalk_field_labels!
   end
 
   private

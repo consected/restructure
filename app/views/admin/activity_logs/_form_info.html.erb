@@ -4,7 +4,10 @@
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
+    <li role="presentation"><a href="#parsed-config" aria-controls="parsed-config" role="tab" data-toggle="tab">Parsed Config</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
+    <li role="presentation"><a href="#def-versions" aria-controls="def-versions" role="tab" data-toggle="tab">Versions</a></li>
+    <li role="presentation"><a href="#api-definitions" aria-controls="api-definitions" role="tab" data-toggle="tab">API</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -20,6 +23,10 @@
       <%= render partial: 'sample_form', locals: {object_instance: object_instance} %>
     </div>
 
+    <div role="tabpanel" class="tab-pane on-open-click" id="parsed-config">
+      <%= render partial: 'admin/common/parsed_config_panel', locals: {object_instance: object_instance} %>
+    </div>
+
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
     <% if current_admin.can_admin?(:user_access_controls)%>
     <%= render partial: 'admin/activity_logs/uac_panel' %>
@@ -27,5 +34,14 @@
     <p>Not authorized to administer user access controls</p>
     <% end %>
     </div>
+
+    <div role="tabpanel" class="tab-pane  on-open-click" id="def-versions">
+      <%= render partial: 'admin/activity_logs/versions_panel', locals: {object_instance: object_instance} %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="api-definitions">
+      <%= render partial: 'admin/common/api_panel', locals: { object_instance: object_instance, resource_type: :activity_log } %>
+    </div>
+
   </div>
 </div>

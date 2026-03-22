@@ -30,23 +30,28 @@ To skip an AWS authorization check at the start of testing:
 
 ## Creating a test database
 
-By default, the scripts use sudo to connect to the database as the superuser **postgres**. Run the following
-script to create a test database using the current `db/structure.sql` schema script:
+By default, the scripts use sudo to connect to the database as the superuser **postgres**. It is preferrable
+if you have a Postgres user with your OS username with the attributes:
+
+- `CREATEDB`
+- `CREATEROLE`
+
+If you have this user, set this environment variable to avoid a "sudo" login:
+
+```
+export USE_PG_UNAME=$(whoami)
+```
+
+Use `USE_PG_HOST=localhost` for IP rather than socket connections.
+
+Run the following script to create a test database using the current `db/structure.sql` schema script:
 
     app-scripts/create-test-db.sh 1
-
-... or if connecting to the database as the superuser over IP rather than OS user **postgres**
-
-    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/create-test-db.sh 1
 
 The argument **1** ensures only a single database is created. For setup of multiple test databases to
 support parallel testing, described below, run without any arguments.
 
     app-scripts/create-test-db.sh
-
-... or if connecting to the database as the superuser over IP rather than OS user **postgres**
-
-    USE_PG_HOST=localhost USE_PG_UNAME=postgres app-scripts/create-test-db.sh
 
 This will create a test database for every available processor or core on the test machine.
 
@@ -59,7 +64,7 @@ development database before creating a test database.
 The following will dump just the required schemas, rather than
 everything in the development database, making subsequent creation faster.
 
-    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
+    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rails db:schema:dump
 
 **NOTE:** the `db/schema.rb` file is not used, and if it is present it does not
 represent a complete database and should not be used.
@@ -68,12 +73,15 @@ represent a complete database and should not be used.
 
 Although the majority of tests run within a transaction and clean up after the example has run, some setup is performed
 outside of transactions. Specifically, database configurations and user data is created outside transactions so that
-_rspec/features/_ tests can see the data in the separate Selenium processes. This can lead to the test database becoming
+_rspec/system/_ tests can see the data in the separate Selenium processes. This can lead to the test database becoming
 bloated and slowing down simple tests after repeated runs.
 
     app-scripts/drop-test-db.sh
 
 This will drop test databases for all processors / cores on the machine.
+
+It also cleans up the test `/var/tmp/` directory structures used by the Filestore functionality,
+to avoid attempts to overwrite directories pointed to by the previous database.
 
 ## Migrations
 
@@ -96,7 +104,7 @@ After the first run, use the following to skip additional setup that happens wit
 
     SKIP_APP_SETUP=true SKIP_BROWSER_SETUP=true bundle exec rspec spec/path...
 
-This will skip app, db and virtual display browser (for `spec/features`) setup, assuming they are already in place.
+This will skip app, db and virtual display browser (for `spec/system`) setup, assuming they are already in place.
 It is not recommended to use these environment variables when starting parallel tests.
 
 ## Running parallel tests
