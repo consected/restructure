@@ -14,6 +14,16 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Added] batch trigger API sync with association resolution and dynamic name substitution - fixes #996
+- [Updated] copilot instructions to allow use of environment variables
+- [Changed] Parsed Config panel to use CodeMirror YAML viewer - fixes #992
+- [Fixed] _configurations key not being stripped in parsed_options_text - fixes #992
+- [Added] parsed_options_text to resolve YAML anchors in Parsed Config tab - fixes #992
+- [Added] admin panel styling fix
+- [Fixed] stopPropagation called on jQuery element instead of event object - fixes #990
+- [Fixed] Import CSV to auto-populate id, created_at and updated_at - fixes #991
+- [Fixed] report criteria admin style issue
+
 ## [9.42.16] - 2026-03-18
 
 - [Security] updated gems to address Devise security issue: <https://github.com/heartcombo/devise/security/advisories/GHSA-57hq-95w6-v4fc>
