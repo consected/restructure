@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.17] - 2026-03-24
+
 - [Added] batch trigger API sync with association resolution and dynamic name substitution - fixes #996
 - [Updated] copilot instructions to allow use of environment variables
 - [Changed] Parsed Config panel to use CodeMirror YAML viewer - fixes #992
