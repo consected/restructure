@@ -51,6 +51,9 @@ class SaveTriggers::SetVariables < SaveTriggers::SaveTriggersBase
         name = config[:name]
         raise FphsException, 'set_variables requires name to be specified' if name.blank?
 
+        # Substitute tags in the name field (e.g. for dynamic iterator_index)
+        name = FieldDefaults.calculate_default(@item, name.to_s, ignore_missing: true)
+
         value = config[:value]
 
         # Calculate the value using FieldDefaults, supporting substitutions,
