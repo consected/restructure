@@ -216,6 +216,16 @@ module Formatter
       end
     end
 
+    #
+    # Resolve a single substitution tag to its value from the provided data
+    # @param tag [String] the tag name, potentially dot-separated (e.g. 'master.first_name')
+    # @param sub_data [Hash] substitution data built by {setup_data}
+    # @param tag_subs [String, nil] HTML tag to wrap the result in (e.g. 'strong')
+    # @param ignore_missing [Symbol, nil] how to handle missing tags:
+    #   nil raises an error, :show_tag returns the raw tag, truthy returns ''
+    # @param original_type [Boolean, nil] when true (triple-brace), return the raw Ruby object
+    #   without converting to String — used by {substitute_plain} for object passthrough
+    # @return [Object] the resolved tag value (String unless original_type is set)
     def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
 
@@ -267,6 +277,11 @@ module Formatter
       tag_value = if missing
                     if ignore_missing == :show_tag
                       "{{#{tag}}}"
+                    elsif original_type && sub_data.is_a?(Hash) && sub_data[:master]
+                      # Tag not found in attributes hash, but original_type (triple-brace) requested.
+                      # Try resolving as a master association (e.g. {{{player_contacts}}})
+                      # so the raw collection is returned for iteration.
+                      associated_master_and_configs(sub_data[:master], tag_name)
                     else
                       ''
                     end
