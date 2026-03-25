@@ -75,6 +75,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
             res =
               case create_in
               when 'this'
+                # Create the reference from the current item (this)
                 ModelReference.create_with @item, new_item, force_create:
               when 'referring_record'
                 ModelReference.create_with @item.referring_record, new_item, force_create:
@@ -90,9 +91,15 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
                         "Unknown 'in' value in create_reference for config #{config}"
                 end
 
-                # A specific instance is the target for the reference from_record
-                # Include return: return_result to return the actual instance
-                # or use {{{triple curly substitution}}}
+                # specific_record: create the reference from a specified item (not just 'this').
+                # Use criteria to look up the from-record. Include return: return_result to
+                # return the actual instance, or use {{{triple curly substitution}}}.
+                # Example:
+                #   in:
+                #     specific_record:
+                #       activity_log__player_contact_phones:
+                #         id: 123
+                #         return: return_result
                 ci = FieldDefaults.calculate_default @item, create_in[:specific_record]
                 raise FphsException, "Result for 'in' hash is not an instance" unless ci.is_a? UserBase
 
