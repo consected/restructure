@@ -90,9 +90,8 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
                         "Unknown 'in' value in create_reference for config #{config}"
                 end
 
-                # A specific instance is the target for the reference from_record
-                # Include return: return_result to return the actual instance
-                # or use {{{triple curly substitution}}}
+                # specific_record: create the reference from a specified item, looked up
+                # using FieldDefaults.calculate_default criteria
                 ci = FieldDefaults.calculate_default @item, create_in[:specific_record]
                 raise FphsException, "Result for 'in' hash is not an instance" unless ci.is_a? UserBase
 
