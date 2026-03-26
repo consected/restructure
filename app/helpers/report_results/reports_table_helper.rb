@@ -20,7 +20,7 @@ module ReportResults
     def report_table_header_cache_key
       sn = @runner.data_reference.schema_name
       tn = @runner.data_reference.table_name
-      partial_cache_key("report_table_header--#{@report.id}--#{@report.updated_at}--#{sn}--#{tn}")
+      partial_cache_key("report_table_header--#{@report.id}--#{@report.updated_at}--#{sn}--#{tn}--#{editable?}")
     end
 
     #

@@ -5,7 +5,7 @@
     @view_options = @report.report_options(fail_without_exception: true)&.view_options
 %>  
   <div class="admin-view report-criteria">
-  <%= form_tag report_path(@report.id), 
+  <%= form_tag preview_admin_report_path(@report.id), 
         method: :get, 
         class: 'form-formatted search_report', 
         id: "report_query_form", 
