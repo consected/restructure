@@ -44,7 +44,17 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
           handle_with_attributes create_with, vals
 
           @item.transaction do
-            new_type = in_master.assoc_named(model_name.to_s.pluralize)
+            # Resolve the target model class to check for standalone models
+            target_model = Resources::Models.find_by(resource_name: model_name.to_s.pluralize)&.dig(:model)
+            standalone = target_model&.no_master_association
+
+            # Standalone models have no master association — use the model class directly
+            new_type = if standalone
+                         target_model
+                       else
+                         in_master.assoc_named(model_name.to_s.pluralize)
+                       end
+
             if to_existing_record
               to_record_id = to_existing_record[:record_id]
               raise FphsException, 'record_id must be set in to_existing_record' unless to_record_id
@@ -52,6 +62,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
               to_existing_record_id = FieldDefaults.calculate_default @item, to_record_id
               new_item = new_type.find(to_existing_record_id)
             else
+              vals[:current_user] ||= @item.current_user if standalone
               vals[:ignore_configurable_valid_if] = force_not_valid
               new_item = new_type.new vals
               # new_item.ignore_configurable_valid_if = force_not_valid
@@ -78,9 +89,8 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
                 ModelReference.create_with @item, new_item, force_create:
               when 'referring_record'
                 ModelReference.create_with @item.referring_record, new_item, force_create:
-              when 'master'
-                # 'master' indicates that we want to create an instance belonging to the master without
-                # creating a ModelReference. Do nothing here.
+              when 'master', 'none'
+                # 'master' or 'none' creates the record without a ModelReference.
               when 'master_with_reference'
                 ModelReference.create_from_master_with in_master, new_item, force_create:
               else
