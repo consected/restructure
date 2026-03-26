@@ -1,4 +1,5 @@
-<p><a href="#edit_table_block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Edit table data?</a>  </p>
+<% edit_table_configured = f.object.edit_model.present? || f.object.edit_field_names.present? || f.object.selection_fields.present? %>
+<p><a href="#edit_table_block" class="collapsed btn <%= edit_table_configured ? 'btn-info' : 'btn-default' %>" data-toggle="collapse"><span class="caret"></span> Edit table data?<%= ' <span class="glyphicon glyphicon-ok"></span>'.html_safe if edit_table_configured %></a></p>
 <div class="collapse well" id="edit_table_block">
   <div class="help-block">
     <p>Entering an edit table name enables data editing for this report. Users authorized to edit report data can edit rows in a report, when viewed as a table.</p>
