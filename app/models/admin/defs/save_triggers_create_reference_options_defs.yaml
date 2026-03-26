@@ -3,15 +3,22 @@
           - model_name:
             if: if_extras
             in: |
-              one of:
-                - this
-                - referring_record
-                - master (creates no reference, just uses master_id)
-                - master_with_reference (creates a reference to the master, not the item)
-                - specific_record:
+              Specify the record from which the model reference is created (i.e., the "from" record).
+              One of:
+                - this (default: creates a reference from the current item)
+                - referring_record (creates a reference from the record that referred to this item)
+                - master (creates the new record under the master, without creating a model reference)
+                - master_with_reference (creates the new record and a reference from the master record)
+                - specific_record: (creates a reference from a specified item, looked up by criteria)
                     resource_name:
                       criteria_field: criteria_value
                       id: return_value
+              # Example using specific_record:
+              # in:
+              #   specific_record:
+              #     activity_log__player_contact_phones:
+              #       id: '{{some_field_id}}'
+              #       return: return_result
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
