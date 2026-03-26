@@ -4,6 +4,7 @@ require 'rails_helper'
 
 # Tests for master search with searchable report tabs
 # Related to GitHub issue #834 - Master results get requested twice
+# Related to GitHub issue #87 - Report tabs should refresh, not collapse, when clicked again
 describe 'master search with reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
@@ -103,19 +104,19 @@ describe 'master search with reports', js: true, driver: $browser_driver do
       @auto_run_reports = existing_reports.take(3)
       # Ensure the current user has access to these restored reports
       @auto_run_reports.each do |report|
-        unless Admin::UserAccessControl.exists?(
+        next if Admin::UserAccessControl.exists?(
           app_type: @user.app_type,
           resource_type: :report,
           resource_name: report.alt_resource_name
         )
-          Admin::UserAccessControl.create!(
-            app_type: @user.app_type,
-            access: :read,
-            resource_type: :report,
-            resource_name: report.alt_resource_name,
-            current_admin: @admin
-          )
-        end
+
+        Admin::UserAccessControl.create!(
+          app_type: @user.app_type,
+          access: :read,
+          resource_type: :report,
+          resource_name: report.alt_resource_name,
+          current_admin: @admin
+        )
       end
       return
     end
@@ -447,10 +448,10 @@ describe 'master search with reports', js: true, driver: $browser_driver do
         tab_link.click
         sleep 0.5
       end
-      
+
       # Wait for panel to expand (Bootstrap collapse animation)
       expect(page).to have_css("#{panel_selector}.in", wait: 10)
-      
+
       # Check if auto-run button exists and its state
       within panel_selector do
         auto_run_btn = all('[type="submit"].auto-run', visible: :all).first
@@ -458,20 +459,24 @@ describe 'master search with reports', js: true, driver: $browser_driver do
           btn_classes = auto_run_btn[:class]
           puts "  DEBUG: Auto-run button classes: #{btn_classes}"
         else
-          puts "  DEBUG: No auto-run button found!"
+          puts '  DEBUG: No auto-run button found!'
         end
       end
-      
+
       # Wait for auto-run search to complete - must have count > 0
       unless page.has_css?('.search_count_reports .search_count', text: /[1-9]\d*/, wait: 15)
-        puts "  DEBUG: Search count not found. Taking snapshot..."
+        puts '  DEBUG: Search count not found. Taking snapshot...'
         save_html_snapshot('/tmp/rotation_test_failure.html')
         take_screenshot('rotation_test_failure', 'Search count 0', force: true)
-        count_text = find('.search_count_reports .search_count').text rescue 'not found'
+        count_text = begin
+          find('.search_count_reports .search_count').text
+        rescue StandardError
+          'not found'
+        end
         puts "  DEBUG: Current count text: #{count_text}"
       end
       expect(page).to have_css('.search_count_reports .search_count', text: /[1-9]\d*/, wait: 5)
-      
+
       count = find('.search_count_reports .search_count').text.to_i
       expect(count).to be > 0,
                        "#{round_info} Expected results for #{report.name}, but got 0"
@@ -496,5 +501,74 @@ describe 'master search with reports', js: true, driver: $browser_driver do
                        "Round 2 - Expected #{expected_counts[report.id]} results for #{report.name}, but got #{count}"
       puts "  Round 2 - Tab #{idx + 1} (#{report.name}): #{count} results"
     end
+  end
+
+  # Test for GitHub issue #87 - Clicking an already-expanded auto-run report tab
+  # should NOT collapse the panel. Currently Bootstrap collapse toggles the panel
+  # closed on re-click, which is the bug we want to fix.
+  it 'does not collapse an already-expanded auto-run report tab when clicked again' do
+    visit '/masters/search'
+    finish_page_loading
+
+    report = @auto_run_report
+    tab_selector = "a#expand-searchable-report-#{report.alt_resource_name}"
+    panel_selector = "#master-report-#{report.alt_resource_name}"
+
+    # Click the auto-run report tab to expand it
+    find(tab_selector).click
+    expect(page).to have_css("#{panel_selector}.in", wait: 10)
+
+    # Wait for form to load and auto-run to complete
+    expect(page).to have_css("#{panel_selector} form.search_report", wait: 10)
+    finish_page_loading
+    expect(page).to have_css('.search_count_reports .search_count', text: /[1-9]\d*/, wait: 15)
+
+    # Click the SAME tab again while it is already expanded
+    find(tab_selector).click
+
+    # Allow time for any collapse animation to start
+    sleep 1
+
+    # The panel should still be expanded (still has .in class)
+    expect(page).to have_css("#{panel_selector}.in"),
+                    'Expected the panel to remain expanded after clicking the already-expanded tab, but it collapsed'
+  end
+
+  # Test for GitHub issue #87 - Clicking an already-expanded auto-run report tab
+  # should re-run the report search. The auto-run submit button should be triggered
+  # again so results are refreshed.
+  it 're-runs the auto-run report when clicking an already-expanded tab again' do
+    visit '/masters/search'
+    finish_page_loading
+
+    report = @auto_run_report
+    tab_selector = "a#expand-searchable-report-#{report.alt_resource_name}"
+    panel_selector = "#master-report-#{report.alt_resource_name}"
+
+    # Click the auto-run report tab to expand it
+    find(tab_selector).click
+    expect(page).to have_css("#{panel_selector}.in", wait: 10)
+
+    # Wait for form to load and auto-run to complete
+    expect(page).to have_css("#{panel_selector} form.search_report", wait: 10)
+    finish_page_loading
+    expect(page).to have_css('.search_count_reports .search_count', text: /[1-9]\d*/, wait: 15)
+
+    # Set up JavaScript to track new search submissions from this point forward
+    page.execute_script(<<~JS)
+      window.rerunSubmitCount = 0;
+      $(document).on('submit', 'form.search_report', function(e) {
+        window.rerunSubmitCount++;
+      });
+    JS
+
+    # Click the SAME tab again while it is already expanded
+    find(tab_selector).click
+
+    # The click handler triggers the auto-run submit synchronously via jQuery,
+    # so the counter is already incremented by the time Selenium returns
+    sleep 0.5
+    expect(page.evaluate_script('window.rerunSubmitCount')).to be >= 1,
+                                                               'Expected the auto-run report to re-submit when clicking the already-expanded tab, but no submit was detected'
   end
 end
