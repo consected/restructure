@@ -209,5 +209,27 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
         end
       end
     end
+
+    it 'shows a visual indicator on the Edit table data button when fields are configured' do
+      admin_sign_in_with_2fa
+
+      visit '/admin/reports'
+      finish_page_loading
+
+      # Click the edit button for our editable test report (which has edit_model set)
+      within "#admin-item-#{@editable_report.id}" do
+        find('a.edit-entity.glyphicon-pencil').click
+      end
+
+      # Wait for the edit form to load
+      expect(page).to have_css('#report_query_form', wait: 10)
+
+      # The "Edit table data?" button should have a visual indicator (btn-info class and check icon)
+      edit_table_btn = find('a[href="#edit_table_block"]')
+      expect(edit_table_btn[:class]).to include('btn-info'),
+        'Edit table data button should have btn-info class when edit table fields are configured'
+      expect(edit_table_btn).to have_css('.glyphicon-ok'),
+        'Edit table data button should show a check icon when edit table fields are configured'
+    end
   end
 end
