@@ -170,39 +170,75 @@ module HandlebarsPrecompilerHelper
     relative_path
   end
 
+  # Compute an access-control version string for multi-file caching.
+  # Combines user role timestamps, access control timestamps, and handlebars_cache_key
+  # into a stable identifier that changes only when access controls or template
+  # definitions change — NOT on every login.
+  # @return [String] 13-character hex string (truncated SHA256)
+  def access_control_version
+    @access_control_version ||= begin
+      u = current_user || current_admin
+      app_type_id = u&.app_type_id if u.respond_to?(:app_type_id)
+
+      userrole = Admin::UserRole.where(app_type_id: app_type_id)
+                                .reorder(updated_at: :desc)
+                                .limit(1)
+                                .pluck(:updated_at)
+                                &.first.to_i.to_s
+
+      uac = Admin::UserAccessControl.where(app_type_id: app_type_id)
+                                    .reorder(updated_at: :desc)
+                                    .limit(1)
+                                    .pluck(:updated_at)
+                                    &.first.to_i.to_s
+
+      Digest::SHA256.hexdigest("#{userrole}-#{uac}-#{handlebars_cache_key}")[0..12]
+    end
+  end
+
+  # Write a concatenated multi-file combining all requested compiled templates.
+  # Uses a stable filename based on user_id, app_type_id, content digest, and
+  # access_control_version — stable across login sessions for effective browser caching.
+  # Skips all I/O if the output file already exists.
+  # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial keys
+  # @return [Array(String, Array, Array)] URL path, template IDs, partial IDs
   def write_multiple_handlebars_templates(requested_handlebars_templates)
-    template_html = []
     handlebars_partial_ids = []
     handlebars_template_ids = []
     requested_handlebars_templates.each do |template_info|
-      id = template_info[:id]
-      is_partial = template_info[:is_partial]
-      compiled_file_path = template_info[:compiled_file_path]
-      template_html << read_handlebars_template(id, is_partial:)
-      if is_partial
-        handlebars_partial_ids << id
+      if template_info[:is_partial]
+        handlebars_partial_ids << template_info[:id]
       else
-        handlebars_template_ids << id
+        handlebars_template_ids << template_info[:id]
       end
     end
 
     u = current_user || current_admin
     app_type_id = u&.app_type_id if u.respond_to? :app_type_id
     req_digest = Digest::SHA256.hexdigest([handlebars_template_ids, handlebars_partial_ids].join(','))
-    filename = "requested-templates-#{u&.id}-#{u&.current_sign_in_at.to_i}-#{app_type_id}-#{req_digest}.js"
-    dir = HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join(filename)
-
-    # Add initialization header to ensure Handlebars.partials exists before partials register themselves
-    # The CLI-compiled partials assume Handlebars.partials already exists
-    init_header = <<~JS
-      (function() {
-        Handlebars.partials = Handlebars.partials || {};
-        Handlebars.templates = Handlebars.templates || {};
-      })();
-    JS
-    File.write(dir, (init_header + template_html.join("\n")).html_safe)
-
+    filename = "requested-templates-#{u&.id}-#{app_type_id}-#{req_digest}-#{access_control_version}.js"
     url_path = HandlebarsPrecompiler::URL_RELATIVE_PATH
+    multi_file = HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join(filename)
+
+    if File.exist?(multi_file)
+      Rails.logger.info { "Serving existing multi file: #{filename}" }
+    else
+      template_html = requested_handlebars_templates.map do |template_info|
+        read_handlebars_template(template_info[:id], is_partial: template_info[:is_partial])
+      end
+
+      # Add initialization header to ensure Handlebars.partials exists before partials register themselves
+      # The CLI-compiled partials assume Handlebars.partials already exists
+      init_header = <<~JS
+        (function() {
+          Handlebars.partials = Handlebars.partials || {};
+          Handlebars.templates = Handlebars.templates || {};
+        })();
+      JS
+      File.write(multi_file, (init_header + template_html.join("\n")).html_safe)
+      Rails.logger.info { "Generated multi file: #{filename}" }
+    end
+
     ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids]
   end
 
