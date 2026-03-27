@@ -9,6 +9,7 @@
                 - referring_record (creates a reference from the record that referred to this item)
                 - master (creates the new record under the master, without creating a model reference)
                 - master_with_reference (creates the new record and a reference from the master record)
+                - none (creates the record without any model reference — useful for standalone models)
                 - specific_record: (creates a reference from a specified item, looked up by criteria)
                     resource_name:
                       criteria_field: criteria_value
@@ -19,6 +20,10 @@
               #     activity_log__player_contact_phones:
               #       id: '{{some_field_id}}'
               #       return: return_result
+              #
+              # Standalone dynamic models (no_master_association, i.e. no master_id column) are
+              # supported as targets. The record is created directly using the model class rather
+              # than through the master association. All 'in:' options work with standalone models.
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
