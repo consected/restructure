@@ -58,6 +58,29 @@
       "note": ""
     },
     {
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "1b8bbec4741095cdf990baadb1ad6bc4901a6b8eafcf5536f15017d2e4cb161a",
+      "check_name": "MassAssignment",
+      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
+      "file": "app/controllers/admin/reports_controller.rb",
+      "line": 79,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:search_attrs).permit!",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::ReportsController",
+        "method": "search_attrs_params_hash"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
@@ -456,40 +479,6 @@
       "note": ""
     },
     {
-      "warning_type": "Path Traversal",
-      "warning_code": 125,
-      "fingerprint": "669bef58b2f24edef3e309fc45c747d52e128029afe0ff53fe53400ae2703c5b",
-      "check_name": "Pathname",
-      "message": "Absolute paths in `Pathname#join` cause the entire path to be relative to the absolute path, ignoring any prior values",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 42,
-      "link": "https://brakemanscanner.org/docs/warning_types/path_traversal/",
-      "code": "Rails.root.join(\"app\", \"views\", \"reports\", \"result_template\", \"_#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}.html.erb\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "High",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "686be0b9f9abcfcccb4ddda23612008a4c5e60782c05002d3acb5bb5e7a7442c",
@@ -719,40 +708,6 @@
       "confidence": "High",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Dynamic Render Path",
-      "warning_code": 15,
-      "fingerprint": "bb318909165e2e17e8af6aa6fd6893dd91ba241da2ab4c7db7087947fa75aa08",
-      "check_name": "Render",
-      "message": "Render path contains parameter value",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 45,
-      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
-      "code": "render(partial => \"reports/result_template/#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}\", { :locals => ({ :result_tables => ((Report.find_by_id_or_resource_name(params[:id]).runner.result_tables_by_index or [])) }) })",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "Medium",
-      "cwe_id": [
-        22
       ],
       "note": ""
     },
