@@ -14,6 +14,23 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.17 back to develop
+- [Updated] structure.sql
+- [Added] admin report preview action to fix auth issue - fixes #1000
+- [Fixed] report table header cache key to include editable state - fixes #1000
+- [Added] visual indicator on Edit table data button when fields are configured - fixes #1000
+- [Changed] edit table data button to use ternary for btn class
+- [Documented] create_reference specific_record option - resolves #221 (#1002)
+- [Added] refactor prompt
+- [Fixed] report tab to refresh instead of collapse when already expanded - fixes #87
+- [Added] standalone dynamic model support to create_reference save trigger - fixes #1003
+- [Fixed] user session timeout spec to finish in a reasonable time
+- [Fixed] multi-file caching for Handlebars templates - fixes #1004
+- [Fixed] redcap_email and redcap_phone fields showing blank in show mode - fixes #558
+- [Added] full agent tool to tdd-implementation agent
+- [Added] optional expire_datetime field to users and admins - fixes #330
+- [Updated] DB structure to reflect recent migration
+
 ## [9.42.17] - 2026-03-24
 
 - [Added] batch trigger API sync with association resolution and dynamic name substitution - fixes #996
