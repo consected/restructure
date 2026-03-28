@@ -19,7 +19,8 @@
           <th>First Name</th>
           <th>Last Name</th>
           <th>Matching User?</th>
-          <th>Expires in (days)</th>
+          <th>Password expires in (days)</th>
+          <th>Account Expiration</th>
           <th>Locked</th>
           <th>Capabilities</th>
           <th>Admin</th>
@@ -36,6 +37,7 @@
             <td><%= list_item.last_name %></td>
             <td><%= list_item.matching_user ? 'yes' : 'no' %></td>
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
+            <td><%= list_item.expire_datetime&.strftime('%Y-%m-%d %H:%M') %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
             <td>
               <ul class="admin-tag-list">

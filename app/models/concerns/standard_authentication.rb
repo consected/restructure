@@ -40,6 +40,11 @@ module StandardAuthentication
     scope :can_email, -> { where 'do_not_email IS NULL or do_not_email = FALSE' }
   end
 
+  # Check if the account has expired based on the expire_datetime field
+  def account_expired?
+    expire_datetime.present? && expire_datetime <= Time.current
+  end
+
   class_methods do
     def sign_in_after_change_password
       true
