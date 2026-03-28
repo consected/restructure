@@ -2144,7 +2144,8 @@ CREATE TABLE ml_app.users (
     confirmation_sent_at timestamp without time zone,
     country_code character varying,
     terms_of_use_accepted character varying,
-    otp_secret character varying
+    otp_secret character varying,
+    expire_datetime timestamp without time zone
 );
 
 
@@ -8600,7 +8601,8 @@ CREATE TABLE ml_app.admins (
     do_not_email boolean DEFAULT false,
     admin_id bigint,
     capabilities character varying[],
-    otp_secret character varying
+    otp_secret character varying,
+    expire_datetime timestamp without time zone
 );
 
 
@@ -23390,6 +23392,8 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260327153857'),
+('20260327120000'),
 ('20260311180146'),
 ('20260311180013'),
 ('20260311174709'),
