@@ -32,14 +32,20 @@ class Admin < ActiveRecord::Base
     Settings::AdminTimeout
   end
 
-  # Standard Devise callback to allow accounts to be disabled
+  # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled
+    super && !disabled && !account_expired?
   end
 
-  # Standard Devise callback to tell user that an account has been disabled
+  # Standard Devise callback to tell user that an account has been disabled or expired
   def inactive_message
-    !disabled ? super : :account_has_been_disabled
+    if disabled
+      :account_has_been_disabled
+    elsif account_expired?
+      :account_expired
+    else
+      super
+    end
   end
 
   # Get the user that corresponds to this admin

@@ -127,6 +127,6 @@ class Admin::ManageAdminsController < AdminController
   private
 
   def permitted_params
-    %i[email first_name last_name disabled] + [{ capabilities: [] }]
+    %i[email first_name last_name disabled expire_datetime] + [{ capabilities: [] }]
   end
 end
