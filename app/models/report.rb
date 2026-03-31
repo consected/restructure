@@ -16,6 +16,7 @@ class Report < ActiveRecord::Base
   before_validation :downcase_item_type
   before_validation :search_attributes_config_valid
   before_validation :gen_short_name
+  after_save :clear_report_options_cache
   validates :report_type, presence: true
   validates :name, presence: true
   validate :valid_short_name?, unless: -> { disabled }
@@ -223,6 +224,12 @@ class Report < ActiveRecord::Base
     report_options.list_options.list_description || description
   end
 
+  # Should this report auto-fetch query counts when the reports list page loads?
+  # Configured via list_options.get_query_count in report options
+  def get_query_count?
+    report_options.list_options.get_query_count == true
+  end
+
   def gen_short_name
     self.short_name = self.class.gen_short_name(name) if short_name.blank?
   end
@@ -240,6 +247,10 @@ class Report < ActiveRecord::Base
   end
 
   private
+
+  def clear_report_options_cache
+    @report_options = nil
+  end
 
   def search_attributes_config_valid
     return true if search_attributes_config.valid?
