@@ -20,6 +20,14 @@
   <span class="info-danger">invalid</span>
   <% end %>
   </p>
+  <%= render partial: 'admin/common_templates/def_uac_summary',
+             locals: {
+               object_instance: @report,
+               resource_name: @report.alt_resource_name,
+               resource_type: 'report',
+               current_app_type_id: current_admin.matching_user&.app_type_id,
+               current_user: current_admin.matching_user
+             } %>
   <label>preview</label>
   <div class="well row force-form-block">
   <%= render partial: 'admin/reports/form/admin_criteria_view' %>  
