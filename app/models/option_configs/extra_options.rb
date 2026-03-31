@@ -1035,21 +1035,37 @@ module OptionConfigs
     end
 
     #
-    # Find referenced libraries into the provided content
+    # Find referenced libraries into the provided content,
+    # recursively resolving nested library references.
     # @param [String] content
     # @return [Array{Hash}] array of hashes {category:, name:}
     def self.requested_libraries(content)
-      reshashes = []
-      content = content.dup
-      reg = LibraryMatchRegex
-      res = content.match reg
+      return [] if content.blank?
 
-      while res
-        category = res[1].strip
-        name = res[2].strip
-        reshashes << { category:, name: }
-        content.gsub!(res[0], '')
-        res = content.match reg
+      reshashes = []
+      seen = Set.new
+      queue = [content.dup]
+      reg = LibraryMatchRegex
+
+      while (text = queue.shift)
+        res = text.match reg
+        while res
+          category = res[1].strip
+          name = res[2].strip
+          key = [category, name]
+          unless seen.include?(key)
+            seen.add(key)
+            reshashes << { category:, name: }
+            begin
+              lib_content = Admin::ConfigLibrary.content_named(category, name, format: :yaml)
+              queue << lib_content.dup if lib_content.present?
+            rescue FphsException
+              # Library not found - skip nested resolution for this reference
+            end
+          end
+          text = text.sub(res[0], '')
+          res = text.match reg
+        end
       end
 
       reshashes
