@@ -4,7 +4,7 @@ module EditFields
   class SelectFieldHandler
     attr_accessor :form_object_instance, :assoc_or_class_name,
                   :value_attr, :label_attr, :group_split_char,
-                  :no_assoc
+                  :no_assoc, :sort_order
 
     FailedValuesArray = ['failed to get values', 'failed to get values'].freeze
 
@@ -18,7 +18,7 @@ module EditFields
     # @return [Array(String, Array(Array, Array))] a human name string and a list of data from the matched records
     def self.list_record_data_for_select(form_object_instance, assoc_or_class_name,
                                          value_attr: :data, label_attr: :data, group_split_char: nil,
-                                         no_assoc: nil)
+                                         no_assoc: nil, sort_order: nil)
       sf = SelectFieldHandler.new
       sf.form_object_instance = form_object_instance
       sf.assoc_or_class_name = assoc_or_class_name
@@ -26,6 +26,7 @@ module EditFields
       sf.label_attr = label_attr
       sf.group_split_char = group_split_char
       sf.no_assoc = no_assoc
+      sf.sort_order = sort_order
       sf.generate_record_data
     end
 
@@ -187,9 +188,15 @@ module EditFields
       arr_label_attr, pluck_attrs, do_subs_label = pluck_attrs_for(label_attr, model)
       arr_value_attr, val_pluck_attrs, do_subs_value = pluck_attrs_for(value_attr, model)
 
+      sort_target, sort_direction = parsed_sort_order
+      sort_attr = if sort_target == :value
+                    val_pluck_attrs.first || pluck_attrs.first
+                  else
+                    pluck_attrs.first
+                  end
+
       pluck_attrs += val_pluck_attrs
       pluck_attrs.uniq!
-      sort_attr = pluck_attrs.first
       pluck_attrs_strs = pluck_attrs.map(&:to_s)
 
       if pluck_attrs.empty? || sort_attr.blank?
@@ -208,7 +215,7 @@ module EditFields
       end
 
       reslist_data = reslist.reorder('')
-                            .order(sort_attr => :asc)
+                            .order(sort_attr => sort_direction)
                             .pluck(*pluck_attrs)
 
       if pluck_attrs.one?
@@ -253,6 +260,20 @@ module EditFields
     end
 
     #
+    # Parse the sort_order string into target and direction
+    # @return [Array(Symbol, Symbol)] target (:label or :value) and direction (:asc or :desc)
+    def parsed_sort_order
+      return %i[label asc] unless sort_order.present?
+
+      parts = sort_order.to_s.strip.split(/\s+/, 2)
+      target = parts[0]&.to_sym
+      target = :label unless %i[label value].include?(target)
+      direction = parts[1]&.to_sym
+      direction = :asc unless %i[asc desc].include?(direction)
+      [target, direction]
+    end
+
+    #
     # Generate the result list for complex attributes (where the *data* attribute has been selected)
     # since it is likely that we can't retrieve this directly from the database since it is dynamically calculated.
     # The method #list_for_defined_attributes may be much faster than using named methods.
@@ -275,9 +296,12 @@ module EditFields
               "SelectFieldHandler generate_record_data with complex attributes: #{first_res.class} does not respond to #{value_attr}"
       end
 
+      sort_target, sort_direction = parsed_sort_order
+      sort_index = sort_target == :value ? :last : :first
       reslist.all
              .map { |i| [i.send(label_attr), i.send(value_attr)] }
-             .sort { |x, y| x.first <=> y.first }
+             .sort_by { |item| item.send(sort_index) || '' }
+             .then { |sorted| sort_direction == :desc ? sorted.reverse : sorted }
     rescue StandardError, SystemStackError => e
       sql = reslist.to_sql if reslist.respond_to?(:to_sql)
       msg = "list_for_complex_attributes fails with #{label_attr} and #{value_attr}: #{e}\n#{sql}"
