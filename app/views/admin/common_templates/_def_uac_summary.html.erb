@@ -1,10 +1,15 @@
 <%#
-  Partial to display User Access Control summary for a dynamic definition (dynamic model, external identifier, etc.)
+  Partial to display User Access Control summary for a resource definition
+  (dynamic model, external identifier, report, etc.)
   
   Required local variables:
-  - object_instance: The dynamic definition instance (DynamicModel, ExternalIdentifier, etc.)
+  - object_instance: The definition instance (DynamicModel, ExternalIdentifier, Report, etc.)
   - current_app_type_id: The current admin user's app type ID (via current_admin.matching_user.app_type_id)
   - current_user: The current admin user's matching user (for access check)
+  
+  Optional local variables:
+  - resource_name: Override the resource name (defaults to object_instance.resource_name.pluralize)
+  - resource_type: Override the resource type (defaults to 'table')
   
   This partial:
   1. Shows a summary of UAC roles and access levels for this resource
@@ -12,7 +17,8 @@
   3. Warns if the current user/admin has no access to this resource
 %>
 <%
-  resource_name = object_instance.resource_name&.pluralize
+  resource_name = local_assigns[:resource_name] || object_instance.resource_name&.pluralize
+  resource_type = local_assigns[:resource_type] || 'table'
   return unless resource_name.present?
 
   uacs = Admin::UserAccessControl.active_for(resource_name:).not_template_role
@@ -24,7 +30,7 @@
     current_user_has_access = Admin::UserAccessControl.access_for?(
       current_user,
       :access,
-      :table,
+      resource_type.to_sym,
       resource_name,
       alt_app_type_id: current_app_type_id
     ).present?
@@ -38,7 +44,7 @@
 
 <label>user access controls</label>
 <%= link_to link_label_open_in_new("view all"), 
-            admin_user_access_controls_path(filter: { resource_name:, resource_type: "table", app_type_id: '' }), 
+            admin_user_access_controls_path(filter: { resource_name:, resource_type:, app_type_id: '' }), 
             target: '_blank' %>
 
 <% if no_non_template_uacs %>
