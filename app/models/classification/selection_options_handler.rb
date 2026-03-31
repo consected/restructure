@@ -225,12 +225,14 @@ class Classification::SelectionOptionsHandler
                      end
 
         assoc_or_class_name = alt_fn.sub(/^(tag_)?select_record_(id_)?from_(table_)?/, '').singularize
+        sort_order = edit_as[:sort_order]
 
         got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
                                                                                   assoc_or_class_name,
                                                                                   value_attr:,
                                                                                   label_attr:,
-                                                                                  group_split_char:)
+                                                                                  group_split_char:,
+                                                                                  sort_order: sort_order)
 
         if got_res && res
           res = res.to_h if hash_res
