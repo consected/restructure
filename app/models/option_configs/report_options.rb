@@ -22,7 +22,7 @@ module OptionConfigs
                                       force_show_search_button no_sorting result_handlers add_classes
                                       prevent_adding_items use_plain_attribute_names]
 
-    configure :list_options, with: %i[hide_in_list list_description]
+    configure :list_options, with: %i[hide_in_list list_description get_query_count]
     configure :tree_view_options, with: %i[num_levels column_levels expand_level]
     configure :plain_text_options, with: %i[results_column return_content_type
                                             line_join_string column_join_string
