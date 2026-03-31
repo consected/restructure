@@ -17,7 +17,8 @@ The following information builds on For general Rspec standards: [Rspec project 
 3. **Wait for AJAX** using `finish_page_loading` and `finish_form_formatting` after interactions
 4. **Expand UI sections before accessing fields** - forms load via AJAX
 5. **Never write raw Capybara selectors in system specs**
-6. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
+6. **Use the VSCode internal browser (vscode/openSimpleBrowser) if needed**
+7. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
 
 ## Rspec System Specs Helper Methods Quick Reference
 
