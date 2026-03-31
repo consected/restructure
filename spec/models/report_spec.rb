@@ -41,6 +41,32 @@ RSpec.describe Report, type: :model do
     expect(res.length).to eq 0
   end
 
+  # Issue #1011: get_query_count? decouples count fetching from the auto flag.
+  # A report should only auto-fetch query counts when get_query_count option is true,
+  # regardless of the auto column value.
+  describe '#get_query_count?' do
+    it 'returns false when auto is true but get_query_count is not set' do
+      report = @report1
+      report.current_admin = @admin
+      report.update!(auto: true, options: '')
+      expect(report.get_query_count?).to be false
+    end
+
+    it 'returns true when get_query_count is set to true' do
+      report = @report1
+      report.current_admin = @admin
+      report.update!(auto: true, options: "list_options:\n  get_query_count: true")
+      expect(report.get_query_count?).to be true
+    end
+
+    it 'returns false when get_query_count is explicitly set to false' do
+      report = @report1
+      report.current_admin = @admin
+      report.update!(auto: false, options: "list_options:\n  get_query_count: false")
+      expect(report.get_query_count?).to be false
+    end
+  end
+
   it 'references reports by an item_type__short_name alternative resource name' do
     create_admin
     first_rep = @report1
