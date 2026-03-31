@@ -12,13 +12,14 @@ module EditFields
     # @return [Array(String, Array(Array, Array))] a human name string and a list of data from the matched records
     def list_record_data_for_select(form_object_instance, assoc_or_class_name,
                                     value_attr: :data, label_attr: :data, group_split_char: nil,
-                                    no_assoc: nil)
+                                    no_assoc: nil, sort_order: nil)
       EditFields::SelectFieldHandler.list_record_data_for_select(form_object_instance,
                                                                  assoc_or_class_name,
                                                                  value_attr: value_attr,
                                                                  label_attr: label_attr,
                                                                  group_split_char: group_split_char,
-                                                                 no_assoc: no_assoc)
+                                                                 no_assoc: no_assoc,
+                                                                 sort_order: sort_order)
     end
 
     #

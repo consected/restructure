@@ -6,8 +6,9 @@ options = field_options_for(form_object_instance, field_name_sym)
 group_split_char = options.dig(:edit_as, :group_split_char)
 value_attr = options.dig(:edit_as, :value_attr) || :data
 label_attr = options.dig(:edit_as, :label_attr) || :data
+sort_order = options.dig(:edit_as, :sort_order)
 
-human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: value_attr, label_attr: label_attr, group_split_char: group_split_char)
+human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: value_attr, label_attr: label_attr, group_split_char: group_split_char, sort_order: sort_order)
 
 unless human_name
   logger.warn "Failed to find valid class name for #{field_name}"
