@@ -216,30 +216,30 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         switch_button = find('a.switch_id')
 
         # Initially master_id should be visible
-        expect(find('.alt-id-item.master_id', visible: :all)).to be_visible
+        expect(page).to have_css('.alt-id-item.master_id', visible: true)
 
         # First click: switch to msid
         switch_button.click
-        expect(find('.alt-id-item.master_id', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.msid', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.master_id', visible: true)
+        expect(page).to have_css('.alt-id-item.msid', visible: true)
         expect(switch_button['title']).to eq('switch to Scantron ID')
 
         # Second click: switch to scantron_id
         switch_button.click
-        expect(find('.alt-id-item.msid', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.scantron_id', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.msid', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
         expect(switch_button['title']).to eq('switch to Sage ID')
 
         # Third click: switch to sage_id
         switch_button.click
-        expect(find('.alt-id-item.scantron_id', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.sage_id', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.sage_id', visible: true)
         expect(switch_button['title']).to eq('switch to Master')
 
         # Fourth click: back to master_id
         switch_button.click
-        expect(find('.alt-id-item.sage_id', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.master_id', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.sage_id', visible: true)
+        expect(page).to have_css('.alt-id-item.master_id', visible: true)
         expect(switch_button['title']).to eq('switch to MSID')
       end
     end
@@ -256,21 +256,21 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
 
         # Switch to msid - should show actual value
         switch_button.click
-        msid_span = find('.alt-id-item.msid', visible: true)
-        expect(msid_span).to have_css('[title="MSID"]')
-        expect(msid_span).to have_content(@master_msid_only.msid.to_s)
+        expect(page).to have_css('.alt-id-item.msid', visible: true)
+        expect(page).to have_css('.alt-id-item.msid [title="MSID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.msid', text: @master_msid_only.msid.to_s, visible: true)
 
         # Switch to scantron_id - should show (none)
         switch_button.click
-        scantron_span = find('.alt-id-item.scantron_id', visible: true)
-        expect(scantron_span).to have_css('[title="No Scantron ID"]')
-        expect(scantron_span).to have_content('(none)')
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id [title="No Scantron ID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', text: '(none)', visible: true)
 
         # Switch to sage_id - should show (none)
         switch_button.click
-        sage_span = find('.alt-id-item.sage_id', visible: true)
-        expect(sage_span).to have_css('[title="No Sage ID"]')
-        expect(sage_span).to have_content('(none)')
+        expect(page).to have_css('.alt-id-item.sage_id', visible: true)
+        expect(page).to have_css('.alt-id-item.sage_id [title="No Sage ID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.sage_id', text: '(none)', visible: true)
       end
     end
   end
@@ -287,19 +287,19 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         switch_button = find('a.switch_id')
 
         # First should be msid
-        expect(find('.alt-id-item.msid', visible: :all)).to be_visible
+        expect(page).to have_css('.alt-id-item.msid', visible: true)
         expect(switch_button['title']).to eq('switch to Scantron ID')
 
         # Click to switch to scantron_id
         switch_button.click
-        expect(find('.alt-id-item.msid', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.scantron_id', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.msid', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
         expect(switch_button['title']).to eq('switch to MSID')
 
         # Click again to return to msid
         switch_button.click
-        expect(find('.alt-id-item.scantron_id', visible: :all)).not_to be_visible
-        expect(find('.alt-id-item.msid', visible: :all)).to be_visible
+        expect(page).to have_no_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.msid', visible: true)
       end
     end
 
@@ -310,15 +310,16 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         switch_button = find('a.switch_id')
 
         # First (msid) should show (none)
-        msid_span = find('.alt-id-item.msid', visible: true)
-        expect(msid_span).to have_css('[title="No MSID"]')
-        expect(msid_span).to have_content('(none)')
+        expect(page).to have_css('.alt-id-item.msid', visible: true)
+        expect(page).to have_css('.alt-id-item.msid [title="No MSID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.msid', text: '(none)', visible: true)
 
         # Switch to scantron_id - should also show (none)
         switch_button.click
-        scantron_span = find('.alt-id-item.scantron_id', visible: true)
-        expect(scantron_span).to have_css('[title="No Scantron ID"]')
-        expect(scantron_span).to have_content('(none)')
+        expect(page).to have_no_css('.alt-id-item.msid', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id [title="No Scantron ID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', text: '(none)', visible: true)
       end
     end
   end
@@ -335,16 +336,14 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         switch_button = find('a.switch_id')
 
         # First should be sage_id
-        sage_span = find('.alt-id-item.sage_id', visible: :all)
-        expect(sage_span).to be_visible
-        expect(sage_span).to have_content(@sage_base.to_s)
+        expect(page).to have_css('.alt-id-item.sage_id', visible: true)
+        expect(page).to have_css('.alt-id-item.sage_id', text: @sage_base.to_s, visible: true)
 
         # Switch to scantron_id
         switch_button.click
-        expect(sage_span).not_to be_visible
-        scantron_span = find('.alt-id-item.scantron_id', visible: :all)
-        expect(scantron_span).to be_visible
-        expect(scantron_span).to have_content(@scantron_base.to_s)
+        expect(page).to have_no_css('.alt-id-item.sage_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', text: @scantron_base.to_s, visible: true)
       end
     end
 
@@ -356,14 +355,14 @@ describe 'switch ID display in search results', js: true, driver: $browser_drive
         switch_button = find('a.switch_id')
 
         # First should be sage_id with value
-        sage_span = find('.alt-id-item.sage_id', visible: true)
-        expect(sage_span).to have_content((@sage_base + 3).to_s)
+        expect(page).to have_css('.alt-id-item.sage_id', text: (@sage_base + 3).to_s, visible: true)
 
         # Switch to scantron_id - should show (none)
         switch_button.click
-        scantron_span = find('.alt-id-item.scantron_id', visible: true)
-        expect(scantron_span).to have_css('[title="No Scantron ID"]')
-        expect(scantron_span).to have_content('(none)')
+        expect(page).to have_no_css('.alt-id-item.sage_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id [title="No Scantron ID"]', visible: true)
+        expect(page).to have_css('.alt-id-item.scantron_id', text: '(none)', visible: true)
       end
     end
   end

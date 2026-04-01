@@ -105,10 +105,11 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
+      expand_master_record(master_id: @master.id)
+      expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
+
       # Find the details tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      expand_master_record_tab('details')
 
       expect(page).to have_css("#details-#{@master_id}")
 
@@ -167,10 +168,11 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
+      expand_master_record(master_id: @master.id)
+      expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
+
       # Find the details tab
-      l = all('a[data-panel-tab="details"]').first
-      expect(l).not_to be nil
-      l.click
+      expand_master_record_tab('details')
 
       expect(page).to have_css("#details-#{@master_id}")
 
@@ -236,10 +238,8 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
 
       # Find the history tab (if it exists as a separate tab)
       # or it may be under a general tab depending on app configuration
-      history_tab = all('a[data-panel-tab="history"]').first
-
-      if history_tab
-        history_tab.click
+      if page.has_css?('a[data-panel-tab="history"]', wait: 5)
+        expand_master_record_tab('history')
         expect(page).to have_css("#history-#{@master_id}")
 
         # Find the dynamic model container with horizontal orientation
@@ -314,6 +314,13 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       Rails.application.routes_reloader.reload!
     end
 
+    after(:all) do
+      Admin::PageLayout.active.where(app_type_id: @app_type.id, panel_name: 'test-columns-panel').each do |panel_layout|
+        panel_layout.disable!(@admin)
+      end
+      Rails.application.routes_reloader.reload!
+    end
+
     before :each do
       validate_setup
       login
@@ -327,10 +334,8 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).not_to have_css('.alert')
 
       # Find the test-columns-panel tab
-      columns_tab = all('a[data-panel-tab="test-columns-panel"]').first
-
-      if columns_tab
-        columns_tab.click
+      if page.has_css?('a[data-panel-tab="test-columns-panel"]', wait: 5)
+        expand_master_record_tab('test-columns-panel')
         expect(page).to have_css("#test-columns-panel-#{@master_id}")
 
         # Find the dynamic model container with columns orientation
@@ -401,12 +406,12 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).not_to have_css('.alert')
 
       # Find the external IDs tab
-      l = all('a[data-panel-tab="external_ids"]').first
-
       # Skip if external IDs tab is not available in this app type
-      skip 'External IDs tab not available in this app type' if l.nil?
+      unless page.has_css?('a[data-panel-tab="external_ids"]', wait: 5)
+        skip 'External IDs tab not available in this app type'
+      end
 
-      l.click
+      expand_master_record_tab('external ids')
 
       expect(page).to have_css("#external-ids-#{@master_id}")
 

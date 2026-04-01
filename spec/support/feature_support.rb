@@ -316,8 +316,15 @@ module FeatureSupport
   # Expectations are also enforced to ensure the tab shows.
   def expand_master_record_tab(name)
     finish_form_formatting
-    tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
+    tab_selector = "a[data-panel-tab='#{name.id_underscore}']"
+    unless page.has_css?(tab_selector, visible: :all, wait: 15)
+      available_tabs = all('a[data-panel-tab]', visible: :all, wait: 0).map { |tab| tab['data-panel-tab'] }.uniq
+      raise "Could not find panel tab #{name.id_underscore.inspect}. Available tabs: #{available_tabs.join(', ')}"
+    end
+
+    tab_link = find(tab_selector, visible: :all, wait: 0)
     expect(tab_link).not_to be nil
+    scroll_into_view(tab_link)
     tab_link.click if tab_link['aria-expanded'] != 'true'
 
     # Wait for the target panel to fully expand (Bootstrap collapse animation)
@@ -447,8 +454,8 @@ module FeatureSupport
 
     list_of_items = []
     list_of_texts = []
-    got_item_key = nil
-    all_items.each_with_index do |item, _i|
+    chosen_item = nil
+    all_items.each do |item|
       item_text = item.text.strip
       item_key = item['data-bsi-key']
       list_of_items << item_key
@@ -457,9 +464,24 @@ module FeatureSupport
       # Match by key OR by text
       next unless item_key == value || item_text.include?(value) || value.nil?
 
-      item.click
-      got_item_key = item_key
+      chosen_item = { key: item_key, text: item_text }
       break
+    end
+
+    got_item_key = chosen_item&.dig(:key)
+    if chosen_item
+      # Re-find the item before clicking because the modal content can re-render while opening.
+      item_selector = if chosen_item[:key].present?
+                        %(#primary-modal .big-select-item[data-bsi-key="#{chosen_item[:key]}"])
+                      else
+                        [:xpath, %{//div[@id="primary-modal"]//*[contains(@class, "big-select-item")][contains(normalize-space(.), #{chosen_item[:text].inspect})]}]
+                      end
+
+      if item_selector.is_a?(Array)
+        find(*item_selector, wait: 5).click
+      else
+        find(item_selector, wait: 5).click
+      end
     end
 
     page.has_css?('#primary-modal.fade', class: '!in')
