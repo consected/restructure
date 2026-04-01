@@ -903,7 +903,13 @@ module ActiveRecord
             f = field_config[:type]
             fopts = {}
             fopts[:default] = field_config[:default] if field_config[:default]
-            fopts[:index] = field_config[:index] if field_config[:index]
+            if field_config[:index].is_a?(Symbol) || field_config[:index].is_a?(String)
+              # Support custom index types like :gin, :gist (YAML parses as String)
+              idx_type = field_config[:index].to_sym
+              fopts[:index] = { using: idx_type, name: "#{rand_id}_#{idx_type}_idx" }
+            elsif field_config[:index]
+              fopts[:index] = field_config[:index]
+            end
           elsif a == 'created_by_user_id'
             f = :references
             fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users }, attr_name: :created_by_user }
