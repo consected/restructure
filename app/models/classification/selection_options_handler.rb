@@ -217,9 +217,6 @@ class Classification::SelectionOptionsHandler
         label_attr = edit_as[:label_attr] || :data
         value_attr = if alt_fn.index(/^(tag_)?select_record_id_/)
                        :id
-                     elsif alt_fn.index(/^(tag_)?select_user_with_role_/)
-                       label_attr = edit_as[:label_attr] || :email
-                       edit_as[:value_attr] || :email
                      else
                        edit_as[:value_attr] || :data
                      end
@@ -235,6 +232,16 @@ class Classification::SelectionOptionsHandler
                                                                                   sort_order: sort_order)
 
         if got_res && res
+          res = res.to_h if hash_res
+          fndefs[fn] = res
+        end
+      elsif alt_fn.index(/^(tag_)?select_user_with_role_/)
+        role_name = alt_fn.sub(/^(tag_)?select_user_with_role_/, '').gsub('_', ' ')
+        label_attr = edit_as[:label_attr] || :email
+        value_attr = edit_as[:value_attr] || :email
+        users = Admin::UserRole.active.where(role_name: role_name).users.not_template
+        res = users.map { |user| [user[label_attr], user[value_attr]] }
+        if res.present?
           res = res.to_h if hash_res
           fndefs[fn] = res
         end
