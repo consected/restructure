@@ -47,6 +47,15 @@
             file_filters:
               - '\.pdf$'
 
+      - full_text_search:
+          target_table: schema.table_name # required: table that stores the tsvector
+          target_column: search_vector # required: tsvector field in target_table
+          target_foreign_key_column: stored_file_id # required: FK referencing stored file id
+          ts_config: english # optional: PostgreSQL text search config (default english)
+          file_filters: # optional: regex filters using the same pattern as scripted job filters
+            - '.*\\.txt$'
+            - '.*\\.pdf$'
+
     # user_file_actions defines custom pipelines to perform if a user selects files 
     # and clicks the action in the drop down
     user_file_actions: 

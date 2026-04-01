@@ -56,3 +56,4 @@ A separate developer's reference, including API samples, is available in the [De
 ### General Concepts
 
 - [Substitutions](../general/substitutions.md) provide insertion of data into calculated conditions, captions, message templates and dialogs
+- [Full Text Search](../general/full_text_search.md) outlines end-to-end configuration for indexing and searching file and record content
