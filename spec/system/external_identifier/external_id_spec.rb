@@ -58,20 +58,13 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
   it 'creates external IDs' do
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
     dismiss_modal
+    finish_page_loading
 
     expect(page).to have_css("#master-#{@master.id}")
     expect(page).not_to have_css('.alert')
 
-    # Find the external ID tab
-    l = all('a[data-panel-tab="external_ids"]').first
-
-    unless l
-      ls = all('a[data-panel-tab]').map { |a| a['data-panel-tab'] }
-      puts "About to fail a[data-panel-tab=\"external_ids\"] - available tabs: #{ls.join(',')}"
-    end
-    expect(l).not_to be nil
-
-    l.click
+    expand_master_record_and_tab(master_id: @master.id, tab_name: 'external ids')
+    finish_page_loading
 
     expect(page).to have_css("#external-ids-#{@master_id}")
     c = "#bhs-assignments-#{@master_id}- .new-button-container a.btn"

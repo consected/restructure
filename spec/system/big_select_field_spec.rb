@@ -57,6 +57,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
     @app_type = @user.app_type
     expect(@app_type).not_to be nil
     expect(@user.two_factor_setup_required?).to be_falsey
+    disable_active_panel_layout('test-columns-panel')
   end
 
   # Create a source table with test data for selections
@@ -233,14 +234,26 @@ describe 'big-select field component', js: true, driver: $browser_driver do
 
     expect(page).to have_css("#master-#{@master.id}")
 
-    details_tab = all('a[data-panel-tab="details"]').first
-    details_tab.click
+    expand_master_record_and_tab(master_id: @master.id, tab_name: 'details')
     finish_page_loading
 
     new_button_selector = '.details-item-type-dynamic-model--test-big-select-fields .new-button-container a.btn'
     expect(page).to have_css(new_button_selector, wait: 10)
-    find(new_button_selector).click
-    finish_page_loading
+    5.times do
+      new_button = find(new_button_selector, wait: 10)
+      scroll_into_view(new_button)
+      new_button.click
+      finish_page_loading
+
+      break if page.has_css?('form.new_dynamic_model_test_big_select_field', wait: 2)
+    end
+
+    unless page.has_css?('form.new_dynamic_model_test_big_select_field', wait: 2)
+      new_button = find(new_button_selector, wait: 10)
+      scroll_into_view(new_button)
+      new_button.click
+      finish_page_loading
+    end
 
     expect(page).to have_css('form.new_dynamic_model_test_big_select_field', wait: 10)
     finish_form_formatting
@@ -473,8 +486,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
 
       expect(page).to have_css("#master-#{@master.id}")
 
-      details_tab = all('a[data-panel-tab="details"]').first
-      details_tab.click
+      expand_master_record_and_tab(master_id: @master.id, tab_name: 'details')
       finish_page_loading
 
       # Find the details section for our dynamic model
@@ -486,6 +498,15 @@ describe 'big-select field component', js: true, driver: $browser_driver do
         edit_button = find('.edit-entity', match: :first, visible: :all)
         scroll_into_view(edit_button)
         edit_button.click
+      end
+
+      unless page.has_css?('form.edit_dynamic_model_test_big_select_field', wait: 2)
+        details_section = find('.details-item-type-dynamic-model--test-big-select-fields', wait: 5)
+        within(details_section) do
+          edit_button = find('.edit-entity', match: :first, visible: :all)
+          scroll_into_view(edit_button)
+          edit_button.click
+        end
       end
 
       expect(page).to have_css('form.edit_dynamic_model_test_big_select_field', wait: 10)
