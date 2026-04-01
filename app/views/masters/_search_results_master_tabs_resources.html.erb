@@ -22,7 +22,7 @@
         end
       end
 
-      extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click-initial-show' : ''}"
+      extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
   %>
   {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%=resource.pluralize%>')) }}
   <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(resource, default_panels.length) %>" data-open-panels="{{open_panels}}">
