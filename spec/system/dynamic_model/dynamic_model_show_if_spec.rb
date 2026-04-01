@@ -61,8 +61,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       expect(page).to have_css("#master-#{@master_id}")
       expect(page).not_to have_css('.alert')
 
-      # Find and click the details tab
-      expand_master_record_tab('details')
+      expand_master_record_and_tab(master_id: @master_id, tab_name: 'details')
       finish_page_loading
       finish_form_formatting
 
@@ -137,8 +136,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       expect(page).to have_css("#master-#{@master_id}")
       expect(page).not_to have_css('.alert')
 
-      # Find and click the details tab
-      expand_master_record_tab('details')
+      expand_master_record_and_tab(master_id: @master_id, tab_name: 'details')
       finish_page_loading
       finish_form_formatting
       expect(page).to have_css("#details-#{@master_id}")
@@ -213,8 +211,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       expect(page).to have_css("#master-#{@master_id}")
       expect(page).not_to have_css('.alert')
 
-      # Find and click the details tab
-      expand_master_record_tab('details')
+      expand_master_record_and_tab(master_id: @master_id, tab_name: 'details')
       finish_page_loading
       finish_form_formatting
 

@@ -335,6 +335,22 @@ module FeatureSupport
     expect(page).to have_css(target_selector, wait: 15)
   end
 
+  def expand_master_record_and_tab(master_id:, tab_name:)
+    expand_master_record(master_id:)
+    expect(page).to have_css("#master-#{master_id}-main-container.in", wait: 10)
+    expand_master_record_tab(tab_name)
+  end
+
+  def disable_active_panel_layout(panel_name, app_type: @app_type, admin: @admin, reload_routes: false)
+    return unless app_type&.id && admin
+
+    Admin::PageLayout.active.where(app_type_id: app_type.id, panel_name:).each do |panel_layout|
+      panel_layout.disable!(admin)
+    end
+
+    Rails.application.routes_reloader.reload! if reload_routes
+  end
+
   #
   # Expand a search tab by the name that appears on the button
   # Expectations are also enforced to ensure the search form shows.
@@ -477,10 +493,17 @@ module FeatureSupport
                         [:xpath, %{//div[@id="primary-modal"]//*[contains(@class, "big-select-item")][contains(normalize-space(.), #{chosen_item[:text].inspect})]}]
                       end
 
-      if item_selector.is_a?(Array)
-        find(*item_selector, wait: 5).click
-      else
-        find(item_selector, wait: 5).click
+      3.times do |attempt|
+        begin
+          if item_selector.is_a?(Array)
+            find(*item_selector, wait: 5).click
+          else
+            find(item_selector, wait: 5).click
+          end
+          break
+        rescue Selenium::WebDriver::Error::StaleElementReferenceError
+          raise if attempt == 2
+        end
       end
     end
 

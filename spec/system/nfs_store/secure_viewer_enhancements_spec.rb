@@ -166,9 +166,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
   end
 
   def expand_phone_log_tab
-    expand_master_record(master_id: @master.id)
-    expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
-    expand_master_record_tab('activity_log__player_contact_phones')
+    expand_master_record_and_tab(master_id: @master.id, tab_name: 'activity_log__player_contact_phones')
   end
 
   # Open the secure viewer by clicking a file link in the filestore browser
@@ -194,9 +192,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
     create_admin unless @admin
 
     @app_type = @user.app_type
-    Admin::PageLayout.active.where(app_type_id: @app_type.id, panel_name: 'test-columns-panel').each do |panel_layout|
-      panel_layout.disable!(@admin)
-    end
+    disable_active_panel_layout('test-columns-panel')
 
     # Setup filestore directories
     test_dir = File.join(
@@ -310,9 +306,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
   end
 
   after :all do
-    Admin::PageLayout.active.where(app_type_id: @app_type.id, panel_name: 'test-columns-panel').each do |panel_layout|
-      panel_layout.disable!(@admin)
-    end
+    disable_active_panel_layout('test-columns-panel')
     temp_dir = Rails.root.join('tmp', 'test_files')
     FileUtils.rm_rf(temp_dir)
   end

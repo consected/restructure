@@ -63,11 +63,7 @@ describe 'external id (bhs_assignments)', js: true, driver: $browser_driver do
     expect(page).to have_css("#master-#{@master.id}")
     expect(page).not_to have_css('.alert')
 
-    expand_master_record(master_id: @master.id)
-    expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
-
-    # Find the external ID tab
-    expand_master_record_tab('external ids')
+    expand_master_record_and_tab(master_id: @master.id, tab_name: 'external ids')
     finish_page_loading
 
     expect(page).to have_css("#external-ids-#{@master_id}")

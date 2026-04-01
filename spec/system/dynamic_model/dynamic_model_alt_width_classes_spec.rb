@@ -105,11 +105,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      expand_master_record(master_id: @master.id)
-      expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
-
-      # Find the details tab
-      expand_master_record_tab('details')
+      expand_master_record_and_tab(master_id: @master.id, tab_name: 'details')
 
       expect(page).to have_css("#details-#{@master_id}")
 
@@ -168,11 +164,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       expect(page).to have_css("#master-#{@master.id}")
       expect(page).not_to have_css('.alert')
 
-      expand_master_record(master_id: @master.id)
-      expect(page).to have_css("#master-#{@master.id}-main-container.in", wait: 10)
-
-      # Find the details tab
-      expand_master_record_tab('details')
+      expand_master_record_and_tab(master_id: @master.id, tab_name: 'details')
 
       expect(page).to have_css("#details-#{@master_id}")
 
@@ -290,9 +282,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
       )
 
       # Create a panel layout with 'columns' orientation for this category
-      Admin::PageLayout.active.where(app_type_id: @app_type.id, panel_name: 'test-columns-panel').each do |p|
-        p.disable!(@admin)
-      end
+      disable_active_panel_layout('test-columns-panel')
 
       @panel_layout = Admin::PageLayout.create!(
         current_admin: @admin,
@@ -315,10 +305,7 @@ describe 'Dynamic Model alt_width_classes', js: true, driver: $browser_driver do
     end
 
     after(:all) do
-      Admin::PageLayout.active.where(app_type_id: @app_type.id, panel_name: 'test-columns-panel').each do |panel_layout|
-        panel_layout.disable!(@admin)
-      end
-      Rails.application.routes_reloader.reload!
+      disable_active_panel_layout('test-columns-panel', reload_routes: true)
     end
 
     before :each do
