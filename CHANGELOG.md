@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.18] - 2026-04-01
+
 - [Merged] release 9.42.17 back to develop
 - [Updated] structure.sql
 - [Added] admin report preview action to fix auth issue - fixes #1000
