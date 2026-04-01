@@ -1,6 +1,7 @@
 name: refactor
 description: Run TDD Red, Green, and Refactor Phases
 agent: tdd-implementation
+tools: [execute, read, edit, search, web, agent, todo]
 ---
 
 Run **TDD Implementation** agent
