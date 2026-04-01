@@ -58,7 +58,7 @@ class Admin::DynamicModelsController < AdminController
   rescue StandardError => e
     Rails.logger.error "Batch processing failed for #{object_instance}: #{e.message}"
     Rails.logger.error e.short_string_backtrace
-    @error_message = e.message
+    @error_message = "Batch processing failed: #{e.message}"
     render partial: 'admin/dynamic_models/run_batch_now_error'
   end
 

@@ -17,6 +17,13 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   before :all do
+    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
+    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
+    table_name = 'test_replace_opts'
+    unless Admin::MigrationGenerator.table_exists? table_name
+      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
     DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
     DynamicModel.reset_active_model_configurations!
   end
@@ -149,12 +156,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'replaces option configurations' do
-    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
-    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
     table_name = 'test_replace_opts'
-    unless Admin::MigrationGenerator.table_exists? table_name
-      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
-    end
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     name = 'test replace opts'
