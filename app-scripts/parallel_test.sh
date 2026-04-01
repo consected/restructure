@@ -159,7 +159,10 @@ if [ -f tmp/parallel_specs_failed.txt ]; then
   cat tmp/failing_specs.log
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
   echo "Running retest for failed specs"
-  $(dirname "$0")/parallel_test_retest.sh >> tmp/failing_specs.log 2>&1
+  $(dirname "$0")/parallel_test_retest.sh
+  res=$?
+  cat tmp/retest_output.log >> tmp/failing_specs.log
+  exit $res
 else
   echo "All parallel specs passed."
   echo "All parallel specs passed."  >> tmp/failing_specs.log
