@@ -7,6 +7,7 @@ handoffs:
     agent: tdd-green
     prompt: Now implement the plan outlined above.
     send: true
+model: Claude Opus 4.6 (copilot)
 ---
 
 # TDD Red Phase - Write Failing Tests First

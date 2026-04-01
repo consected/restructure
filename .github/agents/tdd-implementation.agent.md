@@ -3,6 +3,7 @@ description: 'Implement code to satisfy GitHub issue requirements and make faili
 name: 'TDD Implementation'
 tools: [agent, vscode/openSimpleBrowser, vscode/askQuestions, execute/testFailure, execute/getTerminalOutput, execute/awaitTerminal, execute/runInTerminal, read/problems, read/readFile, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/editFiles, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, todo]
 agents: ['TDD Red Phase - Write Failing Tests First', 'TDD Green Phase - Make Tests Pass Quickly', 'TDD Refactor Phase - Improve Quality & Security']
+model: Claude Opus 4.6 (copilot)
 ---
 # General Implementation
 

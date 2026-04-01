@@ -7,6 +7,7 @@ SecureView.setup do |config|
   config.dcmj2pnm_path = 'dcmj2pnm'
   config.netpbm_path = 'jpegtopnm'
   config.pdfgrep_path = 'pdfgrep'
+  config.pdftotext_path = 'pdftotext'
 
   config.resolution = {
     pdf: 150

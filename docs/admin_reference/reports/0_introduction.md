@@ -8,6 +8,12 @@ the risk of SQL injection.
 
 Administration is provided in [Admin: Reports](/admin/reports)
 
+## Full Text Search in Reports
+
+Reports can query full-text indexed data by joining to `tsvector` target tables and using PostgreSQL search operators such as `@@`, `to_tsquery`, and `plainto_tsquery`.
+
+See [Full Text Search](full_text_search.md) for a concise guide and query patterns.
+
 ## Field Definitions
 
 !defs(report_field_defs.yaml)
@@ -18,3 +24,4 @@ Administration is provided in [Admin: Reports](/admin/reports)
 - [URL Search Attributes](url_search_attributes.md)
 - [Detailed Options](detailed_options.md)
 - [File Filtering](file_filtering.md)
+- [Full Text Search](full_text_search.md)

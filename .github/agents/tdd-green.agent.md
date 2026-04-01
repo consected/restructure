@@ -11,6 +11,7 @@ handoffs:
     agent: tdd-refactor
     prompt: Now refactor this work.
     send: true
+model: Claude Opus 4.6 (copilot)
 ---
 # TDD Green Phase - Make Tests Pass Quickly
 
