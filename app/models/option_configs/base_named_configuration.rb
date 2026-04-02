@@ -46,7 +46,7 @@ module OptionConfigs
     # @param other [Object] value to compare against
     # @return [Boolean]
     def ==(other)
-      return to_h == other if other.is_a?(Hash)
+      return filtered_hash == other if other.is_a?(Hash)
 
       super
     end

@@ -5,10 +5,18 @@ module OptionConfigs
     # Configuration class for field-level edit options.
     # Extracted from ExtraOptions#clean_field_options_def
     #
-    # Values are arbitrary option hashes keyed by field name.
+    # Values are per-field option hashes keyed by field name.
     # Handles converting edit_as.alt_options from Array to Hash.
     class FieldOptions < BaseConfiguration
-      # No NamedConfiguration — values are arbitrary option hashes
+      # Named configuration for a single field's options.
+      class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
+        configure_attributes %i[
+          include_blank pattern value blank_value preset_value blank_preset_value
+          active_value no_downcase view_original_case view_with_formats format
+          config edit_as calculate_with prompt use_app_type selected show_expanded
+          keep_label
+        ]
+      end
 
       # Override to preprocess alt_options arrays.
       def add_named_configuration(sym_key, value)
