@@ -241,9 +241,9 @@ module OptionConfigs
 
       set_defaults config_obj, loaded_config
 
-      config_obj.table_comments = loaded_config.delete(:_comments)
+      config_obj.table_comments = ExtraOptionConfigs::Comments.new(loaded_config.delete(:_comments) || {})
       config_obj.db_columns = loaded_config.delete(:_db_columns)
-      config_obj.data_dictionary = loaded_config.delete(:_data_dictionary)
+      config_obj.data_dictionary = ExtraOptionConfigs::DataDictionaryConfig.new(loaded_config.delete(:_data_dictionary) || {})
       config_obj.options_constants = loaded_config.delete(:_constants)
 
       # Definitions '_definitions...' are only used by YAML for the definition of anchors

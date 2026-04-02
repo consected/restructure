@@ -176,6 +176,9 @@ module OptionConfigs
         end
       end
 
+      alias to_h symbolize_keys
+      alias to_hash symbolize_keys
+
       # JSON serialization producing the same format as the original plain hash.
       # @return [Hash]
       def as_json(options = nil)
