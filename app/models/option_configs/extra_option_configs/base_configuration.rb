@@ -156,6 +156,14 @@ module OptionConfigs
 
       alias filter select
 
+      # Return a plain Hash with specified keys removed.
+      # Used by ConditionalActions#calc_save_option_if to strip keys like :label.
+      # @param keys [Array<Symbol>] keys to exclude
+      # @return [Hash]
+      def except(*keys)
+        symbolize_keys.except(*keys)
+      end
+
       # Equality comparison: compare as plain Hash for backward compatibility
       # with code that previously compared against Hash literals.
       # @param other [Object] value to compare against
