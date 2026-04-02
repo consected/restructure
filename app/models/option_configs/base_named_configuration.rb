@@ -84,6 +84,27 @@ module OptionConfigs
       to_h.reject { |_k, v| v.nil? }
     end
 
+    # Duplicate as a plain Hash for backward compatibility with callers that
+    # historically treated named configurations as mutable hashes.
+    # @return [Hash{Symbol => Object}]
+    def dup
+      filtered_hash.deep_dup
+    end
+
+    # Deep duplicate as a plain Hash for compatibility with callers that merge
+    # nested field option configs after duplicating them.
+    # @return [Hash{Symbol => Object}]
+    def deep_dup
+      filtered_hash.deep_dup
+    end
+
+    # Merge with another hash-like object and return a plain Hash.
+    # @param other [Hash, #to_h, #filtered_hash]
+    # @return [Hash{Symbol => Object}]
+    def merge(other)
+      filtered_hash.merge(coerce_hash(other))
+    end
+
     def config_text
       return super unless owner
 
@@ -119,6 +140,15 @@ module OptionConfigs
 
         owner.send(:failed_config, key, "unrecognized attribute '#{key}'", level: :warn)
       end
+    end
+
+    private
+
+    def coerce_hash(other)
+      return other.filtered_hash if other.respond_to?(:filtered_hash)
+      return other.to_h if other.respond_to?(:to_h)
+
+      other || {}
     end
   end
 end

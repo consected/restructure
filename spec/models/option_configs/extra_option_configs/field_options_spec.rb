@@ -114,6 +114,27 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       nc[:value] = 'override'
       expect(nc[:value]).to eq 'override'
     end
+
+    it 'NamedConfiguration dup returns a plain hash for legacy callers' do
+      instance = klass.new(field1: { preset_value: 'abc', edit_as: { field_type: 'select' } })
+
+      expect(instance[:field1].dup).to eq(
+        preset_value: 'abc',
+        edit_as: { field_type: 'select' }
+      )
+    end
+
+    it 'NamedConfiguration deep_dup and merge behave like a hash for legacy callers' do
+      instance = klass.new(field1: { preset_value: 'abc', edit_as: { field_type: 'select' } })
+
+      merged = instance[:field1].deep_dup.merge(include_blank: true)
+
+      expect(merged).to eq(
+        preset_value: 'abc',
+        edit_as: { field_type: 'select' },
+        include_blank: true
+      )
+    end
   end
 
   describe 'ExtraOptions integration' do
