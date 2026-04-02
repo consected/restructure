@@ -35,6 +35,15 @@ module OptionConfigs
         false
       end
 
+      # Optional: override to read raw input from a different ExtraOptions attribute
+      # than the registry key. For example, References uses `source_attribute :references`
+      # so the registry key `references_config` reads its input from `extra_options.references`,
+      # and the enriched hash is stored back there while the instance is kept at the registry key.
+      # @return [Symbol, nil] the source attribute name, or nil to use the registry key
+      def self.source_attribute
+        nil
+      end
+
       # Initialize with just a hash config (no owner required).
       # Bypasses the parent's owner-based initialization since these
       # config classes don't persist independently — managed by ExtraOptions.

@@ -37,7 +37,7 @@ module OptionConfigs
         filestore: ExtraOptionConfigs::Filestore,
         field_options: ExtraOptionConfigs::FieldOptions,
         embed: ExtraOptionConfigs::Embed,
-        references: ExtraOptionConfigs::References,
+        references_config: ExtraOptionConfigs::References,
         save_trigger: ExtraOptionConfigs::SaveTrigger,
         batch_trigger: ExtraOptionConfigs::BatchTrigger,
         config_trigger: ExtraOptionConfigs::ConfigTrigger,
@@ -50,6 +50,7 @@ module OptionConfigs
       %i[
         name config_obj resource_name resource_item_name add_reference_if
         button_label orig_config show_if_condition_strings raw_field_configs
+        references
       ]
     end
 
@@ -69,7 +70,7 @@ module OptionConfigs
       key_attributes - %i[name config_obj resource_name resource_item_name] + [:label]
     end
 
-    attr_accessor(*key_attributes, :def_item, :bad_ref_items, :config_instances)
+    attr_accessor(*key_attributes, :def_item, :config_instances)
 
     #
     # Initialize a named option configuration, which may form one of many in a dynamic definition
@@ -101,15 +102,20 @@ module OptionConfigs
         # Delegate to configuration classes in order
         self.class.config_class_registry.each do |key, config_class|
           if config_class < ExtraOptionConfigs::BaseConfiguration
-            # BaseConfiguration config: initialize with raw value
-            raw = send(key)
+            # Determine where to read raw input (source_attribute or registry key)
+            source_key = config_class.source_attribute || key
+            raw = send(source_key)
             raw = config_class.prepare_config(raw, self) if config_class.respond_to?(:prepare_config)
             instance = config_class.new(raw)
 
-            # Collect errors/warnings before potentially discarding the instance
-            collect_instance_errors(instance)
-
-            if config_class.store_processed_value?
+            if config_class.source_attribute
+              # source_attribute pattern: enriched value → source attr, instance → registry key
+              direct_attr = config_class.option_types[:direct]&.first || source_key
+              send("#{source_key}=", instance.send(direct_attr))
+              send("#{key}=", instance)
+            elsif config_class.store_processed_value?
+              # Collect errors/warnings before discarding the instance
+              collect_instance_errors(instance)
               # Value-preprocessor class: store the processed value, not the object
               direct_attr = config_class.option_types[:direct]&.first || key
               send("#{key}=", instance.send(direct_attr))
@@ -190,6 +196,9 @@ module OptionConfigs
     # Collect config errors and warnings from field-keyed config instances
     # (those inheriting ExtraOptionConfigs::BaseConfiguration) into the
     # parent ExtraOptions config_errors/config_warnings arrays.
+    # Only collects from instances that were not already collected via
+    # collect_instance_errors during initialization (i.e. store_processed_value?
+    # classes that were discarded).
     def collect_field_config_errors
       self.class.config_class_registry.each do |key, config_class|
         next unless config_class < ExtraOptionConfigs::BaseConfiguration
