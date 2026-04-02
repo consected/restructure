@@ -82,14 +82,15 @@ RSpec.describe 'ExtraOptionConfigs registry and class structure', type: :model d
     it 'base_key_attributes does not overlap config class attributes (except source_attribute keys)' do
       base = OptionConfigs::ExtraOptions.base_key_attributes
       config_attrs = OptionConfigs::ExtraOptions.config_class_attributes
-      # source_attribute classes read from a base_key_attribute, so :references
-      # appears in base_key_attributes but not in config_class_attributes
+      # source_attribute classes read from a base_key_attribute, so :references and :embed
+      # appear in base_key_attributes but not in config_class_attributes
       overlap = base & config_attrs
       expect(overlap).to be_empty,
                          "base_key_attributes should not overlap config_class_attributes, but found: #{overlap}"
     end
 
-    it 'base_key_attributes includes source_attribute keys for source_attribute classes' do
+    it 'base_key_attributes or add_key_attributes includes source_attribute keys for source_attribute classes' do
+      # ExtraOptions source_attribute classes (e.g. References, Embed)
       base = OptionConfigs::ExtraOptions.base_key_attributes
       registry = OptionConfigs::ExtraOptions.config_class_registry
       registry.each do |_key, config_class|
@@ -98,6 +99,17 @@ RSpec.describe 'ExtraOptionConfigs registry and class structure', type: :model d
         expect(base).to include(config_class.source_attribute),
                          "Expected base_key_attributes to include :#{config_class.source_attribute} " \
                          "for source_attribute class #{config_class.name}"
+      end
+
+      # ActivityLogOptions source_attribute classes (e.g. ESignConfig)
+      alo_registry = OptionConfigs::ActivityLogOptions.config_class_registry
+      alo_all_attrs = OptionConfigs::ActivityLogOptions.key_attributes
+      alo_registry.each do |_key, config_class|
+        next unless config_class.respond_to?(:source_attribute) && config_class.source_attribute
+
+        expect(alo_all_attrs).to include(config_class.source_attribute),
+                                  "Expected ActivityLogOptions key_attributes to include :#{config_class.source_attribute} " \
+                                  "for source_attribute class #{config_class.name}"
       end
     end
 

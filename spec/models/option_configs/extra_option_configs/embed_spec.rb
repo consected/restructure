@@ -4,8 +4,9 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 # Tests for Embed configuration class.
-# Verifies resource_name handling, validate callbacks, and integration through
-# ExtraOptions initialization (clean_embed_def behavior).
+# Verifies source_attribute pattern, configure_attributes, COMPUTED_KEYS,
+# resource_name handling, validate callbacks, and integration through
+# ExtraOptions initialization with enriched hash and instance separation.
 RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
   include MasterSupport
   include ModelSupport
@@ -28,12 +29,20 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
       expect(klass.ancestors).to include(OptionConfigs::ExtraOptionConfigs::BaseConfiguration)
     end
 
-    it 'does not inherit from ConfigBase' do
-      expect(klass.ancestors).not_to include(OptionConfigs::ExtraOptionConfigs::ConfigBase)
+    it 'declares source_attribute :embed' do
+      expect(klass.source_attribute).to eq :embed
     end
 
     it 'declares configure_direct with type :hash' do
       expect(klass.option_types[:direct]).to include(:embed)
+    end
+
+    it 'declares configure_attributes for input-only fields' do
+      expect(klass.option_types[:simple]).to include(:resource_name, :resource_id, :limit)
+    end
+
+    it 'defines COMPUTED_KEYS for enrichment-only keys' do
+      expect(klass::COMPUTED_KEYS).to eq %i[resource_model_def]
     end
   end
 
@@ -43,9 +52,17 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
       expect(instance.embed[:resource_name]).to eq 'some_resource'
     end
 
-    it 'stores resource_name from hash input' do
-      instance = klass.new(resource_name: 'some_resource')
-      expect(instance.embed[:resource_name]).to eq 'some_resource'
+    it 'assigns input-only configure_attributes from hash input' do
+      instance = klass.new(resource_name: 'some_resource', resource_id: 42, limit: 1)
+      expect(instance.resource_name).to eq 'some_resource'
+      expect(instance.resource_id).to eq 42
+      expect(instance.limit).to eq 1
+    end
+
+    it 'does not assign computed keys to configure_attributes' do
+      instance = klass.new(resource_name: 'test', resource_model_def: { model: 'fake' })
+      expect(instance.embed[:resource_model_def]).to eq({ model: 'fake' })
+      expect(instance).not_to respond_to(:resource_model_def)
     end
 
     it 'returns blank when initialized with nil' do
@@ -93,7 +110,7 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
       expect(eo.embed).to be_nil
     end
 
-    it 'converts a string resource_name into a hash with resource_name key' do
+    it 'converts a string resource_name into an enriched hash with resource_name and resource_model_def' do
       eo = config_for(<<~YAML)
         default:
           embed: dynamic_model__some_resource
@@ -101,6 +118,31 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
 
       expect(eo.embed).to be_a Hash
       expect(eo.embed[:resource_name]).to eq 'dynamic_model__some_resource'
+      expect(eo.embed).to have_key(:resource_model_def)
+    end
+
+    it 'stores the Embed instance at embed_config' do
+      eo = config_for(<<~YAML)
+        default:
+          embed: dynamic_model__some_resource
+      YAML
+
+      expect(eo.embed_config).to be_a(klass)
+      expect(eo.embed_config.resource_name).to eq 'dynamic_model__some_resource'
+    end
+
+    it 'embed_config has input-only attributes without computed keys' do
+      eo = config_for(<<~YAML)
+        default:
+          embed:
+            resource_name: dynamic_model__some_resource
+            limit: 1
+      YAML
+
+      instance = eo.embed_config
+      expect(instance.resource_name).to eq 'dynamic_model__some_resource'
+      expect(instance.limit).to eq 1
+      expect(instance).not_to respond_to(:resource_model_def)
     end
 
     it 'preserves a hash-style embed with resource_name' do

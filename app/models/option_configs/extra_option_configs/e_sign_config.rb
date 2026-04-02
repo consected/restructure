@@ -3,14 +3,28 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for e-signature definitions.
-    # Migrated from ActivityLogOptions#clean_e_sign_def (issue #986).
     #
-    # Transforms e_sign document_reference structure: wraps in {item: ...},
-    # singularizes keys, and resolves model references.
+    # Uses the source_attribute pattern: the registry key is :e_sign_config,
+    # but the raw input is read from :e_sign (an add_key_attribute on ActivityLogOptions).
+    # After processing:
+    # - extra_options.e_sign = enriched hash (runtime code consumes this)
+    # - extra_options.e_sign_config = this ESignConfig instance (input-only attributes)
     #
-    # The processed hash is stored back on the parent ExtraOptions (not the object).
+    # Handles:
+    # - Wrapping document_reference in {item: ...}
+    # - Singularizing keys within document_reference entries
+    # - Resolving model references and enriching with class metadata
     class ESignConfig < BaseConfiguration
       configure_direct :e_sign, type: :hash
+      configure_attributes %i[create_document auto_create_document document_reference title intro]
+
+      # Keys added by prepare_config within document_reference model entries
+      # that are not part of admin input.
+      COMPUTED_KEYS = %i[to_record_label no_master_association to_model_name_us].freeze
+
+      def self.source_attribute
+        :e_sign
+      end
 
       def self.store_processed_value?
         true
@@ -49,8 +63,42 @@ module OptionConfigs
         raw
       end
 
+      # Store enriched hash on the direct attribute and assign input-only
+      # configured attributes for round-trip serialization.
+      # @return [void]
       def setup_named_configurations
-        self.e_sign = hash_configuration
+        self.e_sign = hash_configuration.presence
+        return unless e_sign
+
+        # Assign top-level input attributes
+        e_sign.each do |k, v|
+          next if k == :document_reference
+
+          send("#{k}=", v) if respond_to?("#{k}=")
+        end
+
+        # Store input-only document_reference (strip computed keys from nested model entries)
+        return unless e_sign[:document_reference]
+
+        self.document_reference = strip_doc_ref_computed_keys(e_sign[:document_reference])
+      end
+
+      private
+
+      # Strip computed keys from each model entry nested within document_reference.
+      # Structure: { item: { model_name: { from: ..., to_record_label: ..., ... } } }
+      # @param doc_ref [Hash] the document_reference hash
+      # @return [Hash] document_reference with computed keys removed from model entries
+      def strip_doc_ref_computed_keys(doc_ref)
+        doc_ref.transform_values do |group|
+          next group unless group.is_a?(Hash)
+
+          group.transform_values do |entry|
+            next entry unless entry.is_a?(Hash)
+
+            entry.except(*COMPUTED_KEYS)
+          end
+        end
       end
     end
   end
