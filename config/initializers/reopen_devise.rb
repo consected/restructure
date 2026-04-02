@@ -100,4 +100,12 @@ Rails.application.config.to_prepare do
       throw(:warden, scope:, reason: 'Your password has expired.', message: msg)
     end
   end
+
+  Warden::Manager.send(:after_authentication) do |record, warden, options|
+    if record.respond_to?(:api_access_only?) && record.api_access_only?
+      scope = options[:scope]
+      warden.logout(scope)
+      throw(:warden, scope:, message: 'This account is configured for API access only.')
+    end
+  end
 end

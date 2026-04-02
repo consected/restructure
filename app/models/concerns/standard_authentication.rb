@@ -10,6 +10,7 @@ module StandardAuthentication
 
   included do
     before_validation :setup_new_password, on: :create
+    before_validation :ensure_api_access_only_password, on: :create
     validates :email,
               presence: true,
               uniqueness: {
@@ -30,7 +31,9 @@ module StandardAuthentication
     validate :password_like_email, if: :password_changed?
     validate :check_strength, if: :password_changed?
     before_create :setup_two_factor_auth
+    before_create :handle_api_access_only_on_create
     before_save :handle_password_change
+    before_save :handle_api_access_only_change
     after_save :handle_password_reminder_setup, if: :set_reminder
     after_save :clear_plaintext_password
     after_save :clean_memos
@@ -393,6 +396,32 @@ module StandardAuthentication
     temp_password_hash = BCrypt::Engine.hash_secret(password, salt)
     # Compare
     temp_password_hash != prev_password_hash
+  end
+
+  def handle_api_access_only_on_create
+    return unless respond_to?(:api_access_only)
+
+    self.otp_required_for_login = true if api_access_only?
+  end
+
+  # Ensure API-only users always get a generated password on create,
+  # even when setup_new_password skips generation (e.g. registration admin scenario)
+  def ensure_api_access_only_password
+    return unless respond_to?(:api_access_only) && api_access_only?
+    return if password.present?
+
+    generate_password
+  end
+
+  def handle_api_access_only_change
+    return unless respond_to?(:api_access_only)
+    return if new_record?
+
+    if api_access_only? && api_access_only_changed?
+      self.otp_required_for_login = true
+    elsif api_access_only_changed? && !api_access_only?
+      setup_two_factor_auth
+    end
   end
 
   #

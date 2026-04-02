@@ -120,6 +120,6 @@ class Admin::ManageUsersController < AdminController
   private
 
   def permitted_params
-    %i[email disabled first_name last_name do_not_email expire_datetime]
+    %i[email disabled first_name last_name do_not_email expire_datetime api_access_only]
   end
 end
