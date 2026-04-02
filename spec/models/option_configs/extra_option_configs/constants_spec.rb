@@ -41,6 +41,15 @@ RSpec.describe 'ExtraOptionConfigs::Constants', type: :model do
       copy = instance.dup
       expect(copy[:key1]).to eq 'val1'
     end
+
+    it 'to_h returns a plain Hash for substitution compatibility' do
+      instance = klass.new(replace_me: 'super special', program_name: 'LC2Test')
+      h = instance.to_h
+      expect(h).to be_a(Hash)
+      expect(h[:replace_me]).to eq 'super special'
+      expect(h[:program_name]).to eq 'LC2Test'
+      expect(h.key?(:replace_me)).to be true
+    end
   end
 
   describe 'parse_config integration' do

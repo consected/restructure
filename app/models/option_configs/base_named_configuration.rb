@@ -17,6 +17,18 @@ module OptionConfigs
       send(sym_key)
     end
 
+    # Check if a key is a recognized attribute with a non-nil value.
+    # Matches Hash#key? semantics for configs parsed from YAML:
+    # a key is "present" only when it was actually defined (non-nil).
+    # @param [Symbol | String] key - the attribute name
+    # @return [Boolean]
+    def key?(key)
+      sym_key = key.to_sym
+      self.class.option_types[:simple]&.include?(sym_key) && !send(sym_key).nil?
+    end
+
+    alias has_key? key?
+
     #
     # Convert all configured attributes to a plain Hash.
     # Mirrors OptionsHandler::Configuration#to_h for named configurations.

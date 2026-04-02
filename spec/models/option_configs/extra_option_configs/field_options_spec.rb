@@ -76,6 +76,29 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(instance[:field1]).to be_a(klass::NamedConfiguration)
       expect(instance.config_warnings).not_to be_empty
     end
+
+    it 'NamedConfiguration supports key? for defined attributes' do
+      instance = klass.new(field1: { preset_value: 'abc', no_downcase: true })
+      nc = instance[:field1]
+      expect(nc).to be_a(klass::NamedConfiguration)
+      expect(nc.key?(:preset_value)).to be true
+      expect(nc.key?(:no_downcase)).to be true
+      expect(nc.key?(:blank_preset_value)).to be false
+      expect(nc.key?(:active_value)).to be false
+    end
+
+    it 'NamedConfiguration key? returns false for unknown attributes' do
+      instance = klass.new(field1: { preset_value: 'abc' })
+      nc = instance[:field1]
+      expect(nc.key?(:nonexistent_attr)).to be false
+    end
+
+    it 'NamedConfiguration supports has_key? alias' do
+      instance = klass.new(field1: { preset_value: 'abc' })
+      nc = instance[:field1]
+      expect(nc.has_key?(:preset_value)).to be true
+      expect(nc.has_key?(:active_value)).to be false
+    end
   end
 
   describe 'ExtraOptions integration' do
