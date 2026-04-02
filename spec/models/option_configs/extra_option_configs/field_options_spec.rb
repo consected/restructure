@@ -4,7 +4,8 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 # Tests for FieldOptions configuration class.
-# Verifies alt_options preprocessing and integration through
+# Verifies NamedConfiguration for per-field options (edit_as, value, pattern, etc.),
+# alt_options preprocessing, and integration through
 # ExtraOptions initialization (clean_field_options_def behavior).
 RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
   include MasterSupport
@@ -23,7 +24,36 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::FieldOptions }
 
+  describe 'class structure' do
+    it 'defines a NamedConfiguration inner class' do
+      expect(klass.const_defined?(:NamedConfiguration)).to be true
+    end
+
+    it 'NamedConfiguration declares field option attributes' do
+      nc = klass::NamedConfiguration
+      expected = %i[
+        include_blank pattern value blank_value preset_value blank_preset_value
+        active_value no_downcase view_original_case view_with_formats format
+        config edit_as calculate_with prompt use_app_type selected show_expanded
+        keep_label
+      ]
+      expected.each { |attr| expect(nc.option_types[:simple]).to include(attr) }
+    end
+  end
+
   describe 'initialization' do
+    it 'creates NamedConfiguration entries for hash values' do
+      instance = klass.new(field1: { no_downcase: true, pattern: '.+' })
+      expect(instance[:field1]).to be_a(klass::NamedConfiguration)
+      expect(instance[:field1].no_downcase).to be true
+      expect(instance[:field1].pattern).to eq '.+'
+    end
+
+    it 'stores non-hash values directly' do
+      instance = klass.new(field1: 'simple_value')
+      expect(instance[:field1]).to eq 'simple_value'
+    end
+
     it 'converts alt_options Array to Hash' do
       instance = klass.new(
         field1: { edit_as: { alt_options: %w[ChoiceA ChoiceB] } }
@@ -31,6 +61,20 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       ao = instance[:field1][:edit_as][:alt_options]
       expect(ao).to be_a Hash
       expect(ao[:ChoiceA]).to eq 'choicea'
+    end
+
+    it 'symbolize_keys converts NamedConfiguration entries to plain hashes' do
+      instance = klass.new(field1: { no_downcase: true, value: 'x' })
+      result = instance.symbolize_keys
+      expect(result[:field1]).to be_a(Hash)
+      expect(result[:field1][:no_downcase]).to be true
+      expect(result[:field1][:value]).to eq 'x'
+    end
+
+    it 'warns about unrecognized keys in field config' do
+      instance = klass.new(field1: { no_downcase: true, bogus_key: 'bad' })
+      expect(instance[:field1]).to be_a(klass::NamedConfiguration)
+      expect(instance.config_warnings).not_to be_empty
     end
   end
 
