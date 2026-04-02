@@ -3,17 +3,28 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for embedded resource definitions.
-    # Converted from ConfigBase to BaseConfiguration pattern.
+    #
+    # Uses the source_attribute pattern: the registry key is :embed_config,
+    # but the raw input is read from :embed (a base_key_attribute).
+    # After processing:
+    # - extra_options.embed = enriched hash (runtime code consumes this)
+    # - extra_options.embed_config = this Embed instance (input-only attributes)
     #
     # Handles:
     # - Converting 'default_embed_resource' string to resource_name hash
     # - Converting plain string to { resource_name: string } hash
     # - Looking up the resource model definition
     # - Warning when embedded resource does not exist
-    #
-    # The processed hash is stored back on the parent ExtraOptions (not the object).
     class Embed < BaseConfiguration
       configure_direct :embed, type: :hash
+      configure_attributes %i[resource_name resource_id limit]
+
+      # Key added by prepare_config that is not part of admin input.
+      COMPUTED_KEYS = %i[resource_model_def].freeze
+
+      def self.source_attribute
+        :embed
+      end
 
       def self.store_processed_value?
         true
@@ -53,8 +64,8 @@ module OptionConfigs
         emb
       end
 
-      # Store the embed hash value.
-      # Handles string input by converting to resource_name hash.
+      # Store enriched hash on the direct attribute and assign input-only
+      # configured attributes for round-trip serialization.
       # @return [void]
       def setup_named_configurations
         raw = hash_configuration
@@ -62,9 +73,12 @@ module OptionConfigs
                        { resource_name: raw }
                      elsif raw.is_a?(Hash) && raw.present?
                        raw
-                     else
-                       raw.presence
                      end
+        return unless embed
+
+        embed.except(*COMPUTED_KEYS).each do |k, v|
+          send("#{k}=", v) if respond_to?("#{k}=")
+        end
       end
 
       private

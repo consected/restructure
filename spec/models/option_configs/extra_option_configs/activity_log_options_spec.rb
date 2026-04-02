@@ -27,10 +27,10 @@ RSpec.describe 'ActivityLogOptions config_class_registry', type: :model do
                         'Expected ActivityLogOptions.config_class_registry to include :nfs_store'
   end
 
-  it 'extends parent registry with e_sign' do
+  it 'extends parent registry with e_sign_config' do
     registry = OptionConfigs::ActivityLogOptions.config_class_registry
-    expect(registry).to have_key(:e_sign),
-                        'Expected ActivityLogOptions.config_class_registry to include :e_sign'
+    expect(registry).to have_key(:e_sign_config),
+                        'Expected ActivityLogOptions.config_class_registry to include :e_sign_config'
   end
 
   it 'maps nfs_store to NfsStoreConfig class' do
@@ -38,13 +38,13 @@ RSpec.describe 'ActivityLogOptions config_class_registry', type: :model do
     expect(registry[:nfs_store]).to eq(OptionConfigs::ExtraOptionConfigs::NfsStoreConfig)
   end
 
-  it 'maps e_sign to ESignConfig class' do
+  it 'maps e_sign_config to ESignConfig class' do
     registry = OptionConfigs::ActivityLogOptions.config_class_registry
-    expect(registry[:e_sign]).to eq(OptionConfigs::ExtraOptionConfigs::ESignConfig)
+    expect(registry[:e_sign_config]).to eq(OptionConfigs::ExtraOptionConfigs::ESignConfig)
   end
 
-  it 'returns empty add_key_attributes' do
-    expect(OptionConfigs::ActivityLogOptions.add_key_attributes).to eq([])
+  it 'returns add_key_attributes containing :e_sign' do
+    expect(OptionConfigs::ActivityLogOptions.add_key_attributes).to eq([:e_sign])
   end
 
   it 'does not define clean_nfs_store_def as instance method' do

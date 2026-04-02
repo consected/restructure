@@ -23,7 +23,7 @@ module ExtraOptionConfigsSupport
     valid_if: :ValidIf,
     filestore: :Filestore,
     field_options: :FieldOptions,
-    embed: :Embed,
+    embed_config: :Embed,
     references_config: :References,
     save_trigger: :SaveTrigger,
     batch_trigger: :BatchTrigger,
@@ -39,11 +39,11 @@ module ExtraOptionConfigsSupport
   # Config classes converted to BaseConfiguration with typed or direct attributes
   TYPED_CONFIG_CLASSES = %i[
     BatchTrigger SaveTrigger ViewOptions Filestore ConfigTrigger SaveAction ValidIf SetVariable
-    Fields Label CreatableIf EditableIf ShowableIf Embed FieldConfigs
+    Fields Label CreatableIf EditableIf ShowableIf FieldConfigs
   ].freeze
 
   # Config classes that use source_attribute to read input from a different ExtraOptions attribute
-  SOURCE_ATTRIBUTE_CLASSES = %i[References].freeze
+  SOURCE_ATTRIBUTE_CLASSES = %i[References Embed ESignConfig].freeze
 
   # Helper: update the DynamicModel with given YAML options and return the first option config
   def config_for(yaml)

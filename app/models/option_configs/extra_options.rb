@@ -36,7 +36,7 @@ module OptionConfigs
         valid_if: ExtraOptionConfigs::ValidIf,
         filestore: ExtraOptionConfigs::Filestore,
         field_options: ExtraOptionConfigs::FieldOptions,
-        embed: ExtraOptionConfigs::Embed,
+        embed_config: ExtraOptionConfigs::Embed,
         references_config: ExtraOptionConfigs::References,
         save_trigger: ExtraOptionConfigs::SaveTrigger,
         batch_trigger: ExtraOptionConfigs::BatchTrigger,
@@ -50,7 +50,7 @@ module OptionConfigs
       %i[
         name config_obj resource_name resource_item_name add_reference_if
         button_label orig_config show_if_condition_strings raw_field_configs
-        references
+        references embed
       ]
     end
 

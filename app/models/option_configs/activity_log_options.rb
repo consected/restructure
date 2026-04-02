@@ -12,13 +12,13 @@ module OptionConfigs
 
     def self.config_class_registry
       super.merge(
-        e_sign: ExtraOptionConfigs::ESignConfig,
+        e_sign_config: ExtraOptionConfigs::ESignConfig,
         nfs_store: ExtraOptionConfigs::NfsStoreConfig
       )
     end
 
     def self.add_key_attributes
-      []
+      %i[e_sign]
     end
 
     attr_accessor(*key_attributes)
