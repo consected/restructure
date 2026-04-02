@@ -1,0 +1,57 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+require './db/table_generators/dynamic_models_table'
+
+# Tests for ActivityLogOptions config_class_registry integration.
+# Verifies that nfs_store and e_sign are registered config classes
+# and the old clean_ instance methods no longer exist.
+RSpec.describe 'ActivityLogOptions config_class_registry', type: :model do
+  include MasterSupport
+  include ModelSupport
+  include DynamicModelSupport
+  include ExtraOptionConfigsSupport
+
+  before(:each) do
+    create_admin
+    create_user
+    setup_access :trackers
+    setup_access :tracker_histories
+    @dm = generate_test_dynamic_model
+    setup_access :dynamic_model__test_created_by_recs, user: @user
+  end
+
+  it 'extends parent registry with nfs_store' do
+    registry = OptionConfigs::ActivityLogOptions.config_class_registry
+    expect(registry).to have_key(:nfs_store),
+                        'Expected ActivityLogOptions.config_class_registry to include :nfs_store'
+  end
+
+  it 'extends parent registry with e_sign' do
+    registry = OptionConfigs::ActivityLogOptions.config_class_registry
+    expect(registry).to have_key(:e_sign),
+                        'Expected ActivityLogOptions.config_class_registry to include :e_sign'
+  end
+
+  it 'maps nfs_store to NfsStoreConfig class' do
+    registry = OptionConfigs::ActivityLogOptions.config_class_registry
+    expect(registry[:nfs_store]).to eq(OptionConfigs::ExtraOptionConfigs::NfsStoreConfig)
+  end
+
+  it 'maps e_sign to ESignConfig class' do
+    registry = OptionConfigs::ActivityLogOptions.config_class_registry
+    expect(registry[:e_sign]).to eq(OptionConfigs::ExtraOptionConfigs::ESignConfig)
+  end
+
+  it 'returns empty add_key_attributes' do
+    expect(OptionConfigs::ActivityLogOptions.add_key_attributes).to eq([])
+  end
+
+  it 'does not define clean_nfs_store_def as instance method' do
+    expect(OptionConfigs::ActivityLogOptions.method_defined?(:clean_nfs_store_def, false)).to be false
+  end
+
+  it 'does not define clean_e_sign_def as instance method' do
+    expect(OptionConfigs::ActivityLogOptions.method_defined?(:clean_e_sign_def, false)).to be false
+  end
+end
