@@ -4,7 +4,8 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 # Tests for DbConfigs configuration class.
-# Verifies field-keyed BaseConfiguration behavior and integration through
+# Verifies NamedConfiguration for column definitions (type, array, index, encrypted),
+# field-keyed BaseConfiguration behavior, and integration through
 # ExtraOptions initialization (clean_db_configs_def behavior).
 RSpec.describe 'ExtraOptionConfigs::DbConfigs', type: :model do
   include MasterSupport
@@ -23,11 +24,36 @@ RSpec.describe 'ExtraOptionConfigs::DbConfigs', type: :model do
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::DbConfigs }
 
+  describe 'class structure' do
+    it 'defines a NamedConfiguration inner class' do
+      expect(klass.const_defined?(:NamedConfiguration)).to be true
+    end
+
+    it 'NamedConfiguration declares column config attributes' do
+      nc = klass::NamedConfiguration
+      expect(nc.option_types[:simple]).to include(:type, :array, :index, :encrypted)
+    end
+  end
+
   describe 'initialization' do
-    it 'stores column configs directly' do
+    it 'creates NamedConfiguration entries for hash values' do
+      instance = klass.new(col1: { type: 'string', array: true })
+      expect(instance[:col1]).to be_a(klass::NamedConfiguration)
+      expect(instance[:col1].type).to eq 'string'
+      expect(instance[:col1].array).to be true
+    end
+
+    it 'stores non-hash values directly' do
       instance = klass.new(col1: 'type_a')
       expect(instance[:col1]).to eq 'type_a'
-      expect(instance.symbolize_keys).to eq(col1: 'type_a')
+    end
+
+    it 'symbolize_keys converts NamedConfiguration entries to plain hashes' do
+      instance = klass.new(col1: { type: 'string', encrypted: true })
+      result = instance.symbolize_keys
+      expect(result[:col1]).to be_a(Hash)
+      expect(result[:col1][:type]).to eq 'string'
+      expect(result[:col1][:encrypted]).to be true
     end
   end
 
@@ -44,7 +70,8 @@ RSpec.describe 'ExtraOptionConfigs::DbConfigs', type: :model do
       eo = config_for(<<~YAML)
         default:
           db_configs:
-            some_column: some_value
+            some_column:
+              type: string
       YAML
       expect(eo.db_configs.keys).to all(be_a Symbol)
     end
@@ -53,10 +80,24 @@ RSpec.describe 'ExtraOptionConfigs::DbConfigs', type: :model do
       eo = config_for(<<~YAML)
         default:
           db_configs:
-            some_column: some_value
+            some_column:
+              type: string
       YAML
 
-      expect(@dm.db_columns).to eq(some_column: 'some_value')
+      expect(@dm.db_columns).to eq(some_column: { type: 'string' })
+    end
+
+    it 'warns about unrecognized keys in column config' do
+      eo = config_for(<<~YAML)
+        default:
+          db_configs:
+            some_column:
+              type: string
+              bogus_key: invalid
+      YAML
+
+      expect(eo.db_configs[:some_column]).to be_a(klass::NamedConfiguration)
+      expect(eo.config_warnings).not_to be_empty
     end
   end
 end

@@ -6,11 +6,14 @@ module OptionConfigs
     # Extracted from ExtraOptions#clean_db_configs_def
     #
     # Values are column configuration hashes keyed by column name.
+    # Each entry defines database column overrides (type, array, index, encrypted).
     # The mutation of config_obj.db_columns is handled by ExtraOptions
     # after this config class runs.
     class DbConfigs < BaseConfiguration
-      # No special processing needed — keys are already symbolized
-      # by parse_options_text's deep_symbolize_keys!
+      # Named configuration for a single column's database settings.
+      class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
+        configure_attributes %i[type array index encrypted]
+      end
     end
   end
 end
