@@ -29,6 +29,19 @@ module OptionConfigs
 
     alias has_key? key?
 
+    # Set a configuration attribute by key.
+    # Enables backward compatibility with template code that mutates
+    # field option configs, e.g. `options[:include_blank] = true`.
+    # Only allows setting attributes declared via configure_attributes.
+    # @param [Symbol | String] key - the attribute name
+    # @param [Object] value - value to set
+    def []=(key, value)
+      sym_key = key.to_sym
+      return unless respond_to?(:"#{sym_key}=")
+
+      send(:"#{sym_key}=", value)
+    end
+
     #
     # Convert all configured attributes to a plain Hash.
     # Mirrors OptionsHandler::Configuration#to_h for named configurations.
