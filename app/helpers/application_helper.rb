@@ -214,7 +214,9 @@ module ApplicationHelper
 
     mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
-    caption = caption[:"#{mode}_caption"] || caption[:caption] || '' if caption.is_a?(Hash)
+    if caption.is_a?(Hash) || caption.is_a?(OptionConfigs::BaseNamedConfiguration)
+      caption = caption[:"#{mode}_caption"] || caption[:caption] || ''
+    end
     if @form_object_instance && !no_sub
       caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil,
                                                             ignore_missing:)

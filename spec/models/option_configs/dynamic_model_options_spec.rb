@@ -513,11 +513,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
 
     expect(dmdef.default_options.show_if[:test1]).to be_a Hash
     expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
-    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields]).to respond_to(:[])
     expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
-    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1]).to respond_to(:[])
     expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
-    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test2]).to respond_to(:[])
     # The field_configs definition overrides any other standalone defs
     expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
     # The cleaned values go back into field_configs
@@ -578,11 +578,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect(dmdef.default_options.fields).to eq(dmdef.field_list_array)
     expect(dmdef.default_options.show_if[:test1]).to be_a Hash
     expect(dmdef.default_options.show_if[:test1]).to eq(never: true)
-    expect(dmdef.default_options.caption_before[:all_fields]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:all_fields]).to respond_to(:[])
     expect(dmdef.default_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields</p>')
-    expect(dmdef.default_options.caption_before[:test1]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test1]).to respond_to(:[])
     expect(dmdef.default_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
-    expect(dmdef.default_options.caption_before[:test2]).to be_a Hash
+    expect(dmdef.default_options.caption_before[:test2]).to respond_to(:[])
     expect(dmdef.default_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
     expect(dmdef.default_options.field_configs[:test2][:caption_before]).to eq(dmdef.default_options.caption_before[:test2])
     expect(dmdef.default_options.raw_field_configs[:test2][:caption_before]).to eq('has a caption before test2')
@@ -591,11 +591,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect(view_1_options.fields).to be_empty
     expect(view_1_options.show_if[:test1]).to be_a Hash
     expect(view_1_options.show_if[:test1]).to eq(never: true)
-    expect(view_1_options.caption_before[:all_fields]).to be_a Hash
+    expect(view_1_options.caption_before[:all_fields]).to respond_to(:[])
     expect(view_1_options.caption_before[:all_fields][:caption]).to eq('<p>show before all fields in view_1</p>')
-    expect(view_1_options.caption_before[:test1]).to be_a Hash
+    expect(view_1_options.caption_before[:test1]).to respond_to(:[])
     expect(view_1_options.caption_before[:test1][:caption]).to eq('<p>field_configs defined test1 caption</p>')
-    expect(view_1_options.caption_before[:test2]).to be_a Hash
+    expect(view_1_options.caption_before[:test2]).to respond_to(:[])
     expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
     expect(view_1_options.caption_before[:test2][:caption]).to eq('<p>has a caption before test2</p>')
 

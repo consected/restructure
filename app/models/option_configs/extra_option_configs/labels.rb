@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module OptionConfigs
+  module ExtraOptionConfigs
+    # Configuration class for field labels.
+    # Extracted from ExtraOptions#clean_labels_def
+    #
+    # Values are plain strings keyed by field name.
+    # No NamedConfiguration needed — values are simple strings.
+    class Labels < BaseConfiguration
+    end
+  end
+end

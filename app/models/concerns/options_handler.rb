@@ -173,6 +173,72 @@ module OptionsHandler
     end
 
     #
+    # Class method for declaring that a class stores a single direct value of a given type.
+    # This provides a consistent mechanism for defining configuration classes that hold
+    # one typed value (e.g., a string, array, hash, or if_condition) rather than
+    # multiple named attributes.
+    #
+    # The type metadata allows future validation and coercion. Currently supported types:
+    # - :string  — stores a String value
+    # - :array   — stores an Array value
+    # - :hash    — stores an arbitrary Hash value
+    # - :if_condition — stores a conditional Hash (for access/validation conditions)
+    #
+    # Example:
+    #   class Label < SomeBase
+    #     configure_direct :label, type: :string
+    #   end
+    #
+    # @param [Symbol] config_item_name - the name of the configuration item
+    # @param [Symbol] type - the value type (:string, :array, :hash, :if_condition)
+    def configure_direct(config_item_name, type:)
+      attr_accessor(config_item_name) unless method_defined?(config_item_name)
+
+      add_option_type(:direct, config_item_name)
+
+      # Store type metadata for future validation/coercion
+      @direct_types ||= {}
+      @direct_types[config_item_name] = type
+    end
+
+    #
+    # Returns the registered direct types for this class.
+    # @return [Hash{Symbol => Symbol}] mapping of attribute name to type
+    def direct_types
+      @direct_types || {}
+    end
+
+    #
+    # Class method for declaring a typed attribute whose value is an instance of
+    # a class inheriting from BaseConfiguration.
+    #
+    # When the including class is initialized with a hash configuration, the
+    # attribute value is automatically set by passing the corresponding hash
+    # entry to the type class constructor.
+    #
+    # @param [Symbol] config_item_name - the attribute name
+    # @param [Class] type - a class inheriting from BaseConfiguration that
+    #   accepts a hash in its constructor
+    #
+    # @example
+    #   configure_typed_attribute :creatable_if, type: ExtraOptionConfigs::IfCondition
+    def configure_typed_attribute(config_item_name, type:)
+      attr_accessor(config_item_name) unless method_defined?(config_item_name)
+
+      add_option_type(:typed, config_item_name)
+
+      @typed_attribute_types ||= {}
+      @typed_attribute_types[config_item_name] = type
+    end
+
+    #
+    # Returns the registered typed attribute types for this class.
+    # @return [Hash{Symbol => Class}] mapping of attribute name to type class
+    def typed_attribute_types
+      @typed_attribute_types || {}
+    end
+
+    #
     # List of configuration items having child options.
     # Each represents the name of an accessor attribute in this model
     # @return [Array{Symbol}]
@@ -180,7 +246,9 @@ module OptionsHandler
       @option_types ||= {
         multi: [],
         simple: [],
-        hash: []
+        hash: [],
+        direct: [],
+        typed: []
       }
     end
 
@@ -303,6 +371,7 @@ module OptionsHandler
     setup_all_options_multi hash_configuration
     setup_all_options_simple hash_configuration
     setup_all_options_hash hash_configuration
+    setup_all_options_typed hash_configuration
 
     hash_configuration
   end
@@ -319,6 +388,14 @@ module OptionsHandler
     self.class.option_types[:simple].each do |option_type|
       config_val = hash_configuration[option_type]
       send("#{option_type}=", config_val)
+    end
+  end
+
+  def setup_all_options_typed(hash_configuration)
+    self.class.option_types[:typed]&.each do |option_type|
+      type_class = self.class.typed_attribute_types[option_type]
+      config_val = hash_configuration[option_type]
+      send("#{option_type}=", type_class.new(config_val))
     end
   end
 
