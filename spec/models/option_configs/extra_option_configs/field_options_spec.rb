@@ -99,6 +99,21 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(nc.has_key?(:preset_value)).to be true
       expect(nc.has_key?(:active_value)).to be false
     end
+
+    it 'NamedConfiguration supports []= to set attributes for template compatibility' do
+      instance = klass.new(field1: { preset_value: 'abc', edit_as: { field_type: 'select' } })
+      nc = instance[:field1]
+      # Templates set :include_blank and :selected on field option configs
+      nc[:include_blank] = true
+      expect(nc[:include_blank]).to eq true
+      expect(nc.key?(:include_blank)).to be true
+
+      nc[:selected] = 'some_value'
+      expect(nc[:selected]).to eq 'some_value'
+
+      nc[:value] = 'override'
+      expect(nc[:value]).to eq 'override'
+    end
   end
 
   describe 'ExtraOptions integration' do
