@@ -12,7 +12,7 @@ module OptionConfigs
       # Named configuration for a single field's caption settings.
       # Each field (e.g. :test1) has caption values for different display modes.
       class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
-        configure_attributes %i[caption edit_caption show_caption new_caption]
+        configure_attributes %i[caption edit_caption show_caption new_caption keep_label]
       end
 
       # Override to preprocess caption values before creating NamedConfiguration.

@@ -38,7 +38,7 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
     end
 
     it 'NamedConfiguration declares caption attributes via configure_attributes' do
-      expected = %i[caption edit_caption show_caption new_caption]
+      expected = %i[caption edit_caption show_caption new_caption keep_label]
       expected.each do |attr|
         expect(klass::NamedConfiguration.option_types[:simple]).to include(attr)
       end
@@ -71,6 +71,12 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
       nc = instance.configurations[:test2]
       expect(nc.caption).to include('Cap')
       expect(nc.edit_caption).to include('Edit')
+    end
+
+    it 'preserves keep_label for field captions that should retain the label element' do
+      keep_label_instance = klass.new(test3: { caption: 'Cap', keep_label: true })
+
+      expect(keep_label_instance[:test3][:keep_label]).to be_present
     end
 
     it 'defaults new_caption to edit_caption when not specified' do
@@ -172,7 +178,7 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
     end
 
     it 'does not report warnings for valid attributes only' do
-      raw = { test1: { caption: 'Cap', edit_caption: 'Edit', show_caption: 'Show', new_caption: 'New' } }
+      raw = { test1: { caption: 'Cap', edit_caption: 'Edit', show_caption: 'Show', new_caption: 'New', keep_label: true } }
       instance = klass.new(raw)
       expect(instance.config_warnings).to be_empty,
                                           "Expected no config_warnings for valid attributes, got: #{instance.config_warnings}"
@@ -275,6 +281,21 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
 
       cb = eo.caption_before[:test1]
       expect(cb[:new_caption]).to eq cb[:edit_caption]
+    end
+
+    it 'retains keep_label so edit forms can preserve labels after captions' do
+      eo = config_for(<<~YAML)
+        default:
+          fields:
+            - test1
+          caption_before:
+            test1:
+              caption: Edit caption value
+              keep_label: true
+      YAML
+
+      cb = eo.caption_before[:test1]
+      expect(cb[:keep_label]).to be_present
     end
 
     it 'symbolizes caption_before keys' do
