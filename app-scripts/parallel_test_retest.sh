@@ -37,8 +37,12 @@ else
   echo "NO_RUN is set. Skipping retest run."
   exit 0
 fi
+
+set -o pipefail
 bundle exec rspec -f d $retest 2>&1 | tee tmp/retest_output.log
 res=$?
+set +o pipefail
+
 if [ "$QUIETLY" == "true" ]; then
   exit $res
 fi
