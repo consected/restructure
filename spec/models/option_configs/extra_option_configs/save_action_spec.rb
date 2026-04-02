@@ -59,6 +59,14 @@ RSpec.describe 'ExtraOptionConfigs::SaveAction', type: :model do
       instance = klass.new(label: 'Test')
       expect(instance.symbolize_keys).to eq(label: 'Test')
     end
+
+    it 'supports except to return a hash without specified keys for ConditionalActions compatibility' do
+      instance = klass.new(on_save: { label: 'Saved' }, label: 'My Label')
+      result = instance.except(:label)
+      expect(result).to be_a Hash
+      expect(result).not_to have_key(:label)
+      expect(result).to have_key(:on_save)
+    end
   end
 
   describe 'ExtraOptions integration' do
