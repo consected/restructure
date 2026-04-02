@@ -8,6 +8,7 @@ User profiles are created for end-users of the application, containing:
 - first and last name
 - password
 - API token
+- API access only setting (for automated systems that only use the API)
 
 Other additional details are presented showing user / login details.
 
