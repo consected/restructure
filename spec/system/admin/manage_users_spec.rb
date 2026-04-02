@@ -39,6 +39,9 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
   end
 
   before(:each) do
+    # Re-enable the test user in case a prior test disabled them
+    User.find_by(email: @test_user_email)&.update(disabled: false)
+
     change_setting('AllowUsersToRegister', false)
     change_setting('TwoFactorAuthDisabledForUser', false)
     admin_sign_in_with_2fa
@@ -49,156 +52,150 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
     change_setting('TwoFactorAuthDisabledForUser', false)
   end
 
-  it 'adds a new user and shows credential document' do
+  def visit_manage_users_page
     visit '/admin/manage_users'
     finish_page_loading
-
-    expect(page).to have_content('Usernames and Passwords')
-
-    all('a.add-item-button').first.click
-    expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
-
-    new_email = "new_std_user_#{SecureRandom.hex(4)}@test.com"
-
-    within('#admin-edit- .admin-edit-form') do
-      find("input[name='user[email]']").set(new_email)
-      find("input[name='user[first_name]']").set('Standard')
-      find("input[name='user[last_name]']").set('Testuser')
-      first('input[type="submit"]').click
-    end
-
-    # After AJAX save, the show partial renders with credential info
-    expect(page).to have_content('New password:', wait: 10)
-    expect(page).to have_content(new_email)
-
-    # Verify user appears in the list
-    expect(page).to have_content('Standard')
-    expect(page).to have_content('Testuser')
   end
 
-  it 'adds an API-access-only user and shows API credentials' do
-    visit '/admin/manage_users'
-    finish_page_loading
-
+  def click_add_user_button
     all('a.add-item-button').first.click
     expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
-
-    api_email = "api_user_#{SecureRandom.hex(4)}@test.com"
-
-    within('#admin-edit- .admin-edit-form') do
-      find("input[name='user[email]']").set(api_email)
-      find("input[name='user[first_name]']").set('Api')
-      find("input[name='user[last_name]']").set('OnlyUser')
-      # Rails check_box generates hidden input + visible checkbox; use JS to check
-      page.execute_script("document.querySelector(\"input[type='checkbox'][name='user[api_access_only]']\").checked = true")
-      first('input[type="submit"]').click
-    end
-
-    # API-only user gets a specific credential document
-    expect(page).to have_content('New API token:', wait: 10)
-    expect(page).to have_content(api_email)
   end
 
-  it 'disables an existing user' do
-    visit '/admin/manage_users'
-    finish_page_loading
+  def fill_user_form(email:, first_name:, last_name:)
+    find("input[name='user[email]']").set(email)
+    find("input[name='user[first_name]']").set(first_name)
+    find("input[name='user[last_name]']").set(last_name)
+  end
 
-    # Find the test user's row and click edit
-    user_row = find('td', text: @test_user_email).ancestor('tr')
+  def submit_user_form
+    first('input[type="submit"]').click
+  end
+
+  def click_edit_for_user(email)
+    user_row = find('td', text: email).ancestor('tr')
     within(user_row) do
       find('a.edit-entity.glyphicon-pencil').click
     end
-
     expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
-
-    within('#admin-edit- .admin-edit-form') do
-      # Rails check_box generates hidden input + visible checkbox; use JS to check
-      page.execute_script("document.querySelector(\"input[type='checkbox'][name='user[disabled]']\").checked = true")
-      first('input[type="submit"]').click
-    end
-
-    # Wait for AJAX save to complete - the show partial confirms the disabled state
-    expect(page).to have_content('Disabled:true', wait: 10)
-
-    # The default filter shows only enabled users, so the disabled user
-    # should no longer appear in the table after the AJAX re-render
-    expect(page).not_to have_css('td', text: @test_user_email)
   end
 
-  it 'enforces email validation on create' do
-    visit '/admin/manage_users'
-    finish_page_loading
-
-    all('a.add-item-button').first.click
-    expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
-
-    within('#admin-edit- .admin-edit-form') do
-      find("input[name='user[email]']").set('not-a-valid-email')
-      find("input[name='user[first_name]']").set('Bad')
-      find("input[name='user[last_name]']").set('Email')
-
-      # The email field has type="email" with required: true, so HTML5 validation
-      # will fire and prevent submission.
-      first('input[type="submit"]').click
-    end
-
-    # HTML5 email validation should prevent submission - the form stays open with invalid field
-    expect(page).to have_css('input:invalid', wait: 5)
+  # Rails check_box generates a hidden input + visible checkbox.
+  # Use JS to set the checked state to avoid Capybara ambiguity.
+  def check_admin_checkbox(field_name)
+    page.execute_script(
+      "document.querySelector(\"input[type='checkbox'][name='user[#{field_name}]']\").checked = true"
+    )
   end
 
-  it 'shows 2FA reset option when 2FA is enforced' do
-    visit '/admin/manage_users'
-    finish_page_loading
+  context 'when adding users' do
+    it 'adds a new user and shows credential document' do
+      visit_manage_users_page
 
-    # Edit an existing user - they should see 2FA reset option
-    user_row = find('td', text: @test_user_email).ancestor('tr')
-    within(user_row) do
-      find('a.edit-entity.glyphicon-pencil').click
+      expect(page).to have_content('Usernames and Passwords')
+
+      click_add_user_button
+
+      new_email = "new_std_user_#{SecureRandom.hex(4)}@test.com"
+
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: new_email, first_name: 'Standard', last_name: 'Testuser')
+        submit_user_form
+      end
+
+      expect(page).to have_content('New password:', wait: 10)
+      expect(page).to have_content(new_email)
+      expect(page).to have_content('Standard')
+      expect(page).to have_content('Testuser')
     end
 
-    expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
+    it 'adds an API-access-only user and shows API credentials' do
+      visit_manage_users_page
+      click_add_user_button
 
-    within('#admin-edit- .admin-edit-form') do
-      expect(page).to have_content('Reset two factor auth')
-    end
-  end
+      api_email = "api_user_#{SecureRandom.hex(4)}@test.com"
 
-  it 'hides 2FA reset option when 2FA is disabled for users' do
-    change_setting('TwoFactorAuthDisabledForUser', true)
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: api_email, first_name: 'Api', last_name: 'OnlyUser')
+        check_admin_checkbox('api_access_only')
+        submit_user_form
+      end
 
-    visit '/admin/manage_users'
-    finish_page_loading
-
-    user_row = find('td', text: @test_user_email).ancestor('tr')
-    within(user_row) do
-      find('a.edit-entity.glyphicon-pencil').click
+      expect(page).to have_content('New API token:', wait: 10)
+      expect(page).to have_content(api_email)
     end
 
-    expect(page).to have_css('#admin-edit- .admin-edit-form', wait: 10)
+    it 'enforces email validation on create' do
+      visit_manage_users_page
+      click_add_user_button
 
-    within('#admin-edit- .admin-edit-form') do
-      expect(page).not_to have_content('Reset two factor auth')
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: 'not-a-valid-email', first_name: 'Bad', last_name: 'Email')
+        submit_user_form
+      end
+
+      # HTML5 email validation prevents submission - the form stays open with invalid field
+      expect(page).to have_css('input:invalid', wait: 5)
     end
   end
 
-  it 'shows self-registration info when AllowUsersToRegister is enabled' do
-    change_setting('AllowUsersToRegister', true)
-    change_setting('InvitationCode', 'SPEC-TEST-CODE')
+  context 'when editing users' do
+    it 'disables an existing user' do
+      visit_manage_users_page
+      click_edit_for_user(@test_user_email)
 
-    visit '/admin/manage_users'
-    finish_page_loading
+      within('#admin-edit- .admin-edit-form') do
+        check_admin_checkbox('disabled')
+        submit_user_form
+      end
 
-    expect(page).to have_content('User Registration')
-    expect(page).to have_content('SPEC-TEST-CODE')
+      # The show partial confirms the disabled state
+      expect(page).to have_content('Disabled:true', wait: 10)
+
+      # The default filter shows only enabled users, so the disabled user
+      # should no longer appear in the table after the AJAX re-render
+      expect(page).not_to have_css('td', text: @test_user_email)
+    end
   end
 
-  it 'shows "Adding Users" info when self-registration is disabled' do
-    change_setting('AllowUsersToRegister', false)
+  context 'when 2FA setting varies' do
+    it 'shows 2FA reset option when 2FA is enforced' do
+      visit_manage_users_page
+      click_edit_for_user(@test_user_email)
 
-    visit '/admin/manage_users'
-    finish_page_loading
+      within('#admin-edit- .admin-edit-form') do
+        expect(page).to have_content('Reset two factor auth')
+      end
+    end
 
-    expect(page).to have_content('Adding Users')
-    expect(page).not_to have_content('User Registration')
+    it 'hides 2FA reset option when 2FA is disabled for users' do
+      change_setting('TwoFactorAuthDisabledForUser', true)
+
+      visit_manage_users_page
+      click_edit_for_user(@test_user_email)
+
+      within('#admin-edit- .admin-edit-form') do
+        expect(page).not_to have_content('Reset two factor auth')
+      end
+    end
+  end
+
+  context 'when self-registration setting varies' do
+    it 'shows self-registration info when AllowUsersToRegister is enabled' do
+      change_setting('AllowUsersToRegister', true)
+      change_setting('InvitationCode', 'SPEC-TEST-CODE')
+
+      visit_manage_users_page
+
+      expect(page).to have_content('User Registration')
+      expect(page).to have_content('SPEC-TEST-CODE')
+    end
+
+    it 'shows "Adding Users" info when self-registration is disabled' do
+      visit_manage_users_page
+
+      expect(page).to have_content('Adding Users')
+      expect(page).not_to have_content('User Registration')
+    end
   end
 end
