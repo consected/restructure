@@ -2,8 +2,12 @@
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <p>Email: <%= @user.email %></p>
       <% if @user.new_password %>
+      <% if @user.respond_to?(:api_access_only?) && @user.api_access_only? %>
+      <p>New API token: <%= @user.new_token %> </p>
+      <% else %>
       <p>New password: <%= @user.new_password %> </p>
       <p>New token: <%= @user.new_token %> </p>
+      <% end %>
       <% end %>
       <p>Disabled:<%=!!@user.disabled%></p>
       

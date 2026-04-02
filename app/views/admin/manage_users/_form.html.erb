@@ -26,6 +26,10 @@
     <%= f.check_box :do_not_email %>
     <%= label_tag :do_not_email, 'Do not email' %>
   </div>
+  <div class="form-group">
+    <%= f.check_box :api_access_only %>
+    <%= f.label :api_access_only, 'API access only' %>
+  </div>
   <% if object_instance.id %>
   <div>
     <div class="form-group">
