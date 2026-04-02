@@ -15,14 +15,46 @@ module OptionConfigs
     LibraryKeyRenamePatterns = %w[_definitions _default _constants _configurations].freeze
     ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
+    # Registry of configuration classes, in the order they must be initialized.
+    # Each entry maps a key (used in config_instances) to the config class.
+    # The order mirrors the original clean_... method call sequence.
+    def self.config_class_registry
+      {
+        fields: ExtraOptionConfigs::Fields,
+        field_configs: ExtraOptionConfigs::FieldConfigs,
+        label: ExtraOptionConfigs::Label,
+        caption_before: ExtraOptionConfigs::CaptionBefore,
+        dialog_before: ExtraOptionConfigs::DialogBefore,
+        labels: ExtraOptionConfigs::Labels,
+        show_if: ExtraOptionConfigs::ShowIf,
+        save_action: ExtraOptionConfigs::SaveAction,
+        view_options: ExtraOptionConfigs::ViewOptions,
+        db_configs: ExtraOptionConfigs::DbConfigs,
+        creatable_if: ExtraOptionConfigs::CreatableIf,
+        editable_if: ExtraOptionConfigs::EditableIf,
+        showable_if: ExtraOptionConfigs::ShowableIf,
+        valid_if: ExtraOptionConfigs::ValidIf,
+        filestore: ExtraOptionConfigs::Filestore,
+        field_options: ExtraOptionConfigs::FieldOptions,
+        embed: ExtraOptionConfigs::Embed,
+        references: ExtraOptionConfigs::References,
+        save_trigger: ExtraOptionConfigs::SaveTrigger,
+        batch_trigger: ExtraOptionConfigs::BatchTrigger,
+        config_trigger: ExtraOptionConfigs::ConfigTrigger,
+        preset_fields: ExtraOptionConfigs::PresetFields,
+        set_variables: ExtraOptionConfigs::SetVariable
+      }
+    end
+
     def self.base_key_attributes
       %i[
-        name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
-        field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
-        filestore labels fields button_label orig_config db_configs save_trigger embed references
-        show_if_condition_strings batch_trigger config_trigger preset_fields field_configs raw_field_configs
-        set_variables
+        name config_obj resource_name resource_item_name add_reference_if
+        button_label orig_config show_if_condition_strings raw_field_configs
       ]
+    end
+
+    def self.config_class_attributes
+      config_class_registry.keys
     end
 
     def self.add_key_attributes
@@ -30,14 +62,14 @@ module OptionConfigs
     end
 
     def self.key_attributes
-      base_key_attributes + add_key_attributes
+      base_key_attributes + config_class_attributes + add_key_attributes
     end
 
     def self.editable_attributes
       key_attributes - %i[name config_obj resource_name resource_item_name] + [:label]
     end
 
-    attr_accessor(*key_attributes, :def_item, :bad_ref_items)
+    attr_accessor(*key_attributes, :def_item, :bad_ref_items, :config_instances)
 
     #
     # Initialize a named option configuration, which may form one of many in a dynamic definition
@@ -48,6 +80,7 @@ module OptionConfigs
       super()
       @name = name
       @orig_config = config
+      @config_instances = {}
 
       self.def_item = @config_obj = config_obj
 
@@ -64,333 +97,48 @@ module OptionConfigs
       begin
         self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
         self.resource_item_name = resource_name
-        clean_fields_def
-        clean_field_configs
 
-        clean_label_def
-        clean_caption_before_def
-        clean_dialog_before_def
-        clean_labels_def
-        clean_show_if_def
-        clean_save_action_def
-        clean_view_options_def
-        clean_db_configs_def
-        clean_access_if_def
-        clean_valid_if_def
-        clean_filestore_def
-        clean_field_options_def
-        clean_embed_def
-        clean_references_def
-        clean_save_triggers
-        clean_batch_triggers
-        clean_config_triggers
-        clean_preset_fields
-        clean_set_variables_def
+        # Delegate to configuration classes in order
+        self.class.config_class_registry.each do |key, config_class|
+          if config_class < ExtraOptionConfigs::BaseConfiguration
+            # BaseConfiguration config: initialize with raw value
+            raw = send(key)
+            raw = config_class.prepare_config(raw, self) if config_class.respond_to?(:prepare_config)
+            instance = config_class.new(raw)
 
-        # Add the cleaned values back into field_configs - save a raw version for use elsewhere
-        # This needs to be "deep cloned", to avoid a simple clone just copying references
-        # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
-        self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
+            # Collect errors/warnings before potentially discarding the instance
+            collect_instance_errors(instance)
+
+            if config_class.store_processed_value?
+              # Value-preprocessor class: store the processed value, not the object
+              direct_attr = config_class.option_types[:direct]&.first || key
+              send("#{key}=", instance.send(direct_attr))
+            else
+              # Rich object class: store the BaseConfiguration instance
+              send("#{key}=", instance)
+            end
+          else
+            # ConfigBase pattern: initialize with parent reference, apply back
+            ci = config_class.new(self)
+            ci.apply_to_parent!
+            @config_instances[key] = ci
+          end
+        end
+
+        # Collect config errors/warnings from field-keyed config instances
+        collect_field_config_errors
+
+        # Handle config_obj mutation for db_configs (extracted from clean_db_configs_def)
+        config_obj.db_columns ||= db_configs.symbolize_keys if config_obj.respond_to?(:db_columns)
+
+        # raw_field_configs is saved inside FieldConfigs.prepare_config (before standalone cleaning)
+        # Now merge cleaned standalone definitions into field_configs
         validate_missing_general_selection_configs
         add_field_configs_from_standalone_defs
       rescue StandardError => e
         Rails.logger.warn "Failed to initialize ExtraOptions for #{@name}: #{e}"
         Rails.logger.warn e.short_string_backtrace
         raise FphsOptionsGeneralError, "Failed to initialize ExtraOptions for #{@name}: #{e}", e.backtrace
-      end
-    end
-
-    # Defintion label
-    def clean_label_def
-      self.label ||= @name.to_s.humanize
-    end
-
-    def clean_caption_before_def
-      self.caption_before ||= {}
-      self.caption_before = caption_before.symbolize_keys
-
-      self.caption_before = caption_before.each do |k, v|
-        if v.is_a? String
-
-          v = Formatter::Substitution.text_to_html(v).strip
-
-          caption_before[k] = {
-            caption: v,
-            edit_caption: v,
-            show_caption: v,
-            new_caption: v
-          }
-        elsif v.is_a? Hash
-          v.each do |mode, modeval|
-            v[mode] = Formatter::Substitution.text_to_html(modeval).to_s.strip
-          end
-
-          v[:new_caption] = v[:edit_caption] unless v.key?(:new_caption)
-        end
-      end
-    end
-
-    def clean_dialog_before_def
-      self.dialog_before ||= {}
-      self.dialog_before = dialog_before.symbolize_keys
-
-      dialog_before.transform_values! { |v| v.is_a?(String) ? { name: v } : v }
-      dialog_before.each do |k, v|
-        unless v.is_a? Hash
-          failed_config :dialog_before,
-                        "dialog_before must be a Hash { name: '<template name>' } or String: #{k}",
-                        level: :error
-          next
-        end
-
-        name = v[:name]
-        mt = Admin::MessageTemplate.active.find_by(name:)
-        next if mt
-
-        failed_config :dialog_before,
-                      "dialog_before specifies a named message template that doesn't exist: #{name}",
-                      level: :warn
-      end
-    end
-
-    # Field labels definitions
-    def clean_labels_def
-      self.labels ||= {}
-      self.labels = labels.symbolize_keys
-    end
-
-    def clean_show_if_def
-      self.show_if ||= {}
-
-      show_if_condition_strings&.each do |fn, val|
-        # Generate a real show_if hash fs a condition string was provided
-        # and show if is not already set
-        next if val.nil? || val.empty? || show_if[fn]
-
-        begin
-          bl = Redcap::DataDictionaries::BranchingLogic.new(val)
-          sis = bl&.generate_show_if
-          show_if[fn] = sis if sis.present?
-        rescue StandardError => e
-          Rails.logger.warn "Failed to generate real show_if (in #{@config_obj&.resource_name}) " \
-                            "for #{fn}: #{val}\n#{e}"
-          show_if[fn] = { generate_show_if: "failed - #{e}" }
-        end
-      end
-
-      self.show_if = show_if.symbolize_keys
-    end
-
-    def clean_save_action_def
-      self.save_action ||= {}
-      self.save_action = save_action.symbolize_keys
-
-      # Make save_action.on_save the default for on_create and on_update
-      os = save_action[:on_save]
-      return unless os
-
-      ou = save_action[:on_update] || {}
-      oc = save_action[:on_create] || {}
-      save_action[:on_update] = os.merge(ou)
-      save_action[:on_create] = os.merge(oc)
-    end
-
-    def clean_view_options_def
-      self.view_options ||= {}
-      self.view_options = view_options.symbolize_keys
-    end
-
-    def clean_db_configs_def
-      self.db_configs ||= {}
-      @config_obj.db_columns ||= self.db_configs = db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
-    end
-
-    #
-    # Clean the fields definition. This intentionally does not override the dynamic model field list
-    # or external identifier extra fields list. The fields definition is intended to be a list of
-    # fields that are presented to the end user, and may be a subset of the fields in the model.
-    def clean_fields_def
-      self.fields ||= []
-    end
-
-    def clean_field_options_def
-      self.field_options ||= {}
-      self.field_options = field_options.symbolize_keys
-
-      # Allow field_options.edit_as.alt_options to be an array
-      field_options.each do |k, v|
-        ao = nil
-        ao = v[:edit_as][:alt_options] if v && v[:edit_as]
-        next unless ao.is_a? Array
-
-        new_ao = {}
-        ao.each do |aov|
-          new_ao[aov.to_s.to_sym] = aov.to_s.downcase
-        end
-        field_options[k][:edit_as][:alt_options] = new_ao
-      end
-    end
-
-    def clean_filestore_def
-      self.filestore ||= {}
-      self.filestore = filestore.symbolize_keys
-    end
-
-    def clean_access_if_def
-      self.creatable_if ||= {}
-      self.creatable_if = creatable_if.symbolize_keys
-
-      self.editable_if ||= {}
-      self.editable_if = editable_if.symbolize_keys
-
-      self.showable_if ||= {}
-      self.showable_if = showable_if.symbolize_keys
-    end
-
-    def clean_valid_if_def
-      self.valid_if ||= {}
-      self.valid_if = valid_if.symbolize_keys
-
-      unless valid_if.keys.empty? || (valid_if.keys - ValidValidIfTriggers).empty?
-        failed_config :valid_if,
-                      "valid_if contains invalid keys #{valid_if.keys} - expected only:",
-                      extra_details: ValidValidIfTriggers
-      end
-
-      os = valid_if[:on_save]
-      return unless os
-
-      ou = valid_if[:on_update] || {}
-      oc = valid_if[:on_create] || {}
-      valid_if[:on_update] = os.merge(ou)
-      valid_if[:on_create] = os.merge(oc)
-    end
-
-    def clean_embed_def
-      return unless embed
-
-      if embed == 'default_embed_resource'
-        rn = config_obj.default_embed_resource_name(name)
-        self.embed = { resource_name: rn }
-      elsif embed.is_a?(String)
-        rn = embed
-        self.embed = { resource_name: rn }
-      else
-        rn = embed[:resource_name]
-      end
-
-      resource = Resources::Models.find_by(resource_name: rn)
-      embed[:resource_model_def] = resource
-
-      return if resource && resource[:model]
-
-      Rails.logger.warn "embed for #{rn} does not exist as a class in #{name} / #{config_obj.name}"
-      # Log this as a warning, not an error, since we are not able to control the order of items being created
-      # in an app import, and many references to underlying definitions will not yet have been created
-      failed_config :embed,
-                    "embed for #{rn} does not exist as a class in #{name} / #{config_obj.name}",
-                    level: :warn
-    end
-
-    def clean_references_def
-      return unless references
-
-      new_ref = {}
-      if references.is_a? Array
-        references.each do |refitem|
-          # Make all keys singular, to simplify configurations
-          add_refitem = {}
-          refitem.each_key do |k|
-            if k.to_s != k.to_s.singularize
-              new_k = k.to_s.singularize.to_sym
-              add_refitem[new_k] = refitem.delete(k)
-            end
-          end
-
-          refitem.merge! add_refitem
-
-          refitem.each do |k, v|
-            vi = v[:add_with] && v[:add_with][:extra_log_type]
-            ckey = k.to_s
-            ckey += "_#{vi}" if vi
-            new_ref[ckey.to_sym] = { k => v }
-          end
-        end
-      else
-        new_ref = {}
-        fix_refs = {}
-
-        # Make all keys singular, to simplify configurations
-        # The changes can't be made directly inside the iteration, so handle it in two steps
-        references.each_key do |k|
-          fix_refs[k] = references[k] if k.to_s != k.to_s.singularize
-        end
-
-        fix_refs.each_key do |k|
-          new_k = k.to_s.singularize.to_sym
-          references[new_k] = references.delete(k)
-        end
-
-        references.each do |k, v|
-          vi = v[:add_with] && v[:add_with][:extra_log_type]
-          ckey = k.to_s
-          ckey += "_#{vi}" if vi
-          new_ref[ckey.to_sym] = { k => v }
-        end
-      end
-
-      self.references = new_ref
-
-      references.each_value do |refitem|
-        self.bad_ref_items = []
-        refitem.each do |mn, conf|
-          to_class = ModelReference.to_record_class_for_type(mn)
-
-          # Avoid breaking app type imports if the resource being pointed to in the reference
-          # hasn't been set up yet.
-          if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
-            Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
-            break
-          end
-
-          if to_class
-            elt = conf[:add_with] && conf[:add_with][:extra_log_type]
-            add_with_elt = nil
-            add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
-            refitem[mn][:to_record_label] = conf[:result_label] || conf[:label] || add_with_elt || to_class.human_name
-
-            if to_class.respond_to?(:no_master_association)
-              refitem[mn][:no_master_association] = to_class.no_master_association
-            end
-
-            refitem[mn][:to_model_name_us] = to_class.to_s.ns_underscore
-            refitem[mn][:to_model_class_name] = to_class.to_s
-            refitem[mn][:to_table_name] = to_class.table_name
-            nil
-
-            if to_class.respond_to?(:definition)
-              cd = to_class.definition
-              tsn = cd.schema_name
-              tct = cd.class.to_s
-              refitem[mn][:to_schema_name] = tsn
-              refitem[mn][:to_class_type] = tct
-            end
-          else
-            bad_ref_items << mn
-            Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
-            Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
-            # Log this as a warning, not an error, since we are not able to control the order of items being created
-            # in an app import, and many references to underlying definitions will not yet have been created
-            failed_config :references,
-                          "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}",
-                          level: :warn
-          end
-        end
-
-        # Cleanup bad items
-        bad_ref_items.each do |br|
-          refitem.delete(br)
-        end
       end
     end
 
@@ -406,137 +154,6 @@ module OptionConfigs
       references[model_reference.to_record_result_key.to_sym] ||
         references[model_reference.to_record.class.table_name.singularize.to_sym] ||
         references[model_reference.to_record.class.name.ns_underscore.singularize.to_sym]
-    end
-
-    def clean_save_triggers
-      self.save_trigger ||= {}
-      self.save_trigger = save_trigger.symbolize_keys
-
-      unless save_trigger.keys.empty? || (save_trigger.keys - ValidSaveTriggerTriggers).empty?
-        failed_config :save_trigger,
-                      "save_trigger contains invalid keys #{save_trigger.keys} - expected only:",
-                      extra_details: ValidSaveTriggerTriggers
-      end
-
-      # Make save_trigger.on_save the default for on_create and on_update
-      os = save_trigger[:on_save]
-      if os
-        os = [os] if os.is_a?(Hash)
-
-        ou = save_trigger[:on_update]
-        oc = save_trigger[:on_create]
-        ou = [ou] if ou.is_a?(Hash)
-        oc = [oc] if oc.is_a?(Hash)
-
-        ou ||= []
-        oc ||= []
-        save_trigger[:on_update] = os + ou
-        save_trigger[:on_create] = os + oc
-      end
-
-      save_trigger[:on_upload] ||= {}
-      save_trigger[:on_disable] ||= {}
-    end
-
-    def clean_batch_triggers
-      self.batch_trigger ||= {}
-      self.batch_trigger = batch_trigger.symbolize_keys
-      batch_trigger[:on_record] ||= {}
-    end
-
-    def clean_config_triggers
-      self.config_trigger ||= {}
-      self.config_trigger = config_trigger.symbolize_keys
-      od = config_trigger[:on_define] ||= []
-
-      config_trigger[:on_define] = [od] unless od.is_a?(Array)
-    end
-
-    def clean_preset_fields
-      self.preset_fields ||= {}
-      self.preset_fields = preset_fields.symbolize_keys
-    end
-
-    #
-    # Validate and clean the set_variables definition.
-    # set_variables accepts an ordered array of variable definitions,
-    # each with :name, :value, and optional :if condition.
-    def clean_set_variables_def
-      return if set_variables.blank?
-
-      unless set_variables.is_a?(Array)
-        failed_config :set_variables, 'must be an array of variable definitions'
-        self.set_variables = []
-        return
-      end
-
-      self.set_variables = set_variables.map do |entry|
-        entry = entry.symbolize_keys if entry.is_a?(Hash)
-        unless entry.is_a?(Hash) && entry[:name].present? && entry.key?(:value)
-          failed_config :set_variables, "each entry must have 'name' and 'value' keys"
-          next nil
-        end
-        entry
-      end.compact
-    end
-
-    def clean_field_configs
-      fla = fields
-      if field_configs.nil?
-        self.field_configs = {}
-      else
-        # 'field_configs' was explicitly set, so use it to set the appropriate configurations
-        # for each of the valid_configs
-        self.field_configs ||= {}
-        self.field_configs = field_configs.symbolize_keys
-        failed = false
-        field_configs.each do |fname, fconfig|
-          unless fconfig.is_a? Hash
-            failed_config :field_configs, "field '#{fname}' is not a Hash"
-            failed = true
-            field_configs[fname] = {}
-            next
-          end
-
-          ValidFieldConfigs.each do |vc|
-            # For each of the ValidFieldConfigs, add the corresponding definition to the
-            #  named attribute
-            c = fconfig[vc]
-            next unless c
-
-            ivar = instance_variable_get("@#{vc}")
-            unless ivar
-              instance_variable_set("@#{vc}", {})
-              ivar = instance_variable_get("@#{vc}")
-            end
-
-            ivar.merge!(fname => c)
-          end
-        end
-
-        return if failed
-
-      end
-
-      # Build the list of errors from the explicitly defined field_configs
-      efs = field_configs.keys.map(&:to_s) - fla
-      if efs.present?
-        failed_config :field_configs, 'field_configs includes fields that are not in the field list:',
-                      extra_details: efs
-      end
-
-      field_configs.each do |fname, fconfig|
-        extra_keys = fconfig.keys - ValidFieldConfigs
-        next if extra_keys.empty?
-
-        failed_config :field_configs,
-                      "field_configs for #{fname} includes invalid keys: #{extra_keys} - expected only:",
-                      extra_details: ValidFieldConfigs
-      end
-
-      # Now that the field_configs errors have been checked for the explicitly definition,
-      # go ahead and merge in the values from the standalone definitions
-      add_field_configs_from_standalone_defs
     end
 
     # Set field_configs from the configurations listed in ValidFieldConfigs
@@ -600,6 +217,32 @@ module OptionConfigs
       return false unless edit_as.is_a?(Hash)
 
       edit_as[:alt_options].present? || edit_as[:general_selection].present? || edit_as[:field_type].present?
+    end
+
+    # Collect config errors and warnings from a single BaseConfiguration instance.
+    # Used during registry initialization to capture errors before the instance
+    # may be discarded (for store_processed_value? classes).
+    # @param instance [BaseConfiguration] the config instance
+    def collect_instance_errors(instance)
+      return unless instance.respond_to?(:config_errors)
+
+      config_errors.concat(instance.config_errors) if instance.config_errors.present?
+      config_warnings.concat(instance.config_warnings) if instance.config_warnings.present?
+    end
+
+    # Collect config errors and warnings from field-keyed config instances
+    # (those inheriting ExtraOptionConfigs::BaseConfiguration) into the
+    # parent ExtraOptions config_errors/config_warnings arrays.
+    def collect_field_config_errors
+      self.class.config_class_registry.each do |key, config_class|
+        next unless config_class < ExtraOptionConfigs::BaseConfiguration
+
+        config_instance = send(key)
+        next unless config_instance&.respond_to?(:config_errors)
+
+        config_errors.concat(config_instance.config_errors) if config_instance.config_errors.present?
+        config_warnings.concat(config_instance.config_warnings) if config_instance.config_warnings.present?
+      end
     end
 
     # Check if any of the configs were bad

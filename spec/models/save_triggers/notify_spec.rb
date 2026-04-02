@@ -120,7 +120,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       }
     }
 
-    @al.extra_log_type_config.clean_references_def
+    OptionConfigs::ExtraOptionConfigs::References.reprocess(@al.extra_log_type_config)
     @al.extra_log_type_config.editable_if = { always: true }
 
     setup_access @al.class.resource_name, resource_type: :table, access: :create, user: @user
