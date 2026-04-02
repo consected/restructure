@@ -235,7 +235,9 @@ module OptionConfigs
       loaded_config = parse_options_text(config_obj)
       # Configurations need to be set in order for
       # defaults to be set correctly
-      config_obj.configurations = options_based_on_keys_stating_with('_configurations', loaded_config)
+      config_obj.configurations = ExtraOptionConfigs::Configurations.new(
+        options_based_on_keys_stating_with('_configurations', loaded_config)
+      )
 
       set_defaults config_obj, loaded_config
 
