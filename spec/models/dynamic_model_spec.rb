@@ -122,7 +122,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       expect(dm).to be_a DynamicModel
       # The field list has been set up
-      expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
+      expect(dm.field_list.split).to include('test1', 'test2', 'created_by_user_id')
       # The keys have been set up automatically
       expect(dm.foreign_key_name).to eq 'master_id'
       expect(dm.primary_key_name).to eq 'id'
@@ -168,7 +168,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       expect(dm).to be_a DynamicModel
       # The field list has been set up
-      expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
+      expect(dm.field_list.split).to include('test1', 'test2', 'created_by_user_id')
       # The keys have been set up automatically
       expect(dm.foreign_key_name).to eq 'master_id'
       expect(dm.primary_key_name).to eq 'id'

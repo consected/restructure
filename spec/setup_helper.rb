@@ -261,10 +261,10 @@ module SetupHelper
     Rails.logger.info 'Reload configs'
     Admin::AppType.reset_memo_associated_items!
     AppControl.define_models
+    ExternalIdentifier.enable_active_configurations
     DynamicModel.enable_active_configurations disable_on_failure: true
     ItemFlag.enable_active_configurations
     ActivityLog.enable_active_configurations
-    ExternalIdentifier.enable_active_configurations
     DynamicModel.routes_reload
   end
 

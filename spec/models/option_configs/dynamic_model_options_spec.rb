@@ -849,4 +849,106 @@ RSpec.describe 'Dynamic Model Options', type: :model do
       expect(history_records.first['input_b'].to_i).to eq(456)
     end
   end
+
+  # Test for renamed dynamic-model fields keeping history tables and triggers in sync.
+  # This protects create/update paths after field names change in app configuration.
+  context 'field renames' do
+    before :all do
+      create_admin
+      create_user
+
+      @original_allow_migrations = Settings::AllowDynamicMigrations
+      change_setting('AllowDynamicMigrations', true)
+
+      @schema_name = 'dynamic_test'
+      @table_name = 'test_field_renames'
+      @history_table_name = 'test_field_rename_history'
+
+      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.send(:remove_const, :TestFieldRename) if defined?(DynamicModel::TestFieldRename)
+
+      @conn = ActiveRecord::Base.connection
+      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@history_table_name} CASCADE")
+      @conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
+
+      @dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test Field Renames',
+        table_name: @table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: :master_id,
+        category: :test,
+        field_list: 'select_still_interested select_continue_now notes',
+        options: <<~YAML
+          _db_columns:
+            select_still_interested:
+              type: string
+            select_continue_now:
+              type: string
+            notes:
+              type: string
+        YAML
+      )
+
+      @dm.update_tracker_events
+    end
+
+    after :all do
+      @dm&.disable!(@admin)
+      change_setting('AllowDynamicMigrations', @original_allow_migrations)
+    end
+
+    it 'rebuilds the history trigger when fields are renamed' do
+      master = Master.create! current_user: @user
+      master.current_user = @user
+
+      setup_access :dynamic_model__test_field_renames
+
+      @dm.instance_variable_set(:@ran_migration, nil)
+      @dm.update!(
+        current_admin: @admin,
+        field_list: 'still_interested continue_now notes',
+        options: <<~YAML
+          _db_columns:
+            still_interested:
+              type: string
+            continue_now:
+              type: string
+            notes:
+              type: string
+        YAML
+      )
+
+      @dm.instance_variable_set(:@migration_generator, nil)
+      @dm.send(:generate_migration)
+      @dm.send(:run_migration) if @dm.instance_variable_get(:@do_migration)
+      @dm.update_tracker_events
+
+      @conn.schema_cache.clear!
+      DynamicModel.reset_active_model_configurations!
+
+      history_columns = @conn.columns("#{@schema_name}.#{@history_table_name}").map(&:name)
+      expect(history_columns).to include('still_interested', 'continue_now')
+      expect(history_columns).not_to include('select_still_interested', 'select_continue_now')
+
+      model_class = @dm.implementation_class
+      model_class.reset_column_information
+
+      record = master.dynamic_model__test_field_renames.create!(
+        current_user: @user,
+        still_interested: 'yes',
+        continue_now: 'no',
+        notes: 'renamed fields'
+      )
+
+      history_record = @conn.exec_query(
+        "SELECT still_interested, continue_now FROM #{@schema_name}.#{@history_table_name} " \
+        "WHERE #{@table_name.singularize}_id = #{record.id} ORDER BY id DESC LIMIT 1"
+      ).first
+
+      expect(history_record['still_interested']).to eq('yes')
+      expect(history_record['continue_now']).to eq('no')
+    end
+  end
 end

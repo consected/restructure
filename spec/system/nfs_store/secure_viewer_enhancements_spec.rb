@@ -282,7 +282,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
     expect(@container).to be_a(NfsStore::Manage::Container)
 
     # Upload a test file to the container for secure viewer tests
-    temp_dir = Rails.root.join('tmp', 'test_files')
+    temp_dir = Rails.root.join('tmp', 'test_files_secure_viewer')
     FileUtils.mkdir_p(temp_dir)
     @test_image_path = temp_dir.join('test-image.png')
     # Create a valid 100x100 PNG that the secure viewer can convert
@@ -307,7 +307,7 @@ describe 'Secure viewer enhancements (Issue #590)', js: true, driver: $browser_d
 
   after :all do
     disable_active_panel_layout('test-columns-panel')
-    temp_dir = Rails.root.join('tmp', 'test_files')
+    temp_dir = Rails.root.join('tmp', 'test_files_secure_viewer')
     FileUtils.rm_rf(temp_dir)
   end
 
