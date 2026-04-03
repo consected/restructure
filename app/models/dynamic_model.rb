@@ -525,7 +525,9 @@ class DynamicModel < ActiveRecord::Base
     new_options = String.yaml_dump(hash)
     self.options ||= ''
     self.options = if self.options.index(/^#{key}:/)
-                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\n\n\\3")
+                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m) do
+                       "#{new_options}\n\n#{Regexp.last_match(3)}"
+                     end
                    else
                      "#{new_options}\n\n#{self.options}"
                    end
