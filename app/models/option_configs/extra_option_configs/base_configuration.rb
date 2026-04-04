@@ -72,9 +72,11 @@ module OptionConfigs
       # (not wrapped in {key => value}).
       # For classes with NamedConfiguration and Hash values, creates a NamedConfiguration.
       # For classes without (or with non-Hash values), stores the value directly.
+      # Tracks @current_field_name so failed_config can include field context.
       # @param [Symbol] sym_key - field name
       # @param [Object] value - field configuration value
       def add_named_configuration(sym_key, value)
+        @current_field_name = sym_key
         configurations[sym_key] = if self.class.const_defined?(:NamedConfiguration) && value.is_a?(Hash)
                                     nc = self.class::NamedConfiguration.new(self, use_hash_config: value)
                                     nc.validate_recognized_keys
@@ -82,6 +84,8 @@ module OptionConfigs
                                   else
                                     value
                                   end
+      ensure
+        @current_field_name = nil
       end
 
       # Assign a field configuration by key.
@@ -210,13 +214,22 @@ module OptionConfigs
 
       # Error reporting — stores errors locally.
       # ExtraOptions collects these after initialization.
+      # Includes the current field name and raw config when available for context.
       # @param [Symbol] type - error category
       # @param [String] message - error description
       # @param [Object] extra_details - additional context
       # @param [Symbol] level - :error or :warn
       def failed_config(type, message, extra_details: nil, level: :error)
         target = (level == :warn ? config_warnings : config_errors)
-        target << { type:, message:, extra_details: }
+        entry = { type:, message:, extra_details: }
+        if @current_field_name
+          entry[:field_name] = @current_field_name
+          raw = hash_configuration[@current_field_name] if hash_configuration.is_a?(Hash)
+          entry[:field_config] = raw
+        elsif hash_configuration.present?
+          entry[:field_config] = hash_configuration
+        end
+        target << entry
       end
 
       private

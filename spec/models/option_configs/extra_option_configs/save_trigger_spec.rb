@@ -199,5 +199,59 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
       expect(eo.save_trigger).to be_a OptionConfigs::ExtraOptionConfigs::SaveTrigger
       expect(eo.save_trigger[:on_create]).to be_a Array
     end
+
+    it 'normalizes nested create_reference trigger lists to plain hashes and arrays' do
+      eo = config_for(<<~YAML)
+        default:
+          save_trigger:
+            on_create:
+              create_reference:
+                - activity_log__play_ipa_assignment_inex_checklist:
+                    in: master
+                    with:
+                      extra_log_type: phone_screen_review
+                      force_create: true
+                - activity_log__play_ipa_assignment:
+                    if:
+                      all:
+                        embedded_item:
+                          allow_future_comms_yes_no:
+                            -
+                            - ''
+                            - 'no'
+                      any:
+                        embedded_item:
+                          select_still_interested: 'no'
+                          select_intro_interested: not interested
+                    in: master
+                    with:
+                      extra_log_type: finalized_phone_screen
+                    notify:
+                      - type: email
+                        role: email - inex pi
+      YAML
+
+      on_create = eo.save_trigger[:on_create]
+
+      expect(on_create).to be_a(Hash)
+      expect(on_create[:create_reference]).to be_an(Array)
+      expect(on_create[:create_reference].first).to be_a(Hash)
+      expect(on_create[:create_reference].first[:activity_log__play_ipa_assignment_inex_checklist]).to be_a(Hash)
+      expect(on_create[:create_reference].last[:activity_log__play_ipa_assignment][:if]).to eq(
+        all: {
+          embedded_item: {
+            allow_future_comms_yes_no: [nil, '', 'no']
+          }
+        },
+        any: {
+          embedded_item: {
+            select_still_interested: 'no',
+            select_intro_interested: 'not interested'
+          }
+        }
+      )
+      expect(on_create[:create_reference].last[:activity_log__play_ipa_assignment][:notify]).to be_an(Array)
+      expect(on_create[:create_reference].last[:activity_log__play_ipa_assignment][:notify].first).to be_a(Hash)
+    end
   end
 end

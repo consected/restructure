@@ -7,11 +7,11 @@
   prev_id = nil
   sorted_cns = @config_notices.sort_by { |ce| "#{ce[:resource_name]}--#{ce[:name]}--#{ce[:type]}" }
   sorted_cns.each do |ce| 
-    el_id = "app-type-config-notices-body--#{ce[:resource_name]}--#{ce[:name].id_hyphenate}-#{ce[:type].id_hyphenate}"
+    el_id = "app-type-config-notices-body--#{ce[:resource_name]}--#{ce[:name].to_s.id_hyphenate}-#{ce[:type].to_s.id_hyphenate}"
     next if el_id == prev_id
 
     prev_id = el_id
-    head_el_id = "app-type-config-notices-heading--#{ce[:name].id_hyphenate}-#{ce[:type].id_hyphenate}"
+    head_el_id = "app-type-config-notices-heading--#{ce[:name].to_s.id_hyphenate}-#{ce[:type].to_s.id_hyphenate}"
     title = "<span class=\"activity-list-name\">#{ce[:resource_name]} - #{ce[:name]}</span> - #{ce[:type]}".html_safe
   %>
     <div class="panel panel-default">
@@ -35,7 +35,7 @@
               <% end %>
           <div class="config-notice">
             <p><%= cn[:message] %></p>
-            <pre><%= cn[:config_def].to_yaml.sub("---\n",'') %></pre>
+            <pre><%= String.yaml_dump(cn[:config_def]) %></pre>
           </div>
           <% end %>
         </div>

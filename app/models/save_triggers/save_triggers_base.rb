@@ -5,15 +5,18 @@ class SaveTriggers::SaveTriggersBase
   attr_accessor :config, :user, :item, :master, :model_defs, :this_config, :in_master
 
   def initialize(config, item)
+    on_complete_triggers, on_failure_triggers = extract_lifecycle_hooks(config)
+
+    config = normalize_trigger_config(config)
     self.config = config
     raise FphsException, 'save_trigger configuration must be a Hash' unless config.is_a?(Hash) || config.is_a?(Array)
 
     raise FphsException, 'save_trigger item must be set' unless item
 
-    # Extract lifecycle hooks before subclasses process the config.
-    # This ensures on_complete and on_failure are automatically available
-    # to all trigger types including future implementations.
-    extract_lifecycle_hooks(config)
+    # Normalize extracted lifecycle hooks so lifecycle dispatch uses the same
+    # plain Ruby hashes/arrays as the main trigger config.
+    @on_complete_triggers = normalize_trigger_config(on_complete_triggers)
+    @on_failure_triggers = normalize_trigger_config(on_failure_triggers)
 
     self.item = item
     self.master = item.master if item.respond_to? :master
@@ -220,6 +223,34 @@ class SaveTriggers::SaveTriggersBase
 
   private
 
+  def normalize_trigger_config(value)
+    return nil if value.nil?
+
+    case value
+    when Array
+      value.map! { |entry| normalize_trigger_config(entry) }
+    when Hash
+      normalized = value.each_with_object({}) do |(key, nested_value), result|
+        result[key.to_sym] = normalize_trigger_config(nested_value)
+      end
+      value.clear
+      value.merge!(normalized)
+      value
+    else
+      if value.respond_to?(:filtered_hash)
+        normalize_trigger_config(value.filtered_hash)
+      elsif value.respond_to?(:conditions)
+        normalize_trigger_config(value.conditions)
+      elsif value.respond_to?(:symbolize_keys) && !value.is_a?(String)
+        normalize_trigger_config(value.symbolize_keys)
+      elsif value.respond_to?(:to_h) && !value.is_a?(String)
+        normalize_trigger_config(value.to_h)
+      else
+        value
+      end
+    end
+  end
+
   #
   # Extract on_complete and on_failure from the config hash for lifecycle processing.
   # These keys are removed from the config so subclass trigger processing
@@ -229,10 +260,15 @@ class SaveTriggers::SaveTriggersBase
   # continue to function correctly.
   # @param [Hash | Array] trigger_config
   def extract_lifecycle_hooks(trigger_config)
-    return unless trigger_config.is_a?(Hash)
+    return [nil, nil] unless trigger_config.is_a?(Hash)
 
-    @on_complete_triggers = trigger_config.delete(:on_complete)
-    @on_failure_triggers = trigger_config.delete(:on_failure)
+    on_complete = trigger_config.delete(:on_complete)
+    on_complete ||= trigger_config.delete('on_complete')
+
+    on_failure = trigger_config.delete(:on_failure)
+    on_failure ||= trigger_config.delete('on_failure')
+
+    [on_complete, on_failure]
   end
 
   #

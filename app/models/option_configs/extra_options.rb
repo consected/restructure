@@ -115,7 +115,7 @@ module OptionConfigs
               send("#{key}=", instance)
             elsif config_class.store_processed_value?
               # Collect errors/warnings before discarding the instance
-              collect_instance_errors(instance)
+              collect_instance_errors(instance, registry_key: key)
               # Value-preprocessor class: store the processed value, not the object
               direct_attr = config_class.option_types[:direct]&.first || key
               send("#{key}=", instance.send(direct_attr))
@@ -229,11 +229,16 @@ module OptionConfigs
     # Used during registry initialization to capture errors before the instance
     # may be discarded (for store_processed_value? classes).
     # @param instance [BaseConfiguration] the config instance
-    def collect_instance_errors(instance)
+    # @param registry_key [Symbol] the config_class_registry key for this instance
+    def collect_instance_errors(instance, registry_key: nil)
       return unless instance.respond_to?(:config_errors)
 
-      config_errors.concat(instance.config_errors) if instance.config_errors.present?
-      config_warnings.concat(instance.config_warnings) if instance.config_warnings.present?
+      if instance.config_errors.present?
+        config_errors.concat(instance.config_errors.each { |e| enrich_config_notice(e, registry_key:) })
+      end
+      return unless instance.config_warnings.present?
+
+      config_warnings.concat(instance.config_warnings.each { |e| enrich_config_notice(e, registry_key:) })
     end
 
     # Collect config errors and warnings from field-keyed config instances
@@ -249,9 +254,61 @@ module OptionConfigs
         config_instance = send(key)
         next unless config_instance&.respond_to?(:config_errors)
 
-        config_errors.concat(config_instance.config_errors) if config_instance.config_errors.present?
-        config_warnings.concat(config_instance.config_warnings) if config_instance.config_warnings.present?
+        if config_instance.config_errors.present?
+          config_errors.concat(config_instance.config_errors.each { |e| enrich_config_notice(e, registry_key: key) })
+        end
+        if config_instance.config_warnings.present?
+          config_warnings.concat(config_instance.config_warnings.each { |e| enrich_config_notice(e, registry_key: key) })
+        end
       end
+    end
+
+    # Enrich a config notice hash from a BaseConfiguration instance with
+    # the parent ExtraOptions context fields expected by the admin panel template.
+    # Mutates the hash in place, filling in missing keys.
+    #
+    # The template title renders: "{resource_name} - {name} - {type}"
+    # so :type should identify the config section (and field) for admin clarity,
+    # e.g. "caption_before > no_field". The :message should contain just the
+    # error detail without redundant context.
+    #
+    # :config_def is built as a YAML-friendly hash mirroring the config path,
+    # e.g. { caption_before: { no_field: { "do this" => true } } } so the
+    # admin panel preview shows exactly which YAML structure is problematic.
+    #
+    # @param notice [Hash] the config error/warning hash to enrich
+    # @param registry_key [Symbol, nil] the config_class_registry key (e.g. :caption_before)
+    def enrich_config_notice(notice, registry_key: nil)
+      notice[:name] ||= name
+      notice[:resource_name] ||= resource_name
+      notice[:config_class] ||= config_obj&.class&.name
+      notice[:config_object] ||= config_obj
+      notice[:config_resource_name] ||= config_obj&.class&.resource_name if config_obj
+
+      # Set :type to the config section path so the template heading identifies
+      # the source. field_name is the YAML key within the section (e.g. :no_field).
+      field_name = notice.delete(:field_name)
+      field_config = notice.delete(:field_config)
+      if registry_key
+        section = registry_key.to_s
+        section = "#{section} > #{field_name}" if field_name
+        notice[:type] = section
+
+        # Build config_def as a string-keyed nested hash showing the YAML path.
+        # Deep-stringify keys so the template renders clean YAML regardless of
+        # which YAML method is used.
+        unless notice[:config_def].present?
+          cd = if field_name
+                 { registry_key => { field_name => field_config } }
+               elsif field_config
+                 { registry_key => field_config }
+               else
+                 {}
+               end
+          notice[:config_def] = cd.deep_stringify_keys
+        end
+      end
+      notice[:config_def] ||= {}
     end
 
     # Check if any of the configs were bad

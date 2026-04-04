@@ -532,6 +532,7 @@ describe 'custom editor', js: true, driver: $browser_driver do
         editor.click
         sleep 0.3
 
+        expect(page).to have_css('.btn-toolbar[data-role="editor-toolbar"]', visible: true, wait: 10)
         toolbar = find('.btn-toolbar[data-role="editor-toolbar"]', match: :first)
         bullet_button = toolbar.find("[data-edit='insertunorderedlist']")
         bullet_button.click
@@ -555,6 +556,7 @@ describe 'custom editor', js: true, driver: $browser_driver do
         editor.click
         sleep 0.3
 
+        expect(page).to have_css('.btn-toolbar[data-role="editor-toolbar"]', visible: true, wait: 10)
         toolbar = find('.btn-toolbar[data-role="editor-toolbar"]', match: :first)
         number_button = toolbar.find("[data-edit='insertorderedlist']")
         number_button.click
