@@ -23,9 +23,17 @@ module OptionConfigs
       end
 
       # Store the string value, defaulting to empty string.
+      # Warns when label is not a string (e.g. a Hash was provided).
       # @return [void]
       def setup_named_configurations
-        self.label = hash_configuration.is_a?(String) ? hash_configuration : ''
+        if hash_configuration.is_a?(String)
+          self.label = hash_configuration
+        else
+          self.label = ''
+          unless hash_configuration.blank?
+            failed_config(:label, "label must be a string, got #{hash_configuration.class.name.downcase}", level: :warn)
+          end
+        end
       end
     end
   end

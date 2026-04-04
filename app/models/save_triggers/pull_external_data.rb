@@ -11,7 +11,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   def initialize(config, item)
     super
 
-    @model_defs = config
+    @model_defs = self.config
   end
 
   def perform

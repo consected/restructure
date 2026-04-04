@@ -24,11 +24,7 @@ module OptionConfigs
       # @return [void]
       def setup_named_configurations
         raw = hash_configuration
-        self.tasks = if raw.is_a?(Array)
-                       raw
-                     else
-                       (raw || {}).symbolize_keys
-                     end
+        self.tasks = normalize_tasks(raw)
       end
 
       # Returns true when no tasks are defined.
@@ -40,6 +36,29 @@ module OptionConfigs
       # @return [Hash{Symbol => Object}, Array]
       def symbolize_keys
         tasks || {}
+      end
+
+      private
+
+      def normalize_tasks(value)
+        return nil if value.nil?
+
+        case value
+        when Array
+          value.map { |item| normalize_tasks(item) }
+        when Hash
+          value.each_with_object({}) do |(key, nested_value), normalized|
+            normalized[key.to_sym] = normalize_tasks(nested_value)
+          end
+        else
+          if value.respond_to?(:filtered_hash)
+            normalize_tasks(value.filtered_hash)
+          elsif value.respond_to?(:to_h) && !value.is_a?(String)
+            normalize_tasks(value.to_h)
+          else
+            value
+          end
+        end
       end
     end
   end

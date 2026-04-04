@@ -204,8 +204,20 @@ describe 'advanced search', js: true, driver: $browser_driver do
       # h = el['data-target'].split('#').last
       # have_css("##{h}.collapse.in")
       # find "##{h}.collapse.in", wait: 5
+      expand_master_record_tab('tracker') unless page.has_css?("##{h}.tracker-block.collapse.in", wait: 3)
       have_css "##{h}.tracker-block.collapse.in"
-      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i
+      tracker_protocol_selector = "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name"
+
+      unless page.has_css?(tracker_protocol_selector, text: /#{protocol.name}/i, wait: 3)
+        view_as_events = first("##{h} div.tracker-block a[title='view as events']", wait: 5)
+        if view_as_events
+          scroll_into_view(view_as_events)
+          view_as_events.click
+          finish_page_loading
+        end
+      end
+
+      expect(page).to have_css tracker_protocol_selector, text: /#{protocol.name}/i
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: /#{sp.name}/i
 
       done += 1

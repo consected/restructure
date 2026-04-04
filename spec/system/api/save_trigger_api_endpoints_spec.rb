@@ -84,6 +84,13 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
     expect(@target_record.id).to be_present
   end
 
+  before(:each) do
+    # Other system specs reload routes while running in parallel. Re-register the
+    # dynamic model routes here so the Capybara server always has the API endpoints.
+    DynamicModel.routes_load
+    Rails.application.routes_reloader.reload!
+  end
+
   #
   # Capybara test server URL (e.g., "http://127.0.0.1:12345")
   # @return [String]
