@@ -11,6 +11,8 @@ module OptionConfigs
     ValidValidIfTriggers = %i[on_create on_save on_update].freeze
     ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    # Top-level YAML keys in libraries that must be renamed to avoid collisions when injected
+    LibraryKeyRenamePatterns = %w[_definitions _default].freeze
     ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
     def self.base_key_attributes
@@ -1025,7 +1027,9 @@ module OptionConfigs
         name = res[2].strip
         lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
         lib = (lib || '').dup
-        lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+        LibraryKeyRenamePatterns.each do |key|
+          lib.gsub!(/^#{key}:.*/, "#{key}__#{category}_#{name}:")
+        end
         lib = "# @sourced_library_start #{category} #{name}\n#{lib}\n# @sourced_library_end #{category} #{name}\n"
         content_to_update.gsub!(res[0], lib)
         res = content_to_update.match reg
