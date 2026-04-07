@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for field-level edit options.
+    # Schema docs: docs/admin_reference/general/field_options.md
     # Extracted from ExtraOptions#clean_field_options_def
     #
     # Values are per-field option hashes keyed by field name.

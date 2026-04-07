@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for field list setup.
+    # Schema docs: docs/admin_reference/general/fields.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Stores the field list as a direct array value.
     # The processed array is stored back on the parent ExtraOptions (not the object).

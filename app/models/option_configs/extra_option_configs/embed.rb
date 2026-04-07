@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for embedded resource definitions.
+    # Schema docs: docs/admin_reference/general/embed.md
     #
     # Uses the source_attribute pattern: the registry key is :embed_config,
     # but the raw input is read from :embed (a base_key_attribute).
@@ -18,6 +19,7 @@ module OptionConfigs
     class Embed < BaseConfiguration
       configure_direct :embed, type: :hash
       configure_attributes %i[resource_name resource_id limit]
+      VALID_KEYS = %i[resource_name resource_id limit].freeze
 
       # Key added by prepare_config that is not part of admin input.
       COMPUTED_KEYS = %i[resource_model_def].freeze
@@ -30,6 +32,7 @@ module OptionConfigs
         true
       end
 
+      validate :validate_embed_structure
       validate :validate_embed_resource
 
       # Pre-process the embed value using parent context.
@@ -50,14 +53,14 @@ module OptionConfigs
           rn = raw
           emb = { resource_name: rn }
         else
-          emb = raw.is_a?(Hash) ? raw.symbolize_keys : {}
+          emb = raw.is_a?(Hash) ? raw.symbolize_keys : { _validation_errors: ['embed must be a String or Hash'] }
           rn = emb[:resource_name]
         end
 
-        resource = Resources::Models.find_by(resource_name: rn)
+        resource = rn.present? ? Resources::Models.find_by(resource_name: rn) : nil
         emb[:resource_model_def] = resource
 
-        unless resource && resource[:model]
+        if rn.present? && !(resource && resource[:model])
           Rails.logger.warn "embed for #{rn} does not exist as a class in #{parent.name} / #{config_obj.name}"
         end
 
@@ -76,7 +79,7 @@ module OptionConfigs
                      end
         return unless embed
 
-        embed.except(*COMPUTED_KEYS).each do |k, v|
+        embed.except(*COMPUTED_KEYS, :_validation_errors).each do |k, v|
           send("#{k}=", v) if respond_to?("#{k}=")
         end
       end
@@ -84,6 +87,28 @@ module OptionConfigs
       private
 
       # Validate that the embedded resource exists.
+      def validate_embed_structure
+        raw = hash_configuration
+        return if raw.blank?
+        return if raw.is_a?(String)
+        return unless validate_hash_attribute(:embed, raw)
+
+        Array(raw[:_validation_errors]).each { |msg| add_validation_notice(:embed, msg) }
+        validate_allowed_hash_keys(:embed, raw.except(*COMPUTED_KEYS, :_validation_errors), VALID_KEYS)
+
+        if raw.key?(:resource_name) && !string_like?(raw[:resource_name])
+          add_validation_notice(:embed, 'resource_name must be a String')
+        end
+
+        if raw.key?(:resource_id) && !scalar_reference?(raw[:resource_id])
+          add_validation_notice(:embed, 'resource_id must be a String or Integer')
+        end
+
+        return unless raw.key?(:limit) && !raw[:limit].is_a?(Integer)
+
+        add_validation_notice(:embed, 'limit must be an Integer')
+      end
+
       def validate_embed_resource
         emb = hash_configuration
         return if emb.blank? || !emb.is_a?(Hash)
@@ -95,6 +120,14 @@ module OptionConfigs
         return if resource && resource[:model]
 
         errors.add(:embed, "embed for #{rn} does not exist as a resource", type: :warning)
+      end
+
+      def string_like?(value)
+        value.is_a?(String) || value.is_a?(Symbol)
+      end
+
+      def scalar_reference?(value)
+        value.is_a?(String) || value.is_a?(Symbol) || value.is_a?(Integer)
       end
     end
   end

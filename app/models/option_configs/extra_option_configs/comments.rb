@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for top-level _comments options.
+    # Schema docs: docs/admin_reference/general/comments.md
     # Extracted from ExtraOptions.parse_config
     #
     # Stores table and field comments for the underlying database.

@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for e-signature definitions.
+    # Schema docs: docs/admin_reference/general/e_sign.md
     #
     # Uses the source_attribute pattern: the registry key is :e_sign_config,
     # but the raw input is read from :e_sign (an add_key_attribute on ActivityLogOptions).

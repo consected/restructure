@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for conditional visibility (show_if).
+    # Schema docs: docs/admin_reference/general/show_if.md
     # Extracted from ExtraOptions#clean_show_if_def
     #
     # Values are arbitrary condition hashes keyed by field name.
@@ -10,6 +11,8 @@ module OptionConfigs
     # via prepare_config before initialization.
     class ShowIf < BaseConfiguration
       # No NamedConfiguration — values are arbitrary condition hashes
+
+      validate :validate_show_if_shape
 
       # Pre-process config using parent context to merge
       # show_if_condition_strings (REDCap branching logic).
@@ -35,6 +38,24 @@ module OptionConfigs
         end
 
         raw
+      end
+
+      def setup_named_configurations
+        return unless hash_configuration.is_a?(Hash)
+
+        super
+      end
+
+      private
+
+      def validate_show_if_shape
+        return unless validate_hash_attribute(:show_if, hash_configuration)
+
+        hash_configuration.each do |field_name, config|
+          next if config.nil? || config.is_a?(Hash)
+
+          add_validation_notice(:show_if, "#{field_name} must define a Hash of conditions")
+        end
       end
     end
   end

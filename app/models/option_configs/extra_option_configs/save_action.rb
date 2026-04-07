@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for save action cascading (on_save -> on_create/on_update).
+    # Schema docs: docs/admin_reference/general/save_action.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Stores the entire hash as a single direct attribute after cascading.
     #

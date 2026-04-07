@@ -1,58 +1,70 @@
 # references options
+#
+# Pattern 1: Simple reference definition
   references:
     model_name:
       label: button label
-      result_label: alternative label rather than the to-record label in result caption
-      from: this | master | any | user_is_creator (item in any master that was created by current user)
-      without_reference: |
-        true | outside_master - 
-          true will check only within the current master, if the instance has a master association
-          outside_master always ignores the master, even if defined, relying only on the filter_by definition
+      from: this | master | any | user_is_creator
       add: many | one_to_master | one_to_this
+
+# Pattern 2: Reference with add_with and filter_by
+  references:
+    activity_log__example_step:
+      label: Add Example Step
+      from: this
+      add: one_to_this
       add_with:
-        extra_log_type: type name
+        extra_log_type: review
         item_name:
           embedded_item:
             field_name: value
       filter_by:
-        field_name: literal value to filter the referenced items by - may include [substitutions](../general/substitutions.md)
+        field_name: literal value or {{substitution}}
         field_name2:
-          this: 
+          this:
             field_name: return_value
-            # Note that this is evaluated in the context of the current item, so
-            # the attributes returned are relative to the `from:` item:
-            #   `from: this`, then the attributes are from the current item
-            #   `from: master` or `from: any`, then they are from the master item
-      order_by: # Order results within model references matching this model and filter
-                # Note that this can be overridden by view_options.sort_references, sorting the
-                # results across all references
-        field_name: asc | desc
-        field_name2: asc | desc
+
+# Pattern 3: Reference with ordering and activity selector
+  references:
+    activity_log__example_step:
+      from: this
+      add: many
+      order_by:
+        created_at: desc
       type_config:
         activity_selector:
-          # use an activity selector to show the creatable extra log types
           extra_log_type_key1: Label for button
-          extra_log_type_key2: Label for button
-          extra_log_type_key3: Label for button
+          extra_log_type_key2: Another label
+
+# Pattern 4: Reference display behavior
+  references:
+    model_name:
+      result_label: alternative label shown in the result caption
       view_as:
-        edit: hide|readonly|not_embedded|select_or_add
-        show: hide|readonly|see_presence|filestore|as_edit
-        new: outside_this|not_embedded|select_or_add
-        _notes_:
-        - "*outside_this* presents a button that triggers a form outside of this container
-          in the regular panel"
+        edit: hide | readonly | not_embedded | select_or_add
+        show: hide | readonly | see_presence | filestore | as_edit
+        new: outside_this | not_embedded | select_or_add
       view_options:
-        always_open: true # force the reference to always be expanded
-      showable_if: # exclude to always show
-      creatable_if: # exclude to always allow creation
-      prevent_disable: true | condition Hash 
-        # always prevent the reference from being disabled, even if the containing record is editable
-      also_disable_record: false (default) | true
-        # if not prevented from disabling the model reference, also disable the referenced record if the
-        # reference is disabled
-      allow_disable_if_not_editable: true | condition Hash 
-        # always allow the references to be disabled, even if the containing record is not editable
-      prevent_reload_on_save: true | false (default)
-        # prevent the parent from reloading on save - use in combination with {save_action: expand_reference}
-      action_position: top|bottom
-        # position this action at the top or bottom of the reference results (default: bottom)
+        always_open: true
+      showable_if:
+        always: true
+      creatable_if:
+        all:
+          this:
+            status: active
+
+# Pattern 5: Reference disable behavior
+  references:
+    model_name:
+      prevent_disable: true | <condition Hash>
+      also_disable_record: false | true
+      allow_disable_if_not_editable: true | <condition Hash>
+      prevent_reload_on_save: true | false
+      action_position: top | bottom
+
+# Notes:
+# - Each reference entry must be a Hash.
+# - Top-level keys are reference model names; they may be declared in hash form or array form.
+# - without_reference may be true or outside_master.
+# - order_by applies within one reference definition; view_options.sort_references can reorder across all references.
+# - Only the documented keys in each entry are supported for admin configuration.

@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for the definition label.
+    # Schema docs: docs/admin_reference/general/label.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Stores the label string as a direct value.
     # Uses prepare_config to default to humanized name when not specified.

@@ -52,6 +52,18 @@ RSpec.describe 'ExtraOptionConfigs::ViewOptions', type: :model do
       instance = klass.new(data_attribute: 'test')
       expect(instance.symbolize_keys).to eq(data_attribute: 'test')
     end
+
+    it 'warns on unrecognized keys' do
+      instance = klass.new(not_a_real_key: true)
+      expect(instance.config_warnings).not_to be_empty
+      expect(instance.errors[:view_options]).not_to be_empty
+    end
+
+    it 'reports an error when sort_references.keep_top is not boolean' do
+      instance = klass.new(sort_references: { attribute: 'id', keep_top: 'yes' })
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:view_options]).not_to be_empty
+    end
   end
 
   describe 'ExtraOptions integration' do

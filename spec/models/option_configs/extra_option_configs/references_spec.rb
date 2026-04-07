@@ -111,6 +111,23 @@ RSpec.describe 'ExtraOptionConfigs::References', type: :model do
       expect(instance.errors).to be_empty,
                                  "Expected no ActiveModel errors for valid references, got: #{instance.errors.full_messages}"
     end
+
+    it 'produces ActiveModel errors when initialized with a top-level validation error' do
+      instance = klass.new(_validation_errors: ['references must be a Hash or an Array of Hash entries'])
+      expect(instance.errors[:references]).not_to be_empty
+    end
+
+    it 'produces ActiveModel errors when a reference entry is not a hash' do
+      yaml = <<~YAML
+        default:
+          label: Test
+      YAML
+      eo = config_for(yaml)
+
+      processed = klass.prepare_config({ player_contact: 'bad' }, eo)
+      instance = klass.new(processed)
+      expect(instance.errors[:references]).not_to be_empty
+    end
   end
 
   describe 'References.reprocess' do
@@ -276,7 +293,7 @@ RSpec.describe 'ExtraOptionConfigs::References', type: :model do
               label: Bad Reference
       YAML
 
-      has_warning = eo.config_warnings.any? { |w| w[:type] == :references }
+      has_warning = eo.config_warnings.any? { |w| w[:type].to_s == 'references' }
       expect(has_warning).to be(true), 'Expected config_warnings to include a :references warning'
     end
   end

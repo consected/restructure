@@ -60,6 +60,18 @@ RSpec.describe 'ExtraOptionConfigs::BatchTrigger', type: :model do
       instance = klass.new({})
       expect(instance).to be_blank
     end
+
+    it 'reports an error when initialized with a scalar instead of a hash' do
+      instance = klass.new('bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:batch_trigger]).not_to be_empty
+    end
+
+    it 'reports an error when on_record is not a hash or array' do
+      instance = klass.new(on_record: 'bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:batch_trigger]).not_to be_empty
+    end
   end
 
   describe 'ExtraOptions integration' do

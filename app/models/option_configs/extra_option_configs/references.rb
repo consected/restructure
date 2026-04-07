@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for model reference configurations.
+    # Schema docs: docs/admin_reference/general/references.md
     #
     # Uses the source_attribute pattern: the registry key is :references_config,
     # but the raw input is read from :references (a base_key_attribute).
@@ -17,6 +18,7 @@ module OptionConfigs
     # - Warning when referenced models do not exist
     class References < BaseConfiguration
       configure_direct :references, type: :hash
+      SPECIAL_KEYS = %i[_bad_references _validation_errors].freeze
 
       # Keys added by enrich_ref_metadata that are not part of admin input.
       COMPUTED_KEYS = %i[
@@ -57,9 +59,10 @@ module OptionConfigs
       def self.prepare_config(raw, parent)
         return nil unless raw
 
-        new_ref = normalize_references(raw)
+        new_ref, validation_errors = normalize_references(raw)
         bad_items = resolve_reference_classes(new_ref, parent)
         new_ref[:_bad_references] = bad_items if bad_items.present?
+        new_ref[:_validation_errors] = validation_errors if validation_errors.present?
         new_ref
       end
 
@@ -69,16 +72,37 @@ module OptionConfigs
       # @param raw [Array, Hash] raw references from YAML config
       # @return [Hash] normalized references hash
       private_class_method def self.normalize_references(raw)
-        ref_items = raw.is_a?(Array) ? raw.map(&:dup) : [raw.dup]
+        unless raw.is_a?(Hash) || raw.is_a?(Array)
+          return [{}, ['references must be a Hash or an Array of Hash entries']]
+        end
+
+        validation_errors = []
+        ref_items = if raw.is_a?(Array)
+                      raw.each_with_index.filter_map do |item, index|
+                        if item.is_a?(Hash)
+                          item.dup
+                        else
+                          validation_errors << "references entry #{index + 1} must be a Hash"
+                          nil
+                        end
+                      end
+                    else
+                      [raw.dup]
+                    end
 
         result = {}
         ref_items.each do |refitem|
           singularize_keys!(refitem)
           refitem.each do |k, v|
+            unless v.is_a?(Hash)
+              validation_errors << "reference #{k} must be a Hash"
+              v = {}
+            end
+
             result[composite_ref_key(k, v)] = { k => v }
           end
         end
-        result
+        [result, validation_errors]
       end
 
       # Replace all plural keys with their singular form, mutating the hash.
@@ -173,7 +197,7 @@ module OptionConfigs
       # named configurations for each entry's input-only keys.
       # @return [void]
       def setup_named_configurations
-        self.references = hash_configuration.except(:_bad_references).presence
+        self.references = hash_configuration.except(*SPECIAL_KEYS).presence
         return unless references
 
         references.each do |composite_key, refitem|
@@ -188,6 +212,10 @@ module OptionConfigs
 
       # Validate that all referenced models exist.
       def validate_references
+        Array(hash_configuration[:_validation_errors]).each do |msg|
+          errors.add(:references, msg)
+        end
+
         bad_refs = hash_configuration[:_bad_references]
         return unless bad_refs&.present?
 

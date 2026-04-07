@@ -257,9 +257,11 @@ module OptionConfigs
         if config_instance.config_errors.present?
           config_errors.concat(config_instance.config_errors.each { |e| enrich_config_notice(e, registry_key: key) })
         end
-        if config_instance.config_warnings.present?
-          config_warnings.concat(config_instance.config_warnings.each { |e| enrich_config_notice(e, registry_key: key) })
-        end
+        next unless config_instance.config_warnings.present?
+
+        config_warnings.concat(config_instance.config_warnings.each do |e|
+          enrich_config_notice(e, registry_key: key)
+        end)
       end
     end
 
@@ -290,7 +292,9 @@ module OptionConfigs
       field_name = notice.delete(:field_name)
       field_config = notice.delete(:field_config)
       if registry_key
-        section = registry_key.to_s
+        config_class = self.class.config_class_registry[registry_key]
+        section_key = config_class&.source_attribute || registry_key
+        section = section_key.to_s
         section = "#{section} > #{field_name}" if field_name
         notice[:type] = section
 
@@ -299,9 +303,9 @@ module OptionConfigs
         # which YAML method is used.
         unless notice[:config_def].present?
           cd = if field_name
-                 { registry_key => { field_name => field_config } }
+                 { section_key => { field_name => field_config } }
                elsif field_config
-                 { registry_key => field_config }
+                 { section_key => field_config }
                else
                  {}
                end

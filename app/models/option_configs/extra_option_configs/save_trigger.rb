@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for save trigger cascading.
+    # Schema docs: docs/admin_reference/general/save_trigger.md
     # Uses the BaseConfiguration pattern with typed attributes for each
     # trigger key, all typed as TriggerTasks.
     #
@@ -23,13 +24,16 @@ module OptionConfigs
       configure_typed_attribute :before_save, type: TriggerTasks
 
       validate :validate_keys
+      validate :validate_trigger_shapes
 
       # Set up typed attributes with cascade logic.
       # @return [void]
       def setup_named_configurations
+        config_hash = hash_configuration.is_a?(Hash) ? hash_configuration.deep_dup : {}
+        self.hash_configuration = config_hash
         cascade_on_save
 
-        setup_all_options_typed(hash_configuration)
+        setup_all_options_typed(config_hash)
 
         # Store the raw tasks values in configurations for hash-like bracket access.
         # Consumers expect raw Array/Hash, not TriggerTasks instances.
@@ -49,7 +53,7 @@ module OptionConfigs
       # Validate keys against the allowed set.
       # @return [void]
       def validate_keys
-        return unless hash_configuration.is_a?(Hash)
+        return unless validate_hash_attribute(:save_trigger, raw_configuration)
         return if hash_configuration.keys.empty?
 
         invalid = hash_configuration.keys - OptionConfigs::ExtraOptions::ValidSaveTriggerTriggers
@@ -57,6 +61,17 @@ module OptionConfigs
 
         errors.add(:save_trigger,
                    "contains invalid keys #{hash_configuration.keys} - expected only: #{OptionConfigs::ExtraOptions::ValidSaveTriggerTriggers}")
+      end
+
+      def validate_trigger_shapes
+        return unless raw_configuration.is_a?(Hash)
+
+        hash_configuration.each do |trigger_name, config|
+          next if config.nil? || config.is_a?(Hash) || config.is_a?(Array)
+
+          add_validation_notice(:save_trigger,
+                                "#{trigger_name} must be a Hash or Array of Hash task definitions")
+        end
       end
 
       # Cascade on_save into on_create and on_update (wrapping hashes into arrays).

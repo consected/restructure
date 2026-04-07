@@ -1,2 +1,22 @@
 # showable_if options
-  showable_if: 'ref: ** conditions reference **'
+#
+# Pattern 1: Always show the option type
+  showable_if:
+    always: true
+
+# Pattern 2: Never show the option type
+  showable_if:
+    never: true
+
+# Pattern 3: Show only when conditions are met
+  showable_if:
+    all:
+      this:
+        status: active
+    not_any:
+      activity_log__example_reviews:
+        extra_log_type: hidden
+
+# Notes:
+# - showable_if must be a Hash using the standard conditional-actions syntax.
+# - showable_if controls the visibility of the whole option type, whereas show_if controls individual fields or buttons.

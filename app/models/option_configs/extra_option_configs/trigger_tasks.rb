@@ -19,6 +19,8 @@ module OptionConfigs
     class TriggerTasks < BaseConfiguration
       configure_direct :tasks, type: :hash
 
+      validate :validate_tasks_structure
+
       # Override default field-keyed setup to store the value as a single
       # attribute. Handles both Hash and Array inputs.
       # @return [void]
@@ -39,6 +41,19 @@ module OptionConfigs
       end
 
       private
+
+      def validate_tasks_structure
+        raw = hash_configuration
+        return if raw.blank?
+        return unless validate_array_or_hash_attribute(:tasks, raw)
+        return unless raw.is_a?(Array)
+
+        raw.each_with_index do |item, index|
+          next if item.is_a?(Hash)
+
+          add_validation_notice(:tasks, "entry #{index + 1} must be a Hash task definition")
+        end
+      end
 
       def normalize_tasks(value)
         return nil if value.nil?

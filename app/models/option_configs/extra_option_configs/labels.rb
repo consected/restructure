@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for field labels.
+    # Schema docs: docs/admin_reference/general/labels.md
     # Extracted from ExtraOptions#clean_labels_def
     #
     # Values are plain strings keyed by field name.

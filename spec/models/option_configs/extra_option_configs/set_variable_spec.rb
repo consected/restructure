@@ -129,7 +129,7 @@ RSpec.describe 'ExtraOptionConfigs::SetVariable', type: :model do
 
       expect(eo.set_variables).to eq []
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :set_variables }
+      err = eo.config_errors.find { |e| e[:type].to_s.start_with?('set_variables') }
       expect(err).to be_present
     end
 

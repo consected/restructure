@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for config trigger setup.
+    # Schema docs: docs/admin_reference/general/config_trigger.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Uses a typed TriggerTasks attribute for on_define.
     #

@@ -113,6 +113,18 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
       instance = klass.new(on_invalid_trigger: { something: true })
       expect(instance.errors[:save_trigger]).not_to be_empty
     end
+
+    it 'reports an error when initialized with a scalar instead of a hash' do
+      instance = klass.new('bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:save_trigger]).not_to be_empty
+    end
+
+    it 'reports an error when a trigger payload is not a hash or array' do
+      instance = klass.new(on_create: 'bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:save_trigger]).not_to be_empty
+    end
   end
 
   describe 'ExtraOptions integration' do
@@ -171,7 +183,7 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :save_trigger }
+      err = eo.config_errors.find { |e| e[:type].to_s == 'save_trigger' }
       expect(err).to be_present
     end
 

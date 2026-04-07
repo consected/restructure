@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for filestore configuration.
+    # Schema docs: docs/admin_reference/general/filestore_container.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Stores the entire hash as a single direct attribute.
     #

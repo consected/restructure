@@ -33,6 +33,18 @@ RSpec.describe 'ExtraOptionConfigs::ShowIf', type: :model do
       instance = klass.new(field1: { other_field: 'value' })
       expect(instance.symbolize_keys).to eq(field1: { other_field: 'value' })
     end
+
+    it 'reports an error when a field condition is not a hash' do
+      instance = klass.new(field1: 'value')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:show_if]).not_to be_empty
+    end
+
+    it 'reports an error when initialized with a scalar instead of a hash' do
+      instance = klass.new('bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:show_if]).not_to be_empty
+    end
   end
 
   describe 'ExtraOptions integration' do

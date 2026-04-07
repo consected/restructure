@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for dialog overlay definitions.
+    # Schema docs: docs/admin_reference/general/dialog_before.md
     # Extracted from ExtraOptions#clean_dialog_before_def
     #
     # Each field name maps to a NamedConfiguration with dialog attributes.

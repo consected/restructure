@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for NFS store definitions.
+    # Schema docs: docs/admin_reference/general/filestore_nfs_store.md
     # Migrated from ActivityLogOptions#clean_nfs_store_def (issue #986).
     #
     # Validates nfs_store top-level and can sub-keys, and delegates

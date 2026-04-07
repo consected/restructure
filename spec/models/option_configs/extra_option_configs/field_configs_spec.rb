@@ -166,7 +166,7 @@ RSpec.describe 'ExtraOptionConfigs::FieldConfigs', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :field_configs }
+      err = eo.config_errors.find { |e| e[:type].to_s.start_with?('field_configs') }
       expect(err).to be_present
     end
 
@@ -181,7 +181,7 @@ RSpec.describe 'ExtraOptionConfigs::FieldConfigs', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :field_configs }
+      err = eo.config_errors.find { |e| e[:type].to_s.start_with?('field_configs') }
       expect(err).to be_present
     end
 
@@ -195,7 +195,7 @@ RSpec.describe 'ExtraOptionConfigs::FieldConfigs', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :field_configs }
+      err = eo.config_errors.find { |e| e[:type].to_s.start_with?('field_configs') }
       expect(err).to be_present
     end
 

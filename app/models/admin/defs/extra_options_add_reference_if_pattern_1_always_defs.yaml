@@ -1,0 +1,3 @@
+# Pattern 1: Always allow adding the reference
+  add_reference_if:
+    always: true

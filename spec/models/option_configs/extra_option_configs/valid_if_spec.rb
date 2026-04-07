@@ -81,6 +81,12 @@ RSpec.describe 'ExtraOptionConfigs::ValidIf', type: :model do
       instance = klass.new(on_invalid_key: { always: true })
       expect(instance.errors[:valid_if]).not_to be_empty
     end
+
+    it 'reports an error when a trigger payload is not a hash' do
+      instance = klass.new(on_save: 'bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:valid_if]).not_to be_empty
+    end
   end
 
   describe 'ExtraOptions integration' do
@@ -134,7 +140,7 @@ RSpec.describe 'ExtraOptionConfigs::ValidIf', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :valid_if }
+      err = eo.config_errors.find { |e| e[:type].to_s == 'valid_if' }
       expect(err).to be_present
     end
 

@@ -1,73 +1,82 @@
-# Valid If Options
-# The valid_if option allows you to define custom validation rules that are evaluated when saving records.
-# These validations can check conditions on the current item, related items, or even cross-table lookups.
-# If validation fails, the record will not be saved and error messages will be displayed.
-
+# valid_if options
+#
+# Pattern 1: Trigger map
+# valid_if is a Hash keyed only by the save lifecycle trigger names below.
+# Each trigger value must itself be a Hash containing conditional-actions syntax.
+# on_save is merged into on_create and on_update as the default base definition.
   valid_if:
     on_save:
-      # Validation rules evaluated when saving (both create and update)
-      # Uses the standard conditional actions syntax
-      
-      all: # All conditions must be true for validation to pass
-        # For simple validations on the current item, put invalid_error_message directly within the condition:
+      all:
         this:
-          field_name: 'expected_value'
-          invalid_error_message: 'Custom error message shown when validation fails'
-        
-        # For cross-table queries (with no_masters), use a named condition wrapper:
-        condition_name: # Named condition (required when querying tables)
-          # The condition name appears in error messages as a prefix
-          invalid_error_message: 'Custom error message shown when validation fails'
-          no_masters: {}
-          table_name:
-            field_in_table:
-              this: field_name # Match field in table to field in current item
+          field_name: expected_value
+          invalid_error_message: Custom error message shown when validation fails
+    on_create:
+      all:
+        this:
+          create_only_field: expected_value
+          invalid_error_message: Only checked on create
+    on_update:
+      all:
+        this:
+          update_only_field: expected_value
+          invalid_error_message: Only checked on update
 
-# Examples:
-
-# Example 1: Basic Field Validation
-# Ensure status field is set to 'active' when saving
+# Pattern 2: Simple validation against the current item
+# Put invalid_error_message inside the this: block when validating attributes
+# on the current item only.
 valid_if:
   on_save:
     all:
       this:
-        status: 'active'
-        invalid_error_message: 'Status must be active'
+        status: active
+        invalid_error_message: Status must be active
 
-# Example 2: Multiple Field Conditions
-# Ensure both status is 'active' AND item_type is 'primary' (note: avoid 'type' - reserved for Rails STI)
+# Pattern 3: Multiple current-item requirements in one validation block
+# All field/value pairs inside the same this: block are evaluated together.
 valid_if:
   on_save:
     all:
       this:
-        status: 'active'
-        item_type: 'primary'
-        invalid_error_message: 'Record must have status=active and item_type=primary'
+        status: active
+        item_type: primary
+        invalid_error_message: Record must have status=active and item_type=primary
 
-# Example 3: Cross-Table Email Validation
-# Verify that an email address exists in the users table
-# Uses no_masters: {} to query without master_id constraint
-# Requires named condition wrapper for cross-table queries
+# Pattern 4: Named validation wrapper for cross-table lookup
+# Use a named wrapper when the validation refers to another table, especially
+# with no_masters: {}.
 valid_if:
   on_save:
     all:
       user_exists:
-        invalid_error_message: 'This email address does not exist as a user of the system'
+        invalid_error_message: This email address does not exist as a user of the system
         no_masters: {}
         users:
           email:
-            this: email # Match users.email to this_record.email
+            this: email
+
+# Pattern 5: Mixed validation blocks in one trigger
+# A trigger may combine multiple named or unnamed validations using the normal
+# all / any / not_* conditional-actions structure.
+valid_if:
+  on_save:
+    all:
+      this:
+        status: active
+        invalid_error_message: Status must be active
+      user_exists:
+        invalid_error_message: This email address does not exist as a user of the system
+        no_masters: {}
+        users:
+          email:
+            this: email
 
 # Notes:
-# - For simple `this:` conditions, put invalid_error_message inside the `this:` block
-# - For cross-table queries with `no_masters: {}`, use a named condition wrapper with invalid_error_message inside
-# - Error messages appear with format: "<Field> invalid_error_message: <Message>"
-#   or "<ConditionName> invalid_error_message: <Message>" for named conditions
-# - Validation happens before save_trigger actions
-# - Use no_masters: {} for queries that should not filter by master_id
-# - All standard conditional actions syntax is supported (all, any, not, etc.)
-# - Substitutions with {{field_name}} are supported in error messages and values
-# - Multiple validations under 'all' must all pass for the record to save
-# - Tested examples match those in spec/models/option_configs/valid_if_spec.rb
-# - More complex validation patterns (master record attributes, current_user conditions, value_in) 
-#   may require different syntax than documented here - consult real working examples in app configs
+# - Top-level keys are limited to on_save, on_create and on_update.
+# - Each trigger payload must be a Hash, not a String, Array or scalar value.
+# - For simple this: conditions, place invalid_error_message inside the this: block.
+# - For cross-table lookups, place invalid_error_message inside the named wrapper block.
+# - Error messages appear as "<Field> invalid_error_message: <Message>" or
+#   "<ConditionName> invalid_error_message: <Message>".
+# - Validation happens before save_trigger actions.
+# - All standard conditional-actions syntax is supported inside each trigger block.
+# - Tested examples match spec/models/option_configs/valid_if_spec.rb.

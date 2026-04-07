@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for database column configs.
+    # Schema docs: docs/admin_reference/general/db_columns.md
     # Extracted from ExtraOptions#clean_db_configs_def
     #
     # Values are column configuration hashes keyed by column name.
