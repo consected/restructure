@@ -22,6 +22,7 @@ module OptionConfigs
       # @return [void]
       def setup_named_configurations
         self.conditions = hash_configuration.is_a?(Hash) ? hash_configuration.symbolize_keys : {}
+        conditions.each { |key, value| configurations[key] = value }
       end
 
       # Returns true when no conditions are defined.

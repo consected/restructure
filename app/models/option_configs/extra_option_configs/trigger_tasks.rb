@@ -17,7 +17,7 @@ module OptionConfigs
     #   tasks = TriggerTasks.new([{ notify: { type: 'email' } }])
     #   tasks.tasks  #=> [{ notify: { type: 'email' } }]
     class TriggerTasks < BaseConfiguration
-      configure_direct :tasks, type: :hash
+      configure_direct :tasks, type: :array_or_hash
 
       validate :validate_tasks_structure
 

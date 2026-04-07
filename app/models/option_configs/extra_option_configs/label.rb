@@ -9,7 +9,7 @@ module OptionConfigs
     # Uses prepare_config to default to humanized name when not specified.
     # The processed string is stored back on the parent ExtraOptions (not the object).
     class Label < BaseConfiguration
-      configure_direct :label, type: :string
+      configure_direct :label, type: :string, level: :warn
 
       def self.store_processed_value?
         true
@@ -24,17 +24,9 @@ module OptionConfigs
       end
 
       # Store the string value, defaulting to empty string.
-      # Warns when label is not a string (e.g. a Hash was provided).
       # @return [void]
       def setup_named_configurations
-        if hash_configuration.is_a?(String)
-          self.label = hash_configuration
-        else
-          self.label = ''
-          unless hash_configuration.blank?
-            failed_config(:label, "label must be a string, got #{hash_configuration.class.name.downcase}", level: :warn)
-          end
-        end
+        self.label = raw_configuration.is_a?(String) ? raw_configuration : ''
       end
     end
   end

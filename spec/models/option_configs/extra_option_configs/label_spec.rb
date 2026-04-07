@@ -43,6 +43,14 @@ RSpec.describe 'ExtraOptionConfigs::Label', type: :model do
       expect(instance.label).to eq 'My Label'
     end
 
+    it 'warns through validations when initialized with a non-string value' do
+      instance = klass.new(test: true)
+
+      expect(instance.label).to eq ''
+      expect(instance.config_warnings).not_to be_empty
+      expect(instance.errors[:label]).to include('must be a string, got hash')
+    end
+
     it 'defaults to empty string when initialized with nil' do
       instance = klass.new(nil)
       expect(instance.label).to eq ''

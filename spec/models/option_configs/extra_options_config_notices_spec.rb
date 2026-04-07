@@ -98,6 +98,14 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
       expect(label_warning[:message]).to eq 'label must be a string, got hash'
     end
 
+    it 'records the label warning through ActiveModel validation errors' do
+      oc = config_for(yaml)
+      label_config = OptionConfigs::ExtraOptionConfigs::Label.new(is_wrong: true)
+
+      expect(label_config.errors[:label]).to include('must be a string, got hash')
+      expect(oc.config_warnings.find { |w| w[:message].include?('label must be a string') }).to be_present
+    end
+
     it 'builds config_def showing the label config value with string keys' do
       oc = config_for(yaml)
       label_warning = oc.config_warnings.find { |w| w[:message].include?('label must be a string') }

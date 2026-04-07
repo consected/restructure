@@ -1,11 +1,34 @@
 # dialog_before options
+# Canonical schema
+# dialog_before: <Hash(dialog_target_key: DialogBeforeValue)>
+#
+# Key type
+# dialog_target_key: <valid_field_name | all_fields | submit>
+#
+# Value type
+# DialogBeforeValue: <String | Hash(
+#   name: String (required),
+#   label: String,
+#   keep_label: Boolean
+# )>
+# Keys are optional unless marked (required).
+#
+# Pattern 1: Simple string (template name only)
+#!defs(extra_options_dialog_before_pattern_1_simple_defs.yaml)
+#
+# Pattern 2: Hash with label
+#!defs(extra_options_dialog_before_pattern_2_hash_defs.yaml)
+#
+# Special keys
   dialog_before:
-    field_name:
-      name: message template name
-      label: show dialog button label
     all_fields:
       name: message template name
       label: show dialog button label
     submit:
       name: message template name
       label: show dialog button label
+
+# Notes:
+# - String values are expanded to { name: string }.
+# - The name must reference an existing Admin::MessageTemplate.
+# - all_fields and submit are pseudo-keys with the same behavior as caption_before.

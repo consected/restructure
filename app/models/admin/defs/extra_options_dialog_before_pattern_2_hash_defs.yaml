@@ -1,0 +1,5 @@
+# Pattern 2: Hash with label
+  dialog_before:
+    field_name:
+      name: message template name
+      label: show dialog button label

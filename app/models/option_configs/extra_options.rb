@@ -578,7 +578,7 @@ module OptionConfigs
       ci = ref_config[key]
       return default_if_no_config unless ci
 
-      ca = ConditionalActions.new ci, obj
+      ca = ConditionalActions.new(normalize_condition_config(ci), obj)
       ca.calc_action_if
     rescue StandardError => e
       Rails.logger.error "Error occurred while checking calc_reference_if with #{key} on #{obj} user #{obj.current_user}: #{e}"
@@ -597,7 +597,7 @@ module OptionConfigs
     def calc_if(key, obj)
       raise FphsException, "invalid calc_if key #{key}" unless key.in?(ValidCalcIfKeys)
 
-      config = send(key)
+      config = normalize_condition_config(send(key))
       ca = ConditionalActions.new config, obj
       ca.calc_action_if
     rescue StandardError => e
@@ -621,7 +621,7 @@ module OptionConfigs
 
       ci = valid_if[:"on_#{action_type}"]
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
-      ca = ConditionalActions.new(ci, obj, return_failures:)
+      ca = ConditionalActions.new(normalize_condition_config(ci), obj, return_failures:)
       ca.calc_action_if
     rescue StandardError => e
       Rails.logger.error "Error occurred while checking calc_valid_if with #{action_type} on #{obj} user #{obj.current_user}: #{e}"
@@ -631,6 +631,16 @@ module OptionConfigs
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
+
+    private
+
+    def normalize_condition_config(config)
+      return config if config.is_a?(Hash) || config.nil?
+      return config.to_hash if config.respond_to?(:to_hash)
+      return config.to_h if config.respond_to?(:to_h)
+
+      config
+    end
 
     #
     # Extract standard anchor names from standard definition files

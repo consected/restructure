@@ -1,18 +1,40 @@
 # caption_before options
+# Canonical schema
+# caption_before: <Hash(caption_target_key: CaptionBeforeValue)>
+#
+# Key type
+# caption_target_key: <valid_field_name | all_fields | submit | reference_<reference_name>>
+#
+# Value type
+# CaptionBeforeValue: <String | Hash(
+#   caption: String,
+#   show_caption: String,
+#   edit_caption: String,
+#   new_caption: String,
+#   keep_label: Boolean
+# )>
+# All keys are optional.
+#
+# Pattern 1: Simple caption string
+#!defs(extra_options_caption_before_pattern_1_simple_defs.yaml)
+#
+# Pattern 2: Caption hash with keep_label
+#!defs(extra_options_caption_before_pattern_2_keep_label_defs.yaml)
+#
+# Pattern 3: View-specific captions
+#!defs(extra_options_caption_before_pattern_3_view_specific_defs.yaml)
+#
+# Special keys
   caption_before:
-    field_name: |
-      String caption to appear before field. Use markdown formatting if needed.
-
-      [Substitutions](../general/substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
     all_fields: caption to appear before all fields
     submit: caption to appear before submit button
-    field_to_retain_label:
-      keep_label: true
-      caption: caption to appear before label
-    field_with_different_views:
-      show_caption: caption in show mode
-      edit_caption: caption in edit mode
-      new_caption: caption in new mode
-    reference_with_reference_name: |
+    reference_<reference_name>: |
       add caption above a reference action / list where
       the reference is named reference_<reference name>
+
+# Notes:
+# - String values are expanded to all caption modes with text_to_html conversion.
+# - new_caption defaults to edit_caption when not specified.
+# - all_fields and submit are pseudo-keys excluded from field_configs merging.
+# - reference_<reference_name> adds a caption above the named reference action/list.
+# - <field_name> and <reference_name> must refer to valid configured items in the current definition.
