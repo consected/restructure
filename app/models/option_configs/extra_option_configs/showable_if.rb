@@ -4,30 +4,11 @@ module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for showable_if access control condition.
     # Schema docs: docs/admin_reference/general/showable_if.md
-    # Converted from ConfigBase to BaseConfiguration pattern.
-    # Split from AccessIf to manage a single if_condition directly.
-    # The processed hash is stored back on the parent ExtraOptions (not the object).
-    class ShowableIf < BaseConfiguration
-      configure_direct :showable_if, type: :hash
-
-      validate :validate_showable_if_shape
-
-      def self.store_processed_value?
-        true
-      end
-
-      # Store the symbolized hash value, defaulting to empty hash.
-      # Populate configurations for hash-like bracket access.
-      # @return [void]
-      def setup_named_configurations
-        self.showable_if = hash_configuration.is_a?(Hash) ? (hash_configuration.presence || {}) : {}
-        showable_if.each { |k, v| configurations[k] = v }
-      end
-
-      private
-
-      def validate_showable_if_shape
-        validate_hash_attribute(:showable_if, hash_configuration)
+    # Implemented as an IfCondition-backed config object rather than a raw Hash
+    # so validation and hash-like behavior come from the shared IfCondition class.
+    class ShowableIf < IfCondition
+      def showable_if
+        conditions
       end
     end
   end

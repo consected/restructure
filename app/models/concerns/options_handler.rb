@@ -178,10 +178,11 @@ module OptionsHandler
     # one typed value (e.g., a string, array, hash, or if_condition) rather than
     # multiple named attributes.
     #
-    # The type metadata allows future validation and coercion. Currently supported types:
+    # The type metadata allows shared validation and future coercion. Currently supported types:
     # - :string  — stores a String value
     # - :array   — stores an Array value
     # - :hash    — stores an arbitrary Hash value
+    # - :array_or_hash — stores either an Array or a Hash value
     # - :if_condition — stores a conditional Hash (for access/validation conditions)
     #
     # Example:
@@ -190,15 +191,19 @@ module OptionsHandler
     #   end
     #
     # @param [Symbol] config_item_name - the name of the configuration item
-    # @param [Symbol] type - the value type (:string, :array, :hash, :if_condition)
-    def configure_direct(config_item_name, type:)
+    # @param [Symbol] type - the value type (:string, :array, :hash, :array_or_hash, :if_condition)
+    # @param [Symbol] level - validation severity for automatic type enforcement
+    def configure_direct(config_item_name, type:, level: :error)
       attr_accessor(config_item_name) unless method_defined?(config_item_name)
 
       add_option_type(:direct, config_item_name)
 
-      # Store type metadata for future validation/coercion
+      # Store type metadata for shared validation/coercion
       @direct_types ||= {}
       @direct_types[config_item_name] = type
+
+      @direct_validation_levels ||= {}
+      @direct_validation_levels[config_item_name] = level
     end
 
     #
@@ -206,6 +211,12 @@ module OptionsHandler
     # @return [Hash{Symbol => Symbol}] mapping of attribute name to type
     def direct_types
       @direct_types || {}
+    end
+
+    # Returns the registered validation levels for direct types.
+    # @return [Hash{Symbol => Symbol}] mapping of attribute name to validation level
+    def direct_validation_levels
+      @direct_validation_levels || {}
     end
 
     #

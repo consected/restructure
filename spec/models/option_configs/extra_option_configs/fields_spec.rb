@@ -48,6 +48,14 @@ RSpec.describe 'ExtraOptionConfigs::Fields', type: :model do
       expect(instance.fields).to eq []
     end
 
+    it 'adds validation errors when initialized with a non-array value' do
+      instance = klass.new('field1')
+
+      expect(instance.fields).to eq []
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:fields]).to include('must be an array, got string')
+    end
+
     it 'returns blank when initialized with empty array' do
       instance = klass.new([])
       expect(instance).to be_blank

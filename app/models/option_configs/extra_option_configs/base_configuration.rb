@@ -20,6 +20,8 @@ module OptionConfigs
     class BaseConfiguration < OptionConfigs::BaseConfiguration
       include Enumerable
 
+      validate :validate_configure_direct_types
+
       attr_reader :raw_configuration
 
       # Provide a model_name that handles anonymous subclasses.
@@ -267,6 +269,52 @@ module OptionConfigs
       end
 
       private
+
+      def validate_configure_direct_types
+        self.class.direct_types.each do |attribute, expected_type|
+          validate_direct_type(attribute, expected_type)
+        end
+      end
+
+      def validate_direct_type(attribute, expected_type)
+        return if raw_configuration.blank?
+        return if direct_type_valid?(raw_configuration, expected_type)
+
+        level = self.class.direct_validation_levels[attribute] || :error
+        add_validation_notice(attribute, direct_type_error_message(expected_type), level:)
+      end
+
+      def direct_type_valid?(value, expected_type)
+        case expected_type
+        when :string
+          value.is_a?(String)
+        when :array
+          value.is_a?(Array)
+        when :hash, :if_condition
+          value.is_a?(Hash)
+        when :array_or_hash
+          value.is_a?(Array) || value.is_a?(Hash)
+        else
+          true
+        end
+      end
+
+      def direct_type_error_message(expected_type)
+        actual_type = raw_configuration.class.name.downcase
+
+        case expected_type
+        when :string
+          "must be a string, got #{actual_type}"
+        when :array
+          "must be an array, got #{actual_type}"
+        when :array_or_hash
+          "must be a Hash or Array, got #{actual_type}"
+        when :if_condition
+          "must be a Hash, got #{actual_type}"
+        else
+          "must be a #{expected_type}, got #{actual_type}"
+        end
+      end
 
       # Bridge ActiveModel::Validations errors into config_errors.
       # Called at the end of initialize so that subclass validates

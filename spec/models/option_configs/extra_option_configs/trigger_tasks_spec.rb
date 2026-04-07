@@ -18,9 +18,9 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks', type: :model do
       expect(klass.ancestors).to include(OptionConfigs::ExtraOptionConfigs::BaseConfiguration)
     end
 
-    it 'declares configure_direct with type :hash' do
+    it 'declares configure_direct with type :array_or_hash' do
       expect(klass.option_types[:direct]).to include(:tasks)
-      expect(klass.direct_types[:tasks]).to eq(:hash)
+      expect(klass.direct_types[:tasks]).to eq(:array_or_hash)
     end
   end
 

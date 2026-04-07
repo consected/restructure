@@ -5,8 +5,8 @@ require './db/table_generators/dynamic_models_table'
 
 # Tests for IfCondition configuration class and the three split classes
 # (CreatableIf, EditableIf, ShowableIf) that replaced AccessIf.
-# Verifies configure_direct with type :hash, store_processed_value?,
-# and integration through ExtraOptions initialization (clean_access_if_def behavior).
+# Verifies IfCondition-backed behavior and integration through ExtraOptions
+# initialization (clean_access_if_def behavior).
 RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :model do
   include MasterSupport
   include ModelSupport
@@ -86,14 +86,14 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
           expect(klass).to be_a Class
         end
 
-        it 'uses configure_direct with type :hash' do
-          expect(klass.option_types[:direct]).to be_present
+        it 'inherits shared IfCondition behavior' do
+          expect(klass.ancestors).to include(OptionConfigs::ExtraOptionConfigs::IfCondition)
         end
       end
     end
   end
 
-  describe 'if_condition classes (converted to BaseConfiguration)' do
+  describe 'if_condition classes (implemented as IfCondition subclasses)' do
     %i[CreatableIf EditableIf ShowableIf].each do |class_name|
       context "#{class_name}" do
         let(:klass) { "OptionConfigs::ExtraOptionConfigs::#{class_name}".constantize }
@@ -107,11 +107,12 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
           expect(klass.ancestors).not_to include(OptionConfigs::ExtraOptionConfigs::ConfigBase)
         end
 
-        it 'declares configure_direct with type :hash' do
-          expect(klass.option_types[:direct]).to include(attr_name)
+        it 'uses the shared conditions storage' do
+          instance = klass.new(always: true)
+          expect(instance.conditions).to eq(always: true)
         end
 
-        it 'stores the hash as the attribute' do
+        it 'exposes the named attribute as the normalized conditions hash' do
           instance = klass.new(always: true)
           expect(instance.send(attr_name)).to eq(always: true)
         end
@@ -130,7 +131,7 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
         it 'reports an error when initialized with a scalar instead of a hash' do
           instance = klass.new('bad')
           expect(instance.config_errors).not_to be_empty
-          expect(instance.errors[attr_name]).not_to be_empty
+          expect(instance.errors[:conditions]).not_to be_empty
           expect(instance.send(attr_name)).to eq({})
         end
       end
@@ -165,7 +166,7 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
       expect(eo.showable_if).to eq(user_is_creator: true)
     end
 
-    it 'access_if classes store processed hash values (via store_processed_value?)' do
+    it 'access_if classes store IfCondition-backed objects' do
       eo = config_for(<<~YAML)
         default:
           creatable_if:
@@ -176,11 +177,11 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
             user_is_creator: true
       YAML
 
-      expect(eo.creatable_if).to be_a Hash
+      expect(eo.creatable_if).to be_a OptionConfigs::ExtraOptionConfigs::CreatableIf
       expect(eo.creatable_if[:always]).to eq true
-      expect(eo.editable_if).to be_a Hash
+      expect(eo.editable_if).to be_a OptionConfigs::ExtraOptionConfigs::EditableIf
       expect(eo.editable_if[:never]).to eq true
-      expect(eo.showable_if).to be_a Hash
+      expect(eo.showable_if).to be_a OptionConfigs::ExtraOptionConfigs::ShowableIf
       expect(eo.showable_if[:user_is_creator]).to eq true
     end
   end
