@@ -1,4 +1,4 @@
-name: refactor
+name: tdd
 description: Run TDD Red, Green, and Refactor Phases
 agent: tdd-implementation
 tools: [execute, read, edit, search, web, agent, todo]
@@ -6,7 +6,7 @@ tools: [execute, read, edit, search, web, agent, todo]
 
 Run **TDD Implementation** agent
 
-Get the specified Github issue. Then follow TDD principles, recursively follow these steps using the following subagents:
+Read the copilot instructions. Get the specified Github issue. Create a feature branch. Then follow TDD principles, recursively follow these steps using the following subagents:
 
 - [TDD Red Phase - Write Failing Tests First](tdd-red.agent.md)
   - Focus on writing clear, specific failing tests that describe the desired behaviour from GitHub issue requirements before any implementation exists.
