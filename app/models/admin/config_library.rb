@@ -18,13 +18,33 @@ class Admin::ConfigLibrary < Admin::AdminBase
   after_commit :refresh_dependencies
 
   def self.content_named(category, name, format: nil)
+    find_active_library!(category, name, format:).options
+  end
+
+  # Get config library content as it was at a specific point in time.
+  # Uses the VersionHandler#versioned method to look up the historical version.
+  # If at: is nil, returns the current content.
+  # @param category [String]
+  # @param name [String]
+  # @param format [Symbol]
+  # @param at [Time | nil] the point in time to get the content for
+  # @return [String] library content
+  def self.content_named_at(category, name, format: nil, at: nil)
+    return content_named(category, name, format:) unless at
+
+    l = find_active_library!(category, name, format:)
+    versioned_lib = l.versioned(at)
+    (versioned_lib || l).options
+  end
+
+  # Find an active config library matching category, name and format.
+  # @raise [FphsException] if no matching library found
+  # @return [Admin::ConfigLibrary]
+  def self.find_active_library!(category, name, format: nil)
     l = where(name:, category:, format:).first
+    return l if l
 
-    unless l
-      raise FphsException, "No config library in category #{category} named #{name} with format #{format || '(nil)'}"
-    end
-
-    l.options
+    raise FphsException, "No config library in category #{category} named #{name} with format #{format || '(nil)'}"
   end
 
   # Directly substitute the library configurations into the supplied text
@@ -164,7 +184,18 @@ class Admin::ConfigLibrary < Admin::AdminBase
       ms << a if cl.include? self
     end
 
-    ms.each(&:force_option_config_parse)
+    ms.each do |m|
+      # Touch the definition to create a new version history entry,
+      # so that instances created before and after this library change
+      # resolve to the correct library content via versioned definitions.
+      # Skip the touch when versioning is disabled globally (DisableVDef)
+      # or when the definition uses use_current_version (always uses latest).
+      unless Settings::DisableVDef || m.use_current_version
+        m.current_admin ||= current_admin
+        m.touch
+      end
+      m.force_option_config_parse
+    end
   end
 
   def valid_options

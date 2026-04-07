@@ -9,6 +9,7 @@ module Dynamic
       attr_accessor :current_definition # latest defined configuration
 
       after_save :reset_all_versions
+      after_touch :reset_all_versions
     end
 
     class_methods do
