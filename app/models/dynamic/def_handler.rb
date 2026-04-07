@@ -239,13 +239,23 @@ module Dynamic
       # @return [DateTime]
       def latest_stored_update(using: nil)
         using ||= active_model_configurations
-        using
+        @latest_def_update = using
           .select(:updated_at)
           .reorder('')
           .order('updated_at desc nulls last')
           .limit(1)
           .pluck(:updated_at)
           .first
+
+        cl_update = Admin::ConfigLibrary
+          .where(format: 'yaml')
+          .reorder('')
+          .order('updated_at desc nulls last')
+          .limit(1)
+          .pluck(:updated_at)
+          .first
+
+        [@latest_def_update, cl_update].compact.max
       end
 
       #
@@ -257,18 +267,25 @@ module Dynamic
 
         if !lu && !@prev_latest_update
           # They match if both nil
+          @config_library_only_change = false
           true
         elsif lu && @prev_latest_update && (lu - @prev_latest_update).abs < 2
           # Consider them a match if they are within 2 seconds of one another,
           # accounting for the difference between Rails and DB times
+          @config_library_only_change = false
           true
         elsif @prev_latest_update.nil?
           # The remembered value was nil, so let the caller know this
           self.prev_latest_update = lu
+          @prev_latest_def_update = @latest_def_update
+          @config_library_only_change = false
           nil
         else
-          # There was no match
+          # There was no match - check if only config libraries changed
+          @config_library_only_change = @prev_latest_def_update && @latest_def_update &&
+                                        (@latest_def_update - @prev_latest_def_update).abs < 2
           self.prev_latest_update = lu
+          @prev_latest_def_update = @latest_def_update
           false
         end
       end

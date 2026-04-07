@@ -110,6 +110,17 @@ module Dynamic
         # (and therefore we are on our first load and everything will have just been set up) just return
         return if utd || utd.nil?
 
+        if @config_library_only_change
+          Rails.logger.warn "Refreshing config library dependents for #{name}"
+          reset_active_model_configurations!
+          active.each do |d|
+            next unless d.options_text&.include?('# @library ')
+
+            d.force_option_config_parse(raise_bad_configs: false)
+          end
+          return
+        end
+
         Rails.logger.warn "Refreshing outdated #{name}"
         reset_active_model_configurations!
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')

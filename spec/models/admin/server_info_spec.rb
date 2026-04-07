@@ -92,6 +92,50 @@ RSpec.describe Admin::ServerInfo, type: :model do
     expect(stats[:error]).to include('Memcached unavailable')
   end
 
+  # Tests for issue #1035 - Admin panel server alerts duplicated
+  # Settings.configuration_successful? appends to a persistent class-level array,
+  # so multiple calls produce duplicate alert messages.
+  describe '#configuration_failed_reason - Issue1035' do
+    before :each do
+      # Reset Settings state so alerts will be freshly generated
+      Settings.instance_variable_set(:@configuration_failed_reason, nil)
+      # Stub a blank encryption setting to ensure at least one alert is generated
+      stub_const('Settings::EncryptionSecretKeyBase', '')
+    end
+
+    after :each do
+      # Clean up Settings state
+      Settings.instance_variable_set(:@configuration_failed_reason, nil)
+    end
+
+    it 'does not produce duplicate Settings alerts when called multiple times' do
+      # First call should generate alerts
+      Settings.configuration_successful?
+      first_call_reasons = Settings.configuration_failed_reason.dup
+      expect(first_call_reasons).to include('EncryptionSecretKeyBase is not set')
+
+      # Second call should NOT add duplicate alerts
+      Settings.configuration_successful?
+      second_call_reasons = Settings.configuration_failed_reason.dup
+
+      expect(second_call_reasons).to eq(first_call_reasons)
+      expect(second_call_reasons.length).to eq(first_call_reasons.length)
+    end
+
+    it 'does not produce duplicate alerts in ServerInfo when instantiated multiple times' do
+      si1 = Admin::ServerInfo.new(@admin)
+      reasons1 = si1.configuration_failed_reason.dup
+      expect(reasons1).to include('EncryptionSecretKeyBase is not set')
+
+      # A second ServerInfo instance should report the same alerts without duplication
+      si2 = Admin::ServerInfo.new(@admin)
+      reasons2 = si2.configuration_failed_reason.dup
+
+      expect(reasons2).to eq(reasons1)
+      expect(reasons2.length).to eq(reasons1.length)
+    end
+  end
+
   # Tests for issue #896 - NFS mountpoint info
   describe '#nfs_store_mount_dirs' do
     it 'returns structured data with mountpoint status for all group IDs - Issue896' do
