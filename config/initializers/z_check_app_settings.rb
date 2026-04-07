@@ -28,6 +28,7 @@ class Settings
     configuration_failed_reason << 'EncryptionSecretKeyBase is not set' if EncryptionSecretKeyBase.blank?
     configuration_failed_reason << 'EncryptionSalt is not set' if EncryptionSalt.blank?
 
+    configuration_failed_reason.uniq!
     configuration_failed_reason.blank?
   end
 end
