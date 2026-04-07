@@ -74,5 +74,17 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks', type: :model do
       instance = klass.new(arr)
       expect(instance.symbolize_keys).to eq(arr)
     end
+
+    it 'reports an error when initialized with a scalar instead of a hash or array' do
+      instance = klass.new('bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:tasks]).not_to be_empty
+    end
+
+    it 'reports an error when an array entry is not a hash' do
+      instance = klass.new([{ notify: { type: 'email' } }, 'bad'])
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:tasks]).not_to be_empty
+    end
   end
 end

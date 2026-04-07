@@ -15,11 +15,13 @@ module OptionConfigs
     class IfCondition < BaseConfiguration
       configure_direct :conditions, type: :hash
 
+      validate :validate_condition_shape
+
       # Override default field-keyed setup to store the hash as a single value
       # on the conditions attribute.
       # @return [void]
       def setup_named_configurations
-        self.conditions = (hash_configuration || {}).symbolize_keys
+        self.conditions = hash_configuration.is_a?(Hash) ? hash_configuration.symbolize_keys : {}
       end
 
       # Returns true when no conditions are defined.
@@ -31,6 +33,12 @@ module OptionConfigs
       # @return [Hash{Symbol => Object}]
       def symbolize_keys
         conditions || {}
+      end
+
+      private
+
+      def validate_condition_shape
+        validate_hash_attribute(:conditions, hash_configuration)
       end
     end
   end

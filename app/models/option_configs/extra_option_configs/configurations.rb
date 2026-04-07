@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for top-level _configurations options.
+    # Schema docs: docs/admin_reference/general/configurations.md
     # Extracted from ExtraOptions.parse_config
     #
     # Stores definition-level settings such as secondary_key, view_sql,

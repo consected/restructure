@@ -20,6 +20,8 @@ module OptionConfigs
     class BaseConfiguration < OptionConfigs::BaseConfiguration
       include Enumerable
 
+      attr_reader :raw_configuration
+
       # Provide a model_name that handles anonymous subclasses.
       # ActiveModel::Name requires a class name; anonymous classes have nil.
       # Falls back to 'Configuration' for anonymous classes.
@@ -54,6 +56,7 @@ module OptionConfigs
         self.config_errors = []
         self.config_warnings = []
         self.configurations = {}
+        @raw_configuration = hash_config
         self.hash_configuration = hash_config.is_a?(Hash) ? hash_config.symbolize_keys : (hash_config || {})
         setup_named_configurations
         run_validations
@@ -230,6 +233,37 @@ module OptionConfigs
           entry[:field_config] = hash_configuration
         end
         target << entry
+      end
+
+      def add_validation_notice(attribute, message, level: :error)
+        options = {}
+        options[:type] = :warning if level == :warn
+        errors.add(attribute, message, **options)
+      end
+
+      def validate_hash_attribute(attribute, value, allow_blank: true, level: :error)
+        return true if allow_blank && value.blank?
+        return true if value.is_a?(Hash)
+
+        add_validation_notice(attribute, 'must be a Hash', level:)
+        false
+      end
+
+      def validate_array_or_hash_attribute(attribute, value, allow_blank: true, level: :error)
+        return true if allow_blank && value.blank?
+        return true if value.is_a?(Hash) || value.is_a?(Array)
+
+        add_validation_notice(attribute, 'must be a Hash or Array', level:)
+        false
+      end
+
+      def validate_allowed_hash_keys(attribute, value, allowed_keys, level: :warn)
+        return unless value.is_a?(Hash)
+
+        invalid = value.keys.map(&:to_sym) - allowed_keys
+        return if invalid.empty?
+
+        add_validation_notice(attribute, "contains unrecognized keys #{invalid}", level:)
       end
 
       private

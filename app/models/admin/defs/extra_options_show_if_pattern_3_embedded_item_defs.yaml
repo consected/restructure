@@ -1,0 +1,7 @@
+# Pattern 3: Embedded item condition
+  show_if:
+    field_depends_on_embedded_item:
+      depends_on_field_name: conditional value
+      embedded_item:
+        field_name: conditional value
+        field_name_2: conditional value

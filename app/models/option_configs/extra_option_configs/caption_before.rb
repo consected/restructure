@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for caption formatting (text-to-HTML conversion).
+    # Schema docs: docs/admin_reference/general/caption_before.md
     # Extracted from ExtraOptions#clean_caption_before_def
     #
     # Each field name maps to a NamedConfiguration with caption mode attributes.

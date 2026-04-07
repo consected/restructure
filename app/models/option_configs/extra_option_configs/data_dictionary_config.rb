@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for top-level _data_dictionary options.
+    # Schema docs: docs/admin_reference/general/data_dictionary.md
     # Extracted from ExtraOptions.parse_config
     #
     # Stores data dictionary settings for automatic variable registration.

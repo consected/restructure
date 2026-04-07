@@ -1,2 +1,22 @@
 # creatable_if options
-  creatable_if: 'ref: ** conditions reference **'
+#
+# Pattern 1: Always creatable
+  creatable_if:
+    always: true
+
+# Pattern 2: Never creatable
+  creatable_if:
+    never: true
+
+# Pattern 3: Creatable only when conditions are met
+  creatable_if:
+    all:
+      this:
+        status: active
+    not_any:
+      activity_log__example_reviews:
+        extra_log_type: closed
+
+# Notes:
+# - creatable_if must be a Hash using the standard conditional-actions syntax.
+# - This commonly interacts with view_options.hide_unless_creatable and with references.creatable_if.

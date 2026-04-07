@@ -69,6 +69,25 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
       instance = klass.new(nil)
       expect(instance).to be_blank
     end
+
+    it 'reports an error when prepared from an unsupported type' do
+      yaml = <<~YAML
+        default:
+          label: Test
+      YAML
+      eo = config_for(yaml)
+
+      processed = klass.prepare_config(123, eo)
+      instance = klass.new(processed)
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:embed]).not_to be_empty
+    end
+
+    it 'warns on unrecognized hash keys' do
+      instance = klass.new(resource_name: 'some_resource', unexpected: true)
+      expect(instance.config_warnings).not_to be_empty
+      expect(instance.errors[:embed]).not_to be_empty
+    end
   end
 
   describe 'validate callbacks' do
@@ -163,7 +182,7 @@ RSpec.describe 'ExtraOptionConfigs::Embed', type: :model do
       YAML
 
       expect(eo.config_warnings).not_to be_empty
-      warn = eo.config_warnings.find { |w| w[:type] == :embed }
+      warn = eo.config_warnings.find { |w| w[:type].to_s == 'embed' }
       expect(warn).to be_present
     end
   end

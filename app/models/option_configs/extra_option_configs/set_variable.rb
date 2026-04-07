@@ -3,6 +3,7 @@
 module OptionConfigs
   module ExtraOptionConfigs
     # Configuration class for variable definitions.
+    # Schema docs: docs/admin_reference/general/set_variables.md
     # Converted from ConfigBase to BaseConfiguration pattern.
     # Stores the validated array as a direct attribute.
     #

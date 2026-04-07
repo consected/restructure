@@ -1,0 +1,5 @@
+# Pattern 6: Submit button visibility
+  show_if:
+    submit_buttons_<button_id>:
+      current_mode: edit
+      depends_on_field_name: conditional value

@@ -68,6 +68,13 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
       instance = klass.new(always: true, never: false)
       expect(instance.symbolize_keys).to eq(always: true, never: false)
     end
+
+    it 'reports an error when initialized with a scalar instead of a hash' do
+      instance = klass.new('bad')
+      expect(instance.config_errors).not_to be_empty
+      expect(instance.errors[:conditions]).not_to be_empty
+      expect(instance.conditions).to eq({})
+    end
   end
 
   describe 'if_condition classes (split from AccessIf)' do
@@ -118,6 +125,13 @@ RSpec.describe 'ExtraOptionConfigs::IfCondition and access_if classes', type: :m
           instance = klass.new(nil)
           expect(instance.send(attr_name)).to eq({})
           expect(instance).to be_blank
+        end
+
+        it 'reports an error when initialized with a scalar instead of a hash' do
+          instance = klass.new('bad')
+          expect(instance.config_errors).not_to be_empty
+          expect(instance.errors[attr_name]).not_to be_empty
+          expect(instance.send(attr_name)).to eq({})
         end
       end
     end

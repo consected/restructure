@@ -137,7 +137,7 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
       YAML
 
       expect(eo.config_warnings).not_to be_empty
-      warn_msg = eo.config_warnings.find { |w| w[:type] == :dialog_before }
+      warn_msg = eo.config_warnings.find { |w| w[:type].to_s.start_with?('dialog_before') }
       expect(warn_msg).to be_present
     end
 
@@ -152,7 +152,7 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
       YAML
 
       expect(eo.config_errors).not_to be_empty
-      err = eo.config_errors.find { |e| e[:type] == :dialog_before }
+      err = eo.config_errors.find { |e| e[:type].to_s.start_with?('dialog_before') }
       expect(err).to be_present
     end
 
