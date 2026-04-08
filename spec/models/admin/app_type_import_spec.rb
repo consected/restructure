@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Tests for Admin::AppType import functionality.
+# Verifies that import_config correctly creates app types from exported JSON,
+# including app configurations, user access controls, activity logs,
+# config libraries, and item flag names.
+
 require 'rails_helper'
 
 RSpec.describe 'Import an app configuration', type: :model do
@@ -318,5 +323,46 @@ RSpec.describe 'Import an app configuration', type: :model do
     res.update(disabled: true, current_admin: @admin)
     imported_lib_b.update(disabled: true, current_admin: @admin)
     imported_lib_z.update(disabled: true, current_admin: @admin)
+  end
+
+  it 'imports item flag names from an exported configuration' do
+    # Create an item flag name associated with a table in the app type
+    existing_flag_name = "Existing Flag #{rand(1_000_000)}"
+    Classification::ItemFlagName.create!(
+      name: existing_flag_name,
+      item_type: 'player_info',
+      current_admin: @admin
+    )
+
+    # Export the app type configuration
+    config = @app_type.export_config
+    exported = JSON.parse(config)
+    expect(exported['app_type']['associated_item_flag_names'].map { |f| f['name'] }).to include(existing_flag_name)
+
+    # Inject a new item flag name into the exported config that does not yet exist in the database
+    new_flag_name = "New Imported Flag #{rand(1_000_000)}"
+    exported['app_type']['associated_item_flag_names'] << {
+      'name' => new_flag_name,
+      'item_type' => 'player_info',
+      'updated_at' => Time.now.iso8601
+    }
+
+    # Import into a new app type using the modified config
+    modified_config = JSON.generate(exported)
+    res, results = Admin::AppTypeImport.import_config(modified_config, @admin, name: 'import_flags_test')
+
+    expect(results).to be_a Hash
+    expect(res).to be_a Admin::AppType
+    expect(res.name).to eq 'import_flags_test'
+
+    # Verify the import processed item flag names
+    expect(results['updates / creations']).to have_key('associated_item_flag_names')
+
+    # Verify the new item flag name was created by the import
+    imported_flag = Classification::ItemFlagName.active.find_by(name: new_flag_name, item_type: 'player_info')
+    expect(imported_flag).to be_present
+
+    # Cleanup
+    res.update(disabled: true, current_admin: @admin)
   end
 end
