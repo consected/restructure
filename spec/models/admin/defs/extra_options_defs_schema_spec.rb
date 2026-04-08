@@ -75,21 +75,21 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
           #   # label: <String>
           schema_comment = comments.find { |c| c.match?(/^#\s*#{meta[:schema_key]}:\s*</) }
           expect(schema_comment).to be_present,
-            "#{filename} must contain a canonical schema signature comment " \
-            "like '# #{meta[:schema_key]}: <Type(...)>'"
+                                    "#{filename} must contain a canonical schema signature comment " \
+                                    "like '# #{meta[:schema_key]}: <Type(...)>'"
         end
 
         it 'documents value types using the schema notation' do
           # Must contain at least one type reference using angle brackets
           type_comments = comments.select { |c| c.match?(/<\w+/) }
           expect(type_comments).not_to be_empty,
-            "#{filename} must document value types using <Type> notation"
+                                       "#{filename} must document value types using <Type> notation"
         end
 
         it 'has a Notes section' do
           notes_comment = comments.find { |c| c.match?(/^#\s*Notes:/) }
           expect(notes_comment).to be_present,
-            "#{filename} must contain a '# Notes:' section for normalization/semantic constraints"
+                                   "#{filename} must contain a '# Notes:' section for normalization/semantic constraints"
         end
       end
     end
@@ -108,13 +108,13 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
           # Get the attributes defined in the Ruby NamedConfiguration class
           ruby_attrs = named_config_class.option_types[:simple] || []
           expect(ruby_attrs).not_to be_empty,
-            "#{config_class}::NamedConfiguration should have configure_attributes"
+                                    "#{config_class}::NamedConfiguration should have configure_attributes"
 
           # Each Ruby attribute should be mentioned in the YAML file
           ruby_attrs.each do |attr|
             expect(content).to include(attr.to_s),
-              "#{filename} must document the '#{attr}' attribute " \
-              "from #{config_class}::NamedConfiguration"
+                               "#{filename} must document the '#{attr}' attribute " \
+                               "from #{config_class}::NamedConfiguration"
           end
         end
 
@@ -123,8 +123,8 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
           optional_key_pattern = /^\s*#.*\w+\?:\s/
           lines_with_optional = content.lines.select { |l| l.match?(optional_key_pattern) }
           expect(lines_with_optional).to be_empty,
-            "#{filename} should not use '?' suffix for optional keys. " \
-            "Keys are optional by default; mark required keys with (required) instead."
+                                         "#{filename} should not use '?' suffix for optional keys. " \
+                                         'Keys are optional by default; mark required keys with (required) instead.'
         end
       end
     end
@@ -137,11 +137,11 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
       it 'documents the caption_target_key type with all allowed forms' do
         # Must document: valid_field_name, all_fields, submit, reference_<reference_name>
         expect(content).to match(/all_fields/),
-          'caption_before must document the all_fields pseudo-key'
+                           'caption_before must document the all_fields pseudo-key'
         expect(content).to match(/submit/),
-          'caption_before must document the submit pseudo-key'
+                           'caption_before must document the submit pseudo-key'
         expect(content).to match(/reference_/),
-          'caption_before must document the reference_<reference_name> key pattern'
+                           'caption_before must document the reference_<reference_name> key pattern'
       end
 
       it 'documents the key type as a named alias' do
@@ -150,7 +150,7 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
         #   # caption_target_key: <valid_field_name | all_fields | submit | reference_<reference_name>>
         key_type_comment = comments.find { |c| c.match?(/caption_target_key/) }
         expect(key_type_comment).to be_present,
-          'caption_before must define a named key type (caption_target_key) for its dynamic keys'
+                                    'caption_before must define a named key type (caption_target_key) for its dynamic keys'
       end
     end
 
@@ -159,14 +159,14 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
 
       it 'documents the dialog_target_key type with all allowed forms' do
         expect(content).to match(/all_fields/),
-          'dialog_before must document the all_fields pseudo-key'
+                           'dialog_before must document the all_fields pseudo-key'
         expect(content).to match(/submit/),
-          'dialog_before must document the submit pseudo-key'
+                           'dialog_before must document the submit pseudo-key'
       end
 
       it 'marks name as required in the value type' do
         expect(content).to match(/name.*\(required\)/i),
-          'dialog_before must mark name as (required) in the value type documentation'
+                           'dialog_before must mark name as (required) in the value type documentation'
       end
     end
   end

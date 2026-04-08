@@ -9,6 +9,12 @@ module OptionConfigs
     # Values are plain strings keyed by field name.
     # No NamedConfiguration needed — values are simple strings.
     class Labels < BaseConfiguration
+      value_pattern :label_string,
+                    description: 'Display label string',
+                    match: String
+
+      validate :validate_field_key_names
+      validate :validate_value_patterns
     end
   end
 end

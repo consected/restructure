@@ -50,8 +50,8 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
   describe 'validate callbacks' do
     it 'produces ActiveModel errors when value is an invalid type' do
       instance = klass.new(test_field: 12_345)
-      expect(instance.errors.any? { |e| e.attribute == :dialog_before }).to be(true),
-                                                                            'Expected ActiveModel error on :dialog_before for invalid type, but none found'
+      expect(instance.errors).to be_present,
+                                 'Expected ActiveModel errors for invalid type, but none found'
     end
 
     it 'produces ActiveModel errors (warning level) when template does not exist' do

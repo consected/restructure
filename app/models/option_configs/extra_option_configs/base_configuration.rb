@@ -19,6 +19,7 @@ module OptionConfigs
     #   store their processed attribute value on the parent ExtraOptions instead of the object
     class BaseConfiguration < OptionConfigs::BaseConfiguration
       include Enumerable
+      include Concerns::PatternValidation
 
       validate :validate_configure_direct_types
 
@@ -65,10 +66,13 @@ module OptionConfigs
       end
 
       # Default setup: iterate hash entries and create configurations.
+      # Skips metadata keys injected by PatternValidation (e.g. _valid_fields).
       # Subclasses override for custom preprocessing.
       # @return [void]
       def setup_named_configurations
         hash_configuration.each do |k, v|
+          next if k == Concerns::PatternValidation::VALID_FIELDS_KEY
+
           add_named_configuration(k.to_sym, v)
         end
       end

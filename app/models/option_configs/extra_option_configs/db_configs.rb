@@ -15,6 +15,14 @@ module OptionConfigs
       class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
         configure_attributes %i[type array index encrypted]
       end
+
+      value_pattern :db_config_hash,
+                    description: 'Column configuration hash',
+                    match: Hash,
+                    allowed_keys: NamedConfiguration.option_types[:simple]
+
+      validate :validate_field_key_names
+      validate :validate_value_patterns
     end
   end
 end

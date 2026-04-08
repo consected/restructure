@@ -384,7 +384,7 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         warnings = eo.caption_before.config_warnings
         warning_messages = warnings.map { |w| w[:message] }
         expect(warning_messages.any? { |m| m.include?('nonexistent_field') }).to be(true),
-          "Expected warning about nonexistent_field, got: #{warning_messages}"
+                                                                                 "Expected warning about nonexistent_field, got: #{warning_messages}"
       end
 
       it 'accepts the all_fields pseudo-key without warnings' do
