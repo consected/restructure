@@ -310,4 +310,154 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
       expect(eo.caption_before.keys.first).to be_a Symbol
     end
   end
+
+  describe 'validation' do
+    context 'value type validation' do
+      it 'rejects non-string non-hash values with an error' do
+        instance = klass.new(test1: 123)
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test1') }).to be(true)
+      end
+
+      it 'rejects array values with an error' do
+        instance = klass.new(test1: %w[a b c])
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test1') }).to be(true)
+      end
+
+      it 'rejects boolean values with an error' do
+        instance = klass.new(test1: true)
+        expect(instance.config_errors).to be_present
+      end
+
+      it 'accepts string values without errors' do
+        instance = klass.new(test1: 'Valid caption')
+        expect(instance.config_errors).to be_empty
+      end
+
+      it 'accepts hash values without errors' do
+        instance = klass.new(test1: { caption: 'Valid' })
+        expect(instance.config_errors).to be_empty
+      end
+    end
+
+    context 'hash value key validation' do
+      it 'warns on unrecognized hash keys' do
+        instance = klass.new(test1: { caption: 'Valid', bogus_key: 'bad' })
+        expect(instance.config_warnings).to be_present
+        warning_messages = instance.config_warnings.map { |w| w[:message] }
+        expect(warning_messages.any? { |m| m.include?('bogus_key') }).to be(true)
+      end
+
+      it 'accepts all recognized hash keys without warnings' do
+        instance = klass.new(test1: { caption: 'C', edit_caption: 'E', show_caption: 'S', new_caption: 'N', keep_label: true })
+        expect(instance.config_warnings).to be_empty
+      end
+    end
+
+    context 'contextual field name validation via ExtraOptions integration' do
+      it 'accepts valid field names without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+              - test2
+            caption_before:
+              test1: Valid caption
+              test2: Also valid
+        YAML
+
+        expect(eo.caption_before.config_warnings).to be_empty
+      end
+
+      it 'warns when a caption_before key is not a valid field name or pseudo-key' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            caption_before:
+              nonexistent_field: Bad caption
+        YAML
+
+        warnings = eo.caption_before.config_warnings
+        warning_messages = warnings.map { |w| w[:message] }
+        expect(warning_messages.any? { |m| m.include?('nonexistent_field') }).to be(true),
+          "Expected warning about nonexistent_field, got: #{warning_messages}"
+      end
+
+      it 'accepts the all_fields pseudo-key without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            caption_before:
+              all_fields: Caption for all
+        YAML
+
+        field_warnings = eo.caption_before.config_warnings.select { |w| w[:message].include?('all_fields') }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'accepts the submit pseudo-key without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            caption_before:
+              submit: Caption before submit
+        YAML
+
+        field_warnings = eo.caption_before.config_warnings.select { |w| w[:message].include?('submit') }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'accepts reference_ prefixed keys without field name warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            caption_before:
+              reference_some_ref: Caption above reference
+        YAML
+
+        field_warnings = eo.caption_before.config_warnings.select { |w| w[:message].include?('reference_some_ref') }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'warns about multiple invalid field names' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            caption_before:
+              bad_field_1: Caption 1
+              bad_field_2: Caption 2
+        YAML
+
+        warnings = eo.caption_before.config_warnings
+        warning_messages = warnings.map { |w| w[:message] }
+        expect(warning_messages.any? { |m| m.include?('bad_field_1') }).to be(true)
+        expect(warning_messages.any? { |m| m.include?('bad_field_2') }).to be(true)
+      end
+
+      it 'allows a mix of valid fields and pseudo-keys without field warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+              - test2
+            caption_before:
+              test1: Field caption
+              all_fields: All fields caption
+              submit: Submit caption
+              reference_my_ref: Reference caption
+        YAML
+
+        field_warnings = eo.caption_before.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
+    end
+  end
 end
