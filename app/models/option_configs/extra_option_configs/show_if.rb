@@ -12,10 +12,17 @@ module OptionConfigs
     class ShowIf < BaseConfiguration
       # No NamedConfiguration — values are arbitrary condition hashes
 
+      value_pattern :condition_hash,
+                    description: 'Hash of field conditions',
+                    match: Hash
+
+      validate :validate_field_key_names
+      validate :validate_value_patterns
       validate :validate_show_if_shape
 
       # Pre-process config using parent context to merge
       # show_if_condition_strings (REDCap branching logic).
+      # Also injects _valid_fields for field key validation.
       # Called by ExtraOptions before initialization.
       # @param [Hash] raw - raw show_if hash from YAML
       # @param [ExtraOptions] parent - parent ExtraOptions instance
@@ -37,6 +44,7 @@ module OptionConfigs
           end
         end
 
+        raw[Concerns::PatternValidation::VALID_FIELDS_KEY] = parent.fields || [] if raw.is_a?(Hash)
         raw
       end
 
@@ -51,7 +59,7 @@ module OptionConfigs
       def validate_show_if_shape
         return unless validate_hash_attribute(:show_if, hash_configuration)
 
-        hash_configuration.each do |field_name, config|
+        each_config_entry do |field_name, config|
           next if config.nil? || config.is_a?(Hash)
 
           add_validation_notice(:show_if, "#{field_name} must define a Hash of conditions")

@@ -8,7 +8,7 @@ module OptionConfigs
     #
     # Values are preset values (strings, hashes, or arrays) keyed by field name.
     class PresetFields < BaseConfiguration
-      # No special processing needed — values stored directly
+      validate :validate_field_key_names
     end
   end
 end

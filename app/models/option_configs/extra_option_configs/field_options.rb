@@ -19,6 +19,14 @@ module OptionConfigs
         ]
       end
 
+      value_pattern :field_option_hash,
+                    description: 'Per-field option hash with edit behavior settings',
+                    match: Hash,
+                    allowed_keys: NamedConfiguration.option_types[:simple]
+
+      validate :validate_field_key_names
+      validate :validate_value_patterns
+
       # Override to preprocess alt_options arrays.
       def add_named_configuration(sym_key, value)
         super(sym_key, preprocess_field(value))

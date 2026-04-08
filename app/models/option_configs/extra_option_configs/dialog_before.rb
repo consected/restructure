@@ -10,12 +10,26 @@ module OptionConfigs
     # String values are expanded to { name: string } hashes.
     # Validates that referenced Admin::MessageTemplate records exist.
     class DialogBefore < BaseConfiguration
+      extra_keys :all_fields, :submit
+
       # Named configuration for a single field's dialog settings.
       class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
         configure_attributes %i[name label keep_label]
       end
 
-      validate :validate_dialog_entries
+      value_pattern :simple_template,
+                    description: 'Template name string',
+                    match: String
+
+      value_pattern :dialog_hash,
+                    description: 'Dialog hash with template name and label',
+                    match: Hash,
+                    allowed_keys: NamedConfiguration.option_types[:simple],
+                    required_keys: %i[name]
+
+      validate :validate_field_key_names
+      validate :validate_value_patterns
+      validate :validate_dialog_template_existence
 
       # Override to preprocess and validate dialog values.
       # Converts strings to { name: string } hashes, validates template existence.
@@ -42,17 +56,13 @@ module OptionConfigs
         end
       end
 
-      # Validate dialog_before entries via ActiveModel validate callback.
-      # Checks for invalid types and missing message templates.
-      def validate_dialog_entries
+      # Validate that referenced Admin::MessageTemplate records exist.
+      # Value type and key validation is handled by PatternValidation.
+      def validate_dialog_template_existence
         return if hash_configuration.blank?
 
-        hash_configuration.each do |key, value|
-          unless value.is_a?(String) || value.is_a?(Hash)
-            errors.add(:dialog_before,
-                       "must be a Hash { name: '<template name>' } or String: #{key}")
-            next
-          end
+        each_config_entry do |key, value|
+          next unless value.is_a?(String) || value.is_a?(Hash)
 
           processed = value.is_a?(String) ? { name: value } : value.symbolize_keys
           name = processed[:name]
