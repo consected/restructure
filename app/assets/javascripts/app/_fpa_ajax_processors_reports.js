@@ -109,6 +109,7 @@ _fpa.postprocessors_reports = {
   },
   reports_result: function (block, data) {
     block.removeClass('use-secure-view-on-links-setup');
+    _fpa.form_utils.setup_secure_view_links(block);
     if (data) {
       // Update the search form results count bar manually
       var c = block.find('.result-count').html();
@@ -346,7 +347,8 @@ _fpa.postprocessors_reports = {
       'list': 'ul',
       'tags': 'div',
       'choice_label': 'div',
-      'iframe': 'div'
+      'iframe': 'div',
+      'filestore_view': 'span'
     }
 
 
@@ -381,8 +383,12 @@ _fpa.postprocessors_reports = {
         var sa = show_as[ct];
         var orig_cell_content = cell_content;
         if (sa) {
-          sa = mapping[sa] || sa
-          cell_content = `<${sa}>${cell_content}</${sa}>`
+          if (sa === 'filestore_view') {
+            cell_content = `<span class="use-secure-view-on-links">${cell_content}</span>`;
+          } else {
+            sa = mapping[sa] || sa
+            cell_content = `<${sa}>${cell_content}</${sa}>`
+          }
         }
 
         // Format the cell if it is an array or show_as specifies it is tags
@@ -417,6 +423,8 @@ _fpa.postprocessors_reports = {
       row.find('.td-date-formatted').removeClass('td-date-formatted');
       _fpa.postprocessors_reports.report_format_result_cells(row, data);
       row.find('td').removeClass('report-el-was-from-new');
+      row.removeClass('use-secure-view-on-links-setup');
+      _fpa.form_utils.setup_secure_view_links(row);
     }, 50)
 
   },

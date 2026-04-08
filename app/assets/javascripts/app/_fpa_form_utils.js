@@ -842,8 +842,8 @@ _fpa.form_utils = {
   },
 
   // Blocks marked with the class use-secure-view-on-links are checked
-  // to find <a> links for filestore downloads. These are then set to
-  //
+  // to find <a> links for filestore downloads or Redcap file downloads.
+  // These are then set to use the secure viewer.
   setup_secure_view_links: function (block) {
     if (block.hasClass('use-secure-view-on-links-setup')) return;
 
@@ -861,6 +861,13 @@ _fpa.form_utils = {
         $(this).parents('.nfs-store-container-block').length == 0
       ) {
         $(this).addClass('use-secure-view');
+      } else if (
+        href &&
+        href.indexOf('/redcap/project_user_requests/') >= 0 &&
+        href.indexOf('/download_field_file/') >= 0 &&
+        !$(this).hasClass('redcap-file-use-secure-view')
+      ) {
+        $(this).addClass('redcap-file-use-secure-view');
       }
     });
 
