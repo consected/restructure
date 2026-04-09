@@ -28,9 +28,19 @@ class ReportsController < UserBaseController
   def index
     @no_masters = true
 
-    pm = @all_reports_for_user = Report.enabled.for_user(current_user)
+    pm = @all_reports_for_user = Report.enabled
+
+    # Allow an admin to see reports in a filtered item_type, even if the associated user
+    # does not have access to any reports of that type.
+    if current_admin && params[:filter].present? && params[:filter][:item_type].present?
+      @admin_list_item_type = params[:filter][:item_type]
+    else
+      pm = pm.for_user(current_user)
+    end
+
     pm = filtered_primary_model(pm)
 
+    @simple_view = params[:simple_view] == 'true'
     @reports = pm.order auto: :desc, report_type: :asc, position: :asc
     @reports = @reports.reject { |r| r.report_options.list_options.hide_in_list }
 

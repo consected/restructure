@@ -1,7 +1,11 @@
 <div class="reports-index" data-admin-type="<%=controller_name.ns_underscore%>">
   <div class="data-results col-md-offset-1 col-md-22 col-lg-offset-2 col-lg-20" data-subscription="admin-list">
     <div data-result="admin-list">
+      <% if @admin_list_item_type %>
+      <h1><%= @admin_list_item_type.gsub('-', ' ').titleize %></h1>
+      <% else %>
       <h1><%= app_config_text :reports_list_title, 'Reports' %></h1>
+      <% end %>
       <% 
     @shown_filter_break = true 
     num_cats = @reports.pluck(:category).uniq.length
