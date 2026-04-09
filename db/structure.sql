@@ -165960,6 +165960,7 @@ ALTER TABLE ONLY study_info.activity_log_data_variable_package_reviews
 SET search_path TO ml_app,ref_data,redcap,dynamic,organization,pitt_bhi,ipa_ops,study_info;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260409072921'),
 ('20260402110412'),
 ('20260401153819'),
 ('20260331133109'),

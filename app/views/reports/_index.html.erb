@@ -1,6 +1,7 @@
 <%
 link_extras = {} unless defined? link_extras
 simple_view = false unless defined? simple_view
+simple_view ||= @simple_view
 
 link_extras ||= {}
 extra_params = {} unless defined? extra_params

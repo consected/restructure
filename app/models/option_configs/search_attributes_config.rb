@@ -8,7 +8,7 @@ module OptionConfigs
   class SearchAttributesConfig < BaseConfiguration
     class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
       configure_attributes %i[name label type all item_type multiple default disabled hidden selections conditions
-                              resource_name defined_selector filter_selector options show_if]
+                              resource_name defined_selector filter_selector options show_if group_by]
     end
 
     #
