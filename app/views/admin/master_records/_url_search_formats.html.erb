@@ -1,0 +1,126 @@
+<%# URL Search tab for the masters table entry (issue #1041).
+    Shows URL formats for searching master records by various identifiers. %>
+
+<h4>URL Search</h4>
+
+<div class="master-records-url-search-formats">
+
+  <% begin %>
+    <% crosswalk_attrs = Master.crosswalk_attrs %>
+  <% rescue StandardError => e %>
+    <p class="text-danger">Error loading masters metadata: <%= e.message %></p>
+    <% crosswalk_attrs = [] %>
+  <% end %>
+
+  <label>URL search formats</label>
+  <p class="help-block">
+    The following URL formats can be used to search for master records.
+  </p>
+  <table class="table table-condensed table-striped master-records-url-formats">
+    <thead>
+      <tr>
+        <th>Format</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/masters/&lt;master_id&gt;</code></td>
+        <td>Direct lookup by primary master ID</td>
+      </tr>
+      <tr>
+        <td><code>/masters/&lt;value&gt;?type=&lt;crosswalk_attr&gt;</code></td>
+        <td>Search by crosswalk field on masters table (see below)</td>
+      </tr>
+      <tr>
+        <td><code>/masters/&lt;value&gt;?type=&lt;external_id_attr&gt;</code></td>
+        <td>Search by external identifier attribute (see below)</td>
+      </tr>
+      <tr>
+        <td><code>/masters/search?external_id[field]=&lt;attr&gt;&amp;external_id[id]=&lt;value&gt;</code></td>
+        <td>Search by external identifier using query params</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <label>result format parameter</label>
+  <p class="help-block">
+    Append <code>&amp;req_format=&lt;format&gt;</code> to any search URL to control the result format.
+  </p>
+  <table class="table table-condensed table-striped">
+    <thead>
+      <tr>
+        <th>Value</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>reg</code></td>
+        <td>UI search result (default)</td>
+      </tr>
+      <tr>
+        <td><code>csv</code></td>
+        <td>CSV download</td>
+      </tr>
+      <tr>
+        <td><code>json</code></td>
+        <td>JSON response</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <label>crosswalk attributes for URL search</label>
+  <p class="help-block">
+    These crosswalk fields on the masters table can be used as
+    <code>type</code> parameter values.
+  </p>
+  <table class="table table-condensed table-striped">
+    <thead>
+      <tr>
+        <th>Attribute</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% crosswalk_attrs.each do |attr| %>
+        <tr>
+          <td><code><%= attr %></code></td>
+          <td><code>/masters/&lt;value&gt;?type=<%= attr %></code></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% ext_defs = Master.external_id_definitions %>
+  <% if ext_defs.present? %>
+    <label>external identifiers for URL search</label>
+    <p class="help-block">
+      These external identifier attributes can be used as
+      <code>type</code> parameter values.
+    </p>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Label</th>
+          <th>URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% ext_defs.each do |attr_name, ext_id| %>
+          <tr>
+            <td>
+              <%= link_to link_label_open_in_new(attr_name),
+                          admin_external_identifiers_path(filter: { name: ext_id.name, disabled: :enabled }, perform_action: 'edit'),
+                          target: '_blank' %>
+            </td>
+            <td><%= ext_id.label %></td>
+            <td><code>/masters/&lt;value&gt;?type=<%= attr_name %></code></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+</div>

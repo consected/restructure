@@ -30,6 +30,15 @@
                 target: '_blank' %>
   </p>
 
+  <label>estimated record count</label>
+  <p>
+    <% begin %>
+      <%= number_with_delimiter(Master.count) %>
+    <% rescue StandardError => e %>
+      <em>Unable to get count: <%= e.message %></em>
+    <% end %>
+  </p>
+  
   <div>
     <div>
       <label>crosswalk fields</label>
@@ -61,18 +70,24 @@
       <p class="help-block">
         These master IDs are reserved for temporary / anonymous sessions with
         limited user access controls.
-      </p>
-
-      <label>estimated record count</label>
-      <p>
-        <% begin %>
-          <%= number_with_delimiter(Master.count) %>
-        <% rescue StandardError => e %>
-          <em>Unable to get count: <%= e.message %></em>
-        <% end %>
-      </p>
+      </p>      
     </div>
     <div>
+      <label>prevent reload master list</label>
+      <p>
+        <%= link_to link_label_open_in_new('app configuration'),
+                    admin_app_configurations_path(filter: { name: 'prevent reload master list' }),
+                    target: '_blank',
+                    class: 'admin-page-link' %>
+        <code><%= prevent_reload_master_list = app_config_text(:prevent_reload_master_list, alt_user: current_admin.matching_user).presence || 'not set' %></code>
+      </p>
+      <p class="help-block">
+        <% if prevent_reload_master_list == 'not set' %>
+        If the user refreshes a page showing master records from a search, the list of previous master records will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value.
+        <% else %>
+        If the user refreshes a page showing master records from a search, the list of previous master records won't be reloaded, to avoid confusing results. This can be changed back to allow reloading by setting the value to blank or removing it.
+        <% end %>
+      </p>
       <label>create master with resource</label>
       <p>
         <%= link_to link_label_open_in_new('app configuration'),
@@ -88,6 +103,7 @@
 
   <%# Model field listing %>
   <% fields = object_instance.fields %>
+
   <% if fields.present? %>
     <label>fields (<%= fields.length %>)</label>
     <table class="table table-condensed table-striped master-records-def-details__fields-table">

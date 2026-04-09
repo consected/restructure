@@ -57,6 +57,13 @@
   <%= render partial: 'admin/dynamic_models/est_record_count' %>
   <%= render partial: 'admin/dynamic_models/check_tracker_updates' %>
 
+  <label>URL search format</label>
+  <p class="help-block">
+    Search for a master record by this external identifier using:
+  </p>
+  <p>
+    <code>/masters/&lt;value&gt;?type=<%= object_instance.external_id_attribute %></code>
+  </p>
 
   <label>fields</label>
   <ul class="activity-list">
