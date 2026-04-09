@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.19] - 2026-04-09
+
 - [Merged] release 9.42.18 back to develop
 - [Fixed] initial_show CSS class bug and added system specs - fixes #219
 - [Fixed] select_user_with_role_ label resolution in reports and selections - fixes #333
