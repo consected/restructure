@@ -51,8 +51,11 @@ Rails.application.configure do
 
   # Use a different cache store in production.
   # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
-  # and requires memcached 1.6+
-  config.cache_store = :mem_cache_store, { protocol: :meta }
+  # and requires memcached 1.6+.
+  # Explicit serializer: Marshal suppresses Dalli's SECURITY WARNING about Marshal
+  # deserialization. A compromised memcached server implies full server compromise,
+  # so Marshal does not amplify the risk (issue #1038).
+  config.cache_store = :mem_cache_store, { protocol: :meta, serializer: Marshal }
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
