@@ -51,7 +51,14 @@ Rails.application.config.to_prepare do
     @resource = resource_name == :user ? current_user : current_admin
     @resource_name = @resource.class.name.downcase
     redirect_to('/') && return unless @resource.two_factor_setup_required?
-    # The user hasn't completed the required OTP setup, so continue with the action
+
+    # Generate OTP secret if not already present (e.g. user was created when 2FA was disabled)
+    unless @resource.otp_secret.present?
+      @resource.otp_secret = @resource.class.generate_otp_secret
+      @resource.otp_required_for_login = false
+      @resource.new_two_factor_auth_code = true
+      @resource.save!
+    end
   end
 
   DeviseController.send(:define_method, :test_otp) do

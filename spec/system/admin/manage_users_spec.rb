@@ -12,8 +12,9 @@
 # - Enforcing user validations (email format via HTML5)
 # - Server option: 2FA enforcement affects form options
 # - Server option: self-registration info shown vs hidden
+# - 2FA set up? column displays correct status per user
 #
-# Related issues: #1025 (api_access_only flag), #330
+# Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column)
 
 require 'rails_helper'
 
@@ -159,6 +160,27 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
   end
 
   context 'when 2FA setting varies' do
+    it 'shows 2FA set up column with correct status for each user' do
+      visit_manage_users_page
+
+      # The column header should be present
+      expect(page).to have_css('th', text: '2FA set up?')
+
+      # The test user was created with 2FA enabled, so they have an OTP secret
+      user_row = find('td', text: @test_user_email).ancestor('tr')
+      within(user_row) do
+        # Find the 2FA column cell - it's rendered by index_list_item_boolean_field
+        tds = all('td')
+        # The 2FA column uses val-checked (checkmark) when otp_secret is present
+        two_fa_user = User.find_by(email: @test_user_email)
+        if two_fa_user.otp_secret.present?
+          expect(user_row).to have_css('.val-checked')
+        else
+          expect(user_row).to have_css('.val-unchecked')
+        end
+      end
+    end
+
     it 'shows 2FA reset option when 2FA is enforced' do
       visit_manage_users_page
       click_edit_for_user(@test_user_email)

@@ -22,6 +22,7 @@
           <th>Password expires in (days)</th>
           <th>Account Expiration</th>
           <th>Locked</th>
+          <th>2FA set up?</th>
           <th>Capabilities</th>
           <th>Admin</th>
         </tr>
@@ -39,6 +40,7 @@
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.expire_datetime&.strftime('%Y-%m-%d %H:%M') %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
+            <td><%= index_list_item_boolean_field(list_item.otp_secret.present?) %></td>
             <td>
               <ul class="admin-tag-list">
               <% list_item.capabilities&.reject(&:blank?)&.each do |c| %>
