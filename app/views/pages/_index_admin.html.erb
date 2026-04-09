@@ -89,6 +89,7 @@
               <% if current_admin.can_admin?(:user_contact_infos)%><% got_one ||= true %><li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_roles)%><% got_one ||= true %><li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_access_controls)%><% got_one ||= true %><li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li><%end%>
+              <% if current_admin.can_admin?(:user_roles) && current_admin.can_admin?(:user_access_controls) && Report.active.where(item_type: 'admin-user-access-overview').exists? %><% got_one ||= true %><li class="nav"><%= link_to "User Access Overview", reports_path(filter: { item_type: 'admin-user-access-overview' }, simple_view: true), target: '_blank' %> </li><%end%>
               <% if current_admin.can_admin?(:role_descriptions)%><% got_one ||= true %><li class="nav"><%= link_to "Role Descriptions", admin_role_descriptions_path %> </li><%end%>
               <% if current_admin.can_admin?(:filters)%><% got_one ||= true %><li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li><%end%>
               <% if current_admin.can_admin?(:manage_admins)%><% got_one ||= true %><li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li><%end%>
