@@ -10,12 +10,12 @@
   class: 'btn btn-primary btn-sm' %>
   </p>
 <% end %>
-<% if current_admin&.matching_user_app_type&.name != 'ref-data' %>
+<% if current_admin&.matching_user_app_type&.name != Settings::FilestoreAdminAppType %>
   <h4>Important - 
     <%= link_to "switch to the <b>Ref Data</b> app".html_safe, 
               redcap_project_admins_path(
                 no_redirect: true, 
-                use_app_type: 'ref-data',
+                use_app_type: Settings::FilestoreAdminAppType,
                 filter: {id: object_instance.id},
                 perform_action: 'edit'
               ) %> 
