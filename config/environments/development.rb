@@ -39,8 +39,9 @@ Rails.application.configure do
 
     # config.cache_store = :null_store
     # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
-    # and requires memcached 1.6+
-    config.cache_store = :mem_cache_store, { protocol: :meta }
+    # and requires memcached 1.6+.
+    # Explicit serializer: Marshal suppresses Dalli's SECURITY WARNING (issue #1038).
+    config.cache_store = :mem_cache_store, { protocol: :meta, serializer: Marshal }
 
   end
 

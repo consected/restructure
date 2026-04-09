@@ -62,8 +62,9 @@ Rails.application.configure do
   config.cache_store = if ENV['TEST_MEM_CACHE_STORE'] == 'true'
                          # Use Dalli memcached store with :meta protocol for cache integration testing.
                          # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
-                         # and requires memcached 1.6+
-                         [:mem_cache_store, { protocol: :meta }]
+                         # and requires memcached 1.6+.
+                         # Explicit serializer: Marshal suppresses Dalli's SECURITY WARNING (issue #1038).
+                         [:mem_cache_store, { protocol: :meta, serializer: Marshal }]
                        else
                          [:memory_store, { namespace: "paralleltests#{ENV.fetch('TEST_ENV_NUMBER', nil)}" }]
                        end
