@@ -68,6 +68,8 @@ class MastersController < UserBaseController
   #
   # An external ID (or master crosswalk ID) may be used to search instead, using the params
   # external_id[id], external_id[field]. The 'field' param names the alternative ID to use.
+  # Alternatively, the #show action handles params[:type] for crosswalk attributes and
+  # external identifier attributes via the URL format /masters/<value>?type=<attr>.
   #
   # params[:external_id] - we have an external_id parameter, use this to search
   # params[:nav_q_id] - if not an external_id instead search by master id
@@ -108,7 +110,7 @@ class MastersController < UserBaseController
 
   def new
     @master = Master.new_master_record current_user
-    
+
     # For admin sample forms, render just the form partial without layout
     if params[:admin_sample] == 'true'
       render partial: 'form', layout: false
