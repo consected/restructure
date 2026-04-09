@@ -14,6 +14,37 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.18 back to develop
+- [Fixed] initial_show CSS class bug and added system specs - fixes #219
+- [Fixed] select_user_with_role_ label resolution in reports and selections - fixes #333
+- [Updated] parallel test scripts for better logging
+- [Refactored] spec helper stability and layout cleanup - fixes #1020
+- [Refactored] system spec navigation helpers - fixes #1020
+- [Changed] parallel test script to accept command line args in place of environment variables
+- [Fixed] bad exit message in parallel test retests
+- [Added] api_access_only flag for API-only users to bypass 2FA setup - fixes #1025
+- [Added] admin manage users system specs - resolves #1027
+- [Refactored] admin manage users spec with helpers and context blocks - resolves #1027
+- [Fixed] prepend_to_options gsub corrupting YAML with escaped quotes - fixes #1029
+- [Fixed] config library _default: breaking configs when _definitions: appear below it - fixes #521
+- [Added] versioned config library resolution for dynamic definitions - fixes #666
+- [Added] config library timestamp check to dynamic definition cache invalidation - fixes #523
+- [Fixed] duplicate admin panel server alerts - fixes #1035
+- [Added] test for item flag name export filtering by app type - fixes #3
+- [Fixed] tdd agent prompt
+- [Added] item flag name import support and test - fixes #3
+- [Added] secure viewer support for Redcap file links and filestore_view show_as option in reports - fixes #1040
+- [Added] URL search formats to admin Master Records and External Identifiers panels - fixes #1041
+- [Added] new agent prompts for feature branch management
+- [Added] agent prompt to merge latest changes from up-develop branch to local develop
+- [Fixed] admin Redcap project creation failing in non-ref-data app types - fixes #1043
+- [Added] explicit serializer: Marshal to Dalli cache config to suppress security warning - fixes #1038
+- [Added] 2FA upgrade spec, docs, OTP setup fix, and admin 2FA status column - fixes #1047
+- [Fixed] message template form losing message_type and template_type on save - fixes #1049
+- [Fixed] admin forms overriding saved select field values with filter params - fixes #1050
+- [Added] URL fallback and XSS protection for report column show_as url - fixes #1053
+- [Added] User Access Overview admin reports with 5 perspectives - fixes #706
+
 ## [9.42.18] - 2026-04-01
 
 - [Merged] release 9.42.17 back to develop
