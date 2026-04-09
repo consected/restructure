@@ -12,6 +12,10 @@
 #   - Handles markdown format links like [Label](/dynamic_model/table_name/123)
 #   - Handles activity log URLs like /activity_log/log_type/456
 #   - Handles edit mode URLs ending with /edit (GitHub #325)
+# - #cell_content_for_url: Renders cell content as a link in a new tab (GitHub #1053)
+#   - Handles markdown format [text](url) correctly
+#   - Falls back to plain text when content doesn't match markdown link format
+#   - Handles nil and blank content gracefully
 
 require 'rails_helper'
 
@@ -114,6 +118,56 @@ RSpec.describe ReportResults::ReportsCommonResultCell do
 
         expect(html).to include('href="/dynamic_model/test/123/edit"')
       end
+    end
+  end
+
+  describe '#cell_content_for_url' do
+    # Override col_show_as to 'url' for these tests
+    let(:col_show_as) { 'url' }
+
+    it 'renders markdown format [text](url) as a link' do
+      html = build_cell('[Click here](https://example.com/page)').cell_content_for_url
+
+      expect(html).to include('href="https://example.com/page"')
+      expect(html).to include('>Click here</a>')
+      expect(html).to include('target="_blank"')
+    end
+
+    it 'falls back to showing plain text when content is not markdown link format' do
+      result = build_cell('just some plain text').cell_content_for_url
+
+      expect(result).to eq('just some plain text')
+    end
+
+    it 'returns nil when content is nil' do
+      result = build_cell(nil).cell_content_for_url
+
+      expect(result).to be_nil
+    end
+
+    it 'returns blank content as-is when content is empty' do
+      result = build_cell('').cell_content_for_url
+
+      expect(result).to eq('')
+    end
+
+    it 'falls back to showing a plain URL as text when not in markdown format' do
+      result = build_cell('https://example.com').cell_content_for_url
+
+      expect(result).to eq('https://example.com')
+    end
+
+    it 'html-escapes the URL in the href attribute' do
+      result = build_cell('[text](https://example.com/path?a=1&b=2)').cell_content_for_url
+
+      expect(result).to include('href="https://example.com/path?a=1&amp;b=2"')
+    end
+
+    it 'falls back to plain text for javascript: protocol URLs' do
+      result = build_cell('[click](javascript:alert(1))').cell_content_for_url
+
+      expect(result).not_to include('<a ')
+      expect(result).to include('javascript:alert(1)')
     end
   end
 end
