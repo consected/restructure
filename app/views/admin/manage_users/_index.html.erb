@@ -27,6 +27,7 @@
           <th>Locked</th>
           <th>Do Not Email</th>
           <th>API Only</th>
+          <th>2FA set up?</th>
           <th>Disabled</th>
           <th>Admin</th>
         </tr>
@@ -51,6 +52,7 @@
             <td><%= index_list_item_boolean_field(list_item.access_locked?) %></td>
             <td><%= index_list_item_boolean_field(list_item.do_not_email) %></td>
             <td><%= index_list_item_boolean_field(list_item.api_access_only) %></td>
+            <td><%= index_list_item_boolean_field(list_item.otp_secret.present?) %></td>
             <td><%= index_list_item_boolean_field(list_item.disabled) %></td>
             <td class="admin-item-admin-infos">
               <%= admin_last_updated_by_icon(list_item) %>
