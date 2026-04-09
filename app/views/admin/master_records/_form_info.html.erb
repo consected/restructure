@@ -5,6 +5,7 @@
     The masters table entry (table_name == 'masters') shows:
       - Details tab (masters-specific)
       - Sample Form tab
+      - URL Search tab (URL formats for searching master records)
       - API tab (masters-specific, no UAC)
     
     Other standard models show:
@@ -31,7 +32,13 @@
            role="tab" data-toggle="tab">Sample Form</a>
       </li>
     <% end %>
-    <% unless is_masters_table %>
+    <% if is_masters_table %>
+      <li role="presentation">
+        <a href="#mr-url-search-<%= object_instance.id %>"
+           aria-controls="mr-url-search-<%= object_instance.id %>"
+           role="tab" data-toggle="tab">URL Search</a>
+      </li>
+    <% else %>
       <li role="presentation">
         <a href="#mr-user-access-controls-<%= object_instance.id %>"
            aria-controls="mr-user-access-controls-<%= object_instance.id %>"
@@ -64,7 +71,11 @@
       </div>
     <% end %>
 
-    <% unless is_masters_table %>
+    <% if is_masters_table %>
+      <div role="tabpanel" class="tab-pane" id="mr-url-search-<%= object_instance.id %>">
+        <%= render partial: 'admin/master_records/url_search_formats' %>
+      </div>
+    <% else %>
       <div role="tabpanel" class="tab-pane on-open-click" id="mr-user-access-controls-<%= object_instance.id %>">
         <% if current_admin.can_admin?(:user_access_controls) %>
           <%= render partial: 'admin/master_records/uac_panel', locals: { object_instance: object_instance } %>
