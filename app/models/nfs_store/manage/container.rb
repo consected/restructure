@@ -248,6 +248,12 @@ module NfsStore
         false
       end
 
+      def can_create?
+        return true if can_access_if_admin_master?
+
+        super
+      end
+
       def can_edit?
         res = allows_current_user_access_to? :edit
         return unless res

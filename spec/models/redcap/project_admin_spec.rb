@@ -322,4 +322,56 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
       expect(rc.frequency).to be_nil
     end
   end
+
+  # Tests for issue #1043: Admin Redcap projects - fails to create new project
+  # when admin's matching user is in a non-ref-data app type.
+  # The file store container creation should succeed regardless of the admin's
+  # current app type, because admin containers use admin_master and the admin NFS role.
+  describe 'creating project admin in non-ref-data app type' do
+    it 'creates a project and file store container when user is in a different app type' do
+      # Ensure all existing projects are disabled so we can create duplicates
+      Redcap::ProjectAdmin.update_all(disabled: true)
+
+      # Create a brand new app type with no container access configured
+      other_app_type = Admin::AppType.create!(name: "test-no-containers-#{rand(1000)}",
+                                              label: 'Test No Containers',
+                                              current_admin: @admin)
+
+      # Switch user to the new app type
+      enable_user_app_access(other_app_type, @user)
+      @user.app_type = other_app_type
+      @user.save!
+      expect(@user.app_type_id).to eq other_app_type.id
+
+      # Add the admin NFS role for this app type (roles are per-app-type)
+      add_user_to_role Settings.admin_nfs_role, for_user: @user
+      @user.clear_role_names!
+      expect(@user.role_names).to include(Settings.admin_nfs_role)
+
+      # Verify user does NOT have container create access in the new app type
+      @user.clear_has_access_to!
+      has_container_access = @user.has_access_to?(:create, :table, 'nfs_store__manage__containers',
+                                                  force_reset: true)
+      expect(has_container_access).to be_falsey
+
+      # Reset admin's memoized matching_user so it picks up the user's current
+      # app type (simulates production where the admin's user is freshly loaded)
+      @admin.instance_variable_set(:@matching_user, nil)
+      expect(@admin.matching_user.app_type_id).to eq other_app_type.id
+
+      p = @projects.first
+
+      # This should NOT raise "This item can not be created" error
+      pa = Redcap::ProjectAdmin.create!(
+        current_admin: @admin,
+        study: Redcap::RedcapSupport::DefaultStudy,
+        name: p[:name],
+        api_key: p[:api_key],
+        server_url: p[:server_url]
+      )
+
+      expect(pa).to be_persisted
+      expect(pa.file_store).to be_a(NfsStore::Manage::Container)
+    end
+  end
 end
