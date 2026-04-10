@@ -15,11 +15,21 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
 
   describe 'dynamic models' do
     it 'displays parsed config tab with line numbers' do
-      # Find any existing dynamic model to test with
+      # Find a dynamic model and ensure it has option types that produce parsed config output
       dm = DynamicModel.active.first
+      expect(dm).not_to be nil
 
-      # Skip test if no dynamic models exist
-      skip 'No active dynamic models found' unless dm
+      # Set up options with actual config so parsed_options_text produces output
+      dm.current_admin = @admin
+      dm.options = <<~YAML
+        default:
+          labels:
+            field_1: Test Field
+          view_options:
+            data_attribute: field_1
+      YAML
+      dm.updated_at = Time.now
+      dm.save!
 
       admin_sign_in_with_2fa
 
@@ -38,8 +48,15 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
 
-      # Wait for CodeMirror to render
-      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
+      # Wait for CodeMirror to render (may need time for JS initialization after tab switch)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 10)
+
+      # Verify merged YAML content is displayed with CodeMirror
+      within '#parsed-config .CodeMirror' do
+        content = page.text
+        expect(content.length).to be > 10
+        expect(content).to match(/:\s/)
+      end
 
       # Verify merged YAML content is displayed with CodeMirror
       within '#parsed-config .CodeMirror' do
@@ -56,7 +73,7 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       # Find or use a dynamic model (all should have at least some config after parsing)
       dm = DynamicModel.active.first
 
-      skip 'No active dynamic models found' unless dm
+      expect(dm).not_to be nil
 
       admin_sign_in_with_2fa
 
@@ -207,7 +224,7 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       # Use any existing dynamic model (they all should work)
       dm = DynamicModel.active.first
 
-      skip 'No active dynamic models found' unless dm
+      expect(dm).not_to be nil
 
       admin_sign_in_with_2fa
 

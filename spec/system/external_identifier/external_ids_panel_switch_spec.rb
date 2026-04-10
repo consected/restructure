@@ -101,7 +101,7 @@ describe 'external ids panel switching between participants', js: true, driver: 
       finish_form_formatting
 
       # Expand the external ids tab using helper
-      expand_master_record_tab('external ids')
+      expand_master_record_tab('external ids', master_id: master.id)
       finish_page_loading
 
       # Verify the external ids panel is shown and has content
@@ -124,7 +124,7 @@ describe 'external ids panel switching between participants', js: true, driver: 
         expect(page).to have_css("#master-#{master.id}-main-container.in", wait: 10)
 
         # Expand external ids tab using helper
-        expand_master_record_tab('external ids')
+        expand_master_record_tab('external ids', master_id: master.id)
         finish_page_loading
 
         # Verify panel has content

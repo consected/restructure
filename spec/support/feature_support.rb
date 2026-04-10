@@ -314,15 +314,23 @@ module FeatureSupport
   # Expand a master record tab (such as "details", "external ids", "phone log", etc) by name
   # This avoids the need to explicitly get `a[data-panel-tab="<name>"]` and click it.
   # Expectations are also enforced to ensure the tab shows.
-  def expand_master_record_tab(name)
+  def expand_master_record_tab(name, master_id: nil)
     finish_form_formatting
     tab_selector = "a[data-panel-tab='#{name.id_underscore}']"
-    unless page.has_css?(tab_selector, visible: :all, wait: 15)
+
+    # Scope to a specific master container when master_id is provided
+    scoped_selector = if master_id
+                        "#master-#{master_id}-main-container #{tab_selector}"
+                      else
+                        tab_selector
+                      end
+
+    unless page.has_css?(scoped_selector, visible: :all, wait: 15)
       available_tabs = all('a[data-panel-tab]', visible: :all, wait: 0).map { |tab| tab['data-panel-tab'] }.uniq
       raise "Could not find panel tab #{name.id_underscore.inspect}. Available tabs: #{available_tabs.join(', ')}"
     end
 
-    tab_link = find(tab_selector, visible: :all, wait: 0)
+    tab_link = all(scoped_selector, visible: :all, wait: 0).first
     expect(tab_link).not_to be nil
     scroll_into_view(tab_link)
     tab_link.click if tab_link['aria-expanded'] != 'true'
@@ -338,7 +346,7 @@ module FeatureSupport
   def expand_master_record_and_tab(master_id:, tab_name:)
     expand_master_record(master_id:)
     expect(page).to have_css("#master-#{master_id}-main-container.in", wait: 10)
-    expand_master_record_tab(tab_name)
+    expand_master_record_tab(tab_name, master_id:)
   end
 
   def disable_active_panel_layout(panel_name, app_type: @app_type, admin: @admin, reload_routes: false)
