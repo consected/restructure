@@ -161,13 +161,18 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     expect(sprot.length).to be > 0
 
-    protocol = pick_one_from(sprot)
-    sp = pick_one_from(protocol.sub_processes.active)
+    # Use a protocol and sub_process that have existing tracker records to avoid flaky empty results
+    selectable_ids = sprot.pluck(:id)
+    tracker_with_data = Tracker.where(protocol_id: selectable_ids).where.not(sub_process_id: nil).first
+    expect(tracker_with_data).to be_present, 'Expected at least one tracker record with a selectable protocol and sub_process'
+    protocol = tracker_with_data.protocol
+    sp = tracker_with_data.sub_process
     has_css? '#master_trackers_attributes_0_sub_process_id'
 
     within '#advanced_search_master' do
       select protocol.name, from: 'master_trackers_attributes_0_protocol_id'
-      select sp.name, from: 'master_trackers_attributes_0_sub_process_id'
+      # Use option value (id) to avoid ambiguity when multiple sub_processes share the same name
+      find('#master_trackers_attributes_0_sub_process_id').find("option[value='#{sp.id}']").select_option
     end
 
     # wait a while, maybe
