@@ -125,7 +125,7 @@ RSpec.describe 'PatternValidation concern', type: :model do
         config = eo.send(config_attr)
         field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
         expect(field_warnings).to be_present,
-          "Expected field name warning on #{config_attr}, got: #{config.config_warnings}"
+                                  "Expected field name warning on #{config_attr}, got: #{config.config_warnings}"
       end
     end
 

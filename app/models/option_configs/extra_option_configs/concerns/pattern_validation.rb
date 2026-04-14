@@ -196,7 +196,7 @@ module OptionConfigs
             extra_keys_desc = self.class._extra_keys.map { |k| k.is_a?(Regexp) ? k.inspect : k }.join(', ')
             add_validation_notice(field_name,
                                   "#{field_name} is not a valid field name" \
-                                  "#{extra_keys_desc.present? ? " or extra key (#{extra_keys_desc})" : ''}",
+                                  "#{" or extra key (#{extra_keys_desc})" if extra_keys_desc.present?}",
                                   level: :warn)
           end
         end

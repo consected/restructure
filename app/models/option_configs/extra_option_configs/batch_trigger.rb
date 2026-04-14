@@ -23,9 +23,7 @@ module OptionConfigs
       def setup_named_configurations
         config_hash = hash_configuration.is_a?(Hash) ? hash_configuration : {}
         setup_all_options_typed(config_hash)
-        # Store the raw tasks value in configurations for hash-like access.
-        # Consumers expect raw Array/Hash, not TriggerTasks instance.
-        configurations[:on_record] = on_record.respond_to?(:tasks) ? on_record.tasks : on_record
+        sync_typed_to_configurations
       end
 
       # Returns true if there are no trigger tasks configured.
