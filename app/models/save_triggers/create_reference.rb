@@ -27,6 +27,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
           create_if = config[:if]
           create_with = config[:with]
           with_result = config[:with_result]
+          no_master = config[:this_has_no_master_association]
 
           # We calculate the conditional if inside each item, rather than relying
           # on the outer processing in ActivityLogOptions#calc_save_trigger_if
@@ -47,10 +48,15 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
             # Resolve the target model class to check for standalone models
             target_model = Resources::Models.find_by(resource_name: model_name.to_s.pluralize)&.dig(:model)
             create_without_reference = %w[master none].include?(create_in.to_s)
-            standalone = target_model&.no_master_association || (create_without_reference && in_master.nil?)
+            standalone = no_master || target_model&.no_master_association || create_without_reference
 
-            # Standalone models have no master association — use the model class directly
+            # Standalone models or those created without a reference use the model class directly.
+            # For create_without_reference modes (in: master/none), carry over master_id from
+            # in_master when available so the record is associated with the correct master.
             new_type = if standalone
+                         if create_without_reference && in_master && !target_model&.no_master_association
+                           vals[:master_id] ||= in_master.id
+                         end
                          target_model
                        else
                          in_master.assoc_named(model_name.to_s.pluralize)

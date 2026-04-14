@@ -27,3 +27,24 @@ association involved and no model reference is needed.
 ```yaml
 !defs(save_triggers_create_reference_options_defs.yaml)
 ```
+
+### Source Items Without Master Association
+
+When the source item (the item firing the trigger) has no master association, set
+`this_has_no_master_association: true` alongside `in: none`. This forces the target
+record to be created directly using its model class, bypassing the master association
+lookup that would otherwise fail.
+
+```yaml
+save_trigger:
+  on_create:
+    create_reference:
+      - dynamic_model__target_recs:
+          in: none
+          force_create: true
+          force_not_valid: true
+          this_has_no_master_association: true
+          with:
+            master_id: -1
+            value1: some value
+```

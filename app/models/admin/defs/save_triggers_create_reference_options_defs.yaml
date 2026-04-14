@@ -27,6 +27,11 @@
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
+            this_has_no_master_association: |
+              true to force standalone resolution for the current (source) item, bypassing the
+              master association lookup. Use this when the source item has no master_id and
+              in: none is set, to ensure the target record is created directly using the model
+              class rather than attempting to resolve through a master association.
 
             with_result: 
             # Map attributes from a related item to the target item.
