@@ -6,6 +6,7 @@ require 'rails_helper'
 # - Verifies embedded_item creation within create_reference
 # - Verifies storing objects to JSONB fields via the object: wrapper (issue #943)
 # - Verifies create_reference for standalone dynamic models with no master_id (issue #1003)
+# - Verifies create_reference from standalone source to mastered target with in: none/master (issue #1062)
 
 AlNameGenTestCr = 'Gen Test ELT Save'
 
@@ -846,6 +847,162 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(created_item.notes).to eq 'standalone none test'
       expect(@al.save_trigger_results['created_references'].last).to be_nil
       expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+  end
+
+  # Tests for create_reference with in: none from a standalone source to a mastered target (issue #1062)
+  # When the source item has no master association and the target has master_id,
+  # using in: none should skip the master association lookup and create the record directly.
+  describe 'creating a mastered target from a standalone source with in: none (issue #1062)' do
+    before :all do
+      change_setting('AllowDynamicMigrations', true)
+
+      create_admin
+      create_user
+
+      @schema_name = 'dynamic_test'
+      @source_table_name = 'test_standalone_src_recs'
+      @target_table_name = 'test_mastered_tgt_recs'
+
+      # Clean up any existing test tables and models
+      DynamicModel.active.where(table_name: @source_table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.active.where(table_name: @target_table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.send(:remove_const, :TestStandaloneSrcRec) if defined?(DynamicModel::TestStandaloneSrcRec)
+      DynamicModel.send(:remove_const, :TestMasteredTgtRec) if defined?(DynamicModel::TestMasteredTgtRec)
+
+      conn = ActiveRecord::Base.connection
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.test_standalone_src_rec_history CASCADE")
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@source_table_name} CASCADE")
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.test_mastered_tgt_rec_history CASCADE")
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@target_table_name} CASCADE")
+
+      # Create standalone source model (no master_id)
+      @source_dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test Standalone Src Recs',
+        table_name: @source_table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: '',
+        category: :test,
+        field_list: 'value1',
+        options: <<~YAML
+          _db_columns:
+            value1:
+              type: string
+        YAML
+      )
+      @source_dm.update_tracker_events
+
+      # Create target model WITH master_id
+      @target_dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test Mastered Tgt Recs',
+        table_name: @target_table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: 'master_id',
+        category: :test,
+        field_list: 'value1',
+        options: <<~YAML
+          _db_columns:
+            value1:
+              type: string
+        YAML
+      )
+      @target_dm.update_tracker_events
+
+      change_setting('AllowDynamicMigrations', nil)
+    end
+
+    after :all do
+      DynamicModel.active.where(table_name: @source_table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.active.where(table_name: @target_table_name).each { |dm| dm.disable!(@admin) }
+    end
+
+    before :example do
+      create_user
+      @master = create_master
+      setup_access :dynamic_model__test_standalone_src_recs, user: @user
+      setup_access :dynamic_model__test_mastered_tgt_recs, user: @user
+    end
+
+    it 'creates a mastered target record when source has no master and in: none is set' do
+      source_class = DynamicModel::TestStandaloneSrcRec
+      expect(source_class.no_master_association).to be true
+
+      source_record = source_class.create!(value1: 'source value', current_user: @user)
+
+      config = {
+        dynamic_model__test_mastered_tgt_rec: {
+          in: 'none',
+          force_create: true,
+          force_not_valid: true,
+          with: { master_id: @master.id, value1: 'target from standalone' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, source_record)
+      @trigger.perform
+
+      created_item = source_record.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestMasteredTgtRec
+      expect(created_item.value1).to eq 'target from standalone'
+      expect(created_item.master_id).to eq @master.id
+      expect(source_record.save_trigger_results['created_references'].last).to be_nil
+      expect(source_record.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'finds an existing mastered target with in: none when source has no master' do
+      source_class = DynamicModel::TestStandaloneSrcRec
+      target_class = DynamicModel::TestMasteredTgtRec
+
+      source_record = source_class.create!(value1: 'source existing test', current_user: @user)
+      existing_target = target_class.create!(master_id: @master.id,
+                                             value1: 'existing target',
+                                             current_user: @user)
+
+      config = {
+        dynamic_model__test_mastered_tgt_rec: {
+          in: 'none',
+          force_create: true,
+          to_existing_record: {
+            record_id: existing_target.id
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, source_record)
+      @trigger.perform
+
+      created_item = source_record.save_trigger_results['created_items'].last
+      expect(created_item).to eq existing_target
+      expect(created_item.id).to eq existing_target.id
+      expect(source_record.save_trigger_results['created_references'].last).to be_nil
+      expect(source_record.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a mastered target record when source has no master and in: master is set' do
+      source_class = DynamicModel::TestStandaloneSrcRec
+      source_record = source_class.create!(value1: 'source master test', current_user: @user)
+
+      config = {
+        dynamic_model__test_mastered_tgt_rec: {
+          in: 'master',
+          force_create: true,
+          force_not_valid: true,
+          with: { master_id: @master.id, value1: 'target via master mode' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, source_record)
+      @trigger.perform
+
+      created_item = source_record.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestMasteredTgtRec
+      expect(created_item.value1).to eq 'target via master mode'
+      expect(source_record.save_trigger_results['created_references'].last).to be_nil
+      expect(source_record.save_trigger_results['created_results'].last).to eq true
     end
   end
 end
