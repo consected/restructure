@@ -5,21 +5,27 @@ module Formatter
     HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/
     TagnameRegExString = '[0-9a-zA-Z_.:\-]+'
 
-    # Gets an array of 5 element arrays for each {(#if <tagname>}}true text{{else}}else text{{/if}}
-    # - the full matched block
-    # - tagname
-    # - true text
-    # - truthy if there is an {{else}}
-    # - else text
-    IfBlockRegEx = %r{({{#if +(#{TagnameRegExString})}}(.+?)({{else if +(#{TagnameRegExString})}}(.+?))?({{else}}(.+?))?{{/if}})}m
+    # Matches an if block: {{#if tagname}}content{{/if}}
+    # Content may include {{else if tagname}} and {{else}} clauses which are parsed iteratively
+    # Capture groups: [0] full match, [1] initial tag, [2] full inner content
+    IfBlockRegEx = %r{({{#if +(#{TagnameRegExString})}}(.+?){{/if}})}m
+
+    # Boundary regex for splitting {{else if tagname}} clauses within an if block
+    ElseIfBoundaryRegEx = /{{else if +(#{TagnameRegExString})}}/
 
     StartQuote = '["\'‘“]'
     EndQuote = '["\'’”]'
     NotEndQuote = '[^"\'’”]'
     IsOperator = '(.+?)'
-    MaxElseIfs = 2
     IsConditions = "([0-9a-zA-Z_.:-]+) +#{StartQuote}#{IsOperator}#{EndQuote} +(#{StartQuote}?.+?#{EndQuote}?)"
-    IsBlockRegEx = %r{({{#is +#{IsConditions}}}(.+?)?({{else is +#{IsConditions}}}(.+?))?({{else is +#{IsConditions}}}(.+?))?({{else}}(.+?))?{{/is}})}m
+
+    # Matches an is block: {{#is condition}}content{{/is}}
+    # Content may include {{else is condition}} and {{else}} clauses which are parsed iteratively
+    # Capture groups: [0] full match, [1] tag, [2] operator, [3] expression, [4] full inner content
+    IsBlockRegEx = %r{({{#is +#{IsConditions}}}(.+?){{/is}})}m
+
+    # Boundary regex for splitting {{else is condition}} clauses within an is block
+    ElseIsBoundaryRegEx = /{{else is +#{IsConditions}}}/
     OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/
 
     FunctionalDirectives = %w[shortlink].freeze
@@ -67,68 +73,47 @@ module Formatter
       # Only setup data if there are double curly brackets
       sub_data = setup_data(data) if all_content.index('{{')
 
-      # Replace each if block {{#if ...}}...(optional {{else}}...){{/if}}
+      # Replace each if block {{#if ...}}...(optional {{else if ...}}...)...(optional {{else}}...){{/if}}
       if_blocks = all_content.scan(IfBlockRegEx)
       if_blocks.each do |if_block|
         block_container = if_block[0]
-        tag = if_block[1]
-        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
-        else_if_block = if_block[3]
-        else_if_tag = if_block[4]
+        initial_tag = if_block[1]
+        inner_content = if_block[2]
 
-        # Handle {{if}}
-        sub_text = if_block[2] || '' if tag_value.present?
+        clauses, else_content = parse_if_clauses(initial_tag, inner_content)
 
-        if !sub_text && else_if_block
-          else_if_tag_value = value_for_tag(else_if_tag, sub_data, tag_subs: nil, ignore_missing: true)
-          sub_text = if_block[5] || '' if else_if_tag_value.present?
+        sub_text = nil
+        clauses.each do |tag, clause_content|
+          tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true)
+          if tag_value.present?
+            sub_text = clause_content || ''
+            break
+          end
         end
 
-        # Handle {{else}}
-        sub_text ||= if_block[7] || ''
-
+        sub_text ||= else_content || ''
         all_content.sub!(block_container, sub_text)
       end
 
-      # Replace each if block {{#is ...}}...(optional {{else}}...){{/is}}
+      # Replace each is block {{#is ...}}...(optional {{else is ...}}...)...(optional {{else}}...){{/is}}
       is_blocks = all_content.scan(IsBlockRegEx)
       is_blocks.each do |is_block|
         block_container = is_block[0]
-        tag = is_block[1]
-        tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
-        op = is_block[2]
-        exp = is_block[3]
-        comp = eval_is_comp(op, tag_value, exp, sub_data, is_block:)
+        inner_content = is_block[4]
 
-        # Handle {{is}}
-        sub_text = is_block[4] || '' if comp
+        clauses, else_content = parse_is_clauses(is_block[1], is_block[2], is_block[3], inner_content)
 
-        iters = 1
-        start_pos = iters * 5
-        else_is_block = is_block[start_pos]
-        while !sub_text && else_is_block
-          else_is_tag = is_block[start_pos + 1]
-          else_is_op = is_block[start_pos + 2]
-          else_is_exp = is_block[start_pos + 3]
-          else_is_tag_value = value_for_tag(else_is_tag, sub_data, tag_subs: nil, ignore_missing: true,
-                                                                   original_type: true)
-          comp = eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, sub_data, is_block:)
-
+        sub_text = nil
+        clauses.each do |tag, op, exp, clause_content|
+          tag_value = value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: true, original_type: true)
+          comp = eval_is_comp(op, tag_value, exp, sub_data, is_block: [block_container])
           if comp
-            sub_text = is_block[start_pos + 4] || ''
+            sub_text = clause_content || ''
             break
           end
-
-          iters += 1
-          break if iters > MaxElseIfs
-
-          start_pos = iters * 5
-          else_is_block = is_block[start_pos]
         end
 
-        # Handle {{else}}
-        sub_text ||= is_block[16] || ''
-
+        sub_text ||= else_content || ''
         all_content.sub!(block_container, sub_text)
       end
 
@@ -371,6 +356,98 @@ module Formatter
     end
 
     ##### The following methods are not intended for use outside this class ######
+
+    # Parse the inner content of an if block into an array of [tag, content] clauses
+    # and an optional else content string.
+    # @param initial_tag [String] the tag from the {{#if tag}} opener
+    # @param inner_content [String] everything between {{#if tag}} and {{/if}}
+    # @return [Array<Array(String, String)>, String|nil] clauses and else_content
+    def self.parse_if_clauses(initial_tag, inner_content)
+      clauses = []
+      else_content = nil
+      remaining = inner_content
+      current_tag = initial_tag
+
+      while remaining
+        # Look for the next {{else if tag}} or {{else}} boundary
+        else_if_match = remaining.match(ElseIfBoundaryRegEx)
+        else_match = remaining.match(/{{else}}/)
+
+        # Determine which boundary comes first
+        next_boundary = nil
+        if else_if_match && else_match
+          next_boundary = else_if_match.begin(0) < else_match.begin(0) ? :else_if : :else
+        elsif else_if_match
+          next_boundary = :else_if
+        elsif else_match
+          next_boundary = :else
+        end
+
+        case next_boundary
+        when :else_if
+          clauses << [current_tag, remaining[0...else_if_match.begin(0)]]
+          current_tag = else_if_match[1]
+          remaining = remaining[else_if_match.end(0)..]
+        when :else
+          clauses << [current_tag, remaining[0...else_match.begin(0)]]
+          else_content = remaining[else_match.end(0)..]
+          break
+        else
+          clauses << [current_tag, remaining]
+          break
+        end
+      end
+
+      [clauses, else_content]
+    end
+
+    # Parse the inner content of an is block into an array of [tag, op, exp, content] clauses
+    # and an optional else content string.
+    # @param initial_tag [String] the tag from the {{#is}} opener
+    # @param initial_op [String] the operator from the {{#is}} opener
+    # @param initial_exp [String] the expression from the {{#is}} opener
+    # @param inner_content [String] everything between {{#is ...}} and {{/is}}
+    # @return [Array<Array(String, String, String, String)>, String|nil] clauses and else_content
+    def self.parse_is_clauses(initial_tag, initial_op, initial_exp, inner_content)
+      clauses = []
+      else_content = nil
+      remaining = inner_content
+      current_tag = initial_tag
+      current_op = initial_op
+      current_exp = initial_exp
+
+      while remaining
+        else_is_match = remaining.match(ElseIsBoundaryRegEx)
+        else_match = remaining.match(/{{else}}/)
+
+        next_boundary = nil
+        if else_is_match && else_match
+          next_boundary = else_is_match.begin(0) < else_match.begin(0) ? :else_is : :else
+        elsif else_is_match
+          next_boundary = :else_is
+        elsif else_match
+          next_boundary = :else
+        end
+
+        case next_boundary
+        when :else_is
+          clauses << [current_tag, current_op, current_exp, remaining[0...else_is_match.begin(0)]]
+          current_tag = else_is_match[1]
+          current_op = else_is_match[2]
+          current_exp = else_is_match[3]
+          remaining = remaining[else_is_match.end(0)..]
+        when :else
+          clauses << [current_tag, current_op, current_exp, remaining[0...else_match.begin(0)]]
+          else_content = remaining[else_match.end(0)..]
+          break
+        else
+          clauses << [current_tag, current_op, current_exp, remaining]
+          break
+        end
+      end
+
+      [clauses, else_content]
+    end
 
     # if the item has its own referenced item (much like an activity log might), then get it
     def self.setup_data_for_referenced_item(data, item)
