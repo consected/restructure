@@ -8,6 +8,7 @@ module OptionConfigs
       trigger_name :log
       pattern :named_entry
       allowed_keys %i[if message severity on_complete on_failure]
+      standard_hook_key_types
       key_type :string, :message, :severity
     end
   end

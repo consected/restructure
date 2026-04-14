@@ -8,6 +8,8 @@ module OptionConfigs
       trigger_name :add_tracker
       pattern :named_entry
       allowed_keys %i[if with on_complete on_failure]
+      standard_hook_key_types
+      key_type :hash, :with
     end
   end
 end

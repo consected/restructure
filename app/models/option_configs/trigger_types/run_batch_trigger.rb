@@ -8,6 +8,7 @@ module OptionConfigs
       trigger_name :run_batch_trigger
       pattern :named_entry
       allowed_keys %i[if resource_name mode limit on_complete on_failure]
+      standard_hook_key_types
       key_type :string, :resource_name, :mode
       key_type :integer, :limit
     end

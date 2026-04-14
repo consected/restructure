@@ -8,6 +8,7 @@ module OptionConfigs
       trigger_name :reload_this
       pattern :direct_config
       allowed_keys %i[if on_complete on_failure]
+      standard_hook_key_types
     end
   end
 end

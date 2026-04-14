@@ -52,7 +52,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
     it 'maps each key to a class that inherits from Base' do
       base.registered_types.each_value do |klass|
         expect(klass.ancestors).to include(base),
-                                    "Expected #{klass} to inherit from #{base}"
+                                   "Expected #{klass} to inherit from #{base}"
       end
     end
   end
@@ -61,7 +61,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
     it 'direct-config types return :direct_config pattern' do
       %i[change_user_roles set_item_flags create_filestore_container reload_this].each do |name|
         expect(base.for(name).pattern).to eq(:direct_config),
-                                           "Expected #{name} to have :direct_config pattern"
+                                          "Expected #{name} to have :direct_config pattern"
       end
     end
 
@@ -73,14 +73,14 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
       ]
       named.each do |name|
         expect(base.for(name).pattern).to eq(:named_entry),
-                                           "Expected #{name} to have :named_entry pattern"
+                                          "Expected #{name} to have :named_entry pattern"
       end
     end
 
     it 'delegate types return :delegate pattern' do
       %i[transaction background case].each do |name|
         expect(base.for(name).pattern).to eq(:delegate),
-                                           "Expected #{name} to have :delegate pattern"
+                                          "Expected #{name} to have :delegate pattern"
       end
     end
   end
@@ -93,7 +93,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         type_class = base.for(name)
         universal_keys.each do |key|
           expect(type_class.allowed_keys).to include(key),
-                                              "Expected #{name} allowed_keys to include :#{key}"
+                                             "Expected #{name} allowed_keys to include :#{key}"
         end
       end
     end
@@ -108,7 +108,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         type_class = base.for(name)
         universal_keys.each do |key|
           expect(type_class.allowed_keys).to include(key),
-                                              "Expected #{name} allowed_keys to include :#{key}"
+                                             "Expected #{name} allowed_keys to include :#{key}"
         end
       end
     end
@@ -118,6 +118,21 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         type_class = base.for(name)
         expect(type_class.allowed_keys).to be_nil.or(be_empty),
                                            "Expected #{name} to have no allowed_keys"
+      end
+    end
+  end
+
+  describe 'key type coverage' do
+    it 'all non-delegate types declare key_type rules for every allowed key' do
+      base.registered_types.each do |name, type_class|
+        next if type_class.pattern == :delegate
+
+        expect(type_class.allowed_keys).to be_present,
+                                           "Expected #{name} to define allowed_keys"
+
+        missing = type_class.allowed_keys - type_class.key_type_rules.keys
+        expect(missing).to be_empty,
+                           "Expected #{name} to define key_type rules for keys #{missing}"
       end
     end
   end

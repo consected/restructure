@@ -8,7 +8,9 @@ module OptionConfigs
       trigger_name :set_save_trigger_results
       pattern :named_entry
       allowed_keys %i[if element value on_complete on_failure]
+      standard_hook_key_types
       key_type :string, :element
+      key_type :scalar_or_array_or_hash, :value
     end
   end
 end

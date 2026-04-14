@@ -33,8 +33,9 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(%i[if add_role_names remove_role_names on_complete on_failure])
     end
 
-    it 'declares no key_type_rules' do
-      expect(type_class.key_type_rules).to be_empty
+    it 'declares key_type_rules for every allowed key' do
+      missing = type_class.allowed_keys - type_class.key_type_rules.keys
+      expect(missing).to be_empty
     end
   end
 
@@ -69,10 +70,10 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       )
     end
 
-    it 'declares name, label, create_with_role as :string' do
-      expect(type_class.key_type_rules[:name]).to eq(:string)
-      expect(type_class.key_type_rules[:label]).to eq(:string)
-      expect(type_class.key_type_rules[:create_with_role]).to eq(:string)
+    it 'declares name, label, create_with_role as :string_or_hash' do
+      expect(type_class.key_type_rules[:name]).to eq(:string_or_hash)
+      expect(type_class.key_type_rules[:label]).to eq(:string_or_hash)
+      expect(type_class.key_type_rules[:create_with_role]).to eq(:string_or_hash)
     end
   end
 
@@ -87,8 +88,9 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(%i[if on_complete on_failure])
     end
 
-    it 'declares no key_type_rules' do
-      expect(type_class.key_type_rules).to be_empty
+    it 'declares key_type_rules for every allowed key' do
+      missing = type_class.allowed_keys - type_class.key_type_rules.keys
+      expect(missing).to be_empty
     end
   end
 
@@ -111,8 +113,8 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(expected)
     end
 
-    it 'declares type as :string and ignore_no_recipients as :boolean' do
-      expect(type_class.key_type_rules[:type]).to eq(:string)
+    it 'declares type as :string_or_hash and ignore_no_recipients as :boolean' do
+      expect(type_class.key_type_rules[:type]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:ignore_no_recipients]).to eq(:boolean)
     end
   end
@@ -182,8 +184,9 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(%i[if with on_complete on_failure])
     end
 
-    it 'declares no key_type_rules' do
-      expect(type_class.key_type_rules).to be_empty
+    it 'declares key_type_rules for every allowed key' do
+      missing = type_class.allowed_keys - type_class.key_type_rules.keys
+      expect(missing).to be_empty
     end
   end
 
@@ -202,9 +205,9 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(expected)
     end
 
-    it 'declares force_not_editable_save as :boolean and method as :string' do
+    it 'declares force_not_editable_save as :boolean and method as :string_or_hash' do
       expect(type_class.key_type_rules[:force_not_editable_save]).to eq(:boolean)
-      expect(type_class.key_type_rules[:method]).to eq(:string)
+      expect(type_class.key_type_rules[:method]).to eq(:string_or_hash)
     end
   end
 
@@ -291,9 +294,9 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(expected)
     end
 
-    it 'declares content_template_name and content_type as :string, skip_existing and replace as :boolean' do
-      expect(type_class.key_type_rules[:content_template_name]).to eq(:string)
-      expect(type_class.key_type_rules[:content_type]).to eq(:string)
+    it 'declares content_template_name and content_type as :string_or_hash, skip_existing and replace as :boolean' do
+      expect(type_class.key_type_rules[:content_template_name]).to eq(:string_or_hash)
+      expect(type_class.key_type_rules[:content_type]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:skip_existing]).to eq(:boolean)
       expect(type_class.key_type_rules[:replace]).to eq(:boolean)
     end
@@ -314,10 +317,10 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       expect(type_class.allowed_keys).to match_array(expected)
     end
 
-    it 'declares study, project_name, method as :string and force_not_editable_save as :boolean' do
-      expect(type_class.key_type_rules[:study]).to eq(:string)
-      expect(type_class.key_type_rules[:project_name]).to eq(:string)
-      expect(type_class.key_type_rules[:method]).to eq(:string)
+    it 'declares study, project_name, method as :string_or_hash and force_not_editable_save as :boolean' do
+      expect(type_class.key_type_rules[:study]).to eq(:string_or_hash)
+      expect(type_class.key_type_rules[:project_name]).to eq(:string_or_hash)
+      expect(type_class.key_type_rules[:method]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:force_not_editable_save]).to eq(:boolean)
     end
   end

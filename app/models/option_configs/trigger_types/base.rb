@@ -18,8 +18,27 @@ module OptionConfigs
     #     key_type :boolean, :ignore_no_recipients
     #   end
     class Base
-      KEY_TYPE_CHECKERS = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_CHECKERS
-      KEY_TYPE_DESCRIPTIONS = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_DESCRIPTIONS
+      BASE_KEY_TYPE_CHECKERS = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_CHECKERS
+      BASE_KEY_TYPE_DESCRIPTIONS = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_DESCRIPTIONS
+
+      KEY_TYPE_CHECKERS = BASE_KEY_TYPE_CHECKERS.merge(
+        any: ->(_v) { true },
+        array: ->(v) { v.is_a?(Array) },
+        hash_or_array: ->(v) { v.is_a?(Hash) || v.is_a?(Array) },
+        string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
+        scalar_or_array_or_hash: lambda { |v|
+          v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Numeric) ||
+            [true, false, nil].include?(v) || v.is_a?(Array) || v.is_a?(Hash)
+        }
+      ).freeze
+
+      KEY_TYPE_DESCRIPTIONS = BASE_KEY_TYPE_DESCRIPTIONS.merge(
+        any: 'any value',
+        array: 'an Array',
+        hash_or_array: 'a Hash or Array',
+        string_or_hash: 'a string or Hash',
+        scalar_or_array_or_hash: 'a scalar, Array, or Hash'
+      ).freeze
 
       class << self
         # Registry of trigger name → class mappings.
@@ -71,6 +90,13 @@ module OptionConfigs
         def key_type(type_sym, *keys)
           @_key_type_rules ||= {}
           keys.flatten.each { |k| @_key_type_rules[k] = type_sym }
+        end
+
+        # DSL helper: declare standard lifecycle hook key types used by save triggers.
+        # @return [void]
+        def standard_hook_key_types
+          key_type :hash, :if
+          key_type :hash_or_array, :on_complete, :on_failure
         end
 
         # Accessor for key type rules hash.
@@ -153,6 +179,8 @@ module OptionConfigs
         # @return [Array<String>]
         def check_key_types(hash)
           return [] if key_type_rules.empty?
+
+          hash = hash.transform_keys(&:to_sym)
 
           warnings = []
           key_type_rules.each do |key, type_sym|

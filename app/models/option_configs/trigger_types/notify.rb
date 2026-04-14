@@ -13,7 +13,13 @@ module OptionConfigs
         content_template_text subject calendar_invite attachments extra_substitutions
         importance when on_complete on_failure if app_type user
       ]
-      key_type :string, :type
+      standard_hook_key_types
+      key_type :string_or_hash, :type, :role, :list_type, :default_country_code, :layout_template,
+               :content_template, :content_template_text, :subject, :importance, :app_type,
+               :user
+      key_type :scalar_or_array_or_hash, :users, :emails, :phones, :phone_records
+      key_type :hash, :from_user_email, :calendar_invite, :extra_substitutions, :when
+      key_type :array, :attachments
       key_type :boolean, :ignore_no_recipients
     end
   end
