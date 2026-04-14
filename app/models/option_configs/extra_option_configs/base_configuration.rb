@@ -210,6 +210,17 @@ module OptionConfigs
         as_json.to_json(*)
       end
 
+      # Sync all typed attributes to configurations hash for hash-like bracket access.
+      # Consumers of trigger configs expect raw Array/Hash, not TriggerTasks instances.
+      # Extracts `.tasks` from typed attributes that respond to it.
+      # @return [void]
+      def sync_typed_to_configurations
+        self.class.option_types[:typed]&.each do |key|
+          typed = send(key)
+          configurations[key] = typed.respond_to?(:tasks) ? typed.tasks : typed
+        end
+      end
+
       # OptionsHandler persistence stubs — field-keyed configs don't store YAML independently
       def config_text = nil
 

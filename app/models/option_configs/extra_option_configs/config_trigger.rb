@@ -26,13 +26,7 @@ module OptionConfigs
         hash_configuration[:on_define] = od || []
 
         setup_all_options_typed(hash_configuration)
-
-        # Store raw tasks values in configurations for hash-like bracket access.
-        # Consumers expect raw Array/Hash, not TriggerTasks instances.
-        self.class.option_types[:typed].each do |key|
-          typed = send(key)
-          configurations[key] = typed.respond_to?(:tasks) ? typed.tasks : typed
-        end
+        sync_typed_to_configurations
       end
 
       # Returns true when on_define has no tasks.

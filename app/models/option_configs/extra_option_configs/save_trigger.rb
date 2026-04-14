@@ -34,13 +34,7 @@ module OptionConfigs
         cascade_on_save
 
         setup_all_options_typed(config_hash)
-
-        # Store the raw tasks values in configurations for hash-like bracket access.
-        # Consumers expect raw Array/Hash, not TriggerTasks instances.
-        self.class.option_types[:typed].each do |key|
-          typed = send(key)
-          configurations[key] = typed.respond_to?(:tasks) ? typed.tasks : typed
-        end
+        sync_typed_to_configurations
       end
 
       # Returns true if no trigger tasks are configured on any key.
