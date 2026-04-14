@@ -46,7 +46,8 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
           @item.transaction do
             # Resolve the target model class to check for standalone models
             target_model = Resources::Models.find_by(resource_name: model_name.to_s.pluralize)&.dig(:model)
-            standalone = target_model&.no_master_association
+            create_without_reference = %w[master none].include?(create_in.to_s)
+            standalone = target_model&.no_master_association || (create_without_reference && in_master.nil?)
 
             # Standalone models have no master association — use the model class directly
             new_type = if standalone
