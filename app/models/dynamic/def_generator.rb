@@ -331,7 +331,7 @@ module Dynamic
     # ActiveRecord::Encryption.
     # @param [Class] impl_class - the generated implementation class
     def apply_encrypted_attributes(impl_class)
-      return unless db_columns.is_a?(Hash)
+      return if db_columns.blank?
 
       encrypted_fields = db_columns.select { |_field, config| config.is_a?(Hash) && config[:encrypted] }
       return if encrypted_fields.empty?

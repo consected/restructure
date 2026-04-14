@@ -135,7 +135,9 @@ module OptionConfigs
         collect_field_config_errors
 
         # Handle config_obj mutation for db_configs (extracted from clean_db_configs_def)
-        config_obj.db_columns ||= db_configs.symbolize_keys if config_obj.respond_to?(:db_columns)
+        if config_obj.respond_to?(:db_columns) && config_obj.db_columns.blank?
+          config_obj.db_columns.merge!(db_configs.symbolize_keys)
+        end
 
         # raw_field_configs is saved inside FieldConfigs.prepare_config (before standalone cleaning)
         # Now merge cleaned standalone definitions into field_configs
@@ -346,7 +348,7 @@ module OptionConfigs
       set_defaults config_obj, loaded_config
 
       config_obj.table_comments = ExtraOptionConfigs::Comments.new(loaded_config.delete(:_comments) || {})
-      config_obj.db_columns = loaded_config.delete(:_db_columns)
+      config_obj.db_columns = ExtraOptionConfigs::DbColumns.new(loaded_config.delete(:_db_columns) || {})
       config_obj.data_dictionary = ExtraOptionConfigs::DataDictionaryConfig.new(loaded_config.delete(:_data_dictionary) || {})
       config_obj.options_constants = ExtraOptionConfigs::Constants.new(options_based_on_keys_stating_with('_constants', loaded_config) || {})
 
