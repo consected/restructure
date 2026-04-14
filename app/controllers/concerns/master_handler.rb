@@ -33,8 +33,7 @@ module MasterHandler
   # so simply add a parameter like :cache_version => current timestamp to force new data
   def index
     index_res = if params[:cache_result].present?
-                  response.headers['Cache-Control'] = 'max-age=30'
-                  response.headers.delete 'Expires'
+                  set_browser_cache(max_age: 30)
                   return unless stale?(etag: index_cache_key)
 
                   Rails.cache.fetch(index_cache_key) do
