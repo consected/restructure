@@ -1,0 +1,5 @@
+# Keys to be applied to all dynamic definitions. These
+# definitions will take precedence by replacing the later key definitions.
+_override:
+  key1: applied to all dynamic definitions
+  key2: applied to all dynamic definitions

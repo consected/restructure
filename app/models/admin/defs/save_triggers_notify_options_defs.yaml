@@ -1,115 +1,138 @@
-
 # Save Trigger: Notify options
         # An array of definitions allowing multiple notifications to be specified
         # for a single trigger.  
-        - type: 'email|sms'
-          role: |
-            (optional) role name(s) to notify. Supports:
-            - literal string: 'admin'
-            - conditional reference: {this: {user_id: return_value}}
-            - simple template: '{{field_name}}' substitutes field value as string
-            - raw template: '{{{field_name}}}' substitutes field value preserving type
-          
-          users: |
-            (optional) list of user IDs to notify. Supports:
-            - literal value: 123
-            - array of literals: [123, 456]
-            - conditional reference with single value: {this: {user_id: return_value}}
-            - conditional reference with list: {activity_log__player_contact_phones: {master_id: <id>, user_id: return_value_list}}
-            - simple template: '{{user_id}}' substitutes field value as string
-            - raw template: '{{{user_id}}}' substitutes field value preserving type (e.g., Integer)
+        notify:
+          - type: 'email|sms'
+            role: |
+              (optional) role name(s) to notify. Supports:
+              - literal string: 'admin'
+              - conditional reference: {this: {user_id: return_value}}
+              - simple template: '{{field_name}}' substitutes field value as string
+              - raw template: '{{{field_name}}}' substitutes field value preserving type
             
-            Note: return_value_list retrieves an array of values from matching records
-          
-          emails: |
-            (optional) list of email addresses - not necessarily users. Supports:
-            - literal string: 'admin@example.com'
-            - array of literals: ['admin@example.com', 'manager@example.com']
-            - conditional reference with single value: {this: {email: return_value}}
-            - conditional reference with list: {player_contacts: {rec_type: email, data: return_value_list}}
-            - simple template: '{{player_contact_emails.data}}' substitutes associated record field(s)
+            users: |
+              (optional) list of user IDs to notify. Supports:
+              - literal value: 123
+              - array of literals: [123, 456]
+              - conditional reference with single value: {this: {user_id: return_value}}
+              - conditional reference with list: {activity_log__player_contact_phones: {master_id: <id>, user_id: return_value_list}}
+              - simple template: '{{user_id}}' substitutes field value as string
+              - raw template: '{{{user_id}}}' substitutes field value preserving type (e.g., Integer)
+              
+              Note: return_value_list retrieves an array of values from matching records
             
-            Note: return_value_list retrieves an array of values from matching records.
-            Template substitutions for associations return arrays (e.g., ['email1@test.com', 'email2@test.com'])
-          
-          phones: |
-            (optional) list of phone numbers to notify. Supports:
-            - literal string: '+16175550118'
-            - array of literals: ['+16175550118', '+16175550104']
-            - conditional reference with single value: {this: {phone: return_value}}
-            - conditional reference with list: {player_contacts: {rec_type: phone, data: return_value_list}}
-            - simple template: '{{data}}' substitutes field value as string
+            emails: |
+              (optional) list of email addresses - not necessarily users. Supports:
+              - literal string: 'admin@example.com'
+              - array of literals: ['admin@example.com', 'manager@example.com']
+              - conditional reference with single value: {this: {email: return_value}}
+              - conditional reference with list: {player_contacts: {rec_type: email, data: return_value_list}}
+              - simple template: '{{player_contact_emails.data}}' substitutes associated record field(s)
+              
+              Note: return_value_list retrieves an array of values from matching records.
+              Template substitutions for associations return arrays (e.g., ['email1@test.com', 'email2@test.com'])
             
-            Note: return_value_list retrieves an array of phone numbers from matching records.
-            Phone numbers are automatically cleaned and formatted with the specified default_country_code
-          phone_records: |
-            (optional) conditional reference to retrieve phone record IDs. Uses return_value_list
-            to get an array of record IDs from an associated model. Requires list_type to specify
-            the model class to use for retrieving the actual phone records.
+            phones: |
+              (optional) list of phone numbers to notify. Supports:
+              - literal string: '+16175550118'
+              - array of literals: ['+16175550118', '+16175550104']
+              - conditional reference with single value: {this: {phone: return_value}}
+              - conditional reference with list: {player_contacts: {rec_type: phone, data: return_value_list}}
+              - simple template: '{{data}}' substitutes field value as string
+              
+              Note: return_value_list retrieves an array of phone numbers from matching records.
+              Phone numbers are automatically cleaned and formatted with the specified default_country_code
+            phone_records: |
+              (optional) conditional reference to retrieve phone record IDs. Uses return_value_list
+              to get an array of record IDs from an associated model. Requires list_type to specify
+              the model class to use for retrieving the actual phone records.
+              
+              Example configuration:
+                dynamic_model__zeus_bulk_message_recipients:
+                  zeus_bulk_message_id:
+                    parent_references:
+                      dynamic_model__zeus_bulk_messages: 'id'
+                  disabled: false
+                  id: 'return_value_list'
             
-            Example configuration:
-              dynamic_model__zeus_bulk_message_recipients:
-                zeus_bulk_message_id:
-                  parent_references:
-                    dynamic_model__zeus_bulk_messages: 'id'
-                disabled: false
-                id: 'return_value_list'
-          
-          list_type: |
-            (required with phone_records) association name to use to retrieve phone records.
-            Specifies the model class that phone_records IDs belong to.
-            
-            For example: dynamic_model__zeus_bulk_message_recipients
+            list_type: |
+              (required with phone_records) association name to use to retrieve phone records.
+              Specifies the model class that phone_records IDs belong to.
+              
+              For example: dynamic_model__zeus_bulk_message_recipients
 
-          default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified'
-          from_user_email:
-            address: 'email address the message should appear to be from'
-            display_name: 'display name for email address'
-          
-          "from_user_email(alternative)": 'string email address'
-          ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
-
-          layout_template: 'name of layout template'
-          content_template: 'name of content template'
-          content_template_text: |
-            alternative content template text (instead of content_template). Supports:
-            - literal string: 'Your message here'
-            - conditional reference: {this: {importance_level: return_value}}
-            - simple template: '{{field_name}}' substitutes field value into the text
+            default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified'
+            from_user_email:
+              address: 'email address the message should appear to be from'
+              display_name: 'display name for email address'
             
-            Note: Any template substitutions will be made when the content_template_text value
-            is first used. This result may include further curly templates, which
-            will be processed when the message is sent. In this way, stored records may be used to
-            represent templates, which are then rendered with current data at send time.
-          
-          subject: 'subject text'
-          extra_substitutions:
-            data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
-          
-          importance: |
-            transactional (default) | promotional. Supports:
-            - literal string: 'Promotional'
-            - conditional reference: {this: {importance_level: return_value}}
-            - simple template: '{{select_result}}' substitutes field value as string
+            "from_user_email(alternative)": 'string email address'
+            ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+
+            layout_template: 'name of layout template'
+            content_template: 'name of content template'
+            content_template_text: |
+              alternative content template text (instead of content_template). Supports:
+              - literal string: 'Your message here'
+              - conditional reference: {this: {importance_level: return_value}}
+              - simple template: '{{field_name}}' substitutes field value into the text
+              
+              Note: Any template substitutions will be made when the content_template_text value
+              is first used. This result may include further curly templates, which
+              will be processed when the message is sent. In this way, stored records may be used to
+              represent templates, which are then rendered with current data at send time.
             
-            Used for email categorization and compliance with anti-spam regulations
-          
-          when:
-            wait_until: |
-              (optional) one of
-              - ISO date
-              - {date:..., time..., zone:...}  
-                where zone is one specified in MAPPINGS @ 
-                https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
+            subject: 'subject text'
+            calendar_invite:
+              method: '(optional, default: REQUEST) REQUEST|CANCEL - RFC 5545 method (case insensitive)'
+              summary: 'event title - supports {{curly}} substitutions'
+              description: '(optional) event description (plain text) - supports {{curly}} substitutions'
+              location: '(optional) event location - supports {{curly}} substitutions'
+              dtstart: 'start datetime (ISO format or parseable string) - supports {{curly}} substitutions'
+              dtend: '(optional if duration provided) end datetime (ISO format or parseable string) - supports {{curly}} substitutions'
+              duration: '(optional) event duration string (e.g. "90 minutes", "1 hour", "2 days") - used to calculate dtend from dtstart when dtend is not provided'
+              organizer: 'organizer email address - supports {{curly}} substitutions'
+              uid: '(optional, default: auto-generated UUID) unique event identifier - supports {{curly}} substitutions'
+              sequence: '(optional, default: 0) event revision sequence number'
 
-            wait: |
-              Time to wait from now before sending, in the form:
-              <n> seconds|minutes|hours|days|weeks|months|years
-          
-          on_complete: |
-            triggers to run when send has completed, for example update_reference:...
+            attachments:
+              - container_id: |
+                  NfsStore container ID containing the file to attach.
+                  Supports {{curly}} substitutions resolved at trigger time.
+                path: |
+                  (optional) path within the container (empty string for root).
+                  Supports {{curly}} substitutions resolved at trigger time.
+                file_name: |
+                  filename of the NfsStore stored file to attach.
+                  Supports {{curly}} substitutions resolved at trigger time.
 
-          if: if_extras
+            extra_substitutions:
+              data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
+            
+            importance: |
+              transactional (default) | promotional. Supports:
+              - literal string: 'Promotional'
+              - conditional reference: {this: {importance_level: return_value}}
+              - simple template: '{{select_result}}' substitutes field value as string
+              
+              Used for email categorization and compliance with anti-spam regulations
+            
+            when:
+              wait_until: |
+                (optional) one of
+                - ISO date
+                - {date:..., time..., zone:...}  
+                  where zone is one specified in MAPPINGS @ 
+                  https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
 
-          app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
-          user: optionally specify a user id (or email) to force use of the specified user when perfoming actions
+              wait: |
+                Time to wait from now before sending, in the form:
+                <n> seconds|minutes|hours|days|weeks|months|years
+            
+            on_complete: |
+              triggers to run when send has completed, for example update_reference:...
+
+            if: if_extras
+
+            app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
+            user: optionally specify a user id (or email) to force use of the specified user when perfoming actions

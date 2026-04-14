@@ -11,6 +11,8 @@ module OptionConfigs
     ValidValidIfTriggers = %i[on_create on_save on_update].freeze
     ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    # Top-level YAML keys in libraries that must be renamed to avoid collisions when injected
+    LibraryKeyRenamePatterns = %w[_definitions _default].freeze
     ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
     def self.base_key_attributes
@@ -19,6 +21,7 @@ module OptionConfigs
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger embed references
         show_if_condition_strings batch_trigger config_trigger preset_fields field_configs raw_field_configs
+        set_variables
       ]
     end
 
@@ -82,6 +85,7 @@ module OptionConfigs
         clean_batch_triggers
         clean_config_triggers
         clean_preset_fields
+        clean_set_variables_def
 
         # Add the cleaned values back into field_configs - save a raw version for use elsewhere
         # This needs to be "deep cloned", to avoid a simple clone just copying references
@@ -295,7 +299,7 @@ module OptionConfigs
         references.each do |refitem|
           # Make all keys singular, to simplify configurations
           add_refitem = {}
-          refitem.each do |k, _v|
+          refitem.each_key do |k|
             if k.to_s != k.to_s.singularize
               new_k = k.to_s.singularize.to_sym
               add_refitem[new_k] = refitem.delete(k)
@@ -317,11 +321,11 @@ module OptionConfigs
 
         # Make all keys singular, to simplify configurations
         # The changes can't be made directly inside the iteration, so handle it in two steps
-        references.each do |k, _v|
+        references.each_key do |k|
           fix_refs[k] = references[k] if k.to_s != k.to_s.singularize
         end
 
-        fix_refs.each do |k, _v|
+        fix_refs.each_key do |k|
           new_k = k.to_s.singularize.to_sym
           references[new_k] = references.delete(k)
         end
@@ -336,7 +340,7 @@ module OptionConfigs
 
       self.references = new_ref
 
-      references.each do |_k, refitem|
+      references.each_value do |refitem|
         self.bad_ref_items = []
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
@@ -358,10 +362,10 @@ module OptionConfigs
               refitem[mn][:no_master_association] = to_class.no_master_association
             end
 
-            refitem[mn][:to_model_name_us] = to_class.to_s&.ns_underscore
+            refitem[mn][:to_model_name_us] = to_class.to_s.ns_underscore
             refitem[mn][:to_model_class_name] = to_class.to_s
             refitem[mn][:to_table_name] = to_class.table_name
-            tsn = nil
+            nil
 
             if to_class.respond_to?(:definition)
               cd = to_class.definition
@@ -452,6 +456,29 @@ module OptionConfigs
       self.preset_fields = self.preset_fields.symbolize_keys
     end
 
+    #
+    # Validate and clean the set_variables definition.
+    # set_variables accepts an ordered array of variable definitions,
+    # each with :name, :value, and optional :if condition.
+    def clean_set_variables_def
+      return if set_variables.blank?
+
+      unless set_variables.is_a?(Array)
+        failed_config :set_variables, 'must be an array of variable definitions'
+        self.set_variables = []
+        return
+      end
+
+      self.set_variables = set_variables.map do |entry|
+        entry = entry.symbolize_keys if entry.is_a?(Hash)
+        unless entry.is_a?(Hash) && entry[:name].present? && entry.key?(:value)
+          failed_config :set_variables, "each entry must have 'name' and 'value' keys"
+          next nil
+        end
+        entry
+      end.compact
+    end
+
     def clean_field_configs
       fla = fields
       if field_configs.nil?
@@ -463,7 +490,7 @@ module OptionConfigs
         self.field_configs = self.field_configs.symbolize_keys
         failed = false
         field_configs.each do |fname, fconfig|
-          unless fconfig&.is_a? Hash
+          unless fconfig.is_a? Hash
             failed_config :field_configs, "field '#{fname}' is not a Hash"
             failed = true
             self.field_configs[fname] = {}
@@ -603,8 +630,43 @@ module OptionConfigs
       end
 
       config_text = prepend_standard_definitions(config_text)
-      config_text = include_libraries(config_text)
-      config_text = config_text.gsub(/^---.*\n/, '')
+
+      # If the config_obj is a versioned definition (from history), pass its timestamp
+      # so that config libraries are resolved at the same point in time.
+      # Skip versioned library resolution when:
+      #   - Settings::DisableVDef is true (versioning disabled globally, e.g. development)
+      #   - use_current_version is set on the definition (always uses latest)
+      version_at = nil
+      if !(Settings::DisableVDef ||
+           (config_obj.respond_to?(:use_current_version) && config_obj.use_current_version)) &&
+         config_obj.respond_to?(:def_version) && config_obj.def_version.present?
+        version_at = config_obj.updated_at || config_obj.created_at
+      end
+
+      config_text = include_libraries(config_text, version_at:)
+      config_text.gsub(/^---.*\n/, '')
+    end
+
+    #
+    # Parse the options text then dump it back to clean YAML with anchors resolved
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @return [String | nil] clean YAML string with anchors resolved, or nil if blank
+    def self.parsed_options_text(config_obj)
+      loaded_config = parse_options_text(config_obj)
+      return nil unless loaded_config.is_a?(Hash) && loaded_config.present?
+
+      # Remove internal keys that are not part of the option type configurations,
+      # matching the cleanup in parse_config. Keys like _default, _merge_default,
+      # _merge_override and _override are retained for handle_defaults_merges_overrides.
+      %i[_comments _db_columns _data_dictionary _constants].each { |k| loaded_config.delete(k) }
+      loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
+      options_based_on_keys_stating_with('_configurations', loaded_config)
+
+      hash_results = {}
+      handle_defaults_merges_overrides(config_obj, loaded_config, hash_results:)
+      return nil if hash_results.blank?
+
+      String.yaml_dump(hash_results)
     end
 
     #
@@ -626,8 +688,8 @@ module OptionConfigs
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
-            puts e
-            puts errtext
+            $stderr.puts e
+            $stderr.puts errtext
           end
 
           bt = ["#{e.class.name} #{e}"] + [errtext]
@@ -652,7 +714,7 @@ module OptionConfigs
     # @param [ActiveRecord::Base] config_obj dynamic definition record
     # @param [Hash] loaded_config configuration hash
     # @return [Array] configuration instances
-    def self.handle_defaults_merges_overrides(config_obj, loaded_config)
+    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {})
       configs = []
 
       # Handle any entry starting with "_default"
@@ -681,6 +743,7 @@ module OptionConfigs
           # If defined, use the optional _override entry to replace individual options.
           value = value.deep_dup.merge(opt_override) if opt_override
         end
+        hash_results[name] = value
         i = new name, value, config_obj
         configs << i
       end
@@ -962,10 +1025,12 @@ module OptionConfigs
     end
 
     #
-    # Inject config libraries into the provided content
-    # @param [String] content_to_update (will not be updated)
+    # Inject config libraries into the provided content.
+    # When version_at is provided, resolves library content as it was at that point in time.
+    # @param content_to_update [String] (will not be modified)
+    # @param version_at [Time | nil] optional timestamp for resolving versioned library content
     # @return [String] updated content
-    def self.include_libraries(content_to_update)
+    def self.include_libraries(content_to_update, version_at: nil)
       return unless content_to_update
 
       content_to_update = content_to_update.dup
@@ -975,9 +1040,15 @@ module OptionConfigs
       while res
         category = res[1].strip
         name = res[2].strip
-        lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
+        lib = if version_at
+                Admin::ConfigLibrary.content_named_at(category, name, format: :yaml, at: version_at)
+              else
+                Admin::ConfigLibrary.content_named(category, name, format: :yaml)
+              end
         lib = (lib || '').dup
-        lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+        LibraryKeyRenamePatterns.each do |key|
+          lib.gsub!(/^#{key}:.*/, "#{key}__#{category}_#{name}:")
+        end
         lib = "# @sourced_library_start #{category} #{name}\n#{lib}\n# @sourced_library_end #{category} #{name}\n"
         content_to_update.gsub!(res[0], lib)
         res = content_to_update.match reg
@@ -987,21 +1058,37 @@ module OptionConfigs
     end
 
     #
-    # Find referenced libraries into the provided content
+    # Find referenced libraries into the provided content,
+    # recursively resolving nested library references.
     # @param [String] content
     # @return [Array{Hash}] array of hashes {category:, name:}
     def self.requested_libraries(content)
-      reshashes = []
-      content = content.dup
-      reg = LibraryMatchRegex
-      res = content.match reg
+      return [] if content.blank?
 
-      while res
-        category = res[1].strip
-        name = res[2].strip
-        reshashes << { category:, name: }
-        content.gsub!(res[0], '')
-        res = content.match reg
+      reshashes = []
+      seen = Set.new
+      queue = [content.dup]
+      reg = LibraryMatchRegex
+
+      while (text = queue.shift)
+        res = text.match reg
+        while res
+          category = res[1].strip
+          name = res[2].strip
+          key = [category, name]
+          unless seen.include?(key)
+            seen.add(key)
+            reshashes << { category:, name: }
+            begin
+              lib_content = Admin::ConfigLibrary.content_named(category, name, format: :yaml)
+              queue << lib_content.dup if lib_content.present?
+            rescue FphsException
+              # Library not found - skip nested resolution for this reference
+            end
+          end
+          text = text.sub(res[0], '')
+          res = text.match reg
+        end
       end
 
       reshashes

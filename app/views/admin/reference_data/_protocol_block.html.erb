@@ -31,7 +31,7 @@ end
       </div>
 <% end %>
       <div class="<%=tree_list_block_class%>">
-      <ul id="protocols-list" style="overflow: auto; background-color: white;">
+      <ul id="protocols-list" class="admin-ref-data__list">
         <% 
         pid = @filter_protocol_tree_list&.dig(:protocol_id)
         protocols = Classification::Protocol.all
@@ -42,7 +42,7 @@ end
 
         protocols.sort.each do |p| %>
         <li id="protocol-<%=p.id%>" class="protocols-list--protocol">
-          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="<%=init_collapsed%>" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><span><%=p.id%></span> <strong><%= p.name %></strong></a>
+          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="<%=init_collapsed%><%= ' admin-ref-data__list-item--disabled' if p.disabled %>"><span><%=p.id%></span> <strong><%= p.name %></strong></a>
         </li>
         <ul id="pblock-<%=p.id%>" class="<%=init_collapse%>">
           <% 
@@ -50,10 +50,10 @@ end
           sub_processes = p.sub_processes.all
           sub_processes = sub_processes.where(id: sid) if sid
           sub_processes.each do |sp| %>
-          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>" class="protocols-list--sub-process"><span><%=sp.id%></span> <strong><%= sp.name %></strong></li>
+          <li class="protocols-list--sub-process<%= ' admin-ref-data__list-item--disabled' if p.disabled || sp.disabled %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><span><%=sp.id%></span> <strong><%= sp.name %></strong></li>
           <ul>
             <% sp.protocol_events.all.each do |pe| %>
-            <li style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>" class="protocols-list--event"><span><%=pe.id%></span> <strong><%= pe.name %></strong></li>
+            <li class="protocols-list--event<%= ' admin-ref-data__list-item--disabled' if p.disabled || sp.disabled || pe.disabled %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><span><%=pe.id%></span> <strong><%= pe.name %></strong></li>
             <% end %>
           </ul>
           <% end %>

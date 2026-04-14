@@ -70,7 +70,7 @@ class DynamicModel < ActiveRecord::Base
       begin
         res = model_class.attribute_names - StandardFields
       rescue StandardError => e
-        puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
+        warn "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
         raise e unless ignore_errors
 
         return []
@@ -291,6 +291,7 @@ class DynamicModel < ActiveRecord::Base
         add_handlers(res)
 
         res.final_setup
+        apply_encrypted_attributes(res)
 
         # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")
@@ -310,7 +311,7 @@ class DynamicModel < ActiveRecord::Base
         res2.include DynamicModelControllerHandler
       rescue StandardError => e
         failed = true
-        puts "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        warn "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         logger.info '*************************************************************************************'
         logger.info "Failure creating dynamic log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         logger.info '*************************************************************************************'
@@ -524,7 +525,9 @@ class DynamicModel < ActiveRecord::Base
     new_options = String.yaml_dump(hash)
     self.options ||= ''
     self.options = if self.options.index(/^#{key}:/)
-                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\n\n\\3")
+                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m) do
+                       "#{new_options}\n\n#{Regexp.last_match(3)}"
+                     end
                    else
                      "#{new_options}\n\n#{self.options}"
                    end

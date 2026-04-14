@@ -195,22 +195,61 @@ _fpa.form_utils = {
 
   // Handle big-select fields
   setup_big_select_fields(block) {
+    // First, process any JSON data elements that store big-select configuration
+    // This approach avoids inline script tags that fail CSP when loaded via AJAX
+    block.find('script.big-select-data[type="application/json"]').each(function () {
+      var $dataEl = $(this);
+      var fieldId = $dataEl.data('field-id');
+      var optionsAttr = $dataEl.attr('data-options');
+      var hashAttr = $dataEl.attr('data-hash');
+
+      // Parse JSON from attributes (jQuery .data() may not parse HTML-escaped JSON correctly)
+      var options = {};
+      var hashData = {};
+      try {
+        if (optionsAttr) options = JSON.parse(optionsAttr);
+      } catch (e) {
+        // Ignore parse errors - field will work without options
+      }
+      try {
+        if (hashAttr) hashData = JSON.parse(hashAttr);
+      } catch (e) {
+        // Ignore parse errors - field will be skipped if no hash data
+      }
+
+      var field = document.getElementById(fieldId);
+      if (field) {
+        field.big_select_options = field.big_select_options || options;
+        field.big_select_hash = field.big_select_hash || {};
+        // Merge in the hash data (which contains subtype -> data mapping)
+        Object.assign(field.big_select_hash, hashData);
+      }
+      // Remove the data element after processing
+      $dataEl.remove();
+    });
+
     block
       .find('.use-big-select')
       .not('.big-select-su')
       .each(function () {
         var label = '';
+        var hash = $(this)[0].big_select_hash;
+        var opts = $(this)[0].big_select_options;
+        // Skip this field if no data available
+        if (!hash || Object.keys(hash).length === 0) {
+          return;
+        }
         $.big_select(
           $(this),
           $('#primary-modal .modal-body'),
-          $(this)[0].big_select_hash,
+          hash,
           function () {
             _fpa.show_modal('', label);
           },
           function () {
             _fpa.hide_modal();
           },
-          $(this)[0].big_select_options
+          opts
         );
       })
       .addClass('big-select-su');
@@ -227,12 +266,17 @@ _fpa.form_utils = {
         var curr_el = $(this);
         var val = curr_el.val();
 
-        // If an element id has not been specified, assume it is a field name and generate the element id
-        if (sf[0] != '#') sf = `#${fn}_${sf}`;
+        // Store the target field name for use in change handler
+        // The change handler will look for the target element dynamically
+        var target_field_name = sf;
+        var standard_id_selector = sf[0] === '#' ? sf : `#${fn}_${sf}`;
 
-        _fpa.form_utils.select_filtering_changed(val, sf);
+        // Initial call - try to find and update the target
+        _fpa.form_utils.select_filtering_changed(val, target_field_name, standard_id_selector);
+
         curr_el.on('change', function () {
-          _fpa.form_utils.select_filtering_changed($(this).val(), sf);
+          var newVal = $(this).val();
+          _fpa.form_utils.select_filtering_changed(newVal, target_field_name, standard_id_selector);
         });
       })
       .addClass('done-select-filtering');
@@ -304,14 +348,42 @@ _fpa.form_utils = {
     }).addClass('attached-show-if-triggers');
   },
 
-  select_filtering_changed(val, el) {
-    $(el).attr('data-big-select-subtype', val);
-    $(`${el} optgroup[label]`).hide().attr('disabled', 'disabled');
+  select_filtering_changed(val, target_field_name, standard_id_selector) {
+    // Try to find the target element - first by big-select data-attr-name, then by standard ID
+    // Supports backward compatibility: when called with only 2 args (from report_criteria.js),
+    // the second arg is a CSS selector, not a field name.
+    var $target;
+
+    // If no standard_id_selector provided, treat target_field_name as the selector (backward compat)
+    if (!standard_id_selector) {
+      standard_id_selector = target_field_name;
+      target_field_name = null;
+    }
+
+    // First try to find a big-select input with matching data-attr-name
+    if (target_field_name && target_field_name[0] !== '#' && target_field_name[0] !== '[') {
+      $target = $(`input.use-big-select[data-attr-name="${target_field_name}"]`);
+    }
+
+    // If not found, fall back to standard ID/CSS selector
+    if (!$target || $target.length === 0) {
+      $target = $(standard_id_selector);
+    }
+
+    if ($target.length === 0) {
+      return;
+    }
+
+    // Set the subtype attribute for big-select filtering
+    $target.attr('data-big-select-subtype', val);
+
+    // Also handle optgroup filtering for regular select elements
+    $(`${standard_id_selector} optgroup[label]`).hide().attr('disabled', 'disabled');
     // Case insensitive filtering
-    $(`${el} optgroup[label="${val}" i]`).show().attr('disabled', null);
-    if ($(el).hasClass('attached-chosen')) {
+    $(`${standard_id_selector} optgroup[label="${val}" i]`).show().attr('disabled', null);
+    if ($target.hasClass('attached-chosen')) {
       // Refresh the associate chosen.js values if chosen is attached to this field
-      $(el).trigger('chosen:updated');
+      $target.trigger('chosen:updated');
     }
   },
 
@@ -770,8 +842,8 @@ _fpa.form_utils = {
   },
 
   // Blocks marked with the class use-secure-view-on-links are checked
-  // to find <a> links for filestore downloads. These are then set to
-  //
+  // to find <a> links for filestore downloads or Redcap file downloads.
+  // These are then set to use the secure viewer.
   setup_secure_view_links: function (block) {
     if (block.hasClass('use-secure-view-on-links-setup')) return;
 
@@ -789,6 +861,13 @@ _fpa.form_utils = {
         $(this).parents('.nfs-store-container-block').length == 0
       ) {
         $(this).addClass('use-secure-view');
+      } else if (
+        href &&
+        href.indexOf('/redcap/project_user_requests/') >= 0 &&
+        href.indexOf('/download_field_file/') >= 0 &&
+        !$(this).hasClass('redcap-file-use-secure-view')
+      ) {
+        $(this).addClass('redcap-file-use-secure-view');
       }
     });
 
@@ -2013,6 +2092,41 @@ _fpa.form_utils = {
       .addClass('made-sortable');
   },
 
+  // Set up icons to allow copy to clipboard
+  setup_copy_blocks: function (block) {
+
+    $(block).find('.copy-block-button')
+      .not('.added-copy-block-handler')
+      .each(function () {
+        $(this).on('click', function (e) {
+          e.preventDefault();
+          var text = $(this).attr('data-copy-text');
+          // Decode HTML entities
+          var textarea = document.createElement('textarea');
+          textarea.innerHTML = text;
+          text = textarea.value;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              _fpa.flash_notice('Copied to clipboard');
+            }).catch(function () {
+              _fpa.flash_notice('Failed to copy to clipboard');
+            });
+          } else {
+            // Fallback for older browsers
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            _fpa.flash_notice('Copied to clipboard');
+          }
+        })
+      })
+      .addClass('added-copy-block-handler');
+  },
+
   setup_sub_lists: function (block) {
     block
       .find('.sublist-filter-selectors')
@@ -2094,36 +2208,42 @@ _fpa.form_utils = {
       $outer = $inner;
     }
 
-    window.setTimeout(function () {
-      var heights = [];
-      var cols = $outer.find('.sublist-column');
-      if (cols.length === 0) return;
+    // Process each reorder-sublist-columns container individually to avoid
+    // moving columns between different containers (fixes issue #857)
+    $outer.each(function () {
+      const $container = $(this);
+      window.setTimeout(function () {
+        var heights = [];
+        var cols = $container.find('.sublist-column');
+        if (cols.length === 0) return;
 
-      cols.each(function () {
-        var h = $(this).height();
-        if ($(this).find('[data-sub-item]').length === 0) {
-          // No items in the column
-          h = 0;
+        cols.each(function () {
+          var h = $(this).height();
+          if ($(this).find('[data-sub-item]').length === 0) {
+            // No items in the column
+            h = 0;
+          }
+          heights.push([$(this), h]);
+        });
+
+        heights.sort(function (a, b) {
+          return b[1] - a[1]
+        });
+
+        var prev = null;
+        for (var key in heights) {
+          if (!heights.hasOwnProperty(key)) continue;
+
+          // Use the jQuery element directly instead of looking up by ID
+          // This prevents selecting wrong elements when duplicate IDs exist
+          var $col = heights[key][0];
+          if (prev) {
+            prev.after($col);
+          }
+          prev = $col;
         }
-        heights.push([$(this).prop('id'), h]);
-      });
-
-      heights.sort(function (a, b) {
-        return b[1] - a[1]
-      });
-
-      var prev = null;
-      for (var key in heights) {
-        if (!heights.hasOwnProperty(key)) continue;
-
-        var id = heights[key][0];
-        var $col = $(`#${id}`);
-        if (prev) {
-          prev.after($col);
-        }
-        prev = $col;
-      }
-    }, 200)
+      }, 200)
+    });
 
   },
 

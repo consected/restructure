@@ -4,6 +4,16 @@ _fpa.loaded.reports = function () {
   _fpa.report_criteria.reports_form($criteria_form);
   $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
+  // Update page title with report name
+  var $report_title = $criteria_form.find('.report-criteria-block h1').first();
+  if ($report_title.length) {
+    // Get just the report name text (excluding any <small> tags)
+    var report_name = $report_title.clone().children().remove().end().text().trim();
+    if (report_name) {
+      _fpa.page_title.for_report(report_name);
+    }
+  }
+
   // If this an editable data form, automatically submit it if there are no criteria fields to enter
   if ($('#editable_data').length == 1 && $('.report-criteria-fields').length >= 1)
     $('input[type="submit"][value="table"]').click();

@@ -315,3 +315,87 @@ a.link-disabled {
   margin-right: 20px;
   // font-size: 0.9em;
 }
+
+// BEM-named classes for admin views
+.admin-form {
+  &__left-aligned {
+    text-align: left;
+  }
+
+  &__help-info {
+    font-size: 12px;
+  }
+
+  &__vertical-top {
+    vertical-align: top;
+  }
+}
+
+.admin-ref-data {
+  &__list {
+    overflow: auto;
+    background-color: white;
+  }
+
+  &__list-item--disabled {
+    color: #aaa;
+  }
+
+  &__checkbox--inline {
+    width: initial;
+    display: inline-block;
+  }
+}
+
+.admin-version {
+  &__section {
+    margin-bottom: 30px;
+  }
+
+  &__header-cell--attr {
+    width: 20%;
+  }
+
+  &__header-cell--prev {
+    width: 40%;
+  }
+
+  &__header-cell--curr {
+    width: 40%;
+  }
+}
+
+.copy-block-button {
+  cursor: pointer;
+  color: #777;
+  font-size: 14px;
+  margin-left: 5px;
+  vertical-align: middle;
+  display: inline-block;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+  border-radius: 2px;
+  padding: 2px;
+
+  &:hover {
+    color: #337ab7;
+  }
+
+  &.in-block {
+    float: right;
+    margin-top: -25px;
+    margin-right: 3px;
+  }
+}
+
+.config-library-referenced-by-list {
+  padding-inline-start: 0;
+  li{
+    margin-bottom: 8px;
+    list-style: none;
+  }
+}
+
+.model_generators.index .col-sm-12.admin-form__left-aligned {
+  min-width: 800px;
+}

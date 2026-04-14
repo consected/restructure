@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Tests for Admin::AppType export functionality.
+# Verifies that export_config produces correct JSON including app configurations,
+# user access controls, activity logs, external identifiers, general selections,
+# and item flag names. Ensures exported item flag names are scoped to tables
+# associated with the app type via user access controls.
+
 require 'rails_helper'
 
 RSpec.describe 'Export an app configuration', type: :model do
@@ -78,7 +84,10 @@ RSpec.describe 'Export an app configuration', type: :model do
     eis.where('id <> ?', eis.first&.id).update_all(disabled: true) if eis.count != 1
 
     i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
-    i&.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    if i
+      i.force_regenerate = true
+      i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    end
     Master.reset_external_id_matching_fields!
 
     als = ActivityLog.active.where(name: 'BHS Tracker')
@@ -139,5 +148,31 @@ RSpec.describe 'Export an app configuration', type: :model do
     config = uac.select { |a| a['item_type'] == 'player_infos_source' }
     expect(config).to be_a Array
     expect(config.map { |a| a['value'] }).to include 'nflpa'
+  end
+
+  it 'exports only item flag names for tables associated with the app type' do
+    # Create an item flag for a table that IS in the app type (player_infos has :create access)
+    associated_flag = Classification::ItemFlagName.create!(
+      name: "Associated Flag #{rand(1_000_000)}",
+      item_type: 'player_info',
+      current_admin: @admin
+    )
+
+    # Create an item flag for a table that is NOT in the app type
+    unassociated_flag = Classification::ItemFlagName.create!(
+      name: "Unassociated Flag #{rand(1_000_000)}",
+      item_type: 'address',
+      current_admin: @admin
+    )
+
+    res = JSON.parse(@app_type.export_config)
+    app = res['app_type']
+    exported_flags = app['associated_item_flag_names']
+
+    expect(exported_flags).to be_a Array
+
+    exported_names = exported_flags.map { |f| f['name'] }
+    expect(exported_names).to include(associated_flag.name)
+    expect(exported_names).not_to include(unassociated_flag.name)
   end
 end

@@ -116,6 +116,13 @@
   <% end %>
 
   <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
+
+  <%= render partial: 'admin/common_templates/def_uac_summary', 
+             locals: { 
+               object_instance:, 
+               current_app_type_id: current_admin.matching_user&.app_type_id,
+               current_user: current_admin.matching_user
+             } %>
 <% else %>
   <p>
   <label>not yet saved</label>
@@ -173,11 +180,11 @@
    if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? %>
 <%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: object_instance, force: true } %>
 <% end %>
-<script>
+<%= javascript_tag nonce: true do %>
   window.setTimeout(function(){
 
     $('a#expand-captions-dialogs').not('.added-ecs-click-handler').on('click', function() {
       $('.dfc-field-config-block .dfc-config-name[href$="--labels"], .dfc-field-config-block .dfc-config-name[href$="--caption_before"], .dfc-field-config-block .dfc-config-name[href$="--dialog_before"]').not('[aria-expanded="true"]').click()    
     }).addClass('added-ecs-click-handler');
   }, 400);
-</script>
+<% end %>

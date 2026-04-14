@@ -9,7 +9,7 @@ outer = "##{@outer_block_id}"
 %>
 <%= render partial: 'reports/insert_options_css', locals: {outer: outer, view_css: view_css} %>
 
-<div id="standalone-page">
+<div id="standalone-page" data-page-title="<%=@page_layout.panel_label%>">
   <div class="standalone-page-container container-fluid" id="<%=@outer_block_id%>" data-page-layout-id="<%=@page_layout.id%>">
     <div class="sp-main">
       <%= render partial: 'show_row', locals: {rows: rows, container: container} %>

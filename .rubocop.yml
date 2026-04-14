@@ -98,3 +98,6 @@ Lint/NestedMethodDefinition:
 
 Style/FetchEnvVar:
   Enabled: false
+
+Style/StderrPuts:
+  Enabled: false  

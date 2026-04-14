@@ -3,7 +3,7 @@
     # The "default" overrides the value set in the panel definition only if the panel definition was not set
     initial_show = panel_name_us.to_s.in?(default_panels)
   end
-  extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click-initial-show' : ''}"
+  extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
 %>
 {{#if (or (not (params 'only_tabs')) (params 'only_tabs' 'categories')) }}
 <li role="presentation" class="category-tab <%= extra_classes %> <%= class_for_open_panels(panel_name_us, default_panels.length) %>">

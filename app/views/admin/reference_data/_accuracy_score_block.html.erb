@@ -12,11 +12,11 @@
       </code></p>
 
   </div>
-  <ul id="as-list" style="overflow: auto; background-color: white;">
+  <ul id="as-list" class="admin-ref-data__list">
 
     <% Classification::AccuracyScore.all.each do |p| %>
     <li id="as-<%=p.value%>">
-      <span href="#ifblock-<%=p.value%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.value %> - <%=p.name%></span>
+      <span href="#ifblock-<%=p.value%>" data-toggle="collapse" class="collapsed<%= ' admin-ref-data__list-item--disabled' if p.disabled %>"><%=p.value %> - <%=p.name%></span>
     </li>
     <% end %>
   </ul>

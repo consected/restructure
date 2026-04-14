@@ -8,7 +8,7 @@
   # Then it simply calls the following partial "common_page_template_result_inner" with appropriate parameters.
   # Logging is included to help diagnose missing template configurations.
 %>
-<script id="common_page_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_page_template_result-partial', css_class: 'hidden handlebars-partial') do %>
   {{# with (fpa_state_item 'template_config' (underscore (or name_with_option_type name)) vdef_version )}}
     {{> common_page_template_result_inner result_data=../result_data name=../name orig_name=../orig_name activity_log_references_name=../activity_log_references_name name_with_option_type=../name_with_option_type template_config=this _created=../_created vdef_version=../vdef_version}}
   {{else}}
@@ -17,7 +17,7 @@
     {{log (fpa_state_item 'template_config' (underscore name) vdef_version)}}
     {{log this}}
   {{/with}}
-</script>
+<% end %>
 
 <%
   # Partial that renders the full activity log result item for a standalone page.
@@ -30,7 +30,7 @@
   # ability to show an edit form or create new activity log records. The attribute 'data-subscription'
   # has been provided, as has a hidden edit button, although this functionality is currently untested.
 %>
-<script id="common_page_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('common_page_template_result_inner-partial', css_class: 'hidden handlebars-partial') do %>
   {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}"  data-orig-name="{{orig_name}}" {{{ data_sort_str }}}> {{/is}}
   <div class="common-page-templates--result-item common-template-item common-page-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}} default-layout-{{id_hyphenate result_data.default_layout}}" 
        data-model-data-type="{{model_data_type}}" 
@@ -93,4 +93,4 @@
   </div>
   {{#is name '!==' full_name }}</div> {{/is}}
 
-</script>
+<% end %>

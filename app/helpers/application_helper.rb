@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  include HandlebarsPrecompilerHelper
+
   DoNotDisplayErrorMessage = '' # Indicate an empty error message whenever an error message should not be displayed to the user
 
   def is_current_admin_sample?
@@ -369,14 +371,80 @@ module ApplicationHelper
   end
 
   def remove_empty_error(errors)
-    errors.messages.each do |key, messages|
+    # Handle DoNotDisplayErrorMessage markers
+    # We need to iterate over a copy of keys since we might be deleting some
+    errors.messages.keys.dup.each do |key|
+      messages = errors.messages[key]
       if messages.include?(DoNotDisplayErrorMessage)
         if messages.one?
+          # If the only message is DoNotDisplayErrorMessage, remove the entire key
           errors.delete(key)
         else
-          messages.delete(DoNotDisplayErrorMessage)
+          # If there are multiple messages, filter out DoNotDisplayErrorMessage
+          # We need to delete and re-add to ensure proper modification
+          filtered_messages = messages.reject { |msg| msg == DoNotDisplayErrorMessage }
+          errors.delete(key)
+          filtered_messages.each { |msg| errors.add(key, msg) }
         end
       end
+    end
+  end
+
+  #
+  # Generate a style tag with CSP nonce for inline styles
+  # @param content [String] the CSS content to include
+  # @return [String] HTML safe style tag with nonce
+  def csp_style_tag(content)
+    content_tag(:style, content.html_safe, nonce: true)
+  end
+
+  #
+  # Generate a script tag with CSP nonce for inline JavaScript
+  # @param content [String] the JavaScript content to include
+  # @return [String] HTML safe script tag with nonce
+  def csp_script_tag(&)
+    javascript_tag(nonce: true, &)
+  end
+
+  #
+  # Generate a precompiled Handlebars template script include
+  # @param id [String] the template identifier
+  # @param css_class [String] CSS class indicating template type (default: 'hidden handlebars-template')
+  # @param block [Block] the Handlebars template content
+  # @return [String] HTML safe javascript_include_tag for the precompiled template
+  def handlebars_template_tag(id, css_class: 'hidden handlebars-template', &)
+    raise FphsException, 'handlebars_template_tag requires a block' unless block_given?
+
+    is_partial = css_class.include?('handlebars-partial')
+    compiled_file_path = write_handlebars_template(id, is_partial:, &)
+    @requested_handlebars_templates ||= []
+    @requested_handlebars_templates << { id:, is_partial:, compiled_file_path: }
+    # javascript_include_tag(
+    #   compiled_file_path,
+    #   nonce: true,
+    #   data: {
+    #     handlebars_id: id,
+    #     handlebars_type: is_partial ? 'partial' : 'template'
+    #   }
+    # )
+    ''
+  end
+
+  def retrieve_requested_handlebars_templates(from_file_path)
+    return unless @requested_handlebars_templates.present?
+
+    from_file_path = from_file_path.to_s.split('/').last(2).join('-').gsub('.html.erb', '').id_underscore
+    compile_handlebars_templates
+    url, handlebars_template_ids, handlebars_partial_ids = write_multiple_handlebars_templates(@requested_handlebars_templates)
+    @requested_handlebars_template_count = @requested_handlebars_templates.length
+    @retrieved_requested_handlebars_template_count = (handlebars_template_ids + handlebars_partial_ids).length
+    # Clean up before the next set of handlebars templates
+    @requested_handlebars_templates = nil
+    javascript_tag nonce: true do
+      <<~JS
+        _fpa.retrieve_requested_handlebars_templates('#{url}', '#{Rails.env}', '#{from_file_path}');
+      JS
+        .html_safe
     end
   end
 end

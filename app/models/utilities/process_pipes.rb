@@ -78,8 +78,6 @@ module Utilities
 
           t1.join
           t2.join
-
-          # puts "result length #{cmd}: #{res&.length}"
         end
       rescue Timeout::Error
         ::Process.kill 9, stdinout.pid

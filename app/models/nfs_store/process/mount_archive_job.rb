@@ -18,13 +18,15 @@ module NfsStore
 
         container_files.each do |container_file|
           container_file.container.parent_item ||= activity_log
-          setup_container_file_current_user(container_file, in_app_type_id)
-          res = NfsStore::Archive::Mounter.mount container_file
+          res = nil
+          setup_container_file_current_user(container_file, in_app_type_id) do |_c_user|
+            res = NfsStore::Archive::Mounter.mount container_file
+          end
           unless res
             prevent_next_job!
             break
           end
-          puts "Successful mount: #{res}" unless Rails.env.test?
+          STDERR.puts "Successful mount: #{res}" unless Rails.env.test?
         end
       end
     end

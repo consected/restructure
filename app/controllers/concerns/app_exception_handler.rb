@@ -28,6 +28,17 @@ module AppExceptionHandler
 
   protected
 
+  def exceptions_logger
+    @@exceptions_logger ||= Logger.new("#{Rails.root}/log/#{Rails.env}-exceptions.log")
+  end
+
+  def log_exception(error)
+    return if Rails.env.production?
+
+    exceptions_logger.error(error)
+    exceptions_logger.error(error.short_string_backtrace) if error.backtrace
+  end
+
   #
   # Consistent flash handling, to avoid long messages from
   # overloading the header length passed to the client.
@@ -162,6 +173,7 @@ module AppExceptionHandler
     log_level ||= :error
     logger.send(log_level, error.inspect)
     logger.send(log_level, error.short_string_backtrace) if error.backtrace
+    log_exception(error)
 
     if code.in? [400, 500]
       user_id = current_user&.id

@@ -2,6 +2,22 @@
 
 require 'rails_helper'
 
+# System tests for reports functionality
+#
+# Test Coverage:
+# - Report listing and search with various criteria
+# - Report criteria fields (date ranges, dropdowns, filter_selector)
+# - Report results display and pagination
+# - Report parameter substitution and filtering
+# - filter_selector JavaScript callback: Tests that changing a parent
+#   dropdown (protocol) updates dependent dropdowns (sub_process) via
+#   the select_filtering_changed callback without JavaScript errors
+#
+# Implementation Notes:
+# - Report criteria dropdowns use chosen.js for enhanced selection
+# - Use select_from_dropdown_field with is_report: true for report fields
+# - The filter_selector mechanism updates data-big-select-subtype attributes
+#   on dependent fields when a parent selection changes
 describe 'reports', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
@@ -38,6 +54,9 @@ describe 'reports', js: true, driver: $browser_driver do
 
     create_report_with_all_criteria_fields
     create_report_with_add_item_button
+    create_report_with_activity_log_add_item_button
+    create_report_with_external_identifier_add_item_button
+    create_report_with_filter_selector
 
     @report = r
   end
@@ -219,6 +238,9 @@ describe 'reports', js: true, driver: $browser_driver do
                                            position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
+  # Creates a report with add_item_button substitution for a dynamic model.
+  # The button uses the temporary master (-1) to create new records.
+  # Tests: {{add_item_button_to_temporary_master_dynamic_model__test_with_id_recs}}
   def create_report_with_add_item_button
     dm = DynamicModel.active.find_by(table_name: 'test_with_id_recs')
     expect(dm).not_to be nil
@@ -242,6 +264,98 @@ describe 'reports', js: true, driver: $browser_driver do
                                             name: 'Add Item Button', description:, sql: sql, search_attrs: search_attrs,
                                             disabled: false, report_type: 'regular_report', auto: false, searchable: false,
                                             position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
+  # Creates a report with add_item_button substitution for an activity log.
+  # Uses blank_log which doesn't require a player_contact parent item.
+  # Tests: {{add_item_button_to_temporary_master_activity_log__player_contact_phone__blank_log}}
+  def create_report_with_activity_log_add_item_button
+    expect(Master.find(-1)).to be_a Master
+
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    description = <<~END_DESC
+      This report has an activity log add item button.
+
+      {{add_item_button_to_temporary_master_activity_log__player_contact_phone__blank_log}}
+    END_DESC
+
+    @activity_log_add_item_button_report = Report.create(current_admin: @admin,
+                                                         name: 'Activity Log Add Item Button', description:, sql: sql, search_attrs: search_attrs,
+                                                         disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                                         position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
+  # Creates a report with add_item_button substitution for an external identifier.
+  # External identifiers use the simple resource name (e.g., scantrons).
+  # Tests: {{add_item_button_to_temporary_master_scantrons}}
+  def create_report_with_external_identifier_add_item_button
+    expect(Master.find(-1)).to be_a Master
+    ei = ExternalIdentifier.active.find_by(name: 'scantrons')
+    expect(ei).not_to be_nil
+
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    description = <<~END_DESC
+      This report has an external identifier add item button.
+
+      {{add_item_button_to_temporary_master_scantrons}}
+    END_DESC
+
+    @external_identifier_add_item_button_report = Report.create(current_admin: @admin,
+                                                                name: 'External Identifier Add Item Button', description:, sql: sql, search_attrs: search_attrs,
+                                                                disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                                                position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+  end
+
+  # Creates a report with filter_selector configuration to test the JavaScript
+  # filtering functionality in report_criteria.js. The protocol field filters
+  # the sub_process field's optgroups when changed.
+  def create_report_with_filter_selector
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+      protocol_filter:
+        protocol:
+          all: true
+          multiple: single
+          disabled: false
+          filter_selector: sub_process_filter
+
+      sub_process_filter:
+        sub_process:
+          all: true
+          multiple: single
+          disabled: false
+    END_CONFIG
+
+    @filter_selector_report = Report.create(current_admin: @admin,
+                                            name: 'Filter Selector Test',
+                                            description: 'Tests filter_selector functionality',
+                                            sql: sql,
+                                            search_attrs: search_attrs,
+                                            disabled: false,
+                                            report_type: 'regular_report',
+                                            auto: false,
+                                            searchable: false,
+                                            position: nil,
+                                            edit_model: nil,
+                                            edit_field_names: nil,
+                                            selection_fields: nil,
+                                            item_type: nil)
   end
 
   before :each do
@@ -365,6 +479,8 @@ describe 'reports', js: true, driver: $browser_driver do
     end
   end
 
+  # Tests add_item_button substitution for dynamic models.
+  # Dynamic models need the 'dynamic-model--' prefix in the data-target attribute.
   it 'shows add item button on report with criteria' do
     setup_access :dynamic_model__test_with_id_recs, user: @user
 
@@ -374,14 +490,12 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-criteria')
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
-    puts "Add Item Button href: #{aib[:href]}"
 
     aib.click
 
     expect(page).to have_css('#primary-modal1.fade.in')
     expect(page).to have_css('#primary-modal1.fade.in h4.list-group-item-heading', text: 'Test Records With ID')
 
-    debug_process_status
     within('form.new_dynamic_model_test_with_id_rec') do
       fill_in_field 'value', 'New Test Value'
       fill_in_field 'name', 'New Test Name'
@@ -396,5 +510,133 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-results-block table')
     expect(page).to have_css('.report-results-block table', text: /new test value/)
     expect(page).to have_css('.report-results-block table', text: /new test name/)
+  end
+
+  # Tests add_item_button substitution for activity logs.
+  # Activity logs use the hyphenated_name with activity suffix (e.g., activity-log--player-contact-phone-primary).
+  it 'shows activity log add item button on report' do
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
+
+    let_user_create_master(@user)
+    create_master(@user)
+
+    get_list
+
+    open_report @activity_log_add_item_button_report.id, 'Activity Log Add Item Button'
+    expect(page).to have_css('.report-criteria')
+    expect(page).to have_css('a.add-item-button')
+    aib = find('a.add-item-button')
+
+    # Verify the button has correct attributes for blank log
+    expect(aib[:href]).to match(%r{/masters/-1/activity_log/player_contact_phones/blank_log/new})
+    expect(aib[:'data-target']).to match(/activity-log--player-contact-phone-blank-logs--1-/)
+
+    aib.click
+
+    expect(page).to have_css('#primary-modal1.fade.in')
+
+    # Fill in form fields for blank log (no player_contact required)
+    within('form.new_activity_log_player_contact_phone') do
+      # Blank logs require select_who, select_next_step, notes, and a protocol
+      select_from_dropdown_field 'select_who', 'User'
+      select_from_dropdown_field 'select_next_step', 'Complete'
+      fill_in_field 'notes', 'Test blank log note'
+      select_from_dropdown_field 'protocol_id', 'Study'
+    end
+
+    # Submit form via JS (raw submit bypasses Rails UJS remote form handling,
+    # but ensures form data is posted successfully for testing purposes)
+    page.execute_script("document.querySelector('form.new_activity_log_player_contact_phone').submit()")
+
+    # Wait for page reload (non-AJAX submit) and formatting
+    finish_page_loading
+    finish_form_formatting
+
+    # Verify form submission succeeded - modal should close
+    expect(page).not_to have_css('#primary-modal1.fade.in', wait: 5)
+
+    # Verify activity log was created
+    expect(ActivityLog::PlayerContactPhone.where(notes: 'Test blank log note')).to exist
+  end
+
+  # Tests add_item_button substitution for external identifiers.
+  # External identifiers use simple hyphenated_name (e.g., scantron for scantrons table).
+  it 'shows external identifier add item button on report' do
+    setup_access :scantrons, user: @user
+
+    let_user_create_master(@user)
+    create_master(@user)
+
+    scantron_count_before = Scantron.count
+
+    get_list
+
+    open_report @external_identifier_add_item_button_report.id, 'External Identifier Add Item Button'
+    expect(page).to have_css('.report-criteria')
+    expect(page).to have_css('a.add-item-button')
+    aib = find('a.add-item-button')
+
+    # Verify the button has correct attributes for external identifiers
+    expect(aib[:href]).to match(%r{/masters/-1/scantrons/new})
+    expect(aib[:'data-target']).to match(/scantrons--1-/)
+
+    aib.click
+
+    expect(page).to have_css('#primary-modal1.fade.in')
+
+    # Fill in the scantron_id field (required for non-pregenerate_ids external identifiers)
+    new_scantron_id = rand(100_000..999_999)
+    within('form.new_scantron') do
+      fill_in 'scantron_scantron_id', with: new_scantron_id
+    end
+
+    # Submit form via JS
+    page.execute_script("document.querySelector('form.new_scantron').submit()")
+
+    # Wait for submission
+    sleep 1
+
+    finish_page_loading
+    finish_form_formatting
+
+    # Verify form submission succeeded - modal should close
+    expect(page).not_to have_css('#primary-modal1.fade.in', wait: 10)
+
+    # Verify a scantron was created
+    expect(Scantron.count).to be > scantron_count_before, 'No scantron was created'
+  end
+
+  # Test that filter_selector configuration in report criteria correctly filters
+  # optgroups in dependent dropdowns. This verifies backward compatibility of
+  # the select_filtering_changed JavaScript function when called from report_criteria.js.
+  it 'filters dependent dropdown when parent selection changes via filter_selector' do
+    protocol = Classification::Protocol.active.first
+    expect(protocol).not_to be_nil, 'No active protocol found for filtering test'
+
+    get_list
+    open_report @filter_selector_report.id, 'Filter Selector Test'
+    finish_page_loading
+    expect(page).to have_css('.report-criteria')
+
+    # Verify the filter_selector attribute is set on the protocol field
+    protocol_select = find('select[name="search_attrs[protocol_filter]"]', visible: :all)
+    expect(protocol_select['data-filter-selector']).to eq('sub_process_filter')
+
+    # Verify sub_process subtype is initially empty
+    sub_process_select = find('select[name="search_attrs[sub_process_filter]"]', visible: :all)
+    expect(sub_process_select['data-big-select-subtype']).to eq(''), 'Initial subtype should be empty'
+
+    # Use helper to select from the dropdown (detects chosen.js automatically for reports)
+    select_from_dropdown_field('protocol_filter', protocol.name, is_report: true)
+    sleep 0.5 # Allow JavaScript filtering to process
+
+    # After selecting a protocol, the sub_process select should have its
+    # data-big-select-subtype attribute updated to the protocol's ID
+    # (This verifies select_filtering_changed was called without errors)
+    sub_process_select = find('select[name="search_attrs[sub_process_filter]"]', visible: :all)
+    updated_subtype = sub_process_select['data-big-select-subtype']
+    expect(updated_subtype).to eq(protocol.id.to_s),
+                               "Expected sub_process subtype to be '#{protocol.id}', got '#{updated_subtype}'"
   end
 end

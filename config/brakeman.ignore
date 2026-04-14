@@ -30,7 +30,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/layouts/application.html.erb",
-      "line": 39,
+      "line": 40,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
       "render_path": [
@@ -58,6 +58,29 @@
       "note": ""
     },
     {
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "1b8bbec4741095cdf990baadb1ad6bc4901a6b8eafcf5536f15017d2e4cb161a",
+      "check_name": "MassAssignment",
+      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
+      "file": "app/controllers/admin/reports_controller.rb",
+      "line": 79,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:search_attrs).permit!",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::ReportsController",
+        "method": "search_attrs_params_hash"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
@@ -74,6 +97,52 @@
         "method": "Admin::MigrationGenerator.tables_and_views"
       },
       "user_input": "quoted_schemas",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "21ff6d3b4153987a315b6cd13958dbe4b718007c837ac5982fbfd2a6175a302e",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/models/messaging/message_notification.rb",
+      "line": 543,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "File.read(NfsStore::Manage::StoredFile.find_by(:nfs_store_container_id => entry[\"container_id\"], :path => entry[\"path\"].to_s, :file_name => entry[\"file_name\"]).retrieval_path)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Messaging::MessageNotification",
+        "method": "resolve_nfsstore_attachments"
+      },
+      "user_input": "NfsStore::Manage::StoredFile.find_by(:nfs_store_container_id => entry[\"container_id\"], :path => entry[\"path\"].to_s, :file_name => entry[\"file_name\"]).retrieval_path",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "2221c38cc9371ddeaddeed015a8f9db4a918dff1f831ff982d9de5ab2d4161dd",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/full_text_search/tsvector_writer.rb",
+      "line": 75,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.exec_query(\"UPDATE #{table_name.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")}\\nSET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($1, $2)\\nWHERE id = $3\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"record_id\", record_id, ActiveModel::Type::Integer.new)])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "FullTextSearch::TsvectorWriter",
+        "method": "FullTextSearch::TsvectorWriter.update_tsvector"
+      },
+      "user_input": "table_name.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
       "confidence": "Medium",
       "cwe_id": [
         89
@@ -133,7 +202,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/concerns/master_handler.rb",
-      "line": 203,
+      "line": 205,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.permit!",
       "render_path": null,
@@ -146,6 +215,29 @@
       "confidence": "Medium",
       "cwe_id": [
         915
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "2edb9849da815c5c992a7078fb2d38ceb39da72ed7f57d9ceb14aed24c43adaf",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/admin/app_types_controller.rb",
+      "line": 102,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{Admin::AppType::AppExportDirSuffix}.zip\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::AppTypesController",
+        "method": "export_migrations"
+      },
+      "user_input": "Admin::AppType.find(params[:id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
       ],
       "note": ""
     },
@@ -184,35 +276,25 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "377f63b8b4bf6e917f2e914bec659d87874fe12f73de8683b03f91e24e8dd4fc",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/pages/_admin_redcap_status_indicators.html.erb",
-      "line": 12,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name).map do\n \"#{p.name} (#{p.study}) - #{current_user_date_time(p.failed_at)}\"\n end.join(\"<li>\")",
-      "render_path": [
-        {
-          "type": "template",
-          "name": "pages/_index_admin",
-          "line": 111,
-          "file": "app/views/pages/_index_admin.html.erb",
-          "rendered": {
-            "name": "pages/_admin_redcap_status_indicators",
-            "file": "app/views/pages/_admin_redcap_status_indicators.html.erb"
-          }
-        }
-      ],
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3de79f153616490b025e39ad6ef2724f9a202fcd8eb4612a5ee2e48603b5eff6",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 43,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download_or_view or :download))))",
+      "render_path": null,
       "location": {
-        "type": "template",
-        "template": "pages/_admin_redcap_status_indicators"
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "show"
       },
-      "user_input": "Redcap::ProjectAdmin.failed_scheduled_projects.order(:name)",
+      "user_input": "params[:retrieval_type]",
       "confidence": "Weak",
       "cwe_id": [
-        79
+        22
       ],
       "note": ""
     },
@@ -269,7 +351,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/layouts/application.html.erb",
-      "line": 40,
+      "line": 41,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false, :no_substitutions => true)",
       "render_path": [
@@ -316,29 +398,6 @@
       "confidence": "Weak",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "4cc941f4aa2f087c45d0360910d3b97e7be48ed3b2ed20a053c6728166550b89",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/models/admin/server_info.rb",
-      "line": 165,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::ServerInfo",
-        "method": "nfs_store_mount_dirs"
-      },
-      "user_input": "NfsStore::Manage::Filesystem.group_id_range.first",
-      "confidence": "High",
-      "cwe_id": [
-        77
       ],
       "note": ""
     },
@@ -403,7 +462,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/masters_controller.rb",
-      "line": 157,
+      "line": 194,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.except(:utf8, :controller, :action).permit!",
       "render_path": null,
@@ -416,40 +475,6 @@
       "confidence": "Medium",
       "cwe_id": [
         915
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Path Traversal",
-      "warning_code": 125,
-      "fingerprint": "669bef58b2f24edef3e309fc45c747d52e128029afe0ff53fe53400ae2703c5b",
-      "check_name": "Pathname",
-      "message": "Absolute paths in `Pathname#join` cause the entire path to be relative to the absolute path, ignoring any prior values",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 42,
-      "link": "https://brakemanscanner.org/docs/warning_types/path_traversal/",
-      "code": "Rails.root.join(\"app\", \"views\", \"reports\", \"result_template\", \"_#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}.html.erb\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "High",
-      "cwe_id": [
-        22
       ],
       "note": ""
     },
@@ -523,6 +548,25 @@
       "note": ""
     },
     {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "7a0ed01b9b81be32a792c33dc3a6a0b884e4eb0a74e62ddf767f923000465ee0",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "config/initializers/handlebars_precompiler.rb",
+      "line": 38,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`which #{ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)}`",
+      "render_path": null,
+      "location": null,
+      "user_input": "ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
@@ -580,29 +624,6 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "8d13efa20c2c351e4ec6a9a57d90b099bae4ce08cc246e1921c00095c0261dec",
-      "check_name": "SendFile",
-      "message": "Parameter value used in file name",
-      "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 39,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download or :download_or_view))))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::DownloadsController",
-        "method": "show"
-      },
-      "user_input": "params[:retrieval_type]",
-      "confidence": "Weak",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -649,25 +670,21 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "a471446d5c83e4f289e6c57062e3f7952ef8acf5fcaaeafd6896b42f49a0d2d0",
-      "check_name": "SendFile",
-      "message": "Model attribute used in file name",
-      "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 102,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "a46c3cb99f9cb7e6b36fae9fd0958a375aab5d01be76be109ac7a37d01ad1a78",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "config/initializers/handlebars_precompiler.rb",
+      "line": 30,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "system(\"#{ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)} --version > /dev/null 2>&1\")",
       "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::AppTypesController",
-        "method": "export_migrations"
-      },
-      "user_input": "Admin::AppType.find(params[:id])",
-      "confidence": "Weak",
+      "location": null,
+      "user_input": "ENV.fetch(\"HANDLEBARS_CLI\", Rails.root.join(\"node_modules\", \"handlebars\", \"bin\", \"handlebars\").to_s)",
+      "confidence": "Medium",
       "cwe_id": [
-        22
+        77
       ],
       "note": ""
     },
@@ -691,40 +708,6 @@
       "confidence": "High",
       "cwe_id": [
         89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Dynamic Render Path",
-      "warning_code": 15,
-      "fingerprint": "bb318909165e2e17e8af6aa6fd6893dd91ba241da2ab4c7db7087947fa75aa08",
-      "check_name": "Render",
-      "message": "Render path contains parameter value",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 45,
-      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
-      "code": "render(partial => \"reports/result_template/#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}\", { :locals => ({ :result_tables => ((Report.find_by_id_or_resource_name(params[:id]).runner.result_tables_by_index or [])) }) })",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "Medium",
-      "cwe_id": [
-        22
       ],
       "note": ""
     },
@@ -758,7 +741,7 @@
       "check_name": "Deserialize",
       "message": "Use of `Marshal.load` may be dangerous",
       "file": "app/models/option_configs/extra_options.rb",
-      "line": 89,
+      "line": 91,
       "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
       "code": "Marshal.load(Marshal.dump(field_configs))",
       "render_path": null,
@@ -777,50 +760,6 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "cc839fcc3d042100ab0bb70eceec8f0fd0d467d612241405a0e96380c5dcb7a2",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped parameter value",
-      "file": "app/views/reports/_insert_options_css.html.erb",
-      "line": 62,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + (active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_css.selectors.map do\n next unless v\ncs = c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)) or (([\"#{mk} {\"] + mv.map do\n cs = c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{c.to_s.split(\",\").map do\n \"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c1}\"\n end.join(\", \")} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end) << \"}\")).join(\"\\n\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "PageLayoutsController",
-          "method": "show",
-          "line": 28,
-          "file": "app/controllers/page_layouts_controller.rb",
-          "rendered": {
-            "name": "page_layouts/show",
-            "file": "app/views/page_layouts/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "page_layouts/show",
-          "line": 10,
-          "file": "app/views/page_layouts/show.html.erb",
-          "rendered": {
-            "name": "reports/_insert_options_css",
-            "file": "app/views/reports/_insert_options_css.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_insert_options_css"
-      },
-      "user_input": "params[:id]",
-      "confidence": "Weak",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
       "fingerprint": "cd55ea2ed0e4120c9b0f6a5b0191342ce890fa9eb842e05162e03d095107b10e",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
@@ -833,7 +772,7 @@
           "type": "controller",
           "class": "Admin::ServerInfoController",
           "method": "index",
-          "line": 22,
+          "line": 23,
           "file": "app/controllers/admin/server_info_controller.rb",
           "rendered": {
             "name": "admin/server_info/index",
@@ -843,7 +782,7 @@
         {
           "type": "template",
           "name": "admin/server_info/index",
-          "line": 6,
+          "line": 18,
           "file": "app/views/admin/server_info/index.html.erb",
           "rendered": {
             "name": "pages/_admin_status_indicators",
@@ -949,7 +888,30 @@
         79
       ],
       "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "fcbe8cefbe5a53fefd20ecb75613ff3ae50b3b61bbd196ee2eb429d7be405e14",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/full_text_search/tsvector_writer.rb",
+      "line": 45,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.exec_query(\"INSERT INTO #{target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")} (#{ActiveRecord::Base.connection.quote_column_name(fk_column)}, master_id, #{ActiveRecord::Base.connection.quote_column_name(target_field)}, created_at, updated_at)\\nVALUES ($1, $2, to_tsvector($4, $3), now(), now())\\nON CONFLICT (#{ActiveRecord::Base.connection.quote_column_name(fk_column)})\\nDO UPDATE SET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($4, $3), updated_at = now()\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"fk_value\", fk_value, ActiveModel::Type::Integer.new), bind_param(\"master_id\", master_id, ActiveModel::Type::Integer.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new)])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "FullTextSearch::TsvectorWriter",
+        "method": "FullTextSearch::TsvectorWriter.write_tsvector"
+      },
+      "user_input": "target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
     }
   ],
-  "brakeman_version": "7.1.2"
+  "brakeman_version": "8.0.4"
 }

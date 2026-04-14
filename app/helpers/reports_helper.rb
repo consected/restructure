@@ -152,6 +152,14 @@ module ReportsHelper
                      selections.map do |r|
                        [r.send(label), r.send(value)]
                      end
+                   elsif config.group_by
+                     group_field = config.group_by.to_s
+                     unless group_field.in?(valid_attrs)
+                       raise FphsException, "Invalid group_by attribute: #{group_field}"
+                     end
+
+                     raw = selections.pluck(group_field, label, value)
+                     raw.map { |g, l, v| ["#{g}|#{l}", v] }
                    else
                      selections.pluck(label, value)
                    end

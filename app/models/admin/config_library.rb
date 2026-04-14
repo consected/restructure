@@ -18,13 +18,33 @@ class Admin::ConfigLibrary < Admin::AdminBase
   after_commit :refresh_dependencies
 
   def self.content_named(category, name, format: nil)
+    find_active_library!(category, name, format:).options
+  end
+
+  # Get config library content as it was at a specific point in time.
+  # Uses the VersionHandler#versioned method to look up the historical version.
+  # If at: is nil, returns the current content.
+  # @param category [String]
+  # @param name [String]
+  # @param format [Symbol]
+  # @param at [Time | nil] the point in time to get the content for
+  # @return [String] library content
+  def self.content_named_at(category, name, format: nil, at: nil)
+    return content_named(category, name, format:) unless at
+
+    l = find_active_library!(category, name, format:)
+    versioned_lib = l.versioned(at)
+    (versioned_lib || l).options
+  end
+
+  # Find an active config library matching category, name and format.
+  # @raise [FphsException] if no matching library found
+  # @return [Admin::ConfigLibrary]
+  def self.find_active_library!(category, name, format: nil)
     l = where(name:, category:, format:).first
+    return l if l
 
-    unless l
-      raise FphsException, "No config library in category #{category} named #{name} with format #{format || '(nil)'}"
-    end
-
-    l.options
+    raise FphsException, "No config library in category #{category} named #{name} with format #{format || '(nil)'}"
   end
 
   # Directly substitute the library configurations into the supplied text
@@ -66,11 +86,73 @@ class Admin::ConfigLibrary < Admin::AdminBase
   end
 
   def parsed
-    res = if content.present? && is_yaml?
-            YAML.safe_load(c)
-          else
-            {}
-          end
+    if content.present? && is_yaml?
+      YAML.safe_load(c)
+    else
+      {}
+    end
+  end
+
+  # Find all active definitions that reference this config library
+  # via `# @library category name` in their options text.
+  # Searches ActivityLog, DynamicModel, ExternalIdentifier, and ConfigLibrary definitions.
+  # @return [Array<Hash>] array of hashes with :type, :id, :name, :admin_path keys
+  def referenced_by
+    refs = []
+    library_ref = "# @library #{category} #{name}"
+
+    ActivityLog.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'ActivityLog',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/activity_logs?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    DynamicModel.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'DynamicModel',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/dynamic_models?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    ExternalIdentifier.active.each do |item|
+      text = item.options_text
+      next unless text&.include?(library_ref)
+
+      refs << {
+        type: 'ExternalIdentifier',
+        id: item.id,
+        name: item.name,
+        resource_name: item.resource_name,
+        admin_path: "/admin/external_identifiers?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    Admin::ConfigLibrary.active.where.not(id:).each do |item|
+      next unless item.options&.include?(library_ref)
+
+      refs << {
+        type: 'ConfigLibrary',
+        id: item.id,
+        name: "#{item.category} - #{item.name}",
+        resource_name: nil,
+        admin_path: "/admin/config_libraries?filter[id]=#{item.id}&perform_action=edit"
+      }
+    end
+
+    refs
   end
 
   private
@@ -102,7 +184,18 @@ class Admin::ConfigLibrary < Admin::AdminBase
       ms << a if cl.include? self
     end
 
-    ms.each(&:force_option_config_parse)
+    ms.each do |m|
+      # Touch the definition to create a new version history entry,
+      # so that instances created before and after this library change
+      # resolve to the correct library content via versioned definitions.
+      # Skip the touch when versioning is disabled globally (DisableVDef)
+      # or when the definition uses use_current_version (always uses latest).
+      unless Settings::DisableVDef || m.use_current_version
+        m.current_admin ||= current_admin
+        m.touch
+      end
+      m.force_option_config_parse
+    end
   end
 
   def valid_options

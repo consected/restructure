@@ -82,6 +82,7 @@ _nfs_store.fs_browser = function ($outer) {
     var form = btn.parents('form').first();
     form.removeAttr("data-remote");
     form.removeData("remote");
+    _fpa.form_utils.set_auth_tokens(form);
 
     $('body').addClass('prevent-page-transition');
     btn.click();
@@ -113,7 +114,9 @@ _nfs_store.fs_browser = function ($outer) {
 
     form.attr('data-remote', 'true');
     form[0].app_callback = function () {
-      refresh_browser($outer, container_id);
+      window.setTimeout(function () {
+        refresh_browser($outer, container_id);
+      }, 1000);
     }
 
     $('body').addClass('prevent-page-transition');

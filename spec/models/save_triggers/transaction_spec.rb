@@ -16,7 +16,12 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
     expect(@master).not_to be nil
 
     # Set up activity log definition with save_trigger_results support
-    al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+    # Re-setup the activity log if it was removed by other specs during this test run
+    al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
+    unless al_def
+      SetupHelper.setup_al_gen_tests('Phone Log', nil, 'player_contact', rec_type: 'phone')
+      al_def = ActivityLog.active.where(item_type: 'player_contact', rec_type: 'phone').first
+    end
 
     ActivityLog.active.where(item_type: al_def.item_type).where.not(id: al_def.id).each do |oal|
       oal.current_admin = @admin
@@ -29,10 +34,17 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
     END_DEF
 
     al_def.current_admin = @admin
+    al_def.force_regenerate = true
+    al_def.updated_at = DateTime.now
     al_def.save!
+    ActivityLog.refresh_outdated
+    al_def.reload
+    al_def.force_option_config_parse
 
-    setup_access :activity_log__player_contact_phones
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create
+    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create,
+                                                              user: @user
+    al_def.add_master_association
 
     @activity_log = @master.activity_log__player_contact_phones.create!(
       select_call_direction: 'to player',

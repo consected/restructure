@@ -50,7 +50,12 @@ Rails.application.configure do
   config.log_tags = [:request_id]
 
   # Use a different cache store in production.
-  config.cache_store = :mem_cache_store
+  # The :meta protocol replaces the deprecated :binary protocol (removed in Dalli 5.0)
+  # and requires memcached 1.6+.
+  # Explicit serializer: Marshal suppresses Dalli's SECURITY WARNING about Marshal
+  # deserialization. A compromised memcached server implies full server compromise,
+  # so Marshal does not amplify the risk (issue #1038).
+  config.cache_store = :mem_cache_store, { protocol: :meta, serializer: Marshal }
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
@@ -72,7 +77,7 @@ Rails.application.configure do
 
   case ENV.fetch('FPHS_USE_LOGGER', nil)
   when 'TRUE', 'true', 'default'
-    puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
     # Use default logging formatter so that PID and timestamp are not suppressed.
     config.log_formatter = Logger::Formatter.new
   when 'STDOUT'
@@ -81,14 +86,14 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   when 'syslog'
     # Use a different logger for distributed setups.
-    puts '!!!!!!!!!!!!!!!!!!!!!! syslog enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! syslog enabled !!!!!!!!!!!!!!!!!!!!!!'
     require 'syslog/logger'
     config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new('restructure-app'))
   when 'DoNothing'
-    puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = nil
   else
-    puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
+    STDERR.puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :fatal
     config.log_formatter = Logger::Formatter.new
   end

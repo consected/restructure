@@ -6,8 +6,8 @@
 # Underlying database triggers supporting the model handle this 'upsert'.
 class TrackersController < UserBaseController
   TRACKER_SORTERS = {
-    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.updated_at DESC',
-    'latest entry date' => 'event_date DESC NULLS LAST, trackers.updated_at DESC',
+    'protocol position' => 'protocols.position ASC, event_date DESC NULLS LAST, trackers.id DESC',
+    'latest entry date' => 'event_date DESC NULLS LAST, trackers.id DESC',
     'protocol name' => { 'protocols.name': :asc }
   }.freeze
 

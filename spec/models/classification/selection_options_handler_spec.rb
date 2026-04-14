@@ -23,7 +23,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
   it 'overrides general selection configurations with dynamic model alt_options' do
     config0 = Classification::SelectionOptionsHandler.selector_with_config_overrides
 
-    ::ActivityLog.define_models
+    ActivityLog.define_models
     @activity_log = al = ActivityLog::PlayerContactPhone.definition
 
     cleanup_matching_activity_logs(al.item_type, al.rec_type, al.process_name, excluding_id: al.id)
@@ -214,11 +214,10 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     setup_access :player_contacts, user: @user
 
     player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
-    player_contact2 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
+    @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
     player_contact3 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7892', rank: 5)
 
     pc_data = "#{player_contact.data} [primary]"
-    pc_data2 = "#{player_contact2.data} [secondary]"
     pc_data3 = "#{player_contact3.data} [secondary]"
 
     create_item name: 'User',
@@ -334,11 +333,10 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     setup_access :player_contacts, user: @user
 
     player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
-    player_contact2 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
+    @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7891', rank: 5)
     player_contact3 = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7892', rank: 5)
 
     pc_data = "#{player_contact.data} [primary]"
-    pc_data2 = "#{player_contact2.data} [secondary]"
     pc_data3 = "#{player_contact3.data} [secondary]"
 
     create_item name: 'User',
@@ -456,5 +454,203 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     al._general_selections
     expect(al._general_selections).to eq algs
+  end
+
+  # Tests for select_user_with_role_ field type (Issue #333)
+  # The select_user_with_role_ field type sources options from Admin::UserRole,
+  # fetching active, non-template users with a specific role.
+  # These tests verify label_for, selector_with_config_overrides, and _general_selections
+  # return correct data for select_user_with_role_ fields.
+
+  it 'gets labels for select_user_with_role field' do
+    ActivityLog.define_models
+
+    @master.current_user = @user
+    setup_access :player_contacts, user: @user
+
+    player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
+
+    create_item name: 'User',
+                value: 'user',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    # Create an additional user and assign a role to them
+    role_name = 'test reviewer'
+    original_user = @user
+    role_user, = create_user('role-user-333')
+    create_user_role(role_name, user: role_user, app_type: role_user.app_type)
+    @user = original_user
+
+    al_def = ActivityLog::PlayerContactElt.definition
+    cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
+
+    al_def.extra_log_types = <<~END_DEF
+      step_user_role:
+        label: Step User Role
+        fields:
+          - select_call_direction
+          - select_who
+          - select_result
+
+        field_options:
+          select_who:
+            edit_as:
+              field_type: select_user_with_role_test_reviewer
+              label_attr: first_name
+          select_call_direction:
+            edit_as:
+              alt_options:
+                This is one: one
+                This is two: two
+    END_DEF
+
+    al_def.current_admin = @admin
+    al_def.save!
+    al_def.force_option_config_parse
+
+    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+
+    expect(player_contact.current_user).to eq @user
+    sleep 2
+    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
+                                                                  select_who: role_user.email,
+                                                                  extra_log_type: 'step_user_role')
+
+    ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
+    al.save!
+
+    # label_for should return the user's first_name as the label for a select_user_with_role_ field
+    # when label_attr is configured as first_name and value_attr defaults to email.
+    res = Classification::SelectionOptionsHandler.label_for(al, :select_who, role_user.email)
+    expect(res).to eq role_user.first_name
+  end
+
+  it 'includes select_user_with_role options in selector_with_config_overrides' do
+    ActivityLog.define_models
+
+    @master.current_user = @user
+    setup_access :player_contacts, user: @user
+
+    @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
+
+    create_item name: 'User',
+                value: 'user',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    # Create an additional user and assign a role to them
+    role_name = 'test reviewer'
+    original_user = @user
+    role_user, = create_user('role-user-swco-333')
+    create_user_role(role_name, user: role_user, app_type: role_user.app_type)
+    @user = original_user
+
+    al_def = ActivityLog::PlayerContactElt.definition
+    cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
+
+    al_def.extra_log_types = <<~END_DEF
+      step_user_role:
+        label: Step User Role
+        fields:
+          - select_call_direction
+          - select_who
+
+        field_options:
+          select_who:
+            edit_as:
+              field_type: select_user_with_role_test_reviewer
+          select_call_direction:
+            edit_as:
+              alt_options:
+                This is one: one
+    END_DEF
+
+    al_def.current_admin = @admin
+    al_def.save!
+    al_def.force_option_config_parse
+
+    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+
+    Classification::SelectionOptionsHandler.reset!
+
+    config = Classification::SelectionOptionsHandler.selector_with_config_overrides(
+      extra_log_type: 'step_user_role',
+      item_type: al_def.resource_name.singularize
+    )
+
+    # selector_with_config_overrides should include entries for the select_user_with_role_ field
+    select_who_entries = config.select { |c| c[:field_name] == :select_who }
+    expect(select_who_entries).not_to be_empty
+
+    role_user_entry = select_who_entries.find { |c| c[:value] == role_user.email }
+    expect(role_user_entry).not_to be_nil
+    expect(role_user_entry[:name]).to eq role_user.email
+  end
+
+  it 'includes select_user_with_role values in _general_selections' do
+    ActivityLog.define_models
+
+    @master.current_user = @user
+    setup_access :player_contacts, user: @user
+
+    player_contact = @master.player_contacts.create!(rec_type: :phone, data: '(123) 456-7890', rank: 10)
+
+    create_item name: 'User',
+                value: 'user',
+                item_type: 'activity_log__player_contact_elt_select_who',
+                disabled: false
+
+    # Create an additional user and assign a role to them
+    role_name = 'test reviewer'
+    original_user = @user
+    role_user, = create_user('role-user-gs-333')
+    create_user_role(role_name, user: role_user, app_type: role_user.app_type)
+    @user = original_user
+
+    al_def = ActivityLog::PlayerContactElt.definition
+    cleanup_matching_activity_logs(al_def.item_type, al_def.rec_type, al_def.process_name, excluding_id: al_def.id)
+
+    al_def.extra_log_types = <<~END_DEF
+      step_user_role:
+        label: Step User Role
+        fields:
+          - select_call_direction
+          - select_who
+
+        field_options:
+          select_who:
+            edit_as:
+              field_type: select_user_with_role_test_reviewer
+          select_call_direction:
+            edit_as:
+              alt_options:
+                This is one: one
+    END_DEF
+
+    al_def.current_admin = @admin
+    al_def.save!
+    al_def.force_option_config_parse
+
+    setup_access :activity_log__player_contact_elts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_elt__step_user_role, resource_type: :activity_log_type, user: @user
+
+    expect(player_contact.current_user).to eq @user
+    sleep 2
+    al = player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'one',
+                                                                  select_who: role_user.email,
+                                                                  extra_log_type: 'step_user_role')
+
+    ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
+    al.save!
+
+    # _general_selections should include the role user's email as the label for the select_who field
+    gs = al._general_selections
+    expect(gs['select_who']).to be_present
+    expect(gs['select_who'][role_user.email]).to eq({ name: role_user.email })
   end
 end

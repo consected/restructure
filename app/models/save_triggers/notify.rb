@@ -49,7 +49,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @emails
         setup_emails
       else
-        raise FphsException, 'role, users or phones must be specified in save_trigger: notify: role: ...'
+        raise FphsException, 'role, users, emails or phones must be specified in save_trigger: notify: role: ...'
       end
 
       if !@receiving_user_ids&.present? && !@force_phones && !@force_emails && !@force_recip_recs
@@ -283,15 +283,71 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # to be substituted into the message using substitutions like {{extra_substitutions.data1}}
   # Data within the extra substitutions is substituted from the item, so may also contain its own
   # {{curly}} substitutions, set at the time the notification is created, not at the time it is sent.
+  # If a calendar_invite config is present, its values are resolved and merged into
+  # extra_substitutions[:calendar_invite] for storage on the MessageNotification record.
   # @return [Hash | nil]
   def extra_substitutions
     return @extra_substitutions if @extra_substitutions
 
-    @extra_substitutions = config[:extra_substitutions]
+    @extra_substitutions = config[:extra_substitutions] || {}
 
-    @extra_substitutions&.each do |k, v|
-      @extra_substitutions[k] = Formatter::Substitution.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
+    @extra_substitutions.each do |k, v|
+      next unless v.is_a?(String)
+
+      @extra_substitutions[k] = substitute_from_item(v)
     end
+
+    merge_calendar_invite_into_extra_substitutions
+    merge_attachments_into_extra_substitutions
+
+    @extra_substitutions = nil if @extra_substitutions.blank?
+    @extra_substitutions
+  end
+
+  #
+  # Parse the calendar_invite config option, resolve substitutions in all values,
+  # and merge the resolved hash into extra_substitutions[:calendar_invite].
+  # Values support {{curly}} substitutions and conditional action hashes.
+  # @return [void]
+  def merge_calendar_invite_into_extra_substitutions
+    cal_config = config[:calendar_invite]
+    return unless cal_config
+
+    resolved = cal_config.to_h do |k, v|
+      [k.to_s, substitute_from_item(v)]
+    end
+
+    @extra_substitutions[:calendar_invite] = resolved
+  end
+
+  #
+  # Parse the attachments config option, resolve substitutions in all values,
+  # and merge the resolved array into extra_substitutions[:attachments].
+  # Each attachment entry is a hash with container_id, path, and file_name keys.
+  # Values support {{curly}} substitutions and conditional action hashes
+  # (e.g. {this: {field: return_value}}).
+  # @return [void]
+  def merge_attachments_into_extra_substitutions
+    att_config = config[:attachments]
+    return unless att_config
+
+    resolved = att_config.map do |entry|
+      entry.to_h do |k, v|
+        [k.to_s, substitute_from_item(v)]
+      end
+    end
+
+    @extra_substitutions[:attachments] = resolved
+  end
+
+  #
+  # Resolve a config value from the current item using FieldDefaults.calculate_default.
+  # Supports {{curly}} substitutions, {{{raw}}} substitutions, conditional action hashes
+  # (e.g. {this: {field: return_value}}), and literal values passed through unchanged.
+  # @param [String | Hash | Object] value - value to resolve
+  # @return [Object] resolved value
+  def substitute_from_item(value)
+    FieldDefaults.calculate_default(@item, value, allow_nil: true, ignore_missing: true)
   end
 
   #

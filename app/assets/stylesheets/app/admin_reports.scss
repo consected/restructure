@@ -1,0 +1,25 @@
+.report-rn--admin_user_access_overview__user_access_overview_by_role,
+.report-rn--admin_user_access_overview__user_access_overview_by_resource,
+.report-rn--admin_user_access_overview__user_access_overview_resolved,
+.report-rn--admin_user_access_overview__user_access_overview_roles_only,
+.report-rn--admin_user_access_overview__user_access_overview_users_with_role {
+
+  th[data-col-name="id0"],
+  th[data-col-name="id1"], 
+  td[data-col-type="id0"],
+  td[data-col-type="id1"] {
+    width: 60px;
+  }
+
+  table.table.report-table tr {
+    td[data-col-type="id1"], th[data-col-name="id1"]{
+      border-right: none;
+    }
+
+    td[data-col-type="blank"], th[data-col-name="blank"] {
+      background: white;
+      border-left: none;
+      visibility: hidden;
+    }
+  }
+}

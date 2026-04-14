@@ -1,0 +1,51 @@
+// Styles for the API definitions panel in admin dynamic definition views
+.api-panel {
+  padding: 10px 0;
+
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 3px;
+  }
+
+  &__endpoint {
+    margin-bottom: 5px;
+
+    p {
+      margin-bottom: 2px;
+    }
+
+    code {
+      font-size: 13px;
+    }
+
+    code:first-child {
+      color: #337ab7;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+  }
+
+  &__curl-section {
+    p strong {
+      font-size: 13px;
+    }
+  }
+
+  &__curl-block,
+  &__fields-block,
+  &__save-trigger-block {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-bottom: 2px;
+  }
+}

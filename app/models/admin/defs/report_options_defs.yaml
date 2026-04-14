@@ -102,6 +102,11 @@ list_options:
   # Markdown formatted description to appear in the list of available reports,
   # allowing the main description field to appear just in the search criteria form
 
+  get_query_count: false (default) | true
+  # Automatically fetch the query count when the reports list page loads.
+  # When true, the report will run to retrieve a count and populate search attribute
+  # and result count cells in the reports list.
+
 tree_view_options:
   # A tree view allows for drill down into lower levels.
   # A query must return an "id" field to operate, even if it is random.

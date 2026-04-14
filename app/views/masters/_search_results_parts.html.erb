@@ -3,32 +3,31 @@
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
   no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
-<script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('search-count-template') do %>
   <span>
   {{#with count}}
   <span class="search_count">{{count}}</span> record{{#is count '!==' 1}}s{{/is}}
   {{#is count '>' show_count }} - showing {{show_count}} results - refine search to show others{{/is}}
   </span>
   {{/with}}
-</script>
+<% end %>
 
-<script id="search-action-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('search-action-template') do %>
   <span id="search-action" class="hidden search-action">{{search_action}}</span>
-</script>
+<% end %>
 
 
-<script id="empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-</script>
+<%= handlebars_template_tag('empty-template') do %><% end %>
 
-<script id="master_header_prefix-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_header_prefix-partial', css_class: 'hidden handlebars-partial') do %>
   <span class="master-header-prefix">{{{header_prefix}}}</span>
-</script>
+<% end %>
 
-<script id="master_header_title-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_header_title-partial', css_class: 'hidden handlebars-partial') do %>
   <span class="master-header-title">{{{header_title}}}</span>
-</script>
+<% end %>
 
-<script id="subject_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('subject_info_summary_result-partial', css_class: 'hidden handlebars-partial') do %>
   <strong class="player-names">
     {{capitalize first_name}}
     <span class="middle-name">{{capitalize middle_name}}</span>
@@ -49,9 +48,9 @@
     {{>accuracy_badge player_info=this}}
   </span>
   <% end %>
-</script>
+<% end %>
 
-<script id="master_panel_heading" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_panel_heading', css_class: 'hidden handlebars-partial') do %>
   <div class="panel-heading master-result num-masters-{{num_masters}} {{#is num_masters '===' 1}}selected-result{{/is}}" role="tab" id="master-{{id}}">
     <h3 class="panel-title">
       <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="link to this record"> </a>
@@ -90,24 +89,28 @@
       </div>
     </h3>
   </div>
-</script>
+<% end %>
 
 
 
-<script id="master_id_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('master_id_summary_result-partial', css_class: 'hidden handlebars-partial') do %>
 <% id_list = app_config_items(:show_ids_in_master_result, ['master_id']) %>
+<%
+  # Get the alternative ID labels for display
+  id_labels = Master.alternative_id_labels(access_by: current_user)
+%>
 <% unless id_list.first == 'none' %>
 <div class="col-md-2 col-lg-2 result-refs">
-  <% if id_list.length > 1 %>
-  <% end %>
   <%
   first = true
   id_list.each do |i|
+    id_label = id_labels[i.to_sym] || i.to_s.humanize
   %>
     <% if first && id_list.length > 1 %>
-    <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to alternative ID"></a>
+    <% next_label = id_labels[id_list[1].to_sym] || id_list[1].to_s.humanize %>
+    <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to <%= next_label %>"></a>
     <% end %>
-    <span class="alt-id-item <%= first && id_list.length > 1 ? '' : 'alt_id' %> <%=i%>" <% unless first %> style="display: none"<% end %> title="<%= i.humanize %>">{{#if <%= i %>}}{{<%= i %>}}{{else}}no&nbsp;<%= i.humanize %>{{/if}}</span>
+    <span class="alt-id-item<%= first && id_list.length > 1 ? '' : ' alt_id' %> <%=i%>" data-id-label="<%= id_label %>"<% unless first %> style="display: none"<% end %>>{{#if <%= i %>}}<span title="<%= id_label %>">{{<%= i %>}}</span>{{else}}<span title="No <%= id_label %>">(none)</span>{{/if}}</span>
   <%
     first = false
   end
@@ -115,9 +118,9 @@
   <span>&nbsp;</span>
 </div>
 <% end %>
-</script>
+<% end %>
 
-<script id="secondary_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('secondary_info_summary_result-partial', css_class: 'hidden handlebars-partial') do %>
         <strong class="pro-names">
                   {{capitalize first_name}}
                   <span class="middle-name">{{capitalize middle_name}}</span>
@@ -132,34 +135,34 @@
         {{#if death_date}}
                 <small>DOD</small> {{local_date death_date '-'}}
         {{/if}}
-</script>
+<% end %>
 
-<script id="tracker_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('tracker_badge-partial', css_class: 'hidden handlebars-partial') do %>
 <span class="badge tracker-button-badge" id="tracker-count-{{master_id}}">{{#is trackers_length null}}{{trackers.length}}{{else}}{{trackers_length}}{{/is}}</span>
-</script>
+<% end %>
 
-<script id="accuracy_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('accuracy_badge-partial', css_class: 'hidden handlebars-partial') do %>
 <span class="label label-info player-info-badge-{{player_info.rank}}" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
-</script>
+<% end %>
 
 
 
-<script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('tracker-badge-template') do %>
   {{>tracker_badge}}
-</script>
+<% end %>
 
-<script id="accuracy-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('accuracy-badge-template') do %>
   {{>accuracy_badge}}
-</script>
+<% end %>
 
-<script id="subject-info-summary-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag('subject-info-summary-result-template') do %>
   {{#with <%=subject_data_type%>}}
   {{>subject_info_summary_result}}
   {{/with}}
-</script>
+<% end %>
 
 
-<script id="sublist_controls" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<%= handlebars_template_tag('sublist_controls', css_class: 'hidden handlebars-partial') do %>
   <div class="sublist-controls">
     {{#if filter_attr}}
     <div class="sublist-filter-selectors">
@@ -169,7 +172,7 @@
       {{#each (sort (unique (pluck (lookup this (or sub_list_data_name sub_list)) filter_attr filter_name)) 'desc')}}
       {{#is this.[1] 'includes' '{{' }}
       {{else}}
-      <button class="btn btn-default btn-sm filter-switch {{#if ../all_active}}active{{else}}{{#is @key 0}}active{{/is}}{{/if}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{hyphenate ../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
+      <button class="btn btn-default btn-sm filter-switch {{#if ../all_active}}active{{else}}{{#is ../active_values 'all'}}active{{else}}{{#is ../active_values 'none'}}{{else}}{{#if ../active_values}}{{#is this.[0] 'in' ../active_values}}active{{/is}}{{else}}{{#is @key 0}}active{{/is}}{{/if}}{{/is}}{{/is}}{{/if}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{hyphenate ../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
       {{/is}}
       {{/each}}
     </div>
@@ -191,4 +194,4 @@
     </div>
     {{/if}}
   </div>
-</script>
+<% end %>

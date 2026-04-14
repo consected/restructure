@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Tests for SaveTriggers::Notify
+# Covers notification trigger configuration parsing, role/user setup, message creation,
+# template substitutions, conditional actions, return_value_list references,
+# calendar invite integration (#953), and NfsStore file attachment config parsing (#954).
+
 require 'rails_helper'
 
 AlNameGenTestN = 'Gen Test ELT 2'
@@ -420,9 +425,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(@trigger.send(:content_template_text)).to eq 'Custom message for {{select_who}}'
   end
 
-  it 'uses template reference for content_template_text with existing field' do
-    # Use the data field (phone number) in content_template_text
-    # This should be substituted and preserved as a template for later rendering
+  it 'uses conditional reference for content_template_text with existing field' do
+    # Use a conditional hash reference to retrieve the notes field value.
+    # This should be substituted and preserved as a template for later rendering.
     @al.notes = 'Custom message for {{select_who}}'
     @al.select_who = 'notify test person'
     @al.current_user = @user
@@ -808,7 +813,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep2_last_sent_msg.item_id).to eq alstep2.id
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p> 1\n</div></body></html>"
-    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p>"
+    ctt = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep1.master}. This is a name: #{alstep1.select_who} in #{alstep1.id}.</p>"
     expect(alstep1_first_sent_msg.item_id).to eq alstep1.id
     expect(alstep1_first_sent_msg.status).to eq 'complete'
     expect(alstep1_first_sent_msg.role_name).to eq 'test'
@@ -825,7 +830,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(alstep1_last_sent_msg.generated_content).to eq tsub
 
     tsub = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p> 1\n</div></body></html>"
-    ctt = t = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p>"
+    ctt = "<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id #{alstep2.master}. This is a name: #{alstep2.select_who} in #{alstep2.id}.</p>"
 
     expect(alstep2_first_sent_msg.item_id).to eq alstep2.id
     expect(alstep2_first_sent_msg.status).to eq 'complete'
@@ -882,6 +887,130 @@ RSpec.describe SaveTriggers::Notify, type: :model do
         expect do
           notify.send(:calc_field_or_return, hash_config)
         end.not_to raise_error
+      end
+    end
+
+    context 'with calendar_invite config (issue #953)' do
+      it 'parses calendar_invite config, resolves substitutions, and merges into extra_substitutions' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Meeting Invite',
+          calendar_invite: {
+            method: 'REQUEST',
+            summary: 'Review Meeting for {{master_id}}',
+            description: 'Notes about {{select_who}}',
+            location: 'Room 101',
+            dtstart: '2026-04-01 10:00:00',
+            dtend: '2026-04-01 11:00:00',
+            organizer: 'organizer@example.com',
+            uid: '{{id}}-{{master_id}}@restructure',
+            sequence: 0
+          }
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        ci_data = new_mn.calendar_invite_data
+        expect(ci_data).to be_a(Hash)
+        expect(ci_data['method']).to eq('REQUEST')
+        expect(ci_data['summary']).to eq("Review Meeting for #{@al.master_id}")
+        expect(ci_data['description']).to eq("Notes about #{@al.select_who}")
+        expect(ci_data['location']).to eq('Room 101')
+        expect(ci_data['organizer']).to eq('organizer@example.com')
+        expect(ci_data['uid']).to eq("#{@al.id}-#{@al.master_id}@restructure")
+      end
+    end
+
+    context 'with attachments config (issue #954)' do
+      before :example do
+        # Mock NfsStore file resolution so the inline job doesn't fail
+        # (the actual resolution is tested in message_notification_spec)
+        allow_any_instance_of(Messaging::MessageNotification).to receive(:resolve_nfsstore_attachments)
+      end
+
+      it 'parses attachments config, resolves substitutions, and merges into extra_substitutions' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Report Delivery',
+          attachments: [
+            {
+              container_id: '{{master_id}}',
+              path: 'reports',
+              file_name: 'summary.pdf'
+            },
+            {
+              container_id: 42,
+              path: '',
+              file_name: 'static_file.txt'
+            }
+          ]
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        es_data = YAML.safe_load(new_mn.extra_substitutions, permitted_classes: [Symbol])
+                      &.with_indifferent_access
+        attachments_data = es_data['attachments']
+
+        expect(attachments_data).to be_a(Array)
+        expect(attachments_data.length).to eq(2)
+
+        # First attachment should have {{master_id}} resolved
+        expect(attachments_data[0]['container_id']).to eq(@al.master_id.to_s)
+        expect(attachments_data[0]['path']).to eq('reports')
+        expect(attachments_data[0]['file_name']).to eq('summary.pdf')
+
+        # Second attachment should have literal values preserved
+        expect(attachments_data[1]['container_id']).to eq(42)
+        expect(attachments_data[1]['path']).to eq('')
+        expect(attachments_data[1]['file_name']).to eq('static_file.txt')
+      end
+
+      it 'works with both attachments and calendar_invite in the same config' do
+        config = {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Combined Notification',
+          calendar_invite: {
+            method: 'REQUEST',
+            summary: 'Meeting',
+            dtstart: '2026-04-01 10:00:00',
+            dtend: '2026-04-01 11:00:00',
+            organizer: 'org@example.com'
+          },
+          attachments: [
+            {
+              container_id: 99,
+              path: '',
+              file_name: 'report.pdf'
+            }
+          ]
+        }
+
+        @trigger = SaveTriggers::Notify.new(config, @al)
+        @trigger.perform
+
+        new_mn = MessageNotification.order(id: :desc).first
+        es_data = YAML.safe_load(new_mn.extra_substitutions, permitted_classes: [Symbol])
+                      &.with_indifferent_access
+
+        # Both should be present
+        expect(es_data['calendar_invite']).to be_a(Hash)
+        expect(es_data['attachments']).to be_a(Array)
+        expect(es_data['attachments'].length).to eq(1)
+        expect(es_data['attachments'][0]['file_name']).to eq('report.pdf')
       end
     end
   end

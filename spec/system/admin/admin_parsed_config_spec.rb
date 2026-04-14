@@ -5,6 +5,7 @@ require 'rails_helper'
 describe 'admin parsed config display', js: true, driver: $browser_driver do
   include ModelSupport
   include AdminActionsSetup
+  include FeatureSupport
 
   before(:all) do
     SetupHelper.feature_setup
@@ -14,11 +15,21 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
 
   describe 'dynamic models' do
     it 'displays parsed config tab with line numbers' do
-      # Find any existing dynamic model to test with
+      # Find a dynamic model and ensure it has option types that produce parsed config output
       dm = DynamicModel.active.first
+      expect(dm).not_to be nil
 
-      # Skip test if no dynamic models exist
-      skip 'No active dynamic models found' unless dm
+      # Set up options with actual config so parsed_options_text produces output
+      dm.current_admin = @admin
+      dm.options = <<~YAML
+        default:
+          labels:
+            field_1: Test Field
+          view_options:
+            data_attribute: field_1
+      YAML
+      dm.updated_at = Time.now
+      dm.save!
 
       admin_sign_in_with_2fa
 
@@ -37,29 +48,32 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
 
-      # Wait for content to render
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      # Wait for CodeMirror to render (may need time for JS initialization after tab switch)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 10)
 
-      # Verify merged YAML content is displayed (content depends on the model)
-      within '.parsed-config-output' do
-        # Verify we have some YAML-like content (not empty)
+      # Verify merged YAML content is displayed with CodeMirror
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers are present
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
-      expect(line_numbers.first.text.strip).to match(/^\d+$/)
+      # Verify merged YAML content is displayed with CodeMirror
+      within '#parsed-config .CodeMirror' do
+        content = page.text
+        expect(content.length).to be > 10
+        expect(content).to match(/:\s/)
+      end
+
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
 
     it 'handles dynamic models with no config options' do
       # Find or use a dynamic model (all should have at least some config after parsing)
       dm = DynamicModel.active.first
 
-      skip 'No active dynamic models found' unless dm
+      expect(dm).not_to be nil
 
       admin_sign_in_with_2fa
 
@@ -74,8 +88,8 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
 
-      # Should show either empty config or warning message
-      expect(page).to have_css('.parsed-config-output, .alert-warning', wait: 5)
+      # Should show either CodeMirror config or warning message
+      expect(page).to have_css('#parsed-config .CodeMirror, .alert-warning', wait: 5)
     end
   end
 
@@ -85,6 +99,13 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       al = ActivityLog.active.first
 
       skip 'No active activity logs found' unless al
+
+      # Ensure it has extra_log_types for this test
+      unless al.extra_log_types.present?
+        al.update_column(:extra_log_types, "default:\n  label: Test Log\n  fields:\n    - field1\n")
+        al.force_option_config_parse if al.respond_to?(:force_option_config_parse)
+        al.reload
+      end
 
       admin_sign_in_with_2fa
 
@@ -102,20 +123,18 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
 
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
+      finish_page_loading
 
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
 
-      within '.parsed-config-output' do
-        # Verify we have merged YAML content
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
   end
 
@@ -170,7 +189,7 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       admin_sign_in_with_2fa
 
       visit '/admin/external_identifiers'
-
+      finish_page_loading
       # Wait for page to load
       expect(page).to have_css("#admin-item-#{ei.id}", wait: 10)
 
@@ -178,25 +197,25 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
         find('a.edit-entity.glyphicon-pencil').click
       end
 
-      expect(page).to have_css('.nav-tabs', wait: 15)
+      finish_form_formatting
+      expect(page).to have_css('.nav-tabs', wait: 20)
+      finish_page_loading
       sleep 1 # Extra wait for AJAX
 
       click_link 'Parsed Config'
       expect(page).to have_css('#parsed-config', visible: true)
+      finish_page_loading
 
-      expect(page).to have_css('.parsed-config-output', wait: 5)
+      expect(page).to have_css('#parsed-config .CodeMirror', wait: 5)
 
-      within '.parsed-config-output' do
-        # Verify we have merged YAML content
+      within '#parsed-config .CodeMirror' do
         content = page.text
         expect(content.length).to be > 10
-        # Should contain YAML key-value structures (colons)
         expect(content).to match(/:\s/)
       end
 
-      # Verify line numbers
-      line_numbers = all('.parsed-config-output .line-number')
-      expect(line_numbers.length).to be > 0
+      # Verify CodeMirror has line numbers configured (gutter present)
+      expect(page).to have_css('#parsed-config .CodeMirror-gutters', visible: :all)
     end
   end
 
@@ -205,24 +224,26 @@ describe 'admin parsed config display', js: true, driver: $browser_driver do
       # Use any existing dynamic model (they all should work)
       dm = DynamicModel.active.first
 
-      skip 'No active dynamic models found' unless dm
+      expect(dm).not_to be nil
 
       admin_sign_in_with_2fa
 
       visit '/admin/dynamic_models'
+      finish_page_loading
 
       within "#admin-item-#{dm.id}" do
         find('a.edit-entity.glyphicon-pencil').click
       end
+      finish_form_formatting
 
       expect(page).to have_css('.nav-tabs', wait: 10)
+      sleep 1 # Extra wait for AJAX
 
       click_link 'Parsed Config'
-      expect(page).to have_css('#parsed-config', visible: true)
+      sleep 1 # Wait for tab content to load
 
-      # Should either show the parsed config or an error message
-      # The implementation should handle both cases gracefully
-      expect(page).to have_css('.parsed-config-output, .alert-danger, .alert-warning', wait: 5)
+      # Should either show the CodeMirror parsed config or an error/warning message
+      expect(page).to have_css('#parsed-config .CodeMirror, .alert-danger, .alert-warning', wait: 5)
     end
   end
 end

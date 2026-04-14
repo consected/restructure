@@ -47,7 +47,7 @@
         <%= form_field_label(f, p) %>
         <%
           select_item_type = {}
-          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == p.to_s
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == p.to_s && object_instance.send(p).blank?
           select_item_type[:include_blank] = true          
 
           options = send("#{p}_options")
@@ -80,7 +80,7 @@
           <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), ib, add_opts %>
       <% elsif p == :user_id %>
           <%
-            default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id'
+            default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id' && object_instance.user_id.blank?
           %>
           <%= form_field_label(f, p) %>
           <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true }, class: 'use-chosen' %>

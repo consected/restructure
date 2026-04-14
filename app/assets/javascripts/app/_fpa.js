@@ -9,6 +9,9 @@ _fpa = {
     template_config_versions: {},
   },
 
+  preprocessors: {},
+  loaded: {},
+
   before_send_processors: {},
   view_handlers: {},
   app_specific: {},
@@ -130,30 +133,13 @@ _fpa = {
   },
   compile_templates: function () {
     $('body').addClass('status-compiling');
-    $('script.handlebars-partial')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        id = id.replace('-partial', '');
 
-        var fnTemplate = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-        Handlebars.registerPartial(id, fnTemplate);
-        _fpa.partials[id] = fnTemplate;
-      });
+    // Alias Handlebars registries to _fpa for compatibility
+    // Precompiled templates auto-register to Handlebars.templates and Handlebars.partials
+    _fpa.templates = Handlebars.templates = Handlebars.templates || {};
+    _fpa.partials = Handlebars.partials = Handlebars.partials || {};
 
-    $('script.handlebars-template')
-      .not('.compiled')
-      .each(function () {
-        $(this).addClass('compiled');
-        var id = $(this).attr('id');
-        var source = $(this).html();
-        source = _fpa.setup_template_source(source);
-        _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
-      });
-    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
+    // Note: status-compiled is set by one_time_setup after all templates are loaded
   },
 
   send_ajax_request: function (url, options) {
@@ -264,7 +250,9 @@ _fpa = {
 
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
-    if (!template) console.log('template for ' + template_name + ' was not found');
+    if (!template) {
+      console.log('Template not found: ' + template_name);
+    }
 
     // Pass the template back in the options for use later
     options.template = template;
@@ -418,7 +406,7 @@ _fpa = {
         }
 
         new_block = html;
-        var id = new_block.attr('id');
+        var id = new_block ? new_block.attr('id') : undefined;
         // If the results has a root element with an id that exist in the DOM already,
         // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
         // replace it rather than placing the result before the specified block
@@ -438,7 +426,7 @@ _fpa = {
         }
 
         new_block = html;
-        var id = new_block.attr('id');
+        var id = new_block ? new_block.attr('id') : undefined;
         var existing = $('#' + id);
         // If the results has a root element with an id that exist in the DOM already,
         // replace it rather than placing the result after the specified block
@@ -454,7 +442,7 @@ _fpa = {
 
         // If the results has a root element with an id that matches the existing block,
         // replace it rather than placing the result inside the current item
-        if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
+        if (new_block && block.attr('id') && block.attr('id') == new_block.attr('id')) {
           block.replaceWith(new_block);
         } else {
           // Just replace the content of the specified block
@@ -1316,8 +1304,8 @@ _fpa = {
     })
 
     if (modal_index) {
-      // Hide a previously shown modal back
-      $('.modal.in').removeClass('in').addClass('was-in');
+      // Hide a previously shown modal back, but not the one we're currently showing
+      $('.modal.in').not(pm).removeClass('in').addClass('was-in');
 
       pm.on('click.dismiss.bs.modal', `[data-dismiss="modal${modal_index}"]`, function () {
         _fpa.hide_modal(modal_index);
@@ -1425,7 +1413,119 @@ _fpa = {
     _fpa.page_transition_callback = null;
     $('body').removeClass('prevent-page-change');
   },
-};
 
-_fpa.preprocessors = {};
-_fpa.loaded = {};
+  load_template_version: function (template_version, rails_env) {
+    $.get({ url: `/pages/${template_version}/template`, cache: true }).done(function (data) {
+      // Inject the template HTML into the page and run any included scripts.
+      // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
+      // which increments pending_template_retrieves before starting async AJAX.
+      $('body').append(data);
+
+      // Wait for all pending multi file AJAX requests to complete before
+      // marking templates as loaded. This prevents the splash guard from
+      // being removed before templates are available for rendering.
+      function waitForPendingRetrieves() {
+        if (_fpa.status.pending_template_retrieves > 0) {
+          window.setTimeout(waitForPendingRetrieves, 10);
+        } else {
+          _fpa.status.loaded_templates = true;
+          _fpa.one_time_setup();
+        }
+      }
+      window.setTimeout(waitForPendingRetrieves, 1);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The page failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+    });
+  },
+
+
+  one_time_setup: function () {
+    if (_fpa.status.one_time_setup_run || !_fpa.status.loaded_templates || !_fpa.status.html_ready) return;
+
+    _fpa.status.one_time_setup_run = true;
+    _fpa.compile_templates();
+    // Mark compilation complete - splash guard is removed only after all templates are loaded
+    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
+    _fpa.reset_page_size();
+    _fpa.loaded.default();
+  },
+
+  retrieve_requested_handlebars_templates: function (url, rails_env, file_id) {
+    // Track pending multi file AJAX requests so load_template_version knows
+    // when all templates have been fetched before removing the splash guard.
+    _fpa.status.pending_template_retrieves = (_fpa.status.pending_template_retrieves || 0) + 1;
+
+    // Use $.ajax with dataType 'script' to fetch and execute the precompiled template JavaScript
+    // $.getScript disables caching by default, so we use $.ajax directly
+    $.ajax({
+      url: url,
+      dataType: 'script',
+      cache: true
+    }).done(function () {
+      // Script executed - templates are now registered, just need to compile them
+      _fpa.compile_templates();
+      $('body').addClass(`loaded-templates--${file_id}`);
+      _fpa.status.pending_template_retrieves--;
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR, textStatus, errorThrown);
+      if (rails_env != 'test') {
+        _fpa.flash_notice('The requested templates failed to load correctly. Please refresh to try again.', 'danger');
+        $('body').removeClass('status-compiling initial-compiling').addClass('status-failed-compilation');
+      }
+      _fpa.cache.clean();
+      _fpa.status.pending_template_retrieves--;
+    });
+  },
+
+  initialize_app: function () {
+
+    var current_user = _fpa.state.current_user, current_admin = _fpa.state.current_admin,
+      controller_name = _fpa.state.controller_name, action_name = _fpa.state.action_name;
+
+    if (_fpa.state.current_user) {
+      window.localStorage.setItem('session_app_type_id', _fpa.state.current_user.app_type_id);
+    }
+    _fpa.loaded.preload();
+    _fpa.handle_remotes();
+    if (current_user || current_admin) {
+
+      if (current_user && current_user.app_type_id && !(controller_name == 'app_types' && action_name == 'upload')) {
+        _fpa.load_template_version(_fpa.state.template_version, _fpa.state.rails_env);
+
+
+      }
+      else {
+        _fpa.cache.clean();
+        window.setTimeout(function () {
+          _fpa.status.loaded_templates = true;
+          _fpa.one_time_setup();
+        }, 1);
+
+      }
+
+      $('html').ready(function () {
+        _fpa.status.html_ready = true;
+        _fpa.one_time_setup();
+      });
+    }
+
+    if (controller_name == 'sessions') {
+      $('html').ready(function () {
+        _fpa.loaded.login();
+      });
+    }
+
+    if (controller_name == 'registrations') {
+      $('html').ready(() => {
+        _fpa.loaded.registrations();
+      });
+    }
+
+  }
+
+};

@@ -5,7 +5,7 @@
     @view_options = @report.report_options(fail_without_exception: true)&.view_options
 %>  
   <div class="admin-view report-criteria">
-  <%= form_tag report_path(@report.id), 
+  <%= form_tag preview_admin_report_path(@report.id), 
         method: :get, 
         class: 'form-formatted search_report', 
         id: "report_query_form", 
@@ -32,7 +32,7 @@
 <% end 
 end%>      
     </div>
-    <div class="row form-actions" style="border-color: transparent;">
+    <div class="row form-actions report-criteria__actions">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", 'results', id: nil%>
       <%= hidden_field_tag  "embed", true, id: nil%>

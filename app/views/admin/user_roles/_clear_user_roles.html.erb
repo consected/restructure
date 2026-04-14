@@ -1,0 +1,20 @@
+<div class="col-sm-24 admin-head-block">
+  <h4><a href="#clear-roles-block" data-toggle="collapse" class="collapsed"><span class="caret caret-large"></span></a> Clear All Roles for a User</h4>
+
+  <div id="clear-roles-block" class="collapse">
+    <div class="form-group">
+      <%= form_tag admin_user_roles_clear_user_roles_path, action: :post do %>
+      <%= label_tag :clear_user_id, "User" %>
+      <%= select_tag :clear_user_id, active_user_options, include_blank: true, class: 'use-chosen' %>
+    </div>
+    <div class="form-group">
+      <%= label_tag :clear_app_type_id, "App type" %>
+      <%= select_tag :clear_app_type_id, app_type_options(default_app_type_id: app_type_select_current_item(use_current_user: true)) %>
+    </div>
+    <div class="form-group">
+      <%= hidden_filter_fields %>
+      <%= submit_tag :clear, class: "btn btn-warning" %>
+    </div>
+  </div>
+  <% end %>
+</div>

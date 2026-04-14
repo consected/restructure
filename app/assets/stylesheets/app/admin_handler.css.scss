@@ -52,6 +52,41 @@ table.admin-list tbody {
   font-size: 110%;
 }
 
+.admin-alerts-panel {
+  margin-bottom: 15px;
+
+  .panel-heading {
+    .panel-title a {
+      text-decoration: none;
+      display: block;
+
+      .glyphicon-alert {
+        color: #a94442;
+        margin-right: 5px;
+      }
+
+      .admin-alerts-badge {
+        margin-left: 5px;
+        font-size: 85%;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .admin-alerts-list__item {
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .admin-alerts-list__category {
+    margin-right: 8px;
+  }
+}
+
 .admin-edit-form {
   background-color: #eee;
   padding: 1.4em;
@@ -261,4 +296,23 @@ ul.admin-menu-list {
     margin-top: 6px;
     margin-bottom: 6px;
   }
+}
+
+.master-records-show-panel .panel{
+    // border: 1px solid #eee;
+    background-color: #eee;
+    // padding: 1.4em;
+    margin: 1.4em;
+    border-radius: 8px;
+
+    .form-group {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .nav-tabs>li>a {
+      border-radius: 4px 4px 0 0;
+      border: 1px solid rgb(221, 221, 221);
+    }
+  
 }

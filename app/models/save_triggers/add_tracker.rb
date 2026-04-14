@@ -26,35 +26,37 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
   def perform
     model_defs.each do |model_def|
       model_def.each do |pn, c|
-        self.this_config = c
-        self.protocol_name = pn
-        unless if_evaluates(this_config[:if])
-          trackers << { protocol_name => nil }
-          next
+        with_entry_lifecycle(c) do
+          self.this_config = c
+          self.protocol_name = pn
+          unless if_evaluates(this_config[:if])
+            trackers << { protocol_name => nil }
+            next
+          end
+
+          setup_with_config
+
+          # be sure about the master and the current_user being set, to avoid hidden errors
+          raise FphsException, 'no master record set to add the tracker to' unless use_master
+          raise FphsException, 'no user set when adding tracker' unless use_master.current_user
+
+          begin
+            t = use_master.trackers.create!(
+              protocol_id: protocol.id,
+              sub_process_id: sub_process.id,
+              protocol_event_id: protocol_event&.id,
+              notes: config_values[:notes],
+              item: use_item,
+              event_date: event_date
+            )
+          rescue StandardError => e
+            error_details = build_error_details(e)
+            Rails.logger.error "AddTracker failed: #{error_details}"
+            raise FphsException, "AddTracker failed with error: #{e.message}\n#{error_details}"
+          end
+
+          trackers << { protocol_name => t }
         end
-
-        setup_with_config
-
-        # be sure about the master and the current_user being set, to avoid hidden errors
-        raise FphsException, 'no master record set to add the tracker to' unless use_master
-        raise FphsException, 'no user set when adding tracker' unless use_master.current_user
-
-        begin
-          t = use_master.trackers.create!(
-            protocol_id: protocol.id,
-            sub_process_id: sub_process.id,
-            protocol_event_id: protocol_event&.id,
-            notes: config_values[:notes],
-            item: use_item,
-            event_date: event_date
-          )
-        rescue StandardError => e
-          error_details = build_error_details(e)
-          Rails.logger.error "AddTracker failed: #{error_details}"
-          raise FphsException, "AddTracker failed with error: #{e.message}\n#{error_details}"
-        end
-
-        trackers << { protocol_name => t }
       end
     end
     trackers

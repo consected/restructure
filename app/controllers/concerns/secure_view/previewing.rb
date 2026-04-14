@@ -66,7 +66,7 @@ module SecureView
     end
 
     def secure_view_params
-      @secure_view_params ||= params[:secure_view] || {}
+      @secure_view_params ||= params[:secure_view].presence || {}
     end
   end
 end

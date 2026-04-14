@@ -1,0 +1,3 @@
+# label options
+  label: main label  (also used as + button label if button_label not defined)
+  button_label: add record button label

@@ -68,6 +68,7 @@ put_now 'Require setup_helper'
 require 'setup_helper'
 
 if ENV['QUICK'] == 'true'
+  put_now 'Running QUICK'
   ENV['SKIP_BROWSER_SETUP'] = 'true'
   ENV['SKIP_DB_SETUP'] = 'true'
   ENV['SKIP_APP_SETUP'] = 'true'
@@ -75,7 +76,10 @@ else
   put_now 'check_spec_db for skips'
   # Use a database table to track creations in the test db
   ENV['SKIP_DB_SETUP'] = 'true' if SetupHelper.spec_tally_done?('db_setup')
-  ENV['SKIP_APP_SETUP'] = 'true' if SetupHelper.spec_tally_done?('app_setup')
+  if SetupHelper.spec_tally_done?('app_setup')
+    put_now 'Already done app_setup'
+    ENV['SKIP_APP_SETUP'] = 'true'
+  end
 end
 
 put_now 'Require webmock'
@@ -106,6 +110,7 @@ setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
 SetupHelper.setup_nfs_directories
 SetupHelper.clean_app_migrations_dirs
+SetupHelper.clean_handlebars_dirs
 
 put_now 'Devise and warden'
 require 'devise'
@@ -121,7 +126,10 @@ Warden.test_mode!
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
 SetupHelper.check_bhs_assignments_table
-SetupHelper.setup_full_test_db unless ENV['SKIP_DB_SETUP']
+unless ENV['SKIP_DB_SETUP']
+  SetupHelper.setup_full_test_db
+  SetupHelper.create_view_activity_labels
+end
 
 unless ENV['SKIP_FS_SETUP']
   put_now 'Filestore mount'
@@ -208,13 +216,22 @@ RSpec.configure do |config|
 
   # For system tests that need javascript, use selenium_chrome
   # The following avoids this needing to be specified in each spec file
-  config.before(:each, type: :system, js: true) do
+  # The js: true metadata is also set to true to ensure proper handling
+  config.before(:each, type: :system, js: true) do |example|
     driven_by $browser_driver
     Capybara.page.driver.browser.manage.window.maximize
+    example.metadata[:js] = true
   end
 
   config.before(:each) do
     SetupHelper.raise_if_stale_instance_variables!(instance_variables)
+  end
+
+  # Set a default before(:all) for system tests setup consistent app settings.
+  config.before(:all, type: :system) do
+    change_setting('TwoFactorAuthDisabledForUser', true)
+    change_setting('TwoFactorAuthDisabledForAdmin', false)
+    change_setting('AllowDynamicMigrations', true)
   end
 
   Shoulda::Matchers.configure do |config|

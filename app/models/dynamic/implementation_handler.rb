@@ -16,7 +16,8 @@ module Dynamic
 
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
-      attr_accessor :skip_save_trigger, :save_trigger_results, :option_type
+      # trigger_variables: Variables set by the set_variables save trigger
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type
     end
 
     class_methods do
@@ -69,10 +70,14 @@ module Dynamic
       end
 
       def option_type_attr_name
+        return unless respond_to?(:definition)
+
         definition.option_type_attr_name
       end
 
       def default_option_type_name
+        return unless respond_to?(:definition)
+
         definition.default_option_type_name
       end
     end
@@ -149,6 +154,8 @@ module Dynamic
     end
 
     def default_option_type_name
+      return unless self.class.respond_to?(:definition)
+
       self.class.definition.default_option_type_name
     end
 

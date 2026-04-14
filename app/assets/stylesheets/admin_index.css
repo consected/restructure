@@ -18,13 +18,16 @@
  *= require codemirror/addon/scroll/simplescrollbars
  *= require admin/admin
  *= require admin/app_import
+ *= require admin/common_dynamic_def_panels
  *= require admin/diffy
  *= require admin/activity_list
  *= require admin/admin_options
+ *= require admin/api_panel
  *= require admin/message_notification
  *= require admin/server_info
  *= require admin/sortable
  *= require admin/report_admin
+ *= require admin/parsed_config
  *= require admin/z_admin_overrides
  *= require_self
  */

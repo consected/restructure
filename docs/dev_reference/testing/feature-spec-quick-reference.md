@@ -75,8 +75,8 @@ end
 all('input[name*="field_name"]', visible: :all).count
 
 # Scroll element into view
-page.execute_script('arguments[0].scrollIntoView(true);', element)
-sleep 0.5
+include FeatureSupport
+scroll_into_view(element)
 ```
 
 ## Extract Field Names from HTML
@@ -104,28 +104,8 @@ EOF
 ## Big Select Field Pattern
 
 ```ruby
-def select_from_big_select_field(field_name, value)
-  field = find("input[name*='#{field_name}']", match: :first)
-  page.execute_script('arguments[0].scrollIntoView(true);', field)
-  
-  # Focus triggers modal
-  page.execute_script('arguments[0].focus();', field)
-  sleep 1
-  
-  expect(page).to have_css('#primary-modal.fade.in', wait: 5)
-  expect(page).to have_css('.big-select-item', wait: 3)
-  
-  # Match by key OR text
-  page.all('.big-select-item').each do |item|
-    if item['data-bsi-key'] == value || item.text.include?(value)
-      item.click
-      return
-    end
-  end
-  
-  File.write('/tmp/big_select_dialog.html', page.html)
-  raise "Could not find '#{value}'"
-end
+include FeatureSupport
+select_from_big_select_field(field_name, value)
 ```
 
 ## Show_if Pattern

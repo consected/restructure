@@ -1,6 +1,6 @@
-
 # Save Trigger: Create Master options
-        - if: #if_extras
+        create_master:
+          - if: #if_extras
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             move_this: 'true to move the current instance to the new master'
             with: 
@@ -14,3 +14,4 @@
                   field_name: return_value
           # NOTE: this sets:
           # - save_trigger_results.created_masters (with the master record created, if it was created)
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

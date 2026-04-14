@@ -3,6 +3,41 @@
 class Master < ActiveRecord::Base
   FilteredAssocPrefix = 'filtered__'
 
+  #
+  # Get the labels for crosswalk ID fields on the masters table from AppConfiguration.
+  # The configuration value should be a YAML hash format, e.g.:
+  #   msid: MSID
+  #   pro_id: Pro Football ID
+  # Falls back to humanizing the field name if no configuration is set.
+  # @param [User | nil] access_by - current user for app-type specific configuration
+  # @return [Hash{Symbol => String}] hash of field names to labels
+  def self.crosswalk_field_labels(access_by: nil)
+    if access_by
+      key = "#{access_by.id}-#{access_by.app_type_id}"
+      @crosswalk_field_labels_by_user ||= {}
+      return @crosswalk_field_labels_by_user[key] if @crosswalk_field_labels_by_user.key?(key)
+    elsif @crosswalk_field_labels
+      return @crosswalk_field_labels
+    end
+
+    config_value = Admin::AppConfiguration.hash_for(:crosswalk_field_labels, access_by)
+    labels = config_value.presence || crosswalk_attrs.to_h { |attr| [attr, attr.to_s.humanize] }
+
+    if access_by
+      @crosswalk_field_labels_by_user[key] = labels
+    else
+      @crosswalk_field_labels = labels
+    end
+
+    labels
+  end
+
+  # Clear memoized crosswalk field labels (called when app configuration changes)
+  def self.reset_crosswalk_field_labels!
+    @crosswalk_field_labels = nil
+    @crosswalk_field_labels_by_user = nil
+  end
+
   # Temporary master records can be used with limited(_if_one) user access controls
   # Providing an association onto these records allows inner join or left joins to
   # within this functionality to operate, just like an association to any other table
@@ -23,7 +58,7 @@ class Master < ActiveRecord::Base
          not_trackers not_tracker_histories].freeze
 
   TrackerEventOrderClause =
-    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
+    Arel.sql 'protocols.position ASC, event_date DESC NULLS last, trackers.id DESC'
   TrackerHistoryEventOrderClause = Arel.sql 'event_date::date DESC NULLS last, tracker_history.id DESC'
   SubjectInfoRankOrderClause = Arel.sql 'rank desc nulls last '
 
@@ -403,38 +438,76 @@ class Master < ActiveRecord::Base
   #
   # Create a fully hydrated master record, potentially including
   # embedded parameters to create associated records and external identifiers.
-  # Embed items listed in app configuration item :create_master_with for the user/role
+  # Embed items listed in app configuration item :create_master_with for the user/role.
+  # Additional associated records (player_contacts, addresses, external identifiers,
+  # dynamic models, etc.) can be created in the same transaction via with_associated_params.
+  # If any record fails validation, the entire transaction rolls back.
   # @param [User] user - current user
   # @param [Boolean] empty - create an empty master, independent of :create_master_with
   # @param [ActionController::StrongParameters] with_embedded_params - associated parameters
-  #   permitted to create instances
+  #   permitted to create the first :create_master_with item
   # @param [Hash] extra_ids - hash representing extra identifier id field => value pairs
+  # @param [Hash] with_associated_params - hash of association_name => indexed record attributes
+  #   e.g. { "player_contacts" => { "0" => { data: "...", rank: 10 }, "1" => { ... } } }
   # @return [Master] resulting persisted Master instance
-  def self.create_master_record(user, empty: nil, with_embedded_params: nil, extra_ids: nil)
+  def self.create_master_record(user, empty: nil, with_embedded_params: nil, extra_ids: nil,
+                                with_associated_params: nil)
     raise 'no user specified' unless user
 
-    vals = { current_user: user, creating_master: true }
-    vals = vals.merge(extra_ids) if extra_ids
-    m = Master.create!(vals)
+    transaction do
+      vals = { current_user: user, creating_master: true }
+      vals = vals.merge(extra_ids) if extra_ids
+      m = Master.create!(vals)
 
-    unless empty
-      i = 0
-      each_create_master_with_item(user) do |cw|
-        with_embedded_params = nil if i > 0
+      unless empty
+        i = 0
+        each_create_master_with_item(user) do |cw|
+          with_embedded_params = nil if i > 0
 
-        init_data = { creating_master: true }
-        assoc = m.assoc_named(cw)
+          init_data = { creating_master: true }
+          assoc = m.assoc_named(cw)
 
-        init_data.merge! with_embedded_params.permit(assoc.permitted_params) if with_embedded_params
+          init_data.merge! with_embedded_params.permit(assoc.permitted_params) if with_embedded_params
 
-        assoc.create! init_data
+          assoc.create! init_data
 
-        i += 1
+          i += 1
+        end
+
+        # Create additional associated records passed via the API
+        create_associated_records(m, with_associated_params) if with_associated_params.present?
+      end
+
+      m.creating_master = false
+      m
+    end
+  end
+
+  #
+  # Create additional associated records for a master from nested params.
+  # Called within the transaction opened by {.create_master_record}.
+  #
+  # Each key in +assoc_params+ is a pluralized association name (matching a
+  # +has_many+ on Master), and the value is a hash of indexed record attribute
+  # hashes. Attributes are filtered through each association's +permitted_params+
+  # before creation, and +create!+ is used so that validation failures raise
+  # +ActiveRecord::RecordInvalid+, triggering a full transaction rollback.
+  #
+  # @param master [Master] persisted master record to attach associations to
+  # @param assoc_params [Hash{String => Hash}] e.g.
+  #   { "player_contacts" => { "0" => { data: "...", rank: 10 }, "1" => { ... } } }
+  # @raise [ActiveRecord::RecordInvalid] if any record fails validation
+  # @return [void]
+  def self.create_associated_records(master, assoc_params)
+    assoc_params.each do |assoc_name, records_params|
+      assoc = master.assoc_named(assoc_name)
+      permitted = assoc.permitted_params
+
+      records_params.each_value do |record_attrs|
+        record_data = record_attrs.permit(permitted)
+        assoc.create!(record_data)
       end
     end
-
-    m.creating_master = false
-    m
   end
 
   #

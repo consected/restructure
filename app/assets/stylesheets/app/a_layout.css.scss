@@ -297,7 +297,8 @@ a.add-icon[data-show-modal] {
 .glyphicon-edit,
 a.glyphicon.show-entity,
 a.glyphicon.edit-entity,
-a.close-entity {
+a.close-entity,
+a.glyphicon-eye-open {
   color: white;
   background-color: rgb(227, 141, 19);
   display: inline-block;
@@ -352,6 +353,14 @@ a.glyphicon.glyphicon-remove-sign {
   }
 }
 
+a.glyphicon.glyphicon-eye-open {
+  background-color: #5050c9;
+  border: 1px solid #8a8af7;
+
+  &:hover {
+    background-color: #8a8af7;
+  }
+}
 .close {
   color: #900;
   filter: none;

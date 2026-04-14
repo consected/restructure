@@ -39,6 +39,8 @@
         <% end %>
       </div>
       <div class="col-sm-17 col-sm-offset-1">
+        <%= render partial: 'pages/admin_alerts_panel' %>            
+
         <div class="row">
           <div class="col-sm-6">
             <h3>App Configs</h3>
@@ -68,6 +70,7 @@
             <h3>Definitions</h3>
             <ul class="nav">
               <% got_one = false %>
+              <% if current_admin.can_admin?(:master_records)%><% got_one ||= true %><li class="nav"><%= link_to "Master Records", admin_master_records_path %> </li><%end%>
               <% if current_admin.can_admin?(:reports)%><% got_one ||= true %><li class="nav"><%= link_to "Reports", admin_reports_path %> </li><%end%>
               <% if current_admin.can_admin?(:activity_logs)%><% got_one ||= true %><li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li><%end%>
               <% if current_admin.can_admin?(:dynamic_models)%><% got_one ||= true %><li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li><%end%>
@@ -86,6 +89,7 @@
               <% if current_admin.can_admin?(:user_contact_infos)%><% got_one ||= true %><li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_roles)%><% got_one ||= true %><li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_access_controls)%><% got_one ||= true %><li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li><%end%>
+              <% if current_admin.can_admin?(:user_roles) && current_admin.can_admin?(:user_access_controls) && Report.active.where(item_type: 'admin-user-access-overview').exists? %><% got_one ||= true %><li class="nav"><%= link_to "User Access Overview", reports_path(filter: { item_type: 'admin-user-access-overview' }, simple_view: true), target: '_blank' %> </li><%end%>
               <% if current_admin.can_admin?(:role_descriptions)%><% got_one ||= true %><li class="nav"><%= link_to "Role Descriptions", admin_role_descriptions_path %> </li><%end%>
               <% if current_admin.can_admin?(:filters)%><% got_one ||= true %><li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li><%end%>
               <% if current_admin.can_admin?(:manage_admins)%><% got_one ||= true %><li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li><%end%>
@@ -96,7 +100,7 @@
       
         <div class="row">
           <div class="col-sm-6">
-            <h3>Status <%= render partial: 'pages/admin_status_indicators' %></h3>
+            <h3>Status</h3>
             <ul class="nav">
               <% got_one = false %>
               <% if current_admin.can_admin?(:message_notifications)%><% got_one ||= true %><li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li><%end%>
@@ -108,7 +112,7 @@
           </div>
           <% if current_admin.can_admin?(:redcap)%>
           <div class="col-sm-6">
-            <h3>REDCap <%= render partial: 'pages/admin_redcap_status_indicators' %></h3>
+            <h3>REDCap</h3>
           <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
             <ul class="nav">
               <li class="nav">

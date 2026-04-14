@@ -1,0 +1,5 @@
+# config_trigger options
+  config_trigger:
+    on_define:
+      # Add default configurations and extra detailed configurations when a dynamic definition configuration is saved or updated
+#!defs(config_trigger_options_defs.yaml)

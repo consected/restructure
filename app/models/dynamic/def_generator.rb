@@ -49,8 +49,8 @@ module Dynamic
           end
         rescue Exception => e
           msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
-          puts msg
-          puts e.short_string_backtrace
+          STDERR.puts msg
+          STDERR.puts e.short_string_backtrace
           Rails.logger.warn msg
         end
       end
@@ -85,14 +85,14 @@ module Dynamic
               dm.add_master_association
             else
               msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}. #{disable_on_failure && 'Disabling!'}"
-              puts msg
+              warn msg
               Rails.logger.warn msg
               dm.class.where(id: dm.id).update_all(disabled: true) if disable_on_failure
             end
           end
         else
           msg = "Table doesn't exist yet: #{table_name}"
-          puts msg
+          warn msg
           Rails.logger.warn msg
         end
       rescue StandardError, Psych::Exception => e
@@ -109,6 +109,17 @@ module Dynamic
         # If up to date, or not previously set
         # (and therefore we are on our first load and everything will have just been set up) just return
         return if utd || utd.nil?
+
+        if @config_library_only_change
+          Rails.logger.warn "Refreshing config library dependents for #{name}"
+          reset_active_model_configurations!
+          active.each do |d|
+            next unless d.options_text&.include?('# @library ')
+
+            d.force_option_config_parse(raise_bad_configs: false)
+          end
+          return
+        end
 
         Rails.logger.warn "Refreshing outdated #{name}"
         reset_active_model_configurations!
@@ -303,7 +314,7 @@ module Dynamic
       Rails.logger.info 'Refreshing item types'
       begin
         Classification::GeneralSelection.item_types refresh: true
-      rescue NameError => e
+      rescue NameError
         Rails.logger.info "Failed to clear general selections for #{model_class_name}"
       end
 
@@ -311,6 +322,24 @@ module Dynamic
       remove_assoc_class 'Master'
       remove_implementation_class
       remove_implementation_controller_class
+    end
+
+    #
+    # Apply Rails `encrypts` declarations to the implementation class for any fields
+    # marked with `encrypted: true` in the _db_columns configuration.
+    # This enables transparent encryption/decryption of field values using
+    # ActiveRecord::Encryption.
+    # @param [Class] impl_class - the generated implementation class
+    def apply_encrypted_attributes(impl_class)
+      return unless db_columns.is_a?(Hash)
+
+      encrypted_fields = db_columns.select { |_field, config| config.is_a?(Hash) && config[:encrypted] }
+      return if encrypted_fields.empty?
+
+      encrypted_fields.each_key do |field_name|
+        impl_class.encrypts field_name
+        Rails.logger.info "Applied encryption to field #{field_name} on #{impl_class.name}"
+      end
     end
 
     # A list of model names and definitions is stored in the class so we can
@@ -347,7 +376,7 @@ module Dynamic
       alt_target_class ||= model_class_name.pluralize
       alt_target_class = alt_target_class.gsub('::', '')
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
-      return unless klass.constants.include?(assoc_ext_name.to_sym)
+      return unless klass.const_defined?(assoc_ext_name.to_sym)
 
       remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e

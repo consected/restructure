@@ -363,3 +363,42 @@ table .report-cb-inner {
     white-space: nowrap;
   }
 }
+
+// BEM-named classes for report index and criteria
+.report-index {
+  &__type-cell {
+    width: 5%;
+  }
+
+  &__name-cell {
+    width: 15%;
+  }
+
+  &__description-cell {
+    width: 30%;
+  }
+
+  &__search-attr-cell {
+    width: 25%;
+  }
+
+  &__measure-cell {
+    width: 25%;
+  }
+}
+
+.report-criteria {
+  &__actions {
+    border-color: transparent;
+  }
+
+  &__field-group {
+    padding-bottom: 1em;
+  }
+}
+
+.report-results {
+  &__show-btn--hidden {
+    display: none;
+  }
+}

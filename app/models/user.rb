@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
-  has_one :user_preference, autosave: true, inverse_of: :user
+  has_one :user_preference, autosave: true, inverse_of: :user, validate: false
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
@@ -145,7 +145,7 @@ class User < ActiveRecord::Base
       res = all
     end
 
-    res.map { |u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id] }
+    res.map { |u| ["#{u.email} #{'[disabled]' if u.disabled}", u.id] }
   end
 
   #
@@ -163,14 +163,20 @@ class User < ActiveRecord::Base
                   end
   end
 
-  # Standard Devise callback to allow accounts to be disabled
+  # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled
+    super && !disabled && !account_expired?
   end
 
-  # Standard Devise callback to tell user that an account has been disabled
+  # Standard Devise callback to tell user that an account has been disabled or expired
   def inactive_message
-    !disabled ? super : :account_has_been_disabled
+    if disabled
+      :account_has_been_disabled
+    elsif account_expired?
+      :account_expired
+    else
+      super
+    end
   end
 
   # By default, the user is redirected to the login page after registration.

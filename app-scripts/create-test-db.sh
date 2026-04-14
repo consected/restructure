@@ -14,12 +14,16 @@
 
 BASEDIR=$0
 DB_BASE_NAME=${DB_BASE_NAME:=restr}
+DBNUM=${DBNUM:=${TEST_ENV_NUMBER}}
 DBOWNER=${DBOWNER:=$(whoami)}
+DB_NAME_PREFIX="${DB_BASE_NAME}${TEST_ENV_SET}_test"
+
+export PGOPTIONS='--client-min-messages=warning'
 
 function setup() {
 
-  DBNAME=${DB_BASE_NAME}_test${DBNUM}
-
+  DBNAME=${DB_BASE_NAME}${TEST_ENV_SET}_test${DBNUM}
+  echo "Creating: ${DBNAME}"
   cd "$(dirname "${BASEDIR}")" || return
 
   if [ "${USE_PG_HOST}" ] || [ "${USE_PG_UNAME}" ]; then
@@ -28,26 +32,26 @@ function setup() {
     if [ "${USE_PG_HOST}" ]; then
       PSQL_ARGS="${PSQL_ARGS} -h ${USE_PG_HOST}"
     fi
-    psql -c "create extension if not exists pgcrypto;" $PSQL_ARGS
-    psql -c "create database $DBNAME;" $PSQL_ARGS
+    psql -c "create extension if not exists pgcrypto;" $PSQL_ARGS > /dev/null
+    psql -c "create database $DBNAME;" $PSQL_ARGS > /dev/null
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
-      psql -c "create user ${user} password 'fphs';" $PSQL_ARGS
+      psql -c "create user ${user} password 'fphs';" $PSQL_ARGS > /dev/null
     done
-    psql -d "$DBNAME" $PSQL_ARGS < "../db/structure.sql"
-    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" $PSQL_ARGS
-    psql -d "$DBNAME" -c "create schema if not exists ref_data;" $PSQL_ARGS
+    psql -d "$DBNAME" $PSQL_ARGS < "../db/structure.sql" > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" $PSQL_ARGS > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists ref_data;" $PSQL_ARGS > /dev/null
   else
-    sudo -u postgres psql -c "create extension if not exists pgcrypto;"
-    sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
+    sudo -u postgres psql -c "create extension if not exists pgcrypto;" > /dev/null
+    sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;" > /dev/null
     for user in fphsetl fphs fphsrailsapp fphsadm fphsusr; do
-      sudo -u postgres psql -c "create user ${user} password 'fphs';"
+      sudo -u postgres psql -c "create user ${user} password 'fphs';" > /dev/null
     done
-    psql -d "$DBNAME" < "../db/structure.sql"
-    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;"
-    psql -d "$DBNAME" -c "create schema if not exists ref_data;"
+    psql -d "$DBNAME" < "../db/structure.sql" > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists bulk_msg;" > /dev/null
+    psql -d "$DBNAME" -c "create schema if not exists ref_data;" > /dev/null
   fi
 
-  RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rails db:seed
+  RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rails db:seed > /dev/null
 }
 
 if [ -z $1 ]; then
@@ -56,11 +60,11 @@ else
   PARALLEL=$1
 fi
 
-if [ -z "${PARALLEL}" ]; then
-  echo "Single setup"
+if [ -z "${PARALLEL}" ] || [ "${PARALLEL}" == '1' ]; then
+  echo "Single setup: ${DB_NAME_PREFIX}${DBNUM}"
   setup
 else
-  echo "Setup ${PARALLEL} databases"
+  echo "Setup ${PARALLEL} databases: ${DB_NAME_PREFIX}<n>"
   for i in $(seq 1 "${PARALLEL}"); do
     if [ ${i} == 1 ]; then
       DBNUM=''

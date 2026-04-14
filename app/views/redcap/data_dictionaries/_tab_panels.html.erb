@@ -35,7 +35,7 @@
   <h4>Metadata</h4>
   <% if @rc_data_dictionary.captured_metadata.present?%>
     <div class="admin-options-ref-textarea-block">
-      <textarea style="font-size: 12px" class="extra-help-info">
+      <textarea class="extra-help-info admin-form__help-info">
 <%= @rc_data_dictionary.captured_metadata.map(&:stringify_keys).to_yaml%>
           </textarea>
     </div>

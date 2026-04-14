@@ -30,7 +30,8 @@ else
   gs = alt_options
 end
 options = field_options_for(form_object_instance, field_name_sym)
-default_options = { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}
+sf_el = fopt.dig(:edit_as, :select_filtering_target)
+default_options = { data: {attr_name: field_name_sym, object_name: form_object_item_type_us, select_filtering_target: sf_el}}
 new_options = default_options.merge(options)
 
 options[:include_blank] = true unless options.has_key?(:include_blank)

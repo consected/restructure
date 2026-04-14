@@ -1,0 +1,3 @@
+# filestore container options
+  filestore:
+    container: {}

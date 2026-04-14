@@ -1,5 +1,12 @@
 require 'rails_helper'
 
+# Tests for SaveTriggers::CreateReference
+# - Verifies create_reference from activity logs to player contacts
+# - Verifies force_create, to_existing_record, master references, specific record references
+# - Verifies embedded_item creation within create_reference
+# - Verifies storing objects to JSONB fields via the object: wrapper (issue #943)
+# - Verifies create_reference for standalone dynamic models with no master_id (issue #1003)
+
 AlNameGenTestCr = 'Gen Test ELT Save'
 
 RSpec.describe SaveTriggers::CreateReference, type: :model do
@@ -15,7 +22,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       @player_contact_prev = @master.player_contacts.create! data: '(617)123-1234 prev', rec_type: :phone, rank: 5, source: 'nflpa2'
       @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
       @al = create_item master: @master
-      add_reference_def_to(@al, [player_contacts: { from: 'this', add: 'many' }])
+      add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
       expect(@al.master_id).to eq @master.id
       setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
     end
@@ -151,10 +158,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
     it 'creates a reference in a specific record' do
       pn = random_phone_number
 
-      config = {
-        if: { always: true }
-      }
-
       al_alt = create_item master: @master
 
       config = {
@@ -186,10 +189,6 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates a reference in a specific record with other item attributes' do
       pn = @player_contact.data
-
-      config = {
-        if: { always: true }
-      }
 
       al_alt = create_item master: @master
 
@@ -234,11 +233,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates a reference in a specific record with attributes from multiple items' do
       pn = @player_contact.data
-      pn_prev = @player_contact_prev.data
-
-      config = {
-        if: { always: true }
-      }
+      @player_contact_prev.data
 
       al_alt = create_item master: @master
 
@@ -412,7 +407,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
 
     it 'creates an embedded_item when creating another record' do
       pn = random_phone_number
-      pn2 = random_phone_number
+      random_phone_number
 
       pc_hash = {
         rec_type: :phone,
@@ -488,6 +483,369 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(pc2).not_to be nil
 
       expect(al_cr.embedded_item.embedded_item).to eq pc2
+    end
+  end
+
+  describe 'creating a referenced dynamic model with JSONB object storage (issue #943)' do
+    before :all do
+      change_setting('AllowDynamicMigrations', true)
+
+      create_admin
+      create_user
+
+      @schema_name = 'dynamic_test'
+      @table_name = 'test_json_update_recs'
+
+      # Clean up any existing test tables and model
+      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.send(:remove_const, :TestJsonUpdateRec) if defined?(DynamicModel::TestJsonUpdateRec)
+
+      conn = ActiveRecord::Base.connection
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.test_json_update_rec_history CASCADE")
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@table_name} CASCADE")
+
+      @dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test JSON Update Recs',
+        table_name: @table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: :master_id,
+        category: :test,
+        field_list: 'status test_json',
+        options: <<~YAML
+          _db_columns:
+            status:
+              type: string
+            test_json:
+              type: jsonb
+        YAML
+      )
+
+      @dm.update_tracker_events
+      change_setting('AllowDynamicMigrations', nil)
+    end
+
+    after :all do
+      DynamicModel.active.where(table_name: @table_name).each { |dm| dm.disable!(@admin) }
+    end
+
+    before :example do
+      SetupHelper.setup_al_player_contact_phones
+      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
+      create_user
+      @master = create_master
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      setup_access :dynamic_model__test_json_update_recs, user: @user
+      add_reference_def_to(@al, [
+                             {
+                               player_contacts: { from: 'this', add: 'many' },
+                               dynamic_model__test_json_update_recs: { from: 'this', add: 'many' }
+                             }
+                           ])
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'stores an object to a JSONB field using the object: wrapper' do
+      json_object = { attr1: 1, attr2: 'test value', nested: { key: 'val' } }
+
+      config = {
+        dynamic_model__test_json_update_rec: {
+          in: 'this',
+          force_create: true,
+          with: {
+            status: 'initializing',
+            test_json: {
+              object: json_object
+            }
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestJsonUpdateRec
+      expect(created_item.status).to eq 'initializing'
+
+      # Verify the JSONB field stored the object correctly,
+      # not the wrapper hash with the 'object' key
+      stored_json = created_item.test_json
+      expect(stored_json).to be_a Hash
+      expect(stored_json['attr1']).to eq 1
+      expect(stored_json['attr2']).to eq 'test value'
+      expect(stored_json['nested']).to eq({ 'key' => 'val' })
+    end
+  end
+
+  describe 'creating a standalone dynamic model record with no master_id (issue #1003)' do
+    before :all do
+      change_setting('AllowDynamicMigrations', true)
+
+      create_admin
+      create_user
+
+      @schema_name = 'dynamic_test'
+      @standalone_table_name = 'test_standalone_recs'
+
+      # Clean up any existing test tables and model
+      DynamicModel.active.where(table_name: @standalone_table_name).each { |dm| dm.disable!(@admin) }
+      DynamicModel.send(:remove_const, :TestStandaloneRec) if defined?(DynamicModel::TestStandaloneRec)
+
+      conn = ActiveRecord::Base.connection
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.test_standalone_rec_history CASCADE")
+      conn.execute("DROP TABLE IF EXISTS #{@schema_name}.#{@standalone_table_name} CASCADE")
+
+      @standalone_dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: 'Test Standalone Recs',
+        table_name: @standalone_table_name,
+        schema_name: @schema_name,
+        primary_key_name: :id,
+        foreign_key_name: '',
+        category: :test,
+        field_list: 'status notes',
+        options: <<~YAML
+          _db_columns:
+            status:
+              type: string
+            notes:
+              type: string
+        YAML
+      )
+
+      @standalone_dm.update_tracker_events
+      change_setting('AllowDynamicMigrations', nil)
+    end
+
+    after :all do
+      DynamicModel.active.where(table_name: @standalone_table_name).each { |dm| dm.disable!(@admin) }
+    end
+
+    before :example do
+      SetupHelper.setup_al_player_contact_phones
+      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
+      create_user
+      @master = create_master
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      setup_access :dynamic_model__test_standalone_recs, user: @user
+      add_reference_def_to(@al, [
+                             {
+                               player_contacts: { from: 'this', add: 'many' },
+                               dynamic_model__test_standalone_recs: { from: 'this', add: 'many' }
+                             }
+                           ])
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'creates a standalone record with in: this and a model reference' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'this',
+          force_create: true,
+          with: { status: 'active', notes: 'standalone this test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'active'
+      expect(created_item.notes).to eq 'standalone this test'
+      expect(created_item.class.no_master_association).to be true
+
+      mr = @al.model_references(force_reload: true).last
+      expect(mr.to_record).to eq created_item
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a standalone record with in: master (no model reference)' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'master',
+          force_create: true,
+          with: { status: 'pending', notes: 'standalone master test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'pending'
+      expect(created_item.notes).to eq 'standalone master test'
+      expect(@al.save_trigger_results['created_references'].last).to be_nil
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a standalone record with in: master_with_reference' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'master_with_reference',
+          force_create: true,
+          with: { status: 'review', notes: 'standalone master_with_reference test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'review'
+
+      mr = ModelReference.order(:id).last&.reload
+      expect(mr.to_record_id).to eq created_item.id
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a standalone record with in: specific_record' do
+      al_alt = create_item master: @master
+
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: {
+            specific_record: {
+              activity_log__player_contact_phones: {
+                id: al_alt.id,
+                return: 'return_result'
+              }
+            }
+          },
+          force_create: true,
+          with: { status: 'specific', notes: 'standalone specific_record test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'specific'
+
+      mr = ModelReference.order(:id).last&.reload
+      expect(mr.to_record_id).to eq created_item.id
+      expect(mr.from_record_id).to eq al_alt.id
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a standalone record with force_create when user lacks access' do
+      uac = @user.has_access_to? :access, :table, :dynamic_model__test_standalone_recs
+      if uac
+        uac = Admin::UserAccessControl.find(uac.id)
+        uac.update! current_admin: @admin, user: @user, access: nil,
+                    resource_type: :table, resource_name: :dynamic_model__test_standalone_recs
+      end
+      @user.has_access_to? :access, :table, :dynamic_model__test_standalone_recs, force_reset: true
+
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'this',
+          force_create: true,
+          with: { status: 'forced', notes: 'standalone force_create test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'forced'
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'finds an existing standalone record with to_existing_record' do
+      # First create a standalone record directly
+      standalone_class = DynamicModel::TestStandaloneRec
+      existing = standalone_class.create!(status: 'existing', notes: 'pre-existing record',
+                                          current_user: @user)
+
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'this',
+          force_create: true,
+          to_existing_record: {
+            record_id: existing.id
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      ref_item = @al.save_trigger_results['created_items'].last
+      expect(ref_item).to eq existing
+      expect(ref_item.id).to eq existing.id
+      expect(ref_item.status).to eq 'existing'
+
+      mr = @al.model_references(force_reload: true).last
+      expect(mr.to_record).to eq existing
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'applies with: attributes correctly to standalone record' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'this',
+          force_create: true,
+          with: { status: 'with-attrs', notes: 'testing with attributes' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'with-attrs'
+      expect(created_item.notes).to eq 'testing with attributes'
+      expect(@al.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'populates save_trigger_results correctly for standalone records' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'this',
+          force_create: true,
+          with: { status: 'results-test', notes: 'trigger results' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['created_items']).not_to be_empty
+      expect(@al.save_trigger_results['created_items'].last).to be_a DynamicModel::TestStandaloneRec
+      expect(@al.save_trigger_results['created_results']).to include(true)
+      expect(@al.save_trigger_results['created_references']).not_to be_empty
+    end
+
+    it 'creates a standalone record with in: none (no model reference)' do
+      config = {
+        dynamic_model__test_standalone_rec: {
+          in: 'none',
+          force_create: true,
+          with: { status: 'no-ref', notes: 'standalone none test' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+      @trigger.perform
+
+      created_item = @al.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestStandaloneRec
+      expect(created_item.status).to eq 'no-ref'
+      expect(created_item.notes).to eq 'standalone none test'
+      expect(@al.save_trigger_results['created_references'].last).to be_nil
+      expect(@al.save_trigger_results['created_results'].last).to eq true
     end
   end
 end

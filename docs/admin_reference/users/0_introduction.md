@@ -8,6 +8,7 @@ User profiles are created for end-users of the application, containing:
 - first and last name
 - password
 - API token
+- API access only setting (for automated systems that only use the API)
 
 Other additional details are presented showing user / login details.
 
@@ -20,3 +21,4 @@ Administration is provided in [Usernames and Passwords](/admin/manage_users)
 - [Profile Configuration and Management](user_profile_configuration.md)
 - [Login and Lock-Out](login_and_lockout.md)
 - [Account Notifications](account_notifications.md)
+- [Upgrade to Two-Factor Authentication (2FA)](upgrade_to_2fa.md)

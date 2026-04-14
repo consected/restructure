@@ -1,0 +1,104 @@
+# nfs_store options
+  nfs_store:
+    always_use_this_for_access_control: false(default) | true 
+                                        # use this activity log to enforce access control, 
+                                        # even if another activity log references the container
+    
+    container_files:
+      # use most extra options to control the display and triggers for stored and archived files
+      stored_file:
+        field_options:
+          embed_resource_name:
+            preset_value: resource name to embed
+      
+      archived_file: 
+      # other extra options are implemented, but it is not possible to use direct embedded items for archived files
+        
+
+    pipeline: # pipeline_config - a list of jobs to perform for new uploads
+      - mount_archive:
+      - index_files:
+
+      - dicom_deidentify:
+          - new_path: 'reidentified/\{\{path\}\}'
+            recursive: true              
+            file_filters:
+                - '.*_MPRAGE_RMS_0.*'
+                - '.*_TOF_0.*'
+                - '.*_DTI_ADC_0.*'              
+            set_tags:
+              '0010,0010': '\{\{player_infos.first_name::initial\}\}\{\{ player_infos.last_name::initial\}\}'
+              '0010,0020': '\{\{player_infos.first_name::initial\}\}\{\{ player_infos.last_name::initial\}\}'
+              '0008,0020': '\{\{parent_item.session_date::dicom_date\}\}'
+
+      - dicom_metadata: # run to reextract metadata from dicom files
+      - scripted:
+          - script_filename: ocr_pdf.sh
+            environment: # environment variables hash
+              varname: value
+            args:
+              - '--deskew'
+            fail_silently: # true | false
+            timeout: 3600 # seconds
+            on_success:
+              store_files: # one of the following options
+                to_same_path_as_source: true
+                to_path: string
+            file_filters:
+              - '\.pdf$'
+
+      - full_text_search:
+          target_table: schema.table_name # required: table that stores the tsvector
+          target_column: search_vector # required: tsvector field in target_table
+          target_foreign_key_column: stored_file_id # required: FK referencing stored file id
+          ts_config: english # optional: PostgreSQL text search config (default english)
+          file_filters: # optional: regex filters using the same pattern as scripted job filters
+            - '.*\\.txt$'
+            - '.*\\.pdf$'
+
+    # user_file_actions defines custom pipelines to perform if a user selects files 
+    # and clicks the action in the drop down
+    user_file_actions: 
+      - name: 'name to present to user'
+        id: '(optional) underscored identifier for the action'
+        pipeline: # a pipeline to perform, using the pipeline format described above
+          - rerun_all:
+
+    view_options:
+      show_file_links_as: basic|path - basic (default) is an id based link, whereas "path" follows the format
+                            "/nfs_store/downloads/in/:activity_log_type/:activity_log_id/:download_path"
+
+
+    # Configure conditional logic for specific actions to be performed against the container.
+    # If the action <perform>_if: configuration is not set, then the default for the user based on user access controls
+    # will be used. If the configuration is set, then it will supplement the default.
+    can:
+      # user access control allows and this condition evaluates to true
+      download_if:
+        # for example
+        all:
+          this:
+            select_call_direction: to staff
+      
+      # user access control allows and this condition evaluates to true
+      view_files_as_image_if:
+        never: true # to override a user access control default for this container to always prevent viewing as an image
+
+      # user access control allows and this condition evaluates to true  
+      view_files_as_html_if:
+        always: true # does not override the user access control default for this container
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      send_files_to_trash_if:
+        'ref: ** conditions reference **'
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      move_files_if:
+        'ref: ** conditions reference **'
+
+      # user access control allows and this condition evaluates to true 
+      # (if no condition configuration, then default is to check if the activity log is editable)
+      user_file_actions_if:
+        'ref: ** conditions reference **'

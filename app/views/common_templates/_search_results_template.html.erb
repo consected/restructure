@@ -301,8 +301,7 @@
   end
 %>
 
-<script id="fpa_state_config--<%=name_with_option_type.underscore%>--v<%=def_version%>">
-
+<%= javascript_tag id: "fpa_state_config--#{name_with_option_type.underscore}--v#{def_version}", nonce: true do %>
   _fpa.state.caption_before.<%=name_with_option_type.underscore%> = _fpa.state.caption_before.<%=name_with_option_type.underscore%> || {};
   _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
   _fpa.state.labels_<%=name_with_option_type.underscore%> = _fpa.state.labels_<%=name_with_option_type.underscore%> || {};
@@ -393,7 +392,7 @@
   _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> = _fpa.state.template_config.<%=name.underscore.sub('dynamic_model__', '')%> || _fpa.state.template_config.<%=name.underscore%>
   <% end %>
   
-</script>
+<% end %>
 
 
 <% 
@@ -427,30 +426,30 @@
     } %>
 
 
-<script id="<%=name.underscore.gsub('dynamic_model__', '').hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{name.underscore.gsub('dynamic_model__', '').hyphenate}-result-template") do %>
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="<%=name.underscore.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{name.underscore.hyphenate}-result-template") do %>
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="<%=name_with_option_type.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{name_with_option_type.hyphenate}-result-template") do %>
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
-</script>
+<% end %>
 
-<script id="<%=full_name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-list-template") do %>
   {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
-</script>
+<% end %>
 
-<script id="<%=full_name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<%= handlebars_template_tag("#{full_name.pluralize.hyphenate}-compact-list-template") do %>
   {{>common_template_list name='<%=name%>' list_data=this list_template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v') compact=true prevent_create=true }}
-</script>
+<% end %>
 
 <% end %>

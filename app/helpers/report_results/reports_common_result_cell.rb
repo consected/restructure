@@ -5,15 +5,16 @@ module ReportResults
   # A non-helper class to superclass for Report*ResultCell to inherit from,
   # and to support report helpers without polluting the global namespace
   class ReportsCommonResultCell
-    attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options
+    attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options, :request
 
-    def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options)
+    def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options, request = nil)
       self.cell_content = cell_content
       self.col_name = col_name
       self.col_tag = col_tag
       self.col_show_as = col_show_as
       self.table_name = table_name
       self.selection_options = selection_options
+      self.request = request
     end
 
     #
@@ -33,7 +34,8 @@ module ReportResults
         'list' => 'ul',
         'tags' => 'div',
         'choice_label' => 'div',
-        'iframe' => 'div'
+        'iframe' => 'div',
+        'filestore_view' => nil
       }
 
       return col_show_as unless mapping.key? col_show_as
@@ -163,49 +165,126 @@ module ReportResults
     end
 
     #
-    # Show the result as a link to be opened link to be opened in a new tab.
+    # Show the result as a link to be opened in a new tab.
     # The content should be formatted using Markdown format
     #     [label for link](/url/path)
+    # Falls back to plain text if the content does not match the markdown link format (GitHub #1053)
     def cell_content_for_url
       return cell_content unless cell_content.present?
 
       col_url_parts = cell_content&.scan(/^\[(.+)\]\((.+)\)$/)
+      return html_escape(cell_content) if col_url_parts.blank?
+
+      url = col_url_parts.first.last
+      return html_escape(cell_content) unless safe_url_protocol?(url)
+
       html = <<~END_HTML
-        <a href="#{col_url_parts&.first&.last}" target="_blank">#{html_escape col_url_parts&.first&.first}</a>
+        <a href="#{html_escape url}" target="_blank">#{html_escape col_url_parts.first.first}</a>
       END_HTML
 
       html.html_safe
     end
 
+    #
+    # Show the result as a link opened in the secure file viewer.
+    # The content should be formatted using Markdown format
+    #     [label for link](/url/path)
+    # The link is wrapped in a span with use-secure-view-on-links class
+    # to enable the secure viewer for filestore and Redcap file downloads.
+    def cell_content_for_filestore_view
+      return cell_content unless cell_content.present?
+
+      col_url_parts = cell_content&.scan(/^\[(.+)\]\((.+)\)$/)
+      html = <<~END_HTML
+        <span class="use-secure-view-on-links"><a href="#{col_url_parts&.first&.last}">#{html_escape col_url_parts&.first&.first}</a></span>
+      END_HTML
+
+      html.html_safe
+    end
+
+    #
+    # Generate HTML for opening a dynamic model or activity log record in a modal dialog.
+    # Supports both show and edit modes:
+    # - Show mode: URL like /masters/123/dynamic_model/table_name/456
+    # - Edit mode: URL ending with /edit (GitHub #325)
+    #
+    # The content can be either a plain URL or a markdown format link [label](url)
     def cell_content_for_embedded_block
       return cell_content unless cell_content.present?
 
-      url = cell_content
+      parsed = parse_embedded_block_url(cell_content)
+      build_embedded_block_html(parsed)
+    end
 
-      if url.start_with? '['
-        # This is a markdown format link
-        col_url_parts = url&.scan(/^\[(.+)\]\((.+)\)$/)
-        a_text = html_escape col_url_parts&.first&.first
-        url = html_escape col_url_parts&.first&.last
+    private
+
+    #
+    # Check if a URL uses a safe protocol for rendering as a link.
+    # Rejects javascript: and data: protocols to prevent XSS.
+    def safe_url_protocol?(url)
+      return true if url.start_with?('/', '#')
+
+      !url.match?(/\A\s*(javascript|data|vbscript):/i)
+    end
+
+    #
+    # Parse the URL from embedded_block content.
+    # Returns a hash with parsed components including edit_mode flag.
+    def parse_embedded_block_url(content)
+      url = content
+      link_text = nil
+      icon_class = nil
+
+      if content.start_with?('[')
+        # Markdown format link: [Label](/url/path)
+        url_parts = content.scan(/^\[(.+)\]\((.+)\)$/)
+        link_text = html_escape(url_parts&.first&.first)
+        url = html_escape(url_parts&.first&.last)
       else
-        # This is a plain URL
-        icon = 'glyphicon glyphicon-tasks'
+        # Plain URL - show icon
+        icon_class = 'glyphicon glyphicon-tasks'
       end
 
-      split_url = url.split('/')
+      edit_mode = url.end_with?('/edit')
+      url_segments = url.split('/').reject(&:blank?)
 
-      split_url = split_url.reject(&:blank?)
-      id = split_url.last
-      master_id = split_url[1] if split_url.first == 'masters'
-      hyph_name = split_url[-3..-2]&.join('__')&.hyphenate&.singularize || ''
+      # Remove 'edit' suffix before extracting record id
+      url_segments.pop if edit_mode
+
+      record_id = url_segments.last
+      master_id = url_segments[1] if url_segments.first == 'masters'
+      # Join the last two path segments to form model name (e.g., dynamic_model__table_name)
+      # rubocop:disable Style/SafeNavigationChainLength
+      model_name_hyphenated = url_segments[-3..-2]&.join('__')&.hyphenate&.singularize || ''
+      # rubocop:enable Style/SafeNavigationChainLength
+
+      {
+        url:,
+        link_text:,
+        icon_class:,
+        edit_mode:,
+        record_id:,
+        master_id:,
+        model_name_hyphenated:
+      }
+    end
+
+    #
+    # Build the HTML for an embedded_block link and target div
+    def build_embedded_block_html(parsed)
+      hyph_name = parsed[:model_name_hyphenated]
+      record_id = parsed[:record_id]
+      edit_mode_attr = parsed[:edit_mode] ? ' data-edit-mode="true"' : ''
 
       html = <<~END_HTML
-        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{a_text}</a>
-        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"></div>
+        <a class="report-embedded-block-link #{parsed[:icon_class]}" title="open result" href="#{parsed[:url]}" data-remote="true" data-preprocessor="report_embed_dynamic_block" data-#{hyph_name}-id="#{record_id}" data-result-target="#report-result-embedded-block--#{record_id}" data-template="#{hyph_name}-OPTION_TYPE-result-template" data-result-target-force="true">#{parsed[:link_text]}</a>
+        <div id="report-result-embedded-block--#{record_id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{record_id}" data-master-id="#{parsed[:master_id]}"#{edit_mode_attr}></div>
       END_HTML
 
       html.html_safe
     end
+
+    public
 
     def cell_content_for_embedded_report
       return cell_content unless cell_content.present?
@@ -270,22 +349,31 @@ module ReportResults
 
       block_id = SecureRandom.hex(10)
 
-      html = <<~END_HTML
+      iframe_html = <<~END_HTML.html_safe
         <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
-        <script id="report-cell-content-#{block_id}" class="hidden" type="x-html">
-          #{cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe}
-        </script>
-        <script>
+      END_HTML
+
+      # Store the HTML content in a script tag (data container, not executable)
+      nonce = request.content_security_policy_nonce
+      content_script = ActionController::Base.helpers.xhtml_script_tag(nonce: nonce, id: "report-cell-content-#{block_id}",
+                                                                       class: 'hidden') do
+        cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe
+      end
+
+      # Script to load the content into the iframe
+      loader_script = ActionController::Base.helpers.javascript_tag(nonce: nonce) do
+        <<~END_JS.html_safe
           window.setTimeout(function() {
             var c = $('#report-cell-content-#{block_id}');
             var html = c.html();
 
             $('#report-cell-iframe-#{block_id}').attr('srcdoc', html);
           }, 100);
-        </script>
-      END_HTML
+        END_JS
+      end
 
-      html.html_safe
+      "#{iframe_html}#{content_script}#{loader_script}".html_safe
+    rescue StandardError => e
     end
 
     private

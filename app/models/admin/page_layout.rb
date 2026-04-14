@@ -16,7 +16,7 @@ class Admin::PageLayout < Admin::AdminBase
 
   validates :layout_name, presence: { scope: :active, message: "can't be blank" }
   validates :panel_name, presence: { scope: :active, message: "can't be blank" },
-                         uniqueness: { scope: %i[app_type_id layout_name], message: "can't be already present" },
+                         uniqueness: { scope: %i[app_type_id layout_name disabled], message: "can't be already present" },
                          if: :enabled?
   validates :panel_label, presence: { scope: :active, message: "can't be blank" }
 
@@ -67,10 +67,15 @@ class Admin::PageLayout < Admin::AdminBase
   #   limit: max number of items to show in panel
   #   initial_show: initially open up a panel
   #   find_with: the alternative id (crosswalk or external id) to search for the master record with for standalone pages
+  #   active_sublist_values: hash of resource names to array of filter values that should be active by default
+  #                         e.g. { player_contacts: [10, 5], addresses: 'all' }
+  #   sort_sublists: hash of resource names to default sort order ('asc' or 'desc')
+  #                  e.g. { player_contacts: 'desc', addresses: 'asc' }
   configure :view_options,
             with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls default_expander
                      hide_activity_logs_header close_others
-                     show_for_single_master_only show_for_multi_master_only filter_items]
+                     show_for_single_master_only show_for_multi_master_only filter_items
+                     active_sublist_values sort_sublists]
 
   # List options for dashboards list
   configure :list_options, with: %i[hide_in_list]

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::DynamicModelsController < AdminController
-  helper_method :permitted_params, :objects_instance, :human_name
+  helper_method :permitted_params, :objects_instance, :human_name,
+                :resource_name_column, :batch_jobs_column, :view_sql_column
   before_action :set_defaults
   helper_method :view_folder
   # after_action :routes_reload, only: %i[update create]
@@ -120,12 +121,78 @@ class Admin::DynamicModelsController < AdminController
   def filters
     {
       category: DynamicModel.categories,
-      table_name: DynamicModel.table_names
+      table_name: DynamicModel.table_names,
+      in_current_app_type: %w[yes no]
     }
   end
 
   def filters_on
-    %i[category table_name]
+    %i[category table_name in_current_app_type]
+  end
+
+  #
+  # Override filter_params to extract the custom in_current_app_type filter
+  # before the parent class processes it as a database column
+  # @return [Hash]
+  def filter_params
+    result = super
+    @in_current_app_type_filter = result&.delete(:in_current_app_type)
+    result
+  end
+
+  #
+  # Override to handle the special "in_current_app_type" filter
+  # This filter shows/hides items based on whether they're in the admin's current app type
+  # @return [ActiveRecord::Relation]
+  def filtered_primary_model(pm = nil)
+    pm = super
+
+    filtered_in_current_app_type(pm)
+  end
+
+  #
+  # Show extra index columns for resource name, batch jobs status, view SQL indicator,
+  # and whether the dynamic model is in the current app type
+  def extra_index_columns
+    {
+      batch_jobs_column: 'Batch jobs',
+      view_sql_column: 'Is a view?',
+      in_current_app_type_result_checkbox: 'In current app type'
+    }
+  end
+
+  #
+  # Show the batch jobs status for the dynamic model.
+  # If batch_trigger is configured, shows the frequency.
+  # @param [DynamicModel] list_item
+  # @return [String]
+  def batch_jobs_column(list_item)
+    return '' unless list_item.persisted?
+
+    # Ensure configurations is loaded
+    list_item.option_configs unless list_item.configurations
+    bt = list_item.configurations&.dig(:batch_trigger)
+    return '' unless bt.present?
+
+    frequency = bt[:frequency]
+    frequency.present? ? frequency.to_s : 'configured'
+  rescue StandardError
+    ''
+  end
+
+  #
+  # Show a boolean checkbox if the dynamic model has view_sql configured
+  # @param [DynamicModel] list_item
+  # @return [String] HTML for checked/unchecked indicator
+  def view_sql_column(list_item)
+    return helpers.index_list_item_boolean_field(false) unless list_item.persisted?
+
+    # Ensure configurations is loaded
+    list_item.option_configs unless list_item.configurations
+    has_view_sql = list_item.configurations&.dig(:view_sql).present?
+    helpers.index_list_item_boolean_field(has_view_sql)
+  rescue StandardError
+    helpers.index_list_item_boolean_field(false)
   end
 
   def view_folder
@@ -140,9 +207,7 @@ class Admin::DynamicModelsController < AdminController
   end
 
   def index_params
-    %i[id name schema_name table_name category
-       table_key_name primary_key_name
-       foreign_key_name result_order position admin_id]
+    %i[id category name table_name resource_name position admin_id]
   end
 
   #

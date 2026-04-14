@@ -1,11 +1,40 @@
 # frozen_string_literal: true
 
+# Helper methods for Capybara system specs
+#
+# This module provides reusable methods for interacting with the application UI
+# in system tests, abstracting common patterns and handling edge cases.
+#
+# Key Method Categories:
+# - Field Interaction: fill_in_field, select_from_dropdown_field, set_yes_no_field,
+#   set_checkbox_field, select_from_big_select_field, select_from_grouped_big_select_field
+# - Navigation: expand_master_record, expand_master_record_tab, expand_model_reference,
+#   click_edit_button_within_target
+# - Debugging: debug_process_status, available_form_fields, puts_alerts
+# - Waiting: finish_page_loading, finish_form_formatting
+#
+# Chosen.js Detection:
+# The select_from_dropdown_field method automatically detects chosen.js via:
+# - 'use-chosen' class (explicit declaration)
+# - 'attached-chosen' class (added after JS initialization)
+# - Presence of #{field_id}_chosen container element
+#
+# Big-Select Fields:
+# - select_from_big_select_field: For standard big-select modal dialogs
+# - select_from_grouped_big_select_field: For big-select with group_split_char grouping
+#
+# Usage Guidelines:
+# - Always use helper methods instead of raw Capybara selectors
+# - Helpers handle scrolling, visibility, and AJAX waits automatically
+# - Modal interactions must happen outside Capybara `within` blocks
 require './spec/support/feature_helper'
 require './spec/support/user_actions_setup'
+require './spec/support/codemirror_editor_support'
 module FeatureSupport
   include FeatureHelper
   include UserActionsSetup
   include FeatureExpectations
+  include CodemirrorEditorSupport
 
   ResultsMasterPanel = '.results-panel .master-panel'
   ResultsMasterExpander = '.master-expander'
@@ -13,7 +42,7 @@ module FeatureSupport
   def js_console_log
     nil unless ENV['DEBUG_JS'] == 'true'
 
-    # puts page.driver.browser.logs.get(:browser).select { |l| l.start_with?('console.') }.join("\n")
+    # puts_debug_plain page.driver.browser.logs.get(:browser).select { |l| l.start_with?('console.') }.join("\n")
   end
 
   def login
@@ -163,6 +192,38 @@ module FeatureSupport
     have_no_css('.collapsing')
   end
 
+  # Navigate to a master record by ID
+  def navigate_to_master(master_id)
+    expect(master_id).not_to be nil
+    visit "/masters/search?nav_q_id=#{master_id}"
+    finish_page_loading
+
+    # Debug output
+    puts_debug "Page title: #{page.title}"
+    puts_debug "Page URL: #{page.current_url}"
+    debug_process_status if respond_to?(:debug_process_status)
+
+    unless page.has_css?('.master-result', wait: 15)
+      # Capture page state before failing
+      alerts = all('div.alert', visible: true, wait: 0)
+      if alerts.any?
+        puts_debug "ALERTS visible on page (#{alerts.count}):"
+        alerts.each { |a| puts_debug "  Alert: #{a.text.strip.first(300)}" }
+      end
+      flash_msgs = all('.flash .alert', visible: true, wait: 0)
+      if flash_msgs.any?
+        puts_debug "FLASH messages (#{flash_msgs.count}):"
+        flash_msgs.each { |f| puts_debug "  Flash: #{f.text.strip.first(300)}" }
+      end
+      puts_debug "Page body text (first 500 chars): #{page.text.first(500)}"
+      raise "navigate_to_master: .master-result not found for master_id #{master_id}. Check alerts above."
+    end
+
+    # Expand the master record to see details
+    expand_master_record(master_id: master_id)
+    finish_page_loading
+  end
+
   def finish_page_loading
     if all('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations').present?
       return
@@ -190,9 +251,7 @@ module FeatureSupport
   end
 
   def dismiss_all_modals
-    all('button[data-dismiss="modal"]', wait: false).each do |m|
-      m.click
-    end
+    all('button[data-dismiss="modal"]', wait: false).each(&:click)
     # wait for the modal to fade out before continuing
     has_no_css?('.modal.fade.in')
     has_css?('.modal[style~="display: none"]')
@@ -239,6 +298,8 @@ module FeatureSupport
     all(ResultsMasterExpander)
   end
 
+  #
+  # Expand a master record by its index in the results list (0-based)
   def expand_master(index)
     has_css?('.results-panel')
     finish_form_formatting
@@ -249,13 +310,58 @@ module FeatureSupport
     expect(new_panel).to have_css('.master-main-panel')
   end
 
-  def expand_master_record_tab(name)
+  #
+  # Expand a master record tab (such as "details", "external ids", "phone log", etc) by name
+  # This avoids the need to explicitly get `a[data-panel-tab="<name>"]` and click it.
+  # Expectations are also enforced to ensure the tab shows.
+  def expand_master_record_tab(name, master_id: nil)
     finish_form_formatting
-    tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
+    tab_selector = "a[data-panel-tab='#{name.id_underscore}']"
+
+    # Scope to a specific master container when master_id is provided
+    scoped_selector = if master_id
+                        "#master-#{master_id}-main-container #{tab_selector}"
+                      else
+                        tab_selector
+                      end
+
+    unless page.has_css?(scoped_selector, visible: :all, wait: 15)
+      available_tabs = all('a[data-panel-tab]', visible: :all, wait: 0).map { |tab| tab['data-panel-tab'] }.uniq
+      raise "Could not find panel tab #{name.id_underscore.inspect}. Available tabs: #{available_tabs.join(', ')}"
+    end
+
+    tab_link = all(scoped_selector, visible: :all, wait: 0).first
     expect(tab_link).not_to be nil
-    all('ul.details-tabs').first.click_link name if tab_link['aria-expanded'] != 'true'
+    scroll_into_view(tab_link)
+    tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    # Wait for the target panel to fully expand (Bootstrap collapse animation)
+    target = tab_link['data-target']
+    return unless target.present?
+
+    target_selector = "#{target}.collapse.in"
+    expect(page).to have_css(target_selector, wait: 15)
   end
 
+  def expand_master_record_and_tab(master_id:, tab_name:)
+    expand_master_record(master_id:)
+    expect(page).to have_css("#master-#{master_id}-main-container.in", wait: 10)
+    expand_master_record_tab(tab_name, master_id:)
+  end
+
+  def disable_active_panel_layout(panel_name, app_type: @app_type, admin: @admin, reload_routes: false)
+    return unless app_type&.id && admin
+
+    Admin::PageLayout.active.where(app_type_id: app_type.id, panel_name:).each do |panel_layout|
+      panel_layout.disable!(admin)
+    end
+
+    Rails.application.routes_reloader.reload! if reload_routes
+  end
+
+  #
+  # Expand a search tab by the name that appears on the button
+  # Expectations are also enforced to ensure the search form shows.
   def expand_search_with_button(name)
     search_btn = all(".advanced-form-selections a[type='button']").select { |b| b.text == name }.first
     expect(search_btn).not_to be nil
@@ -297,6 +403,11 @@ module FeatureSupport
     if is_report
       find("[name='search_attrs[#{field_name}]']", visible: :all, wait: 2)
     else
+      # For big-select fields, there may be both a hidden select and an input element
+      # Prefer the input element if it exists (big-select uses input)
+      inputs = all("input[data-attr-name='#{field_name}']", visible: :all, wait: 2)
+      return inputs.first if inputs.any?
+
       find("[data-attr-name='#{field_name}']", visible: :all, wait: 2)
     end
   rescue Capybara::ElementNotFound => e
@@ -348,27 +459,27 @@ module FeatureSupport
     big_select_field = element_for_field(field_name)
     scroll_into_view(big_select_field)
 
-    # Trigger focus event to open big-select dialog
+    field_id = big_select_field[:id]
+    puts_debug "Big-select field ID: #{field_id}"
+
+    # Click the field to open the modal
     big_select_field.click
-    page.execute_script('arguments[0].focus();', big_select_field)
 
-    # Wait for big-select dialog to appear
+    # Wait for modal to become visible
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
 
-    sleep 1
-    page.has_css?('#primary-modal.fade.in')
-
-    # Look for big-select-item elements (clickable items in the dialog)
-    page.has_css?('.big-select-item', wait: 3)
-    all_items = page.all('.big-select-item')
+    # Look for big-select-item elements within the modal (modal is outside form scope)
+    all_items = page.all('#primary-modal .big-select-item')
     puts_debug " - Found #{all_items.count} big-select items in modal"
 
-    # Debug: save HTML to check what's in the dialog
-    File.write('/tmp/big_select_dialog.html', page.html)
+    # Debug: save HTML if no items found
+    save_html_snapshot('/tmp/big_select_dialog.html') if all_items.empty?
 
     list_of_items = []
     list_of_texts = []
-    got_item_key = nil
-    all_items.each_with_index do |item, _i|
+    chosen_item = nil
+    all_items.each do |item|
       item_text = item.text.strip
       item_key = item['data-bsi-key']
       list_of_items << item_key
@@ -377,9 +488,31 @@ module FeatureSupport
       # Match by key OR by text
       next unless item_key == value || item_text.include?(value) || value.nil?
 
-      item.click
-      got_item_key = item_key
+      chosen_item = { key: item_key, text: item_text }
       break
+    end
+
+    got_item_key = chosen_item&.dig(:key)
+    if chosen_item
+      # Re-find the item before clicking because the modal content can re-render while opening.
+      item_selector = if chosen_item[:key].present?
+                        %(#primary-modal .big-select-item[data-bsi-key="#{chosen_item[:key]}"])
+                      else
+                        [:xpath, %{//div[@id="primary-modal"]//*[contains(@class, "big-select-item")][contains(normalize-space(.), #{chosen_item[:text].inspect})]}]
+                      end
+
+      3.times do |attempt|
+        begin
+          if item_selector.is_a?(Array)
+            find(*item_selector, wait: 5).click
+          else
+            find(item_selector, wait: 5).click
+          end
+          break
+        rescue Selenium::WebDriver::Error::StaleElementReferenceError
+          raise if attempt == 2
+        end
+      end
     end
 
     page.has_css?('#primary-modal.fade', class: '!in')
@@ -388,7 +521,7 @@ module FeatureSupport
     # Verify the field value was actually set
     unless got_item_key
       puts_debug("big-select #{value} not in keys: #{list_of_items} or texts: #{list_of_texts}")
-      puts_debug('Saved big select dialog HTML to /tmp/big_select_dialog.html')
+      save_html_snapshot('/tmp/big_select_dialog.html')
     end
     expect(got_item_key).not_to be nil
 
@@ -396,6 +529,140 @@ module FeatureSupport
     big_select_field_after = element_for_field(field_name)
     field_value = big_select_field_after.value
     expect(field_value).to eq(got_item_key), '⚠️  WARNING: Field value still empty after clicking item!'
+  end
+
+  # Select from a big-select field that has grouped items (uses group_split_char configuration)
+  # @param [String] field_name - the field name (data-attr-name attribute)
+  # @param [String] value - the value to select
+  # @param [String|nil] group_name - optional group name to expand; if nil, searches all groups
+  def select_from_grouped_big_select_field(field_name, value, group_name: nil)
+    big_select_field = element_for_field(field_name)
+    scroll_into_view(big_select_field)
+
+    field_id = big_select_field[:id]
+
+    # Open the big-select dialog
+    big_select_field.click
+    sleep 1
+
+    # Check if modal opened
+    modal_visible = page.has_css?('#primary-modal.fade.in', wait: 3)
+
+    unless modal_visible
+      # Try triggering focus directly via JS
+      page.execute_script("$('##{field_id}').focus();")
+      sleep 1
+      modal_visible = page.has_css?('#primary-modal.fade.in', wait: 3)
+    end
+
+    unless modal_visible
+      save_html_snapshot('/tmp/grouped_no_modal.html')
+      raise "Modal did not open for grouped big-select field '#{field_name}'. HTML saved to /tmp/grouped_no_modal.html"
+    end
+
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+
+    # Check if there are grouped items
+    if page.has_css?('.big-select-group-head', wait: 2)
+      group_headers = page.all('.big-select-group-head')
+
+      if group_name
+        # Find specific group and expand it
+        target_group = group_headers.find { |h| h.text.include?(group_name) }
+        unless target_group
+          available_groups = group_headers.map(&:text)
+          raise "Could not find group '#{group_name}' in big-select. Available: #{available_groups.inspect}"
+        end
+
+        within(target_group) do
+          find('a[data-toggle="collapse"]').click
+        end
+        sleep 0.5
+      else
+        # Expand all groups to search for the item
+        group_headers.each do |header|
+          within(header) do
+            collapse_link = find('a[data-toggle="collapse"]')
+            collapse_link.click if collapse_link['aria-expanded'] != 'true'
+          end
+          sleep 0.3
+        end
+      end
+    end
+
+    # Wait for items and select the matching one (within modal scope)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
+    all_items = page.all('#primary-modal .big-select-item', visible: true)
+
+    # Find matching item by key or text
+    got_item = nil
+    all_items.each do |item|
+      item_key = item['data-bsi-key']
+      item_text = item.text.strip
+
+      # Skip items without a valid key (group headers, clear option, etc.)
+      next if item_key.nil? || item_key == '' || item_key == 'big-select-clear'
+
+      # Match by key or by text
+      if item_key == value || item_text.include?(value)
+        got_item = item
+        break
+      end
+    end
+
+    unless got_item
+      available = all_items.map { |i| "#{i['data-bsi-key']}: #{i.text[0..50]}" }
+      raise "Could not find '#{value}' in grouped big-select. Available: #{available.take(10).inspect}"
+    end
+
+    puts_debug "Grouped big-select: clicking item with key='#{got_item['data-bsi-key']}', text='#{got_item.text[0..30]}'"
+    expected_key = got_item['data-bsi-key'] # Store key BEFORE clicking (element becomes stale after)
+    got_item.click
+
+    expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+    sleep 0.5
+
+    # Verify the field value was set
+    big_select_field_after = element_for_field(field_name)
+    field_value = big_select_field_after.value
+
+    unless field_value == expected_key
+      save_html_snapshot('/tmp/grouped_mismatch.html')
+      puts_debug "Field value mismatch! Expected '#{expected_key}', got '#{field_value}'. HTML saved."
+    end
+
+    expect(field_value).to eq(expected_key),
+                           "⚠️  WARNING: Field value '#{field_value}' doesn't match expected '#{expected_key}'"
+  end
+
+  # Clear the selection in a big-select field by clicking the (none) option
+  # @param [String] field_name - the field name (data-attr-name attribute)
+  def clear_big_select_field(field_name)
+    big_select_field = element_for_field(field_name)
+    scroll_into_view(big_select_field)
+
+    big_select_field.click
+    sleep 1
+
+    expect(page).to have_css('#primary-modal.fade.in', wait: 5)
+    expect(page).to have_css('#primary-modal .big-select-item', wait: 3)
+
+    # Find the (none) / clear option within the modal
+    clear_option = page.all('#primary-modal .big-select-item').find do |item|
+      item['data-bsi-key'] == '' || item['id'] == 'big-select-item--big-select-clear' || item.text == '(none)'
+    end
+
+    raise 'Could not find (none) option in big-select dialog' unless clear_option
+
+    clear_option.click
+
+    expect(page).not_to have_css('#primary-modal.fade.in', wait: 3)
+    sleep 0.5
+
+    # Verify the field was cleared (value is set to 'big-select-clear' marker)
+    big_select_field_after = element_for_field(field_name)
+    expect(big_select_field_after.value).to eq('big-select-clear'),
+                                            "⚠️  WARNING: Field was not cleared, value is '#{big_select_field_after.value}'"
   end
 
   def fill_in_field(field_name, value)
@@ -406,10 +673,22 @@ module FeatureSupport
     field.fill_in(with: value)
   end
 
+  # Select a value from a dropdown field, automatically detecting chosen.js
+  # Chosen can be attached via:
+  # 1. `use-chosen` class on the element
+  # 2. `attached-chosen` class added after chosen.js initialization
+  # 3. Report criteria fields (always use chosen via .report-criteria-fields-block selector)
   def select_from_dropdown_field(field_name, value, is_report: false)
     element = element_for_field(field_name, is_report:)
     scroll_into_view(element)
-    if element['class'].include?('use-chosen')
+
+    # Detect if chosen.js is attached via multiple fallback checks
+    has_chosen = element['class'].include?('use-chosen') ||
+                 element['class'].include?('attached-chosen') ||
+                 is_report ||
+                 page.has_css?("##{element[:id]}_chosen", visible: :all, wait: 0.5)
+
+    if has_chosen
       select_from_chosen(field_name, value, is_report:)
     else
       element.select value
@@ -533,7 +812,7 @@ module FeatureSupport
   end
 
   #
-  # Expand a master record, optionally with matching text
+  # Expand a master record, by id or matching link text
   # @param [String, nil] text The text to match for the master-expander link
   def expand_master_record(text: nil, master_id: nil)
     finish_form_formatting
@@ -555,7 +834,16 @@ module FeatureSupport
     if link[:class].include?('collapsed')
       puts_debug 'Found collapsed master-expander, clicking to expand master record panel...'
 
-      link.click
+      # Click on the player-info-header child element which has actual dimensions
+      # The master-expander anchor itself may have zero size due to CSS styling
+      player_header = link.all('.player-info-header').first
+      if player_header
+        scroll_into_view(player_header)
+        player_header.click
+      else
+        scroll_into_view(link)
+        link.click
+      end
       finish_form_formatting
       sleep 2 # Extra wait for AJAX to load master record details
       # Check for alerts after expanding master record
@@ -605,9 +893,111 @@ module FeatureSupport
     puts "[FeatureSupport DEBUG] #{msg}" if ENV['FEATURE_DEBUG'] == 'true' || force
   end
 
+  def puts_debug_plain(msg, force: false)
+    puts msg if ENV['FEATURE_DEBUG'] == 'true' || force
+  end
+
   def save_html_snapshot(filename)
     File.write(filename, page.html)
     puts_debug "Saved HTML snapshot to #{filename}"
+  end
+
+  #
+  # Set up browser console log capture. Call this AFTER initial page load but BEFORE
+  # navigating to the page you want to debug. Captures console.log, console.error,
+  # console.warn, and CSP violation events.
+  #
+  # Usage:
+  #   visit '/some/page'
+  #   setup_browser_console_capture
+  #   visit '/page/to/debug'  # Console capture active for this navigation
+  #   finish_page_loading
+  #   print_browser_console_logs('After visiting debug page')
+  #
+  def setup_browser_console_capture
+    page.execute_script(<<~JS)
+      window.browserLogs = [];
+      window.cspViolations = [];
+      if (!window._consoleIntercepted) {
+        window._consoleIntercepted = true;
+        var origLog = console.log;
+        var origError = console.error;
+        var origWarn = console.warn;
+        console.log = function() {
+          window.browserLogs.push('LOG: ' + Array.from(arguments).join(' '));
+          origLog.apply(console, arguments);
+        };
+        console.error = function() {
+          window.browserLogs.push('ERROR: ' + Array.from(arguments).join(' '));
+          origError.apply(console, arguments);
+        };
+        console.warn = function() {
+          window.browserLogs.push('WARN: ' + Array.from(arguments).join(' '));
+          origWarn.apply(console, arguments);
+        };
+
+        // Listen for CSP violation events
+        document.addEventListener('securitypolicyviolation', function(e) {
+          var violation = {
+            blockedURI: e.blockedURI,
+            violatedDirective: e.violatedDirective,
+            sourceFile: e.sourceFile,
+            lineNumber: e.lineNumber,
+            columnNumber: e.columnNumber,
+            sample: e.sample
+          };
+          window.cspViolations.push(violation);
+          window.browserLogs.push('CSP VIOLATION: ' + e.violatedDirective +
+            ' - blocked: ' + e.blockedURI +
+            ' at ' + e.sourceFile + ':' + e.lineNumber + ':' + e.columnNumber +
+            ' sample: ' + e.sample);
+        });
+      }
+    JS
+  end
+
+  #
+  # Retrieve and print captured browser console logs. Call after setup_browser_console_capture
+  # and after performing the actions you want to debug.
+  #
+  # @param context [String] Description of what was being tested (for output header)
+  # @return [Hash] { logs: Array, csp_violations: Array }
+  #
+  def print_browser_console_logs(context = 'Browser Console')
+    logs = page.evaluate_script('window.browserLogs || []')
+    violations = page.evaluate_script('window.cspViolations || []')
+
+    puts_debug "\n#{'=' * 80}"
+    puts_debug "CONTEXT: #{context}"
+    puts_debug '-' * 80
+    puts_debug "BROWSER CONSOLE LOGS (#{logs.length} entries):"
+    logs.each { |log| puts_debug "  #{log}" }
+
+    if violations.any?
+      puts_debug "\nCSP VIOLATIONS CAPTURED (#{violations.length}):"
+      violations.each_with_index do |v, i|
+        puts_debug "  Violation ##{i + 1}:"
+        puts_debug "    Directive: #{v['violatedDirective']}"
+        puts_debug "    Blocked URI: #{v['blockedURI']}"
+        puts_debug "    Source: #{v['sourceFile']}:#{v['lineNumber']}:#{v['columnNumber']}"
+        puts_debug "    Sample: #{v['sample']}"
+      end
+    else
+      puts_debug "\nNo CSP violations captured"
+    end
+    puts_debug '=' * 80
+
+    { logs:, csp_violations: violations }
+  end
+
+  #
+  # Get captured browser console logs without printing.
+  # @return [Hash] { logs: Array, csp_violations: Array }
+  #
+  def get_browser_console_logs
+    logs = page.evaluate_script('window.browserLogs || []')
+    violations = page.evaluate_script('window.cspViolations || []')
+    { logs:, csp_violations: violations }
   end
 
   # Click a tab in the top report tabs bar
@@ -662,7 +1052,7 @@ module FeatureSupport
         available_submit_fields
         available_embedded_model_reference_add_buttons
       end
-    elsif forms.length > 0
+    elsif !forms.empty?
       forms.each do |f|
         puts_debug "Form ##{f[:id]}:"
         within f do
@@ -696,9 +1086,9 @@ module FeatureSupport
       res_html = res_html.gsub("\r", '').gsub(/\n\n+/, "\n")
       res_md = res_html.html_to_markdown
       puts_debug 'Caption for user:'
-      puts '---'
-      puts res_md
-      puts '---'
+      puts_debug_plain '---'
+      puts_debug_plain res_md
+      puts_debug_plain '---'
       results[field_name] = res_md
     end
     results
@@ -725,8 +1115,8 @@ module FeatureSupport
       res[:is_active] = (tab['aria-expanded'] == 'true')
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -771,8 +1161,8 @@ module FeatureSupport
       res[:is_in_show_mode] = true
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -788,8 +1178,8 @@ module FeatureSupport
       res[:visible] = f.visible?
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -806,8 +1196,8 @@ module FeatureSupport
       res[:data_target] = mr_action['data-target']
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -835,8 +1225,8 @@ module FeatureSupport
       end
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
@@ -854,8 +1244,8 @@ module FeatureSupport
 
     if results.present?
       puts_debug '⚠️  Form validation errors:'
-      puts String.yaml_dump(results)
-      puts '---'
+      puts_debug_plain String.yaml_dump(results)
+      puts_debug_plain '---'
     else
       puts_debug 'Form validation errors: none'
     end
@@ -866,9 +1256,9 @@ module FeatureSupport
   end
 
   def puts_highlighted(text)
-    puts "\n" + ('=' * 80)
-    puts text
-    puts ('=' * 80) + "\n"
+    puts_debug_plain "\n#{'=' * 80}"
+    puts_debug_plain text
+    puts_debug_plain "#{'=' * 80}\n"
   end
 
   def puts_error_page
@@ -878,8 +1268,8 @@ module FeatureSupport
       return
     end
     puts_debug '⚠️  Error page message:'
-    puts epb.html.html_to_markdown
-    puts '---'
+    puts_debug_plain epb.html.html_to_markdown
+    puts_debug_plain '---'
   end
 
   def puts_alerts
@@ -896,17 +1286,15 @@ module FeatureSupport
       res[:body] = m.all('.modal-body').first&.text
       results << res
     end
-    puts String.yaml_dump(results)
-    puts '---'
+    puts_debug_plain String.yaml_dump(results)
+    puts_debug_plain '---'
     results
   end
 
   def dismiss_all_alerts
     finish_page_loading
 
-    all('div.alert button.close', wait: 0).each do |btn|
-      btn.click
-    end
+    all('div.alert button.close', wait: 0).each(&:click)
     sleep 0.5
   end
 
@@ -925,8 +1313,8 @@ module FeatureSupport
     page.save_screenshot(filepath)
 
     # Log the screenshot
-    puts "[Screenshot] #{name}: #{filepath}"
-    puts "[Screenshot] #{description}" if description
+    puts_debug_plain "[Screenshot] #{name}: #{filepath}"
+    puts_debug_plain "[Screenshot] #{description}" if description
 
     # Return relative path for documentation
     filepath.to_s

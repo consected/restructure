@@ -203,6 +203,10 @@ li.list-group-item label {
     padding-top: 4px;
     padding-bottom: 4px;
   }
+
+  &.admin-form__left-aligned {
+    text-align: left;
+  }
 }
 
 select[multiple] {

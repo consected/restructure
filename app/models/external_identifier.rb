@@ -244,6 +244,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res.include UserHandler
         res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
+        apply_encrypted_attributes(res)
 
         remove_implementation_controller_class
         res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
@@ -251,7 +252,7 @@ class ExternalIdentifier < ActiveRecord::Base
       rescue StandardError => e
         failed = true
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        puts "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        warn "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
       end
     end
     if failed || !ready_to_generate?
@@ -306,7 +307,7 @@ class ExternalIdentifier < ActiveRecord::Base
   def id_range_correct
     return if max_id.nil? || min_id.nil?
 
-    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || max_id && max_id > min_id
+    errors.add(:max_id, 'must be greater than min id') unless max_id.nil? || (max_id && max_id > min_id)
   end
 
   def name_format_correct

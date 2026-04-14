@@ -216,6 +216,16 @@ module Formatter
       end
     end
 
+    #
+    # Resolve a single substitution tag to its value from the provided data
+    # @param tag [String] the tag name, potentially dot-separated (e.g. 'master.first_name')
+    # @param sub_data [Hash] substitution data built by {setup_data}
+    # @param tag_subs [String, nil] HTML tag to wrap the result in (e.g. 'strong')
+    # @param ignore_missing [Symbol, nil] how to handle missing tags:
+    #   nil raises an error, :show_tag returns the raw tag, truthy returns ''
+    # @param original_type [Boolean, nil] when true (triple-brace), return the raw Ruby object
+    #   without converting to String — used by {substitute_plain} for object passthrough
+    # @return [Object] the resolved tag value (String unless original_type is set)
     def self.value_for_tag(tag, sub_data, tag_subs: nil, ignore_missing: nil, original_type: nil)
       missing = false
 
@@ -267,6 +277,11 @@ module Formatter
       tag_value = if missing
                     if ignore_missing == :show_tag
                       "{{#{tag}}}"
+                    elsif original_type && sub_data.is_a?(Hash) && sub_data[:master]
+                      # Tag not found in attributes hash, but original_type (triple-brace) requested.
+                      # Try resolving as a master association (e.g. {{{player_contacts}}})
+                      # so the raw collection is returned for iteration.
+                      associated_master_and_configs(sub_data[:master], tag_name)
                     else
                       ''
                     end
@@ -351,6 +366,7 @@ module Formatter
       setup_data_for_item_user(data, item)
       setup_data_for_current_user(data, master, item)
       setup_methods_as_attributes(data)
+      setup_set_variables(data, item)
       data
     end
 
@@ -442,6 +458,55 @@ module Formatter
       ValidMethodsAsAttributes[rn].each do |tag_name|
         data[tag_name] = orig_obj.send(tag_name) if orig_obj.respond_to?(tag_name)
       end
+    end
+
+    #
+    # Evaluate set_variables from the item's option_type_config and add them to data[:variables].
+    # Also merges in any trigger_variables set by the set_variables save trigger.
+    # Variables are processed in array order. Each entry has :name, :value, and optional :if condition.
+    # Later entries with the same name override earlier ones.
+    # Values may contain {{substitution}} tags resolved against the current data.
+    # Hash values with :object key are used directly as hash values.
+    # @param [Hash] data - the substitution data hash
+    # @param [Object] item - the original item instance
+    def self.setup_set_variables(data, item)
+      return unless data.is_a?(Hash)
+
+      variables = {}
+
+      # Include trigger_variables set by the set_variables save trigger (issue #964)
+      if item.respond_to?(:trigger_variables) && item.trigger_variables.present?
+        variables.merge!(item.trigger_variables)
+      end
+
+      # Include config-level set_variables from option_type_config
+      if item.respond_to?(:option_type_config)
+        config = item.option_type_config
+        if config&.respond_to?(:set_variables) && config.set_variables.present?
+          config.set_variables.each do |entry|
+            # Evaluate the if condition when present
+            if entry[:if].present?
+              ca = ConditionalActions.new(entry[:if], item)
+              next unless ca.calc_action_if
+            end
+
+            value = entry[:value]
+
+            # Handle hash values with :object key
+            if value.is_a?(Hash) && value.key?(:object)
+              value = value[:object]
+              value = value.deep_symbolize_keys if value.respond_to?(:deep_symbolize_keys)
+            elsif value.is_a?(String) && value.include?('{{')
+              # Substitute tags in the value string
+              value = substitute(value, data:, ignore_missing: true)
+            end
+
+            variables[entry[:name].to_sym] = value
+          end
+        end
+      end
+
+      data[:variables] = variables if variables.present?
     end
 
     #
@@ -651,6 +716,9 @@ module Formatter
       elsif name == 'constants'
         # Options constants
         item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
+      elsif name == 'variables'
+        # Set variables from option type config
+        data[:variables] if data.is_a?(Hash)
       elsif name.in?(allowable_associations(item.class))
         item.send(name)
       elsif item_reference

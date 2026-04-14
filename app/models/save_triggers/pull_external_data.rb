@@ -3,6 +3,9 @@
 class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   attr_accessor :response_code
 
+  BODY_METHODS = %w[put patch lock mkcol propfind proppatch unlock].freeze
+  NO_BODY_METHODS = %w[head delete options trace copy move].freeze
+
   def self.config_def(if_extras: {}); end
 
   def initialize(config, item)
@@ -15,115 +18,136 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
 
     @model_defs.each do |model_def|
-      model_def.each do |_model_name, config|
-        data_field = config[:data_field]
-        response_code_field = config[:response_code_field]
-        data_field_format = config[:data_field_format]
-        local_data_name = config[:local_data]
-        success_if = config[:success_if]
-        vals = {}
+      model_def.each_value do |config|
+        with_entry_lifecycle(config) do
+          data_field = config[:data_field]
+          response_code_field = config[:response_code_field]
+          data_field_format = config[:data_field_format]
+          local_data_name = config[:local_data]
+          success_if = config[:success_if]
+          vals = {}
 
-        # We calculate the conditional if inside each item, rather than relying
-        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
-        if config[:if]
-          ca = ConditionalActions.new config[:if], @item
-          next unless ca.calc_action_if
+          # We calculate the conditional if inside each item, rather than relying
+          # on the outer processing in ActivityLogOptions#calc_save_trigger_if
+          if config[:if]
+            ca = ConditionalActions.new config[:if], @item
+            next unless ca.calc_action_if
+          end
+
+          @this_config = config
+          @submitted_request_data = nil
+          data = run_request
+          orig_data = data
+
+          if data_field
+            data = data&.to_json if data_field_format == 'json'
+            vals[data_field] = data
+          end
+
+          vals[response_code_field] = response_code if response_code_field
+          if local_data_name
+            @item.save_trigger_results[local_data_name] = orig_data
+            @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
+            @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
+              'data' => @submitted_request_data,
+              'url' => url_from_config,
+              'method' => method_from_config
+            }
+          end
+
+          # We calculate the conditional if inside each item, rather than relying
+          # on the outer processing in ActivityLogOptions#calc_save_trigger_if
+          success_if_res = nil
+          if success_if
+            ca = ConditionalActions.new success_if, @item
+            success_if_res = !!ca.calc_action_if
+            @item.save_trigger_results["#{local_data_name}_success_if_res"] = success_if_res if local_data_name
+          end
+
+          uri = url_from_config.split('?').first
+          logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
+                   "&& success_if_res #{success_if_res}"
+          if response_code == 200 && success_if_res != false
+            Rails.logger.info logmsg
+          else
+            Rails.logger.warn logmsg
+          end
+
+          next unless vals.present?
+
+          # Retain the flags so that the #update! doesn't change
+          # what we need to report through the API
+          res = @item
+          created = res._created
+          updated = res._updated
+          disabled = res._disabled
+          @item.transaction do
+            res.ignore_configurable_valid_if = true if config[:force_not_valid]
+            res.force_save! if config[:force_not_editable_save]
+            res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
+          end
+          res._created = created
+          res._updated = updated
+          res._disabled = disabled
         end
-
-        @this_config = config
-        data = run_request
-        orig_data = data
-
-        if data_field
-          data = data&.to_json if data_field_format == 'json'
-          vals[data_field] = data
-        end
-
-        vals[response_code_field] = response_code if response_code_field
-        if local_data_name
-          @item.save_trigger_results[local_data_name] = orig_data
-          @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
-        end
-
-        # We calculate the conditional if inside each item, rather than relying
-        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
-        success_if_res = nil
-        if success_if
-          ca = ConditionalActions.new success_if, @item
-          success_if_res = !!ca.calc_action_if
-          @item.save_trigger_results["#{local_data_name}_success_if_res"] = success_if_res if local_data_name
-        end
-
-        uri = url_from_config.split('?').first
-        logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
-                 "&& success_if_res #{success_if_res}"
-        if response_code == 200 && success_if_res != false
-          Rails.logger.info logmsg
-        else
-          Rails.logger.warn logmsg
-        end
-
-        next unless vals.present?
-
-        # Retain the flags so that the #update! doesn't change
-        # what we need to report through the API
-        res = @item
-        created = res._created
-        updated = res._updated
-        disabled = res._disabled
-        @item.transaction do
-          res.ignore_configurable_valid_if = true if config[:force_not_valid]
-          res.force_save! if config[:force_not_editable_save]
-          res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
-        end
-        res._created = created
-        res._updated = updated
-        res._disabled = disabled
       end
     end
   end
 
   def run_request
-    case method_from_config
-    when 'get'
-      pull_data
+    method = method_from_config
+    case method
+    when 'get', *NO_BODY_METHODS
+      send_no_body_request(method)
     when 'post'
       if post_data_config
-        post_data
+        send_body_request(method)
       else
         post_form
       end
+    when *BODY_METHODS
+      send_body_request(method)
     else
-      raise FphsException, "pull_external_data method '#{http_method}' is not supported"
+      raise FphsException, "pull_external_data method '#{method}' is not supported"
     end
-  end
-
-  def pull_data
-    url = url_from_config
-    response = Net::HTTP.get_response(URI.parse(url))
-    handle_response(from_config, response)
   end
 
   def post_form
-    url = url_from_config
+    uri = URI.parse(url_from_config)
     form = @this_config[:form] || {}
     form = form.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
-    response = Net::HTTP.post_form(URI.parse(url), form)
+    @submitted_request_data = form.deep_stringify_keys
+    response = Net::HTTP.post_form(uri, form)
     handle_response(to_config, response)
   end
 
-  def post_data
-    url = url_from_config
-    data = post_data_config || {}
-    if data.is_a? Hash
-      data = data.deep_stringify_keys
-      data = data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
-      data = data.to_json
-    else
-      data = FieldDefaults.calculate_default @item, data
-    end
-    response = Net::HTTP.post(URI.parse(url), data, header_config)
+  def send_body_request(method)
+    uri = URI.parse(url_from_config)
+    data = serialize_send_data
+
+    request_class = Net::HTTP.const_get(method.capitalize)
+    req = request_class.new(uri)
+    req.body = data
+    apply_headers(req)
+
+    response = start_http(uri).request(req)
     handle_response(to_config, response)
+  end
+
+  def send_no_body_request(method)
+    uri = URI.parse(url_from_config)
+    request_class = Net::HTTP.const_get(method.capitalize)
+    req = request_class.new(uri)
+    apply_headers(req)
+
+    response = start_http(uri).request(req)
+    handle_response(from_config || to_config, response)
+  end
+
+  def start_http(uri)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = uri.scheme == 'https'
+    http
   end
 
   def handle_response(sub_config, response)
@@ -181,11 +205,40 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   end
 
   def post_data_config
-    @this_config[:post_data]
+    @this_config[:send_data] || @this_config[:post_data]
   end
 
   def header_config
     sub_config = from_config || to_config
-    sub_config[:headers]&.stringify_keys
+    headers = sub_config[:headers]
+    return unless headers
+
+    substitute_values_in_config(headers)
+    headers.stringify_keys
+  end
+
+  private
+
+  #
+  # Serialize the send_data / post_data configuration value to a JSON string
+  # or calculate it as a default field value
+  # @return [String]
+  def serialize_send_data
+    data = post_data_config || {}
+    if data.is_a? Hash
+      data = data.deep_stringify_keys
+      data = data.deep_transform_values { |v| FieldDefaults.calculate_default @item, v }
+      @submitted_request_data = data.dup
+      data.to_json
+    else
+      @submitted_request_data = FieldDefaults.calculate_default(@item, data)
+    end
+  end
+
+  #
+  # Apply configured headers to a Net::HTTP request object
+  # @param [Net::HTTPGenericRequest] req
+  def apply_headers(req)
+    header_config&.each { |k, v| req[k] = v }
   end
 end

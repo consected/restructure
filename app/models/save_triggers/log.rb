@@ -28,43 +28,44 @@ class SaveTriggers::Log < SaveTriggers::SaveTriggersBase
       # Handle both simple format { message: 'x', severity: 'y' }
       # and named format { log_1: { message: 'x', severity: 'y' } }
       config = extract_config(model_def)
+      with_entry_lifecycle(config) do
+        # Evaluate conditional if
+        if config[:if]
+          ca = ConditionalActions.new config[:if], @item
+          next unless ca.calc_action_if
+        end
 
-      # Evaluate conditional if
-      if config[:if]
-        ca = ConditionalActions.new config[:if], @item
-        next unless ca.calc_action_if
+        message = config[:message]
+        severity = (config[:severity] || 'info').to_s.downcase
+
+        raise FphsException, 'log save trigger requires message to be specified' if message.blank?
+
+        unless severity.in?(ValidSeverities)
+          raise FphsException,
+                "log save trigger severity must be one of #{ValidSeverities.join(', ')}, got: #{severity}"
+        end
+
+        # Perform substitutions in the message
+        formatted_message = Formatter::Substitution.substitute(message, data: @item, ignore_missing: true)
+
+        # Add context prefix for easier identification
+        log_prefix = "[SaveTrigger::Log] [#{@item.class.name}##{@item.id}]"
+        full_message = "#{log_prefix} #{formatted_message}"
+
+        # Log at the appropriate severity level
+        case severity
+        when 'debug'
+          Rails.logger.debug full_message
+        when 'info'
+          Rails.logger.info full_message
+        when 'warn'
+          Rails.logger.warn full_message
+        when 'error'
+          Rails.logger.error full_message
+        end
+
+        results << { message: formatted_message, severity:, logged_at: Time.current }
       end
-
-      message = config[:message]
-      severity = (config[:severity] || 'info').to_s.downcase
-
-      raise FphsException, 'log save trigger requires message to be specified' if message.blank?
-
-      unless severity.in?(ValidSeverities)
-        raise FphsException,
-              "log save trigger severity must be one of #{ValidSeverities.join(', ')}, got: #{severity}"
-      end
-
-      # Perform substitutions in the message
-      formatted_message = Formatter::Substitution.substitute(message, data: @item, ignore_missing: true)
-
-      # Add context prefix for easier identification
-      log_prefix = "[SaveTrigger::Log] [#{@item.class.name}##{@item.id}]"
-      full_message = "#{log_prefix} #{formatted_message}"
-
-      # Log at the appropriate severity level
-      case severity
-      when 'debug'
-        Rails.logger.debug full_message
-      when 'info'
-        Rails.logger.info full_message
-      when 'warn'
-        Rails.logger.warn full_message
-      when 'error'
-        Rails.logger.error full_message
-      end
-
-      results << { message: formatted_message, severity:, logged_at: Time.current }
     end
 
     # Store results for potential use by subsequent triggers

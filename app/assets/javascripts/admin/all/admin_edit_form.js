@@ -20,6 +20,7 @@ _fpa_admin.all.admin_edit_form = class {
     _fpa.form_utils.setup_big_select_fields(aef.block)
     _fpa.form_utils.on_open_click(aef.block);
     _fpa.form_utils.setup_drag_and_drop(aef.block);
+    _fpa.form_utils.setup_copy_blocks(aef.block);
 
   }
 
@@ -283,7 +284,13 @@ _fpa_admin.all.admin_edit_form = class {
 
       var ehi = tar.find('.extra-help-info').not('.code-extra-help-info-formatted-in-tab');
       if (ehi.length) {
-        CodeMirror.fromTextArea(ehi[0]).refresh();
+        ehi.each(function () {
+          if (this.CodeMirror) {
+            this.CodeMirror.refresh();
+          } else {
+            _this.setup_yaml_viewer($(this));
+          }
+        });
         ehi.addClass('code-extra-help-info-formatted-in-tab')
       }
     })

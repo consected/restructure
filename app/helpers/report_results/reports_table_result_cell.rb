@@ -23,7 +23,8 @@ module ReportResults
         'url' => 'div',
         'tags' => 'div',
         'choice_label' => 'div',
-        'iframe' => 'div'
+        'iframe' => 'div',
+        'filestore_view' => nil
       }
 
       return col_show_as unless mapping.key? col_show_as
