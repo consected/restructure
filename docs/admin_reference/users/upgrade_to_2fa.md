@@ -27,7 +27,7 @@ Before making the change, inform all active users:
 - They will need a smartphone with an authenticator app installed
 - Recommended apps: Duo Mobile, Google Authenticator, Microsoft Authenticator,
   LastPass Authenticator, or Authy
-- Direct users to the [User Upgrade Guide](../../user_reference/main/upgrade_to_2fa.md)
+- Direct users to the [User Upgrade Guide](../../guest_reference/main/upgrade_to_2fa.md)
 
 ### 2. Update the Server Configuration
 
