@@ -213,7 +213,7 @@ class Admin
       when :json
         config = JSON.parse(config_text)
       when :yaml
-        config = YAML.safe_load(config_text)
+        config = YAML.safe_load(config_text, permitted_classes: [Date, Time], permitted_symbols: [])
       when :raw
         config = config_text.deep_stringify_keys
       else

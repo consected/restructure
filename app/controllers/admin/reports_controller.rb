@@ -11,8 +11,7 @@ class Admin::ReportsController < AdminController
 
   def search_attr_definer
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key('report_search_attr_definer'))
-    response.headers['Cache-Control'] = "max-age=#{SearchAttrBrowserCacheSeconds}"
-    response.headers.delete 'Expires'
+    set_browser_cache(max_age: SearchAttrBrowserCacheSeconds)
     return unless stale?(etag: cache_key)
 
     render partial: 'admin/reports/form/search_attr_definer'
@@ -68,9 +67,7 @@ class Admin::ReportsController < AdminController
     %i[name item_type category report_type auto searchable admin_id]
   end
 
-  def embedded_report
-    @embedded_report
-  end
+  attr_reader :embedded_report
 
   def search_attrs_params_hash
     @search_attrs_params_hash ||= if params[:search_attrs].blank?

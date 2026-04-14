@@ -18,8 +18,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     Application.refresh_dynamic_defs
 
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key("activity-log-template-config-#{@item_type}-#{@id_list}"))
-    response.headers['Cache-Control'] = 'max-age=30'
-    response.headers.delete 'Expires'
+    set_browser_cache(max_age: 30)
     return unless stale?(etag: cache_key)
 
     refresh_embedded_item_for @instance_list
@@ -87,7 +86,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   end
 
   def item_type_id
-    "#{item_type_us}_id".to_sym
+    :"#{item_type_us}_id"
   end
 
   def item_type_us

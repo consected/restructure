@@ -65,8 +65,7 @@ class PagesController < ApplicationController
 
     etag = Digest::SHA256.hexdigest(helpers.partial_cache_key(:master__search_results_template))
     if current_user
-      response.headers['Cache-Control'] = 'max-age=604800'
-      response.headers['Expires'] = 'Fri, 01 Jan 2090 00:00:00 GMT'
+      set_browser_cache(max_age: 604_800, immutable: true)
       return unless stale?(etag: etag)
 
       render partial: 'masters/cache_search_results_template'
