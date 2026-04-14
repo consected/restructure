@@ -14,6 +14,10 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.19 back to develop
+- [Fixed] parallel test failures in specs
+- [Fixed] documentation link
+
 ## [9.42.19] - 2026-04-09
 
 - [Merged] release 9.42.18 back to develop
