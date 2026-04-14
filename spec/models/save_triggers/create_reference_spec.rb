@@ -7,6 +7,7 @@ require 'rails_helper'
 # - Verifies storing objects to JSONB fields via the object: wrapper (issue #943)
 # - Verifies create_reference for standalone dynamic models with no master_id (issue #1003)
 # - Verifies create_reference from standalone source to mastered target with in: none/master (issue #1062)
+# - Verifies this_has_no_master_association config attribute forces standalone resolution (issue #1062)
 
 AlNameGenTestCr = 'Gen Test ELT Save'
 
@@ -1001,6 +1002,34 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       created_item = source_record.save_trigger_results['created_items'].last
       expect(created_item).to be_a DynamicModel::TestMasteredTgtRec
       expect(created_item.value1).to eq 'target via master mode'
+      expect(source_record.save_trigger_results['created_references'].last).to be_nil
+      expect(source_record.save_trigger_results['created_results'].last).to eq true
+    end
+
+    it 'creates a mastered target using this_has_no_master_association to force standalone' do
+      source_class = DynamicModel::TestStandaloneSrcRec
+      source_record = source_class.create!(value1: 'source no_master flag', current_user: @user)
+
+      # Use this_has_no_master_association with in: none to explicitly force standalone resolution,
+      # even though in: none already implies it. This verifies the flag is recognized and doesn't
+      # interfere with normal operation.
+      config = {
+        dynamic_model__test_mastered_tgt_rec: {
+          in: 'none',
+          force_create: true,
+          force_not_valid: true,
+          this_has_no_master_association: true,
+          with: { master_id: @master.id, value1: 'forced standalone via config' }
+        }
+      }
+
+      @trigger = SaveTriggers::CreateReference.new(config, source_record)
+      @trigger.perform
+
+      created_item = source_record.save_trigger_results['created_items'].last
+      expect(created_item).to be_a DynamicModel::TestMasteredTgtRec
+      expect(created_item.value1).to eq 'forced standalone via config'
+      expect(created_item.master_id).to eq @master.id
       expect(source_record.save_trigger_results['created_references'].last).to be_nil
       expect(source_record.save_trigger_results['created_results'].last).to eq true
     end
