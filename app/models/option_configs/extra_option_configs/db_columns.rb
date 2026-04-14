@@ -16,40 +16,12 @@ module OptionConfigs
         configure_attributes %i[type array index encrypted]
       end
 
-      COLUMN_TYPE_VALUES = %w[string datetime date integer float decimal bigint].to_set.freeze
+      value_pattern :column_config,
+                    description: 'Column configuration hash',
+                    match: Hash,
+                    key_types: { type: :string, array: :boolean, index: :boolean, encrypted: :boolean }
 
-      BOOLEAN_KEYS = %i[array index encrypted].to_set.freeze
-
-      validate :validate_db_columns_shape
-
-      private
-
-      def validate_db_columns_shape
-        return unless hash_configuration.is_a?(Hash)
-
-        hash_configuration.each do |field_name, config|
-          next unless config.is_a?(Hash)
-
-          validate_column_type(field_name, config)
-          validate_column_booleans(field_name, config)
-        end
-      end
-
-      def validate_column_type(field_name, config)
-        return unless config.key?(:type)
-        return if config[:type].is_a?(String) || config[:type].is_a?(Symbol)
-
-        add_validation_notice(field_name, "#{field_name} type must be a string")
-      end
-
-      def validate_column_booleans(field_name, config)
-        BOOLEAN_KEYS.each do |key|
-          next unless config.key?(key)
-          next if [true, false].include?(config[key])
-
-          add_validation_notice(field_name, "#{field_name} #{key} must be true or false")
-        end
-      end
+      validate :validate_value_patterns
     end
   end
 end

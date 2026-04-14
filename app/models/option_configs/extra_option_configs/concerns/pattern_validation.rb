@@ -3,8 +3,8 @@
 module OptionConfigs
   module ExtraOptionConfigs
     module Concerns
-      # Provides class-level DSLs for declaring extra key patterns and value patterns
-      # on field-keyed BaseConfiguration subclasses.
+      # Provides class-level DSLs for declaring extra key patterns, value patterns,
+      # and key type constraints on field-keyed BaseConfiguration subclasses.
       #
       # == Extra Keys
       #
@@ -19,6 +19,7 @@ module OptionConfigs
       # - +match+: Class, Array of Classes, or Proc for type discrimination
       # - +allowed_keys+: (Hash patterns) valid keys within the hash value
       # - +required_keys+: (Hash patterns) keys that must be present
+      # - +key_types+: (Hash patterns) per-key type constraints (see Key Types below)
       # - +description+: human-readable description for future UI guidance
       #
       #   value_pattern :simple_caption,
@@ -30,6 +31,28 @@ module OptionConfigs
       #     match: Hash,
       #     allowed_keys: %i[caption show_caption edit_caption new_caption keep_label]
       #
+      #   value_pattern :column_config,
+      #     description: 'Column configuration hash',
+      #     match: Hash,
+      #     allowed_keys: %i[type array index encrypted],
+      #     key_types: { type: :string, array: :boolean, index: :boolean, encrypted: :boolean }
+      #
+      # When both +allowed_keys+ and +key_types+ are provided, a consistency check
+      # ensures every +key_types+ key is present in +allowed_keys+. A mismatch raises
+      # +ArgumentError+ at class load time.
+      #
+      # == Key Types (top-level)
+      #
+      # Declares type constraints on top-level hash_configuration keys.
+      # The allowed keys are derived automatically from all declarations.
+      #
+      #   key_type :boolean, %i[use_current_version prevent_migrations]
+      #   key_type :string, %i[secondary_key view_sql]
+      #   key_type :string_or_array, %i[uniqueness_fields]
+      #   key_type :hash, %i[batch_trigger], allowed_keys: %i[frequency run_at limit]
+      #
+      # Supported type symbols: +:boolean+, +:string+, +:string_or_array+, +:integer+, +:hash+
+      #
       # == Automatic Validation
       #
       # When +_valid_fields+ metadata is present (injected by +prepare_config+),
@@ -39,14 +62,40 @@ module OptionConfigs
       # +validate_value_patterns+ checks each entry's value against declared patterns,
       # reporting errors for values that match no pattern, warnings for unrecognized
       # hash keys, and errors for missing required keys.
+      #
+      # +validate_key_types+ checks top-level hash_configuration keys against
+      # key_type declarations, reporting warnings for unrecognized keys and errors
+      # for type mismatches.
       module PatternValidation
         extend ActiveSupport::Concern
 
         VALID_FIELDS_KEY = :_valid_fields
 
+        # Type-checking lambdas for key_type and value_pattern key_types.
+        KEY_TYPE_CHECKERS = {
+          boolean: ->(v) { [true, false].include?(v) },
+          string: ->(v) { v.is_a?(String) || v.is_a?(Symbol) },
+          string_or_array: lambda { |v|
+            v.is_a?(String) || v.is_a?(Symbol) ||
+              (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
+          },
+          integer: ->(v) { v.is_a?(Integer) },
+          hash: ->(v) { v.is_a?(Hash) }
+        }.freeze
+
+        # Human-readable descriptions for each type symbol.
+        KEY_TYPE_DESCRIPTIONS = {
+          boolean: 'true or false',
+          string: 'a string',
+          string_or_array: 'a string or array of strings',
+          integer: 'an integer',
+          hash: 'a Hash'
+        }.freeze
+
         included do
           class_attribute :_extra_keys, default: []
           class_attribute :_value_patterns, default: {}
+          class_attribute :_key_type_rules, default: {}
         end
 
         class_methods do
@@ -62,15 +111,42 @@ module OptionConfigs
           # @param match [Class, Array<Class>, Proc] type discriminator
           # @param allowed_keys [Array<Symbol>, nil] valid hash keys (Hash patterns only)
           # @param required_keys [Array<Symbol>, nil] mandatory hash keys (Hash patterns only)
-          def value_pattern(name, description:, match:, allowed_keys: nil, required_keys: nil)
+          # @param key_types [Hash{Symbol => Symbol}, nil] per-key type constraints (Hash patterns only)
+          def value_pattern(name, description:, match:, allowed_keys: nil, required_keys: nil, key_types: nil)
+            if key_types && allowed_keys
+              mismatched = key_types.keys.map(&:to_sym) - allowed_keys.map(&:to_sym)
+              if mismatched.any?
+                raise ArgumentError,
+                      "value_pattern :#{name} has key_types keys #{mismatched} not in allowed_keys"
+              end
+            end
+
             self._value_patterns = _value_patterns.merge(
               name => {
                 description:,
                 match:,
                 allowed_keys: allowed_keys&.freeze,
-                required_keys: required_keys&.freeze
+                required_keys: required_keys&.freeze,
+                key_types: key_types&.freeze
               }
             ).freeze
+          end
+
+          # Declare type constraints on top-level hash_configuration keys.
+          # Allowed keys are derived automatically from all key_type declarations.
+          # @param type [Symbol] type specifier (:boolean, :string, :string_or_array, :integer, :hash)
+          # @param keys [Symbol, Array<Symbol>] key names to constrain
+          # @param allowed_keys [Array<Symbol>, nil] valid sub-keys (for :hash type only)
+          def key_type(type, keys, allowed_keys: nil)
+            new_rules = {}
+            Array(keys).each { |key| new_rules[key] = { type:, allowed_keys: allowed_keys&.freeze } }
+            self._key_type_rules = _key_type_rules.merge(new_rules).freeze
+          end
+
+          # Allowed keys derived from all key_type declarations.
+          # @return [Array<Symbol>]
+          def key_type_allowed_keys
+            _key_type_rules.keys
           end
 
           # Default prepare_config that injects _valid_fields from parent context.
@@ -146,6 +222,38 @@ module OptionConfigs
           end
         end
 
+        # Validate top-level hash_configuration keys against key_type declarations.
+        # Warns about unrecognized keys and errors on type mismatches.
+        def validate_key_types
+          return unless hash_configuration.is_a?(Hash)
+          return if self.class._key_type_rules.empty?
+
+          allowed = self.class.key_type_allowed_keys
+          hash_configuration.each_key do |key|
+            next if key == VALID_FIELDS_KEY
+            next if allowed.include?(key)
+
+            failed_config(key, "unrecognized key '#{key}'", level: :warn)
+          end
+
+          self.class._key_type_rules.each do |key, rule|
+            next unless hash_configuration.key?(key)
+
+            value = hash_configuration[key]
+            checker = KEY_TYPE_CHECKERS[rule[:type]]
+            unless checker&.call(value)
+              desc = KEY_TYPE_DESCRIPTIONS[rule[:type]] || rule[:type].to_s
+              add_validation_notice(key, "#{key} must be #{desc}")
+              next
+            end
+
+            # For hash-typed keys with allowed_keys, validate sub-keys
+            next unless rule[:type] == :hash && rule[:allowed_keys]
+
+            validate_allowed_hash_keys(key, value, rule[:allowed_keys])
+          end
+        end
+
         # Find the first matching value pattern for a given value.
         # @param value [Object] the entry value
         # @return [Hash, nil] the matched pattern definition, or nil
@@ -181,7 +289,7 @@ module OptionConfigs
           end
         end
 
-        # Apply constraints from a matched pattern (allowed_keys, required_keys).
+        # Apply constraints from a matched pattern (allowed_keys, required_keys, key_types).
         def validate_pattern_constraints(field_name, value, pattern)
           return unless value.is_a?(Hash)
 
@@ -194,6 +302,8 @@ module OptionConfigs
             end
           end
 
+          validate_pattern_key_types(field_name, value, pattern[:key_types]) if pattern[:key_types]
+
           return unless pattern[:required_keys]
 
           missing = pattern[:required_keys] - value.keys.map(&:to_sym)
@@ -201,6 +311,19 @@ module OptionConfigs
 
           add_validation_notice(field_name,
                                 "#{field_name} is missing required keys #{missing}")
+        end
+
+        # Check value types within a hash against key_types declarations.
+        def validate_pattern_key_types(field_name, value, key_types)
+          key_types.each do |kt_key, type|
+            next unless value.key?(kt_key)
+
+            checker = KEY_TYPE_CHECKERS[type]
+            next if checker&.call(value[kt_key])
+
+            desc = KEY_TYPE_DESCRIPTIONS[type] || type.to_s
+            add_validation_notice(field_name, "#{field_name} #{kt_key} must be #{desc}")
+          end
         end
 
         # Human-readable description of a match spec.

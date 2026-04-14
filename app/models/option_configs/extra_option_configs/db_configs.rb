@@ -19,7 +19,8 @@ module OptionConfigs
       value_pattern :db_config_hash,
                     description: 'Column configuration hash',
                     match: Hash,
-                    allowed_keys: NamedConfiguration.option_types[:simple]
+                    allowed_keys: NamedConfiguration.option_types[:simple],
+                    key_types: { type: :string, array: :boolean, index: :boolean, encrypted: :boolean }
 
       validate :validate_field_key_names
       validate :validate_value_patterns
