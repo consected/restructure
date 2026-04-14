@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.20 back to develop
+- [Fixed] activestorage CVE-2026-33658 by pinning minitest to 5.x
+- [Fixed] YAML safe_load to permit Date and Time classes during app type import - fixes #4
+- [Added] private and immutable Cache-Control headers to cached endpoints - fixes #63
+- [Added] support for arbitrary-length else-if and else-is conditional blocks - fixes #1061
+- [Fixed] create_reference failing with in: none when source has no master association - fixes #1062
+
 ## [9.42.20] - 2026-04-14
 
 - [Merged] release 9.42.19 back to develop
