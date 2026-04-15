@@ -22,7 +22,23 @@ module OptionConfigs
       value_pattern :field_option_hash,
                     description: 'Per-field option hash with edit behavior settings',
                     match: Hash,
-                    allowed_keys: NamedConfiguration.option_types[:simple]
+                    allowed_keys: NamedConfiguration.option_types[:simple],
+                    key_types: {
+                      include_blank: :boolean,
+                      no_downcase: :boolean,
+                      view_original_case: :boolean,
+                      show_expanded: :boolean,
+                      keep_label: :boolean,
+                      pattern: :string,
+                      value: :string,
+                      blank_value: :string,
+                      preset_value: :string,
+                      blank_preset_value: :string,
+                      active_value: :string,
+                      format: :string,
+                      edit_as: :hash,
+                      config: :hash
+                    }
 
       validate :validate_field_key_names
       validate :validate_value_patterns
@@ -40,7 +56,10 @@ module OptionConfigs
       def preprocess_field(value)
         return value unless value.is_a?(Hash)
 
-        ao = value.dig(:edit_as, :alt_options)
+        edit_as = value[:edit_as]
+        return value unless edit_as.is_a?(Hash)
+
+        ao = edit_as[:alt_options]
         return value unless ao.is_a?(Array)
 
         new_ao = {}

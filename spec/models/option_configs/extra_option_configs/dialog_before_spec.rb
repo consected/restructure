@@ -72,6 +72,22 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
       expect(instance.errors).to be_empty,
                                  "Expected no ActiveModel errors for valid dialog_before, got: #{instance.errors.full_messages}"
     end
+
+    context 'dialog_hash key type validation' do
+      it 'rejects a non-string name value with a config error' do
+        instance = klass.new(test_field: { name: 12_345 })
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test_field name must be a string') }).to be(true)
+      end
+
+      it 'rejects a non-boolean keep_label value with a config error' do
+        instance = klass.new(test_field: { name: 'some_dialog', keep_label: 'yes' })
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test_field keep_label must be true or false') }).to be(true)
+      end
+    end
   end
 
   describe 'ExtraOptions integration' do

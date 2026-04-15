@@ -77,6 +77,22 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(instance.config_warnings).not_to be_empty
     end
 
+    context 'field option hash key type validation' do
+      it 'rejects a non-boolean include_blank with a config error' do
+        instance = klass.new(field1: { include_blank: 'yes' })
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('field1 include_blank must be true or false') }).to be(true)
+      end
+
+      it 'rejects a non-hash edit_as with a config error' do
+        instance = klass.new(field1: { edit_as: 'inline' })
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('field1 edit_as must be a Hash') }).to be(true)
+      end
+    end
+
     it 'NamedConfiguration supports key? for defined attributes' do
       instance = klass.new(field1: { preset_value: 'abc', no_downcase: true })
       nc = instance[:field1]

@@ -130,6 +130,24 @@ RSpec.describe 'ExtraOptionConfigs::References', type: :model do
     end
   end
 
+  describe 'reference entry attribute type validation' do
+    before(:each) do
+      @eo = config_for("default:\n  label: Test\n")
+    end
+
+    it 'rejects a non-integer limit with a config error' do
+      processed = klass.prepare_config({ player_contact: { from: 'this', add: 'many', limit: 'five' } }, @eo)
+      instance = klass.new(processed)
+      expect(instance.config_errors.any? { |e| e[:message].include?('limit must be an integer') }).to be(true)
+    end
+
+    it 'rejects a non-boolean prevent_disable with a config error' do
+      processed = klass.prepare_config({ player_contact: { from: 'this', add: 'many', prevent_disable: 'yes' } }, @eo)
+      instance = klass.new(processed)
+      expect(instance.config_errors.any? { |e| e[:message].include?('prevent_disable must be true or false') }).to be(true)
+    end
+  end
+
   describe 'References.reprocess' do
     it 'exists as a class method on References' do
       expect(klass).to respond_to(:reprocess)

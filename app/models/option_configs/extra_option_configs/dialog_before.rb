@@ -25,7 +25,12 @@ module OptionConfigs
                     description: 'Dialog hash with template name and label',
                     match: Hash,
                     allowed_keys: NamedConfiguration.option_types[:simple],
-                    required_keys: %i[name]
+                    required_keys: %i[name],
+                    key_types: {
+                      name: :string,
+                      label: :string,
+                      keep_label: :boolean
+                    }
 
       validate :validate_field_key_names
       validate :validate_value_patterns

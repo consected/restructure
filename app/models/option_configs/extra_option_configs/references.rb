@@ -40,6 +40,24 @@ module OptionConfigs
 
       ReferenceEntry = NamedConfiguration
 
+      # Per-attribute type rules for reference entry configuration.
+      # Used by validate_reference_entry_types to report type mismatches.
+      ENTRY_KEY_TYPES = {
+        limit: :integer,
+        without_reference: :boolean,
+        prevent_disable: :boolean,
+        also_disable_record: :boolean,
+        allow_disable_if_not_editable: :boolean,
+        prevent_reload_on_save: :boolean,
+        add_with: :hash,
+        filter_by: :hash,
+        order_by: :hash,
+        view_options: :hash,
+        showable_if: :hash,
+        creatable_if: :hash,
+        type_config: :hash
+      }.freeze
+
       def self.source_attribute
         :references
       end
@@ -49,6 +67,7 @@ module OptionConfigs
       end
 
       validate :validate_references
+      validate :validate_reference_entry_types
 
       # Pre-process references using parent context.
       # Normalizes array/hash formats, singularizes keys, resolves target classes,
@@ -221,6 +240,28 @@ module OptionConfigs
 
         bad_refs.each do |mn|
           errors.add(:references, "reference for #{mn} does not exist as a class", type: :warning)
+        end
+      end
+
+      def validate_reference_entry_types
+        return if configurations.blank?
+
+        checkers = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_CHECKERS
+        descriptions = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_DESCRIPTIONS
+
+        configurations.each do |entry_key, entry|
+          next unless entry.respond_to?(:[])
+
+          ENTRY_KEY_TYPES.each do |attr, type|
+            value = entry[attr]
+            next if value.nil?
+
+            checker = checkers[type]
+            next if checker&.call(value)
+
+            desc = descriptions[type] || type.to_s
+            failed_config entry_key, "#{attr} must be #{desc}"
+          end
         end
       end
     end
