@@ -26,7 +26,11 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :master_records, only: %i[index show]
-    resources :external_identifiers, except: %i[show destroy]
+    resources :external_identifiers, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
+    end
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy] do
       member do
@@ -41,6 +45,9 @@ Rails.application.routes.draw do
     end
     resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
       member do
         post :update_config_from_table
         post :run_batch_now
@@ -56,6 +63,9 @@ Rails.application.routes.draw do
     resources :manage_admins, except: %i[show destroy]
     resources :accuracy_scores, except: %i[show destroy]
     resources :activity_logs, except: %i[show destroy] do
+      collection do
+        get :schema_reference
+      end
       member do
         get :versions
       end

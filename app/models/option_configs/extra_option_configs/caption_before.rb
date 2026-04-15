@@ -25,7 +25,14 @@ module OptionConfigs
       value_pattern :caption_hash,
                     description: 'Caption hash with optional view-specific modes',
                     match: Hash,
-                    allowed_keys: NamedConfiguration.option_types[:simple]
+                    allowed_keys: NamedConfiguration.option_types[:simple],
+                    key_types: {
+                      caption: :string,
+                      edit_caption: :string,
+                      show_caption: :string,
+                      new_caption: :string,
+                      keep_label: :boolean
+                    }
 
       validate :validate_field_key_names
       validate :validate_value_patterns

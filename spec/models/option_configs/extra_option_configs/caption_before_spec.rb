@@ -355,6 +355,22 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         instance = klass.new(test1: { caption: 'C', edit_caption: 'E', show_caption: 'S', new_caption: 'N', keep_label: true })
         expect(instance.config_warnings).to be_empty
       end
+
+      it 'rejects non-string caption attributes with an error' do
+        instance = klass.new(test1: { caption: 123 })
+
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test1 caption must be a string') }).to be(true)
+      end
+
+      it 'rejects non-boolean keep_label values with an error' do
+        instance = klass.new(test1: { caption: 'Valid', keep_label: 'yes' })
+
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages.any? { |m| m.include?('test1 keep_label must be true or false') }).to be(true)
+      end
     end
 
     context 'contextual field name validation via ExtraOptions integration' do

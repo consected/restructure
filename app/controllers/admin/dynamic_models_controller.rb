@@ -7,6 +7,19 @@ class Admin::DynamicModelsController < AdminController
   helper_method :view_folder
   # after_action :routes_reload, only: %i[update create]
 
+  def schema_reference
+    respond_to do |format|
+      format.json do
+        render json: OptionConfigs::DynamicModelOptions.accepted_config_schema(format: :json),
+               content_type: 'application/json'
+      end
+      format.yaml do
+        render plain: OptionConfigs::DynamicModelOptions.accepted_config_schema(format: :yaml),
+               content_type: 'application/x-yaml'
+      end
+    end
+  end
+
   def update_config_from_table
     set_instance_from_id
     object_instance.current_admin = current_admin
