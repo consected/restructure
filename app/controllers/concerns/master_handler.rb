@@ -151,7 +151,10 @@ module MasterHandler
   # Retrieve the index action JSON from master objects and extended data
   # @return [String] JSON
   def retrieve_index
-    s = { objects_name => filter_records.as_json(current_user:), multiple_results: objects_name }
+    records = filter_records
+    handle_embedded_items records if respond_to?(:handle_embedded_items, true)
+
+    s = { objects_name => records.as_json(current_user:), multiple_results: objects_name }
 
     set_objects_instance(@master_objects) # re add_trackers collection
     s.merge!(extend_result)
