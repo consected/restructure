@@ -15,6 +15,8 @@
   <%= object_instance.resource_name %>
   </p>
 
+  <%= render partial: 'admin/common_templates/def_details_version_mode', locals: { object_instance: } %>
+
   <label>database <%= object_instance.table_or_view || '<span class="info-danger">not defined</span>'.html_safe %></label>
   <%
     schema_name = object_instance.schema_name.presence || object_instance.schema_name_in_db

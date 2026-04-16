@@ -1,5 +1,5 @@
 <p class="admin-form-title">
-  <%= @copy_with ? "Copy Entry" : object_instance.id ? "Edit Entry" : "New Entry" %>
+  <%= @copy_with ? "Copy Entry" : object_instance.id ? "Edit Entry <small>##{object_instance.id}</small>".html_safe : "New Entry" %>
 </p>
 <% if object_instance.errors.any?
     shown = []

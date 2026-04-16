@@ -372,6 +372,21 @@ module Dynamic
       @use_current_version = configurations && configurations[:use_current_version]
     end
 
+    # Resolve whether this definition should use the current configuration version
+    # instead of definition-at-record-creation versioning.
+    # This follows the existing behavior used by version selection and library resolution.
+    def uses_current_definition_version?
+      versioning_disabled_globally? || definition_uses_current_version_option?
+    end
+
+    def versioning_disabled_globally?
+      Settings::DisableVDef
+    end
+
+    def definition_uses_current_version_option?
+      respond_to?(:use_current_version) && use_current_version
+    end
+
     def prevent_migrations
       return @prevent_migrations if @prevent_migrations_set
 
