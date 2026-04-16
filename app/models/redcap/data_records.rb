@@ -192,6 +192,43 @@ module Redcap
     end
 
     #
+    # For longitudinal projects with a foreign key configured via
+    # associate_master_through_external_identifer, populate the longitudinal_study_id
+    # field on all records. If a record has a study id value, use it directly.
+    # If the study id value is blank, look up from other records sharing the same
+    # record_id to find a non-blank value and use that.
+    def handle_longitudinal_study_id
+      return unless project_admin.is_longitudinal?
+
+      source_field = project_admin.longitudinal_fkey_source_field
+      return unless source_field.present?
+
+      source_field_sym = source_field.to_sym
+      rid_field = record_id_field
+
+      # Build lookup: record_id → first non-blank study id value
+      study_id_lookup = {}
+      records.each do |rec|
+        val = rec[source_field_sym]
+        next if val.blank?
+
+        rid = rec[rid_field]
+        study_id_lookup[rid] ||= val.to_i
+      end
+
+      # Set longitudinal_study_id on all records
+      records.each do |rec|
+        val = rec[source_field_sym]
+        if val.present?
+          rec[:longitudinal_study_id] = val.to_i
+        else
+          rid = rec[rid_field]
+          rec[:longitudinal_study_id] = study_id_lookup[rid]
+        end
+      end
+    end
+
+    #
     # Immediately retrieve file from a REDCap file field for a
     # specific record. The most recent request is stored to the
     # retrieved_files Hash.
@@ -277,6 +314,10 @@ module Redcap
     # to the value set in #step_count. This is intended to limit the memory consumption
     # from holding record instances in #upserted_records
     def store
+      # For longitudinal projects with a foreign key configured, populate
+      # longitudinal_study_id on all records before storing
+      handle_longitudinal_study_id
+
       # Skip deleted records handling when using date range filter
       # since we're only retrieving a subset of updated records
       disable_deleted_records if project_admin.disable_deleted_records? && !using_date_range_filter

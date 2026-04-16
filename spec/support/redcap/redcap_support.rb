@@ -160,6 +160,16 @@ module Redcap
       stub_request_longitudinal_field_instruments url, api_key
     end
 
+    def mock_longitudinal_long_requests
+      url = server_url('longitudinal')
+      api_key = @longitudinal_project[:api_key]
+      stub_request_longitudinal_field_project url, api_key
+      stub_request_longitudinal_long_metadata url, api_key
+      stub_request_longitudinal_long_records url, api_key
+      stub_request_project_users url, api_key
+      stub_request_longitudinal_long_instruments url, api_key
+    end
+
     # Get project configurations from encrypted credential storage
     def redcap_project_configs(mocks: true, force_reload: false)
       return @redcap_project_configs if @redcap_project_configs && !force_reload
@@ -556,6 +566,38 @@ module Redcap
         .to_return(status: 200, body: data_longitudinal_response, headers: {})
     end
 
+    def stub_request_longitudinal_long_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+        )
+        .to_return(status: 200, body: metadata_longitudinal_long_response, headers: {})
+    end
+
+    def stub_request_longitudinal_long_records(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json'
+          }
+        )
+        .to_return(status: 200, body: data_longitudinal_long_response, headers: {})
+    end
+
+    def stub_request_longitudinal_long_instruments(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'instrument',
+            'format' => 'json',
+            'token' => api_key
+          }
+        )
+        .to_return(status: 200, body: project_instruments_longitudinal_long_response, headers: {})
+    end
+
     def project_admin_sample_response
       File.read('spec/fixtures/redcap/full_project_info.json')
     end
@@ -646,6 +688,18 @@ module Redcap
 
     def data_longitudinal_response(suffix = nil)
       File.read("spec/fixtures/redcap/longitudinal_records#{suffix}.json")
+    end
+
+    def metadata_longitudinal_long_response
+      File.read('spec/fixtures/redcap/longitudinal_long_metadata.json')
+    end
+
+    def data_longitudinal_long_response
+      File.read('spec/fixtures/redcap/longitudinal_records_long.json')
+    end
+
+    def project_instruments_longitudinal_long_response
+      File.read('spec/fixtures/redcap/longitudinal_long_instruments.json')
     end
 
     #
@@ -778,6 +832,20 @@ module Redcap
       @project_admin_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url('longitudinal'),
                                                              api_key: @longitudinal_project[:api_key], study: 'Repeat',
                                                              current_admin: @admin, dynamic_model_table: tn
+    end
+
+    def setup_longitudinal_long_fields(alt_name = nil)
+      mock_longitudinal_long_requests
+
+      tn = alt_name || 'test.test_longitudinal_long_recs'
+      name = @longitudinal_project[:name]
+
+      @project_admin_long_metadata = Redcap::ProjectAdmin.active.where(name:, study: 'RepeatLong', dynamic_model_table: tn).first
+      return @project_admin_long_metadata if @project_admin_long_metadata
+
+      @project_admin_long_metadata = Redcap::ProjectAdmin.create! name:, server_url: server_url('longitudinal'),
+                                                                  api_key: @longitudinal_project[:api_key], study: 'RepeatLong',
+                                                                  current_admin: @admin, dynamic_model_table: tn
     end
   end
 end
