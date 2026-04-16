@@ -118,8 +118,20 @@ module Dynamic
         has_schema_name = dma.attribute_names.include?('schema_name')
         if has_schema_name
           schemas = Admin::MigrationGenerator.current_search_paths
-          schemas += [nil, '']
-          dma = dma.where(schema_name: schemas) if has_schema_name
+          has_table_name = dma.attribute_names.include?('table_name')
+          if has_table_name
+            # Filter definitions by schema and table accessibility. Definitions with an
+            # explicit schema_name must have it in the server's search path. Definitions
+            # with nil/blank schema_name must have their table accessible in one of the
+            # search path schemas, preventing loading of definitions whose tables are in
+            # inaccessible schemas on this server. (issue #525)
+            accessible_tables = Admin::MigrationGenerator.tables_and_views.map { |t| t['table_name'] }
+            dma = dma.where(schema_name: schemas)
+                     .or(dma.where(schema_name: [nil, '']).where(table_name: accessible_tables))
+          else
+            schemas += [nil, '']
+            dma = dma.where(schema_name: schemas)
+          end
         end
 
         @active_model_configurations[ckey] = dma
