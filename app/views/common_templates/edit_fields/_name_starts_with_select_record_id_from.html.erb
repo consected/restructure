@@ -22,8 +22,12 @@ unless human_name
   logger.warn "Failed to find valid class name for #{field_name}"
 end
 
-unless big_select
-%>
+creatable_enabled = options.dig(:edit_as, :creatable, :enabled)
+
+if creatable_enabled %>
+<%= render partial: 'common_templates/edit_fields/creatable_select_input',
+         locals: { form:, field_name_sym:, labels:, assoc_or_class_name:, form_object_item_type_us:, reslist: } %>
+<% elsif !big_select %>
 <%= edit_field_label(form, field_name_sym, labels, force_default: assoc_or_class_name) %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us, select_filtering_target: sf_el}}%>
 <% else %>
