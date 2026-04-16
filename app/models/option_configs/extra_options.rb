@@ -637,8 +637,14 @@ module OptionConfigs
       #   - Settings::DisableVDef is true (versioning disabled globally, e.g. development)
       #   - use_current_version is set on the definition (always uses latest)
       version_at = nil
-      if !(Settings::DisableVDef ||
-           (config_obj.respond_to?(:use_current_version) && config_obj.use_current_version)) &&
+      uses_current_definition_version = if config_obj.respond_to?(:uses_current_definition_version?)
+                                          config_obj.uses_current_definition_version?
+                                        else
+                                          Settings::DisableVDef ||
+                                            (config_obj.respond_to?(:use_current_version) && config_obj.use_current_version)
+                                        end
+
+      if !uses_current_definition_version &&
          config_obj.respond_to?(:def_version) && config_obj.def_version.present?
         version_at = config_obj.updated_at || config_obj.created_at
       end

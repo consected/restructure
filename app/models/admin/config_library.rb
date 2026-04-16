@@ -190,7 +190,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
       # resolve to the correct library content via versioned definitions.
       # Skip the touch when versioning is disabled globally (DisableVDef)
       # or when the definition uses use_current_version (always uses latest).
-      unless Settings::DisableVDef || m.use_current_version
+      unless m.uses_current_definition_version?
         m.current_admin ||= current_admin
         m.touch
       end

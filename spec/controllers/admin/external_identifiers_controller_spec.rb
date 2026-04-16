@@ -2,9 +2,13 @@
 
 require 'rails_helper'
 
+# Tests for issue #1066:
+# - Show resolved definition versioning in external identifier admin details
 RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
   include MasterSupport
   include ExternalIdentifierSupport
+
+  render_views
 
   def object_class
     ExternalIdentifier
@@ -45,5 +49,31 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
     }
     put :create, params: { object_symbol => inv }
     expect(assigns(object_symbol).errors.empty?).not_to be true
+  end
+
+  describe 'GET #edit issue #1066 details display' do
+    it 'shows current version when current-definition mode is resolved' do
+      ext = ExternalIdentifier.active.first
+      expect(ext).to be_present
+
+      allow_any_instance_of(ExternalIdentifier).to receive(:uses_current_definition_version?).and_return(true)
+
+      get :edit, params: { id: ext.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to have_selector('.def-version-resolution', text: /current version/i)
+    end
+
+    it 'shows version at record creation when definition-time versioning is resolved' do
+      ext = ExternalIdentifier.active.first
+      expect(ext).to be_present
+
+      allow_any_instance_of(ExternalIdentifier).to receive(:uses_current_definition_version?).and_return(false)
+
+      get :edit, params: { id: ext.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to have_selector('.def-version-resolution', text: /record creation/i)
+    end
   end
 end
