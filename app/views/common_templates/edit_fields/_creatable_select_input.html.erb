@@ -1,0 +1,23 @@
+<%
+# Shared partial for creatable select fields (typeahead text input for select_record_* fields)
+# Renders a text field with typeahead autocomplete backed by existing records,
+# allowing creation of new entries when no match is selected.
+#
+# Required locals:
+#   form                   - Rails form builder
+#   field_name_sym         - Symbol for the field name
+#   labels                 - Labels hash for field display
+#   assoc_or_class_name    - Association or class name for label defaults
+#   form_object_item_type_us - Underscored object type name for data attributes
+#   reslist                - Array of [label, value] pairs or plain values from list_record_data_for_select
+typeahead_values = reslist.map { |item| item.is_a?(Array) ? {label: item.first, value: item.last} : {label: item, value: item} }
+current_value = form.object.send(field_name_sym) if form.object.respond_to?(field_name_sym)
+current_label = typeahead_values.find { |item| item[:value].to_s == current_value.to_s }&.dig(:label) || current_value
+%>
+<%= edit_field_label(form, field_name_sym, labels, force_default: assoc_or_class_name) %>
+<%= form.text_field field_name_sym,
+                    value: current_label,
+                    class: 'creatable-select-input typeahead',
+                    data: {attr_name: field_name_sym, object_name: form_object_item_type_us,
+                           creatable_items: typeahead_values.to_json,
+                           creatable_new_prefix: Dynamic::ImplementationHandler::CREATABLE_NEW_PREFIX} %>

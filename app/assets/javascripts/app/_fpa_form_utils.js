@@ -532,8 +532,14 @@ _fpa.form_utils = {
   setup_typeahead: function (element, list, name, limit, options) {
     if (typeof list === 'string') list = _fpa.cache.fetch(list);
 
+    var hasObjectItems = list && list.length && typeof list[0] === 'object';
+
     var items = new Bloodhound({
-      datumTokenizer: Bloodhound.tokenizers.whitespace,
+      datumTokenizer: hasObjectItems
+        ? function (datum) {
+          return Bloodhound.tokenizers.whitespace(datum.label || '');
+        }
+        : Bloodhound.tokenizers.whitespace,
       queryTokenizer: Bloodhound.tokenizers.whitespace,
       local: list,
     });
@@ -560,12 +566,32 @@ _fpa.form_utils = {
       source: items,
     };
 
+    if (hasObjectItems) {
+      dataset.display = function (item) {
+        return item.label;
+      };
+    }
+
     if (limit) {
       dataset.limit = limit;
     }
 
     $(element)
       .typeahead(options, dataset)
+      .on('typeahead:select typeahead:autocomplete', function (_ev, suggestion) {
+        if (suggestion && typeof suggestion === 'object') {
+          $(this).attr('data-creatable-selected-label', suggestion.label);
+          $(this).attr('data-creatable-selected-value', suggestion.value);
+          $(this).val(suggestion.label);
+        }
+      })
+      .on('input', function () {
+        var selectedLabel = $(this).attr('data-creatable-selected-label');
+        if (selectedLabel && $(this).val() !== selectedLabel) {
+          $(this).removeAttr('data-creatable-selected-label');
+          $(this).removeAttr('data-creatable-selected-value');
+        }
+      })
       .on('keypress', function (ev) {
         if (ev.keyCode != 13) return;
         var dnf = $(this).attr('data-next-field');
@@ -1856,6 +1882,49 @@ _fpa.form_utils = {
         _fpa.cache.get_definition('colleges', function () {
           _fpa.form_utils.setup_typeahead(el, 'colleges', 'colleges');
         });
+      });
+
+    block
+      .find('input.creatable-select-input.typeahead')
+      .not('.attached-creatable-select_ta')
+      .addClass('attached-creatable-select_ta')
+      .each(function () {
+        var el = $(this);
+        var rawItems = el.attr('data-creatable-items');
+        if (rawItems) {
+          var items = JSON.parse(rawItems);
+          var fieldName = el.attr('data-attr-name');
+          el.data('creatable-select-items', items);
+
+          var form = el.closest('form');
+          if (form.length && !form.hasClass('attached-creatable-select-submit')) {
+            form
+              .addClass('attached-creatable-select-submit')
+              .on('submit', function () {
+                $(this)
+                  .find('input.creatable-select-input.typeahead')
+                  .each(function () {
+                    var input = $(this);
+                    var inputItems = input.data('creatable-select-items') || [];
+                    if (!inputItems.length || typeof inputItems[0] !== 'object') return;
+
+                    var selectedValue = input.attr('data-creatable-selected-value');
+                    if (selectedValue !== undefined) {
+                      // User selected an existing item from typeahead — submit its value (e.g. id)
+                      input.val(selectedValue);
+                    } else {
+                      // User typed freeform text not matching any suggestion — mark as new
+                      var rawValue = input.val();
+                      var newPrefix = input.attr('data-creatable-new-prefix') || '__creatable_new__';
+                      if (rawValue && rawValue !== '') {
+                        input.val(newPrefix + rawValue);
+                      }
+                    }
+                  });
+              });
+          }
+          _fpa.form_utils.setup_typeahead(el, items, fieldName);
+        }
       });
 
     block
