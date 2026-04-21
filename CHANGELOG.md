@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.42.25] - 2026-04-21
+
 - [Merged] release 9.42.24 back to develop
 
 ## [9.42.24] - 2026-04-21
