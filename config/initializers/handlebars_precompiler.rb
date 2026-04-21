@@ -65,7 +65,8 @@ end
 
 # Initialize on Rails startup (but not during asset precompilation or rake tasks)
 Rails.application.config.after_initialize do
-  if defined?(Rake) && Rake.application.top_level_tasks.any? { |t| t.start_with?('assets:') || t.start_with?('db:') }
+  rake_tasks = defined?(Rake) ? Array(Rake.application&.top_level_tasks) : []
+  if rake_tasks.any? && rake_tasks.none? { |task| %w[server s].include?(task.to_s) }
     next
   end
 
