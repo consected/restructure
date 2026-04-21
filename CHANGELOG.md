@@ -14,6 +14,14 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.23 back to develop
+- [Fixed] embedded item preset_value null in index serialization - fixes #1067
+- [Added] resolved definition versioning indicator to admin details panels and record id to Edit Entry title - fixes #1066
+- [Added] creatable select field auto-creation for all single-select variants - fixes #73
+- [Updated] agent tools
+- [Added] field types documentation and spec for dynamic definitions - fixes #1071
+- [Fixed] failing EB installs due to staging preventing Rails tmp directory use for rake db:migrate
+
 ## [9.42.23] - 2026-04-14
 
 - [Merged] release 9.42.22 back to develop
