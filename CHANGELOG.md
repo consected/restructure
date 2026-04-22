@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.43.0] - 2026-04-22
+
 ### From FPHS - PR #1082 - 2026-04-21
 
 - [Fixed] failing EB installs due to staging preventing Rails tmp directory use for rake db:migrate
