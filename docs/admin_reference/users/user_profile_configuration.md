@@ -64,3 +64,48 @@ A _user_ profile can be disabled by an _admin_ through the **Usernames and Passw
 In the future, an admin can re-enable a _user_ profile if needed.
 
 There is no way to delete a _user_ profile from the application. This ensures that all data records created or updated by a _user_ retain a reference to the profile responsible for editing them.
+
+## Account Expiration Date
+
+An _admin_ can set an **Account Expiration** date and time on a _user_ profile. This provides a way to grant temporary access that automatically expires without requiring manual intervention.
+
+When an expiration date is set:
+
+- **Before the expiration date**: the user can log in and use the application normally
+- **After the expiration date**: the user is prevented from logging in and receives a message that their account has expired
+- **During an active session**: if the expiration date passes while a user is logged in, they will be signed out on their next request to the server
+
+To set an expiration date, edit the _user_ profile in the **Usernames and Passwords** admin panel and enter a date and time in the **Account Expiration** field. To remove the expiration and allow indefinite access, clear the field.
+
+**Note:** account expiration is independent of password expiration. A user's password may still expire based on the password age limit even if no account expiration date is set. Similarly, setting an account expiration does not extend or override the password expiration policy.
+
+## API Access Only
+
+A _user_ profile can be configured for **API access only**, allowing automated systems or scripts to make authenticated API requests without needing to complete two-factor authentication (2FA) setup interactively.
+
+### Creating an API-Only User
+
+When creating or editing a _user_, an _admin_ can check the **API access only** option. This has the following effects:
+
+- **2FA is auto-confirmed**: the user's account is immediately marked as having completed 2FA setup, so API requests using token authentication are not redirected to the 2FA configuration page
+- **A password and API token are generated**: the user receives a random password and API authentication token, displayed to the _admin_ one time only
+- **UI login is blocked**: the user cannot log in through the web browser login form — attempts will be rejected with a message indicating the account is for API access only
+
+### Credential Document
+
+After creating or updating an API-only user, the _admin_ is shown the user's email address and API token. The **show user information document** link displays a printable credential document containing these details. Unlike regular users, the credential document for an API-only user does not include a password or 2FA setup instructions, since these are not relevant.
+
+### Using API Authentication
+
+An API-only user authenticates requests by including their email and API token as query parameters or headers. See the [API documentation](../../dev_reference/main/README.md) for details on making authenticated API requests.
+
+### Toggling API Access
+
+An _admin_ can toggle the **API access only** setting on an existing user:
+
+- **Enabling API access only** on a regular user auto-confirms 2FA and blocks UI login
+- **Disabling API access only** resets the user's 2FA, requiring them to set up an authenticator app on their next interactive login
+
+### API-Only Column
+
+The user list in the **Usernames and Passwords** admin panel includes an **API Only** column, making it easy to identify which users are configured for API-only access.

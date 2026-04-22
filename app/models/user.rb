@@ -163,14 +163,20 @@ class User < ActiveRecord::Base
                   end
   end
 
-  # Standard Devise callback to allow accounts to be disabled
+  # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled
+    super && !disabled && !account_expired?
   end
 
-  # Standard Devise callback to tell user that an account has been disabled
+  # Standard Devise callback to tell user that an account has been disabled or expired
   def inactive_message
-    disabled ? :account_has_been_disabled : super
+    if disabled
+      :account_has_been_disabled
+    elsif account_expired?
+      :account_expired
+    else
+      super
+    end
   end
 
   # By default, the user is redirected to the login page after registration.

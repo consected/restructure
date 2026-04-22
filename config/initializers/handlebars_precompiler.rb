@@ -65,7 +65,10 @@ end
 
 # Initialize on Rails startup (but not during asset precompilation or rake tasks)
 Rails.application.config.after_initialize do
-  next if defined?(Rake) && Rake.application.top_level_tasks.any? { |t| t.start_with?('assets:') }
+  rake_tasks = defined?(Rake) ? Array(Rake.application&.top_level_tasks) : []
+  if rake_tasks.any? && rake_tasks.none? { |task| %w[server s].include?(task.to_s) }
+    next
+  end
 
   HandlebarsPrecompiler.setup_directories
   HandlebarsPrecompiler.cleanup_tmp_dir

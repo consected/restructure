@@ -221,26 +221,20 @@ RSpec.describe Formatter::Substitution, type: :model do
 
     if_blocks = txt.scan Formatter::Substitution::IfBlockRegEx
 
-    # 13 blocks each of 7 elements
+    # 13 blocks each of 3 capture groups (full match, tag, inner content)
     expect(if_blocks.length).to eq 13
-    expect(if_blocks[0].length).to eq 8
+    expect(if_blocks[0].length).to eq 3
     expect(if_blocks[0][0]).to eq '{{#if some_text}}shows {{some_text}}{{/if}}'
     expect(if_blocks[0][1]).to eq 'some_text'
     expect(if_blocks[0][2]).to eq 'shows {{some_text}}'
-    expect(if_blocks[0][3]).to be nil
-    expect(if_blocks[0][4]).to be nil
 
     expect(if_blocks[1][0]).to eq '{{#if truthy_val}}some other text{{/if}}'
     expect(if_blocks[1][1]).to eq 'truthy_val'
     expect(if_blocks[1][2]).to eq 'some other text'
-    expect(if_blocks[1][3]).to be nil
-    expect(if_blocks[1][4]).to be nil
 
     expect(if_blocks[3][0]).to eq '{{#if false_val}}does not show false{{else}}but does show {{int_val}} else{{/if}}'
     expect(if_blocks[3][1]).to eq 'false_val'
-    expect(if_blocks[3][2]).to eq 'does not show false'
-    expect(if_blocks[3][6]).to be_truthy
-    expect(if_blocks[3][7]).to eq 'but does show {{int_val}} else'
+    expect(if_blocks[3][2]).to eq 'does not show false{{else}}but does show {{int_val}} else'
 
     expect(if_blocks[6][0]).to eq %({{#if true_val}}
 It can also handle multiple
@@ -255,41 +249,24 @@ lines in the results.
 OK?
 )
 
-    expect(if_blocks[6][3]).to be nil
-    expect(if_blocks[6][4]).to eq nil
-
     expect(if_blocks[7][0]).to eq %({{#if false_val}}Not shown{{else}}It can also handle multiple
 lines in the else results.
 Good?{{/if}})
     expect(if_blocks[7][1]).to eq 'false_val'
-    expect(if_blocks[7][2]).to eq 'Not shown'
-    expect(if_blocks[7][6]).to be_truthy
-
-    expect(if_blocks[7][7]).to eq %(It can also handle multiple
+    expect(if_blocks[7][2]).to eq %(Not shown{{else}}It can also handle multiple
 lines in the else results.
 Good?)
 
-    # Now test else if
-    expect(if_blocks[10].length).to eq 8
+    # Now test else if - inner content includes the else if and else clauses
+    expect(if_blocks[10].length).to eq 3
     expect(if_blocks[10][0]).to eq '{{#if false_val}}Not shown{{else if true_val}}Else If shown{{else}}Not else{{/if}}'
     expect(if_blocks[10][1]).to eq 'false_val'
-    expect(if_blocks[10][2]).to eq 'Not shown'
-    expect(if_blocks[10][3]).to eq '{{else if true_val}}Else If shown'
-    expect(if_blocks[10][4]).to eq 'true_val'
-    expect(if_blocks[10][5]).to eq 'Else If shown'
-    expect(if_blocks[10][6]).to be_truthy
-    expect(if_blocks[10][7]).to eq 'Not else'
+    expect(if_blocks[10][2]).to eq 'Not shown{{else if true_val}}Else If shown{{else}}Not else'
 
-    # Now test else if
-    expect(if_blocks[12].length).to eq 8
+    expect(if_blocks[12].length).to eq 3
     expect(if_blocks[12][0]).to eq '{{#if false_val}}Not shown{{else if false_val}}Else If shown{{else}}Show else{{/if}}'
     expect(if_blocks[12][1]).to eq 'false_val'
-    expect(if_blocks[12][2]).to eq 'Not shown'
-    expect(if_blocks[12][3]).to eq '{{else if false_val}}Else If shown'
-    expect(if_blocks[12][4]).to eq 'false_val'
-    expect(if_blocks[12][5]).to eq 'Else If shown'
-    expect(if_blocks[12][6]).to be_truthy
-    expect(if_blocks[12][7]).to eq 'Show else'
+    expect(if_blocks[12][2]).to eq 'Not shown{{else if false_val}}Else If shown{{else}}Show else'
 
     data = {
       int_val: 12_345,
@@ -354,47 +331,26 @@ Good?)
 
     if_blocks = txt.scan Formatter::Substitution::IsBlockRegEx
 
-    # 5 blocks each of 10 elements
+    # 10 blocks each of 5 capture groups (full match, tag, op, exp, inner content)
     expect(if_blocks.length).to eq 10
-    expect(if_blocks[0].length).to eq 17
+    expect(if_blocks[0].length).to eq 5
     expect(if_blocks[0][0]).to eq '{{#is some_text "==" \'this is optional\'}}shows {{some_text}}{{/is}}'
     expect(if_blocks[0][1]).to eq 'some_text'
     expect(if_blocks[0][2]).to eq '=='
     expect(if_blocks[0][3]).to eq "'this is optional'"
     expect(if_blocks[0][4]).to eq 'shows {{some_text}}'
-    expect(if_blocks[0][5]).to be nil
-    expect(if_blocks[0][6]).to be nil
-    expect(if_blocks[0][7]).to be nil
-    expect(if_blocks[0][8]).to be nil
-    expect(if_blocks[0][9]).to be nil
-    expect(if_blocks[0][15]).to be nil
-    expect(if_blocks[0][16]).to be nil
 
     expect(if_blocks[1][0]).to eq '{{#is some_text \'!=\' "this is optional"}}shows {{some_text}}{{else}}no show {{some_text}}{{/is}}'
     expect(if_blocks[1][1]).to eq 'some_text'
     expect(if_blocks[1][2]).to eq '!='
     expect(if_blocks[1][3]).to eq '"this is optional"'
-    expect(if_blocks[1][4]).to eq 'shows {{some_text}}'
-    expect(if_blocks[1][5]).to be nil
-    expect(if_blocks[1][6]).to be nil
-    expect(if_blocks[1][7]).to be nil
-    expect(if_blocks[1][8]).to be nil
-    expect(if_blocks[1][9]).to be nil
-    expect(if_blocks[1][15]).to eq '{{else}}no show {{some_text}}'
-    expect(if_blocks[1][16]).to eq 'no show {{some_text}}'
+    expect(if_blocks[1][4]).to eq 'shows {{some_text}}{{else}}no show {{some_text}}'
 
     expect(if_blocks[2][0]).to eq "{{#is int_val '<' 50}}too large {{int_val}}{{else}}so show {{int_val}} >= 50{{/is}}"
     expect(if_blocks[2][1]).to eq 'int_val'
     expect(if_blocks[2][2]).to eq '<'
     expect(if_blocks[2][3]).to eq '50'
-    expect(if_blocks[2][4]).to eq 'too large {{int_val}}'
-    expect(if_blocks[2][5]).to be nil
-    expect(if_blocks[2][6]).to be nil
-    expect(if_blocks[2][7]).to be nil
-    expect(if_blocks[2][8]).to be nil
-    expect(if_blocks[2][9]).to be nil
-    expect(if_blocks[2][15]).to eq '{{else}}so show {{int_val}} >= 50'
-    expect(if_blocks[2][16]).to eq 'so show {{int_val}} >= 50'
+    expect(if_blocks[2][4]).to eq 'too large {{int_val}}{{else}}so show {{int_val}} >= 50'
 
     data = {
       int_val: 12_345,
@@ -426,5 +382,144 @@ Good?)
 
       All done!
     END_TEXT
+  end
+
+  it 'handles arbitrary number of else if conditions in if blocks' do
+    txt = <<~END_TEXT
+      {{#if val_a}}A{{else if val_b}}B{{else if val_c}}C{{else if val_d}}D{{else if val_e}}E{{else}}none{{/if}}
+    END_TEXT
+
+    # First condition true
+    data = { val_a: true, val_b: false, val_c: false, val_d: false, val_e: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'A'
+
+    # Second condition true
+    data = { val_a: false, val_b: true, val_c: false, val_d: false, val_e: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'B'
+
+    # Third condition true
+    data = { val_a: false, val_b: false, val_c: true, val_d: false, val_e: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'C'
+
+    # Fourth condition true
+    data = { val_a: false, val_b: false, val_c: false, val_d: true, val_e: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'D'
+
+    # Fifth condition true
+    data = { val_a: false, val_b: false, val_c: false, val_d: false, val_e: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'E'
+
+    # No conditions true - falls through to else
+    data = { val_a: false, val_b: false, val_c: false, val_d: false, val_e: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'none'
+
+    # First truthy wins even if later ones are also truthy
+    data = { val_a: false, val_b: false, val_c: true, val_d: true, val_e: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'C'
+  end
+
+  it 'handles arbitrary number of else if conditions without a final else' do
+    txt = '{{#if val_a}}A{{else if val_b}}B{{else if val_c}}C{{else if val_d}}D{{/if}}'
+
+    data = { val_a: false, val_b: false, val_c: false, val_d: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res).to eq 'D'
+
+    data = { val_a: false, val_b: false, val_c: false, val_d: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res).to eq ''
+  end
+
+  it 'handles a single if string with at least five else if clauses' do
+    txt = '{{#if a}}A{{else if b}}B{{else if c}}C{{else if d}}D{{else if e}}E{{else if f}}F{{else}}none{{/if}}'
+
+    data = { a: true, b: false, c: false, d: false, e: false, f: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res).to eq 'A'
+
+    data = { a: false, b: false, c: false, d: false, e: false, f: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res).to eq 'F'
+
+    data = { a: false, b: false, c: false, d: false, e: false, f: false }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res).to eq 'none'
+  end
+
+  it 'handles arbitrary number of else is conditions in is blocks' do
+    txt = <<~END_TEXT
+      {{#is val '==' "a"}}A{{else is val '==' "b"}}B{{else is val '==' "c"}}C{{else is val '==' "d"}}D{{else is val '==' "e"}}E{{else}}none{{/is}}
+    END_TEXT
+
+    data = { val: 'a' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'A'
+
+    data = { val: 'b' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'B'
+
+    data = { val: 'c' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'C'
+
+    data = { val: 'd' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'D'
+
+    data = { val: 'e' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'E'
+
+    data = { val: 'z' }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'none'
+  end
+
+  it 'handles arbitrary else is with numeric comparisons' do
+    txt = <<~END_TEXT
+      {{#is score '>' 90}}excellent{{else is score '>' 80}}great{{else is score '>' 70}}good{{else is score '>' 60}}ok{{else is score '>' 50}}fair{{else}}poor{{/is}}
+    END_TEXT
+
+    data = { score: 95 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'excellent'
+
+    data = { score: 85 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'great'
+
+    data = { score: 75 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'good'
+
+    data = { score: 65 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'ok'
+
+    data = { score: 55 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'fair'
+
+    data = { score: 30 }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'poor'
+  end
+
+  it 'handles multiple if blocks with arbitrary else-if in the same text' do
+    txt = <<~END_TEXT
+      Result: {{#if x}}X{{else if y}}Y{{else if z}}Z{{/if}} and {{#if a}}A{{else if b}}B{{else if c}}C{{else if d}}D{{/if}}
+    END_TEXT
+
+    data = { x: false, y: false, z: true, a: false, b: false, c: false, d: true }
+    res = Formatter::Substitution.substitute(txt.dup, data:)
+    expect(res.strip).to eq 'Result: Z and D'
   end
 end

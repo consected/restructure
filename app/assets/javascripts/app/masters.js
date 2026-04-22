@@ -215,6 +215,28 @@ _fpa.loaded.masters = function () {
     window.setTimeout(initializeAutoRunReports, _fpa.masters.auto_run_init_delay);
 
     /**
+     * Prevent collapse and re-run auto-run report when clicking an already-expanded tab.
+     * Fixes GitHub issue #87.
+     */
+    $('a.prevent-on-collapse.search-selector-btn').on('click', function (ev) {
+        // If the button is not collapsed, the panel is already expanded
+        if (!$(this).hasClass('collapsed')) {
+            // Stop Bootstrap collapse from toggling
+            ev.stopPropagation();
+            ev.preventDefault();
+
+            // Re-run the auto-run report if applicable
+            var targetId = $(this).attr('data-target');
+            if (targetId) {
+                var $autoRunBtn = $(targetId).find('[type="submit"].auto-run');
+                if ($autoRunBtn.length > 0) {
+                    $autoRunBtn.removeClass('was-auto-run-clicked').click();
+                }
+            }
+        }
+    });
+
+    /**
      * Handle searchable report tab collapse.
      * Resets the auto-run state so the button can be clicked again on next expansion.
      * NOTE: We don't clear results here because the new tab's results may already be loading

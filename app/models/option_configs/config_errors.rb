@@ -59,7 +59,8 @@ module OptionConfigs
           option_configs = if object_instance_or_config.respond_to?(:option_configs)
                              object_instance = object_instance_or_config
                              object_instance_or_config.option_configs(raise_bad_configs: [FphsOptionsParseError,
-                                                                                          FphsOptionsGeneralError])
+                                                                                          FphsOptionsGeneralError,
+                                                                                          FphsException])
                            else
                              object_instance_or_config
                            end

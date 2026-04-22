@@ -14,7 +14,7 @@
 
 
 ### Critical Rules for Running Terminal Commands
-1. **Never set environment variables** - use app-scripts instead
+1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - load the `execute/awaitTerminal` tool first
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. **Never run commands in the background** - all commands exit when complete with success or failure codes
@@ -68,9 +68,9 @@ For Rspec System Specs Refer to: [Rspec System Specs project coding standards](i
 ### Command Line Usage
 - Create a directory `./tmp/agent-tmp` in the workspace root
 - Use `./tmp/agent-tmp` for all temporary files and logs
-- DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead
+- DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
 - DO NOT run commands that redirect output to `/dev/null` or `/tmp/`
-- DO NOT run commands in the background using `&` or `nohup`
+- DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` for later analysis
 - DO NOT run commands with `timeout` unless absolutely necessary
 
 ```bash

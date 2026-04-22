@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Tests for Admin::AppType import functionality.
+# Verifies that import_config correctly creates app types from exported JSON and YAML,
+# including app configurations, user access controls, activity logs,
+# config libraries, and item flag names.
+# Also verifies that YAML import handles unquoted dates and YAML round-trip (export/import).
+
 require 'rails_helper'
 
 RSpec.describe 'Import an app configuration', type: :model do
@@ -102,7 +108,6 @@ RSpec.describe 'Import an app configuration', type: :model do
 
     @activity_log = ActivityLog.active.first
 
-    al_orig_name = @activity_log.name
     @activity_log.name = "Changed #{rand}!"
     @activity_log.current_admin = @admin
     @activity_log.disabled = false
@@ -137,7 +142,6 @@ RSpec.describe 'Import an app configuration', type: :model do
     expect(@user.has_access_to?(:read, :table, :sage_assignments)).to be_truthy
 
     @activity_log.reload
-    # expect(@activity_log.name).to eq al_orig_name
   end
 
   it 'imports a test JSON config file' do
@@ -318,5 +322,96 @@ RSpec.describe 'Import an app configuration', type: :model do
     res.update(disabled: true, current_admin: @admin)
     imported_lib_b.update(disabled: true, current_admin: @admin)
     imported_lib_z.update(disabled: true, current_admin: @admin)
+  end
+
+  it 'imports item flag names from an exported configuration' do
+    # Create an item flag name associated with a table in the app type
+    existing_flag_name = "Existing Flag #{rand(1_000_000)}"
+    Classification::ItemFlagName.create!(
+      name: existing_flag_name,
+      item_type: 'player_info',
+      current_admin: @admin
+    )
+
+    # Export the app type configuration
+    config = @app_type.export_config
+    exported = JSON.parse(config)
+    expect(exported['app_type']['associated_item_flag_names'].map { |f| f['name'] }).to include(existing_flag_name)
+
+    # Inject a new item flag name into the exported config that does not yet exist in the database
+    new_flag_name = "New Imported Flag #{rand(1_000_000)}"
+    exported['app_type']['associated_item_flag_names'] << {
+      'name' => new_flag_name,
+      'item_type' => 'player_info',
+      'updated_at' => Time.now.iso8601
+    }
+
+    # Import into a new app type using the modified config
+    modified_config = JSON.generate(exported)
+    res, results = Admin::AppTypeImport.import_config(modified_config, @admin, name: 'import_flags_test')
+
+    expect(results).to be_a Hash
+    expect(res).to be_a Admin::AppType
+    expect(res.name).to eq 'import_flags_test'
+
+    # Verify the import processed item flag names
+    expect(results['updates / creations']).to have_key('associated_item_flag_names')
+
+    # Verify the new item flag name was created by the import
+    imported_flag = Classification::ItemFlagName.active.find_by(name: new_flag_name, item_type: 'player_info')
+    expect(imported_flag).to be_present
+
+    # Cleanup
+    res.update(disabled: true, current_admin: @admin)
+  end
+
+  it 'imports a YAML configuration exported from an app type' do
+    config_yaml = @app_type.export_config(format: :yaml)
+
+    res, results = Admin::AppTypeImport.import_config(config_yaml, @admin, name: 'yaml_import_test', format: :yaml)
+
+    expect(results).to be_a Hash
+    expect(res).to be_a Admin::AppType
+    expect(res.name).to eq 'yaml_import_test'
+    expect(res.label).to eq 'Test App 12'
+
+    acs = Admin::AppConfiguration.where app_type: res
+    expect(acs.length).to eq 3
+
+    ac = Admin::AppConfiguration.where(app_type: res, name: 'create master with').first
+    expect(ac.value).to eq 'player_info'
+  end
+
+  it 'imports a YAML configuration containing unquoted date values' do
+    yaml_with_dates = <<~YAML
+      app_type:
+        name: yaml_dates_test
+        label: YAML Dates Test
+        default_schema_name: ml_app
+        created_at: 2020-11-11
+        updated_at: 2020-07-27 13:25:11
+        app_configurations:
+        - name: create master with
+          value: player_info
+          created_at: 2020-11-11
+          updated_at: 2020-11-11
+    YAML
+
+    res, results = Admin::AppTypeImport.import_config(yaml_with_dates, @admin, format: :yaml)
+
+    expect(results).to be_a Hash
+    expect(res).to be_a Admin::AppType
+    expect(res.name).to eq 'yaml_dates_test'
+    expect(res.label).to eq 'YAML Dates Test'
+  end
+
+  it 'imports the zeus config YAML file successfully' do
+    config_text = File.read(Rails.root.join('db', 'dumps', 'zeus_config.yaml'))
+
+    res, results = Admin::AppTypeImport.import_config(config_text, @admin, format: :yaml, skip_fail: true)
+
+    expect(results).to be_a Hash
+    expect(res).to be_a Admin::AppType
+    expect(res.name).to eq 'zeus'
   end
 end

@@ -57,6 +57,10 @@
         value_attr: attribute_name to use for selection value in select_record_* fields
         label_attr: attribute_name to use for selection label in select_record_* fields
         group_split_char: optional character to split on when grouping selections in select_record_* fields
+        sort_order: |
+          optional sort order for select_record_* fields, as "attribute direction"
+          where attribute is "value" or "label" and direction is "asc" or "desc".
+          For example: "value desc" or "label asc". Default is "label asc".
         no_assoc: | 
           false | true - optionally specify that no association should be used in select_record_* data lookup
                          select_record_from_table_* automatically sets this to true
@@ -177,6 +181,17 @@
           # Specifies the target field to be filtered when this field changes.
           # Used with big_select.filtered configuration to dynamically filter another big-select field.
           # The filter value from this field is passed via blank_preset_value to constrain the query.
+        
+        # configuration for allowing users to create new items in the source model
+        # when their entered value doesn't already exist (applies to select_record_from_table_* fields)
+        creatable:
+          enabled: true | false
+            # When true, the field renders as a typeahead text input instead of a select dropdown.
+            # If the user enters a value that doesn't exist in the source model, a new record
+            # is automatically created on save.
+            # Requires the user to have 'create' access on the source dynamic model.
+            # If the user lacks create access, they can only select from existing items.
+            # Default is false (standard select dropdown behavior).
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text

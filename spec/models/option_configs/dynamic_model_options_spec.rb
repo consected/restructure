@@ -17,6 +17,13 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   before :all do
+    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
+    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
+    table_name = 'test_replace_opts'
+    unless Admin::MigrationGenerator.table_exists? table_name
+      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
     DynamicModel.active.where(table_name: 'test_created_by_recs').each { |dm| dm.disable!(@admin) }
     DynamicModel.reset_active_model_configurations!
   end
@@ -149,12 +156,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   end
 
   it 'replaces option configurations' do
-    # Use a unique table name to avoid conflicts with generate_test_dynamic_model
-    # which creates test_created_by_recs with additional columns (use_def_version_time, text_array)
     table_name = 'test_replace_opts'
-    unless Admin::MigrationGenerator.table_exists? table_name
-      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id')
-    end
     DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
 
     name = 'test replace opts'
@@ -328,6 +330,117 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     END_OPT
 
     expect(dm.options.strip).to eq exp.strip
+  end
+
+  # Test that prepend_to_options correctly handles _comments containing escaped single quotes.
+  # GitHub issue #1029: When a comment value contains a literal backslash-quote (e.g., Alzheimer\'s),
+  # YAML.dump produces text with \' which Ruby's gsub interprets as a postmatch backreference,
+  # corrupting the output.
+  it 'handles comments containing escaped quotes in prepend_to_options' do
+    table_name = 'test_replace_opts'
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+
+    name = 'test replace opts'
+    dm = DynamicModel.create! current_admin: @admin,
+                              name:,
+                              table_name:,
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    dm.options = <<~END_OPT
+      _comments:
+        test1: A simple comment
+
+      default:
+        label: Something
+
+    END_OPT
+
+    # Call prepend_to_options with a _comments hash where a field value contains
+    # a literal backslash and single quote, as would appear in a caption like
+    # "Dementia (Alzheimer's Disease)" stored with an escaped quote in YAML
+    comment_with_escaped_quote = "Dementia (Alzheimer\\'s Disease)"
+    hash = {
+      _comments: {
+        test1: comment_with_escaped_quote
+      }
+    }
+
+    dm.prepend_to_options(hash)
+
+    # The resulting options must be valid YAML (not corrupted by postmatch substitution)
+    parsed = nil
+    expect { parsed = YAML.safe_load(dm.options) }.not_to raise_error
+    expect(parsed).to be_a Hash
+
+    # The _comments section should contain the correct value, not corrupted text
+    expect(parsed['_comments']['test1']).to eq "Dementia (Alzheimer\\'s Disease)"
+
+    # The default section should still be present and intact
+    expect(parsed['default']['label']).to eq 'Something'
+  end
+
+  # Test that options with caption_before containing quotes can have _comments regenerated
+  # and re-saved without YAML parse errors.
+  # GitHub issue #1029: Simulates "Update Config from Table" where _comments are regenerated
+  # from captions containing single quotes.
+  it 'handles re-saving comments derived from caption_before with quotes' do
+    table_name = 'test_replace_opts'
+    DynamicModel.active.where(table_name:).each { |dm| dm.disable!(@admin) }
+
+    name = 'test replace opts'
+    dm = DynamicModel.create! current_admin: @admin,
+                              name:,
+                              table_name:,
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    # Set up initial options with _comments containing a value with backslash-quote
+    # (as would be generated from a caption_before like "Dementia (Alzheimer's Disease)")
+    dm.options = <<~END_OPT
+      _comments:
+        test1: simple comment
+
+      default:
+        label: Test Label
+
+    END_OPT
+
+    # First prepend: simulate initial _comments generation with escaped quote
+    comment_value = "Dementia (Alzheimer\\'s Disease)"
+    hash = {
+      _comments: {
+        test1: comment_value
+      }
+    }
+    dm.prepend_to_options(hash)
+
+    # Verify first pass produced valid YAML
+    first_pass = nil
+    expect { first_pass = YAML.safe_load(dm.options) }.not_to raise_error
+
+    # Second prepend: simulate "Update Config from Table" re-generating _comments
+    # This is where the bug manifests — the already-corrupted options text
+    # gets further mangled on the second pass
+    hash2 = {
+      _comments: {
+        test1: comment_value
+      }
+    }
+    dm.prepend_to_options(hash2)
+
+    # The resulting options must still be valid YAML after the second pass
+    second_pass = nil
+    expect { second_pass = YAML.safe_load(dm.options) }.not_to raise_error
+    expect(second_pass).to be_a Hash
+
+    # The field comment should be preserved correctly
+    expect(second_pass['_comments']['test1']).to eq "Dementia (Alzheimer\\'s Disease)"
+
+    # The default section should still be intact
+    expect(second_pass['default']['label']).to eq 'Test Label'
   end
 
   it 'generates show_if from show_if_condition_strings' do

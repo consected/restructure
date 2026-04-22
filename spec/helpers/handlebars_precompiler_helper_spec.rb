@@ -468,4 +468,190 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       expect(url).to include('/multi/')
     end
   end
+
+  # Multi-file caching specs for issue #1004
+  #
+  # Tests that write_multiple_handlebars_templates:
+  # - AC1: Skips I/O when the multi file already exists on disk
+  # - AC2: Does NOT include current_sign_in_at in the filename (stable across logins)
+  # - AC3: Includes user_id in the filename (templates are user-specific)
+  # - AC5: Filename changes when user roles/access controls change
+  # - AC6: Filename changes when handlebars_cache_key changes (template content change)
+  # - AC2: Filename includes an access_control_version derived from userrole, uac, and handlebars_cache_key
+  describe '#write_multiple_handlebars_templates multi-file caching (issue #1004)' do
+    let(:cache_key) { 'cachekey123456' }
+    let(:sign_in_time) { Time.at(1_000_000) }
+    let(:user) { Struct.new(:id, :current_sign_in_at, :app_type_id).new(42, sign_in_time, 7) }
+    let(:templates) { [{ id: 'tpl_alpha', is_partial: false, compiled_file_path: 'irrelevant' }] }
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+
+      # Create compiled template files so read_handlebars_template succeeds
+      FileUtils.mkdir_p(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR)
+      compiled_file = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("tpl_alpha-#{cache_key}.js")
+      File.write(compiled_file, '(function() { var t = Handlebars.template; })();')
+    end
+
+    # AC1: Skip all I/O if the multi file already exists
+    context 'when the multi file already exists on disk' do
+      it 'returns the correct URL path without re-reading individual compiled templates' do
+        # First call creates the file
+        url_first, = helper.write_multiple_handlebars_templates(templates)
+
+        # Spy on File.read to ensure it is not called again for individual templates
+        expect(File).not_to receive(:read).with(a_string_including('tpl_alpha'))
+
+        url_second, = helper.write_multiple_handlebars_templates(templates)
+
+        expect(url_second).to eq(url_first)
+      end
+
+      it 'does not call File.write on the second invocation' do
+        # First call writes the file
+        helper.write_multiple_handlebars_templates(templates)
+
+        # Second call should skip writing entirely
+        expect(File).not_to receive(:write)
+
+        helper.write_multiple_handlebars_templates(templates)
+      end
+    end
+
+    # AC1: Calling twice with same inputs only writes the file once
+    context 'write count' do
+      it 'calls File.write exactly once for two identical invocations' do
+        write_count = 0
+        allow(File).to receive(:write).and_wrap_original do |original, *args|
+          # Only count writes to the MULTI_PUBLIC_DIR
+          write_count += 1 if args.first.to_s.include?('multi/')
+          original.call(*args)
+        end
+
+        helper.write_multiple_handlebars_templates(templates)
+        helper.write_multiple_handlebars_templates(templates)
+
+        expect(write_count).to eq(1)
+      end
+    end
+
+    # AC2: Filename does NOT contain current_sign_in_at
+    context 'filename composition' do
+      it 'does not include current_sign_in_at in the filename' do
+        url, = helper.write_multiple_handlebars_templates(templates)
+        filename = File.basename(url)
+
+        # current_sign_in_at.to_i for Time.at(1_000_000) is "1000000"
+        expect(filename).not_to include(sign_in_time.to_i.to_s)
+      end
+
+      # AC2: Filename does NOT change across different current_sign_in_at values
+      it 'produces the same filename regardless of current_sign_in_at changes' do
+        url_before, = helper.write_multiple_handlebars_templates(templates)
+
+        # Simulate a new login with different sign_in_at
+        new_user = Struct.new(:id, :current_sign_in_at, :app_type_id).new(42, Time.at(9_999_999), 7)
+        allow(helper).to receive(:current_user).and_return(new_user)
+
+        # Clean multi dir to force fresh write
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+
+        url_after, = helper.write_multiple_handlebars_templates(templates)
+
+        expect(File.basename(url_after)).to eq(File.basename(url_before))
+      end
+
+      # AC3: Filename contains user_id
+      it 'includes the user_id in the filename' do
+        url, = helper.write_multiple_handlebars_templates(templates)
+        filename = File.basename(url)
+
+        expect(filename).to include("-#{user.id}-")
+      end
+
+      # AC2: Filename includes access_control_version hash derived from userrole, uac, handlebars_cache_key
+      it 'includes an access_control_version segment in the filename' do
+        url, = helper.write_multiple_handlebars_templates(templates)
+        filename = File.basename(url)
+
+        # The filename should follow the pattern:
+        # requested-templates-{user_id}-{app_type_id}-{req_digest}-{access_control_version}.js
+        # access_control_version is a 13-char hex substring
+        parts = filename.delete_suffix('.js').split('-')
+
+        # Last segment should be a hex hash (access_control_version)
+        last_segment = parts.last
+        expect(last_segment).to match(/\A[a-f0-9]{13}\z/),
+                                     "Expected last filename segment '#{last_segment}' to be a 13-char hex access_control_version"
+      end
+    end
+
+    # AC5: Filename changes when user roles/access controls change
+    context 'when user roles or access controls change' do
+      before do
+        # Stub partial_cache_key related queries for access control version
+        allow(Admin::UserRole).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(2_000_000)])
+        allow(Admin::UserAccessControl).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(3_000_000)])
+      end
+
+      it 'produces a different filename when userrole timestamps change' do
+        url_before, = helper.write_multiple_handlebars_templates(templates)
+
+        # Clean multi dir and change userrole timestamp
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        allow(Admin::UserRole).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(5_000_000)])
+
+        # Clear any memoization
+        helper.instance_variable_set(:@access_control_version, nil)
+
+        url_after, = helper.write_multiple_handlebars_templates(templates)
+
+        expect(File.basename(url_after)).not_to eq(File.basename(url_before))
+      end
+
+      it 'produces a different filename when user access control timestamps change' do
+        url_before, = helper.write_multiple_handlebars_templates(templates)
+
+        # Clean multi dir and change uac timestamp
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        allow(Admin::UserAccessControl).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(8_000_000)])
+
+        # Clear any memoization
+        helper.instance_variable_set(:@access_control_version, nil)
+
+        url_after, = helper.write_multiple_handlebars_templates(templates)
+
+        expect(File.basename(url_after)).not_to eq(File.basename(url_before))
+      end
+    end
+
+    # AC6: Filename changes when handlebars_cache_key changes (template content change)
+    context 'when template content changes (handlebars_cache_key changes)' do
+      it 'produces a different filename when handlebars_cache_key changes' do
+        url_before, = helper.write_multiple_handlebars_templates(templates)
+
+        # Simulate template content change: new cache key and new compiled file
+        new_cache_key = 'newcachekey1234'
+        allow(helper).to receive(:handlebars_cache_key).and_return(new_cache_key)
+
+        new_compiled = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("tpl_alpha-#{new_cache_key}.js")
+        File.write(new_compiled, '(function() { var t = Handlebars.template; })();')
+
+        # Clean multi dir to force fresh write
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+
+        # Clear any memoization
+        helper.instance_variable_set(:@access_control_version, nil)
+
+        url_after, = helper.write_multiple_handlebars_templates(templates)
+
+        expect(File.basename(url_after)).not_to eq(File.basename(url_before))
+      end
+    end
+  end
 end

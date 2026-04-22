@@ -86,11 +86,20 @@ module EmbeddedItemHandler
   end
 
   #
-  # Set up embedded items for each instance list item
-  def refresh_embedded_item_for(instance_list)
+  # Apply embedded item handling to all objects in an index result set.
+  # This mirrors #handle_embedded_item behavior for individual actions,
+  # ensuring force_preset_values and evaluate_active_values are applied
+  # consistently before index serialization.
+  def handle_embedded_items(instance_list)
     instance_list.each do |oi|
       handle_embedded_item oi
     end
+  end
+
+  #
+  # Set up embedded items for each instance list item
+  def refresh_embedded_item_for(instance_list)
+    handle_embedded_items instance_list
   end
 
   def embedded_item_secure_params

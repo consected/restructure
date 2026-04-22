@@ -13,22 +13,31 @@ module NfsStore
 
     #
     # Create a file store container referenced by this project admin record,
-    # with the name of the project admin record as its name
+    # with the name of the project admin record as its name.
+    # Ensures the file store user's app_type is correct for admin container access,
+    # since the admin may be viewing a different app type.
     # @return [NfsStore::Manage::Container]
     def create_file_store
-      master.current_user = file_store_user
+      user = file_store_user
+      orig_app_type_id = user.app_type_id
+      admin_app_type_id = admin_file_store_app_type_id
+      user.app_type_id = admin_app_type_id if admin_app_type_id && admin_app_type_id != orig_app_type_id
+
+      master.current_user = user
 
       safe_name = name.gsub('/', '_')
-      container = NfsStore::Manage::Container.create_in_current_app user: file_store_user,
+      container = NfsStore::Manage::Container.create_in_current_app user:,
                                                                     name: safe_name,
                                                                     extra_params: {
                                                                       master:,
                                                                       create_with_role: nfs_role
                                                                     }
-      container.current_user = file_store_user
+      container.current_user = user
       ModelReference.create_with self, container, force_create: true
 
       @file_store = container
+    ensure
+      user&.app_type_id = orig_app_type_id if admin_app_type_id && admin_app_type_id != orig_app_type_id
     end
 
     #
@@ -104,6 +113,14 @@ module NfsStore
 
     def nfs_role
       Settings.admin_nfs_role
+    end
+
+    #
+    # The app_type_id for admin file store containers,
+    # defined by Settings::FilestoreAdminAppType.
+    # @return [Integer | nil]
+    def admin_file_store_app_type_id
+      Admin::AppType.active.find_by(name: Settings::FilestoreAdminAppType)&.id
     end
   end
 end

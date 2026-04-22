@@ -81,6 +81,8 @@
       <a class="redcap-file-use-secure-view" href="/redcap/project_user_requests/{{name}}/download_field_file/{{key}}/{{result_data.record_id}}">{{this_value}}</a>
       {{/if}}
     </li>
+  {{else is field_type 'includes' '^redcap_' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) }} <strong>{{this_value}}</strong></li>
 
 {{! #######  Field name matches ...}}
   {{else is field_type "notes"}}

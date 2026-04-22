@@ -9,6 +9,7 @@ class ApplicationJob < ActiveJob::Base
 
   around_perform do |job, block|
     Rails.logger.info "Run job - #{job}"
+    Application.refresh_dynamic_defs
     block.call
   rescue StandardError, FsException, FphsException, RuntimeError, IOError => e
     begin

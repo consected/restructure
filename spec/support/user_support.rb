@@ -195,7 +195,11 @@ module UserSupport
     app_type ||= @user.app_type
 
     uac = Admin::UserAccessControl.where(app_type:, resource_type:, resource_name:, role_name: [nil, ''])
-    uac = uac.where(user:) if user
+    uac = if user
+            uac.where(user:)
+          else
+            uac.where(user_id: nil)
+          end
 
     uac.active.update_all(disabled: true) if uac.active.length > 1
     uac = uac.active.first || uac.first

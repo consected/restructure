@@ -190,8 +190,11 @@ class Settings
     (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
   end
 
-  # A list of resource names for admin classes that us filestore for file storage
+  # A list of resource names for admin classes that use filestore for file storage
   FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
+
+  # App type used for admin filestore containers (e.g. REDCap project files)
+  FilestoreAdminAppType = 'ref-data'
 
   #
   # Short links are generated and can be used by text substitutions

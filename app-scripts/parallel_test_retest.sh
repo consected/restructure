@@ -30,22 +30,25 @@ if [ -z "${retest}" ]; then
 fi
 
 echo "Retesting: ${retest}"
-echo "bundle exec rspec -f d $retest"
+echo "bundle exec rspec -f d "$retest
 if [ -z "${NO_RUN}" ]; then
   echo "Running retest..."
 else
   echo "NO_RUN is set. Skipping retest run."
   exit 0
 fi
-bundle exec rspec -f d $retest
+
+set -o pipefail
+bundle exec rspec -f d $retest 2>&1 | tee tmp/retest_output.log
 res=$?
+set +o pipefail
+
 if [ "$QUIETLY" == "true" ]; then
   exit $res
 fi
 
-echo "Retested: ${retest}"
 if [ $res != 0 ]; then
-  echo "Retest of failed specs did not pass"
+  echo "Retest of failed specs did not pass - results in tmp/retest_output.log"
   exit $res
 else
   echo "Retest of failed specs passed."

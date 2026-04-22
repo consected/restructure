@@ -20,6 +20,27 @@ RSpec.describe OptionConfigs::ExtraOptions, '.parsed_options_text', type: :model
 
   before :all do
     change_setting('AllowDynamicMigrations', true)
+    create_admin
+    create_user
+
+    # Create the DynamicModel and its table once to avoid migration timeouts in parallel tests
+    DynamicModel.active.where(table_name: 'test_parsed_opts').reload.each { |d| d.disable!(@admin) }
+    DynamicModel.send(:remove_const, :TestParsedOpt) if DynamicModel.const_defined?(:TestParsedOpt, false)
+
+    @dm_for_parsed_opts = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'test parsed opts',
+      table_name: 'test_parsed_opts',
+      schema_name: 'dynamic_test',
+      primary_key_name: :id,
+      foreign_key_name: :master_id,
+      category: :test,
+      field_list: 'field_1 field_2',
+      options: nil
+    )
+
+    # Disable migrations now that the table exists - subsequent saves only update options
+    change_setting('AllowDynamicMigrations', false)
   end
 
   after :all do
@@ -223,21 +244,16 @@ RSpec.describe OptionConfigs::ExtraOptions, '.parsed_options_text', type: :model
 
   private
 
-  # Create a DynamicModel definition with the given options YAML for testing
+  # Update the existing DynamicModel definition with the given options YAML for testing.
+  # The table was created once in before(:all) to avoid migration timeouts in parallel tests.
+  # Uses update_columns to bypass callbacks (including migration handler) since only
+  # the options text needs to change, not the underlying table structure.
   def generate_dm_with_options(options_yaml)
-    DynamicModel.active.where(table_name: 'test_parsed_opts').reload.each { |d| d.disable!(@admin) }
     DynamicModel.send(:remove_const, :TestParsedOpt) if DynamicModel.const_defined?(:TestParsedOpt, false)
 
-    DynamicModel.create!(
-      current_admin: @admin,
-      name: 'test parsed opts',
-      table_name: 'test_parsed_opts',
-      schema_name: 'dynamic_test',
-      primary_key_name: :id,
-      foreign_key_name: :master_id,
-      category: :test,
-      field_list: 'field_1 field_2',
-      options: options_yaml
-    )
+    dm = @dm_for_parsed_opts
+    dm.update_columns(options: options_yaml, updated_at: Time.now)
+    dm.reload
+    dm
   end
 end

@@ -122,15 +122,21 @@ To view failing tests, in a separate console run:
 
 This log file is cleared shortly after running `parallel_test.sh`.
 
+If any of the specs fail, they will be re-run in a single `rspec` (non-parallel) process. The results of this may be found at the end of the `tmp/failing_specs.log` file, or separately in the file `tmp/retest_output.log`
+
 **NOTE**: the **brakeman** static tester is run at the start of a parallel test, to ensure testing is not being run against
 dangerous code. To skip the _brakeman_ test, run instead:
 
-    NO_BRAKEMAN=true app-scripts/parallel_test.sh
+    app-scripts/parallel_test.sh --no-brakeman
 
 A subset of the full test suite can be run by specifying a path as the first argument. For example, the following will just
 run the redcap model specs.
 
-    NO_BRAKEMAN=true app-scripts/parallel_test.sh spec/models/redcap
+    app-scripts/parallel_test.sh --no-brakeman spec/models/redcap
+
+Other useful options may be found by running
+
+    app-scripts/parallel_test.sh --help
 
 ## Running Javascript tests with Jasmine
 

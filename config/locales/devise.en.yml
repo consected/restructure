@@ -17,6 +17,7 @@ en:
       unauthenticated: "You need to sign in or sign up before continuing."
       unconfirmed: "You have to confirm your email address before continuing."
       account_has_been_disabled: "This account has been disabled."
+      account_expired: "Your account has expired. Please contact your administrator."
     mailer:
       confirmation_instructions:
         subject: "Confirmation instructions"

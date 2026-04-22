@@ -73,6 +73,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'times out the session after inactivity and redirects to login' do
+    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
     login
     finish_page_loading
 
@@ -100,6 +101,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'shows a timeout warning alarm before session expires' do
+    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
     login
     finish_page_loading
 
@@ -116,6 +118,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'keeps the session alive when the user clicks Continue Working' do
+    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
     login
     finish_page_loading
 
@@ -150,5 +153,6 @@ describe 'user session timeout', js: true, driver: $browser_driver do
 
   after(:all) do
     # Clean up
+      change_setting('UserTimeout', 30.minutes) # Set timeout back to 30 minutes
   end
 end

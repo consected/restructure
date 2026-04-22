@@ -28,7 +28,11 @@ Rails.application.routes.draw do
     resources :master_records, only: %i[index show]
     resources :external_identifiers, except: %i[show destroy]
     get :external_identifier_details, to: 'external_identifiers#details'
-    resources :reports, except: %i[show destroy]
+    resources :reports, except: %i[show destroy] do
+      member do
+        get :preview
+      end
+    end
     get :report_search_attr_definer, to: 'reports#search_attr_definer'
     resources :config_libraries, except: %i[show destroy] do
       member do

@@ -3,13 +3,31 @@
 class Admin::ReportsController < AdminController
   SearchAttrBrowserCacheSeconds = 48.hours.to_i
 
+  helper_method :embedded_report, :search_attrs_params_hash
+
+  def self.local_prefixes
+    super + ['reports']
+  end
+
   def search_attr_definer
     cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key('report_search_attr_definer'))
-    response.headers['Cache-Control'] = "max-age=#{SearchAttrBrowserCacheSeconds}"
-    response.headers.delete 'Expires'
+    set_browser_cache(max_age: SearchAttrBrowserCacheSeconds)
     return unless stale?(etag: cache_key)
 
     render partial: 'admin/reports/form/search_attr_definer'
+  end
+
+  def preview
+    @report = Report.find(params[:id])
+    @report.current_user = current_user if current_user
+    @runner = @report.runner
+    @embedded_report = true
+    @force_view_as = 'table'
+
+    @runner.search_attr_values = search_attrs_params_hash
+    @results = @runner.run(search_attrs_params_hash, current_admin)
+
+    render partial: 'reports/results'
   end
 
   protected
@@ -47,5 +65,15 @@ class Admin::ReportsController < AdminController
 
   def index_params
     %i[name item_type category report_type auto searchable admin_id]
+  end
+
+  attr_reader :embedded_report
+
+  def search_attrs_params_hash
+    @search_attrs_params_hash ||= if params[:search_attrs].blank?
+                                    { _use_defaults_: '_use_defaults_' }
+                                  else
+                                    params.require(:search_attrs).permit!.to_h.dup
+                                  end
   end
 end

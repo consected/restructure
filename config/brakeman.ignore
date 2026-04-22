@@ -58,6 +58,29 @@
       "note": ""
     },
     {
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "1b8bbec4741095cdf990baadb1ad6bc4901a6b8eafcf5536f15017d2e4cb161a",
+      "check_name": "MassAssignment",
+      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
+      "file": "app/controllers/admin/reports_controller.rb",
+      "line": 79,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:search_attrs).permit!",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::ReportsController",
+        "method": "search_attrs_params_hash"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
@@ -100,6 +123,29 @@
       "confidence": "Medium",
       "cwe_id": [
         22
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "2221c38cc9371ddeaddeed015a8f9db4a918dff1f831ff982d9de5ab2d4161dd",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/full_text_search/tsvector_writer.rb",
+      "line": 75,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.exec_query(\"UPDATE #{table_name.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")}\\nSET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($1, $2)\\nWHERE id = $3\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"record_id\", record_id, ActiveModel::Type::Integer.new)])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "FullTextSearch::TsvectorWriter",
+        "method": "FullTextSearch::TsvectorWriter.update_tsvector"
+      },
+      "user_input": "table_name.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
       ],
       "note": ""
     },
@@ -433,40 +479,6 @@
       "note": ""
     },
     {
-      "warning_type": "Path Traversal",
-      "warning_code": 125,
-      "fingerprint": "669bef58b2f24edef3e309fc45c747d52e128029afe0ff53fe53400ae2703c5b",
-      "check_name": "Pathname",
-      "message": "Absolute paths in `Pathname#join` cause the entire path to be relative to the absolute path, ignoring any prior values",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 42,
-      "link": "https://brakemanscanner.org/docs/warning_types/path_traversal/",
-      "code": "Rails.root.join(\"app\", \"views\", \"reports\", \"result_template\", \"_#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}.html.erb\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "High",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "686be0b9f9abcfcccb4ddda23612008a4c5e60782c05002d3acb5bb5e7a7442c",
@@ -700,40 +712,6 @@
       "note": ""
     },
     {
-      "warning_type": "Dynamic Render Path",
-      "warning_code": 15,
-      "fingerprint": "bb318909165e2e17e8af6aa6fd6893dd91ba241da2ab4c7db7087947fa75aa08",
-      "check_name": "Render",
-      "message": "Render path contains parameter value",
-      "file": "app/views/reports/_results.html.erb",
-      "line": 45,
-      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
-      "code": "render(partial => \"reports/result_template/#{(params[:force_view_as] or (Report.find_by_id_or_resource_name(params[:id]).report_options.view_options.view_as or \"table\")).gsub(/[^a-z_]/, \"\")}\", { :locals => ({ :result_tables => ((Report.find_by_id_or_resource_name(params[:id]).runner.result_tables_by_index or [])) }) })",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 93,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_results"
-      },
-      "user_input": "params[:force_view_as]",
-      "confidence": "Medium",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "c4849bbd5ad704cab1a06825b331b0bb903881abf1a54590aab0ed6af1d03276",
@@ -908,6 +886,29 @@
       "confidence": "Medium",
       "cwe_id": [
         79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "fcbe8cefbe5a53fefd20ecb75613ff3ae50b3b61bbd196ee2eb429d7be405e14",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/full_text_search/tsvector_writer.rb",
+      "line": 45,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.exec_query(\"INSERT INTO #{target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")} (#{ActiveRecord::Base.connection.quote_column_name(fk_column)}, master_id, #{ActiveRecord::Base.connection.quote_column_name(target_field)}, created_at, updated_at)\\nVALUES ($1, $2, to_tsvector($4, $3), now(), now())\\nON CONFLICT (#{ActiveRecord::Base.connection.quote_column_name(fk_column)})\\nDO UPDATE SET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($4, $3), updated_at = now()\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"fk_value\", fk_value, ActiveModel::Type::Integer.new), bind_param(\"master_id\", master_id, ActiveModel::Type::Integer.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new)])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "FullTextSearch::TsvectorWriter",
+        "method": "FullTextSearch::TsvectorWriter.write_tsvector"
+      },
+      "user_input": "target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
       ],
       "note": ""
     }

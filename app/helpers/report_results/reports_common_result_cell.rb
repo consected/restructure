@@ -34,7 +34,8 @@ module ReportResults
         'list' => 'ul',
         'tags' => 'div',
         'choice_label' => 'div',
-        'iframe' => 'div'
+        'iframe' => 'div',
+        'filestore_view' => nil
       }
 
       return col_show_as unless mapping.key? col_show_as
@@ -164,15 +165,38 @@ module ReportResults
     end
 
     #
-    # Show the result as a link to be opened link to be opened in a new tab.
+    # Show the result as a link to be opened in a new tab.
     # The content should be formatted using Markdown format
     #     [label for link](/url/path)
+    # Falls back to plain text if the content does not match the markdown link format (GitHub #1053)
     def cell_content_for_url
       return cell_content unless cell_content.present?
 
       col_url_parts = cell_content&.scan(/^\[(.+)\]\((.+)\)$/)
+      return html_escape(cell_content) if col_url_parts.blank?
+
+      url = col_url_parts.first.last
+      return html_escape(cell_content) unless safe_url_protocol?(url)
+
       html = <<~END_HTML
-        <a href="#{col_url_parts&.first&.last}" target="_blank">#{html_escape col_url_parts&.first&.first}</a>
+        <a href="#{html_escape url}" target="_blank">#{html_escape col_url_parts.first.first}</a>
+      END_HTML
+
+      html.html_safe
+    end
+
+    #
+    # Show the result as a link opened in the secure file viewer.
+    # The content should be formatted using Markdown format
+    #     [label for link](/url/path)
+    # The link is wrapped in a span with use-secure-view-on-links class
+    # to enable the secure viewer for filestore and Redcap file downloads.
+    def cell_content_for_filestore_view
+      return cell_content unless cell_content.present?
+
+      col_url_parts = cell_content&.scan(/^\[(.+)\]\((.+)\)$/)
+      html = <<~END_HTML
+        <span class="use-secure-view-on-links"><a href="#{col_url_parts&.first&.last}">#{html_escape col_url_parts&.first&.first}</a></span>
       END_HTML
 
       html.html_safe
@@ -193,6 +217,15 @@ module ReportResults
     end
 
     private
+
+    #
+    # Check if a URL uses a safe protocol for rendering as a link.
+    # Rejects javascript: and data: protocols to prevent XSS.
+    def safe_url_protocol?(url)
+      return true if url.start_with?('/', '#')
+
+      !url.match?(/\A\s*(javascript|data|vbscript):/i)
+    end
 
     #
     # Parse the URL from embedded_block content.

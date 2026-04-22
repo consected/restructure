@@ -161,6 +161,8 @@ class Admin
 
       import_config_sub_items 'associated_general_selections', %w[item_type value]
 
+      import_config_sub_items 'associated_item_flag_names', %w[name item_type]
+
       import_config_sub_items 'associated_reports', %w[short_name item_type]
 
       import_config_sub_items 'page_layouts', %w[layout_name panel_name]
@@ -211,7 +213,7 @@ class Admin
       when :json
         config = JSON.parse(config_text)
       when :yaml
-        config = YAML.safe_load(config_text)
+        config = YAML.safe_load(config_text, permitted_classes: [Date, Time], permitted_symbols: [])
       when :raw
         config = config_text.deep_stringify_keys
       else

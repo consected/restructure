@@ -708,6 +708,33 @@ $$;
 
 
 --
+-- Name: log_pfrpa_test_cis_rcs_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_pfrpa_test_cis_rcs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pfrpa_test_cis_rc_history (
+    
+    record_id, first_name, last_name, nickname, cis_yob, email, st_address, st_address_cont, city, state, zip_code, cell_number, other_number, nfl_contract, current_former_player, provide_blood_sample, not_interested_sample___0, not_interested_sample___1, not_interested_sample___2, not_interested_sample___3, not_interested_sample___4, not_interested_sample___5, explain, personal_results, other_share, consent_statement, consent_signature, signature_time, football_players_health_study_pro_football_retired_complete, football_players_health_study_pro_football_retired_timestamp, redcap_survey_identifier,
+    user_id,
+    created_at,
+    updated_at,
+    pfrpa_test_cis_rc_id)
+  SELECT
+    
+    NEW.record_id, NEW.first_name, NEW.last_name, NEW.nickname, NEW.cis_yob, NEW.email, NEW.st_address, NEW.st_address_cont, NEW.city, NEW.state, NEW.zip_code, NEW.cell_number, NEW.other_number, NEW.nfl_contract, NEW.current_former_player, NEW.provide_blood_sample, NEW.not_interested_sample___0, NEW.not_interested_sample___1, NEW.not_interested_sample___2, NEW.not_interested_sample___3, NEW.not_interested_sample___4, NEW.not_interested_sample___5, NEW.explain, NEW.personal_results, NEW.other_share, NEW.consent_statement, NEW.consent_signature, NEW.signature_time, NEW.football_players_health_study_pro_football_retired_complete, NEW.football_players_health_study_pro_football_retired_timestamp, NEW.redcap_survey_identifier,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_q2_demo2_rcs_update(); Type: FUNCTION; Schema: dynamic; Owner: -
 --
 
@@ -1140,6 +1167,33 @@ $$;
 
 
 --
+-- Name: log_test_fails_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_test_fails_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test_fail_history (
+    master_id,
+    
+    user_id,
+    created_at,
+    updated_at,
+    test_fail_id)
+  SELECT
+    NEW.master_id,
+    
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_test_fields_from_spec_tests_update(); Type: FUNCTION; Schema: dynamic; Owner: -
 --
 
@@ -1331,6 +1385,33 @@ $$;
 
 
 --
+-- Name: log_test_libs_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_test_libs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test_lib_history (
+    
+    hello,
+    user_id,
+    created_at,
+    updated_at,
+    test_lib_id)
+  SELECT
+    
+    NEW.hello,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_test_multi_options_update(); Type: FUNCTION; Schema: dynamic; Owner: -
 --
 
@@ -1466,6 +1547,33 @@ $$;
 
 
 --
+-- Name: log_test_notify_attachments_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_test_notify_attachments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test_notify_attachment_history (
+    
+    title, description, location, start_at, end_at, from_email,
+    user_id,
+    created_at,
+    updated_at,
+    test_notify_attachment_id)
+  SELECT
+    
+    NEW.title, NEW.description, NEW.location, NEW.start_at, NEW.end_at, NEW.from_email,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_test_rails_sevens_update(); Type: FUNCTION; Schema: dynamic; Owner: -
 --
 
@@ -1537,6 +1645,33 @@ BEGIN
   SELECT
     
     NEW.username, NEW.first_name, NEW.last_name, NEW.email_address, NEW.administrator, NEW.users_sponsor, NEW.institution_id, NEW.comments, NEW.first_activity, NEW.last_activity, NEW.last_login, NEW.time_of_suspension, NEW.expiration_date,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_test_secrets_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_test_secrets_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test_secret_history (
+    
+    name, secret_value,
+    user_id,
+    created_at,
+    updated_at,
+    test_secret_id)
+  SELECT
+    
+    NEW.name, NEW.secret_value,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -1645,6 +1780,33 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.test1, NEW.test2,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_test_trigger_fails_update(); Type: FUNCTION; Schema: dynamic; Owner: -
+--
+
+CREATE FUNCTION dynamic.log_test_trigger_fails_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test_trigger_fail_history (
+    master_id,
+    info,
+    user_id,
+    created_at,
+    updated_at,
+    test_trigger_fail_id)
+  SELECT
+    NEW.master_id,
+    NEW.info,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -9031,7 +9193,9 @@ CREATE TABLE ml_app.users (
     confirmation_sent_at timestamp without time zone,
     country_code character varying,
     terms_of_use_accepted character varying,
-    otp_secret character varying
+    otp_secret character varying,
+    expire_datetime timestamp without time zone,
+    api_access_only boolean DEFAULT false
 );
 
 
@@ -15773,6 +15937,33 @@ $$;
 
 
 --
+-- Name: log_rc_femfl_cif_rcs_update(); Type: FUNCTION; Schema: redcap; Owner: -
+--
+
+CREATE FUNCTION redcap.log_rc_femfl_cif_rcs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO rc_femfl_cif_rc_history (
+    
+    record_id, first_name, last_name, cis_yob, email, cell_number, other_phone_number, hear_about___1, hear_about___10, hear_about___11, hear_about___12, hear_about___2, hear_about___3, hear_about___4, hear_about___5, hear_about___6, hear_about___7, hear_about___8, hear_about___9, hear_about_wives_group, hear_about_event, hear_about_other, relationship_to_player___1, relationship_to_player___2, relationship_to_player___3, relationship_to_player___4, relationship_to_player___5, relationship_to_player___6, relationship_to_player___12, relationship_to_player___7, relationship_to_player___8, relationship_to_player___9, relationship_to_player___10, relationship_to_player___11, relationship_other, comments, femfl_contact_info_complete, femfl_contact_info_timestamp, redcap_survey_identifier,
+    user_id,
+    created_at,
+    updated_at,
+    rc_femfl_cif_rc_id)
+  SELECT
+    
+    NEW.record_id, NEW.first_name, NEW.last_name, NEW.cis_yob, NEW.email, NEW.cell_number, NEW.other_phone_number, NEW.hear_about___1, NEW.hear_about___10, NEW.hear_about___11, NEW.hear_about___12, NEW.hear_about___2, NEW.hear_about___3, NEW.hear_about___4, NEW.hear_about___5, NEW.hear_about___6, NEW.hear_about___7, NEW.hear_about___8, NEW.hear_about___9, NEW.hear_about_wives_group, NEW.hear_about_event, NEW.hear_about_other, NEW.relationship_to_player___1, NEW.relationship_to_player___2, NEW.relationship_to_player___3, NEW.relationship_to_player___4, NEW.relationship_to_player___5, NEW.relationship_to_player___6, NEW.relationship_to_player___12, NEW.relationship_to_player___7, NEW.relationship_to_player___8, NEW.relationship_to_player___9, NEW.relationship_to_player___10, NEW.relationship_to_player___11, NEW.relationship_other, NEW.comments, NEW.femfl_contact_info_complete, NEW.femfl_contact_info_timestamp, NEW.redcap_survey_identifier,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_rc_q2_demos_update(); Type: FUNCTION; Schema: redcap; Owner: -
 --
 
@@ -19674,6 +19865,552 @@ CREATE SEQUENCE dynamic.persons_id_seq
 --
 
 ALTER SEQUENCE dynamic.persons_id_seq OWNED BY dynamic.persons.id;
+
+
+--
+-- Name: pfrpa_test_cis_rc_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.pfrpa_test_cis_rc_history (
+    id bigint NOT NULL,
+    record_id character varying,
+    first_name character varying,
+    last_name character varying,
+    nickname character varying,
+    cis_yob character varying,
+    email character varying,
+    st_address character varying,
+    st_address_cont character varying,
+    city character varying,
+    state character varying,
+    zip_code character varying,
+    cell_number character varying,
+    other_number character varying,
+    nfl_contract character varying,
+    current_former_player character varying,
+    provide_blood_sample character varying,
+    not_interested_sample___0 boolean,
+    not_interested_sample___1 boolean,
+    not_interested_sample___2 boolean,
+    not_interested_sample___3 boolean,
+    not_interested_sample___4 boolean,
+    not_interested_sample___5 boolean,
+    explain character varying,
+    personal_results character varying,
+    other_share character varying,
+    consent_statement character varying,
+    consent_signature character varying,
+    signature_time time without time zone,
+    football_players_health_study_pro_football_retired_complete integer,
+    football_players_health_study_pro_football_retired_timestamp timestamp without time zone,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pfrpa_test_cis_rc_id bigint
+);
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.record_id; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.record_id IS 'Record ID';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.first_name; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.first_name IS 'First Name';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.last_name; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.last_name IS 'Last Name';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.nickname; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.nickname IS 'Nickname';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.cis_yob; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.cis_yob IS 'Year of birth';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.email; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.email IS 'E-mail';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.st_address; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.st_address IS 'Street Address';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.st_address_cont; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.st_address_cont IS 'Street Address, continued';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.city; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.city IS 'City';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.state; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.state IS 'State';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.zip_code; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.zip_code IS 'Zip Code';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.cell_number; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.cell_number IS 'Cell phone number';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.other_number; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.other_number IS 'Other phone number';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.nfl_contract; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.nfl_contract IS 'Have you ever signed a contract for an NFL team?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.current_former_player; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.current_former_player IS 'Are you a current or former NFL player?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.provide_blood_sample; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.provide_blood_sample IS 'Would you be wiling to provide a blood sample at home using the finger prick method? A finger prick is a method of drawing blood using a small device called a lancet. Lancets prick the finger to produce a drop of blood, which is placed on special paper.  
+  
+No genetic testing will be conducted without your consent.';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___0; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___0 IS 'Concerns about pain or discomfort';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___1; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___1 IS 'Concerns about data privacy, data sharing, or data security';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___2; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___2 IS 'Uncomfortable with the collection process or not enough knowledge of the collection process';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___3; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___3 IS 'Time or logistical constraints';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___4; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___4 IS 'I prefer not to answer';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.not_interested_sample___5; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.not_interested_sample___5 IS 'Other';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.explain; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.explain IS 'Please explain:';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.personal_results; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.personal_results IS 'Would you like to receive a copy of your personalized health results?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.other_share; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.other_share IS 'Is there anything else you would like to share with the study team?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.consent_statement; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.consent_statement IS '###### Statement of Consent
+
+I have read the information in this consent form including risks and
+possible benefits. All my questions about the research have been
+answered to my satisfaction. I understand that I am free to withdraw at
+any time without penalty or loss of benefits to which I am otherwise
+entitled.  
+  
+I consent to participate in the study.
+{: style="font-weight: lighter;"}';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.consent_signature; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.consent_signature IS 'Please sign here to indicate your consent to participate in the FPHS Health Biodata Initiative:';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rc_history.signature_time; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rc_history.signature_time IS 'Date and time of consent';
+
+
+--
+-- Name: pfrpa_test_cis_rc_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.pfrpa_test_cis_rc_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pfrpa_test_cis_rc_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.pfrpa_test_cis_rc_history_id_seq OWNED BY dynamic.pfrpa_test_cis_rc_history.id;
+
+
+--
+-- Name: pfrpa_test_cis_rcs; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.pfrpa_test_cis_rcs (
+    id bigint NOT NULL,
+    record_id character varying,
+    first_name character varying,
+    last_name character varying,
+    nickname character varying,
+    cis_yob character varying,
+    email character varying,
+    st_address character varying,
+    st_address_cont character varying,
+    city character varying,
+    state character varying,
+    zip_code character varying,
+    cell_number character varying,
+    other_number character varying,
+    nfl_contract character varying,
+    current_former_player character varying,
+    provide_blood_sample character varying,
+    not_interested_sample___0 boolean,
+    not_interested_sample___1 boolean,
+    not_interested_sample___2 boolean,
+    not_interested_sample___3 boolean,
+    not_interested_sample___4 boolean,
+    not_interested_sample___5 boolean,
+    explain character varying,
+    personal_results character varying,
+    other_share character varying,
+    consent_statement character varying,
+    consent_signature character varying,
+    signature_time time without time zone,
+    football_players_health_study_pro_football_retired_complete integer,
+    football_players_health_study_pro_football_retired_timestamp timestamp without time zone,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE pfrpa_test_cis_rcs; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.pfrpa_test_cis_rcs IS 'Dynamicmodel: Pfrpa Hbi Cis';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.record_id; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.record_id IS 'Record ID';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.first_name; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.first_name IS 'First Name';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.last_name; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.last_name IS 'Last Name';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.nickname; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.nickname IS 'Nickname';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.cis_yob; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.cis_yob IS 'Year of birth';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.email; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.email IS 'E-mail';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.st_address; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.st_address IS 'Street Address';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.st_address_cont; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.st_address_cont IS 'Street Address, continued';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.city; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.city IS 'City';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.state; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.state IS 'State';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.zip_code; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.zip_code IS 'Zip Code';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.cell_number; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.cell_number IS 'Cell phone number';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.other_number; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.other_number IS 'Other phone number';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.nfl_contract; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.nfl_contract IS 'Have you ever signed a contract for an NFL team?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.current_former_player; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.current_former_player IS 'Are you a current or former NFL player?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.provide_blood_sample; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.provide_blood_sample IS 'Would you be wiling to provide a blood sample at home using the finger prick method? A finger prick is a method of drawing blood using a small device called a lancet. Lancets prick the finger to produce a drop of blood, which is placed on special paper.  
+  
+No genetic testing will be conducted without your consent.';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___0; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___0 IS 'Concerns about pain or discomfort';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___1; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___1 IS 'Concerns about data privacy, data sharing, or data security';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___2; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___2 IS 'Uncomfortable with the collection process or not enough knowledge of the collection process';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___3; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___3 IS 'Time or logistical constraints';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___4; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___4 IS 'I prefer not to answer';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.not_interested_sample___5; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.not_interested_sample___5 IS 'Other';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.explain; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.explain IS 'Please explain:';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.personal_results; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.personal_results IS 'Would you like to receive a copy of your personalized health results?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.other_share; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.other_share IS 'Is there anything else you would like to share with the study team?';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.consent_statement; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.consent_statement IS '###### Statement of Consent
+
+I have read the information in this consent form including risks and
+possible benefits. All my questions about the research have been
+answered to my satisfaction. I understand that I am free to withdraw at
+any time without penalty or loss of benefits to which I am otherwise
+entitled.  
+  
+I consent to participate in the study.
+{: style="font-weight: lighter;"}';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.consent_signature; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.consent_signature IS 'Please sign here to indicate your consent to participate in the FPHS Health Biodata Initiative:';
+
+
+--
+-- Name: COLUMN pfrpa_test_cis_rcs.signature_time; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON COLUMN dynamic.pfrpa_test_cis_rcs.signature_time IS 'Date and time of consent';
+
+
+--
+-- Name: pfrpa_test_cis_rcs_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.pfrpa_test_cis_rcs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pfrpa_test_cis_rcs_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.pfrpa_test_cis_rcs_id_seq OWNED BY dynamic.pfrpa_test_cis_rcs.id;
 
 
 --
@@ -31269,6 +32006,78 @@ ALTER SEQUENCE dynamic.test_dm_classes_id_seq OWNED BY dynamic.test_dm_classes.i
 
 
 --
+-- Name: test_fail_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_fail_history (
+    id bigint NOT NULL,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_fail_id bigint,
+    master_id bigint
+);
+
+
+--
+-- Name: test_fail_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_fail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_fail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_fail_history_id_seq OWNED BY dynamic.test_fail_history.id;
+
+
+--
+-- Name: test_fails; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_fails (
+    id bigint NOT NULL,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    master_id bigint
+);
+
+
+--
+-- Name: TABLE test_fails; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.test_fails IS 'Dynamicmodel: Test Fail';
+
+
+--
+-- Name: test_fails_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_fails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_fails_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_fails_id_seq OWNED BY dynamic.test_fails.id;
+
+
+--
 -- Name: test_field_history; Type: TABLE; Schema: dynamic; Owner: -
 --
 
@@ -32221,6 +33030,78 @@ ALTER SEQUENCE dynamic.test_jnks_id_seq OWNED BY dynamic.test_jnks.id;
 
 
 --
+-- Name: test_lib_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_lib_history (
+    id bigint NOT NULL,
+    hello character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_lib_id bigint
+);
+
+
+--
+-- Name: test_lib_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_lib_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_lib_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_lib_history_id_seq OWNED BY dynamic.test_lib_history.id;
+
+
+--
+-- Name: test_libs; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_libs (
+    id bigint NOT NULL,
+    hello character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE test_libs; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.test_libs IS 'Dynamicmodel: Test Libs';
+
+
+--
+-- Name: test_libs_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_libs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_libs_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_libs_id_seq OWNED BY dynamic.test_libs.id;
+
+
+--
 -- Name: test_multi_option_history; Type: TABLE; Schema: dynamic; Owner: -
 --
 
@@ -33001,6 +33882,88 @@ ALTER SEQUENCE dynamic.test_new_ones_id_seq OWNED BY dynamic.test_new_ones.id;
 
 
 --
+-- Name: test_notify_attachment_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_notify_attachment_history (
+    id bigint NOT NULL,
+    title character varying,
+    description character varying,
+    location character varying,
+    start_at timestamp without time zone,
+    end_at timestamp without time zone,
+    from_email character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_notify_attachment_id bigint
+);
+
+
+--
+-- Name: test_notify_attachment_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_notify_attachment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_notify_attachment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_notify_attachment_history_id_seq OWNED BY dynamic.test_notify_attachment_history.id;
+
+
+--
+-- Name: test_notify_attachments; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_notify_attachments (
+    id bigint NOT NULL,
+    title character varying,
+    description character varying,
+    location character varying,
+    start_at timestamp without time zone,
+    end_at timestamp without time zone,
+    from_email character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE test_notify_attachments; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.test_notify_attachments IS 'Dynamicmodel: Test Batch';
+
+
+--
+-- Name: test_notify_attachments_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_notify_attachments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_notify_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_notify_attachments_id_seq OWNED BY dynamic.test_notify_attachments.id;
+
+
+--
 -- Name: test_rails_seven_history; Type: TABLE; Schema: dynamic; Owner: -
 --
 
@@ -33327,6 +34290,80 @@ ALTER SEQUENCE dynamic.test_s7s_statuses_id_seq OWNED BY dynamic.test_s7s_status
 
 
 --
+-- Name: test_secret_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_secret_history (
+    id bigint NOT NULL,
+    name character varying,
+    secret_value character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_secret_id bigint
+);
+
+
+--
+-- Name: test_secret_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_secret_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_secret_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_secret_history_id_seq OWNED BY dynamic.test_secret_history.id;
+
+
+--
+-- Name: test_secrets; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_secrets (
+    id bigint NOT NULL,
+    name character varying,
+    secret_value character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE test_secrets; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.test_secrets IS 'Dynamicmodel: Test Secrets';
+
+
+--
+-- Name: test_secrets_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_secrets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_secrets_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_secrets_id_seq OWNED BY dynamic.test_secrets.id;
+
+
+--
 -- Name: test_simple_rec_history; Type: TABLE; Schema: dynamic; Owner: -
 --
 
@@ -33636,6 +34673,80 @@ CREATE SEQUENCE dynamic.test_table_three_recs_id_seq
 --
 
 ALTER SEQUENCE dynamic.test_table_three_recs_id_seq OWNED BY dynamic.test_table_three_recs.id;
+
+
+--
+-- Name: test_trigger_fail_history; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_trigger_fail_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_trigger_fail_id bigint,
+    info character varying
+);
+
+
+--
+-- Name: test_trigger_fail_history_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_trigger_fail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_trigger_fail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_trigger_fail_history_id_seq OWNED BY dynamic.test_trigger_fail_history.id;
+
+
+--
+-- Name: test_trigger_fails; Type: TABLE; Schema: dynamic; Owner: -
+--
+
+CREATE TABLE dynamic.test_trigger_fails (
+    id bigint NOT NULL,
+    master_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    info character varying
+);
+
+
+--
+-- Name: TABLE test_trigger_fails; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON TABLE dynamic.test_trigger_fails IS 'Dynamicmodel: Test Fail';
+
+
+--
+-- Name: test_trigger_fails_id_seq; Type: SEQUENCE; Schema: dynamic; Owner: -
+--
+
+CREATE SEQUENCE dynamic.test_trigger_fails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_trigger_fails_id_seq; Type: SEQUENCE OWNED BY; Schema: dynamic; Owner: -
+--
+
+ALTER SEQUENCE dynamic.test_trigger_fails_id_seq OWNED BY dynamic.test_trigger_fails.id;
 
 
 --
@@ -37486,6 +38597,41 @@ CREATE VIEW dynamic.view_pfrpa_cis_recs AS
 --
 
 COMMENT ON VIEW dynamic.view_pfrpa_cis_recs IS 'Dynamicmodel: Pfrpa Registration Events';
+
+
+--
+-- Name: view_test_trigger_fails; Type: VIEW; Schema: dynamic; Owner: -
+--
+
+CREATE VIEW dynamic.view_test_trigger_fails AS
+ SELECT id,
+    master_id,
+    first_name,
+    last_name,
+    middle_name,
+    nick_name,
+    birth_date,
+    death_date,
+    user_id,
+    created_at,
+    updated_at,
+    contact_pref,
+    start_year,
+    rank,
+    notes,
+    contact_id,
+    college,
+    end_year,
+    source
+   FROM ml_app.player_infos
+  WHERE ((first_name)::text = 'test'::text);
+
+
+--
+-- Name: VIEW view_test_trigger_fails; Type: COMMENT; Schema: dynamic; Owner: -
+--
+
+COMMENT ON VIEW dynamic.view_test_trigger_fails IS 'Dynamicmodel: Test Fail';
 
 
 --
@@ -54088,7 +55234,8 @@ CREATE TABLE ml_app.admins (
     do_not_email boolean DEFAULT false,
     admin_id bigint,
     capabilities character varying[],
-    otp_secret character varying
+    otp_secret character varying,
+    expire_datetime timestamp without time zone
 );
 
 
@@ -110108,6 +111255,658 @@ ALTER SEQUENCE redcap.q2_redcap_v2_recs_id_seq OWNED BY redcap.q2_redcap_v2_recs
 
 
 --
+-- Name: rc_femfl_cif_rc_history; Type: TABLE; Schema: redcap; Owner: -
+--
+
+CREATE TABLE redcap.rc_femfl_cif_rc_history (
+    id bigint NOT NULL,
+    record_id bigint,
+    first_name character varying,
+    last_name character varying,
+    cis_yob character varying,
+    email character varying,
+    cell_number integer,
+    other_phone_number integer,
+    hear_about___1 character varying,
+    hear_about___10 character varying,
+    hear_about___11 character varying,
+    hear_about___12 character varying,
+    hear_about___2 character varying,
+    hear_about___3 character varying,
+    hear_about___4 character varying,
+    hear_about___5 character varying,
+    hear_about___6 character varying,
+    hear_about___7 character varying,
+    hear_about___8 character varying,
+    hear_about___9 character varying,
+    hear_about_wives_group character varying,
+    hear_about_event character varying,
+    hear_about_other character varying,
+    relationship_to_player___1 character varying,
+    relationship_to_player___2 character varying,
+    relationship_to_player___3 character varying,
+    relationship_to_player___4 character varying,
+    relationship_to_player___5 character varying,
+    relationship_to_player___6 character varying,
+    relationship_to_player___12 character varying,
+    relationship_to_player___7 character varying,
+    relationship_to_player___8 character varying,
+    relationship_to_player___9 character varying,
+    relationship_to_player___10 character varying,
+    relationship_to_player___11 character varying,
+    relationship_other character varying,
+    comments character varying,
+    femfl_contact_info_complete character varying,
+    femfl_contact_info_timestamp integer,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    rc_femfl_cif_rc_id bigint
+);
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.record_id; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.record_id IS 'Study ID';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.first_name; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.first_name IS 'First Name';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.last_name; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.last_name IS 'Last Name';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.cis_yob; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.cis_yob IS 'Year of birth:';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.email; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.email IS 'E-mail';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.cell_number; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.cell_number IS 'Cell phone number';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.other_phone_number; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.other_phone_number IS 'Other phone number';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___1; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___1 IS 'Former or current NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___10; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___10 IS 'Off the Field Players'' Wives Association';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___11; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___11 IS 'NFL Thread';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___12; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___12 IS 'Women of the NFL';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___2; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___2 IS 'Other football wives''/partners''/mothers'' group';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___3; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___3 IS 'Friend or family member';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___4; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___4 IS 'Twitter';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___5; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___5 IS 'Instagram';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___6; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___6 IS 'Facebook';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___7; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___7 IS 'At an event';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___8; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___8 IS 'From study staff';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about___9; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about___9 IS 'Other';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about_wives_group; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about_wives_group IS 'Which wives/partners/mothers group?';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about_event; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about_event IS 'Which event?';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.hear_about_other; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.hear_about_other IS 'Other (please specify)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___1; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___1 IS 'Current spouse/partner of former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___2; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___2 IS 'Current spouse/partner of active NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___3; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___3 IS 'Current spouse/partner of NFL free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___4; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___4 IS 'Previously married/partnered to former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___5; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___5 IS 'Previously married/partnered to active NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___6; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___6 IS 'Previously married/partnered to NFL free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___12; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___12 IS 'Surviving spouse/partner of deceased former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___7; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___7 IS 'Mother of former or active NFL player or free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___8; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___8 IS 'Sister of former or active NFL player or free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___9; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___9 IS 'Daughter of former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___10; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___10 IS 'Other family member of former or active NFL player or free agent (e.g. cousin, grandparent, father, brother)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_to_player___11; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_to_player___11 IS 'Other';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.relationship_other; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.relationship_other IS 'Other (please specify)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rc_history.comments; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rc_history.comments IS 'Is there anything else you would like to share with the study team?';
+
+
+--
+-- Name: rc_femfl_cif_rc_history_id_seq; Type: SEQUENCE; Schema: redcap; Owner: -
+--
+
+CREATE SEQUENCE redcap.rc_femfl_cif_rc_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_femfl_cif_rc_history_id_seq; Type: SEQUENCE OWNED BY; Schema: redcap; Owner: -
+--
+
+ALTER SEQUENCE redcap.rc_femfl_cif_rc_history_id_seq OWNED BY redcap.rc_femfl_cif_rc_history.id;
+
+
+--
+-- Name: rc_femfl_cif_rcs; Type: TABLE; Schema: redcap; Owner: -
+--
+
+CREATE TABLE redcap.rc_femfl_cif_rcs (
+    id bigint NOT NULL,
+    record_id bigint,
+    first_name character varying,
+    last_name character varying,
+    cis_yob character varying,
+    email character varying,
+    cell_number integer,
+    other_phone_number integer,
+    hear_about___1 character varying,
+    hear_about___10 character varying,
+    hear_about___11 character varying,
+    hear_about___12 character varying,
+    hear_about___2 character varying,
+    hear_about___3 character varying,
+    hear_about___4 character varying,
+    hear_about___5 character varying,
+    hear_about___6 character varying,
+    hear_about___7 character varying,
+    hear_about___8 character varying,
+    hear_about___9 character varying,
+    hear_about_wives_group character varying,
+    hear_about_event character varying,
+    hear_about_other character varying,
+    relationship_to_player___1 character varying,
+    relationship_to_player___2 character varying,
+    relationship_to_player___3 character varying,
+    relationship_to_player___4 character varying,
+    relationship_to_player___5 character varying,
+    relationship_to_player___6 character varying,
+    relationship_to_player___12 character varying,
+    relationship_to_player___7 character varying,
+    relationship_to_player___8 character varying,
+    relationship_to_player___9 character varying,
+    relationship_to_player___10 character varying,
+    relationship_to_player___11 character varying,
+    relationship_other character varying,
+    comments character varying,
+    femfl_contact_info_complete character varying,
+    femfl_contact_info_timestamp integer,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE rc_femfl_cif_rcs; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON TABLE redcap.rc_femfl_cif_rcs IS 'Dynamicmodel: Rc Femfl Cif Rc';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.record_id; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.record_id IS 'Study ID';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.first_name; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.first_name IS 'First Name';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.last_name; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.last_name IS 'Last Name';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.cis_yob; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.cis_yob IS 'Year of birth:';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.email; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.email IS 'E-mail';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.cell_number; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.cell_number IS 'Cell phone number';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.other_phone_number; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.other_phone_number IS 'Other phone number';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___1; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___1 IS 'Former or current NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___10; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___10 IS 'Off the Field Players'' Wives Association';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___11; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___11 IS 'NFL Thread';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___12; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___12 IS 'Women of the NFL';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___2; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___2 IS 'Other football wives''/partners''/mothers'' group';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___3; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___3 IS 'Friend or family member';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___4; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___4 IS 'Twitter';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___5; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___5 IS 'Instagram';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___6; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___6 IS 'Facebook';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___7; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___7 IS 'At an event';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___8; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___8 IS 'From study staff';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about___9; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about___9 IS 'Other';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about_wives_group; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about_wives_group IS 'Which wives/partners/mothers group?';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about_event; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about_event IS 'Which event?';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.hear_about_other; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.hear_about_other IS 'Other (please specify)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___1; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___1 IS 'Current spouse/partner of former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___2; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___2 IS 'Current spouse/partner of active NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___3; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___3 IS 'Current spouse/partner of NFL free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___4; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___4 IS 'Previously married/partnered to former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___5; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___5 IS 'Previously married/partnered to active NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___6; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___6 IS 'Previously married/partnered to NFL free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___12; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___12 IS 'Surviving spouse/partner of deceased former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___7; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___7 IS 'Mother of former or active NFL player or free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___8; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___8 IS 'Sister of former or active NFL player or free agent';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___9; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___9 IS 'Daughter of former NFL player';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___10; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___10 IS 'Other family member of former or active NFL player or free agent (e.g. cousin, grandparent, father, brother)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_to_player___11; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_to_player___11 IS 'Other';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.relationship_other; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.relationship_other IS 'Other (please specify)';
+
+
+--
+-- Name: COLUMN rc_femfl_cif_rcs.comments; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON COLUMN redcap.rc_femfl_cif_rcs.comments IS 'Is there anything else you would like to share with the study team?';
+
+
+--
+-- Name: rc_femfl_cif_rcs_id_seq; Type: SEQUENCE; Schema: redcap; Owner: -
+--
+
+CREATE SEQUENCE redcap.rc_femfl_cif_rcs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_femfl_cif_rcs_id_seq; Type: SEQUENCE OWNED BY; Schema: redcap; Owner: -
+--
+
+ALTER SEQUENCE redcap.rc_femfl_cif_rcs_id_seq OWNED BY redcap.rc_femfl_cif_rcs.id;
+
+
+--
 -- Name: rc_q2_demo_history; Type: TABLE; Schema: redcap; Owner: -
 --
 
@@ -127637,6 +129436,20 @@ ALTER TABLE ONLY dynamic.persons ALTER COLUMN id SET DEFAULT nextval('dynamic.pe
 
 
 --
+-- Name: pfrpa_test_cis_rc_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rc_history ALTER COLUMN id SET DEFAULT nextval('dynamic.pfrpa_test_cis_rc_history_id_seq'::regclass);
+
+
+--
+-- Name: pfrpa_test_cis_rcs id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rcs ALTER COLUMN id SET DEFAULT nextval('dynamic.pfrpa_test_cis_rcs_id_seq'::regclass);
+
+
+--
 -- Name: q2_demo2_rc_history id; Type: DEFAULT; Schema: dynamic; Owner: -
 --
 
@@ -127931,6 +129744,20 @@ ALTER TABLE ONLY dynamic.test_dm_classes ALTER COLUMN id SET DEFAULT nextval('dy
 
 
 --
+-- Name: test_fail_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fail_history ALTER COLUMN id SET DEFAULT nextval('dynamic.test_fail_history_id_seq'::regclass);
+
+
+--
+-- Name: test_fails id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fails ALTER COLUMN id SET DEFAULT nextval('dynamic.test_fails_id_seq'::regclass);
+
+
+--
 -- Name: test_field_history id; Type: DEFAULT; Schema: dynamic; Owner: -
 --
 
@@ -128029,6 +129856,20 @@ ALTER TABLE ONLY dynamic.test_jnks ALTER COLUMN id SET DEFAULT nextval('dynamic.
 
 
 --
+-- Name: test_lib_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_lib_history ALTER COLUMN id SET DEFAULT nextval('dynamic.test_lib_history_id_seq'::regclass);
+
+
+--
+-- Name: test_libs id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_libs ALTER COLUMN id SET DEFAULT nextval('dynamic.test_libs_id_seq'::regclass);
+
+
+--
 -- Name: test_multi_option_history id; Type: DEFAULT; Schema: dynamic; Owner: -
 --
 
@@ -128099,6 +129940,20 @@ ALTER TABLE ONLY dynamic.test_new_ones ALTER COLUMN id SET DEFAULT nextval('dyna
 
 
 --
+-- Name: test_notify_attachment_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachment_history ALTER COLUMN id SET DEFAULT nextval('dynamic.test_notify_attachment_history_id_seq'::regclass);
+
+
+--
+-- Name: test_notify_attachments id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachments ALTER COLUMN id SET DEFAULT nextval('dynamic.test_notify_attachments_id_seq'::regclass);
+
+
+--
 -- Name: test_rails_seven_history id; Type: DEFAULT; Schema: dynamic; Owner: -
 --
 
@@ -128138,6 +129993,20 @@ ALTER TABLE ONLY dynamic.test_s7s_status_history ALTER COLUMN id SET DEFAULT nex
 --
 
 ALTER TABLE ONLY dynamic.test_s7s_statuses ALTER COLUMN id SET DEFAULT nextval('dynamic.test_s7s_statuses_id_seq'::regclass);
+
+
+--
+-- Name: test_secret_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secret_history ALTER COLUMN id SET DEFAULT nextval('dynamic.test_secret_history_id_seq'::regclass);
+
+
+--
+-- Name: test_secrets id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secrets ALTER COLUMN id SET DEFAULT nextval('dynamic.test_secrets_id_seq'::regclass);
 
 
 --
@@ -128194,6 +130063,20 @@ ALTER TABLE ONLY dynamic.test_table_three_rec_history ALTER COLUMN id SET DEFAUL
 --
 
 ALTER TABLE ONLY dynamic.test_table_three_recs ALTER COLUMN id SET DEFAULT nextval('dynamic.test_table_three_recs_id_seq'::regclass);
+
+
+--
+-- Name: test_trigger_fail_history id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fail_history ALTER COLUMN id SET DEFAULT nextval('dynamic.test_trigger_fail_history_id_seq'::regclass);
+
+
+--
+-- Name: test_trigger_fails id; Type: DEFAULT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fails ALTER COLUMN id SET DEFAULT nextval('dynamic.test_trigger_fails_id_seq'::regclass);
 
 
 --
@@ -131403,6 +133286,20 @@ ALTER TABLE ONLY redcap.q2_redcap_v2_recs ALTER COLUMN id SET DEFAULT nextval('r
 
 
 --
+-- Name: rc_femfl_cif_rc_history id; Type: DEFAULT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rc_history ALTER COLUMN id SET DEFAULT nextval('redcap.rc_femfl_cif_rc_history_id_seq'::regclass);
+
+
+--
+-- Name: rc_femfl_cif_rcs id; Type: DEFAULT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rcs ALTER COLUMN id SET DEFAULT nextval('redcap.rc_femfl_cif_rcs_id_seq'::regclass);
+
+
+--
 -- Name: rc_q2_demo_history id; Type: DEFAULT; Schema: redcap; Owner: -
 --
 
@@ -132179,6 +134076,22 @@ ALTER TABLE ONLY dynamic.persons
 
 
 --
+-- Name: pfrpa_test_cis_rc_history pfrpa_test_cis_rc_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rc_history
+    ADD CONSTRAINT pfrpa_test_cis_rc_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pfrpa_test_cis_rcs pfrpa_test_cis_rcs_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rcs
+    ADD CONSTRAINT pfrpa_test_cis_rcs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: q2_demo2_rc_history q2_demo2_rc_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -132515,6 +134428,22 @@ ALTER TABLE ONLY dynamic.test_dm_classes
 
 
 --
+-- Name: test_fail_history test_fail_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fail_history
+    ADD CONSTRAINT test_fail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_fails test_fails_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fails
+    ADD CONSTRAINT test_fails_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: test_field_history test_field_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -132627,6 +134556,22 @@ ALTER TABLE ONLY dynamic.test_jnks
 
 
 --
+-- Name: test_lib_history test_lib_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_lib_history
+    ADD CONSTRAINT test_lib_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_libs test_libs_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_libs
+    ADD CONSTRAINT test_libs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: test_multi_option_history test_multi_option_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -132707,6 +134652,22 @@ ALTER TABLE ONLY dynamic.test_new_ones
 
 
 --
+-- Name: test_notify_attachment_history test_notify_attachment_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachment_history
+    ADD CONSTRAINT test_notify_attachment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_notify_attachments test_notify_attachments_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachments
+    ADD CONSTRAINT test_notify_attachments_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: test_rails_seven_history test_rails_seven_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -132752,6 +134713,22 @@ ALTER TABLE ONLY dynamic.test_s7s_status_history
 
 ALTER TABLE ONLY dynamic.test_s7s_statuses
     ADD CONSTRAINT test_s7s_statuses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_secret_history test_secret_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secret_history
+    ADD CONSTRAINT test_secret_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_secrets test_secrets_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secrets
+    ADD CONSTRAINT test_secrets_pkey PRIMARY KEY (id);
 
 
 --
@@ -132816,6 +134793,22 @@ ALTER TABLE ONLY dynamic.test_table_three_rec_history
 
 ALTER TABLE ONLY dynamic.test_table_three_recs
     ADD CONSTRAINT test_table_three_recs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_trigger_fail_history test_trigger_fail_history_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fail_history
+    ADD CONSTRAINT test_trigger_fail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_trigger_fails test_trigger_fails_pkey; Type: CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fails
+    ADD CONSTRAINT test_trigger_fails_pkey PRIMARY KEY (id);
 
 
 --
@@ -136491,6 +138484,22 @@ ALTER TABLE ONLY redcap.q2_redcap_v2_recs
 
 
 --
+-- Name: rc_femfl_cif_rc_history rc_femfl_cif_rc_history_pkey; Type: CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rc_history
+    ADD CONSTRAINT rc_femfl_cif_rc_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rc_femfl_cif_rcs rc_femfl_cif_rcs_pkey; Type: CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rcs
+    ADD CONSTRAINT rc_femfl_cif_rcs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: rc_q2_demo_history rc_q2_demo_history_pkey; Type: CONSTRAINT; Schema: redcap; Owner: -
 --
 
@@ -136985,6 +138994,48 @@ CREATE INDEX "081f8c0b_id_idx" ON dynamic.test_alt_id_history USING btree (test_
 --
 
 CREATE INDEX "081f8c0b_user_idx" ON dynamic.test_alt_ids USING btree (user_id);
+
+
+--
+-- Name: 0f50716a_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "0f50716a_hist_user_idx" ON dynamic.test_secret_history USING btree (user_id);
+
+
+--
+-- Name: 0f50716a_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "0f50716a_id_idx" ON dynamic.test_secret_history USING btree (test_secret_id);
+
+
+--
+-- Name: 0f50716a_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "0f50716a_user_idx" ON dynamic.test_secrets USING btree (user_id);
+
+
+--
+-- Name: 130c201b_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "130c201b_hist_user_idx" ON dynamic.test_notify_attachment_history USING btree (user_id);
+
+
+--
+-- Name: 130c201b_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "130c201b_id_idx" ON dynamic.test_notify_attachment_history USING btree (test_notify_attachment_id);
+
+
+--
+-- Name: 130c201b_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX "130c201b_user_idx" ON dynamic.test_notify_attachments USING btree (user_id);
 
 
 --
@@ -138451,6 +140502,34 @@ CREATE INDEX ae0a19df_user_idx ON dynamic.dynamic_model__test_dqdddd_history USI
 
 
 --
+-- Name: b0dc4577_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX b0dc4577_hist_user_idx ON dynamic.test_fail_history USING btree (user_id);
+
+
+--
+-- Name: b0dc4577_history_master_id; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX b0dc4577_history_master_id ON dynamic.test_fail_history USING btree (master_id);
+
+
+--
+-- Name: b0dc4577_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX b0dc4577_id_idx ON dynamic.test_fail_history USING btree (test_fail_id);
+
+
+--
+-- Name: b0dc4577_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX b0dc4577_user_idx ON dynamic.test_fails USING btree (user_id);
+
+
+--
 -- Name: b394f963_history_master_id; Type: INDEX; Schema: dynamic; Owner: -
 --
 
@@ -138602,6 +140681,27 @@ CREATE INDEX bf6208d7_ref_cb_user_idx_hist ON dynamic.testapp_test3a_embed_step2
 --
 
 CREATE INDEX bf6208d7_user_idx ON dynamic.testapp_test3a_embed_step2_recs USING btree (user_id);
+
+
+--
+-- Name: bf8b3d3f_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX bf8b3d3f_hist_user_idx ON dynamic.test_lib_history USING btree (user_id);
+
+
+--
+-- Name: bf8b3d3f_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX bf8b3d3f_id_idx ON dynamic.test_lib_history USING btree (test_lib_id);
+
+
+--
+-- Name: bf8b3d3f_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX bf8b3d3f_user_idx ON dynamic.test_libs USING btree (user_id);
 
 
 --
@@ -138836,6 +140936,34 @@ CREATE INDEX d69e61a3_user_idx ON dynamic.test_api_recs USING btree (user_id);
 
 
 --
+-- Name: d77a72da_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX d77a72da_hist_user_idx ON dynamic.test_trigger_fail_history USING btree (user_id);
+
+
+--
+-- Name: d77a72da_history_master_id; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX d77a72da_history_master_id ON dynamic.test_trigger_fail_history USING btree (master_id);
+
+
+--
+-- Name: d77a72da_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX d77a72da_id_idx ON dynamic.test_trigger_fail_history USING btree (test_trigger_fail_id);
+
+
+--
+-- Name: d77a72da_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX d77a72da_user_idx ON dynamic.test_trigger_fails USING btree (user_id);
+
+
+--
 -- Name: d7fbd5b0_history_master_id; Type: INDEX; Schema: dynamic; Owner: -
 --
 
@@ -139060,6 +141188,13 @@ CREATE INDEX dmbt_a807cbc3_id_idx ON dynamic.testapp_test3a_embed_step1_recs USI
 
 
 --
+-- Name: dmbt_b0dc4577_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX dmbt_b0dc4577_id_idx ON dynamic.test_fails USING btree (master_id);
+
+
+--
 -- Name: dmbt_b394f963_id_idx; Type: INDEX; Schema: dynamic; Owner: -
 --
 
@@ -139120,6 +141255,13 @@ CREATE INDEX dmbt_cdaf5ebf_id_idx ON dynamic.testapp_test3_embed_step2_recs USIN
 --
 
 CREATE INDEX dmbt_d44ea22a_id_idx ON dynamic.test_rails_sevens USING btree (master_id);
+
+
+--
+-- Name: dmbt_d77a72da_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX dmbt_d77a72da_id_idx ON dynamic.test_trigger_fails USING btree (master_id);
 
 
 --
@@ -139547,6 +141689,27 @@ CREATE INDEX fae71320_id_idx ON dynamic.test_abdefgwer_history USING btree (test
 --
 
 CREATE INDEX fae71320_user_idx ON dynamic.test_abdefgwer_history USING btree (user_id);
+
+
+--
+-- Name: fd76e9a1_hist_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX fd76e9a1_hist_user_idx ON dynamic.pfrpa_test_cis_rc_history USING btree (user_id);
+
+
+--
+-- Name: fd76e9a1_id_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX fd76e9a1_id_idx ON dynamic.pfrpa_test_cis_rc_history USING btree (pfrpa_test_cis_rc_id);
+
+
+--
+-- Name: fd76e9a1_user_idx; Type: INDEX; Schema: dynamic; Owner: -
+--
+
+CREATE INDEX fd76e9a1_user_idx ON dynamic.pfrpa_test_cis_rcs USING btree (user_id);
 
 
 --
@@ -146480,6 +148643,27 @@ CREATE INDEX e598ff12_user_idx ON redcap.q2_demo6_record_history USING btree (us
 
 
 --
+-- Name: ebb3469c_hist_user_idx; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX ebb3469c_hist_user_idx ON redcap.rc_femfl_cif_rc_history USING btree (user_id);
+
+
+--
+-- Name: ebb3469c_id_idx; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX ebb3469c_id_idx ON redcap.rc_femfl_cif_rc_history USING btree (rc_femfl_cif_rc_id);
+
+
+--
+-- Name: ebb3469c_user_idx; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX ebb3469c_user_idx ON redcap.rc_femfl_cif_rcs USING btree (user_id);
+
+
+--
 -- Name: ee26383c_id_idx; Type: INDEX; Schema: redcap; Owner: -
 --
 
@@ -147740,6 +149924,13 @@ CREATE TRIGGER log_ffggffd_history_update AFTER UPDATE ON dynamic.ffggffds FOR E
 
 
 --
+-- Name: pfrpa_test_cis_rcs log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.pfrpa_test_cis_rcs FOR EACH ROW EXECUTE FUNCTION dynamic.log_pfrpa_test_cis_rcs_update();
+
+
+--
 -- Name: test_altb_ids log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
 --
 
@@ -147796,6 +149987,13 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_dm_classes FOR EA
 
 
 --
+-- Name: test_fails log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_fails FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_fails_update();
+
+
+--
 -- Name: test_fields_from_spec_tests log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
 --
 
@@ -147817,10 +150015,24 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_jnks FOR EACH ROW
 
 
 --
+-- Name: test_libs log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_libs FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_libs_update();
+
+
+--
 -- Name: test_multi_options log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
 --
 
 CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_multi_options FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_multi_options_update();
+
+
+--
+-- Name: test_notify_attachments log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_notify_attachments FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_notify_attachments_update();
 
 
 --
@@ -147835,6 +150047,13 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_rails_sevens FOR 
 --
 
 CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_regex_show_if_recs FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_regex_show_if_recs_update();
+
+
+--
+-- Name: test_secrets log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_secrets FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_secrets_update();
 
 
 --
@@ -147856,6 +150075,13 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_simple_view_alt_d
 --
 
 CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_simple_view_recs FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_simple_view_recs_update();
+
+
+--
+-- Name: test_trigger_fails log_history_insert; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_trigger_fails FOR EACH ROW EXECUTE FUNCTION dynamic.log_test_trigger_fails_update();
 
 
 --
@@ -147891,6 +150117,13 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.test_without_id_recs F
 --
 
 CREATE TRIGGER log_history_insert AFTER INSERT ON dynamic.user_map_names FOR EACH ROW EXECUTE FUNCTION dynamic.log_user_map_names_update();
+
+
+--
+-- Name: pfrpa_test_cis_rcs log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.pfrpa_test_cis_rcs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_pfrpa_test_cis_rcs_update();
 
 
 --
@@ -147950,6 +150183,13 @@ CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_dm_classes FOR EA
 
 
 --
+-- Name: test_fails log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_fails FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_fails_update();
+
+
+--
 -- Name: test_fields_from_spec_tests log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
 --
 
@@ -147971,10 +150211,24 @@ CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_jnks FOR EACH ROW
 
 
 --
+-- Name: test_libs log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_libs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_libs_update();
+
+
+--
 -- Name: test_multi_options log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
 --
 
 CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_multi_options FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_multi_options_update();
+
+
+--
+-- Name: test_notify_attachments log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_notify_attachments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_notify_attachments_update();
 
 
 --
@@ -147989,6 +150243,13 @@ CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_rails_sevens FOR 
 --
 
 CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_regex_show_if_recs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_regex_show_if_recs_update();
+
+
+--
+-- Name: test_secrets log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_secrets FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_secrets_update();
 
 
 --
@@ -148010,6 +150271,13 @@ CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_simple_view_alt_d
 --
 
 CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_simple_view_recs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_simple_view_recs_update();
+
+
+--
+-- Name: test_trigger_fails log_history_update; Type: TRIGGER; Schema: dynamic; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON dynamic.test_trigger_fails FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION dynamic.log_test_trigger_fails_update();
 
 
 --
@@ -151324,6 +153592,13 @@ CREATE TRIGGER log_history_insert AFTER INSERT ON redcap.q1_part4_rcs FOR EACH R
 
 
 --
+-- Name: rc_femfl_cif_rcs log_history_insert; Type: TRIGGER; Schema: redcap; Owner: -
+--
+
+CREATE TRIGGER log_history_insert AFTER INSERT ON redcap.rc_femfl_cif_rcs FOR EACH ROW EXECUTE FUNCTION redcap.log_rc_femfl_cif_rcs_update();
+
+
+--
 -- Name: test_api_rcs log_history_insert; Type: TRIGGER; Schema: redcap; Owner: -
 --
 
@@ -151412,6 +153687,13 @@ CREATE TRIGGER log_history_update AFTER UPDATE ON redcap.play_ipa_controls_cif_r
 --
 
 CREATE TRIGGER log_history_update AFTER UPDATE ON redcap.q1_part4_rcs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION redcap.log_q1_part4_rcs_update();
+
+
+--
+-- Name: rc_femfl_cif_rcs log_history_update; Type: TRIGGER; Schema: redcap; Owner: -
+--
+
+CREATE TRIGGER log_history_update AFTER UPDATE ON redcap.rc_femfl_cif_rcs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION redcap.log_rc_femfl_cif_rcs_update();
 
 
 --
@@ -152400,6 +154682,14 @@ ALTER TABLE ONLY dynamic.person_history
 
 
 --
+-- Name: test_lib_history fk_rails_13e4674990; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_lib_history
+    ADD CONSTRAINT fk_rails_13e4674990 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: femfl_spam_review_rec_history fk_rails_140224b703; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -152509,6 +154799,14 @@ ALTER TABLE ONLY dynamic.dynamic_model__test_abdefgwerabxds
 
 ALTER TABLE ONLY dynamic.viva_collection_instrument_history
     ADD CONSTRAINT fk_rails_1c6a3924e9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: test_notify_attachments fk_rails_1e4dae1f5e; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachments
+    ADD CONSTRAINT fk_rails_1e4dae1f5e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -152864,6 +155162,14 @@ ALTER TABLE ONLY dynamic.femfl_contact_phone_infos
 
 
 --
+-- Name: test_trigger_fail_history fk_rails_3de3cf43b0; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fail_history
+    ADD CONSTRAINT fk_rails_3de3cf43b0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: activity_log_person_handlers fk_rails_40473d6555; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -152989,6 +155295,14 @@ ALTER TABLE ONLY dynamic.testapp_test_embed_step2_recs
 
 ALTER TABLE ONLY dynamic.test_hhhh2a_recs
     ADD CONSTRAINT fk_rails_4743112265 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: test_fail_history fk_rails_474746039f; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fail_history
+    ADD CONSTRAINT fk_rails_474746039f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -153312,6 +155626,14 @@ ALTER TABLE ONLY dynamic.testapp_test2_embed_step2_rec_history
 
 
 --
+-- Name: pfrpa_test_cis_rc_history fk_rails_62e0e5a10c; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rc_history
+    ADD CONSTRAINT fk_rails_62e0e5a10c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: test_abdefgwer_history fk_rails_633546e94a; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -153413,6 +155735,14 @@ ALTER TABLE ONLY dynamic.test_hhhh_recs
 
 ALTER TABLE ONLY dynamic.test_abdefgwera_history
     ADD CONSTRAINT fk_rails_6a620e6cbc FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: test_notify_attachment_history fk_rails_6a91c20246; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_notify_attachment_history
+    ADD CONSTRAINT fk_rails_6a91c20246 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -153589,6 +155919,14 @@ ALTER TABLE ONLY dynamic.test_regex_show_if_recs
 
 ALTER TABLE ONLY dynamic.testapp_test2_embed_step3_recs
     ADD CONSTRAINT fk_rails_74d705ee32 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: pfrpa_test_cis_rcs fk_rails_75c1086729; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.pfrpa_test_cis_rcs
+    ADD CONSTRAINT fk_rails_75c1086729 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -153781,6 +156119,14 @@ ALTER TABLE ONLY dynamic.test_new_onec_table_history
 
 ALTER TABLE ONLY dynamic.activity_log_player_contact_test_embed_phone_history
     ADD CONSTRAINT fk_rails_840e29fcf6 FOREIGN KEY (activity_log_player_contact_test_embed_phone_id) REFERENCES dynamic.activity_log_player_contact_test_embed_phones(id);
+
+
+--
+-- Name: test_fail_history fk_rails_845e947fbc; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fail_history
+    ADD CONSTRAINT fk_rails_845e947fbc FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -154104,6 +156450,14 @@ ALTER TABLE ONLY dynamic.test_app_add_uac_history
 
 
 --
+-- Name: test_secret_history fk_rails_9ae1062bb4; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secret_history
+    ADD CONSTRAINT fk_rails_9ae1062bb4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: test_new_oneb_tables fk_rails_9b6961d4e5; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -154141,6 +156495,14 @@ ALTER TABLE ONLY dynamic.test_alt_ids
 
 ALTER TABLE ONLY dynamic.test_fields_from_spec_tests
     ADD CONSTRAINT fk_rails_9d44099a05 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: test_fails fk_rails_9d4d3251bc; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fails
+    ADD CONSTRAINT fk_rails_9d4d3251bc FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -154389,6 +156751,14 @@ ALTER TABLE ONLY dynamic.test_jnks
 
 ALTER TABLE ONLY dynamic.testapp_test_embed_step3_rec_history
     ADD CONSTRAINT fk_rails_b045b80209 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: test_libs fk_rails_b0586193cd; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_libs
+    ADD CONSTRAINT fk_rails_b0586193cd FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -154648,6 +157018,14 @@ ALTER TABLE ONLY dynamic.femfl_contact_phone_info_history
 
 
 --
+-- Name: test_trigger_fails fk_rails_c2e6a265ed; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fails
+    ADD CONSTRAINT fk_rails_c2e6a265ed FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: test_app_add_uac_history fk_rails_c36cd2f5c1; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -154701,6 +157079,14 @@ ALTER TABLE ONLY dynamic.activity_log_view_user_data_user_proc_history
 
 ALTER TABLE ONLY dynamic.test_again_rec_history
     ADD CONSTRAINT fk_rails_c730ffbefe FOREIGN KEY (test_again_rec_id) REFERENCES dynamic.test_again_recs(id);
+
+
+--
+-- Name: test_trigger_fails fk_rails_c7af229cec; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_trigger_fails
+    ADD CONSTRAINT fk_rails_c7af229cec FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -155032,6 +157418,14 @@ ALTER TABLE ONLY dynamic.test_dm_classes
 
 
 --
+-- Name: test_fails fk_rails_e182d19c08; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_fails
+    ADD CONSTRAINT fk_rails_e182d19c08 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: viva_collection_instruments fk_rails_e1c63e4b44; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
 --
 
@@ -155213,6 +157607,14 @@ ALTER TABLE ONLY dynamic.testapp_test3a_embed_step3_rec_history
 
 ALTER TABLE ONLY dynamic.test_altb_id_history
     ADD CONSTRAINT fk_rails_f1c4f89542 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: test_secrets fk_rails_f2e4291861; Type: FK CONSTRAINT; Schema: dynamic; Owner: -
+--
+
+ALTER TABLE ONLY dynamic.test_secrets
+    ADD CONSTRAINT fk_rails_f2e4291861 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -161864,6 +164266,14 @@ ALTER TABLE ONLY redcap.biodata_archive_samples_rcs
 
 
 --
+-- Name: rc_femfl_cif_rcs fk_rails_0b8ecc22ca; Type: FK CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rcs
+    ADD CONSTRAINT fk_rails_0b8ecc22ca FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: q2_demo11_records fk_rails_0bae38ecdd; Type: FK CONSTRAINT; Schema: redcap; Owner: -
 --
 
@@ -162117,6 +164527,14 @@ ALTER TABLE ONLY redcap.q2_demo_new41_recs
 
 ALTER TABLE ONLY redcap.q2_demo_new39_recs
     ADD CONSTRAINT fk_rails_5ebce77a87 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: rc_femfl_cif_rc_history fk_rails_600eb82501; Type: FK CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.rc_femfl_cif_rc_history
+    ADD CONSTRAINT fk_rails_600eb82501 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -163542,6 +165960,20 @@ ALTER TABLE ONLY study_info.activity_log_data_variable_package_reviews
 SET search_path TO ml_app,ref_data,redcap,dynamic,organization,pitt_bhi,ipa_ops,study_info;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260409072921'),
+('20260402110412'),
+('20260401153819'),
+('20260331133109'),
+('20260327153857'),
+('20260327120000'),
+('20260311180146'),
+('20260311180013'),
+('20260311174709'),
+('20260311174641'),
+('20260311174520'),
+('20260311134612'),
+('20260310090836'),
+('20260305161501'),
 ('20260304120000'),
 ('20260123182253'),
 ('20260121102758'),

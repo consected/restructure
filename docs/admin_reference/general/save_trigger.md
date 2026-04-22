@@ -26,6 +26,7 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [set_item_flags](save_trigger_set_item_flags.md) | Set item flags |
 | [update_reference](save_trigger_update_reference.md) | Update a referenced record |
 | [update_this](save_trigger_update_this.md) | Update fields on the current record |
+| [full_text_search](save_trigger_full_text_search.md) | Build and persist PostgreSQL `tsvector` search indexes |
 | [run_batch_trigger](save_trigger_run_batch_trigger.md) | Run a batch trigger |
 | [log](save_trigger_log.md) | Log a message |
 | [transaction](save_trigger_transaction.md) | Wrap triggers in a transaction |

@@ -116,19 +116,21 @@ _fpa.substitution = class {
     text = text.replaceAll('{^{', '{{').replaceAll('}^}', '}}')
 
     const TagnameRegExString = '[0-9a-zA-Z_.:\-]+';
-    const IfBlockRegExString = `({{#if +(${TagnameRegExString})}}([^]+?)({{else if +(${TagnameRegExString})}}(.+?))?({{else}}([^]+?))?{{/if}})`;
+    const IfBlockRegExString = `({{#if +(${TagnameRegExString})}}([^]+?){{/if}})`;
     const StartQuote = `["'‘“]`
     const EndQuote = `["'’”]`
     const IsOperator = '(.+?)'
     const IsConditions = `([0-9a-zA-Z_.:-]+) ${StartQuote}${IsOperator}${EndQuote} (${StartQuote}?.+?${EndQuote}?)`
-    const IsBlockRegExString = `({{#is ${IsConditions}}}(.+?)({{else is ${IsConditions}}}(.+?))?({{else is ${IsConditions}}}(.+?))?({{else}}(.+?))?{{/is}})`;
+    const IsBlockRegExString = `({{#is ${IsConditions}}}(.+?){{/is}})`;
 
     // [^]+? if the Javascript way to get everything across multiple lines (non-greedy)
     const IfBlocksRegEx = new RegExp(IfBlockRegExString, 'gms');
     const IfBlockRegEx = new RegExp(IfBlockRegExString, 'ms');
     const IsBlocksRegEx = new RegExp(IsBlockRegExString, 'gms');
     const IsBlockRegEx = new RegExp(IsBlockRegExString, 'ms');
-    const MaxElseIfs = 2;
+    const ElseIfBoundaryRegEx = new RegExp(`{{else if +(${TagnameRegExString})}}`, 'ms');
+    const ElseRegEx = /{{else}}/ms;
+    const ElseIsBoundaryRegEx = new RegExp(`{{else is +${IsConditions}}}`, 'ms');
     const TagRegEx = new RegExp(`{{${TagnameRegExString}}}`, 'g');
 
     var ifres = text.match(IfBlocksRegEx);
@@ -139,28 +141,28 @@ _fpa.substitution = class {
 
       ifres.forEach(function (if_blocks) {
         const if_block = if_blocks.match(IfBlockRegEx);
+        if (!if_block) return;
+
         let block_container = if_block[0];
-        let tag = if_block[2]
-        let vpair = _this.value_for_tag(tag, new_data)
-        let tag_value = vpair[0];
-        let else_if_block = if_block[4];
-        let else_if_tag = if_block[5];
+        let initial_tag = if_block[2];
+        let inner_content = if_block[3] || '';
+        let parsed = _this.parse_if_clauses(initial_tag, inner_content, ElseIfBoundaryRegEx, ElseRegEx);
+        let clauses = parsed[0];
+        let else_content = parsed[1];
         let sub_text = null;
 
-        if (tag_value && tag_value.toString().length) {
-          sub_text = if_block[3] || ''
-        }
+        clauses.forEach(function (clause) {
+          if (sub_text != null) return;
+          let tag = clause[0];
+          let clause_content = clause[1];
+          let vpair = _this.value_for_tag(tag, new_data)
+          let tag_value = vpair[0];
+          if (tag_value && tag_value.toString().length) {
+            sub_text = clause_content || '';
+          }
+        });
 
-        if (sub_text == null && else_if_block) {
-          vpair = _this.value_for_tag(else_if_tag, new_data)
-          tag_value = vpair[0];
-          if (tag_value && tag_value.toString().length) sub_text = if_block[6] || '';
-        }
-
-        //  Handle {{else}}
-        if (sub_text == null)
-          sub_text = if_block[8] || ''
-
+        if (sub_text == null) sub_text = else_content || '';
         text = text.replace(block_container, sub_text || '');
       });
     }
@@ -172,45 +174,34 @@ _fpa.substitution = class {
 
       isres.forEach(function (is_blocks) {
         const is_block = is_blocks.match(IsBlockRegEx);
+        if (!is_block) return;
+
         let block_container = is_block[0];
-        let tag = is_block[2]
-        let vpair = _this.value_for_tag(tag, new_data)
-        let tag_value = vpair[0];
-        let op = is_block[3]
-        let exp = is_block[4]
-        let comp = _this.eval_is_comp(op, tag_value, exp, new_data)
+        let initial_tag = is_block[2]
+        let initial_op = is_block[3]
+        let initial_exp = is_block[4]
+        let inner_content = is_block[5] || '';
+        let parsed = _this.parse_is_clauses(initial_tag, initial_op, initial_exp, inner_content, ElseIsBoundaryRegEx, ElseRegEx);
+        let clauses = parsed[0];
+        let else_content = parsed[1];
         let sub_text = null;
 
-        if (comp) {
-          sub_text = is_block[5] || '';
-        }
-
-        let iters = 1
-        let start_pos = iters * 5 + 1
-        let else_is_block = is_block[start_pos]
-        while (!sub_text && else_is_block) {
-          let else_is_tag = is_block[start_pos + 1]
-          let else_is_op = is_block[start_pos + 2]
-          let else_is_exp = is_block[start_pos + 3]
-
-          vpair = _this.value_for_tag(else_is_tag, new_data)
-          let else_is_tag_value = vpair[0];
-          comp = _this.eval_is_comp(else_is_op, else_is_tag_value, else_is_exp, new_data)
+        clauses.forEach(function (clause) {
+          if (sub_text != null) return;
+          let tag = clause[0];
+          let op = clause[1];
+          let exp = clause[2];
+          let clause_content = clause[3];
+          let vpair = _this.value_for_tag(tag, new_data)
+          let tag_value = vpair[0];
+          let comp = _this.eval_is_comp(op, tag_value, exp, new_data)
           if (comp) {
-            sub_text = is_block[start_pos + 4] || ''
-            break;
+            sub_text = clause_content || '';
           }
-          iters++;
-          if (iters > MaxElseIfs) break;
+        });
 
-          start_pos = iters * 5 + 1;
-          else_is_block = is_block[start_pos];
-        }
-        // Handle {{else}}
-        if (sub_text == null) sub_text = is_block[17] || ''
-
+        if (sub_text == null) sub_text = else_content || '';
         text = text.replace(block_container, sub_text || '');
-
       });
     }
 
@@ -254,6 +245,82 @@ _fpa.substitution = class {
 
     return text;
   };
+
+  parse_if_clauses(initial_tag, inner_content, elseIfBoundaryRegEx, elseRegEx) {
+    let clauses = [];
+    let else_content = null;
+    let remaining = inner_content;
+    let current_tag = initial_tag;
+
+    while (remaining != null) {
+      let else_if_match = remaining.match(elseIfBoundaryRegEx);
+      let else_match = remaining.match(elseRegEx);
+      let next_boundary = null;
+
+      if (else_if_match && else_match) {
+        next_boundary = else_if_match.index < else_match.index ? 'else_if' : 'else';
+      } else if (else_if_match) {
+        next_boundary = 'else_if';
+      } else if (else_match) {
+        next_boundary = 'else';
+      }
+
+      if (next_boundary === 'else_if') {
+        clauses.push([current_tag, remaining.slice(0, else_if_match.index)]);
+        current_tag = else_if_match[1];
+        remaining = remaining.slice(else_if_match.index + else_if_match[0].length);
+      } else if (next_boundary === 'else') {
+        clauses.push([current_tag, remaining.slice(0, else_match.index)]);
+        else_content = remaining.slice(else_match.index + else_match[0].length);
+        break;
+      } else {
+        clauses.push([current_tag, remaining]);
+        break;
+      }
+    }
+
+    return [clauses, else_content];
+  }
+
+  parse_is_clauses(initial_tag, initial_op, initial_exp, inner_content, elseIsBoundaryRegEx, elseRegEx) {
+    let clauses = [];
+    let else_content = null;
+    let remaining = inner_content;
+    let current_tag = initial_tag;
+    let current_op = initial_op;
+    let current_exp = initial_exp;
+
+    while (remaining != null) {
+      let else_is_match = remaining.match(elseIsBoundaryRegEx);
+      let else_match = remaining.match(elseRegEx);
+      let next_boundary = null;
+
+      if (else_is_match && else_match) {
+        next_boundary = else_is_match.index < else_match.index ? 'else_is' : 'else';
+      } else if (else_is_match) {
+        next_boundary = 'else_is';
+      } else if (else_match) {
+        next_boundary = 'else';
+      }
+
+      if (next_boundary === 'else_is') {
+        clauses.push([current_tag, current_op, current_exp, remaining.slice(0, else_is_match.index)]);
+        current_tag = else_is_match[1];
+        current_op = else_is_match[2];
+        current_exp = else_is_match[3];
+        remaining = remaining.slice(else_is_match.index + else_is_match[0].length);
+      } else if (next_boundary === 'else') {
+        clauses.push([current_tag, current_op, current_exp, remaining.slice(0, else_match.index)]);
+        else_content = remaining.slice(else_match.index + else_match[0].length);
+        break;
+      } else {
+        clauses.push([current_tag, current_op, current_exp, remaining]);
+        break;
+      }
+    }
+
+    return [clauses, else_content];
+  }
 
   eval_is_comp(op, tag_value, exp, new_data) {
     const _this = this;

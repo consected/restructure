@@ -121,7 +121,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master3.id)
     finish_page_loading
 
     # Verify master 3 external IDs are loaded
@@ -137,7 +137,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master1.id)
     finish_page_loading
 
     # Verify master 1 external IDs are loaded
@@ -153,7 +153,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expect(page).to have_css("#master-#{master3.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master3.id)
     finish_page_loading
 
     # THIS IS THE CRITICAL CHECK - the panel should have content when returning
@@ -169,7 +169,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expect(page).to have_css("#master-#{master2.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master2.id)
     finish_page_loading
 
     ext_panel_2 = find("#external-ids-#{master2.id}", visible: :all)
@@ -184,7 +184,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     expect(page).to have_css("#master-#{master1.id}-main-container.in", wait: 10)
     finish_form_formatting
 
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master1.id)
     finish_page_loading
 
     ext_panel_1_revisit = find("#external-ids-#{master1.id}", visible: :all)
@@ -211,7 +211,7 @@ describe 'external ids panel on-open-click mechanism', js: true, driver: $browse
     finish_form_formatting
 
     # Click the external IDs tab to expand the panel
-    expand_master_record_tab('external ids')
+    expand_master_record_tab('external ids', master_id: master1.id)
     finish_page_loading
 
     # The panel should now be expanded - wait for it

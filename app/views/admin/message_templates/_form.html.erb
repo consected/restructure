@@ -15,7 +15,7 @@
           <%= f.label :message_type, 'Is a' %>
           <%
           select_item_type = {}
-          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'message_type'
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'message_type' && object_instance.message_type.blank?
           select_item_type[:include_blank] = true
 
           options = message_type_options
@@ -26,7 +26,7 @@
           <%= f.label :template_type %>
           <%
           select_item_type = {}
-          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'template_type'
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'template_type' && object_instance.template_type.blank?
           select_item_type[:include_blank] = true
 
           options = template_type_options

@@ -244,6 +244,10 @@ p.like-type {
   font-size: 127%;
   font-weight: bold;
   color: rgb(121, 121, 121);
+
+  small {
+    font-weight: normal;
+  }
 }
 
 .alert.alert-success.logged-in-as-admin {

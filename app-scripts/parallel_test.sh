@@ -18,6 +18,101 @@
 # These can be set by a Postgres superuser with the command:
 # ALTER USER <username> WITH CREATEDB CREATEROLE LOGIN;
 
+require_arg_value() {
+  if [ -z "$2" ] || [[ "$2" == --* ]]; then
+    echo "Missing value for $1"
+    exit 2
+  fi
+}
+
+show_help() {
+  cat <<EOF
+Usage: $(basename "$0") [options] [spec_path ...]
+
+Options:
+  --no-run                        Parse options but do not run specs
+  --run-restests                  Run the retest script for failed specs
+  --browser BROWSER               Browser to use: chrome or firefox
+  --no-clean-db                   Skip cleaning the test database
+  --no-brakeman                   Skip Brakeman security analysis
+  --skip-brakeman                 Alias for --no-brakeman
+  --sudo-postgres                 Use sudo as postgres when cleaning the database
+  --use-pg-uname USERNAME         PostgreSQL username to use when cleaning the database
+  --use-pg-host HOST              PostgreSQL host to use instead of sudo-based cleanup
+  --skip-zeitwerk                 Skip the Zeitwerk check
+  --parallel-test-processors N    Number of parallel test processors to use
+  --run-app-specs VALUE           Set RUN_APP_SPECS, for example true or false
+  --help, -h                      Show this help message and exit
+
+Any remaining arguments are treated as spec paths.
+EOF
+}
+
+while true; do
+  case "$1" in
+    --help|-h)
+      show_help
+      exit 0
+      ;;
+    --no-run)
+      NO_RUN=true
+      shift
+      ;;
+    --run-restests)
+      RUN_RESTESTS=true
+      shift
+      ;;
+    --browser)
+      require_arg_value "$1" "$2"
+      BROWSER="$2"
+      shift 2
+      ;;
+    --no-clean-db)
+      NO_CLEAN_DB=true
+      shift
+      ;;
+    --no-brakeman)
+      NO_BRAKEMAN=true
+      shift
+      ;;
+    --skip-brakeman)
+      SKIP_BRAKEMAN=true
+      shift
+      ;;
+    --sudo-postgres)
+      SUDO_POSTGRES=true
+      shift
+      ;;
+    --use-pg-uname)
+      require_arg_value "$1" "$2"
+      USE_PG_UNAME="$2"
+      shift 2
+      ;;
+    --use-pg-host)
+      require_arg_value "$1" "$2"
+      USE_PG_HOST="$2"
+      shift 2
+      ;;
+    --skip-zeitwerk)
+      SKIP_ZEITWERK=true
+      shift
+      ;;
+    --parallel-test-processors)
+      require_arg_value "$1" "$2"
+      PARALLEL_TEST_PROCESSORS="$2"
+      shift 2
+      ;;
+    --run-app-specs)
+      require_arg_value "$1" "$2"
+      RUN_APP_SPECS="$2"
+      shift 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 
 BROWSER=${BROWSER:-chrome}
 export USE_PG_UNAME=${USE_PG_UNAME:=$(whoami)}
@@ -159,7 +254,10 @@ if [ -f tmp/parallel_specs_failed.txt ]; then
   cat tmp/failing_specs.log
   echo "Parallel specs failed. Check tmp/failing_specs.log for details."
   echo "Running retest for failed specs"
-  $(dirname "$0")/parallel_test_retest.sh >> tmp/failing_specs.log 2>&1
+  $(dirname "$0")/parallel_test_retest.sh
+  res=$?
+  cat tmp/retest_output.log >> tmp/failing_specs.log
+  exit $res
 else
   echo "All parallel specs passed."
   echo "All parallel specs passed."  >> tmp/failing_specs.log

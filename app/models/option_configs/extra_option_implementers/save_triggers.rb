@@ -26,7 +26,8 @@ module OptionConfigs
                              case
                              set_save_trigger_results
                              set_variables
-                             generate_document].freeze
+                             generate_document
+                             full_text_search].freeze
 
       class_methods do
         #
