@@ -96,4 +96,43 @@ describe('substitutions', function () {
     var res = $t[0].outerHTML;
     expect(res).toEqual(expected_text)
   });
+
+  it("supports arbitrary else-if conditions", function () {
+    const text = '{{#if v1}}one{{else if v2}}two{{else if v3}}three{{else if v4}}four{{else if v5}}five{{else}}none{{/if}}';
+
+    let res = _fpa.substitution.substitute(text, { v1: false, v2: false, v3: true, v4: true, v5: true });
+    expect(res).toEqual('three');
+
+    res = _fpa.substitution.substitute(text, { v1: false, v2: false, v3: false, v4: false, v5: true });
+    expect(res).toEqual('five');
+
+    res = _fpa.substitution.substitute(text, { v1: false, v2: false, v3: false, v4: false, v5: false });
+    expect(res).toEqual('none');
+  });
+
+  it("handles a single if string with at least five else-if clauses", function () {
+    const text = '{{#if a}}A{{else if b}}B{{else if c}}C{{else if d}}D{{else if e}}E{{else if f}}F{{else}}none{{/if}}';
+
+    let res = _fpa.substitution.substitute(text, { a: true, b: false, c: false, d: false, e: false, f: true });
+    expect(res).toEqual('A');
+
+    res = _fpa.substitution.substitute(text, { a: false, b: false, c: false, d: false, e: false, f: true });
+    expect(res).toEqual('F');
+
+    res = _fpa.substitution.substitute(text, { a: false, b: false, c: false, d: false, e: false, f: false });
+    expect(res).toEqual('none');
+  });
+
+  it("supports arbitrary else-is conditions", function () {
+    const text = '{{#is score \'==\' 1}}one{{else is score \'==\' 2}}two{{else is score \'==\' 3}}three{{else is score \'==\' 4}}four{{else is score \'==\' 5}}five{{else}}none{{/is}}';
+
+    let res = _fpa.substitution.substitute(text, { score: 4 });
+    expect(res).toEqual('four');
+
+    res = _fpa.substitution.substitute(text, { score: 5 });
+    expect(res).toEqual('five');
+
+    res = _fpa.substitution.substitute(text, { score: 99 });
+    expect(res).toEqual('none');
+  });
 });

@@ -7,9 +7,15 @@ require 'rails_helper'
 # - Added resource_name to index_params as a regular column
 # - Added extra index columns: batch_jobs status, "Is a view?" boolean
 # - These new columns use the existing extra_index_columns mechanism
+#
+# Additional tests for issue #1066:
+# - Show resolved definition versioning in definition details
+# - Show the edited record id in the Edit Entry title
 RSpec.describe Admin::DynamicModelsController, type: :controller do
   include ModelSupport
   include DynamicModelSupport
+
+  render_views
 
   before :all do
     create_admin
@@ -108,6 +114,49 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       result = controller.send(:view_sql_column, dm)
       # Should render a checked boolean field
       expect(result).to include('val-checked')
+    end
+  end
+
+  describe 'GET #edit issue #1066 details display' do
+    it 'shows current version when current-definition mode is resolved and includes record id in the title' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test version mode #{suffix}",
+        table_name: "test_version_mode_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "_configurations:\n  use_current_version: true\ndefault:\n  label: Test"
+      )
+
+      allow_any_instance_of(DynamicModel).to receive(:uses_current_definition_version?).and_return(true)
+
+      get :edit, params: { id: dm.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to have_selector('.def-version-resolution', text: /current version/i)
+      expect(response.body).to include("Edit Entry <small>##{dm.id}</small>")
+    end
+
+    it 'shows that definition-time versioning is used when current-version mode is not enabled' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test versioned mode #{suffix}",
+        table_name: "test_versioned_mode_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test"
+      )
+
+      get :edit, params: { id: dm.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to have_selector('.def-version-resolution', text: /record creation/i)
     end
   end
 end

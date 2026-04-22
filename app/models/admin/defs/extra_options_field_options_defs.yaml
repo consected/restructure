@@ -181,6 +181,17 @@
           # Specifies the target field to be filtered when this field changes.
           # Used with big_select.filtered configuration to dynamically filter another big-select field.
           # The filter value from this field is passed via blank_preset_value to constrain the query.
+        
+        # configuration for allowing users to create new items in the source model
+        # when their entered value doesn't already exist (applies to select_record_from_table_* fields)
+        creatable:
+          enabled: true | false
+            # When true, the field renders as a typeahead text input instead of a select dropdown.
+            # If the user enters a value that doesn't exist in the source model, a new record
+            # is automatically created on save.
+            # Requires the user to have 'create' access on the source dynamic model.
+            # If the user lacks create access, they can only select from existing items.
+            # Default is false (standard select dropdown behavior).
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text

@@ -3,6 +3,10 @@ module Dynamic
   module ImplementationHandler
     extend ActiveSupport::Concern
 
+    # Prefix added by the frontend to freeform typeahead entries to distinguish them
+    # from existing record selections. Must match the JS constant in _fpa_form_utils.js.
+    CREATABLE_NEW_PREFIX = '__creatable_new__'
+
     included do
       after_find :set_option_type_attr_name
       after_initialize :set_option_type_attr_name
@@ -10,6 +14,7 @@ module Dynamic
       after_initialize :force_preset_values, unless: :persisted?
       after_initialize :evaluate_active_values
 
+      before_save :handle_creatable_select_fields
       before_save :handle_before_save_triggers
       after_commit :handle_save_triggers
       after_commit :reset_access_evaluations!
@@ -232,6 +237,116 @@ module Dynamic
       option_type_config&.calc_save_trigger_if self unless skip_save_trigger
       true
     end
+
+    #
+    # Handle creatable select fields before save.
+    # For fields configured with edit_as.creatable.enabled, auto-create
+    # records in the target model if the entered value doesn't already exist.
+    # Requires the user to have 'create' access on the target model.
+    # Supports single-value select_record_* fields.
+    def handle_creatable_select_fields
+      fo = option_type_config&.field_options
+      return true unless fo
+
+      fo.each do |field_name, config|
+        next unless config.dig(:edit_as, :creatable, :enabled)
+
+        prefix = creatable_select_field_prefix(field_name)
+        next unless prefix
+
+        value = send(field_name) if respond_to?(field_name)
+        next if value.blank?
+
+        value_attr = creatable_select_value_attr(prefix, config)
+        lookup_attr = creatable_select_lookup_attr(value_attr, config)
+        table_name = field_name.to_s.sub(prefix, '')
+        target = Resources::Models.find_by(table_name:)
+        next unless target
+
+        target_class = target[:model]
+
+        # Strip the CREATABLE_NEW_PREFIX marker added by the frontend for freeform entries
+        is_new_entry = value.to_s.start_with?(CREATABLE_NEW_PREFIX)
+        clean_value = is_new_entry ? value.to_s.sub(CREATABLE_NEW_PREFIX, '') : value
+
+        if value_attr == :id
+          # Value is an existing record id selected from the typeahead
+          if !is_new_entry && target_class.exists?(id: clean_value)
+            send("#{field_name}=", clean_value.to_i)
+            next
+          end
+
+          # Look up by label for both [new] entries and unrecognized values
+          existing_record = target_class.find_by(lookup_attr => clean_value)
+          if existing_record
+            send("#{field_name}=", existing_record.id)
+            next
+          end
+        elsif target_class.exists?(value_attr => clean_value)
+          # Non-id field: check if value already exists
+          send("#{field_name}=", clean_value)
+          next
+        end
+
+        values = clean_value.is_a?(Array) ? clean_value.reject(&:blank?) : [clean_value]
+
+        values.each do |v|
+          if value_attr == :id
+            next if target_class.exists?(lookup_attr => v)
+          elsif target_class.exists?(value_attr => v)
+            next
+          end
+
+          unless target_class.allows_user_access_to?(current_user, :create)
+            errors.add(field_name, 'cannot create new items (insufficient access)')
+            throw(:abort)
+          end
+
+          create_attrs = { value_attr => v, current_user: }
+          create_attrs = { lookup_attr => v, current_user: } if value_attr == :id
+          create_attrs[:master] = master if target_class.method_defined?(:master)
+          begin
+            record = target_class.create!(create_attrs)
+            send("#{field_name}=", record.id) if value_attr == :id
+          rescue ActiveRecord::RecordNotUnique
+            # Another concurrent request already created this value - safe to ignore
+            next
+          rescue ActiveRecord::RecordInvalid => e
+            errors.add(field_name, "could not create new item: #{e.record.errors.full_messages.join(', ')}")
+            throw(:abort)
+          end
+        end
+      end
+
+      true
+    end
+
+    private
+
+    def creatable_select_field_prefix(field_name)
+      %w[
+        select_record_from_table_
+        select_record_from_
+        select_record_id_from_table_
+        select_record_id_from_
+      ].find { |prefix| field_name.to_s.start_with?(prefix) }
+    end
+
+    def creatable_select_value_attr(prefix, config)
+      return :id if prefix.include?('select_record_id_')
+
+      (config.dig(:edit_as, :value_attr) || 'data').to_sym
+    end
+
+    def creatable_select_lookup_attr(value_attr, config)
+      label_attr = config.dig(:edit_as, :label_attr)
+      return label_attr.to_sym if label_attr.respond_to?(:to_sym) && !label_attr.is_a?(Array)
+      return :data if value_attr == :id
+
+      value_attr
+    end
+
+    public
 
     #
     # Handle actions that must be performed before on save save triggers

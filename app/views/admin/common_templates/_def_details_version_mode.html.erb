@@ -1,0 +1,13 @@
+<%
+  setting = object_instance.respond_to?(:versioning_disabled_globally?) && object_instance.versioning_disabled_globally?
+  config_ucv = object_instance.respond_to?(:definition_uses_current_version_option?) && object_instance.definition_uses_current_version_option?
+  uses_current_version = object_instance.respond_to?(:uses_current_definition_version?) && object_instance.uses_current_definition_version?
+
+%>
+<label>definition versioning</label>
+<span class="def-version-resolution">
+  <%= uses_current_version ? 'current version' : 'version at record creation' %>
+</span>
+<p class="help-block">
+  Resolved from <% if setting.present? %><%= link_to link_label_open_in_new("application setting DisableVDef"), "/admin/server_info", target: "_blank" %><% end %> <% if setting && config_ucv %>and<% end %> <% if config_ucv.present? %>the definition <code>_configurations.use_current_version</code> option<% end %>.
+</p>

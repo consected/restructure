@@ -10,6 +10,17 @@ module ControllerUtils
     response.headers['Expires'] = 'Fri, 01 Jan 1990 00:00:00 GMT'
   end
 
+  # Set browser cache headers for user/admin-specific content.
+  # Always includes 'private' to prevent WAFs/proxies from caching sensitive data.
+  # Expires is computed automatically from max_age for HTTP/1.0 client compatibility.
+  # Use immutable: true for responses where the URL changes on content change (cache busting by URL).
+  def set_browser_cache(max_age:, immutable: false)
+    directives = "private, max-age=#{max_age}"
+    directives += ', immutable' if immutable
+    response.headers['Cache-Control'] = directives
+    response.headers['Expires'] = (Time.now + max_age).httpdate
+  end
+
   def params_nil_if_blank(p)
     p1 = p.dup
     p.each do |k, v|
