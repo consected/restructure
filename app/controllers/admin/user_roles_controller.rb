@@ -58,12 +58,13 @@ class Admin::UserRolesController < AdminController
     {
       app_type_id: Admin::AppType.all_by_name,
       role_name: Admin::UserRole.active.role_names.sort,
-      user_id: Admin::UserRole.active.users.pluck(:id, :email).to_h
+      user_id: Admin::UserRole.active.users.pluck(:id, :email).to_h,
+      user_status: [true, false] # try hash?
     }
   end
 
   def filters_on
-    %i[app_type_id role_name user_id]
+    %i[app_type_id role_name user_id user_status]
   end
 
   def admin_links(item = nil)

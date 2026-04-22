@@ -51,6 +51,8 @@ class Admin::UserRole < Admin::AdminBase
   # @param conditions [Hash] full set of where clause conditions
   # @return [ActiveRecord::Relation]
   def self.where(conditions)
+    # TODO remove
+    # debugger
     if conditions.is_a?(Hash) && !conditions.empty?
       ur_cond = conditions.dup
       ur_cond = conditions[:user_roles] if conditions[:user_roles]

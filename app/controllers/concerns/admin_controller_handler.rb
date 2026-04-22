@@ -19,6 +19,8 @@ module AdminControllerHandler
   end
 
   def index
+    # TODO remove
+    # debugger
     pm = filtered_primary_model
     pm = pm.limited_index
     pm = pm.reorder('').order(default_index_order) if default_index_order.present?

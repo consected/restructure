@@ -15,8 +15,10 @@ module FilterUtils
   # @param [ActiveRecord::Model] pm optionally overrides the default in the primary_model attribute value
   # @return [ActiveRecord::Relation] <description>
   def filtered_primary_model(pm = nil)
+    # TODO remove
+    # debugger
     pm ||= primary_model
-
+    # where clause
     if filter_params
       pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin
       pm = pm.disabled if filter_params[:disabled] == 'disabled' && current_admin
