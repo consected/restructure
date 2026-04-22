@@ -1,7 +1,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -2930,42 +2929,6 @@ $$;
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
-
-
---
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -4587,6 +4550,25 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4717,6 +4699,23 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -6080,20 +6079,20 @@ ALTER SEQUENCE ml_app.tracker_history_id_seq OWNED BY ml_app.tracker_history.id;
 --
 
 CREATE VIEW ml_app.trackers AS
- SELECT DISTINCT ON (master_id, protocol_id) tracker_id AS id,
-    master_id,
-    protocol_id,
-    event_date,
-    user_id,
-    notes,
-    created_at,
-    updated_at,
-    sub_process_id,
-    protocol_event_id,
-    item_id,
-    item_type
+ SELECT DISTINCT ON (th.master_id, th.protocol_id) th.tracker_id AS id,
+    th.master_id,
+    th.protocol_id,
+    th.event_date,
+    th.user_id,
+    th.notes,
+    th.created_at,
+    th.updated_at,
+    th.sub_process_id,
+    th.protocol_event_id,
+    th.item_id,
+    th.item_type
    FROM ml_app.tracker_history th
-  ORDER BY master_id, protocol_id, ((event_date)::date) DESC NULLS LAST, th.id DESC;
+  ORDER BY th.master_id, th.protocol_id, ((th.event_date)::date) DESC NULLS LAST, th.id DESC;
 
 
 --
@@ -6113,15 +6112,15 @@ CREATE SEQUENCE ml_app.trackers_id_seq
 --
 
 CREATE TABLE ml_app.trackers_old (
-    id integer DEFAULT nextval('ml_app.trackers_id_seq'::regclass) CONSTRAINT trackers_id_not_null NOT NULL,
+    id integer DEFAULT nextval('ml_app.trackers_id_seq'::regclass) NOT NULL,
     master_id integer,
-    protocol_id integer CONSTRAINT trackers_protocol_id_not_null NOT NULL,
+    protocol_id integer NOT NULL,
     event_date timestamp without time zone,
     user_id integer DEFAULT ml_app.current_user_id(),
-    created_at timestamp without time zone CONSTRAINT trackers_created_at_not_null NOT NULL,
-    updated_at timestamp without time zone CONSTRAINT trackers_updated_at_not_null NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
     notes character varying,
-    sub_process_id integer CONSTRAINT trackers_sub_process_id_not_null NOT NULL,
+    sub_process_id integer NOT NULL,
     protocol_event_id integer,
     item_id integer,
     item_type character varying
@@ -6657,10 +6656,10 @@ ALTER SEQUENCE ml_app.users_id_seq OWNED BY ml_app.users.id;
 --
 
 CREATE VIEW ml_app.view_users AS
- SELECT email,
-    first_name,
-    last_name,
-    disabled
+ SELECT users.email,
+    users.first_name,
+    users.last_name,
+    users.disabled
    FROM ml_app.users;
 
 
