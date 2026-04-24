@@ -25,3 +25,4 @@ See [Full Text Search](full_text_search.md) for a concise guide and query patter
 - [Detailed Options](detailed_options.md)
 - [File Filtering](file_filtering.md)
 - [Full Text Search](full_text_search.md)
+- [Chart Reports](chart_reports.md)
