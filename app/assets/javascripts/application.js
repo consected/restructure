@@ -21,6 +21,7 @@
 //= require handlebars/dist/handlebars
 //= require bootstrap-datepicker/dist/js/bootstrap-datepicker
 //= require chart.js/dist/chart
+//= require chartjs-chart-sankey/dist/chartjs-chart-sankey
 //= require bootstrap-wysiwyg/src/bootstrap-wysiwyg
 //= require jquery.hotkeys/jquery.hotkeys
 // Note: moment is required with the min file to avoid the need to transcompile
