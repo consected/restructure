@@ -295,4 +295,90 @@ describe '2FA OTP idle timeout on login page - issue #1075', js: true, driver: $
       expect(Settings::TwoFactorAuthIdleTimeout).to eq(second_timeout)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Group 4 – Admin Login OTP Timeout
+  # The admin login page has a separate #new_admin form at /admins/sign_in but
+  # uses the same JS and the same shared #mfa-step1 timeout block.
+  # ---------------------------------------------------------------------------
+
+  context 'admin login OTP timeout' do
+    before(:all) do
+      change_setting('TwoFactorAuthDisabledForAdmin', false)
+
+      ENV['FPHS_ADMIN_SETUP'] = 'yes'
+      @admin_email = "test-2fa-timeout-#{rand(1_000_000_000)}admin@testing.com"
+      @admin = Admin.create! email: @admin_email
+      @admin = Admin.find(@admin.id)
+      @admin_password = @admin.generate_password
+      @admin.otp_secret = Admin.generate_otp_secret
+      @admin.otp_required_for_login = true
+      @admin.new_two_factor_auth_code = false
+      @admin.save!
+    end
+
+    after(:all) do
+      change_setting('TwoFactorAuthDisabledForAdmin', true)
+    end
+
+    def reach_admin_otp_step
+      Capybara.reset_sessions!
+      visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+      expect(page).to have_css('#new_admin', wait: 10)
+
+      within '#new_admin' do
+        fill_in 'Email', with: @admin_email
+        fill_in 'Password', with: @admin_password
+        click_button 'Log in'
+      end
+
+      expect(page).to have_selector('.login-2fa-block', visible: true, wait: 10),
+                      'Expected OTP entry block to appear for admin after step 1'
+    end
+
+    it 'resets the admin form to step 1 after the idle timeout expires' do
+      change_setting('TwoFactorAuthIdleTimeout', SHORT_TIMEOUT_SECS)
+
+      reach_admin_otp_step
+
+      expect(page).to have_selector('.login-2fa-block', visible: true)
+      expect(page).not_to have_selector('.login-user-password-block', visible: true)
+
+      sleep SHORT_TIMEOUT_SECS + 2
+
+      expect(page).to have_selector('.login-user-password-block', visible: true, wait: 5),
+                      'Expected login-user-password-block to be visible again after admin idle timeout'
+    end
+
+    it 'clears the admin OTP field after the idle timeout expires' do
+      change_setting('TwoFactorAuthIdleTimeout', SHORT_TIMEOUT_SECS)
+
+      reach_admin_otp_step
+
+      within '#new_admin' do
+        fill_in 'Two-Factor Authentication Code', with: '123'
+      end
+
+      sleep SHORT_TIMEOUT_SECS + 2
+
+      otp_value = find('#admin_otp_attempt', visible: :all).value
+      expect(otp_value).to be_blank,
+                           'Expected admin OTP field to be cleared after idle timeout reset'
+    end
+
+    it 'does not reset the admin form when OTP is submitted before the timeout' do
+      change_setting('TwoFactorAuthIdleTimeout', SHORT_TIMEOUT_SECS)
+
+      reach_admin_otp_step
+
+      @admin.reload
+      within '#new_admin' do
+        fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+        click_button 'Log in'
+      end
+
+      expect(page).to have_css('.flash .alert', text: "×\nSigned in successfully.", wait: 10),
+                      'Expected successful admin login when OTP submitted before timeout'
+    end
+  end
 end
