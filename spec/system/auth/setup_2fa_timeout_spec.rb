@@ -80,6 +80,9 @@ describe '2FA setup page idle timeout', js: true, driver: $browser_driver do
 
     expect(current_path).to eq('/users/sign_in')
     expect(page).to have_css('#new_user', wait: 10)
+
+    visit '/users/show_otp'
+    expect(current_path).to eq('/users/sign_in')
   end
 
   it 'does not time out when valid setup OTP is submitted before timeout' do

@@ -2,40 +2,21 @@ _fpa.loaded.registrations = () => {
 
     const setupOtpForm = $('#form-validate-otp');
     if (setupOtpForm.length > 0) {
+        const twoFactorTimeout = _fpa.loaded.two_factor_timeout;
         const timeoutSecs = parseInt(setupOtpForm.data('otp-setup-idle-timeout'), 10) || 300;
         const signInPath = setupOtpForm.data('sign-in-path');
         const signOutPath = setupOtpForm.data('sign-out-path');
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
-        let setupOtpTimer = null;
 
-        const signOutAndRedirect = () => {
-            const redirectPath = signInPath || '/users/sign_in';
-
-            if (!signOutPath) {
-                window.location.assign(redirectPath);
-                return;
-            }
-
-            $.ajax({
-                url: signOutPath,
-                method: 'POST',
-                data: { _method: 'delete' },
-                headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
-            }).always(() => {
-                window.location.assign(redirectPath);
-            });
-        };
-
-        setupOtpTimer = window.setTimeout(() => {
+        const setupOtpTimer = twoFactorTimeout.create_timer(timeoutSecs, () => {
             $('#otp_attempt').val('');
-            signOutAndRedirect();
-        }, timeoutSecs * 1000);
+            twoFactorTimeout.sign_out_and_redirect({ signInPath, signOutPath, csrfToken });
+        });
+
+        setupOtpTimer.start();
 
         setupOtpForm.on('submit', () => {
-            if (setupOtpTimer) {
-                clearTimeout(setupOtpTimer);
-                setupOtpTimer = null;
-            }
+            setupOtpTimer.clear();
         });
     }
 

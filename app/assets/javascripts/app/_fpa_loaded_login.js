@@ -1,7 +1,6 @@
 _fpa.loaded.login = function () {
 
   let allow_submit = false;
-  let otp_timer = null;
   const el_mfa_form = $('#mfa-step1')[0];
 
   // Setup help icon trigger
@@ -20,6 +19,18 @@ _fpa.loaded.login = function () {
   _fpa.loaded.login_state = {
     otp_idle_timeout: parseInt($(el_mfa_form).data('otp-idle-timeout')) || 300
   };
+
+  const otp_idle_timer = _fpa.loaded.two_factor_timeout.create_timer(
+    _fpa.loaded.login_state.otp_idle_timeout,
+    function () {
+      allow_submit = false;
+      $('#user_password, #admin_password').val('');
+      $('#user_otp_attempt, #admin_otp_attempt').val('');
+      $('.login-2fa-block').hide();
+      $('.login-user-password-block').show();
+      $('#user_otp_attempt, #admin_otp_attempt').removeAttr('required');
+    }
+  );
 
   const $form = $('form#new_user, form#new_admin');
   const $btn_final = $('input[type="submit"]');
@@ -41,16 +52,7 @@ _fpa.loaded.login = function () {
         $('#user_otp_attempt, #admin_otp_attempt').attr('required', true).focus();
 
         // Start idle timeout: reset to step 1 if OTP not submitted in time
-        if (otp_timer) clearTimeout(otp_timer);
-        otp_timer = window.setTimeout(function () {
-          otp_timer = null;
-          allow_submit = false;
-          $('#user_password, #admin_password').val('');
-          $('#user_otp_attempt, #admin_otp_attempt').val('');
-          $('.login-2fa-block').hide();
-          $('.login-user-password-block').show();
-          $('#user_otp_attempt, #admin_otp_attempt').removeAttr('required');
-        }, _fpa.loaded.login_state.otp_idle_timeout * 1000);
+        otp_idle_timer.start();
       }
       else {
         $('form#new_user, form#new_admin').submit();
@@ -67,10 +69,7 @@ _fpa.loaded.login = function () {
   $form.on('submit', function (ev) {
     if (allow_submit) {
       // User is submitting the OTP - clear the idle timeout timer
-      if (otp_timer) {
-        clearTimeout(otp_timer);
-        otp_timer = null;
-      }
+      otp_idle_timer.clear();
       return;
     }
 
