@@ -76,6 +76,61 @@ Any Chart.js chart type is supported:
 | `polarArea` | Polar area chart |
 | `scatter` | Scatter plot |
 | `bubble` | Bubble chart |
+| `sankey` | Sankey flow diagram — see [Sankey Charts](#sankey-charts) |
+
+## Sankey Charts
+
+Sankey diagrams visualise flow quantities between nodes. They require the [chartjs-chart-sankey](https://github.com/kurkle/chartjs-chart-sankey) plugin, which is bundled with the application.
+
+### SQL Structure for Sankey
+
+Unlike standard charts (which use a label column plus one or more value columns), Sankey charts require **three columns** per row:
+
+| Column | Default name | Description |
+|--------|-------------|-------------|
+| Source node | `from` | The name of the origin node |
+| Target node | `to` | The name of the destination node |
+| Flow magnitude | `flow` | A positive number representing the quantity flowing |
+
+**Example:**
+
+```sql
+SELECT
+  stage_from  AS "from",
+  stage_to    AS "to",
+  participant_count AS "flow"
+FROM cohort_transitions
+ORDER BY participant_count DESC;
+```
+
+### Custom Column Names
+
+If your SQL uses different column names, map them with `sankey_columns`:
+
+```yaml
+component:
+  options:
+    type: sankey
+    sankey_columns:
+      from_column: source
+      to_column: destination
+      flow_column: value
+```
+
+### Sankey Dataset Options
+
+The first entry in `dataset_options` applies to the single Sankey dataset. Supported keys:
+
+| Key | Description |
+|-----|-------------|
+| `label` | Dataset label (shown in the tooltip header) |
+| `colorMode` | Colour blending mode: `'gradient'` (default), `'from'`, or `'to'` |
+| `alpha` | Opacity of the flow ribbons (0–1, default `0.5`) |
+| `colorFrom` | Colour of the source end of each ribbon (CSS string or callback) |
+| `colorTo` | Colour of the target end of each ribbon (CSS string or callback) |
+| `size` | `'max'` (default) or `'min'` — controls overlap strategy |
+
+---
 
 ## Dataset Options
 
@@ -311,6 +366,58 @@ component:
     options:
       maintainAspectRatio: false
       responsive: true
+```
+
+---
+
+### Example 6: Sankey Flow Diagram
+
+A report showing participant transitions between study stages.
+
+**SQL:**
+```sql
+SELECT
+  stage_from        AS "from",
+  stage_to          AS "to",
+  count(*)          AS "flow"
+FROM participant_transitions
+GROUP BY stage_from, stage_to
+ORDER BY stage_from, stage_to;
+```
+
+**Options:**
+```yaml
+view_options:
+  view_as: chart
+
+component:
+  options:
+    type: sankey
+    width: 800
+    height: 400
+    dataset_options:
+      - label: Participant flow
+        colorMode: gradient
+        alpha: 0.6
+    options:
+      responsive: false
+```
+
+**With custom column names** (when SQL columns differ from the defaults):
+
+```yaml
+component:
+  options:
+    type: sankey
+    width: 800
+    height: 400
+    sankey_columns:
+      from_column: source_stage
+      to_column: destination_stage
+      flow_column: participant_count
+    dataset_options:
+      - label: Participant flow
+        colorMode: gradient
 ```
 
 ---
