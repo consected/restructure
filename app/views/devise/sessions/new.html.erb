@@ -8,7 +8,7 @@
   <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage.html_safe %></div><% end %>
 
   <% unless resource.two_factor_auth_disabled %>
-  <%= form_for(resource, as: resource_name, url: '/bad_request', remote: true, html: { id: 'mfa-step1' }) do |f| %>
+  <%= form_for(resource, as: resource_name, url: '/bad_request', remote: true, html: { id: 'mfa-step1', data: { otp_idle_timeout: Settings::TwoFactorAuthIdleTimeout.to_i } }) do |f| %>
     <%= f.hidden_field :email, id: 'step1-email' %>
     <%= f.hidden_field :password, id: 'step1-password' %>
     <%= hidden_field_tag :resource_type, resource_name %>
