@@ -14,6 +14,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.42.25 back to develop
+- [Updated] CHANGELOG
+- [Updated] gems
+- [Updated] db structure
+- [Merged] release 9.43.0 back to develop
+- [Added] Chart.js chart reports documentation and system spec - fixes #1086
+- [Allow] run_at to be specified with batch_trigger frequency 'once' - fixes #1090
+- [Fixed] api_access_only 2FA edge cases: missing otp_secret generation and flag reset - fixes #1083
+- [Added] Sankey diagram chart support using chartjs-chart-sankey - fixes #1088
+- [Added] 2FA OTP idle timeout on login page - fixes #1075
+- [Added] idle timeout on 2FA QR setup page - fixes #1075
+- [Refactored] 2FA timeout handling into shared secure utils - fixes #1075
+- [Added] admin flow coverage to 2FA timeout specs - fixes #1075
+
 ## [9.43.0] - 2026-04-22
 
 ### From FPHS - PR #1082 - 2026-04-21
