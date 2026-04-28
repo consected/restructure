@@ -1,5 +1,44 @@
 _fpa.loaded.registrations = () => {
 
+    const setupOtpForm = $('#form-validate-otp');
+    if (setupOtpForm.length > 0) {
+        const timeoutSecs = parseInt(setupOtpForm.data('otp-setup-idle-timeout'), 10) || 300;
+        const signInPath = setupOtpForm.data('sign-in-path');
+        const signOutPath = setupOtpForm.data('sign-out-path');
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let setupOtpTimer = null;
+
+        const signOutAndRedirect = () => {
+            const redirectPath = signInPath || '/users/sign_in';
+
+            if (!signOutPath) {
+                window.location.assign(redirectPath);
+                return;
+            }
+
+            $.ajax({
+                url: signOutPath,
+                method: 'POST',
+                data: { _method: 'delete' },
+                headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
+            }).always(() => {
+                window.location.assign(redirectPath);
+            });
+        };
+
+        setupOtpTimer = window.setTimeout(() => {
+            $('#otp_attempt').val('');
+            signOutAndRedirect();
+        }, timeoutSecs * 1000);
+
+        setupOtpForm.on('submit', () => {
+            if (setupOtpTimer) {
+                clearTimeout(setupOtpTimer);
+                setupOtpTimer = null;
+            }
+        });
+    }
+
     /**
      see also, config/initializers/app_settings.rb GdprCountryCodes
 
