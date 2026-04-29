@@ -348,6 +348,78 @@ table.table tbody.tracker-history {
   border: 0;
 }
 
+// Tracker history panel filter row (issue #1074)
+.tracker-history-filters {
+  background: #f7f7f7;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-bottom: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+
+  &__cell {
+    flex: 1 1 140px;
+    min-width: 140px;
+  }
+
+  &__clear-cell {
+    flex: 0 0 auto;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  &__clear {
+    color: #999;
+    text-decoration: none;
+    font-size: 18px;
+
+    &:hover {
+      color: #333;
+    }
+  }
+
+  &__date-cell {
+    display: flex;
+    gap: 4px;
+
+    input {
+      flex: 1 1 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  &__notes-cell {
+    .tracker-history-filters__notes-wrap {
+      position: relative;
+      display: block;
+    }
+
+    .tracker-history-filters__notes-icon {
+      position: absolute;
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      color: #999;
+      pointer-events: none;
+    }
+
+    .tracker-history-filter-notes {
+      width: 100%;
+      box-sizing: border-box;
+      padding-left: 26px;
+    }
+  }
+}
+
+.tracker-history-row--filtered-out {
+  display: none !important;
+}
+
 .tracker-block table.table > tbody > tr > td {
   border-top: 0;
 }
