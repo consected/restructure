@@ -1,8 +1,11 @@
+p.common-def-panel--access-type {
+  font-style: italic;
+  padding: 0;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 3px;
+}
 .common-def-panel--uacs {
-  span.common-def-panel--access-type {
-    font-style: italic;
-    padding: 0 10px 0 20px;
-  }
 }
 
 ul.admin-tag-list, ul.common-def-panel--uacs {

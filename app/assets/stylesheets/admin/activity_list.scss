@@ -5,10 +5,14 @@
 .activity-list-file-filters,
 .activity-list-dialogs,
 .activity-list-all-fields,
-.activity-list-view-refs {
+.activity-list-view-refs,
+.activity-list-fields,
+.activity-list-activities,
+.activity-list-field-configs {
   padding: 10px 10px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  // margin-top: 20px;
+  // margin-bottom: 20px;
+  margin: -15px;
   border-bottom: 1px solid silver;
   background-color: #f3f3f3;
 }
