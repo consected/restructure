@@ -1,4 +1,4 @@
-<% if object_instance.persisted? && object_instance.options_text 
+<% if object_instance.persisted?
      schema = object_instance.schema_name
      table_name = object_instance.table_name
      begin
@@ -9,7 +9,6 @@
      end  
     %>
 <div class="activity-list-view-refs">
-  <label>views referencing database table</label>
   <% if view_refs.present? %>
   <ul class="al-reference-list">  
   <% view_refs.each do |l| 

@@ -1,7 +1,16 @@
-<% if object_instance.persisted? && object_instance.options_text && !object_instance.disabled
-     dialogs = object_instance.option_configs.map { |d| d.dialog_before.map { |e| e.last } }.flatten %>
+<% if object_instance.persisted? && !object_instance.disabled
+     dialogs = (object_instance.option_configs || []).flat_map do |d|
+       dialog_before = d.dialog_before
+       case dialog_before
+       when Hash
+         dialog_before.values
+       when String
+         [dialog_before]
+       else
+         []
+       end
+     end %>
 <div class="activity-list-dialogs">
-  <label>dialogs</label>
   <% if dialogs.present? %>
   <ul class="al-reference-list">  
   <% dialogs.each do |l| %>       
@@ -10,8 +19,8 @@
   </li>
   <% end %>
   </ul>
-  <% end %>
   <hr />
+  <% end %>
     <p>Add a <%= link_to link_label_open_in_new("new dialog template"), admin_message_templates_path(init_with: {message_type: 'dialog', template_type: 'content', category: object_instance.category}, perform_action: 'new'), target: "_blank" %>
     with <i>message type:</i> <b>dialog</b> &amp; <i>template type:</i> <b>content</b></p>
 </div>
