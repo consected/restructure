@@ -572,12 +572,12 @@ class Master < ActiveRecord::Base
   # if we have already preloaded the trackers
   # since we don't want to run individual queries for each item
   def trackers_length
-    return @trackers_length if @trackers_length
+    return @trackers_length unless @trackers_length.nil?
 
     @trackers_length = if association(:trackers).loaded?
                          trackers.length
                        else
-                         trackers.count
+                         trackers.unscope(:eager_load, :includes, :order).count
                        end
   end
 
