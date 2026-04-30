@@ -205,7 +205,7 @@ class Imports::Import < ActiveRecord::Base
     keys = csv_rows.first.to_h.keys
     excess = keys - permitted_params_for_primary_table.map(&:to_sym) - %i[id created_at updated_at]
     if excess.present?
-      errors.add 'some columns', 'in the CSV file do not match the table columns. ' \
+      errors.add 'some columns', "in the CSV file do not match the table columns. Go back to upload another file.\n" \
                                  "Unexpected columns in the CSV file are: #{excess.join(', ')}"
       return false
     end

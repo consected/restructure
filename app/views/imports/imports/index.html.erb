@@ -5,7 +5,7 @@
       <h3>Step 1: Select table to import into</h3>
       <%= form_tag imports_imports_path(format: :csv), method: :get, target: 'csvfile', id: 'import_template_download' do %>
         <div class="form-group">
-          <%= select_tag :get_template_for, options_for_select(@primary_tables), prompt: '- select table -' %>
+          <%= select_tag :get_template_for, options_for_select(@primary_tables), prompt: '- select table -', class: 'use-chosen' %>
         </div>
         <%= field_set_tag '', disabled: true do %>
         <p><br>Need a template CSV for this table?</p>

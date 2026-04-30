@@ -58,6 +58,7 @@ module Imports
     # @return [Hash {fieldname: :type}]
     def analyze_csv(csv, keep_core_fields: nil)
       csv_rows = parse(csv)
+      header_labels = @header_labels || {}
 
       self.field_types = {}
       # Ensure the fields are set up in the original order
@@ -100,6 +101,13 @@ module Imports
 
       generator_config.setup_fields_config field_types
 
+      field_types.each_key do |field_name|
+        original_header = header_labels[field_name.to_sym]
+        next if original_header.blank? || original_header == field_name.to_s
+
+        generator_config.fields[field_name].label = original_header
+      end
+
       field_types
     end
 
@@ -108,9 +116,16 @@ module Imports
     # @param [String] csv
     # @return [CSV::Table]
     def parse(csv)
+      @header_labels = {}
+      header_converter = lambda { |header|
+        normalized = CSV::HeaderConverters[:symbol].call(header)
+        @header_labels[normalized.to_sym] ||= header.to_s
+        normalized
+      }
+
       CSV.parse(csv,
                 headers: true,
-                header_converters: :symbol,
+                header_converters: header_converter,
                 converters: %i[
                   integer
                   float
