@@ -219,4 +219,66 @@ RSpec.describe Tracker, type: :model do
       expect(panel_entries.first.sub_process_id).to eq @sp1_2.id
     end
   end
+
+  # Regression specs for issue #1106: Master#trackers_length raised
+  # PG::SyntaxError ("syntax error at or near 'Table'") when the trackers
+  # association carried eager_load values (from TrackerHandler default_scope
+  # and the has_many lambda), causing an Arel::Attribute object to leak into
+  # the generated SQL.  The memoization guard also had a falsy-zero bug.
+  describe 'Master#trackers_length' do
+    it 'returns the correct count when the association is not preloaded' do
+      master = create_master
+      # Use two distinct protocols so the trackers view shows two rows
+      # (the view returns one row per protocol per master)
+      master.trackers.create!(
+        protocol_id: @p1.id, sub_process_id: @sp1_1.id, event_date: DateTime.now
+      )
+      master.trackers.create!(
+        protocol_id: @p2.id, sub_process_id: @sp2_1.id, event_date: DateTime.now
+      )
+
+      # Reload so the association is NOT cached
+      fresh = Master.find(master.id)
+      fresh.current_user = @user
+
+      expect { fresh.trackers_length }.not_to raise_error
+      expect(fresh.trackers_length).to eq 2
+    end
+
+    it 'returns 0 (not nil) and does not re-query when the master has no trackers' do
+      master = create_master
+      fresh = Master.find(master.id)
+      fresh.current_user = @user
+
+      expect(fresh.trackers_length).to eq 0
+
+      # Second call must use the memoized value, not hit the DB again
+      query_count = 0
+      counter = ->(_name, _started, _finished, _unique_id, payload) {
+        query_count += 1 if payload[:sql]&.match?(/tracker/i)
+      }
+      ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
+        fresh.trackers_length
+      end
+      expect(query_count).to eq 0
+    end
+
+    it 'uses trackers.length (not a SQL count) when the association is already loaded' do
+      master = create_master
+      master.trackers.create!(
+        protocol_id: @p1.id, sub_process_id: @sp1_1.id, event_date: DateTime.now
+      )
+      master.trackers.load # preload
+
+      query_count = 0
+      counter = ->(_name, _started, _finished, _unique_id, payload) {
+        query_count += 1 if payload[:sql]&.match?(/tracker/i)
+      }
+      ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
+        master.trackers_length
+      end
+      expect(query_count).to eq 0
+      expect(master.trackers_length).to eq 1
+    end
+  end
 end
