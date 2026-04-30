@@ -160,4 +160,19 @@ module FilterUtils
 
     @filter_params = res
   end
+
+  #
+  # Generate a list of unique, non-blank values for a given field from the primary model.
+  # This is useful for populating filter dropdown options, excluding nil and empty string values.
+  # Results are sorted alphabetically for consistent display in filter UI dropdowns.
+  # Avoids SQL DISTINCT to prevent PostgreSQL ORDER BY conflicts with model default scopes.
+  # @param [Symbol, String] field_name the database field to retrieve values from
+  # @return [Array] sorted array of unique non-blank values from the field
+  def filter_values_for(field_name)
+    primary_model
+      .where.not(field_name => [nil, ''])
+      .pluck(field_name)
+      .uniq
+      .sort
+  end
 end
