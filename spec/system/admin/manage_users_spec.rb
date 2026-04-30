@@ -14,7 +14,7 @@
 # - Server option: self-registration info shown vs hidden
 # - 2FA set up? column displays correct status per user
 #
-# Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column)
+# Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column), #1096 (email/first/last filters)
 
 require 'rails_helper'
 
@@ -218,6 +218,38 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
 
       expect(page).to have_content('Adding Users')
       expect(page).not_to have_content('User Registration')
+    end
+  end
+
+  context 'when filtering users - Issue #1096' do
+    it 'filters by email, first name and last name' do
+      user, = create_user(nil, '', email: "issue1096_#{SecureRandom.hex(4)}@testing.com")
+      user.update!(
+        first_name: 'Issue1096First',
+        last_name: 'Issue1096Last'
+      )
+
+      visit '/admin/manage_users'
+      finish_page_loading
+
+      expect(page).to have_content('Email:')
+      expect(page).to have_content('First name:')
+      expect(page).to have_content('Last name:')
+
+      visit "/admin/manage_users?filter[email]=#{CGI.escape(user.email)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
+
+      visit "/admin/manage_users?filter[first_name]=#{CGI.escape(user.first_name)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
+
+      visit "/admin/manage_users?filter[last_name]=#{CGI.escape(user.last_name)}"
+      finish_page_loading
+      expect(page).to have_css('td', text: user.email)
+      expect(page).not_to have_css('td', text: @test_user_email)
     end
   end
 end
