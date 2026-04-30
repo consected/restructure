@@ -78,12 +78,15 @@ class Admin::ManageUsersController < AdminController
 
   def filters
     {
-      app_type_id: Admin::AppType.all_by_name
+      app_type_id: Admin::AppType.all_by_name,
+      email: filter_values_for(:email),
+      first_name: filter_values_for(:first_name),
+      last_name: filter_values_for(:last_name)
     }
   end
 
   def filters_on
-    [:app_type_id]
+    %i[app_type_id email first_name last_name]
   end
 
   # Override regular defaults, which force the current user's app_type_id
