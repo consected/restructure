@@ -57,6 +57,7 @@ EOF
         f = 'varchar' if a == 'data'
         f = 'varchar' if a.end_with?('_name')
         f = 'boolean' if a.end_with?('_check')
+        f = 'boolean' if a == 'disabled'
         f = 'varchar' if a == 'notes'
         f = 'varchar' if a.start_with?('select_')
         f = 'integer' if a == 'age'

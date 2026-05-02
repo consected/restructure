@@ -14,6 +14,62 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #1110 - 2026-05-02
+
+- [Added] report list documentation and specs - resolves #1108
+
+### From Viva - PR #1107 - 2026-04-30
+
+- [Fixed] trackers_length SQL error and zero-count memoization bug - fixes #1106
+
+### From FPHS - PR #1093 - 2026-04-30
+
+- [Fixed] versioned phone log (and other activity log) templates and added UI coverage - fixes #1078
+
+### From FPHS - PR #1105 -
+
+- [Changed] admin details sections accordion-based with auto-expanding UAC panel - fixes #1095
+
+### From FPHS - PR #1104 - 2026-04-30
+
+- [Fixed] CSV import field matching, header labels and chosen table selector - fixes #1097, fixes #1099
+
+### From FPHS - PR #1103 - 2026-04-30
+
+- [Added] admin user filters for email, first_name, and last_name - fixes #1096
+
+### From FPHS - PR #1102 - 2026-04-29
+
+- [Fixed] incomplete 'Resolved from .' text in admin definition versioning details - fixes #1094
+
+### From FPHS - PR #1101 - 2026-04-29
+
+- [Fixed] CSV model generation error feedback and added request/controller specs - fixes #1098
+
+### From FPHS - PR #1100 - 2026-04-29
+
+- [Added] tracker history panel filters and initial config - fixes #1074
+
+### From FPHS - PR #1092 - 2026-04-28
+
+- [Added] 2FA idle timeout for login and setup flows - fixes #1075
+
+### From FPHS - PR #1089 - 2026-04-28
+
+- [Added] Sankey diagram chart support using chartjs-chart-sankey - fixes #1088
+
+### From FPHS - PR #1084 - 2026-04-28
+
+- [Fixed] api_access_only 2FA edge cases: missing otp_secret generation and flag reset - fixes #1083
+
+### From FPHS - PR #1090 - 2026-04-28
+
+- [Changed] `run_at` to allow it to be specified with `batch_trigger` frequency 'once' - fixes #1090
+
+### From FPHS - PR #1087 - 2026-04-24
+
+- [Added] Chart.js chart reports documentation and system spec - fixes #1086
+
 ## [9.43.0] - 2026-04-22
 
 ### From FPHS - PR #1082 - 2026-04-21

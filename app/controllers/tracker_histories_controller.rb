@@ -16,7 +16,7 @@ class TrackerHistoriesController < UserBaseController
 
     logger.info "Tracker histories returned #{@tracker_histories.length} items"
 
-    if params[:skip_last]=='true'
+    if params[:skip_last] == 'true'
       # Remove a current tracker item from the list.
       mid = @tracker_histories.first
       @tracker_histories = @tracker_histories.reject {|x| x.id == mid.id}
@@ -24,7 +24,19 @@ class TrackerHistoriesController < UserBaseController
 
     @master_objects = @tracker_histories
 
-    render json: {tracker_histories: @tracker_histories, master_id: @master.id}
+    initial_filter_regex = TrackerHistoryFilterConfig.config_for(current_user)
+    initial_filter_notes = TrackerHistoryFilterConfig.notes_initial_for(current_user)
+    initial_filter_dates = TrackerHistoryFilterConfig.date_initial_for(current_user)
+
+    render json: {
+      tracker_histories: @tracker_histories,
+      master_id: @master.id,
+      initial_filter_regex: initial_filter_regex,
+      initial_filter_notes: initial_filter_notes,
+      initial_filter_date_from: initial_filter_dates[:date_from],
+      initial_filter_date_to: initial_filter_dates[:date_to],
+      record_updates_protocol_name: Classification::Protocol::RecordUpdatesProtocolName
+    }
   end
 
 

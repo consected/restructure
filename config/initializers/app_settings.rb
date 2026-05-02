@@ -73,6 +73,8 @@ class Settings
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'].presence || DefaultSettings::TwoFactorAuthIssuer
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'].presence || 30).to_i
+  # Number of seconds the OTP entry page waits before resetting to step 1 (client-side idle timeout)
+  TwoFactorAuthIdleTimeout = (ENV['FPHS_2FA_IDLE_TIMEOUT'].presence || DefaultSettings::TwoFactorAuthIdleTimeout).to_i
 
   # Check number of previous passwords back to check for new password repeating an old one
   CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'].presence || (Rails.env.development? ? 0 : 5)).to_i
@@ -294,7 +296,7 @@ class Settings
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
     NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail
-    TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift
+    TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift TwoFactorAuthIdleTimeout
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage
     SearchResultsLimit

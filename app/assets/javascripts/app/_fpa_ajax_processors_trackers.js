@@ -136,9 +136,17 @@ _fpa.postprocessors_trackers = {
     },
 
     tracker_chron_result_template: function (block, data) {
+        // Populate filter options BEFORE format_block initializes chosen.js,
+        // so chosen sees the populated <select> elements.
+        if (_fpa.tracker_history_filter && _fpa.tracker_history_filter.populate) {
+            _fpa.tracker_history_filter.populate(block, data);
+        }
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
         _fpa.postprocessors.tracker_item_link_hander(block);
+        if (_fpa.tracker_history_filter && _fpa.tracker_history_filter.attach) {
+            _fpa.tracker_history_filter.attach(block, data);
+        }
 
     },
 

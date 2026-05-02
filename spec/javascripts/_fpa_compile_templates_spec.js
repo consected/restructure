@@ -59,26 +59,26 @@ describe('_fpa.compile_templates', function () {
   });
 
   describe('body class management', function () {
-    it('adds status-compiled class to body', function () {
+    it('adds status-compiling class to body', function () {
       _fpa.compile_templates();
 
-      expect($('body').hasClass('status-compiled')).toBe(true);
+      expect($('body').hasClass('status-compiling')).toBe(true);
     });
 
-    it('removes status-compiling class from body', function () {
+    it('does not add status-compiled class to body yet', function () {
       $('body').addClass('status-compiling');
 
       _fpa.compile_templates();
 
-      expect($('body').hasClass('status-compiling')).toBe(false);
+      expect($('body').hasClass('status-compiled')).toBe(false);
     });
 
-    it('removes initial-compiling class from body', function () {
+    it('does not remove initial-compiling class from body', function () {
       $('body').addClass('initial-compiling');
 
       _fpa.compile_templates();
 
-      expect($('body').hasClass('initial-compiling')).toBe(false);
+      expect($('body').hasClass('initial-compiling')).toBe(true);
     });
   });
 

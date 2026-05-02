@@ -217,9 +217,9 @@ module Dynamic
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
                              .map do |a|
-                               mn = imp_class.model_name.to_s.ns_underscore
-                               mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
-                               :"#{mn}_#{a}"
+              mn = imp_class.model_name.to_s.ns_underscore
+              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+              :"#{mn}_#{a}"
             end
           end
 
@@ -240,20 +240,20 @@ module Dynamic
       def latest_stored_update(using: nil)
         using ||= active_model_configurations
         @latest_def_update = using
-          .select(:updated_at)
-          .reorder('')
-          .order('updated_at desc nulls last')
-          .limit(1)
-          .pluck(:updated_at)
-          .first
+                             .select(:updated_at)
+                             .reorder('')
+                             .order('updated_at desc nulls last')
+                             .limit(1)
+                             .pluck(:updated_at)
+                             .first
 
         cl_update = Admin::ConfigLibrary
-          .where(format: 'yaml')
-          .reorder('')
-          .order('updated_at desc nulls last')
-          .limit(1)
-          .pluck(:updated_at)
-          .first
+                    .where(format: 'yaml')
+                    .reorder('')
+                    .order('updated_at desc nulls last')
+                    .limit(1)
+                    .pluck(:updated_at)
+                    .first
 
         [@latest_def_update, cl_update].compact.max
       end
@@ -555,10 +555,11 @@ module Dynamic
         # or will be manually triggered as needed. Re-importing should not re-trigger one-time jobs.
         return if Admin::AppTypeImport.import_in_progress?
 
+        scheduled_run_at = run_at.present? ? Time.zone.parse(run_at.to_s) : DateTime.now + 10.seconds
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
                                          run_every: 10_000.years,
-                                         run_at: DateTime.now + 10.seconds
+                                         run_at: scheduled_run_at
       else
         RecurringBatchTask.schedule_task self,
                                          { dynamic_def: to_global_id.to_s },
@@ -694,7 +695,7 @@ module Dynamic
       ckey = estimated_record_count_ckey
       Rails.cache.fetch(ckey, expires_in: 15.minutes) do
         implementation_class.count
-      rescue StandardError => e
+      rescue StandardError
         Rails.logger.warn "Failed to get estimated record count for #{name}"
         nil
       end

@@ -140,6 +140,52 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       expect(response.body).to include("Edit Entry <small>##{dm.id}</small>")
     end
 
+    it 'shows complete default versioning help text for definition-at-record-creation mode issue #1094' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test default version help #{suffix}",
+        table_name: "test_default_version_help_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "default:\n  label: Test"
+      )
+
+      allow_any_instance_of(DynamicModel).to receive(:versioning_disabled_globally?).and_return(false)
+      allow_any_instance_of(DynamicModel).to receive(:definition_uses_current_version_option?).and_return(false)
+
+      get :edit, params: { id: dm.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Resolved from the default definition-at-record-creation versioning behavior.')
+    end
+
+    it 'renders the use_current_version option as a code element when config_ucv resolves it issue #1094' do
+      suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
+
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: "test config ucv mode #{suffix}",
+        table_name: "test_config_ucv_mode_#{suffix}_recs",
+        schema_name: 'dynamic_test',
+        category: 'test',
+        disabled: true,
+        options: "_configurations:\n  use_current_version: true\ndefault:\n  label: Test"
+      )
+
+      allow_any_instance_of(DynamicModel).to receive(:versioning_disabled_globally?).and_return(false)
+      allow_any_instance_of(DynamicModel).to receive(:definition_uses_current_version_option?).and_return(true)
+      allow_any_instance_of(DynamicModel).to receive(:uses_current_definition_version?).and_return(true)
+
+      get :edit, params: { id: dm.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to have_selector('p.help-block code', text: '_configurations.use_current_version')
+      expect(response.body).to include('Resolved from')
+    end
+
     it 'shows that definition-time versioning is used when current-version mode is not enabled' do
       suffix = Array.new(8) { ('a'..'z').to_a.sample }.join
 

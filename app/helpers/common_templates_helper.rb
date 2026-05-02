@@ -52,4 +52,48 @@ module CommonTemplatesHelper
   def class_for_open_panels(resource, default_panels_length)
     "{{# is (split_lines open_panels) 'includes' '#{resource}'}}on-open-click initial_show_value-true-{{else}}initial_show_value-false-{{/is}}#{default_panels_length}".html_safe
   end
+
+  def def_uac_summary_data(object_instance:, current_user:, current_app_type_id:, resource_name: nil, resource_type: 'table')
+    resource_name = resource_name || object_instance.resource_name&.pluralize
+    return { resource_name:, resource_type:, uacs: [], no_non_template_uacs: true, current_user_has_access: false, current_app_uacs: [] } if resource_name.blank?
+
+    uacs = Admin::UserAccessControl.active_for(resource_name:).not_template_role
+    no_non_template_uacs = uacs.empty?
+
+    current_user_has_access = false
+    if current_user && current_app_type_id
+      current_user_has_access = Admin::UserAccessControl.access_for?(
+        current_user,
+        :access,
+        resource_type.to_sym,
+        resource_name,
+        alt_app_type_id: current_app_type_id
+      ).present?
+    end
+
+    current_app_uacs = uacs.select { |uac| uac.app_type_id == current_app_type_id }
+
+    {
+      resource_name:,
+      resource_type:,
+      uacs:,
+      no_non_template_uacs:,
+      current_user_has_access:,
+      current_app_uacs:
+    }
+  end
+
+  def def_uac_needs_attention?(object_instance:, current_user:, current_app_type_id:, resource_name: nil, resource_type: 'table')
+    uac_data = def_uac_summary_data(
+      object_instance:,
+      current_user:,
+      current_app_type_id:,
+      resource_name:,
+      resource_type:
+    )
+
+    uac_data[:no_non_template_uacs] ||
+      (current_app_type_id.present? && !uac_data[:current_user_has_access]) ||
+      (current_app_type_id.present? && uac_data[:current_app_uacs].empty?)
+  end
 end

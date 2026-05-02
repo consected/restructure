@@ -1,3 +1,9 @@
+# frozen_string_literal: true
+
+# Specs for TrackerHistoriesController - verifies the JSON payload returned
+# by the index action, including the `initial_filter_*` keys added for the
+# tracker history panel filter feature (consected/restructure issue #1074).
+
 require 'rails_helper'
 
 RSpec.describe TrackerHistoriesController, type: :controller do
@@ -163,6 +169,64 @@ RSpec.describe TrackerHistoriesController, type: :controller do
         # Verify the first entry from the ordered list is not included
         returned_ids = tracker_histories.map { |th| th['id'] }
         expect(returned_ids).not_to include(first_entry_id)
+      end
+    end
+
+    # Issue #1074: tracker history panel filtering
+    context 'when the tracker history initial filters app config is set' do
+      it 'includes initial_filter_regex in the JSON response' do
+        master = create_master
+
+        Admin::AppConfiguration.add_default_config(
+          @user.app_type,
+          :tracker_history_initial_filters,
+          "protocols: '^Study'\nsub_processes: 'consented'\n",
+          @admin
+        )
+
+        get :index, params: { master_id: master.id }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        expect(json_response['initial_filter_regex']).to eq(
+          'protocols' => '^Study',
+          'sub_processes' => 'consented'
+        )
+      end
+
+      it 'includes the literal initial_filter_notes value in the JSON response' do
+        master = create_master
+
+        Admin::AppConfiguration.add_default_config(
+          @user.app_type,
+          :tracker_history_initial_filters,
+          "notes: 'follow-up'\n",
+          @admin
+        )
+
+        get :index, params: { master_id: master.id }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        expect(json_response['initial_filter_notes']).to eq('follow-up')
+      end
+
+      it 'returns an empty initial_filter_regex and notes when no config is set' do
+        master = create_master
+        get :index, params: { master_id: master.id }
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        expect(json_response['initial_filter_regex']).to eq({})
+        expect(json_response['initial_filter_notes']).to eq('')
+      end
+
+      it 'includes the record_updates_protocol_name from Classification::Protocol' do
+        master = create_master
+        get :index, params: { master_id: master.id }
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        expect(json_response['record_updates_protocol_name'])
+          .to eq(Classification::Protocol::RecordUpdatesProtocolName)
       end
     end
   end

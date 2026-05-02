@@ -5,6 +5,8 @@
     <p>Using this definition will fail</p>
   <% end %>
 
+  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
+
   <label>item type name</label>
   <p class="dynamic-item-type">
   <%= object_instance.full_item_type_name %>
@@ -117,66 +119,182 @@
   </div>
   <% end %>
 
-  <%= render partial: 'admin/dynamic_models/config_errors', locals: { object_instance: } %>
-
-  <%= render partial: 'admin/common_templates/def_uac_summary', 
-             locals: { 
-               object_instance:, 
-               current_app_type_id: current_admin.matching_user&.app_type_id,
-               current_user: current_admin.matching_user
-             } %>
 <% else %>
   <p>
   <label>not yet saved</label>
   </p>
 <% end %>
-  <label>fields</label>
 <% if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready?%>
   <%
     fields = object_instance.all_implementation_fields(only_real: true)
     table_cols = object_instance.table_columns.map { |c| c.name.to_s }
   %>
-  <p><%=fields.length%> fields</p>
-  <% if object_instance.fields_match_columns? %>
-  <p>Fields match table</p>
-  <% else %>
-  <p>Fields don't match table</p>
-  <p><%= "definition : table: +[#{(fields - table_cols).join(" ")}] -[#{(table_cols - fields).join(" ")}]" %><p>
-  <% end %>  
 <% end %>
 
-<label>field definitions</label>
-<p>
-<a href="#field-list-outer-block" id="expand-captions-dialogs">show all dialogs and captions</a>
-</p>
+<%
+  current_app_type_id = current_admin.matching_user&.app_type_id
+  current_user = current_admin.matching_user
+  dm_accordion_id = "dm-details-accordion-#{object_instance.id || 'new'}"
+  dm_uac_needs_attention = def_uac_needs_attention?(
+    object_instance:,
+    current_user:,
+    current_app_type_id:
+  )
+%>
+<div class="panel-group dm-details-accordion" id="<%= dm_accordion_id %>" role="tablist">
 
-  <ul class="activity-list" id="field-list-outer-block">
-    <%= sortable_block "#dynamic_model_field_list", "li" %>
-  </ul>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-uac-heading">
+      <h4 class="panel-title">
+        <a class="<%= dm_uac_needs_attention ? '' : 'collapsed' %>" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-uac-collapse"
+           aria-expanded="<%= dm_uac_needs_attention %>" aria-controls="<%= dm_accordion_id %>-uac-collapse">
+          user access controls
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-uac-collapse" class="panel-collapse collapse <%= dm_uac_needs_attention ? 'in' : '' %>"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-uac-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_uac_summary',
+                   locals: {
+                     object_instance:,
+                     current_app_type_id:,
+                     current_user:
+                   } %>
+      </div>
+    </div>
+  </div>
 
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-fields-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-fields-collapse"
+           aria-expanded="false" aria-controls="<%= dm_accordion_id %>-fields-collapse">
+          fields
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-fields-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-fields-heading">
+      <div class="panel-body">
+        <div class="activity-list-fields">
+        <label>status</label>
 <% if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready?%>
-  <label>additional table columns</label>
-  <ul class="activity-list">
-  <% (table_cols - fields).each do |f|%><li><%=f%></li><% end %>
-  </ul>
-<% end %>  
-
-</div>
-<% if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready?%>
-<div class="dynamic-list-section">
-  <label>activities</label>
-  <ul class="activity-list">
-  <% object_instance.option_configs_names&.each do |name| %>
-    <li><%=name%><%= object_instance.option_type_config_for(name) ? '' : "(invalid)" %></li>
-  <% end %>
-  </ul>
-  <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
-</div>
+        <p><%=fields.length%> fields</p>
+        <% if object_instance.fields_match_columns? %>
+        <p>Fields match table</p>
+        <% else %>
+        <p>Fields don't match table</p>
+        <p><%= "definition : table: +[#{(fields - table_cols).join(" ")}] -[#{(table_cols - fields).join(" ")}]" %></p>
+        <% end %>
+<% else %>
+        <p>Fields not available until definition is saved, enabled, and table/view is ready</p>
 <% end %>
-<%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
-<%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
-<%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
-<%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
+
+        <label>field definitions</label>
+        <p>
+          <a href="#field-list-outer-block" id="expand-captions-dialogs">show all dialogs and captions</a>
+        </p>
+
+        <ul class="activity-list" id="field-list-outer-block">
+          <%= sortable_block "#dynamic_model_field_list", "li" %>
+        </ul>
+
+<% if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready?%>
+        <label>additional table columns</label>
+        <ul class="activity-list">
+        <% (table_cols - fields).each do |f|%><li><%=f%></li><% end %>
+        </ul>
+
+        <label>activities</label>
+        <ul class="activity-list">
+        <% object_instance.option_configs_names&.each do |name| %>
+          <li><%=name%><%= object_instance.option_type_config_for(name) ? '' : "(invalid)" %></li>
+        <% end %>
+        </ul>
+        <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
+<% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-libraries-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-libraries-collapse"
+           aria-expanded="false" aria-controls="<%= dm_accordion_id %>-libraries-collapse">
+          libraries
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-libraries-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-libraries-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_libraries', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-dialogs-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-dialogs-collapse"
+           aria-expanded="false" aria-controls="<%= dm_accordion_id %>-dialogs-collapse">
+          dialogs
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-dialogs-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-dialogs-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_dialogs', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-view-refs-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-view-refs-collapse"
+           aria-expanded="false" aria-controls="<%= dm_accordion_id %>-view-refs-collapse">
+          views referencing database table
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-view-refs-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-view-refs-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_view_refs', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= dm_accordion_id %>-field-configs-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= dm_accordion_id %>"
+           href="#<%= dm_accordion_id %>-field-configs-collapse"
+           aria-expanded="false" aria-controls="<%= dm_accordion_id %>-field-configs-collapse">
+          field configs
+        </a>
+      </h4>
+    </div>
+    <div id="<%= dm_accordion_id %>-field-configs-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= dm_accordion_id %>-field-configs-heading">
+      <div class="panel-body">
+        <%= render partial: 'admin/common_templates/def_details_field_configs', locals: {object_instance: object_instance} %>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
 
 <% # Load the appropriate configurations for showing the form correctly
    if object_instance.persisted? && object_instance.enabled? && object_instance.table_or_view_ready? %>

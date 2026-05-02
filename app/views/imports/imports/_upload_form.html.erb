@@ -4,7 +4,7 @@
 
     <div class="form-group">
       <label for="primary_table">Select the table to import into</label>
-      <%= select_tag :primary_table, options_for_select(@primary_tables, @primary_table), include_blank: true %>
+      <%= select_tag :primary_table, options_for_select(@primary_tables, @primary_table), include_blank: true, class: 'use-chosen' %>
     </div>
     <div class="row">
       <div class="form-group col-md-6" id="browse-block">

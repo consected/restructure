@@ -49,43 +49,62 @@
   
     opts.data.datasets = [];
     var datasets = opts.data.datasets;
-    var data_labels = opts.data.labels = opts.data_labels;
     var dataset_options = opts.dataset_options;
-  
-    for(var i = 0; i < json.length; i++) {
-      var row = json[i];
-      var col_label = null;
-  
-      var col_iter = 0;
-      var row_iter = 0;
-      for(col_label in row) {
-        if(row.hasOwnProperty(col_label)) {
-          var colval = row[col_label];
-          if (col_label == opts.label_with_column) {
-            data_labels.push(colval);
-          }
-          else {
-            if (!datasets[col_iter]) {
-              datasets[col_iter] = {
-                data: [],
-                label: col_label
+
+    if (opts.type === 'sankey') {
+      // Sankey charts use a flat array of {from, to, flow} objects in a single dataset.
+      // Column names default to 'from', 'to', 'flow' but can be overridden via sankey_columns.
+      var sankey_cols = $.extend({from_column: 'from', to_column: 'to', flow_column: 'flow'}, opts.sankey_columns);
+      var sankey_data = [];
+
+      for (var i = 0; i < json.length; i++) {
+        var row = json[i];
+        sankey_data.push({
+          from: String(row[sankey_cols.from_column]),
+          to: String(row[sankey_cols.to_column]),
+          flow: Number(row[sankey_cols.flow_column])
+        });
+      }
+
+      var sankey_dataset = {data: sankey_data};
+      if (dataset_options[0]) {
+        $.extend(sankey_dataset, dataset_options[0]);
+      }
+      datasets.push(sankey_dataset);
+    } else {
+      var data_labels = opts.data.labels = opts.data_labels;
+
+      for (var i = 0; i < json.length; i++) {
+        var row = json[i];
+        var col_label = null;
+        var col_iter = 0;
+
+        for (col_label in row) {
+          if (row.hasOwnProperty(col_label)) {
+            var colval = row[col_label];
+            if (col_label == opts.label_with_column) {
+              data_labels.push(colval);
+            } else {
+              if (!datasets[col_iter]) {
+                datasets[col_iter] = {
+                  data: [],
+                  label: col_label
+                };
+                if (dataset_options[col_iter]) {
+                  $.extend(datasets[col_iter], dataset_options[col_iter]);
+                }
               }
-              if (dataset_options[col_iter]) {
-                $.extend(datasets[col_iter], dataset_options[col_iter]);
-              }
+              datasets[col_iter].data.push(colval);
+              col_iter++;
             }
-            datasets[col_iter].data.push(colval);
-  
-            col_iter++;
           }
         }
       }
-      row_iter++;
     }
   
     var new_html = $('<canvas width="'+width+'" height="'+height+'" class="report-chart-canvas"></canvas>');
-  
-  $block.html(new_html);
+
+    $block.html(new_html);
     var ctx = $block.find('canvas');
   
     var myPieChart = new Chart(ctx, opts);

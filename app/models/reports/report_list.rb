@@ -128,6 +128,11 @@ module Reports
       items_in_list_record_ids = items_in_list.pluck(:record_id)
       items_in_list_ids = items_in_list.pluck(:id)
 
+      # NOTE: For *remove_from_list* configurations, the SQL typically returns the list table's
+      # primary key (e.g. *zeus_bulk_message_recipients.id*) in the *id* field of the JSON,
+      # so that intersecting with *items_in_list_ids* yields the list rows to disable.
+      # For *add_to_list* / *update_list* configurations, the JSON *id* is the source record's id,
+      # used through *new_item_ids* / *removed_item_ids* below (against *record_id*).
       self.item_ids_in_list = item_ids & items_in_list_ids
       self.new_item_ids = item_ids - items_in_list_record_ids
       self.removed_item_ids = items_in_list_record_ids - item_ids
