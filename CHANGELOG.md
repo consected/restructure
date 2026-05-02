@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.0] - 2026-05-02
+
 ### From FPHS - PR #1110 - 2026-05-02
 
 - [Added] report list documentation and specs - resolves #1108
