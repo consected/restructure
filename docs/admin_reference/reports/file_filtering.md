@@ -1,10 +1,18 @@
 # File Filtering
 
+This page covers the `select items: download files` variant of report checkboxes, which lets users
+download multiple files in one action.
+
+For the `add to list` / `update list` / `remove from list` checkbox variants used by list-building
+workflows (bulk messaging, variable selection, etc.) see
+[Select Items: Checkbox Actions in Reports](select_items_lists.md).
+
+---
+
 Thew following is an example SQL query for viewing or downloading masses of documents within a regular tabular report.
 
 Notice the use of `:file_filtering_conditions_for_activity_log__ipa_assignment_session_filestore`, which is substituted with inner join
 SQL that limits the files the current user can see in the final report.
-
 
     select 
     al.master_id,
