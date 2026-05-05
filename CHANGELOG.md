@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.1] - 2026-05-05
+
 - [Merged] release 9.43.1 back to develop
 - [Added] tracker history panel filters and initial config - fixes #1074
 - [Fixed] incomplete 'Resolved from .' text in admin definition versioning details - fixes #1094
