@@ -14,6 +14,20 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.43.1 back to develop
+- [Added] tracker history panel filters and initial config - fixes #1074
+- [Fixed] incomplete 'Resolved from .' text in admin definition versioning details - fixes #1094
+- [Added] admin user filters for email, first_name, and last_name - fixes #1096
+- [Fixed] CSV import field matching, header labels and chosen table selector - fixes #1097, fixes #1099
+- [Implemented] accordion-based admin Details panels with auto-expanding UAC and regression coverage - resolves #1095
+- [Fixed] versioned phone log templates and added UI coverage - fixes #1078
+- [Added] guidance to copilot instructions to avoid CHANGELOG updates
+- [Fixed] trackers_length SQL error and zero-count memoization bug - fixes #1106
+- [Added] report list documentation and specs - resolves #1108
+- [Updated] CHANGELOG
+- [Try] fixing release_and_build.sh merge
+- [Merged] release 9.44.0 back to develop
+
 ## [9.44.0] - 2026-05-02
 
 ### From FPHS - PR #1110 - 2026-05-02
