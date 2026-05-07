@@ -125,8 +125,11 @@ Rails.application.config.to_prepare do
 
     # Only log if this appears to be an API request
     if user_token.present? || user_email.present?
+      # Strip newlines from user-supplied values to prevent log injection
+      safe_email = (user_email || 'not_provided').gsub(/[\r\n]/, '')
+      safe_app_type = (app_type || 'not_specified').gsub(/[\r\n]/, '')
       log_message = "API authentication failed: path=#{request.path}, method=#{request.request_method}, " \
-                    "user_email=#{user_email || 'not_provided'}, app_type=#{app_type || 'not_specified'}, " \
+                    "user_email=#{safe_email}, app_type=#{safe_app_type}, " \
                     "reason=#{env['warden.options']&.dig(:reason) || 'unknown'}"
       Rails.logger.warn(log_message)
     end
