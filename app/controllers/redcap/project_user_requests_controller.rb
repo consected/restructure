@@ -18,7 +18,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
             'set the dynamic model has not been set up'
     end
 
-    @redcap__project_admin.dynamic_storage.request_records
+    @redcap__project_admin.dynamic_storage.request_records(request_source: :api)
 
     msg = "Records requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
