@@ -118,20 +118,55 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     if pid.to_i.to_s == pid
       @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
     elsif pid == 'project_id'
-      # Find a matching data collection instrument by name and if found look up the project admin
-      @redcap__project_admin = Redcap::ProjectAdmin
-                               .active
-                               .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
-                               .where(server_url: server_url)
-                               .reorder('')
-                               .order(updated_at: :desc)
-                               .first
+      # Find a matching project admin by project_id, first with an exact server_url match, then
+      # falling back to matching on protocol + host only to tolerate path differences
+      # (e.g. caller sends https://redcap.partners.org/redcap/ but project stores .../redcap/api/)
+      by_project_id = Redcap::ProjectAdmin
+                      .active
+                      .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                      .reorder('')
+                      .order(updated_at: :desc)
+
+      @redcap__project_admin = by_project_id.where(server_url: server_url).first
+
+      if @redcap__project_admin.nil? && server_url.present?
+        begin
+          uri = URI.parse(server_url)
+
+          if uri.scheme.present? && uri.host.present?
+            request_scheme = uri.scheme.downcase
+            request_host = uri.host.downcase
+
+            @redcap__project_admin = by_project_id.find do |project_admin|
+              begin
+                stored_uri = URI.parse(project_admin.server_url.to_s)
+                stored_uri.scheme.present? &&
+                  stored_uri.host.present? &&
+                  stored_uri.scheme.downcase == request_scheme &&
+                  stored_uri.host.downcase == request_host
+              rescue URI::InvalidURIError
+                Rails.logger.warn "Invalid stored server_url for project_admin #{project_admin.id}: #{project_admin.server_url}"
+                false
+              end
+            end
+          end
+        rescue URI::InvalidURIError
+          Rails.logger.warn "Invalid server_url param in set_instance_from_id: #{server_url}"
+        end
+      end
     elsif pid == 'project_name'
       # Try the project by name instead
       @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(project_name)
     end
 
-    raise FphsException, 'no matching project found' unless @redcap__project_admin
+    unless @redcap__project_admin
+      msg = if pid == 'project_name'
+              "no matching project found (project_name: #{project_name})"
+            else
+              "no matching project found (project_id: #{project_id}, server_url: #{server_url})"
+            end
+      raise FphsException, msg
+    end
 
     @id = @redcap__project_admin.id
     upgrade_user_to_admin
