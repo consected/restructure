@@ -115,4 +115,20 @@ Rails.application.config.to_prepare do
       throw(:warden, scope:, message: 'This account is configured for API access only.')
     end
   end
+
+  Warden::Manager.send(:before_failure) do |env|
+    # Log failed API authentication attempts
+    request = Rack::Request.new(env)
+    user_token = request.params['user_token']
+    user_email = request.params['user_email']
+    app_type = request.params['use_app_type']
+
+    # Only log if this appears to be an API request
+    if user_token.present? || user_email.present?
+      log_message = "API authentication failed: path=#{request.path}, method=#{request.request_method}, " \
+                    "user_email=#{user_email || 'not_provided'}, app_type=#{app_type || 'not_specified'}, " \
+                    "reason=#{env['warden.options']&.dig(:reason) || 'unknown'}"
+      Rails.logger.warn(log_message)
+    end
+  end
 end
