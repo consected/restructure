@@ -22,9 +22,10 @@ module Redcap
                   :skip_store_if_no_survey_identifier, :skipped_ids,
                   :external_id_fkey_name,
                   :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
-                  :date_range_begin
+                  :date_range_begin,
+                  :request_source
 
-    def initialize(project_admin, class_name, is_manual_pull: false)
+    def initialize(project_admin, class_name, is_manual_pull: false, request_source: nil)
       super()
       self.project_admin = project_admin
       self.class_name = class_name
@@ -50,6 +51,7 @@ module Redcap
       self.retrieved_from_cache = false
       self.using_date_range_filter = false
       self.is_manual_pull = is_manual_pull
+      self.request_source = request_source
     end
 
     #
@@ -65,7 +67,8 @@ module Redcap
       self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name, ignore_cache:, retrieve_all:)
       return if Rails.application.config.active_job.queue_adapter == :inline
 
-      project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id })
+      source_result = request_source ? { request_source => true } : {}
+      project_admin.record_job_request('setup job: store records', result: { requested: true, job: job&.job_id }.merge(source_result))
     end
 
     #
@@ -706,6 +709,7 @@ module Redcap
         using_date_range_filter:,
         date_range_begin: (date_range_begin if using_date_range_filter)
       }
+      result[request_source] = true if request_source
 
       if create
         project_admin.record_job_request('store records', result:)
