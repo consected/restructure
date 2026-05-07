@@ -1,0 +1,150 @@
+# Save Trigger: Pull Emails options
+        pull_emails:
+          if: #if_extras
+          # Read MIME-encoded email files (e.g. captured by AWS SES into an S3 bucket
+          # or stored on a filesystem) and run a list of inner save triggers per email.
+          # The parsed fields are exposed via trigger_variables[:email] for use in
+          # the inner triggers' substitutions, e.g. {{variables.email.subject}}.
+          #
+          # All string values within `source`, `limit`, `after_processing` and
+          # `attachments` (except the `on_email` triggers themselves) are passed
+          # through FieldDefaults, so {{variables.*}} substitutions are supported
+          # for hostnames, bucket names, paths, usernames, passwords, etc. (e.g.
+          # populated by an earlier set_variables save trigger from secret config).
+          source:
+            type: s3                  # 's3', 'filesystem' or 'imap'
+            # For S3 sources:
+            bucket: my-ses-bucket     # required for s3
+            prefix: 'inbox/'          # optional key prefix to list
+            # since_modified: '{{variables.last_run.at}}' # (optional) only objects whose
+            #                                              # last_modified is strictly newer than
+            #                                              # the supplied timestamp (ISO8601 string
+            #                                              # or anything Time.parse understands).
+            #                                              # {{variables.*}} substitutions allowed.
+
+            # For filesystem sources:
+            # type: filesystem
+            # path: /var/mail/incoming  # required for filesystem; directory of *.eml files
+            # since_modified: '{{variables.last_run.at}}' # (optional) only files whose mtime is
+            #                                              # strictly newer than the supplied time
+
+            # For IMAP sources:
+            # type: imap
+            # host: imap.example.com    # required for imap
+            # port: 993                 # optional; defaults to 993 (ssl) or 143
+            # ssl: true                 # optional; default false
+            # username: inbox@example.com   # required
+            # password: '...'               # required (use a secret reference)
+            # mailbox: 'INBOX'              # optional; mailbox/folder to read from
+            # search: ['UNSEEN']            # optional; IMAP search criteria, defaults to ['ALL']
+            # since_uid: '{{variables.last_run.uid}}' # (optional) only messages whose UID is
+            #                                          # strictly greater than the supplied value.
+            #                                          # Combined with `search` (AND) when both set.
+            #                                          # {{variables.*}} substitutions allowed.
+            #
+            # Incremental retrieval pattern: capture the last processed UID (imap) or
+            # latest last_modified timestamp (s3/filesystem) - e.g. via an inner
+            # set_variables / update trigger - and store it on a tracking record.
+            # On the next run, feed that value back in via {{variables.last_run.*}}
+            # so previously processed messages are skipped.
+
+          limit: 50                   # (optional) maximum number of emails to process per run
+
+          after_processing:           # (optional) what to do with each successfully processed email
+            # Move the email out of the source. Failed emails are left in place
+            # so they can be retried on the next run.
+            move_to:
+              # For S3:
+              prefix: 'processed/'    # destination key prefix
+              bucket: alt-bucket      # (optional) destination bucket; defaults to source bucket
+              # For filesystem:
+              # path: /var/mail/processed
+              # For IMAP:
+              # mailbox: 'Processed'  # destination mailbox (created if missing)
+            # OR delete instead of moving:
+            # delete: true            # works for s3, filesystem and imap
+
+          attachments:                # (optional) capture MIME attachments to an NfsStore container
+            container:
+              # One of:
+              from_this: model_reference   # find via ModelReference from the current item
+              # id: 123                    # OR a specific container id (substitution allowed)
+              # name: 'inbox-container'    # OR by container name within the master
+            path: 'emails'              # (optional) sub-path within the container
+            store_as_user: user@example.com  # (optional) user to perform the import as
+            store_in_app_type: app_type      # (optional) app type for resolving store_as_user
+            skip_existing: true              # (optional) skip if a file with the same name/path exists
+            replace: false                   # (optional) replace existing different file
+            # Each captured attachment is recorded on the email hash as:
+            #   {{variables.email.attachments.<index>.filename}}
+            #   {{variables.email.attachments.<index>.content_type}}
+            #   {{variables.email.attachments.<index>.size}}
+            #   {{variables.email.attachments.<index>.stored_file_id}}
+            #   {{variables.email.attachments.<index>.status}}    # 'ok' or 'failed'
+            #   {{variables.email.attachments.<index>.error}}     # message if failed
+            #
+            # Failure isolation: if any attachment fails to store, that
+            # attachment is recorded with status: 'failed' (and an error
+            # message), the *email* is marked status: 'failed', and the
+            # email is NOT moved or deleted by after_processing - so it can
+            # be retried. Use `skip_existing: true` (above) to ensure the
+            # successful attachments are not re-imported on retry.
+
+          on_email:
+            # List of inner save triggers to run for each email.
+            # Within each trigger, the *current* email's fields are available via:
+            #   {{variables.email.from}}
+            #   {{variables.email.to}}        (array)
+            #   {{variables.email.cc}}        (array)
+            #   {{variables.email.bcc}}       (array)
+            #   {{variables.email.subject}}
+            #   {{variables.email.body}}
+            #   {{variables.email.headers.<header_name>}}
+            #   {{variables.email.source_key}} (S3 key or filesystem path)
+            #   {{variables.email.raw}}        (full MIME content)
+            #
+            # Additionally, an accumulating array of all processed emails is
+            # available so previously processed emails can be referenced:
+            #   {{variables.emails.0.subject}}
+            #   {{variables.emails.1.from}}
+            #   {{variables.emails.<index>.<field>}}
+            #
+            # Each email entry also carries a status:
+            #   {{variables.email.status}}   # 'ok' or 'failed'
+            #   {{variables.email.error}}    # error message if failed
+            # An email is marked 'failed' if any on_email trigger raises
+            # an FphsException, or if any attachment failed to store.
+            # A failed email is NOT moved or deleted by after_processing;
+            # it remains in the source so it can be retried on the next run.
+            - create_reference:
+                # Example: store captured email metadata to a reference record
+                to_existing_record: false
+                to_record_type: dynamic_model__captured_emails
+                with:
+                  email_from: '{{variables.email.from}}'
+                  email_to: '{{variables.email.to}}'
+                  email_subject: '{{variables.email.subject}}'
+                  email_body: '{{variables.email.body}}'
+            - update_this:
+                with:
+                  notes: 'Last email subject: {{variables.email.subject}}'
+
+          # Per-email lifecycle hooks. Run for each individual email
+          # AFTER its on_email triggers have completed.
+          # on_email_complete fires only when the email succeeded (status: 'ok').
+          # on_email_failure  fires only when the email failed (status: 'failed').
+          # Within both, {{variables.email.*}} is the current email
+          # (including status and error). These are distinct from the
+          # outer trigger-level on_complete / on_failure (defined in the
+          # lifecycle_hooks_defs file below), which fire once for the
+          # whole batch and only fire on_failure if perform itself
+          # raises (per-email FphsExceptions are caught and isolated).
+          on_email_complete:
+            - update_this:
+                with:
+                  notes: 'Processed: {{variables.email.subject}}'
+          on_email_failure:
+            - update_this:
+                with:
+                  notes: 'Failed: {{variables.email.subject}} - {{variables.email.error}}'
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
