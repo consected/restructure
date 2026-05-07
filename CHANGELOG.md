@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.1 back to develop
+- [Fixed] tracker history protocol casing in history view - fixes #1112
+- [Added] pull_emails save trigger to read MIME emails from S3, filesystem and IMAP - resolves #1109
+- [Added] warn logging for failed API authentication attempts - fixes #1114
+- [Fixed] log injection risk by sanitizing user-supplied values in API auth failure log - fixes #1114
+- [Updated] gems
+
 ## [9.44.1] - 2026-05-05
 
 - [Merged] release 9.43.1 back to develop
