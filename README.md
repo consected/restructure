@@ -325,6 +325,11 @@ Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
 
     AWS_PROFILE=<profile> bundle exec rspec
 
+To test IMAP functionality against a test server:
+
+    docker pull greenmail/standalone:2.0.1
+    docker run -t -i -p 3025:3025 -p 3110:3110 -p 3143:3143 -p 3465:3465 -p 3993:3993 -p 3995:3995 -p 8080:8080 greenmail/standalone:2.0.1
+
 For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
 
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.

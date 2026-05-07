@@ -16,6 +16,7 @@ module OptionConfigs
                              add_tracker
                              change_user_roles
                              pull_external_data
+                             pull_emails
                              set_item_flags
                              redcap_request
                              run_batch_trigger
