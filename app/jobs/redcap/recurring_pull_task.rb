@@ -44,7 +44,7 @@ module Redcap
       # Schedule an update of the data collection instruments list in the background
       project_admin.request_data_collection_instruments
 
-      dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: false)
+      dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: false, request_source: :scheduled)
       dr.retrieve_validate_store
       project_admin.update_status(:scheduled_run_successful)
     rescue StandardError => e

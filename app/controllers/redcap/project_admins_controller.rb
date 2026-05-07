@@ -37,7 +37,7 @@ class Redcap::ProjectAdminsController < AdminController
     ignore_cache = params[:ignore_cache].to_s == 'true'
     retrieve_all = params[:retrieve_all].to_s == 'true'
 
-    @redcap__project_admin.dynamic_storage.request_records(ignore_cache:, retrieve_all:)
+    @redcap__project_admin.dynamic_storage.request_records(ignore_cache:, retrieve_all:, request_source: :admin_ui)
 
     msg = "Records requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
