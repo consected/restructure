@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.4] - 2026-05-08
+
 - [Merged] release 9.44.3 back to develop
 - [Added] regression guard spec for versioned field list - refs #665
 - [Added] lenient server_url matching when looking up REDCap project by project_id - fixes #1116
