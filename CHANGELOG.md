@@ -14,6 +14,11 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.3 back to develop
+- [Added] regression guard spec for versioned field list - refs #665
+- [Added] lenient server_url matching when looking up REDCap project by project_id - fixes #1116
+- [Added] request_source tracking to Redcap::DataRecords job requests - resolves #1118
+
 ## [9.44.3] - 2026-05-07
 
 ## [9.44.2] - 2026-05-07
