@@ -172,13 +172,15 @@ RSpec.describe 'User Access Overview Reports', type: :model do
 
     it 'sets correct names for each perspective' do
       expect(Report.find_by(short_name: 'user_access_overview_by_role', item_type: 'admin-user-access-overview').name)
-        .to include('By Role')
+        .to eq("User Access Controls - Selected User's Grants by Role")
       expect(Report.find_by(short_name: 'user_access_overview_by_resource', item_type: 'admin-user-access-overview').name)
-        .to include('By Resource')
+        .to eq("User Access Controls - Selected User's Grants by Resource")
       expect(Report.find_by(short_name: 'user_access_overview_resolved', item_type: 'admin-user-access-overview').name)
-        .to include('Resolved')
+        .to eq("User Access Controls - Selected User's Effective Access")
       expect(Report.find_by(short_name: 'user_access_overview_roles_only', item_type: 'admin-user-access-overview').name)
-        .to include('Roles')
+        .to eq("User Roles - Each User's Roles")
+      expect(Report.find_by(short_name: 'user_access_overview_users_with_role', item_type: 'admin-user-access-overview').name)
+        .to eq("User Roles - Each Role's Users")
     end
 
     it 'includes search_attrs with app_type_id and user for all reports' do
