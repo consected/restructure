@@ -543,10 +543,10 @@ module Seeds
 
       report_values = [
         {
-          name: 'User Access Overview - By Role',
+          name: "User Access Controls - Selected User's Grants by Role",
           item_type: 'admin-user-access-overview',
           short_name: 'user_access_overview_by_role',
-          description: 'View all access controls for a user, grouped by role name or direct assignment',
+          description: 'Lists every access control granted to the selected user, grouped by the role that grants it (or shown as a direct user assignment). Raw, unresolved entries — the same resource may appear more than once under different roles.',
           report_type: 'regular_report',
           auto: false,
           searchable: false,
@@ -555,10 +555,10 @@ module Seeds
           search_attrs: search_attrs
         },
         {
-          name: 'User Access Overview - By Resource',
+          name: "User Access Controls - Selected User's Grants by Resource",
           item_type: 'admin-user-access-overview',
           short_name: 'user_access_overview_by_resource',
-          description: 'View all access controls for a user, grouped by resource',
+          description: 'Lists every access control granted to the selected user, grouped by resource. Raw, unresolved entries from all roles and direct assignments — the same resource may appear more than once with different access levels.',
           report_type: 'regular_report',
           auto: false,
           searchable: false,
@@ -567,10 +567,10 @@ module Seeds
           search_attrs: search_attrs
         },
         {
-          name: 'User Access Overview - Resolved',
+          name: "User Access Controls - Selected User's Effective Access",
           item_type: 'admin-user-access-overview',
           short_name: 'user_access_overview_resolved',
-          description: 'View the effective access for each resource after priority resolution',
+          description: 'Shows the effective access the selected user has for each resource after role precedence and resolution rules have been applied. Each resource appears once, with the access level that actually takes effect.',
           report_type: 'regular_report',
           auto: false,
           searchable: false,
@@ -579,10 +579,10 @@ module Seeds
           search_attrs: search_attrs
         },
         {
-          name: 'User Access Overview - Roles Listed by User',
+          name: "User Roles - Each User's Roles",
           item_type: 'admin-user-access-overview',
           short_name: 'user_access_overview_roles_only',
-          description: 'View the roles assigned to a user in the selected app type',
+          description: 'Lists each user in the selected app type with the roles assigned to them. One row per user-role assignment, ordered by user. Does not include resource-level access controls.',
           report_type: 'regular_report',
           auto: false,
           searchable: false,
@@ -591,10 +591,10 @@ module Seeds
           search_attrs: search_attrs_roles_with_user
         },
         {
-          name: 'User Access Overview - Users Listed by Role',
+          name: "User Roles - Each Role's Users",
           item_type: 'admin-user-access-overview',
           short_name: 'user_access_overview_users_with_role',
-          description: 'View users who have a role assigned in the selected app type',
+          description: 'Lists each role in the selected app type with the users assigned to it. One row per user-role assignment, ordered by role. Does not include resource-level access controls.',
           report_type: 'regular_report',
           auto: false,
           searchable: false,
