@@ -69,11 +69,36 @@ class Admin::UserRolesController < AdminController
   def admin_links(item = nil)
     return [true] if item.nil?
 
-    [
+    links = [
       ['description', admin_role_descriptions_path(filter: { role_name: item.role_name })],
       ['user profile', admin_manage_users_path(filter: { id: item.user_id })],
       ['access controls', admin_user_access_controls_path(filter: { role_name: item.role_name })]
     ]
+
+    if item.user_id.present?
+      links << [
+        'access overview',
+        view_context.user_access_overview_report_path(
+          :by_role,
+          user: item.user_id,
+          app_type_id: item.app_type_id,
+          role_name: item.role_name
+        )
+      ]
+    end
+
+    if item.role_name.present?
+      links << [
+        'users with role',
+        view_context.user_access_overview_report_path(
+          :users_with_role,
+          app_type_id: item.app_type_id,
+          role_name: item.role_name
+        )
+      ]
+    end
+
+    links
   end
 
   def index_params
