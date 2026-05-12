@@ -183,6 +183,26 @@ RSpec.describe 'User Access Overview Reports', type: :model do
         .to eq("User Roles - Each Role's Users")
     end
 
+    it 'creates a resource-focused perspective without changing existing identifiers (issue #1128)' do
+      %w[
+        user_access_overview_by_role
+        user_access_overview_by_resource
+        user_access_overview_resolved
+        user_access_overview_roles_only
+        user_access_overview_users_with_role
+      ].each do |short_name|
+        existing = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+        expect(existing).to be_present, "Expected existing report '#{short_name}' to remain unchanged"
+      end
+
+      new_report = Report.find_by(
+        short_name: 'user_access_overview_resource_by_role',
+        item_type: 'admin-user-access-overview'
+      )
+      expect(new_report).to be_present,
+                             "Expected resource-focused report 'user_access_overview_resource_by_role' to exist"
+    end
+
     it 'includes search_attrs with app_type_id and user for all reports' do
       report_short_names.each do |short_name|
         report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
@@ -317,11 +337,12 @@ RSpec.describe 'User Access Overview Reports', type: :model do
                                        "Expected source alt_column_header to include '(role name)' in resolved report"
     end
 
-    it 'sets a consistent position order for the five reports (issue #1124)' do
+    it 'sets a consistent position order for the seeded reports (issues #1124, #1128)' do
       expected_order = %w[
         user_access_overview_by_role
         user_access_overview_by_resource
         user_access_overview_resolved
+        user_access_overview_resource_by_role
         user_access_overview_roles_only
         user_access_overview_users_with_role
       ]
@@ -452,6 +473,13 @@ RSpec.describe 'User Access Overview Reports', type: :model do
         expect(uac).to be_present,
                        "Expected a UAC with resource_name '#{alt_name}' for report '#{short_name}'"
       end
+
+      resource_focus_uac = Admin::UserAccessControl.active.find_by(
+        resource_type: 'report',
+        resource_name: 'admin_user_access_overview__user_access_overview_resource_by_role'
+      )
+      expect(resource_focus_uac).to be_present,
+                                     "Expected a UAC with resource_name 'admin_user_access_overview__user_access_overview_resource_by_role'"
     end
   end
 
@@ -461,6 +489,13 @@ RSpec.describe 'User Access Overview Reports', type: :model do
         report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
         expect(report.alt_resource_name).to eq("admin_user_access_overview__#{short_name}")
       end
+
+      resource_focus = Report.find_by(
+        short_name: 'user_access_overview_resource_by_role',
+        item_type: 'admin-user-access-overview'
+      )
+      expect(resource_focus.alt_resource_name)
+        .to eq('admin_user_access_overview__user_access_overview_resource_by_role')
     end
   end
 
@@ -629,6 +664,88 @@ RSpec.describe 'User Access Overview Reports', type: :model do
                         'Expected P3 results to include id0 for tree grouping'
       expect(fields).to include('id1'),
                         'Expected P3 results to include id1 for tree row identity'
+    end
+  end
+
+  describe 'Perspective 6 — resource-focused by role/source (issue #1128)' do
+    let(:report) do
+      Report.find_by(
+        short_name: 'user_access_overview_resource_by_role',
+        item_type: 'admin-user-access-overview'
+      )
+    end
+
+    it 'defines search criteria for app type, resource type, and resource name' do
+      expect(report).to be_present,
+                        'Expected resource-focused report to exist before validating search_attrs'
+
+      attrs = YAML.safe_load(report.search_attrs)
+
+      expect(attrs).to have_key('app_type_id')
+      expect(attrs).to have_key('resource_type')
+      expect(attrs).to have_key('resource_name')
+    end
+
+    it 'groups by resource and labels source as direct, role-based, or default' do
+      expect(report).to be_present,
+                        'Expected resource-focused report to exist before validating grouping'
+
+      results = run_report_sql(report, resource_type: 'table', resource_name: 'trackers')
+      expect(results).not_to be_empty,
+                             'Expected rows for table/trackers in resource-focused perspective'
+
+      # Primary grouping is by resource (id0 = resource_type / resource_name)
+      id0_values = results.map { |r| r['id0'] }.uniq
+      expect(id0_values).to all(include('trackers')),
+                            "Expected id0 to group rows by resource (trackers), got: #{id0_values}"
+
+      # Source column carries short, distinct category labels — not the role name itself
+      sources = results.map { |r| r['source'].to_s }
+      expect(sources).to include(a_string_matching(/direct/i)),
+                         'Expected a direct user-specific source label'
+      expect(sources).to include(a_string_matching(/default|fallback/i)),
+                         'Expected a default/fallback source label'
+      expect(sources).to include(a_string_matching(/role-based/i)),
+                         'Expected a role-based source label'
+
+      # Role-based rows must carry the role link in role_name (not duplicated in source)
+      role_rows = results.select { |r| r['source'].to_s.match?(/role-based/i) }
+      expect(role_rows).not_to be_empty
+      role_rows.each do |row|
+        expect(row['role_name']).to match(%r{\[.+\]\(/admin/user_roles}),
+                                    "Expected role_name to carry the role link, got: #{row['role_name']}"
+        expect(row['source']).not_to match(%r{/admin/user_roles}),
+                                     "Expected source not to duplicate the role link, got: #{row['source']}"
+      end
+    end
+
+    it 'returns access, scope, user/role, resource type and resource name columns' do
+      expect(report).to be_present,
+                        'Expected resource-focused report to exist before validating columns'
+
+      results = run_report_sql(report, resource_type: 'table', resource_name: 'trackers')
+      expect(results).not_to be_empty
+
+      fields = results.first.keys
+      expect(fields).to include('access')
+      expect(fields).to include('app_scope')
+      expect(fields).to include('user_email')
+      expect(fields).to include('role_name')
+      expect(fields).to include('resource_type')
+      expect(fields).to include('resource_name')
+    end
+
+    it 'applies app type, resource type and resource name filters to the selected resource' do
+      expect(report).to be_present,
+                        'Expected resource-focused report to exist before validating filters'
+
+      results = run_report_sql(report, resource_type: 'table', resource_name: 'trackers')
+      expect(results).not_to be_empty
+
+      results.each do |row|
+        expect(row['resource_type']).to eq('table')
+        expect(row['resource_name']).to include('trackers')
+      end
     end
   end
 
