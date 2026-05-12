@@ -316,6 +316,129 @@ RSpec.describe 'User Access Overview Reports', type: :model do
       expect(alt_headers['source']).to include('(role name)'),
                                        "Expected source alt_column_header to include '(role name)' in resolved report"
     end
+
+    it 'sets a consistent position order for the five reports (issue #1124)' do
+      expected_order = %w[
+        user_access_overview_by_role
+        user_access_overview_by_resource
+        user_access_overview_resolved
+        user_access_overview_roles_only
+        user_access_overview_users_with_role
+      ]
+
+      positions = expected_order.map do |short_name|
+        report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+        [short_name, report.position]
+      end
+
+      # Each report has an assigned position
+      positions.each do |short_name, position|
+        expect(position).to be_present, "Expected report '#{short_name}' to have a position set"
+      end
+
+      # Positions are unique
+      position_values = positions.map(&:last)
+      expect(position_values).to eq(position_values.uniq),
+                                 "Expected unique positions, got: #{position_values}"
+
+      # Ordering reports by position yields the expected sequence
+      ordered_short_names = Report
+                            .where(item_type: 'admin-user-access-overview', short_name: expected_order)
+                            .order(position: :asc)
+                            .pluck(:short_name)
+      expect(ordered_short_names).to eq(expected_order)
+    end
+
+    # Issue #1124 - search criteria field labels must indicate required vs
+    # optional inputs so admins can use each report without trial and error.
+    describe 'search criteria labels (issue #1124)' do
+      # Helper to load the configured label for a search attribute key
+      def label_for(report, attr_key)
+        config = report.search_attributes_config[attr_key.to_sym]
+        config&.label
+      end
+
+      let(:resource_reports) do
+        %w[
+          user_access_overview_by_role
+          user_access_overview_by_resource
+          user_access_overview_resolved
+        ]
+      end
+
+      let(:role_reports) do
+        %w[
+          user_access_overview_roles_only
+          user_access_overview_users_with_role
+        ]
+      end
+
+      it 'marks user and app_type_id as required in the first three reports' do
+        resource_reports.each do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          expect(label_for(report, :user)).to match(/required/i),
+                                              "Expected 'user' label to indicate required in '#{short_name}'"
+          expect(label_for(report, :app_type_id)).to match(/required/i),
+                                                     "Expected 'app_type_id' label to indicate required in '#{short_name}'"
+        end
+      end
+
+      it 'marks resource_type, resource_name, and role_name as optional in the first three reports' do
+        resource_reports.each do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          expect(label_for(report, :resource_type)).to match(/optional/i),
+                                                       "Expected 'resource_type' label to indicate optional in '#{short_name}'"
+          expect(label_for(report, :resource_name)).to match(/optional/i),
+                                                       "Expected 'resource_name' label to indicate optional in '#{short_name}'"
+          expect(label_for(report, :role_name)).to match(/optional/i),
+                                                   "Expected 'role_name' label to indicate optional in '#{short_name}'"
+        end
+      end
+
+      it 'marks app_type_id as required in the roles-by-user and users-by-role reports' do
+        role_reports.each do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          expect(label_for(report, :app_type_id)).to match(/required/i),
+                                                     "Expected 'app_type_id' label to indicate required in '#{short_name}'"
+        end
+      end
+
+      it 'marks user and role_name as optional in the roles-by-user and users-by-role reports' do
+        role_reports.each do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          expect(label_for(report, :user)).to match(/optional/i),
+                                              "Expected 'user' label to indicate optional in '#{short_name}'"
+          expect(label_for(report, :role_name)).to match(/optional/i),
+                                                   "Expected 'role_name' label to indicate optional in '#{short_name}'"
+        end
+      end
+
+      it 'uses consistent required/optional label copy across all five reports' do
+        # The exact label strings must match across reports for the same
+        # required/optional designation, so admins see consistent copy.
+        required_user_labels = resource_reports.map do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          label_for(report, :user)
+        end
+        expect(required_user_labels.uniq.length).to eq(1),
+                                                    "Expected consistent required 'user' label, got: #{required_user_labels.uniq}"
+
+        all_reports = resource_reports + role_reports
+        app_type_labels = all_reports.map do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          label_for(report, :app_type_id)
+        end
+        expect(app_type_labels.uniq.length).to eq(1),
+                                               "Expected consistent required 'app_type_id' label across all reports, got: #{app_type_labels.uniq}"
+
+        optional_role_labels = (resource_reports + role_reports).map do |short_name|
+          report = Report.find_by(short_name: short_name, item_type: 'admin-user-access-overview')
+          label_for(report, :role_name)
+        end
+        expect(optional_role_labels.uniq.length).to eq(1),
+                                                    "Expected consistent optional 'role_name' label across all reports, got: #{optional_role_labels.uniq}"
+      end
+    end
   end
 
   describe 'UAC seed records' do
