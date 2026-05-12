@@ -23,21 +23,26 @@ module Seeds
     end
 
     def self.create_templates
-      # Shared search attributes for all perspectives
+      # Shared search attributes for the first three perspectives (by_role,
+      # by_resource, resolved). User and App Type are required for meaningful
+      # results; Resource Type, Resource Name, and Role are optional filters.
       search_attrs = <<~END_YAML
         user:
           user:
+            label: 'User (required)'
             multiple: single
             default: current_user
-        role_name:
+        app_type_id:
           select_from_model:
-            resource_name: admin__user_roles
+            label: 'App Type (required)'
+            multiple: single
+            resource_name: admin__app_types
             selections:
-              role_name: role_name
-            all: true
+              name: id
+            default: '{{current_user_app_type_id}}'
         resource_type:
           config_selector:
-            label: Resource Type
+            label: 'Resource Type (optional)'
             multiple: single
             all: true
             filter_selector: resource_name
@@ -50,56 +55,67 @@ module Seeds
               activity_log_type: activity_log_type
         resource_name:
           select_from_model:
+            label: 'Resource Name (optional)'
             resource_name: admin__user_access_controls
             selections:
               resource_name: resource_name
             group_by: resource_type
             all: true
-        app_type_id:
+        role_name:
           select_from_model:
-            multiple: single
-            resource_name: admin__app_types
+            label: 'Role (optional)'
+            resource_name: admin__user_roles
             selections:
-              name: id
-            default: '{{current_user_app_type_id}}'
+              role_name: role_name
+            all: true
       END_YAML
 
+      # Search attributes for the roles-by-user perspective (roles_only).
+      # App Type is required; User and Role are optional filters.
       search_attrs_roles_with_user = <<~END_YAML
-        user:
-          user:
-            multiple: single
-        role_name:
-          select_from_model:
-            resource_name: admin__user_roles
-            selections:
-              role_name: role_name
-            all: true
         app_type_id:
           select_from_model:
+            label: 'App Type (required)'
             multiple: single
             resource_name: admin__app_types
             selections:
               name: id
             default: '{{current_user_app_type_id}}'
+        user:
+          user:
+            label: 'User (optional)'
+            multiple: single
+        role_name:
+          select_from_model:
+            label: 'Role (optional)'
+            resource_name: admin__user_roles
+            selections:
+              role_name: role_name
+            all: true
       END_YAML
 
+      # Search attributes for the users-by-role perspective (users_with_role).
+      # App Type is required; User and Role are optional filters.
       search_attrs_users_with_role = <<~END_YAML
-        user:
-          user:
-            multiple: single
-        role_name:
-          select_from_model:
-            resource_name: admin__user_roles
-            selections:
-              role_name: role_name
-            all: true
         app_type_id:
           select_from_model:
+            label: 'App Type (required)'
             multiple: single
             resource_name: admin__app_types
             selections:
               name: id
             default: '{{current_user_app_type_id}}'
+        user:
+          user:
+            label: 'User (optional)'
+            multiple: single
+        role_name:
+          select_from_model:
+            label: 'Role (optional)'
+            resource_name: admin__user_roles
+            selections:
+              role_name: role_name
+            all: true
       END_YAML
 
       # ── Perspective 1: By Role ──────────────────────────────────────────
@@ -550,6 +566,7 @@ module Seeds
           report_type: 'regular_report',
           auto: false,
           searchable: false,
+          position: 1,
           options: p1_options,
           sql: p1_sql,
           search_attrs: search_attrs
@@ -562,6 +579,7 @@ module Seeds
           report_type: 'regular_report',
           auto: false,
           searchable: false,
+          position: 2,
           options: p2_options,
           sql: p2_sql,
           search_attrs: search_attrs
@@ -574,6 +592,7 @@ module Seeds
           report_type: 'regular_report',
           auto: false,
           searchable: false,
+          position: 3,
           options: p3_options,
           sql: p3_sql,
           search_attrs: search_attrs
@@ -586,6 +605,7 @@ module Seeds
           report_type: 'regular_report',
           auto: false,
           searchable: false,
+          position: 4,
           options: p4_options,
           sql: p4_sql,
           search_attrs: search_attrs_roles_with_user
@@ -598,6 +618,7 @@ module Seeds
           report_type: 'regular_report',
           auto: false,
           searchable: false,
+          position: 5,
           options: p5_options,
           sql: p5_sql,
           search_attrs: search_attrs_users_with_role
