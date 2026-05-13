@@ -51,7 +51,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     record_id = params[:record_id]
     field_name = params[:field_name]
     resource_name = params[:id]
-    m = Resources::Models.find_by(resource_name:)
+    m = find_resource_model(resource_name)
     raise FphsException, "download_field_file resource model not found for resource_name: #{resource_name}" unless m
 
     tn = "\\.#{m.table_name}"
@@ -87,6 +87,36 @@ class Redcap::ProjectUserRequestsController < UserBaseController
 
   def permitted_params
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency disabled options notes]
+  end
+
+  #
+  # Find a model in Resources::Models using the resource_name from the URL.
+  # The URL may contain one of several name formats:
+  #   - The exact plural resource_name (e.g. "dynamic_model__press_bp_measurement_rcs")
+  #   - The singular item_type_name (e.g. "dynamic_model__press_bp_measurement_rc")
+  #   - The name_with_option_type format used by longitudinal Redcap projects with multiple
+  #     data collection instruments (e.g. "dynamic_model__press_bp_measurement_rc_day_home_bp_form_upload"),
+  #     which is {item_type_name}_{option_type} - the singular name followed by underscore and option type name.
+  # @param resource_name [String] the resource_name from the URL parameter
+  # @return [Resources::Models::Item | nil]
+  def find_resource_model(resource_name)
+    return if resource_name.blank?
+
+    found = Resources::Models.find_by(resource_name:) ||
+            Resources::Models.find_by(resource_item_name: resource_name.to_sym)
+    return found if found
+
+    # Fall back to matching the longest {resource_item_name} prefix by progressively
+    # trimming trailing "_segment" suffixes (which represent the option_type).
+    # Stop once the candidate no longer contains the "__" namespace separator,
+    # to avoid matching base type registrations such as :dynamic_model.
+    candidate = resource_name.to_s
+    while candidate.include?('__') && (idx = candidate.rindex('_'))
+      candidate = candidate[0...idx]
+      match = Resources::Models.find_by(resource_item_name: candidate.to_sym)
+      return match if match
+    end
+    nil
   end
 
   #
@@ -138,16 +168,14 @@ class Redcap::ProjectUserRequestsController < UserBaseController
             request_host = uri.host.downcase
 
             @redcap__project_admin = by_project_id.find do |project_admin|
-              begin
-                stored_uri = URI.parse(project_admin.server_url.to_s)
-                stored_uri.scheme.present? &&
-                  stored_uri.host.present? &&
-                  stored_uri.scheme.downcase == request_scheme &&
-                  stored_uri.host.downcase == request_host
-              rescue URI::InvalidURIError
-                Rails.logger.warn "Invalid stored server_url for project_admin #{project_admin.id}: #{project_admin.server_url}"
-                false
-              end
+              stored_uri = URI.parse(project_admin.server_url.to_s)
+              stored_uri.scheme.present? &&
+                stored_uri.host.present? &&
+                stored_uri.scheme.downcase == request_scheme &&
+                stored_uri.host.downcase == request_host
+            rescue URI::InvalidURIError
+              Rails.logger.warn "Invalid stored server_url for project_admin #{project_admin.id}: #{project_admin.server_url}"
+              false
             end
           end
         rescue URI::InvalidURIError
