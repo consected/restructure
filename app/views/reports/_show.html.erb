@@ -34,6 +34,9 @@
         <%= table_comment %>
         <% end %>
         <%= render partial: 'description_content' %>
+        <% if @report.item_type == UserAccessOverviewLinksHelper::USER_ACCESS_OVERVIEW_ITEM_TYPE && !embedded_report %>
+          <%= render partial: 'admin_user_access_overview_related' %>
+        <% end %>
         <%= render partial: 'criteria' %>
       </div>
     </div>

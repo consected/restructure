@@ -23,4 +23,29 @@
   <td><%= list_item.bad_resource_name(@resource_names_for_type) ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>
   <td><%= category %></td>
   <td><%= list_item.options %></td>
+  <td class="admin-item-admin-links uac-overview-links">
+    <%
+      # User Access Overview drill-down links - only render when the filter
+      # combination is meaningful for the target report. See
+      # UserAccessOverviewLinksHelper for the report keys.
+      base_attrs = { app_type_id: list_item.app_type_id }
+      base_attrs[:resource_type] = list_item.resource_type if list_item.resource_type.present?
+      base_attrs[:resource_name] = list_item.resource_name if list_item.resource_name.present?
+    %>
+    <% if list_item.user_id.present? %>
+      <%= user_access_overview_link 'access overview', :by_role,
+                                    search_attrs: { user: list_item.user_id, app_type_id: list_item.app_type_id },
+                                    required: %i[user] %>
+    <% end %>
+    <% if list_item.role_name.present? %>
+      <%= user_access_overview_link 'users with role', :users_with_role,
+                                    search_attrs: { app_type_id: list_item.app_type_id, role_name: list_item.role_name },
+                                    required: %i[role_name] %>
+    <% end %>
+    <% if list_item.resource_name.present? %>
+      <%= user_access_overview_link 'resource grants', :resource_by_role,
+                                    search_attrs: base_attrs,
+                                    required: %i[resource_name] %>
+    <% end %>
+  </td>
 </tr>
