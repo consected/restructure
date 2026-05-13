@@ -13,6 +13,9 @@
 #     - Rejects back_path values that don't conform to /help/<segment>/<segment>[/<segment>]
 #     - Falls back to IntroductionDocument when no valid back_path is present
 #   - Returns IntroductionDocument for all other sections
+# - #display_embedded?: Returns true when display_as param is 'embedded', false otherwise
+#   - Defined in HelpHelper (not just HelpController) so it is available in any view context,
+#     including views rendered by PageLayoutsController (fixes issue #1134)
 
 require 'rails_helper'
 
@@ -96,6 +99,30 @@ RSpec.describe HelpHelper, type: :helper do
       it 'returns IntroductionDocument regardless of params' do
         controller.params[:back_path] = '/help/admin_reference/general/save_trigger'
         expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+      end
+    end
+  end
+
+  describe '#display_embedded?' do
+    context 'when display_as param is "embedded"' do
+      before { controller.params[:display_as] = 'embedded' }
+
+      it 'returns true' do
+        expect(helper.display_embedded?).to be true
+      end
+    end
+
+    context 'when display_as param is absent' do
+      it 'returns false' do
+        expect(helper.display_embedded?).to be false
+      end
+    end
+
+    context 'when display_as param is a different value' do
+      before { controller.params[:display_as] = 'full' }
+
+      it 'returns false' do
+        expect(helper.display_embedded?).to be false
       end
     end
   end
