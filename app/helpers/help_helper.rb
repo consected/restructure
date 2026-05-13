@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module HelpHelper
+  HELP_BACK_PATH_PATTERN = %r{\A/help(?:/[a-zA-Z0-9\-_]+){2,3}\z}.freeze
+
   def view_doc(library, section, subsection)
     <<~END_HTML
       #{view_doc_in_wrapper(formatted_doc(library, section, subsection), library, section)}
@@ -150,8 +152,8 @@ module HelpHelper
       HelpController::IndexSubsection
     elsif section == 'general'
       back = params[:back_path].to_s
-      # Validate: must be a /help/ path using only safe characters (no traversal)
-      if back.match?(%r{\A/help(/[a-zA-Z0-9\-_]+){2,3}\z})
+      # Validate: must be a /help/ path using only safe characters (no traversal).
+      if valid_help_back_path?(back)
         back
       else
         HelpController::IntroductionDocument
@@ -159,6 +161,24 @@ module HelpHelper
     else
       HelpController::IntroductionDocument
     end
+  end
+
+  #
+  # How should the requested page be rendered? The only option is 'embedded'
+  # in the :display_as param
+  def display_as
+    params[:display_as]
+  end
+
+  #
+  # Was the requested page to be displayed embedded, or as a full page?
+  def display_embedded?
+    display_as == 'embedded'
+  end
+
+  # Validate explicit help back-path links to avoid traversal and unrelated routes.
+  def valid_help_back_path?(path)
+    path.match?(HELP_BACK_PATH_PATTERN)
   end
 
   #
