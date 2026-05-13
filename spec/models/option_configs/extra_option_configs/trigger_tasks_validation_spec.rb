@@ -333,6 +333,17 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
         expect(key_warnings).to be_empty
       end
 
+      it 'accepts separate-table mode keys without warnings' do
+        instance = klass.new(full_text_search: { fts1: {
+                               source_fields: ['name'],
+                               target_column: 'search_vector',
+                               target_table: 'schema_name.records_search_index',
+                               target_foreign_key_column: 'source_record_id'
+                             } })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/full_text_search|target_table|target_foreign_key_column/) }
+        expect(key_warnings).to be_empty
+      end
+
       it 'warns on unrecognized keys inside the named entry' do
         instance = klass.new(full_text_search: { fts1: { source_fields: ['name'], fake_setting: 'y' } })
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/fake_setting/) }
@@ -381,6 +392,79 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
         instance = klass.new(case: [{ when: { condition: true }, then: { notify: { n: { type: 'email' } } } }])
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/\bcase\b/) }
         expect(key_warnings).to be_empty
+      end
+    end
+  end
+
+  # ── Nested validation propagation for delegate triggers ─────────────
+
+  describe 'nested validation propagation for delegate triggers' do
+    context 'transaction' do
+      it 'warns when a nested trigger uses an unrecognized action name' do
+        instance = klass.new(transaction: [{ notifyy: { n1: { type: 'email' } } }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/notifyy/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'warns when a nested trigger has an unrecognized key inside a named entry' do
+        instance = klass.new(transaction: [{ notify: { n1: { type: 'email', not_a_notify_key: 1 } } }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/not_a_notify_key/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'warns on unrecognized keys for a direct-config trigger nested inside transaction' do
+        instance = klass.new(transaction: [{ change_user_roles: { add_role_names: ['admin'], bogus_inner: 'x' } }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bogus_inner/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'recurses into transaction nested inside transaction' do
+        instance = klass.new(transaction: [{ transaction: [{ notify: { n1: { type: 'email', bad_one: 1 } } }] }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bad_one/) }
+        expect(warnings).not_to be_empty
+      end
+    end
+
+    context 'background' do
+      it 'warns when a nested trigger uses an unrecognized action name' do
+        instance = klass.new(background: [{ fake_action: { x: 1 } }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/fake_action/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'warns when a nested trigger has unrecognized keys' do
+        instance = klass.new(background: [{ log: { l1: { message: 'ok', wrong_field: true } } }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/wrong_field/) }
+        expect(warnings).not_to be_empty
+      end
+    end
+
+    context 'case' do
+      it 'warns on unrecognized action names inside a then branch' do
+        instance = klass.new(case: [{ when: { all: { this: { f: 1 } } }, then: [{ bogus_trigger: {} }] }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bogus_trigger/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'warns on unrecognized keys inside triggers in a then branch' do
+        instance = klass.new(case: [{ when: { all: { this: { f: 1 } } },
+                                       then: [{ notify: { n1: { type: 'email', invalid_inner: 'y' } } }] }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/invalid_inner/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'warns on unrecognized action names inside an else branch' do
+        instance = klass.new(case: [{ else: [{ phantom: {} }] }])
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/phantom/) }
+        expect(warnings).not_to be_empty
+      end
+
+      it 'does not warn for valid then/else branches' do
+        instance = klass.new(case: [
+          { when: { all: { this: { f: 1 } } }, then: [{ notify: { n1: { type: 'email' } } }] },
+          { else: [{ log: { l1: { message: 'no match' } } }] }
+        ])
+        expect(instance.config_warnings).to be_empty
       end
     end
   end

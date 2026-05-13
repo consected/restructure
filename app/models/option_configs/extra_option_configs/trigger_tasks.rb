@@ -82,7 +82,51 @@ module OptionConfigs
             next
           end
 
-          validate_trigger_keys(trigger_name, trigger_type, config)
+          if trigger_type.pattern == :delegate
+            validate_nested_trigger_definitions(trigger_name, config)
+          else
+            validate_trigger_keys(trigger_name, trigger_type, config)
+          end
+        end
+      end
+
+      # Recursively validates nested trigger definitions for delegate-pattern triggers
+      # (transaction, background, case). The nested content is itself a trigger task list
+      # (or, for case, a list of when/then/else branches whose then/else are trigger task lists).
+      # @param trigger_name [Symbol] the delegate trigger name
+      # @param config [Object] the nested config value
+      # @return [void]
+      def validate_nested_trigger_definitions(trigger_name, config)
+        case trigger_name.to_sym
+        when :case
+          validate_case_branches(config)
+        else
+          validate_nested_trigger_task_list(config)
+        end
+      end
+
+      # Validates a list (Hash or Array of Hashes) of nested trigger tasks.
+      # @param value [Hash, Array] nested trigger task list
+      # @return [void]
+      def validate_nested_trigger_task_list(value)
+        case value
+        when Hash
+          validate_trigger_hash(value)
+        when Array
+          value.each { |entry| validate_trigger_hash(entry) if entry.is_a?(Hash) }
+        end
+      end
+
+      # Validates the branches of a case trigger, recursing into then/else trigger lists.
+      # @param value [Hash, Array<Hash>] the case branches
+      # @return [void]
+      def validate_case_branches(value)
+        branches = value.is_a?(Array) ? value : [value]
+        branches.each do |branch|
+          next unless branch.is_a?(Hash)
+
+          validate_nested_trigger_task_list(branch[:then]) if branch.key?(:then)
+          validate_nested_trigger_task_list(branch[:else]) if branch.key?(:else)
         end
       end
 

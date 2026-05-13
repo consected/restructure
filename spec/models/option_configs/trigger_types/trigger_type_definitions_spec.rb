@@ -350,13 +350,19 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
     end
 
     it 'declares the expected allowed_keys' do
-      expected = %i[source_fields target_column extra_content ts_config if on_complete on_failure]
+      expected = %i[source_fields target_column target_table target_foreign_key_column
+                    extra_content ts_config if on_complete on_failure]
       expect(type_class.allowed_keys).to match_array(expected)
     end
 
     it 'declares target_column and ts_config as :string' do
       expect(type_class.key_type_rules[:target_column]).to eq(:string)
       expect(type_class.key_type_rules[:ts_config]).to eq(:string)
+    end
+
+    it 'declares target_table and target_foreign_key_column as :string' do
+      expect(type_class.key_type_rules[:target_table]).to eq(:string)
+      expect(type_class.key_type_rules[:target_foreign_key_column]).to eq(:string)
     end
   end
 

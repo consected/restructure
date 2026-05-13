@@ -63,6 +63,7 @@ module OptionConfigs
         self.hash_configuration = hash_config.is_a?(Hash) ? hash_config.symbolize_keys : (hash_config || {})
         setup_named_configurations
         run_validations
+        collect_typed_attribute_notices
       end
 
       # Default setup: iterate hash entries and create configurations.
@@ -341,6 +342,32 @@ module OptionConfigs
         errors.each do |error|
           level = error.options[:type] == :warning ? :warn : :error
           failed_config error.attribute, "#{error.attribute} #{error.message}", level: level
+        end
+      end
+
+      # Aggregate config_errors/config_warnings from any typed attribute values
+      # that are themselves BaseConfiguration instances. This allows nested
+      # validation (e.g. TriggerTasks contained inside SaveTrigger/BatchTrigger/
+      # ConfigTrigger) to surface notices on the parent configuration object.
+      # Each propagated notice is prefixed with the typed attribute name so
+      # the source key remains identifiable in admin output.
+      # @return [void]
+      def collect_typed_attribute_notices
+        typed_keys = self.class.option_types[:typed] || []
+        typed_keys.each do |key|
+          child = send(key)
+          next unless child.is_a?(BaseConfiguration)
+
+          propagate_child_notices(child, key)
+        end
+      end
+
+      def propagate_child_notices(child, key)
+        child.config_errors.each do |entry|
+          config_errors << entry.merge(parent_attribute: key)
+        end
+        child.config_warnings.each do |entry|
+          config_warnings << entry.merge(parent_attribute: key)
         end
       end
     end
