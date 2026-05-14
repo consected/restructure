@@ -21,9 +21,11 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [create_filestore_container](save_trigger_create_filestore_container.md) | Create an NFS filestore container |
 | [generate_document](save_trigger_generate_document.md) | Generate a document from a template and store in a filestore container |
 | [notify](save_trigger_notify.md) | Send a notification |
+| [pull_emails](save_trigger_pull_emails.md) | Read MIME emails from S3, filesystem, or IMAP and run nested triggers per email |
 | [pull_external_data](save_trigger_pull_external_data.md) | Pull data from an external source |
 | [redcap_request](save_trigger_redcap_request.md) | Make a REDCap API request |
 | [set_item_flags](save_trigger_set_item_flags.md) | Set item flags |
+| [set_variables](save_trigger_set_variables.md) | Set variables for subsequent substitutions and triggers |
 | [update_reference](save_trigger_update_reference.md) | Update a referenced record |
 | [update_this](save_trigger_update_this.md) | Update fields on the current record |
 | [full_text_search](save_trigger_full_text_search.md) | Build and persist PostgreSQL `tsvector` search indexes |
@@ -33,8 +35,9 @@ Each trigger task listed under an event key corresponds to one of the following 
 | [background](save_trigger_background.md) | Run a trigger in the background |
 | [reload_this](save_trigger_reload_this.md) | Reload the current record |
 | [case](save_trigger_case.md) | Conditionally branch trigger execution |
-| [each](save_trigger_each.md) | Iterate over a list and apply triggers |
 | [set_save_trigger_results](save_trigger_set_save_trigger_results.md) | Set save trigger result values |
+
+The list above matches the validated save trigger action names used by option config validation.
 
 ## Lifecycle Hooks
 
