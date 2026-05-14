@@ -12,8 +12,10 @@ module Redcap
     # @param [String] class_name
     # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    # @param [Boolean] verify_file_fields - check that each file field's underlying stored file exists,
+    #                                       and retry capture for any missing files.
     # @return [Boolean] success
-    def perform(project_admin, class_name, ignore_cache: false, retrieve_all: false)
+    def perform(project_admin, class_name, ignore_cache: false, retrieve_all: false, verify_file_fields: false)
       setup_with project_admin
 
       unless project_admin&.dynamic_model_ready?
@@ -27,7 +29,9 @@ module Redcap
                              "#{project_admin.dynamic_model_table}"
       end
 
-      dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: true)
+      dr = Redcap::DataRecords.new(project_admin, class_name,
+                                   is_manual_pull: true,
+                                   verify_file_fields:)
       dr.retrieve_validate_store(ignore_cache:, retrieve_all:)
       project_admin.update_status(:manual_run_successful)
     rescue StandardError => e
