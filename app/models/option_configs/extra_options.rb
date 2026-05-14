@@ -91,6 +91,7 @@ module OptionConfigs
         # This needs to be "deep cloned", to avoid a simple clone just copying references
         # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
         self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
+        validate_missing_general_selection_configs
         add_field_configs_from_standalone_defs
       rescue StandardError => e
         Rails.logger.warn "Failed to initialize ExtraOptions for #{@name}: #{e}"
@@ -557,6 +558,45 @@ module OptionConfigs
           field_configs[k].merge!({ vc => v })
         end
       end
+    end
+
+    # For dynamic model definitions, fields that are selection-like by naming
+    # convention (for example source, rank, select_*) must provide at least one
+    # selection source. This can come from persisted general selections or
+    # explicit field_options.edit_as overrides.
+    def validate_missing_general_selection_configs
+      return unless config_obj.is_a?(DynamicModel)
+
+      selection_fields = Array(fields).select { |f| Classification::GeneralSelection.use_with_attribute?(f.to_s) }
+      return if selection_fields.empty?
+
+      selection_fields.each do |field_name|
+        next if general_selection_present_for_dynamic_model_field?(field_name)
+        next if field_has_selection_override?(field_name)
+
+        failed_config(:field_options, "missing general selection config for field #{field_name}")
+      end
+    end
+
+    def general_selection_present_for_dynamic_model_field?(field_name)
+      item_type_prefixes = [
+        "dynamic_model__#{config_obj.table_name}",
+        "dynamic_model__#{config_obj.table_name.singularize}",
+        "dynamic_model__#{config_obj.table_name.pluralize}"
+      ].uniq
+
+      item_type_names = item_type_prefixes.map { |prefix| "#{prefix}_#{field_name}" }
+      Classification::GeneralSelection.where(item_type: item_type_names).exists?
+    end
+
+    def field_has_selection_override?(field_name)
+      fopts = field_options[field_name.to_sym] if field_options.respond_to?(:[])
+      return false unless fopts.respond_to?(:dig)
+
+      edit_as = fopts[:edit_as]
+      return false unless edit_as.is_a?(Hash)
+
+      edit_as[:alt_options].present? || edit_as[:general_selection].present? || edit_as[:field_type].present?
     end
 
     # Check if any of the configs were bad

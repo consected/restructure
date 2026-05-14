@@ -3,13 +3,16 @@ set_related_field = handle_set_related_field(form_object_instance, field_name_sy
 
 if set_related_field
 
-  gs = general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value], quiet_fail: true)
-  unless gs
-    raise FphsException.new "The general selection #{set_related_field[:name_and_field]} has not been defined. Please inform the administrator of this error."
-  end
+  gs_item_type = set_related_field[:name_and_field]
+  gs = general_selection(gs_item_type, present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value], quiet_fail: true)
+  gs_fallback = general_selection_missing_fallback?(gs, gs_item_type, form_object_instance)
 %>
   <%= edit_field_label(form, field_name_sym, labels) %>
+  <% if gs_fallback %>
+  <%= missing_general_selection_text_fallback(form, field_name_sym, form_object_instance, form_object_item_type_us, gs_item_type) %>
+  <% else %>
   <%= form.select field_name_sym, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+  <% end %>
 <% elsif form_object_instance.respond_to?(:rank) %>
   <%= render partial: 'common_templates/edit_fields/name_is_rank', locals: locals %>
 <% end %>
