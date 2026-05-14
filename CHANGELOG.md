@@ -14,6 +14,18 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.4 back to develop
+- [Clarified] User Access Overview report titles and descriptions - fixes #1123
+- [Clarified] User Access Overview search criteria labels and report ordering - fixes #1124
+- [Added] triggering instance details to trigger exception messages - fixes #1121
+- [Updated] DB schema SQL
+- [Fixed] bulk message response updates across app-type switch and expanded retry-path coverage - fixes #1129
+- [Updated] prompts
+- [Added] drill-down links between User Access Overview reports and admin pages - fixes #1125
+- [Fixed] download_field_file failing for longitudinal Redcap projects with multiple instruments - fixes #1135
+- [Fixed] display_embedded? error in page layouts - fixes #1134
+- [Fixed] Redcap file capture desync and added manual recovery option - fixes #1137
+
 ## [9.44.4] - 2026-05-08
 
 - [Merged] release 9.44.3 back to develop
