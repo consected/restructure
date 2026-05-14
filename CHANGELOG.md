@@ -14,6 +14,9 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.5 back to develop
+- [Fixed] Redcap job perform() to use opts hash instead of kwargs for delayed_job Ruby 3 compatibility - fixes #1137
+
 ## [9.44.5] - 2026-05-14
 
 - [Merged] release 9.44.4 back to develop
