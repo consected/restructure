@@ -39,13 +39,13 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
       %i[
         change_user_roles set_item_flags create_filestore_container reload_this
         notify create_reference update_reference update_this add_tracker
-        pull_external_data run_batch_trigger set_save_trigger_results set_variables
+        pull_external_data pull_emails run_batch_trigger set_save_trigger_results set_variables
         log generate_document redcap_request create_master full_text_search
         transaction background case
       ]
     end
 
-    it 'includes all 21 trigger types' do
+    it 'includes all 22 trigger types' do
       expect(base.registered_types.keys).to match_array(expected_types)
     end
 

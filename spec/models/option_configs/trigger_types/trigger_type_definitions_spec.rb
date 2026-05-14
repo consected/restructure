@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# Tests for all 21 trigger type descriptor classes under OptionConfigs::TriggerTypes.
+# Tests for all 22 trigger type descriptor classes under OptionConfigs::TriggerTypes.
 # Each trigger type declares its structural pattern (:direct_config, :named_entry, or :delegate),
 # allowed configuration keys, and per-key type constraints.
 #
@@ -208,6 +208,28 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
     it 'declares force_not_editable_save as :boolean and method as :string_or_hash' do
       expect(type_class.key_type_rules[:force_not_editable_save]).to eq(:boolean)
       expect(type_class.key_type_rules[:method]).to eq(:string_or_hash)
+    end
+  end
+
+  describe 'PullEmails' do
+    let(:type_class) { OptionConfigs::TriggerTypes::PullEmails }
+
+    it 'has :direct_config pattern' do
+      expect(type_class.pattern).to eq(:direct_config)
+    end
+
+    it 'declares the expected allowed_keys' do
+      expected = %i[
+        source attachments limit after_processing
+        on_email on_email_complete on_email_failure
+        if on_complete on_failure
+      ]
+      expect(type_class.allowed_keys).to match_array(expected)
+    end
+
+    it 'declares limit as :integer and on_email as :hash_or_array' do
+      expect(type_class.key_type_rules[:limit]).to eq(:integer)
+      expect(type_class.key_type_rules[:on_email]).to eq(:hash_or_array)
     end
   end
 
