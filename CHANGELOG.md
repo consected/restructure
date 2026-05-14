@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.5] - 2026-05-14
+
 - [Merged] release 9.44.4 back to develop
 - [Clarified] User Access Overview report titles and descriptions - fixes #1123
 - [Clarified] User Access Overview search criteria labels and report ordering - fixes #1124
