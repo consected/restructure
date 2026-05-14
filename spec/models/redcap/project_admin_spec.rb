@@ -239,6 +239,40 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     end
   end
 
+  describe '.preferred_active' do
+    it 'prefers the most recent non-never project among matching table names' do
+      matching = Redcap::ProjectAdmin.active.order(:id).limit(3).to_a
+      expect(matching.length).to eq 3
+
+      table_names = ['pref_table', 'redcap_test.pref_table']
+      matching[0].update_columns(dynamic_model_table: table_names[0], frequency: 'never')
+      matching[1].update_columns(dynamic_model_table: table_names[1], frequency: '15 minutes')
+      matching[2].update_columns(dynamic_model_table: table_names[0], frequency: '1 hour')
+
+      result = Redcap::ProjectAdmin.preferred_active(table_names)
+      expect(result).to be_present
+      expect(result.id).to eq matching[2].id
+    end
+
+    it 'falls back to the most recent match when all candidates are frequency never' do
+      matching = Redcap::ProjectAdmin.active.order(:id).limit(2).to_a
+      expect(matching.length).to eq 2
+
+      table_name = 'redcap_test.all_never_table'
+      matching[0].update_columns(dynamic_model_table: table_name, frequency: 'never')
+      matching[1].update_columns(dynamic_model_table: table_name, frequency: 'never')
+
+      result = Redcap::ProjectAdmin.preferred_active(table_name)
+      expect(result).to be_present
+      expect(result.id).to eq matching[1].id
+    end
+
+    it 'returns nil when no active project matches' do
+      result = Redcap::ProjectAdmin.preferred_active(['missing_table', 'redcap_test.missing_table'])
+      expect(result).to be_nil
+    end
+  end
+
   describe 'transfer mode "none" enforcement' do
     it 'sets frequency to nil when transfer_mode is set to "none"' do
       rc = Redcap::ProjectAdmin.active.first

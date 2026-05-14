@@ -493,6 +493,18 @@ module Redcap
     end
 
     #
+    # When multiple active project admins match the same dynamic_model_table
+    # we want to pick the one that actually captures data. Prefer a project admin
+    # whose frequency is not 'never' and is the most recently created (highest id).
+    # Fall back to the most recently created match if all candidates have frequency 'never'.
+    # @param table_names [String, Array<String>] table name(s) to match
+    # @return [Redcap::ProjectAdmin, nil]
+    def self.preferred_active(table_names)
+      ordered = active.where(dynamic_model_table: table_names).order(id: :desc)
+      ordered.where.not(frequency: 'never').first || ordered.first
+    end
+
+    #
     # Create a job request record for the *action*
     # If no result is specified, default to { requested: true }
     # @param [String] action

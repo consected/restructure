@@ -547,14 +547,25 @@ RSpec.describe Redcap::DataRecords, type: :model do
       dr.retrieve
       expect(dr.records.length).to be > 0
 
+      # Identify the retrieved record that has both file fields BEFORE
+      # create_or_update mutates the hash to NULL out file fields.
+      retrieved_with_files = dr.records.find { |r| r[:file1].present? && r[:signature].present? }
+      expect(retrieved_with_files).to be_present
+      target_record_id = retrieved_with_files[dr.send(:record_id_field)]
+
       # Create/update records first so we have ActiveRecord instances
       dr.records.each do |record|
         dr.send(:create_or_update, record)
       end
 
-      # Find a record that has both file1 and signature fields
-      model_record = dr.upserted_records.find { |r| r[:file1].present? && r[:signature].present? }
+      # Find the AR record corresponding to the retrieved record that had both
+      # file fields. After create_or_update the column values are NULL, so we
+      # locate it by record_id and verify via the stashed pending values.
+      model_record = dr.upserted_records.find { |r| r[dr.send(:record_id_field)] == target_record_id }
       expect(model_record).to be_present
+      pending = model_record.instance_variable_get(:@_redcap_pending_file_fields)
+      expect(pending[:file1]).to be_present
+      expect(pending[:signature]).to be_present
 
       dr.send(:capture_files, model_record)
 
@@ -570,6 +581,210 @@ RSpec.describe Redcap::DataRecords, type: :model do
       model_record.reload
       expect(model_record.file1).to eq Redcap::DataRecords::FailedFileFieldMarker
       expect(model_record.signature).to be_present
+    end
+
+    # The following specs verify that file field filenames are not persisted to
+    # the dynamic-model row until the underlying file has actually been imported
+    # to the NfsStore container. This avoids leaving the row in an inconsistent
+    # state ("filename present, no file stored") if anything between the row
+    # commit and capture_files raises - notably an after_commit save trigger.
+    it 'defers persisting file field values until after the file has been captured' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      clean_file_fields_filesystem rc.file_store
+      mock_file_field_requests
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      expect(dr.records.length).to be > 0
+
+      # Find a retrieved record that has both file fields populated by REDCap
+      retrieved = dr.records.find { |r| r[:file1].present? && r[:signature].present? }
+      expect(retrieved).to be_present
+
+      # Keep a copy of the original retrieved values. create_or_update now
+      # persists from a dup hash, so the caller's retrieved hash remains
+      # unchanged while file field values are deferred on persistence.
+      pre_file1_value = retrieved[:file1]
+      pre_signature_value = retrieved[:signature]
+
+      dr.send(:create_or_update, retrieved)
+
+      # After create_or_update but before capture_files, the row must have NULL
+      # in each file field column, and the captured values must be stashed on
+      # the AR instance for replay by capture_files.
+      model_record = dr.upserted_records.last
+      expect(model_record).to be_present
+
+      model_record.reload
+      expect(model_record.file1).to be_blank
+      expect(model_record.signature).to be_blank
+
+      pending = model_record.instance_variable_get(:@_redcap_pending_file_fields)
+      expect(pending).to eq(file1: pre_file1_value, signature: pre_signature_value)
+
+      # The retrieved hash remains unchanged (we only null on the persistence
+      # copy), while the DB row itself stores NULL until capture_files runs.
+      expect(retrieved[:file1]).to eq pre_file1_value
+      expect(retrieved[:signature]).to eq pre_signature_value
+
+      # Now run capture_files. The file is imported and the filename is written
+      # back to the column via update_columns (no callbacks, no after_commit).
+      dr.send(:capture_files, model_record)
+      expect(dr.errors).not_to be_present
+      expect(dr.imported_files.count).to eq 2
+
+      model_record.reload
+      expect(model_record.file1).to eq pre_file1_value
+      expect(model_record.signature).to eq pre_signature_value
+    end
+
+    it 'leaves the file field NULL when capture_files is not invoked (simulating an after_commit failure)' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      clean_file_fields_filesystem rc.file_store
+      mock_file_field_requests
+
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+
+      retrieved = dr.records.find { |r| r[:file1].present? && r[:signature].present? }
+      original_file1 = retrieved[:file1]
+      original_signature = retrieved[:signature]
+
+      dr.send(:create_or_update, retrieved)
+      model_record = dr.upserted_records.last
+      expect(model_record).to be_present
+
+      # Simulate the failure mode where an after_commit save trigger raises
+      # after the row is committed but before capture_files runs for this record.
+      # capture_files is intentionally NOT invoked here.
+
+      model_record.reload
+      expect(model_record.file1).to be_blank
+      expect(model_record.signature).to be_blank
+
+      # On the next pull, REDCap returns the original filename strings; because
+      # the DB row has NULL, record_matches_retrieved returns false and the
+      # record is reprocessed, allowing capture_files to retry the import.
+      Rails.cache.clear
+      mock_file_field_requests
+      dr2 = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr2.retrieve
+      retrieved2 = dr2.records.find { |r| r[:file1] == original_file1 && r[:signature] == original_signature }
+      expect(retrieved2).to be_present
+
+      dr2.send(:create_or_update, retrieved2)
+      model_record2 = dr2.upserted_records.last
+      expect(model_record2).to be_present
+      expect(model_record2.id).to eq model_record.id
+
+      dr2.send(:capture_files, model_record2)
+      expect(dr2.errors).not_to be_present
+      expect(dr2.imported_files.count).to eq 2
+
+      model_record2.reload
+      expect(model_record2.file1).to eq original_file1
+      expect(model_record2.signature).to eq original_signature
+    end
+
+    # When the admin requests a manual pull with verify_file_fields: true, any
+    # record whose dynamic-model row has a non-blank file field value but no
+    # corresponding stored_files entry in the project's filestore container
+    # should be treated as changed, so capture_files retries the file import.
+    # This is a recovery option for legacy desynced rows; the option is
+    # forced off for scheduled (non-manual) pulls to keep them fast.
+    it 'verify_file_fields retries capture when a stored file is missing from the container' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      clean_file_fields_filesystem rc.file_store
+      mock_file_field_requests
+
+      # First, pull normally so file fields are captured and the dynamic-model
+      # row has the filenames and the container has the stored_files rows.
+      dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr.retrieve
+      retrieved = dr.records.find { |r| r[:file1].present? && r[:signature].present? }
+      original_file1 = retrieved[:file1]
+      original_signature = retrieved[:signature]
+      dr.send(:create_or_update, retrieved)
+      model_record = dr.upserted_records.last
+      dr.send(:capture_files, model_record)
+      expect(dr.errors).not_to be_present
+
+      model_record.reload
+      expect(model_record.file1).to eq original_file1
+      expect(model_record.signature).to eq original_signature
+
+      # Simulate the production symptom: delete the stored_files row(s) for
+      # this record so the container no longer knows about the file. The
+      # dynamic-model row still holds the filename.
+      sf_path = "#{rc.dynamic_model_table}/file-fields/#{model_record[dr.send(:record_id_field)]}"
+      sf_ids = rc.file_store.stored_files.where(path: sf_path).pluck(:id)
+      ActiveRecord::Base.connection.execute(
+        "DELETE FROM nfs_store_stored_file_history WHERE nfs_store_stored_file_id IN (#{sf_ids.join(',')})"
+      )
+      rc.file_store.stored_files.where(id: sf_ids).delete_all
+
+      # Without verify_file_fields the next pull treats this record as
+      # unchanged (filename matches between REDCap and DB), so the missing
+      # file is not noticed and capture_files is not run.
+      Rails.cache.clear
+      mock_file_field_requests
+      dr_default = Redcap::DataRecords.new(rc, 'TestFileFieldRec', is_manual_pull: true)
+      dr_default.retrieve
+      retrieved_default = dr_default.records.find { |r| r[:file1] == original_file1 && r[:signature] == original_signature }
+      expect(retrieved_default).to be_present
+      dr_default.send(:create_or_update, retrieved_default)
+      expect(dr_default.upserted_records).to be_empty
+      expect(dr_default.unchanged_ids).not_to be_empty
+
+      # With verify_file_fields enabled, the missing stored file is detected
+      # and the record flows through to capture_files. We assert the
+      # detection-and-upsert behaviour here (the actual re-import side
+      # effects are covered by other specs).
+      Rails.cache.clear
+      mock_file_field_requests
+      dr_verify = Redcap::DataRecords.new(rc, 'TestFileFieldRec',
+                                          is_manual_pull: true,
+                                          verify_file_fields: true)
+      dr_verify.retrieve
+      retrieved_verify = dr_verify.records.find { |r| r[:file1] == original_file1 && r[:signature] == original_signature }
+      expect(retrieved_verify).to be_present
+      dr_verify.send(:create_or_update, retrieved_verify)
+      expect(dr_verify.upserted_records).not_to be_empty
+      reupserted = dr_verify.upserted_records.find { |r| r.id == model_record.id }
+      expect(reupserted).to be_present
+    end
+
+    it 'verify_file_fields is forced off for scheduled (non-manual) pulls' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+
+      dr_scheduled = Redcap::DataRecords.new(rc, 'TestFileFieldRec',
+                                             is_manual_pull: false,
+                                             verify_file_fields: true)
+      expect(dr_scheduled.verify_file_fields).to be false
+
+      dr_manual = Redcap::DataRecords.new(rc, 'TestFileFieldRec',
+                                          is_manual_pull: true,
+                                          verify_file_fields: true)
+      expect(dr_manual.verify_file_fields).to be true
     end
 
     it 'downloads files in background' do
