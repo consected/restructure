@@ -448,7 +448,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'warns on unrecognized keys inside triggers in a then branch' do
         instance = klass.new(case: [{ when: { all: { this: { f: 1 } } },
-                                       then: [{ notify: { n1: { type: 'email', invalid_inner: 'y' } } }] }])
+                                      then: [{ notify: { n1: { type: 'email', invalid_inner: 'y' } } }] }])
         warnings = instance.config_warnings.select { |w| w[:message]&.match?(/invalid_inner/) }
         expect(warnings).not_to be_empty
       end
@@ -461,9 +461,9 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'does not warn for valid then/else branches' do
         instance = klass.new(case: [
-          { when: { all: { this: { f: 1 } } }, then: [{ notify: { n1: { type: 'email' } } }] },
-          { else: [{ log: { l1: { message: 'no match' } } }] }
-        ])
+                               { when: { all: { this: { f: 1 } } }, then: [{ notify: { n1: { type: 'email' } } }] },
+                               { else: [{ log: { l1: { message: 'no match' } } }] }
+                             ])
         expect(instance.config_warnings).to be_empty
       end
     end
@@ -474,35 +474,35 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'array-style task list validation' do
     it 'validates trigger names in each array entry' do
       instance = klass.new([
-        { notify: { n1: { type: 'email' } } },
-        { fake_trigger: { some: 'config' } }
-      ])
+                             { notify: { n1: { type: 'email' } } },
+                             { fake_trigger: { some: 'config' } }
+                           ])
       warnings = instance.config_warnings.select { |w| w[:message]&.match?(/fake_trigger/) }
       expect(warnings).not_to be_empty
     end
 
     it 'validates keys inside named-entry triggers within array entries' do
       instance = klass.new([
-        { notify: { n1: { type: 'email', bogus: true } } }
-      ])
+                             { notify: { n1: { type: 'email', bogus: true } } }
+                           ])
       warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bogus/) }
       expect(warnings).not_to be_empty
     end
 
     it 'validates keys for direct-config triggers within array entries' do
       instance = klass.new([
-        { change_user_roles: { add_role_names: ['admin'], phantom_key: 'val' } }
-      ])
+                             { change_user_roles: { add_role_names: ['admin'], phantom_key: 'val' } }
+                           ])
       warnings = instance.config_warnings.select { |w| w[:message]&.match?(/phantom_key/) }
       expect(warnings).not_to be_empty
     end
 
     it 'does not warn for valid array entries' do
       instance = klass.new([
-        { notify: { n1: { type: 'email' } } },
-        { change_user_roles: { add_role_names: ['admin'] } },
-        { transaction: [{ log: { l1: { message: 'done' } } }] }
-      ])
+                             { notify: { n1: { type: 'email' } } },
+                             { change_user_roles: { add_role_names: ['admin'] } },
+                             { transaction: [{ log: { l1: { message: 'done' } } }] }
+                           ])
       expect(instance.config_warnings).to be_empty
     end
   end
@@ -512,8 +512,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'mixed valid and invalid configurations' do
     it 'reports warnings only for invalid parts while accepting valid parts' do
       instance = klass.new(
-        notify: { n1: { type: 'email' } },                        # valid
-        change_user_roles: { add_role_names: ['admin'] },          # valid
+        notify: { n1: { type: 'email' } }, # valid
+        change_user_roles: { add_role_names: ['admin'] }, # valid
         fake_action: { x: 1 },                                    # invalid trigger name
         update_this: { u1: { with: { field: 'v' }, bad_key: 1 } } # valid trigger, invalid inner key
       )
