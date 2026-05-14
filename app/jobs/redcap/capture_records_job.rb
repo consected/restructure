@@ -10,12 +10,21 @@ module Redcap
     # The result (number of created, updated, matched, error items) is stored to a Redcap::ClientRequest
     # @param [Redcap::ProjectAdmin] project_admin
     # @param [String] class_name
-    # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
-    # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
-    # @param [Boolean] verify_file_fields - check that each file field's underlying stored file exists,
-    #                                       and retry capture for any missing files.
+    # @param [Hash] opts
+    # @option opts [Boolean] :ignore_cache - force pull from REDCap, bypassing cache
+    # @option opts [Boolean] :retrieve_all - ignore export_only_updated_records setting and retrieve all records
+    # @option opts [Boolean] :verify_file_fields - check that each file field's underlying stored file exists,
+    #                                              and retry capture for any missing files.
     # @return [Boolean] success
-    def perform(project_admin, class_name, ignore_cache: false, retrieve_all: false, verify_file_fields: false)
+    # NOTE: opts must be a plain Hash default arg (not Ruby keyword args) so that delayed_job can
+    # deserialize and splat arguments correctly in Ruby 3. Active Job serializes kwargs as a symbol-keyed
+    # Hash; when the worker calls perform(*arguments), Ruby 3 passes that hash as a positional arg and
+    # will NOT auto-convert it to keyword arguments, causing ArgumentError.
+    def perform(project_admin, class_name, opts = {})
+      ignore_cache = opts.fetch(:ignore_cache, false)
+      retrieve_all = opts.fetch(:retrieve_all, false)
+      verify_file_fields = opts.fetch(:verify_file_fields, false)
+
       setup_with project_admin
 
       unless project_admin&.dynamic_model_ready?

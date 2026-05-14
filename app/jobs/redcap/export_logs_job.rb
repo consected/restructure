@@ -7,8 +7,13 @@ module Redcap
     #
     # Download the list of data collection instruments.
     # @param [Redcap::ProjectAdmin] project_admin
+    # @param [Hash] opts
+    # @option opts [Hash] :filter
     # @return [Boolean] success
-    def perform(project_admin, filter: nil)
+    # NOTE: opts must be a plain Hash default arg (not Ruby keyword args) — see CaptureRecordsJob for explanation.
+    def perform(project_admin, opts = {})
+      filter = opts.fetch(:filter, nil)
+
       setup_with project_admin
 
       el = Redcap::ExportLogs.new(project_admin)
