@@ -189,16 +189,11 @@ RSpec.describe Redcap::ProjectUserRequestsController, type: :controller do
     end
 
     before do
+      setup_redcap_project_admin_configs
       Resources::Models.add(
         model_class,
         resource_name: model_resource_name,
         resource_item_name: model_resource_item_name
-      )
-      # Stub project admin DB query so tests focus on the resource lookup only.
-      # When no project admin is found, the controller returns 404 (file not found), which
-      # is the expected behavior for a valid resource but missing file.
-      allow(Redcap::ProjectAdmin).to receive(:active).and_return(
-        double('scope', order: double('scope2', find_by: nil))
       )
     end
 

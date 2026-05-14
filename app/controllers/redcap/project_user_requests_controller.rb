@@ -54,11 +54,16 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     m = find_resource_model(resource_name)
     raise FphsException, "download_field_file resource model not found for resource_name: #{resource_name}" unless m
 
-    tn = "\\.#{m.table_name}"
+    tn = m.table_name
+    sn = m.model.respond_to?(:definition) ? m.model.definition.schema_name : nil
+    tns = sn ? [tn, "#{sn}.#{tn}"] : [tn]
 
     svp = { secure_view: params[:secure_view]&.to_unsafe_h }
 
-    project_admin = Redcap::ProjectAdmin.active.order(id: :desc).find_by('dynamic_model_table ~ ?', tn)
+    # When more than one active project admin shares the same dynamic model table,
+    # prefer one that actually pulls data (frequency != 'never') and the most recently
+    # created (highest id), to match the project that actually captures files.
+    project_admin = Redcap::ProjectAdmin.preferred_active(tns)
     if project_admin
       project_admin.current_user = current_user
       container = project_admin.file_store
@@ -73,7 +78,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
       redirect_to url
     else
       Rails.logger.warn "Download field file failed for record_id: #{record_id}, field_name: #{field_name}, " \
-                        "project_admin: #{project_admin&.id}, container: #{container&.id}, path: #{path}, tn: #{tn}"
+                        "project_admin: #{project_admin&.id}, container: #{container&.id}, path: #{path}, tns: #{tns.inspect}"
       render json: { message: 'File not found or inaccessible' }, status: 404
     end
   end
