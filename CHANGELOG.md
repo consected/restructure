@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.8] - 2026-05-15
+
 - [Merged] release 9.44.7 back to develop
 - [Added] if: conditions to attachments and after_processing in pull_emails trigger - fixes #1144
 - [Updated] pull_emails spec whitespace formatting - fixes #1144
