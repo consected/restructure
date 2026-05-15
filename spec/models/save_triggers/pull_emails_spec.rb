@@ -1118,16 +1118,16 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
         # Email subject is "Invoice #5678" — matches the Invoice condition.
         # capture_attachments must run and the attachment must be imported.
         File.write(File.join(tmp_dir, 'invoice.eml'), build_mime_email(
-                                                         from: 'billing@vendor.com',
-                                                         to: 'inbox@example.org',
-                                                         subject: 'Invoice #5678',
-                                                         body: 'invoice body.',
-                                                         attachments: [
-                                                           { filename: 'inv.pdf',
-                                                             content: 'pdf-content',
-                                                             mime_type: 'application/pdf' }
-                                                         ]
-                                                       ))
+                                                        from: 'billing@vendor.com',
+                                                        to: 'inbox@example.org',
+                                                        subject: 'Invoice #5678',
+                                                        body: 'invoice body.',
+                                                        attachments: [
+                                                          { filename: 'inv.pdf',
+                                                            content: 'pdf-content',
+                                                            mime_type: 'application/pdf' }
+                                                        ]
+                                                      ))
 
         SaveTriggers::PullEmails.new(
           {
@@ -1172,16 +1172,16 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
       it 'runs capture_attachments when no if: is present (backward compatible)' do
         # Attachments configured without any if: must still be imported unconditionally.
         File.write(File.join(tmp_dir, 'any.eml'), build_mime_email(
-                                                     from: 'sender@vendor.com',
-                                                     to: 'inbox@example.org',
-                                                     subject: 'Some Email Subject',
-                                                     body: 'body content.',
-                                                     attachments: [
-                                                       { filename: 'file.pdf',
-                                                         content: 'pdf-content',
-                                                         mime_type: 'application/pdf' }
-                                                     ]
-                                                   ))
+                                                    from: 'sender@vendor.com',
+                                                    to: 'inbox@example.org',
+                                                    subject: 'Some Email Subject',
+                                                    body: 'body content.',
+                                                    attachments: [
+                                                      { filename: 'file.pdf',
+                                                        content: 'pdf-content',
+                                                        mime_type: 'application/pdf' }
+                                                    ]
+                                                  ))
 
         SaveTriggers::PullEmails.new(
           {
@@ -1200,17 +1200,17 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
 
       before do
         File.write(File.join(tmp_dir, 'invoice.eml'), build_mime_email(
-                                                         from: 'billing@vendor.com',
-                                                         to: 'inbox@example.org',
-                                                         subject: 'Invoice #5678',
-                                                         body: 'invoice email.'
-                                                       ))
+                                                        from: 'billing@vendor.com',
+                                                        to: 'inbox@example.org',
+                                                        subject: 'Invoice #5678',
+                                                        body: 'invoice email.'
+                                                      ))
         File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
-                                                            from: 'news@vendor.com',
-                                                            to: 'inbox@example.org',
-                                                            subject: 'Monthly Newsletter',
-                                                            body: 'newsletter email.'
-                                                          ))
+                                                           from: 'news@vendor.com',
+                                                           to: 'inbox@example.org',
+                                                           subject: 'Monthly Newsletter',
+                                                           body: 'newsletter email.'
+                                                         ))
       end
 
       after { FileUtils.remove_entry(tmp_dir) if Dir.exist?(tmp_dir) }
@@ -1234,11 +1234,11 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
         invoice_only_dir = Dir.mktmpdir(['pull_emails_inv_only', ''])
         begin
           File.write(File.join(invoice_only_dir, 'invoice.eml'), build_mime_email(
-                                                                    from: 'billing@vendor.com',
-                                                                    to: 'inbox@example.org',
-                                                                    subject: 'Invoice #9999',
-                                                                    body: 'invoice.'
-                                                                  ))
+                                                                   from: 'billing@vendor.com',
+                                                                   to: 'inbox@example.org',
+                                                                   subject: 'Invoice #9999',
+                                                                   body: 'invoice.'
+                                                                 ))
           config = {
             source: { type: 'filesystem', path: invoice_only_dir },
             after_processing: { delete: true, if: invoice_if_condition }
@@ -1286,11 +1286,11 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
                                                       body: 'Please find your invoice attached.'
                                                     ))
       File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
-                                                          from: 'news@vendor.com',
-                                                          to: 'inbox@study.example.org',
-                                                          subject: 'Monthly Newsletter',
-                                                          body: 'Here is your newsletter.'
-                                                        ))
+                                                         from: 'news@vendor.com',
+                                                         to: 'inbox@study.example.org',
+                                                         subject: 'Monthly Newsletter',
+                                                         body: 'Here is your newsletter.'
+                                                       ))
     end
 
     after { FileUtils.remove_entry(tmp_dir) if Dir.exist?(tmp_dir) }
