@@ -6,6 +6,8 @@ model: Claude Opus 4.6 (copilot)
 
 If requested to create a PR, follow these steps:
 
+- Ensure files have been formatted and linted according to our workspace standards
+- Ensure all work has been commited to the feature branch
 - Squash commits into a single commit with a clear message describing the change and referencing the related issue number (e.g. "Added feature X - fixes #123"): use `git reset --soft...`
 - Rebase your branch onto the latest local `up-develop` branch before creating a pull request
 - Create a (cross fork) pull request on repo `consected/restructure` based on the `develop` branch, with a descriptive title and summary of changes. "head" should refer to the local branch created for the feature.
