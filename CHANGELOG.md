@@ -14,6 +14,13 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.7 back to develop
+- [Added] if: conditions to attachments and after_processing in pull_emails trigger - fixes #1144
+- [Updated] pull_emails spec whitespace formatting - fixes #1144
+- [Added] lookup sub-query value source and condition: return flags - fixes #1142
+- [Added] inline data URI image embedding in notification emails - resolves #1148
+- [Fixed] notify on_complete array handling - fixes #1147
+
 ## [9.44.7] - 2026-05-14
 
 ## [9.44.6] - 2026-05-14
