@@ -64,7 +64,7 @@ class SaveTriggers::PullEmails < SaveTriggers::SaveTriggersBase
 
       mail = parse_mime(raw_content)
       assign_email_trigger_variables(mail, raw_content, email_id)
-      capture_attachments(mail) if @config[:attachments].present?
+      capture_attachments(mail) if resolved_attachments.present? && step_applies?(resolved_attachments)
 
       attachment_failed = current_email[:status] == 'failed'
 
@@ -79,7 +79,7 @@ class SaveTriggers::PullEmails < SaveTriggers::SaveTriggersBase
       success = current_email[:status] != 'failed'
       if success
         run_on_email_complete_triggers
-        after_process(source, after_cfg, email_id)
+        after_process(source, after_cfg, email_id) if step_applies?(after_cfg)
       else
         # Re-mark failed in case attachment failed but on_email succeeded -
         # ensure we never move/delete a partially-failed email.
@@ -131,6 +131,15 @@ class SaveTriggers::PullEmails < SaveTriggers::SaveTriggersBase
 
   private
 
+  # Returns true when the step should run: either no +if:+ condition is
+  # present in +cfg+, or the condition evaluates as truthy.
+  def step_applies?(cfg)
+    return true if cfg.blank?
+
+    if_cond = cfg[:if]
+    if_cond.blank? || if_evaluates(if_cond)
+  end
+
   # Resolve {{variables.*}} (and other FieldDefaults patterns) within the
   # source configuration so that hostnames, bucket names, paths, usernames,
   # passwords, etc. can be supplied dynamically (e.g. populated by an
@@ -150,6 +159,15 @@ class SaveTriggers::PullEmails < SaveTriggers::SaveTriggersBase
 
     @resolved_after_processing ||= FieldDefaults.substitute_value_recurse(
       @item, after, allow_nil: true, ignore_missing: true
+    )
+  end
+
+  def resolved_attachments
+    attachments = @config[:attachments]
+    return attachments unless attachments.is_a?(Hash)
+
+    @resolved_attachments ||= FieldDefaults.substitute_value_recurse(
+      @item, attachments, allow_nil: true, ignore_missing: true
     )
   end
 
@@ -436,7 +454,7 @@ class SaveTriggers::PullEmails < SaveTriggers::SaveTriggersBase
   # Mirrors the file-storage approach used by SaveTriggers::GenerateDocument.
   # @param [Mail::Message] mail
   def capture_attachments(mail)
-    attachments_config = @config[:attachments]
+    attachments_config = resolved_attachments
     return if attachments_config.blank?
     return if mail.attachments.blank?
 

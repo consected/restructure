@@ -1051,4 +1051,333 @@ RSpec.describe SaveTriggers::PullEmails, type: :model do
         .to include(:pull_emails)
     end
   end
+
+  # Issue #1144: per-email if: conditions on attachments and after_processing.
+  # When attachments.if: evaluates false the email's attachments must be skipped
+  # (without marking the email as failed). When after_processing.if: evaluates
+  # false the move/delete step must be skipped for that email.
+  describe 'if: conditions on attachments and after_processing (issue #1144)' do
+    # DSL condition that matches emails whose subject contains the word "Invoice"
+    let(:invoice_if_condition) do
+      {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.subject', condition: '~', value: 'Invoice' }
+          }
+        }
+      }
+    end
+
+    describe 'attachments.if:' do
+      let(:tmp_dir) { Dir.mktmpdir(['pull_emails_if_attach', '']) }
+      let(:fake_container) { instance_double('NfsStore::Manage::Container', id: 4242, master_id: 0) }
+
+      before do
+        allow_any_instance_of(SaveTriggers::PullEmails)
+          .to receive(:resolve_attachment_container).and_return(fake_container)
+        allow_any_instance_of(SaveTriggers::PullEmails)
+          .to receive(:resolve_attachment_user).and_return(@user)
+
+        @imports = []
+        stub_sf = Struct.new(:id, :file_name, :content_type, :file_size)
+        allow(NfsStore::Import).to receive(:import_file) do |_cid, file_name, _path, _user, **opts|
+          @imports << { file_name: }
+          stub_sf.new(@imports.length, file_name, opts[:content_type], 4)
+        end
+      end
+
+      after { FileUtils.remove_entry(tmp_dir) if Dir.exist?(tmp_dir) }
+
+      it 'skips capture_attachments when the if: condition is false' do
+        # Email subject is "Monthly Newsletter" — does NOT match the Invoice condition.
+        # Expect capture_attachments to be bypassed entirely.
+        File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
+                                                           from: 'news@vendor.com',
+                                                           to: 'inbox@example.org',
+                                                           subject: 'Monthly Newsletter',
+                                                           body: 'newsletter body.',
+                                                           attachments: [
+                                                             { filename: 'news.pdf',
+                                                               content: 'pdf-content',
+                                                               mime_type: 'application/pdf' }
+                                                           ]
+                                                         ))
+
+        expect_any_instance_of(SaveTriggers::PullEmails).not_to receive(:capture_attachments)
+
+        SaveTriggers::PullEmails.new(
+          {
+            source: { type: 'filesystem', path: tmp_dir },
+            attachments: { container: { id: 4242 }, path: 'emails', if: invoice_if_condition }
+          },
+          @al
+        ).perform
+      end
+
+      it 'runs capture_attachments when the if: condition is true' do
+        # Email subject is "Invoice #5678" — matches the Invoice condition.
+        # capture_attachments must run and the attachment must be imported.
+        File.write(File.join(tmp_dir, 'invoice.eml'), build_mime_email(
+                                                        from: 'billing@vendor.com',
+                                                        to: 'inbox@example.org',
+                                                        subject: 'Invoice #5678',
+                                                        body: 'invoice body.',
+                                                        attachments: [
+                                                          { filename: 'inv.pdf',
+                                                            content: 'pdf-content',
+                                                            mime_type: 'application/pdf' }
+                                                        ]
+                                                      ))
+
+        SaveTriggers::PullEmails.new(
+          {
+            source: { type: 'filesystem', path: tmp_dir },
+            attachments: { container: { id: 4242 }, path: 'emails', if: invoice_if_condition }
+          },
+          @al
+        ).perform
+
+        expect(@imports.map { |i| i[:file_name] }).to include('inv.pdf')
+      end
+
+      it 'does not mark email as failed when attachment if: is false' do
+        # Skipping attachments because the condition is false must NOT put the
+        # email into a failed state (it should remain status: ok).
+        File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
+                                                           from: 'news@vendor.com',
+                                                           to: 'inbox@example.org',
+                                                           subject: 'Monthly Newsletter',
+                                                           body: 'newsletter body.',
+                                                           attachments: [
+                                                             { filename: 'news.pdf',
+                                                               content: 'pdf-content',
+                                                               mime_type: 'application/pdf' }
+                                                           ]
+                                                         ))
+
+        SaveTriggers::PullEmails.new(
+          {
+            source: { type: 'filesystem', path: tmp_dir },
+            attachments: { container: { id: 4242 }, path: 'emails', if: invoice_if_condition }
+          },
+          @al
+        ).perform
+
+        email = @al.trigger_variables[:emails].first
+        expect(email[:status]).to eq 'ok'
+        # No imports should have been triggered — the attachment step was skipped
+        expect(@imports).to be_empty
+      end
+
+      it 'runs capture_attachments when no if: is present (backward compatible)' do
+        # Attachments configured without any if: must still be imported unconditionally.
+        File.write(File.join(tmp_dir, 'any.eml'), build_mime_email(
+                                                    from: 'sender@vendor.com',
+                                                    to: 'inbox@example.org',
+                                                    subject: 'Some Email Subject',
+                                                    body: 'body content.',
+                                                    attachments: [
+                                                      { filename: 'file.pdf',
+                                                        content: 'pdf-content',
+                                                        mime_type: 'application/pdf' }
+                                                    ]
+                                                  ))
+
+        SaveTriggers::PullEmails.new(
+          {
+            source: { type: 'filesystem', path: tmp_dir },
+            attachments: { container: { id: 4242 }, path: 'emails' }
+          },
+          @al
+        ).perform
+
+        expect(@imports.map { |i| i[:file_name] }).to include('file.pdf')
+      end
+    end
+
+    describe 'after_processing.if:' do
+      let(:tmp_dir) { Dir.mktmpdir(['pull_emails_if_after', '']) }
+
+      before do
+        File.write(File.join(tmp_dir, 'invoice.eml'), build_mime_email(
+                                                        from: 'billing@vendor.com',
+                                                        to: 'inbox@example.org',
+                                                        subject: 'Invoice #5678',
+                                                        body: 'invoice email.'
+                                                      ))
+        File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
+                                                           from: 'news@vendor.com',
+                                                           to: 'inbox@example.org',
+                                                           subject: 'Monthly Newsletter',
+                                                           body: 'newsletter email.'
+                                                         ))
+      end
+
+      after { FileUtils.remove_entry(tmp_dir) if Dir.exist?(tmp_dir) }
+
+      it 'skips after_processing when the if: condition is false' do
+        # after_processing delete: true — but only when the Invoice condition matches.
+        # The Newsletter email's condition is false, so it must remain on disk.
+        config = {
+          source: { type: 'filesystem', path: tmp_dir },
+          after_processing: { delete: true, if: invoice_if_condition }
+        }
+        SaveTriggers::PullEmails.new(config, @al).perform
+
+        remaining = Dir.children(tmp_dir).sort
+        expect(remaining.length).to eq 1
+        expect(remaining.first).to match(/newsletter/)
+      end
+
+      it 'runs after_processing when the if: condition is true' do
+        # The Invoice email matches the condition; it must be deleted.
+        invoice_only_dir = Dir.mktmpdir(['pull_emails_inv_only', ''])
+        begin
+          File.write(File.join(invoice_only_dir, 'invoice.eml'), build_mime_email(
+                                                                   from: 'billing@vendor.com',
+                                                                   to: 'inbox@example.org',
+                                                                   subject: 'Invoice #9999',
+                                                                   body: 'invoice.'
+                                                                 ))
+          config = {
+            source: { type: 'filesystem', path: invoice_only_dir },
+            after_processing: { delete: true, if: invoice_if_condition }
+          }
+          SaveTriggers::PullEmails.new(config, @al).perform
+
+          expect(Dir.children(invoice_only_dir)).to be_empty
+        ensure
+          FileUtils.remove_entry(invoice_only_dir) if Dir.exist?(invoice_only_dir)
+        end
+      end
+
+      it 'runs after_processing for all emails when no if: is present (backward compatible)' do
+        config = {
+          source: { type: 'filesystem', path: tmp_dir },
+          after_processing: { delete: true }
+        }
+        SaveTriggers::PullEmails.new(config, @al).perform
+
+        expect(Dir.children(tmp_dir)).to be_empty
+      end
+    end
+  end
+
+  # Issue #1144: verify that the existing ConditionalActions / if_evaluates DSL
+  # can already evaluate conditions against email fields stored in
+  # trigger_variables, using the `element:` path-traversal syntax.
+  # This underpins the planned if: support on `attachments` and `after_processing`.
+  #
+  # The mechanism relies on:
+  #   attribute_from_instance(@item, :trigger_variables)
+  #     -> falls back to instance_variable_get('@trigger_variables')
+  #     -> returns the full trigger_variables hash
+  #   non_query_expected_val_not_a_hash detects expected_val[:element]
+  #     -> traverse_element(hash, 'email.subject') navigates the nested hash
+  #     -> eval_simple_condition applies the requested condition operator
+  describe 'if_evaluates with trigger_variables element path (issue #1144)' do
+    let(:tmp_dir) { Dir.mktmpdir(['pull_emails_if_cond', '']) }
+
+    before do
+      File.write(File.join(tmp_dir, 'invoice.eml'), build_mime_email(
+                                                      from: 'billing@vendor.com',
+                                                      to: 'inbox@study.example.org',
+                                                      subject: 'Invoice #1234',
+                                                      body: 'Please find your invoice attached.'
+                                                    ))
+      File.write(File.join(tmp_dir, 'newsletter.eml'), build_mime_email(
+                                                         from: 'news@vendor.com',
+                                                         to: 'inbox@study.example.org',
+                                                         subject: 'Monthly Newsletter',
+                                                         body: 'Here is your newsletter.'
+                                                       ))
+    end
+
+    after { FileUtils.remove_entry(tmp_dir) if Dir.exist?(tmp_dir) }
+
+    it 'evaluates true when trigger_variables email subject matches the condition' do
+      # Simulate the state pull_emails sets after assign_email_trigger_variables
+      @al.trigger_variables = {
+        email: { subject: 'Invoice #1234', from: 'billing@vendor.com' }
+      }
+
+      condition = {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.subject', condition: '~', value: 'Invoice' }
+          }
+        }
+      }
+      ca = ConditionalActions.new(condition, @al)
+      expect(ca.calc_action_if).to be_truthy
+    end
+
+    it 'evaluates false when trigger_variables email subject does not match' do
+      @al.trigger_variables = {
+        email: { subject: 'Monthly Newsletter', from: 'news@vendor.com' }
+      }
+
+      condition = {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.subject', condition: '~', value: 'Invoice' }
+          }
+        }
+      }
+      ca = ConditionalActions.new(condition, @al)
+      expect(ca.calc_action_if).to be_falsy
+    end
+
+    it 'evaluates true for an exact equality match on email.from' do
+      @al.trigger_variables = {
+        email: { subject: 'Hello', from: 'billing@vendor.com' }
+      }
+
+      condition = {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.from', condition: '==', value: 'billing@vendor.com' }
+          }
+        }
+      }
+      ca = ConditionalActions.new(condition, @al)
+      expect(ca.calc_action_if).to be_truthy
+    end
+
+    it 'evaluates false for an equality mismatch on email.from' do
+      @al.trigger_variables = {
+        email: { subject: 'Hello', from: 'other@vendor.com' }
+      }
+
+      condition = {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.from', condition: '==', value: 'billing@vendor.com' }
+          }
+        }
+      }
+      ca = ConditionalActions.new(condition, @al)
+      expect(ca.calc_action_if).to be_falsy
+    end
+
+    it 'is consistent with what if_evaluates returns on the same trigger instance' do
+      @al.trigger_variables = {
+        email: { subject: 'Invoice #9999', from: 'ar@company.com' }
+      }
+
+      condition = {
+        all: {
+          this: {
+            trigger_variables: { element: 'email.subject', condition: '~', value: 'Invoice' }
+          }
+        }
+      }
+      trigger = SaveTriggers::PullEmails.new({ source: { type: 'filesystem', path: tmp_dir } }, @al)
+      expect(trigger.send(:if_evaluates, condition)).to be_truthy
+
+      @al.trigger_variables[:email][:subject] = 'Unrelated email'
+      trigger2 = SaveTriggers::PullEmails.new({ source: { type: 'filesystem', path: tmp_dir } }, @al)
+      expect(trigger2.send(:if_evaluates, condition)).to be_falsy
+    end
+  end
 end
