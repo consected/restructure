@@ -1014,4 +1014,56 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       end
     end
   end
+
+  context 'with data URI inline images in content (issue #1148)' do
+    # Minimal valid 1x1 red pixel PNG in base64
+    PNG_BASE64_NOTIFY = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=='
+
+    before :example do
+      change_setting('TestMail', true)
+      change_setting('ProcessInlineDataUriImages', true)
+    end
+
+    after :example do
+      change_setting('TestMail', false)
+      change_setting('ProcessInlineDataUriImages', nil)
+    end
+
+    it 'converts data URI images to inline attachments when sending notification email triggered by notify' do
+      # Content template embeds a data URI image
+      data_img = %(<img src="data:image/png;base64,#{PNG_BASE64_NOTIFY}" alt="embedded"/>)
+      t = "<p>Here is an image: #{data_img}</p>"
+      content_with_image = Admin::MessageTemplate.create!(
+        name: 'test email content with image',
+        message_type: :email,
+        template_type: :content,
+        template: t,
+        current_admin: @admin
+      )
+
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: content_with_image.name,
+        subject: 'Image Notification'
+      }
+
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+
+      new_mn = MessageNotification.order(id: :desc).first
+      new_mn.generate
+
+      mail = NotificationMailer.send_message_notification(new_mn)
+
+      # The data URI must have been replaced with an inline cid: attachment
+      inline_attachments = mail.attachments.select(&:inline?)
+      expect(inline_attachments.size).to eq(1)
+
+      body = (mail.html_part || mail).body.decoded
+      expect(body).to include('src="cid:')
+      expect(body).not_to include('src="data:')
+    end
+  end
 end
