@@ -93,7 +93,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @emails = config[:emails]
     @default_country_code = config[:default_country_code]
     @layout_template = config[:layout_template]
-    @on_complete = config[:on_complete]
+    @on_complete = config[:on_complete] || @on_complete_triggers
     @from_user_email = config[:from_user_email]
     @ignore_no_recipients = config[:ignore_no_recipients]
 

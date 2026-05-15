@@ -273,6 +273,36 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
   end
 
+  it 'runs on_complete when notify config is an array of trigger entries - issue #1147' do
+    completion_note = 'notify on_complete array fired issue 1147'
+
+    config = {
+      type: 'email',
+      role: 'test',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text',
+      on_complete: [
+        {
+          update_this: {
+            one: {
+              with: {
+                notes: completion_note
+              }
+            }
+          }
+        }
+      ]
+    }
+
+    @al.update!(notes: nil, current_user: @user)
+    @trigger = SaveTriggers::Notify.new(config, @al)
+
+    @trigger.perform
+
+    expect(@al.reload.notes).to eq(completion_note)
+  end
+
   it 'uses a simple {{template}} reference to get the users for a notification' do
     config = {
       type: 'email',
