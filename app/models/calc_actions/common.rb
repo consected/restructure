@@ -2,6 +2,8 @@
 
 module CalcActions
   module Common
+    UnsetThisVal = Object.new.freeze
+
     SelectionTypes = %i[all any not_all not_any].freeze
 
     ValidExtraConditionsArrays = [
@@ -74,7 +76,7 @@ module CalcActions
     # @return [True | False]
     def expected_value_requests_return?(type, condition)
       ret_type = "return_#{type}"
-      condition == ret_type || condition.is_a?(Array) && condition.include?(ret_type)
+      (condition == ret_type) || (condition.is_a?(Array) && condition.include?(ret_type))
     end
 
     #
@@ -156,13 +158,34 @@ module CalcActions
     end
 
     #
-    # Allows this_val to be passed so it can be changed in nested and non-query conditions
+    # Allows this_val to be passed so it can be changed in nested and non-query conditions.
     def this_val=(value)
       return_this[:value] = value
     end
 
+    # Gets the successfully evaluated return value.
+    # We gracefully return nil (rather than raising an exception) if the value is unset.
+    # This is critical because normal ConditionalActions rules that evaluate to false 
+    # (e.g. no matching records found) naturally bypass the return bindings and never set 
+    # a value. Callers like get_this_val rely on this returning nil to propagate a 
+    # non-match logic up the stack. Strict operations (like lookup sub-queries) check 
+    # this_val_set? separately to assert when a value was strictly required.
     def this_val
+      return nil unless this_val_set?
+
       return_this[:value]
+    end
+
+    def this_val_set?
+      !return_this[:value].equal?(UnsetThisVal)
+    end
+
+    def this_val_mode=(value)
+      return_this[:mode] = value
+    end
+
+    def this_val_mode
+      return_this[:mode]
     end
 
     #
