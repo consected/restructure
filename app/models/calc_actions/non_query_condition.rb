@@ -6,7 +6,7 @@ module CalcActions
     include Common
 
     NonQueryTableNames = %i[this user parent referring_record top_referring_record embedded_item role_name
-                            reference].freeze
+                            reference lookup].freeze
 
     NonQueryNestedKeyNames = %i[this referring_record top_referring_record embedded_item this_references parent_references
                                 parent_or_this_references reference validate].freeze
