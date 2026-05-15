@@ -229,6 +229,9 @@ class Settings
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
 
+  # Convert inline data URI images in email bodies to MIME inline attachments
+  ProcessInlineDataUriImages = ENV.key?('FPHS_PROCESS_INLINE_DATA_URI_IMAGES') ? ENV['FPHS_PROCESS_INLINE_DATA_URI_IMAGES'] == 'true' : true
+
   # Redcap records request options - additional request parameters to add / override the payload
   # to a records request.
   # Hash of options are:
@@ -303,7 +306,7 @@ class Settings
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
-    DisableVDef AllowDynamicMigrations
+    DisableVDef AllowDynamicMigrations ProcessInlineDataUriImages
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     CountryCodesForTimezones DefaultUserTimezone
