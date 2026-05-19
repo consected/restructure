@@ -1,21 +1,27 @@
 # frozen_string_literal: true
 
 # Spec for GitHub Issue #219: Allow a page layout master panel to specify the master tab to open by default
+# Related to GitHub Issue #1153: Auto open panels is opening everything
 #
 # Tests the page layout view_options.initial_show configuration and its interaction
 # with the "open panels" app configuration.
 #
-# Two independent mechanisms control tab auto-expansion:
+# Two mechanisms control tab auto-expansion:
 #   1. initial_show (static, ERB-time): set in page layout view_options, adds 'on-open-click'
 #      class directly to the tab <li> during server-side template rendering
 #   2. open_panels (dynamic, Handlebars runtime): set via app configuration, evaluated per
 #      master record with substitution support, adds 'on-open-click' via Handlebars helper
 #
 # Precedence rules:
-#   - If initial_show is nil (not set), open_panels determines whether to auto-expand
-#   - If initial_show is explicitly true, the tab always auto-expands (regardless of open_panels)
-#   - If initial_show is explicitly false, the ERB class is NOT added, but open_panels can
-#     still cause the tab to auto-expand via the Handlebars runtime evaluation
+#   - open_panels only controls panels where initial_show is nil (not explicitly set).
+#   - If a panel has initial_show: true, it will always auto-expand regardless of open_panels.
+#     To allow open_panels to control which panels open, panels must NOT have initial_show: true.
+#   - If initial_show is explicitly false, the panel never opens via the static ERB path.
+#     However, open_panels can still cause expansion via the Handlebars runtime evaluation.
+#
+# Issue #1153 root cause: the Viva app page layouts had initial_show: true on all panels,
+# preventing open_panels from controlling which panels opened. The resolution was to correct
+# the page layout configuration — the template code was correct all along.
 
 require 'rails_helper'
 
@@ -59,10 +65,11 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
 
   def set_open_panels(value)
     if value.nil?
-      ac = @app_type.app_configurations.active.where(name: 'open panels').first
-      ac&.update!(current_admin: @admin, disabled: true)
+      @app_type.app_configurations.active.where(name: 'open panels').each do |ac|
+        ac.update!(current_admin: @admin, disabled: true)
+      end
     else
-      add_app_config(@app_type, 'open panels', value, user: @user)
+      Admin::AppConfiguration.add_user_config(@user, @app_type, :open_panels, value, @admin)
     end
   end
 
@@ -149,18 +156,18 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
   end
 
   after(:all) do
-    # Restore original layouts
-    @original_layouts&.each do |id, attrs|
-      pl = Admin::PageLayout.find_by(id: id)
-      pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
-    end
-
-    # Remove test layouts and their history records
+    # Remove test layouts FIRST to avoid panel_name uniqueness conflicts when restoring originals
     [@details_panel, @trackers_panel].compact.each do |pl|
       ActiveRecord::Base.connection.execute(
         "DELETE FROM page_layout_history WHERE page_layout_id = #{pl.id}"
       )
       pl.destroy
+    end
+
+    # Restore original layouts (no panel_name conflicts now)
+    @original_layouts&.each do |id, attrs|
+      pl = Admin::PageLayout.find_by(id: id)
+      pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
     end
 
     # Restore original open_panels config
@@ -177,6 +184,17 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
   end
 
   before(:each) do
+    # Clear the AppConfiguration memoization cache before each test.
+    # DatabaseCleaner truncates records between tests, so any user-specific config
+    # created by a previous test is gone from the DB. Without clearing the memo,
+    # value_for still returns the stale cached value from the prior test even though
+    # the record no longer exists, causing incorrect open_panels behavior.
+    Admin::AppConfiguration.clear_memo!
+    # Clear precompiled Handlebars templates so each test gets a fresh compilation
+    # reflecting the current layout and config state (avoids stale cache from prior tests)
+    HandlebarsPrecompiler.cleanup_tmp_dir
+    HandlebarsPrecompiler.cleanup_public_dir
+    Rails.cache.delete('server_cache_version')
     login
   end
 
@@ -213,13 +231,32 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       expect_panel_collapsed('trackers')
     end
 
-    it 'initial_show: true wins even when open_panels does not list the panel' do
+    it 'initial_show: true opens a panel even when not listed in open_panels - #1153 was a config bug' do
+      # initial_show: true is not overridden by open_panels. A panel with initial_show: true
+      # will always auto-expand regardless of what open_panels specifies.
+      # The root cause of #1153 was that all Viva page layout panels had initial_show: true,
+      # which must be removed for open_panels to control which panel opens.
       update_layout(@details_panel, details_layout_yaml(initial_show: true))
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('trackers')
 
       navigate_to_master
-      # details auto-expands via initial_show, trackers via open_panels
+      # details opens because initial_show: true is not suppressed by open_panels
+      wait_for_panel_expanded('details')
+      # trackers also opens because it is listed in open_panels (initial_show: nil allows the override)
+      wait_for_panel_expanded('trackers')
+    end
+
+    it 'initial_show: true on all panels opens all panels regardless of open_panels - #1153' do
+      # When every panel has initial_show: true, open_panels has no effect — all panels open.
+      # This is the exact scenario reported in #1153.
+      # Resolution: remove initial_show: true from panels that should be controlled by open_panels.
+      update_layout(@details_panel, details_layout_yaml(initial_show: true))
+      update_layout(@trackers_panel, trackers_layout_yaml(initial_show: true))
+      set_open_panels('details')
+
+      navigate_to_master
+      # Both open because initial_show: true is not overridden by open_panels
       wait_for_panel_expanded('details')
       wait_for_panel_expanded('trackers')
     end
