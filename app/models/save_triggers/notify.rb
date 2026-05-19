@@ -155,8 +155,12 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @receiving_user_ids = rusers.map(&:id)
   end
 
+  #
+  # Set up the phones to get a list of recipient phone numbers
+  # Supports literal strings, template substitutions `{{field}}`, and conditional action hashes.
+  # Can also be an array containing any combination of strings, substitutions and hashes.
   def setup_phones
-    @force_phones = calc_field_or_return(@phones)
+    @force_phones = Array(calc_field_or_return(@phones)).map { |p| calc_field_or_return(p) }.compact
 
     @phones = @force_phones = @force_phones.map do |p|
       Formatter::Phone.format p, format: :unformatted,
@@ -181,10 +185,12 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     end
   end
 
+  #
+  # Set up the emails to get a list of recipient email addresses
+  # Supports literal strings, template substitutions `{{field}}`, and conditional action hashes.
+  # Can also be an array containing any combination of strings, substitutions and hashes.
   def setup_emails
-    @force_emails = calc_field_or_return(@emails)
-    @force_emails = [@force_emails] if @force_emails.is_a? String
-    @force_emails
+    @force_emails = Array(calc_field_or_return(@emails)).map { |e| calc_field_or_return(e) }.compact
   end
 
   def filter_notifications
