@@ -466,8 +466,11 @@ module NfsStore
                 else
                   current_user_role_names
                 end
+
+        test_dir_ok = false
         roles.each do |role_name|
-          next unless Filesystem.test_dir role_name, self, :mkdir
+          test_dir_ok = Filesystem.test_dir role_name, self, :mkdir
+          next unless test_dir_ok
 
           res = Filesystem.create_container self, role_name
           break if res
@@ -475,6 +478,7 @@ module NfsStore
 
         unless res
           raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. " \
+                                     "Test directory access results: #{test_dir_ok}. " \
                                      "App type: #{user.app_type.name} (#{user.app_type.id}). " \
                                      "Name: #{name}. " \
                                      "Roles: #{roles.join(', ')}"

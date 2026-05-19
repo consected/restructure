@@ -181,7 +181,8 @@ module NfsStore
           # Check the path to create is actually part of the container
           container_path = container.path_for(role_name:)
           unless fs_test_path.start_with? container_path
-            Rails.logger.info 'Container path is not part of the path to be tested for mkdir'
+            Rails.logger.warn 'Container path is not part of the path to be tested for mkdir: ' \
+                              "#{container_path} not in #{fs_test_path}"
             return false
           end
 
@@ -201,11 +202,14 @@ module NfsStore
           # Although we tested up front for existence of the directory, use this as a failsafe to
           # ensure that we can not accidentally remove an existing file unexpectedly
           if File.exist? curr_path
-            raise FsException::Action, "Target directory already exists when attempting test: #{fs_test_path}"
+            raise FsException::Action, 'Target directory already exists when attempting test: ' \
+                                       "#{curr_path} in #{fs_test_path}"
           end
 
           FileUtils.touch curr_path
-          FileUtils.rm curr_path
+          res = FileUtils.rm curr_path
+          Rails.logger.warn "Failed to test mkdir for container with #{curr_path}" unless res
+          res
         elsif action == :read
           fs_test_path = nfs_store_path(role_name, container, extra_path, file_name)
           Pathname.new(fs_test_path).readable?
