@@ -121,8 +121,10 @@ open panels: |
       \{\{else is activity_log__project_assignments.last.status '!==' "analysis plan proposal submitted"}}activity_log__project_assignments
       \{\{/is}}
 
-  NOTE: this option will override a master panel's `view_options.initial_show` in page layouts 
-  if they have value nil, true or false
+  NOTE: this option will control auto-expanding panels unless `view_options.initial_show` is `true`.
+  If a panel has `initial_show: true`, it will always auto-expand regardless of this setting.
+  To allow `open panels` to control which panel opens, ensure the panel does not have
+  `initial_show: true` set in its page layout view_options (leave it unset, or set to false).
 prevent reload master list: |
   If the user refreshes a page showing master records from a search, the list of previous master records 
   will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value

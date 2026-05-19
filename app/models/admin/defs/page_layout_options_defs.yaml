@@ -29,7 +29,10 @@ view_options:
   add_item_label: contact             # button label for adding a resource
   orientation: (columns|horizontal|vertical)  # panel orientation for block lists
   limit: (integer)                    # max number of items to show in panel
-  initial_show: true|false            # initially open up a panel
+  initial_show: true|false            # initially open up a panel. When true, the panel will
+                                      # always open regardless of the `open panels` app configuration.
+                                      # To allow `open panels` to control which panel opens, leave
+                                      # this unset or set it to false.
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
   hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
@@ -94,7 +97,7 @@ tab:
 #
 # A standalone page container defining rows that define the contents of the page
 container:
-  rows: an array of row definitions
+  rows: # an array of row definitions
     classes: string of space separated class names to add directly to each standard-page-row div
     styles: maps key/value to standard styles
     cols: #&cols
