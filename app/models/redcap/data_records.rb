@@ -17,6 +17,7 @@ module Redcap
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
+                  :skipped_files,
                   :step_count, :job, :done,
                   :integer_survey_identifier_field_name, :survey_identifier_field_name, :set_master_id_using_association,
                   :skip_store_if_no_survey_identifier, :skipped_ids,
@@ -24,7 +25,7 @@ module Redcap
                   :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
                   :date_range_begin,
                   :request_source,
-                  :verify_file_fields
+                  :ignore_cache, :retrieve_all, :verify_file_fields
 
     def initialize(project_admin, class_name, is_manual_pull: false, request_source: nil, verify_file_fields: false)
       super()
@@ -43,6 +44,7 @@ module Redcap
       self.upserted_records = []
       self.imported_files = []
       self.failed_files = []
+      self.skipped_files = []
       self.step_count = UpdateJobRequestEvery
       self.survey_identifier_field_name = project_admin.survey_identifier_field.to_sym
       self.integer_survey_identifier_field_name = project_admin.integer_survey_identifier_field.to_sym
@@ -70,6 +72,14 @@ module Redcap
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
       return if jobs.count > 0
 
+      # Remember the requested options so they can be recorded in the job request,
+      # giving admins visibility into what was actually requested. Note that
+      # self.verify_file_fields may have been clamped to false by #initialize when
+      # is_manual_pull is false, so we explicitly record the value passed here.
+      self.ignore_cache = ignore_cache
+      self.retrieve_all = retrieve_all
+      self.verify_file_fields = verify_file_fields
+
       self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name,
                                                          ignore_cache:,
                                                          retrieve_all:,
@@ -77,8 +87,12 @@ module Redcap
       return if Rails.application.config.active_job.queue_adapter == :inline
 
       source_result = request_source ? { request_source => true } : {}
-      project_admin.record_job_request('setup job: store records',
-                                       result: { requested: true, job: job&.job_id }.merge(source_result))
+      project_admin.record_job_request(
+        'setup job: store records',
+        result: { requested: true,
+                  job: job&.job_id,
+                  requested_options: requested_options }.merge(source_result)
+      )
     end
 
     #
@@ -91,6 +105,10 @@ module Redcap
     # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @param [Boolean] retrieve_all - ignore export_only_updated_records setting and retrieve all records
     def retrieve_validate_store(ignore_cache: false, retrieve_all: false)
+      # Capture the effective options on the instance so they can be recorded in
+      # the job request result alongside verify_file_fields (set in #initialize).
+      self.ignore_cache = ignore_cache
+      self.retrieve_all = retrieve_all
       self.storage_stage = 'retrieve_validate_store'
       # Calculate date_range_begin BEFORE creating new job request record,
       # so we get the timestamp from the previous successful run
@@ -701,6 +719,7 @@ module Redcap
             # This can mask a missing-on-disk file when a stored_files row exists
             # but the underlying file is not actually present, so log everything
             # passed to import_file for diagnosis.
+            skipped_files << { record_id:, field_name:, file_name: filename, path: }
             Rails.logger.warn(
               'Redcap capture_files: NfsStore::Import.import_file returned nil (file skipped). ' \
               "container_id: #{container.id}, file_name: #{filename}, " \
@@ -820,6 +839,19 @@ module Redcap
     end
 
     #
+    # Hash describing the options that were requested for this pull, suitable
+    # for recording on the project admin job request so admins can see exactly
+    # what was asked for (including options threaded through to background jobs).
+    # @return [Hash]
+    def requested_options
+      {
+        ignore_cache: ignore_cache || false,
+        retrieve_all: retrieve_all || false,
+        verify_file_fields: verify_file_fields || false
+      }
+    end
+
+    #
     # Create or update job request record
     # @param [true | nil] create - optional - create a new record for this request
     def update_job_request(create: nil)
@@ -836,10 +868,12 @@ module Redcap
         errors:,
         imported_files_count: imported_files&.length,
         failed_files_count: failed_files&.length,
+        skipped_files_count: skipped_files&.length,
         job: job&.id,
         retrieved_from_cache:,
         using_date_range_filter:,
-        date_range_begin: (date_range_begin if using_date_range_filter)
+        date_range_begin: (date_range_begin if using_date_range_filter),
+        requested_options: requested_options
       }
       result[request_source] = true if request_source
 
