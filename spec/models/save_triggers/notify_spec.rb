@@ -3,7 +3,8 @@
 # Tests for SaveTriggers::Notify
 # Covers notification trigger configuration parsing, role/user setup, message creation,
 # template substitutions, conditional actions, return_value_list references,
-# calendar invite integration (#953), and NfsStore file attachment config parsing (#954).
+# calendar invite integration (#953), NfsStore file attachment config parsing (#954),
+# inline data URI image conversion (#1148), and literal/template/array phones+emails (#1152).
 
 require 'rails_helper'
 
@@ -1094,6 +1095,78 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       body = (mail.html_part || mail).body.decoded
       expect(body).to include('src="cid:')
       expect(body).not_to include('src="data:')
+    end
+  end
+
+  context 'phones and emails support literal strings, template substitutions, and per-element resolution - issue #1152' do
+    # Tests for issue #1152: setup_phones fails when calc_field_or_return returns a String
+    # (e.g. literal phone, template substitution, or conditional hash) because .map is called
+    # directly on the result. Also covers that array elements containing {{templates}} should
+    # each be individually resolved via calc_field_or_return.
+
+    before :example do
+      @al.update!(data: '(617)555-0101', notes: 'dynamic@example.com', current_user: @user)
+    end
+
+    let(:sms_config_base) do
+      {
+        type: 'sms',
+        default_country_code: '1',
+        layout_template: @layout_sms.name,
+        content_template_text: 'Test SMS content',
+        subject: 'subject text'
+      }
+    end
+
+    let(:email_config_base) do
+      {
+        type: 'email',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+    end
+
+    it 'accepts phones as a literal string - issue #1152' do
+      config = sms_config_base.merge(phones: '+16175551234')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175551234'])
+    end
+
+    it 'accepts phones as a template substitution resolving the item field - issue #1152' do
+      config = sms_config_base.merge(phones: '{{data}}')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175550101'])
+    end
+
+    it 'accepts phones as a conditional hash resolving the item field via ConditionalActions - issue #1152' do
+      config = sms_config_base.merge(phones: { this: { data: 'return_value' } })
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175550101'])
+    end
+
+    it 'resolves template substitutions within each element of a phones array - issue #1152' do
+      config = sms_config_base.merge(phones: ['{{data}}', '+16175551235'])
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones.sort).to eq(['+16175550101', '+16175551235'].sort)
+    end
+
+    it 'accepts emails as a literal string - issue #1152' do
+      config = email_config_base.merge(emails: 'test@example.com')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.instance_variable_get(:@force_emails)).to eq(['test@example.com'])
+    end
+
+    it 'resolves template substitutions within each element of an emails array - issue #1152' do
+      config = email_config_base.merge(emails: ['{{notes}}', 'static@example.com'])
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.instance_variable_get(:@force_emails)).to eq(['dynamic@example.com', 'static@example.com'])
     end
   end
 end

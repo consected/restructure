@@ -159,11 +159,15 @@ module Dynamic
     # to ensure that there is a true record of the original data (in case something is changed
     # in the parent item subsequently)
     # Skip this if the item is not set (for a blank activity log)
+    # Skip syncing any field that was explicitly changed by the caller, so user-set values
+    # are not overwritten by the parent's current value.
     def sync_item_data
-      return true unless item
+      return unless item
 
       fields_to_sync.each do |f|
-        send("#{f}=", item.send(f))
+        next if attribute_changed?(f.to_s) || !item.respond_to?(f)
+
+        public_send("#{f}=", item.public_send(f)) if respond_to?("#{f}=")
       end
     end
 
