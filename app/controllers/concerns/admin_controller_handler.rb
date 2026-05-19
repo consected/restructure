@@ -10,7 +10,8 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: %i[edit update destroy]
     before_action :handle_options_encoding, only: %i[create update]
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
+    helper_method :filters, :filters_on, :effective_filters, :effective_filters_on,
+                  :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
                   :help_section, :help_subsection, :title, :sub_title, :no_create, :show_head_info, :view_folder,
@@ -139,6 +140,40 @@ module AdminControllerHandler
 
   def filters_on
     []
+  end
+
+  #
+  # Returns filters merged with an auto-detected name filter if:
+  # - the primary model has a `name` column
+  # - `name` is not already in the defined filters
+  # @return [Hash]
+  def effective_filters
+    result = filters.dup
+    return result unless result.is_a?(Hash)
+    return result if result.key?(:name)
+    return result unless primary_model.respond_to?(:attribute_names) &&
+                         primary_model.attribute_names.include?('name')
+
+    name_values = filter_values_for(:name)
+    result[:name] = name_values if name_values.present?
+    result
+  end
+
+  #
+  # Returns filters_on merged with `:name` if:
+  # - the primary model has a `name` column
+  # - `:name` is not already in filters_on
+  # - `name` is not already in the defined filters
+  # @return [Array]
+  def effective_filters_on
+    result = Array(filters_on).dup
+    return result if result.include?(:name)
+    return result if filters.is_a?(Hash) && filters.key?(:name)
+    return result unless primary_model.respond_to?(:attribute_names) &&
+                         primary_model.attribute_names.include?('name')
+
+    result << :name
+    result
   end
 
   #

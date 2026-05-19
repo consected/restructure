@@ -175,5 +175,46 @@ RSpec.describe AdminHelper, type: :helper do
 
       expect(result).to include('clear filters')
     end
+
+    # -------------------------------------------------------------------------
+    # Auto name filter - Issue #1159
+    # -------------------------------------------------------------------------
+    # These tests verify that show_filters automatically includes a name filter
+    # select when the primary model has a 'name' column, without the controller
+    # having to explicitly define it in #filters / #filters_on.
+    #
+    # They will FAIL until show_filters is updated to use effective_filters and
+    # effective_filters_on instead of filters and filters_on directly.
+
+    context 'when the primary model has a name column and no name filter is explicitly defined' do
+      before do
+        # Stub the controller methods that show_filters falls back on
+        # to test that it successfully consumes them if present context responds to them.
+        helper.define_singleton_method(:filters) { {} }
+        helper.define_singleton_method(:effective_filters) { { name: %w[Alice Bob] } }
+        helper.define_singleton_method(:effective_filters_on) { [:name] }
+      end
+
+      it 'automatically renders a name filter select' do
+        result = helper.show_filters
+
+        expect(result).to include('filter-select')
+        expect(result).to include('data-filter-on="name"')
+      end
+    end
+
+    context 'when the primary model has a name column and name is already in the explicit filters' do
+      before do
+        helper.define_singleton_method(:primary_model) { Classification::AccuracyScore }
+        helper.define_singleton_method(:filters) { { name: %w[Alice Bob] } }
+        helper.define_singleton_method(:filters_on) { [:name] }
+      end
+
+      it 'renders exactly one name filter select (no duplication)' do
+        result = helper.show_filters
+
+        expect(result.scan('data-filter-on="name"').count).to eq(1)
+      end
+    end
   end
 end
