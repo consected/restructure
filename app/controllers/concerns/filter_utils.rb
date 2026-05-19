@@ -98,7 +98,8 @@ module FilterUtils
   def filter_params_permitted
     return @filter_params_permitted if @filter_params_permitted
 
-    fo = filters_on
+    fo = respond_to?(:effective_filters_on, true) ? effective_filters_on : filters_on
+    fo = Array(fo).dup # ensure it's a mutable array
     # Add some additional attributes to allow to be filtered on
     fo << :disabled if has_disabled_field
     fo << :id
