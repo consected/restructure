@@ -32,7 +32,7 @@ view_options:
   initial_show: true|false            # initially open up a panel. When true, the panel will
                                       # always open regardless of the `open panels` app configuration.
                                       # To allow `open panels` to control which panel opens, leave
-                                      # this unset rather than setting it to true.
+                                      # this unset or set it to false.
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
   hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
