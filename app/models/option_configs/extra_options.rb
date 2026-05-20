@@ -636,7 +636,7 @@ module OptionConfigs
       # and so will already by incorporated into the relevant configurations.
       loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
-      configs = handle_defaults_merges_overrides(config_obj, loaded_config)
+      configs = handle_defaults_merges_overrides(config_obj, loaded_config, raise_underscore_keys: true)
       # Update comments for table and fields, based on the default option type configuration
       # after all the _default, _merge_... and _override processing has been completed
       handle_table_comments_just_if_saved(config_obj, configs, force_all)
@@ -760,7 +760,7 @@ module OptionConfigs
     # @param [ActiveRecord::Base] config_obj dynamic definition record
     # @param [Hash] loaded_config configuration hash
     # @return [Array] configuration instances
-    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {})
+    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {}, raise_underscore_keys: nil)
       configs = []
 
       # Handle any entry starting with "_default"
@@ -769,6 +769,23 @@ module OptionConfigs
       opt_merge_default = loaded_config.delete(:_merge_default)
       opt_merge_override = loaded_config.delete(:_merge_override)
       opt_override = loaded_config.delete(:_override)
+
+      # All valid underscore keys have now been consumed. Any remaining key starting with '_'
+      # is a config error — e.g. _definition_... instead of _definitions_... (#1163).
+      if raise_underscore_keys
+        unexpected_keys = loaded_config.keys.select { |k| k.to_s.start_with?('_') }
+        if unexpected_keys.any?
+          suggestion = if unexpected_keys.any? do |k|
+            k.to_s.start_with?('_definition_')
+          end
+                         ' (did you mean _definitions_?)'
+                       else
+                         ''
+                       end
+          raise FphsOptionsParseError,
+                "Configuration contains unexpected underscore-prefixed keys: #{unexpected_keys.join(', ')}#{suggestion}"
+        end
+      end
 
       loaded_config.each do |name, value|
         unless name.in?(%i[primary blank_log])
