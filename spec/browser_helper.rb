@@ -17,7 +17,7 @@ module BrowserHelper
     is_not_in_use = false
     portnum = nil
     100.times do
-      portnum = BASE_BROWSER_PORT + test_num
+      portnum = BASE_BROWSER_PORT + test_num + rand(10_000)
       # Try binding the port directly — more reliable than lsof which may not
       # be in PATH or may miss sockets in certain states (TIME_WAIT, etc.)
       begin
@@ -26,7 +26,7 @@ module BrowserHelper
         is_not_in_use = true
         break
       rescue Errno::EADDRINUSE
-        test_num += 1
+        # try another port
       end
     end
 
@@ -56,7 +56,7 @@ module BrowserHelper
     cb = Capybara
     # cb.server = :puma
     # cb.reuse_server = false
-    service = nil
+    nil
 
     if ENV['BROWSER'] == 'firefox'
       $browser_driver = :app_firefox_driver
@@ -110,7 +110,7 @@ module BrowserHelper
     exe = ENV.fetch('GECKO_PATH', nil)
     exe = if exe.blank?
             alt_exe = ['/snap/bin/firefox.geckodriver', '/usr/local/bin/geckodriver']
-            exe = alt_exe.select { |p| File.exist?(p) }.first
+            alt_exe.select { |p| File.exist?(p) }.first
           end
 
     service.executable_path = exe
