@@ -79,6 +79,7 @@ class Admin::ManageUsersController < AdminController
   def filters
     {
       app_type_id: Admin::AppType.all_by_name,
+      current_app_access: { 'true' => 'yes', 'false' => 'no' },
       email: filter_values_for(:email),
       first_name: filter_values_for(:first_name),
       last_name: filter_values_for(:last_name)
@@ -86,7 +87,7 @@ class Admin::ManageUsersController < AdminController
   end
 
   def filters_on
-    %i[app_type_id email first_name last_name]
+    %i[app_type_id current_app_access email first_name last_name]
   end
 
   # Override regular defaults, which force the current user's app_type_id
@@ -94,8 +95,25 @@ class Admin::ManageUsersController < AdminController
     {}
   end
 
-  # Run a special filter on app_type_id, so that we don't just get the
-  # users current app, but all they have access to
+  # Override to inject current_app_access: 'true' as the default when no filter
+  # params are present in the URL, so the page opens showing only users with
+  # access to the current app type.
+  def filter_params_permitted
+    return @filter_params_permitted if @filter_params_permitted
+
+    super
+    return @filter_params_permitted if @filter_params_permitted
+
+    # No filter params in URL - inject default to show users with current app access
+    fo = filters_on + [:id, :filter_name, { ids: [] }]
+    fo << :disabled if has_disabled_field
+    @filter_params_permitted = ActionController::Parameters.new(current_app_access: 'true').permit(*fo)
+  end
+
+  # Run a special filter on app_type_id and current_app_access, so that we don't
+  # just get the users current app, but all they have access to.
+  # current_app_access is a virtual boolean filter (not a DB column) indicating
+  # whether a user has access to the admin's current app type.
   def filtered_primary_model(_ = nil)
     pm = primary_model
     a = filter_params_permitted[:app_type_id] if filter_params_permitted
@@ -108,11 +126,28 @@ class Admin::ManageUsersController < AdminController
       pm = pm.where(id: ids)
     end
 
-    # Filter on everything (except the specified app_type_id, which has beem temporarily removed)
+    # Handle current_app_access virtual filter: filter by the admin's current app type
+    caa = filter_params_permitted[:current_app_access] if filter_params_permitted
+    if caa.present?
+      # Temporarily clear so the super method doesn't attempt to filter on a non-existent column
+      filter_params_permitted[:current_app_access] = nil
+      current_app_type_id = admin_current_app_type&.id
+      if current_app_type_id
+        has_access_ids = pm.all.select { |u| current_app_type_id.in?(u.accessible_app_type_ids) }.map(&:id)
+        pm = if caa == 'true'
+               pm.where(id: has_access_ids)
+             else
+               pm.where.not(id: has_access_ids)
+             end
+      end
+    end
+
+    # Filter on everything (except the virtual filters temporarily removed above)
     res = super(pm)
 
-    # Reset the filter params so that the buttons appear correctly
+    # Reset the filter params so that the filter buttons appear correctly
     filter_params_permitted[:app_type_id] = a.to_s if a.present?
+    filter_params_permitted[:current_app_access] = caa if caa.present?
     res
   end
 
@@ -124,5 +159,11 @@ class Admin::ManageUsersController < AdminController
 
   def permitted_params
     %i[email disabled first_name last_name do_not_email expire_datetime api_access_only]
+  end
+
+  # Returns the app type currently associated with the admin session.
+  # Mirrors the admin_app_type view helper logic for use in controller filtering.
+  def admin_current_app_type
+    current_user&.app_type || current_admin.matching_user&.app_type || Admin::AppType.active.first
   end
 end
