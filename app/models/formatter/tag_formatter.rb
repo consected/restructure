@@ -65,6 +65,8 @@ module Formatter
       last
       no_html_tag
       general_selection_label
+      parse_json
+      parse_yaml
     ].freeze
 
     #
@@ -542,6 +544,26 @@ module Formatter
     # @return [String, nil] pretty JSON string or nil if object doesn't respond to to_json
     def json(res, _orig_val)
       JSON.pretty_generate(res) if res.respond_to?(:to_json)
+    end
+
+    #
+    # Parses a JSON string into a Ruby Hash or Array
+    # @param [String] res - the JSON string to parse
+    # @return [Hash, Array, nil] parsed object or nil if invalid JSON
+    def parse_json(res, _orig_val)
+      JSON.parse(res)
+    rescue JSON::ParserError, TypeError
+      nil
+    end
+
+    #
+    # Parses a YAML string into a Ruby Hash or Array
+    # @param [String] res - the YAML string to parse
+    # @return [Hash, Array, nil] parsed object or nil if invalid YAML
+    def parse_yaml(res, _orig_val)
+      YAML.safe_load(res)
+    rescue Psych::Exception, TypeError
+      nil
     end
 
     #
