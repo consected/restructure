@@ -522,4 +522,27 @@ Good?)
     res = Formatter::Substitution.substitute(txt.dup, data:)
     expect(res.strip).to eq 'Result: Z and D'
   end
+
+  it 'converts a JSON string field to YAML via parse_json and yaml formatters' do
+    json_string = '{"name":"Alice","scores":[10,20,30]}'
+    txt = '{{json_field::parse_json::yaml}}'
+    data = { json_field: json_string }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq "name: Alice\nscores:\n- 10\n- 20\n- 30\n"
+  end
+
+  it 'converts a YAML string field to JSON via parse_yaml and json formatters' do
+    yaml_string = "name: Alice\nscores:\n- 10\n- 20\n- 30\n"
+    txt = '{{yaml_field::parse_yaml::json}}'
+    data = { yaml_field: yaml_string }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq "{\n  \"name\": \"Alice\",\n  \"scores\": [\n    10,\n    20,\n    30\n  ]\n}"
+  end
+
+  it 'returns nil representation when parse_json fails and is chained with a serializer' do
+    txt = '{{json_field::parse_json::json}}'
+    data = { json_field: 'not valid json' }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'null'
+  end
 end
