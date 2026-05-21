@@ -21,6 +21,7 @@
           <th>First Name</th>
           <th>Last Name</th>
           <th>Apps</th>
+          <th>Current App</th>
           <th>Password expires in (days)</th>
           <th>Account Expiration</th>
           <th>Signed in at</th>
@@ -47,6 +48,7 @@
                 <p><span><%= a&.label %></span></p>
               <% end %>
             </td>
+            <td><%= index_list_item_boolean_field(list_item.accessible_app_type_ids.include?(admin_app_type&.id)) %></td>
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.expire_datetime&.strftime('%Y-%m-%d %H:%M') %></td>
             <td><%= list_item.current_sign_in_at %></td>
