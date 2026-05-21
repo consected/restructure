@@ -53,7 +53,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       end
 
       if !@receiving_user_ids&.present? && !@force_phones && !@force_emails && !@force_recip_recs
-        msg = "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name}"
+        msg = "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name} (user: #{resolve_user.email}, app_type: #{resolve_app_type&.id})"
         Rails.logger.warn msg
         @item.save_trigger_results['notify_results'] << false
         @item.save_trigger_results['notify_errors'] << msg
@@ -96,6 +96,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @on_complete = config[:on_complete] || @on_complete_triggers
     @from_user_email = config[:from_user_email]
     @ignore_no_recipients = config[:ignore_no_recipients]
+    @config_app_type = config[:app_type]
 
     @message_type = config[:type]
     @run_if = config[:if]
@@ -125,6 +126,18 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @message_type.to_s == 'email'
   end
 
+  def resolve_app_type
+    if @config_app_type.present?
+      Admin::AppType.find_active_by_name_or_id(@config_app_type)
+    else
+      @user.app_type
+    end
+  end
+
+  def resolve_user
+    @alt_batch_user || @user
+  end
+
   #
   # Set up the roles and users to get a list of receiving user IDs
   def setup_role_and_users
@@ -137,7 +150,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       @role_name = calc_field_or_return(@role)
       @role_name = @role_name.reject(&:blank?) if @role_name.is_a? Array
 
-      @receiving_user_ids += Admin::UserRole.active_user_ids role_name: @role_name, app_type: @user.app_type
+      @receiving_user_ids += Admin::UserRole.active_user_ids role_name: @role_name, app_type: resolve_app_type
     end
 
     if @users
@@ -367,8 +380,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   def create_message_notification
     setup_data = {
-      app_type: @user.app_type,
-      user: @user,
+      app_type: resolve_app_type,
+      user: resolve_user,
       layout_template_name: @layout_template,
       content_template_name: content_template,
       content_template_text:,
