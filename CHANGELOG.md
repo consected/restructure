@@ -14,6 +14,21 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.8 back to develop
+- [Added] tracking for Redcap DataRecords requested options and skipped files - fixes #1143
+- [Improved] NFS container error messaging and mkdir test return value - refs #1155
+- [Added] regression specs for embed via create_reference extra_log_type investigation
+- [Corrected] initial_show and open_panels documentation and specs - resolves #1153
+- [Update] docs to correctly note that initial_show: false is also overridden by open panels
+- [Added] auto name filter for admin pages with name column - fixes #1159
+- [Added] validation to raise FphsOptionsParseError for unexpected underscore-prefixed keys in option configs - fixes #1163
+- [Fixed] Puma test port selection reliability - fixes #1165
+- [Fixed] notes field format: plain newlines overridden by app config markdown setting - fixes #1167
+- [Added] async lazy loading for admin components panel - fixes #1171
+- [Added] ActivityLog embedded_item API panel trigger examples - fixes #930
+- [Added] parse_json and parse_yaml substitution formatters - fixes #1170
+- [Added] current app type access boolean column and filter to Usernames and Passwords admin page - resolves #1168
+
 ## [9.44.8] - 2026-05-15
 
 - [Merged] release 9.44.7 back to develop
