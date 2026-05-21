@@ -587,4 +587,256 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       expect(Master.count).to eq master_count_before
     end
   end
+
+  # Validates that the YAML rendered by AdminApiDefinitionsHelper#api_save_trigger_example
+  # for a dynamic model, an activity log, and an external identifier is actually usable —
+  # i.e. that the information shown to an administrator in the "Save Trigger Usage" panel
+  # really does perform the documented GET and POST when its placeholders are filled in
+  # and it is fed to SaveTriggers::PullExternalData.
+  context 'rendered admin API panel save trigger example' do
+    include AdminApiDefinitionsHelper
+
+    AL_TABLE_NAME = 'activity_log_player_contact_api_panel_trigger_test_emails'
+    AL_RESOURCE_NAME = :activity_log__player_contact_api_panel_trigger_test_emails
+    EI_NAME = 'test_api_panel_ext_ids'
+    EI_ATTR = 'test_api_panel_ext_id'
+
+    before(:all) do
+      # --- Activity log setup ---
+      # AL definition auto-migrates its table because AllowDynamicMigrations is set above.
+      setup_access :player_contacts, user: @user
+      @parent_player_contact = @master.player_contacts.create!(
+        data: '(617)555-7777', source: 'nfl', rank: 10, rec_type: 'phone',
+        current_user: @user
+      )
+
+      @al = ActivityLog.where(item_type: 'player_contact', rec_type: nil,
+                              process_name: 'api_panel_trigger_test_email').first
+      @al ||= ActivityLog.create!(
+        current_admin: @admin,
+        name: AL_TABLE_NAME,
+        item_type: 'player_contact',
+        rec_type: nil,
+        process_name: 'api_panel_trigger_test_email',
+        schema_name: SCHEMA_NAME,
+        action_when_attribute: 'data',
+        field_list: 'data select_call_direction',
+        blank_log_field_list: 'data select_call_direction'
+      )
+      @al.update_tracker_events
+
+      # `add_model_to_list` (which registers AL extra_log_type resources in
+      # Resources::Models) runs in the after_commit chain via `other_regenerate_actions`,
+      # which doesn't fire under transactional fixtures. Invoke the regeneration
+      # chain explicitly so the implementation class and option_config resources
+      # are registered before `setup_access` runs.
+      ActivityLog.define_models
+      @al.force_regenerate = true
+      @al.generate_model
+      @al.add_master_association
+      @al.add_user_access_controls(force: true, app_type: @user.app_type)
+      @al.other_regenerate_actions
+      ActivityLog.reset_active_model_configurations!
+      ActivityLog.reset_all_option_configs_resource_names!
+      @al_impl_class = @al.implementation_class
+      expect(@al_impl_class).to be_present
+
+      setup_access AL_RESOURCE_NAME, user: @user
+      @al.option_configs.each do |c|
+        setup_access c.resource_name, resource_type: :activity_log_type, user: @user
+      end
+
+      ActivityLog.routes_load
+
+      @al_target_record = @al_impl_class.create!(
+        master: @master,
+        current_user: @user,
+        player_contact_id: @parent_player_contact.id,
+        data: 'al panel get target',
+        select_call_direction: 'to staff'
+      )
+      expect(@al_target_record).to be_persisted
+
+      # --- External identifier setup ---
+      # EI definition auto-migrates its table because AllowDynamicMigrations is set above.
+      @ei = ExternalIdentifier.where(name: EI_NAME).first
+      @ei ||= ExternalIdentifier.create!(
+        current_admin: @admin,
+        name: EI_NAME,
+        label: 'API Panel External IDs',
+        external_id_attribute: EI_ATTR,
+        schema_name: SCHEMA_NAME,
+        min_id: 1_000_000,
+        max_id: 9_999_999,
+        prevent_edit: false
+      )
+
+      setup_access EI_NAME.to_sym, user: @user
+
+      @ei.other_regenerate_actions if @ei.respond_to?(:other_regenerate_actions)
+      ExternalIdentifier.define_models
+      ExternalIdentifier.routes_load
+
+      @ei_impl_class = @ei.implementation_class
+      # Use master-id-derived value to keep uniqueness across spec reruns
+      # (external identifier table persists outside of transactional fixtures).
+      @ei_get_value = 5_000_000 + (@master.id * 10)
+      @ei_post_value = @ei_get_value + 1
+      @ei_target_record = @ei_impl_class.create!(
+        master: @master,
+        current_user: @user,
+        EI_ATTR => @ei_get_value
+      )
+      expect(@ei_target_record).to be_persisted
+    end
+
+    #
+    # Render the helper's save trigger YAML for the given definition, substitute all
+    # template placeholders with real values, and parse to a Ruby hash.
+    #
+    # @param definition [DynamicModel, ActivityLog, ExternalIdentifier]
+    # @param item_id [Integer] the value to substitute for {{constants.item_id}}
+    # @return [Hash] parsed YAML config
+    def render_resolved_save_trigger_yaml(definition, item_id:)
+      yaml_str = api_save_trigger_example(definition)
+
+      # Placeholders referenced inside _constants: lines (which are unquoted, so we
+      # substitute them before YAML parsing) and inside the URLs.
+      subs = {
+        '{{base_url}}' => server_url,
+        '{{user_email}}' => @user.email,
+        '{{app_type_id}}' => @user.app_type_id.to_s,
+        '{{api_token}}' => @user_authentication_token,
+        '{{constants.api_user_email}}' => @user.email,
+        '{{constants.api_app_type}}' => @user.app_type_id.to_s,
+        '{{constants.api_shared_secret}}' => @user_authentication_token,
+        '{{constants.master_id}}' => @master.id.to_s,
+        '{{constants.item_id}}' => item_id.to_s,
+        '{{master_id}}' => @master.id.to_s,
+        '{{item_id}}' => item_id.to_s,
+        '{master_id}' => @master.id.to_s,
+        '{item_id}' => item_id.to_s
+      }
+      subs.each { |k, v| yaml_str = yaml_str.gsub(k, v) }
+
+      YAML.safe_load(yaml_str)
+    end
+
+    #
+    # Extract the individual pull_external_data action configs (get_record, create_record)
+    # from a parsed save trigger YAML hash, in a form ready to pass to
+    # SaveTriggers::PullExternalData.new.
+    #
+    # @return [Array<Hash>] symbolized action configs
+    def pull_external_data_actions(parsed)
+      on_create = parsed.dig('default', 'save_trigger', 'on_create') || []
+      on_create
+        .flat_map { |step| step['pull_external_data'] || [] }
+        .map(&:deep_symbolize_keys)
+    end
+
+    shared_examples 'a usable rendered save trigger panel' do
+      it 'rendered GET save trigger retrieves the target record' do
+        parsed = render_resolved_save_trigger_yaml(definition, item_id: target_record.id)
+        get_action = pull_external_data_actions(parsed).find { |a| a.key?(:get_record) }
+        expect(get_action).to be_present, 'No get_record action in rendered YAML'
+
+        trigger = SaveTriggers::PullExternalData.new(get_action, trigger_item)
+        trigger.perform
+
+        expect(trigger.response_code).to eq(200),
+                                         "GET returned #{trigger.response_code} for #{definition.class.name}"
+        get_result = trigger_item.save_trigger_results['get_result']
+        expect(get_result).to be_present
+        # The response body is { "<resource_name>" => { record data }, "_control" => {...} }
+        record_data = get_result.values.find { |v| v.is_a?(Hash) && v['id'] }
+        expect(record_data).to be_present
+        expect(record_data['id']).to eq target_record.id
+      end
+
+      it 'rendered POST save trigger creates a new record' do
+        parsed = render_resolved_save_trigger_yaml(definition, item_id: target_record.id)
+        create_action = pull_external_data_actions(parsed).find { |a| a.key?(:create_record) }
+        expect(create_action).to be_present, 'No create_record action in rendered YAML'
+
+        # Helper renders placeholder values ("" / 0) — overlay valid attribute values
+        # so the POST actually creates a valid record. Demonstrates that the wrapping
+        # key generated by api_params_key matches what the controller requires.
+        key_sym = api_params_key(definition).to_sym
+        expect(create_action[:create_record][:post_data]).to have_key(key_sym)
+        create_action[:create_record][:post_data][key_sym] =
+          create_action[:create_record][:post_data][key_sym].merge(valid_post_overrides)
+
+        # Helper now sets method: post explicitly; sanity-check that it survived parsing
+        expect(create_action[:create_record][:method].to_s).to eq('post')
+
+        # Materialize trigger_item BEFORE capturing count so the count reflects
+        # post-creation state (avoids off-by-one).
+        ti = trigger_item
+        initial_count = impl_class.where(master_id: @master.id).count
+
+        trigger = SaveTriggers::PullExternalData.new(create_action, ti)
+        trigger.perform
+
+        expect(trigger.response_code).to eq(200),
+                                         "POST returned #{trigger.response_code} for #{definition.class.name}"
+        create_result = trigger_item.save_trigger_results['create_result']
+        expect(create_result).to be_present
+        created_data = create_result.values.find { |v| v.is_a?(Hash) && v['id'] }
+        expect(created_data).to be_present
+        expect(impl_class.where(master_id: @master.id).count).to eq(initial_count + 1)
+      end
+    end
+
+    context 'dynamic model panel' do
+      let(:definition) { @dm }
+      let(:impl_class) { @impl_class }
+      let(:target_record) { @target_record }
+      let(:trigger_item) do
+        @impl_class.create!(current_user: @user, master: @master,
+                            name: 'dm panel trigger', description: 'dm panel trigger')
+      end
+      let(:valid_post_overrides) do
+        { name: 'dm panel api created', description: 'created from rendered panel YAML' }
+      end
+
+      it_behaves_like 'a usable rendered save trigger panel'
+    end
+
+    context 'activity log panel' do
+      let(:definition) { @al }
+      let(:impl_class) { @al_impl_class }
+      let(:target_record) { @al_target_record }
+      let(:trigger_item) do
+        @al_impl_class.create!(master: @master, current_user: @user,
+                               player_contact_id: @parent_player_contact.id,
+                               data: 'al panel trigger',
+                               select_call_direction: 'to staff')
+      end
+      # Override fields rendered with placeholder values so the AL record is valid.
+      # player_contact_id must point to a real parent item; extra_log_type is left
+      # blank (treated as blank_log) since no extra log types are configured.
+      let(:valid_post_overrides) do
+        { player_contact_id: @parent_player_contact.id,
+          data: 'al panel api created',
+          select_call_direction: 'to player' }
+      end
+
+      it_behaves_like 'a usable rendered save trigger panel'
+    end
+
+    context 'external identifier panel' do
+      let(:definition) { @ei }
+      let(:impl_class) { @ei_impl_class }
+      let(:target_record) { @ei_target_record }
+      let(:trigger_item) do
+        @ei_impl_class.create!(master: @master, current_user: @user, EI_ATTR => @ei_get_value + 2)
+      end
+      let(:valid_post_overrides) do
+        { EI_ATTR.to_sym => @ei_post_value }
+      end
+
+      it_behaves_like 'a usable rendered save trigger panel'
+    end
+  end
 end
