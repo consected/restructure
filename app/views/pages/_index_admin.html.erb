@@ -28,15 +28,9 @@
   <div class="panel-body">
     <div class="row">
       <div class="col-sm-6">
-        <% begin %>        
-        <%= Rails.cache.fetch(partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) { render partial: 'admin/app_types/components' } %>
-        <% rescue StandardError => e
-            logger.warn 'Failed to load admin components panel'
-            logger.warn e
-            logger.warn e.backtrace.join("\n")
-        %>
-        <p>Failed to load components</p>
-        <% end %>
+        <div class="admin-components-lazy-panel"
+             data-lazy-url="<%= components_panel_admin_app_types_path %>">
+        </div>
       </div>
       <div class="col-sm-17 col-sm-offset-1">
         <%= render partial: 'pages/admin_alerts_panel' %>            
