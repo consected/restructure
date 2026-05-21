@@ -305,8 +305,10 @@ module Dynamic
         app_type = Admin::AppType.find_active_by_name_or_id(app_type) if app_type
         if user
           user = User.find_active_by_email_or_id(user)
-          user.app_type = app_type if app_type
-          user.save
+          if app_type && user.app_type != app_type
+            user.app_type = app_type 
+            user.save
+          end
         elsif app_type
           user = User.use_batch_user(app_type)
         end
