@@ -83,6 +83,10 @@
     <div class="custom-editor-viewer">
       <div class="notes-text">{{{markdown_html value}}}</div>
     </div>
+    {{else is (get template_config 'field_options' key 'format') 'plain'}}
+      <div class="notes-text">
+        {{pretty_string value return_string="true"}}
+      </div>
     {{else is (fpa_state_item 'app_configs' 'notes_field_format') 'markdown'}}
     <div class="custom-editor-viewer">
       <div class="notes-text">{{{markdown_html value}}}</div>
