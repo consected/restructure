@@ -4,7 +4,8 @@
 # Covers notification trigger configuration parsing, role/user setup, message creation,
 # template substitutions, conditional actions, return_value_list references,
 # calendar invite integration (#953), NfsStore file attachment config parsing (#954),
-# inline data URI image conversion (#1148), and literal/template/array phones+emails (#1152).
+# inline data URI image conversion (#1148), literal/template/array phones+emails (#1152),
+# and config app_type for role lookup + error message improvements (#1172).
 
 require 'rails_helper'
 
@@ -20,7 +21,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
     ud, = create_user
     ud.disable!
-    u0, = create_user
+    @u0, = create_user
     u1, = create_user
     create_user
     let_user_create :player_contacts
@@ -50,8 +51,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test_2', current_admin: @admin
 
-    at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
-    Admin::UserRole.create! app_type: at2, user: u0, role_name: 'test', current_admin: @admin
+    @at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
+    Admin::UserRole.create! app_type: @at2, user: @u0, role_name: 'test', current_admin: @admin
 
     # The number of roles is one more than we added due to automatic setup of a template@template item
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
@@ -1168,5 +1169,71 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       @trigger.perform
       expect(@trigger.instance_variable_get(:@force_emails)).to eq(['dynamic@example.com', 'static@example.com'])
     end
+  end
+
+  it 'uses config app_type for role lookup when app_type is specified in config - issue #1172' do
+    # @u0 has the 'test' role only in @at2 (not in @user.app_type)
+    # @user has the 'test' role only in @user.app_type (not in @at2)
+    # With app_type: @at2.id in config, the trigger should look up roles in @at2,
+    # not in @user.app_type (the current user's app type).
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: @at2.id,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    # @u0 has role 'test' in @at2, so must be a recipient
+    expect(@trigger.receiving_user_ids).to include(@u0.id)
+    # @user has role 'test' in @user.app_type (not @at2), so must NOT be a recipient
+    expect(@trigger.receiving_user_ids).not_to include(@user.id)
+  end
+
+  it 'includes current user and app type ID in no-recipients error message - issue #1172' do
+    # The error message for missing recipients should identify which user and app type
+    # were used for the role lookup so the problem can be diagnosed.
+    config = {
+      type: 'email',
+      role: 'nonexistent-role-xyz',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    error_msg = @al.save_trigger_results['notify_errors'].last
+    expect(error_msg).to include(@user.email)
+    expect(error_msg).to include(@user.app_type.id.to_s)
+  end
+
+  it 'stores resolved app_type and user on the MessageNotification record when config app_type is specified - issue #1172' do
+    # When app_type and user are specified in the config, the MessageNotification record should
+    # be associated with the configured app_type (not the triggering user's app_type),
+    # and the user should be the alt_batch_user (@u0) resolved from the config.
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: @at2.id,
+      user: @u0.email,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    new_mn = MessageNotification.order(id: :desc).first
+    # The notification's app_type should be the configured @at2, not @user.app_type
+    expect(new_mn.app_type).to eq @at2
+    # The user on the notification should be @u0 (the resolved alt_batch_user), not the triggering @user
+    expect(new_mn.user.id).to eq @u0.id
   end
 end
