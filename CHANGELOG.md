@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.9] - 2026-05-22
+
 - [Merged] release 9.44.8 back to develop
 - [Added] tracking for Redcap DataRecords requested options and skipped files - fixes #1143
 - [Improved] NFS container error messaging and mkdir test return value - refs #1155
