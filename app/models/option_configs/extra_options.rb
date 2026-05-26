@@ -134,8 +134,11 @@ module OptionConfigs
         # Collect config errors/warnings from field-keyed config instances
         collect_field_config_errors
 
-        # Handle config_obj mutation for db_configs (extracted from clean_db_configs_def)
-        if config_obj.respond_to?(:db_columns) && config_obj.db_columns.blank?
+        # Handle config_obj mutation for db_configs (extracted from clean_db_configs_def).
+        # Guard against nil db_columns: option_type_config_for may instantiate
+        # ExtraOptions directly with config_obj where db_columns has not been
+        # assigned by parse_config (e.g. boot-time synthesized empty defaults).
+        if config_obj.respond_to?(:db_columns) && config_obj.db_columns && config_obj.db_columns.blank?
           config_obj.db_columns.merge!(db_configs.symbolize_keys)
         end
 
