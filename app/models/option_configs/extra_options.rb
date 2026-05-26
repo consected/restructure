@@ -12,7 +12,7 @@ module OptionConfigs
     ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
     # Top-level YAML keys in libraries that must be renamed to avoid collisions when injected
-    LibraryKeyRenamePatterns = %w[_definitions _default].freeze
+    LibraryKeyRenamePatterns = %w[_definitions _default _constants _configurations].freeze
     ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
     def self.base_key_attributes
@@ -630,7 +630,7 @@ module OptionConfigs
       config_obj.table_comments = loaded_config.delete(:_comments)
       config_obj.db_columns = loaded_config.delete(:_db_columns)
       config_obj.data_dictionary = loaded_config.delete(:_data_dictionary)
-      config_obj.options_constants = loaded_config.delete(:_constants)
+      config_obj.options_constants = options_based_on_keys_stating_with('_constants', loaded_config)
 
       # Definitions '_definitions...' are only used by YAML for the definition of anchors
       # and so will already by incorporated into the relevant configurations.
@@ -702,11 +702,18 @@ module OptionConfigs
       return nil unless loaded_config.is_a?(Hash) && loaded_config.present?
 
       # Remove internal keys that are not part of the option type configurations,
-      # matching the cleanup in parse_config. Keys like _default, _merge_default,
-      # _merge_override and _override are retained for handle_defaults_merges_overrides.
-      %i[_comments _db_columns _data_dictionary _constants].each { |k| loaded_config.delete(k) }
+      # matching the cleanup in parse_config.
+      # _comments, _db_columns, _data_dictionary are deleted directly.
+      # _definitions (and _definitions__xxx from libraries) are deleted by prefix.
+      # _constants and _configurations (and their library-prefixed variants) are consumed
+      #   by options_based_on_keys_stating_with — return values discarded as they are not
+      #   needed here; the calls are made only to strip those keys from loaded_config.
+      # Keys like _default, _merge_default, _merge_override and _override are retained
+      #   for handle_defaults_merges_overrides below.
+      %i[_comments _db_columns _data_dictionary].each { |k| loaded_config.delete(k) }
       loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
       options_based_on_keys_stating_with('_configurations', loaded_config)
+      options_based_on_keys_stating_with('_constants', loaded_config)
 
       hash_results = {}
       handle_defaults_merges_overrides(config_obj, loaded_config, hash_results:)
