@@ -13,6 +13,12 @@
   _fpa.state.action_name = _fpa.state.action_name || '<%=action_name%>';
   _fpa.state.template_version = '<%=template_version%>';
   _fpa.state.rails_env = '<%=Rails.env%>';
+  // Indicate whether the current request is being served as an admin page
+  // (admin controller namespace, the redirect-to-admin-panel index, or any
+  // request under /admin/). The front-end uses this to avoid blocking the
+  // page with the main template "loading..." splash guard whilst the
+  // (large, slow) main template loads in the background. See issue #1181.
+  _fpa.state.is_admin_page = <%= (admin_or_user_class == 'admin_page').to_s %>;
   <% if current_user %>
   _fpa.state.app_configs = <%= Admin::AppConfiguration.all_for(current_user).to_json.html_safe %>;
   _fpa.state.current_user_roles = <%= current_user.app_type ? current_user.role_names.to_json.html_safe : [] %>;
