@@ -45,7 +45,7 @@ class Admin::ReportsController < AdminController
   end
 
   def filters
-    { item_type: Report.categories.map { |g| [g, g.to_s] }.to_h }
+    { item_type: Report.categories.to_h { |g| [g, g.to_s] } }
   end
 
   def editor_code_type
@@ -70,10 +70,13 @@ class Admin::ReportsController < AdminController
   attr_reader :embedded_report
 
   def search_attrs_params_hash
+    # Plain Hash used only for report runner query parameter binding.
+    # Use to_unsafe_h instead of permit! so the params object itself is
+    # not marked permitted (avoiding any accidental mass-assignment).
     @search_attrs_params_hash ||= if params[:search_attrs].blank?
                                     { _use_defaults_: '_use_defaults_' }
                                   else
-                                    params.require(:search_attrs).permit!.to_h.dup
+                                    params.require(:search_attrs).to_unsafe_h.dup
                                   end
   end
 end
