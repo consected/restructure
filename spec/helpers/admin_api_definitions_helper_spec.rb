@@ -5,7 +5,14 @@
 # Tests helper methods for generating API documentation in admin definition panels.
 # Verifies that the correct REST API endpoints, curl examples, field definitions,
 # save trigger YAML, and report-specific curl/save trigger YAML are generated for
-# dynamic models, activity logs, external identifiers, and reports.
+# dynamic models, activity logs, external identifiers, reports, and standard master
+# record models (Admin::MasterRecord - issue #1183).
+#
+# Issue #1183: clicking the API tab for a non-masters entry in /admin/master_records
+# raised "undefined method 'full_item_type_name' for an instance of Admin::MasterRecord"
+# because the generic api_panel partial (and AdminApiDefinitionsHelper#api_params_key)
+# called full_item_type_name which was missing from Admin::MasterRecord. These specs
+# verify that all helper methods work correctly with Admin::MasterRecord instances.
 
 require 'rails_helper'
 
@@ -483,6 +490,63 @@ RSpec.describe AdminApiDefinitionsHelper, type: :helper do
       key = helper.api_params_key(ei)
       expect(key).not_to include('__')
       expect(key).to eq(ei.implementation_model_name)
+    end
+
+    it 'returns the singular table name for Admin::MasterRecord (issue #1183)' do
+      record = Admin::MasterRecord.find(2) # player_infos
+      key = helper.api_params_key(record)
+      expect(key).to eq(Settings::DefaultSubjectInfoTableName.singularize)
+      expect(key).not_to include('__')
+    end
+
+    it 'does not raise an error when called with Admin::MasterRecord (issue #1183)' do
+      Admin::MasterRecord.all.each do |record|
+        expect { helper.api_params_key(record) }.not_to raise_error
+      end
+    end
+  end
+
+  describe 'Admin::MasterRecord support in API helpers (issue #1183)' do
+    let(:player_info_record) { Admin::MasterRecord.find(2) }
+
+    it 'api_base_path generates a master-nested path for player_infos' do
+      path = helper.api_base_path(player_info_record)
+      expect(path).to start_with('/masters/{{master_id}}/')
+      expect(path).to include(Settings::DefaultSubjectInfoTableName)
+    end
+
+    it 'api_endpoints generates the 4 standard endpoints for a master record model' do
+      endpoints = helper.api_endpoints(player_info_record)
+      expect(endpoints.length).to eq(4)
+      methods = endpoints.map { |e| e[:method] }
+      expect(methods).to eq(%w[GET GET POST PUT])
+    end
+
+    it 'api_fields excludes standard fields for a master record model' do
+      fields = helper.api_fields(player_info_record)
+      field_names = fields.map { |f| f[:name] }
+      expect(field_names).not_to include('id', 'created_at', 'updated_at', 'master_id')
+      expect(fields).to be_an Array
+    end
+
+    it 'api_sample_json_body does not raise an error for Admin::MasterRecord' do
+      expect { helper.api_sample_json_body(player_info_record) }.not_to raise_error
+    end
+
+    it 'api_sample_json_body wraps fields under the singular table name key' do
+      body = helper.api_sample_json_body(player_info_record)
+      key = player_info_record.table_name.singularize
+      parsed = JSON.parse(body)
+      expect(parsed.keys).to eq([key])
+    end
+
+    it 'api_save_trigger_example does not raise an error for Admin::MasterRecord' do
+      expect { helper.api_save_trigger_example(player_info_record) }.not_to raise_error
+    end
+
+    it 'api_save_trigger_example includes the correct base path for player_infos' do
+      yaml = helper.api_save_trigger_example(player_info_record)
+      expect(yaml).to include("/masters/{{master_id}}/#{Settings::DefaultSubjectInfoTableName}")
     end
   end
 
