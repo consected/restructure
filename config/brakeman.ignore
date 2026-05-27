@@ -58,29 +58,6 @@
       "note": ""
     },
     {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "1b8bbec4741095cdf990baadb1ad6bc4901a6b8eafcf5536f15017d2e4cb161a",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/controllers/admin/reports_controller.rb",
-      "line": 79,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.require(:search_attrs).permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::ReportsController",
-        "method": "search_attrs_params_hash"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "1ef406f7ae232b6060832fc9f74de3c73debb32b49384ef77a63c8e5338379b0",
@@ -196,29 +173,6 @@
       "note": ""
     },
     {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "2784ca78e0e2edce2a830bf31905df4ea527922a540481ffa3440208782b5cdf",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/controllers/concerns/master_handler.rb",
-      "line": 205,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MasterHandler",
-        "method": "index_cache_key"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "2edb9849da815c5c992a7078fb2d38ceb39da72ed7f57d9ceb14aed24c43adaf",
@@ -295,75 +249,6 @@
       "confidence": "Weak",
       "cwe_id": [
         22
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "3de79f153616490b025e39ad6ef2724f9a202fcd8eb4612a5ee2e48603b5eff6",
-      "check_name": "SendFile",
-      "message": "Parameter value used in file name",
-      "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 43,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download_or_view or :download))))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::DownloadsController",
-        "method": "show"
-      },
-      "user_input": "params[:retrieval_type]",
-      "confidence": "Weak",
-      "cwe_id": [
-        22
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "400bb8ca8aa70318439abf6184505d97492cb3d1709f6acb834ee013df71dbee",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/app_type.rb",
-      "line": 244,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "Classification::GeneralSelection.active.where(\"item_type ~ '#{\"^(#{associated_table_names.map do\n \"#{tn.singularize}_|#{tn}_\"\n end.join(\"|\")})\"}'\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "AppType",
-        "method": "associated_general_selections"
-      },
-      "user_input": "associated_table_names.map do\n \"#{tn.singularize}_|#{tn}_\"\n end.join(\"|\")",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "4175d525dd3543dcab5b9c3e569d9f4676238aa0e39ea4193bf55958c10aeb99",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/controllers/reports_controller.rb",
-      "line": 471,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.require(:search_attrs).permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ReportsController",
-        "method": "search_attrs_params_hash"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
       ],
       "note": ""
     },
@@ -475,52 +360,6 @@
       "confidence": "Medium",
       "cwe_id": [
         79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "636708f4c9842c831cfbeb696abb245d35c8fe414d9edec6b91f4b016c77fff0",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/controllers/masters_controller.rb",
-      "line": 194,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.except(:utf8, :controller, :action).permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "MastersController",
-        "method": "search_params"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "686be0b9f9abcfcccb4ddda23612008a4c5e60782c05002d3acb5bb5e7a7442c",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/controllers/reports_controller.rb",
-      "line": 460,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ReportsController",
-        "method": "set_search_attrs"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
       ],
       "note": ""
     },
