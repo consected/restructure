@@ -218,7 +218,7 @@ module Reports
     def substitute_current_user(sql)
       cur = current_user&.user_roles&.active&.pluck(:role_name)
       if cur
-        curtxt = cur.map { |r| "'#{r}'" }.join(',')
+        curtxt = cur.map { |r| Report.connection.quote(r) }.join(',')
         curtxt = "array[#{curtxt}]"
       end
 
