@@ -1,3 +1,5 @@
+$admin_background_well: rgb(245, 245, 245);
+
 .admin-index-page,
 .admin-user-index-page {
   border-color: silver;
@@ -23,7 +25,7 @@
 }
 
 .admin-edit-form .well {
-  background: rgb(245, 245, 245);
+  background: $admin_background_well;
 }
 
 a>.caret {
@@ -398,4 +400,15 @@ a.link-disabled {
 
 .model_generators.index .col-sm-12.admin-form__left-aligned {
   min-width: 800px;
+}
+
+.admin-components-lazy-panel {
+  .admin-components-lazy-panel__loading {
+    min-height: 500px;
+    background-color: $admin_background_well;
+    padding: 20px;
+    font-style: italic;
+    color: gray;
+    width: auto;
+  }
 }

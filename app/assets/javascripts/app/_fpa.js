@@ -1509,6 +1509,14 @@ _fpa = {
     if (current_user || current_admin) {
 
       if (current_user && current_user.app_type_id && !(controller_name == 'app_types' && action_name == 'upload')) {
+        // On admin pages the main template can be very large and slow to
+        // compile, but the admin UI does not actually depend on it. Load it
+        // in the background and immediately mark templates as loaded so the
+        // "loading..." splash guard is removed as soon as the HTML is ready.
+        // See issue #1181.
+        if (_fpa.state.is_admin_page) {
+          _fpa.status.loaded_templates = true;
+        }
         _fpa.load_template_version(_fpa.state.template_version, _fpa.state.rails_env);
 
 
