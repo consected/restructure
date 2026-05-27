@@ -1,34 +1,84 @@
 <%
+  # Render a single outer collapsible panel containing all resources listed in
+  # `panel.contains.resources`. Mirrors the contains.categories pattern – the
+  # tab rendered by masters/_search_results_master_tabs_resources toggles this
+  # outer collapse, and each resource produces an inner block (always visible
+  # inside the outer panel) plus a hidden loader anchor that fires the
+  # AJAX list fetch via the existing Rails UJS / Handlebars pipeline.
+  #
+  # Loader anchors are clicked the first time the outer panel is opened
+  # (handled by JS in page_layouts.js on show.bs.collapse). Initial-show
+  # panels open via the existing `on-open-click` tab auto-click in
+  # _fpa.form_utils.on_open_click, which triggers the same path.
+  #
+  # Backwards-compatibility: single-resource panels render exactly one inner
+  # resource block + one loader anchor inside the outer container, preserving
+  # the user-visible behaviour of the previous per-resource-tab design.
+
+  panel_name = panel.panel_name
+  panel_label = panel.panel_label
   resources = panel.contains.resources
-  init_visible = panel.view_options.initial_show || nil if panel.view_options
   default_expander = panel.view_options&.default_expander
   hide_sl_class = 'hide-sublist-controls' if panel.view_options&.hide_sublist_controls
   hide_al_header_class = 'hide-activity-logs-header' if panel.view_options&.hide_activity_logs_header
-  resources.each do |resource|
-    if master_viewables[resource.to_sym]
-      rs = resource.split('__', 2)
-      if rs.length == 2
-        resource_type = rs.first.hyphenate.pluralize
-      else
-        resource_type = 'details'
-      end
-      block_id = "#{resource.hyphenate}-{{id}}"
-      view_css = panel.view_css
-      outer = "##{block_id}"
-%>
-    <%= render partial: 'reports/insert_options_css', locals: {outer: outer, view_css: view_css} %>
-    <div id="<%= block_id %>" 
-         class="<%= resource_type %>-generic-block <%= resource.hyphenate %>-block collapse <%=hide_sl_class%> <%=hide_al_header_class%>"
-         data-sub-for-root="master_id"
-         data-sub-id="{{id}}"
-         data-sub-item="<%= resource %>"
-         data-template="<%= resource.hyphenate %>-main-result-template"
-         data-default-expander="<%= default_expander %>"
-    >
-        <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= resource_type %>-inner-block">
-        </div>
-    </div>
-<%
-    end
+  view_css = panel.view_css
+  limit = (panel.view_options&.limit || 20).to_i
+
+  renderable = resources.each_with_object([]) do |resource, memo|
+    next unless master_viewables[resource.to_sym]
+
+    info = resource_render_info(resource, context: :master_panel)
+    next unless info
+
+    memo << [resource, info]
   end
 %>
+<% if renderable.any? %>
+  <% outer = "##{panel_name}-{{id}}" %>
+  <%= render partial: 'reports/insert_options_css', locals: { outer: outer, view_css: view_css } %>
+  <div id="<%= panel_name %>-{{id}}"
+       class="panel panel-default section-panel page-layout-panel contains-resources collapse <%= panel_name %>-block format-block-on-expand <%= hide_sl_class %> <%= hide_al_header_class %>">
+    <div class="is-header default-header section-panel-header">
+      <% unless hide_player_tabs? %>
+        <a href="#<%= panel_name %>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity btn-close-panel" title="close panel"></a>
+      <% end %>
+      <h4 class="list-group-item-heading panel-heading--<%= panel_label.to_s.id_hyphenate %>"><%= panel_label %></h4>
+    </div>
+    <%# Hidden loader anchors – one per resource – are picked up by
+        _fpa.form_utils.on_open_click when the master record is expanded
+        (called from the search_results_template postprocessor). This is the
+        same mechanism used by the standard master_external_ids_panel to
+        lazily fetch each resource's list via Rails UJS and render it
+        through the data-template Handlebars pipeline. %>
+    <div class="on-open-click hidden">
+      <% renderable.each do |resource, render_info|
+           block_id = "#{resource.hyphenate}-{{id}}"
+           route_path = render_info[:route_path]
+           template_name = render_info[:template_name] %>
+        <a href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %>"
+           data-remote="true"
+           data-result-target="#<%= block_id %>"
+           data-template="<%= template_name %>"
+           data-panel-tab="<%= resource %>"
+           class="contains-resources-loader contains-resources-loader--<%= resource.hyphenate %>"
+           aria-hidden="true"
+           tabindex="-1">load <%= resource %></a>
+      <% end %>
+    </div>
+    <% renderable.each do |resource, render_info|
+         block_id = "#{resource.hyphenate}-{{id}}"
+         inner_block_class = render_info[:wrapper_class].gsub('generic-block', 'inner-block')
+         template_name = render_info[:template_name] %>
+      <div id="<%= block_id %>"
+           class="<%= render_info[:wrapper_class] %> <%= resource.hyphenate %>-block"
+           data-sub-for-root="master_id"
+           data-sub-id="{{id}}"
+           data-sub-item="<%= resource %>"
+           data-template="<%= template_name %>"
+           data-default-expander="<%= default_expander %>">
+        <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= inner_block_class %>">
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
