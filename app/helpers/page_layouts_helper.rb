@@ -41,6 +41,61 @@ module PageLayoutsHelper
   end
 
   #
+  # Resolve per-resource rendering metadata for a given resource name.
+  # Returns a hash with resource_name, template_name, route_path, wrapper_class, and viewable_key,
+  # or nil if the resource name cannot be resolved.
+  # @param [String] resource_name - the resource name to resolve (e.g. 'activity_log__case_reviews')
+  # @param [Symbol] context - :master_panel or :standalone_page
+  # @param [String|nil] template_prefix - explicit template prefix override (e.g. 'page-'), or nil to use
+  #   the resource-type default: activity log → '<suffix>-result-template', others → '-list-template'
+  # @return [Hash, nil]
+  def resource_render_info(resource_name, context:, template_prefix: nil)
+    model = Resources::Models.find_by(resource_name: resource_name)
+    model ||= Resources::Models.find_by(resource_item_name: resource_name.to_sym)
+
+    unless model
+      Rails.logger.warn "resource_render_info: could not resolve resource '#{resource_name}'"
+      return nil
+    end
+
+    type = model[:type]
+
+    # Handlebars templates are registered using the full, namespaced, pluralised
+    # resource name with underscores replaced by hyphens (e.g.
+    # `activity-log--case-reviews-main-result-template`, `dynamic-model--contact-infos-list-template`,
+    # `scantron-ids-list-template`). Use the resource name itself (not the
+    # stripped singular `hyphenated_name` from Resources::Models) to align with
+    # the names produced by handlebars_template_tag in the search-results partials.
+    resource_hyph = resource_name.to_s.hyphenate
+
+    template_name = if !template_prefix.nil?
+                      "#{resource_hyph}-#{template_prefix}result-template"
+                    elsif %i[activity_log activity_log_type].include?(type)
+                      # Activity logs use a context-dependent suffix:
+                      # master panels → -main-result-template; standalone pages → -page-result-template
+                      suffix = context == :master_panel ? 'main' : 'page'
+                      "#{resource_hyph}-#{suffix}-result-template"
+                    else
+                      # Dynamic models and external identifiers use the plural list template
+                      "#{resource_hyph}-list-template"
+                    end
+
+    wrapper_class = case type
+                    when :dynamic_model then 'dynamic-model-generic-block'
+                    when :external_identifier then 'external-id-generic-block'
+                    else 'activity-logs-generic-block'
+                    end
+
+    {
+      resource_name: resource_name,
+      route_path: model[:base_route_segments],
+      template_name: template_name,
+      wrapper_class: wrapper_class,
+      viewable_key: resource_name.to_sym
+    }
+  end
+
+  #
   # Format active sublist values for Handlebars template rendering.
   # Converts arrays to comma-separated strings for use with the 'in' operator.
   # @param [Array|String|nil] values - array of values, 'all' string, or nil
@@ -49,7 +104,7 @@ module PageLayoutsHelper
     return '' if values.nil?
     return 'all' if values == 'all'
     return 'none' if values.is_a?(Array) && values.empty?
-    return values.map(&:to_s).join(',') if values.is_a?(Array)
+    return values.join(',') if values.is_a?(Array)
 
     values.to_s
   end

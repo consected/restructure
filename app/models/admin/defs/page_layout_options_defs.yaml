@@ -14,8 +14,15 @@ contains:
     - external-ids    # all available external identifiers
     - external-links  # defined external links for a master record
   resources:
-    # a single or array of named resources (model names)
-    - activity_log__player_contact_phones
+    # a single or array of named resources (model names).
+    # Three resource-name forms are supported and may be mixed within a single panel:
+    #   activity log:          activity_log__<plural_table_name>
+    #   dynamic model:         dynamic_model__<plural_table_name>
+    #   external identifier:   <plural_table_name>  (bare plural, no namespace prefix)
+    # Examples:
+    - activity_log__case_reviews        # activity log
+    - dynamic_model__contact_infos      # dynamic model
+    - scantron_ids                      # external identifier (bare plural)
     # For user_profile type, these resources may be also defined as hashes
     # allowing a resource name and tab label to be defined
     - label: Date/Time
@@ -141,8 +148,12 @@ container:
       #
       #
       resource:
-        # View a resource list (such as activity logs)
-        name: activity_log__player_contact_phone        # resource name
+        # View a resource list for any supported resource type.
+        # The same three resource-name forms accepted by contains.resources are supported here:
+        #   activity log:        activity_log__<plural_table_name>
+        #   dynamic model:       dynamic_model__<plural_table_name>
+        #   external identifier: <plural_table_name>  (bare plural, no namespace prefix)
+        name: activity_log__player_contact_phone        # resource name (any of the three forms above)
         id: 123     # optional resource id to filter the results on
                     # if missing, the URL params
                     # *filters[resource_id]* will be used (if present)
