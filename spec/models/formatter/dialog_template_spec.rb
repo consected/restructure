@@ -1,5 +1,7 @@
 require 'rails_helper'
 
+# Covers dialog template rendering, versioning, and stored XSS protection for generated dialog HTML.
+
 RSpec.describe Formatter::DialogTemplate, type: :model do
   include ModelSupport
   include PlayerContactSupport
@@ -75,5 +77,19 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
 
     dmsg1 = Formatter::DialogTemplate.generate_message(dt.name, pc1)
     expect(dmsg1).to eq expected_text1
+  end
+
+  it 'raises when dialog content contains dangerous HTML' do
+    seed_database
+    create_user
+    create_master
+    create_item
+
+    dt = Admin::MessageTemplate.create! name: 'dangerous dialog', message_type: :dialog, template_type: :content,
+                                        template: '<script>alert(1)</script>', current_admin: @admin
+
+    expect do
+      Formatter::DialogTemplate.generate_message(dt.name, @player_contact)
+    end.to raise_error(FphsException, /disallowed tag or attribute/)
   end
 end
