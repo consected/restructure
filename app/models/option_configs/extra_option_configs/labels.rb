@@ -9,6 +9,10 @@ module OptionConfigs
     # Values are plain strings keyed by field name.
     # No NamedConfiguration needed — values are simple strings.
     class Labels < BaseConfiguration
+      # Library _default blocks legitimately inject label entries for fields
+      # absent from this particular model. Skip those warnings.
+      lenient_field_key_names!
+
       value_pattern :label_string,
                     description: 'Display label string',
                     match: String

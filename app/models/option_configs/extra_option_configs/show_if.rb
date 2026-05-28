@@ -12,6 +12,14 @@ module OptionConfigs
     class ShowIf < BaseConfiguration
       # No NamedConfiguration — values are arbitrary condition hashes
 
+      # _-prefixed keys are YAML anchor definitions (e.g. _show_v1: &show_v1 ...)
+      # submit_buttons_* keys conditionally show/hide submit buttons
+      extra_keys(/\A_/, /\Asubmit_buttons_/)
+
+      # Library _default blocks legitimately inject show_if entries for fields
+      # absent from this particular model. Skip those warnings.
+      lenient_field_key_names!
+
       value_pattern :condition_hash,
                     description: 'Hash of field conditions',
                     match: Hash
@@ -44,7 +52,7 @@ module OptionConfigs
           end
         end
 
-        raw[Concerns::PatternValidation::VALID_FIELDS_KEY] = parent.fields || [] if raw.is_a?(Hash)
+        raw[Concerns::PatternValidation::VALID_FIELDS_KEY] = build_valid_fields(parent) if raw.is_a?(Hash)
         raw
       end
 

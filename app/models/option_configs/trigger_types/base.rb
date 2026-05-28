@@ -153,7 +153,20 @@ module OptionConfigs
         # Validate keys inside each named entry.
         # @param config [Hash] config hash with arbitrary entry names
         # @return [Array<String>]
+        #
+        # Note: some trigger types (e.g. notify) accept either a named-entry
+        # form (`{ entry_name: { real_keys... } }`) OR a direct-config form
+        # (`{ type:..., role:..., extra_substitutions: {...}, if: {...} }`).
+        # To avoid misclassifying value-hashes (such as the value of
+        # `extra_substitutions` or `if`) as named entries and reporting the
+        # nested keys as unrecognized, auto-detect direct form when any of the
+        # outer keys are themselves declared in @_allowed_keys, and validate
+        # the config directly in that case.
         def validate_named_entries(config)
+          if @_allowed_keys && config.keys.map(&:to_sym).any? { |k| @_allowed_keys.include?(k) }
+            return validate_direct(config)
+          end
+
           warnings = []
           config.each_value do |inner|
             next unless inner.is_a?(Hash)

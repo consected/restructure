@@ -65,6 +65,6 @@
 # Notes:
 # - Each reference entry must be a Hash.
 # - Top-level keys are reference model names; they may be declared in hash form or array form.
-# - without_reference may be true or outside_master.
+# - without_reference may be true, false or outside_master.
 # - order_by applies within one reference definition; view_options.sort_references can reorder across all references.
 # - Only the documented keys in each entry are supported for admin configuration.

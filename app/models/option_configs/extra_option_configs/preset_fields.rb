@@ -7,7 +7,11 @@ module OptionConfigs
     # Extracted from ExtraOptions#clean_preset_fields
     #
     # Values are preset values (strings, hashes, or arrays) keyed by field name.
+    # `with_result` and `with` are top-level directives for attribute-mapping from
+    # related items — they are not field names and must be explicitly allowed.
     class PresetFields < BaseConfiguration
+      extra_keys :with_result, :with
+
       validate :validate_field_key_names
     end
   end

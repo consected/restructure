@@ -221,6 +221,11 @@ module OptionConfigs
     end
 
     def field_has_selection_override?(field_name)
+      # Fields using these naming patterns have implicit selection mechanisms
+      # (role-based user lists or record-from-table lookups) that don't require
+      # a GeneralSelection entry.
+      return true if field_name.to_s.start_with?('select_record_from_', 'select_user_with_role_')
+
       fopts = field_options[field_name.to_sym] if field_options.respond_to?(:[])
       return false unless fopts.respond_to?(:dig)
 

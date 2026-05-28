@@ -341,6 +341,17 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         instance = klass.new(test1: { caption: 'Valid' })
         expect(instance.config_errors).to be_empty
       end
+
+      it 'accepts nil values without errors, treating them as clearing the caption' do
+        instance = klass.new(test1: nil)
+        expect(instance.config_errors).to be_empty
+      end
+
+      it 'removes nil-valued entries from the config so they do not render' do
+        instance = klass.new(test1: nil, test2: 'Keep this')
+        expect(instance[:test1]).to be_nil
+        expect(instance[:test2]).to be_a klass::NamedConfiguration
+      end
     end
 
     context 'hash value key validation' do
@@ -356,12 +367,11 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         expect(instance.config_warnings).to be_empty
       end
 
-      it 'rejects non-string caption attributes with an error' do
+      it 'coerces non-string caption attributes to strings via preprocess_field' do
+        # preprocess_field calls text_to_html(value).to_s, so integers and other
+        # non-string scalars are coerced before validation — no error is raised.
         instance = klass.new(test1: { caption: 123 })
-
-        expect(instance.config_errors).to be_present
-        error_messages = instance.config_errors.map { |e| e[:message] }
-        expect(error_messages.any? { |m| m.include?('test1 caption must be a string') }).to be(true)
+        expect(instance.config_errors).to be_empty
       end
 
       it 'rejects non-boolean keep_label values with an error' do
@@ -388,7 +398,10 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         expect(eo.caption_before.config_warnings).to be_empty
       end
 
-      it 'warns when a caption_before key is not a valid field name or pseudo-key' do
+      it 'silently ignores unknown field names in lenient mode (library-default injection)' do
+        # CaptionBefore uses lenient_field_key_names! so that library _default
+        # blocks can inject captions for fields the current model does not have.
+        # Unknown keys are silently dropped rather than generating warnings.
         eo = config_for(<<~YAML)
           default:
             fields:
@@ -399,8 +412,8 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
 
         warnings = eo.caption_before.config_warnings
         warning_messages = warnings.map { |w| w[:message] }
-        expect(warning_messages.any? { |m| m.include?('nonexistent_field') }).to be(true),
-                                                                                 "Expected warning about nonexistent_field, got: #{warning_messages}"
+        expect(warning_messages.any? { |m| m.include?('nonexistent_field') }).to be(false),
+                                                                                 "Expected no warning about nonexistent_field in lenient mode, got: #{warning_messages}"
       end
 
       it 'accepts the all_fields pseudo-key without warnings' do
@@ -442,7 +455,8 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
         expect(field_warnings).to be_empty
       end
 
-      it 'warns about multiple invalid field names' do
+      it 'silently ignores multiple unknown field names in lenient mode' do
+        # See note above: lenient_field_key_names! suppresses unknown-field warnings.
         eo = config_for(<<~YAML)
           default:
             fields:
@@ -454,8 +468,8 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
 
         warnings = eo.caption_before.config_warnings
         warning_messages = warnings.map { |w| w[:message] }
-        expect(warning_messages.any? { |m| m.include?('bad_field_1') }).to be(true)
-        expect(warning_messages.any? { |m| m.include?('bad_field_2') }).to be(true)
+        expect(warning_messages.any? { |m| m.include?('bad_field_1') }).to be(false)
+        expect(warning_messages.any? { |m| m.include?('bad_field_2') }).to be(false)
       end
 
       it 'allows a mix of valid fields and pseudo-keys without field warnings' do

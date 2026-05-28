@@ -73,6 +73,7 @@ module OptionConfigs
       def setup_named_configurations
         hash_configuration.each do |k, v|
           next if k == Concerns::PatternValidation::VALID_FIELDS_KEY
+          next if k == Concerns::PatternValidation::DECLARED_FIELDS_KEY
 
           add_named_configuration(k.to_sym, v)
         end

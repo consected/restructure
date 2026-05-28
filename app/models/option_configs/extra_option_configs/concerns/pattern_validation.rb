@@ -70,11 +70,21 @@ module OptionConfigs
         extend ActiveSupport::Concern
 
         VALID_FIELDS_KEY = :_valid_fields
+        # Stores the YAML-declared fields list separately so lenient mode can
+        # distinguish library-injected defaults (not declared) from real fields.
+        DECLARED_FIELDS_KEY = :_declared_fields
 
         # Type-checking lambdas for key_type and value_pattern key_types.
         KEY_TYPE_CHECKERS = {
           boolean: ->(v) { [true, false].include?(v) },
+          # Tri-state used by reference entries: accepts true/false or the
+          # special string literal 'outside_master'.
+          boolean_or_outside_master: ->(v) { [true, false, 'outside_master', :outside_master].include?(v) },
           string: ->(v) { v.is_a?(String) || v.is_a?(Symbol) },
+          # Accepts a literal string (including substitution strings like
+          # '{{field_name}}') or a Hash form such as { this: { field: return_value } }
+          # used by field_default-style lookups (e.g. active_value).
+          string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
           string_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
@@ -86,7 +96,9 @@ module OptionConfigs
         # Human-readable descriptions for each type symbol.
         KEY_TYPE_DESCRIPTIONS = {
           boolean: 'true or false',
+          boolean_or_outside_master: "true, false or 'outside_master'",
           string: 'a string',
+          string_or_hash: 'a string (literal or {{substitution}}) or a Hash (e.g. { this: { field: return_value } })',
           string_or_array: 'a string or array of strings',
           integer: 'an integer',
           hash: 'a Hash'
@@ -96,9 +108,21 @@ module OptionConfigs
           class_attribute :_extra_keys, default: []
           class_attribute :_value_patterns, default: {}
           class_attribute :_key_type_rules, default: {}
+          class_attribute :_lenient_field_key_names, default: false
         end
 
         class_methods do
+          # Opt the class in to lenient field key name validation.
+          # In lenient mode, field keys that are neither in the YAML-declared
+          # +fields:+ array nor in the model's DB columns are silently skipped
+          # rather than generating a warning. This is appropriate for display
+          # configuration classes (e.g. CaptionBefore, FieldOptions) where
+          # library +_default+ blocks legitimately inject config for fields
+          # that exist in some models but not others.
+          def lenient_field_key_names!
+            self._lenient_field_key_names = true
+          end
+
           # Declare extra key names or patterns that are valid beyond field names.
           # @param keys [Array<Symbol, Regexp>] exact symbols or regex patterns
           def extra_keys(*keys)
@@ -153,6 +177,10 @@ module OptionConfigs
           # Only injects when the class has registered validate_field_key_names,
           # avoiding pollution of non-field-keyed classes (ViewOptions, Filestore, etc.).
           # Subclasses with custom prepare_config should call super or inject _valid_fields.
+          # The _valid_fields set is enriched with the underlying model's real database
+          # columns (where available) so that audit/FK columns such as
+          # created_by_user_id, master_id and direct table FK references are
+          # accepted even when not declared in the YAML `fields:` array.
           # @param raw [Hash, nil] raw config hash
           # @param parent [ExtraOptions] parent options instance
           # @return [Object] raw config with _valid_fields metadata
@@ -160,8 +188,31 @@ module OptionConfigs
             return raw unless raw.is_a?(Hash)
             return raw unless uses_field_key_validation?
 
-            raw[VALID_FIELDS_KEY] = parent.fields || []
+            raw[VALID_FIELDS_KEY] = build_valid_fields(parent)
+            raw[DECLARED_FIELDS_KEY] = Array(parent.fields).map(&:to_s) if _lenient_field_key_names
             raw
+          end
+
+          # Build the merged list of valid field names for key validation.
+          # Combines the YAML-declared `fields:` array with the implementation
+          # model's real attribute names (audit columns, foreign keys, etc.)
+          # so legitimately existing columns aren't flagged as invalid.
+          # @param parent [ExtraOptions]
+          # @return [Array<String>]
+          def build_valid_fields(parent)
+            declared = Array(parent.fields).map(&:to_s)
+            model_cols =
+              begin
+                co = parent.config_obj
+                if co.respond_to?(:model_class) && co.model_class
+                  co.model_class.attribute_names.map(&:to_s)
+                else
+                  []
+                end
+              rescue StandardError
+                []
+              end
+            (declared + model_cols).uniq
           end
 
           # Whether this class has registered validate_field_key_names in its callbacks.
@@ -171,18 +222,46 @@ module OptionConfigs
           end
         end
 
-        # Check whether a field key matches any declared extra_keys entry.
+        # Globally-allowed field name patterns. These match framework-injected
+        # columns, foreign-key columns and audit columns that legitimately
+        # exist on dynamic-definition tables even when not enumerated in the
+        # YAML `fields:` array. Patterns are applied in addition to the
+        # per-class +extra_keys+ declarations.
+        GLOBAL_FIELD_NAME_ALLOW_PATTERNS = [
+          /_id\z/,                  # any foreign-key or audit *_id column
+          /\Acreated_by_/,          # created_by_user_id, created_by_*
+          /\Aupdated_by_/,          # updated_by_user_id, updated_by_*
+          /\Aplaceholder_/,         # template/UI placeholder fields
+          /\Aembedded_report_/,     # embedded report references
+          /\Areference_/,           # related-record reference fields
+          /\Aq\d+_/,                # framework status cols (q1_status, q2_*, ...)
+          :form_version,
+          :form_type,
+          :form_status,
+          :master_id,
+          :user_id,
+          :extra_log_type
+        ].freeze
+
+        # Check whether a field key matches any declared extra_keys entry,
+        # falling back to the global allow patterns for framework / audit /
+        # foreign-key columns.
         # @param field_name [Symbol] the key to check
         # @return [Boolean]
         def extra_key?(field_name)
-          self.class._extra_keys.any? do |key|
-            key.is_a?(Regexp) ? key.match?(field_name.to_s) : key == field_name
+          matchers = self.class._extra_keys + GLOBAL_FIELD_NAME_ALLOW_PATTERNS
+          matchers.any? do |key|
+            key.is_a?(Regexp) ? key.match?(field_name.to_s) : key.to_sym == field_name.to_sym
           end
         end
 
         # Validate all entry keys against valid field names and extra_keys.
         # Skips validation when _valid_fields metadata is not present.
         # Reports unrecognized keys as warnings.
+        # In lenient mode (_lenient_field_key_names), a key that is not in
+        # valid_fields is only flagged if it also appears in the model's
+        # declared fields list. Keys introduced solely by library +_default+
+        # blocks for fields absent from this model are silently ignored.
         def validate_field_key_names
           return unless hash_configuration.is_a?(Hash)
 
@@ -192,6 +271,14 @@ module OptionConfigs
           each_config_entry do |field_name, _value|
             next if extra_key?(field_name)
             next if valid_fields.include?(field_name.to_s)
+
+            # Lenient mode: skip fields absent from both the declared fields list
+            # and the model DB columns. These are library-provided defaults that
+            # have no effect when the field doesn't exist in this model.
+            if self.class._lenient_field_key_names
+              declared = hash_configuration[DECLARED_FIELDS_KEY] || []
+              next unless declared.include?(field_name.to_s)
+            end
 
             extra_keys_desc = self.class._extra_keys.map { |k| k.is_a?(Regexp) ? k.inspect : k }.join(', ')
             add_validation_notice(field_name,
@@ -270,6 +357,7 @@ module OptionConfigs
         def each_config_entry
           hash_configuration.each do |field_name, value|
             next if field_name == VALID_FIELDS_KEY
+            next if field_name == DECLARED_FIELDS_KEY
 
             yield field_name, value
           end

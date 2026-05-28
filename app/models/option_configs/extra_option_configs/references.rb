@@ -44,7 +44,10 @@ module OptionConfigs
       # Used by validate_reference_entry_types to report type mismatches.
       ENTRY_KEY_TYPES = {
         limit: :integer,
-        without_reference: :boolean,
+        # `without_reference` may be true, false, or the literal string
+        # 'outside_master' (see docs/admin_reference/general/references.md
+        # and app/models/admin/defs/extra_options_references_defs.yaml).
+        without_reference: :boolean_or_outside_master,
         prevent_disable: :boolean,
         also_disable_record: :boolean,
         allow_disable_if_not_editable: :boolean,

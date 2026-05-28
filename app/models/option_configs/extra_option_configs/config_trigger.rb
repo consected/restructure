@@ -5,17 +5,19 @@ module OptionConfigs
     # Configuration class for config trigger setup.
     # Schema docs: docs/admin_reference/general/config_trigger.md
     # Converted from ConfigBase to BaseConfiguration pattern.
-    # Uses a typed TriggerTasks attribute for on_define.
+    # Uses a typed ConfigTriggerTasks attribute for on_define so that the
+    # closed `create_defaults`/`create_configs` action set is validated
+    # independently of the save/batch trigger registry.
     #
     # Handles:
     # - Wrapping a single on_define hash in an array
-    # - Defaulting on_define to an empty TriggerTasks when not provided
+    # - Defaulting on_define to an empty ConfigTriggerTasks when not provided
     #
     # @example
     #   ct = ConfigTrigger.new(on_define: [{ action: 'do_something' }])
     #   ct.on_define.tasks #=> [{ action: 'do_something' }]
     class ConfigTrigger < BaseConfiguration
-      configure_typed_attribute :on_define, type: TriggerTasks
+      configure_typed_attribute :on_define, type: ConfigTriggerTasks
 
       # Preprocess on_define (wrap non-array in array, default to empty)
       # then delegate to typed attribute initialization.
