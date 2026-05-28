@@ -68,7 +68,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param [Symbol|true|false] markdown_to_html - method to call to decide if markdown should be converted to html or literal value
   # @return [String] resulting text
   def generate(content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false,
-               markdown_to_html: :force_markdown_to_html)
+               markdown_to_html: :force_markdown_to_html, check_xss: true)
     raise FphsException, 'Must use a layout template to generate from' unless layout_template?
 
     # Generate the content to be embedded, forcing the result to be converted from markdown to HTML
@@ -78,9 +78,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
                                        data:,
                                        ignore_missing:,
                                        no_substitutions: true,
-                                       markdown_to_html:)
+                                       markdown_to_html:,
+                                       check_xss:)
     all_content = template.sub('{{main_content}}', text)
-    substitute all_content, data:, ignore_missing:
+    rendered_content = substitute(all_content, data:, ignore_missing:)
+
+    self.class.check_for_dangerous_tags!(rendered_content) if check_xss
+    rendered_content
   end
 
   #
@@ -101,7 +105,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,
                             allow_missing_template: false, markdown_to_html: false,
-                            category: nil)
+                            check_xss: true, category: nil)
     if content_template_name
       # Lookup the template based on its name
       cond = { name: content_template_name }
@@ -131,7 +135,69 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text = Formatter::Substitution.text_to_html(text) if res_md
     text = Formatter::Substitution.substitute text, data: data, ignore_missing: ignore_missing unless no_substitutions
 
+    check_for_dangerous_tags!(text) if check_xss
+
     text
+  end
+
+  # Tags and attributes that must never appear in rendered HTML content, to
+  # mitigate stored XSS in pages, dialogs, emails, and generated documents.
+  DangerousHtmlElements = %w[script iframe frame frameset object embed applet base].freeze
+  DangerousHtmlUrlAttributes = %w[action formaction href src xlink:href].freeze
+
+  # Raise if the supplied text contains tags or attributes that could be used to
+  # execute script in a viewer's browser. Called from {.generate_content} just
+  # prior to returning text so that any caller that renders the result as HTML
+  # is protected from stored XSS introduced via admin-authored templates or
+  # substituted data values.
+  # @param [String] text the final generated content
+  # @raise [FphsException] if a dangerous tag or attribute is present
+  def self.check_for_dangerous_tags!(text)
+    return unless text.is_a?(String)
+
+    fragment = parse_html_document(text)
+
+    raise_dangerous_html_error! if fragment.css(DangerousHtmlElements.join(', ')).any?
+
+    fragment.traverse do |node|
+      next unless node.element?
+      next unless dangerous_html_attributes?(node)
+
+      raise_dangerous_html_error!
+    end
+  end
+
+  def self.parse_html_document(text)
+    Nokogiri::HTML.parse(text)
+  end
+
+  def self.dangerous_html_attributes?(node)
+    return true if node.name.casecmp('meta').zero? && node.attribute('http-equiv').present?
+
+    node.attribute_nodes.any? do |attribute|
+      dangerous_html_attribute?(attribute)
+    end
+  end
+
+  def self.dangerous_html_attribute?(attribute)
+    attr_name = attribute.name.to_s.downcase
+
+    return true if attr_name.start_with?('on')
+    return true if attr_name == 'srcdoc'
+
+    attr_value = normalized_html_attribute_value(attribute.value)
+    return false if attr_value.blank?
+
+    DangerousHtmlUrlAttributes.include?(attr_name) && attr_value.match?(/\A(?:javascript|vbscript):/i)
+  end
+
+  def self.normalized_html_attribute_value(value)
+    value.to_s.delete("\u0000").gsub(/[[:space:]]+/, '').strip
+  end
+
+  def self.raise_dangerous_html_error!
+    raise FphsException,
+          'Generated content contains a disallowed tag or attribute that could introduce script execution'
   end
 
   #
