@@ -2,6 +2,8 @@
 
 require 'rails_helper'
 
+# Covers message template rendering, substitutions, and stored XSS protection for generated HTML.
+
 RSpec.describe Admin::MessageTemplate, type: :model do
   include MasterSupport
   include ModelSupport
@@ -286,5 +288,65 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     puts "It took #{t} seconds to create #{test_times} templates"
 
     expect(t).to be < 3
+  end
+
+  # Stored XSS mitigation: generate_content must refuse to return text that
+  # contains tags or attributes capable of executing script when rendered as
+  # HTML on public info pages, dialogs, or emails.
+  describe 'stored XSS protection' do
+    [
+      '<script>alert(1)</script>',
+      '<SCRIPT src="//evil"></SCRIPT>',
+      '<iframe src="//evil"></iframe>',
+      '<frame src="//evil">',
+      '<frameset><frame></frameset>',
+      '<object data="//evil"></object>',
+      '<embed src="//evil">',
+      '<a href="javascript:alert(1)">x</a>',
+      '<a href="javascript&#x3A;alert(1)">x</a>',
+      '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
+      '<img src="x" onerror="alert(1)">',
+      '<svg onload="alert(1)">',
+      '<body onload="alert(1)">',
+      '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">'
+    ].each do |payload|
+      it "raises when generated content contains: #{payload.truncate(40)}" do
+        Admin::MessageTemplate.create! name: 'xss content', message_type: :email, template_type: :content,
+                                       template: payload, current_admin: @admin
+
+        expect do
+          Admin::MessageTemplate.generate_content content_template_name: 'xss content'
+        end.to raise_error(FphsException, /disallowed tag or attribute/)
+      end
+    end
+
+    it 'raises when layout generation substitutes dangerous HTML into the rendered output' do
+      layout = Admin::MessageTemplate.new name: 'test layout', message_type: :email, template_type: :layout,
+                                          template: '<html><body>{{main_content}}</body></html>'
+
+      expect do
+        layout.generate content_template_text: '<p>{{payload}}</p>',
+                        data: { payload: '<img src="x" onerror="alert(1)">' },
+                        markdown_to_html: false
+      end.to raise_error(FphsException, /disallowed tag or attribute/)
+    end
+
+    it 'allows safe HTML and markdown content' do
+      Admin::MessageTemplate.create! name: 'safe content', message_type: :email, template_type: :content,
+                                     template: '<h1>Hello</h1><p>Safe <strong>content</strong>.</p>',
+                                     current_admin: @admin
+
+      res = Admin::MessageTemplate.generate_content content_template_name: 'safe content'
+      expect(res).to include '<h1>Hello</h1>'
+    end
+
+    it 'bypasses XSS check if check_xss is false' do
+      Admin::MessageTemplate.create! name: 'js content', message_type: :plain, template_type: :content,
+                                     template: 'let online = true; onerror=alert;',
+                                     current_admin: @admin
+
+      res = Admin::MessageTemplate.generate_content content_template_name: 'js content', check_xss: false
+      expect(res).to include 'let online = true;'
+    end
   end
 end

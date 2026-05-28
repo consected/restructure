@@ -107,7 +107,8 @@ module Messaging
                                                      content_template_text:,
                                                      data:,
                                                      ignore_missing:,
-                                                     markdown_to_html:)
+                                                     markdown_to_html:,
+                                                     check_xss: !sms?)
 
       self.generated_content = generated_text
       save!
