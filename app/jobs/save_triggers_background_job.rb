@@ -16,8 +16,10 @@ class SaveTriggersBackgroundJob < ApplicationJob
   def perform(item_class:, item_id:, user_id:, triggers:)
     Rails.logger.info "[SaveTriggersBackgroundJob] Starting for #{item_class}##{item_id}"
 
-    # Find the item
-    klass = item_class.constantize
+    # Resolve the model class via the Resources::Models registry (allow-list) rather
+    # than String#constantize. This prevents arbitrary class autoloading even if a
+    # malicious or corrupted job payload provides an unexpected class name.
+    klass = Resources::Models.find_model!(item_class)
     item = klass.find(item_id)
 
     # Set the current user

@@ -25,12 +25,12 @@ module NfsStore
         if altype.start_with?('activity_log_')
           @activity_log = ActivityLog.open_activity_log altype, alid, current_user
         else
-          unless altype.in? Settings::FilestoreAdminResourceNames
-            raise FphsException, "invalid resource type for altype: #{altype}"
-          end
+          # Resolve the admin class through the Settings allow-list rather than
+          # String#constantize so a malicious altype cannot autoload arbitrary classes.
+          klass = Settings.filestore_admin_class_for(altype)
+          raise FphsException, "invalid resource type for altype: #{altype}" unless klass
 
-          altype = Settings::FilestoreAdminResourceNames.find { |r| r == altype } # ensure Brakeman doesn't complain
-          @activity_log = altype.singularize.ns_camelize.ns_constantize.find(alid)
+          @activity_log = klass.find(alid)
           @activity_log.current_user = current_user
         end
       end

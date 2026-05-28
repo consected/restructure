@@ -192,8 +192,26 @@ class Settings
     (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
   end
 
-  # A list of resource names for admin classes that use filestore for file storage
-  FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
+  # Allow-list mapping of resource names => fully qualified class name strings for
+  # admin classes that use filestore for file storage. This is the single source of
+  # truth used both to validate incoming `activity_log_type` parameters and to safely
+  # resolve them to a model class without calling String#constantize on user input.
+  FilestoreAdminResourceClasses = {
+    'redcap__project_admin' => 'Redcap::ProjectAdmin'
+  }.freeze
+
+  # A list of resource names for admin classes that use filestore for file storage.
+  # Derived from FilestoreAdminResourceClasses so the two stay in sync.
+  FilestoreAdminResourceNames = FilestoreAdminResourceClasses.keys.freeze
+
+  # Safely resolve a filestore admin resource name to its model class via the
+  # allow-list above. Returns nil for any name that is not allow-listed.
+  # @param resource_name [String]
+  # @return [Class, nil]
+  def self.filestore_admin_class_for(resource_name)
+    class_name = FilestoreAdminResourceClasses[resource_name]
+    class_name&.safe_constantize
+  end
 
   # App type used for admin filestore containers (e.g. REDCap project files)
   FilestoreAdminAppType = 'ref-data'
