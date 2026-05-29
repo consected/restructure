@@ -271,6 +271,41 @@ class Settings
   # existing expectations around class names being broken
   CaptionAcronyms = DefaultSettings::CaptionAcronyms
 
+  # SSRF guard for admin-configurable outbound HTTP requests (Utilities::UrlSafety).
+  # AllowedExternalUrlSchemes and BlockedExternalIpRanges back the default
+  # validation rules; per-trigger settings tune the allowlist.
+  # SSRF guard defaults applied to admin-configurable outbound URLs
+  # (see Utilities::UrlSafety).
+  AllowedExternalUrlSchemes = %w[http https].freeze
+  BlockedExternalIpRanges = [
+    IPAddr.new('0.0.0.0/8'),         # "this network"
+    IPAddr.new('10.0.0.0/8'),        # RFC1918
+    IPAddr.new('100.64.0.0/10'),     # CGNAT
+    IPAddr.new('127.0.0.0/8'),       # loopback
+    IPAddr.new('169.254.0.0/16'),    # link-local (incl. cloud metadata 169.254.169.254)
+    IPAddr.new('172.16.0.0/12'),     # RFC1918
+    IPAddr.new('192.0.0.0/24'),      # IETF protocol assignments
+    IPAddr.new('192.168.0.0/16'),    # RFC1918
+    IPAddr.new('198.18.0.0/15'),     # benchmarking
+    IPAddr.new('::1/128'),           # IPv6 loopback
+    IPAddr.new('fc00::/7'),          # IPv6 unique-local
+    IPAddr.new('fe80::/10'),         # IPv6 link-local
+    IPAddr.new('::ffff:0:0/96')      # IPv4-mapped IPv6 (further checked after unmapping)
+  ].freeze
+
+  # Optional host allowlist for the pull_external_data save trigger. When set,
+  # listed hosts (exact, case-insensitive match) bypass the private-range block.
+  # Configure via FPHS_PULL_EXTERNAL_DATA_ALLOWED_HOSTS as a space-separated list.
+  PullExternalDataAllowedHosts = ENV['FPHS_PULL_EXTERNAL_DATA_ALLOWED_HOSTS'].to_s.split(/\s+/).reject(&:empty?).freeze
+  # Global override permitting pull_external_data to reach private/loopback
+  # addresses. Defaults true only in development for convenience.
+  PullExternalDataAllowPrivateHosts =
+    if ENV.key?('FPHS_PULL_EXTERNAL_DATA_ALLOW_PRIVATE_HOSTS')
+      ENV['FPHS_PULL_EXTERNAL_DATA_ALLOW_PRIVATE_HOSTS'] == 'true'
+    else
+      Rails.env.development?
+    end
+
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
 
