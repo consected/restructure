@@ -224,11 +224,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
   end
 
   #
-  # The activity log implementation class, based on the controller name
+  # The activity log implementation class, based on the controller name.
+  # Resolved through the Resources::Models registry rather than String#constantize
+  # so only registered (allow-listed) ActivityLog implementations can be returned.
   def implementation_class
     cn = controller_name.singularize.to_s.camelize
-    cnf = "ActivityLog::#{cn}"
-    cnf.constantize
+    Resources::Models.find_model!("ActivityLog::#{cn}")
   end
 
   #
