@@ -330,7 +330,10 @@ module OptionConfigs
             checker = KEY_TYPE_CHECKERS[rule[:type]]
             unless checker&.call(value)
               desc = KEY_TYPE_DESCRIPTIONS[rule[:type]] || rule[:type].to_s
-              add_validation_notice(key, "#{key} must be #{desc}")
+              add_validation_notice(
+                key,
+                "#{key} must be #{desc}, current value: #{value.inspect} (#{value.class})"
+              )
               next
             end
 
@@ -410,7 +413,11 @@ module OptionConfigs
             next if checker&.call(value[kt_key])
 
             desc = KEY_TYPE_DESCRIPTIONS[type] || type.to_s
-            add_validation_notice(field_name, "#{field_name} #{kt_key} must be #{desc}")
+            invalid_value = value[kt_key]
+            add_validation_notice(
+              field_name,
+              "#{field_name} #{kt_key} must be #{desc}, current value: #{invalid_value.inspect} (#{invalid_value.class})"
+            )
           end
         end
 

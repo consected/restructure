@@ -63,6 +63,16 @@ RSpec.describe 'ExtraOptionConfigs::ViewOptions', type: :model do
       expect(instance.config_errors).not_to be_empty
       expect(instance.errors[:view_options]).not_to be_empty
     end
+
+    it 'includes current value when hide_unless_creatable is not boolean' do
+      instance = klass.new(hide_unless_creatable: 'yes')
+      error_messages = instance.config_errors.map { |e| e[:message] }
+
+      expect(error_messages.any? do |msg|
+        msg.include?('hide_unless_creatable must be true or false') &&
+          msg.include?("current value: \"yes\" (String)")
+      end).to be(true)
+    end
   end
 
   describe 'ExtraOptions integration' do
