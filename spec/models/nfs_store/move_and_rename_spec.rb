@@ -233,4 +233,35 @@ RSpec.describe 'Move and rename stored files', type: :model do
 
     expect(found).to be true
   end
+
+  # ---- Security: filename traversal rejection (SECURITY) -------------
+  #
+  # Issue: `MoveAndRename#rename_file` previously had no traversal-aware
+  # check on `new_name` — only the `filters_allow_rename?` regex filter,
+  # which in default configurations accepts everything. With `clean_path`
+  # now applied to `file_name` inside `Filesystem.nfs_store_path`, and
+  # `validate_file_name!` enforced at the entry points and via
+  # `HandlesContainerFile` model validations, these calls must reject
+  # malicious renames before they touch the filesystem.
+  describe 'filename traversal rejection (SECURITY)' do
+    before :each do
+      upload_file 'innocent.txt'
+      @sf = @container.stored_files.where(file_name: 'innocent.txt').first
+    end
+
+    it 'StoredFile#move_to rejects a traversal new_name' do
+      expect { @sf.move_to nil, '../../etc/evil.txt' }
+        .to raise_error(FsException::Action)
+    end
+
+    it 'StoredFile#move_to rejects a new_name containing a path separator' do
+      expect { @sf.move_to nil, 'subdir/evil.txt' }
+        .to raise_error(FsException::Action)
+    end
+
+    it 'StoredFile#move_to rejects a NUL byte in new_name' do
+      expect { @sf.move_to nil, "evil\x00.txt" }
+        .to raise_error(FsException::Action)
+    end
+  end
 end
