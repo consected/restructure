@@ -93,9 +93,9 @@ RSpec.describe 'TriggerTasks per-type validation propagation', type: :model do
     end
 
     it 'surfaces a nested unrecognized inner key warning from on_define' do
-      instance = klass.new(on_define: [{ notify: { n1: { type: 'email', wrong_field: true } } }])
+      instance = klass.new(on_define: [{ wrong_inner_key: { some_config: true } }])
       messages = instance.config_warnings.map { |w| w[:message].to_s }
-      expect(messages.any? { |m| m.include?('wrong_field') }).to be true
+      expect(messages.any? { |m| m.include?('wrong_inner_key') }).to be true
     end
 
     it 'tags propagated warnings with parent_attribute :on_define' do
@@ -105,7 +105,7 @@ RSpec.describe 'TriggerTasks per-type validation propagation', type: :model do
     end
 
     it 'does not surface warnings for valid on_define configurations' do
-      instance = klass.new(on_define: [{ notify: { n1: { type: 'email' } } }])
+      instance = klass.new(on_define: [{ create_defaults: {} }])
       expect(instance.config_warnings).to be_empty
     end
   end

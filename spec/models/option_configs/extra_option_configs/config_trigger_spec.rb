@@ -32,9 +32,9 @@ RSpec.describe 'ExtraOptionConfigs::ConfigTrigger', type: :model do
       expect(klass.ancestors).not_to include(OptionConfigs::ExtraOptionConfigs::ConfigBase)
     end
 
-    it 'declares on_define as a typed attribute with TriggerTasks type' do
+    it 'declares on_define as a typed attribute with ConfigTriggerTasks type' do
       expect(klass.option_types[:typed]).to include(:on_define)
-      expect(klass.typed_attribute_types[:on_define]).to eq(OptionConfigs::ExtraOptionConfigs::TriggerTasks)
+      expect(klass.typed_attribute_types[:on_define]).to eq(OptionConfigs::ExtraOptionConfigs::ConfigTriggerTasks)
     end
   end
 

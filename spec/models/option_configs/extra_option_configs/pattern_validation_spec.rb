@@ -48,9 +48,9 @@ RSpec.describe 'PatternValidation concern', type: :model do
       expect(keys).to be_empty
     end
 
-    it 'ShowIf declares no extra_keys' do
+    it 'ShowIf declares extra_keys for YAML anchors and submit button conditionals' do
       keys = OptionConfigs::ExtraOptionConfigs::ShowIf._extra_keys
-      expect(keys).to be_empty
+      expect(keys).to match_array([/\A_/, /\Asubmit_buttons_/])
     end
 
     it 'FieldOptions declares no extra_keys' do
@@ -129,60 +129,96 @@ RSpec.describe 'PatternValidation concern', type: :model do
       end
     end
 
+    # Labels, ShowIf and FieldOptions use lenient_field_key_names! so that library _default
+    # blocks can inject entries for fields absent from a particular model without generating
+    # spurious warnings. Strict "warns about invalid field names" behaviour does not apply.
     context 'labels' do
-      include_examples 'field key validation', :labels,
-                       <<~YAML, <<~YAML
-                         default:
-                           fields:
-                             - test1
-                           labels:
-                             test1: My Label
-                       YAML
-                         default:
-                           fields:
-                             - test1
-                           labels:
-                             nonexistent_field: Bad Label
-                       YAML
+      it 'accepts valid field names without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            labels:
+              test1: My Label
+        YAML
+        config = eo.labels
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'silently ignores unrecognised field names in lenient mode' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            labels:
+              nonexistent_field: Library Default Label
+        YAML
+        config = eo.labels
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
     end
 
     context 'show_if' do
-      include_examples 'field key validation', :show_if,
-                       <<~YAML, <<~YAML
-                         default:
-                           fields:
-                             - test1
-                             - test2
-                           show_if:
-                             test1:
-                               test2: value
-                       YAML
-                         default:
-                           fields:
-                             - test1
-                           show_if:
-                             nonexistent_field:
-                               test1: value
-                       YAML
+      it 'accepts valid field names without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+              - test2
+            show_if:
+              test1:
+                test2: value
+        YAML
+        config = eo.show_if
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'silently ignores unrecognised field names in lenient mode' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            show_if:
+              nonexistent_field:
+                test1: value
+        YAML
+        config = eo.show_if
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
     end
 
     context 'field_options' do
-      include_examples 'field key validation', :field_options,
-                       <<~YAML, <<~YAML
-                         default:
-                           fields:
-                             - test1
-                           field_options:
-                             test1:
-                               no_downcase: true
-                       YAML
-                         default:
-                           fields:
-                             - test1
-                           field_options:
-                             nonexistent_field:
-                               no_downcase: true
-                       YAML
+      it 'accepts valid field names without warnings' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            field_options:
+              test1:
+                no_downcase: true
+        YAML
+        config = eo.field_options
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
+
+      it 'silently ignores unrecognised field names in lenient mode' do
+        eo = config_for(<<~YAML)
+          default:
+            fields:
+              - test1
+            field_options:
+              nonexistent_field:
+                no_downcase: true
+        YAML
+        config = eo.field_options
+        field_warnings = config.config_warnings.select { |w| w[:message].match?(/not a valid field/) }
+        expect(field_warnings).to be_empty
+      end
     end
 
     context 'db_configs' do
