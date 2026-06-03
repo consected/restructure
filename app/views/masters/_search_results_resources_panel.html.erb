@@ -34,13 +34,13 @@
   end
 %>
 <% if renderable.any? %>
-  <% outer = "##{panel_name}-{{id}}" %>
+  <% outer = "##{panel_name.id_hyphenate}-{{id}}" %>
   <%= render partial: 'reports/insert_options_css', locals: { outer: outer, view_css: view_css } %>
-  <div id="<%= panel_name %>-{{id}}"
-       class="panel panel-default section-panel page-layout-panel contains-resources collapse <%= panel_name %>-block format-block-on-expand <%= hide_sl_class %> <%= hide_al_header_class %>">
+  <div id="<%= panel_name.id_hyphenate %>-{{id}}"
+       class="panel panel-default section-panel page-layout-panel contains-resources collapse <%= panel_name.id_hyphenate %>-block format-block-on-expand <%= hide_sl_class %> <%= hide_al_header_class %>">
     <div class="is-header default-header section-panel-header">
       <% unless hide_player_tabs? %>
-        <a href="#<%= panel_name %>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity btn-close-panel" title="close panel"></a>
+        <a href="#<%= panel_name.id_hyphenate %>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity btn-close-panel" title="close panel"></a>
       <% end %>
       <h4 class="list-group-item-heading panel-heading--<%= panel_label.to_s.id_hyphenate %>"><%= panel_label %></h4>
     </div>
@@ -59,7 +59,7 @@
            data-remote="true"
            data-result-target="#<%= block_id %>"
            data-template="<%= template_name %>"
-           data-panel-tab="<%= resource %>"
+           data-resource-name="<%= resource %>"
            class="contains-resources-loader contains-resources-loader--<%= resource.hyphenate %>"
            aria-hidden="true"
            tabindex="-1">load <%= resource %></a>

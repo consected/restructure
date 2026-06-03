@@ -1144,6 +1144,14 @@ _fpa.form_utils = {
           if ($pos.length) $target = $pos;
         }
 
+        // Fallback: if no direct id match was found, look for an element carrying
+        // a data-alt-click-id alias (used by contains.resources panels to maintain
+        // backwards-compat with pre-PR-#1182 resource-based tab ids).
+        if (!$target.length && target[0] === '#') {
+          const altId = target.replace('#', '');
+          $target = $(`[data-alt-click-id="${altId}"]`);
+        }
+
         if (last) $target = $target.last();
 
         $target.click();
