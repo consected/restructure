@@ -84,15 +84,32 @@ _fpa.activity_logs.save_action = class {
     var res = $(sel).not('[disabled]').first().click();
   }
 
+  // Find the nav tab anchor for the given panel value within this master panel.
+  // Primary lookup uses data-panel-tab:
+  //   - Single-resource contains.resources panels: data-panel-tab = resource name
+  //     (e.g. 'activity_log__play_ipa_assignments'), consistent with standard AL tabs.
+  //   - Multi-resource contains.resources panels: data-panel-tab = panel_name
+  //     (e.g. 'play-ipa-tracker').
+  // Fallback uses data-alt-click-id to support legacy panel_name-based save_action configs
+  // and old click-target links that reference the resource-hyphenated tab id.
+  find_panel_tab() {
+    var master_scope = '.master-panel[data-master-id="' + this.master_id + '"] ';
+    var tab = $(master_scope + 'a[data-panel-tab="' + this.action_value + '"]');
+    if (!tab.length) {
+      tab = $(master_scope + 'a[data-alt-click-id="tab-' + this.action_value.replace(/__/g, '--').replace(/_/g, '-') + '"]');
+    }
+    return tab;
+  }
+
   show_panel() {
-    var tab = $('.master-panel[data-master-id="' + this.master_id + '"] a[data-panel-tab="' + this.action_value + '"]').click();
+    var tab = this.find_panel_tab().click();
     window.setTimeout(function () {
       $(tab.attr('data-target')).collapse('show');
     }, 500);
   }
 
   hide_panel() {
-    var tab2 = $('.master-panel[data-master-id="' + this.master_id + '"] a[data-panel-tab="' + this.action_value + '"]');
+    var tab2 = this.find_panel_tab();
     window.setTimeout(function () {
       $(tab2.attr('data-target')).collapse('hide');
     }, 500);
@@ -100,7 +117,7 @@ _fpa.activity_logs.save_action = class {
 
 
   refresh_panel() {
-    var tab3 = $('.master-panel[data-master-id="' + this.master_id + '"] a[data-panel-tab="' + this.action_value + '"]');
+    var tab3 = this.find_panel_tab();
     var exp = tab3.attr('aria-expanded') == 'true';
     tab3.click();
 
