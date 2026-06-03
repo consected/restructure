@@ -79,6 +79,21 @@
          title="Copy to clipboard"
          data-copy-text="?<%= sa %>"></a>
     </p>
+    <p>
+      <%= link_to(
+          'view more details about url search attributes',
+          help_page_path(
+            library: :admin_reference,
+            section: 'reports',
+            subsection: 'url_search_attributes',
+            display_as: :embedded
+          ),          
+          data: { remote: true, 
+                  toggle: 'collapse', 
+                  target: '#help-sidebar',
+                  'working-target': '#help-sidebar-body' }
+        ) %>
+    </p>  
     <p><label>use plain attributes</label> <%= !!plain_attrs %></p>
     <p class="help-block">based on options configuration:</p>
     <%
