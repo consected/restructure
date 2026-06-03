@@ -38,10 +38,26 @@ describe 'Versioned phone log templates', driver: $browser_driver do
 
   def search_for_player(player)
     click_link 'Research'
+    finish_page_loading
+    finish_form_formatting
+
     within '#master-search-simple-form' do
       fill_in 'Last name', with: player.last_name
       fill_in 'First or nick name', with: player.first_name
-      click_button 'search'
+      finish_page_loading
+      finish_form_formatting
+
+      search_button = find_button('search', wait: 5)
+      scroll_into_view(search_button)
+      begin
+        search_button.click
+      rescue Selenium::WebDriver::Error::ElementClickInterceptedError
+        finish_page_loading
+        finish_form_formatting
+        search_button = find_button('search', wait: 5)
+        scroll_into_view(search_button)
+        search_button.click
+      end
     end
 
     dismiss_modal
