@@ -107,3 +107,10 @@ To do this, use a URL hash formatted with `#click-target-[tab-id]`.
   *(Example: for a panel named "My Custom Panel", use `[Open Custom Panel](#click-target-tab-resources-my-custom-panel)`)*
   
 *Note: For `contains.resources` panels containing only a single resource, the older `#click-target-tab-[resource-name-hyphenated]` format acts as an alias (e.g. `#click-target-tab-activity-log--case-reviews`), but the `tab-resources-[panel-name]` format is preferred.*
+
+## Activity Log Perspectives
+
+Filter buttons can be added above an activity log content block to let users switch between
+server-side filtered views of the list.
+
+See [perspectives.md](perspectives.md) for the full configuration reference.

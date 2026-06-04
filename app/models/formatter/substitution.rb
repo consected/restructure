@@ -37,7 +37,7 @@ module Formatter
 
     NoAutoTitleizeTags = %w[resource_name item_type_name default_embed_resource_name
                             definition_resource_name definition_item_type_name table_name schema_name
-                            default_schema_name redcap_event_name].freeze
+                            default_schema_name redcap_event_name role_name].freeze
     #
     # Perform substitutions on the text, using either a Hash of data or an object item.
     # Provide a tag substitution to be used to enclose the substituted items
@@ -518,6 +518,11 @@ module Formatter
         sym = rn.id_underscore.to_sym
         cur[sym] = rn
       end
+
+      # Make the user's first role available as {{role_name}} for {{#is role_name '===' 'xxx'}} patterns.
+      # Uses ||= to avoid overwriting an existing role_name attribute on the primary data object
+      # (e.g. when processing Admin::UserRole records that have their own role_name column).
+      data[:role_name] ||= cu.role_names.first&.to_s || ''
     end
 
     #

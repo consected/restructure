@@ -24,6 +24,19 @@
   view_css = panel.view_css
   limit = (panel.view_options&.limit || 20).to_i
 
+  # Perspectives: hash keyed by resource name → array of perspective definitions
+  all_perspectives = (panel.view_options&.perspectives || {}).with_indifferent_access
+  # Panel-level default perspective slug (overridden per-user via AppConfiguration)
+  panel_default_perspective = panel.view_options&.default_perspective
+  # User / role / app-type specific default perspectives hash keyed by resource name.
+  # Values may contain {{#is}} / {{#if}} substitution blocks evaluated against the current user.
+  user_default_perspectives = Admin::AppConfiguration.hash_for(:default_activity_log_perspective, current_user)
+                                                     .transform_values do |v|
+    next v unless v.is_a?(String) && v.include?('{{')
+
+    Formatter::Substitution.substitute(v, data: current_user, tag_subs: nil, ignore_missing: true)&.strip
+  end
+
   renderable = resources.each_with_object([]) do |resource, memo|
     next unless master_viewables[resource.to_sym]
 
@@ -54,8 +67,13 @@
       <% renderable.each do |resource, render_info|
            block_id = "#{resource.hyphenate}-{{id}}"
            route_path = render_info[:route_path]
-           template_name = render_info[:template_name] %>
-        <a href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %>"
+           template_name = render_info[:template_name]
+           # Resolve effective default perspective for this resource
+           eff_default = user_default_perspectives[resource.to_sym].presence ||
+                         user_default_perspectives[resource.to_s].presence ||
+                         panel_default_perspective
+           default_param = eff_default.present? ? "&perspective=#{ERB::Util.url_encode(eff_default)}" : '' %>
+        <a href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %>&panel_name=<%= panel_name %><%= default_param %>"
            data-remote="true"
            data-result-target="#<%= block_id %>"
            data-template="<%= template_name %>"
@@ -68,7 +86,39 @@
     <% renderable.each do |resource, render_info|
          block_id = "#{resource.hyphenate}-{{id}}"
          inner_block_class = render_info[:wrapper_class].gsub('generic-block', 'inner-block')
-         template_name = render_info[:template_name] %>
+         template_name = render_info[:template_name]
+         resource_perspectives = all_perspectives[resource.to_s]
+         eff_default = user_default_perspectives[resource.to_sym].presence ||
+                       user_default_perspectives[resource.to_s].presence ||
+                       panel_default_perspective %>
+      <% if resource_perspectives.present? %>
+        <div class="activity-log-perspectives activity-log-perspectives--source"
+             data-resource="<%= resource %>"
+             data-panel-name="<%= panel_name %>">
+          <%# "All" reset button — no perspective param %>
+          <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>"
+             data-remote="true"
+             data-result-target="#<%= block_id %>"
+             data-template="<%= template_name %>"
+             data-panel-tab="<%= resource %>"
+             data-perspective=""
+             class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.blank? %>"
+             ><%= t('activity_log.perspectives.all_label', default: 'All') %></a>
+          <% resource_perspectives.each do |persp|
+               pname  = persp.is_a?(Hash) ? (persp[:name] || persp['name']).to_s : ''
+               plabel = persp.is_a?(Hash) ? (persp[:label] || persp['label']).to_s : pname
+               next if pname.blank? %>
+            <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>&perspective=<%= ERB::Util.url_encode(pname) %>"
+               data-remote="true"
+               data-result-target="#<%= block_id %>"
+               data-template="<%= template_name %>"
+               data-panel-tab="<%= resource %>"
+               data-perspective="<%= pname %>"
+               class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.to_s == pname %>"
+               ><%= plabel %></a>
+          <% end %>
+        </div>
+      <% end %>
       <div id="<%= block_id %>"
            class="<%= render_info[:wrapper_class] %> <%= resource.hyphenate %>-block"
            data-sub-for-root="master_id"
