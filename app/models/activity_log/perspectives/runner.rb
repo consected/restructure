@@ -106,8 +106,11 @@ class ActivityLog
         # Extract IDs from raw PG result set and scope back through the correct
         # al_class + master_id so that records from other resources or masters
         # that happen to share an ID cannot leak into the result.
-        ids = raw_results.map { |r| r['id'] }.compact
+        ids = raw_results.map { |r| r['id'].to_i }.compact
         Rails.logger.debug { "ActivityLog::Perspectives::Runner#run_report_backend – report returned #{ids.length} ids: #{ids.first(10).inspect}" }
+        # Remember the ordered IDs so apply_order can preserve SQL row order when no
+        # explicit order: is configured on this perspective.
+        @report_ordered_ids = ids
         @al_class.where(master_id: @master.id, id: ids)
       end
 
@@ -183,18 +186,45 @@ class ActivityLog
         end
       end
 
-      # Apply a whitelisted ORDER clause from config.
+      # Apply ordering to the relation.
+      #
+      # Priority:
+      #   1. Explicit `order:` in perspective config — always wins (column-name whitelisted).
+      #   2. Report backend with no explicit order — preserve the SQL row order returned by
+      #      the report using array_position so the caller's ORDER BY is honoured.
+      #   3. All other backends with no explicit order — order chronologically by
+      #      action_when_attribute DESC, id DESC (mirrors the Master has_many scope).
       def apply_order(relation)
-        return relation unless @config[:order].present?
+        return relation if relation.nil?
 
-        allowed_columns = @al_class.column_names.map(&:to_s)
-        order_clauses = @config[:order].each_with_object({}) do |(col, dir), h|
-          col_s = col.to_s
-          dir_s = dir.to_s.downcase
-          h[col_s] = dir_s if allowed_columns.include?(col_s) && VALID_DIRECTIONS.include?(dir_s)
+        if @config[:order].present?
+          # Explicit order: always wins.
+          allowed_columns = @al_class.column_names.map(&:to_s)
+          order_clauses = @config[:order].each_with_object({}) do |(col, dir), h|
+            col_s = col.to_s
+            dir_s = dir.to_s.downcase
+            h[col_s] = dir_s if allowed_columns.include?(col_s) && VALID_DIRECTIONS.include?(dir_s)
+          end
+          return order_clauses.any? ? relation.reorder(order_clauses) : relation
         end
 
-        order_clauses.any? ? relation.reorder(order_clauses) : relation
+        if @report_ordered_ids
+          # Report backend: preserve the SQL row order using array_position.
+          # Skip if no results (WHERE id IN () already returns nothing).
+          return relation unless @report_ordered_ids.any?
+
+          ids_array = @report_ordered_ids.join(',')
+          return relation.reorder(
+            Arel.sql("array_position(ARRAY[#{ids_array}]::integer[], #{@al_class.quoted_table_name}.id)")
+          )
+        end
+
+        # Non-report backends: apply action_when_attribute DESC, id DESC.
+        # This mirrors the ordering used on the Master has_many association scope.
+        # Use created_at when action_when_attribute is :alt_order (a pseudo-attribute).
+        awa = @al_class.action_when_attribute
+        awa = :created_at if awa == :alt_order
+        relation.reorder(awa => :desc, id: :desc)
       end
 
       # Apply a LIMIT from config.

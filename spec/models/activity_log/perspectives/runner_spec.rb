@@ -113,6 +113,55 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
     end
   end
 
+  describe 'default ordering (action_when_attribute)' do
+    # Make @al1 (smaller id) more recent than @al2 so that action_when_attribute DESC
+    # puts al1 first — deliberately opposing the class default_scope "id DESC" (which
+    # would put al2 first).  This lets us distinguish the two orderings.
+    before :each do
+      awa = @al_class.action_when_attribute
+      @al1.update_column(awa, 1.day.ago)
+      @al2.update_column(awa, 2.days.ago)
+    end
+
+    it 'orders by action_when_attribute desc when no order: is configured on a where backend' do
+      config = { where: {} }
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      # al1 has more-recent action_when_attribute so should appear before al2
+      expect(ordered_ids.index(@al1.id)).to be < ordered_ids.index(@al2.id)
+    end
+
+    it 'orders by action_when_attribute desc when no order: is configured on the no-backend (all) perspective' do
+      config = {}
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      expect(ordered_ids.index(@al1.id)).to be < ordered_ids.index(@al2.id)
+    end
+
+    it 'orders by action_when_attribute desc when no order: is configured on a conditional_calculation backend' do
+      # Both records have select_who: 'user' so this returns both and lets us check ordering.
+      calc_conf = {
+        @al_class.resource_name.to_s => {
+          select_who: 'user',
+          return: 'return_all_results'
+        }
+      }
+      config = { conditional_calculation: calc_conf }
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      expect(ordered_ids.index(@al1.id)).to be < ordered_ids.index(@al2.id)
+    end
+
+    it 'respects an explicit order: that overrides the action_when_attribute default' do
+      # order by id ASC — al1 (smaller id, more recent awa) should come first by id too,
+      # so use id DESC here to conflict with awa DESC and prove explicit order wins
+      config = { where: {}, order: { id: 'desc' } }
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      expect(ordered_ids.first).to eq [@al1.id, @al2.id].max
+    end
+  end
+
   describe 'limit modifier' do
     it 'applies a positive limit' do
       config = { limit: 1 }
@@ -194,6 +243,49 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
       result = build_runner(config).run
       expect(result).to be_a ActiveRecord::Relation
       expect(result.pluck(:id)).to include @al1.id
+    end
+
+    it 'preserves the SQL row order from the report when no order: is configured' do
+      # Write a report that returns records ORDER BY id ASC.
+      # @al1.id < @al2.id, so ASC order puts al1 first.
+      # The class default_scope is "id DESC" (al2 first), so if the runner applies
+      # the report's order, al1 must appear before al2.
+      al_table = @al_class.table_name
+      ordered_sql = "SELECT id FROM #{al_table} WHERE master_id = :master_id ORDER BY id ASC"
+      ordered_report = Report.create!(
+        current_admin: @admin,
+        name: "Ordered perspective report #{SecureRandom.hex}",
+        sql: ordered_sql,
+        search_attrs: "master_id:\n  integer:\n",
+        disabled: false,
+        report_type: 'regular_report',
+        auto: false,
+        searchable: false
+      )
+      config = { report: { resource_name: ordered_report.alt_resource_name } }
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      expect(ordered_ids.index(@al1.id)).to be < ordered_ids.index(@al2.id)
+    end
+
+    it 'explicit order: overrides the report SQL ordering' do
+      al_table = @al_class.table_name
+      asc_sql = "SELECT id FROM #{al_table} WHERE master_id = :master_id ORDER BY id ASC"
+      asc_report = Report.create!(
+        current_admin: @admin,
+        name: "Asc perspective report #{SecureRandom.hex}",
+        sql: asc_sql,
+        search_attrs: "master_id:\n  integer:\n",
+        disabled: false,
+        report_type: 'regular_report',
+        auto: false,
+        searchable: false
+      )
+      # Explicit order: DESC should override the report's ASC
+      config = { report: { resource_name: asc_report.alt_resource_name }, order: { id: 'desc' } }
+      result = build_runner(config).run
+      ordered_ids = result.pluck(:id)
+      expect(ordered_ids.index(@al2.id)).to be < ordered_ids.index(@al1.id)
     end
 
     it 'excludes IDs returned by the report that belong to a different master' do
