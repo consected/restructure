@@ -56,12 +56,9 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
       expect(ids).not_to include @al2.id
     end
 
-    it 'ignores where keys that are not valid column names' do
+    it 'raises FphsException for where keys that are not valid column names' do
       config = { where: { 'drop table masters;--' => 'x', select_call_direction: 'to staff' } }
-      result = build_runner(config).run
-      expect(result).to be_a ActiveRecord::Relation
-      ids = result.pluck(:id)
-      expect(ids).to include @al2.id
+      expect { build_runner(config).run }.to raise_error(FphsException, /not a valid column/)
     end
 
     it 'returns all master records when where hash is empty' do
@@ -100,16 +97,14 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
       expect(ids).to eq ids.sort.reverse
     end
 
-    it 'ignores invalid column names in the order clause' do
-      config = { where: {}, order: { 'invalid_column' => 'asc', id: 'desc' } }
-      result = build_runner(config).run
-      expect(result).to be_a ActiveRecord::Relation
+    it 'raises FphsException for invalid column names in the order clause' do
+      config = { where: {}, order: { 'invalid_column' => 'asc' } }
+      expect { build_runner(config).run }.to raise_error(FphsException, /not a valid column/)
     end
 
-    it 'ignores invalid directions in the order clause' do
+    it 'raises FphsException for invalid directions in the order clause' do
       config = { where: {}, order: { id: 'RANDOM()' } }
-      result = build_runner(config).run
-      expect(result).to be_a ActiveRecord::Relation
+      expect { build_runner(config).run }.to raise_error(FphsException, /not valid.*use 'asc' or 'desc'/)
     end
   end
 
@@ -169,10 +164,9 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
       expect(result.count).to eq 1
     end
 
-    it 'does not apply a zero or negative limit' do
+    it 'raises FphsException for a zero or non-positive limit' do
       config = { limit: 0 }
-      result = build_runner(config).run
-      expect(result.count).to eq 2
+      expect { build_runner(config).run }.to raise_error(FphsException, /not a positive integer/)
     end
   end
 

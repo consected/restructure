@@ -165,13 +165,29 @@ class ActivityLog
       # String values may contain {{field_defaults}} substitutions which are resolved
       # against the current user/master context before the condition is applied.
       # Returns a clean hash safe to pass to AR's where().
+      # Raises FphsException on unknown columns or unresolved template references so
+      # admin misconfiguration is surfaced immediately rather than silently ignored.
       def sanitized_where_conditions
         allowed_columns = @al_class.column_names.map(&:to_s)
         @config[:where].each_with_object({}) do |(k, v), h|
           col = k.to_s
-          next unless allowed_columns.include?(col)
+          unless allowed_columns.include?(col)
+            raise FphsException,
+                  "Perspectives::Runner – where: key #{col.inspect} is not a valid column on #{@al_class}"
+          end
 
-          h[col] = v.is_a?(String) ? FieldDefaults.calculate_default(context_instance, v, ignore_missing: true) : v
+          if v.is_a?(String)
+            result = FieldDefaults.calculate_default(context_instance, v, ignore_missing: true)
+            if result.blank? && v.include?('{{')
+              raise FphsException,
+                    "Perspectives::Runner – where: value #{v.inspect} for column #{col.inspect} resolved to blank; " \
+                    'check field reference in template'
+            end
+
+            h[col] = result
+          else
+            h[col] = v
+          end
         end
       end
 
@@ -198,14 +214,24 @@ class ActivityLog
         return relation if relation.nil?
 
         if @config[:order].present?
-          # Explicit order: always wins.
+          # Explicit order: always wins. Raise on any invalid column or direction so the
+          # admin knows the config is wrong rather than silently falling back to default order.
           allowed_columns = @al_class.column_names.map(&:to_s)
           order_clauses = @config[:order].each_with_object({}) do |(col, dir), h|
             col_s = col.to_s
             dir_s = dir.to_s.downcase
-            h[col_s] = dir_s if allowed_columns.include?(col_s) && VALID_DIRECTIONS.include?(dir_s)
+            unless allowed_columns.include?(col_s)
+              raise FphsException,
+                    "Perspectives::Runner – order: column #{col_s.inspect} is not a valid column on #{@al_class}"
+            end
+            unless VALID_DIRECTIONS.include?(dir_s)
+              raise FphsException,
+                    "Perspectives::Runner – order: direction #{dir.inspect} for column #{col_s.inspect} is not valid; use 'asc' or 'desc'"
+            end
+
+            h[col_s] = dir_s
           end
-          return order_clauses.any? ? relation.reorder(order_clauses) : relation
+          return relation.reorder(order_clauses)
         end
 
         if @report_ordered_ids
@@ -228,9 +254,17 @@ class ActivityLog
       end
 
       # Apply a LIMIT from config.
+      # Raises FphsException when a limit: value is present but not a positive integer.
       def apply_limit(relation)
+        return relation unless @config[:limit].present?
+
         limit = @config[:limit].to_i
-        limit.positive? ? relation.limit(limit) : relation
+        unless limit.positive?
+          raise FphsException,
+                "Perspectives::Runner – limit: #{@config[:limit].inspect} is not a positive integer"
+        end
+
+        relation.limit(limit)
       end
     end
   end
