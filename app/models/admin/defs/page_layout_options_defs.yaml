@@ -74,7 +74,8 @@ view_options:
                                       #         defaults:            # criteria hash passed to report runner
                                       #           status: active
                                       #       order:                 # whitelisted sort (column: asc|desc)
-                                      #         created_at: desc
+                                      #         created_at: desc     # omit to use action_when_attribute desc
+                                      #                              # (report backend preserves SQL row order)
                                       #       limit: 10              # max records to return
                                       #     - name: my_open          # ConditionalActions backend
                                       #       label: My Open

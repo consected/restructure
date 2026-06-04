@@ -122,11 +122,27 @@ perspectives:
 | `where` | — | Hash of `{ column: value }` conditions applied as an ActiveRecord `where`.  Column names are validated against the model's columns.  Mutually exclusive with `report` and `conditional_calculation`. |
 | `report` | — | Report-based backend.  Specify the report's `alt_resource_name` and optional `defaults` criteria.  Mutually exclusive with `where` and `conditional_calculation`. |
 | `conditional_calculation` | — | [ConditionalActions](../../dev_reference/main/architecture_overview.md) condition hash targeting the activity log's own resource name.  Use `field: value` pairs for equality conditions and `return: return_all_results` as the return-mode directive.  `no_masters: {}` is injected automatically.  Mutually exclusive with `where` and `report`. |
-| `order` | — | Hash of `{ column: "asc" | "desc" }`.  Column names are validated against the model's columns. |
+| `order` | — | Hash of `{ column: "asc" \| "desc" }`.  Column names are validated against the model's columns.  When omitted, a default ordering is applied automatically (see **Ordering** below). |
 | `limit` | — | Integer maximum number of records returned.  Overrides the panel-level `limit` view option for this perspective. |
 
 > **Note:** If none of `where`, `report`, or `conditional_calculation` is provided, clicking the button returns the full
 > unfiltered list (equivalent to the built-in **All** button).
+
+---
+
+## Ordering
+
+The ordering applied to a perspective result follows this priority (highest wins):
+
+| Priority | Condition | Ordering applied |
+|----------|-----------|------------------|
+| 1 | `order:` is present in the perspective config | The specified columns/directions.  Column names are whitelisted; invalid names are silently ignored. |
+| 2 | `report:` backend, no `order:` | The row order returned by the report SQL is preserved using `array_position`.  Write `ORDER BY` in your report SQL to control it. |
+| 3 | Any other backend, no `order:` | `action_when_attribute DESC, id DESC` — matching the chronological ordering used on the master panel (mirrors the activity log's `Master` has_many scope). |
+
+**`action_when_attribute`** is the field configured on the activity log definition (e.g. `called_when`, `completed_when`).  If it is set to `alt_order`, `created_at` is used instead.
+
+Report perspectives intentionally do **not** fall back to `action_when_attribute` because the report author controls the ordering via the SQL `ORDER BY` clause.  Add an explicit `order:` to override it.
 
 ---
 
@@ -250,6 +266,9 @@ The `active` CSS class is toggled on the clicked button by the JavaScript handle
   resource.  If the key is absent the button bar is not rendered.
 - Column names in `where:` and `order:` are whitelisted against the model's actual database
   columns.  Invalid column names are silently ignored.
+- When `order:` is omitted, results are ordered by `action_when_attribute DESC, id DESC` for
+  `where:`, `conditional_calculation:`, and no-backend perspectives.  For `report:` perspectives,
+  the SQL row order from the report is preserved; use `ORDER BY` in the report SQL to control it.
 - Access control is respected: if a user does not have access to the underlying Report resource,
   the perspective returns `nil` and the full unfiltered list is shown instead.
 - The `conditional_calculation` backend uses `ConditionalActions` with `no_masters: {}` injected
