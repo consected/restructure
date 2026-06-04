@@ -49,6 +49,10 @@ view_options:
         label: My Closed
         where:
           status: closed
+      - name: assigned_to_me
+        label: Mine
+        where:
+          assigned_to: '{{current_user_email}}'   # resolved to the logged-in user's email
   default_perspective: recent_active
 ```
 
@@ -97,7 +101,10 @@ perspectives:
     - name: <slug>          # (required) identifier used in request params
       label: <text>         # (required) button label shown to the user
       where:                # (optional) AR conditions hash — column names are
-        <column>: <value>   #   whitelisted against the model's actual columns
+        <column>: <value>   #   whitelisted against the model's actual columns.
+                            #   String values support {{field_defaults}} substitutions
+                            #   evaluated against the current user/master context
+                            #   (e.g. current_user_email, current_user).
       report:               # (optional, mutually exclusive with where: and conditional_calculation:)
         resource_name: <alt_resource_name>   # report's alt_resource_name
         defaults:                            # (optional) criteria hash passed
@@ -119,7 +126,7 @@ perspectives:
 |-----|----------|-------------|
 | `name` | ✅ | Slug used in request parameters and in `default_perspective` references.  Use `all` with no backend to create an explicit "All" reset button (one is always added automatically). |
 | `label` | ✅ | Button label displayed to the user. |
-| `where` | — | Hash of `{ column: value }` conditions applied as an ActiveRecord `where`.  Column names are validated against the model's columns.  Mutually exclusive with `report` and `conditional_calculation`. |
+| `where` | — | Hash of `{ column: value }` conditions applied as an ActiveRecord `where`.  Column names are validated against the model's columns.  String values support `{{field_defaults}}` substitutions evaluated against the current user/master context (e.g. `current_user_email`, `current_user`).  Mutually exclusive with `report` and `conditional_calculation`. |
 | `report` | — | Report-based backend.  Specify the report's `alt_resource_name` and optional `defaults` criteria.  Mutually exclusive with `where` and `conditional_calculation`. |
 | `conditional_calculation` | — | [ConditionalActions](../../dev_reference/main/architecture_overview.md) condition hash targeting the activity log's own resource name.  Use `field: value` pairs for equality conditions and `return: return_all_results` as the return-mode directive.  `no_masters: {}` is injected automatically.  Mutually exclusive with `where` and `report`. |
 | `order` | — | Hash of `{ column: "asc" \| "desc" }`.  Column names are validated against the model's columns.  When omitted, a default ordering is applied automatically (see **Ordering** below). |
