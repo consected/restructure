@@ -144,9 +144,6 @@ class ActivityLog
         # without this, return_all_results would pluck master IDs instead of AL record IDs.
         calc_config[:no_masters] ||= {}
 
-        context_instance = @al_class.new(master_id: @master.id)
-        context_instance.current_user = @current_user
-
         ca = ConditionalActions.new(calc_config, context_instance)
         ca.get_this_val
 
@@ -162,12 +159,27 @@ class ActivityLog
       end
 
       # Validate each key in the where config against the class's column names.
+      # String values may contain {{field_defaults}} substitutions which are resolved
+      # against the current user/master context before the condition is applied.
       # Returns a clean hash safe to pass to AR's where().
       def sanitized_where_conditions
         allowed_columns = @al_class.column_names.map(&:to_s)
         @config[:where].each_with_object({}) do |(k, v), h|
           col = k.to_s
-          h[col] = v if allowed_columns.include?(col)
+          next unless allowed_columns.include?(col)
+
+          h[col] = v.is_a?(String) ? FieldDefaults.calculate_default(context_instance, v, ignore_missing: true) : v
+        end
+      end
+
+      # A lightweight unsaved instance of the activity log class used as the substitution
+      # context for FieldDefaults and ConditionalActions.  Memoized so all backends share
+      # the same object within a single #run call.
+      def context_instance
+        @context_instance ||= begin
+          inst = @al_class.new(master_id: @master.id)
+          inst.current_user = @current_user
+          inst
         end
       end
 

@@ -69,6 +69,18 @@ RSpec.describe ActivityLog::Perspectives::Runner, type: :model do
       result = build_runner(config).run
       expect(result.pluck(:id)).to include @al1.id, @al2.id
     end
+
+    it 'resolves {{current_user_email}} substitution in a where value' do
+      # Store the current user's email on one of the records so a substitution-based
+      # where filter can match it.
+      @al1.update_column(:select_who, @user.email)
+      config = { where: { select_who: '{{current_user_email}}' } }
+      result = build_runner(config).run
+      expect(result).to be_a ActiveRecord::Relation
+      ids = result.pluck(:id)
+      expect(ids).to include @al1.id
+      expect(ids).not_to include @al2.id
+    end
   end
 
   describe 'no-backend (all) perspective' do
