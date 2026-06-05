@@ -1,19 +1,22 @@
 <%
-  # Render a single outer collapsible panel containing all resources listed in
-  # `panel.contains.resources`. Mirrors the contains.categories pattern – the
-  # tab rendered by masters/_search_results_master_tabs_resources toggles this
-  # outer collapse, and each resource produces an inner block (always visible
-  # inside the outer panel) plus a hidden loader anchor that fires the
-  # AJAX list fetch via the existing Rails UJS / Handlebars pipeline.
+  # Render the collapsible block(s) for a contains.resources panel.
   #
-  # Loader anchors are clicked the first time the outer panel is opened
-  # (handled by JS in page_layouts.js on show.bs.collapse). Initial-show
-  # panels open via the existing `on-open-click` tab auto-click in
-  # _fpa.form_utils.on_open_click, which triggers the same path.
+  # TWO MODES – chosen by the number of renderable resources:
   #
-  # Backwards-compatibility: single-resource panels render exactly one inner
-  # resource block + one loader anchor inside the outer container, preserving
-  # the user-visible behaviour of the previous per-resource-tab design.
+  # LEGACY mode (exactly one resource):
+  #   Renders the resource block directly, without an outer wrapper or heading.
+  #   The companion tab in _search_results_master_tabs_resources acts as an AJAX
+  #   trigger whose href is the resource URL and whose data-target/data-result-target
+  #   point at the resource-keyed collapse id (e.g. `activity-log--case-reviews-{{id}}`).
+  #   Applies to all single-resource panels regardless of resource type (AL, DM, EID)
+  #   or whether the panel_name contains spaces.
+  #
+  # WRAPPER mode (two or more resources):
+  #   Renders an outer collapsible panel (panel_name-keyed id) with a heading,
+  #   hidden loader anchors (one per resource), and inner resource blocks inside.
+  #   The tab toggles the outer container; loader anchors fire individual AJAX
+  #   fetches when the outer panel first opens (via on-open-click).
+  #   Activity logs may NOT be mixed with other resource types in wrapper mode.
 
   panel_name = panel.panel_name
   panel_label = panel.panel_label
@@ -33,7 +36,27 @@
     memo << [resource, info]
   end
 %>
-<% if renderable.any? %>
+<% if renderable.length == 1 %>
+  <%# LEGACY single-resource mode: render the resource block directly, without
+      the outer panel wrapper or heading. The tab partial drives the AJAX fetch. %>
+  <% resource, render_info = renderable.first
+     block_id = "#{resource.hyphenate}-{{id}}"
+     inner_block_class = render_info[:wrapper_class].gsub('generic-block', 'inner-block')
+     template_name = render_info[:template_name] %>
+  <div id="<%= block_id %>"
+       class="<%= render_info[:wrapper_class] %> <%= resource.hyphenate %>-block collapse"
+       data-sub-for-root="master_id"
+       data-sub-id="{{id}}"
+       data-sub-item="<%= resource %>"
+       data-template="<%= template_name %>"
+       data-route-path="<%= render_info[:route_path] %>"
+       data-default-expander="<%= default_expander %>">
+    <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= inner_block_class %>">
+    </div>
+  </div>
+<% elsif renderable.length >= 2 %>
+  <%# WRAPPER mode: outer panel container with heading and hidden loader anchors.
+      Used for multi-resource panels (no activity-log mixing allowed). %>
   <% outer = "##{panel_name.id_hyphenate}-{{id}}" %>
   <%= render partial: 'reports/insert_options_css', locals: { outer: outer, view_css: view_css } %>
   <div id="<%= panel_name.id_hyphenate %>-{{id}}"
@@ -46,10 +69,7 @@
     </div>
     <%# Hidden loader anchors – one per resource – are picked up by
         _fpa.form_utils.on_open_click when the master record is expanded
-        (called from the search_results_template postprocessor). This is the
-        same mechanism used by the standard master_external_ids_panel to
-        lazily fetch each resource's list via Rails UJS and render it
-        through the data-template Handlebars pipeline. %>
+        (called from the search_results_template postprocessor). %>
     <div class="on-open-click hidden">
       <% renderable.each do |resource, render_info|
            block_id = "#{resource.hyphenate}-{{id}}"

@@ -97,3 +97,4 @@ yarn-debug.log*
 .__failed-archive__
 
 /public/handlebars*
+.playwright-cli/
