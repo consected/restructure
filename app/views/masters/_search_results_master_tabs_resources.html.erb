@@ -20,40 +20,71 @@
 <% if renderable_resources.any? %>
   <%
     if default_panels.length > 0 && initial_show.nil?
-      # The "default" overrides the value set in the panel definition only if
-      # the panel definition did not specify one. Match if any of the panel's
-      # resources is in the default open panels list.
       initial_show = renderable_resources.any? { |r| r.to_s.in?(default_panels) }
     end
 
-    # Use the panel_name as the open-panels key (consistent with categories).
-    open_panel_key = panel_name
-
     extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
 
-    # For single-resource panels, use the resource name as data-panel-tab so that
-    # spec selectors and save_action configs (which reference resource names) can find
-    # the tab directly — consistent with how standard activity log tabs work.
-    # Multi-resource panels have no single resource name, so they continue to use
-    # the panel_name.
-    panel_tab_value = renderable_resources.length == 1 ? renderable_resources.first.to_s : panel_name
-
-    # For single-resource panels, provide a data-alt-click-id alias using the hyphenated
-    # resource name so that persistent click-target links formed before PR #1182
-    # (e.g. click-target-#tab-activity-log--case-reviews) continue to resolve via the
-    # JS fallback in setup_data_toggles. Multi-resource panels have no legacy id to alias.
-    alt_click_id = renderable_resources.length == 1 ? "tab-#{renderable_resources.first.to_s.hyphenate}" : nil
+    # Use legacy AJAX tab for all single-resource panels (AL, DM, and EID alike).
+    # Multi-resource panels always use wrapper mode.
+    use_legacy = renderable_resources.length == 1
   %>
-  {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%= panel_name %>')) }}
-  <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(open_panel_key, default_panels.length) %>" data-open-panels="{{open_panels}}">
-    <a id="tab-resources-<%= panel_name.id_hyphenate %>"
-       href="#<%= panel_name.id_hyphenate %>-{{id}}"
-       data-panel-tab="<%= panel_tab_value %>"
-       data-toggle="collapse"
-       data-target="#<%= panel_name.id_hyphenate %>-{{id}}"
-       aria-expanded="false"
-       class="scroll-to-expanded collapsed"<% if alt_click_id %>
-       data-alt-click-id="<%= alt_click_id %>"<% end %>><%= panel_label %></a>
-  </li>
-  {{/if}}
+  <% if use_legacy %>
+    <%
+      resource = renderable_resources.first.to_s
+      render_info = resource_render_info(resource, context: :master_panel)
+      route_path = render_info[:route_path]
+      block_id = "#{resource.hyphenate}-{{id}}"
+
+      extra_params = ''
+      using_params = ''
+      if filter_items
+        rparams = filter_items[resource.pluralize]
+        if rparams.is_a?(Hash)
+          rparams = rparams.to_unsafe_h if rparams.respond_to?(:to_unsafe_h)
+          extra_params = "&#{rparams.to_query}"
+          using_params = 'page-layout'
+        elsif rparams == 'using params'
+          using_params = 'page'
+        end
+      end
+    %>
+    {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%= resource.pluralize %>')) }}
+    <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(resource, default_panels.length) %>" data-open-panels="{{open_panels}}">
+      <a id="tab-activity-log-<%= panel_name.id_hyphenate %>"
+         href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %><%= extra_params %>&{{params_to_query 'filter' '<%= resource.pluralize %>'}}"
+         data-using-params="<%= using_params %>"
+         data-panel-tab="<%= resource %>"
+         data-remote="true"
+         data-prevent-on-collapse="true"
+         data-toggle="collapse"
+         data-target="#<%= block_id %>"
+         aria-expanded="false"
+         class="scroll-to-expanded collapsed"
+         data-result-target="#<%= block_id %>"
+         data-alt-click-id="tab-<%= resource.hyphenate %>"
+         data-template="<%= render_info[:template_name] %>"><%= panel_label %></a>
+    </li>
+    {{/if}}
+  <% else %>
+    <%
+      open_panel_key = panel_name
+
+      panel_tab_value = renderable_resources.length == 1 ? renderable_resources.first.to_s : panel_name
+
+      alt_click_id = renderable_resources.length == 1 ? "tab-#{renderable_resources.first.to_s.hyphenate}" : nil
+    %>
+    {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%= panel_name %>')) }}
+    <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(open_panel_key, default_panels.length) %>" data-open-panels="{{open_panels}}">
+      <a id="tab-resources-<%= panel_name.id_hyphenate %>"
+         href="#<%= panel_name.id_hyphenate %>-{{id}}"
+         data-panel-tab="<%= panel_tab_value %>"
+         data-toggle="collapse"
+         data-target="#<%= panel_name.id_hyphenate %>-{{id}}"
+         aria-expanded="false"
+         class="scroll-to-expanded collapsed"<% if alt_click_id %>
+         data-alt-click-id="<%= alt_click_id %>"<% end %>><%= panel_label %></a>
+    </li>
+    {{/if}}
+  <% end %>
 <% end %>

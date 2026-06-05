@@ -56,7 +56,6 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
     allow(Resources::Models).to receive(:find_by) do |args|
       case args[:resource_name].to_s
       when 'activity_log__case_reviews' then activity_log_item
-      else nil
       end
     end
 
@@ -67,56 +66,152 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
     stub_template 'reports/_insert_options_css.html.erb' => ''
   end
 
-  # --- Standard panel_name (no spaces) --------------------------------
+  # --- Single activity-log resource: legacy mode (issue #1205) --------
+  #
+  # Single-resource panels must render WITHOUT the outer collapsible wrapper
+  # introduced by PR #1182. The resource block is rendered directly with its
+  # own resource-keyed id, not a panel_name-keyed id.
 
-  context 'with a simple hyphenated panel_name (e.g. "test-panel")' do
+  context 'with a simple hyphenated panel_name (e.g. "test-panel") — single AL resource legacy mode' do
     before do
       render partial: 'masters/search_results_resources_panel',
              locals: { panel: make_panel(panel_name: 'test-panel', panel_label: 'Test Panel') }
     end
 
-    it 'sets the outer div id from the panel_name' do
-      expect(rendered).to include('id="test-panel-{{id}}"')
+    it 'does NOT render the outer panel-default wrapper div (legacy mode: no outer wrapper)' do
+      expect(rendered).not_to include('class="panel panel-default section-panel')
     end
 
-    it 'sets the close-button href from the panel_name' do
-      expect(rendered).to include('href="#test-panel-{{id}}"')
+    it 'does NOT render an <h4> heading (AL has its own heading)' do
+      expect(rendered).not_to include('<h4')
     end
 
-    it 'includes the panel_name CSS block class' do
-      expect(rendered).to include('test-panel-block')
+    it 'does NOT render the on-open-click hidden loader div (no deferred loader in legacy mode)' do
+      expect(rendered).not_to include('on-open-click hidden')
+    end
+
+    it 'renders the resource block with a resource-keyed id (not panel_name-keyed)' do
+      expect(rendered).to include('id="activity-log--case-reviews-{{id}}"')
+      expect(rendered).not_to include('id="test-panel-{{id}}"')
+    end
+
+    it 'renders the resource block with the legacy wrapper + resource-hyphenated class' do
+      expect(rendered).to include('activity-logs-generic-block activity-log--case-reviews-block')
+    end
+
+    it 'renders data-sub-item with the resource name' do
+      expect(rendered).to include('data-sub-item="activity_log__case_reviews"')
+    end
+
+    it 'renders data-template directly on the resource block (not on a separate loader anchor)' do
+      expect(rendered).to include('data-template="activity-log--case-reviews-main-result-template"')
+    end
+
+    it 'renders the inner block with a resource-keyed id' do
+      expect(rendered).to include('id="activity-log--case-reviews-inner-{{id}}"')
     end
   end
 
-  # --- Panel name with spaces (regression: panel IDs must be valid CSS) ---
+  # --- Single AL resource with spaces in panel_name: still resource-keyed ---
 
-  context 'with a panel_name that contains spaces (e.g. "phone log")' do
+  context 'with a panel_name that contains spaces (e.g. "phone log") — single AL resource legacy mode' do
     before do
       render partial: 'masters/search_results_resources_panel',
              locals: { panel: make_panel(panel_name: 'phone log', panel_label: 'Phone Log') }
     end
 
-    it 'uses a hyphenated id on the outer collapse div (no spaces in id attribute)' do
-      expect(rendered).to include('id="phone-log-{{id}}"')
+    it 'does NOT render the outer panel-default wrapper div' do
+      expect(rendered).not_to include('class="panel panel-default section-panel')
+    end
+
+    it 'does NOT render an <h4> heading' do
+      expect(rendered).not_to include('<h4')
+    end
+
+    it 'does NOT render the on-open-click hidden loader div' do
+      expect(rendered).not_to include('on-open-click hidden')
+    end
+
+    it 'renders the resource block with a resource-keyed id (panel_name not in the id)' do
+      expect(rendered).to include('id="activity-log--case-reviews-{{id}}"')
+      expect(rendered).not_to include('id="phone-log-{{id}}"')
       expect(rendered).not_to include('id="phone log-')
     end
 
-    it 'uses a hyphenated fragment in the close-button href (valid CSS selector)' do
-      expect(rendered).to include('href="#phone-log-{{id}}"')
-      expect(rendered).not_to include('href="#phone log-')
-    end
-
-    it 'uses a hyphenated CSS block class (no spaces in class attribute)' do
-      expect(rendered).to include('phone-log-block')
-      expect(rendered).not_to include('phone log-block')
-    end
-
-    it 'renders the resource loader anchor with the route path' do
+    it 'renders the resource loader route path' do
       expect(rendered).to include('activity_log/case_reviews')
     end
+  end
 
-    it 'renders the on-open-click hidden loader div' do
-      expect(rendered).to include('on-open-click hidden')
+  # --- Single dynamic model resource: legacy mode (issue #1205) --------
+
+  context 'with a single dynamic model resource — legacy mode' do
+    let(:dynamic_model_item) do
+      Resources::Models::Item.new.merge(
+        type: :dynamic_model,
+        resource_name: 'dynamic_model__contact_infos',
+        hyphenated_name: 'dynamic-model--contact-infos',
+        base_route_segments: 'dynamic_model/contact_infos'
+      )
+    end
+
+    let(:render_info_for_contact_infos) do
+      {
+        resource_name: 'dynamic_model__contact_infos',
+        route_path: 'dynamic_model/contact_infos',
+        template_name: 'dynamic-model--contact-infos-list-template',
+        wrapper_class: 'dynamic-model-generic-block',
+        viewable_key: :dynamic_model__contact_infos
+      }
+    end
+
+    before do
+      allow(Resources::Models).to receive(:find_by) do |args|
+        case args[:resource_name].to_s
+        when 'dynamic_model__contact_infos' then dynamic_model_item
+        end
+      end
+
+      allow(view).to receive(:master_viewables).and_return(dynamic_model__contact_infos: true)
+      allow(view).to receive(:resource_render_info).and_return(render_info_for_contact_infos)
+
+      render partial: 'masters/search_results_resources_panel',
+             locals: { panel: make_panel(panel_name: 'contacts-panel',
+                                         panel_label: 'Contacts',
+                                         resources: ['dynamic_model__contact_infos']) }
+    end
+
+    it 'does NOT render the outer panel-default wrapper div (legacy mode: no outer wrapper)' do
+      expect(rendered).not_to include('class="panel panel-default section-panel')
+    end
+
+    it 'does NOT render an <h4> heading' do
+      expect(rendered).not_to include('<h4')
+    end
+
+    it 'does NOT render the on-open-click hidden loader div' do
+      expect(rendered).not_to include('on-open-click hidden')
+    end
+
+    it 'renders the resource block with a resource-keyed id (not panel_name-keyed)' do
+      expect(rendered).to include('id="dynamic-model--contact-infos-{{id}}"')
+      expect(rendered).not_to include('id="contacts-panel-{{id}}"')
+    end
+
+    it 'renders the resource block with the DM wrapper + resource-hyphenated class' do
+      expect(rendered).to include('dynamic-model-generic-block dynamic-model--contact-infos-block')
+    end
+
+    it 'renders data-sub-item with the DM resource name' do
+      expect(rendered).to include('data-sub-item="dynamic_model__contact_infos"')
+    end
+
+    it 'renders data-template with the DM list template directly on the resource block' do
+      expect(rendered).to include('data-template="dynamic-model--contact-infos-list-template"')
+    end
+
+    it 'renders the inner block with a resource-keyed id' do
+      expect(rendered).to include('id="dynamic-model--contact-infos-inner-{{id}}"')
     end
   end
 end
