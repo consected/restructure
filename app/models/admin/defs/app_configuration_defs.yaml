@@ -180,4 +180,22 @@ default options dynamic model: |
       options: |
         _configurations:
           use_current_version: true
-          
+default activity log perspective: |
+  Default perspective to activate for each activity log panel, keyed by resource name.
+  When set, the named perspective will be selected automatically when the panel first loads,
+  overriding the panel-level default_perspective setting in page_layout view_options.
+  Provide a YAML hash where each key is the activity log resource name and the value is the
+  perspective slug to activate. The value may use \{\{#if}} and \{\{#is}} substitutions to
+  conditionally set the default perspective based on the current context. For example:
+
+      activity_log__case_reviews: recent_active
+      activity_log__data_requests: my_open
+
+  With conditional substitutions (values evaluated against the current user):
+
+      activity_log__case_reviews: |
+        \{\{#is role_name '===' 'coordinator'}}
+          coordinator_view
+        \{\{else is role_name '===' 'reviewer'}}
+          reviewer_view
+        \{\{/is}}
