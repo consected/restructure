@@ -14,6 +14,24 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.9 back to develop
+- [Added] _constants and _configurations merging from config libraries - fixes #1178
+- [Refactored] page layout resources to standardise UI panel rendering within generic blocks - fixes #1180
+- [Added] `same_site` lax to session cookie - fixes #1184
+- [Added] full_item_type_name to Admin::MasterRecord - fixes #1183
+- [Fixed] unsafe SQL interpolation of role names in Reports::Runner - fixes #1077
+- [Added] non-blocking main template load on admin pages - fixes #1181
+- [Fixed] SQL injection in AppType#associated_general_selections
+- [Fixed] stored XSS protection with Nokogiri parsing - fixes #1189
+- [Updated] upload notify error message matcher for upstream format change - fixes #1172 compatibility
+- [Added] SSRF guard to pull_external_data save trigger
+- [Refactored] constantize on user-influenced strings to use Resources::Models registry allow-list
+- [Harden] NfsStore path traversal: clean_path guard, containment invariant, filename validation, model-layer defence-in-depth
+- [Added] link from reports API admin panel to extra URL attributes documentation
+- [Fixed] contains.resources panel HTML IDs and data-panel-tab for single-resource panels - fixes #1200
+- [Split] contains.resources panels into legacy single-resource and multi-resource wrapper rendering; forbid mixed AL panels - fixes #1205
+- [Added] activity log panel perspectives feature - resolves #1194
+
 ## [9.44.9] - 2026-05-22
 
 - [Merged] release 9.44.8 back to develop
