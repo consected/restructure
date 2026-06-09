@@ -63,6 +63,32 @@ view_options:
                                       # Example:
                                       #   player_contacts: desc
                                       #   addresses: asc
+  perspectives:                       # hash of resource names to array of perspective definitions for activity log panels
+                                      # Each perspective filters/orders the activity log list server-side
+                                      # Example:
+                                      #   activity_log__case_reviews:
+                                      #     - name: recent_active    # slug used in request params
+                                      #       label: Recent Active   # button label shown to user
+                                      #       report:                # Report backend (use report alt_resource_name)
+                                      #         resource_name: al_recent_active_report
+                                      #         defaults:            # criteria hash passed to report runner
+                                      #           status: active
+                                      #       order:                 # whitelisted sort (column: asc|desc)
+                                      #         created_at: desc     # omit to use action_when_attribute desc
+                                      #                              # (report backend preserves SQL row order)
+                                      #       limit: 10              # max records to return
+                                      #     - name: my_open          # ConditionalActions backend
+                                      #       label: My Open
+                                      #       conditional_calculation:  # CalcActions condition hash;
+                                      #         activity_log__case_reviews: # use field: value for equality
+                                      #           status: active            # and return: return_all_results
+                                      #           return: return_all_results # no_masters is auto-injected
+                                      #     - name: all
+                                      #       label: All             # 'all' with no backend = reset to unfiltered
+  default_perspective:                # slug of the perspective to activate by default for this panel
+                                      # May be overridden per-user via the 'default activity log perspective'
+                                      # Admin::AppConfiguration entry (keyed by resource_name).
+                                      # Example: recent_active
 
 list_options:
   hide_in_list: false (default) | true

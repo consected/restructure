@@ -7,6 +7,7 @@
 The components that can be configured are:
 
 - [Master Panels](master_panels.md)
+- [Activity Log Panel Perspectives](perspectives.md)
 - [User Profile](user_profile.md)
 - [Navigations](navigations.md)
 - [Dashboards](dashboards.md)
@@ -27,3 +28,4 @@ available to all *app types*.
 ## Contents
 
 - [Detailed Options](detailed_options.md)
+- [Activity Log Panel Perspectives](perspectives.md)
