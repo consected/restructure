@@ -239,10 +239,12 @@ class ActivityLog
           # Skip if no results (WHERE id IN () already returns nothing).
           return relation unless @report_ordered_ids.any?
 
-          ids_array = @report_ordered_ids.join(',')
-          return relation.reorder(
-            Arel.sql("array_position(ARRAY[#{ids_array}]::integer[], #{@al_class.quoted_table_name}.id)")
-          )
+          safe_sql = ActiveRecord::Base.sanitize_sql_array([
+            "array_position(ARRAY[?]::integer[], #{@al_class.quoted_table_name}.id)",
+            @report_ordered_ids.map(&:to_i)
+          ])
+          
+          return relation.reorder(Arel.sql(safe_sql))
         end
 
         # Non-report backends: apply action_when_attribute DESC, id DESC.
