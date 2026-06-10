@@ -74,6 +74,51 @@ Conditional blocks of text and substitutions use `\{\{#if substitution_name\}\}a
 The conditional expression evaluates to true if the value is present (not false, nil or blank) and allows the appropriate block of text, markup and
 substitutions to remain in the generated result.
 
+Multiple conditions can be chained with `\{\{else if another_substitution_name\}\}` clauses before the optional `\{\{else\}\}` block.
+
+## Conditional is blocks
+
+Conditional `\{\{#is\}\}` blocks compare an attribute value to an expression using an operator:
+
+`\{\{#is attribute_name 'operator' 'expression'\}\}content\{\{/is\}\}`
+
+If the comparison is true, the content is included in the result. An optional `\{\{else\}\}` block is shown when the comparison is false.
+
+`\{\{#is attribute_name 'operator' 'expression'\}\}truthy content\{\{else\}\}falsy content\{\{/is\}\}`
+
+Multiple conditions can be chained using `\{\{else is attribute_name 'operator' 'expression'\}\}` clauses:
+
+`\{\{#is status '==' 'active'\}\}Active\{\{else is status '==' 'pending'\}\}Pending\{\{else\}\}Unknown\{\{/is\}\}`
+
+### Supported operators
+
+For string and list comparisons:
+
+- `===` — true if both are blank, or both equal
+- `==` — true if both are blank, or both equal
+- `!==` — true unless both are blank or both equal
+- `!=` — true unless both are blank or both equal
+- `in` — true if the attribute value is contained within the expression (expression treated as a list)
+- `!in` — true if the attribute value is NOT contained within the expression
+- `includes` — true if the string matches the expression (as a regex pattern) or the array includes the expression
+- `!includes` — true if the string does NOT match the expression
+
+For numeric comparisons (attribute must be an integer):
+
+- `>=` — greater than or equal to
+- `<=` — less than or equal to
+- `>` — greater than
+- `<` — less than
+
+### Expression values
+
+The expression can be one of:
+
+- A quoted string: `'value'` or `"value"`
+- An integer (no quotes): `42`
+- The literal `null` to represent nil/blank
+- Another attribute name (substitution tag name), to compare two attribute values at runtime
+
 ## For Conditions and Message Templates
 
 Since conditions and message templates are processed on the server side, associations and other server side processable items may be used within substitutions.
