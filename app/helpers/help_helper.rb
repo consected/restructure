@@ -47,7 +47,10 @@ module HelpHelper
 
     text = embed_defs(text)
 
-    text = Formatter::Substitution.text_to_html(text).html_safe
+    # Help doc files are always markdown — render directly with Kramdown to avoid
+    # the HTML-detection heuristic in text_to_html being falsely triggered by
+    # HTML-like tags (e.g. <br>, <ul>) that appear in code examples within the doc.
+    text = Kramdown::Document.new(text, input: 'GFM', hard_wrap: false).to_html.strip.html_safe
 
     # It is necessary to fix the image source before the page is rendered,
     # since the browser will immediately attempt to load images with broken paths
