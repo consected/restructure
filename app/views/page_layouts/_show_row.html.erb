@@ -31,6 +31,23 @@
             result_type = 'report'
             report_id = report['id']
             report_defaults = (report['defaults'] || {}).symbolize_keys
+
+            # Issue #1217: merge URL filter params into report defaults,
+            # but only for keys the report declares as search attributes (allow-list).
+            if @filters.present?
+              begin
+                report_record = Report.find_by_id_or_resource_name(report_id)
+                if report_record
+                  allowed_keys = report_record.search_attributes.symbolize_keys.keys
+                  filter_hash = @filters.respond_to?(:to_unsafe_h) ? @filters.to_unsafe_h : @filters.to_h
+                  filtered_params = filter_hash.symbolize_keys.slice(*allowed_keys)
+                  report_defaults = report_defaults.merge(filtered_params)
+                end
+              rescue ActiveRecord::RecordNotFound
+                # Report not found — fall back to static defaults only
+              end
+            end
+
             report_params = {}
             report_params[:search_attrs] = report_defaults
             report_params[:search_attrs][:_report_id_] = report_id
@@ -87,8 +104,8 @@
         end
       end
 
-      
-      sub_data = @master || {}
+      report_defaults.transform_values! {|v| v.is_a?(String) ? ERB::Util.html_escape(v) : v } if report_defaults
+      sub_data = @master || report_defaults || {}
       
       col_label = Formatter::Substitution.substitute(col_label, data: sub_data, tag_subs: nil)
       col_header = markdown_to_html(col_header)

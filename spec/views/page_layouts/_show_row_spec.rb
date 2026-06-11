@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# View spec for page_layouts/_show_row partial (issue #1180).
+# View spec for page_layouts/_show_row partial (issues #1180 and #1217).
 #
 # The partial renders standalone-page column resource blocks.  The key rendered
 # attributes under test are:
@@ -20,6 +20,14 @@ require 'rails_helper'
 #       expected: data-template="scantron-ids-list-template"
 #   - Activity log regression (AC-020): current behaviour is unchanged.
 #   - Explicit template_prefix override (AC-023): prefix takes precedence over type default.
+#
+# Issue #1217 – URL params passthrough to report search criteria:
+#   - When @filters contains keys that match a report's search_attributes, those
+#     filter values are merged into the report URL's search_attrs query params.
+#   - Filter keys that do NOT appear in the report's search_attributes are excluded
+#     (allow-list safety).
+#   - Static defaults from config are preserved when no matching URL param is provided.
+#   - URL params take precedence over static defaults for the same key.
 #
 # The partial consumes @master_id and two locals: rows and container.
 # Formatter::Substitution and markdown_to_html are stubbed to avoid DB/gem overhead.
@@ -65,7 +73,6 @@ RSpec.describe 'page_layouts/_show_row', type: :view do
       when 'activity_log__case_reviews' then activity_log_item
       when 'dynamic_model__contact_infos' then dynamic_model_item
       when 'scantron_ids' then external_id_item
-      else nil
       end
     end
 
@@ -188,6 +195,131 @@ RSpec.describe 'page_layouts/_show_row', type: :view do
 
     it 'does not include a broken data-template referencing the raw resource name' do
       expect(rendered).not_to include('data-template="nonexistent-resource-')
+    end
+  end
+
+  # --- Issue #1217: URL params passthrough to report search criteria ---
+
+  # Helper to build a minimal rows structure with one col containing a report.
+  def report_rows(report_id, defaults: {})
+    report_def = { 'id' => report_id, 'defaults' => defaults }
+    [{ 'cols' => [{ 'label' => 'Report Label', 'report' => report_def }] }]
+  end
+
+  let(:mock_report) do
+    instance_double(Report, search_attributes: {
+                      'some_field' => [{ 'text' => nil }],
+                      'another_field' => [{ 'text' => nil }]
+                    })
+  end
+
+  context 'with a report block and URL filter params matching declared search_attributes' do
+    before do
+      assign(:filters, { 'some_field' => 'test_value' })
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_return(mock_report)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42), container: container }
+    end
+
+    it 'includes the filter value in the report URL search_attrs' do
+      expect(rendered).to include('search_attrs%5Bsome_field%5D=test_value')
+    end
+  end
+
+  context 'with a report block and URL filter params NOT in search_attributes (safety check)' do
+    before do
+      assign(:filters, { 'undeclared_field' => 'injected' })
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_return(mock_report)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42), container: container }
+    end
+
+    it 'does NOT include the undeclared filter key in the report URL' do
+      expect(rendered).not_to include('undeclared_field')
+    end
+  end
+
+  context 'with a report block and static defaults preserved when no URL param matches' do
+    before do
+      assign(:filters, {})
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_return(mock_report)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42, defaults: { 'some_field' => 'default_val' }), container: container }
+    end
+
+    it 'includes the static default value in the report URL' do
+      expect(rendered).to include('search_attrs%5Bsome_field%5D=default_val')
+    end
+  end
+
+  context 'with a report block and URL params overriding static defaults' do
+    before do
+      assign(:filters, { 'some_field' => 'url_override' })
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_return(mock_report)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42, defaults: { 'some_field' => 'default_val' }), container: container }
+    end
+
+    it 'uses the URL param value overriding the static default' do
+      expect(rendered).to include('search_attrs%5Bsome_field%5D=url_override')
+    end
+
+    it 'does NOT include the overridden static default value' do
+      expect(rendered).not_to include('default_val')
+    end
+  end
+
+  context 'with a report block but no @filters assigned' do
+    before do
+      # @filters is nil (no URL params)
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_return(mock_report)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42, defaults: { 'some_field' => 'static_only' }), container: container }
+    end
+
+    it 'uses static defaults when no filters are present' do
+      expect(rendered).to include('search_attrs%5Bsome_field%5D=static_only')
+    end
+  end
+
+  context 'with a report block when report lookup fails (raises RecordNotFound)' do
+    before do
+      assign(:filters, { 'some_field' => 'injected' })
+      allow(Report).to receive(:find_by_id_or_resource_name).with(42).and_raise(ActiveRecord::RecordNotFound)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows(42, defaults: { 'static' => 'val' }), container: container }
+    end
+
+    it 'falls back to static defaults when report lookup fails' do
+      expect(rendered).to include('search_attrs%5Bstatic%5D=val')
+    end
+
+    it 'does NOT include the URL filter value since report could not be verified' do
+      expect(rendered).not_to include('injected')
+    end
+  end
+
+  context 'with a report block when report lookup returns nil' do
+    before do
+      assign(:filters, { 'some_field' => 'injected' })
+      allow(Report).to receive(:find_by_id_or_resource_name).with('my-report').and_return(nil)
+
+      render partial: 'page_layouts/show_row',
+             locals: { rows: report_rows('my-report', defaults: { 'static' => 'val' }), container: container }
+    end
+
+    it 'falls back to static defaults when report lookup returns nil' do
+      expect(rendered).to include('search_attrs%5Bstatic%5D=val')
+    end
+
+    it 'does NOT include the URL filter value since report could not be verified' do
+      expect(rendered).not_to include('injected')
     end
   end
 end
