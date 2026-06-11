@@ -1,6 +1,7 @@
 <div class="admin-edit-form alert" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <p>Email: <%= @user.email %></p>
+      <p>Name: <%= @user.first_name %> <%= @user.last_name %></p>
       <% if @user.new_password %>
       <% if @user.respond_to?(:api_access_only?) && @user.api_access_only? %>
       <p>New API token: <%= @user.new_token %> </p>
