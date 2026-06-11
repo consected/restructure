@@ -7,13 +7,15 @@
 </div>
 <%= javascript_tag nonce: true do %>
   window.setTimeout(function() {
-  
+    Chart.register(ChartDataLabels);
+
     var $block = $('#<%=block_id%>');
     $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'hidden'});
     var component_options = <%=component_options.to_json.html_safe %>;
     var json = <%= json.html_safe %>;
   
     var opts = {
+      plugins: [ChartDataLabels],
       width: 100,
       height: 100,
       type: '',
