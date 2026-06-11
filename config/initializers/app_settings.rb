@@ -343,6 +343,11 @@ class Settings
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 
+  AdminReportItemTypes = {
+    'z-admin' => 'Admin Reports',
+    'admin-user-access-overview' => 'User Access Overview'
+  }
+
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
   # so it can be displayed in the server info admin view.
