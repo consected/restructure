@@ -84,6 +84,11 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
     expect(@target_record.id).to be_present
   end
 
+  # Allow pull_external_data to reach the Capybara test server (127.0.0.1)
+  before(:each) do
+    stub_const('Settings::PullExternalDataAllowPrivateHosts', true)
+  end
+
   #
   # Capybara test server URL (e.g., "http://127.0.0.1:12345")
   # @return [String]
