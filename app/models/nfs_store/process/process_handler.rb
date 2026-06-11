@@ -219,41 +219,74 @@ module NfsStore
         Settings.nfs_store_default_app_type_id
       end
 
-      # @see ProcessHandler#setup_container_file_current_user
+      # Convenience wrapper around the class method. NOTE: this instance method
+      # does NOT restore the user's app_type_id after the call. Use
+      # NfsStoreJob#setup_container_file_current_user (which wraps in begin/ensure)
+      # whenever a restore is required. Calling this directly is safe only when
+      # the caller takes responsibility for restoring the user's in-memory state.
+      # @see ProcessHandler.setup_container_file_current_user
       def setup_container_file_current_user(container_file)
         self.class.setup_container_file_current_user(container_file, app_type_id_for_file_user)
       end
 
       #
       # Set the current_user in the supplied container_file. If the #user of the container_file
-      # is no longer active, use the Batch User instead, setting it to the in_app_type_id app
+      # is no longer active, or has no nfs_store group roles, use the Batch User instead,
+      # setting it to the in_app_type_id app.
       # @param [NfsStore::Manage::ContainerFile] container_file
       # @param [Integer] in_app_type_id - id of the Admin::AppType for the Batch User if needed
       def self.setup_container_file_current_user(container_file, in_app_type_id)
         user = container_file.user
+        orig_user = user
+
         if user.disabled
           Rails.logger.warn "Job container file user (#{user.id}) is disabled, using batch user instead for app type: #{in_app_type_id}"
-          orig_user = user
           user = User.use_batch_user(in_app_type_id)
-          has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
-          unless has_nfs_role
+          unless user_has_nfs_group_role?(user)
             raise FsException::Action,
-                  "Job container file user (#{orig_user.id}) is disabled and batch user (#{User.batch_user}) does not have an " \
+                  "Job container file user (#{orig_user.id}) is disabled and batch user (#{User.batch_user&.email}) does not have an " \
                   "nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
           end
-        elsif user.app_type_id != default_app_type_id
-          Rails.logger.warn "ProcessHandler - setting user #{user.id} app_type_id from #{user.app_type_id} to #{default_app_type_id}"
-          user.update!(app_type_id: default_app_type_id)
+        else
+          # Normalize the user's app_type_id in-memory first, so that the subsequent role check
+          # queries roles in the correct (default) app type context. user.user_roles is scoped by
+          # user.app_type_id, so nfs_store group roles registered under default_app_type_id would
+          # be invisible if we checked before normalizing.
+          if user.app_type_id != default_app_type_id
+            Rails.logger.warn "ProcessHandler - temporarily switching user #{user.id} app_type_id from #{user.app_type_id} to #{default_app_type_id}"
+            user.app_type_id = default_app_type_id
+          end
+
+          unless user_has_nfs_group_role?(user)
+            Rails.logger.warn "Job container file user (#{orig_user.id}) has no nfs_store group roles, using batch user instead for app type: #{in_app_type_id}"
+            user = User.use_batch_user(in_app_type_id)
+            unless user_has_nfs_group_role?(user)
+              raise FsException::Action,
+                    "Job container file user (#{orig_user.id}) has no nfs_store group role and batch user (#{User.batch_user&.email}) " \
+                    "does not have an nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
+            end
+          end
         end
 
         container_file.current_user = user
+        # Clear memoized role names/group ids since the container's current_user may have changed
+        container_file.container.instance_variable_set(:@current_user_role_names, nil)
+        container_file.container.instance_variable_set(:@current_user_group_ids, nil)
         return user if container_file.current_role_name
 
         Rails.logger.info "Setting current role name for user #{user.id} in app type #{in_app_type_id}"
-        file_path, role_name = container_file.file_path_and_role_name
+        _, role_name = container_file.file_path_and_role_name
         container_file.current_role_name = role_name
         user
       end
+
+      # Check whether a user has at least one active nfs_store group role
+      # @param [User] user
+      # @return [Boolean]
+      def self.user_has_nfs_group_role?(user)
+        user.user_roles.active.pluck(:role_name).any? { |r| r.start_with? 'nfs_store group ' }
+      end
+      private_class_method :user_has_nfs_group_role?
     end
   end
 end

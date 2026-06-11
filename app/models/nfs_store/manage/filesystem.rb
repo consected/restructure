@@ -121,7 +121,7 @@ module NfsStore
         parts << clean_path(path) unless path.blank?
         parts << clean_path(file_name) if file_name
 
-        p = File.join(parts)
+        p = File.join(parts.compact)
 
         # Containment invariant: model fields (parent_sub_dir, directory_name
         # etc.) are not run through clean_path above; guard against any `..`
