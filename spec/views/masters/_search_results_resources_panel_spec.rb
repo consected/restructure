@@ -43,7 +43,9 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
                                  default_expander: nil,
                                  hide_sublist_controls: false,
                                  hide_activity_logs_header: false,
-                                 limit: 20)
+                                 limit: 20,
+                                 perspectives: nil,
+                                 default_perspective: nil)
     double('panel',
            panel_name: panel_name,
            panel_label: panel_label,
@@ -59,6 +61,9 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
       end
     end
 
+    allow(Admin::AppConfiguration).to receive(:hash_for).and_return({})
+
+    allow(view).to receive(:current_user).and_return(nil)
     allow(view).to receive(:master_viewables).and_return(activity_log__case_reviews: true)
     allow(view).to receive(:resource_render_info).and_return(render_info_for_case_reviews)
     allow(view).to receive(:hide_player_tabs?).and_return(false)
