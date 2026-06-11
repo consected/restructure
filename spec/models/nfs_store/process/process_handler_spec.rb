@@ -165,9 +165,8 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     sf.current_user = @user
     sfs << sf
 
-    rets = []
-    sfs.each do |h|
-      rets << {
+    rets = sfs.map do |h|
+      {
         id: h['id'].to_i,
         container_id: @container.id,
         retrieval_type: :stored_file,
@@ -273,5 +272,109 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     sf = sf.class.find(sf.id)
     expect(sf.file_metadata["Patient's Name"]).to eq "set2-#{sf.master_id}"
     expect(sf.file_metadata['Patient ID']).to eq "set2-#{sf.master.player_contacts.first.data}"
+  end
+
+  # Tests for Issue #1204: When an active user with no nfs_store group roles
+  # creates a file (e.g. via e-signature), subsequent background jobs should fall
+  # back to the batch user rather than failing with a permission denied error.
+  describe '.setup_container_file_current_user - Issue1204' do
+    context 'when the container file user is active but has no nfs_store group roles' do
+      let(:no_role_user) { create_user.first }
+
+      before do
+        # Upload a file to create a real stored file owned by @user
+        @ul = upload_file('test-no-role.txt')
+        @stored_file = @ul.stored_file
+        # Reload the stored file to get a clean instance without memoized state
+        @stored_file = NfsStore::Manage::StoredFile.find(@stored_file.id)
+
+        # Reassign the stored file to no_role_user to simulate the e-signature scenario:
+        # a user who can view files via an activity log but has no nfs_store group roles
+        @stored_file.update_column(:user_id, no_role_user.id)
+
+        # Ensure no_role_user is set to the correct app type for the role check
+        no_role_user.update!(app_type_id: @app_type.id)
+      end
+
+      it 'falls back to the batch user when the active user has no nfs_store group roles - Issue1204' do
+        result_user = NfsStore::Process::ProcessHandler.setup_container_file_current_user(
+          @stored_file,
+          @app_type.id
+        )
+
+        expect(result_user).to eq(User.batch_user),
+                               "Expected batch user but got #{result_user&.email} (id: #{result_user&.id})"
+      end
+
+      it 'sets the container file current_user to the batch user - Issue1204' do
+        NfsStore::Process::ProcessHandler.setup_container_file_current_user(
+          @stored_file,
+          @app_type.id
+        )
+
+        expect(@stored_file.current_user).to eq(User.batch_user)
+      end
+
+      it 'sets a current_role_name on the container file when falling back to batch user - Issue1204' do
+        NfsStore::Process::ProcessHandler.setup_container_file_current_user(
+          @stored_file,
+          @app_type.id
+        )
+
+        expect(@stored_file.current_role_name).not_to be_nil
+      end
+    end
+
+    context 'when neither the original user nor the batch user have nfs_store group roles' do
+      let(:no_role_user) { create_user.first }
+
+      before do
+        @ul = upload_file('test-no-role-raise.txt')
+        @stored_file = @ul.stored_file
+        @stored_file = NfsStore::Manage::StoredFile.find(@stored_file.id)
+        @stored_file.update_column(:user_id, no_role_user.id)
+        no_role_user.update!(app_type_id: @app_type.id)
+
+        # Remove nfs_store group roles from the batch user for this app type
+        batch_user = User.use_batch_user(@app_type.id)
+        batch_user.user_roles.where("role_name LIKE 'nfs_store group %'").each do |ur|
+          ur.update!(disabled: true, current_admin: @admin)
+        end
+      end
+
+      after do
+        # Restore batch user nfs_store roles so other tests are unaffected
+        batch_user = User.use_batch_user(@app_type.id)
+        batch_user.user_roles.where("role_name LIKE 'nfs_store group %'").each do |ur|
+          ur.update!(disabled: false, current_admin: @admin)
+        end
+      end
+
+      it 'raises FsException::Action when neither user has nfs_store group roles - Issue1204' do
+        expect do
+          NfsStore::Process::ProcessHandler.setup_container_file_current_user(
+            @stored_file,
+            @app_type.id
+          )
+        end.to raise_error(FsException::Action, /does not have an nfs_store group role/)
+      end
+    end
+
+    context 'when the container file user has nfs_store group roles' do
+      it 'does not replace the user with the batch user - Issue1204' do
+        ul = upload_file('test-has-role.txt')
+        stored_file = ul.stored_file
+        stored_file = NfsStore::Manage::StoredFile.find(stored_file.id)
+
+        result_user = NfsStore::Process::ProcessHandler.setup_container_file_current_user(
+          stored_file,
+          @app_type.id
+        )
+
+        expect(result_user).to eq(@user),
+                               "Expected original user but got #{result_user&.email} (id: #{result_user&.id})"
+        expect(result_user).not_to eq(User.batch_user)
+      end
+    end
   end
 end

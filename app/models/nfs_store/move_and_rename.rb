@@ -50,9 +50,10 @@ module NfsStore
         rf = item[:retrieved_file]
         # Replace the top path with the new path, allowing relative moves of sub directories
         # Handle blank top paths carefully
-        rf.path = "/#{rf.path}" if top_path.blank?
-        rf.path = "#{rf.path}/"
-        new_item_path = rf.path.sub(%r{^#{top_path}/}, "#{new_path}/").gsub(%r{(^/+|/+$)}, '')
+        item_path = rf.path.to_s
+        item_path = "/#{item_path}" if top_path.blank?
+        item_path = "#{item_path}/"
+        new_item_path = item_path.sub(%r{^#{top_path}/}, "#{new_path}/").gsub(%r{(^/+|/+$)}, '')
         rf.move_to new_item_path
       end
 
