@@ -71,6 +71,13 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
     setup_access RESOURCE_NAME, user: @user
     expect(@user.has_access_to?(:access, :table, RESOURCE_NAME)).to be_truthy
 
+    # Reload routes now that the UAC exists for the DM. The earlier DynamicModel.routes_load
+    # call may not have registered the route if add_user_access_controls used a nil app_type
+    # (when admin.matching_user_app_type is nil in a clean DB). Now that setup_access has
+    # created a UAC with @user.app_type, reset the cache and reload routes so the DM is found.
+    DynamicModel.reset_active_model_configurations!
+    DynamicModel.routes_load
+
     # Create the implementation class and a target record for GET tests
     @impl_class = @dm.implementation_class
     @target_record = @impl_class.create!(
