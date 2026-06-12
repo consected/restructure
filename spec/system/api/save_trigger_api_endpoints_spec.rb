@@ -628,6 +628,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
         field_list: 'data select_call_direction',
         blank_log_field_list: 'data select_call_direction'
       )
+      @al.current_admin = @admin
       @al.update_tracker_events
 
       # `add_model_to_list` (which registers AL extra_log_type resources in
@@ -635,6 +636,8 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       # which doesn't fire under transactional fixtures. Invoke the regeneration
       # chain explicitly so the implementation class and option_config resources
       # are registered before `setup_access` runs.
+      # This is also necessary when @al was found (not created) — the class may
+      # not be loaded in this test process.
       ActivityLog.define_models
       @al.force_regenerate = true
       @al.generate_model
