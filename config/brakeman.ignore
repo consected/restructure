@@ -310,60 +310,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "546d379b3f4c806b5aa697f41b98e514cd1c80e6db77a59ca485450ddc7bda1b",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 120,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "PageLayoutsController",
-          "method": "show",
-          "line": 28,
-          "file": "app/controllers/page_layouts_controller.rb",
-          "rendered": {
-            "name": "page_layouts/show",
-            "file": "app/views/page_layouts/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "page_layouts/show",
-          "line": 15,
-          "file": "app/views/page_layouts/show.html.erb",
-          "rendered": {
-            "name": "page_layouts/_show_row",
-            "file": "app/views/page_layouts/_show_row.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "page_layouts/_show_row",
-          "line": 103,
-          "file": "app/views/page_layouts/_show_row.html.erb",
-          "rendered": {
-            "name": "page_layouts/_show_row",
-            "file": "app/views/page_layouts/_show_row.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "page_layouts/_show_row"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "6d610fc02fcf061d54ad702f23cade58e38095a09cfac808a35f1cd1eef3a083",
@@ -698,15 +644,38 @@
       "note": ""
     },
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "fcbe8cefbe5a53fefd20ecb75613ff3ae50b3b61bbd196ee2eb429d7be405e14",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/full_text_search/tsvector_writer.rb",
+      "line": 45,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.exec_query(\"INSERT INTO #{target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")} (#{ActiveRecord::Base.connection.quote_column_name(fk_column)}, master_id, #{ActiveRecord::Base.connection.quote_column_name(target_field)}, created_at, updated_at)\\nVALUES ($1, $2, to_tsvector($4, $3), now(), now())\\nON CONFLICT (#{ActiveRecord::Base.connection.quote_column_name(fk_column)})\\nDO UPDATE SET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($4, $3), updated_at = now()\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"fk_value\", fk_value, ActiveModel::Type::Integer.new), bind_param(\"master_id\", master_id, ActiveModel::Type::Integer.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new)])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "FullTextSearch::TsvectorWriter",
+        "method": "FullTextSearch::TsvectorWriter.write_tsvector"
+      },
+      "user_input": "target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "f027ecfc9397860df7139c0e8e82c88364ae0ab2dc300fdcef882fff74fff6b9",
+      "fingerprint": "cb3759a5b14a5796fe5d5493ac66b2e75f4ca2bff9e60849cb2eb2a0990d0d8b",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/_show_row.html.erb",
-      "line": 111,
+      "line": 131,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or ((col[\"report\"][\"defaults\"] or {}).symbolize_keys.merge((params[:filters].to_unsafe_h or params[:filters].to_h).symbolize_keys.slice(*Report.find_by_id_or_resource_name(col[\"report\"][\"id\"]).search_attributes.symbolize_keys.keys)) or {}))), :tag_subs => nil, :html_escape_values => true)",
       "render_path": [
         {
           "type": "controller",
@@ -732,7 +701,7 @@
         {
           "type": "template",
           "name": "page_layouts/_show_row",
-          "line": 103,
+          "line": 123,
           "file": "app/views/page_layouts/_show_row.html.erb",
           "rendered": {
             "name": "page_layouts/_show_row",
@@ -749,31 +718,62 @@
       "cwe_id": [
         79
       ],
-      "note": ""
+      "note": "False positive: html_escape_values: true causes Formatter::Substitution.substitute to HTML-escape all tag values via ERB::Util.html_escape before splicing into the HTML string. Verified by spec/views/page_layouts/_show_row_xss_spec.rb (issue #1224)."
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "fcbe8cefbe5a53fefd20ecb75613ff3ae50b3b61bbd196ee2eb429d7be405e14",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/full_text_search/tsvector_writer.rb",
-      "line": 45,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.exec_query(\"INSERT INTO #{target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")} (#{ActiveRecord::Base.connection.quote_column_name(fk_column)}, master_id, #{ActiveRecord::Base.connection.quote_column_name(target_field)}, created_at, updated_at)\\nVALUES ($1, $2, to_tsvector($4, $3), now(), now())\\nON CONFLICT (#{ActiveRecord::Base.connection.quote_column_name(fk_column)})\\nDO UPDATE SET #{ActiveRecord::Base.connection.quote_column_name(target_field)} = to_tsvector($4, $3), updated_at = now()\\n\", \"FullTextSearch::TsvectorWriter\", [bind_param(\"fk_value\", fk_value, ActiveModel::Type::Integer.new), bind_param(\"master_id\", master_id, ActiveModel::Type::Integer.new), bind_param(\"text_content\", text_content.to_s, ActiveModel::Type::String.new), bind_param(\"ts_config\", ts_config.to_s, ActiveModel::Type::String.new)])",
-      "render_path": null,
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "3d7f081780d3a743085cf1c1177847a56056fa25c3f191bd6c890d88c42d1227",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/_show_row.html.erb",
+      "line": 140,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or ((col[\"report\"][\"defaults\"] or {}).symbolize_keys.merge((params[:filters].to_unsafe_h or params[:filters].to_h).symbolize_keys.slice(*Report.find_by_id_or_resource_name(col[\"report\"][\"id\"]).search_attributes.symbolize_keys.keys)) or {}))), :tag_subs => nil, :html_escape_values => true)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 28,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/show",
+          "line": 15,
+          "file": "app/views/page_layouts/show.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/_show_row",
+          "line": 123,
+          "file": "app/views/page_layouts/_show_row.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        }
+      ],
       "location": {
-        "type": "method",
-        "class": "FullTextSearch::TsvectorWriter",
-        "method": "FullTextSearch::TsvectorWriter.write_tsvector"
+        "type": "template",
+        "template": "page_layouts/_show_row"
       },
-      "user_input": "target_table.split(\".\").map do\n ActiveRecord::Base.connection.quote_column_name(p)\n end.join(\".\")",
+      "user_input": null,
       "confidence": "Medium",
       "cwe_id": [
-        89
+        79
       ],
-      "note": ""
+      "note": "False positive: html_escape_values: true causes Formatter::Substitution.substitute to HTML-escape all tag values via ERB::Util.html_escape before splicing into the HTML string. Verified by spec/views/page_layouts/_show_row_xss_spec.rb (issue #1224)."
     }
   ],
-  "brakeman_version": "8.0.4"
+  "brakeman_version": "8.0.5"
 }
