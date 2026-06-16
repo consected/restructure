@@ -37,6 +37,11 @@ RSpec.describe User, 'OTP secret decryption handling' do
       expect(@user.otp_secret_decryption_failed?).to be true
     end
 
+    it 'blocks authentication without a prior explicit otp_secret read' do
+      # active_for_authentication? must prime the flag itself (no manual otp_secret call here)
+      expect(@user.active_for_authentication?).to be false
+    end
+
     it 'returns false from active_for_authentication?' do
       @user.otp_secret # trigger the read
       expect(@user.active_for_authentication?).to be false
@@ -45,6 +50,25 @@ RSpec.describe User, 'OTP secret decryption handling' do
     it 'returns :otp_secret_invalid from inactive_message' do
       @user.otp_secret # trigger the read
       expect(@user.inactive_message).to eq(:otp_secret_invalid)
+    end
+  end
+
+  describe 'non-otp_secret attribute decryption errors are not swallowed' do
+    before :each do
+      User.connection.execute("UPDATE users SET otp_secret = 'not-a-valid-cipher' WHERE id = #{@user.id}")
+      @user.reload
+    end
+
+    it 'raises decryption errors for non-otp_secret attributes via attributes' do
+      # Simulate a Decryption failure on a non-otp attribute at the _read_attribute level;
+      # the attributes override must re-raise it (not silence it like it does for otp_secret).
+      original_read = @user.method(:_read_attribute)
+      allow(@user).to receive(:_read_attribute) do |attr_name, &block|
+        raise ActiveRecord::Encryption::Errors::Decryption if attr_name.to_s == 'email'
+
+        original_read.call(attr_name, &block)
+      end
+      expect { @user.attributes }.to raise_error(ActiveRecord::Encryption::Errors::Decryption)
     end
   end
 

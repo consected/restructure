@@ -35,6 +35,11 @@ RSpec.describe Admin, 'OTP secret decryption handling' do
       expect(@admin.otp_secret_decryption_failed?).to be true
     end
 
+    it 'blocks authentication without a prior explicit otp_secret read' do
+      # active_for_authentication? must prime the flag itself (no manual otp_secret call here)
+      expect(@admin.active_for_authentication?).to be false
+    end
+
     it 'returns false from active_for_authentication?' do
       @admin.otp_secret # trigger the read
       expect(@admin.active_for_authentication?).to be false

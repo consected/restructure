@@ -34,6 +34,7 @@ class Admin < ActiveRecord::Base
 
   # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
+    otp_secret # prime the corruption flag so the check is self-contained
     super && !disabled && !account_expired? && !otp_secret_decryption_failed?
   end
 

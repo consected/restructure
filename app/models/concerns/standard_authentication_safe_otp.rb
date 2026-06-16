@@ -41,6 +41,10 @@ module StandardAuthenticationSafeOtp
       hash[name] = begin
                      _read_attribute(name)
                    rescue ActiveRecord::Encryption::Errors::Decryption
+                     # Only silence decryption errors for otp_secret; re-raise
+                     # for any other encrypted attribute so corruption is not hidden.
+                     raise unless name == 'otp_secret'
+
                      nil
                    end
     end
@@ -54,9 +58,13 @@ module StandardAuthenticationSafeOtp
   def otp_secret=(value)
     otp_secret # ensure @otp_secret_decryption_failed is populated if corrupt
     if @otp_secret_decryption_failed
+      # Write nil directly to the DB. Intentionally un-audited: this clears a
+      # corrupt ciphertext so the subsequent encrypted write (via super) succeeds.
       self.class.where(id: id).update_all(otp_secret: nil) if persisted?
+      # Reset the in-memory AR attribute to nil without a full reload, so that
+      # other unsaved attribute changes on this record are preserved.
+      @attributes.write_from_database('otp_secret', nil) if @attributes.key?('otp_secret')
       @otp_secret_decryption_failed = false
-      reload
     end
     super
   end
