@@ -22,7 +22,7 @@ class User < ActiveRecord::Base
 
   devise(*supported_modules)
 
-  include StandardAuthenticationLegacyOtp
+  include StandardAuthenticationSafeOtp
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
@@ -165,7 +165,8 @@ class User < ActiveRecord::Base
 
   # Standard Devise callback to allow accounts to be disabled or expired
   def active_for_authentication?
-    super && !disabled && !account_expired?
+    otp_secret # prime the corruption flag so the check is self-contained
+    super && !disabled && !account_expired? && !otp_secret_decryption_failed?
   end
 
   # Standard Devise callback to tell user that an account has been disabled or expired
@@ -174,6 +175,8 @@ class User < ActiveRecord::Base
       :account_has_been_disabled
     elsif account_expired?
       :account_expired
+    elsif otp_secret_decryption_failed?
+      :otp_secret_invalid
     else
       super
     end

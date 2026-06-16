@@ -186,7 +186,7 @@ module StandardAuthentication
     end
 
     def emails_by_id
-      @emails_by_id_memo ||= all.pluck(:id, :email).to_h
+      @emails_by_id ||= all.pluck(:id, :email).to_h
     end
 
     def clean_memos
@@ -230,7 +230,9 @@ module StandardAuthentication
   # @return [Integer | nil]
   def password_expiring_soon?
     set_default_password_expiration
-    return unless password_updated_at < (self.class.expire_password_after - self.class.remind_days_before).days.ago
+    unless password_updated_at < (self.class.expire_password_after - self.class.remind_days_before).days.ago
+      return false
+    end
 
     ((password_updated_at - self.class.expire_password_after.days.ago) / 1.day).to_i
   end
@@ -448,13 +450,11 @@ module StandardAuthentication
     # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
     self.otp_required_for_login = false
     #
-    # NOTE: if this fails, it is usually because the otp_enc_key has changed compared to the value stored in this record.
-    # This may have been set by FPHS_RAILS_DEVISE_SECRET_KEY or SECRET_KEY_BASE as a fallback.
-    # If you absolutely must change the value in this field, in the database set:
-    # encrypted_otp_secret = null, encrypted_otp_secret_iv = null, encrypted_otp_secret_salt = null
-    #
-    # We might consider doing `self.class.where(id: id).update_all(encrypted_otp_secret: nil, encrypted_otp_secret_iv: nil, encrypted_otp_secret_salt: nil)`
-    # but since this error represent a big change to the security settings somewhere, keeping this as a DBA controlled change seems reasonable.
+    # NOTE: if this fails, it is usually because the encryption key has changed compared to the value stored in this record.
+    # The encryption key is derived from Rails encrypted attribute configuration (see config/initializers/encrypted_fields.rb).
+    # If the otp_secret column is corrupted, the StandardAuthenticationSafeOtp concern will catch the
+    # decryption error and return nil. An admin can reset 2FA via the admin panel to generate a new secret.
+    # Alternatively, a DBA can clear the column: UPDATE users SET otp_secret = NULL WHERE id = <user_id>;
     #
     self.otp_secret = self.class.generate_otp_secret
     self.new_two_factor_auth_code = true
