@@ -69,15 +69,13 @@ RSpec.describe 'masters/_search_results_master_tabs_resources', type: :view do
     }
   end
 
-  # --- Single resource (legacy AJAX pattern) - issue #1205 regression ---
+  # --- Single resource (wrapper mode) - issue #1180 --------------------
   #
-  # Single-resource panels must revert to the pre-PR-#1182 per-resource tab
-  # behaviour: the tab <a> acts as an AJAX trigger (data-remote="true") whose
-  # href is the resource URL, and whose data-target/data-result-target point to
-  # the resource-keyed collapse id, not the panel_name-keyed id.
-  #
-  # These tests describe the CORRECT target behaviour and therefore FAIL with the
-  # current PR-#1182 implementation (Red phase of TDD).
+  # Single DM/EI resource panels use wrapper mode: the tab key is panel_name
+  # and the tab toggles a panel_name-keyed outer collapse container. The actual
+  # AJAX loading of records happens via the hidden on-open-click loader div in
+  # the sibling _search_results_resources_panel partial.
+  # Only single activity-log resource panels retain the legacy AJAX tab.
 
   context 'with a single dynamic model resource' do
     before do
@@ -93,35 +91,35 @@ RSpec.describe 'masters/_search_results_master_tabs_resources', type: :view do
       expect(rendered).to include('Test Panel')
     end
 
-    it 'uses the resource name as data-panel-tab (single-resource panel)' do
-      expect(rendered).to include('data-panel-tab="dynamic_model__contact_infos"')
-      expect(rendered).not_to include('data-panel-tab="test-panel"')
+    it 'uses the panel_name as data-panel-tab (wrapper mode)' do
+      expect(rendered).to include('data-panel-tab="test-panel"')
+      expect(rendered).not_to include('data-panel-tab="dynamic_model__contact_infos"')
     end
 
-    it 'uses a resource-keyed AJAX href (not a panel_name collapse anchor)' do
-      expect(rendered).to include('href="/masters/{{id}}/dynamic_model/contact_infos')
-      expect(rendered).not_to include('href="#test-panel-{{id}}"')
+    it 'uses a panel_name collapse anchor (not an AJAX resource href)' do
+      expect(rendered).to include('href="#test-panel-{{id}}"')
+      expect(rendered).not_to include('href="/masters/{{id}}/dynamic_model/contact_infos')
     end
 
-    it 'sets data-remote="true" on the tab anchor for AJAX loading' do
-      expect(rendered).to include('data-remote="true"')
+    it 'does not set data-remote on the tab anchor (wrapper mode: no AJAX on tab)' do
+      expect(rendered).not_to include('data-remote="true"')
     end
 
-    it 'sets data-result-target to the resource-keyed id' do
-      expect(rendered).to include('data-result-target="#dynamic-model--contact-infos-{{id}}"')
+    it 'does not set data-result-target on the tab anchor (wrapper mode)' do
+      expect(rendered).not_to include('data-result-target=')
     end
 
-    it 'sets data-target to the resource-keyed collapse id' do
-      expect(rendered).to include('data-target="#dynamic-model--contact-infos-{{id}}"')
-      expect(rendered).not_to include('data-target="#test-panel-{{id}}"')
+    it 'sets data-target to the panel_name-keyed collapse id' do
+      expect(rendered).to include('data-target="#test-panel-{{id}}"')
+      expect(rendered).not_to include('data-target="#dynamic-model--contact-infos-{{id}}"')
     end
 
-    it 'places data-template on the tab anchor (legacy: template is on tab, not inner block)' do
-      expect(rendered).to include('data-template="dynamic-model--contact-infos-list-template"')
+    it 'does not place data-template on the tab anchor (wrapper mode: template is on inner block)' do
+      expect(rendered).not_to include('data-template=')
     end
 
-    it 'uses a resource-hyphenated tab id (not tab-resources-prefixed)' do
-      expect(rendered).not_to include('id="tab-resources-test-panel"')
+    it 'uses tab-resources-prefixed tab id (wrapper mode)' do
+      expect(rendered).to include('id="tab-resources-test-panel"')
     end
   end
 
@@ -173,31 +171,31 @@ RSpec.describe 'masters/_search_results_master_tabs_resources', type: :view do
       expect(rendered.scan(/<li\b/).length).to eq(1)
     end
 
-    it 'uses a resource-keyed AJAX href (not a panel_name collapse anchor)' do
-      expect(rendered).to include('href="/masters/{{id}}/scantron_ids')
-      expect(rendered).not_to include('href="#test-panel-{{id}}"')
+    it 'uses a panel_name collapse anchor (not an AJAX resource href)' do
+      expect(rendered).to include('href="#test-panel-{{id}}"')
+      expect(rendered).not_to include('href="/masters/{{id}}/scantron_ids')
     end
 
-    it 'sets data-remote="true" on the tab anchor for AJAX loading' do
-      expect(rendered).to include('data-remote="true"')
+    it 'does not set data-remote on the tab anchor (wrapper mode: no AJAX on tab)' do
+      expect(rendered).not_to include('data-remote="true"')
     end
 
-    it 'sets data-result-target to the resource-keyed id' do
-      expect(rendered).to include('data-result-target="#scantron-ids-{{id}}"')
+    it 'does not set data-result-target on the tab anchor (wrapper mode)' do
+      expect(rendered).not_to include('data-result-target=')
     end
 
-    it 'sets data-target to the resource-keyed collapse id (not panel_name-keyed)' do
-      expect(rendered).to include('data-target="#scantron-ids-{{id}}"')
-      expect(rendered).not_to include('data-target="#test-panel-{{id}}"')
+    it 'sets data-target to the panel_name-keyed collapse id' do
+      expect(rendered).to include('data-target="#test-panel-{{id}}"')
+      expect(rendered).not_to include('data-target="#scantron-ids-{{id}}"')
     end
 
-    it 'places data-template on the tab anchor for the EID list template' do
-      expect(rendered).to include('data-template="scantron-ids-list-template"')
+    it 'does not place data-template on the tab anchor (wrapper mode: template is on inner block)' do
+      expect(rendered).not_to include('data-template=')
     end
 
-    it 'uses the legacy activity-log tab id prefix' do
-      expect(rendered).to include('id="tab-activity-log-test-panel"')
-      expect(rendered).not_to include('id="tab-resources-test-panel"')
+    it 'uses tab-resources-prefixed tab id (wrapper mode, not legacy activity-log prefix)' do
+      expect(rendered).to include('id="tab-resources-test-panel"')
+      expect(rendered).not_to include('id="tab-activity-log-test-panel"')
     end
 
     it 'renders data-alt-click-id with the hyphenated resource name' do

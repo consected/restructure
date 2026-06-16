@@ -71,6 +71,12 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
     setup_access RESOURCE_NAME, user: @user
     expect(@user.has_access_to?(:access, :table, RESOURCE_NAME)).to be_truthy
 
+    # Reset the cache and fully reload routes via routes_reloader so that the newly-registered
+    # UAC is picked up AND the routes are finalized. DynamicModel.routes_load alone adds routes
+    # without calling finalize!, so the Capybara server returns 404 until finalization occurs.
+    DynamicModel.reset_active_model_configurations!
+    Rails.application.routes_reloader.reload!
+
     # Create the implementation class and a target record for GET tests
     @impl_class = @dm.implementation_class
     @target_record = @impl_class.create!(
@@ -82,6 +88,11 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
     expect(@target_record).to be_persisted
     expect(@target_record.id).to be_present
+  end
+
+  # Allow pull_external_data to reach the Capybara test server (127.0.0.1)
+  before(:each) do
+    stub_const('Settings::PullExternalDataAllowPrivateHosts', true)
   end
 
   #
@@ -623,6 +634,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
         field_list: 'data select_call_direction',
         blank_log_field_list: 'data select_call_direction'
       )
+      @al.current_admin = @admin
       @al.update_tracker_events
 
       # `add_model_to_list` (which registers AL extra_log_type resources in
@@ -630,6 +642,8 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       # which doesn't fire under transactional fixtures. Invoke the regeneration
       # chain explicitly so the implementation class and option_config resources
       # are registered before `setup_access` runs.
+      # This is also necessary when @al was found (not created) — the class may
+      # not be loaded in this test process.
       ActivityLog.define_models
       @al.force_regenerate = true
       @al.generate_model
@@ -675,7 +689,10 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
       @ei.other_regenerate_actions if @ei.respond_to?(:other_regenerate_actions)
       ExternalIdentifier.define_models
-      ExternalIdentifier.routes_load
+      # Use routes_reloader.reload! instead of ExternalIdentifier.routes_load to ensure EI routes
+      # are finalized. routes_load adds routes with disable_clear_and_finalize=true but never calls
+      # finalize!, so HTTP requests return 404 until a full reload finalizes the route set.
+      Rails.application.routes_reloader.reload!
 
       @ei_impl_class = @ei.implementation_class
       # Use master-id-derived value to keep uniqueness across spec reruns
