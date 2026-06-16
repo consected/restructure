@@ -52,7 +52,17 @@ Rails.application.config.to_prepare do
     @resource_name = @resource.class.name.downcase
     redirect_to('/') && return unless @resource.two_factor_setup_required?
 
-    # Generate OTP secret if not already present (e.g. user was created when 2FA was disabled)
+    # Generate OTP secret if not already present (e.g. user was created when 2FA was disabled).
+    # Do NOT auto-regenerate if otp_secret decryption failed — this means the column has
+    # corrupt data, not a missing secret. The user must be redirected away and an admin
+    # must reset 2FA via the admin panel.
+    if @resource.otp_secret_decryption_failed?
+      sign_out @resource
+      flash[:alert] = I18n.t('devise.failure.otp_secret_invalid')
+      redirect_to '/'
+      return
+    end
+
     unless @resource.otp_secret.present?
       @resource.otp_secret = @resource.class.generate_otp_secret
       @resource.otp_required_for_login = false
