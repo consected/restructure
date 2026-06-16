@@ -60,7 +60,7 @@ module Formatter
     #    true - quietly ignore the missing tag
     #    false, nil - raise exception if tag is missing
     # @return [String] resulting text after substitution
-    def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
+    def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false, html_escape_values: false)
       return unless all_content
 
       all_content = all_content.dup
@@ -130,6 +130,7 @@ module Formatter
         end
 
         # Finally, substitute the results into the original text
+        tag_value = ERB::Util.html_escape(tag_value) if html_escape_values
         all_content.gsub!(tag_container, tag_value)
       end
 
