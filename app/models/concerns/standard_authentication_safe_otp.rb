@@ -6,18 +6,16 @@ module StandardAuthenticationSafeOtp
   # Single safe rescue point for otp_secret reads via the generated attribute method,
   # direct hash access (obj[:otp_secret]), dirty tracking, and similar paths that
   # go through AR's _read_attribute.
-  def _read_attribute(attr_name, &block)
+  def _read_attribute(attr_name, &)
     super
   rescue ActiveRecord::Encryption::Errors::Decryption
-    if attr_name.to_s == 'otp_secret'
-      unless @otp_secret_decryption_failed
-        Rails.logger.warn { "otp_secret decryption failed for #{self.class.name} id=#{id}: ActiveRecord::Encryption::Errors::Decryption" }
-      end
-      @otp_secret_decryption_failed = true
-      nil
-    else
-      raise
+    raise unless attr_name.to_s == 'otp_secret'
+
+    unless @otp_secret_decryption_failed
+      Rails.logger.warn { "otp_secret decryption failed for #{self.class.name} id=#{id}: ActiveRecord::Encryption::Errors::Decryption" }
     end
+    @otp_secret_decryption_failed = true
+    nil
   end
 
   # Override the devise-two-factor otp_secret reader to use the safe low-level
@@ -37,16 +35,16 @@ module StandardAuthenticationSafeOtp
       Rails.logger.warn { "otp_secret decryption failed in #attributes for #{self.class.name} id=#{id}: ActiveRecord::Encryption::Errors::Decryption" }
     end
     @otp_secret_decryption_failed = true
-    self.class.attribute_names.each_with_object({}) do |name, hash|
-      hash[name] = begin
-                     _read_attribute(name)
-                   rescue ActiveRecord::Encryption::Errors::Decryption
-                     # Only silence decryption errors for otp_secret; re-raise
-                     # for any other encrypted attribute so corruption is not hidden.
-                     raise unless name == 'otp_secret'
+    self.class.attribute_names.to_h do |name|
+      [name, begin
+        _read_attribute(name)
+      rescue ActiveRecord::Encryption::Errors::Decryption
+        # Only silence decryption errors for otp_secret; re-raise
+        # for any other encrypted attribute so corruption is not hidden.
+        raise unless name == 'otp_secret'
 
-                     nil
-                   end
+        nil
+      end]
     end
   end
 

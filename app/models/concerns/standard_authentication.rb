@@ -186,7 +186,7 @@ module StandardAuthentication
     end
 
     def emails_by_id
-      @emails_by_id_memo ||= all.pluck(:id, :email).to_h
+      @emails_by_id ||= all.pluck(:id, :email).to_h
     end
 
     def clean_memos
@@ -230,7 +230,9 @@ module StandardAuthentication
   # @return [Integer | nil]
   def password_expiring_soon?
     set_default_password_expiration
-    return unless password_updated_at < (self.class.expire_password_after - self.class.remind_days_before).days.ago
+    unless password_updated_at < (self.class.expire_password_after - self.class.remind_days_before).days.ago
+      return false
+    end
 
     ((password_updated_at - self.class.expire_password_after.days.ago) / 1.day).to_i
   end
