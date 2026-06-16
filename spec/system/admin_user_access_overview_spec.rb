@@ -171,15 +171,16 @@ describe 'admin User Access Overview reports', js: true, driver: $browser_driver
         expect(page).to have_css('table.tree-table tbody tr')
       end
 
-      it 'returns no results when user is not selected (mandatory)' do
+      it 'returns results for current user when no user is explicitly selected' do
         navigate_to_report('user_access_overview_by_role')
 
-        # Clear the user field and submit with just the default app_type
-        # P1 requires user, so should show no results
+        # The user field defaults to current_user, so submitting without
+        # explicitly selecting a user returns the current user's UACs
         submit_report
 
         expect(page).to have_css('.report-results-block')
-        expect(page).not_to have_css('table.tree-table tbody tr')
+        expect(page).to have_css('table.tree-table tbody tr')
+        expect(page).to have_content(@user.email)
       end
 
       it 'renders inline links in result cells' do

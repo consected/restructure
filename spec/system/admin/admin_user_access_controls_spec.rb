@@ -49,6 +49,12 @@ describe 'admin user access controls', js: true, driver: $browser_driver do
     @test_user2, = create_user(email: "test_user2_#{rand(1_000_000_000)}@testing.com")
     @test_user3, = create_user(email: "test_user3_#{rand(1_000_000_000)}@testing.com")
 
+    # Find a reliable activity_log_type resource name to use in tests.
+    # This avoids dependency on a specific AL that may be disabled or absent.
+    al_resource_names = Admin::UserAccessControl.resource_names_for(:activity_log_type)
+    @activity_log_type_resource_name = al_resource_names.reject { |rn| rn.end_with?('_%') }.first
+    raise 'No activity_log_type resources available for UAC spec' unless @activity_log_type_resource_name
+
     # Create test user roles for the role_name field
     @role1 = Admin::UserRole.create!(
       user: @test_user1,
@@ -148,8 +154,8 @@ describe 'admin user access controls', js: true, driver: $browser_driver do
       finish_page_loading
       sleep 1 # Wait for JavaScript to update big-select options
 
-      # Use an activity log that exists in the test environment (player_contact_phone is always available)
-      select_admin_big_select('resource_name', 'activity_log__player_contact_phone__primary')
+      # Use the first available activity log type (determined in before(:all) from live registry)
+      select_admin_big_select('resource_name', @activity_log_type_resource_name)
       select_admin_field_by_id('access', 'create')
 
       first('input[type="submit"]').click
@@ -159,7 +165,7 @@ describe 'admin user access controls', js: true, driver: $browser_driver do
       uac = Admin::UserAccessControl.active.where(
         user: @test_user3,
         resource_type: 'activity_log_type',
-        resource_name: 'activity_log__player_contact_phone__primary'
+        resource_name: @activity_log_type_resource_name
       ).first
 
       expect(uac).not_to be_nil

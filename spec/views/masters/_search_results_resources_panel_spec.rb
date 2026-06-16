@@ -43,7 +43,9 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
                                  default_expander: nil,
                                  hide_sublist_controls: false,
                                  hide_activity_logs_header: false,
-                                 limit: 20)
+                                 limit: 20,
+                                 perspectives: nil,
+                                 default_perspective: nil)
     double('panel',
            panel_name: panel_name,
            panel_label: panel_label,
@@ -59,6 +61,9 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
       end
     end
 
+    allow(Admin::AppConfiguration).to receive(:hash_for).and_return({})
+
+    allow(view).to receive(:current_user).and_return(nil)
     allow(view).to receive(:master_viewables).and_return(activity_log__case_reviews: true)
     allow(view).to receive(:resource_render_info).and_return(render_info_for_case_reviews)
     allow(view).to receive(:hide_player_tabs?).and_return(false)
@@ -143,9 +148,9 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
     end
   end
 
-  # --- Single dynamic model resource: legacy mode (issue #1205) --------
+  # --- Single dynamic model resource: wrapper mode (issue #1180) --------
 
-  context 'with a single dynamic model resource — legacy mode' do
+  context 'with a single dynamic model resource — wrapper mode' do
     let(:dynamic_model_item) do
       Resources::Models::Item.new.merge(
         type: :dynamic_model,
@@ -181,21 +186,21 @@ RSpec.describe 'masters/_search_results_resources_panel', type: :view do
                                          resources: ['dynamic_model__contact_infos']) }
     end
 
-    it 'does NOT render the outer panel-default wrapper div (legacy mode: no outer wrapper)' do
-      expect(rendered).not_to include('class="panel panel-default section-panel')
+    it 'renders the outer panel-default wrapper div (wrapper mode: outer container)' do
+      expect(rendered).to include('class="panel panel-default section-panel')
     end
 
-    it 'does NOT render an <h4> heading' do
-      expect(rendered).not_to include('<h4')
+    it 'renders an <h4> heading with the panel label' do
+      expect(rendered).to include('<h4')
     end
 
-    it 'does NOT render the on-open-click hidden loader div' do
-      expect(rendered).not_to include('on-open-click hidden')
+    it 'renders the on-open-click hidden loader div (fires AJAX when panel opens)' do
+      expect(rendered).to include('on-open-click hidden')
     end
 
-    it 'renders the resource block with a resource-keyed id (not panel_name-keyed)' do
+    it 'renders the outer div with panel_name-keyed id and inner resource block with resource-keyed id' do
+      expect(rendered).to include('id="contacts-panel-{{id}}"')
       expect(rendered).to include('id="dynamic-model--contact-infos-{{id}}"')
-      expect(rendered).not_to include('id="contacts-panel-{{id}}"')
     end
 
     it 'renders the resource block with the DM wrapper + resource-hyphenated class' do

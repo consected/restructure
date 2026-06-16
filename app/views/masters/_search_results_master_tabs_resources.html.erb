@@ -25,9 +25,11 @@
 
     extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
 
-    # Use legacy AJAX tab for all single-resource panels (AL, DM, and EID alike).
-    # Multi-resource panels always use wrapper mode.
-    use_legacy = renderable_resources.length == 1
+    # Use legacy AJAX tab only for single activity-log panels.
+    # Dynamic model and external identifier single-resource panels use wrapper mode
+    # (panel_name as tab key, outer wrapper container) for a consistent contract.
+    use_legacy = renderable_resources.length == 1 &&
+      resource_render_info(renderable_resources.first, context: :master_panel)&.dig(:wrapper_class) == 'activity-logs-generic-block'
   %>
   <% if use_legacy %>
     <%
@@ -70,7 +72,10 @@
     <%
       open_panel_key = panel_name
 
-      panel_tab_value = renderable_resources.length == 1 ? renderable_resources.first.to_s : panel_name
+      # In wrapper mode the tab always uses the panel_name as key, so that
+      # a single DM/EI resource panel behaves consistently with multi-resource
+      # panels (and the system spec's unified contract for issue #1180).
+      panel_tab_value = panel_name
 
       alt_click_id = renderable_resources.length == 1 ? "tab-#{renderable_resources.first.to_s.hyphenate}" : nil
     %>
