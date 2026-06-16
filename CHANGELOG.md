@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.10] - 2026-06-16
+
 - [Merged] release 9.44.9 back to develop
 - [Added] _constants and _configurations merging from config libraries - fixes #1178
 - [Refactored] page layout resources to standardise UI panel rendering within generic blocks - fixes #1180
