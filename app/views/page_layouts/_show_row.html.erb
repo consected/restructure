@@ -110,8 +110,8 @@
       col_label = Formatter::Substitution.substitute(col_label, data: sub_data, tag_subs: nil)
       col_header = markdown_to_html(col_header)
       col_footer = markdown_to_html(col_footer)
-      col_header = Formatter::Substitution.substitute(col_header, data: sub_data, tag_subs: nil).html_safe
-      col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil).html_safe
+      col_header = Formatter::Substitution.substitute(col_header, data: sub_data, tag_subs: nil, html_escape_values: true).html_safe
+      col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil, html_escape_values: true).html_safe
 
   %>
     <% if !@master_id && !col_url && !no_resource_or_report %>
