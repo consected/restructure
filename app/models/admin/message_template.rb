@@ -172,11 +172,21 @@ class Admin::MessageTemplate < ActiveRecord::Base
   end
 
   def self.dangerous_html_attributes?(node)
-    return true if node.name.casecmp('meta').zero? && node.attribute('http-equiv').present?
+    return true if dangerous_meta_http_equiv?(node)
 
     node.attribute_nodes.any? do |attribute|
       dangerous_html_attribute?(attribute)
     end
+  end
+
+  def self.dangerous_meta_http_equiv?(node)
+    return false unless node.name.casecmp('meta').zero?
+
+    http_equiv = normalized_html_attribute_value(node.attribute('http-equiv')&.value)
+    return false unless http_equiv.casecmp('refresh').zero?
+
+    content = normalized_html_attribute_value(node.attribute('content')&.value)
+    content.match?(/(?:\A|;)url=[^;]+/i)
   end
 
   def self.dangerous_html_attribute?(attribute)
