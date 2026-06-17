@@ -63,10 +63,10 @@ module PageLayoutsHelper
     # Handlebars templates are registered using the full, namespaced, pluralised
     # resource name with underscores replaced by hyphens (e.g.
     # `activity-log--case-reviews-main-result-template`, `dynamic-model--contact-infos-list-template`,
-    # `scantron-ids-list-template`). Use the resource name itself (not the
-    # stripped singular `hyphenated_name` from Resources::Models) to align with
-    # the names produced by handlebars_template_tag in the search-results partials.
-    resource_hyph = resource_name.to_s.hyphenate
+    # `scantron-ids-list-template`). Always derive from the model registry's canonical resource_name
+    # (which is always plural) to align with the names produced by handlebars_template_tag in
+    # the search-results partials. This is safe even when the caller passes a singular name.
+    resource_hyph = model[:resource_name].to_s.hyphenate
 
     template_name = if !template_prefix.nil?
                       "#{resource_hyph}-#{template_prefix}result-template"

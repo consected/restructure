@@ -82,16 +82,32 @@ RSpec.describe PageLayoutsHelper, type: :helper do
 
     before do
       allow(Resources::Models).to receive(:find_by) do |args|
-        case args[:resource_name].to_s
-        when 'activity_log__case_reviews' then activity_log_item
-        when 'dynamic_model__contact_infos' then dynamic_model_item
-        when 'scantron_ids' then external_id_item
-        else nil
+        if args[:resource_name]
+          case args[:resource_name].to_s
+          when 'activity_log__case_reviews' then activity_log_item
+          when 'dynamic_model__contact_infos' then dynamic_model_item
+          when 'scantron_ids' then external_id_item
+          else nil
+          end
+        elsif args[:resource_item_name]
+          # Simulate the fallback lookup used when a singular resource name is passed
+          case args[:resource_item_name].to_s
+          when 'activity_log__case_review' then activity_log_item
+          when 'dynamic_model__contact_info' then dynamic_model_item
+          else nil
+          end
         end
       end
     end
 
     context 'with an activity log resource' do
+      context 'when a singular resource name is passed (as sent by _show_row.html.erb before pluralizing)' do
+        it 'pluralises the name so the template name matches the registered Handlebars template' do
+          info = helper.resource_render_info('activity_log__case_review', context: :standalone_page)
+          expect(info[:template_name]).to eq('activity-log--case-reviews-page-result-template')
+        end
+      end
+
       context 'in :master_panel context' do
         subject(:info) { helper.resource_render_info('activity_log__case_reviews', context: :master_panel) }
 
@@ -178,6 +194,18 @@ RSpec.describe PageLayoutsHelper, type: :helper do
         it 'returns the same -list-template regardless of context' do
           expect(info[:template_name]).to eq('scantron-ids-list-template')
         end
+      end
+    end
+
+    context 'when a singular dynamic model resource name is passed' do
+      it 'pluralises the name so the template name matches the registered Handlebars template' do
+        info = helper.resource_render_info('dynamic_model__contact_info', context: :standalone_page)
+        expect(info[:template_name]).to eq('dynamic-model--contact-infos-list-template')
+      end
+
+      it 'does not use the singular form in the template name' do
+        info = helper.resource_render_info('dynamic_model__contact_info', context: :master_panel)
+        expect(info[:template_name]).not_to include('contact-info-list')
       end
     end
 
