@@ -190,7 +190,7 @@ module StandardAuthentication
     end
 
     def clean_memos
-      @emails_by_id_memo = nil
+      @emails_by_id = nil
     end
 
     def find_active_by_email_or_id(email_or_id)

@@ -11,6 +11,40 @@ class Classification::SelectionOptionsHandler
   CacheKeySelectorWithConfigOverrides = 'selector_with_config_overrides'
 
   #
+  # The canonical list of "self-sourcing" field name prefixes.
+  #
+  # A self-sourcing field derives its own selection options at runtime from the field-name
+  # suffix - for example select_record_from_<association> (records from a master association)
+  # or select_user_with_role_<role> (users holding a role). Each is rendered by a dedicated
+  # `name_starts_with_<prefix>` edit_fields partial and never requires a persisted general
+  # selection or an edit_as override.
+  #
+  # Keep this list in sync with the `_name_starts_with_*` partials that build their options
+  # from the field name (see app/views/common_templates/edit_fields). Ordered so that, when
+  # matching, the longest/most specific prefixes are tested first.
+  SelfSourcingFieldPrefixes = %w[
+    pick_multiple_records_from_table
+    tag_select_record_from_table
+    select_record_id_from_table
+    tag_select_users_with_role
+    tag_select_record_id_from
+    select_record_from_table
+    tag_select_record_from
+    select_record_id_from
+    select_user_with_role
+    select_record_from
+  ].freeze
+
+  #
+  # Check if a field sources its own selection options at runtime, based on its name.
+  # @param [String | Symbol] field_name
+  # @return [Boolean]
+  def self.self_sourcing_field?(field_name)
+    fn = field_name.to_s
+    SelfSourcingFieldPrefixes.any? { |prefix| fn.start_with?("#{prefix}_") }
+  end
+
+  #
   # Get the selection option label for a field value in a user base object, if there is one
   # This does not benefit from memoization, so it is generally recommended to instantiate
   # the class and call #label_form(field_name, field_value)
