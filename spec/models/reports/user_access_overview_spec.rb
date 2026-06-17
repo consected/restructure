@@ -1149,7 +1149,9 @@ RSpec.describe 'User Access Overview Reports', type: :model do
       template_content = File.read(template_path)
 
       # Find the line(s) that contain the User Access Overview link
-      overview_lines = template_content.lines.select { |line| line.include?('User Access Overview') }
+      # The link text uses Settings::AdminReportItemTypes['admin-user-access-overview'] rather than
+      # a hardcoded string, so match by the item_type key instead.
+      overview_lines = template_content.lines.select { |line| line.include?("Settings::AdminReportItemTypes['admin-user-access-overview']") }
       expect(overview_lines).not_to be_empty, 'Expected a User Access Overview link in the admin index'
 
       overview_line = overview_lines.first
