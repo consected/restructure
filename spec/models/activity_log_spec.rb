@@ -3,7 +3,13 @@
 require 'rails_helper'
 
 # Use the activity log player contact phone activity log implementation,
-# since it includes the works_with concern
+# since it includes the works_with concern.
+#
+# Tests cover:
+# - Master association definitions for activity log extra log types
+# - Reconfiguration of extra log types with new steps
+# - View recreation when activity log definition changes
+# - Regression: disabling an activity log definition skips item_type_exists validation
 
 RSpec.describe 'Activity Log definition', type: :model do
   include ModelSupport
@@ -452,6 +458,42 @@ RSpec.describe 'Activity Log definition', type: :model do
 
         ActiveRecord::Base.connection.schema_cache.clear!
       end
+    end
+  end
+
+  describe 'item_type_exists validation' do
+    before :each do
+      create_user
+    end
+
+    it 'skips validation when disabling a record with an unresolvable item type' do
+      # Find an existing enabled activity log definition
+      al_def = ActivityLog.active.first
+      expect(al_def).not_to be_nil
+
+      # Directly write an invalid item_type to simulate a model that no longer exists,
+      # bypassing validations so the record is in the database with the bad value
+      al_def.update_columns(item_type: 'nonexistent_model_type')
+      al_def.reload
+
+      # Disabling the record should succeed despite the unresolvable item_type
+      al_def.current_admin = @admin
+      al_def.disabled = true
+      expect(al_def.save).to be true
+    end
+
+    it 'still validates item_type_exists for enabled records' do
+      al_def = ActivityLog.active.first
+      expect(al_def).not_to be_nil
+
+      al_def.update_columns(item_type: 'nonexistent_model_type')
+      al_def.reload
+
+      # Saving an enabled record with an unresolvable item_type should fail validation
+      al_def.current_admin = @admin
+      al_def.disabled = false
+      expect(al_def.save).to be false
+      expect(al_def.errors[:item_type]).not_to be_empty
     end
   end
 end
