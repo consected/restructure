@@ -590,6 +590,14 @@ module OptionConfigs
     end
 
     def field_has_selection_override?(field_name)
+      # Fields with dedicated template partials that source their own data do not
+      # require a general selection config or an edit_as override:
+      #   select_record_from_* → _name_starts_with_select_record_from.html.erb
+      #     (fetches records from the master's association by name convention)
+      #   select_user_with_role_* → _name_starts_with_select_user_with_role.html.erb
+      #     (fetches users having the role derived from the field name)
+      return true if field_name.to_s.start_with?('select_record_from_', 'select_user_with_role_')
+
       fopts = field_options[field_name.to_sym] if field_options.respond_to?(:[])
       return false unless fopts.respond_to?(:dig)
 
