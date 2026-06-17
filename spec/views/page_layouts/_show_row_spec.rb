@@ -20,6 +20,9 @@ require 'rails_helper'
 #       expected: data-template="scantron-ids-list-template"
 #   - Activity log regression (AC-020): current behaviour is unchanged.
 #   - Explicit template_prefix override (AC-023): prefix takes precedence over type default.
+#   - Singular resource name regression: when the page layout config uses a singular
+#     name (e.g. 'activity_log__case_review'), the template name must still resolve
+#     to the plural form matching the registered Handlebars template.
 #
 # Issue #1217 – URL params passthrough to report search criteria:
 #   - When @filters contains keys that match a report's search_attributes, those
@@ -68,11 +71,20 @@ RSpec.describe 'page_layouts/_show_row', type: :view do
     assign(:master, {})
 
     # Stub Resources::Models.find_by for the new implementation.
+    # Handles both resource_name (plural) and resource_item_name (singular) lookups
+    # to support the fallback path in resource_render_info.
     allow(Resources::Models).to receive(:find_by) do |args|
-      case args[:resource_name].to_s
-      when 'activity_log__case_reviews' then activity_log_item
-      when 'dynamic_model__contact_infos' then dynamic_model_item
-      when 'scantron_ids' then external_id_item
+      if args[:resource_name]
+        case args[:resource_name].to_s
+        when 'activity_log__case_reviews' then activity_log_item
+        when 'dynamic_model__contact_infos' then dynamic_model_item
+        when 'scantron_ids' then external_id_item
+        end
+      elsif args[:resource_item_name]
+        case args[:resource_item_name].to_s
+        when 'activity_log__case_review' then activity_log_item
+        when 'dynamic_model__contact_info' then dynamic_model_item
+        end
       end
     end
 
@@ -177,6 +189,44 @@ RSpec.describe 'page_layouts/_show_row', type: :view do
 
     it 'uses the explicit prefix to build the template name overriding the type default' do
       expect(rendered).to include('data-template="dynamic-model--contact-infos-page-result-template"')
+    end
+  end
+
+  # --- Singular resource name regression (Bug #1180 fix) ---------------
+  # _show_row.html.erb sets lookup_name to the un-pluralized config name
+  # (e.g. 'activity_log__case_review'), then calls resource_render_info
+  # with that singular name. Before the fix, resource_hyph used the caller's
+  # input instead of the registry's canonical plural, producing a
+  # data-template like 'activity-log--case-review-page-result-template'
+  # which did not match any registered Handlebars template.
+
+  context 'when the resource config name is singular (activity log)' do
+    before do
+      render partial: 'page_layouts/show_row',
+             locals: { rows: resource_rows('activity_log__case_review'), container: container }
+    end
+
+    it 'resolves to the plural template name matching the registered Handlebars template' do
+      expect(rendered).to include('data-template="activity-log--case-reviews-page-result-template"')
+    end
+
+    it 'does NOT use the singular form in the template name' do
+      expect(rendered).not_to include('data-template="activity-log--case-review-page-result-template"')
+    end
+  end
+
+  context 'when the resource config name is singular (dynamic model)' do
+    before do
+      render partial: 'page_layouts/show_row',
+             locals: { rows: resource_rows('dynamic_model__contact_info'), container: container }
+    end
+
+    it 'resolves to the plural template name matching the registered Handlebars template' do
+      expect(rendered).to include('data-template="dynamic-model--contact-infos-list-template"')
+    end
+
+    it 'does NOT use the singular form in the template name' do
+      expect(rendered).not_to include('data-template="dynamic-model--contact-info-list-template"')
     end
   end
 
