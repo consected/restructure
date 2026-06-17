@@ -200,7 +200,7 @@ RSpec.describe 'User Access Overview Reports', type: :model do
         item_type: 'admin-user-access-overview'
       )
       expect(new_report).to be_present,
-                             "Expected resource-focused report 'user_access_overview_resource_by_role' to exist"
+                            "Expected resource-focused report 'user_access_overview_resource_by_role' to exist"
     end
 
     it 'includes search_attrs with app_type_id and user for all reports' do
@@ -479,7 +479,7 @@ RSpec.describe 'User Access Overview Reports', type: :model do
         resource_name: 'admin_user_access_overview__user_access_overview_resource_by_role'
       )
       expect(resource_focus_uac).to be_present,
-                                     "Expected a UAC with resource_name 'admin_user_access_overview__user_access_overview_resource_by_role'"
+                                    "Expected a UAC with resource_name 'admin_user_access_overview__user_access_overview_resource_by_role'"
     end
   end
 
