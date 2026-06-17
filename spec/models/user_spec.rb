@@ -25,6 +25,9 @@
 #   - Admin-created users when self-registration disabled
 # - Associations:
 #   - user_preference relationship with autosave and inverse_of
+# - Memoization Cache (GitHub #1228):
+#   - emails_by_id cache is cleared by clean_memos after a user save, so subsequent
+#     lookups reflect the updated email rather than a stale cached value
 
 require 'rails_helper'
 include SetupHelper
@@ -353,6 +356,37 @@ describe User do
   after :all do
     if User.method_defined? :orig_password_updated_at
       User.send :alias_method, :password_updated_at, :orig_password_updated_at
+    end
+  end
+
+  # Regression spec for GitHub #1228:
+  # StandardAuthentication#clean_memos previously cleared @emails_by_id_memo (a
+  # stale ivar name left after a RuboCop rename) instead of @emails_by_id, so the
+  # emails_by_id cache was never actually invalidated after a save.
+  describe '.emails_by_id cache invalidation (clean_memos)' do
+    it 'reflects the updated email after the user is saved' do
+      create_admin
+
+      # Warm the cache
+      original_email = @user.email
+      cache_before = User.emails_by_id
+      expect(cache_before[@user.id]).to eq original_email
+
+      # Update the email as an admin
+      new_email = "updated-#{SecureRandom.hex(4)}@example.com"
+      @user.current_admin = @admin
+      @user.email = new_email
+      @user.save!
+
+      # Cache must have been cleared and repopulated on next access
+      cache_after = User.emails_by_id
+      expect(cache_after[@user.id]).to eq new_email
+    end
+
+    it 'returns nil for the cache ivar before first access' do
+      # Ensure clean_memos sets the ivar to nil (not an incorrect name)
+      User.clean_memos
+      expect(User.instance_variable_get(:@emails_by_id)).to be_nil
     end
   end
 end

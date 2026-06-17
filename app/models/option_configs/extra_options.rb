@@ -571,6 +571,9 @@ module OptionConfigs
       return if selection_fields.empty?
 
       selection_fields.each do |field_name|
+        # Fields that source their own options at runtime (records from a master
+        # association, or users holding a role) never need a general selection config.
+        next if Classification::SelectionOptionsHandler.self_sourcing_field?(field_name)
         next if general_selection_present_for_dynamic_model_field?(field_name)
         next if field_has_selection_override?(field_name)
 
