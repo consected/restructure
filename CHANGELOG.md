@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.12] - 2026-06-17
+
 - [Merged] release 9.44.11 back to develop
 - [Fixed] singular resource name in page layout template resolution - fixes #1233
 
