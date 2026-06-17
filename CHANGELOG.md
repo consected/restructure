@@ -14,6 +14,16 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.10 back to develop
+- [Added] script to analyse an app-type YAML config file
+- [Fixed] safe email layout XSS false-positive handling - fixes #1229
+- [Fixed] User.emails_by_id memo not cleared on save due to wrong ivar name - refs #1228
+- [Fixed] Group D spec failures: user access overview template selector and redcap nfs_store batch user access - refs #1228
+- [Fixed] false config errors for select_record_from_* and select_user_with_role_* fields - refs #1228
+- [Moved] select_record_from_* and select_user_with_role_* exclusion to use_with_attribute? - refs #1228
+- [Refactored] minor formatting updates in selection and report specs - refs #1228
+- [Refactored] Group C self-sourcing field exemption into canonical prefix list - refs #1228
+
 ## [9.44.10] - 2026-06-16
 
 - [Merged] release 9.44.9 back to develop
