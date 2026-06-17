@@ -85,6 +85,12 @@ class Classification::GeneralSelection < ActiveRecord::Base
   # @param [String] attr is the attribute name
   # @return [Boolean]
   def self.use_with_attribute?(attr)
+    # Exclude fields served by dedicated template partials that source their own data
+    # and never require a general selection config:
+    #   select_record_from_* → fetches master association records by field name suffix
+    #   select_user_with_role_* → fetches users having the role derived from field name suffix
+    return false if attr.start_with?('select_record_from_', 'select_user_with_role_')
+
     !attr.in?(%w[disabled user_id created_at updated_at]) && (
       attr.start_with?('select_') ||
       attr.start_with?('multi_') ||
