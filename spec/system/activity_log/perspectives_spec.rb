@@ -161,6 +161,9 @@ describe 'activity log panel perspectives', js: true, driver: $browser_driver do
                            .where(app_type: @app_type, name: 'default activity log perspective')
                            .each { |ac| ac.update!(current_admin: @admin, disabled: true) }
     Admin::AppConfiguration.clear_memo!
+    # Disable the email activity log created for this spec so it doesn't contaminate
+    # subsequent specs that check supports_activity_log for player_contact items
+    @al_def&.update!(disabled: true, current_admin: @admin)
   end
 
   before(:each) do

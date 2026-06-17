@@ -677,6 +677,8 @@ class ActivityLog < ActiveRecord::Base
 
   def item_type_exists
     return true unless errors.empty?
+    # Allow disabling a record even when the associated model is no longer accessible
+    return true if disabled?
 
     begin
       implementation_class
