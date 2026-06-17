@@ -70,7 +70,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     master.current_user = @user
     pn = '(123)456-7890'
     master.player_contacts.create! data: pn, rec_type: :phone, rank: 10
-    master.player_contacts.create! data: pn + ' ext 123', rec_type: :phone, rank: 5
+    master.player_contacts.create! data: "#{pn} ext 123", rec_type: :phone, rank: 5
     master.player_contacts.create! data: 'abc@def.xyz', rec_type: :email, rank: 10
 
     expect(master.player_contact_phones.first.data).to eq pn
@@ -206,7 +206,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     pn = '(123)456-7890'
     pc1 = master.player_contacts.create! data: pn, rec_type: :phone, rank: 10
-    pc2 = @player_contact = master.player_contacts.create! data: pn + ' ext 123', rec_type: :phone, rank: 5
+    pc2 = @player_contact = master.player_contacts.create! data: "#{pn} ext 123", rec_type: :phone, rank: 5
     pc3 = master.player_contacts.create! data: 'abc@def.xyz', rec_type: :email, rank: 10
 
     setup_access :activity_log__player_contact_phones, user: @user
@@ -308,7 +308,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
       '<img src="x" onerror="alert(1)">',
       '<svg onload="alert(1)">',
       '<body onload="alert(1)">',
-      '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">'
+      '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
+      '<meta http-equiv="refresh" content="0; url=\'javascript:alert(1)\'">',
+      '<meta http-equiv="refresh" content="0; url=&quot;javascript:alert(1)&quot;">',
+      '<meta http-equiv="refresh" content="0;url=https://evil.example">',
+      '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
     ].each do |payload|
       it "raises when generated content contains: #{payload.truncate(40)}" do
         Admin::MessageTemplate.create! name: 'xss content', message_type: :email, template_type: :content,
@@ -338,6 +342,28 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
       res = Admin::MessageTemplate.generate_content content_template_name: 'safe content'
       expect(res).to include '<h1>Hello</h1>'
+    end
+
+    it 'allows safe email layouts with standard meta, src, and href attributes' do
+      layout_template = <<~HTML
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          </head>
+          <body>
+            <div class="header"><img src="http://localhost:3000/logo.png" /></div>
+            <div class="main-content">{{main_content}}</div>
+          </body>
+        </html>
+      HTML
+
+      layout = Admin::MessageTemplate.new name: 'safe layout', message_type: :email, template_type: :layout,
+                                          template: layout_template
+
+      expect do
+        layout.generate content_template_text: '<p>Read <a href="https://example.test/page">more</a>.</p>'
+      end.not_to raise_error
     end
 
     it 'bypasses XSS check if check_xss is false' do
