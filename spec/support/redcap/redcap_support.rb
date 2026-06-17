@@ -93,6 +93,21 @@ module Redcap
       add_user_to_role Settings.admin_nfs_role, for_user: @user
       add_user_to_role 'admin', for_user: @user
 
+      # Ensure the batch user can operate in the @app_type (ref-data) context.
+      # setup_container_file_current_user (process_handler.rb #1204) normalises the
+      # file-owner's app_type_id to Settings.nfs_store_default_app_type_id before
+      # checking nfs_store group roles. When those roles are absent it falls back to
+      # the batch user via User.use_batch_user(in_app_type_id). That method calls
+      # bu.update(app_type_id: ...) which is silently rejected by the before_save
+      # :set_app_type callback if the batch user has no :app_type general access.
+      # Mirror what nfs_store_support.rb does: give the batch user access + role.
+      batch_user = User.batch_user
+      if batch_user
+        enable_user_app_access(@app_type, batch_user)
+        batch_user = User.use_batch_user(@app_type.id)
+        add_user_to_role Settings.admin_nfs_role, for_user: batch_user if batch_user
+      end
+
       @user.clear_role_names!
     end
 
