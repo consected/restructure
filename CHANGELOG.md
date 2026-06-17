@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.11] - 2026-06-17
+
 - [Merged] release 9.44.10 back to develop
 - [Added] script to analyse an app-type YAML config file
 - [Fixed] safe email layout XSS false-positive handling - fixes #1229
