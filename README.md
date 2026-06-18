@@ -413,24 +413,12 @@ the state of the upstream/develop branch that will be receiving the PR commits.
 
 ```sh
 feature_branch="$(git branch --show-current)"
-git checkout up-develop || git checkout -b up-develop upstream/develop
-git branch --set-upstream-to=origin
-git pull
+# Update the upstream develop "up-develop" branch (creating it if it isn't already set up locally)
+app-scripts/merge-up-develop.sh
+
 git checkout ${feature_branch}
 git rebase --onto up-develop ${commit-prior-to-first-in-feature-branch}
-git push --force
-```
-
-Then update the CHANGELOG using git commit entries:
-
-```sh
-app-scripts/get_changelog_entries_from_git.sh up-develop --update-cl
-```
-
-Check the updates and commit
-
-```sh
-git commit CHANGELOG.md -m 'Updated CHANGELOG' && git push
+git push --force-with-lease
 ```
 
 ## Getting the latest version from upstream
@@ -438,9 +426,7 @@ git commit CHANGELOG.md -m 'Updated CHANGELOG' && git push
 To pull the latest version from the upstream ReStructure Github repo, ensure you have committed any changes in the _develop_ branch then run the following to merge the latest version. Where there might be merge conflicts, the merge shows a preference for changes coming from upstream.
 
 ```sh
-git remote show upstream > /dev/null || git remote add upstream https://github.com/consected/restructure.git
-git fetch upstream && git checkout develop && git pull && \
-git merge upstream/develop -X theirs -m "Merge from upstream" > /dev/null && git commit --allow-empty -a -m "Commit" && git push
+app-scripts/merge-up-develop.sh
 ```
 
 ## Database connections
