@@ -1,6 +1,5 @@
 name: rebase-on-up-develop
 description: Rebase a feature branch onto the latest up-develop branch
-model: Claude Opus 4.6 (copilot)
 ---
 ### Rebase Feature Branch Onto Latest up-develop
 

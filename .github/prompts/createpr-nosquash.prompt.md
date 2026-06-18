@@ -1,21 +1,20 @@
-name: createpr
-description: Create a new pull request using our workspace workflow
+name: createpr-nosquash
+description: Create a new pull request using our workspace workflow without squashing commits
 ---
 ### Creating a Pull Request
 
-If requested to create a PR, follow these steps:
+If requested to create a PR without squashing commits, follow these steps:
 
 - Ensure files have been formatted and linted according to our workspace standards
 - Ensure all work has been commited to the feature branch
-- Squash commits into a single commit with a clear message describing the change and referencing the related issue number (e.g. "Added feature X - fixes #123"): use `git reset --soft...`
+- Only squash commits so that there is a single commit per logical change, with a clear message describing the change and referencing the related issue number (e.g. "Added feature X - fixes #123")
 - Rebase your branch onto the latest local `up-develop` branch before creating a pull request
 - Create a (cross fork) pull request on repo `consected/restructure` based on the `develop` branch, with a descriptive title and summary of changes. "head" should refer to the local branch created for the feature.
 
 NOTE: Only a human user will merge branches after code review; AI agents should not merge branches.
 
-Step-by-step commands to create the PR:
+Step-by-step commands to create the PR after squashing commits for logical changes:
 ```sh
-git reset --soft start-<branch-name> && git commit -m "<commit message>"
 git checkout up-develop && git pull
 git checkout <branch-name> && git rebase --onto up-develop start-<branch-name>
 git push -u origin <branch-name> --force-with-lease

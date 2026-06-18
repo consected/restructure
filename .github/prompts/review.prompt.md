@@ -1,6 +1,5 @@
 name: review
 description: Review PR for completeness and security issues
-model: Gemini 3.1 Pro (Preview)
 ---
 ### Creating a Pull Request
 
