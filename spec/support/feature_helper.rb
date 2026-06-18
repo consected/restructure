@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 module FeatureHelper
+  # Allow the test to pause and enter an interactive debugging session.
+  # Issue a `sleep 1` command in the debugger to allow the server to process requests.
+  # Or use `finish_form_formatting`, `finish_page_loading` or similar Capybara methods
+  # to wait for the requests to complete.
+  def interactive_debug_session
+    debugger
+  end
+
   def scroll_into_view(element)
     page.execute_script('arguments[0].scrollIntoView(true);', element)
   end
