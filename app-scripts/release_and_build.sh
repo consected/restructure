@@ -120,6 +120,9 @@ RELEASESTARTED="$(echo "${ALLTAGS}" | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
+# Ensure bundler is up to date, but don't update other gems
+gem update --conservative bundler
+
 echo "export RUBY_V=$(cat .ruby-version)" > ${DEF_RUBY_V_FILE}
 
 source ${BUILD_VARS_FILE}
