@@ -70,9 +70,8 @@ For Rspec System Specs Refer to: [Rspec System Specs project coding standards](i
 - Create a directory `./tmp/agent-tmp` in the workspace root
 - Use `./tmp/agent-tmp` for all temporary files and logs
 - DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
-- DO NOT run commands that redirect output to `/dev/null` or `/tmp/`
-- DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` for later analysis
-- DO NOT run commands with `timeout` unless absolutely necessary
+- DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` or '/tmp' for later analysis
+- DO NOT run commands with `timeout` unless absolutely necessary OR if using `interactive_debug_session` or `debugger` to pause execution for analysis
 
 ```bash
 # Let test output stream, then analyze the saved log
