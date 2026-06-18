@@ -2,8 +2,7 @@
 
 git remote show upstream > /dev/null || git remote add upstream https://github.com/consected/restructure.git
 git fetch upstream
-git checkout up-develop || git checkout -b up-develop upstream/develop
-git branch --set-upstream-to=origin
+git checkout up-develop || ( git checkout -b up-develop upstream/develop && git branch --set-upstream-to=origin )
 git pull
 git checkout up-develop
 git pull
