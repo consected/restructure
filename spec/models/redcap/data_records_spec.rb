@@ -420,11 +420,11 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
       rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
 
-      cr = Redcap::ClientRequest.where(action: 'store records',
-                                       server_url: rc.server_url,
-                                       name: rc.name,
-                                       redcap_project_admin: rc)
-                                .last
+      Redcap::ClientRequest.where(action: 'store records',
+                                  server_url: rc.server_url,
+                                  name: rc.name,
+                                  redcap_project_admin: rc)
+                           .last
 
       dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
@@ -468,13 +468,13 @@ RSpec.describe Redcap::DataRecords, type: :model do
       puts @user.email
 
       # Debug: Check what user the data_records will use
-      dr_user = rc.current_user
+      rc.current_user
       # puts "DataRecords current_user: #{dr_user&.email}"
       # puts "DataRecords current_user has edit access to stored_files: #{dr_user&.has_access_to?(:edit, :table, 'nfs_store__manage__stored_files')}"
       # puts "DataRecords current_user app_type: #{dr_user&.app_type&.name}"
       # puts "@user app_type: #{@user.app_type&.name}"
 
-      dd = rc.redcap_data_dictionary
+      rc.redcap_data_dictionary
       clean_file_fields_filesystem rc.file_store
 
       dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
@@ -534,7 +534,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       allow(NfsStore::Import).to receive(:import_file).and_wrap_original do |method, *args, **kwargs|
         call_count += 1
         filename_str = args[1].to_s
-        raise Exception.new("Simulated file import failure for #{filename_str}") if filename_str == 'file1'
+        raise StandardError, "Simulated file import failure for #{filename_str}" if filename_str == 'file1'
 
         # Simulate a file import failure
 
@@ -581,6 +581,73 @@ RSpec.describe Redcap::DataRecords, type: :model do
       model_record.reload
       expect(model_record.file1).to eq Redcap::DataRecords::FailedFileFieldMarker
       expect(model_record.signature).to be_present
+    end
+
+    # Production regression: when a dynamic-model row has a blank file-field column
+    # but the underlying stored_file row already exists (e.g. from a previous pull
+    # that succeeded at the filestore level but did not write the filename back),
+    # the next pull detects the mismatch (DB blank vs REDCap non-blank) and calls
+    # capture_files again. NfsStore::Import.import_file returns nil because the file
+    # hash matches the existing stored_file row, so the import is skipped. Without
+    # the fix, the column stays blank and the loop repeats indefinitely.
+    # With the fix, capture_files writes the filename to the column even on a skip.
+    it 'writes filename to column when import_file skips because file already exists' do
+      setup_file_fields
+      rc = @project_admin
+      rc.current_admin = @admin
+      setup_file_store rc.job_admin
+      setup_file_store
+      clean_file_fields_filesystem rc.file_store
+      mock_file_field_requests
+
+      # First pull: import the files normally so the stored_file row exists.
+      dr1 = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr1.retrieve
+      retrieved = dr1.records.find { |r| r[:file1].present? && r[:signature].present? }
+      expect(retrieved).to be_present
+      original_file1 = retrieved[:file1]
+      dr1.records.each { |r| dr1.send(:create_or_update, r) }
+      model_record = dr1.upserted_records.find { |r| r[dr1.send(:record_id_field)] == retrieved[dr1.send(:record_id_field)] }
+      expect(model_record).to be_present
+      dr1.send(:capture_files, model_record)
+      expect(dr1.imported_files.count).to eq 2
+
+      # Simulate the production symptom: blank the file-field column in the DB
+      # while leaving the stored_file row in place.
+      model_record.update_columns(file1: nil)
+      model_record.reload
+      expect(model_record.file1).to be_nil
+
+      # Second pull: record comparison detects blank DB vs non-blank REDCap value,
+      # so the record is treated as changed and flows through create_or_update.
+      Rails.cache.clear
+      mock_file_field_requests
+      dr2 = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+      dr2.retrieve
+      retrieved2 = dr2.records.find { |r| r[dr2.send(:record_id_field)] == model_record[dr2.send(:record_id_field)] }
+      expect(retrieved2).to be_present
+      dr2.records.each { |r| dr2.send(:create_or_update, r) }
+      model_record2 = dr2.upserted_records.find { |r| r.id == model_record.id }
+      expect(model_record2).to be_present
+
+      # Simulate import_file returning nil (file hash matches existing stored_file —
+      # the production scenario described in the regression). Only nil for file1;
+      # allow signature to go through normally to confirm partial-skip works too.
+      allow(NfsStore::Import).to receive(:import_file).and_wrap_original do |method, *args, **kwargs|
+        next nil if args[1].to_s == 'file1'
+
+        method.call(*args, **kwargs)
+      end
+
+      dr2.send(:capture_files, model_record2)
+
+      # file1 was skipped (nil return), signature was imported normally
+      expect(dr2.skipped_files.any? { |f| f[:field_name] == :file1 }).to be true
+      expect(dr2.errors).to be_empty
+
+      # The fix: file1 column should be written back even though import was skipped
+      model_record2.reload
+      expect(model_record2.file1).to eq original_file1
     end
 
     # The following specs verify that file field filenames are not persisted to
@@ -811,7 +878,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
       mock_file_field_requests
 
       rc.in_background_job = true
-      dd = rc.redcap_data_dictionary
+      rc.redcap_data_dictionary
 
       dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
 

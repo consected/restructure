@@ -70,7 +70,7 @@ module Redcap
     def request_records(ignore_cache: false, retrieve_all: false, verify_file_fields: false)
       jobclass = Redcap::CaptureRecordsJob
       jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
-      return if jobs.count > 0
+      return if jobs.any?
 
       # Remember the requested options so they can be recorded in the job request,
       # giving admins visibility into what was actually requested. Note that
@@ -131,7 +131,7 @@ module Redcap
       store
     rescue StandardError => e
       self.errors ||= []
-      self.errors << { error: e.to_s, backtrace: e.short_string_backtrace }
+      errors << { error: e.to_s, backtrace: e.short_string_backtrace }
       # Append failure indicator to preserve which stage failed
       self.storage_stage = "#{storage_stage} (failed)"
       update_job_request
@@ -213,7 +213,7 @@ module Redcap
       si_name = survey_identifier_field_name
       integer_si_name = integer_survey_identifier_field_name
 
-      return unless records.first.has_key?(si_name)
+      return unless records.first.key?(si_name)
 
       records.each do |rec|
         val = rec[si_name]
@@ -364,7 +364,7 @@ module Redcap
       return @retrieved_rec_ids if @retrieved_rec_ids
 
       @retrieved_rec_ids = records.map do |r|
-        record_identifier_fields.map { |f| [f, r[f].to_s] }.to_h
+        record_identifier_fields.to_h { |f| [f, r[f].to_s] }
       end
     end
 
@@ -703,16 +703,6 @@ module Redcap
                                              replace: true)
           if res
             imported_files << res
-            # Now that the file is stored, write the deferred filename back to
-            # the dynamic-model row. Use update_columns to skip validations and
-            # callbacks so this does not re-fire after_commit save triggers.
-            # Skip when record is not an AR instance (e.g. when capture_files
-            # is called directly with a retrieved hash in tests).
-            if record.respond_to?(:update_columns)
-              record.update_columns(field_name => filename_value)
-            else
-              record[field_name] = filename_value
-            end
           else
             # import_file returned nil: the file was skipped (e.g. an identical
             # stored_file row already existed, or skip_existing matched).
@@ -727,6 +717,17 @@ module Redcap
               "path: #{path}, replace: true, record_id: #{record_id}, " \
               "project_admin: #{project_admin.id}"
             )
+          end
+
+          # Now that the file is stored (or was already stored and skipped), write the deferred
+          # filename back to the dynamic-model row. Use update_columns to skip validations and
+          # callbacks so this does not re-fire after_commit save triggers.
+          # Skip when record is not an AR instance (e.g. when capture_files
+          # is called directly with a retrieved hash in tests).
+          if record.respond_to?(:update_columns)
+            record.update_columns(field_name => filename_value)
+          else
+            record[field_name] = filename_value
           end
         rescue Exception => e
           # We rescue Exception rather than StandardError, since file errors inherit from Exception
