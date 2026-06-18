@@ -14,6 +14,124 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.44.12] - 2026-06-17
+
+- [Merged] release 9.44.11 back to develop
+- [Fixed] singular resource name in page layout template resolution - fixes #1233
+
+## [9.44.11] - 2026-06-17
+
+- [Merged] release 9.44.10 back to develop
+- [Added] script to analyse an app-type YAML config file
+- [Fixed] safe email layout XSS false-positive handling - fixes #1229
+- [Fixed] User.emails_by_id memo not cleared on save due to wrong ivar name - refs #1228
+- [Fixed] Group D spec failures: user access overview template selector and redcap nfs_store batch user access - refs #1228
+- [Fixed] false config errors for select_record_from_* and select_user_with_role_* fields - refs #1228
+- [Moved] select_record_from_* and select_user_with_role_* exclusion to use_with_attribute? - refs #1228
+- [Refactored] minor formatting updates in selection and report specs - refs #1228
+- [Refactored] Group C self-sourcing field exemption into canonical prefix list - refs #1228
+
+## [9.44.10] - 2026-06-16
+
+- [Merged] release 9.44.9 back to develop
+- [Added] _constants and _configurations merging from config libraries - fixes #1178
+- [Refactored] page layout resources to standardise UI panel rendering within generic blocks - fixes #1180
+- [Added] `same_site` lax to session cookie - fixes #1184
+- [Added] full_item_type_name to Admin::MasterRecord - fixes #1183
+- [Fixed] unsafe SQL interpolation of role names in Reports::Runner - fixes #1077
+- [Added] non-blocking main template load on admin pages - fixes #1181
+- [Fixed] SQL injection in AppType#associated_general_selections
+- [Fixed] stored XSS protection with Nokogiri parsing - fixes #1189
+- [Updated] upload notify error message matcher for upstream format change - fixes #1172 compatibility
+- [Added] SSRF guard to pull_external_data save trigger
+- [Refactored] constantize on user-influenced strings to use Resources::Models registry allow-list
+- [Harden] NfsStore path traversal: clean_path guard, containment invariant, filename validation, model-layer defence-in-depth
+- [Added] link from reports API admin panel to extra URL attributes documentation
+- [Fixed] contains.resources panel HTML IDs and data-panel-tab for single-resource panels - fixes #1200
+- [Split] contains.resources panels into legacy single-resource and multi-resource wrapper rendering; forbid mixed AL panels - fixes #1205
+- [Added] activity log panel perspectives feature - resolves #1194
+
+## [9.44.9] - 2026-05-22
+
+- [Merged] release 9.44.8 back to develop
+- [Added] tracking for Redcap DataRecords requested options and skipped files - fixes #1143
+- [Improved] NFS container error messaging and mkdir test return value - refs #1155
+- [Added] regression specs for embed via create_reference extra_log_type investigation
+- [Corrected] initial_show and open_panels documentation and specs - resolves #1153
+- [Update] docs to correctly note that initial_show: false is also overridden by open panels
+- [Added] auto name filter for admin pages with name column - fixes #1159
+- [Added] validation to raise FphsOptionsParseError for unexpected underscore-prefixed keys in option configs - fixes #1163
+- [Fixed] Puma test port selection reliability - fixes #1165
+- [Fixed] notes field format: plain newlines overridden by app config markdown setting - fixes #1167
+- [Added] async lazy loading for admin components panel - fixes #1171
+- [Added] ActivityLog embedded_item API panel trigger examples - fixes #930
+- [Added] parse_json and parse_yaml substitution formatters - fixes #1170
+- [Added] current app type access boolean column and filter to Usernames and Passwords admin page - resolves #1168
+
+## [9.44.8] - 2026-05-15
+
+- [Merged] release 9.44.7 back to develop
+- [Added] if: conditions to attachments and after_processing in pull_emails trigger - fixes #1144
+- [Updated] pull_emails spec whitespace formatting - fixes #1144
+- [Added] lookup sub-query value source and condition: return flags - fixes #1142
+- [Added] inline data URI image embedding in notification emails - resolves #1148
+- [Fixed] notify on_complete array handling - fixes #1147
+
+## [9.44.7] - 2026-05-14
+
+## [9.44.6] - 2026-05-14
+
+- [Merged] release 9.44.5 back to develop
+- [Fixed] Redcap job perform() to use opts hash instead of kwargs for delayed_job Ruby 3 compatibility - fixes #1137
+
+## [9.44.5] - 2026-05-14
+
+- [Merged] release 9.44.4 back to develop
+- [Clarified] User Access Overview report titles and descriptions - fixes #1123
+- [Clarified] User Access Overview search criteria labels and report ordering - fixes #1124
+- [Added] triggering instance details to trigger exception messages - fixes #1121
+- [Updated] DB schema SQL
+- [Fixed] bulk message response updates across app-type switch and expanded retry-path coverage - fixes #1129
+- [Updated] prompts
+- [Added] drill-down links between User Access Overview reports and admin pages - fixes #1125
+- [Fixed] download_field_file failing for longitudinal Redcap projects with multiple instruments - fixes #1135
+- [Fixed] display_embedded? error in page layouts - fixes #1134
+- [Fixed] Redcap file capture desync and added manual recovery option - fixes #1137
+
+## [9.44.4] - 2026-05-08
+
+- [Merged] release 9.44.3 back to develop
+- [Added] regression guard spec for versioned field list - refs #665
+- [Added] lenient server_url matching when looking up REDCap project by project_id - fixes #1116
+- [Added] request_source tracking to Redcap::DataRecords job requests - resolves #1118
+
+## [9.44.3] - 2026-05-07
+
+## [9.44.2] - 2026-05-07
+
+- [Merged] release 9.44.1 back to develop
+- [Fixed] tracker history protocol casing in history view - fixes #1112
+- [Added] pull_emails save trigger to read MIME emails from S3, filesystem and IMAP - resolves #1109
+- [Added] warn logging for failed API authentication attempts - fixes #1114
+- [Fixed] log injection risk by sanitizing user-supplied values in API auth failure log - fixes #1114
+- [Updated] gems
+
+## [9.44.1] - 2026-05-05
+
+- [Merged] release 9.43.1 back to develop
+- [Added] tracker history panel filters and initial config - fixes #1074
+- [Fixed] incomplete 'Resolved from .' text in admin definition versioning details - fixes #1094
+- [Added] admin user filters for email, first_name, and last_name - fixes #1096
+- [Fixed] CSV import field matching, header labels and chosen table selector - fixes #1097, fixes #1099
+- [Implemented] accordion-based admin Details panels with auto-expanding UAC and regression coverage - resolves #1095
+- [Fixed] versioned phone log templates and added UI coverage - fixes #1078
+- [Added] guidance to copilot instructions to avoid CHANGELOG updates
+- [Fixed] trackers_length SQL error and zero-count memoization bug - fixes #1106
+- [Added] report list documentation and specs - resolves #1108
+- [Updated] CHANGELOG
+- [Try] fixing release_and_build.sh merge
+- [Merged] release 9.44.0 back to develop
+
 ## [9.44.0] - 2026-05-02
 
 ### From FPHS - PR #1110 - 2026-05-02
