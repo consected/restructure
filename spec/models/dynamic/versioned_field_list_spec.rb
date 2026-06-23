@@ -40,10 +40,20 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
   before :all do
     change_setting('AllowDynamicMigrations', true)
+    # These specs only have meaning when definition-at-record-creation versioning
+    # is active. In the test environment DisableVDef already defaults to false
+    # (Rails.env.development? is false), but set it explicitly so the versioned
+    # behavior is not silently dependent on the environment default and cannot be
+    # accidentally disabled (e.g. via FPHS_DISABLE_VDEF). With versioning disabled,
+    # `versioned`/`versioned_definition` resolve to the current definition and the
+    # "old fields only" assertions below would no longer be exercised.
+    @prev_disable_vdef = Settings::DisableVDef
+    change_setting('DisableVDef', false)
   end
 
   after :all do
     change_setting('AllowDynamicMigrations', false)
+    change_setting('DisableVDef', @prev_disable_vdef)
   end
 
   before :example do
@@ -118,8 +128,8 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     expect(v1_version.field_list_array).to include('test1')
     expect(v1_version.field_list_array).to include('test2')
     expect(v1_version.field_list_array).not_to include(new_field),
-      "Expected v1 versioned definition field_list_array NOT to include '#{new_field}', " \
-      "but got: #{v1_version.field_list_array}"
+                                               "Expected v1 versioned definition field_list_array NOT to include '#{new_field}', " \
+                                               "but got: #{v1_version.field_list_array}"
   end
 
   it 'returns only old fields from versioned option_type_config when a new field is added' do
@@ -159,8 +169,8 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     versioned_otc = instance_v1.versioned_definition.option_type_config_for(:default)
     expect(versioned_otc).not_to be_nil
     expect(versioned_otc.fields).not_to include(new_field),
-      "Expected versioned option_type_config fields for a v1 instance NOT to include '#{new_field}', " \
-      "but got: #{versioned_otc.fields}"
+                                        "Expected versioned option_type_config fields for a v1 instance NOT to include '#{new_field}', " \
+                                        "but got: #{versioned_otc.fields}"
   end
 
   it 'returns only old fields from edit_form_field_list for instances created under a previous version' do
@@ -195,7 +205,7 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     # v2 instance should include the new field in edit_form_field_list
     v2_edit_fields = instance_v2.edit_form_field_list
     expect(v2_edit_fields.map(&:to_s)).to include(new_field),
-      "Expected v2 instance edit_form_field_list to include '#{new_field}', but got: #{v2_edit_fields}"
+                                          "Expected v2 instance edit_form_field_list to include '#{new_field}', but got: #{v2_edit_fields}"
 
     # Reload the v1 instance to clear memoization
     instance_v1 = DynamicModel::TestCreatedByRec.find(instance_v1.id)
@@ -204,8 +214,8 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
     # v1 instance should NOT include the new field in edit_form_field_list
     v1_edit_fields_after = instance_v1.edit_form_field_list
     expect(v1_edit_fields_after.map(&:to_s)).not_to include(new_field),
-      "Expected v1 instance edit_form_field_list NOT to include '#{new_field}', " \
-      "but got: #{v1_edit_fields_after}"
+                                                    "Expected v1 instance edit_form_field_list NOT to include '#{new_field}', " \
+                                                    "but got: #{v1_edit_fields_after}"
   end
 
   it 'returns only old fields from TemplateOptionMapping.dynamic_model_mapping for versioned definitions' do
@@ -242,13 +252,13 @@ RSpec.describe 'Versioned field list for dynamic model instances', type: :model 
 
     # The item_list in the mapping should only include old fields, NOT the new field
     expect(mapping[:item_list]).not_to include(new_field),
-      "Expected TemplateOptionMapping item_list for versioned definition NOT to include '#{new_field}', " \
-      "but got: #{mapping[:item_list]}"
+                                       "Expected TemplateOptionMapping item_list for versioned definition NOT to include '#{new_field}', " \
+                                       "but got: #{mapping[:item_list]}"
 
     # Verify the current definition DOES include the new field
     current_otc = dmdef.option_type_config_for(:default)
     current_mapping = OptionConfigs::TemplateOptionMapping.dynamic_model_mapping(dmdef, current_otc, @user)
     expect(current_mapping[:item_list]).to include(new_field),
-      "Expected current TemplateOptionMapping item_list to include '#{new_field}'"
+                                           "Expected current TemplateOptionMapping item_list to include '#{new_field}'"
   end
 end
