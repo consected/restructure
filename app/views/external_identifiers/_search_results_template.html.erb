@@ -6,6 +6,21 @@
                def_record: m,
                option_type_config: m.default_options
               } %>
+  <%# Also emit JS-only template_config entries for older history versions so that
+      external identifier records created before a definition version bump can still
+      resolve their vN key (issue #1238).  The common _search_results_template skips
+      Handlebars HTML-template rendering when def_version is non-nil, so this only
+      produces the lightweight JS config block. %>
+  <% m.all_versions.each do |historical_version|
+       # Skip the latest history entry: it corresponds to the current live record,
+       # whose config is already emitted above with def_version=nil.
+       next if historical_version.def_version == m.all_versions.first&.def_version
+  %>
+    <%= render partial: 'external_identifiers/common_search_results_template_item', 
+               locals: { 
+                 def_record: historical_version,
+                 option_type_config: historical_version.default_options
+                } %>
+  <% end %>
 <% end %>
-
 
