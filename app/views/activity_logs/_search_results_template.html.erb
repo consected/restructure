@@ -2,4 +2,22 @@
   next unless m.implementation_class_defined?(::ActivityLog, fail_without_exception: true)
 %>
 <%= render partial: 'activity_logs/search_results_template_item', locals: { def_record: m } %>
+<%# Also emit JS-only template_config entries for older history versions so that
+    activity log records created before a definition version bump can still
+    resolve their vN key (issue #1238).  The common _search_results_template
+    skips Handlebars HTML-template rendering when def_version is non-nil, so this
+    only produces the lightweight JS config block. %>
+<% m.all_versions.each do |historical_version|
+     # Skip the latest history entry: it corresponds to the current live record,
+     # whose config is already emitted above with def_version=nil.
+     next if historical_version.def_version == m.all_versions.first&.def_version
+
+     # Skip versions that cannot produce a usable template: a disabled version (or
+     # one whose stored configuration no longer parses) returns nil/[] from
+     # option_configs, which would raise in the activity log common template and
+     # break the whole page render (issue #1238).
+     next if historical_version.option_configs.blank?
+%>
+  <%= render partial: 'activity_logs/search_results_template_item', locals: { def_record: historical_version } %>
+<% end %>
 <% end%>
