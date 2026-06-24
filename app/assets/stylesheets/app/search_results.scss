@@ -960,7 +960,7 @@ li.list-group-item.is_external_id_item {
     }
 
     .filter-switch.active {
-      background-color: rgb(230, 213, 176);
+      background-color: $switch_bg_on;
       box-shadow: none;
       color: rgb(127, 90, 9);
       text-shadow: 1px 1px 1px white;
@@ -984,7 +984,7 @@ li.list-group-item.is_external_id_item {
     }
 
     .order-switch.active, .expander-switch.active {
-      background-color: rgb(230, 213, 176);
+      background-color: $switch_bg_on;
       box-shadow: none;
       color: rgb(127, 90, 9);
       text-shadow: 1px 1px 1px white;
@@ -1008,7 +1008,7 @@ li.list-group-item.is_external_id_item {
     }
 
     .layout-switch.active {
-      background-color: rgb(230, 213, 176);
+      background-color: $switch_bg_on;
       box-shadow: none;
       color: rgb(127, 90, 9);
       border-color: rgb(199, 181, 142);

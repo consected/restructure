@@ -107,7 +107,8 @@ module Messaging
                                                      content_template_text:,
                                                      data:,
                                                      ignore_missing:,
-                                                     markdown_to_html:)
+                                                     markdown_to_html:,
+                                                     check_xss: !sms?)
 
       self.generated_content = generated_text
       save!
@@ -577,8 +578,13 @@ module Messaging
     def fire_item_on_complete_triggers
       return unless for_item && on_complete_config.present?
 
-      for_item.current_user = batch_user
-      OptionConfigs::ActivityLogOptions.calc_triggers for_item, on_complete_config
+      for_item.current_user ||= user || batch_user
+      trigger_configs = on_complete_config.is_a?(Array) ? on_complete_config : [on_complete_config]
+      trigger_configs.each do |config|
+        next unless config.is_a?(Hash)
+
+        OptionConfigs::ActivityLogOptions.calc_triggers for_item, config
+      end
     end
 
     def batch_user

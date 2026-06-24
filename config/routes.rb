@@ -76,6 +76,9 @@ Rails.application.routes.draw do
     get 'server_info/rails_log', to: 'server_info#rails_log'
 
     resources :app_types, except: [:destroy] do
+      collection do
+        get :components_panel
+      end
       member do
         get :export_migrations
       end

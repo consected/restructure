@@ -16,6 +16,7 @@ module OptionConfigs
                              add_tracker
                              change_user_roles
                              pull_external_data
+                             pull_emails
                              set_item_flags
                              redcap_request
                              run_batch_trigger
@@ -46,7 +47,7 @@ module OptionConfigs
             # to automatically fire on_complete/on_failure
             o.perform_with_lifecycle
           rescue FphsException => e
-            raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(configs)}"
+            raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(configs)}\nTriggering instance: #{obj.class.name}##{obj.id || '(new)'}"
           end
 
           # If we had any results then check if they were all true. If they were then return true.

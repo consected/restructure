@@ -15,7 +15,7 @@
 <% 
     end
   rescue StandardError=> e
-      logger.error "Error loading search results template item for dynamic model #{object_instance.id}: #{e}\n#{e.short_string_backtrace}" 
+      logger.error "Error loading search results template item for dynamic model #{def_record&.id}: #{e}\n#{e.short_string_backtrace}" 
 %>
-<%= "Error loading search results template item for dynamic model #{object_instance.id}: #{e}" %>
+<%= "Error loading search results template item for dynamic model #{def_record&.id}: #{e}" %>
 <% end %>

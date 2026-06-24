@@ -1,34 +1,189 @@
 <%
+  # Render the collapsible block(s) for a contains.resources panel.
+  #
+  # TWO MODES – chosen by the number of renderable resources:
+  #
+  # LEGACY mode (exactly one resource):
+  #   Renders the resource block directly, without an outer wrapper or heading.
+  #   The companion tab in _search_results_master_tabs_resources acts as an AJAX
+  #   trigger whose href is the resource URL and whose data-target/data-result-target
+  #   point at the resource-keyed collapse id (e.g. `activity-log--case-reviews-{{id}}`).
+  #   Applies to all single-resource panels regardless of resource type (AL, DM, EID)
+  #   or whether the panel_name contains spaces.
+  #
+  # WRAPPER mode (two or more resources):
+  #   Renders an outer collapsible panel (panel_name-keyed id) with a heading,
+  #   hidden loader anchors (one per resource), and inner resource blocks inside.
+  #   The tab toggles the outer container; loader anchors fire individual AJAX
+  #   fetches when the outer panel first opens (via on-open-click).
+  #   Activity logs may NOT be mixed with other resource types in wrapper mode.
+
+  panel_name = panel.panel_name
+  panel_label = panel.panel_label
   resources = panel.contains.resources
-  init_visible = panel.view_options.initial_show || nil if panel.view_options
   default_expander = panel.view_options&.default_expander
   hide_sl_class = 'hide-sublist-controls' if panel.view_options&.hide_sublist_controls
   hide_al_header_class = 'hide-activity-logs-header' if panel.view_options&.hide_activity_logs_header
-  resources.each do |resource|
-    if master_viewables[resource.to_sym]
-      rs = resource.split('__', 2)
-      if rs.length == 2
-        resource_type = rs.first.hyphenate.pluralize
-      else
-        resource_type = 'details'
-      end
-      block_id = "#{resource.hyphenate}-{{id}}"
-      view_css = panel.view_css
-      outer = "##{block_id}"
-%>
-    <%= render partial: 'reports/insert_options_css', locals: {outer: outer, view_css: view_css} %>
-    <div id="<%= block_id %>" 
-         class="<%= resource_type %>-generic-block <%= resource.hyphenate %>-block collapse <%=hide_sl_class%> <%=hide_al_header_class%>"
-         data-sub-for-root="master_id"
-         data-sub-id="{{id}}"
-         data-sub-item="<%= resource %>"
-         data-template="<%= resource.hyphenate %>-main-result-template"
-         data-default-expander="<%= default_expander %>"
-    >
-        <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= resource_type %>-inner-block">
-        </div>
-    </div>
-<%
-    end
+  view_css = panel.view_css
+  limit = (panel.view_options&.limit || 20).to_i
+
+  # Perspectives: hash keyed by resource name → array of perspective definitions
+  all_perspectives = (panel.view_options&.perspectives || {}).with_indifferent_access
+  # Panel-level default perspective slug (overridden per-user via AppConfiguration)
+  panel_default_perspective = panel.view_options&.default_perspective
+  # User / role / app-type specific default perspectives hash keyed by resource name.
+  # Values may contain {{#is}} / {{#if}} substitution blocks evaluated against the current user.
+  user_default_perspectives = Admin::AppConfiguration.hash_for(:default_activity_log_perspective, current_user)
+                                                     .transform_values do |v|
+    next v unless v.is_a?(String) && v.include?('{{')
+
+    Formatter::Substitution.substitute(v, data: current_user, tag_subs: nil, ignore_missing: true)&.strip
+  end
+
+  renderable = resources.each_with_object([]) do |resource, memo|
+    next unless master_viewables[resource.to_sym]
+
+    info = resource_render_info(resource, context: :master_panel)
+    next unless info
+
+    memo << [resource, info]
   end
 %>
+<% single_al = renderable.length == 1 && renderable.first[1][:wrapper_class] == 'activity-logs-generic-block' %>
+<% if single_al %>
+  <%# LEGACY single-resource mode: render the resource block directly, without
+      the outer panel wrapper or heading. The tab partial drives the AJAX fetch. %>
+  <% resource, render_info = renderable.first
+     block_id = "#{resource.hyphenate}-{{id}}"
+     inner_block_class = render_info[:wrapper_class].gsub('generic-block', 'inner-block')
+     template_name = render_info[:template_name]
+     resource_perspectives = all_perspectives[resource.to_s]
+     eff_default = user_default_perspectives[resource.to_sym].presence ||
+                   user_default_perspectives[resource.to_s].presence ||
+                   panel_default_perspective %>
+  <%# Perspectives button bar (if configured). Rendered as a preceding sibling
+      of the resource block so the JS `prevAll('.activity-log-perspectives--source')`
+      lookup works the same way as in WRAPPER mode. %>
+  <% if resource_perspectives.present? %>
+    <div class="activity-log-perspectives activity-log-perspectives--source"
+         data-resource="<%= resource %>"
+         data-panel-name="<%= panel_name %>">
+      <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>"
+         data-remote="true"
+         data-result-target="#<%= block_id %>"
+         data-template="<%= template_name %>"
+         data-panel-tab="<%= resource %>"
+         data-perspective=""
+         class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.blank? %>"
+         ><%= t('activity_log.perspectives.all_label', default: 'All') %></a>
+      <% resource_perspectives.each do |persp|
+           pname  = persp.is_a?(Hash) ? (persp[:name] || persp['name']).to_s : ''
+           plabel = persp.is_a?(Hash) ? (persp[:label] || persp['label']).to_s : pname
+           next if pname.blank? %>
+        <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>&perspective=<%= ERB::Util.url_encode(pname) %>"
+           data-remote="true"
+           data-result-target="#<%= block_id %>"
+           data-template="<%= template_name %>"
+           data-panel-tab="<%= resource %>"
+           data-perspective="<%= pname %>"
+           class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.to_s == pname %>"
+           ><%= plabel %></a>
+      <% end %>
+    </div>
+  <% end %>
+  <div id="<%= block_id %>"
+       class="<%= render_info[:wrapper_class] %> <%= resource.hyphenate %>-block collapse"
+       data-sub-for-root="master_id"
+       data-sub-id="{{id}}"
+       data-sub-item="<%= resource %>"
+       data-template="<%= template_name %>"
+       data-route-path="<%= render_info[:route_path] %>"
+       data-default-expander="<%= default_expander %>">
+    <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= inner_block_class %>">
+    </div>
+  </div>
+<% elsif renderable.any? %>
+  <%# WRAPPER mode: outer panel container with heading and hidden loader anchors.
+      Used for multi-resource panels (no activity-log mixing allowed). %>
+  <% outer = "##{panel_name.id_hyphenate}-{{id}}" %>
+  <%= render partial: 'reports/insert_options_css', locals: { outer: outer, view_css: view_css } %>
+  <div id="<%= panel_name.id_hyphenate %>-{{id}}"
+       class="panel panel-default section-panel page-layout-panel contains-resources collapse <%= panel_name.id_hyphenate %>-block format-block-on-expand <%= hide_sl_class %> <%= hide_al_header_class %>">
+    <div class="is-header default-header section-panel-header">
+      <% unless hide_player_tabs? %>
+        <a href="#<%= panel_name.id_hyphenate %>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity btn-close-panel" title="close panel"></a>
+      <% end %>
+      <h4 class="list-group-item-heading panel-heading--<%= panel_label.to_s.id_hyphenate %>"><%= panel_label %></h4>
+    </div>
+    <%# Hidden loader anchors – one per resource – are picked up by
+        _fpa.form_utils.on_open_click when the master record is expanded
+        (called from the search_results_template postprocessor). %>
+    <div class="on-open-click hidden">
+      <% renderable.each do |resource, render_info|
+           block_id = "#{resource.hyphenate}-{{id}}"
+           route_path = render_info[:route_path]
+           template_name = render_info[:template_name]
+           # Resolve effective default perspective for this resource
+           eff_default = user_default_perspectives[resource.to_sym].presence ||
+                         user_default_perspectives[resource.to_s].presence ||
+                         panel_default_perspective
+           default_param = eff_default.present? ? "&perspective=#{ERB::Util.url_encode(eff_default)}" : '' %>
+        <a href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %>&panel_name=<%= panel_name %><%= default_param %>"
+           data-remote="true"
+           data-result-target="#<%= block_id %>"
+           data-template="<%= template_name %>"
+           data-resource-name="<%= resource %>"
+           class="contains-resources-loader contains-resources-loader--<%= resource.hyphenate %>"
+           aria-hidden="true"
+           tabindex="-1">load <%= resource %></a>
+      <% end %>
+    </div>
+    <% renderable.each do |resource, render_info|
+         block_id = "#{resource.hyphenate}-{{id}}"
+         inner_block_class = render_info[:wrapper_class].gsub('generic-block', 'inner-block')
+         template_name = render_info[:template_name]
+         resource_perspectives = all_perspectives[resource.to_s]
+         eff_default = user_default_perspectives[resource.to_sym].presence ||
+                       user_default_perspectives[resource.to_s].presence ||
+                       panel_default_perspective %>
+      <% if resource_perspectives.present? %>
+        <div class="activity-log-perspectives activity-log-perspectives--source"
+             data-resource="<%= resource %>"
+             data-panel-name="<%= panel_name %>">
+          <%# "All" reset button — no perspective param %>
+          <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>"
+             data-remote="true"
+             data-result-target="#<%= block_id %>"
+             data-template="<%= template_name %>"
+             data-panel-tab="<%= resource %>"
+             data-perspective=""
+             class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.blank? %>"
+             ><%= t('activity_log.perspectives.all_label', default: 'All') %></a>
+          <% resource_perspectives.each do |persp|
+               pname  = persp.is_a?(Hash) ? (persp[:name] || persp['name']).to_s : ''
+               plabel = persp.is_a?(Hash) ? (persp[:label] || persp['label']).to_s : pname
+               next if pname.blank? %>
+            <a href="/masters/{{id}}/<%= render_info[:route_path] %>?limit=<%= limit %>&panel_name=<%= panel_name %>&perspective=<%= ERB::Util.url_encode(pname) %>"
+               data-remote="true"
+               data-result-target="#<%= block_id %>"
+               data-template="<%= template_name %>"
+               data-panel-tab="<%= resource %>"
+               data-perspective="<%= pname %>"
+               class="btn btn-default btn-sm activity-log-perspectives__btn<%= ' active' if eff_default.to_s == pname %>"
+               ><%= plabel %></a>
+          <% end %>
+        </div>
+      <% end %>
+      <div id="<%= block_id %>"
+           class="<%= render_info[:wrapper_class] %> <%= resource.hyphenate %>-block"
+           data-sub-for-root="master_id"
+           data-sub-id="{{id}}"
+           data-sub-item="<%= resource %>"
+           data-template="<%= template_name %>"
+           data-default-expander="<%= default_expander %>">
+        <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= inner_block_class %>">
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

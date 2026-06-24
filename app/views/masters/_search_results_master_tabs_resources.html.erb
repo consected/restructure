@@ -1,32 +1,95 @@
-  <% 
-    resources.each do |resource|
-      template_postfix = ''
-      template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
+<%
+  # Render a single tab for a contains.resources panel, regardless of how many
+  # resources the panel lists. The tab toggles a single outer collapse container
+  # (rendered by masters/_search_results_resources_panel) whose id is derived
+  # from the panel_name. This mirrors the contains.categories behaviour, where a
+  # single tab reveals a single panel containing one or more inner blocks.
+  #
+  # Backwards-compatibility note: existing single-resource panels (e.g. an
+  # activity log per panel) continue to function identically from the user
+  # perspective – one tab, one collapse area, one resource block inside. The
+  # configuration contract (`contains.resources: [...]`) is unchanged.
 
-      if default_panels.length > 0 && initial_show.nil?
-      # The "default" overrides the value set in the panel definition only if the panel definition was not set
-        initial_show = resource.to_s.in?(default_panels)
-      end
+  # Determine which resources are renderable for the current user. The tab is
+  # only rendered if at least one of the panel's resources resolves to render
+  # info (i.e. is known to Resources::Models and accessible).
+  renderable_resources = resources.select do |resource|
+    resource_render_info(resource, context: :master_panel)
+  end
+%>
+<% if renderable_resources.any? %>
+  <%
+    if default_panels.length > 0 && initial_show.nil?
+      initial_show = renderable_resources.any? { |r| r.to_s.in?(default_panels) }
+    end
 
-      path = resource.gsub('__', '/').pluralize
+    extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
+
+    # Use legacy AJAX tab only for single activity-log panels.
+    # Dynamic model and external identifier single-resource panels use wrapper mode
+    # (panel_name as tab key, outer wrapper container) for a consistent contract.
+    use_legacy = renderable_resources.length == 1 &&
+      resource_render_info(renderable_resources.first, context: :master_panel)&.dig(:wrapper_class) == 'activity-logs-generic-block'
+  %>
+  <% if use_legacy %>
+    <%
+      resource = renderable_resources.first.to_s
+      render_info = resource_render_info(resource, context: :master_panel)
+      route_path = render_info[:route_path]
+      block_id = "#{resource.hyphenate}-{{id}}"
+
       extra_params = ''
       using_params = ''
       if filter_items
         rparams = filter_items[resource.pluralize]
-        if rparams.is_a? Hash
-          rparams = rparams.to_unsafe_h if rparams.respond_to? :to_unsafe_h
+        if rparams.is_a?(Hash)
+          rparams = rparams.to_unsafe_h if rparams.respond_to?(:to_unsafe_h)
           extra_params = "&#{rparams.to_query}"
           using_params = 'page-layout'
         elsif rparams == 'using params'
           using_params = 'page'
         end
       end
+    %>
+    {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%= resource.pluralize %>')) }}
+    <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(resource, default_panels.length) %>" data-open-panels="{{open_panels}}">
+      <a id="tab-activity-log-<%= panel_name.id_hyphenate %>"
+         href="/masters/{{id}}/<%= route_path %>?limit=<%= limit %><%= extra_params %>&{{params_to_query 'filter' '<%= resource.pluralize %>'}}"
+         data-using-params="<%= using_params %>"
+         data-panel-tab="<%= resource %>"
+         data-remote="true"
+         data-prevent-on-collapse="true"
+         data-toggle="collapse"
+         data-target="#<%= block_id %>"
+         aria-expanded="false"
+         class="scroll-to-expanded collapsed"
+         data-result-target="#<%= block_id %>"
+         data-alt-click-id="tab-<%= resource.hyphenate %>"
+         data-template="<%= render_info[:template_name] %>"><%= panel_label %></a>
+    </li>
+    {{/if}}
+  <% else %>
+    <%
+      open_panel_key = panel_name
 
-      extra_classes = "#{close_others ? 'tabs-close-others' : ''} #{initial_show == true ? 'on-open-click initial-show' : ''}"
-  %>
-  {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%=resource.pluralize%>')) }}
-  <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(resource, default_panels.length) %>" data-open-panels="{{open_panels}}">
-    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= path %>?limit=<%=limit%><%extra_params%>&{{params_to_query 'filter' '<%=resource.pluralize%>'}}" data-using-params="<%= using_params %>" data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><%= panel_label %></a>
-  </li>
-  {{/if}}
+      # In wrapper mode the tab always uses the panel_name as key, so that
+      # a single DM/EI resource panel behaves consistently with multi-resource
+      # panels (and the system spec's unified contract for issue #1180).
+      panel_tab_value = panel_name
+
+      alt_click_id = renderable_resources.length == 1 ? "tab-#{renderable_resources.first.to_s.hyphenate}" : nil
+    %>
+    {{#if (or (not (params 'only_tabs')) (params 'only_tabs' '<%= panel_name %>')) }}
+    <li role="presentation" class="<%= extra_classes %> <%= class_for_open_panels(open_panel_key, default_panels.length) %>" data-open-panels="{{open_panels}}">
+      <a id="tab-resources-<%= panel_name.id_hyphenate %>"
+         href="#<%= panel_name.id_hyphenate %>-{{id}}"
+         data-panel-tab="<%= panel_tab_value %>"
+         data-toggle="collapse"
+         data-target="#<%= panel_name.id_hyphenate %>-{{id}}"
+         aria-expanded="false"
+         class="scroll-to-expanded collapsed"<% if alt_click_id %>
+         data-alt-click-id="<%= alt_click_id %>"<% end %>><%= panel_label %></a>
+    </li>
+    {{/if}}
   <% end %>
+<% end %>

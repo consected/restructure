@@ -194,6 +194,67 @@
               value: 'literal value'
               condition: '(optional) - one of those listed above'
 
+        all_special_conditions_with_return_flag:
+          # A condition: hash may include exactly one return flag alongside the condition operator.
+          # This simultaneously filters the query AND returns the field value as the result,
+          # removing the need to duplicate the field with a separate return_value entry.
+          # Specifying more than one return flag raises an error.
+          model_table_name:
+            field_to_both_filter_and_return:
+              condition: 'IS NOT NULL'
+              # exactly one of:
+              return_value: true           # return the scalar field value
+              # return_value_list: true    # return an array of all matching field values
+              # return_result: true        # return the matched record instance
+              # return_all_results: true   # return all matched record instances
+
+        all_lookup_sub_query:
+          # Use a 'lookup' key to derive a field's comparison value from an independent sub-query.
+          # The sub-query is evaluated first; its result is substituted as the comparison value
+          # for the enclosing field condition.
+          # The sub-query runs independently (not joined to the outer scope), so it can safely
+          # target the same table as the current record without causing a self-join error.
+          # Supported / restricted usage:
+          #   - Structure the sub-query like a normal ConditionalActions query rooted in a
+          #     selection type (typically all:) and include no_masters: {} or masters: {} at
+          #     that level. A malformed sub-query will fail at runtime.
+          #   - lookup is intended only to supply comparison values for the outer query, so the
+          #     supported return directives are return_value and return_value_list.
+          #   - return_result and return_all_results are not supported inside lookup.
+          #   - If no return directive is provided, or an unsupported return mode is used,
+          #     lookup raises a runtime FphsException with the outer table / field context.
+          no_masters: {}
+          outer_table:
+            field_a:
+              lookup:
+                all:
+                  no_masters: {}
+                  inner_table:
+                    filter_field: 'x'
+                    return_field: return_value
+
+          # Lookup using a condition: return flag in the sub-query (filter and return same field):
+          outer_table_condition_return:
+            field_b:
+              lookup:
+                all:
+                  no_masters: {}
+                  inner_table:
+                    filter_field: 'x'
+                    another_field:
+                      condition: 'IS NOT NULL'
+                      return_value: true
+
+          # Lookup with list return (IN semantics — field_c IN (...)):
+          outer_table_list:
+            field_c:
+              lookup:
+                all:
+                  no_masters: {}
+                  inner_table:
+                    filter_field: 'y'
+                    return_field: return_value_list
+
         any_save_trigger_results:
           # save_trigger_results are held for just the life of the transaction, and are not stored to the DB
           # They are set within specific save triggers (such as *pull_external_data*) when the

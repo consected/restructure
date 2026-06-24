@@ -18,7 +18,20 @@ The following information builds on For general Rspec standards: [Rspec project 
 4. **Expand UI sections before accessing fields** - forms load via AJAX
 5. **Never write raw Capybara selectors in system specs**
 6. **Use the VSCode internal browser (vscode/openSimpleBrowser) if needed**
-7. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
+7. **Interactively work on difficult issues** with `interactive_debug_session` to pause execution for analysis - this will require the command to be run in an async terminal and occasional polling to watch for the debugger prompt
+8. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
+
+## Interactive Debugging
+
+When a system spec fails, it may be useful to interactively debug the issue. Use the following steps to analyze the issue:
+
+1. Add `interactive_debug_session` in the spec at the point where you want to pause execution
+2. Run the spec in an async terminal using `app-scripts/headless_rspec.sh spec/system/your_spec.rb -e 'the example to run'`
+3. When the spec hits the `interactive_debug_session` line, it will pause and display a `(ruby)` debugger prompt in the async terminal.
+4. Use the debugger commands to inspect the current state, making use of helpers such as `debug_process_status`, `available_form_fields`, and `available_model_reference_expanders`.
+5. You may also use Capybara commands to interact with the page, such as `find`, `click_link`, and `fill_in`.
+6. Use `next` to step through the spec execution line by line, and `continue` to resume execution until the next breakpoint or the end of the spec.
+7. With the information gathered, you can determine the cause of the failure and make necessary adjustments to the spec or application code.
 
 ## Rspec System Specs Helper Methods Quick Reference
 

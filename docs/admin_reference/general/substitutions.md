@@ -18,7 +18,7 @@ Simple substitution uses double curly brackets:
 Since conditions and message templates are processed on the server side, associations
 may be used within substitutions. Form captions do not have access to this data, so will return blank results.
 
-Drill down through associations with `\{\{association_name.attribute_name}\}`
+Drill down through associations with `\{\{association_name.attribute_name\}\}`
 
 Other options are also available see information [For Conditions and Message Templates](#for-conditions-and-message-templates)
 
@@ -33,9 +33,9 @@ the embedded form data may be accessed in captions, etc, through:
 
 - Parse a JSON string and allow its elements to be accessed:
 
-  - `{\{<string_is_json_hash>.json_parse.<key_name>\}\}`
-  - `{\{<string_is_json_array>.json_parse.<index>\}\}`
-  - `{\{<string_is_json_hash_with_array>.json_parse.<key_name>.<index>\}\}`
+  - `\{\{<string_is_json_hash>.json_parse.<key_name>\}\}`
+  - `\{\{<string_is_json_array>.json_parse.<index>\}\}`
+  - `\{\{<string_is_json_hash_with_array>.json_parse.<key_name>.<index>\}\}`
 
 ## Drill into Object / JSON fields
 
@@ -46,7 +46,7 @@ Simply name the keys in turn:
 If you want to return a value that is actually a Hash / Object, a special substitution format
 using 3 curly braces is used to avoid the result being cast to a String.
 
-- `\{\{\{save_trigger_results.identity.data_structure\}\}\}`
+- `\{\{{save_trigger_results.identity.data_structure\}\}}`
 
 This returns a Hash or Object, which may be stored as raw data in a database JSON field for example.
 Parts of the full data tree may be extracted and stored in this way.
@@ -56,23 +56,73 @@ Parts of the full data tree may be extracted and stored in this way.
 When working with object or array fields, or the result of `json_parse`, the following
 mechanism allows selection of a specific element:
 
-- `{\{array.first}\}`
-- `{\{array.last}\}`
-- `{\{array.<number>}\}` - zero based index
+- `\{\{array.first\}\}`
+- `\{\{array.last\}\}`
+- `\{\{array.<number>\}\}` - zero based index
 
 For complex items, such as `{ key: [ {}, {subkey: 'value'} ] }` then the following is possible:
 
-`{\{key.1.subkey}\}`
+`\{\{key.1.subkey\}\}`
 
 ## Insert a glyphicon
 
-For example: `{\{glyphicon_zoom_in}\}`
+For example: `\{\{glyphicon_zoom_in\}\}`
 
 ## Conditional blocks
 
 Conditional blocks of text and substitutions use `\{\{#if substitution_name\}\}any text, markup or substitutions\{\{else\}\}alternative block\{\{/if\}\}`
 The conditional expression evaluates to true if the value is present (not false, nil or blank) and allows the appropriate block of text, markup and
 substitutions to remain in the generated result.
+
+Multiple conditions can be chained with `\{\{else if another_substitution_name\}\}` clauses before the optional `\{\{else\}\}` block.
+
+## Conditional is blocks
+
+Conditional `\{\{#is\}\}` blocks compare an attribute value to an expression using an operator:
+
+`\{\{#is attribute_name 'operator' 'expression'\}\}content\{\{/is\}\}`
+
+If the comparison is true, the content is included in the result. An optional `\{\{else\}\}` block is shown when the comparison is false.
+
+`\{\{#is attribute_name 'operator' 'expression'\}\}truthy content\{\{else\}\}falsy content\{\{/is\}\}`
+
+Multiple conditions can be chained using `\{\{else is attribute_name 'operator' 'expression'\}\}` clauses:
+
+`\{\{#is status '==' 'active'\}\}Active\{\{else is status '==' 'pending'\}\}Pending\{\{else\}\}Unknown\{\{/is\}\}`
+
+### Supported operators
+
+For string and list comparisons:
+
+- `===` — true if both are blank, or both equal
+- `==` — true if both are blank, or both equal
+- `!==` — true unless both are blank or both equal
+- `!=` — true unless both are blank or both equal
+- `in` — true if the attribute value is contained within the expression (expression treated as a list)
+- `!in` — true if the attribute value is NOT contained within the expression
+- `includes` — true if the string matches the expression (as a regex pattern) or the array includes the expression
+- `!includes` — true if the string does NOT match the expression
+
+For null or blank comparisons:
+
+- variable is null or empty string, use `\{\{#is varname "===" ""\}\}`
+- variable is not null or empty string, use `\{\{#is varname "!==" ""\}\}`
+
+For numeric comparisons (attribute must be an integer):
+
+- `>=` — greater than or equal to
+- `<=` — less than or equal to
+- `>` — greater than
+- `<` — less than
+
+### Expression values
+
+The expression can be one of:
+
+- A quoted string: `'value'` or `"value"`
+- An integer (no quotes): `42`
+- The literal `null` to represent nil/blank
+- Another attribute name (substitution tag name), to compare two attribute values at runtime
 
 ## For Conditions and Message Templates
 
@@ -84,9 +134,9 @@ Form captions do not have access to this data, so will return blank results.
 
 When working with an association, pick a specific element:
 
-- `{\{association.first}\}`
-- `{\{association.last}\}`
-- `{\{association.<number>}\}` - zero based index
+- `\{\{association.first\}\}`
+- `\{\{association.last\}\}`
+- `\{\{association.<number>}\}` - zero based index
 
 ### Other related items
 

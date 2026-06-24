@@ -12,7 +12,7 @@ module OptionConfigs
     ValidSaveTriggerTriggers = %i[before_save on_create on_save on_update on_upload on_disable].freeze
     LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
     # Top-level YAML keys in libraries that must be renamed to avoid collisions when injected
-    LibraryKeyRenamePatterns = %w[_definitions _default].freeze
+    LibraryKeyRenamePatterns = %w[_definitions _default _constants _configurations].freeze
     ValidFieldConfigs = %i[db_configs field_options labels caption_before dialog_before show_if].freeze
 
     def self.base_key_attributes
@@ -91,6 +91,7 @@ module OptionConfigs
         # This needs to be "deep cloned", to avoid a simple clone just copying references
         # Using Marshal for deep cloning is safe here since we're only operating on data already in memory
         self.raw_field_configs = Marshal.load(Marshal.dump(field_configs))
+        validate_missing_general_selection_configs
         add_field_configs_from_standalone_defs
       rescue StandardError => e
         Rails.logger.warn "Failed to initialize ExtraOptions for #{@name}: #{e}"
@@ -106,14 +107,14 @@ module OptionConfigs
 
     def clean_caption_before_def
       self.caption_before ||= {}
-      self.caption_before = self.caption_before.symbolize_keys
+      self.caption_before = caption_before.symbolize_keys
 
-      self.caption_before = self.caption_before.each do |k, v|
+      self.caption_before = caption_before.each do |k, v|
         if v.is_a? String
 
           v = Formatter::Substitution.text_to_html(v).strip
 
-          self.caption_before[k] = {
+          caption_before[k] = {
             caption: v,
             edit_caption: v,
             show_caption: v,
@@ -131,7 +132,7 @@ module OptionConfigs
 
     def clean_dialog_before_def
       self.dialog_before ||= {}
-      self.dialog_before = self.dialog_before.symbolize_keys
+      self.dialog_before = dialog_before.symbolize_keys
 
       dialog_before.transform_values! { |v| v.is_a?(String) ? { name: v } : v }
       dialog_before.each do |k, v|
@@ -155,7 +156,7 @@ module OptionConfigs
     # Field labels definitions
     def clean_labels_def
       self.labels ||= {}
-      self.labels = self.labels.symbolize_keys
+      self.labels = labels.symbolize_keys
     end
 
     def clean_show_if_def
@@ -164,44 +165,44 @@ module OptionConfigs
       show_if_condition_strings&.each do |fn, val|
         # Generate a real show_if hash fs a condition string was provided
         # and show if is not already set
-        next if val.nil? || val.empty? || self.show_if[fn]
+        next if val.nil? || val.empty? || show_if[fn]
 
         begin
           bl = Redcap::DataDictionaries::BranchingLogic.new(val)
           sis = bl&.generate_show_if
-          self.show_if[fn] = sis if sis.present?
+          show_if[fn] = sis if sis.present?
         rescue StandardError => e
           Rails.logger.warn "Failed to generate real show_if (in #{@config_obj&.resource_name}) " \
                             "for #{fn}: #{val}\n#{e}"
-          self.show_if[fn] = { generate_show_if: "failed - #{e}" }
+          show_if[fn] = { generate_show_if: "failed - #{e}" }
         end
       end
 
-      self.show_if = self.show_if.symbolize_keys
+      self.show_if = show_if.symbolize_keys
     end
 
     def clean_save_action_def
       self.save_action ||= {}
-      self.save_action = self.save_action.symbolize_keys
+      self.save_action = save_action.symbolize_keys
 
       # Make save_action.on_save the default for on_create and on_update
-      os = self.save_action[:on_save]
+      os = save_action[:on_save]
       return unless os
 
-      ou = self.save_action[:on_update] || {}
-      oc = self.save_action[:on_create] || {}
-      self.save_action[:on_update] = os.merge(ou)
-      self.save_action[:on_create] = os.merge(oc)
+      ou = save_action[:on_update] || {}
+      oc = save_action[:on_create] || {}
+      save_action[:on_update] = os.merge(ou)
+      save_action[:on_create] = os.merge(oc)
     end
 
     def clean_view_options_def
       self.view_options ||= {}
-      self.view_options = self.view_options.symbolize_keys
+      self.view_options = view_options.symbolize_keys
     end
 
     def clean_db_configs_def
       self.db_configs ||= {}
-      @config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
+      @config_obj.db_columns ||= self.db_configs = db_configs.symbolize_keys if @config_obj.respond_to? :db_columns
     end
 
     #
@@ -214,10 +215,10 @@ module OptionConfigs
 
     def clean_field_options_def
       self.field_options ||= {}
-      self.field_options = self.field_options.symbolize_keys
+      self.field_options = field_options.symbolize_keys
 
       # Allow field_options.edit_as.alt_options to be an array
-      self.field_options.each do |k, v|
+      field_options.each do |k, v|
         ao = nil
         ao = v[:edit_as][:alt_options] if v && v[:edit_as]
         next unless ao.is_a? Array
@@ -226,43 +227,43 @@ module OptionConfigs
         ao.each do |aov|
           new_ao[aov.to_s.to_sym] = aov.to_s.downcase
         end
-        self.field_options[k][:edit_as][:alt_options] = new_ao
+        field_options[k][:edit_as][:alt_options] = new_ao
       end
     end
 
     def clean_filestore_def
       self.filestore ||= {}
-      self.filestore = self.filestore.symbolize_keys
+      self.filestore = filestore.symbolize_keys
     end
 
     def clean_access_if_def
       self.creatable_if ||= {}
-      self.creatable_if = self.creatable_if.symbolize_keys
+      self.creatable_if = creatable_if.symbolize_keys
 
       self.editable_if ||= {}
-      self.editable_if = self.editable_if.symbolize_keys
+      self.editable_if = editable_if.symbolize_keys
 
       self.showable_if ||= {}
-      self.showable_if = self.showable_if.symbolize_keys
+      self.showable_if = showable_if.symbolize_keys
     end
 
     def clean_valid_if_def
       self.valid_if ||= {}
-      self.valid_if = self.valid_if.symbolize_keys
+      self.valid_if = valid_if.symbolize_keys
 
-      unless self.valid_if.keys.empty? || (self.valid_if.keys - ValidValidIfTriggers).empty?
+      unless valid_if.keys.empty? || (valid_if.keys - ValidValidIfTriggers).empty?
         failed_config :valid_if,
                       "valid_if contains invalid keys #{valid_if.keys} - expected only:",
                       extra_details: ValidValidIfTriggers
       end
 
-      os = self.valid_if[:on_save]
+      os = valid_if[:on_save]
       return unless os
 
-      ou = self.valid_if[:on_update] || {}
-      oc = self.valid_if[:on_create] || {}
-      self.valid_if[:on_update] = os.merge(ou)
-      self.valid_if[:on_create] = os.merge(oc)
+      ou = valid_if[:on_update] || {}
+      oc = valid_if[:on_create] || {}
+      valid_if[:on_update] = os.merge(ou)
+      valid_if[:on_create] = os.merge(oc)
     end
 
     def clean_embed_def
@@ -409,51 +410,51 @@ module OptionConfigs
 
     def clean_save_triggers
       self.save_trigger ||= {}
-      self.save_trigger = self.save_trigger.symbolize_keys
+      self.save_trigger = save_trigger.symbolize_keys
 
-      unless self.save_trigger.keys.empty? || (self.save_trigger.keys - ValidSaveTriggerTriggers).empty?
+      unless save_trigger.keys.empty? || (save_trigger.keys - ValidSaveTriggerTriggers).empty?
         failed_config :save_trigger,
                       "save_trigger contains invalid keys #{save_trigger.keys} - expected only:",
                       extra_details: ValidSaveTriggerTriggers
       end
 
       # Make save_trigger.on_save the default for on_create and on_update
-      os = self.save_trigger[:on_save]
+      os = save_trigger[:on_save]
       if os
         os = [os] if os.is_a?(Hash)
 
-        ou = self.save_trigger[:on_update]
-        oc = self.save_trigger[:on_create]
+        ou = save_trigger[:on_update]
+        oc = save_trigger[:on_create]
         ou = [ou] if ou.is_a?(Hash)
         oc = [oc] if oc.is_a?(Hash)
 
         ou ||= []
         oc ||= []
-        self.save_trigger[:on_update] = os + ou
-        self.save_trigger[:on_create] = os + oc
+        save_trigger[:on_update] = os + ou
+        save_trigger[:on_create] = os + oc
       end
 
-      self.save_trigger[:on_upload] ||= {}
-      self.save_trigger[:on_disable] ||= {}
+      save_trigger[:on_upload] ||= {}
+      save_trigger[:on_disable] ||= {}
     end
 
     def clean_batch_triggers
       self.batch_trigger ||= {}
-      self.batch_trigger = self.batch_trigger.symbolize_keys
-      self.batch_trigger[:on_record] ||= {}
+      self.batch_trigger = batch_trigger.symbolize_keys
+      batch_trigger[:on_record] ||= {}
     end
 
     def clean_config_triggers
       self.config_trigger ||= {}
-      self.config_trigger = self.config_trigger.symbolize_keys
-      od = self.config_trigger[:on_define] ||= []
+      self.config_trigger = config_trigger.symbolize_keys
+      od = config_trigger[:on_define] ||= []
 
-      self.config_trigger[:on_define] = [od] unless od.is_a?(Array)
+      config_trigger[:on_define] = [od] unless od.is_a?(Array)
     end
 
     def clean_preset_fields
       self.preset_fields ||= {}
-      self.preset_fields = self.preset_fields.symbolize_keys
+      self.preset_fields = preset_fields.symbolize_keys
     end
 
     #
@@ -487,13 +488,13 @@ module OptionConfigs
         # 'field_configs' was explicitly set, so use it to set the appropriate configurations
         # for each of the valid_configs
         self.field_configs ||= {}
-        self.field_configs = self.field_configs.symbolize_keys
+        self.field_configs = field_configs.symbolize_keys
         failed = false
         field_configs.each do |fname, fconfig|
           unless fconfig.is_a? Hash
             failed_config :field_configs, "field '#{fname}' is not a Hash"
             failed = true
-            self.field_configs[fname] = {}
+            field_configs[fname] = {}
             next
           end
 
@@ -559,6 +560,48 @@ module OptionConfigs
       end
     end
 
+    # For dynamic model definitions, fields that are selection-like by naming
+    # convention (for example source, rank, select_*) must provide at least one
+    # selection source. This can come from persisted general selections or
+    # explicit field_options.edit_as overrides.
+    def validate_missing_general_selection_configs
+      return unless config_obj.is_a?(DynamicModel)
+
+      selection_fields = Array(fields).select { |f| Classification::GeneralSelection.use_with_attribute?(f.to_s) }
+      return if selection_fields.empty?
+
+      selection_fields.each do |field_name|
+        # Fields that source their own options at runtime (records from a master
+        # association, or users holding a role) never need a general selection config.
+        next if Classification::SelectionOptionsHandler.self_sourcing_field?(field_name)
+        next if general_selection_present_for_dynamic_model_field?(field_name)
+        next if field_has_selection_override?(field_name)
+
+        failed_config(:field_options, "missing general selection config for field #{field_name}")
+      end
+    end
+
+    def general_selection_present_for_dynamic_model_field?(field_name)
+      item_type_prefixes = [
+        "dynamic_model__#{config_obj.table_name}",
+        "dynamic_model__#{config_obj.table_name.singularize}",
+        "dynamic_model__#{config_obj.table_name.pluralize}"
+      ].uniq
+
+      item_type_names = item_type_prefixes.map { |prefix| "#{prefix}_#{field_name}" }
+      Classification::GeneralSelection.where(item_type: item_type_names).exists?
+    end
+
+    def field_has_selection_override?(field_name)
+      fopts = field_options[field_name.to_sym] if field_options.respond_to?(:[])
+      return false unless fopts.respond_to?(:dig)
+
+      edit_as = fopts[:edit_as]
+      return false unless edit_as.is_a?(Hash)
+
+      edit_as[:alt_options].present? || edit_as[:general_selection].present? || edit_as[:field_type].present?
+    end
+
     # Check if any of the configs were bad
     # This should be extended to provide additional checks when options are saved
     # @todo - work out why the "raise" was disabled and whether it needs changing
@@ -590,13 +633,13 @@ module OptionConfigs
       config_obj.table_comments = loaded_config.delete(:_comments)
       config_obj.db_columns = loaded_config.delete(:_db_columns)
       config_obj.data_dictionary = loaded_config.delete(:_data_dictionary)
-      config_obj.options_constants = loaded_config.delete(:_constants)
+      config_obj.options_constants = options_based_on_keys_stating_with('_constants', loaded_config)
 
       # Definitions '_definitions...' are only used by YAML for the definition of anchors
       # and so will already by incorporated into the relevant configurations.
       loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
-      configs = handle_defaults_merges_overrides(config_obj, loaded_config)
+      configs = handle_defaults_merges_overrides(config_obj, loaded_config, raise_underscore_keys: true)
       # Update comments for table and fields, based on the default option type configuration
       # after all the _default, _merge_... and _override processing has been completed
       handle_table_comments_just_if_saved(config_obj, configs, force_all)
@@ -662,11 +705,18 @@ module OptionConfigs
       return nil unless loaded_config.is_a?(Hash) && loaded_config.present?
 
       # Remove internal keys that are not part of the option type configurations,
-      # matching the cleanup in parse_config. Keys like _default, _merge_default,
-      # _merge_override and _override are retained for handle_defaults_merges_overrides.
-      %i[_comments _db_columns _data_dictionary _constants].each { |k| loaded_config.delete(k) }
+      # matching the cleanup in parse_config.
+      # _comments, _db_columns, _data_dictionary are deleted directly.
+      # _definitions (and _definitions__xxx from libraries) are deleted by prefix.
+      # _constants and _configurations (and their library-prefixed variants) are consumed
+      #   by options_based_on_keys_stating_with — return values discarded as they are not
+      #   needed here; the calls are made only to strip those keys from loaded_config.
+      # Keys like _default, _merge_default, _merge_override and _override are retained
+      #   for handle_defaults_merges_overrides below.
+      %i[_comments _db_columns _data_dictionary].each { |k| loaded_config.delete(k) }
       loaded_config.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
       options_based_on_keys_stating_with('_configurations', loaded_config)
+      options_based_on_keys_stating_with('_constants', loaded_config)
 
       hash_results = {}
       handle_defaults_merges_overrides(config_obj, loaded_config, hash_results:)
@@ -720,7 +770,7 @@ module OptionConfigs
     # @param [ActiveRecord::Base] config_obj dynamic definition record
     # @param [Hash] loaded_config configuration hash
     # @return [Array] configuration instances
-    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {})
+    def self.handle_defaults_merges_overrides(config_obj, loaded_config, hash_results: {}, raise_underscore_keys: nil)
       configs = []
 
       # Handle any entry starting with "_default"
@@ -729,6 +779,23 @@ module OptionConfigs
       opt_merge_default = loaded_config.delete(:_merge_default)
       opt_merge_override = loaded_config.delete(:_merge_override)
       opt_override = loaded_config.delete(:_override)
+
+      # All valid underscore keys have now been consumed. Any remaining key starting with '_'
+      # is a config error — e.g. _definition_... instead of _definitions_... (#1163).
+      if raise_underscore_keys
+        unexpected_keys = loaded_config.keys.select { |k| k.to_s.start_with?('_') }
+        if unexpected_keys.any?
+          suggestion = if unexpected_keys.any? do |k|
+            k.to_s.start_with?('_definition_')
+          end
+                         ' (did you mean _definitions_?)'
+                       else
+                         ''
+                       end
+          raise FphsOptionsParseError,
+                "Configuration contains unexpected underscore-prefixed keys: #{unexpected_keys.join(', ')}#{suggestion}"
+        end
+      end
 
       loaded_config.each do |name, value|
         unless name.in?(%i[primary blank_log])
@@ -904,7 +971,7 @@ module OptionConfigs
         raise FphsException, "incorrect action type requested in calc_valid_if #{action_type}"
       end
 
-      ci = self.valid_if[:"on_#{action_type}"]
+      ci = valid_if[:"on_#{action_type}"]
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new(ci, obj, return_failures:)
       ca.calc_action_if

@@ -9,7 +9,7 @@ class HelpController < ApplicationController
   ImagesSubdirectory = 'images'
   IntroductionDocument = '0_introduction'
 
-  helper_method :library, :section, :subsection, :display_embedded?
+  helper_method :library, :section, :subsection
 
   include HelpHelper
 
@@ -150,16 +150,4 @@ class HelpController < ApplicationController
     component.to_s.gsub(/[^a-zA-Z0-9\-_]/, '_')
   end
 
-  #
-  # How should the requested page be rendered? The only option is 'embedded'
-  # in the :display_as param
-  def display_as
-    params[:display_as]
-  end
-
-  #
-  # Was the requested page to be displayed embedded, or as a full page?
-  def display_embedded?
-    display_as == 'embedded'
-  end
 end

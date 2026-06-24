@@ -40,16 +40,16 @@ module Dynamic
         @sub_process = protocol.sub_processes.find_by(name: ActivityLog.sub_process_name)
       end
     end
-    
+
     def sub_process_id
       return super if defined?(super)
       return @sub_process_id if @sub_process_id
 
-      if attribute_names.include? 'sub_process_id'
-        @sub_process_id = attributes['sub_process_id']
-      else
-        @sub_process_id = sub_process&.id
-      end
+      @sub_process_id = if attribute_names.include? 'sub_process_id'
+                          attributes['sub_process_id']
+                        else
+                          sub_process&.id
+                        end
     end
 
     def protocol_event
@@ -63,7 +63,8 @@ module Dynamic
         unless self.class.activity_log_name
           raise "activity_log_name not set for #{self.class}. Can't get the protocol event without it"
         end
-        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)        
+
+        # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
         @protocol_event = sub_process.protocol_events.find_by(name: self.class.activity_log_name)
         unless @protocol_event
           raise "Could not find a protocol event (#{self.class.activity_log_name}) " \
@@ -85,7 +86,6 @@ module Dynamic
         @protocol_event_id = protocol_event&.id
       end
     end
-
 
     def protocol_name
       return nil unless protocol
@@ -159,11 +159,15 @@ module Dynamic
     # to ensure that there is a true record of the original data (in case something is changed
     # in the parent item subsequently)
     # Skip this if the item is not set (for a blank activity log)
+    # Skip syncing any field that was explicitly changed by the caller, so user-set values
+    # are not overwritten by the parent's current value.
     def sync_item_data
-      return true unless item
+      return unless item
 
       fields_to_sync.each do |f|
-        send("#{f}=", item.send(f))
+        next if attribute_changed?(f.to_s) || !item.respond_to?(f)
+
+        public_send("#{f}=", item.public_send(f)) if respond_to?("#{f}=")
       end
     end
 

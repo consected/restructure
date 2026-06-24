@@ -365,6 +365,8 @@ module ApplicationHelper
                                                   allow_missing_template:,
                                                   markdown_to_html:,
                                                   category:,
+                                                  check_xss: !(name.to_s.start_with?('ui page css - ') ||
+                                                               name.to_s.start_with?('ui page js - ')),
                                                   ignore_missing: true
 
     res&.html_safe

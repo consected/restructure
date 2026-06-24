@@ -192,8 +192,26 @@ class Settings
     (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
   end
 
-  # A list of resource names for admin classes that use filestore for file storage
-  FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
+  # Allow-list mapping of resource names => fully qualified class name strings for
+  # admin classes that use filestore for file storage. This is the single source of
+  # truth used both to validate incoming `activity_log_type` parameters and to safely
+  # resolve them to a model class without calling String#constantize on user input.
+  FilestoreAdminResourceClasses = {
+    'redcap__project_admin' => 'Redcap::ProjectAdmin'
+  }.freeze
+
+  # A list of resource names for admin classes that use filestore for file storage.
+  # Derived from FilestoreAdminResourceClasses so the two stay in sync.
+  FilestoreAdminResourceNames = FilestoreAdminResourceClasses.keys.freeze
+
+  # Safely resolve a filestore admin resource name to its model class via the
+  # allow-list above. Returns nil for any name that is not allow-listed.
+  # @param resource_name [String]
+  # @return [Class, nil]
+  def self.filestore_admin_class_for(resource_name)
+    class_name = FilestoreAdminResourceClasses[resource_name]
+    class_name&.safe_constantize
+  end
 
   # App type used for admin filestore containers (e.g. REDCap project files)
   FilestoreAdminAppType = 'ref-data'
@@ -229,6 +247,9 @@ class Settings
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
 
+  # Convert inline data URI images in email bodies to MIME inline attachments
+  ProcessInlineDataUriImages = ENV.key?('FPHS_PROCESS_INLINE_DATA_URI_IMAGES') ? ENV['FPHS_PROCESS_INLINE_DATA_URI_IMAGES'] == 'true' : true
+
   # Redcap records request options - additional request parameters to add / override the payload
   # to a records request.
   # Hash of options are:
@@ -249,6 +270,41 @@ class Settings
   # This array of acronyms will be enforced for titleize only, avoiding
   # existing expectations around class names being broken
   CaptionAcronyms = DefaultSettings::CaptionAcronyms
+
+  # SSRF guard for admin-configurable outbound HTTP requests (Utilities::UrlSafety).
+  # AllowedExternalUrlSchemes and BlockedExternalIpRanges back the default
+  # validation rules; per-trigger settings tune the allowlist.
+  # SSRF guard defaults applied to admin-configurable outbound URLs
+  # (see Utilities::UrlSafety).
+  AllowedExternalUrlSchemes = %w[http https].freeze
+  BlockedExternalIpRanges = [
+    IPAddr.new('0.0.0.0/8'),         # "this network"
+    IPAddr.new('10.0.0.0/8'),        # RFC1918
+    IPAddr.new('100.64.0.0/10'),     # CGNAT
+    IPAddr.new('127.0.0.0/8'),       # loopback
+    IPAddr.new('169.254.0.0/16'),    # link-local (incl. cloud metadata 169.254.169.254)
+    IPAddr.new('172.16.0.0/12'),     # RFC1918
+    IPAddr.new('192.0.0.0/24'),      # IETF protocol assignments
+    IPAddr.new('192.168.0.0/16'),    # RFC1918
+    IPAddr.new('198.18.0.0/15'),     # benchmarking
+    IPAddr.new('::1/128'),           # IPv6 loopback
+    IPAddr.new('fc00::/7'),          # IPv6 unique-local
+    IPAddr.new('fe80::/10'),         # IPv6 link-local
+    IPAddr.new('::ffff:0:0/96')      # IPv4-mapped IPv6 (further checked after unmapping)
+  ].freeze
+
+  # Optional host allowlist for the pull_external_data save trigger. When set,
+  # listed hosts (exact, case-insensitive match) bypass the private-range block.
+  # Configure via FPHS_PULL_EXTERNAL_DATA_ALLOWED_HOSTS as a space-separated list.
+  PullExternalDataAllowedHosts = ENV['FPHS_PULL_EXTERNAL_DATA_ALLOWED_HOSTS'].to_s.split(/\s+/).reject(&:empty?).freeze
+  # Global override permitting pull_external_data to reach private/loopback
+  # addresses. Defaults true only in development for convenience.
+  PullExternalDataAllowPrivateHosts =
+    if ENV.key?('FPHS_PULL_EXTERNAL_DATA_ALLOW_PRIVATE_HOSTS')
+      ENV['FPHS_PULL_EXTERNAL_DATA_ALLOW_PRIVATE_HOSTS'] == 'true'
+    else
+      Rails.env.development?
+    end
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
@@ -287,6 +343,11 @@ class Settings
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 
+  AdminReportItemTypes = {
+    'z-admin' => 'Admin Reports',
+    'admin-user-access-overview' => 'User Access Overview'
+  }
+
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
   # so it can be displayed in the server info admin view.
@@ -303,7 +364,7 @@ class Settings
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
-    DisableVDef AllowDynamicMigrations
+    DisableVDef AllowDynamicMigrations ProcessInlineDataUriImages
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     CountryCodesForTimezones DefaultUserTimezone

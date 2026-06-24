@@ -110,6 +110,31 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
       expect(page).to have_content('Testuser')
     end
 
+    it 'shows a view user record link that navigates to the user row' do
+      visit_manage_users_page
+      click_add_user_button
+
+      new_email = "new_view_link_#{SecureRandom.hex(4)}@test.com"
+
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: new_email, first_name: 'Viewlink', last_name: 'Testuser')
+        submit_user_form
+      end
+
+      expect(page).to have_content('New password:', wait: 10)
+      expect(page).to have_link('View user record', wait: 5)
+
+      click_link 'View user record'
+      finish_page_loading
+
+      expect(page).to have_css('td', text: new_email)
+      user_row = find('tr', text: new_email)
+      within(user_row) do
+        expect(page).to have_content('Viewlink')
+        expect(page).to have_content('Testuser')
+      end
+    end
+
     it 'adds an API-access-only user and shows API credentials' do
       visit_manage_users_page
       click_add_user_button

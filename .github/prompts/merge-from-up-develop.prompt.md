@@ -1,6 +1,5 @@
 name: merge-from-up-develop
 description: Merge the latest changes from up-develop into the local develop branch
-model: Claude Opus 4.6 (copilot)
 ---
 ### Merge Latest Changes from up-develop
 

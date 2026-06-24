@@ -54,7 +54,8 @@ module NfsStore
 
       #
       # Set the current_user in the supplied container_file. If the #user of the container_file
-      # is no longer active, use the Batch User instead, setting it to the in_app_type_id app
+      # is no longer active, or has no nfs_store group roles, use the Batch User instead,
+      # setting it to the in_app_type_id app.
       # @see ProcessHandler#setup_container_file_current_user
       # @param [NfsStore::Manage::ContainerFile] container_file
       # @param [Integer] in_app_type_id - id of the Admin::AppType for the Batch User if needed
@@ -80,7 +81,7 @@ module NfsStore
         return unless orig_cf_user == cf_user
         return if orig_cf_user_app_type_id == cf_user.app_type_id
 
-        cf_user.update!(app_type_id: orig_cf_user_app_type_id)
+        cf_user.app_type_id = orig_cf_user_app_type_id
       end
 
       #

@@ -13,6 +13,14 @@
 #     - Rejects back_path values that don't conform to /help/<segment>/<segment>[/<segment>]
 #     - Falls back to IntroductionDocument when no valid back_path is present
 #   - Returns IntroductionDocument for all other sections
+# - #display_embedded?: Returns true when display_as param is 'embedded', false otherwise
+#   - Defined in HelpHelper (not just HelpController) so it is available in any view context,
+#     including views rendered by PageLayoutsController (fixes issue #1134)
+# - #formatted_doc: Reads a markdown doc file and renders it as HTML
+#   - The substitutions.md doc must be rendered as HTML (not raw markdown text)
+#   - Even when the markdown source contains HTML-like tags in code examples (e.g. <br>),
+#     the page should still be rendered through the Kramdown markdown processor
+#   - The rendered page must include documentation for {{#is ...}} conditional processing
 
 require 'rails_helper'
 
@@ -96,6 +104,68 @@ RSpec.describe HelpHelper, type: :helper do
       it 'returns IntroductionDocument regardless of params' do
         controller.params[:back_path] = '/help/admin_reference/general/save_trigger'
         expect(helper.main_section).to eq(HelpController::IntroductionDocument)
+      end
+    end
+  end
+
+  describe '#display_embedded?' do
+    context 'when display_as param is "embedded"' do
+      before { controller.params[:display_as] = 'embedded' }
+
+      it 'returns true' do
+        expect(helper.display_embedded?).to be true
+      end
+    end
+
+    context 'when display_as param is absent' do
+      it 'returns false' do
+        expect(helper.display_embedded?).to be false
+      end
+    end
+
+    context 'when display_as param is a different value' do
+      before { controller.params[:display_as] = 'full' }
+
+      it 'returns false' do
+        expect(helper.display_embedded?).to be false
+      end
+    end
+  end
+
+  describe '#formatted_doc' do
+    before do
+      allow(helper).to receive(:current_admin).and_return(nil)
+      allow(helper).to receive(:current_user).and_return(nil)
+    end
+
+    context 'when rendering the substitutions.md documentation page' do
+      subject(:rendered) { helper.formatted_doc('admin_reference', 'general', 'substitutions') }
+
+      it 'renders as HTML with a top-level heading tag, not raw markdown syntax' do
+        expect(rendered).to match(/<h1[\s>]/)
+        expect(rendered).not_to include('# Substitutions')
+      end
+
+      it 'renders list items as HTML list elements, not raw markdown dashes' do
+        expect(rendered).to include('<li>')
+      end
+
+      it 'includes documentation for the {{#is}} conditional block opener' do
+        expect(rendered).to include('{{#is')
+      end
+
+      it 'includes documentation for the {{/is}} conditional block closer' do
+        expect(rendered).to include('{{/is}}')
+      end
+
+      it 'includes documentation for {{else is}} chaining within an is block' do
+        expect(rendered).to include('{{else is')
+      end
+
+      it 'renders code examples showing substitution tags with double curly braces (not escaped backslashes)' do
+        # The \{\{ escape sequences in the source markdown must be converted to {{ for display
+        expect(rendered).to include('{{')
+        expect(rendered).not_to include('\{\{')
       end
     end
   end

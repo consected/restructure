@@ -1144,6 +1144,14 @@ _fpa.form_utils = {
           if ($pos.length) $target = $pos;
         }
 
+        // Fallback: if no direct id match was found, look for an element carrying
+        // a data-alt-click-id alias (used by contains.resources panels to maintain
+        // backwards-compat with pre-PR-#1182 resource-based tab ids).
+        if (!$target.length && target[0] === '#') {
+          const altId = target.replace('#', '');
+          $target = $(`[data-alt-click-id="${altId}"]`);
+        }
+
         if (last) $target = $target.last();
 
         $target.click();
@@ -2267,6 +2275,56 @@ _fpa.form_utils = {
         });
       })
       .addClass('formatted-slfs');
+
+    // For each sublist-controls block: toggle filter selectors, and inject a clone of the
+    // source perspectives div (kept outside the AJAX-replaced block) so perspectives buttons
+    // appear alongside the filter selectors on every load/reload.
+    block
+      .find('.sublist-controls')
+      .not('.formatted-perspectives')
+      .each(function () {
+        var $controls = $(this);
+
+        // Toggle the filter selectors panel when the toggle button is clicked.
+        $controls.on('click', '.sublist-filter-toggle', function (ev) {
+          ev.preventDefault();
+          $controls.find('.sublist-filter-selectors').toggleClass('hidden');
+          if ($(this).hasClass('glyphicon-triangle-right')) {
+            $(this).removeClass('glyphicon-triangle-right').addClass('glyphicon-triangle-left');
+          } else {
+            $(this).removeClass('glyphicon-triangle-left').addClass('glyphicon-triangle-right');
+          }
+        });
+
+        // Clone the source perspectives div (which lives outside the AJAX-replaced resource
+        // block) and prepend it to this sublist-controls so perspectives appear alongside
+        // the filter toggle button on every load/reload.
+        var $resourceBlock = $controls.closest('[data-sub-for-root]');
+        if ($resourceBlock.length) {
+          var $source = $resourceBlock.prevAll('.activity-log-perspectives--source').first();
+          if ($source.length) {
+            $controls.find('.activity-log-perspectives--injected').remove();
+            var $clone = $source.clone(true, true)
+              .removeClass('activity-log-perspectives--source')
+              .addClass('activity-log-perspectives--injected');
+            // Restore the active button from the slug stored on the --source div.
+            var activePersp = $source.attr('data-active-perspective');
+            if (activePersp !== undefined) {
+              $clone.find('.activity-log-perspectives__btn').removeClass('active');
+              $clone.find('.activity-log-perspectives__btn[data-perspective="' + activePersp + '"]').addClass('active');
+            }
+            $controls.prepend($clone);
+          }
+        }
+
+        // If no perspectives are present, hide the filter toggle button and show the
+        // filter selectors directly (no need for a toggle when perspectives are absent).
+        if (!$controls.find('.activity-log-perspectives--injected').length) {
+          $controls.find('.sublist-filter-toggle').addClass('hidden');
+          $controls.find('.sublist-filter-selectors').removeClass('hidden');
+        }
+      })
+      .addClass('formatted-perspectives');
   },
 
   reorder_sub_list_columns: function (block) {

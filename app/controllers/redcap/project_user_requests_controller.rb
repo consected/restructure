@@ -18,7 +18,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
             'set the dynamic model has not been set up'
     end
 
-    @redcap__project_admin.dynamic_storage.request_records
+    @redcap__project_admin.dynamic_storage.request_records(request_source: :api)
 
     msg = "Records requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
@@ -51,14 +51,19 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     record_id = params[:record_id]
     field_name = params[:field_name]
     resource_name = params[:id]
-    m = Resources::Models.find_by(resource_name:)
+    m = find_resource_model(resource_name)
     raise FphsException, "download_field_file resource model not found for resource_name: #{resource_name}" unless m
 
-    tn = "\\.#{m.table_name}"
+    tn = m.table_name
+    sn = m.model.respond_to?(:definition) ? m.model.definition.schema_name : nil
+    tns = sn ? [tn, "#{sn}.#{tn}"] : [tn]
 
     svp = { secure_view: params[:secure_view]&.to_unsafe_h }
 
-    project_admin = Redcap::ProjectAdmin.active.order(id: :desc).find_by('dynamic_model_table ~ ?', tn)
+    # When more than one active project admin shares the same dynamic model table,
+    # prefer one that actually pulls data (frequency != 'never') and the most recently
+    # created (highest id), to match the project that actually captures files.
+    project_admin = Redcap::ProjectAdmin.preferred_active(tns)
     if project_admin
       project_admin.current_user = current_user
       container = project_admin.file_store
@@ -73,7 +78,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
       redirect_to url
     else
       Rails.logger.warn "Download field file failed for record_id: #{record_id}, field_name: #{field_name}, " \
-                        "project_admin: #{project_admin&.id}, container: #{container&.id}, path: #{path}, tn: #{tn}"
+                        "project_admin: #{project_admin&.id}, container: #{container&.id}, path: #{path}, tns: #{tns.inspect}"
       render json: { message: 'File not found or inaccessible' }, status: 404
     end
   end
@@ -87,6 +92,36 @@ class Redcap::ProjectUserRequestsController < UserBaseController
 
   def permitted_params
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency disabled options notes]
+  end
+
+  #
+  # Find a model in Resources::Models using the resource_name from the URL.
+  # The URL may contain one of several name formats:
+  #   - The exact plural resource_name (e.g. "dynamic_model__press_bp_measurement_rcs")
+  #   - The singular item_type_name (e.g. "dynamic_model__press_bp_measurement_rc")
+  #   - The name_with_option_type format used by longitudinal Redcap projects with multiple
+  #     data collection instruments (e.g. "dynamic_model__press_bp_measurement_rc_day_home_bp_form_upload"),
+  #     which is {item_type_name}_{option_type} - the singular name followed by underscore and option type name.
+  # @param resource_name [String] the resource_name from the URL parameter
+  # @return [Resources::Models::Item | nil]
+  def find_resource_model(resource_name)
+    return if resource_name.blank?
+
+    found = Resources::Models.find_by(resource_name:) ||
+            Resources::Models.find_by(resource_item_name: resource_name.to_sym)
+    return found if found
+
+    # Fall back to matching the longest {resource_item_name} prefix by progressively
+    # trimming trailing "_segment" suffixes (which represent the option_type).
+    # Stop once the candidate no longer contains the "__" namespace separator,
+    # to avoid matching base type registrations such as :dynamic_model.
+    candidate = resource_name.to_s
+    while candidate.include?('__') && (idx = candidate.rindex('_'))
+      candidate = candidate[0...idx]
+      match = Resources::Models.find_by(resource_item_name: candidate.to_sym)
+      return match if match
+    end
+    nil
   end
 
   #
@@ -118,20 +153,53 @@ class Redcap::ProjectUserRequestsController < UserBaseController
     if pid.to_i.to_s == pid
       @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
     elsif pid == 'project_id'
-      # Find a matching data collection instrument by name and if found look up the project admin
-      @redcap__project_admin = Redcap::ProjectAdmin
-                               .active
-                               .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
-                               .where(server_url: server_url)
-                               .reorder('')
-                               .order(updated_at: :desc)
-                               .first
+      # Find a matching project admin by project_id, first with an exact server_url match, then
+      # falling back to matching on protocol + host only to tolerate path differences
+      # (e.g. caller sends https://redcap.partners.org/redcap/ but project stores .../redcap/api/)
+      by_project_id = Redcap::ProjectAdmin
+                      .active
+                      .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                      .reorder('')
+                      .order(updated_at: :desc)
+
+      @redcap__project_admin = by_project_id.where(server_url: server_url).first
+
+      if @redcap__project_admin.nil? && server_url.present?
+        begin
+          uri = URI.parse(server_url)
+
+          if uri.scheme.present? && uri.host.present?
+            request_scheme = uri.scheme.downcase
+            request_host = uri.host.downcase
+
+            @redcap__project_admin = by_project_id.find do |project_admin|
+              stored_uri = URI.parse(project_admin.server_url.to_s)
+              stored_uri.scheme.present? &&
+                stored_uri.host.present? &&
+                stored_uri.scheme.downcase == request_scheme &&
+                stored_uri.host.downcase == request_host
+            rescue URI::InvalidURIError
+              Rails.logger.warn "Invalid stored server_url for project_admin #{project_admin.id}: #{project_admin.server_url}"
+              false
+            end
+          end
+        rescue URI::InvalidURIError
+          Rails.logger.warn "Invalid server_url param in set_instance_from_id: #{server_url}"
+        end
+      end
     elsif pid == 'project_name'
       # Try the project by name instead
       @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(project_name)
     end
 
-    raise FphsException, 'no matching project found' unless @redcap__project_admin
+    unless @redcap__project_admin
+      msg = if pid == 'project_name'
+              "no matching project found (project_name: #{project_name})"
+            else
+              "no matching project found (project_id: #{project_id}, server_url: #{server_url})"
+            end
+      raise FphsException, msg
+    end
 
     @id = @redcap__project_admin.id
     upgrade_user_to_admin

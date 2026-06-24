@@ -14,8 +14,15 @@ contains:
     - external-ids    # all available external identifiers
     - external-links  # defined external links for a master record
   resources:
-    # a single or array of named resources (model names)
-    - activity_log__player_contact_phones
+    # a single or array of named resources (model names).
+    # Three resource-name forms are supported and may be mixed within a single panel:
+    #   activity log:          activity_log__<plural_table_name>
+    #   dynamic model:         dynamic_model__<plural_table_name>
+    #   external identifier:   <plural_table_name>  (bare plural, no namespace prefix)
+    # Examples:
+    - activity_log__case_reviews        # activity log
+    - dynamic_model__contact_infos      # dynamic model
+    - scantron_ids                      # external identifier (bare plural)
     # For user_profile type, these resources may be also defined as hashes
     # allowing a resource name and tab label to be defined
     - label: Date/Time
@@ -29,7 +36,10 @@ view_options:
   add_item_label: contact             # button label for adding a resource
   orientation: (columns|horizontal|vertical)  # panel orientation for block lists
   limit: (integer)                    # max number of items to show in panel
-  initial_show: true|false            # initially open up a panel
+  initial_show: true|false            # initially open up a panel. When true, the panel will
+                                      # always open regardless of the `open panels` app configuration.
+                                      # To allow `open panels` to control which panel opens, leave
+                                      # this unset or set it to false.
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
   hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
@@ -53,6 +63,32 @@ view_options:
                                       # Example:
                                       #   player_contacts: desc
                                       #   addresses: asc
+  perspectives:                       # hash of resource names to array of perspective definitions for activity log panels
+                                      # Each perspective filters/orders the activity log list server-side
+                                      # Example:
+                                      #   activity_log__case_reviews:
+                                      #     - name: recent_active    # slug used in request params
+                                      #       label: Recent Active   # button label shown to user
+                                      #       report:                # Report backend (use report alt_resource_name)
+                                      #         resource_name: al_recent_active_report
+                                      #         defaults:            # criteria hash passed to report runner
+                                      #           status: active
+                                      #       order:                 # whitelisted sort (column: asc|desc)
+                                      #         created_at: desc     # omit to use action_when_attribute desc
+                                      #                              # (report backend preserves SQL row order)
+                                      #       limit: 10              # max records to return
+                                      #     - name: my_open          # ConditionalActions backend
+                                      #       label: My Open
+                                      #       conditional_calculation:  # CalcActions condition hash;
+                                      #         activity_log__case_reviews: # use field: value for equality
+                                      #           status: active            # and return: return_all_results
+                                      #           return: return_all_results # no_masters is auto-injected
+                                      #     - name: all
+                                      #       label: All             # 'all' with no backend = reset to unfiltered
+  default_perspective:                # slug of the perspective to activate by default for this panel
+                                      # May be overridden per-user via the 'default activity log perspective'
+                                      # Admin::AppConfiguration entry (keyed by resource_name).
+                                      # Example: recent_active
 
 list_options:
   hide_in_list: false (default) | true
@@ -94,7 +130,7 @@ tab:
 #
 # A standalone page container defining rows that define the contents of the page
 container:
-  rows: an array of row definitions
+  rows: # an array of row definitions
     classes: string of space separated class names to add directly to each standard-page-row div
     styles: maps key/value to standard styles
     cols: #&cols
@@ -138,8 +174,12 @@ container:
       #
       #
       resource:
-        # View a resource list (such as activity logs)
-        name: activity_log__player_contact_phone        # resource name
+        # View a resource list for any supported resource type.
+        # The same three resource-name forms accepted by contains.resources are supported here:
+        #   activity log:        activity_log__<plural_table_name>
+        #   dynamic model:       dynamic_model__<plural_table_name>
+        #   external identifier: <plural_table_name>  (bare plural, no namespace prefix)
+        name: activity_log__player_contact_phone        # resource name (any of the three forms above)
         id: 123     # optional resource id to filter the results on
                     # if missing, the URL params
                     # *filters[resource_id]* will be used (if present)

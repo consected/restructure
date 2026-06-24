@@ -107,6 +107,9 @@ module NfsStore
         parts << app_dir
         parts << containers_dirname unless containers_dirname.blank?
 
+        # Trust boundary: paths appended below must resolve inside this root.
+        containers_root = File.join(parts)
+
         # Use the parent_path if the container defines it, to place the container directory in a parent directory
         if container&.parent_sub_dir&.present?
           psd_parts = container.parent_sub_dir.split('/').reject(&:blank?)
@@ -115,30 +118,111 @@ module NfsStore
 
         parts << container&.directory_name if container&.directory_name
         parts << Archive::Mounter.archive_mount_name(archive_file) unless archive_file.blank?
-        parts << path unless path.blank?
-        parts << file_name if file_name
+        parts << clean_path(path) unless path.blank?
+        parts << clean_path(file_name) if file_name
 
-        p = File.join(parts)
+        p = File.join(parts.compact)
+
+        # Containment invariant: model fields (parent_sub_dir, directory_name
+        # etc.) are not run through clean_path above; guard against any `..`
+        # smuggled in via those attributes.
+        assert_descendant_of_root!(p, containers_root)
 
         if strip_final_slash
-          clean_path p
+          # `p` is absolute by construction; use Pathname#cleanpath (the strict
+          # clean_path guard would reject it as an absolute path).
+          Pathname.new(p).cleanpath.to_s
         else
           p&.to_s
         end
       end
 
-      # Clean up relative paths, removing useless dots, etc
-      # @param path [String] simple relative path
-      # @return [String, nil] cleaned up path, or nil if it represents the root
+      # Raise FsException::Action unless `path` resolves (lexically) to
+      # a location at or beneath `root`. Both arguments are treated as
+      # absolute filesystem paths.
+      #
+      # @param path [String]
+      # @param root [String]
+      # @raise [FsException::Action]
+      def self.assert_descendant_of_root!(path, root)
+        return if path.blank? || root.blank?
+
+        cleaned_path = Pathname.new(path).cleanpath.to_s
+        cleaned_root = Pathname.new(root).cleanpath.to_s
+
+        return if cleaned_path == cleaned_root
+        return if cleaned_path.start_with?("#{cleaned_root}/")
+
+        raise FsException::Action,
+              'Assembled path escapes containers root (containment violation): ' \
+              "#{cleaned_path.inspect} not under #{cleaned_root.inspect}"
+      end
+
+      # Sanitise a user-supplied relative path before it is joined with
+      # the container's absolute filesystem root.
+      #
+      # Returns `nil` for inputs that represent "no path" (blank or `.`).
+      # Otherwise returns a lexically-normalised relative path string.
+      #
+      # Raises `FsException::Action` for inputs that would let a caller
+      # escape the container root:
+      #   * embedded NUL bytes
+      #   * absolute paths (leading `/`)
+      #   * traversal sequences that resolve to a leading `..` segment
+      #
+      # @param path [String, nil] relative path supplied (directly or
+      #   indirectly) by an end user or persisted in a model attribute.
+      # @return [String, nil] cleaned relative path, or nil for no-op input.
+      # @raise [FsException::Action] when the input would escape the
+      #   container root.
       def self.clean_path(path)
         return nil if path.blank? || path == '.'
 
-        path.sub(%r{/$}, '')
-        pn = Pathname.new path
-        path = pn.cleanpath
-        return if path.nil? || path.to_s.blank?
+        path_str = path.to_s
+        raise FsException::Action, 'Path contains NUL byte' if path_str.include?("\x00")
+        raise FsException::Action, "Absolute path not allowed: #{path_str.inspect}" if path_str.start_with?('/')
 
-        path.to_s
+        pn = Pathname.new(path_str)
+        raise FsException::Action, "Absolute path not allowed: #{path_str.inspect}" if pn.absolute?
+
+        cleaned = pn.cleanpath.to_s
+        return if cleaned.blank? || cleaned == '.'
+
+        # Pathname#cleanpath leaves leading '..' intact (e.g. 'a/../../b' → '../b').
+        raise FsException::Action, "Path traversal not allowed: #{path_str.inspect}" if cleaned.split('/', 2).first == '..'
+
+        cleaned
+      end
+
+      # Validate that a value intended as a single-segment filename does
+      # not contain path separators, traversal sequences, NUL bytes, or
+      # control characters. Use at entry points expecting a basename;
+      # `clean_path` is for multi-segment relative paths.
+      #
+      # @param name [String, nil] candidate filename
+      # @return [String] the validated filename, unchanged
+      # @raise [FsException::Action] when the value is not a safe basename
+      def self.validate_file_name!(name)
+        raise FsException::Action, 'File name is blank' if name.nil?
+
+        name_str = name.to_s
+        raise FsException::Action, 'File name is blank' if name_str.strip.empty?
+        raise FsException::Action, 'File name contains NUL byte' if name_str.include?("\x00")
+
+        # Reject any ASCII control char (incl. newline, tab, CR).
+        if name_str =~ /[\x00-\x1F\x7F]/
+          raise FsException::Action, "File name contains control characters: #{name_str.inspect}"
+        end
+
+        # Single-segment only — no path separators of either flavour.
+        if name_str.include?('/') || name_str.include?('\\')
+          raise FsException::Action, "File name must not contain path separators: #{name_str.inspect}"
+        end
+
+        # Lone "." and ".." are directory navigation entries, not filenames.
+        raise FsException::Action, "File name is reserved: #{name_str.inspect}" if ['.', '..'].include?(name_str)
+
+        name_str
       end
 
       # Test permissions on a container (sub)directory
@@ -152,9 +236,10 @@ module NfsStore
       def self.test_dir(role_name, container, action, extra_path: nil, file_name: nil, ok_if_exists: nil)
         # Make sure we can write to this directory
 
-        if action == :write
+        case action
+        when :write
           fs_test_path = nfs_store_path(role_name, container, extra_path, '.test_file')
-          FileUtils.rm fs_test_path if File.exist? fs_test_path
+          FileUtils.rm_f fs_test_path
           # Avoid a strange NFS timing issue where touch hits a stale file handle
           # Give rm time to complete cleanly
           10.times do
@@ -164,7 +249,7 @@ module NfsStore
           end
           FileUtils.touch fs_test_path
           FileUtils.rm fs_test_path
-        elsif action == :mkdir
+        when :mkdir
           fs_test_path = nfs_store_path(role_name, container, extra_path, strip_final_slash: true)
           if File.exist?(fs_test_path)
             return true if ok_if_exists
@@ -181,12 +266,13 @@ module NfsStore
           # Check the path to create is actually part of the container
           container_path = container.path_for(role_name:)
           unless fs_test_path.start_with? container_path
-            Rails.logger.info 'Container path is not part of the path to be tested for mkdir'
+            Rails.logger.warn 'Container path is not part of the path to be tested for mkdir: ' \
+                              "#{container_path} not in #{fs_test_path}"
             return false
           end
 
           # Calculate the sub_path to be all the components that are deeper than the container_parent
-          sub_path = fs_test_path[container_parent.length..-1]
+          sub_path = fs_test_path[container_parent.length..]
           sub_path_parts = sub_path.split('/').reject(&:blank?)
           curr_path = container_parent
 
@@ -201,15 +287,18 @@ module NfsStore
           # Although we tested up front for existence of the directory, use this as a failsafe to
           # ensure that we can not accidentally remove an existing file unexpectedly
           if File.exist? curr_path
-            raise FsException::Action, "Target directory already exists when attempting test: #{fs_test_path}"
+            raise FsException::Action, 'Target directory already exists when attempting test: ' \
+                                       "#{curr_path} in #{fs_test_path}"
           end
 
           FileUtils.touch curr_path
-          FileUtils.rm curr_path
-        elsif action == :read
+          res = FileUtils.rm curr_path
+          Rails.logger.warn "Failed to test mkdir for container with #{curr_path}" unless res
+          res
+        when :read
           fs_test_path = nfs_store_path(role_name, container, extra_path, file_name)
           Pathname.new(fs_test_path).readable?
-        elsif action == :exists
+        when :exists
           fs_test_path = nfs_store_path(role_name, container, extra_path, file_name)
           File.exist? fs_test_path
         else

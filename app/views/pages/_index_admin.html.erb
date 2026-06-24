@@ -28,15 +28,10 @@
   <div class="panel-body">
     <div class="row">
       <div class="col-sm-6">
-        <% begin %>        
-        <%= Rails.cache.fetch(partial_cache_key('index_admin_components', force_user_or_admin: current_admin)) { render partial: 'admin/app_types/components' } %>
-        <% rescue StandardError => e
-            logger.warn 'Failed to load admin components panel'
-            logger.warn e
-            logger.warn e.backtrace.join("\n")
-        %>
-        <p>Failed to load components</p>
-        <% end %>
+        <div class="admin-components-lazy-panel"
+             data-lazy-url="<%= components_panel_admin_app_types_path %>">
+             <div class="admin-components-lazy-panel__loading">loading...</div>
+        </div>
       </div>
       <div class="col-sm-17 col-sm-offset-1">
         <%= render partial: 'pages/admin_alerts_panel' %>            
@@ -89,7 +84,7 @@
               <% if current_admin.can_admin?(:user_contact_infos)%><% got_one ||= true %><li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_roles)%><% got_one ||= true %><li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li><%end%>
               <% if current_admin.can_admin?(:user_access_controls)%><% got_one ||= true %><li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li><%end%>
-              <% if current_admin.can_admin?(:user_roles) && current_admin.can_admin?(:user_access_controls) && Report.active.where(item_type: 'admin-user-access-overview').exists? %><% got_one ||= true %><li class="nav"><%= link_to "User Access Overview", reports_path(filter: { item_type: 'admin-user-access-overview' }, simple_view: true), target: '_blank' %> </li><%end%>
+              <% if current_admin.can_admin?(:user_roles) && current_admin.can_admin?(:user_access_controls) && Report.active.where(item_type: 'admin-user-access-overview').exists? %><% got_one ||= true %><li class="nav"><%= link_to Settings::AdminReportItemTypes['admin-user-access-overview'], reports_path(filter: { item_type: 'admin-user-access-overview' }, simple_view: true), target: '_blank' %> </li><%end%>
               <% if current_admin.can_admin?(:role_descriptions)%><% got_one ||= true %><li class="nav"><%= link_to "Role Descriptions", admin_role_descriptions_path %> </li><%end%>
               <% if current_admin.can_admin?(:filters)%><% got_one ||= true %><li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li><%end%>
               <% if current_admin.can_admin?(:manage_admins)%><% got_one ||= true %><li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li><%end%>
@@ -107,6 +102,7 @@
               <% if current_admin.can_admin?(:job_reviews)%><% got_one ||= true %><li class="nav"><%= link_to "External ID Details", admin_external_identifier_details_path %> </li><%end%>
               <% if current_admin.can_admin?(:job_reviews)%><% got_one ||= true %><li class="nav"><%= link_to "Background Jobs", admin_job_reviews_path %> </li><%end%>
               <% if current_admin.can_admin?(:server_info)%><% got_one ||= true %><li class="nav"><%= link_to "Server Settings", admin_server_info_index_path %> </li><%end%>
+              <% if current_admin.can_admin?(:reports) && Report.active.where(item_type: 'z-admin').exists?%><% got_one ||= true %><li class="nav"><%= link_to Settings::AdminReportItemTypes['z-admin'], reports_path(filter: { item_type: 'z-admin' }), target: '_blank' %> </li><%end%>
               <% unless got_one %><li class="nav nothing-admin-authed">Nothing authorized</li><% end %>
             </ul>
           </div>

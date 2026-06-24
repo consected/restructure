@@ -31,6 +31,23 @@
             result_type = 'report'
             report_id = report['id']
             report_defaults = (report['defaults'] || {}).symbolize_keys
+
+            # Issue #1217: merge URL filter params into report defaults,
+            # but only for keys the report declares as search attributes (allow-list).
+            if @filters.present?
+              begin
+                report_record = Report.find_by_id_or_resource_name(report_id)
+                if report_record
+                  allowed_keys = report_record.search_attributes.symbolize_keys.keys
+                  filter_hash = @filters.respond_to?(:to_unsafe_h) ? @filters.to_unsafe_h : @filters.to_h
+                  filtered_params = filter_hash.symbolize_keys.slice(*allowed_keys)
+                  report_defaults = report_defaults.merge(filtered_params)
+                end
+              rescue ActiveRecord::RecordNotFound
+                # Report not found — fall back to static defaults only
+              end
+            end
+
             report_params = {}
             report_params[:search_attrs] = report_defaults
             report_params[:search_attrs][:_report_id_] = report_id
@@ -42,9 +59,11 @@
           elsif resource_def
             result_type = 'resource'
             resource = resource_def['name']
+            lookup_name = resource
             resource = resource.pluralize
             @master_id = resource_def['master_id'] || @master_id
             template_prefix = "#{resource_def['template_prefix']}-" if resource_def['template_prefix']
+            explicit_template_prefix = resource_def['template_prefix'] ? "#{resource_def['template_prefix']}-" : nil
             option_classes = resource_def['option_classes']
 
             url_parts = [
@@ -76,6 +95,7 @@
             param_parts.compact!
 
             col_url = "/#{url_parts.join("/")}?#{param_parts.join("&")}"
+            render_info = resource_render_info(lookup_name, context: :standalone_page, template_prefix: explicit_template_prefix)
           else
             # No report or resource was specified, so allow just literal header / footer text to be shown
             # without complaining about a missing resource or report
@@ -84,14 +104,14 @@
         end
       end
 
-      
-      sub_data = @master || {}
+      report_defaults.transform_values! {|v| v.is_a?(String) ? ERB::Util.html_escape(v) : v } if report_defaults
+      sub_data = @master || report_defaults || {}
       
       col_label = Formatter::Substitution.substitute(col_label, data: sub_data, tag_subs: nil)
       col_header = markdown_to_html(col_header)
       col_footer = markdown_to_html(col_footer)
-      col_header = Formatter::Substitution.substitute(col_header, data: sub_data, tag_subs: nil).html_safe
-      col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil).html_safe
+      col_header = Formatter::Substitution.substitute(col_header, data: sub_data, tag_subs: nil, html_escape_values: true).html_safe
+      col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil, html_escape_values: true).html_safe
 
   %>
     <% if !@master_id && !col_url && !no_resource_or_report %>
@@ -110,8 +130,8 @@
         <%if col_label.present? %><h2 class="sp-col-label"><%=col_label%></h2><% end %>
         <% if col_header.present? %><div class="sp-col-header"><%= col_header%></div><% end %>
         <div class="result-target result-target-<%=result_type%> page-template-<%=template_prefix%>prefix <%= option_classes %>">
-          <% if resource %>
-            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results <%= template_prefix != 'page-' ? 'activity-logs-generic-block' : '' %> standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-<%=template_prefix%>result-template">
+          <% if resource && render_info %>
+            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results <%= render_info[:wrapper_class] %> standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= render_info[:template_name] %>">
               <div id="<%= resource.hyphenate %>-inner-<%=@master_id%>" class="standalone-panel-inner-block">
               </div>
             </div>

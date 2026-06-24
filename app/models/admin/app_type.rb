@@ -241,7 +241,7 @@ class Admin
         end
 
       rall = "^(#{rset.join('|')})"
-      Classification::GeneralSelection.active.where("item_type ~ '#{rall}'").order(id: :asc)
+      Classification::GeneralSelection.active.where('item_type ~ ?', rall).order(id: :asc)
     end
 
     def associated_protocols

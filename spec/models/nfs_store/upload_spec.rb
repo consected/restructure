@@ -219,10 +219,10 @@ RSpec.describe NfsStore::Upload, type: :model do
     expect(res).to be true
     exp = { 'iterator_index' => 0,
             'iterator_value' => nil,
-            'notify_errors' => ['No recipients based on role: upload notify role, users or specified phones/emails in SaveTriggers::Notify'],
+            'notify_errors' => [match(/\ANo recipients based on role: upload notify role, users or specified phones\/emails in SaveTriggers::Notify/)],
             'notify_results' => [false],
             'notify_messages' => [] }
-    expect(@container.save_trigger_results).to eq exp
+    expect(@container.save_trigger_results).to match(exp)
     expect(Messaging::MessageNotification.count).to eq initial_notification_count
   end
 end

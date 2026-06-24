@@ -27,7 +27,7 @@ module NfsStore
     # @return [NfsStore::Manage::StoredFile]
     def self.import_file(container_id, file_name, file_path, current_user,
                          path: nil, skip_existing: nil, replace: nil)
-      file_path = NfsStore::Manage::Filesystem.clean_path file_path
+      path = NfsStore::Manage::Filesystem.clean_path(path)
 
       transaction do
         # Set up an import object based on the file to import

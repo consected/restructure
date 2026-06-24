@@ -14,16 +14,28 @@ describe 'admin dynamic model run batch now button', js: true, driver: $browser_
     # Get or create app_type first
     @app_type = Admin::AppType.active.first
 
-    # Create or find batch user for testing
-    @batch_user = User.find_or_create_by!(email: 'batch_test_user@test.com') do |user|
-      user.first_name = 'Batch'
-      user.last_name = 'User'
-      user.current_admin = @admin
-      user.app_type = @app_type
-      user.disabled = false
+    # Create batch user for testing using the standard support method so it gets
+    # a proper password, confirmed_at, and app_type UAC — making it findable by
+    # User.active.find_by_email via user_for_conf_snippet
+    @batch_user = User.find_by(email: 'batch_test_user@test.com')
+    if @batch_user
+      @batch_user.current_admin = @admin
+      @batch_user.update!(disabled: false, app_type: @app_type)
+    else
+      # Save admin-level variables before create_user overwrites them
+      # (create_user sets @good_email, @good_password, @user to the new user)
+      saved_good_email = @good_email
+      saved_good_password = @good_password
+      saved_user = @user
+
+      create_user(nil, '', email: 'batch_test_user@test.com', app_type: @app_type)
+      @batch_user = @user
+
+      # Restore admin login variables so admin_sign_in_with_2fa works correctly
+      @good_email = saved_good_email
+      @good_password = saved_good_password
+      @user = saved_user
     end
-    # Ensure app_type is set for existing users
-    @batch_user.update!(app_type: @app_type) unless @batch_user.app_type
   end
 
   def cleanup_browser_state

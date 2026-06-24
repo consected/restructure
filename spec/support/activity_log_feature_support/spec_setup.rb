@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "#{::Rails.root}/spec/support/activity_log_feature_support/activity_log_setup"
+require "#{Rails.root}/spec/support/activity_log_feature_support/activity_log_setup"
 module SpecSetup
   def setup_database
     # puts 'setup database'
@@ -57,9 +57,17 @@ module SpecSetup
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create
     setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create
 
+    # Delete from all activity_log_player_contact_* tables (including any created by other
+    # specs such as save_trigger_api_endpoints_spec) before clearing player_contacts, to
+    # avoid FK violations when those tables reference player_contacts.
+    # History tables must be deleted before their parent tables (they hold the FK).
+    conn = ActiveRecord::Base.connection
+    al_pc_tables = conn.tables.select { |t| t.start_with?('activity_log_player_contact') }
+    (al_pc_tables.select { |t| t.end_with?('_history') } +
+     al_pc_tables.reject { |t| t.end_with?('_history') }).each do |t|
+      conn.execute("DELETE FROM #{conn.quote_table_name(t)}")
+    end
     ActiveRecord::Base.connection.execute("
-                           delete from activity_log_player_contact_phone_history;
-                           delete from activity_log_player_contact_phones;
                            delete from player_contact_history;
                            delete from player_contacts;
                            delete from tracker_history where item_type = 'ActivityLog::PlayerContactPhone';

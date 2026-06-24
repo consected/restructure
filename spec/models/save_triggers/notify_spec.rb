@@ -3,7 +3,9 @@
 # Tests for SaveTriggers::Notify
 # Covers notification trigger configuration parsing, role/user setup, message creation,
 # template substitutions, conditional actions, return_value_list references,
-# calendar invite integration (#953), and NfsStore file attachment config parsing (#954).
+# calendar invite integration (#953), NfsStore file attachment config parsing (#954),
+# inline data URI image conversion (#1148), literal/template/array phones+emails (#1152),
+# and config app_type for role lookup + error message improvements (#1172).
 
 require 'rails_helper'
 
@@ -19,7 +21,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
     ud, = create_user
     ud.disable!
-    u0, = create_user
+    @u0, = create_user
     u1, = create_user
     create_user
     let_user_create :player_contacts
@@ -49,8 +51,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test_2', current_admin: @admin
 
-    at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
-    Admin::UserRole.create! app_type: at2, user: u0, role_name: 'test', current_admin: @admin
+    @at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
+    Admin::UserRole.create! app_type: @at2, user: @u0, role_name: 'test', current_admin: @admin
 
     # The number of roles is one more than we added due to automatic setup of a template@template item
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
@@ -271,6 +273,36 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+  end
+
+  it 'runs on_complete when notify config is an array of trigger entries - issue #1147' do
+    completion_note = 'notify on_complete array fired issue 1147'
+
+    config = {
+      type: 'email',
+      role: 'test',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text',
+      on_complete: [
+        {
+          update_this: {
+            one: {
+              with: {
+                notes: completion_note
+              }
+            }
+          }
+        }
+      ]
+    }
+
+    @al.update!(notes: nil, current_user: @user)
+    @trigger = SaveTriggers::Notify.new(config, @al)
+
+    @trigger.perform
+
+    expect(@al.reload.notes).to eq(completion_note)
   end
 
   it 'uses a simple {{template}} reference to get the users for a notification' do
@@ -1013,5 +1045,195 @@ RSpec.describe SaveTriggers::Notify, type: :model do
         expect(es_data['attachments'][0]['file_name']).to eq('report.pdf')
       end
     end
+  end
+
+  context 'with data URI inline images in content (issue #1148)' do
+    # Minimal valid 1x1 red pixel PNG in base64
+    PNG_BASE64_NOTIFY = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=='
+
+    before :example do
+      change_setting('TestMail', true)
+      change_setting('ProcessInlineDataUriImages', true)
+    end
+
+    after :example do
+      change_setting('TestMail', false)
+      change_setting('ProcessInlineDataUriImages', nil)
+    end
+
+    it 'converts data URI images to inline attachments when sending notification email triggered by notify' do
+      # Content template embeds a data URI image
+      data_img = %(<img src="data:image/png;base64,#{PNG_BASE64_NOTIFY}" alt="embedded"/>)
+      t = "<p>Here is an image: #{data_img}</p>"
+      content_with_image = Admin::MessageTemplate.create!(
+        name: 'test email content with image',
+        message_type: :email,
+        template_type: :content,
+        template: t,
+        current_admin: @admin
+      )
+
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: content_with_image.name,
+        subject: 'Image Notification'
+      }
+
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+
+      new_mn = MessageNotification.order(id: :desc).first
+      new_mn.generate
+
+      mail = NotificationMailer.send_message_notification(new_mn)
+
+      # The data URI must have been replaced with an inline cid: attachment
+      inline_attachments = mail.attachments.select(&:inline?)
+      expect(inline_attachments.size).to eq(1)
+
+      body = (mail.html_part || mail).body.decoded
+      expect(body).to include('src="cid:')
+      expect(body).not_to include('src="data:')
+    end
+  end
+
+  context 'phones and emails support literal strings, template substitutions, and per-element resolution - issue #1152' do
+    # Tests for issue #1152: setup_phones fails when calc_field_or_return returns a String
+    # (e.g. literal phone, template substitution, or conditional hash) because .map is called
+    # directly on the result. Also covers that array elements containing {{templates}} should
+    # each be individually resolved via calc_field_or_return.
+
+    before :example do
+      @al.update!(data: '(617)555-0101', notes: 'dynamic@example.com', current_user: @user)
+    end
+
+    let(:sms_config_base) do
+      {
+        type: 'sms',
+        default_country_code: '1',
+        layout_template: @layout_sms.name,
+        content_template_text: 'Test SMS content',
+        subject: 'subject text'
+      }
+    end
+
+    let(:email_config_base) do
+      {
+        type: 'email',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+    end
+
+    it 'accepts phones as a literal string - issue #1152' do
+      config = sms_config_base.merge(phones: '+16175551234')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175551234'])
+    end
+
+    it 'accepts phones as a template substitution resolving the item field - issue #1152' do
+      config = sms_config_base.merge(phones: '{{data}}')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175550101'])
+    end
+
+    it 'accepts phones as a conditional hash resolving the item field via ConditionalActions - issue #1152' do
+      config = sms_config_base.merge(phones: { this: { data: 'return_value' } })
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones).to eq(['+16175550101'])
+    end
+
+    it 'resolves template substitutions within each element of a phones array - issue #1152' do
+      config = sms_config_base.merge(phones: ['{{data}}', '+16175551235'])
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.phones.sort).to eq(['+16175550101', '+16175551235'].sort)
+    end
+
+    it 'accepts emails as a literal string - issue #1152' do
+      config = email_config_base.merge(emails: 'test@example.com')
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.instance_variable_get(:@force_emails)).to eq(['test@example.com'])
+    end
+
+    it 'resolves template substitutions within each element of an emails array - issue #1152' do
+      config = email_config_base.merge(emails: ['{{notes}}', 'static@example.com'])
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      @trigger.perform
+      expect(@trigger.instance_variable_get(:@force_emails)).to eq(['dynamic@example.com', 'static@example.com'])
+    end
+  end
+
+  it 'uses config app_type for role lookup when app_type is specified in config - issue #1172' do
+    # @u0 has the 'test' role only in @at2 (not in @user.app_type)
+    # @user has the 'test' role only in @user.app_type (not in @at2)
+    # With app_type: @at2.id in config, the trigger should look up roles in @at2,
+    # not in @user.app_type (the current user's app type).
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: @at2.id,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    # @u0 has role 'test' in @at2, so must be a recipient
+    expect(@trigger.receiving_user_ids).to include(@u0.id)
+    # @user has role 'test' in @user.app_type (not @at2), so must NOT be a recipient
+    expect(@trigger.receiving_user_ids).not_to include(@user.id)
+  end
+
+  it 'includes current user and app type ID in no-recipients error message - issue #1172' do
+    # The error message for missing recipients should identify which user and app type
+    # were used for the role lookup so the problem can be diagnosed.
+    config = {
+      type: 'email',
+      role: 'nonexistent-role-xyz',
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    error_msg = @al.save_trigger_results['notify_errors'].last
+    expect(error_msg).to include(@user.email)
+    expect(error_msg).to include(@user.app_type.id.to_s)
+  end
+
+  it 'stores resolved app_type and user on the MessageNotification record when config app_type is specified - issue #1172' do
+    # When app_type and user are specified in the config, the MessageNotification record should
+    # be associated with the configured app_type (not the triggering user's app_type),
+    # and the user should be the alt_batch_user (@u0) resolved from the config.
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: @at2.id,
+      user: @u0.email,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    new_mn = MessageNotification.order(id: :desc).first
+    # The notification's app_type should be the configured @at2, not @user.app_type
+    expect(new_mn.app_type).to eq @at2
+    # The user on the notification should be @u0 (the resolved alt_batch_user), not the triggering @user
+    expect(new_mn.user.id).to eq @u0.id
   end
 end
