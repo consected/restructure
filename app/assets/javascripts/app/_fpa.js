@@ -345,14 +345,17 @@ _fpa = {
 
       $.ajax(url, {
         success: function (data) {
-          var temploc = $('#master-main-template').first();
           // Iterate all the returned scripts and only add them to the DOM if a script with the same id
-          // doesn't already exist. This prevents accidental bloating of the DOM with duplicates
+          // doesn't already exist. This prevents accidental bloating of the DOM with duplicates.
+          // Append to <head> so that injected config scripts (which set up _fpa.state.template_config
+          // version keys) are always inserted into a live DOM node and evaluated by the browser.
+          // (The previous insertion point #master-main-template no longer exists in the DOM after
+          // the Handlebars precompilation refactoring, so temploc.after() was silently a no-op.)
           $(data).each(function () {
             var templateid = $(this).attr('id');
             console.debug(`got template ${templateid}`)
             if (!$('#' + templateid).length) {
-              temploc.after($(this));
+              $('head').append($(this));
             }
           });
           _fpa.compile_templates();

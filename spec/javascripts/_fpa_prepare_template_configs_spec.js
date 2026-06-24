@@ -10,12 +10,7 @@
 describe('_fpa.prepare_template_configs', function () {
   beforeEach(function () {
     _fpa.state.template_config_versions = {};
-    $('body').append('<script id="master-main-template"></script>');
     spyOn(_fpa, 'compile_templates');
-  });
-
-  afterEach(function () {
-    $('#master-main-template').remove();
   });
 
   it('fetches template configs again when the same record id has a new vdef_version', function () {
