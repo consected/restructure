@@ -51,7 +51,11 @@ if [ -z "${ALLOW_EMPTY_UNRELEASED}" ]; then
   cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
   if [ "${cl_not_ok}" ]; then
     echo "CHANGELOG.md does not have anything entered for the Unreleased section. Will populate it from git log"
-    app-scripts/get_changelog_entries_from_git.sh new-master --update-cl
+    if [ "${UPVLEVEL}" == 'minor' ]; then
+      echo "Minor version requested. Will populate CHANGELOG.md with merged PRs"      
+      use_prs='--prs'
+    fi
+    app-scripts/get_changelog_entries_from_git.sh new-master --update-cl ${use_prs}
     git commit CHANGELOG.md -m "Updated CHANGELOG.md with git commits" && \
     git push
   fi
