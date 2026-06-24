@@ -14,6 +14,112 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.44.0 back to develop
+- [Fixed] tracker history protocol casing in history view - fixes #1112
+- [Added] pull_emails save trigger to read MIME emails from S3, filesystem and IMAP - resolves #1109
+- [Added] warn logging for failed API authentication attempts - fixes #1114
+- [Fixed] log injection risk by sanitizing user-supplied values in API auth failure log - fixes #1114
+- [Added] regression guard spec for versioned field list - refs #665
+- [Added] lenient server_url matching when looking up REDCap project by project_id - fixes #1116
+- [Added] request_source tracking to Redcap::DataRecords job requests - resolves #1118
+- [Clarified] User Access Overview report titles and descriptions - fixes #1123
+- [Clarified] User Access Overview search criteria labels and report ordering - fixes #1124
+- [Added] triggering instance details to trigger exception messages - fixes #1121
+- [Updated] DB schema SQL
+- [Fixed] bulk message response updates across app-type switch and expanded retry-path coverage - fixes #1129
+- [Updated] prompts
+- [Added] drill-down links between User Access Overview reports and admin pages - fixes #1125
+- [Fixed] download_field_file failing for longitudinal Redcap projects with multiple instruments - fixes #1135
+- [Fixed] display_embedded? error in page layouts - fixes #1134
+- [Fixed] Redcap file capture desync and added manual recovery option - fixes #1137
+- [Fixed] missing general selection fallback for report edit fields - fixes #1140
+- [Fixed] Redcap job perform() to use opts hash instead of kwargs for delayed_job Ruby 3 compatibility - fixes #1137
+- [Added] if: conditions to attachments and after_processing in pull_emails trigger - fixes #1144
+- [Updated] pull_emails spec whitespace formatting - fixes #1144
+- [Added] lookup sub-query value source and condition: return flags - fixes #1142
+- [Added] inline data URI image embedding in notification emails - resolves #1148
+- [Fixed] notify on_complete array handling - fixes #1147
+- [Added] tracking for Redcap DataRecords requested options and skipped files - fixes #1143
+- [Improved] NFS container error messaging and mkdir test return value - refs #1155
+- [Added] regression specs for embed via create_reference extra_log_type investigation
+- [Corrected] initial_show and open_panels documentation and specs - resolves #1153
+- [Update] docs to correctly note that initial_show: false is also overridden by open panels
+- [Added] auto name filter for admin pages with name column - fixes #1159
+- [Added] validation to raise FphsOptionsParseError for unexpected underscore-prefixed keys in option configs - fixes #1163
+- [Fixed] Puma test port selection reliability - fixes #1165
+- [Fixed] notes field format: plain newlines overridden by app config markdown setting - fixes #1167
+- [Added] async lazy loading for admin components panel - fixes #1171
+- [Added] ActivityLog embedded_item API panel trigger examples - fixes #930
+- [Added] parse_json and parse_yaml substitution formatters - fixes #1170
+- [Added] current app type access boolean column and filter to Usernames and Passwords admin page - resolves #1168
+- [Added] _constants and _configurations merging from config libraries - fixes #1178
+- [Refactored] page layout resources to standardise UI panel rendering within generic blocks - fixes #1180
+- [Added] `same_site` lax to session cookie - fixes #1184
+- [Added] full_item_type_name to Admin::MasterRecord - fixes #1183
+- [Fixed] unsafe SQL interpolation of role names in Reports::Runner - fixes #1077
+- [Added] non-blocking main template load on admin pages - fixes #1181
+- [Fixed] SQL injection in AppType#associated_general_selections
+- [Fixed] stored XSS protection with Nokogiri parsing - fixes #1189
+- [Updated] upload notify error message matcher for upstream format change - fixes #1172 compatibility
+- [Added] SSRF guard to pull_external_data save trigger
+- [Refactored] constantize on user-influenced strings to use Resources::Models registry allow-list
+- [Harden] NfsStore path traversal: clean_path guard, containment invariant, filename validation, model-layer defence-in-depth
+- [Added] link from reports API admin panel to extra URL attributes documentation
+- [Fixed] contains.resources panel HTML IDs and data-panel-tab for single-resource panels - fixes #1200
+- [Split] contains.resources panels into legacy single-resource and multi-resource wrapper rendering; forbid mixed AL panels - fixes #1205
+- [Added] activity log panel perspectives feature - resolves #1194
+- [Fixed] SQL injection vulnerability in runner.rb - resolves #1194
+- [Updated] Puma to 7.2.1 to fix CVE
+- [Fixed] substitutions.md library page rendering and added {{#is}} docs - fixes #1213
+- [Updated] to fix some formatting issues and add null and blank comparisons
+- [Added] "show in new tab" link to top of library document page
+- [Added] batch user fallback for nfs_store jobs when active user has no group roles - fixes #1204
+- [Added] URL params passthrough to report search criteria in standalone page layouts - fixes #1217
+- [Added] Admin Reports link in Status block on admin page using AdminReportItemTypes constant - fixes #1216
+- [Added] datalabels plugin to chartjs
+- [Fixed] view spec doubles to stub perspectives, default_perspective, AppConfiguration.hash_for and current_user
+- [Fixed] message_notification_spec by granting user access in bulk-msg app type
+- [Fixed] manage users show partial to display user name in credential flash - fixes #1027
+- [Added] view user record link to manage users credential flash - fixes #1168
+- [Fixed] save trigger API spec by allowing private hosts for Capybara test server
+- [Fix] data pollution in specs
+- [Fixed] run_batch_now to raise when configured user not found; fixed batch user setup in spec
+- [Fixed] P1 UAO report spec: user field defaults to current_user, not empty result
+- [Fixed] save trigger API spec AL setup to regenerate class when AL already exists in DB
+- [Fixed] batch_now spec to restore admin vars after create_user; fixed UAC spec to use dynamic activity_log_type resource name
+- [Fixed] save_trigger API spec: reset DM route cache after setup_access creates UAC
+- [Fixed] save_trigger API spec: use routes_reloader.reload! to finalize routes (not routes_load)
+- [Updated] Gemfile.lock gem versions
+- [Fixed] decryption error handling for corrupt otp_secret - fixes #1226
+- [Added] system specs for corrupt OTP login and admin reset flows - fixes #1226
+- [Hardened] SafeOtp concern: fix attributes re-raise, remove reload, self-priming auth flag - refs #1226
+- [Apply] RuboCop formatting fixes
+- [Ignored] brakeman warning about Rails 7.2 series upcoming EOL
+- [Added] script to analyse an app-type YAML config file
+- [Fixed] safe email layout XSS false-positive handling - fixes #1229
+- [Fixed] User.emails_by_id memo not cleared on save due to wrong ivar name - refs #1228
+- [Fixed] Group D spec failures: user access overview template selector and redcap nfs_store batch user access - refs #1228
+- [Fixed] false config errors for select_record_from_* and select_user_with_role_* fields - refs #1228
+- [Moved] select_record_from_* and select_user_with_role_* exclusion to use_with_attribute? - refs #1228
+- [Refactored] minor formatting updates in selection and report specs - refs #1228
+- [Refactored] Group C self-sourcing field exemption into canonical prefix list - refs #1228
+- [Fixed] singular resource name in page layout template resolution - fixes #1233
+- [Fixed] activity log item_type_exists validation to skip disabled records; cleaned up perspectives spec pollution - fixes #1235
+- [Added] bundler update to release script
+- [Updated] agent prompts
+- [Added] new details and scripts for managing up-develop and PRs
+- [Added] better instructions to agents in how to use debugging for system spec issues and development
+- [Added] interactive debugging and development notes for system specs
+- [Fixed] missing filename persistence in REDCap file capture skip branch
+- [Fixed] embedded DM show mode for versioned definitions - fixes #1238
+- [Fixed] activity log historical-version templates breaking page render - refs #1238
+- [Added] external identifier versioned field templates and coexistence test - refs #1238
+- [Added] versioned field list render guards for DMs - refs #665 #1238
+- [Fixed] broken historical version templates and added use_current_version guard - fixes #1238
+- [Added] failing specs for historical version loop removal - fixes #1238 perf
+- [Fixed] historical DM version config injection for on-demand template_config - fixes #1238
+- [Fixed] notes field entry in phone log specs to use markdown editor helper - fixes #1238
+
 ## [9.44.0] - 2026-05-02
 
 ### From FPHS - PR #1110 - 2026-05-02
