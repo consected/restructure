@@ -54,13 +54,15 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   # The `before(:each)` block disables any stale same-name definitions so
   # each test starts from a clean slate.
   # -------------------------------------------------------------------
+  # rubocop:disable Lint/ConstantDefinitionInBlock
   DM_TABLE  = 'test_global_tpl_hist_dm_recs'
   AL_NAME   = 'Test Global Tpl Hist Al'
   EI_NAME   = 'test_global_tpl_hist_eids'
   EI_ATTR   = 'test_global_tpl_hist_id'
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   before(:all) do
-    @prev_allow_dms   = Settings::AllowDynamicMigrations
+    @prev_allow_dms = Settings::AllowDynamicMigrations
     @prev_disable_vdef = Settings::DisableVDef
     # Allow automatic table creation for new definitions.
     change_setting('AllowDynamicMigrations', true)
@@ -139,10 +141,10 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   # Bump a DM's definition version, creating a new history row.
   # AllowDynamicMigrations is briefly disabled during the save to avoid a
   # competing table-comment migration lock (the history trigger still fires).
-  def bump_dm_version(dm, label_suffix)
+  def bump_dm_version(dm_def, label_suffix)
     sleep 2
     change_setting('AllowDynamicMigrations', false)
-    dm = DynamicModel.active.find(dm.id)
+    dm = DynamicModel.active.find(dm_def.id)
     dm.current_admin = @admin
     dm.options = "default:\n  label: Test DM v#{label_suffix}\n  fields:\n    - test1\n    - test2\n"
     dm.save!
@@ -173,12 +175,12 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   end
 
   # Bump an EI definition version.
-  def bump_ei_version(ei, label_suffix)
+  def bump_ei_version(ei_def, label_suffix)
     sleep 2
     # Disable migrations briefly to avoid a lock timeout against the outer test
     # transaction (the history trigger still fires and records the version).
     change_setting('AllowDynamicMigrations', false)
-    ei = ExternalIdentifier.active.find(ei.id)
+    ei = ExternalIdentifier.active.find(ei_def.id)
     ei.current_admin = @admin
     ei.label = "Test Global EI v#{label_suffix}"
     ei.save!
@@ -242,7 +244,9 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   describe 'dynamic model global template' do
     # Create a DM definition and bump its version N_BUMPS times so that
     # N_BUMPS historical entries exist in `all_versions`.
+    # rubocop:disable Lint/ConstantDefinitionInBlock
     N_DM_BUMPS = 3
+    # rubocop:enable Lint/ConstantDefinitionInBlock
 
     it 'emits NO historical version config blocks for a versioned DM definition' do
       dm = create_dm
@@ -251,7 +255,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       dm.reload
       history_count = dm.all_versions.size
       expect(history_count).to be >= N_DM_BUMPS,
-                                "expected at least #{N_DM_BUMPS} history rows, got #{history_count}"
+                               "expected at least #{N_DM_BUMPS} history rows, got #{history_count}"
 
       login_user
       text = page_template_text
@@ -266,20 +270,88 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # the global template is actually rendering it.
       expect(text).to include("fpa_state_config--#{dm_resource_prefix}"),
                       "expected a current-version config block for #{dm_resource_prefix} to be " \
-                      "present in the global page template but it was not. " \
-                      "The test DM may not be associated with the active app type."
+                      'present in the global page template but it was not. ' \
+                      'The test DM may not be associated with the active app type.'
 
       actual = historical_config_block_count(dm_resource_prefix, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{dm_resource_prefix} " \
                         "(any option type) in the global page template, but found #{actual}. " \
-                        "The all_versions loop must be removed from " \
-                        "app/views/dynamic_models/_search_results_template.html.erb."
+                        'The all_versions loop must be removed from ' \
+                        'app/views/dynamic_models/_search_results_template.html.erb.'
+    end
+
+    # A use_current_version: true DM always resolves records to the current
+    # definition. Historical version configs must never be emitted for it:
+    #   - They are not needed (records never reference an older version).
+    #   - They could reference config-library anchors removed in a later library
+    #     update, breaking the entire page render (issue #1238 original cause).
+    # Previously this was guarded by `unless m.definition_uses_current_version_option?`.
+    # With the loop removed entirely the guard is no longer needed, but we test
+    # explicitly to catch any regression that re-introduces historical emission
+    # for use_current_version definitions.
+    it 'emits NO historical version config blocks for a use_current_version: true DM definition' do
+      ucv_options = "default:\n  label: UCVTest\n  fields:\n    - test1\n    - test2\n" \
+                    "_configurations:\n  use_current_version: true\n"
+
+      unless Admin::MigrationGenerator.table_exists?(DM_TABLE)
+        TableGenerators.dynamic_models_table(DM_TABLE, :create_do, 'test1', 'test2')
+      end
+      remove_stale_dm_class(DM_TABLE)
+      DynamicModel.active.where(table_name: DM_TABLE).each { |dm| dm.disable!(@admin) }
+
+      dm = DynamicModel.create!(
+        current_admin: @admin,
+        name: DM_TABLE.tr('_', ' '),
+        table_name: DM_TABLE,
+        schema_name: 'dynamic_test',
+        category: :test,
+        options: ucv_options
+      )
+      dm.current_admin = @admin
+      dm.update_tracker_events
+      DynamicModel.define_models
+      Application.refresh_dynamic_defs
+      setup_access :"dynamic_model__#{DM_TABLE}", user: @user
+
+      N_DM_BUMPS.times do |i|
+        sleep 2
+        change_setting('AllowDynamicMigrations', false)
+        dm = DynamicModel.active.find(dm.id)
+        dm.current_admin = @admin
+        dm.options = ucv_options.sub('UCVTest', "UCVTest v#{i + 1}")
+        dm.save!
+        change_setting('AllowDynamicMigrations', true)
+        DynamicModel.define_models
+        Application.refresh_dynamic_defs
+      end
+
+      dm.reload
+      history_count = dm.all_versions.size
+      expect(history_count).to be >= N_DM_BUMPS,
+                               "expected at least #{N_DM_BUMPS} history rows, got #{history_count}"
+
+      login_user
+      text = page_template_text
+
+      dm_resource_prefix = "dynamic_model__#{DM_TABLE.singularize}"
+
+      # Current version must be present.
+      expect(text).to include("fpa_state_config--#{dm_resource_prefix}"),
+                      "expected a current-version config block for #{dm_resource_prefix} (use_current_version) " \
+                      'to be present in the global page template.'
+
+      actual = historical_config_block_count(dm_resource_prefix, text)
+      expect(actual).to eq(0),
+                        "expected 0 historical version config blocks for #{dm_resource_prefix} " \
+                        "(use_current_version: true) in the global page template, but found #{actual}."
     end
   end
 
   describe 'activity log global template' do
+    # rubocop:disable Lint/ConstantDefinitionInBlock
     N_AL_BUMPS = 3
+    # rubocop:enable Lint/ConstantDefinitionInBlock
 
     it 'emits NO historical version config blocks for a versioned AL definition' do
       SetupHelper.setup_al_gen_tests AL_NAME, 'test_global_hist', 'player_contact'
@@ -308,7 +380,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       al.reload
       history_count = al.all_versions.size
       expect(history_count).to be >= N_AL_BUMPS,
-                                "expected at least #{N_AL_BUMPS} history rows, got #{history_count}"
+                               "expected at least #{N_AL_BUMPS} history rows, got #{history_count}"
 
       login_user
       text = page_template_text
@@ -321,19 +393,21 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # Sanity check: the CURRENT version config block must be present.
       expect(text).to include("fpa_state_config--#{al_base_name}"),
                       "expected a current-version config block for #{al_base_name} (any extra_log_type) " \
-                      "to be present in the global page template but it was not."
+                      'to be present in the global page template but it was not.'
 
       actual = historical_config_block_count(al_base_name, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{al_base_name} " \
                         "(any extra_log_type) in the global page template, but found #{actual}. " \
-                        "The all_versions loop must be removed from " \
-                        "app/views/activity_logs/_search_results_template.html.erb."
+                        'The all_versions loop must be removed from ' \
+                        'app/views/activity_logs/_search_results_template.html.erb.'
     end
   end
 
   describe 'external identifier global template' do
+    # rubocop:disable Lint/ConstantDefinitionInBlock
     N_EI_BUMPS = 3
+    # rubocop:enable Lint/ConstantDefinitionInBlock
 
     it 'emits NO historical version config blocks for a versioned EI definition' do
       ei = create_ei
@@ -342,7 +416,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       ei.reload
       history_count = ei.all_versions.size
       expect(history_count).to be >= N_EI_BUMPS,
-                                "expected at least #{N_EI_BUMPS} history rows, got #{history_count}"
+                               "expected at least #{N_EI_BUMPS} history rows, got #{history_count}"
 
       login_user
       text = page_template_text
@@ -355,14 +429,14 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # Sanity check: the CURRENT version config block must be present.
       expect(text).to include("fpa_state_config--#{ei_resource_prefix}"),
                       "expected a current-version config block for #{ei_resource_prefix} (any option type) " \
-                      "to be present in the global page template but it was not."
+                      'to be present in the global page template but it was not.'
 
       actual = historical_config_block_count(ei_resource_prefix, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{ei_resource_prefix} " \
                         "(any option type) in the global page template, but found #{actual}. " \
-                        "The all_versions loop must be removed from " \
-                        "app/views/external_identifiers/_search_results_template.html.erb."
+                        'The all_versions loop must be removed from ' \
+                        'app/views/external_identifiers/_search_results_template.html.erb.'
     end
   end
 end

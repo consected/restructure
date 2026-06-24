@@ -28,13 +28,14 @@ require './db/table_generators/dynamic_models_table'
 # user + master created once in before(:all), login per example, page layout
 # created explicitly so the AL panel auto-expands via initial_show.
 describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
-         js: true, driver: $browser_driver do
+         js: true, driver: $browser_driver do # rubocop:disable Style/GlobalVars
   include FeatureSupport
   include MasterSupport
   include ModelSupport
   include PlayerContactSupport
   include DynamicModelSupport
 
+  # rubocop:disable Lint/ConstantDefinitionInBlock
   AlNameEmbedShow = 'Embed Show 1238'
   AlProcessEmbedShow = 'embed_show'
   AlFkEmbedShow = 'activity_log_player_contact_embed_show_id'
@@ -46,6 +47,7 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
   # the default Capybara wait, so use a generous timeout to avoid flakiness
   # (the assertion still resolves as soon as the content becomes visible).
   EmbeddedShowRenderWait = 60
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   def setup_embed_target_models
     al_fk = AlFkEmbedShow
@@ -189,6 +191,16 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
       )
       @al_page_layout.destroy
     end
+
+    # Disable the embed_show AL definition so it does not pollute subsequent specs.
+    # The activity_logs table is not truncated between spec files for system specs,
+    # so this definition persists and can interfere with specs that run after us
+    # (e.g. register_call_spec) by being included in Handlebars template compilation.
+    ActivityLog.where(name: AlNameEmbedShow).find_each do |al|
+      al.update_column(:disabled, true)
+    end
+    # Rebuild in-memory class definitions to reflect the disabled AL.
+    ActivityLog.define_models
   end
 
   before :each do
@@ -274,6 +286,7 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
   # ===================================================================
 
   # Navigate to the master page and expand the AL panel tab.
+  # rubocop:disable Naming/PredicateMethod
   def navigate_and_expand_al_panel
     navigate_to_master(@master.id)
     expand_master_record_tab('activity_log__player_contact_embed_shows')
@@ -283,13 +296,17 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
     # before any label-specific assertions run.
     page.has_css?('body.status-compiled', wait: 60)
   end
+  # rubocop:enable Naming/PredicateMethod
 
   # Clear Handlebars caches and re-navigate (needed after definition bumps).
+  # Also clears the browser's HTTP cache via CDP so template_config is re-fetched
+  # rather than served from the max-age=30 browser cache from the first navigation.
   def clear_caches_and_navigate
     Admin::AppConfiguration.clear_memo!
     HandlebarsPrecompiler.cleanup_tmp_dir
     HandlebarsPrecompiler.cleanup_public_dir
     Rails.cache.delete('server_cache_version')
+    page.driver.browser.execute_cdp('Network.clearBrowserCache')
     navigate_and_expand_al_panel
   end
 
@@ -298,6 +315,13 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
   # table-comment migration doesn't race with the just-created record; version
   # history is tracked independently of migrations.  After saving it reloads
   # model definitions and restarts the server so the new version is live.
+  #
+  # The DB trigger inserts a V2 history record within the test transaction.  The
+  # server thread uses a separate connection and cannot see uncommitted data, so
+  # all_versions_query on that connection would only return [V1].  We pre-populate
+  # the class-level all_versions_memo here — using the test-thread connection that
+  # CAN see the trigger's insert — so the server thread reads the shared in-process
+  # memo value [V2, V1] instead of issuing a fresh DB query.
   def bump_dm_version(table_name, new_label)
     sleep 2 # ensure a distinct created_at timestamp for the new version
     dm = DynamicModel.active.find_by(table_name: table_name)
@@ -305,6 +329,9 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
     dm.current_admin = @admin
     dm.options = "default:\n  label: #{new_label}\n  labels:\n    test1: #{new_label} Field\n"
     dm.save!
+    # Pre-populate all_versions_memo via the test-thread connection so the server
+    # thread (which cannot see the uncommitted trigger insert) uses the memo.
+    dm.all_versions
     change_setting('AllowDynamicMigrations', true)
     DynamicModel.define_models
     Application.refresh_dynamic_defs

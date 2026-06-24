@@ -2,31 +2,4 @@
   next unless m.implementation_class_defined?(::DynamicModel, fail_without_exception: true)
 %>
   <%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: m } %>
-  <%# Also emit JS-only template_config entries for older history versions so that embedded
-      items created before a definition version bump can still resolve their vN key (issue #1238).
-      The common _search_results_template already skips Handlebars HTML-template rendering
-      when def_version is non-nil, so this only produces the lightweight JS config block.
-
-      Definitions configured with _configurations.use_current_version always resolve their
-      records to the current version, so historical versions are never referenced and must
-      not be emitted (loading an old version may reference config-library anchors that no
-      longer exist and would otherwise break the whole page render - issue #1238). %>
-  <% unless m.definition_uses_current_version_option? %>
-  <% m.all_versions.each do |historical_version| %>
-    <% begin
-         # Skip the latest history entry: it corresponds to the current live record, whose
-         # config is already emitted above with def_version=nil.
-         next if historical_version.def_version == m.all_versions.first&.def_version
-         # Skip historical versions whose implementation class is no longer defined
-         # (e.g. the DM table name changed at some point in its history).
-         next unless historical_version.implementation_class_defined?(::DynamicModel, fail_without_exception: true)
-    %>
-      <%= render partial: 'dynamic_models/search_results_template_item', locals: { def_record: historical_version } %>
-    <% rescue StandardError => e
-         # A broken historical version (e.g. referencing a removed config-library anchor)
-         # must never prevent the page loading, since the template may never be used.
-         logger.error "Skipping dynamic model historical version #{m.id} v#{historical_version.def_version}: #{e}\n#{e.short_string_backtrace}"
-       end %>
-  <% end %>
-  <% end %>
 <% end %>

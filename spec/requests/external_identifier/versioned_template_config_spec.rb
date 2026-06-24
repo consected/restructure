@@ -1,24 +1,29 @@
 # frozen_string_literal: true
 
-# Request specs for issue #1238 — extending the definition-versioning fix to
-# external identifiers.
+# Request specs for issue #1238 — external identifier definition versioning and
+# the page template.
 #
-# Background: the master record search-results page emits, at page load, the
-# Handlebars template-config <script> blocks for every active definition (see
-# app/views/common_templates/_search_results_template.html.erb). For dynamic
-# models and activity logs the global page template iterates the definition's
-# version history (`all_versions`) so that records created under an older
-# definition version can still resolve their `.v<def_version>` template-config
-# key. The external identifier global template
-# (app/views/external_identifiers/_search_results_template.html.erb) previously
-# emitted only the current version, so an external identifier record created
-# before a definition version bump could not resolve its older version key and
-# its show-mode form would silently fail to render.
+# Background: ExternalIdentifier records always return `def_version = nil`
+# (hard-coded in `Dynamic::ExternalIdImplementer#def_version`). This means EI
+# records NEVER reference a historical definition version; they always resolve
+# against the current version. Therefore the global page template
+# (app/views/external_identifiers/_search_results_template.html.erb) must emit
+# ONLY the current-version config block for each EI definition — emitting
+# historical blocks is unnecessary and incurs a performance cost (YAML parse for
+# every history row of every EI definition on every page load).
 #
-# These tests assert that the page template (pages#template) emits a per-version
-# template-config block for an external identifier's older definition version,
-# including the field labels captured at that version, in addition to the current
-# version. Without the fix only the current version's block is present.
+# Previous behaviour (PR #1242) emitted historical EI version blocks via an
+# `all_versions` loop. That loop has been removed because:
+#   1. EI records never reference historical versions (def_version is always nil).
+#   2. The EI `template_config` controller action returns an empty response, so
+#      no on-demand fallback exists — but one is not needed for the same reason.
+#   3. Emitting historical blocks causes a performance regression proportional to
+#      the number of historical EI definition saves.
+#
+# These tests assert:
+#   - The global page template emits the CURRENT version config block for an EI
+#     definition (confirming it is rendered).
+#   - It does NOT emit any historical version blocks for that EI definition.
 #
 # To exercise genuine field-label versioning (rather than only the id attribute,
 # whose display caption is also influenced by the definition `label`), the
@@ -33,9 +38,11 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
   include MasterSupport
   include ExternalIdentifierSupport
 
+  # rubocop:disable Lint/ConstantDefinitionInBlock
   EiNameVersionedTplCfg = 'test_show1238_eids'
   EiAttrVersionedTplCfg = 'test_show1238_id'
   EiExtraFieldVersionedTplCfg = 'note'
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   before(:all) do
     @prev_allow_dms = Settings::AllowDynamicMigrations
@@ -143,16 +150,15 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
   end
 
   describe 'older definition version field labels' do
-    it 'emits a per-version template-config block for an older definition version on the page template' do
+    it 'does NOT emit historical version config blocks — EI records always use the current version' do
       bump_external_identifier('EiFieldLabelV2')
 
       ei = ExternalIdentifier.active.find_by(name: EiNameVersionedTplCfg)
-      current_version = ei.all_versions.first&.def_version
       older_version = ei.all_versions
                         .map(&:def_version)
                         .compact
                         .uniq
-                        .reject { |v| v == current_version }
+                        .reject { |v| v == ei.all_versions.first&.def_version }
                         .first
 
       expect(older_version)
@@ -160,20 +166,32 @@ RSpec.describe 'ExternalIdentifier versioned template config', type: :request do
 
       name_with_option_type = "#{ei.item_type_name}_#{ei.default_options.name}".underscore
 
+      # Reset memoization so the freshly bumped definition is re-fetched.
+      ExternalIdentifier.reset_active_model_configurations!
+      ExternalIdentifier.all_versions_memo = {}
+      HandlebarsPrecompiler.cleanup_public_dir
+
       get template_page_path(1)
 
       expect(response).to have_http_status(:ok)
 
-      # The fix: the older version's block must also be emitted, carrying the
-      # `note` field label captured at that version. Without the fix only the
-      # current version's block (and thus only the current label) is present.
+      # The CURRENT version config block must be present (the EI is rendered).
       expect(response.body)
-        .to include("fpa_state_config--#{name_with_option_type}--v#{older_version}")
-      # EiFieldLabelV2 is the current version's `note` label; EiFieldLabelV1
-      # belongs to the older version and is only present when the older version's
-      # block is emitted.
-      expect(response.body).to include('EiFieldLabelV1')
+        .to include("fpa_state_config--#{name_with_option_type}--v"),
+            "expected the current-version config block for #{name_with_option_type} to be present"
+
+      # No HISTORICAL version config block must be present. EI records always
+      # return def_version = nil, so historical configs are never referenced.
+      # Emitting them is a pure performance cost with no functional benefit.
+      expect(response.body)
+        .not_to match(/fpa_state_config--#{Regexp.escape(name_with_option_type)}--v\d+/),
+                'expected NO historical version config block for the EI definition in the global page template'
+
+      # The CURRENT field label must appear (the definition is rendered).
       expect(response.body).to include('EiFieldLabelV2')
+
+      # The OLD field label must NOT appear — old blocks are not emitted.
+      expect(response.body).not_to include('EiFieldLabelV1')
     end
   end
 end
