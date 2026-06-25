@@ -12,6 +12,7 @@
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
+10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 
 
 ### Critical Rules for Running Terminal Commands
