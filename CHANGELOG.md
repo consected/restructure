@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.46.0] - 2026-06-25
+
 ### From FPHS - PR #1244 - 2026-06-24
 
 - [Changed] handling of templates to avoid loading all versions on initial login; on-demand template_config serves versioned configs - fixes #1238
