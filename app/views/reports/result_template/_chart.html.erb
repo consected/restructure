@@ -6,16 +6,21 @@
 <div id="<%=block_id%>" class="report-chart <%=@view_options&.add_classes&.join(' ')%>"  data-result-handlers="<%=@view_options&.result_handlers&.join(' ')%>" data-results-count="<%=@results.count%>">
 </div>
 <%= javascript_tag nonce: true do %>
-  window.setTimeout(function() {
-    Chart.register(ChartDataLabels);
-
+  window.setTimeout(function() {    
     var $block = $('#<%=block_id%>');
     $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'hidden'});
     var component_options = <%=component_options.to_json.html_safe %>;
     var json = <%= json.html_safe %>;
+
+    var plugins = [];
   
+    if(component_options && component_options.options && component_options.options.plugins && component_options.options.plugins.datalabels) {      
+      Chart.register(ChartDataLabels);
+      plugins.push(ChartDataLabels);
+    }
+
     var opts = {
-      plugins: [ChartDataLabels],
+      plugins: [],
       width: 100,
       height: 100,
       type: '',
