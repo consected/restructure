@@ -148,6 +148,13 @@ _fpa.postprocessors = {
             var sub_block = block.find(
               '.common-template-item[data-sub-item="' + fit + '"][data-sub-id="' + dii.id + '"]'
             );
+            if (!sub_block.length) {
+              // Records using an option type may be rendered in blocks identified by the base
+              // item type name rather than the option type specific name
+              sub_block = block.find(
+                '.common-template-item[data-sub-item="' + dii.item_type + '"][data-sub-id="' + dii.id + '"]'
+              );
+            }
             dii.current_mode = 'show';
             _fpa.show_if.methods.show_items(sub_block, dii);
           }
