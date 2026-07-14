@@ -345,45 +345,50 @@ module OptionConfigs
         self.bad_ref_items = []
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
+          unresolved = to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
 
-          # Avoid breaking app type imports if the resource being pointed to in the reference
-          # hasn't been set up yet.
-          if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
-            Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
-            break
+          if unresolved
+            if Admin::AppTypeImport.import_in_progress?
+              # Avoid breaking app type imports if the resource being pointed to in the reference
+              # hasn't been set up yet. Leave the raw entry untouched and don't report it, since
+              # we are not able to control the order of items being created in an app import, and
+              # many references to underlying definitions will not yet have been created.
+              Rails.logger.info "Definition for class #{to_class} is not set yet - leaving reference " \
+                                "#{mn} untouched while an app type import is in progress"
+            else
+              bad_ref_items << mn
+              Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
+              Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
+              # Log this as a warning, not an error, since an :error would populate config_errors and
+              # trip raise_bad_configs, potentially halting startup's option config parse. Reporting
+              # it as a warning still surfaces the problem to an admin via the admin panel.
+              failed_config :references,
+                            "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}",
+                            level: :warn
+            end
+
+            next
           end
 
-          if to_class
-            elt = conf[:add_with] && conf[:add_with][:extra_log_type]
-            add_with_elt = nil
-            add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
-            refitem[mn][:to_record_label] = conf[:result_label] || conf[:label] || add_with_elt || to_class.human_name
+          elt = conf[:add_with] && conf[:add_with][:extra_log_type]
+          add_with_elt = nil
+          add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
+          refitem[mn][:to_record_label] = conf[:result_label] || conf[:label] || add_with_elt || to_class.human_name
 
-            if to_class.respond_to?(:no_master_association)
-              refitem[mn][:no_master_association] = to_class.no_master_association
-            end
+          if to_class.respond_to?(:no_master_association)
+            refitem[mn][:no_master_association] = to_class.no_master_association
+          end
 
-            refitem[mn][:to_model_name_us] = to_class.to_s.ns_underscore
-            refitem[mn][:to_model_class_name] = to_class.to_s
-            refitem[mn][:to_table_name] = to_class.table_name
-            nil
+          refitem[mn][:to_model_name_us] = to_class.to_s.ns_underscore
+          refitem[mn][:to_model_class_name] = to_class.to_s
+          refitem[mn][:to_table_name] = to_class.table_name
 
-            if to_class.respond_to?(:definition)
-              cd = to_class.definition
-              tsn = cd.schema_name
-              tct = cd.class.to_s
-              refitem[mn][:to_schema_name] = tsn
-              refitem[mn][:to_class_type] = tct
-            end
-          else
-            bad_ref_items << mn
-            Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
-            Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
-            # Log this as a warning, not an error, since we are not able to control the order of items being created
-            # in an app import, and many references to underlying definitions will not yet have been created
-            failed_config :references,
-                          "reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}",
-                          level: :warn
+          if to_class.respond_to?(:definition)
+            cd = to_class.definition
+            tsn = cd.schema_name
+            tct = cd.class.to_s
+            refitem[mn][:to_schema_name] = tsn
+            refitem[mn][:to_class_type] = tct
           end
         end
 
