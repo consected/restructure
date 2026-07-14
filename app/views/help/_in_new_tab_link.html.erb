@@ -1,0 +1,17 @@
+  <% 
+  begin
+    if display_embedded?
+  %>&nbsp;<%
+      new_tab_params = { library: library, section: section, subsection: subsection }
+      new_tab_params[:back_path] = params[:back_path] if params[:back_path].present?
+    %>
+    <%= link_to help_page_path(new_tab_params) + '#open-in-new-tab',
+          title: 'open in new tab',
+          class: 'help-open-in-new-tab' do %><% end %>
+  <% end %>
+<%
+  rescue StandardError
+  # Handles missing section / subsection / main_section helper methods cleanly, especially
+  # for standalone pages embedded in the sidebar
+  end
+  %>
