@@ -832,6 +832,9 @@ module Formatter
              elsif name == 'json_parse' && data.is_a?(String)
                is_index = true
                JSON.parse(data) if data.present?
+             elsif name == 'yaml_parse' && data.is_a?(String)
+               is_index = true
+               YAML.safe_load(data) if data.present?
              elsif anumber.to_s == name && data.is_a?(Enumerable)
                is_index = true
                data[anumber]

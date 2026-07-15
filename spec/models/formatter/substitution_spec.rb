@@ -545,4 +545,18 @@ Good?)
     res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     expect(res).to eq 'null'
   end
+
+  it 'parses a YAML encoded string using yaml_parse for hash key access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey2}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML abc'
+  end
+
+  it 'parses a YAML encoded string using yaml_parse for array index access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey3.1}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML 4560'
+  end
 end
