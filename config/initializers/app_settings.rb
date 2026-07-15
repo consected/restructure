@@ -369,7 +369,8 @@ class Settings
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
-    NfsStoreJobDefaultAppTypeId
+    nfs_store_default_app_type_id
+    admin_nfs_role
     DefaultCountrySelect GdprCountryCodes
   ].freeze
 end
