@@ -26,6 +26,9 @@ class Admin::ServerInfo
     settings = {}
     Settings::AppSettingsVars.each do |a|
       val = Settings.const_get(a)
+    rescue NameError
+      method_name = a.underscore
+      val = Settings.respond_to?(method_name) ? Settings.send(method_name) : "undefined: #{a}"
     rescue StandardError => e
       val = e.to_s
     ensure
