@@ -310,6 +310,14 @@ class User < ActiveRecord::Base
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
 
+  # Devise trackable/lockable saves the user record on every sign-in and failed
+  # login attempt. Only clear the whole Rails cache when the disabled flag
+  # actually changes, to avoid destroying the shared template/fragment cache
+  # (and server_cache_version) on routine sign-ins.
+  def clear_rails_cache_on_save?
+    saved_change_to_disabled?
+  end
+
   def password_required?
     return false if a_template_or_batch_user?
 

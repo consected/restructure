@@ -310,7 +310,8 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{u&.updated_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
+          "#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
     prev_key = "#{partial}-#{auth_type}-#{u&.id}"
     @@prev_partial_cache_key ||= {}
     prev = @@prev_partial_cache_key[prev_key]
