@@ -85,7 +85,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
 
       b.click
       expect(page).to have_css('form.new_dynamic_model_test_all_v2_field', wait: 10)
-      new_num = rand(100_000_000..999_999_999)
+      rand(100_000_000..999_999_999)
       within('form.new_dynamic_model_test_all_v2_field') do
         sleep 2
         # Basic string fields
@@ -109,8 +109,8 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
         check 'A boolean'
 
         # JSON/JSONB fields
-        fill_in 'Json', with: '{"key": "value"}'
-        fill_in 'Jsonb', with: '{"name": "Test", "active": true}'
+        codemirror_set_value(form_id: 'new_dynamic_model_test_all_v2_field', field_name: 'json', value: '{"key": "value"}')
+        codemirror_set_value(form_id: 'new_dynamic_model_test_all_v2_field', field_name: 'jsonb', value: '{"name": "Test", "active": true}')
 
         # Classification fields
         select 'General', from: 'Protocol'
@@ -143,12 +143,12 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
         select 'True', from: 'Done true false' if page.has_select?('Done true false')
 
         # Text area fields
-        fill_in 'Some description', with: 'This is a detailed description with multiple lines.\nSecond line of description.'
-        fill_in 'Some details', with: 'These are some details about the record.'
-        fill_in 'Some notes', with: 'Important notes about this record.'
-        fill_in 'Description', with: 'Another description field value.'
-        fill_in 'Notes', with: 'Additional notes.'
-        fill_in 'Message', with: 'A message for this record.'
+        edit_rich_text_editor_field('some_description', 'This is a detailed description for the record.')
+        edit_rich_text_editor_field('some_details', 'These are some details about the record.')
+        edit_rich_text_editor_field('some_notes', 'Important notes about this record.')
+        edit_rich_text_editor_field('description', 'Another description field value.')
+        edit_rich_text_editor_field('notes', 'Additional notes.')
+        edit_rich_text_editor_field('message', 'A message for this record.')
 
         # URL and link fields
         fill_in 'A link', with: 'https://example.com/link'

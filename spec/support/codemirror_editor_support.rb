@@ -11,7 +11,7 @@
 #   content = codemirror_get_value(form_id: 'edit_dynamic_model_123')
 #
 #   # Set editor content
-#   codemirror_set_value(form_id: 'edit_dynamic_model_123', value: 'new content')
+#   codemirror_set_value(form_id: 'edit_dynamic_model_123', field_name: 'config', value: 'new content')
 #
 #   # Prepend text
 #   codemirror_prepend(form_id: 'edit_dynamic_model_123', text: "# Header\n")
@@ -38,16 +38,22 @@ module CodemirrorEditorSupport
 
   # Set the value in a CodeMirror editor
   # @param form_id [String] The ID of the form containing the editor
+  # @param field_name [String, nil] The data-attr-name of a specific editor in the form
   # @param value [String] The new content to set
   # @param sync [Boolean] Whether to sync to the underlying textarea (default: true)
-  def codemirror_set_value(form_id:, value:, sync: true)
+  def codemirror_set_value(form_id:, value:, field_name: nil, sync: true)
     escaped_value = value.gsub('\\', '\\\\\\\\').gsub("\n", '\\n').gsub("'", "\\\\'")
+    editor_selector = if field_name
+                        "textarea.code-editor[data-attr-name='#{field_name}']"
+                      else
+                        'textarea.code-editor'
+                      end
     page.execute_script(<<~JS)
       var form = document.getElementById('#{form_id}');
-      var editor = form ? form.querySelector('textarea.code-editor') : null;
+      var editor = form ? form.querySelector("#{editor_selector}") : null;
       if (editor && editor.CodeMirror) {
         editor.CodeMirror.setValue('#{escaped_value}');
-        #{sync ? 'editor.CodeMirror.save();' : ''}
+        #{'editor.CodeMirror.save();' if sync}
       }
     JS
   end
@@ -64,7 +70,7 @@ module CodemirrorEditorSupport
       if (editor && editor.CodeMirror) {
         var currentValue = editor.CodeMirror.getValue();
         editor.CodeMirror.setValue('#{escaped_text}' + currentValue);
-        #{sync ? 'editor.CodeMirror.save();' : ''}
+        #{'editor.CodeMirror.save();' if sync}
       }
     JS
   end
@@ -84,7 +90,7 @@ module CodemirrorEditorSupport
         var currentValue = editor.CodeMirror.getValue();
         var fixedValue = currentValue.replace(/#{pattern}/#{flags}, '#{escaped_replacement}');
         editor.CodeMirror.setValue(fixedValue);
-        #{sync ? 'editor.CodeMirror.save();' : ''}
+        #{'editor.CodeMirror.save();' if sync}
       }
     JS
   end
