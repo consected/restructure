@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Tests for Redcap::ApiClient covering project, metadata, record, user and file
+# retrieval from the REDCap API, including the #remove_project_user method
+# added for issue #1259 (removing a user's access from a REDCap project) and
+# its audit trail (Redcap::ClientRequest#result[:api_action]).
 require 'rails_helper'
 
 RSpec.describe Redcap::ApiClient, type: :model do
@@ -110,6 +114,73 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res.first.keys).to be_present
     expect(res.first.keys.first).to be_a Symbol
     expect(res[0][:username]).to eq 'd20'
+  end
+
+  it 'removes a user from the project' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    stub_request_remove_project_user @project[:server_url], @project[:api_key], username: 'd20'
+
+    res = pc.remove_project_user(username: 'd20')
+    expect(pc.response_code).to eq 200
+    expect(res).to eq 1
+
+    audit = Redcap::ClientRequest.where(action: 'user').order(created_at: :desc).find { |cr| cr.result['api_action'] == 'delete' }
+    expect(audit).to be_present
+    expect(audit.action).to eq 'user'
+    expect(audit.result['api_action']).to eq 'delete'
+
+    # Removing a user does not automatically refresh (or invalidate) the
+    # project_users cache - a subsequent call is still served fresh here only
+    # because it wasn't cached yet in this example; a second call hits the cache.
+    users = pc.project_users
+    expect(pc.last_result_from_cache).to be false
+    pc.project_users
+    expect(pc.last_result_from_cache).to be true
+    expect(users).to be_a Array
+  end
+
+  it 'force reloads the project_users cache on request' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    pc.project_users
+    expect(pc.last_result_from_cache).to be false
+    pc.project_users
+    expect(pc.last_result_from_cache).to be true
+
+    users = pc.project_users(force_reload: true)
+    expect(pc.last_result_from_cache).to be false
+    expect(users).to be_a Array
+  end
+
+  it 'removes multiple users from the project using usernames' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    stub_request_remove_project_user @project[:server_url], @project[:api_key], usernames: %w[d20 j86]
+
+    res = pc.remove_project_user(usernames: %w[d20 j86])
+    expect(pc.response_code).to eq 200
+    expect(res).to eq 1
+  end
+
+  it 'requires a username to remove a project user' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    expect do
+      pc.remove_project_user
+    end.to raise_error(FphsException, /requires a username/)
   end
 
   it 'imports a record' do

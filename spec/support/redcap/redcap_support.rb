@@ -41,6 +41,7 @@ module Redcap
           end
           stub_request_project_users p[:server_url], p[:api_key]
           stub_request_instruments p[:server_url], p[:api_key]
+          stub_request_remove_project_user p[:server_url], p[:api_key]
         end
 
         pa = Redcap::ProjectAdmin.create! current_admin: @admin,
@@ -224,6 +225,22 @@ module Redcap
 
         )
         .to_return(status: 200, body: import_record_save_trigger_response, headers: {})
+    end
+
+    def stub_request_remove_project_user(server_url, api_key, username: 'd20', usernames: nil)
+      usernames ||= [username]
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'action' => 'delete',
+            'users' => usernames,
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: remove_project_user_response, headers: {})
     end
 
     def stub_request_metadata(server_url, api_key)
@@ -585,6 +602,10 @@ module Redcap
 
     def import_record_save_trigger_response
       File.read('spec/fixtures/redcap/save_trigger_import_record.json')
+    end
+
+    def remove_project_user_response
+      File.read('spec/fixtures/redcap/save_trigger_remove_project_user.json')
     end
 
     def project_admin_repeat_instrument_response

@@ -11,7 +11,8 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
                     survey_link survey_participants
                     import_records file arms events
                     repeating_forms_events export_logs
-                    form_event_mapping export_field_names].freeze
+                    form_event_mapping export_field_names
+                    remove_project_user].freeze
 
   def self.config_def(if_extras: {}); end
 
