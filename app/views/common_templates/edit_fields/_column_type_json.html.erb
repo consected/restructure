@@ -1,1 +1,6 @@
+<%
+# `json` columns use the exact same YAML-edit / JSON-store presentation as `jsonb`
+# columns, so simply delegate to that partial. See _column_type_jsonb.html.erb for
+# details of the YAML-to-JSON edit/save flow.
+%>
 <%= render partial: 'common_templates/edit_fields/column_type_jsonb', locals: locals %>

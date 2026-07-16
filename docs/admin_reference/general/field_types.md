@@ -149,16 +149,16 @@ These templates are triggered by conditions other than field name patterns.
 
 These templates match based on the database column type when no name-based or special match is found.
 
-| Template | Column Type | Renders |
-|----------|-------------|---------|
-| `column_type_boolean` | boolean | Checkbox |
-| `column_type_date` | date | Date input |
-| `column_type_datetime` | datetime | Date + time combo |
-| `column_type_decimal` | decimal | Number input (step: any) |
-| `column_type_float` | float | Number input (step: any) |
-| `column_type_integer` | integer | Number input (step: 1) |
-| `column_type_json` | json | YAML code editor |
-| `column_type_jsonb` | jsonb | YAML code editor |
+| Template | Column Type | Renders | Notes |
+|----------|-------------|---------|-------|
+| `column_type_boolean` | boolean | Checkbox | |
+| `column_type_date` | date | Date input | |
+| `column_type_datetime` | datetime | Date + time combo | |
+| `column_type_decimal` | decimal | Number input (step: any) | |
+| `column_type_float` | float | Number input (step: any) | |
+| `column_type_integer` | integer | Number input (step: 1) | |
+| `column_type_json` | json | YAML code editor | Non-blank input must be a YAML Hash or Array; leave blank to clear the field. [Details](../../dev_reference/main/yaml-edit-json-column-storage.md) |
+| `column_type_jsonb` | jsonb | YAML code editor | Non-blank input must be a YAML Hash or Array; leave blank to clear the field. [Details](../../dev_reference/main/yaml-edit-json-column-storage.md) |
 
 ## Sub-Templates
 
