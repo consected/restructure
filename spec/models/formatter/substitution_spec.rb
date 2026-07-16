@@ -559,4 +559,30 @@ Good?)
     res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     expect(res).to eq 'YAML 4560'
   end
+
+  it 'indexes a top-level YAML array using yaml_parse with a numeric index' do
+    txt = 'YAML {{yaml.yaml_parse.0}}'
+    data = { 'yaml' => "- first\n- second\n- third\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML first'
+  end
+
+  it 'indexes a top-level YAML array using yaml_parse with first and last' do
+    data = { 'yaml' => "- alpha\n- beta\n- gamma\n" }
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with a numeric index' do
+    txt = 'JSON {{json.json_parse.0}}'
+    data = { 'json' => '["first","second","third"]' }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'JSON first'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with first and last' do
+    data = { 'json' => '["alpha","beta","gamma"]' }
+    expect(Formatter::Substitution.substitute('{{json.json_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{json.json_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
 end

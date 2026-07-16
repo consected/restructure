@@ -45,8 +45,8 @@ describe('substitutions', function () {
 
   });
 
-  it("parses a YAML encoded string with yaml_parse, mirroring json_parse", function () {
-    const text = '<p>YAML hash {{yaml.yaml_parse.ykey3.1}}. YAML array {{yaml_array.yaml_parse.0}}</p>'
+  it("parses a YAML encoded string with yaml_parse for hash and array access", function () {
+    const text = '<p>YAML hash {{yaml.yaml_parse.ykey3.1}}. YAML top-level array {{yaml_array.yaml_parse.0}}</p>'
     const use_data = {
       yaml: "ykey1: 22\nykey2: abc\nykey3:\n  - 1230\n  - 4560\n",
       yaml_array: "- first\n- second\n"
