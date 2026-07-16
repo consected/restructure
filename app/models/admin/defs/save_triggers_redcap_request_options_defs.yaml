@@ -48,5 +48,36 @@
                     element: link_response
                     condition: "<> LENGTH"
                     value: 0
+        - request_3:
+            # Remove a user's access from the REDCap project.
+            # This can also be used within a batch_trigger definition, since batch
+            # triggers share the same handler and configuration as save_trigger redcap_request.
+            # The result is the count of users removed, as returned by the REDCap API.
+            # Pass a single "username" (as shown below), or an array of usernames using
+            # "usernames" instead, to remove multiple users in one request.
+            # NOTE: the REDCap API user used for this project (the token owner) requires the
+            # following privileges in the REDCap project: "API Import/Update",
+            # "User Rights" (Full Access) and "Delete Records".
+            # Removing a user does NOT automatically refresh the project's cached user list.
+            # Use an on_complete hook (see below) to explicitly call project_users
+            # with force_reload: true, if the refreshed list is needed straight away.
+            study: Test
+            project_name: Test API
+            local_data: remove_user_response
+            method: remove_project_user
+            post_data:
+              username: "{{item.username}}"
+              # usernames: ["{{item.username}}", "{{item.other_username}}"]
+            on_complete:
+              - redcap_request:
+                  request_3a:
+                    # Force reload the cached project_users list from the REDCap API
+                    # now that a user has been removed.
+                    study: Test
+                    project_name: Test API
+                    local_data: remove_user_refreshed_users_response
+                    method: project_users
+                    post_data:
+                      force_reload: true
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
                     
