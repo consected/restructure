@@ -12,6 +12,7 @@ class SaveTriggers::RedcapRequest < SaveTriggers::SaveTriggersBase
                     import_records file arms events
                     repeating_forms_events export_logs
                     form_event_mapping export_field_names
+                    import_project_user
                     remove_project_user].freeze
 
   def self.config_def(if_extras: {}); end
