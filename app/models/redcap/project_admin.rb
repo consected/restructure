@@ -388,6 +388,15 @@ module Redcap
     end
 
     #
+    # In the background, remove a user's access from this REDCap project via
+    # the REDCap API, then refresh the locally stored project user list.
+    # @param [String] username - the REDCap username to remove
+    def remove_project_user(username)
+      pu = ProjectUsers.new self
+      pu.request_remove_user(username)
+    end
+
+    #
     # Store the data dictionary metadata from Redcap for future reference
     # Calls a delayed job to actually do the work
     def request_data_collection_instruments
