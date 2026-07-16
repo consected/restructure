@@ -42,6 +42,15 @@ describe 'API create master with associated records - Issue #924', js: true, dri
     # Configure create_master_with to include player_info (the standard first embedded item)
     add_user_config(:create_master_with, 'player_info', for_user: @user)
 
+    g = Classification::GeneralSelection.new item_type: 'player_contacts_source', name: 'CIS', value: 'cis', current_admin: @admin
+    g.already_taken(:item_type, :value) || g.save
+
+    g = Classification::GeneralSelection.new item_type: 'player_infos_source', name: 'CIS', value: 'cis', current_admin: @admin
+    g.already_taken(:item_type, :value) || g.save
+
+    g = Classification::GeneralSelection.new item_type: 'addresses_source', name: 'CIS', value: 'cis', current_admin: @admin
+    g.already_taken(:item_type, :value) || g.save
+
     # Set up a test dynamic model for API testing
     setup_test_api_dynamic_model
   end
@@ -138,7 +147,7 @@ describe 'API create master with associated records - Issue #924', js: true, dri
             },
             # Address
             addresses: {
-              '0' => { street: '123 test street', city: 'boston', state: 'ma', zip: '02101', rank: 10, source: 'nfl' }
+              '0' => { street: '123 test street', city: 'boston', state: 'ma', zip: '02101', rank: 10, source: 'cis' }
             },
             # Scantron (external identifier)
             scantrons: {
