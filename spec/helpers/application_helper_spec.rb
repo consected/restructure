@@ -9,6 +9,9 @@
 #   - Filters out DoNotDisplayErrorMessage markers while preserving valid error messages
 #   - Removes entire error fields that contain only DoNotDisplayErrorMessage markers
 #   - Ensures clean error display to users by eliminating internal marker constants
+# - #partial_cache_key (issue #1270): the cache key/template version token stays stable
+#   across user saves that don't change relevant attributes, and still changes when the
+#   user's app type genuinely changes
 
 require 'rails_helper'
 
@@ -120,5 +123,49 @@ describe '#handlebars_template_tag' do
         '<span>partial</span>'.html_safe
       end
     end
+  end
+end
+
+# Purpose (issue #1270): partial_cache_key previously embedded the user's
+# `updated_at` timestamp. Since User is saved on almost every request (Devise
+# trackable sign-in tracking, app type switching), this made the cache key -
+# and therefore the /pages/<token>/template URL - change far more often than
+# necessary, defeating the long-lived browser cache. These specs confirm the
+# key stays stable across saves that don't affect its relevant inputs, and
+# still changes when the app type genuinely changes.
+describe '#partial_cache_key' do
+  include ModelSupport
+
+  before :all do
+    create_admin
+  end
+
+  before do
+    helper.define_singleton_method(:current_admin) { nil }
+    helper.define_singleton_method(:current_user) { @current_user }
+  end
+
+  it 'is unchanged when the user is saved without a relevant attribute change' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+    user.update!(first_name: 'Changed Name')
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).to eq(before_key)
+  end
+
+  it 'changes when the user app type changes' do
+    user, = create_user
+    other_app_type = Admin::AppType.active.where.not(id: user.app_type_id).first
+    skip 'No second active app type available for this test' unless other_app_type
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+    user.current_admin = @admin
+    user.update!(app_type: other_app_type)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).not_to eq(before_key)
   end
 end
