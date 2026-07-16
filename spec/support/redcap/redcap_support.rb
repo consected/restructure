@@ -227,6 +227,19 @@ module Redcap
         .to_return(status: 200, body: import_record_save_trigger_response, headers: {})
     end
 
+    def stub_request_import_project_user(server_url, api_key, user_data:)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key,
+            'data' => [user_data].to_json
+          }
+        )
+        .to_return(status: 200, body: import_project_user_response, headers: {})
+    end
+
     def stub_request_remove_project_user(server_url, api_key, username: 'd20', usernames: nil)
       usernames ||= [username]
       stub_request(:post, server_url)
@@ -606,6 +619,10 @@ module Redcap
 
     def remove_project_user_response
       File.read('spec/fixtures/redcap/save_trigger_remove_project_user.json')
+    end
+
+    def import_project_user_response
+      File.read('spec/fixtures/redcap/save_trigger_import_project_user.json')
     end
 
     def project_admin_repeat_instrument_response

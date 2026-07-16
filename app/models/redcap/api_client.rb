@@ -58,6 +58,16 @@ module Redcap
     end
 
     #
+    # Create or update a project user
+    # @param [Hash] user_data - user data fields (e.g. username:, expiration:, record_delete:)
+    # @return [Integer] count of users added or updated, as returned by the REDCap API
+    def import_project_user(**user_data)
+      # The REDCap API expects user fields JSON-encoded as an array in the 'data' parameter.
+      # This request mutates data on the REDCap server, so never cache the result.
+      request :user, request_options: { data: [user_data].to_json }, cache_expires_in: nil
+    end
+
+    #
     # Remove a user's access from the project.
     # NOTE: the REDCap API user used to make this request requires the following privileges
     # in the project: "API Import/Update", "User Rights" (Full Access), "Delete Records".

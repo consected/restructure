@@ -79,5 +79,21 @@
                     method: project_users
                     post_data:
                       force_reload: true
+        - request_4:
+            # Add a user or update their privileges in a REDCap project.
+            # If the user running the request has the "User Rights" privilege,
+            # they can add a new user or update an existing user's privileges, including
+            # their own. For example, this would allow them to add
+            # record_delete and api_import privileges, allowing them to delete
+            # records and use the REDCap API.
+            study: Test
+            project_name: Test API
+            local_data: update_project_user_response
+            method: import_project_user
+            post_data:
+              username: "{{item.username}}"
+              expiration: '2036-01-01'
+              record_delete: 1
+              api_import: 1
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
                     
