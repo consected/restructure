@@ -1,9 +1,19 @@
 <%
-# Accept a yaml document, stored as JSON(b) in the database.
-# The data we send is a field containing a YAML string.
-# This provides a mechanism for passing an hash of data.
-# Accepted format is any valid YAML hash or array
-# Translation of the YAML on receipt is handled by Default::FieldEditAs::Handler
+# Edit a json/jsonb database column's contents as YAML text.
+#
+# DISPLAY (this template): the current column value (a Hash or Array, since it was
+# loaded from a json/jsonb column) is converted to a YAML string with String.yaml_dump
+# and shown in a YAML codemirror editor (data-code-editor-type: 'yaml').
+# Accepted/displayed format is any valid YAML hash or array.
+#
+# SAVE: this template is used for both the `json` and `jsonb` column types - see
+# _column_type_json.html.erb, which simply renders this same partial. On submit,
+# the edited YAML text arrives as a plain param string. Dynamic::FieldEditAs::Handler
+# resolves the column's edit_as field_type to "col_type_json" (json columns) or
+# "col_type_jsonb" (jsonb columns), matches either against its TransformFieldTypes
+# entry "col_type_json" (a substring match, so it matches both), and hands the raw
+# YAML string to Dynamic::FieldEditAs::ColTypeJson.persistable_value, which parses
+# the YAML back into a Hash/Array ready to be persisted into the json/jsonb column.
 
 fopt = field_options_for(form_object_instance, field_name_sym)
 

@@ -11,6 +11,12 @@ module Dynamic
     class Handler
       attr_accessor :object_instance, :params
 
+      # Field types requiring translation from a submitted param string into a
+      # persistable value. Matching is done with `edit_as_field_type.include? f`
+      # (substring match, not equality) below, so `col_type_json` also matches
+      # the `col_type_jsonb` field type derived from jsonb columns - both are
+      # handled by Dynamic::FieldEditAs::ColTypeJson, which parses the submitted
+      # YAML text back into a Hash/Array for storage.
       TransformFieldTypes = %w[multi_editable_list multi_editable_choices col_type_json].freeze
 
       #
@@ -54,12 +60,12 @@ module Dynamic
         fo = object_instance.option_type_config&.field_options || {}
         cols = object_instance.class.columns_hash
         field_list = object_instance.attribute_names
-        field_list.map do |fn|
+        field_list.to_h do |fn|
           [
             fn.to_sym,
             fo.dig(fn.to_sym, :edit_as, :field_type) || "col_type_#{cols[fn].type}"
           ]
-        end.to_h
+        end
       end
     end
   end
