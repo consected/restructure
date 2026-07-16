@@ -110,6 +110,13 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
       expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
     end
 
+    it 'prevents remove_user action when transfer_mode is none' do
+      post :remove_user, params: { id: project_admin.id, username: 'd20' }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Actions cannot be performed on projects with transfer mode "none"/)
+    end
+
     it 'allows actions when transfer_mode is "scheduled"' do
       project_admin.update!(transfer_mode: 'scheduled')
 
@@ -128,6 +135,43 @@ RSpec.describe Redcap::ProjectAdminsController, type: :controller do
       end.not_to raise_error
 
       expect(response).to have_http_status(200)
+    end
+  end
+
+  describe 'remove_user action' do
+    before_each_login_admin
+
+    before(:each) do
+      setup_redcap_project_admin_configs
+    end
+
+    let!(:project_admin) do
+      pa = Redcap::ProjectAdmin.active.first
+      pa.current_admin = @admin
+      pa.transfer_mode = 'manual'
+      pa.save!
+      pa
+    end
+
+    it 'requires a username parameter' do
+      post :remove_user, params: { id: project_admin.id }, format: :json
+      expect(response).to have_http_status(:bad_request)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/username is required/)
+    end
+
+    it 'enqueues a job to remove the user and returns a success message' do
+      fake_job = double('job', job_id: 'test-job-id')
+      allow(Redcap::RemoveProjectUserJob).to receive(:perform_later).and_return(fake_job)
+
+      expect do
+        post :remove_user, params: { id: project_admin.id, username: 'd20' }, format: :json
+      end.not_to raise_error
+
+      expect(response).to have_http_status(200)
+      json_response = JSON.parse(response.body)
+      expect(json_response['message']).to match(/Removal of user d20 requested/)
+      expect(Redcap::RemoveProjectUserJob).to have_received(:perform_later).with(project_admin, 'd20')
     end
   end
 end

@@ -408,4 +408,20 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
       expect(pa.file_store).to be_a(NfsStore::Manage::Container)
     end
   end
+
+  # Tests for issue #1260 - allow an admin to remove a REDCap user from a
+  # project directly from the project admin "users" panel, running the
+  # actual removal in a background job.
+  describe '#remove_project_user' do
+    it 'delegates to Redcap::ProjectUsers#request_remove_user' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+
+      fake_pu = instance_double(Redcap::ProjectUsers)
+      allow(Redcap::ProjectUsers).to receive(:new).with(rc).and_return(fake_pu)
+      expect(fake_pu).to receive(:request_remove_user).with('d20')
+
+      rc.remove_project_user('d20')
+    end
+  end
 end

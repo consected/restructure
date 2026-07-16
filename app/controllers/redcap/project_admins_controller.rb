@@ -109,6 +109,20 @@ class Redcap::ProjectAdminsController < AdminController
     render json: { message: msg }, status: 200
   end
 
+  def remove_user
+    set_instance_from_id
+    check_transfer_mode_not_none
+
+    username = params[:username].to_s
+    raise FphsException, 'username is required to remove a project user' if username.blank?
+
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.remove_project_user(username)
+
+    msg = "Removal of user #{username} requested at #{DateTime.now} - wait a few seconds then click the *refresh* button to review the changes"
+    render json: { message: msg }, status: 200
+  end
+
   protected
 
   def capability_name
