@@ -732,7 +732,8 @@ module Formatter
           item_reference = true
         end
 
-        res_data = setup_data res_data if res_data
+        # Skip setup_data for raw Array results (e.g. from json_parse/yaml_parse)
+        res_data = setup_data res_data if res_data && !res_data.is_a?(Array)
 
         return unless res_data
       rescue StandardError => e
@@ -764,7 +765,9 @@ module Formatter
     #
     def self.get_associated_item(master, name, data, item_reference: false)
       data, is_index = init_associated_data(name, data)
-      data = setup_data data if data
+      # Skip setup_data for raw Array results (e.g. from json_parse/yaml_parse) —
+      # setup_data is designed for Hash/object data and will corrupt a plain Array.
+      data = setup_data data if data && !data.is_a?(Array)
       return unless data
 
       item = data[:original_item] if data.is_a? Hash
@@ -832,6 +835,9 @@ module Formatter
              elsif name == 'json_parse' && data.is_a?(String)
                is_index = true
                JSON.parse(data) if data.present?
+             elsif name == 'yaml_parse' && data.is_a?(String)
+               is_index = true
+               YAML.safe_load(data) if data.present?
              elsif anumber.to_s == name && data.is_a?(Enumerable)
                is_index = true
                data[anumber]

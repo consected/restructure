@@ -545,4 +545,44 @@ Good?)
     res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
     expect(res).to eq 'null'
   end
+
+  it 'parses a YAML encoded string using yaml_parse for hash key access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey2}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML abc'
+  end
+
+  it 'parses a YAML encoded string using yaml_parse for array index access' do
+    txt = 'YAML {{yaml.yaml_parse.ykey3.1}}'
+    data = { 'yaml' => "ykey1: 22\nykey2: abc\nykey3:\n- 1230\n- 4560\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML 4560'
+  end
+
+  it 'indexes a top-level YAML array using yaml_parse with a numeric index' do
+    txt = 'YAML {{yaml.yaml_parse.0}}'
+    data = { 'yaml' => "- first\n- second\n- third\n" }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'YAML first'
+  end
+
+  it 'indexes a top-level YAML array using yaml_parse with first and last' do
+    data = { 'yaml' => "- alpha\n- beta\n- gamma\n" }
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{yaml.yaml_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with a numeric index' do
+    txt = 'JSON {{json.json_parse.0}}'
+    data = { 'json' => '["first","second","third"]' }
+    res = Formatter::Substitution.substitute txt.dup, data:, tag_subs: nil
+    expect(res).to eq 'JSON first'
+  end
+
+  it 'indexes a top-level JSON array using json_parse with first and last' do
+    data = { 'json' => '["alpha","beta","gamma"]' }
+    expect(Formatter::Substitution.substitute('{{json.json_parse.first}}', data:, tag_subs: nil)).to eq 'alpha'
+    expect(Formatter::Substitution.substitute('{{json.json_parse.last}}', data:, tag_subs: nil)).to eq 'gamma'
+  end
 end
