@@ -52,6 +52,7 @@ For all Ruby on Rails code you write, follow these conventions: [Ruby on Rails C
 - Use BEM (Block, Element, Modifier) naming conventions for CSS classes.
 - If JavaScript is needed for UI behavior, preferably use appropriate postprocessors rather than inline scripts.
 - If inline `<script>` or `<style>` tags are necessary, use Rails `javascript_tag` or `style_tag` helpers with a nonce for CSP compliance.
+- When creating links to admin resources, never use the `edit` path directly. Instead, use the `filter[id]=<id>` and `perform_action=edit` parameters to link to the resource in a way that is compatible with the admin panel's search and edit functionality.
 
 ### Database Conventions
 - Use migrations for all schema changes; avoid direct DB modifications for implementation.
