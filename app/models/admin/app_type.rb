@@ -62,7 +62,11 @@ class Admin
     def self.all_ids_available_to(user)
       return unless user
 
-      Rails.cache.fetch("all_app_type_ids_available_to::#{user.id}") do
+      # The key must change whenever access controls, roles or app type definitions change,
+      # since the result depends on them. Whole-cache clears on those saves currently mask
+      # an under-scoped key, but must not be relied upon (see issues #1270 / #1287)
+      ckey = "all_app_type_ids_available_to--#{user.id}-#{Admin::UserAccessControl.access_control_version_token}"
+      Rails.cache.fetch(ckey) do
         all_available_to(user).map(&:id)
       end
     end

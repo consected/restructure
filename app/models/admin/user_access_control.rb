@@ -218,12 +218,28 @@ class Admin::UserAccessControl < Admin::AdminBase
   def self.remake_from_attributes(attribs)
     return unless attribs
 
-    current_admin_id = attribs.delete('admin_id')
-    Admin::UserAccessControl.new(attribs)
+    # Duplicate rather than mutate, since the attributes hash may be a cached value
+    # that is reused by later cache reads
+    Admin::UserAccessControl.new(attribs.except('admin_id'))
   end
 
   def self.cache_key_for_access_for(*args)
     "access-for--#{args.join('-')}-#{latest_update}-#{Settings::OnlyLoadAppTypes}"
+  end
+
+  #
+  # A version token capturing everything that can change an access-control-derived result:
+  # user access controls, user roles, and app type definitions, plus the OnlyLoadAppTypes
+  # scope. Combine it with a user/app-type-scoped key prefix to build cache keys that
+  # invalidate whenever any of those inputs change.
+  #
+  # NOTE: latest_update values are second-granularity (Time#to_s), so two changes within the
+  # same wall-clock second may not rotate the token (see issue #1287). The same caveat applies
+  # to cache_key_for_access_for above.
+  # @return [String]
+  def self.access_control_version_token
+    "#{latest_update}-#{Admin::UserRole.latest_update}-" \
+      "#{Admin::AppType.latest_update}-#{Settings::OnlyLoadAppTypes}"
   end
 
   #
@@ -264,7 +280,7 @@ class Admin::UserAccessControl < Admin::AdminBase
         # The cache key must match that in #access_for?
         ck = cache_key_for_access_for(user&.id, user&.current_sign_in_at&.to_i, can_perform, on_resource_type, named, app_type_id, alt_role_name,
                                       add_conditions)
-        Rails.cache.write(cache_key, v)
+        Rails.cache.write(ck, v)
       end
 
       res
@@ -356,10 +372,14 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   #
   # Check which tables a user can view in the current app type, or an alternative app type if specified
+  # The effective app type id is included in the cache key, since the result depends on it:
+  # without it, a user switching app type within a session (current_sign_in_at unchanged) would
+  # be served the previous app type's cached results, hiding master panel tabs (issue #1279 follow-up)
   def self.viewable_tables(user, alt_app_type_id: nil)
-    ckey = cache_key_for_access_for('viewable_tables--', user.id, user.current_sign_in_at&.to_i, alt_app_type_id)
+    effective_app_type_id = alt_app_type_id || user.app_type_id
+    ckey = cache_key_for_access_for('viewable_tables--', user.id, user.current_sign_in_at&.to_i,
+                                    effective_app_type_id)
     Rails.cache.fetch(ckey) do
-      allow = {}
       names = resource_names_for(:table)
       res = access_for_list?(user, :access, :table, names, alt_app_type_id:)
       res.transform_values { |r| remake_from_attributes(r)&.resource_name }
@@ -448,8 +468,8 @@ class Admin::UserAccessControl < Admin::AdminBase
     elsif !self.class.valid_access_level?(resource_type.to_sym, access)
       errors.add :access, 'is an invalid value'
     elsif !allow_bad_resource_name && (
-            resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s)
-          )
+      resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s)
+    )
       errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
     elsif !disabled && !persisted?
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
