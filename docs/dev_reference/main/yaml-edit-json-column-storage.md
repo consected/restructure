@@ -16,10 +16,14 @@ translation works, and how it is wired together.
   column resolves to `column_type_json`.
 - `app/views/common_templates/edit_fields/_column_type_json.html.erb` simply renders the
   `_column_type_jsonb` partial, so both column types share one implementation.
-- The current attribute value (already a Ruby `Hash` or `Array`, since it was loaded from
-  a json/jsonb column) is converted to a YAML string with `String.yaml_dump` and rendered
-  into a `code-editor-yaml` textarea (a CodeMirror YAML editor keyed by
-  `data-code-editor-type: 'yaml'`).
+- The current attribute value is passed to `Dynamic::FieldEditAs::ColTypeJson.display_value`,
+  which dumps a `Hash` or `Array` value to a YAML string with `String.yaml_dump`, and
+  renders it into a `code-editor-yaml` textarea (a CodeMirror YAML editor keyed by
+  `data-code-editor-type: 'yaml'`). Any other value (`nil`, blank string, etc) renders
+  as an empty textarea. This distinction matters because `#present?` is `false` for an
+  empty `Hash`/`Array` as well as for a blank value - using `#present?` to decide whether
+  to dump would make a stored `{}` or `[]` indistinguishable from "no value", both
+  rendering blank and then being cleared to `nil` if the form were resubmitted unchanged.
 
 ## Save: YAML text → persistable column value
 
@@ -48,6 +52,12 @@ Non-blank YAML documents must have a top-level Hash or Array. Any other value
 (including a bare scalar, `null`, `false`, malformed YAML, or YAML aliases rejected
 by `YAML.safe_load`) raises an `FphsException` from `ColTypeJson.persistable_value`.
 A blank field returns `nil`, allowing the normal model assignment to clear the column.
+
+A YAML document that parses to an empty string (for example `--- ''\n`) is also treated
+as blank and returns `nil`, rather than raising. This specifically covers the display
+template rendering a blank/absent value: `String.yaml_dump('')` produces the YAML
+document `--- ''\n` rather than an empty string, so resubmitting the field unchanged
+when it started blank must not raise.
 
 ## Related code
 
