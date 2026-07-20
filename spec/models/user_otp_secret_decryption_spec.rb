@@ -74,6 +74,7 @@ RSpec.describe User, 'OTP secret decryption handling' do
 
   describe 'admin recovery via reset_two_factor_auth' do
     before :each do
+      allow(User).to receive(:two_factor_auth_disabled).and_return(false)
       User.connection.execute("UPDATE users SET otp_secret = 'not-a-valid-cipher' WHERE id = #{@user.id}")
       @user.reload
       @user.otp_secret # trigger the corruption detection

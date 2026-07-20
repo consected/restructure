@@ -17,6 +17,10 @@
 #   --compare PATH       Compare current config against another YAML file
 #   --class TYPE     Filter by _class_name (e.g. DynamicModel, ActivityLog, ExternalIdentifier)
 #   --errors FILE    Read a config-errors log file and extract unique model table names to inspect
+#   --page-layouts   List page layout panels (Admin::PageLayout): layout/panel name,
+#                    position, contains.resources/categories, tab and view_options
+#   --access-controls  List user access controls (Admin::UserAccessControl):
+#                    resource_type, resource_name, access level and role_name
 #   --help           Show this help
 #
 # Examples:
@@ -31,6 +35,12 @@
 #
 #   # Show just the show_if and caption_before sections for a model
 #   ruby app-scripts/inspect_app_config.rb --sections show_if,caption_before play_ipa_initial_call
+#
+#   # List the master page layout panels and what each contains
+#   ruby app-scripts/inspect_app_config.rb --config "...projects_config.yaml" --page-layouts
+#
+#   # Show access controls that mention data_request_assignments
+#   ruby app-scripts/inspect_app_config.rb --config "...projects_config.yaml" --access-controls data_request
 
 require 'yaml'
 require 'optparse'
@@ -254,6 +264,107 @@ def print_config_diff(new_rec, new_parsed, old_rec, old_preamble, new_preamble =
 end
 
 # ---------------------------------------------------------------------------
+# Page layout / access control reporting  (--page-layouts / --access-controls)
+# ---------------------------------------------------------------------------
+
+# Compile a case-insensitive OR pattern from search terms, or nil when none.
+def build_search_pattern(search_terms)
+  return nil if search_terms.empty?
+
+  Regexp.new(search_terms.map { |t| Regexp.escape(t) }.join('|'), Regexp::IGNORECASE)
+end
+
+# Report on Admin::PageLayout records: the panels that make up the master,
+# nav and view layouts, including what resources/categories each panel
+# contains and its view_options. The page layout `options` is a plain YAML
+# string (no cross-library anchors), so it parses directly.
+def report_page_layouts(app_type, search_terms)
+  layouts = %w[page_layouts valid_page_layouts associated_page_layouts]
+            .flat_map { |key| Array(app_type[key]) }
+  if layouts.empty?
+    puts 'No page_layouts found in config.'
+    return
+  end
+
+  pattern = build_search_pattern(search_terms)
+  matched = layouts.select do |pl|
+    next true unless pattern
+
+    hay = [pl['panel_name'], pl['layout_name'], pl['panel_label'], pl['options']].compact.join("\n")
+    pattern.match?(hay)
+  end
+
+  puts "Found #{matched.size} page layout panel(s)#{" matching: #{search_terms.join(', ')}" if pattern}\n\n"
+
+  matched.sort_by { |pl| [pl['layout_name'].to_s, pl['panel_position'].to_i] }.each do |pl|
+    opts = attempt_yaml_parse(normalize_options_text(pl['options'].to_s)) || {}
+    opts = {} unless opts.is_a?(Hash)
+    contains     = opts['contains'] || {}
+    view_options = opts['view_options'] || {}
+    tab          = opts['tab'] || {}
+
+    disabled_flag = pl['disabled'] ? ', DISABLED' : ''
+    puts '=' * 72
+    puts "#{pl['layout_name']} / #{pl['panel_name']}  (position #{pl['panel_position']}#{disabled_flag})"
+    puts "  label: #{pl['panel_label']}" unless pl['panel_label'].to_s.empty?
+    puts '=' * 72
+
+    resources  = Array(contains['resources']).compact
+    categories = Array(contains['categories']).compact
+    puts "  contains.resources:  #{resources.empty? ? '(none)' : resources.join(', ')}"
+    puts "  contains.categories: #{categories.join(', ')}" unless categories.empty?
+    puts "  tab.parent: #{tab['parent']}" if tab.is_a?(Hash) && !tab['parent'].to_s.empty?
+
+    if view_options.is_a?(Hash)
+      shown = view_options.reject { |_k, v| v.nil? || v.to_s.strip.empty? }
+      unless shown.empty?
+        puts '  view_options:'
+        shown.each { |k, v| puts "    #{k}: #{v}" }
+      end
+    end
+    puts
+  end
+end
+
+# Report on Admin::UserAccessControl records: which roles have which access
+# level to each resource. Filtered by search terms matching resource_type,
+# resource_name or role_name.
+def report_access_controls(app_type, search_terms)
+  controls = %w[user_access_controls valid_user_access_controls associated_user_access_controls]
+             .flat_map { |key| Array(app_type[key]) }
+  if controls.empty?
+    puts 'No user access controls found in config.'
+    return
+  end
+
+  pattern = build_search_pattern(search_terms)
+  matched = controls.select do |ac|
+    next true unless pattern
+
+    hay = [ac['resource_type'], ac['resource_name'], ac['role_name']].compact.join(' ')
+    pattern.match?(hay)
+  end
+
+  puts "Found #{matched.size} access control(s)#{" matching: #{search_terms.join(', ')}" if pattern}\n\n"
+  fmt = "  %-18<type>s %-52<name>s %-10<access>s %-28<role>s %<disabled>s\n"
+  printf(fmt, type: 'TYPE', name: 'RESOURCE', access: 'ACCESS', role: 'ROLE', disabled: 'DISABLED')
+
+  matched
+    .sort_by { |ac| [ac['resource_type'].to_s, ac['resource_name'].to_s, ac['role_name'].to_s] }
+    .each do |ac|
+      access = ac['access']
+      access = access.map { |k, v| "#{k}:#{v}" }.join(',') if access.is_a?(Hash)
+      printf(fmt,
+             type: ac['resource_type'].to_s,
+             name: ac['resource_name'].to_s,
+             access: access.to_s,
+             role: ac['role_name'].to_s,
+             disabled: ac['disabled'] ? 'yes' : '')
+    end
+  puts
+end
+
+# ---------------------------------------------------------------------------
 # CLI option parsing
 # ---------------------------------------------------------------------------
 
@@ -267,7 +378,9 @@ options = {
   errors_file: nil,
   compare_git: nil,
   compare_path: nil,
-  only_changed: false
+  only_changed: false,
+  page_layouts: false,
+  access_controls: false
 }
 
 parser = OptionParser.new do |opts|
@@ -283,6 +396,8 @@ parser = OptionParser.new do |opts|
   opts.on('--compare-git REF', 'Compare config against a git ref (e.g. HEAD~1)') { |v| options[:compare_git] = v }
   opts.on('--compare PATH', 'Compare config against another YAML file') { |v| options[:compare_path] = v }
   opts.on('--only-changed', 'With --compare-git/--compare, only show models that have changes') { options[:only_changed] = true }
+  opts.on('--page-layouts', 'List page layout panels (Admin::PageLayout)') { options[:page_layouts] = true }
+  opts.on('--access-controls', 'List user access controls (Admin::UserAccessControl)') { options[:access_controls] = true }
   opts.on('--help', 'Show help') do
     puts opts
     exit
@@ -310,6 +425,20 @@ end
 
 app_type = outer['app_type'] || outer
 preamble = build_library_preamble(app_type)
+
+# ---------------------------------------------------------------------------
+# Page layout / access control modes short-circuit the model reporting below.
+# ---------------------------------------------------------------------------
+
+if options[:page_layouts]
+  report_page_layouts(app_type, search_terms)
+  exit 0
+end
+
+if options[:access_controls]
+  report_access_controls(app_type, search_terms)
+  exit 0
+end
 
 # ---------------------------------------------------------------------------
 # Load comparison config (for --compare-git / --compare)

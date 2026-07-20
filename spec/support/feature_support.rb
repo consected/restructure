@@ -502,16 +502,14 @@ module FeatureSupport
                       end
 
       3.times do |attempt|
-        begin
-          if item_selector.is_a?(Array)
-            find(*item_selector, wait: 5).click
-          else
-            find(item_selector, wait: 5).click
-          end
-          break
-        rescue Selenium::WebDriver::Error::StaleElementReferenceError
-          raise if attempt == 2
+        if item_selector.is_a?(Array)
+          find(*item_selector, wait: 5).click
+        else
+          find(item_selector, wait: 5).click
         end
+        break
+      rescue Selenium::WebDriver::Error::StaleElementReferenceError
+        raise if attempt == 2
       end
     end
 
