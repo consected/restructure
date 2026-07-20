@@ -65,9 +65,9 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
   #
   # Helper: configure stubs so request_records proceeds past the inline adapter guard
   # and past the existing-jobs guard, without running a real background job.
-  def stub_for_request_records(rc)
+  def stub_for_request_records(_rc)
     # Prevent the "already queued" early return
-    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return(double(count: 0))
+    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return([])
 
     # Prevent the real job from running
     fake_job = double('job', job_id: 'test-job-id')
