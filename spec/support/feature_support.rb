@@ -257,6 +257,16 @@ module FeatureSupport
     has_css?('.modal[style~="display: none"]')
   end
 
+  def set_notes_field_format(markdown: false, app_type: @app_type, admin: @admin)
+    app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
+    Admin::AppConfiguration.create!(
+      name: 'notes field format',
+      value: markdown ? 'markdown' : 'plain',
+      app_type: app_type,
+      current_admin: admin
+    )
+  end
+
   def open_player_element(el, items)
     dismiss_modal
     have_css('.player-info-header')
