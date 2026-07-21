@@ -183,7 +183,8 @@ if [ "${SKIP_ZEITWERK}" != 'true' ]; then
 fi
 
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
-export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
+procs=$(nproc)
+export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$((procs / 2))}
 
 if [ -z "$@" ]; then
   specs='spec'
