@@ -48,5 +48,16 @@ module Fpa1
     # until after transaction commit, until delayed_job commit-timing is validated.
     # Tracking: issue #1296.
     config.active_job.enqueue_after_transaction_commit = :never
+
+    # Rails 7.1+ defaults to a SHA256-derived key for non-deterministic ActiveRecord
+    # Encryption attributes (e.g. otp_secret, dynamic model fields marked encrypted: true).
+    # This app has existing production data encrypted under the old SHA1-derived key.
+    # Keep SHA1 supported as a decrypt-only "previous scheme" so that data stays
+    # readable; new writes still use the SHA256-derived key. Must be set here (not in
+    # config/initializers) because config.active_record.encryption is a buffer that
+    # Rails' "active_record_encryption.configuration" railtie initializer merges
+    # into ActiveRecord::Encryption.config before config/initializers/*.rb load.
+    # Tracking: issue #1293 (re-encrypt existing data and drop this fallback).
+    config.active_record.encryption.support_sha1_for_non_deterministic_encryption = true
   end
 end
