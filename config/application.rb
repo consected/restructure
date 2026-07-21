@@ -35,5 +35,18 @@ module Fpa1
     # Enables YJIT as of Ruby 3.3, to bring sizeable performance improvements.
     # Moved here from config/initializers/new_framework_defaults_7_2.rb (issue #1015).
     config.yjit = true
+
+    # Conservative overrides of Rails 7.2 defaults adopted via load_defaults 7.2 (issue #1015).
+    # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
+    # Remove each override when the corresponding tracking sub-issue is resolved.
+
+    # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
+    # consumers are audited. Tracking: issue #1295.
+    config.active_record.postgresql_adapter_decode_dates = false
+
+    # Keep Active Job enqueuing immediately (pre-7.2 behaviour) rather than deferring
+    # until after transaction commit, until delayed_job commit-timing is validated.
+    # Tracking: issue #1296.
+    config.active_job.enqueue_after_transaction_commit = :never
   end
 end
