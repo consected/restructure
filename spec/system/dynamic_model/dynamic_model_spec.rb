@@ -42,6 +42,8 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
     @app_type = @user.app_type
     expect(@app_type).not_to be nil
     expect(@user.two_factor_setup_required?).to be_falsey
+
+    set_notes_field_format(markdown: false)
   end
 
   describe 'dynamic model fields for a default view' do
