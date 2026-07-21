@@ -43,6 +43,8 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
     @app_type = @user.app_type
     expect(@app_type).not_to be nil
     expect(@user.two_factor_setup_required?).to be_falsey
+
+    set_notes_field_format(markdown: false)
   end
 
   describe 'redcap_email and redcap_phone field types in show and edit modes' do
