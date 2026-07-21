@@ -21,7 +21,7 @@ Bundler.require(*Rails.groups)
 module Fpa1
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 7.2
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -31,5 +31,9 @@ module Fpa1
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.active_record.schema_format = :sql
+
+    # Enables YJIT as of Ruby 3.3, to bring sizeable performance improvements.
+    # Moved here from config/initializers/new_framework_defaults_7_2.rb (issue #1015).
+    config.yjit = true
   end
 end
