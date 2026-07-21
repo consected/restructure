@@ -197,6 +197,12 @@ describe 'advanced search', js: true, driver: $browser_driver do
       dismiss_modal
 
       h = open_player_element el, items
+      # Extract the numeric master id from the container id (e.g. "master-40-main-container" => "40")
+      # so the tracker tab lookup can be scoped to *this* master record. Without scoping,
+      # expand_master_record_tab would match the first "tracker" tab link anywhere on the
+      # page - which, once more than one master record has been expanded, may belong to a
+      # different (and by now collapsed) master record and never become visible.
+      master_id = h[/\d+/]
 
       # b = all('button[data-dismiss="modal"]')
       # b.first.click if b && b.length > 0
@@ -204,8 +210,22 @@ describe 'advanced search', js: true, driver: $browser_driver do
       # h = el['data-target'].split('#').last
       # have_css("##{h}.collapse.in")
       # find "##{h}.collapse.in", wait: 5
-      have_css "##{h}.tracker-block.collapse.in"
-      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i
+      unless page.has_css?("#trackers-#{master_id}.collapse.in", wait: 3)
+        expand_master_record_tab('tracker', master_id: master_id)
+      end
+      expect_tracker_to_be_expanded(master_id)
+      tracker_protocol_selector = "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name"
+
+      unless page.has_css?(tracker_protocol_selector, text: /#{protocol.name}/i, wait: 3)
+        view_as_events = first("##{h} div.tracker-block a[title='view as events']", wait: 5)
+        if view_as_events
+          scroll_into_view(view_as_events)
+          view_as_events.click
+          finish_page_loading
+        end
+      end
+
+      expect(page).to have_css tracker_protocol_selector, text: /#{protocol.name}/i
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: /#{sp.name}/i
 
       done += 1

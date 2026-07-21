@@ -285,8 +285,8 @@ module FeatureSupport
     expect(page).not_to have_css('.collapse.collapsing')
   end
 
-  def expect_tracker_to_be_expanded(master_id)
-    expect(page).to have_css "#trackers-#{master_id}.collapse.in"
+  def expect_tracker_to_be_expanded(master_id, wait: 15)
+    expect(page).to have_css "#trackers-#{master_id}.collapse.in", wait: wait
   end
 
   def all_master_record_panels
@@ -333,10 +333,22 @@ module FeatureSupport
     tab_link = all(scoped_selector, visible: :all, wait: 0).first
     expect(tab_link).not_to be nil
     scroll_into_view(tab_link)
-    tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    target = tab_link['data-target']
+
+    # Avoid clicking again if the panel is already open, or already in the process
+    # of opening: Bootstrap adds `.collapsing` to the target while its collapse
+    # animation is in progress, and `.ajax-running` is added to the clicked link
+    # itself while its `data-remote` request (e.g. for the tracker tab) is in flight.
+    already_expanded_or_expanding = target.present? &&
+                                    page.has_css?("#{target}.collapse.in, #{target}.collapsing", visible: :all, wait: 0)
+    ajax_in_flight = tab_link['class'].to_s.include?('ajax-running')
+
+    tab_link.click if tab_link['aria-expanded'] != 'true' && !already_expanded_or_expanding && !ajax_in_flight
+
+    finish_page_loading
 
     # Wait for the target panel to fully expand (Bootstrap collapse animation)
-    target = tab_link['data-target']
     return unless target.present?
 
     target_selector = "#{target}.collapse.in"
