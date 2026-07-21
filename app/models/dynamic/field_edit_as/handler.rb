@@ -37,12 +37,16 @@ module Dynamic
       # Translate all params in the @object_instance to a persistable value,
       # based on the edit_as configuration
       # Returns a hash of any params that have been updated, so they can be merged in
+      # Fields absent from the submitted params are skipped entirely (rather than being
+      # translated from a nil value), so a partial params submission cannot silently wipe
+      # out a previously persisted value for a field that simply wasn't included this time.
       # @return [Hash]
       def translate_to_persistable
         res = {}
         edit_as_field_types.each do |field_name, edit_as_field_type|
           use = TransformFieldTypes.find { |f| edit_as_field_type.include? f }
           next unless use
+          next unless params_key?(field_name)
 
           value = params[field_name]
           new_value = "dynamic/field_edit_as/#{use}".camelize.constantize.persistable_value(value)
@@ -54,6 +58,17 @@ module Dynamic
       end
 
       private
+
+      #
+      # True if the submitted params include an entry for field_name, checked as both a
+      # Symbol and a String key, so absent fields can be skipped rather than translated
+      # from nil (which would otherwise overwrite/clear the persisted value). Works for
+      # ActionController::Parameters (already indifferent) and plain Hash params (e.g. specs).
+      # @param [Symbol] field_name
+      # @return [Boolean]
+      def params_key?(field_name)
+        params.key?(field_name) || params.key?(field_name.to_s)
+      end
 
       #
       # Return a hash of field_options: <field>: edit_as: field_type: <field type value> as

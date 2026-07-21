@@ -154,5 +154,42 @@ RSpec.describe Dynamic::FieldEditAs::Handler do
 
       expect(handler.translate_to_persistable).to eq({})
     end
+
+    it 'does not include a yaml_object_* field in the persistable hash when it is absent ' \
+       'from submitted params (partial update safety)' do
+      object_instance = build_object_instance(
+        attribute_names: %w[yaml_object_config],
+        column_types: { 'yaml_object_config' => :text }
+      )
+
+      handler = described_class.new(object_instance, {})
+
+      expect(handler.translate_to_persistable).to eq({})
+    end
+
+    it 'does not include a col_type_json field in the persistable hash when it is absent ' \
+       'from submitted params (partial update safety)' do
+      object_instance = build_object_instance(
+        attribute_names: %w[settings],
+        column_types: { 'settings' => :jsonb }
+      )
+
+      handler = described_class.new(object_instance, {})
+
+      expect(handler.translate_to_persistable).to eq({})
+    end
+
+    it 'still translates a yaml_object_* field present in submitted params alongside other omitted fields' do
+      object_instance = build_object_instance(
+        attribute_names: %w[yaml_object_config other_field],
+        column_types: { 'yaml_object_config' => :text, 'other_field' => :string }
+      )
+      yaml_text = "key1: value1\n"
+      params = { yaml_object_config: yaml_text }
+
+      handler = described_class.new(object_instance, params)
+
+      expect(handler.translate_to_persistable).to eq(yaml_object_config: yaml_text)
+    end
   end
 end

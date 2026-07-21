@@ -154,6 +154,19 @@ describe 'dynamic model yaml_object field', js: true, driver: $browser_driver do
 
       within(show_selector) do
         expect(page).to have_css('li.typeof-object-field[data-field-name="yaml_object_config"]', wait: 10)
+
+        # The nested key/value content sits inside a Bootstrap 'collapse' block that is
+        # collapsed by default, so it must be read with visible: :all rather than
+        # requiring it to be on-screen. This confirms the parsed YAML content actually
+        # rendered (name/items/one/two), not just that the container element exists.
+        object_field = find('li.typeof-object-field[data-field-name="yaml_object_config"]', visible: :all, wait: 10)
+        content = object_field.text(:all).downcase
+
+        expect(content).to include('name')
+        expect(content).to include('test')
+        expect(content).to include('items')
+        expect(content).to include('one')
+        expect(content).to include('two')
       end
     end
 
@@ -212,6 +225,17 @@ describe 'dynamic model yaml_object field', js: true, driver: $browser_driver do
       expect(page).to have_css(show_selector, wait: 10)
       within(show_selector) do
         expect(page).to have_css('li.typeof-object-field[data-field-name="yaml_object_config"]', wait: 10)
+
+        # As above, read with visible: :all since the nested content sits inside a
+        # collapsed Bootstrap block by default - confirms the updated YAML content
+        # (key/new_key/updated_value/added) actually rendered, not just the container.
+        object_field = find('li.typeof-object-field[data-field-name="yaml_object_config"]', visible: :all, wait: 10)
+        content = object_field.text(:all).downcase
+
+        expect(content).to include('key')
+        expect(content).to include('updated')
+        expect(content).to include('new key')
+        expect(content).to include('added')
       end
     end
   end
