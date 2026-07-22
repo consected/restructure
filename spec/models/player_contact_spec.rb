@@ -39,6 +39,30 @@ RSpec.describe PlayerContact, type: :model do
 
     end
 
+    it "requires rec_type to be entered" do
+      pc = @master.player_contacts.build data: 'test@email.com', rec_type: nil, rank: PlayerContact::PrimaryRank
+      expect(pc.save).to equal false
+      expect(pc.errors.messages).to have_key(:rec_type)
+    end
+
+    it "allows rec_type presence to be bypassed with ignore_configurable_valid_if, but still validates data format" do
+      # Reproduces the same class of bug as issue #1281 (force_not_valid not bypassing
+      # configurable validations), but for PlayerContact's rec_type presence check in
+      # RecTypeHandler. ignore_configurable_valid_if is the flag set by force_not_valid
+      # on save trigger actions such as update_reference/update_this/create_reference.
+      pc = @master.player_contacts.build data: 'test@email.com', rec_type: nil, rank: PlayerContact::PrimaryRank
+      pc.ignore_configurable_valid_if = true
+      expect(pc.save).to equal(true), "Something went wrong saving. Errors: #{pc.errors.inspect}"
+
+      # The data format validation must still be enforced even when
+      # ignore_configurable_valid_if is set, since rec_type_handler's data
+      # validations were intentionally left unguarded.
+      pc2 = @master.player_contacts.build data: 'not-a-valid-phone', rec_type: 'phone', rank: PlayerContact::SecondaryRank
+      pc2.ignore_configurable_valid_if = true
+      expect(pc2.save).to equal false
+      expect(pc2.errors.messages).to have_key(:data)
+    end
+
     it "validates email address" do
       pc = @master.player_contacts.build data: 'test@email', rec_type: 'email', rank:  PlayerContact::SecondaryRank
       expect(pc.save).to eq false
