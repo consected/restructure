@@ -5,13 +5,13 @@ module RecTypeHandler
 
   included do
     valid_rec_types&.each do |rt|
-      is_rt = "is_#{rt}?".to_sym
+      is_rt = :"is_#{rt}?"
       scope rt, -> { where(rec_type: rt).order(rank: :desc) }
       before_validation :force_data_format
       if File.exist? "#{::Rails.root}/app/models/validates/#{rt}_validator.rb"
         validates :data, "validates/#{rt}": true, if: is_rt
       end
-      validates :rec_type, presence: true
+      validates :rec_type, presence: true, unless: :ignore_configurable_valid_if
 
       Master.has_many "#{name.ns_underscore}_#{rt}".pluralize.to_sym,
                       lambda {
@@ -66,13 +66,13 @@ module RecTypeHandler
       end
     end
 
-    super(value)
+    super
   end
 
   # When a new rec_type is set, force the data to be formatted appropriately
   def rec_type=(new_rec_type)
     Formatter::Formatters.formatter_do(new_rec_type, data)
-    super(new_rec_type)
+    super
   end
 
   def force_data_format

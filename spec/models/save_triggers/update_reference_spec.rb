@@ -1,5 +1,19 @@
 require 'rails_helper'
 
+# Tests for SaveTriggers::UpdateReference.
+#
+# Includes coverage for issue #1281: `update_reference` with `force_not_valid: true`
+# was not bypassing the `validates :source` check defined in ViewHandlers::Subject
+# (used by PlayerInfo), because that validation was missing the
+# `unless: :ignore_configurable_valid_if` guard applied by force_not_valid elsewhere
+# in the codebase. This caused saves to fail with "Source is not a valid source"
+# even when force_not_valid was set on the update_reference trigger config.
+#
+# Also covers the same class of bug for PlayerContact's `rec_type` presence check
+# (RecTypeHandler), exercised through the actual update_reference trigger (rather
+# than setting ignore_configurable_valid_if directly) to prove force_not_valid
+# applies it end-to-end. The `data` format validation is intentionally left
+# unguarded, so a separate example confirms it remains enforced.
 AlNameGenTestUr = 'Gen Test ELT Save'
 
 RSpec.describe SaveTriggers::UpdateReference, type: :model do
@@ -247,6 +261,106 @@ RSpec.describe SaveTriggers::UpdateReference, type: :model do
       expect(pc2).not_to be nil
       al_pc.clear_embedded_item_memo
       expect(al_pc.embedded_item).to eq pc2
+    end
+  end
+
+  describe 'force_not_valid on a referenced PlayerInfo (issue #1281)' do
+    before :example do
+      SetupHelper.setup_al_player_contact_phones
+      SetupHelper.setup_al_gen_tests AlNameGenTestUr, 'elt_save_test', 'player_contact'
+      create_user
+      @master = create_master
+      setup_access PlayerInfo.resource_name, resource_type: :table, access: :create, user: @user
+      # Created without rank/source, so the `validates :source` presence/format
+      # check (only active `if: uses_and_has_rank?`) does not apply yet, and
+      # `prevent_user_changes` does not block the later update (source_was is nil).
+      @player_info = @master.player_infos.create! first_name: 'bob', last_name: 'smith'
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'saves successfully when force_not_valid is true, even with an invalid source' do
+      config = {
+        player_info: {
+          force_not_valid: true,
+          first: {
+            player_infos: {
+              update: 'return_result'
+            }
+          },
+          with: {
+            rank: 10,
+            birth_date: '2021-01-01',
+            source: 'bad source'
+          }
+        }
+      }
+      @trigger = SaveTriggers::UpdateReference.new(config, @al)
+      @trigger.perform
+
+      pi = @master.player_infos.reload.first
+      expect(pi).not_to be nil
+      expect(pi.source).to eq 'bad source'
+      expect(pi.birth_date.to_s).to eq '2021-01-01'
+      expect(@al.save_trigger_results['updated_results'].last).to be true
+    end
+  end
+
+  describe 'force_not_valid on a referenced PlayerContact rec_type presence (issue #1281)' do
+    before :example do
+      SetupHelper.setup_al_player_contact_phones
+      SetupHelper.setup_al_gen_tests AlNameGenTestUr, 'elt_save_test', 'player_contact'
+      create_user
+      @master = create_master
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'saves successfully when force_not_valid is true, even with a blank rec_type' do
+      config = {
+        player_contact: {
+          force_not_valid: true,
+          first: {
+            player_contacts: {
+              update: 'return_result'
+            }
+          },
+          with: {
+            rec_type: nil
+          }
+        }
+      }
+      @trigger = SaveTriggers::UpdateReference.new(config, @al)
+      @trigger.perform
+
+      pc = @master.player_contacts.reload.first
+      expect(pc).not_to be nil
+      expect(pc.rec_type).to be_blank
+      expect(@al.save_trigger_results['updated_results'].last).to be true
+    end
+
+    it 'still enforces data format validation even when force_not_valid is true' do
+      config = {
+        player_contact: {
+          force_not_valid: true,
+          first: {
+            player_contacts: {
+              update: 'return_result'
+            }
+          },
+          with: {
+            data: 'not-a-valid-phone'
+          }
+        }
+      }
+      @trigger = SaveTriggers::UpdateReference.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(ActiveRecord::RecordInvalid, /Data/)
+
+      pc = @master.player_contacts.reload.first
+      expect(pc.data).to eq '(617)123-1234 b'
     end
   end
 end
