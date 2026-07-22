@@ -3,7 +3,7 @@
 module Formatter
   class Formatters
     def self.formatter_for(type)
-      return unless type
+      return if type.blank?
 
       "Formatter::#{type.to_s.split('::').last.classify}".safe_constantize
     end
