@@ -9,8 +9,16 @@ RSpec.describe ExternalIdentifier, type: :model do
   def allow_ext_id_create
     return if @user.has_access_to? :create, :table, @implementation_table_name
 
+    # Scope to role_name: [nil, ''] so this doesn't match (and corrupt) the auto-generated
+    # "_app_" template user access control created for the new definition (see
+    # Dynamic::DefGenerator#add_user_access_controls / Admin::UserAccessControl#create_template_control).
+    # That template control is only meant to apply to Admin::User.template_user - not real users -
+    # so reusing it here would leave a record with role_name: "_app_" that @user can never match,
+    # since @user has no matching Admin::UserRole. This follows the same scoping pattern used by
+    # the shared `setup_access` helper in spec/support/user_support.rb.
     uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table,
-                                         resource_name: @implementation_table_name.pluralize).first
+                                         resource_name: @implementation_table_name.pluralize,
+                                         role_name: [nil, ''], user_id: nil).first
     uac ||= Admin::UserAccessControl.create app_type: @user.app_type, resource_type: :table,
                                             resource_name: @implementation_table_name.pluralize
     uac.current_admin = @admin
@@ -23,7 +31,10 @@ RSpec.describe ExternalIdentifier, type: :model do
     @implementation_table_name = "test_external_#{test_num}_identifiers"
     @implementation_attr_name = "test_#{test_num}_id"
 
-    create_admin
+    # The admin needs a matching user (with a real app type) so that
+    # `Admin#matching_user_app_type` resolves correctly - see #1303 for why a nil app_type here
+    # silently excludes the new definition from ExternalIdentifier.active_model_configurations.
+    create_admin(with_matching_user: true)
     create_user
 
     ExternalIdentifier.define_models
