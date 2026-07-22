@@ -349,6 +349,7 @@ class Tracker < UserBase
   end
 
   def as_json(extras = {})
+    extras = extras.dup
     extras[:include] ||= {}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name

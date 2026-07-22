@@ -141,6 +141,7 @@ module NfsStore
       end
 
       def as_json(extras = {})
+        extras = extras.dup
         lr = extras.delete(:limited_results)
         extras[:methods] ||= []
         extras[:methods] << :container_parent
