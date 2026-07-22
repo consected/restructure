@@ -1083,11 +1083,70 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(embedded_item.id).to be > first_id
     end
 
+    # Regression test for Issue #1303: #memoize_embedded_item used to key its cache by calling
+    # #embed_action_type directly, ignoring the actual embed_action_type resolved for the current
+    # call. That meant an explicit override (like this one) could be cached under the wrong key,
+    # and a later call using a different embed_action_type override could read back that
+    # unrelated, incorrect result instead of recomputing.
+    it 'keys the embedded_item memo by the actual resolved embed_action_type, not derived state' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      # This instance is unpersisted, so its own #embed_action_type would naturally resolve to
+      # :creating. Force a :viewing evaluation instead - nothing is embedded yet, so this
+      # correctly returns nil.
+      expect(dm.embedded_item(embed_action_type: :viewing)).to be nil
+
+      # A separate :creating evaluation on the same instance must not be poisoned by the cached
+      # :viewing result above - it should still build the creatable embedded item.
+      expect(dm.embedded_item(embed_action_type: :creating)).to be_a DynamicModel::TestEmbeddedRec
+    end
+
+    # Regression test for Issue #1303: HandlesUserBase#valid_embedded_item validates on every save,
+    # including the one that creates a direct embed's link. If that validation's :viewing evaluation
+    # runs before the link is established, it memoizes #model_references / #creatable_model_references
+    # against the not-yet-linked state. Without invalidating that memo once the link is in place,
+    # later evaluations on the same in-memory instance would incorrectly keep returning nil forever.
+    it 'does not leave a stale pre-link cache on the same instance after the embed is established' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      results = {}
+      # Simulate another after_create callback that runs before link_embedded_item's own
+      # after_create invocation (Rails runs after_create callbacks in declaration order, and e.g.
+      # NfsStore::Manage::ContainerFile#process_new_file is declared, and so runs, before
+      # Dynamic::ModelReferenceHandler's `after_create :link_embedded_item`) reading the embedded
+      # item in :viewing mode before the direct embed link has been established.
+      dm.class.after_create(prepend: true) { |r| r.embedded_item(embed_action_type: :viewing) }
+      # And another that runs AFTER link_embedded_item (appended normally), capturing what a
+      # caller would see mid-transaction, before after_commit's #reset_model_references has a
+      # chance to clean up any staleness independently of this fix.
+      dm.class.after_create { |r| results[:mid_transaction] = r.embedded_item(embed_action_type: :viewing) }
+
+      dm.save!
+
+      expect(results[:mid_transaction]).to be_a DynamicModel::TestEmbeddedRec
+
+      # Without #link_embedded_item clearing the stale pre-link memo once persisted, this would
+      # incorrectly keep returning the nil cached by the prepended callback above, even though the
+      # link is now set.
+      embedded_item = dm.embedded_item(embed_action_type: :viewing)
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item.test_embed_field_id).to eq dm.id
+    end
+
     it 'ignores the embed if the embed resource is not accessible by the user' do
       revoke_user_create :dynamic_model__test_embedded_recs
 
       dm = @dynamic_model_w_field.implementation_class.new(
         master: @master,
+
         embed_resource_name: @dynamic_model_embed.resource_name,
         action_name: 'new'
       )

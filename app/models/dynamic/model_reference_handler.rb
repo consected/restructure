@@ -180,6 +180,12 @@ module Dynamic
       @model_references[memokey] = block.call
     end
 
+    # Clear the memoized #model_references / #creatable_model_references results, forcing the next
+    # call to recompute against current DB state.
+    # NOTE: this intentionally does NOT clear @always_embed_item / @never_embed_item /
+    # @never_embed_creatable_item - those are only reset via #reset_model_references (wired to
+    # after_commit), since they represent config-derived state that isn't expected to change mid-save.
+    # Don't add those clears here without checking #link_embedded_item's use of this method first.
     def clear_model_reference_memo
       @creatable_model_references = nil
       @model_references = nil
@@ -544,7 +550,7 @@ module Dynamic
 
       clear_embedded_item_memo if force_reload
 
-      memoize_embedded_item do
+      memoize_embedded_item(embed_action_type) do
         res = nil
         mrs = model_references(force_reload:)
         cmrs = creatable_model_references(only_creatables:, force_reload:, current_admin_sample:)
@@ -682,10 +688,20 @@ module Dynamic
       ei
     end
 
-    def memoize_embedded_item(&block)
+    # Memoize the result of #embedded_item, keyed by the actual embed_action_type used for
+    # this call (which may have been explicitly overridden by the caller, e.g. #link_embedded_item
+    # always evaluates with embed_action_type: :creating). Previously this method recomputed
+    # #embed_action_type itself (ignoring any override), so an explicit :creating evaluation and a
+    # default (persisted-state-derived) evaluation could collide on the same cache key once the
+    # record became persisted - allowing an earlier, unrelated :viewing evaluation (which can never
+    # find a directly-embedded item, since direct embeds have no model_reference row) to poison the
+    # memo that #link_embedded_item's after_create :creating evaluation would then read back as nil.
+    # @param [Symbol] for_embed_action_type - the resolved embed_action_type this call is evaluating.
+    #   Named differently from the #embed_action_type instance method so it isn't shadowed by it.
+    def memoize_embedded_item(for_embed_action_type, &block)
       # Check for a memoized result
       @memoize_embedded_items ||= {}
-      memokey = "embedded_item_#{embed_action_type}"
+      memokey = "embedded_item_#{for_embed_action_type}"
       return @memoize_embedded_items[memokey] if @memoize_embedded_items.key?(memokey)
 
       @memoize_embedded_items[memokey] = block.call
@@ -890,10 +906,12 @@ module Dynamic
     # the target embedded item, depending on the configuration. We can only do this when
     # either record has been persisted with an id.
     def link_embedded_item
-      # Capture force_save? state during before_create, before other after_create
-      # callbacks (e.g. process_new_file in NFS store) may set force_save! for
-      # unrelated reasons. This ensures we only bypass permission checks when
-      # the record was intentionally force-created (e.g. by a save trigger).
+      # Capture force_save? state during this before_create invocation of link_embedded_item
+      # (this method runs twice per record - before_create then after_create - and persisted? is
+      # only false on the first of those). Capturing it here, before other after_create callbacks
+      # (e.g. process_new_file in NFS store) may set force_save! for unrelated reasons, ensures we
+      # only bypass permission checks when the record was intentionally force-created (e.g. by a
+      # save trigger).
       @embed_force_create = force_save? unless persisted?
 
       ei = embedded_item(embed_action_type: :creating)
@@ -906,6 +924,28 @@ module Dynamic
       return unless direct_embed?
 
       link_new_embedded_item(ei)
+
+      # A "field" type direct embed (embed_resource_name / embed_resource_id) only gets its
+      # target id set here, inside link_new_embedded_item, once the embedded item exists. Any
+      # earlier call to #model_references / #creatable_model_references / #embedded_item on this
+      # same in-memory instance - e.g. HandlesUserBase#valid_embedded_item, which validates on
+      # every save including the one that creates this very link - would have memoized its result
+      # using the not-yet-linked state (embed_resource_id still nil). That stale memo would
+      # otherwise persist for the rest of this instance's lifetime, making the item appear to have
+      # no embedded item even after the link has been established (e.g. on a subsequent re-save
+      # during file processing, or when the caller later asks to view the already-created item).
+      #
+      # Only clear once persisted (i.e. after the after_create invocation of this method): a
+      # target_fk style embed (e.g. an "option type" embed) can only be linked once this record has
+      # an id, so #link_new_embedded_item intentionally does nothing on the before_create
+      # invocation and relies on the before_create-built `ei` being reused, unmodified, by the
+      # after_create invocation. Clearing the embedded_item memo on the before_create invocation
+      # would discard that built-but-not-yet-linked item and cause a second, different one to be
+      # built when this method runs again after_create.
+      return unless persisted?
+
+      clear_model_reference_memo
+      clear_embedded_item_memo
     end
 
     #
