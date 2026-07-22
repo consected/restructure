@@ -4,6 +4,10 @@ module NfsStore
   module Process
     # Superclass for jobs to inherit from
     class NfsStoreJob < ActiveJob::Base
+      # Keep pre-7.2 behaviour: enqueue immediately, not deferred until after
+      # transaction commit. Tracking: issue #1296.
+      self.enqueue_after_transaction_commit = :never
+
       attr_accessor :provider_job, :orig_cf_user, :orig_cf_user_app_type_id
       attr_writer :job
 

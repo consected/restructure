@@ -40,14 +40,16 @@ module Fpa1
     # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
     # Remove each override when the corresponding tracking sub-issue is resolved.
 
+    # Keep the pre-8.1 behaviour where `to_time` preserves only the UTC offset of
+    # the receiver, rather than its full named timezone. Opt into the new :zone
+    # behaviour only after all date/time handling has been audited for TZ-aware code.
+    # Rails 8.1 will remove this option and make :zone the only behaviour.
+    # Tracking: issue #1302 (audit to_time usage before Rails 8.1 upgrade).
+    config.active_support.to_time_preserves_timezone = :offset
+
     # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
     # consumers are audited. Tracking: issue #1295.
     config.active_record.postgresql_adapter_decode_dates = false
-
-    # Keep Active Job enqueuing immediately (pre-7.2 behaviour) rather than deferring
-    # until after transaction commit, until delayed_job commit-timing is validated.
-    # Tracking: issue #1296.
-    config.active_job.enqueue_after_transaction_commit = :never
 
     # Rails 7.1+ defaults to a SHA256-derived key for non-deterministic ActiveRecord
     # Encryption attributes (e.g. otp_secret, dynamic model fields marked encrypted: true).
