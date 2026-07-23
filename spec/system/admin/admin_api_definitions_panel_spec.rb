@@ -472,11 +472,15 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
       within "#admin-item-#{second_report.id}" do
         find('a.edit-entity.glyphicon-pencil').click
       end
-      expect(page).to have_css('.nav-tabs', wait: 10)
+      # Wait for the edit form to appear and for deferred JS setup to complete
+      # (setup_auto_loading_links 100ms timeout) before clicking the API tab.
+      expect(page).to have_css('.admin-edit-form', wait: 10)
+      finish_admin_form_setup
 
-      find('.nav-tabs a[aria-controls="api-definitions"]', visible: true).click
-      expect(page).to have_css('#api-definitions', visible: true)
-      finish_page_loading
+      within '.admin-edit-form' do
+        find('.nav-tabs a[aria-controls="api-definitions"]', visible: true).click
+      end
+      expect(page).to have_css('#api-definitions', visible: true, wait: 5)
 
       within '#api-definitions' do
         first('.api-panel__copy-btn').click
