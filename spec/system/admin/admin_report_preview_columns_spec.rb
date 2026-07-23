@@ -22,6 +22,7 @@ require 'rails_helper'
 
 describe 'admin report preview columns - Issue #1000', js: true, driver: $browser_driver do
   include ModelSupport
+  include MasterSupport
   include AdminActionsSetup
   include FeatureSupport
 
@@ -36,8 +37,16 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
 
     # Ensure there is data in player_infos for the preview to return results
     unless PlayerInfo.exists?
+      # Save admin credentials before create_user overwrites @good_email / @good_password
+      @admin_email = @good_email
+      @admin_password = @good_password
       create_user
+      # Restore admin credentials for admin_sign_in_with_2fa
+      @good_email = @admin_email
+      @good_password = @admin_password
+      let_user_create_master
       create_master
+      let_user_create :player_infos
       PlayerInfo.create!(
         master: @master,
         first_name: 'test',
