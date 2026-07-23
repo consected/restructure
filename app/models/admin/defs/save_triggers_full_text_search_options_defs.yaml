@@ -1,0 +1,23 @@
+# Save Trigger: Full Text Search options
+        full_text_search:
+          - index_this:
+            if: #if_extras
+            source_fields:       # required Array of field names used to build text content
+              - field_name
+            target_column: tsv_column_name  # required tsvector field to update
+            target_table: schema_name.records_search_index  # optional; when set, writes to a separate table
+            target_foreign_key_column: source_record_id     # required when target_table is set
+            extra_content: '{{some_field}}'                 # optional additional text appended to indexed content
+            ts_config: english                              # optional PostgreSQL text search configuration (default: english)
+          # NOTE: builds text from `source_fields` and persists a PostgreSQL tsvector into `target_column`
+          # e.g. |-
+          #   save_trigger:
+          #     on_save:
+          #       full_text_search:
+          #         - index_this:
+          #             target_column: search_index
+          #             source_fields:
+          #               - title
+          #               - description
+          #             ts_config: english
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)

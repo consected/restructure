@@ -10,6 +10,9 @@ applyTo: 'spec/**'
 - Create new system specs in `spec/system/` - refer to [Rspec System Specs project coding standards](rspec-system-spec.instructions.md)
 - Use schema name `dynamic_test` for test dynamic models, activity logs and external identifiers
 - Be sure to read the Rails logger output in `log/test.log` for errors not shown in Rspec output
+- **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
+- NEVER try to run rspec, headless_rspec.sh or not_headless_rspec.sh when a previous instance of any of these is running (foreground or background). The results will be unpredictable and may cause test failures. 
+
 
 ## Running Bash Scripts and Terminal Commands
 

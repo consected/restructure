@@ -1,0 +1,282 @@
+# frozen_string_literal: true
+
+module OptionConfigs
+  module ExtraOptionConfigs
+    # Configuration class for model reference configurations.
+    # Schema docs: docs/admin_reference/general/references.md
+    #
+    # Uses the source_attribute pattern: the registry key is :references_config,
+    # but the raw input is read from :references (a base_key_attribute).
+    # After processing:
+    # - extra_options.references = enriched hash (views/models consume this)
+    # - extra_options.references_config = this References instance (configurations hold ReferenceEntry objects)
+    #
+    # Handles:
+    # - Converting array-style and hash-style references
+    # - Singularizing reference keys
+    # - Looking up target classes and enriching reference metadata
+    # - Warning when referenced models do not exist
+    class References < BaseConfiguration
+      configure_direct :references, type: :hash
+      SPECIAL_KEYS = %i[_bad_references _validation_errors].freeze
+
+      # Keys added by enrich_ref_metadata that are not part of admin input.
+      COMPUTED_KEYS = %i[
+        to_record_label no_master_association to_model_name_us
+        to_model_class_name to_table_name to_schema_name to_class_type
+      ].freeze
+
+      # Named configuration for a single reference entry's admin-configured attributes.
+      # Validates that only recognized keys are present in each reference config.
+      class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
+        configure_attributes %i[
+          label result_label from without_reference add add_with
+          filter_by order_by limit type_config
+          view_as view_options showable_if creatable_if
+          prevent_disable also_disable_record allow_disable_if_not_editable
+          prevent_reload_on_save action_position
+        ]
+      end
+
+      ReferenceEntry = NamedConfiguration
+
+      # Per-attribute type rules for reference entry configuration.
+      # Used by validate_reference_entry_types to report type mismatches.
+      ENTRY_KEY_TYPES = {
+        limit: :integer,
+        # `without_reference` may be true, false, or the literal string
+        # 'outside_master' (see docs/admin_reference/general/references.md
+        # and app/models/admin/defs/extra_options_references_defs.yaml).
+        without_reference: :boolean_or_outside_master,
+        prevent_disable: :boolean,
+        also_disable_record: :boolean,
+        allow_disable_if_not_editable: :boolean,
+        prevent_reload_on_save: :boolean,
+        add_with: :hash,
+        filter_by: :hash,
+        order_by: :hash,
+        view_options: :hash,
+        showable_if: :hash,
+        creatable_if: :hash,
+        type_config: :hash
+      }.freeze
+
+      def self.source_attribute
+        :references
+      end
+
+      def self.store_processed_value?
+        true
+      end
+
+      validate :validate_references
+      validate :validate_reference_entry_types
+
+      # Pre-process references using parent context.
+      # Normalizes array/hash formats, singularizes keys, resolves target classes,
+      # and enriches reference entries with class metadata.
+      # @param raw [Array, Hash, nil] the raw references value from YAML config
+      # @param parent [ExtraOptions] the parent ExtraOptions instance
+      # @return [Hash, nil] the processed references hash
+      def self.prepare_config(raw, parent)
+        return nil unless raw
+
+        new_ref, validation_errors = normalize_references(raw)
+        bad_items = resolve_reference_classes(new_ref, parent)
+        new_ref[:_bad_references] = bad_items if bad_items.present?
+        new_ref[:_validation_errors] = validation_errors if validation_errors.present?
+        new_ref
+      end
+
+      # Normalize raw references from Array or Hash format into a unified hash.
+      # Each entry maps a composite key to { model_name => config }.
+      # Plural keys are singularized (e.g. :player_contacts => :player_contact).
+      # @param raw [Array, Hash] raw references from YAML config
+      # @return [Hash] normalized references hash
+      private_class_method def self.normalize_references(raw)
+        unless raw.is_a?(Hash) || raw.is_a?(Array)
+          return [{}, ['references must be a Hash or an Array of Hash entries']]
+        end
+
+        validation_errors = []
+        ref_items = if raw.is_a?(Array)
+                      raw.each_with_index.filter_map do |item, index|
+                        if item.is_a?(Hash)
+                          item.dup
+                        else
+                          validation_errors << "references entry #{index + 1} must be a Hash"
+                          nil
+                        end
+                      end
+                    else
+                      [raw.dup]
+                    end
+
+        result = {}
+        ref_items.each do |refitem|
+          singularize_keys!(refitem)
+          refitem.each do |k, v|
+            unless v.is_a?(Hash)
+              validation_errors << "reference #{k} must be a Hash"
+              v = {}
+            end
+
+            result[composite_ref_key(k, v)] = { k => v }
+          end
+        end
+        [result, validation_errors]
+      end
+
+      # Replace all plural keys with their singular form, mutating the hash.
+      # @param hash [Hash] hash whose keys to singularize
+      # @return [void]
+      private_class_method def self.singularize_keys!(hash)
+        hash.keys.each do |k|
+          singular = k.to_s.singularize.to_sym
+          next if singular == k
+
+          hash[singular] = hash.delete(k)
+        end
+      end
+
+      # Build a composite reference key from the model name and optional extra_log_type.
+      # For example, :player_contact or :player_contact_initial_review.
+      # @param model_name [Symbol] the singularized model name
+      # @param config [Hash] the reference configuration
+      # @return [Symbol] composite key
+      private_class_method def self.composite_ref_key(model_name, config)
+        elt = config.dig(:add_with, :extra_log_type)
+        key = model_name.to_s
+        key += "_#{elt}" if elt
+        key.to_sym
+      end
+
+      # Resolve target classes for each reference and enrich with metadata.
+      # Removes entries whose classes cannot be resolved.
+      # @param new_ref [Hash] normalized references hash (mutated in place)
+      # @param parent [ExtraOptions] the parent ExtraOptions instance (used for log context)
+      # @return [Array<Symbol>] model names that could not be resolved
+      private_class_method def self.resolve_reference_classes(new_ref, parent)
+        all_bad_items = []
+
+        new_ref.each_value do |refitem|
+          bad_items = []
+
+          refitem.each do |mn, conf|
+            to_class = ModelReference.to_record_class_for_type(mn)
+
+            # Skip references whose target model or definition isn't set up yet.
+            if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
+              if Admin::AppTypeImport.import_in_progress?
+                # Avoid breaking app type imports if the resource being pointed to in the
+                # reference hasn't been set up yet. Leave the raw entry untouched and don't
+                # report it, since we are not able to control the order of items being
+                # created in an app import, and many references to underlying definitions
+                # will not yet have been created.
+                Rails.logger.info "Definition for class #{to_class} is not set yet - leaving reference " \
+                                  "#{mn} untouched while an app type import is in progress"
+              else
+                Rails.logger.warn "Definition for class #{to_class} is not set - skipping reference setup for #{mn}"
+                all_bad_items << mn
+                bad_items << mn
+              end
+
+              next
+            end
+
+            enrich_ref_metadata(refitem, mn, conf, to_class)
+          end
+
+          bad_items.each { |br| refitem.delete(br) }
+        end
+
+        all_bad_items
+      end
+
+      # Enrich a single reference entry with resolved class metadata.
+      # @param refitem [Hash] the reference item hash (mutated)
+      # @param model_name [Symbol] the model name key
+      # @param conf [Hash] the reference configuration
+      # @param to_class [Class] the resolved target class
+      # @return [void]
+      private_class_method def self.enrich_ref_metadata(refitem, model_name, conf, to_class)
+        elt = conf.dig(:add_with, :extra_log_type)
+        add_with_label = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
+
+        entry = refitem[model_name]
+        entry[:to_record_label] = conf[:result_label] || conf[:label] || add_with_label || to_class.human_name
+        entry[:no_master_association] = to_class.no_master_association if to_class.respond_to?(:no_master_association)
+        entry[:to_model_name_us] = to_class.to_s.ns_underscore
+        entry[:to_model_class_name] = to_class.to_s
+        entry[:to_table_name] = to_class.table_name
+
+        return unless to_class.respond_to?(:definition)
+
+        defn = to_class.definition
+        entry[:to_schema_name] = defn.schema_name
+        entry[:to_class_type] = defn.class.to_s
+      end
+
+      # Re-process references on an already-initialized ExtraOptions instance.
+      # Use this after mutating `instance.references` post-initialization.
+      # @param instance [ExtraOptions] the ExtraOptions instance to reprocess
+      # @return [void]
+      def self.reprocess(instance)
+        instance.references = prepare_config(instance.references, instance)
+      end
+
+      # Store the enriched hash on the direct attribute and create ReferenceEntry
+      # named configurations for each entry's input-only keys.
+      # @return [void]
+      def setup_named_configurations
+        self.references = hash_configuration.except(*SPECIAL_KEYS).presence
+        return unless references
+
+        references.each do |composite_key, refitem|
+          refitem.each_value do |config|
+            input_only = config.except(*COMPUTED_KEYS)
+            add_named_configuration(composite_key, input_only)
+          end
+        end
+      end
+
+      private
+
+      # Validate that all referenced models exist.
+      def validate_references
+        Array(hash_configuration[:_validation_errors]).each do |msg|
+          errors.add(:references, msg)
+        end
+
+        bad_refs = hash_configuration[:_bad_references]
+        return unless bad_refs&.present?
+
+        bad_refs.each do |mn|
+          errors.add(:references, "reference for #{mn} does not exist as a class", type: :warning)
+        end
+      end
+
+      def validate_reference_entry_types
+        return if configurations.blank?
+
+        checkers = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_CHECKERS
+        descriptions = OptionConfigs::ExtraOptionConfigs::Concerns::PatternValidation::KEY_TYPE_DESCRIPTIONS
+
+        configurations.each do |entry_key, entry|
+          next unless entry.respond_to?(:[])
+
+          ENTRY_KEY_TYPES.each do |attr, type|
+            value = entry[attr]
+            next if value.nil?
+
+            checker = checkers[type]
+            next if checker&.call(value)
+
+            desc = descriptions[type] || type.to_s
+            failed_config entry_key, "#{attr} must be #{desc}"
+          end
+        end
+      end
+    end
+  end
+end

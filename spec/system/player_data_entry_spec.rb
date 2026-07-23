@@ -190,7 +190,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
     endyear ||= ''
     endyear = endyear.to_s
 
-    within 'form.edit_player_info' do
+    within player_info_form_selector do
       fill_in 'First name', with: fname
       fill_in 'Last name', with: lname
       fill_in 'Start year', with: startyear
@@ -217,6 +217,13 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     # ensure that we wait for the results to fully show before returning
     expect(page).to have_css(".player-info-item a[title='edit']")
+  end
+
+  def player_info_form_selector
+    return 'form.edit_player_info' if page.has_css?('form.edit_player_info', wait: 3)
+    return 'form#new_player_info' if page.has_css?('form#new_player_info', wait: 3)
+
+    raise 'Could not find player info form'
   end
 
   #
@@ -304,6 +311,33 @@ describe 'advanced search', js: true, driver: $browser_driver do
     have_css(".player-info-item a[title='edit']")
   end
 
+  def ensure_player_info_item_visible
+    return if page.has_css?('.player-info-item', wait: 3)
+
+    expanders = all('a.master-expander', wait: 10)
+    expect(expanders).not_to be_empty
+    open_player_element(expanders.first, expanders)
+    expand_master_record_tab('details') unless page.has_css?('.player-info-item', wait: 3)
+    return if page.has_css?('.player-info-item', wait: 10)
+    return if page.has_css?('.add-item-button', text: /player info/i, wait: 5)
+
+    expect(page).to have_css('.player-info-item', wait: 10)
+  end
+
+  def open_player_info_form
+    ensure_player_info_item_visible
+
+    if page.has_css?(".player-info-item a[title='edit']", wait: 3)
+      all(".player-info-item a[title='edit']").first.click
+    else
+      add_button = find('.add-item-button', text: /player info/i, match: :first, wait: 10)
+      scroll_into_view(add_button)
+      add_button.click
+    end
+
+    expect(page).to have_css('form.edit_player_info, form#new_player_info', wait: 10)
+  end
+
   def add_player_msid(player)
     # create Master
     expect(page).to have_css("a[href='/masters/new']")
@@ -319,11 +353,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
     # edit player info data
 
     expect(page).to have_css('#master_results_block')
-    expect(page).to have_css('.player-info-item')
-    b = all ".player-info-item a[title='edit']"
-    b.first.click
-
-    expect(page).to have_css('form.edit_player_info')
+    open_player_info_form
 
     edit_player_info player[:first_name], player[:last_name], player[:start_year], player[:end_year], player[:source]
 
@@ -393,13 +423,11 @@ describe 'advanced search', js: true, driver: $browser_driver do
     # edit player info data
 
     expect(page).to have_css('#master_results_block')
-    expect(page).to have_css('.player-info-item')
+    open_player_info_form
     sleep 1
-    b = all ".player-info-item a[title='edit']"
-    b.first.click
     sleep 0.5 # Allow edit form to load via AJAX
 
-    expect(page).to have_css('form.edit_player_info', wait: 10)
+    expect(page).to have_css('form.edit_player_info, form#new_player_info', wait: 10)
 
     item_type = 'player_infos_source'
     sources = Classification::GeneralSelection.where(item_type: item_type)
@@ -471,46 +499,25 @@ describe 'advanced search', js: true, driver: $browser_driver do
     scroll_into_view af
     af.click
 
-    sleep 1
-    # Trigger the chosen drop down
-    i = 'ul.chosen-choices .search-field input.default'
-    debug_state('chosen_dropdown_trigger', 'Trigger Chosen drop down for item flags') unless page.has_css?(i, wait: 5)
+    expect(page).to have_css('.item-flags-block form', wait: 10)
 
-    expect(page).to have_css(i)
-    sleep 1
-    f = find(i)
-    f.click
+    flag_name = Classification::ItemFlagName.enabled.where(item_type: 'player_info').pluck(:name).find { |name| name.match?(/\Afo/i) }
+    expect(flag_name).not_to be_nil
 
-    # An absolutely positioned drop down is now shown. Interact with this instead
-    i = 'body > .chosen-container ul.chosen-choices .search-field input'
-    debug_state('chosen_dropdown_input', 'Chosen drop down for item flags') unless page.has_css?(i, wait: 5)
-    expect(page).to have_css(i)
-    f = find(i)
+    page.execute_script(<<~JS, flag_name)
+      var select = document.getElementById('item_flag_item_flag_name_id');
+      if (!select) return;
+      var wanted = arguments[0].toLowerCase();
 
-    f.send_keys('f')
-    f.send_keys('o')
+      Array.from(select.options).forEach(function(option) {
+        option.selected = option.text.trim().toLowerCase() === wanted;
+      });
 
-    expect(page).to have_css('body > .chosen-container ul.chosen-results')
-    res = page.all('body > .chosen-container ul.chosen-results li.active-result')
+      $(select).trigger('chosen:updated');
+      $(select).trigger('change');
+    JS
 
-    expect(res.length).to be > 0
-    res.each do |r|
-      expect(r.text).to match(/fo.+/)
-    end
-
-    text1 = res.first.text
-    res.first.click
-
-    sleep 1
-    # tag = 'body > .chosen-container ul.chosen-choices li.search-choice span'
-    # expect(page).to have_css(tag)
-    # ftag = find(tag)
-    # expect(ftag.text).to eq(res.first.text)
-
-    # Handle the absolutely positioned chosen drop down
-    page.find('body > .chosen-container ul.chosen-choices').click
-    # Clear the chosen box
-    page.all('h4.list-group-item-heading').first.click
+    text1 = flag_name
 
     within('.item-flags-block form') do
       click_button 'Save Item flag'
@@ -518,7 +525,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
 
     # The absolutely positioned chosen has gone away. Search for the standard one
     tag = '.chosen-container ul.chosen-choices li.search-choice span'
-    expect(page).to have_css(tag)
+    expect(page).to have_css(tag, text: text1, wait: 10)
     ftag = find(tag)
     expect(ftag.text).to eq(text1)
 

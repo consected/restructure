@@ -2976,7 +2976,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
 
-      @alref.extra_log_type_config.clean_references_def
+      OptionConfigs::ExtraOptionConfigs::References.reprocess(@alref.extra_log_type_config)
       @alref.extra_log_type_config.editable_if = { always: true }
 
       ModelReference.create_with @alref, @alref1, force_create: true
@@ -3208,7 +3208,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           add: 'many'
         }
       }
-      @new_al.extra_log_type_config.clean_references_def
+      OptionConfigs::ExtraOptionConfigs::References.reprocess(@new_al.extra_log_type_config)
 
       @new_al0.extra_log_type_config.references = {
         activity_log__player_contact_phone: {
@@ -3216,7 +3216,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           add: 'many'
         }
       }
-      @new_al0.extra_log_type_config.clean_references_def
+      OptionConfigs::ExtraOptionConfigs::References.reprocess(@new_al0.extra_log_type_config)
 
       m = @new_al0.master
       m.current_user = @user

@@ -173,7 +173,8 @@ module Dynamic
       dopt = option_type_config
       return unless dopt
 
-      return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
+      add_reference_if = dopt.add_reference_if
+      return unless condition_config_present?(add_reference_if)
 
       res = dopt.calc_if(:add_reference_if, self)
       @can_add_reference = !!res
@@ -197,7 +198,7 @@ module Dynamic
         return
       end
 
-      return unless doptif.is_a?(Hash) && doptif.first && respond_to?(:master)
+      return unless condition_config_present?(doptif) && respond_to?(:master)
 
       # Generate an old version of the object prior to changes
       old_obj = dup
@@ -220,6 +221,13 @@ module Dynamic
       end
 
       res
+    end
+
+    def condition_config_present?(config)
+      # Restore the original is_a?(Hash) guard to avoid NoMethodError on
+      # unexpected scalar values (String, Integer, etc.) that develop previously
+      # tolerated silently.  Valid condition configs are always Hashes.
+      config.is_a?(Hash) && config.first.present?
     end
 
     # If access has changed since an initial check, reset the cached results

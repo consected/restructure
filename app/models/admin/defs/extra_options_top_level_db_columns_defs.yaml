@@ -1,8 +1,9 @@
+# Schema: OptionConfigs::ExtraOptionConfigs::DbColumns
 # NOTE: db_configs may be found within the default: options in older configurations.
 # Although not recommended, the old configuration will continue to work
 _db_columns:
   field_name:
-    type: force the field type (string, datetime, date, integer, float, decimal)
+    type: force the field type (string, datetime, date, integer, float, decimal, bigint)
     array: false (default) | true - optional flag to indicate if this is an array type column
     index: false (default) | true - add an index
     encrypted: false (default) | true - use Rails encrypted attribute for transparent encryption/decryption

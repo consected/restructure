@@ -8,33 +8,46 @@
         # provide a mask for a text field using basic regex
         # This example accepts one or more characters of any type, 3 digits, a hyphen, 1 to 4 letters and any number of final characters
       value: |
-        default value | now() | today() 
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
         NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
         It is not set before building the instances, so will not be available for data conditions.
+        A hash return_value lookup form is also accepted, e.g.:
+          value:
+            this:
+              dynamic_model__some_table:
+                field_name: return_value
       blank_value: |
-        default value | now() | today() 
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
         NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
         It is not set before building the instances, so will not be available for data conditions.
+        A hash return_value lookup form is also accepted (same form as value above).
       preset_value: |
-        default value | now() | today() | \{\{substitutions\}\}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
         NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field.
         It is not applied to persisted instances.
+        A hash return_value lookup form is also accepted, e.g.:
+          preset_value:
+            this:
+              dynamic_model__some_table:
+                field_name: return_value
       blank_preset_value: |
-        default value | now() | today() | \{\{substitutions\}\}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
         NOTE this is set only if the attribute is blank when building the instances 
         and may be used to drive logic like an embed_resource_name field.
         It is not applied to persisted instances.
+        A hash return_value lookup form is also accepted (same form as preset_value above).
       active_value: |
-        default value | now() | today() | \{\{substitutions\}\}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
         NOTE this is set whenever an instance is initialized. It allows for live UI substitutions that wouldn't otherwise
         have access to attributes in other models. The data generated will be persisted to the database whenever the item is saved.
         On re-accessing the item, the value will be re-evaluated. If not saved, the live value will be lost and will be
         re-evaluated on the next access.
+        A hash return_value lookup form is also accepted (same form as preset_value above).
       no_downcase: true - to prevent downcasing of the attribute when stored to the database
       view_original_case: true - to prevent the UI capitalizing downcased fields
       view_with_formats: |

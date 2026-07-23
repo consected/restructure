@@ -15,7 +15,7 @@ module ActivityLogSupport
   # e.g add_reference_def_to(activity_log, [player_contacts: { from: 'this', add: 'many' }])
   def add_reference_def_to(activity_log, ref_def)
     activity_log.option_type_config.references = ref_def
-    activity_log.option_type_config.clean_references_def
+    OptionConfigs::ExtraOptionConfigs::References.reprocess(activity_log.option_type_config)
   end
 
   def generate_test_activity_log

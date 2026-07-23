@@ -5,6 +5,19 @@ class Admin::ExternalIdentifiersController < AdminController
   before_action :set_defaults
   # after_action :routes_reload, only: %i[update create]
 
+  def schema_reference
+    respond_to do |format|
+      format.json do
+        render json: OptionConfigs::ExternalIdentifierOptions.accepted_config_schema(format: :json),
+               content_type: 'application/json'
+      end
+      format.yaml do
+        render plain: OptionConfigs::ExternalIdentifierOptions.accepted_config_schema(format: :yaml),
+               content_type: 'application/x-yaml'
+      end
+    end
+  end
+
   def details
     @external_identifiers = ExternalIdentifier.active.order(label: :asc)
     render 'admin/external_identifier_details/index_admin_external_identifiers'

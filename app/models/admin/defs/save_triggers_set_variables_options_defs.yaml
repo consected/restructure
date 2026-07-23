@@ -1,0 +1,24 @@
+# Save Trigger: Set Variables options
+        set_variables:
+          - set_1:
+            if: #if_extras
+            name: variable_name  # name of the variable to set in trigger_variables; supports dot-notation (e.g. 'hash_var.key1')
+            value: literal_or_substitution  # value to set - literal, substitution string like '{{field}}', or object hash
+          # NOTE: sets the specified variable in trigger_variables for use in subsequent triggers
+          # and substitutions via {{variables.varname}} tags. The direct form
+          # ({ name: ..., value: ... } without a label) is also accepted.
+          # e.g. |-
+          #   save_trigger:
+          #     on_create:
+          #       - set_variables:
+          #           name: simple_var
+          #           value: 123
+          #       - set_variables:
+          #           name: hash_var
+          #           value:
+          #             object:
+          #               id: '{{study_id}}'
+          #       - set_variables:
+          #           name: hash_var.key1
+          #           value: hello
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
