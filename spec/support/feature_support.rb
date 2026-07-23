@@ -192,22 +192,6 @@ module FeatureSupport
     have_no_css('.collapsing')
   end
 
-  # Wait for the admin edit form's deferred JS setup to complete before interacting
-  # with tabs. The JS in setup_auto_loading_links (100ms setTimeout) marks every
-  # [data-toggle="tab"] element with 'attached-tab-show' once event handlers are
-  # attached. Additionally, any on-show-auto-click links that fire automatically on
-  # the initially-active tab are marked with 'auto-clicked'.
-  # Waiting for these markers is more robust than a fixed sleep.
-  def finish_admin_form_setup
-    if page.has_css?('[data-toggle="tab"]:not(.attached-tab-show)', wait: 0)
-      expect(page).not_to have_css('[data-toggle="tab"]:not(.attached-tab-show)', wait: 5)
-    end
-
-    if page.has_css?('a.on-show-auto-click:not(.auto-clicked)', wait: 0)
-      expect(page).not_to have_css('a.on-show-auto-click:not(.auto-clicked)', wait: 5)
-    end
-  end
-
   # Navigate to a master record by ID
   def navigate_to_master(master_id)
     expect(master_id).not_to be nil
@@ -246,18 +230,6 @@ module FeatureSupport
     end
 
     has_css?('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations', wait: 10)
-
-    # After status-compiled appears, wait for JS setup markers from setup_extra_actions
-    # (called via format_block on each rendered block). These are the same signals used
-    # by finish_admin_form_setup — checking them here catches visible tabs and
-    # on-show-auto-click links that may not have been processed yet.
-    if page.has_css?('[data-toggle="tab"]:not(.attached-tab-show)', wait: 0)
-      expect(page).not_to have_css('[data-toggle="tab"]:not(.attached-tab-show)', wait: 5)
-    end
-    if page.has_css?('a.on-show-auto-click:not(.auto-clicked)', wait: 0)
-      expect(page).not_to have_css('a.on-show-auto-click:not(.auto-clicked)', wait: 5)
-    end
-
     sleep 1
   end
 

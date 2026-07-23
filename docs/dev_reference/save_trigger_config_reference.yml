@@ -1,0 +1,681 @@
+# Save Trigger Configuration Reference
+# =====================================
+# Generated from OptionConfigs::TriggerTypes definitions.
+#
+# Each save trigger accepts a configuration hash. Structure depends on `pattern`:
+#
+#   direct_config  — keys are placed directly on the trigger's config hash
+#                    e.g.  my_trigger: { if: {...}, some_key: value }
+#
+#   named_entry    — config is a hash of arbitrary labels/names, each containing the keys
+#                    e.g.  my_trigger: { my_label: { some_key: value } }
+#
+#   delegate       — contains a nested list of trigger task definitions, validated
+#                    recursively by TriggerTasks (same schema as the parent trigger list)
+#
+# Key types:
+#   boolean              — true or false
+#   string               — a string (or symbol)
+#   string_or_array      — a string, or an array of strings
+#   string_or_hash       — a string or Hash (commonly used where {{substitution}} templates
+#                          or conditional expressions are also accepted)
+#   integer              — an integer
+#   hash                 — a Hash
+#   array                — an Array
+#   hash_or_array        — a Hash or Array
+#   scalar_or_array_or_hash — a scalar (string / number / boolean / nil), Array, or Hash
+#
+# Common lifecycle hooks present on nearly every trigger type:
+#   if:          (hash)          Run this trigger only when condition evaluates truthy
+#   on_complete: (hash_or_array) Nested trigger task(s) to run on success
+#   on_failure:  (hash_or_array) Nested trigger task(s) to run on failure
+
+trigger_types:
+
+  # ---------------------------------------------------------------------------
+  # add_tracker
+  # ---------------------------------------------------------------------------
+  add_tracker:
+    pattern: named_entry
+    description: >
+      Add a tracker record for the current master. Config is
+      { <protocol_name>: { keys... } }.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression; trigger runs only when this is truthy
+      with:
+        type: hash
+        description: Attribute overrides to apply when creating the tracker
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # background
+  # ---------------------------------------------------------------------------
+  background:
+    pattern: delegate
+    description: >
+      Run nested trigger tasks asynchronously in the background.
+      The value is a nested trigger task list (same schema as any other trigger list).
+
+  # ---------------------------------------------------------------------------
+  # case
+  # ---------------------------------------------------------------------------
+  case:
+    pattern: delegate
+    description: >
+      Conditionally branch trigger execution. The value is a nested trigger task
+      list whose individual conditional (if:) keys determine which branch runs.
+
+  # ---------------------------------------------------------------------------
+  # change_user_roles
+  # ---------------------------------------------------------------------------
+  change_user_roles:
+    pattern: direct_config
+    description: Add or remove app roles on the current user.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      add_role_names:
+        type: scalar_or_array_or_hash
+        description: Role name(s) to add to the current user
+      remove_role_names:
+        type: scalar_or_array_or_hash
+        description: Role name(s) to remove from the current user
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # create_filestore_container
+  # ---------------------------------------------------------------------------
+  create_filestore_container:
+    pattern: direct_config
+    description: Create a filestore container linked to the current record.
+    keys:
+      name:
+        type: string_or_hash
+        description: Container name (supports {{substitution}} templates)
+      label:
+        type: string_or_hash
+        description: Human-readable display label
+      create_with_role:
+        type: string_or_hash
+        description: Linux group/role used to assign container ownership
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # create_master
+  # ---------------------------------------------------------------------------
+  create_master:
+    pattern: named_entry
+    description: >
+      Create a new master record. Config is { <label>: { keys... } }.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      force_create:
+        type: boolean
+        description: Create even when a matching master already exists
+      move_this:
+        type: boolean
+        description: Move the current record over to the newly created master
+      with:
+        type: hash
+        description: Attribute values to set on the new master record
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # create_reference
+  # ---------------------------------------------------------------------------
+  create_reference:
+    pattern: named_entry
+    description: >
+      Create a new related (reference) record. Config is { <model_name>: { keys... } }.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      in:
+        type: string_or_hash
+        description: >
+          Target table/model name to create the record in
+          (supports {{substitution}} templates)
+      force_create:
+        type: boolean
+        description: Create even when a matching record already exists
+      force_not_valid:
+        type: boolean
+        description: Allow creation without triggering full model validation
+      with_result:
+        type: hash_or_array
+        description: Conditions used to match or select an existing record
+      with:
+        type: hash
+        description: Attribute values to set on the new record
+      to_existing_record:
+        type: hash
+        description: Criteria to find an existing record to associate with
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # full_text_search
+  # ---------------------------------------------------------------------------
+  full_text_search:
+    pattern: named_entry
+    description: >
+      Update a PostgreSQL full-text search index column.
+      Config is { <label>: { keys... } }.
+    keys:
+      source_fields:
+        type: string_or_array
+        description: Field name(s) whose content feeds the search index
+      target_column:
+        type: string
+        description: Name of the tsvector column to update
+      ts_config:
+        type: string
+        description: PostgreSQL text search configuration name (e.g. 'english')
+      extra_content:
+        type: scalar_or_array_or_hash
+        description: Additional content to include in the index beyond source_fields
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # generate_document
+  # ---------------------------------------------------------------------------
+  generate_document:
+    pattern: named_entry
+    description: >
+      Generate a document (e.g. PDF) from a template and store it in the filestore.
+      Config is { <label>: { keys... } }.
+    keys:
+      content_template_name:
+        type: string_or_hash
+        description: Name of the registered content template to render
+      content_template_text:
+        type: string_or_hash
+        description: Inline template text (alternative to content_template_name)
+      layout_template:
+        type: string_or_hash
+        description: Name of the layout template to wrap the content in
+      extra_substitutions:
+        type: hash
+        description: Additional substitution variables passed to the template
+      container:
+        type: hash
+        description: Filestore container configuration for storing the output file
+      filename:
+        type: string_or_hash
+        description: Output filename (supports {{substitution}} templates)
+      content_type:
+        type: string_or_hash
+        description: MIME type of the output (e.g. 'application/pdf')
+      path:
+        type: string_or_hash
+        description: Subpath within the container to store the generated file
+      skip_existing:
+        type: boolean
+        description: Skip generation if an output file with the same name already exists
+      replace:
+        type: boolean
+        description: Replace any pre-existing output file
+      store_as_user:
+        type: string_or_hash
+        description: Store the document under this user's ownership context
+      store_in_app_type:
+        type: string_or_hash
+        description: Store the document scoped to this app type
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # log
+  # ---------------------------------------------------------------------------
+  log:
+    pattern: named_entry
+    description: >
+      Write a message to the application log.
+      Config is { <label>: { keys... } }.
+    keys:
+      message:
+        type: string
+        description: Log message text
+      severity:
+        type: string
+        description: Log level (e.g. 'info', 'warn', 'error')
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # notify
+  # ---------------------------------------------------------------------------
+  notify:
+    pattern: named_entry
+    description: >
+      Send a notification (email, SMS, etc.).
+      Config is { <label>: { keys... } }.
+    keys:
+      type:
+        type: string_or_hash
+        description: Notification type (e.g. 'email', 'sms', 'sms_or_email')
+      role:
+        type: string_or_hash
+        description: App role whose members receive the notification
+      users:
+        type: scalar_or_array_or_hash
+        description: Specific user login(s) to notify
+      emails:
+        type: scalar_or_array_or_hash
+        description: Explicit email address(es) to send to
+      phones:
+        type: scalar_or_array_or_hash
+        description: Explicit phone number(s) for SMS
+      phone_records:
+        type: scalar_or_array_or_hash
+        description: Reference to model records that contain phone numbers
+      list_type:
+        type: string_or_hash
+        description: Distribution list type identifier
+      default_country_code:
+        type: string_or_hash
+        description: Default country dialling code for phone numbers (e.g. '1')
+      from_user_email:
+        type: hash
+        description: Sender email address override configuration
+      ignore_no_recipients:
+        type: boolean
+        description: Suppress errors when no recipients can be resolved
+      layout_template:
+        type: string_or_hash
+        description: Name of the layout template wrapping the notification body
+      content_template:
+        type: string_or_hash
+        description: Name of the registered content template to render
+      content_template_text:
+        type: string_or_hash
+        description: Inline content template text (alternative to content_template)
+      subject:
+        type: string_or_hash
+        description: Email subject line (supports {{substitution}} templates)
+      calendar_invite:
+        type: hash
+        description: Calendar invite (iCal) configuration block
+      attachments:
+        type: array
+        description: List of file attachment configuration hashes
+      extra_substitutions:
+        type: hash
+        description: Additional substitution variables for template rendering
+      importance:
+        type: string_or_hash
+        description: Message priority / importance level (e.g. 'high')
+      when:
+        type: hash
+        description: Scheduled send-time configuration
+      app_type:
+        type: string_or_hash
+        description: App type context for resolving templates and recipients
+      user:
+        type: string_or_hash
+        description: Specific user context override
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # pull_external_data
+  # ---------------------------------------------------------------------------
+  pull_external_data:
+    pattern: named_entry
+    description: >
+      Fetch data from an external HTTP endpoint and store the result locally.
+      Config is { <label>: { keys... } }.
+    keys:
+      force_not_editable_save:
+        type: boolean
+        description: Allow save even when the record is marked not-editable
+      local_data:
+        type: string_or_hash
+        description: Local field or variable name to store the retrieved value in
+      data_field:
+        type: string_or_hash
+        description: Field name in the parsed response to extract
+      data_field_format:
+        type: string_or_hash
+        description: Path/format expression for extracting data_field (e.g. 'json_path')
+      response_code_field:
+        type: string_or_hash
+        description: Field or variable name to store the HTTP response status code in
+      method:
+        type: string_or_hash
+        description: HTTP method (e.g. 'GET', 'POST')
+      from:
+        type: string_or_hash
+        description: >
+          Source URL or endpoint to fetch from
+          (supports {{substitution}} templates)
+      to:
+        type: string_or_hash
+        description: >
+          Destination URL or endpoint to push to
+          (supports {{substitution}} templates)
+      post_data:
+        type: scalar_or_array_or_hash
+        description: Request body / payload for POST requests
+      success_if:
+        type: hash
+        description: Condition expression that determines a successful response
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # redcap_request
+  # ---------------------------------------------------------------------------
+  redcap_request:
+    pattern: named_entry
+    description: >
+      Make a REDCap API request (import or export records, etc.).
+      Config is { <label>: { keys... } }.
+    keys:
+      study:
+        type: string_or_hash
+        description: REDCap study name / identifier
+      project_name:
+        type: string_or_hash
+        description: REDCap project name (alternative to study)
+      local_data:
+        type: string_or_hash
+        description: Local field or variable to store retrieved data in
+      method:
+        type: string_or_hash
+        description: REDCap API method name (e.g. 'import_records', 'export_records')
+      post_data:
+        type: scalar_or_array_or_hash
+        description: Data payload for the REDCap API call
+      success_if:
+        type: hash
+        description: Condition expression determining a successful API response
+      force_not_editable_save:
+        type: boolean
+        description: Allow save even when the record is marked not-editable
+      data_field:
+        type: string_or_hash
+        description: Field name in the API response to extract
+      data_field_format:
+        type: string_or_hash
+        description: Path/format expression for extracting data_field
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # reload_this
+  # ---------------------------------------------------------------------------
+  reload_this:
+    pattern: direct_config
+    description: Reload the current record from the database (discards in-memory changes).
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # run_batch_trigger
+  # ---------------------------------------------------------------------------
+  run_batch_trigger:
+    pattern: named_entry
+    description: >
+      Run a save trigger over a batch of matching records.
+      Config is { <label>: { keys... } }.
+    keys:
+      resource_name:
+        type: string
+        description: Resource name of the model whose records will be iterated
+      mode:
+        type: string
+        description: Batch execution mode (controls ordering / chunking behaviour)
+      limit:
+        type: integer
+        description: Maximum number of records to process in this batch run
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # set_item_flags
+  # ---------------------------------------------------------------------------
+  set_item_flags:
+    pattern: direct_config
+    description: Set, add, or remove flag values on the current record.
+    keys:
+      first:
+        type: scalar_or_array_or_hash
+        description: Criteria to select a specific record to operate on (if not current)
+      force_not_editable_save:
+        type: boolean
+        description: Allow save even when the record is marked not-editable
+      flags:
+        type: scalar_or_array_or_hash
+        description: Replace the entire flags set with these value(s)
+      add_flags:
+        type: scalar_or_array_or_hash
+        description: Flag value(s) to add to the existing set
+      remove_flags:
+        type: scalar_or_array_or_hash
+        description: Flag value(s) to remove from the existing set
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # set_save_trigger_results
+  # ---------------------------------------------------------------------------
+  set_save_trigger_results:
+    pattern: named_entry
+    description: >
+      Compute and store a named result value accessible to later triggers in the chain.
+      Config is { <label>: { keys... } }.
+    keys:
+      element:
+        type: string
+        description: Name of the result variable to set
+      value:
+        type: scalar_or_array_or_hash
+        description: Value or expression to store in the named result
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # set_variables
+  # ---------------------------------------------------------------------------
+  set_variables:
+    pattern: named_entry
+    description: >
+      Set a named runtime variable for use in subsequent trigger configurations.
+      Config is { <label>: { keys... } }.
+    keys:
+      name:
+        type: string
+        description: Variable name to set
+      value:
+        type: scalar_or_array_or_hash
+        description: Value or expression to assign to the variable
+      if:
+        type: hash
+        description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # transaction
+  # ---------------------------------------------------------------------------
+  transaction:
+    pattern: delegate
+    description: >
+      Wrap nested trigger tasks inside a database transaction.
+      The value is a nested trigger task list; if any nested trigger fails the
+      transaction is rolled back.
+
+  # ---------------------------------------------------------------------------
+  # update_reference
+  # ---------------------------------------------------------------------------
+  update_reference:
+    pattern: named_entry
+    description: >
+      Update an existing related (reference) record.
+      Config is { <model_name>: { keys... } }.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      first:
+        type: scalar_or_array_or_hash
+        description: Criteria to select which related record to update
+      force_not_editable_save:
+        type: boolean
+        description: Allow save even when the target record is marked not-editable
+      force_not_valid:
+        type: boolean
+        description: Save without triggering full model validation on the target
+      with_result:
+        type: hash_or_array
+        description: Conditions for matching the related record to update
+      with:
+        type: hash
+        description: Attribute values to update on the matched record
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # update_this
+  # ---------------------------------------------------------------------------
+  update_this:
+    pattern: named_entry
+    description: >
+      Update the current record.
+      Config is { <label>: { keys... } }.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      force_not_editable_save:
+        type: boolean
+        description: Allow save even when the record is marked not-editable
+      force_not_valid:
+        type: boolean
+        description: Save without triggering full model validation
+      with_result:
+        type: hash_or_array
+        description: Conditions for identifying the version of this record to update
+      with:
+        type: hash
+        description: Attribute values to update on the current record
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure

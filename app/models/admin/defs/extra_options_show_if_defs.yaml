@@ -1,37 +1,60 @@
 # show_if options
+#
+# Pattern 1: Simple field-to-field condition
   show_if:
     field_name:
       depends_on_field_name: conditional value
       current_mode: show | edit
+
+# Pattern 2: Combined conditions for one field
+# Use all, any, not_all or not_any when the field depends on more than one rule.
+  show_if:
+    field_name:
+      all:
+        depends_on_field_name: conditional value
+        current_mode: show | edit
+      any:
+        alternative_field: another conditional value
+      not_all:
+        hidden_when_field: hidden value
+
+# Pattern 3: Conditions that refer to an embedded item
+# embedded_item is available when the current option type defines an embed:
+# configuration or otherwise exposes embedded-item substitutions.
+  show_if:
     field_depends_on_embedded_item:
-      # Condition referencing data from an embedded item defined via embed: configuration
-      # The embedded_item key allows access to fields in a separate model that is 
-      # embedded in the current model through the embed: option
       depends_on_field_name: conditional value
       embedded_item:
         field_name: conditional value
         field_name_2: conditional value
-    field_name_2:
-      all:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-      all_with_any_prefix_description:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
+
+# Pattern 4: Nested conditional groups with embedded_item
+  show_if:
+    field_name:
       any:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-      not_all:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-      not_any:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-    # Use regex to match multiple fields to control using the same condition
-    # For example: `/^.+_complete/` or `field_[0-9]` or `/^status_.*$/`
+        this_form_field: current value
+        embedded_item:
+          all:
+            embedded_status: active
+            embedded_score:
+              condition: '>='
+              value: 10
+
+# Pattern 5: Apply the same condition to multiple fields using a regex key
+# Example regex keys: /^.+_complete/, field_[0-9], /^status_.*$/
+  show_if:
     /field_name_regex/:
       depends_on_field_name: conditional value
       current_mode: show | edit
-    submit_buttons_<button_id>: |
-      Controls the display of a display button, identified by <button_id> being
-      the underscored id representing the button label
+
+# Pattern 6: Control submit buttons instead of data fields
+  show_if:
+    submit_buttons_<button_id>:
+      current_mode: edit
+      depends_on_field_name: conditional value
+
+# Notes:
+# - Each top-level show_if entry must be a Hash of conditions.
+# - show_if_condition_strings generates additional Hash entries in this same shape.
+# - Field keys may be literal field names, regex keys or submit_buttons_<button_id>.
+# - current_mode is commonly combined with field conditions, but still belongs in the same Hash.

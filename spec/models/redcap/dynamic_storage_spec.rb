@@ -191,7 +191,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
       otc = dm.option_type_config_for(:default)
 
-      expect(otc.field_options[:option_type]).to be_a Hash
+      expect(otc.field_options[:option_type]).to respond_to(:[], :key?)
       expect(otc.field_options.dig(:option_type, :active_value)).to eq('{{#if q2_survey_complete}}q2_survey{{else if test_complete}}test{{/if}}')
     end
   end

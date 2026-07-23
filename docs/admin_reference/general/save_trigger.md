@@ -12,29 +12,74 @@ Define actions to perform automatically when a record is created, updated, saved
 
 Each trigger task listed under an event key corresponds to one of the following trigger types:
 
+### Record Operations
+
 | Trigger | Description |
 |---|---|
 | [add_tracker](save_trigger_add_tracker.md) | Add a tracker entry |
 | [create_master](save_trigger_create_master.md) | Create a new master record |
 | [create_reference](save_trigger_create_reference.md) | Create a reference to another model |
-| [change_user_roles](save_trigger_change_user_roles.md) | Add or remove user roles |
-| [create_filestore_container](save_trigger_create_filestore_container.md) | Create an NFS filestore container |
-| [generate_document](save_trigger_generate_document.md) | Generate a document from a template and store in a filestore container |
-| [notify](save_trigger_notify.md) | Send a notification |
-| [pull_external_data](save_trigger_pull_external_data.md) | Pull data from an external source |
-| [redcap_request](save_trigger_redcap_request.md) | Make a REDCap API request |
-| [set_item_flags](save_trigger_set_item_flags.md) | Set item flags |
+| [reload_this](save_trigger_reload_this.md) | Reload the current record from the database |
 | [update_reference](save_trigger_update_reference.md) | Update a referenced record |
 | [update_this](save_trigger_update_this.md) | Update fields on the current record |
-| [full_text_search](save_trigger_full_text_search.md) | Build and persist PostgreSQL `tsvector` search indexes |
-| [run_batch_trigger](save_trigger_run_batch_trigger.md) | Run a batch trigger |
-| [log](save_trigger_log.md) | Log a message |
-| [transaction](save_trigger_transaction.md) | Wrap triggers in a transaction |
-| [background](save_trigger_background.md) | Run a trigger in the background |
-| [reload_this](save_trigger_reload_this.md) | Reload the current record |
-| [case](save_trigger_case.md) | Conditionally branch trigger execution |
-| [each](save_trigger_each.md) | Iterate over a list and apply triggers |
-| [set_save_trigger_results](save_trigger_set_save_trigger_results.md) | Set save trigger result values |
+
+### Communication & Notification
+
+| Trigger | Description |
+|---|---|
+| [notify](save_trigger_notify.md) | Send an email or SMS notification |
+| [pull_emails](save_trigger_pull_emails.md) | Read MIME emails from S3, filesystem, or IMAP and run nested triggers per email |
+
+### User & Access
+
+| Trigger | Description |
+|---|---|
+| [change_user_roles](save_trigger_change_user_roles.md) | Add or remove user roles |
+| [set_item_flags](save_trigger_set_item_flags.md) | Set item flags on the current record |
+
+### Files & Documents
+
+| Trigger | Description |
+|---|---|
+| [create_filestore_container](save_trigger_create_filestore_container.md) | Create an NFS filestore container |
+| [generate_document](save_trigger_generate_document.md) | Generate a document from a template and store in a filestore container |
+
+### External Integrations
+
+| Trigger | Description |
+|---|---|
+| [pull_external_data](save_trigger_pull_external_data.md) | Pull data from an external HTTP source |
+| [redcap_request](save_trigger_redcap_request.md) | Make a REDCap API request |
+
+### Search
+
+| Trigger | Description |
+|---|---|
+| [full_text_search](save_trigger_full_text_search.md) | Build and persist PostgreSQL `tsvector` full-text search indexes |
+
+### Variables & Results
+
+| Trigger | Description |
+|---|---|
+| [set_save_trigger_results](save_trigger_set_save_trigger_results.md) | Set save trigger result values for use in subsequent triggers |
+| [set_variables](save_trigger_set_variables.md) | Set variables for use in subsequent substitutions and triggers |
+
+### Control Flow
+
+| Trigger | Description |
+|---|---|
+| [background](save_trigger_background.md) | Run a set of triggers asynchronously in a background job |
+| [case](save_trigger_case.md) | Conditionally branch trigger execution based on a condition |
+| [each](save_trigger_each.md) | Iterate over a list and apply a set of triggers for each item |
+| [run_batch_trigger](save_trigger_run_batch_trigger.md) | Run a batch trigger on a set of records |
+| [transaction](save_trigger_transaction.md) | Wrap a set of triggers in a database transaction |
+
+### Utilities
+
+| Trigger | Description |
+|---|---|
+| [log](save_trigger_log.md) | Write a log entry (useful for debugging and audit trails) |
+
 
 ## Lifecycle Hooks
 

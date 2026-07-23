@@ -93,6 +93,10 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
   # Allow pull_external_data to reach the Capybara test server (127.0.0.1)
   before(:each) do
     stub_const('Settings::PullExternalDataAllowPrivateHosts', true)
+    # Other system specs reload routes while running in parallel. Re-register the
+    # dynamic model routes here so the Capybara server always has the API endpoints.
+    DynamicModel.routes_load
+    Rails.application.routes_reloader.reload!
   end
 
   #

@@ -1,6 +1,30 @@
 # editable_if options
-  editable_if: |
-    'ref: ** conditions reference **'
+#
+# Pattern 1: Explicitly always editable
+  editable_if:
+    always: true
 
-    NOTE: if not defined, the default is to only allow an item to be editable if it is the most recently created or
-    item in the list. If you want items to be always editable, use *always: true*
+# Pattern 2: Explicitly never editable
+  editable_if:
+    never: true
+
+# Pattern 3: Conditional editable rules using the standard conditions reference
+  editable_if:
+    all:
+      this:
+        status: draft
+    not_any:
+      activity_log__example_reviews:
+        extra_log_type: finalized
+
+# Pattern 4: Merge reusable conditions with local rules
+  editable_if:
+    <<: *some_condition_anchor
+    all:
+      this:
+        status: draft
+
+# Notes:
+# - editable_if must be a Hash using the standard conditional-actions syntax.
+# - If not defined, the default behavior is to allow editing only for the most recent item in the list.
+# - Use always: true when you want to override that default and keep all matching items editable.

@@ -1,0 +1,6 @@
+# Pattern 1: Simple reference definition
+  references:
+    model_name:
+      label: button label
+      from: this | master | any | user_is_creator
+      add: many | one_to_master | one_to_this

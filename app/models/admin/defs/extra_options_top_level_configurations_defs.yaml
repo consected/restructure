@@ -46,3 +46,10 @@ _configurations:
     # *foreign_key_through_external_id:* configuration would specify the external identifier type to use to lookup the associated master.
   no_user_id: true|false (default)
     # The table should be created without a user_id field or foreign key onto `users.id` and association to the User model.
+  option_type_attr_name: field name to use as the option type attribute (default 'option_type')
+    # Allows a dynamic model or activity log to use a different field to determine which option type configuration to use.
+    # For activity logs, this is always 'extra_log_type'.
+    # For dynamic models, it defaults to 'option_type' but can be overridden — for example,
+    # REDCap dynamic models may use 'redcap_repeat_instrument' as the option type attribute.
+  default_option_type_name: name of the default option type (default 'default')
+    # Specifies the option type name to use when no explicit option type is matched.

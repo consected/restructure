@@ -1,3 +1,10 @@
 # labels options
+# Canonical schema
+# labels: <Hash(valid_field_name: String)>
+#
   labels:
     field_name: label to show
+
+# Notes:
+# - Each key must be a valid field name on the current model.
+# - Values are plain strings used as display labels for the corresponding field.

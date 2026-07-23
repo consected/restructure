@@ -98,6 +98,15 @@ app-scripts/clean-test-db.sh
 
 # Clean test assets and cache
 app-scripts/clean-test-assets-and-cache.sh
+
+# Extract an app config YAML. Analyse all models from a previous error run
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff --errors tmp/agent-tmp/config_errors_app.log
+
+# Extract an app config YAML. Inspect a single model
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff play_ipa_initial_call
+
+# Extract an app config YAML. Show just show_if and labels for models matching "phone_screen"
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --sections show_if,labels phone_screen
 ```
 
 #### Why These Rules Exist
