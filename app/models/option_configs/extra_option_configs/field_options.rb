@@ -63,10 +63,11 @@ module OptionConfigs
                       # value, blank_value, preset_value, blank_preset_value all
                       # accept the same Hash return_value lookup form as active_value
                       # (e.g. { this: { model: { field: return_value } } })
-                      value: :string_or_hash,
-                      blank_value: :string_or_hash,
-                      preset_value: :string_or_hash,
-                      blank_preset_value: :string_or_hash,
+                      # They also accept an Array of strings for multi-value presets.
+                      value: :string_hash_or_array,
+                      blank_value: :string_hash_or_array,
+                      preset_value: :string_hash_or_array,
+                      blank_preset_value: :string_hash_or_array,
                       active_value: :string_or_hash,
                       format: :string,
                       class: :string,

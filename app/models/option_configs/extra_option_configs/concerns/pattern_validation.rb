@@ -89,6 +89,12 @@ module OptionConfigs
             v.is_a?(String) || v.is_a?(Symbol) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
           },
+          # Accepts a string, a Hash (return_value lookup), or an Array of strings.
+          # Used by field value options (preset_value, blank_preset_value, value, blank_value).
+          string_hash_or_array: lambda { |v|
+            v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) ||
+              (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
+          },
           integer: ->(v) { v.is_a?(Integer) },
           hash: ->(v) { v.is_a?(Hash) }
         }.freeze
@@ -100,6 +106,7 @@ module OptionConfigs
           string: 'a string',
           string_or_hash: 'a string (literal or {{substitution}}) or a Hash (e.g. { this: { field: return_value } })',
           string_or_array: 'a string or array of strings',
+          string_hash_or_array: 'a string, a Hash (e.g. { this: { field: return_value } }), or an array of strings',
           integer: 'an integer',
           hash: 'a Hash'
         }.freeze

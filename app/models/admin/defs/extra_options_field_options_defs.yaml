@@ -8,7 +8,7 @@
         # provide a mask for a text field using basic regex
         # This example accepts one or more characters of any type, 3 digits, a hyphen, 1 to 4 letters and any number of final characters
       value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
         
         NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
         It is not set before building the instances, so will not be available for data conditions.
@@ -17,14 +17,19 @@
             this:
               dynamic_model__some_table:
                 field_name: return_value
+        An array of strings is accepted for multi-value fields (e.g. multi-select), e.g.:
+          value:
+            - blood spot card
+            - saliva tube
       blank_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
         
         NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
         It is not set before building the instances, so will not be available for data conditions.
         A hash return_value lookup form is also accepted (same form as value above).
+        An array of strings is also accepted (same form as value above).
       preset_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
         
         NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field.
         It is not applied to persisted instances.
@@ -33,13 +38,19 @@
             this:
               dynamic_model__some_table:
                 field_name: return_value
+        An array of strings is accepted for multi-value fields (e.g. multi-select), e.g.:
+          preset_value:
+            - blood spot card
+            - saliva tube
+            - test kit
       blank_preset_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
+        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
         
         NOTE this is set only if the attribute is blank when building the instances 
         and may be used to drive logic like an embed_resource_name field.
         It is not applied to persisted instances.
         A hash return_value lookup form is also accepted (same form as preset_value above).
+        An array of strings is also accepted (same form as preset_value above).
       active_value: |
         default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
         
