@@ -10,6 +10,7 @@ module Seeds
       values.each do |v|
         res = Report.find_or_initialize_by(short_name: v[:short_name], item_type: v[:item_type])
         res.assign_attributes(v)
+        res.disabled = false
         res.current_admin = Seeds.auto_admin
         res.save!
       end

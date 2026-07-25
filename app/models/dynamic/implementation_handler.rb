@@ -169,7 +169,6 @@ module Dynamic
     def can_add_reference?
       return @can_add_reference unless @can_add_reference.nil?
 
-      @can_add_reference = false
       dopt = option_type_config
       return unless dopt
 
@@ -224,10 +223,18 @@ module Dynamic
     end
 
     def condition_config_present?(config)
-      # Restore the original is_a?(Hash) guard to avoid NoMethodError on
-      # unexpected scalar values (String, Integer, etc.) that develop previously
-      # tolerated silently.  Valid condition configs are always Hashes.
-      config.is_a?(Hash) && config.first.present?
+      return false if config.nil?
+
+      if config.respond_to?(:conditions)
+        # IfCondition/EditableIf/etc. wrapper objects — check the inner conditions Hash
+        config.conditions.present?
+      elsif config.is_a?(Hash)
+        config.first.present?
+      else
+        # Guard against unexpected non-nil scalar values (String, Integer, etc.)
+        Rails.logger.error "Unexpected condition config type: #{config.class.name} - #{config.inspect}"
+        false
+      end
     end
 
     # If access has changed since an initial check, reset the cached results

@@ -541,7 +541,7 @@ describe 'reports', js: true, driver: $browser_driver do
       # Blank logs require select_who, select_next_step, notes, and a protocol
       select_from_dropdown_field 'select_who', 'User'
       select_from_dropdown_field 'select_next_step', 'Complete'
-      fill_in_field 'notes', 'Test blank log note'
+      edit_rich_text_editor_field 'notes', 'Test blank log note'
       select_from_dropdown_field 'protocol_id', 'Study'
     end
 

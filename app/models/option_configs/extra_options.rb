@@ -167,6 +167,30 @@ module OptionConfigs
         references[model_reference.to_record.class.name.ns_underscore.singularize.to_sym]
     end
 
+    # Re-run reference resolution on the current +references+ attribute.
+    #
+    # Normalizes, resolves, and enriches references using the References config class,
+    # updating +self.references+ in place. Unresolved references outside of an
+    # app-type import are removed from the hash and a +:warn+ notice is recorded in
+    # +config_warnings+. During an import, unresolved references are left untouched
+    # and silent (forward references to not-yet-imported definitions are expected).
+    #
+    # This is the public post-initialization API for cases where +references+ is
+    # assigned directly (e.g. after runtime config changes or in tests).
+    def clean_references_def
+      return unless references
+
+      new_ref = ExtraOptionConfigs::References.prepare_config(references, self)
+      self.references = new_ref
+
+      bad_refs = new_ref&.delete(:_bad_references)
+      return unless bad_refs.present?
+
+      bad_refs.each do |mn|
+        failed_config(:references, "unresolved reference '#{mn}' - no model class could be found", level: :warn)
+      end
+    end
+
     # Set field_configs from the configurations listed in ValidFieldConfigs
     # for each of the valid fields
     def add_field_configs_from_standalone_defs

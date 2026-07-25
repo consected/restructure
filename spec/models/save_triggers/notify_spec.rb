@@ -662,7 +662,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i).to be_within(10).of((DateTime.now + 1.day).to_i)
   end
 
   it 'sets the notification to send at a specific time in the future' do
@@ -685,7 +685,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i).to be_within(10).of((DateTime.now + 1.day).to_i)
   end
 
   it 'sets the notification to send at a specific time in the future based on a date / time / zone definition' do
@@ -721,7 +721,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     wait_until = @trigger.send(:run_when)[:wait_until]
 
     # The time should be close enough
-    expect(wait_until.to_i / 10).to eq(d_in_edt.to_i / 10) || eq((d_in_edt.to_i - 1) / 10)
+    expect(wait_until.to_i).to be_within(10).of(d_in_edt.to_i)
   end
 
   it 'uses an if select the correct notification' do

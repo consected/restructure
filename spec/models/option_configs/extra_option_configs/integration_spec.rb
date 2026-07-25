@@ -179,7 +179,6 @@ RSpec.describe 'ExtraOptions integration', type: :model do
         clean_access_if_def
         clean_valid_if_def
         clean_embed_def
-        clean_references_def
         clean_save_triggers
         clean_batch_triggers
         clean_config_triggers

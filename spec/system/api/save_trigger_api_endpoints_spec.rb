@@ -625,8 +625,9 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
         current_user: @user
       )
 
-      @al = ActivityLog.where(item_type: 'player_contact', rec_type: nil,
-                              process_name: 'api_panel_trigger_test_email').first
+      @al = ActivityLog.active.where(item_type: 'player_contact', rec_type: nil,
+                                    process_name: 'api_panel_trigger_test_email',
+                                    table_name: AL_TABLE_NAME, schema_name: SCHEMA_NAME).first
       @al ||= ActivityLog.create!(
         current_admin: @admin,
         name: AL_TABLE_NAME,
