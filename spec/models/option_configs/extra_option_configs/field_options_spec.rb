@@ -7,6 +7,8 @@ require './db/table_generators/dynamic_models_table'
 # Verifies NamedConfiguration for per-field options (edit_as, value, pattern, etc.),
 # alt_options preprocessing, and integration through
 # ExtraOptions initialization (clean_field_options_def behavior).
+# Also verifies that preset_value, blank_preset_value, value, blank_value, and
+# default_value accept array values in addition to strings and hashes (issue #1313).
 RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
   include MasterSupport
   include ModelSupport
@@ -133,6 +135,36 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
                                  blank_preset_value: '{{other_field}}',
                                  active_value: 'some default'
                                })
+          error_messages = instance.config_errors.map { |e| e[:message] }
+          expect(error_messages).to be_empty
+        end
+
+        it 'accepts an Array for preset_value without config errors' do
+          instance = klass.new(field1: { preset_value: ['blood spot card', 'saliva tube', 'test kit'] })
+          error_messages = instance.config_errors.map { |e| e[:message] }
+          expect(error_messages).to be_empty
+        end
+
+        it 'accepts an Array for blank_preset_value without config errors' do
+          instance = klass.new(field1: { blank_preset_value: %w[option1 option2] })
+          error_messages = instance.config_errors.map { |e| e[:message] }
+          expect(error_messages).to be_empty
+        end
+
+        it 'accepts an Array for value without config errors' do
+          instance = klass.new(field1: { value: %w[item1 item2 item3] })
+          error_messages = instance.config_errors.map { |e| e[:message] }
+          expect(error_messages).to be_empty
+        end
+
+        it 'accepts an Array for blank_value without config errors' do
+          instance = klass.new(field1: { blank_value: %w[val1 val2] })
+          error_messages = instance.config_errors.map { |e| e[:message] }
+          expect(error_messages).to be_empty
+        end
+
+        it 'accepts an Array for default_value without config errors' do
+          instance = klass.new(field1: { default_value: %w[default1 default2] })
           error_messages = instance.config_errors.map { |e| e[:message] }
           expect(error_messages).to be_empty
         end
