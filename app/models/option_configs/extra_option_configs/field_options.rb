@@ -72,7 +72,7 @@ module OptionConfigs
                       format: :string,
                       class: :string,
                       placeholder: :string,
-                      default_value: :string_hash_or_array,
+                      default_value: :string,
                       edit_as: :hash,
                       config: :hash
                     }

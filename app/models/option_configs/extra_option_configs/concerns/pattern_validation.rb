@@ -90,7 +90,7 @@ module OptionConfigs
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
           },
           # Accepts a string, a Hash (return_value lookup), or an Array of strings.
-          # Used by field value options (preset_value, blank_preset_value, value, blank_value, default_value).
+          # Used by field value options (preset_value, blank_preset_value, value, blank_value).
           string_hash_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })

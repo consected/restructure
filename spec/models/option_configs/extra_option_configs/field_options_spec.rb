@@ -163,10 +163,34 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
           expect(error_messages).to be_empty
         end
 
-        it 'accepts an Array for default_value without config errors' do
+        it 'rejects an Array for default_value with a config error (HTML pass-through — string only)' do
           instance = klass.new(field1: { default_value: %w[default1 default2] })
-          error_messages = instance.config_errors.map { |e| e[:message] }
-          expect(error_messages).to be_empty
+          expect(instance.config_errors).to be_present
+          expect(instance.config_errors.map { |e| e[:message] }.any? { |m| m.include?('default_value') }).to be true
+        end
+
+        context 'array boundary cases' do
+          it 'accepts an empty array for preset_value (valid for clearing multi-select fields)' do
+            instance = klass.new(field1: { preset_value: [] })
+            expect(instance.config_errors).to be_empty
+          end
+
+          it 'accepts a symbol array for preset_value' do
+            instance = klass.new(field1: { preset_value: %i[choice_a choice_b] })
+            expect(instance.config_errors).to be_empty
+          end
+
+          it 'rejects a mixed string/integer array for preset_value' do
+            instance = klass.new(field1: { preset_value: ['valid', 123] })
+            expect(instance.config_errors).to be_present
+            expect(instance.config_errors.map { |e| e[:message] }.any? { |m| m.include?('preset_value') }).to be true
+          end
+
+          it 'rejects an array containing nil for preset_value' do
+            instance = klass.new(field1: { preset_value: [nil, 'valid'] })
+            expect(instance.config_errors).to be_present
+            expect(instance.config_errors.map { |e| e[:message] }.any? { |m| m.include?('preset_value') }).to be true
+          end
         end
       end
     end
@@ -289,6 +313,21 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       ao = eo.field_options[:test1][:edit_as][:alt_options]
       expect(ao).to be_a Hash
       expect(ao[:'Option 1']).to eq 'opt1'
+    end
+
+    it 'assigns an array preset_value to the attribute at runtime via force_preset_values' do
+      config_for(<<~YAML)
+        default:
+          field_options:
+            text_array:
+              preset_value:
+                - blood spot card
+                - saliva tube
+                - test kit
+      YAML
+
+      instance = @master.dynamic_model__test_created_by_recs.build
+      expect(instance.text_array).to eq %w[blood\ spot\ card saliva\ tube test\ kit]
     end
   end
 end
