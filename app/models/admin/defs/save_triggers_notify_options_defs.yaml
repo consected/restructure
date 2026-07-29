@@ -134,5 +134,11 @@
 
             if: if_extras
 
-            app_type: optionally specify an app_type id to force the use of a batch user when perfoming actions
-            user: optionally specify a user id (or email) to force use of the specified user when perfoming actions
+            app_type: |
+              optionally specify an app type to force the use of a batch user when performing actions.
+              Accepts an app type id (integer), an app type name (string), a {{curly}} substitution,
+              or a conditional Hash reference (e.g. {this: {field: return_value}}).
+            user: |
+              optionally specify a user to force use of the specified user when performing actions.
+              Accepts a user id (integer), a user email (string), a {{curly}} substitution, or a
+              conditional Hash reference (e.g. {this: {field: return_value}}).

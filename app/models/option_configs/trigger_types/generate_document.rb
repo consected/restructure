@@ -14,7 +14,12 @@ module OptionConfigs
       ]
       standard_hook_key_types
       key_type :string_or_hash, :content_template_name, :content_template_text, :layout_template,
-               :filename, :content_type, :path, :store_as_user, :store_in_app_type
+               :filename, :content_type, :path
+      # store_as_user/store_in_app_type accept a literal id/name, a {{substitution}}, or
+      # a conditional Hash reference (e.g. {this: {field: return_value}}) - resolved via
+      # FieldDefaults before being passed to the id/name lookup (see
+      # SaveTriggers::GenerateDocument#resolve_user).
+      key_type :string_or_integer_or_hash, :store_as_user, :store_in_app_type
       key_type :hash, :extra_substitutions, :container
       key_type :boolean, :skip_existing, :replace
     end

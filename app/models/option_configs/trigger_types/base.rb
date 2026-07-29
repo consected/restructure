@@ -26,6 +26,7 @@ module OptionConfigs
         array: ->(v) { v.is_a?(Array) },
         hash_or_array: ->(v) { v.is_a?(Hash) || v.is_a?(Array) },
         string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
+        string_or_integer_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Integer) || v.is_a?(Hash) },
         scalar_or_array_or_hash: lambda { |v|
           v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Numeric) ||
             [true, false, nil].include?(v) || v.is_a?(Array) || v.is_a?(Hash)
@@ -37,6 +38,7 @@ module OptionConfigs
         array: 'an Array',
         hash_or_array: 'a Hash or Array',
         string_or_hash: 'a string or Hash',
+        string_or_integer_or_hash: 'a string, integer, or Hash',
         scalar_or_array_or_hash: 'a scalar, Array, or Hash'
       ).freeze
 
@@ -87,9 +89,20 @@ module OptionConfigs
         # DSL: declare per-key type constraints.
         # @param type_sym [Symbol] type specifier (:boolean, :string, :integer, etc.)
         # @param keys [Symbol, Array<Symbol>] key name(s) to constrain
-        def key_type(type_sym, *keys)
+        # @param allowed_keys [Array<Symbol>, nil] when the key's value is a Hash (or an
+        #   Array of Hashes, e.g. change_user_roles' add_role_names), validates the inner
+        #   hash(es) do not contain unrecognized keys
+        # @param key_types [Hash{Symbol => Symbol}, nil] per-inner-key type constraints,
+        #   checked the same way as top-level key_type rules, for each Hash described above
+        def key_type(type_sym, *keys, allowed_keys: nil, key_types: nil)
           @_key_type_rules ||= {}
-          keys.flatten.each { |k| @_key_type_rules[k] = type_sym }
+          @_nested_key_rules ||= {}
+          keys.flatten.each do |k|
+            @_key_type_rules[k] = type_sym
+            next unless allowed_keys || key_types
+
+            @_nested_key_rules[k] = { allowed_keys: allowed_keys&.freeze, key_types: key_types&.freeze }.freeze
+          end
         end
 
         # DSL helper: declare standard lifecycle hook key types used by save triggers.
@@ -105,6 +118,12 @@ module OptionConfigs
           @_key_type_rules || {}
         end
 
+        # Accessor for nested key validation rules (allowed_keys:/key_types: passed to key_type).
+        # @return [Hash{Symbol => Hash}]
+        def nested_key_rules
+          @_nested_key_rules || {}
+        end
+
         # Validate a config hash (or array of config hashes) according to this
         # type's pattern and constraints.
         # Returns an array of warning message strings (empty if valid).
@@ -115,9 +134,7 @@ module OptionConfigs
         def validate_config(config)
           return [] if @_pattern == :delegate
 
-          if config.is_a?(Array)
-            return config.flat_map { |entry| validate_config(entry) }
-          end
+          return config.flat_map { |entry| validate_config(entry) } if config.is_a?(Array)
 
           return [] unless config.is_a?(Hash)
 
@@ -174,9 +191,7 @@ module OptionConfigs
         # direct hash and a named-entry hash.
         def validate_named_entries(config)
           non_lifecycle_keys = config.keys.map(&:to_sym) - NAMED_ENTRY_OUTER_KEYS
-          if @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
-            return validate_direct(config)
-          end
+          return validate_direct(config) if @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
 
           warnings = []
           config.each do |k, inner|
@@ -217,10 +232,52 @@ module OptionConfigs
             next if hash[key].nil?
 
             checker = KEY_TYPE_CHECKERS[type_sym]
-            next if checker&.call(hash[key])
+            if checker&.call(hash[key])
+              warnings.concat(check_nested_keys(key, hash[key]))
+              next
+            end
 
             desc = KEY_TYPE_DESCRIPTIONS[type_sym] || type_sym.to_s
             warnings << "#{key} must be #{desc}"
+          end
+          warnings
+        end
+
+        # Validate the inner keys of a nested Hash value (or each Hash within an
+        # Array value, e.g. change_user_roles' add_role_names) against the
+        # allowed_keys:/key_types: rules declared via +key_type+.
+        # @param key [Symbol] the outer key being checked
+        # @param value [Hash, Array, Object] the outer key's value
+        # @return [Array<String>]
+        def check_nested_keys(key, value)
+          rules = nested_key_rules[key]
+          return [] unless rules
+
+          entries = value.is_a?(Array) ? value : [value]
+          warnings = []
+
+          entries.each do |entry|
+            next unless entry.is_a?(Hash)
+
+            entry = entry.transform_keys(&:to_sym)
+
+            if rules[:allowed_keys]
+              invalid = entry.keys - rules[:allowed_keys]
+              warnings.concat(invalid.map { |k| "#{key}.#{k} unrecognized key" })
+            end
+
+            next unless rules[:key_types]
+
+            rules[:key_types].each do |inner_key, inner_type|
+              next unless entry.key?(inner_key)
+              next if entry[inner_key].nil?
+
+              inner_checker = KEY_TYPE_CHECKERS[inner_type]
+              next if inner_checker&.call(entry[inner_key])
+
+              desc = KEY_TYPE_DESCRIPTIONS[inner_type] || inner_type.to_s
+              warnings << "#{key}.#{inner_key} must be #{desc}"
+            end
           end
           warnings
         end

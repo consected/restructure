@@ -19,6 +19,9 @@
 #   string_or_array      — a string, or an array of strings
 #   string_or_hash       — a string or Hash (commonly used where {{substitution}} templates
 #                          or conditional expressions are also accepted)
+#   string_or_integer_or_hash — a string, integer, or Hash (used for app_type/user identifier
+#                          fields that accept a literal id/name, {{substitution}}, or a
+#                          conditional Hash reference, resolved via FieldDefaults)
 #   integer              — an integer
 #   hash                 — a Hash
 #   array                — an Array
@@ -84,10 +87,16 @@ trigger_types:
         description: Conditional expression
       add_role_names:
         type: scalar_or_array_or_hash
-        description: Role name(s) to add to the current user
+        description: >
+          Role name(s) to add to the current user. Each entry may be a literal role
+          name string, or a Hash of { app_type:, role_name:, for_user: }. All three
+          accept a literal id/name/string, a {{substitution}}, or a conditional Hash
+          reference (resolved via FieldDefaults).
       remove_role_names:
         type: scalar_or_array_or_hash
-        description: Role name(s) to remove from the current user
+        description: >
+          Role name(s) to remove from the current user. Same entry shape as
+          add_role_names.
       on_complete:
         type: hash_or_array
         description: Nested trigger task(s) to run on success
@@ -257,11 +266,11 @@ trigger_types:
         type: boolean
         description: Replace any pre-existing output file
       store_as_user:
-        type: string_or_hash
-        description: Store the document under this user's ownership context
+        type: string_or_integer_or_hash
+        description: Store the document under this user's ownership context (accepts a user id integer, email string, {{substitution}}, or conditional Hash reference; resolved via FieldDefaults)
       store_in_app_type:
-        type: string_or_hash
-        description: Store the document scoped to this app type
+        type: string_or_integer_or_hash
+        description: Store the document scoped to this app type (accepts an app type id integer, name string, {{substitution}}, or conditional Hash reference; resolved via FieldDefaults)
       if:
         type: hash
         description: Conditional expression
@@ -364,14 +373,60 @@ trigger_types:
         type: hash
         description: Scheduled send-time configuration
       app_type:
-        type: string_or_hash
-        description: App type context for resolving templates and recipients
+        type: string_or_integer_or_hash
+        description: App type context for resolving templates and recipients (accepts an app type id integer, app type name string, {{substitution}}, or conditional Hash reference; resolved via FieldDefaults)
       user:
-        type: string_or_hash
-        description: Specific user context override
+        type: string_or_integer_or_hash
+        description: Specific user context override (accepts a user id integer, email string, {{substitution}}, or conditional Hash reference; resolved via FieldDefaults)
       if:
         type: hash
         description: Conditional expression
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # pull_emails
+  # ---------------------------------------------------------------------------
+  pull_emails:
+    pattern: direct_config
+    description: >
+      Read MIME-encoded email files (e.g. from an S3 bucket, filesystem directory,
+      or IMAP mailbox) and run a list of inner save triggers per email. Parsed
+      email fields are exposed via trigger_variables[:email] for the inner triggers.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      source:
+        type: hash
+        description: Email source configuration (type: s3|filesystem|imap, plus type-specific keys)
+      limit:
+        type: integer
+        description: Maximum number of emails to process per run
+      after_processing:
+        type: hash
+        description: What to do with each successfully processed email (move_to or delete)
+      attachments:
+        type: hash
+        description: >
+          Capture MIME attachments to an NfsStore container. Inner keys: if (hash),
+          container (hash), path (string_or_hash), store_as_user (string_or_integer_or_hash),
+          store_in_app_type (string_or_integer_or_hash), skip_existing (boolean), replace (boolean).
+          store_as_user/store_in_app_type are resolved via FieldDefaults before use, so
+          they accept a literal id/name, a {{substitution}}, or a conditional Hash reference.
+      on_email:
+        type: hash_or_array
+        description: Nested trigger task(s) to run for each email
+      on_email_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run for each successfully processed email
+      on_email_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run for each email that failed processing
       on_complete:
         type: hash_or_array
         description: Nested trigger task(s) to run on success
