@@ -103,6 +103,94 @@ RSpec.describe SaveTriggers::ChangeUserRoles, type: :model do
     expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['viewer-has-agreement2'])
   end
 
+  it 'changes the roles of the current user in another app specified by app_type id' do
+    @orig_app_type = @user.app_type
+    @alt_app_type = Admin::AppType.active_app_types(force: true).last
+    expect(@alt_app_type.id).not_to eq @user.app_type_id
+
+    Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
+
+    config = {
+      add_role_names: [
+        { role_name: 'viewer-has-agreement', app_type: @user.app_type.id },
+        { role_name: 'user', app_type: @alt_app_type.id }
+      ],
+      remove_role_names: ['viewer-no-agreement']
+    }
+
+    res = @user.user_roles.pluck(:role_name)
+    expect(res).to be_empty
+    @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
+    @trigger.perform
+
+    expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['viewer-has-agreement'])
+
+    @user.app_type = @alt_app_type
+    @user.save!
+
+    expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['user'])
+
+    @user.app_type = @orig_app_type
+    @user.save!
+  end
+
+  it 'changes the roles of the current user in another app specified by a conditional Hash app_type reference - issue #1318' do
+    # notes is reused here purely as a string field a conditional Hash reference
+    # ({this: {field: return_value}}) can read back; it is not semantically related to protocols.
+    # This proves app_type is resolved via FieldDefaults.calculate_default before use,
+    # so a Hash config (in addition to a literal id/name) now works.
+    @orig_app_type = @user.app_type
+    @alt_app_type = Admin::AppType.active_app_types(force: true).last
+    expect(@alt_app_type.id).not_to eq @user.app_type_id
+
+    Admin::UserAccessControl.create app_type: @alt_app_type, role_name: 'user', resource_type: 'general', resource_name: 'app_type', access: 'read', current_admin: @admin
+
+    @al.update!(notes: @alt_app_type.name)
+
+    config = {
+      add_role_names: [
+        { role_name: 'user', app_type: { this: { notes: 'return_value' } } }
+      ]
+    }
+
+    res = @user.user_roles.pluck(:role_name)
+    expect(res).to be_empty
+    @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
+    @trigger.perform
+
+    expect(@user.user_roles.active.reload.pluck(:role_name)).to be_empty
+
+    @user.app_type = @alt_app_type
+    @user.save!
+
+    expect(@user.user_roles.active.reload.pluck(:role_name)).to eq(['user'])
+
+    @user.app_type = @orig_app_type
+    @user.save!
+  end
+
+  it 'does not resolve a config app_type outside the app types loaded on this server (OnlyLoadAppTypes) - issue #1318' do
+    @alt_app_type = Admin::AppType.active_app_types(force: true).last
+    expect(@alt_app_type.id).not_to eq @user.app_type_id
+
+    # Restrict the server to only load @user's app type, excluding @alt_app_type.
+    stub_const('Settings::OnlyLoadAppTypes', [@user.app_type_id])
+    Admin::AppType.reset_active_app_types!
+
+    config = {
+      add_role_names: [
+        { role_name: 'user', app_type: @alt_app_type.id }
+      ]
+    }
+
+    @trigger = SaveTriggers::ChangeUserRoles.new(config, @al)
+    # @alt_app_type exists and is active, but is excluded from this server's
+    # OnlyLoadAppTypes scope, so it must not be resolvable.
+    expect { @trigger.perform }.to raise_error(ActiveRecord::RecordNotFound)
+  ensure
+    Admin::AppType.reset_active_app_types!
+  end
+
   it 'changes the roles of the specified user' do
     @orig_app_type = @user.app_type
     @alt_app_type = Admin::AppType.active_app_types(force: true).last

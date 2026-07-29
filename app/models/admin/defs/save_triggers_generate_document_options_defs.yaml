@@ -26,7 +26,11 @@
           replace: true  # Optional: replace existing file if content has changed
 
           # --- User/Access Context ---
+          # Accepts a literal user id (integer) or email (string), a {{curly}} substitution,
+          # or a conditional Hash reference (e.g. {this: {field: return_value}}).
           store_as_user: user@example.com  # User to perform the file store operation
+          # Accepts a literal app type id (integer) or name (string), a {{curly}} substitution,
+          # or a conditional Hash reference (e.g. {this: {field: return_value}}).
           store_in_app_type: app_type_name  # App type context for access control
 
           # --- Standard Trigger Options ---

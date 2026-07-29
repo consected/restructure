@@ -148,6 +148,32 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bogus_key/) }
         expect(key_warnings).not_to be_empty
       end
+
+      it 'accepts an integer app_type within an add_role_names entry without warnings' do
+        instance = klass.new(change_user_roles: { add_role_names: [{ app_type: 1, role_name: 'viewer' }] })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash for_user within an add_role_names entry without warnings' do
+        instance = klass.new(change_user_roles: { add_role_names: [
+                               { app_type: 'study info', role_name: 'viewer', for_user: { this: { created_by_user_id: 'return_value' } } }
+                             ] })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash app_type within an add_role_names entry without warnings, since it is resolved via FieldDefaults' do
+        instance = klass.new(change_user_roles: { add_role_names: [
+                               { app_type: { this: { app_type_id: 'return_value' } }, role_name: 'viewer' }
+                             ] })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/add_role_names\.app_type must be/) }
+        expect(key_warnings).to be_empty
+      end
+
+      it 'warns on unrecognized keys within an add_role_names entry' do
+        instance = klass.new(change_user_roles: { add_role_names: [{ app_type: 1, role_name: 'viewer', bogus_inner: 'x' }] })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/add_role_names\.bogus_inner unrecognized key/) }
+        expect(key_warnings).not_to be_empty
+      end
     end
 
     context 'set_item_flags' do
@@ -191,6 +217,41 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
         expect(key_warnings).not_to be_empty
       end
     end
+
+    context 'pull_emails' do
+      it 'accepts valid keys without warnings' do
+        instance = klass.new(pull_emails: { source: { type: 's3', bucket: 'my-bucket' }, limit: 10 })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/pull_emails/) }
+        expect(key_warnings).to be_empty
+      end
+
+      it 'warns on unrecognized top-level keys' do
+        instance = klass.new(pull_emails: { source: { type: 's3' }, bogus_top_level: true })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/bogus_top_level/) }
+        expect(key_warnings).not_to be_empty
+      end
+
+      it 'accepts an integer store_as_user/store_in_app_type within attachments without warnings' do
+        instance = klass.new(pull_emails: { source: { type: 's3' },
+                                            attachments: { container: { from_this: 'model_reference' },
+                                                           store_as_user: 1, store_in_app_type: 2 } })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash store_as_user/store_in_app_type within attachments without warnings, since attachments values are resolved via FieldDefaults' do
+        instance = klass.new(pull_emails: { source: { type: 's3' },
+                                            attachments: { container: { from_this: 'model_reference' },
+                                                           store_as_user: { this: { user_id: 'return_value' } } } })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'warns on unrecognized keys within attachments' do
+        instance = klass.new(pull_emails: { source: { type: 's3' },
+                                            attachments: { container: { from_this: 'model_reference' }, bogus_attachment_key: 'x' } })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/attachments\.bogus_attachment_key unrecognized key/) }
+        expect(key_warnings).not_to be_empty
+      end
+    end
   end
 
   # ── Named-entry triggers ────────────────────────────────────────────
@@ -200,6 +261,38 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
       it 'accepts valid keys without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', subject: 'Test' })
         expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts an integer app_type without warnings' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 1 })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a string app_type without warnings' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 'study info' })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash app_type without warnings, since it is resolved via FieldDefaults' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', app_type: { this: { app_type_id: 'return_value' } } })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/app_type must be/) }
+        expect(key_warnings).to be_empty
+      end
+
+      it 'accepts an integer user without warnings' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', user: 1 })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a string (email) user without warnings' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', user: 'fphsetl@hms.harvard.edu' })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash user without warnings, since it is resolved via FieldDefaults' do
+        instance = klass.new(notify: { type: 'email', role: 'admin', user: { this: { user_id: 'return_value' } } })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/user must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'warns on unrecognized keys' do
@@ -338,6 +431,19 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
       it 'accepts valid keys inside the named entry without warnings' do
         instance = klass.new(generate_document: { doc1: { content_template_name: 'template', filename: 'out.pdf' } })
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/generate_document/) }
+        expect(key_warnings).to be_empty
+      end
+
+      it 'accepts an integer store_as_user and store_in_app_type without warnings' do
+        instance = klass.new(generate_document: { doc1: { content_template_name: 'template', filename: 'out.pdf',
+                                                          store_as_user: 1, store_in_app_type: 2 } })
+        expect(instance.config_warnings).to be_empty
+      end
+
+      it 'accepts a Hash store_as_user without warnings, since it is resolved via FieldDefaults' do
+        instance = klass.new(generate_document: { doc1: { content_template_name: 'template', filename: 'out.pdf',
+                                                          store_as_user: { this: { user_id: 'return_value' } } } })
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/store_as_user must be/) }
         expect(key_warnings).to be_empty
       end
 

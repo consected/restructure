@@ -95,6 +95,10 @@
               # id: 123                    # OR a specific container id (substitution allowed)
               # name: 'inbox-container'    # OR by container name within the master
             path: 'emails'              # (optional) sub-path within the container
+            # store_as_user/store_in_app_type accept a literal user/app type id (integer),
+            # a literal name/email (string), a {{curly}} substitution, or a conditional
+            # Hash reference (e.g. {this: {field: return_value}}) - all attachments
+            # values are resolved via FieldDefaults before use.
             store_as_user: user@example.com  # (optional) user to perform the import as
             store_in_app_type: app_type      # (optional) app type for resolving store_as_user
             skip_existing: true              # (optional) skip if a file with the same name/path exists

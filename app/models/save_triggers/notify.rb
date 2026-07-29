@@ -96,11 +96,15 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @on_complete = config[:on_complete] || @on_complete_triggers
     @from_user_email = config[:from_user_email]
     @ignore_no_recipients = config[:ignore_no_recipients]
-    @config_app_type = config[:app_type]
+    # app_type/user accept a literal id/name, a {{substitution}}, or a conditional
+    # Hash reference (e.g. {this: {field: return_value}}) - resolved here via
+    # FieldDefaults before being passed to the id/name lookups below.
+    @config_app_type = FieldDefaults.calculate_default(@item, config[:app_type], allow_nil: true, ignore_missing: true)
+    @config_user = FieldDefaults.calculate_default(@item, config[:user], allow_nil: true, ignore_missing: true)
 
     @message_type = config[:type]
     @run_if = config[:if]
-    @alt_batch_user = DynamicModel.user_for_conf_snippet(config)
+    @alt_batch_user = DynamicModel.user_for_conf_snippet({ user: @config_user, app_type: @config_app_type })
 
     # Clear memos for the following
     @extra_substitutions = nil
@@ -128,7 +132,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   def resolve_app_type
     if @config_app_type.present?
-      Admin::AppType.find_active_by_name_or_id(@config_app_type)
+      Admin::AppType.find_active_by_name_or_id(@config_app_type, only_active_on_server: true)
     else
       @user.app_type
     end

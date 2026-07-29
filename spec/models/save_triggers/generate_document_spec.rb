@@ -337,6 +337,32 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
       stored = @container.stored_files.find_by(file_name: 'user-context-doc.html')
       expect(stored).not_to be_nil
     end
+
+    it 'resolves store_as_user and store_in_app_type from a conditional Hash reference, not just a literal value - issue #1318' do
+      # select_who/data are reused here purely as string fields a conditional Hash
+      # reference ({this: {field: return_value}}) can read back. store_in_app_type is
+      # resolved to @user's own current app_type (rather than a different one) since
+      # resolving to a different app_type would reassign @user's app_type as a side
+      # effect and break access to the container set up under the original app_type -
+      # that cross-app-type behaviour is unrelated to what this test is proving (that
+      # Hash configs are resolved via FieldDefaults.calculate_default).
+      @al.update!(select_who: @user.email, data: @user.app_type.name)
+
+      config = {
+        content_template_text: '<p>hash user context doc</p>',
+        container: { from_this: 'model_reference' },
+        filename: 'hash-user-context-doc.html',
+        content_type: 'text/html',
+        store_as_user: { this: { select_who: 'return_value' } },
+        store_in_app_type: { this: { data: 'return_value' } }
+      }
+
+      trigger = SaveTriggers::GenerateDocument.new(config, @al)
+      trigger.perform
+
+      stored = @container.stored_files.find_by(file_name: 'hash-user-context-doc.html')
+      expect(stored).not_to be_nil
+    end
   end
 
   describe 'conditional execution' do

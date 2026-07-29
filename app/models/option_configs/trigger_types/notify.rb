@@ -17,9 +17,13 @@ module OptionConfigs
         importance when on_complete on_failure if app_type user
       ]
       standard_hook_key_types
+      # app_type/user accept a literal id/name, a {{substitution}}, or a conditional
+      # Hash reference (e.g. {this: {field: return_value}}) - resolved via
+      # FieldDefaults before being passed to the id/name lookups (see
+      # SaveTriggers::Notify#init_attribs and #resolve_app_type).
+      key_type :string_or_integer_or_hash, :app_type, :user
       key_type :string_or_hash, :type, :list_type, :default_country_code, :layout_template,
-               :content_template, :content_template_text, :subject, :importance, :app_type,
-               :user
+               :content_template, :content_template_text, :subject, :importance
       key_type :scalar_or_array_or_hash, :role, :users, :emails, :phones, :phone_records
       key_type :hash, :from_user_email, :calendar_invite, :extra_substitutions, :when
       key_type :array, :attachments
