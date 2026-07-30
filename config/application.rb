@@ -40,12 +40,15 @@ module Fpa1
     # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
     # Remove each override when the corresponding tracking sub-issue is resolved.
 
-    # Keep the pre-8.1 behaviour where `to_time` preserves only the UTC offset of
-    # the receiver, rather than its full named timezone. Opt into the new :zone
-    # behaviour only after all date/time handling has been audited for TZ-aware code.
-    # Rails 8.1 will remove this option and make :zone the only behaviour.
-    # Tracking: issue #1302 (audit to_time usage before Rails 8.1 upgrade).
-    config.active_support.to_time_preserves_timezone = :offset
+    # Adopt the Rails 8.1 behaviour early: `to_time` preserves the full named timezone
+    # of the receiver, returning an ActiveSupport::TimeWithZone, rather than a plain
+    # Time with only the UTC offset. Audited in issue #1302: every explicit `.to_time`
+    # call in the codebase either (a) chains `.utc`/`.to_i` immediately afterwards
+    # (unaffected either way, since both Time and TimeWithZone respond the same to
+    # those), or (b) is called on a String/Date/plain Time (unaffected, since this
+    # setting only changes ActiveSupport::TimeWithZone#to_time). Rails 8.1 will remove
+    # this option and make :zone the only behaviour.
+    config.active_support.to_time_preserves_timezone = :zone
 
     # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
     # consumers are audited. Tracking: issue #1295.

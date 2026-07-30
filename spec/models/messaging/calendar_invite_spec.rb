@@ -89,6 +89,24 @@ RSpec.describe Messaging::CalendarInvite, type: :model do
       expect(ics_content).to include('DTSTAMP:20260305T120000Z')
     end
 
+    # Regression coverage for issue #1302 (config.active_support.to_time_preserves_timezone).
+    # #parse_datetime's `Date` branch calls `value.to_time.utc`. Under :zone, `Date#to_time`
+    # is unaffected (only ActiveSupport::TimeWithZone#to_time changes behaviour), but this
+    # confirms the whole chain still produces a correct UTC ical timestamp when a Date object
+    # (rather than a String) is supplied for dtstart/dtend. `Date#to_time` converts using the
+    # server's local system timezone (not Rails' `Time.zone`), so the expected value is
+    # computed the same way rather than hardcoded, keeping the spec environment-independent.
+    it 'accepts a Date object for dtstart/dtend and formats it to UTC' do
+      date = Date.new(2026, 6, 15)
+      config = valid_config.merge('dtstart' => date, 'dtend' => date)
+      invite = described_class.new(config)
+      ics_content = invite.generate
+
+      expected = date.to_time.utc.strftime('%Y%m%dT%H%M%SZ')
+      expect(ics_content).to include("DTSTART:#{expected}")
+      expect(ics_content).to include("DTEND:#{expected}")
+    end
+
     context 'with defaults' do
       it 'defaults method to REQUEST when not provided' do
         invite = described_class.new(minimal_config)
