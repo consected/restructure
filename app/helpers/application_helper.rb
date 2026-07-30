@@ -282,20 +282,20 @@ module ApplicationHelper
     end
 
     auth_type = u.class.name
-    if u.is_a? User
-      apptype = u.app_type_id
-      userrole = Admin::UserRole.where(app_type_id: apptype)
-                                .reorder(updated_at: :desc)
-                                .limit(1)
-                                .pluck(:updated_at)
-                                &.first.to_i.to_s
 
-      uac = Admin::UserAccessControl.where(app_type_id: apptype)
-                                    .reorder(updated_at: :desc)
-                                    .limit(1)
-                                    .pluck(:updated_at)
-                                    &.first.to_i.to_s
+    paired_user = if u.is_a?(User)
+                    u
+                  elsif u.is_a?(Admin)
+                    safe_current_user || u.matching_user
+                  end
+
+    if paired_user
+      apptype = paired_user.app_type_id
+      userrole = latest_updated_at_token(Admin::UserRole, apptype)
+      uac = latest_updated_at_token(Admin::UserAccessControl, apptype)
     end
+
+    paired_user_key = "-#{paired_user.id}-#{paired_user.current_sign_in_at}" if u.is_a?(Admin) && paired_user
 
     unless @item_updates
       cs = [Admin::MessageTemplate,
@@ -313,7 +313,7 @@ module ApplicationHelper
 
     ver = Application.server_cache_version
     res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
-          "#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+          "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
     prev_key = "#{partial}-#{auth_type}-#{u&.id}"
     @@prev_partial_cache_key ||= {}
     prev = @@prev_partial_cache_key[prev_key]
@@ -323,6 +323,29 @@ module ApplicationHelper
       @@prev_partial_cache_key[prev_key] = res
     end
     res
+  end
+
+  #
+  # Safely resolve the current signed-in user, returning nil instead of raising
+  # if unavailable (e.g. no user session present). Used by #partial_cache_key to
+  # determine the effective user paired with an Admin without duplicating the
+  # rescue logic at each call site.
+  def safe_current_user
+    current_user
+  rescue StandardError
+    nil
+  end
+
+  #
+  # Token representing the most recent +updated_at+ for the given class scoped to an
+  # app type. Used by #partial_cache_key to invalidate cached partials whenever related
+  # admin configuration (user roles / access controls) changes for that app type.
+  def latest_updated_at_token(klass, app_type_id)
+    klass.where(app_type_id:)
+         .reorder(updated_at: :desc)
+         .limit(1)
+         .pluck(:updated_at)
+         &.first.to_i.to_s
   end
 
   #
