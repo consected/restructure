@@ -2,6 +2,10 @@
 
 require 'rails_helper'
 
+# Tests for the AdminHandler concern (mixed into Admin::AppType, Admin::UserAccessControl,
+# Admin::UserRole, Classification::GeneralSelection, and other admin-configured resources).
+# Covers `already_taken` uniqueness checks and `latest_update` memoization, including the
+# issue #1302 regression coverage below (config.active_support.to_time_preserves_timezone).
 RSpec.describe AdminHandler, type: :model do
   include ModelSupport
 
@@ -35,18 +39,31 @@ RSpec.describe AdminHandler, type: :model do
   end
 
   # Regression coverage for issue #1302 (config.active_support.to_time_preserves_timezone).
-  # `latest_update` calls `updated_at.to_time`, whose result is used both in string
-  # interpolation (cache keys, e.g. Admin::UserAccessControl.cache_key_for_access_for) and
-  # in arithmetic (e.g. Dynamic::DefHandler#up_to_date? does `(lu - @prev_latest_update).abs`).
+  # `latest_update` calls `updated_at.to_time` (or `created_at.to_time` as a fallback), whose
+  # result is used both in cache-key string interpolation
+  # (Admin::UserAccessControl.cache_key_for_access_for / .access_control_version_token, which
+  # depend on second-granularity formatting - see issue #1287) and in memoized equality
+  # comparisons that gate memo invalidation (UserAccessHandler#user_access_controls_updated?
+  # and #user_roles_updated? do `@latest_user_access_control != Admin::UserAccessControl.latest_update`).
   # Both usages must keep working whether `to_time` returns a plain Time (:offset) or an
   # ActiveSupport::TimeWithZone (:zone).
-  it 'returns a latest_update value usable in string interpolation and arithmetic' do
+  it 'returns a latest_update value usable as a stable cache-key component and in equality comparisons' do
     Admin::AppType.reset_latest_update
     lu = Admin::AppType.latest_update(force: true)
 
     expect(lu).not_to be_nil
-    expect { "key-#{lu}" }.not_to raise_error
-    expect((lu - (lu - 5.seconds)).abs).to be_within(0.01).of(5)
+    # Locks the second-granularity string format that cache_key_for_access_for and
+    # access_control_version_token depend on (issue #1287), regardless of :offset vs :zone.
+    expect(lu.to_s).to match(/\A\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)
+
+    # The value must remain equal to itself across repeated (unforced) memo reads, and
+    # correctly detect a genuine change - mirroring the != comparisons UserAccessHandler
+    # performs against a previously memoized value.
+    expect(Admin::AppType.latest_update).to eq(lu)
+
+    Admin::AppType.create!(name: "tz-audit-#{SecureRandom.hex(4)}", label: 'TZ Audit', current_admin: @admin)
+    new_lu = Admin::AppType.latest_update(force: true)
+    expect(new_lu).not_to eq(lu)
   end
 end
 

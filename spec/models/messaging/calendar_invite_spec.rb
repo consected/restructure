@@ -4,7 +4,8 @@
 # Validates RFC 5545 compliant VCALENDAR/VEVENT .ics generation
 # supporting METHOD:REQUEST (invitation) and METHOD:CANCEL (cancellation).
 # Tests cover: defaults, case insensitivity, duration option, validation errors,
-# and optional field omission.
+# optional field omission, and (issue #1302) Date-typed dtstart/dtend input via
+# the parse_datetime `Date` branch.
 
 require 'rails_helper'
 
