@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
-# Purpose: Tests for the User Access Overview seeded admin reports (GitHub Issue #706).
+# Purpose: Tests for the User Access Overview seeded admin reports (GitHub Issue #706, #1330).
 #
-# These reports provide five complementary perspectives on a user's effective access controls
+# These reports provide six complementary perspectives on a user's effective access controls
 # within an app type:
 #   Perspective 1 (by_role): UACs grouped by role name or "direct" assignment
 #   Perspective 2 (by_resource): UACs grouped by resource, showing which roles granted each
 #   Perspective 3 (resolved): One effective UAC per resource after priority_order resolution
 #   Perspective 4 (roles_only): User's assigned roles in the selected app type (user optional)
 #   Perspective 5 (users_with_role): Users who have a role assigned (user optional)
+#   Perspective 6 (resource_by_role): All grants for selected resource(s) by source
 #
 # The tests verify:
-#   - All four reports are seeded with correct attributes
+#   - All six reports are seeded with correct attributes
 #   - Default UAC records are created to gate access to the reports
 #   - Each perspective returns expected results given a known set of roles and UACs
 #   - Results are correctly scoped by app_type and user
@@ -33,6 +34,8 @@
 #     which causes SQL patterns like (:param = '' OR ...) to fail because NULL = '' is NULL (falsy).
 #     The NULLIF(:param, '') IS NULL pattern used for :user and :app_type_id handles nil correctly,
 #     but :resource_type, :resource_name, and :role_name use the broken (:param = '' OR ...) pattern.
+#   - Issue #1330: activity_log_type filtering returns correct results (not empty)
+#   - Issue #1330: Related reports panel shows all UAO reports with title "User access overviews"
 
 require 'rails_helper'
 
@@ -1185,5 +1188,174 @@ RSpec.describe 'User Access Overview Reports', type: :model do
     }.merge(extra_params)
     sanitized = ActiveRecord::Base.sanitize_sql_for_conditions([sql, params])
     ActiveRecord::Base.connection.execute(sanitized).to_a
+  end
+
+  # ── Issue #1330: activity_log_type filtering ────────────────────────────────
+
+  describe 'activity_log_type resource filtering (issue #1330)' do
+    # Creates an activity_log_type UAC using allow_bad_resource_name because the
+    # test environment does not have activity log option configs loaded.
+    let(:alt_resource_name) { 'activity_log__test_activity__some_type' }
+
+    before do
+      # Role-based activity_log_type UAC for 'editor' role
+      Admin::UserAccessControl.create!(
+        app_type: @test_app_type,
+        access: :read,
+        resource_type: :activity_log_type,
+        resource_name: alt_resource_name,
+        role_name: 'editor',
+        allow_bad_resource_name: true,
+        current_admin: @admin
+      )
+      # Default (no user, no role) activity_log_type UAC
+      Admin::UserAccessControl.create!(
+        app_type: @test_app_type,
+        access: :read,
+        resource_type: :activity_log_type,
+        resource_name: 'activity_log__test_activity__default_type',
+        allow_bad_resource_name: true,
+        current_admin: @admin
+      )
+    end
+
+    it 'P1 (by_role): returns activity_log_type UACs when filtered by resource_type' do
+      report = Report.find_by(short_name: 'user_access_overview_by_role', item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type')
+
+      expect(results).not_to be_empty,
+                             'Expected P1 to return results when resource_type=activity_log_type'
+      result_types = results.map { |r| r['resource_type'] }.uniq
+      expect(result_types).to eq(['activity_log_type']),
+                              "Expected only activity_log_type rows, got: #{result_types}"
+    end
+
+    it 'P1 (by_role): returns activity_log_type UACs when filtered by resource_type and resource_name' do
+      report = Report.find_by(short_name: 'user_access_overview_by_role', item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type', resource_name: alt_resource_name)
+
+      expect(results).not_to be_empty,
+                             "Expected P1 to return results for resource_name='#{alt_resource_name}'"
+      results.each do |row|
+        expect(row['resource_type']).to eq('activity_log_type')
+        expect(row['resource_name']).to include(alt_resource_name)
+      end
+    end
+
+    it 'P2 (by_resource): returns activity_log_type UACs when filtered by resource_type' do
+      report = Report.find_by(short_name: 'user_access_overview_by_resource', item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type')
+
+      expect(results).not_to be_empty,
+                             'Expected P2 to return results when resource_type=activity_log_type'
+      result_types = results.map { |r| r['resource_type'] }.uniq
+      expect(result_types).to eq(['activity_log_type']),
+                              "Expected only activity_log_type rows in P2, got: #{result_types}"
+    end
+
+    it 'P3 (resolved): returns activity_log_type UACs when filtered by resource_type' do
+      report = Report.find_by(short_name: 'user_access_overview_resolved', item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type')
+
+      expect(results).not_to be_empty,
+                             'Expected P3 to return results when resource_type=activity_log_type'
+      result_types = results.map { |r| r['resource_type'] }.uniq
+      expect(result_types).to eq(['activity_log_type']),
+                              "Expected only activity_log_type rows in P3, got: #{result_types}"
+    end
+
+    it 'P6 (resource_by_role): returns activity_log_type UACs when filtered by resource_type' do
+      report = Report.find_by(short_name: 'user_access_overview_resource_by_role',
+                              item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type')
+
+      expect(results).not_to be_empty,
+                             'Expected P6 to return results when resource_type=activity_log_type'
+      result_types = results.map { |r| r['resource_type'] }.uniq
+      expect(result_types).to eq(['activity_log_type']),
+                              "Expected only activity_log_type rows in P6, got: #{result_types}"
+    end
+
+    it 'P6 (resource_by_role): returns activity_log_type UACs filtered by resource_type and resource_name' do
+      report = Report.find_by(short_name: 'user_access_overview_resource_by_role',
+                              item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: 'activity_log_type', resource_name: alt_resource_name)
+
+      expect(results).not_to be_empty,
+                             "Expected P6 to return results for activity_log_type/#{alt_resource_name}"
+      results.each do |row|
+        expect(row['resource_type']).to eq('activity_log_type')
+        expect(row['resource_name']).to include(alt_resource_name)
+      end
+    end
+
+    it 'P1 (by_role): nil resource_type still returns all resource types including activity_log_type' do
+      report = Report.find_by(short_name: 'user_access_overview_by_role', item_type: 'admin-user-access-overview')
+
+      results = run_report_sql(report, resource_type: nil, resource_name: nil)
+
+      expect(results).not_to be_empty
+      result_types = results.map { |r| r['resource_type'] }.uniq
+      expect(result_types).to include('activity_log_type'),
+                              "Expected all resource types to be included when filter is nil, got: #{result_types}"
+    end
+  end
+
+  # ── Issue #1330: related reports panel ─────────────────────────────────────
+
+  describe '"User access overviews" related reports panel (issue #1330)' do
+    let(:partial_path) do
+      Rails.root.join('app/views/reports/_admin_user_access_overview_related.html.erb')
+    end
+
+    it 'partial file exists' do
+      expect(File.exist?(partial_path)).to be true
+    end
+
+    it 'partial heading reads "User access overviews" not "Other views with the same filters"' do
+      content = File.read(partial_path)
+      expect(content).to include('User access overviews'),
+                         'Expected panel heading to be "User access overviews"'
+      expect(content).not_to include('Other views with the same filters'),
+                             'Expected old heading "Other views with the same filters" to be removed'
+    end
+
+    it 'partial shows all UAO reports regardless of current report perspective' do
+      content = File.read(partial_path)
+      # The panel must NOT restrict display using a related_groups hash keyed on short_name.
+      # It should instead show all reports with the admin-user-access-overview item_type.
+      expect(content).not_to include('related_groups'),
+                             'Expected related_groups hash (which limits to related perspectives) to be removed'
+    end
+
+    it 'all six seeded UAO reports appear in the related panel for any perspective' do
+      all_short_names = %w[
+        user_access_overview_by_role
+        user_access_overview_by_resource
+        user_access_overview_resolved
+        user_access_overview_resource_by_role
+        user_access_overview_roles_only
+        user_access_overview_users_with_role
+      ]
+
+      # Each of the six reports should see the same full six-report list.
+      all_short_names.each do |current_short_name|
+        report = Report.find_by(short_name: current_short_name, item_type: 'admin-user-access-overview')
+        expect(report).to be_present, "Expected report '#{current_short_name}' to be seeded"
+
+        listed_reports = Report.active.where(
+          item_type: 'admin-user-access-overview'
+        )
+
+        expect(listed_reports.count).to eq(6),
+                                        "Expected 6 reports for #{current_short_name}, found #{listed_reports.count}"
+      end
+    end
   end
 end

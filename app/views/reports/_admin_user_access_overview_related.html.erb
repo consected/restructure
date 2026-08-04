@@ -1,64 +1,30 @@
 <%
-  # Cross-perspective navigation panel for the User Access Overview admin
-  # reports (GitHub Issue #1125). Renders links to related report
-  # perspectives that share filters with the current report, preserving the
-  # filter values so admins can switch perspective without re-entering them.
-  #
-  # The list of related perspectives depends on the current report's
-  # short_name. Filter forwarding is done by mapping the current
-  # search_attrs to the target report's parameters.
+  # Navigation panel for the User Access Overview admin reports (GitHub Issues #1125, #1330).
+  # Renders links to all UAO report perspectives, including the current one, preserving the 
+  # current filter values so admins can switch perspective without re-entering them.
 
-  related_groups = {
-    'user_access_overview_by_role' => %w[
-      user_access_overview_by_resource
-      user_access_overview_resolved
-      user_access_overview_resource_by_role
-    ],
-    'user_access_overview_by_resource' => %w[
-      user_access_overview_by_role
-      user_access_overview_resolved
-      user_access_overview_resource_by_role
-    ],
-    'user_access_overview_resolved' => %w[
-      user_access_overview_by_role
-      user_access_overview_by_resource
-      user_access_overview_resource_by_role
-    ],
-    'user_access_overview_resource_by_role' => %w[
-      user_access_overview_by_role
-      user_access_overview_by_resource
-      user_access_overview_resolved
-    ],
-    'user_access_overview_roles_only' => %w[
-      user_access_overview_users_with_role
-    ],
-    'user_access_overview_users_with_role' => %w[
-      user_access_overview_roles_only
-    ]
-  }
-
-  related_short_names = related_groups[@report&.short_name] || []
-  related_reports = Report.active.where(
-    item_type: UserAccessOverviewLinksHelper::USER_ACCESS_OVERVIEW_ITEM_TYPE,
-    short_name: related_short_names
-  ).to_a
+  all_reports = Report.active.where(
+    item_type: UserAccessOverviewLinksHelper::USER_ACCESS_OVERVIEW_ITEM_TYPE
+  ).order(:position, :id).to_a
 
   current_search_attrs = search_attrs_params_hash || {}
 %>
-<% if related_reports.any? %>
+<% if all_reports.any? %>
   <div class="uao-related-perspectives panel panel-default">
     <div class="panel-heading">
-      <strong>Other views with the same filters</strong>
+      <strong>User access overviews</strong>
     </div>
     <ul class="list-group">
-      <% related_reports.each do |r|
+      <% all_reports.each do |r|
+           is_current = (@report&.id == r.id)
            forwarded = current_search_attrs.slice(:user, :app_type_id, :resource_type, :resource_name, :role_name)
            forwarded = forwarded.reject { |_, v| v.nil? || v.to_s.strip.empty? }
       %>
-        <li class="list-group-item">
+        <li class="list-group-item not-header<%= ' current-row' if is_current %>">
           <%= link_to r.name,
                       report_path(id: r.alt_resource_name, search_attrs: forwarded),
-                      class: 'uao-related-perspective-link' %>
+                      class: 'uao-related-perspective-link',
+                      aria: (is_current ? { current: 'page' } : {}) %>
           <% if r.description.present? %>
             <span class="text-muted small uao-related-perspective-desc">&mdash; <%= r.description %></span>
           <% end %>
