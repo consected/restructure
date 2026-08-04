@@ -353,10 +353,30 @@ module Dynamic
       end
       return if encrypted_fields.empty?
 
-      encrypted_fields.each_key do |field_name|
-        impl_class.encrypts field_name
+      encrypted_fields.each do |field_name, config|
+        provider = build_digest_key_provider(config[:hash_digest_class])
+        impl_class.encrypts field_name, key_provider: provider
         Rails.logger.info "Applied encryption to field #{field_name} on #{impl_class.name}"
       end
+    end
+
+    # Build a DerivedSecretKeyProvider using the specified digest class.
+    # Falls back to SHA256 for a blank or unsupported value - config validation
+    # (DbColumns#validate_hash_digest_class_values) is advisory only and does not
+    # block save, so this must independently enforce the same allowlist to avoid
+    # silently deriving a weaker (or non-existent) digest.
+    # @param digest_class_name [String, Symbol, nil] 'sha1' or 'sha256' (defaults to 'sha256')
+    # @return [ActiveRecord::Encryption::DerivedSecretKeyProvider]
+    def build_digest_key_provider(digest_class_name)
+      allowed = OptionConfigs::ExtraOptionConfigs::DbColumns::ALLOWED_HASH_DIGEST_CLASSES
+      requested = digest_class_name.presence&.to_s&.downcase
+      resolved = allowed.include?(requested) ? requested : 'sha256'
+      digest_class = OpenSSL::Digest.const_get(resolved.upcase)
+      key_generator = ActiveRecord::Encryption::KeyGenerator.new(hash_digest_class: digest_class)
+      ActiveRecord::Encryption::DerivedSecretKeyProvider.new(
+        ActiveRecord::Encryption.config.primary_key,
+        key_generator: key_generator
+      )
     end
 
     # A list of model names and definitions is stored in the class so we can
