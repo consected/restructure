@@ -256,7 +256,7 @@ class DynamicModel < ActiveRecord::Base
             end
 
             def primary_key_name
-              @primary_key_name ||= definition.primary_key_name.to_sym
+              @primary_key_name ||= definition.primary_key_name.blank? ? :id : definition.primary_key_name.to_sym
             end
 
             def foreign_key_through_external_id
