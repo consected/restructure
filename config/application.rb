@@ -56,10 +56,6 @@ module Fpa1
     # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
     # Remove each override when the corresponding tracking sub-issue is resolved.
 
-    # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
-    # consumers are audited. Tracking: issue #1295.
-    config.active_record.postgresql_adapter_decode_dates = false
-
     # Rails 7.1+ defaults to a SHA256-derived key for non-deterministic ActiveRecord
     # Encryption attributes (e.g. otp_secret, dynamic model fields marked encrypted: true).
     # This app has existing production data encrypted under the old SHA1-derived key.
