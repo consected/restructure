@@ -3,7 +3,7 @@
 module MasterHandler
   extend ActiveSupport::Concern
 
-  UseMasterParam = %w[new create index template_config].freeze
+  UseMasterParam = %w[new create index template_config].freeze unless defined? UseMasterParam
 
   included do
     before_action :init_vars_master_handler
@@ -73,6 +73,7 @@ module MasterHandler
       if object_instance.save
         reload_objects
         handle_additional_updates
+        create_embedded_item_reference
         @id = object_instance.id
         if object_instance.has_multiple_results
           @master_objects = object_instance.multiple_results
@@ -105,7 +106,7 @@ module MasterHandler
       translate_params_to_persistable
       if object_instance.update(secure_params)
         reload_objects
-        handle_additional_updates :update
+        handle_additional_updates
         if object_instance.has_multiple_results && !@assigning_master_to_existing_instance
           @master_objects = object_instance.multiple_results
           index
@@ -215,13 +216,21 @@ module MasterHandler
   # values, since column values may have changed in the database at the point of #save or #update
   # being called. These changes are not reflected in the attributes of the object or embedded intem
   # and therefore a careful reload must be performed.
+  #
+  # When called from #create, uses embed_action_type: :latest to retrieve whatever embedded item
+  # was already established earlier in this request (e.g. by handle_embedded_item / link_embedded_item),
+  # rather than asking #embedded_item to make a fresh :creating decision - which could behave
+  # differently once the save just performed has changed reference/limit counts. :latest is only
+  # ever populated for :creating evaluations (see #embedded_item), so #update must NOT use it here -
+  # it needs the normal :editing lookup instead.
   def reload_objects
     object_instance.reload
     object_instance.current_user = current_user
-    return unless object_instance.embedded_item&.persisted?
+    ei = action_name == 'create' ? latest_or_current_embedded_item : object_instance.embedded_item
+    return unless ei&.persisted?
 
-    object_instance.embedded_item.reload
-    object_instance.embedded_item.current_user = current_user
+    ei.reload
+    ei.current_user = current_user
   end
 
   #
@@ -537,10 +546,8 @@ module MasterHandler
 
   #
   # #create and #update actions require additional updates to be performed.
-  # This:
-  # - sets up flags changed during new / edit
-  # - creates a model reference for an embedded item form
-  def handle_additional_updates(action = :create)
+  # This sets up flags changed during new / edit
+  def handle_additional_updates
     @flag_item_type = object_instance.item_type
     # Check for blank item_flag param to cover testing scenarios that do not return
     # the item_flag set. Which is reasonable and conceivable in a real form too
@@ -550,15 +557,43 @@ module MasterHandler
       ItemFlag.set_flags flag_list, object_instance, current_user
     end
 
-    # Based on an embedded item coming from a dynamic form, create the reference.
-    # In this mode we are in the dynamic record, so the order is different from the previous create_with usage
-    if action == :create && object_instance.embedded_item&.id && !object_instance.direct_embed?
-      ModelReference.create_with object_instance,
-                                 object_instance.embedded_item
-
-    end
-
     true
+  end
+
+  #
+  # Based on an embedded item coming from a dynamic form, create the reference. Only called
+  # from #create - the reference is only ever created once, at creation time.
+  # In this mode we are in the dynamic record, so the order is different from the previous
+  # create_with usage.
+  # Uses embed_action_type: :latest for the same reason as #reload_objects - this just wants
+  # "the item we already established", not a fresh :creating evaluation.
+  def create_embedded_item_reference
+    ei = latest_or_current_embedded_item
+    return unless ei&.id && !object_instance.direct_embed?
+
+    ModelReference.create_with object_instance, ei
+  end
+
+  #
+  # #embedded_item(embed_action_type: :latest) is only understood by models that include
+  # Dynamic::ModelReferenceHandler (ActivityLog / DynamicModel / NfsStore::Manage::ContainerFile
+  # implementations) - that's the only place #embedded_item accepts keyword arguments at all.
+  # Simpler models (Address, PlayerContact, Tracker, etc.) only have HandlesUserBase's zero-arity
+  # #embedded_item reader, which would raise ArgumentError if called with embed_action_type:.
+  # Fall back to the plain call for those - they never populate @latest_embedded_item anyway, so
+  # there's nothing for :latest to retrieve.
+  #
+  # :latest can also legitimately be nil even for a ModelReferenceHandler instance: #reset_model_references
+  # (which clears it) isn't only wired to after_commit - it also runs synchronously mid-request, e.g.
+  # from ModelReference.create_with (called by #finalize_prepped_embedded_item, an after_create hook
+  # that can run as part of this very #save for save-trigger-prepped embedded items). In that case, fall
+  # back to a fresh :creating evaluation rather than silently returning nothing - safe to do so, since
+  # the dispatch logic no longer raises for a genuinely-at-capacity reference (see #always_embed_creatable_item).
+  def latest_or_current_embedded_item
+    return object_instance.embedded_item unless object_instance.respond_to?(:model_references)
+
+    object_instance.embedded_item(embed_action_type: :latest) ||
+      object_instance.embedded_item(embed_action_type: :creating)
   end
 
   #
