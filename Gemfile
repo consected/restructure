@@ -40,7 +40,7 @@ gem 'pg', '~> 1.4', '>= 1.4.3'
 gem 'minitest', '~> 5.1' # minitest 6 is incompatible with rails 7.2.x
 gem 'puma', '~> 8.0'
 
-gem 'rails', '~> 8.0.0'
+gem 'rails', '~> 8.1.0'
 
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:

@@ -629,7 +629,7 @@
       "location": {
         "type": "method",
         "class": "OptionConfigs::ExtraOptionConfigs::FieldConfigs",
-        "method": "OptionConfigs::ExtraOptionConfigs::FieldConfigs.prepare_config"
+        "method": "prepare_config"
       },
       "user_input": null,
       "confidence": "Weak",
