@@ -234,6 +234,18 @@ RSpec.configure do |config|
     change_setting('AllowDynamicMigrations', true)
   end
 
+  config.before(:all, type: :models) do
+    change_setting('AllowDynamicMigrations', nil)
+  end
+
+  config.before(:all, type: :controllers) do
+    change_setting('AllowDynamicMigrations', nil)
+  end
+
+  config.before(:all, type: :requests) do
+    change_setting('AllowDynamicMigrations', nil)
+  end
+
   Shoulda::Matchers.configure do |config|
     config.integrate do |with|
       with.test_framework :rspec

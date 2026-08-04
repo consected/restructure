@@ -12,7 +12,7 @@
 # Background context recorded in /memories/repo/embed_extra_log_type_create_gotchas.md
 #
 # Scenario being modelled (mirroring the user's real config):
-#   - ActivityLog::PlayerContactElt with two extra_log_types:
+#   - ActivityLog::PlayerContactVcri with two extra_log_types:
 #       * `step_1`   — no embed
 #       * `embed_step` — has `embed: dynamic_model__test_embed_invs`
 #     and `creatable_if: { never: true }`, so it can only be reached via a
@@ -67,7 +67,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
 
     # Resolve the parent activity log's expected table name and FK column
     # used by direct embed: foreign_key_field_name => "#{table_name.singularize}_id"
-    @al_table = 'activity_log_player_contact_elts'
+    @al_table = 'activity_log_player_contact_vcris'
     @al_fk = "#{@al_table.singularize}_id"
 
     setup_embed_target_models
@@ -119,10 +119,10 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
     let_user_create :dynamic_model__test_embed_validifs
   end
 
-  # Configure ActivityLog::PlayerContactElt with several extra_log_types,
+  # Configure ActivityLog::PlayerContactVcri with several extra_log_types,
   # each exercising a different hypothesis.
   def setup_activity_log_with_embed
-    SetupHelper.setup_al_gen_tests AlNameEmbedInv, 'elt', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameEmbedInv, 'vcri', 'player_contact'
 
     al = ActivityLog.active.where(name: al_name).first
     raise "Activity Log #{al_name} not set up" if al.nil?
@@ -177,10 +177,11 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
 
     al.current_admin = @admin
     al.save!
+    al.force_option_config_parse
 
     @activity_log = al
 
-    setup_access :activity_log__player_contact_elts, user: @user
+    setup_access :activity_log__player_contact_vcris, user: @user
     al.option_configs.each do |c|
       setup_access c.resource_name, resource_type: :activity_log_type, user: @user
     end
@@ -191,7 +192,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
   # the user's setup where the trigger fires from a source extra_log_type's
   # save_trigger block (in: referring_record).
   def source_log
-    al = @player_contact.activity_log__player_contact_elts.build(
+    al = @player_contact.activity_log__player_contact_vcris.build(
       select_call_direction: 'from staff',
       extra_log_type: 'step_1',
       select_who: 'tester'
@@ -206,7 +207,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
   # newly created activity log instance from save_trigger_results.
   def fire_create_reference(target_extra_log_type, source:, force_not_valid: true)
     config = {
-      activity_log__player_contact_elt: {
+      activity_log__player_contact_vcri: {
         in: 'this',
         with: { extra_log_type: target_extra_log_type },
         force_create: true,
@@ -321,7 +322,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
       end.to raise_error(FphsException, /embed_resource not found/)
 
       # Confirm no row was created under the embed_step_bad_resource type
-      bad = src.master.activity_log__player_contact_elts
+      bad = src.master.activity_log__player_contact_vcris
                .where(extra_log_type: 'embed_step_bad_resource')
       expect(bad.count).to eq 0
     end
@@ -334,7 +335,7 @@ RSpec.describe 'embed via create_reference investigation', type: :model do
       src = source_log
 
       config = {
-        activity_log__player_contact_elt: {
+        activity_log__player_contact_vcri: {
           in: 'this',
           with: { extra_log_type: 'embed_step' },
           force_create: true,

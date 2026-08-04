@@ -319,13 +319,14 @@ RSpec.describe Admin::MessageTemplate, type: :model do
         '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
       ]
     end
-    it 'raises when generated content contains XSS payload}' do
-      payloads.each do |payload|
-        Admin::MessageTemplate.create! name: 'xss content', message_type: :email, template_type: :content,
+    it 'raises when generated content contains XSS payloads' do
+      payloads.each_with_index do |payload, index|
+        template_name = "xss content #{index}"
+        Admin::MessageTemplate.create! name: template_name, message_type: :email, template_type: :content,
                                        template: payload, current_admin: @admin
 
         expect do
-          Admin::MessageTemplate.generate_content content_template_name: 'xss content'
+          Admin::MessageTemplate.generate_content content_template_name: template_name
         end.to raise_error(FphsException, /disallowed tag or attribute/)
       end
     end

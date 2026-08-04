@@ -11,7 +11,7 @@ module FeatureHelper
 
   # Ensure that the app is set to use markdown for notes fields.
   # This is important for tests that rely on rich text editors (often notes or details fields).
-  def setup_markdown_notes(app_type: nil)
+  def set_up_markdown_notes(app_type: nil)
     @app_type = app_type if app_type
     @app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
     Admin::AppConfiguration.create!(

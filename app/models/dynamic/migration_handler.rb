@@ -65,11 +65,12 @@ module Dynamic
     end
 
     #
-    # Typically we only allow migrations in development, but an app setting
-    # can allow this on servers running in Rails production that are used for
+    # App settings can allow migrations on servers running in Rails production that are used for
     # app development.
+    # In the test environment, we don't memoize the value, since the server settings may change
+    # between tests that reuse a dynamic definition.
     def allow_migrations
-      unless @allow_migrations.nil?
+      unless @allow_migrations.nil? || Rails.env.test?
         Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
         return @allow_migrations
       end
@@ -171,9 +172,9 @@ module Dynamic
       return unless (!config_view_sql && migration_generator.migration_update_table) ||
                     (config_view_sql && view_sql_changed?) ||
                     (table_comments && (
-                        migration_generator.table_comment_changes ||
-                        migration_generator.fields_comments_changes.present?
-                      )
+                      migration_generator.table_comment_changes ||
+                      migration_generator.fields_comments_changes.present?
+                    )
                     ) ||
                     reference_views_missing? ||
                     saved_change_to_table_name? ||
@@ -202,7 +203,7 @@ module Dynamic
     #
     # Run a generated migration triggered after_save
     def run_migration
-      return if @ran_migration
+      return if @ran_migration || !allow_migrations
 
       @ran_migration = true
       migration_generator.run_migration
