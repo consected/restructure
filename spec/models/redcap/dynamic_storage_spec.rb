@@ -9,6 +9,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
   describe 'dynamic storage for Redcap project' do
     before :all do
+      change_setting('AllowDynamicMigrations', true)
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin

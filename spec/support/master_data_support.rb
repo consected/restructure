@@ -115,13 +115,13 @@ module MasterDataSupport
       # which is uniquely set during create_data_set for the reference record
       ref_pi = PlayerInfo.find_by(rank: 12)
       @master = ref_pi&.master || Master.no_temporary_masters.first
+      @master.current_user = @user if @master && @user
       @master_id = @master&.id
       @full_player_info = ref_pi || @master.player_infos.first
       @full_pro_info = @master.pro_infos.first
       @full_master_record = @master
       @full_trackers = @master.trackers.reload
       @app_type = Admin::AppType.active.first
-      @user_start = rand 1_000_000_000
       @master_count = [Master.count, list_length].min
       return
     end
@@ -165,7 +165,6 @@ module MasterDataSupport
     expect(Classification::ProtocolEvent.active.reload.find_by(name: 'updated player info')).not_to be nil
 
     # Start the user number embedded in the email address at a random number
-    @user_start = rand 1_000_000_000
     reference_list_item = nil
     reference_pro_item = nil
     ActiveRecord::Base.connection.execute 'update player_infos set rank = 11 where rank = 12;'
@@ -174,9 +173,10 @@ module MasterDataSupport
 
     prol = pro_list.first(list_length)
     pl = player_list.first(list_length)
+    @full_master_users = []
     pl.each do |l|
       # Create a user with a specific number embedded
-      create_user(@master_count + @user_start, 'mds1')
+      @full_master_users << create_user
       @user.app_type = @app_type
       setup_access :trackers
       setup_access :player_infos
@@ -196,6 +196,7 @@ module MasterDataSupport
       # current @master record so that we can refer to it again
       # in the tests
       if @master_count == full_master_number
+        @full_master_user = @user
         reference_list_item = l
         reference_pro_item = p
 

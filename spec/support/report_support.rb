@@ -31,4 +31,20 @@ module ReportSupport
 
     expect(User.find_by_sql([@report_sql]).length).to be > 0
   end
+
+  #
+  # @params report [Report|Integer] the report to open
+  def open_report_by_id(report)
+    report = Report.find(report) if report.is_a? Integer
+
+    finish_page_loading
+    expect(page).to have_css(".data-results table.tablesorter tr[data-report-id='#{report.id}']")
+    within ".data-results table.tablesorter tr[data-report-id='#{report.id}']" do
+      click_link report.name
+    end
+    finish_page_loading
+    # The .report-criteria element may be hidden when hide_criteria_panel is configured,
+    # so use visible: :all to confirm the page loaded without requiring it to be visible.
+    expect(page).to have_css('.report-criteria', visible: :all)
+  end
 end

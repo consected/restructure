@@ -9,6 +9,19 @@ module FeatureHelper
     debugger
   end
 
+  # Ensure that the app is set to use markdown for notes fields.
+  # This is important for tests that rely on rich text editors (often notes or details fields).
+  def setup_markdown_notes(app_type: nil)
+    @app_type = app_type if app_type
+    @app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
+    Admin::AppConfiguration.create!(
+      name: 'notes field format',
+      value: 'markdown',
+      app_type: @app_type,
+      current_admin: @admin
+    )
+  end
+
   def scroll_into_view(element)
     page.execute_script('arguments[0].scrollIntoView(true);', element)
   end

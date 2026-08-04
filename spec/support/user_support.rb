@@ -100,8 +100,9 @@ module UserSupport
     part ||= SecureRandom.hex(10)
     good_admin_email = "e-testadmin-tester#{part}@testing.com"
 
-    admin = Admin.create! email: good_admin_email
-
+    admin = Admin.find_or_initialize_by(email: good_admin_email)
+    admin.disabled = false
+    admin.save! if admin.new_record? || admin.changed?
     # Save a new password, as required to handle temp passwords
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password

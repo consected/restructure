@@ -25,7 +25,7 @@ module ModelSupport
   end
 
   def add_app_config(app_type, name, value, user: nil, role_name: nil)
-    @admin ||= create_admin
+    @admin, = create_admin unless @admin
 
     cond = { name: }
     cond[:role_name] = role_name if role_name

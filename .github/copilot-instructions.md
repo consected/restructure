@@ -19,7 +19,7 @@
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
 2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
-4. **Never run commands in the background** - all commands exit when complete with success or failure codes
+4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
 ### Git and GitHub Usage
 

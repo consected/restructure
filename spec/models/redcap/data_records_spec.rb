@@ -27,6 +27,11 @@ RSpec.describe Redcap::DataRecords, type: :model do
   def clean_file_fields_filesystem(container)
     FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{container.app_type_id}/containers/#{container.id} -- q2_demo/redcap_test.test_file_field_recs/file-fields/"
   end
+
+  before :all do
+    change_setting('AllowDynamicMigrations', true)
+  end
+
   describe 'retrieving records and files' do
     before :all do
       @bad_admin, = create_admin

@@ -25,13 +25,11 @@ module SetupHelper
   end
 
   def self.auto_admin
-    admin, = ::UserSupport.create_admin
-    admin
+    @auto_admin ||= ::UserSupport.create_admin('auto-admin').first
   end
 
   def self.registration_admin
-    admin, = ::UserSupport.create_admin('registration')
-    admin
+    @registration_admin ||= ::UserSupport.create_admin('registration').first
   end
 
   def self.db_name
@@ -369,16 +367,18 @@ module SetupHelper
       )
     end
 
-    res = ActivityLog.find_or_initialize_by(
+    res = ActivityLog.unscoped.find_or_initialize_by(
       name:, item_type:,
       rec_type:,
       process_name:,
-      disabled: false,
       action_when_attribute: 'called_when',
       field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,' \
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
+    # Re-enable if previously disabled so the same DB record (and id) is reused,
+    # preventing the definition_cache from pointing to a stale entry with a different id
+    res.disabled = false if res.disabled?
     cleaned = ActivityLogSupport.cleanup_matching_activity_logs(item_type, rec_type, process_name, admin: auto_admin, excluding_id: res&.id)
 
     was_active = res.active_model_configuration?

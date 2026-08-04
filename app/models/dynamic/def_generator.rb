@@ -43,9 +43,13 @@ module Dynamic
             dm.generate_model
             # Force the admin for cases that this is run outside of the admin console
             # It is expected that this is mostly when originally seeding the database
-            dm.current_admin ||= dm.admin
+            next if dm.current_admin
 
-            # dm.update_tracker_events
+            # No current admin is set, so use the last admin to update the record.
+            # Ensure the admin is set to enabled, but avoid persisting the change, which would be incorrect.
+            # This should be sufficient to allow subsequent calls related to define_models to succeed.
+            dm.admin.disabled = false
+            dm.current_admin = dm.admin
           end
         rescue Exception => e
           msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
