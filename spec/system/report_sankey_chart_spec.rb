@@ -182,15 +182,6 @@ describe 'sankey chart reports', js: true, driver: $browser_driver do
     finish_page_loading
   end
 
-  def open_report_by_id(report)
-    expect(page).to have_css(".data-results table.tablesorter tr[data-report-id='#{report.id}']")
-    within ".data-results table.tablesorter tr[data-report-id='#{report.id}']" do
-      click_link report.name
-    end
-    finish_page_loading
-    expect(page).to have_css('.report-criteria', visible: :all)
-  end
-
   def run_report
     within '#report_query_form' do
       click_button 'table'

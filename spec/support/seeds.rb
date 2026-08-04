@@ -16,12 +16,15 @@ module Seeds
 
   # Provide auto_admin as both module method and instance method
   def self.auto_admin
-    SetupHelper.auto_admin
+    @auto_admin = SetupHelper.auto_admin
+    @auto_admin.disabled = false
+    @auto_admin.save! if @auto_admin.changed?
+    @auto_admin
   end
 end
 
 def auto_admin
-  SetupHelper.auto_admin
+  Seeds.auto_admin
 end
 
 def log(txt)

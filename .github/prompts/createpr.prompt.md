@@ -13,6 +13,8 @@ If requested to create a PR, follow these steps:
 
 NOTE: Only a human user will merge branches after code review; AI agents should not merge branches.
 
+Create a PR body file in `tmp/agent-tmp/pr-body-<issue-number>.md` directly, rather than using command line tools (since these lead to quoting, backticks and other escaping issues).
+
 Step-by-step commands to create the PR:
 ```sh
 git reset --soft start-<branch-name> && git commit -m "<commit message>"
@@ -22,8 +24,6 @@ git push -u origin <branch-name> --force-with-lease
 cd /home/phil/NetBeansProjects/fphs/fphs-restructure && \
 gh pr create --repo consected/restructure --base develop --head hmsrc:<branch-name> --title "<commit message>" --body-file tmp/agent-tmp/pr-body-<issue-number>.md
 ```
-
-IMPORTANT: escape backticks when used in the command line.
 
 ### Git and GitHub Usage
 

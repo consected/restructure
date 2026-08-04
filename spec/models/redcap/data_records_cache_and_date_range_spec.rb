@@ -104,6 +104,10 @@ RSpec.describe 'Redcap::DataRecords cache and date range', type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
+  before :all do
+    change_setting('AllowDynamicMigrations', true)
+  end
+
   describe 'configurable cache times' do
     before :all do
       @bad_admin, = create_admin

@@ -11,11 +11,14 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include ReportSupport
   include ItemFlagSupport
 
-  before :example do
+  before :all do
     seed_database # to ensure embedded reports work
     create_admin
     create_user
     create_master
+  end
+
+  before :example do
     l = Admin::MessageTemplate.last.id
     Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")
     Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
@@ -294,27 +297,30 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   # contains tags or attributes capable of executing script when rendered as
   # HTML on public info pages, dialogs, or emails.
   describe 'stored XSS protection' do
-    [
-      '<script>alert(1)</script>',
-      '<SCRIPT src="//evil"></SCRIPT>',
-      '<iframe src="//evil"></iframe>',
-      '<frame src="//evil">',
-      '<frameset><frame></frameset>',
-      '<object data="//evil"></object>',
-      '<embed src="//evil">',
-      '<a href="javascript:alert(1)">x</a>',
-      '<a href="javascript&#x3A;alert(1)">x</a>',
-      '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
-      '<img src="x" onerror="alert(1)">',
-      '<svg onload="alert(1)">',
-      '<body onload="alert(1)">',
-      '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
-      '<meta http-equiv="refresh" content="0; url=\'javascript:alert(1)\'">',
-      '<meta http-equiv="refresh" content="0; url=&quot;javascript:alert(1)&quot;">',
-      '<meta http-equiv="refresh" content="0;url=https://evil.example">',
-      '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
-    ].each do |payload|
-      it "raises when generated content contains: #{payload.truncate(40)}" do
+    def payloads
+      [
+        '<script>alert(1)</script>',
+        '<SCRIPT src="//evil"></SCRIPT>',
+        '<iframe src="//evil"></iframe>',
+        '<frame src="//evil">',
+        '<frameset><frame></frameset>',
+        '<object data="//evil"></object>',
+        '<embed src="//evil">',
+        '<a href="javascript:alert(1)">x</a>',
+        '<a href="javascript&#x3A;alert(1)">x</a>',
+        '<iframe srcdoc="<script>alert(1)</script>"></iframe>',
+        '<img src="x" onerror="alert(1)">',
+        '<svg onload="alert(1)">',
+        '<body onload="alert(1)">',
+        '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
+        '<meta http-equiv="refresh" content="0; url=\'javascript:alert(1)\'">',
+        '<meta http-equiv="refresh" content="0; url=&quot;javascript:alert(1)&quot;">',
+        '<meta http-equiv="refresh" content="0;url=https://evil.example">',
+        '<meta http-equiv="refresh" content="0;url=data:text/html,%3Ch1%3Ephish%3C/h1%3E">'
+      ]
+    end
+    it 'raises when generated content contains XSS payload}' do
+      payloads.each do |payload|
         Admin::MessageTemplate.create! name: 'xss content', message_type: :email, template_type: :content,
                                        template: payload, current_admin: @admin
 

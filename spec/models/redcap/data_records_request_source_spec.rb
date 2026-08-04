@@ -35,6 +35,7 @@ RSpec.describe 'Redcap::DataRecords request source recording', type: :model do
   include Redcap::RedcapSupport
 
   before :all do
+    change_setting('AllowDynamicMigrations', true)
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin

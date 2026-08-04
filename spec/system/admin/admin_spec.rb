@@ -214,8 +214,10 @@ describe 'admin sign in process', js: true, driver: $browser_driver do
 
   it 'shows the current project in the left hand panel' do
     admin_sign_in_with_2fa
+    finish_page_loading
 
-    expect(page).to have_css('.admin-panel-components')
+    # Components panel loads asynchronously via AJAX after page load (Issue #1171)
+    expect(page).to have_css('.admin-panel-components', wait: 15)
 
     within '.admin-panel-components' do
       click_link 'Protocols'

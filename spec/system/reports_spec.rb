@@ -361,6 +361,7 @@ describe 'reports', js: true, driver: $browser_driver do
   before :each do
     setup_report_user
     validate_setup
+    setup_markdown_notes
 
     login
   end
@@ -370,15 +371,6 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(page).to have_css("a[href='/reports']")
     click_link 'Reports'
     expect(page).to have_css('.data-results table.tablesorter tr[data-report-id]')
-  end
-
-  def open_report(id, name = nil)
-    name ||= 'Item Flags types'
-    expect(page).to have_css(".data-results table.tablesorter tr[data-report-id='#{id}']")
-    within ".data-results table.tablesorter tr[data-report-id='#{id}']" do
-      click_link name
-    end
-    has_css? '.status-compiled'
   end
 
   def get_column_values(col, table, db_table = nil)
@@ -396,7 +388,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
   it 'runs a report' do
     get_list
-    open_report @report.id
+    open_report_by_id @report
     expect(page).to have_css('.report-criteria')
 
     within '#report_query_form' do
@@ -455,7 +447,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
   it 'exports a report' do
     get_list
-    open_report @report.id
+    open_report_by_id @report
     expect(page).to have_css('.report-criteria')
 
     expect(@user.can?(:export_csv)).to be_truthy
@@ -471,7 +463,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
   it 'has many criteria field types' do
     get_list
-    open_report @criteria_field_report.id, 'Criteria Fields'
+    open_report_by_id @criteria_field_report
     expect(page).to have_css('.report-criteria')
 
     within '#report_query_form' do
@@ -486,7 +478,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
     get_list
 
-    open_report @add_item_button_report.id, 'Add Item Button'
+    open_report_by_id @add_item_button_report
     expect(page).to have_css('.report-criteria')
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
@@ -523,7 +515,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
     get_list
 
-    open_report @activity_log_add_item_button_report.id, 'Activity Log Add Item Button'
+    open_report_by_id @activity_log_add_item_button_report
     expect(page).to have_css('.report-criteria')
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
@@ -572,7 +564,7 @@ describe 'reports', js: true, driver: $browser_driver do
 
     get_list
 
-    open_report @external_identifier_add_item_button_report.id, 'External Identifier Add Item Button'
+    open_report_by_id @external_identifier_add_item_button_report
     expect(page).to have_css('.report-criteria')
     expect(page).to have_css('a.add-item-button')
     aib = find('a.add-item-button')
@@ -615,7 +607,7 @@ describe 'reports', js: true, driver: $browser_driver do
     expect(protocol).not_to be_nil, 'No active protocol found for filtering test'
 
     get_list
-    open_report @filter_selector_report.id, 'Filter Selector Test'
+    open_report_by_id @filter_selector_report
     finish_page_loading
     expect(page).to have_css('.report-criteria')
 

@@ -44,6 +44,7 @@ module Redcap
           stub_request_remove_project_user p[:server_url], p[:api_key]
         end
 
+        expect(@admin.email).to eq @admin.matching_user&.email
         pa = Redcap::ProjectAdmin.create! current_admin: @admin,
                                           study: DefaultStudy,
                                           name: p[:name],
@@ -74,16 +75,18 @@ module Redcap
       # Create a matching user for the admin
       @app_type = Admin::AppType.active.find_by(name: 'ref-data')
 
-      admin ||= @admin
-      user = User.active.find_by_email(admin.email)
-      if user
-        @user = user
-        @user.app_type = @app_type
-      else
-        @user, = create_user nil, '', email: admin.email, app_type: @app_type
+      @admin = admin if admin
+      @user = @admin&.matching_user
+
+      unless @user
+        admin, = create_admin(with_matching_user: true)
+        @admin = admin
       end
-      setup_access :app_type, resource_type: :general, access: :read, user: @user
-      @user.save!
+      user = @user
+
+      setup_access :app_type, resource_type: :general, access: :read, user: @user, app_type: @app_type
+      @user.app_type_id = @app_type.id
+      @user.save! if @user.changed?
       expect(@user.can?(:app_type)).to be_truthy
       expect(@user.app_type.id).to eq @app_type.id
 

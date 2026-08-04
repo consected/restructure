@@ -234,17 +234,6 @@ describe 'report charts', js: true, driver: $browser_driver do
     finish_page_loading
   end
 
-  def open_report_by_id(report)
-    expect(page).to have_css(".data-results table.tablesorter tr[data-report-id='#{report.id}']")
-    within ".data-results table.tablesorter tr[data-report-id='#{report.id}']" do
-      click_link report.name
-    end
-    finish_page_loading
-    # The .report-criteria element may be hidden when hide_criteria_panel is configured,
-    # so use visible: :all to confirm the page loaded without requiring it to be visible.
-    expect(page).to have_css('.report-criteria', visible: :all)
-  end
-
   def run_report
     within '#report_query_form' do
       click_button 'table'
@@ -339,5 +328,4 @@ describe 'report charts', js: true, driver: $browser_driver do
     expect(page).to have_css('.report-chart canvas.report-chart-canvas', wait: 5)
     expect(page).not_to have_css('.report-criteria-content', visible: true)
   end
-
 end

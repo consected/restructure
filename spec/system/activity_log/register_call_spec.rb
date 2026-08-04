@@ -38,14 +38,7 @@ describe 'Register an incoming call', driver: $browser_driver do
     ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
     ac&.disable!(@admin)
 
-    @app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
-    Admin::AppConfiguration.create!(
-      name: 'notes field format',
-      value: 'markdown',
-      app_type: @app_type,
-      current_admin: @admin
-    )
-
+    set_up_markdown_notes
     puts_debug 'done setting up user access'
   end
 

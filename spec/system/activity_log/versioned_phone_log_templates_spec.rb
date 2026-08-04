@@ -17,7 +17,7 @@ describe 'Versioned phone log templates', driver: $browser_driver do
   include ActivityLogMain
 
   def set_up_user_access
-    ensure_user_matches_login_email
+    setup_access :player_infos, user: @user
     setup_access :player_contacts
     setup_access :player_contacts, user: @user
 
@@ -44,39 +44,30 @@ describe 'Versioned phone log templates', driver: $browser_driver do
     )
   end
 
-  def search_for_player(player)
-    click_link 'Research'
-    finish_page_loading
-    finish_form_formatting
-
-    within '#master-search-simple-form' do
-      fill_in 'Last name', with: player.last_name
-      fill_in 'First or nick name', with: player.first_name
-      finish_page_loading
-      finish_form_formatting
-
-      search_button = find_button('search', wait: 5)
-      scroll_into_view(search_button)
-      begin
-        search_button.click
-      rescue Selenium::WebDriver::Error::ElementClickInterceptedError
-        finish_page_loading
-        finish_form_formatting
-        search_button = find_button('search', wait: 5)
-        scroll_into_view(search_button)
-        search_button.click
-      end
+  def set_up_target_contact_record
+    @player = @test_player_infos.find do |player_info|
+      master = player_info.master
+      master && master.player_contacts.phone.any? && master.activity_log__player_contact_phones.any?
     end
 
-    dismiss_modal
-    finish_form_formatting
-    dismiss_modal
+    expect(@player).not_to be_nil
+    @master = @player.master
+  end
+
+  def open_target_contact_record
+    user_logs_in
+    navigate_to_master(@master.id)
+    expect_master_to_have_expanded(@master.id)
   end
 
   def update_phone_log_definition!
     activity_log = ActivityLog.active.find_by(name: ActivityLogMain::ActivityLogName, rec_type: 'phone', item_type: 'player_contact')
     expect(activity_log).not_to be_nil
 
+    # Clear the class-level all_versions memo to ensure we read the actual DB count,
+    # not a stale value left by a prior transaction (e.g. from lifecycle_hooks_spec
+    # before :each) that was rolled back without clearing the class-level memo.
+    ActivityLog.all_versions_memo.delete("ActivityLog-#{activity_log.id}")
     previous_versions_count = activity_log.all_versions.length
     activity_log.current_admin = @admin
 
@@ -144,15 +135,15 @@ describe 'Versioned phone log templates', driver: $browser_driver do
   end
 
   before :example do
-    create_user(create_master: false)
+    @user, @good_password = create_user
+    @good_email = @user.email
     set_up_user_access
-    ensure_user_matches_login_email
-    user_logs_in
+    set_up_target_contact_record
     expect(User.find(@user.id).app_type_id).to eq @app_type.id
   end
 
   it 'renders historical phone log records after activity log definition update' do
-    user_views_contact_record
+    open_target_contact_record
     show_top_ranked_phone_log
     expect_phone_log_to_be_visible
 
@@ -176,8 +167,7 @@ describe 'Versioned phone log templates', driver: $browser_driver do
 
     visit '/'
     finish_form_formatting
-    search_for_player(@player)
-    expand_master_record(master_id: @master.id)
+    open_target_contact_record
 
     show_top_ranked_phone_log
 
