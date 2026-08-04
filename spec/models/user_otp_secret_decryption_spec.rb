@@ -125,4 +125,41 @@ RSpec.describe User, 'OTP secret decryption handling' do
       expect(reloaded.otp_secret).to eq(legacy_secret)
     end
   end
+
+  # Related issue: #1293 - confirms the flip side of the legacy-decryption spec above:
+  # a value written today (no context override) must be encrypted with the new SHA256-derived
+  # key, not the legacy SHA1 one, since new writes should not depend on the decrypt-only
+  # previous scheme.
+  describe 'writing a new otp_secret value' do
+    def legacy_sha1_key_provider
+      key_generator = ActiveRecord::Encryption::KeyGenerator.new(hash_digest_class: OpenSSL::Digest::SHA1)
+      ActiveRecord::Encryption::DerivedSecretKeyProvider.new(
+        ActiveRecord::Encryption.config.primary_key,
+        key_generator: key_generator
+      )
+    end
+
+    it 'uses the current SHA256-derived key, not the legacy SHA1 one' do
+      new_secret = 'KRSXG5CTMVRXEZLU'
+      @user.otp_secret = new_secret
+      @user.save!(validate: false)
+
+      reloaded = User.find(@user.id)
+      expect(reloaded.otp_secret).to eq(new_secret)
+
+      # A context restricted to only the SHA1 key (no SHA256 current scheme, no fallback list)
+      # must fail to decrypt the ciphertext, proving it was not encrypted with SHA1.
+      # The safe reader (StandardAuthenticationSafeOtp) rescues the Decryption error rather
+      # than raising it, so assert via the failure flag instead of expecting a raised error.
+      ActiveRecord::Encryption.with_encryption_context(key_provider: legacy_sha1_key_provider) do
+        reloaded.reload
+        expect(reloaded.otp_secret).to be_nil
+        expect(reloaded.otp_secret_decryption_failed?).to be true
+      end
+    end
+
+    it 'confirms the app-wide hash_digest_class is SHA256' do
+      expect(ActiveRecord::Encryption.config.hash_digest_class).to eq(OpenSSL::Digest::SHA256)
+    end
+  end
 end
