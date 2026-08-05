@@ -1,0 +1,6 @@
+# Pattern 4: Merge reusable conditions with local rules
+  editable_if:
+    <<: *some_condition_anchor
+    all:
+      this:
+        status: draft

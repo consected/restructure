@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+# Tests for Redcap::ApiClient covering project, metadata, record, user and file
+# retrieval from the REDCap API, including the #remove_project_user method
+# added for issue #1259 (removing a user's access from a REDCap project) and
+# its audit trail (Redcap::ClientRequest#result[:api_action]), and the
+# #import_project_user method for adding or updating a user's privileges in a
+# REDCap project (verifying the response, audit record, and that results are
+# never served from cache since the call is mutating).
 require 'rails_helper'
 
 RSpec.describe Redcap::ApiClient, type: :model do
@@ -110,6 +117,123 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res.first.keys).to be_present
     expect(res.first.keys.first).to be_a Symbol
     expect(res[0][:username]).to eq 'd20'
+  end
+
+  it 'removes a user from the project' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    stub_request_remove_project_user @project[:server_url], @project[:api_key], username: 'd20'
+
+    res = pc.remove_project_user(username: 'd20')
+    expect(pc.response_code).to eq 200
+    expect(res).to eq 1
+
+    audit = Redcap::ClientRequest.where(action: 'user').order(created_at: :desc).find { |cr| cr.result['api_action'] == 'delete' }
+    expect(audit).to be_present
+    expect(audit.action).to eq 'user'
+    expect(audit.result['api_action']).to eq 'delete'
+
+    # Removing a user does not automatically refresh (or invalidate) the
+    # project_users cache - a subsequent call is still served fresh here only
+    # because it wasn't cached yet in this example; a second call hits the cache.
+    users = pc.project_users
+    expect(pc.last_result_from_cache).to be false
+    pc.project_users
+    expect(pc.last_result_from_cache).to be true
+    expect(users).to be_a Array
+  end
+
+  it 'force reloads the project_users cache on request' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    pc.project_users
+    expect(pc.last_result_from_cache).to be false
+    pc.project_users
+    expect(pc.last_result_from_cache).to be true
+
+    users = pc.project_users(force_reload: true)
+    expect(pc.last_result_from_cache).to be false
+    expect(users).to be_a Array
+  end
+
+  it 'removes multiple users from the project using usernames' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    stub_request_remove_project_user @project[:server_url], @project[:api_key], usernames: %w[d20 j86]
+
+    res = pc.remove_project_user(usernames: %w[d20 j86])
+    expect(pc.response_code).to eq 200
+    expect(res).to eq 1
+  end
+
+  it 'requires a username to remove a project user' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    expect do
+      pc.remove_project_user
+    end.to raise_error(FphsException, /requires a username/)
+  end
+
+  it 'imports a project user to add or update their privileges' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    user_data = { username: 'd20', expiration: '2036-01-01', record_delete: 1, api_import: 1 }
+    stub_request_import_project_user @project[:server_url], @project[:api_key], user_data: user_data
+
+    res = pc.import_project_user(**user_data)
+    expect(pc.response_code).to eq 200
+    expect(res).to eq 1
+  end
+
+  it 'creates an audit record for the import_project_user action' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    user_data = { username: 'd20', expiration: '2036-01-01', record_delete: 1, api_import: 1 }
+    stub_request_import_project_user @project[:server_url], @project[:api_key], user_data: user_data
+
+    pc.import_project_user(**user_data)
+
+    audit = Redcap::ClientRequest.where(action: 'user').order(created_at: :desc).first
+    expect(audit).to be_present
+    expect(audit.action).to eq 'user'
+    expect(audit.result['retrieved_from']).to eq 'api'
+    # import_project_user carries no 'action' key in request_options, so api_action is nil
+    expect(audit.result['api_action']).to be_nil
+  end
+
+  it 'does not cache the result of import_project_user' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    user_data = { username: 'd20', expiration: '2036-01-01', record_delete: 1, api_import: 1 }
+    stub_request_import_project_user @project[:server_url], @project[:api_key], user_data: user_data
+
+    pc.import_project_user(**user_data)
+    expect(pc.last_result_from_cache).to be false
+
+    # A second call also hits the API (never serves from cache) because import is mutating
+    pc.import_project_user(**user_data)
+    expect(pc.last_result_from_cache).to be false
   end
 
   it 'imports a record' do

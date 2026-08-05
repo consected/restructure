@@ -30,9 +30,9 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
     @admin = create_admin.first
     @user = create_user.first
     @master = create_master(@user)
-    
+
     @al_def = generate_test_activity_log
-    
+
     @implementation_class = ActivityLog::PlayerContactEmail
 
     # Set up basic user access to the specific resources
@@ -42,14 +42,15 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
   end
 
   def login_user(user = nil)
-    user ||= @user || create_user.first
+    unless user
+      create_user
+      user = @user
+    end
     sign_out :user
-    user.confirmed_at ||= Time.now
-    user.current_admin ||= @admin
-    user.save
+
     get '/users/sign_in'
     expect(response.status).to eq 200
-    
+
     # We must actually sign in via Devise or Warden
     sign_in user
   end
@@ -57,19 +58,19 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
   describe 'perspectives with User Access Controls' do
     before(:each) do
       # Create a player contact so the activity log has an item
-      @player_contact = PlayerContact.create!(current_user: @user, master: @master, data: 'test@example.com', rec_type: 'email', rank: 10 )
+      @player_contact = PlayerContact.create!(current_user: @user, master: @master, data: 'test@example.com', rec_type: 'email', rank: 10)
 
       # Create some logs
       @al1 = @player_contact.activity_log__player_contact_emails.new(select_who: 'subject', extra_log_type: 'primary')
       @al1.master = @master
       @al1.current_user = @user
       @al1.save!
-      
+
       @al2 = @player_contact.activity_log__player_contact_emails.new(select_who: 'agent', extra_log_type: 'primary')
       @al2.master = @master
       @al2.current_user = @user
       @al2.save!
-      
+
       # We create a third one that belongs to an extra log type or something that falls out of UAC
       @al3 = @player_contact.activity_log__player_contact_emails.new(select_who: 'agent', extra_log_type: 'blank_log')
       @al3.master = @master
@@ -83,7 +84,7 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
             activity_log__player_contact_emails:
               - name: who_is_agent
                 label: Is Agent
-                where: 
+                where:#{' '}
                   select_who: agent
       YAML
 
@@ -108,11 +109,11 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
       # When no perspective is applied, they see all 3 items via standard UAC
       get "/masters/#{@master.id}/activity_log/player_contact_emails.json"
       expect(response).to have_http_status(:success)
-      
+
       json = JSON.parse(response.body)
       ids = json['activity_log__player_contact_emails'].map { |i| i['id'] }
       expect(ids).to include(@al1.id, @al2.id, @al3.id)
-      
+
       # With perspective applied, they only see matching items
       get "/masters/#{@master.id}/activity_log/player_contact_emails.json", params: { perspective: 'who_is_agent', panel_name: 'test_panel' }
       expect(response).to have_http_status(:success)
@@ -120,11 +121,11 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
       ids = json['activity_log__player_contact_emails'].map { |i| i['id'] }
       expect(ids).not_to include(@al1.id) # 'subject'
       expect(ids).to include(@al2.id, @al3.id) # Both 'agent'
-      
+
       # Now, we change the user's UAC for this specific action to exclude 'extra_log_type: blank_log'
       Admin::UserAccessControl.where(resource_name: 'activity_log__player_contact_email__primary', app_type: @user.app_type).update_all(disabled: true)
       Admin::UserAccessControl.where(resource_name: 'activity_log__player_contact_email__blank_log', app_type: @user.app_type).update_all(disabled: true)
-      
+
       setup_access :activity_log__player_contact_email__primary, resource_type: :activity_log_type, access: :read, user: @user
       uac = Admin::UserAccessControl.last
       uac.update!(
@@ -135,22 +136,22 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
           }
         }
       )
-      
+
       # Reload the index
       get "/masters/#{@master.id}/activity_log/player_contact_emails.json"
       json = JSON.parse(response.body)
       ids = json['activity_log__player_contact_emails'].map { |i| i['id'] }
-      
+
       # UAC alone means @al3 should be missing because it lacks access to extra_log_type 'blank_log'
       expect(ids).to include(@al1.id, @al2.id)
       expect(ids).not_to include(@al3.id)
-      
+
       # FINALLY assert the intersection:
       # Applying perspective AND the filtered UAC
       get "/masters/#{@master.id}/activity_log/player_contact_emails.json", params: { perspective: 'who_is_agent', panel_name: 'test_panel' }
       json = JSON.parse(response.body)
       ids = json['activity_log__player_contact_emails'].map { |i| i['id'] }
-      
+
       # Should ONLY contain @al2 ('agent' AND 'extra_log_type: primary')
       expect(ids).not_to include(@al1.id) # Fails perspective ('subject')
       expect(ids).to include(@al2.id)     # Passes both
@@ -216,6 +217,7 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
                      "activity_log__player_contact_emails: only_agent\n"
 
       login_user(@user)
+      expect(Admin::AppConfiguration.value_for('default activity log perspective', @user)).to eq "activity_log__player_contact_emails: only_agent\n"
       get "/masters/#{@master.id}/activity_log/player_contact_emails.json",
           params: { panel_name: 'role_perspective_panel' }
       expect(response).to have_http_status(:success)
@@ -232,12 +234,12 @@ RSpec.describe 'ActivityLog Perspectives', type: :request do
       create_user_role 'coordinator', user: @user_coordinator
       create_user_role 'reviewer',    user: @user_reviewer
 
-      setup_access :player_contacts,                                          user: @user_coordinator
-      setup_access :activity_log__player_contact_emails,                     user: @user_coordinator
+      setup_access :player_contacts, user: @user_coordinator
+      setup_access :activity_log__player_contact_emails, user: @user_coordinator
       setup_access :activity_log__player_contact_email__primary,
                    resource_type: :activity_log_type, user: @user_coordinator
-      setup_access :player_contacts,                                          user: @user_reviewer
-      setup_access :activity_log__player_contact_emails,                     user: @user_reviewer
+      setup_access :player_contacts, user: @user_reviewer
+      setup_access :activity_log__player_contact_emails, user: @user_reviewer
       setup_access :activity_log__player_contact_email__primary,
                    resource_type: :activity_log_type, user: @user_reviewer
 

@@ -9,6 +9,9 @@
 #   - Filters out DoNotDisplayErrorMessage markers while preserving valid error messages
 #   - Removes entire error fields that contain only DoNotDisplayErrorMessage markers
 #   - Ensures clean error display to users by eliminating internal marker constants
+# - #partial_cache_key (issue #1270): the cache key/template version token stays stable
+#   across user saves that don't change relevant attributes, and still changes when the
+#   user's app type genuinely changes
 
 require 'rails_helper'
 
@@ -119,6 +122,129 @@ describe '#handlebars_template_tag' do
       helper.handlebars_template_tag('my-partial', css_class: 'hidden handlebars-partial') do
         '<span>partial</span>'.html_safe
       end
+    end
+  end
+end
+
+# Purpose (issue #1270): partial_cache_key previously embedded the user's
+# `updated_at` timestamp. Since User is saved on almost every request (Devise
+# trackable sign-in tracking, app type switching), this made the cache key -
+# and therefore the /pages/<token>/template URL - change far more often than
+# necessary, defeating the long-lived browser cache. These specs confirm the
+# key stays stable across saves that don't affect its relevant inputs, and
+# still changes when the app type genuinely changes.
+describe '#partial_cache_key' do
+  include ModelSupport
+
+  before :all do
+    create_admin
+  end
+
+  before do
+    helper.define_singleton_method(:current_admin) { nil }
+    helper.define_singleton_method(:current_user) { @current_user }
+  end
+
+  it 'is unchanged when the user is saved without a relevant attribute change' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+    user.update!(first_name: 'Changed Name')
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).to eq(before_key)
+  end
+
+  it 'changes when the user app type changes' do
+    user, = create_user
+    other_app_type = Admin::AppType.active.where.not(id: user.app_type_id).first
+    skip 'No second active app type available for this test' unless other_app_type
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+    user.current_admin = @admin
+    user.update!(app_type: other_app_type)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).not_to eq(before_key)
+  end
+
+  # Issue #1323: partial_cache_key does not vary by app type when forced with an Admin.
+  # The admin components panel calls partial_cache_key with force_user_or_admin: current_admin,
+  # but the method only computes apptype/userrole/uac when u.is_a?(User). When u is an Admin,
+  # apptype stays nil so the key never changes when the admin's effective app type changes
+  # (via matching_user or current_user). These tests demonstrate the bug.
+  context 'when forced with an Admin (issue #1323)' do
+    before do
+      helper.define_singleton_method(:current_admin) { @test_admin }
+      helper.define_singleton_method(:current_user) { @current_user }
+    end
+
+    it 'changes when the admin matching_user app type changes (no current_user in session)' do
+      admin, = create_admin(nil, with_matching_user: true)
+      matching_user = admin.matching_user
+      expect(matching_user).to be_present
+
+      app_types = Admin::AppType.active.limit(2).to_a
+      skip 'Need at least 2 active app types for this test' unless app_types.size >= 2
+
+      # Grant matching_user access to both app types
+      app_types.each { |at| enable_user_app_access(at, matching_user) }
+
+      matching_user.current_admin = @admin
+      matching_user.update!(app_type: app_types.first)
+
+      @test_admin = admin
+      @current_user = nil
+      helper.instance_variable_set(:@current_user, nil)
+
+      before_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+
+      matching_user.current_admin = @admin
+      matching_user.update!(app_type: app_types.second)
+
+      after_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+
+      expect(after_key).not_to eq(before_key),
+                               "Expected cache key to change when admin's matching_user switches app type, " \
+                               "but both keys were: #{before_key}"
+    end
+
+    it 'changes when current_user app type changes (current_user takes precedence over matching_user)' do
+      admin, = create_admin(nil, with_matching_user: true)
+      matching_user = admin.matching_user
+      expect(matching_user).to be_present
+
+      app_types = Admin::AppType.active.limit(2).to_a
+      skip 'Need at least 2 active app types for this test' unless app_types.size >= 2
+
+      # Grant matching_user access to first app type
+      enable_user_app_access(app_types.first, matching_user)
+
+      # Set matching_user to first app type (stays fixed throughout)
+      matching_user.current_admin = @admin
+      matching_user.update!(app_type: app_types.first)
+
+      # Create a separate current_user with access to both app types
+      separate_user, = create_user(nil, '', app_type: app_types.first)
+      enable_user_app_access(app_types.second, separate_user)
+
+      @test_admin = admin
+      @current_user = separate_user
+      helper.instance_variable_set(:@current_user, separate_user)
+
+      before_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+
+      # Switch current_user to second app type (matching_user stays on first)
+      separate_user.current_admin = @admin
+      separate_user.update!(app_type: app_types.second)
+
+      after_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+
+      expect(after_key).not_to eq(before_key),
+                               'Expected cache key to change when current_user switches app type ' \
+                               '(current_user takes precedence over matching_user in admin_app_type), ' \
+                               "but both keys were: #{before_key}"
     end
   end
 end

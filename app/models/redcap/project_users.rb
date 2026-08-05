@@ -35,10 +35,27 @@ module Redcap
     end
 
     #
+    # Request a background job to remove a user's access from the project
+    # via the REDCap API, then refresh the locally stored project user list.
+    # @see Redcap::RemoveProjectUserJob#perform_later
+    # @param [String] username - the REDCap username to remove
+    def request_remove_user(username)
+      jobclass = Redcap::RemoveProjectUserJob
+      jobs = Redcap::ProjectAdmin.existing_jobs(jobclass, project_admin)
+      return if jobs.count > 0
+
+      jobclass.perform_later(project_admin, username)
+      project_admin.record_job_request('remove project user', result: { requested: true, username: })
+    end
+
+    #
     # Immediately retrieve, validate and store the records from REDCap.
     # This is only intended to be called from a background job.
-    def retrieve_validate_store
-      retrieve
+    # @param [Boolean] force_reload - bypass any cached #project_users response
+    #   (see Redcap::ApiClient#remove_project_user, which does not itself
+    #   invalidate the cache)
+    def retrieve_validate_store(force_reload: false)
+      retrieve(force_reload:)
       validate
       store
     end
@@ -46,9 +63,10 @@ module Redcap
     #
     # Immediately retrieve records from REDCap.
     # This is only intended to be called from a background job.
+    # @param [Boolean] force_reload - bypass any cached #project_users response
     # @return [Array{Hash}]
-    def retrieve
-      self.records = project_admin.api_client.project_users
+    def retrieve(force_reload: false)
+      self.records = project_admin.api_client.project_users(force_reload:)
     end
 
     #

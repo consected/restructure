@@ -1,0 +1,6 @@
+# Pattern 2: Caption hash with keep_label
+# Specify a field with a caption hash allowing an option to retain the label.
+  caption_before:
+    field_name:
+      caption: caption to appear before label
+      keep_label: true

@@ -81,25 +81,6 @@
       "note": ""
     },
     {
-      "warning_type": "Unmaintained Dependency",
-      "warning_code": 122,
-      "fingerprint": "21ab0fe00fdd5899ffc405cff75aadb91b805ee996a614f7e27b08a287e9062d",
-      "check_name": "EOLRails",
-      "message": "Support for Rails 7.2.3.1 ends on 2026-08-09",
-      "file": "Gemfile.lock",
-      "line": 322,
-      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
-      "code": null,
-      "render_path": null,
-      "location": null,
-      "user_input": null,
-      "confidence": "Weak",
-      "cwe_id": [
-        1104
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "21ff6d3b4153987a315b6cd13958dbe4b718007c837ac5982fbfd2a6175a302e",
@@ -528,6 +509,25 @@
       "note": ""
     },
     {
+      "warning_type": "Unmaintained Dependency",
+      "warning_code": 122,
+      "fingerprint": "98b26f60d776fd41ee6f088c833725145be9aac2d7c5b33780241c273622db42",
+      "check_name": "EOLRails",
+      "message": "Support for Rails 7.2.3.2 ends on 2026-08-09",
+      "file": "Gemfile.lock",
+      "line": 318,
+      "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
+      "code": null,
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        1104
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "a1a1a9e56151a033ef45d00320fdfad7b2588d784cbb2d0afbd2087c5d7e3add",
@@ -618,18 +618,18 @@
     {
       "warning_type": "Remote Code Execution",
       "warning_code": 25,
-      "fingerprint": "c7c6c1154ec87f956418d64e1b4b9c513d5970d648dcf5b3cdbba080a42b50ee",
+      "fingerprint": "c8e48122b64abba29841124b59e0a6f4deb63dd39df727c344f1bb9f33feb66e",
       "check_name": "Deserialize",
       "message": "Use of `Marshal.load` may be dangerous",
-      "file": "app/models/option_configs/extra_options.rb",
-      "line": 93,
+      "file": "app/models/option_configs/extra_option_configs/field_configs.rb",
+      "line": 97,
       "link": "https://brakemanscanner.org/docs/warning_types/unsafe_deserialization",
-      "code": "Marshal.load(Marshal.dump(field_configs))",
+      "code": "Marshal.load(Marshal.dump(raw.symbolize_keys))",
       "render_path": null,
       "location": {
         "type": "method",
-        "class": "OptionConfigs::ExtraOptions",
-        "method": "initialize"
+        "class": "OptionConfigs::ExtraOptionConfigs::FieldConfigs",
+        "method": "OptionConfigs::ExtraOptionConfigs::FieldConfigs.prepare_config"
       },
       "user_input": null,
       "confidence": "Weak",
@@ -794,5 +794,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "8.0.4"
+  "brakeman_version": "8.0.5"
 }

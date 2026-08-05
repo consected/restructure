@@ -257,6 +257,16 @@ module FeatureSupport
     has_css?('.modal[style~="display: none"]')
   end
 
+  def set_notes_field_format(markdown: false, app_type: @app_type, admin: @admin)
+    app_type.app_configurations.where(name: 'notes field format').update_all(disabled: true)
+    Admin::AppConfiguration.create!(
+      name: 'notes field format',
+      value: markdown ? 'markdown' : 'plain',
+      app_type: app_type,
+      current_admin: admin
+    )
+  end
+
   def open_player_element(el, items)
     dismiss_modal
     have_css('.player-info-header')
@@ -285,8 +295,8 @@ module FeatureSupport
     expect(page).not_to have_css('.collapse.collapsing')
   end
 
-  def expect_tracker_to_be_expanded(master_id)
-    expect(page).to have_css "#trackers-#{master_id}.collapse.in"
+  def expect_tracker_to_be_expanded(master_id, wait: 15)
+    expect(page).to have_css "#trackers-#{master_id}.collapse.in", wait: wait
   end
 
   def all_master_record_panels
@@ -333,10 +343,22 @@ module FeatureSupport
     tab_link = all(scoped_selector, visible: :all, wait: 0).first
     expect(tab_link).not_to be nil
     scroll_into_view(tab_link)
-    tab_link.click if tab_link['aria-expanded'] != 'true'
+
+    target = tab_link['data-target']
+
+    # Avoid clicking again if the panel is already open, or already in the process
+    # of opening: Bootstrap adds `.collapsing` to the target while its collapse
+    # animation is in progress, and `.ajax-running` is added to the clicked link
+    # itself while its `data-remote` request (e.g. for the tracker tab) is in flight.
+    already_expanded_or_expanding = target.present? &&
+                                    page.has_css?("#{target}.collapse.in, #{target}.collapsing", visible: :all, wait: 0)
+    ajax_in_flight = tab_link['class'].to_s.include?('ajax-running')
+
+    tab_link.click if tab_link['aria-expanded'] != 'true' && !already_expanded_or_expanding && !ajax_in_flight
+
+    finish_page_loading
 
     # Wait for the target panel to fully expand (Bootstrap collapse animation)
-    target = tab_link['data-target']
     return unless target.present?
 
     target_selector = "#{target}.collapse.in"
@@ -502,16 +524,14 @@ module FeatureSupport
                       end
 
       3.times do |attempt|
-        begin
-          if item_selector.is_a?(Array)
-            find(*item_selector, wait: 5).click
-          else
-            find(item_selector, wait: 5).click
-          end
-          break
-        rescue Selenium::WebDriver::Error::StaleElementReferenceError
-          raise if attempt == 2
+        if item_selector.is_a?(Array)
+          find(*item_selector, wait: 5).click
+        else
+          find(item_selector, wait: 5).click
         end
+        break
+      rescue Selenium::WebDriver::Error::StaleElementReferenceError
+        raise if attempt == 2
       end
     end
 

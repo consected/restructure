@@ -116,6 +116,14 @@
                             redcap_project_admins_path(no_redirect: true) %>
               </li>
               <li class="nav"><%= link_to "Request Log", redcap_client_requests_path %> </li>
+              <% if current_admin.can_admin?(:reports) 
+                   if Report.active.where(item_type: 'z-admin', short_name: 'redcap_users').exists? %>
+              <li class="nav"><%= link_to "Search Project Users", report_path(id: 'z_admin__redcap_users'), target: '_blank' %></li>
+                <% else %>
+                <p>Search Project Users report is not available. <br>
+                  Create it by performing server action <i>Run DB Seeds</i> in <%= link_to 'Server Settings', admin_server_info_index_path %></p>
+                <% end %>
+              <% end %>
             </ul>
           <% elsif !Admin::AppType.where(name: 'ref-data').first&.active_on_server? %>
             <p><b>ref-data</b> app is not active on this server. <br>

@@ -12,13 +12,14 @@
 7. **Focus on configuration over code** - most features should be achievable through admin panel settings rather than new Ruby code
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
+10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
 
 
 ### Critical Rules for Running Terminal Commands
 1. **Never set environment variables inline** - use app-scripts instead or `export` them in the terminal before running commands
-2. **Always wait for commands to complete before proceeding** - load the `execute/awaitTerminal` tool first
+2. **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
-4. **Never run commands in the background** - all commands exit when complete with success or failure codes
+4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
 ### Git and GitHub Usage
 
@@ -51,6 +52,7 @@ For all Ruby on Rails code you write, follow these conventions: [Ruby on Rails C
 - Use BEM (Block, Element, Modifier) naming conventions for CSS classes.
 - If JavaScript is needed for UI behavior, preferably use appropriate postprocessors rather than inline scripts.
 - If inline `<script>` or `<style>` tags are necessary, use Rails `javascript_tag` or `style_tag` helpers with a nonce for CSP compliance.
+- When creating links to admin resources, never use the `edit` path directly. Instead, use the `filter[id]=<id>` and `perform_action=edit` parameters to link to the resource in a way that is compatible with the admin panel's search and edit functionality.
 
 ### Database Conventions
 - Use migrations for all schema changes; avoid direct DB modifications for implementation.
@@ -96,6 +98,15 @@ app-scripts/clean-test-db.sh
 
 # Clean test assets and cache
 app-scripts/clean-test-assets-and-cache.sh
+
+# Extract an app config YAML. Analyse all models from a previous error run
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff --errors tmp/agent-tmp/config_errors_app.log
+
+# Extract an app config YAML. Inspect a single model
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --diff play_ipa_initial_call
+
+# Extract an app config YAML. Show just show_if and labels for models matching "phone_screen"
+app-scripts/inspect_app_config.rb --config 'db/app_configs/app_config.yaml' --sections show_if,labels phone_screen
 ```
 
 #### Why These Rules Exist

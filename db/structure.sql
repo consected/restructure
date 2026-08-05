@@ -6512,7 +6512,9 @@ BEGIN
       do_not_email,
       country_code,
       terms_of_use_accepted,
-      otp_secret
+      otp_secret,
+      expire_datetime,
+      api_access_only
   )
   SELECT
     NEW.id,
@@ -6546,7 +6548,9 @@ BEGIN
     NEW.do_not_email,
     NEW.country_code,
     NEW.terms_of_use_accepted,
-    NEW.otp_secret
+    NEW.otp_secret,
+    NEW.expire_datetime,
+    NEW.api_access_only
   ;
   RETURN NEW;
   END;
@@ -6635,6 +6639,20 @@ $$;
 
 
 --
+-- Name: tracker_history_assign_tracker_id(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.tracker_history_assign_tracker_id() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.tracker_id := NEW.master_id::bigint * 1000000 + NEW.protocol_id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: trackers_instead_of_delete(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -6658,33 +6676,21 @@ CREATE FUNCTION ml_app.trackers_instead_of_insert() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
-  existing_tracker_id INTEGER;
+  inserted_tracker_id BIGINT;
 BEGIN
-  -- Find existing tracker_id for this master/protocol pair
-  SELECT tracker_id INTO existing_tracker_id
-  FROM tracker_history
-  WHERE master_id = NEW.master_id AND protocol_id = NEW.protocol_id
-  LIMIT 1;
-
-  -- If no existing group, use the sequence
-  IF existing_tracker_id IS NULL THEN
-    existing_tracker_id := nextval('trackers_id_seq');
-  END IF;
-
-  -- Always insert into tracker_history (the single source of truth)
   INSERT INTO tracker_history
-    (tracker_id, master_id, protocol_id,
+    (master_id, protocol_id,
      protocol_event_id, event_date, sub_process_id, notes,
      item_id, item_type,
      created_at, updated_at, user_id)
   VALUES
-    (existing_tracker_id, NEW.master_id, NEW.protocol_id,
+    (NEW.master_id, NEW.protocol_id,
      NEW.protocol_event_id, NEW.event_date, NEW.sub_process_id, NEW.notes,
      NEW.item_id, NEW.item_type,
-     COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id);
+     COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id)
+  RETURNING tracker_id INTO inserted_tracker_id;
 
-  -- Set the id on NEW so Rails gets it back via RETURNING
-  NEW.id := existing_tracker_id;
+  NEW.id := inserted_tracker_id;
   RETURN NEW;
 END;
 $$;
@@ -6697,19 +6703,22 @@ $$;
 CREATE FUNCTION ml_app.trackers_instead_of_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+DECLARE
+  inserted_tracker_id BIGINT;
 BEGIN
-  -- Insert a new tracker_history row with the updated values
   INSERT INTO tracker_history
-    (tracker_id, master_id, protocol_id,
+    (master_id, protocol_id,
      protocol_event_id, event_date, sub_process_id, notes,
      item_id, item_type,
      created_at, updated_at, user_id)
   VALUES
-    (OLD.id, NEW.master_id, NEW.protocol_id,
+    (NEW.master_id, NEW.protocol_id,
      NEW.protocol_event_id, NEW.event_date, NEW.sub_process_id, NEW.notes,
      NEW.item_id, NEW.item_type,
-     COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id);
+     COALESCE(NEW.created_at, now()), COALESCE(NEW.updated_at, now()), NEW.user_id)
+  RETURNING tracker_id INTO inserted_tracker_id;
 
+  NEW.id := inserted_tracker_id;
   RETURN NEW;
 END;
 $$;
@@ -7733,6 +7742,122 @@ BEGIN
   RETURN QUERY execute sql;  
 END
 $_$;
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.masters (
+    id integer NOT NULL,
+    msid integer,
+    pro_id integer,
+    pro_info_id integer,
+    rank integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_id integer,
+    contact_id integer,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.tracker_history (
+    id integer NOT NULL,
+    master_id integer NOT NULL,
+    protocol_id integer NOT NULL,
+    tracker_id bigint NOT NULL,
+    event_date timestamp without time zone,
+    user_id integer,
+    notes character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    sub_process_id integer,
+    protocol_event_id integer,
+    item_id integer,
+    item_type character varying
+);
+
+
+--
+-- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantrons (
+    id integer NOT NULL,
+    master_id integer,
+    scantron_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_logs; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_logs (
+    id integer NOT NULL,
+    name character varying,
+    item_type character varying,
+    rec_type character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    action_when_attribute character varying,
+    field_list character varying,
+    blank_log_field_list character varying,
+    blank_log_name character varying,
+    extra_log_types character varying,
+    hide_item_list_panel boolean,
+    main_log_name character varying,
+    process_name character varying,
+    table_name character varying,
+    category character varying,
+    schema_name character varying
+);
 
 
 --
@@ -11049,7 +11174,8 @@ CREATE TABLE ml_app.protocols (
     disabled boolean,
     admin_id integer,
     "position" integer,
-    app_type_id bigint
+    app_type_id bigint,
+    CONSTRAINT protocols_id_below_tracker_id_multiplier CHECK ((id < 1000000))
 );
 
 
@@ -11070,6 +11196,45 @@ CREATE SEQUENCE ml_app.protocols_id_seq
 --
 
 ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
+
+
+--
+-- Name: q1_rc_links; Type: VIEW; Schema: ml_app; Owner: -
+--
+
+CREATE VIEW ml_app.q1_rc_links AS
+ SELECT id,
+    master_id,
+    link AS q1_rc_link_ext_id,
+    NULL::timestamp without time zone AS created_at,
+    NULL::timestamp without time zone AS updated_at,
+    NULL::integer AS user_id
+   FROM q1.rc_links;
+
+
+--
+-- Name: q2_rc_links; Type: VIEW; Schema: ml_app; Owner: -
+--
+
+CREATE VIEW ml_app.q2_rc_links AS
+ SELECT rc.id,
+    masters.id AS master_id,
+    split_part((rc.link)::text, '='::text, 2) AS q2_rc_link_ext_id,
+    NULL::timestamp without time zone AS created_at,
+    NULL::timestamp without time zone AS updated_at,
+    NULL::integer AS user_id
+   FROM (q2.rc_links rc
+     JOIN ml_app.masters ON ((masters.msid = rc.msid)));
+
+
+--
+-- Name: rails_spec_db_tally; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.rails_spec_db_tally (
+    name character varying,
+    updated_at timestamp without time zone
+);
 
 
 --
@@ -12673,7 +12838,9 @@ CREATE TABLE ml_app.user_history (
     do_not_email boolean,
     otp_secret character varying,
     country_code character varying,
-    terms_of_use_accepted character varying
+    terms_of_use_accepted character varying,
+    expire_datetime timestamp without time zone,
+    api_access_only boolean
 );
 
 
@@ -14307,7 +14474,7 @@ ALTER SEQUENCE ref_data.domain_mappings_id_seq OWNED BY ref_data.domain_mappings
 --
 
 CREATE VIEW ref_data.next_msid_values AS
- SELECT (max(masters.msid) + 1) AS msid
+ SELECT (max(msid) + 1) AS msid
    FROM ml_app.masters;
 
 
@@ -20553,6 +20720,13 @@ CREATE TRIGGER test_ext_history_update AFTER UPDATE ON ml_app.test_exts FOR EACH
 
 
 --
+-- Name: tracker_history tracker_history_assign_tracker_id_trigger; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER tracker_history_assign_tracker_id_trigger BEFORE INSERT OR UPDATE ON ml_app.tracker_history FOR EACH ROW EXECUTE FUNCTION ml_app.tracker_history_assign_tracker_id();
+
+
+--
 -- Name: trackers trackers_delete_trigger; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -23349,6 +23523,119 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260730120000'),
+('20260723161812'),
+('20260723161807'),
+('20260723161802'),
+('20260723161757'),
+('20260723161755'),
+('20260723161749'),
+('20260723153426'),
+('20260723153424'),
+('20260723153422'),
+('20260723153421'),
+('20260723153419'),
+('20260723153417'),
+('20260723153415'),
+('20260723153413'),
+('20260723153412'),
+('20260723153410'),
+('20260723153409'),
+('20260723153407'),
+('20260723153405'),
+('20260723153401'),
+('20260723153359'),
+('20260723153357'),
+('20260723153354'),
+('20260723103222'),
+('20260716181221'),
+('20260716153920'),
+('20260716152505'),
+('20260716151338'),
+('20260716151221'),
+('20260716151045'),
+('20260716145728'),
+('20260716145637'),
+('20260716145456'),
+('20260716142453'),
+('20260716094845'),
+('20260716094732'),
+('20260716094542'),
+('20260701063204'),
+('20260701063109'),
+('20260701062749'),
+('20260625120737'),
+('20260625120728'),
+('20260625120406'),
+('20260618154847'),
+('20260618154845'),
+('20260618154840'),
+('20260618154838'),
+('20260618154836'),
+('20260618154835'),
+('20260618154833'),
+('20260618154832'),
+('20260618154830'),
+('20260618154829'),
+('20260618154827'),
+('20260618154825'),
+('20260618154822'),
+('20260618154821'),
+('20260618154819'),
+('20260618154818'),
+('20260618154816'),
+('20260618154815'),
+('20260618154813'),
+('20260618154811'),
+('20260618154810'),
+('20260618154751'),
+('20260618154746'),
+('20260618154745'),
+('20260618154741'),
+('20260618154738'),
+('20260618064131'),
+('20260618064127'),
+('20260618064125'),
+('20260618064122'),
+('20260618064018'),
+('20260618064016'),
+('20260618064014'),
+('20260618064013'),
+('20260618063915'),
+('20260618063913'),
+('20260618063912'),
+('20260618063911'),
+('20260618063910'),
+('20260618063909'),
+('20260618063908'),
+('20260618063907'),
+('20260618063906'),
+('20260618063905'),
+('20260618063904'),
+('20260618063903'),
+('20260618063902'),
+('20260618063901'),
+('20260618063900'),
+('20260618063857'),
+('20260618063856'),
+('20260618063853'),
+('20260618063852'),
+('20260618063851'),
+('20260618063850'),
+('20260618063849'),
+('20260618063848'),
+('20260618063847'),
+('20260618063846'),
+('20260618063845'),
+('20260618063844'),
+('20260618063843'),
+('20260618063842'),
+('20260618063840'),
+('20260618063839'),
+('20260618063838'),
+('20260618063837'),
+('20260618063836'),
+('20260611090630'),
 ('20260512134244'),
 ('20260512122159'),
 ('20260512103117'),

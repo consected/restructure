@@ -10,6 +10,7 @@ module Seeds
       values.each do |v|
         res = Report.find_or_initialize_by(short_name: v[:short_name], item_type: v[:item_type])
         res.assign_attributes(v)
+        res.disabled = false
         res.current_admin = Seeds.auto_admin
         res.save!
       end
@@ -17,8 +18,13 @@ module Seeds
 
     def self.add_uac_values(values)
       values.each do |v|
-        res = Admin::UserAccessControl.find_or_initialize_by(v)
-        res.update(current_admin: Seeds.auto_admin) unless res.admin
+        res = Admin::UserAccessControl.find_or_initialize_by(
+          resource_type: v[:resource_type],
+          resource_name: v[:resource_name]
+        )
+        res.assign_attributes(v)
+        res.current_admin = Seeds.auto_admin
+        res.save!
       end
     end
 

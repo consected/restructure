@@ -120,7 +120,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       }
     }
 
-    @al.extra_log_type_config.clean_references_def
+    OptionConfigs::ExtraOptionConfigs::References.reprocess(@al.extra_log_type_config)
     @al.extra_log_type_config.editable_if = { always: true }
 
     setup_access @al.class.resource_name, resource_type: :table, access: :create, user: @user
@@ -662,7 +662,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i).to be_within(10).of((DateTime.now + 1.day).to_i)
   end
 
   it 'sets the notification to send at a specific time in the future' do
@@ -685,7 +685,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i).to be_within(10).of((DateTime.now + 1.day).to_i)
   end
 
   it 'sets the notification to send at a specific time in the future based on a date / time / zone definition' do
@@ -721,7 +721,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     wait_until = @trigger.send(:run_when)[:wait_until]
 
     # The time should be close enough
-    expect(wait_until.to_i / 10).to eq(d_in_edt.to_i / 10) || eq((d_in_edt.to_i - 1) / 10)
+    expect(wait_until.to_i).to be_within(10).of(d_in_edt.to_i)
   end
 
   it 'uses an if select the correct notification' do
@@ -1235,5 +1235,60 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(new_mn.app_type).to eq @at2
     # The user on the notification should be @u0 (the resolved alt_batch_user), not the triggering @user
     expect(new_mn.user.id).to eq @u0.id
+  end
+
+  it 'resolves app_type and user from a conditional Hash reference, not just a literal id/name - issue #1318' do
+    # notes/select_who are reused here purely as string fields a conditional Hash reference
+    # ({this: {field: return_value}}) can read back; protocol_id (an alternative integer field)
+    # carries a real foreign key constraint on this table, so string values are used instead.
+    # This proves app_type/user are resolved via FieldDefaults.calculate_default before use,
+    # so a Hash config (in addition to a literal id/name) now works for both.
+    @al.update!(notes: @at2.name, select_who: @u0.email)
+
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: { this: { notes: 'return_value' } },
+      user: { this: { select_who: 'return_value' } },
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    @trigger.perform
+
+    # @u0 has role 'test' in @at2 (resolved from the Hash config), so must be a recipient
+    expect(@trigger.receiving_user_ids).to include(@u0.id)
+    # @user has role 'test' in @user.app_type (not @at2), so must NOT be a recipient
+    expect(@trigger.receiving_user_ids).not_to include(@user.id)
+
+    new_mn = MessageNotification.order(id: :desc).first
+    expect(new_mn.app_type).to eq @at2
+    # user resolved from the Hash-based `user` config should be @u0
+    expect(new_mn.user.id).to eq @u0.id
+  end
+
+  it 'does not resolve a config app_type outside the app types loaded on this server (OnlyLoadAppTypes) - issue #1318' do
+    # Restrict the server to only load @user's app type, excluding @at2.
+    stub_const('Settings::OnlyLoadAppTypes', [@user.app_type_id])
+    Admin::AppType.reset_active_app_types!
+
+    config = {
+      type: 'email',
+      role: 'test',
+      app_type: @at2.id,
+      user: @u0.email,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: 'subject text'
+    }
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+    # @at2 exists and is active, but is excluded from this server's OnlyLoadAppTypes scope,
+    # so it must not be resolvable - matching the app_type scoping restored for change_user_roles.
+    expect { @trigger.perform }.to raise_error(ActiveRecord::RecordNotFound)
+  ensure
+    Admin::AppType.reset_active_app_types!
   end
 end

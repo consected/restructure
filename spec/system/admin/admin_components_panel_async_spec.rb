@@ -112,4 +112,81 @@ RSpec.describe 'Admin components panel async loading - Issue1171', js: true, typ
       expect(page).to have_css('.admin-panel-components', wait: 10)
     end
   end
+
+  # Issue #1323: The admin components panel cache key does not vary by app type
+  # when the controller calls partial_cache_key with force_user_or_admin: current_admin.
+  # Because the method only computes apptype/userrole/uac when u.is_a?(User), the key
+  # stays constant when u is an Admin - so switching the admin's effective app type
+  # (via matching_user) serves stale cached content from the previous app type.
+  describe 'components panel cache busts on app type switch (Issue #1323)' do
+    it 'shows updated components after the admin matching_user switches app type' do
+      app_types = Admin::AppType.active.order(:id).limit(2).to_a
+      skip 'Need at least 2 active app types for this test' unless app_types.size >= 2
+
+      app_type_a = app_types.first
+      app_type_b = app_types.second
+
+      # Create a matching user for the admin on app_type_a
+      unless @admin.matching_user
+        user = User.create!(
+          email: @admin.email,
+          current_admin: @admin,
+          first_name: 'AdminMatch',
+          last_name: 'User',
+          password: Devise.friendly_token(30)
+        )
+        user = User.find(user.id)
+        user.current_admin = @admin
+        user.otp_required_for_login = false
+        user.new_two_factor_auth_code = false
+        user.confirmed_at = Time.now
+        user.save!
+      end
+
+      matching_user = @admin.matching_user
+      expect(matching_user).to be_present
+
+      # Grant access to both app types
+      [app_type_a, app_type_b].each do |at|
+        next if matching_user.has_access_to?(:access, :general, :app_type, alt_app_type_id: at.id)
+
+        Admin::UserAccessControl.create!(
+          user: matching_user, app_type: at, access: :read,
+          resource_type: :general, resource_name: :app_type, current_admin: @admin
+        )
+      end
+
+      # Set matching user to app_type_a
+      matching_user.current_admin = @admin
+      matching_user.update!(app_type: app_type_a)
+      expect(matching_user.reload.app_type_id).to eq(app_type_a.id)
+
+      # Clear any prior cache entries for this key
+      Rails.cache.clear
+
+      # Visit components panel - content is rendered for app_type_a and cached
+      visit '/admin/app_types/components_panel'
+      expect(page).to have_css('.admin-panel-components', wait: 10)
+      first_visit_content = find('#admin-panel-components').text
+
+      # Switch matching user to app_type_b
+      matching_user.current_admin = @admin
+      matching_user.update!(app_type: app_type_b)
+      expect(matching_user.reload.app_type_id).to eq(app_type_b.id)
+
+      # Visit components panel again - should show content for app_type_b
+      visit '/admin/app_types/components_panel'
+      expect(page).to have_css('.admin-panel-components', wait: 10)
+      second_visit_content = find('#admin-panel-components').text
+
+      # The bug: cache key doesn't include app_type when u is Admin, so stale
+      # content from app_type_a is served even after switching to app_type_b.
+      # This assertion fails with the bug (content is identical) and passes
+      # once the cache key properly varies by the admin's effective app type.
+      expect(second_visit_content).not_to eq(first_visit_content),
+                                          'Expected components panel content to differ after switching from ' \
+                                          "'#{app_type_a.name}' to '#{app_type_b.name}', but got identical content. " \
+                                          'This indicates the cache key is not varying by app type (Issue #1323).'
+    end
+  end
 end

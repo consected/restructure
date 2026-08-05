@@ -77,13 +77,23 @@ module Dynamic
         force_update ||= Admin::AppType.active_app_types_changed?
         return got if got && !force_update
 
+        olat_setting = Settings::OnlyLoadAppTypes
         olat = Admin::AppType.active_app_types force: force_update
 
         # List of names that the associated_* items have already returned
         # to avoid building huge lists of repetitive joined queries
         got_names = []
 
-        if olat&.present?
+        if olat_setting.present? && olat.blank?
+          # The operator set a filter (FPHS_LOAD_APP_TYPES) but it matched no active app type.
+          # This is likely a misconfiguration (typo, or a disabled app type), so avoid the
+          # fail-open behavior of loading all definitions. Return nothing and log an error loudly.
+          Rails.logger.error(
+            "FPHS_LOAD_APP_TYPES=#{olat_setting.join(',')} matched no active app type; " \
+            'active_model_configurations will return empty to avoid loading unintended definitions'
+          )
+          dma = where(id: nil)
+        elsif olat&.present?
           qs = []
           olat.each do |app_type|
             resnames = []

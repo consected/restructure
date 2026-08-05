@@ -8,12 +8,17 @@ RSpec.describe Master, type: :model do
   include ModelSupport
   include MasterDataSupport
 
+  before(:all) do
+    create_data_set
+  end
+
   before(:example) do
     # seed_database
 
-    create_data_set
-
+    # create_data_set
+    create_user
     add_app_config @user.app_type, 'create master with', 'player_info'
+    add_app_config @user.app_type, 'create master with', 'player_info', user: @user
     # Cleanup to get started
     Master.reset_external_id_matching_fields!
   end
@@ -26,12 +31,12 @@ RSpec.describe Master, type: :model do
 
     pi1 = @full_master_record.player_infos.first
     expect(first_names).to include pi1.first_name.capitalize
-    expect(pi1.user.email).to eq gen_username("#{full_master_number + @user_start}-mds1-")
+    expect(pi1.user.email).to eq @full_master_user.email
     expect(pi1.user.email).to_not be nil
 
     pro1 = @full_master_record.pro_infos.first
     expect(first_names).to include pro1.first_name.capitalize
-    expect(pro1.user.email).to eq gen_username("#{full_master_number + @user_start}-mds1-")
+    expect(pro1.user.email).to eq @full_master_user.email
   end
 
   it 'should see results of database triggers ok' do
@@ -57,25 +62,6 @@ RSpec.describe Master, type: :model do
     new_master.rank = 0
     new_master.save!
     expect(new_master.msid).to be nil
-
-    # # Now set a rank, and expect the MSID to be set
-    # new_master.rank = 11
-    # new_master.save!
-    # expect(new_master.msid).not_to be nil
-
-    # # Create a new master with a rank that creates an MSID
-    # new_master = Master.new
-    # new_master.current_user = @user
-    # new_master.rank = 12
-    # new_master.save!
-
-    # msid = new_master.msid
-    # expect(msid).not_to be nil
-
-    # # Check the MSID did not change once an MSID has been assigned
-    # new_master.rank = 11
-    # new_master.save!
-    # expect(new_master.msid).to eq new_master.msid
   end
 
   it "should ensure users can't change data" do
@@ -110,7 +96,7 @@ RSpec.describe Master, type: :model do
     expect(res.first.pro_infos.first).to eq @full_pro_info
 
     # The user should match that we used to create the item
-    expect(res.first.player_infos.first.user.email).to eq gen_username("#{full_master_number + @user_start}-mds1-")
+    expect(res.first.player_infos.first.user.email).to eq @full_master_user.email
   end
 
   it 'should support simple search across matching start of first name or nickname' do
@@ -242,7 +228,9 @@ RSpec.describe Master, type: :model do
 
   describe 'contact search' do
     before(:example) do
-      create_data_set
+      # create_data_set
+      create_user
+      @full_master_record.current_user = @user
       @contact_1 = @full_master_record.player_contacts.create!(data: '(617)794-1213', rec_type: 'phone', rank: 10)
       @contact_2 = @full_master_record.player_contacts.create!(data: '(617)223-1213 ext 1621', rec_type: 'phone',
                                                                rank: 5)

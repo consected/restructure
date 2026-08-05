@@ -65,8 +65,13 @@ class PagesController < ApplicationController
 
     etag = Digest::SHA256.hexdigest(helpers.partial_cache_key(:master__search_results_template))
     if current_user
-      set_browser_cache(max_age: 604_800, immutable: true)
-      return unless stale?(etag: etag)
+      current_version = helpers.template_version
+      if params[:id].present? && params[:id] == current_version
+        set_browser_cache(max_age: 604_800, immutable: true)
+        return unless stale?(etag: etag)
+      else
+        prevent_cache
+      end
 
       render partial: 'masters/cache_search_results_template'
     else

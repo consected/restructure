@@ -43,9 +43,13 @@ module Dynamic
             dm.generate_model
             # Force the admin for cases that this is run outside of the admin console
             # It is expected that this is mostly when originally seeding the database
-            dm.current_admin ||= dm.admin
+            next if dm.current_admin
 
-            # dm.update_tracker_events
+            # No current admin is set, so use the last admin to update the record.
+            # Ensure the admin is set to enabled, but avoid persisting the change, which would be incorrect.
+            # This should be sufficient to allow subsequent calls related to define_models to succeed.
+            dm.admin.disabled = false
+            dm.current_admin = dm.admin
           end
         rescue Exception => e
           msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
@@ -202,6 +206,8 @@ module Dynamic
     # @option opt [String] :class_name is an alternative class name within the
     #   parent class to test. This can be used to avoid namespacing issues
     # @option opt [Boolean] :fail_without_exception if true we return a Boolean rather than raising an exception
+    # @option opt [Boolean] :not_found_ok if true, a missing class is expected (for example, when checking
+    #   whether an old class exists before generating a new one) and is logged at debug level rather than warn
     # @return [Boolean] true if the class is defined, and false or a raised exception depending on the options
     def implementation_class_defined?(parent_class = Module, opt = {})
       icn = opt[:class_name] || full_implementation_class_name
@@ -234,7 +240,11 @@ module Dynamic
       end
     rescue NameError => e
       err = "Failed to get the class #{icn} in parent #{parent_class}: #{e}"
-      logger.warn err
+      if opt[:not_found_ok]
+        logger.debug err
+      else
+        logger.warn err
+      end
       false
     end
 
@@ -331,9 +341,16 @@ module Dynamic
     # ActiveRecord::Encryption.
     # @param [Class] impl_class - the generated implementation class
     def apply_encrypted_attributes(impl_class)
-      return unless db_columns.is_a?(Hash)
+      return if db_columns.blank?
 
-      encrypted_fields = db_columns.select { |_field, config| config.is_a?(Hash) && config[:encrypted] }
+      # db_columns values may be plain Hashes (legacy) or NamedConfiguration
+      # objects (post-BaseConfiguration refactor). Both respond to [].
+      encrypted_fields = db_columns.select do |_field, config|
+        next false if config.nil?
+        next config[:encrypted] if config.respond_to?(:[])
+
+        false
+      end
       return if encrypted_fields.empty?
 
       encrypted_fields.each_key do |field_name|
@@ -378,7 +395,8 @@ module Dynamic
       assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
       return unless klass.const_defined?(assoc_ext_name.to_sym)
 
-      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object)
+      # The class may not exist yet (for example, on first generation), which is expected here
+      remove_const_for(klass, assoc_ext_name) if implementation_class_defined?(Object, not_found_ok: true)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
@@ -386,9 +404,11 @@ module Dynamic
     def remove_implementation_class(alt_prefix_class = nil)
       klass = alt_prefix_class || prefix_class
       # This may fail if an underlying dependent class (parent class) has been redefined by
-      # another dynamic implementation, such as external identifier
+      # another dynamic implementation, such as external identifier.
+      # A missing class is also expected here on first generation, since there is nothing to remove yet
       return unless implementation_class_defined?(klass, fail_without_exception: true,
-                                                         fail_without_exception_newable_result: true)
+                                                         fail_without_exception_newable_result: true,
+                                                         not_found_ok: true)
 
       remove_const_for(klass, model_class_name)
     rescue StandardError => e

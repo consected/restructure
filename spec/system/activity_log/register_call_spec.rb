@@ -37,6 +37,8 @@ describe 'Register an incoming call', driver: $browser_driver do
 
     ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
     ac&.disable!(@admin)
+
+    set_up_markdown_notes
     puts_debug 'done setting up user access'
   end
 

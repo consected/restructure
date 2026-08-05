@@ -249,8 +249,8 @@ describe 'creatable select field component', js: true, driver: $browser_driver d
     within('form.new_dynamic_model_test_creatable_consumer') do
       click_button 'Save'
     end
-    finish_page_loading
-
+    finish_form_formatting
+    puts_form_validation_errors
     # Verify the record was saved and the value is displayed
     expect(page).to have_css('.details-item-type-dynamic-model--test-creatable-consumers', wait: 10)
     # Value is displayed as stored (lowercase)

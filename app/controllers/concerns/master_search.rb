@@ -115,7 +115,12 @@ module MasterSearch
   end
 
   def preloadables
-    Rails.cache.fetch("preloadable_tables_for_user: #{current_user.id}") do
+    # The key must be scoped to the user's current app type and must change when access
+    # controls or roles change, otherwise a user switching app type within a session (or an
+    # access control change) would be served a stale preloadable table list (issue #1279 follow-up)
+    ckey = "preloadable_tables_for_user--#{current_user.id}-#{current_user.app_type_id}-" \
+           "#{Admin::UserAccessControl.access_control_version_token}"
+    Rails.cache.fetch(ckey) do
       master = Master.new(current_user: current_user)
       preloadables = []
       tnames = [

@@ -5,7 +5,11 @@ require 'rails_helper'
 # Tests for issue #1098:
 # - create_model returns a usable 400 error body for migration failures from CSV-derived fields.
 RSpec.describe 'Imports::ModelGenerators create_model', type: :request do
-  include ::UserSupport
+  include UserSupport
+
+  before :all do
+    change_setting('AllowDynamicMigrations', true)
+  end
 
   before :each do
     @admin, = create_admin

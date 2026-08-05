@@ -353,11 +353,11 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
         ]
       }
 
-      SaveTriggers::Log.new(config, @activity_log)
+      trigger = SaveTriggers::Log.new(config, @activity_log)
 
-      # on_complete is removed from Hash configs so triggers that iterate
-      # all config keys (e.g. update_this) don't encounter it
-      expect(config).not_to have_key(:on_complete)
+      # normalize_trigger_config creates an owned deep copy; on_complete is
+      # extracted from that copy so the trigger's working config never sees it
+      expect(trigger.config).not_to have_key(:on_complete)
     end
 
     it 'removes on_failure from Hash config before trigger processes it' do
@@ -369,9 +369,9 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
         ]
       }
 
-      SaveTriggers::Log.new(config, @activity_log)
+      trigger = SaveTriggers::Log.new(config, @activity_log)
 
-      expect(config).not_to have_key(:on_failure)
+      expect(trigger.config).not_to have_key(:on_failure)
     end
 
     it 'does not modify Array configs, preserving per-entry on_complete' do
@@ -524,15 +524,17 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       }
 
       # After UpdateThis processes the config, on_complete should be
-      # extracted from the inner config hash by with_entry_lifecycle
+      # extracted from the inner config hash by with_entry_lifecycle.
+      # normalize_trigger_config owns a deep copy; with_entry_lifecycle
+      # deletes on_complete from the owned copy's entry, not the original.
       allow(Rails.logger).to receive(:info)
       trigger = SaveTriggers::UpdateThis.new(config, @activity_log)
       trigger.perform_with_lifecycle
 
-      # The inner config should have on_complete removed
-      expect(config[:one]).not_to have_key(:on_complete)
+      # The trigger's owned config entry should have on_complete removed
+      expect(trigger.config[:one]).not_to have_key(:on_complete)
       # But other keys should still be present
-      expect(config[:one]).to have_key(:with)
+      expect(trigger.config[:one]).to have_key(:with)
     end
   end
 end

@@ -191,6 +191,7 @@ options:
 A report showing counts by category.
 
 **SQL:**
+
 ```sql
 SELECT
   category  AS "category",
@@ -201,6 +202,7 @@ ORDER BY category;
 ```
 
 **Options:**
+
 ```yaml
 view_options:
   view_as: chart
@@ -231,6 +233,7 @@ component:
 A report tracking two running totals over time.
 
 **SQL:**
+
 ```sql
 SELECT
   created_at    AS "date",
@@ -241,6 +244,7 @@ ORDER BY created_at;
 ```
 
 **Options:**
+
 ```yaml
 view_options:
   view_as: chart
@@ -285,6 +289,7 @@ component:
 A report showing proportions across categories.
 
 **SQL:**
+
 ```sql
 SELECT
   status        AS "status",
@@ -294,6 +299,7 @@ GROUP BY status;
 ```
 
 **Options:**
+
 ```yaml
 view_options:
   view_as: chart
@@ -353,6 +359,9 @@ When a chart report is embedded in a page layout panel, the dimensions are autom
 
 You can override these defaults in the `component: options:` configuration. A full-page report uses its explicit `width` and `height` values.
 
+In the example below, we also enable a value number to appear on each bar (the `component.options.options.plugins.datalabels` entry)
+and remove the legend (the `component.options.options.plugins.legend` entry).
+
 For an embedded chart, specify a meaningful height via the `options` block:
 
 ```yaml
@@ -366,6 +375,16 @@ component:
     options:
       maintainAspectRatio: false
       responsive: true
+      plugins:
+        legend:
+          display: false
+        datalabels:
+          color: white
+          font:
+            weight: bold
+          textStrokeWidth: 3
+          textStrokeColor: '#4472c4'
+      
 ```
 
 ---
@@ -375,6 +394,7 @@ component:
 A report showing participant transitions between study stages.
 
 **SQL:**
+
 ```sql
 SELECT
   stage_from        AS "from",
@@ -386,6 +406,7 @@ ORDER BY stage_from, stage_to;
 ```
 
 **Options:**
+
 ```yaml
 view_options:
   view_as: chart

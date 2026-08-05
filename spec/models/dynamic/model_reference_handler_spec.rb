@@ -238,6 +238,42 @@ RSpec.describe 'Model reference implementation', type: :model do
               add: many
               also_disable_record: true
 
+        always_embed_limited:
+          label: Always Embed Limited
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          view_options:
+            always_embed_creatable_reference: address
+          references:
+            address:
+              from: this
+              add: many
+              limit: 1
+              also_disable_record: true
+
+        always_embed_limited_multi:
+          label: Always Embed Limited Multi
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          view_options:
+            always_embed_creatable_reference: address
+          references:
+            player_contact:
+              from: master
+              add: many
+              limit: 2
+            address:
+              from: this
+              add: many
+              limit: 1
+              also_disable_record: true
+
         avoid_missing:
           label: Avoid Missing
           fields:
@@ -410,13 +446,15 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 6, 'Activity Selector', %w[select_call_direction select_who]
       setup_option_config 7, 'Creatable on Master Test', %w[select_call_direction select_who]
       setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
-      setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
-      setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
-      setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
-      setup_option_config 12, 'Prevent Disable', %w[select_call_direction select_who]
-      setup_option_config 13, 'Filter By Hash', %w[select_call_direction select_who]
-      setup_option_config 14, 'Filter By This Hash', %w[select_call_direction select_who]
-      setup_option_config 15, 'Filter By Substitution', %w[select_call_direction select_who]
+      setup_option_config 9, 'Always Embed Limited', %w[select_call_direction select_who]
+      setup_option_config 10, 'Always Embed Limited Multi', %w[select_call_direction select_who]
+      setup_option_config 11, 'Avoid Missing', %w[select_call_direction select_who]
+      setup_option_config 12, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
+      setup_option_config 13, 'User is Creator', %w[select_call_direction select_who]
+      setup_option_config 14, 'Prevent Disable', %w[select_call_direction select_who]
+      setup_option_config 15, 'Filter By Hash', %w[select_call_direction select_who]
+      setup_option_config 16, 'Filter By This Hash', %w[select_call_direction select_who]
+      setup_option_config 17, 'Filter By Substitution', %w[select_call_direction select_who]
     end
 
     it 'evaluates rules to optionally show references' do
@@ -706,6 +744,119 @@ RSpec.describe 'Model reference implementation', type: :model do
       al_simple.action_name = 'create'
       al_simple.reset_model_references
       expect(al_simple.embedded_item).to be_a Address
+    end
+
+    # Regression test for issue #1319:
+    # always_embed_creatable_reference must not raise FphsException when the
+    # configured reference has genuinely reached its creation limit. Instead,
+    # it should gracefully fall back to the existing linked record. Previously
+    # any invocation of #embedded_item(embed_action_type: :creating) after the
+    # single allowed record had already been created and linked (for example
+    # a follow up request/render after the initial save completed) would
+    # raise, even though nothing was actually misconfigured.
+    it 'falls back to the existing linked record when always_embed_creatable_reference has reached its limit' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                          extra_log_type: 'always_embed_limited',
+                                                                          select_who: 'abc')
+      al_simple.save!
+
+      al_simple.action_name = 'create'
+      al_simple.reset_model_references
+
+      # Nothing has been linked yet, so the single creatable address reference
+      # should be built and embedded.
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs.keys).to eq %i[address]
+      expect(al_simple.embedded_item(embed_action_type: :creating, force_reload: true)).to be_a Address
+
+      # Link the one allowed address record, simulating a completed embed.
+      address = Address.create!(master: @player_contact.master, rank: -1)
+      ModelReference.create_with(al_simple, address)
+      al_simple.reset_model_references
+
+      # The limit has now genuinely been reached - address is no longer creatable.
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs).to be_empty
+
+      # A later, delayed evaluation of the creating action (for example a
+      # follow up request after the initial save) must not raise. It should
+      # gracefully fall back to the existing linked address record.
+      result = nil
+      expect do
+        result = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      end.not_to raise_error
+      expect(result).to eq address
+    end
+
+    # Regression test for issue #1319 (part 2):
+    # embed_action_type: :latest must return whatever the most recent :creating evaluation
+    # resolved to, without recomputing mrs/cmrs (avoiding the raise/limit issue entirely), and
+    # without being clobbered by an unrelated :viewing/:editing evaluation that happens to run
+    # afterwards on the same instance (e.g. a calc_action condition referencing embedded_item,
+    # such as NonQueryCondition#in_instance, which always evaluates with embed_action_type: :viewing).
+    it 'retrieves the last :creating result via embed_action_type: :latest, immune to interleaved :viewing calls' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                          extra_log_type: 'always_embed_limited',
+                                                                          select_who: 'abc')
+      al_simple.save!
+
+      al_simple.action_name = 'create'
+      al_simple.reset_model_references
+
+      created = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      expect(created).to be_a Address
+
+      # :latest should return the same item that :creating just resolved to.
+      expect(al_simple.embedded_item(embed_action_type: :latest)).to eq created
+
+      # An unrelated :viewing evaluation (as calc_action conditions perform) must not clobber
+      # the :latest result, even when it resolves to something different (nil, since nothing
+      # has been linked as a model reference yet).
+      expect(al_simple.embedded_item(embed_action_type: :viewing)).to be_nil
+      expect(al_simple.embedded_item(embed_action_type: :latest)).to eq created
+    end
+
+    # Regression test for a review finding on #1319's fix: when always_embed_creatable_reference
+    # has reached its limit, and OTHER reference types are also configured, the fallback must not
+    # mistake an unrelated linked reference for the configured target - it should behave as if
+    # nothing of that type is embeddable (nil), not return the wrong record.
+    it 'does not fall back to an unrelated reference type when the always_embed_creatable_reference has reached its limit' do
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                          extra_log_type: 'always_embed_limited_multi',
+                                                                          select_who: 'abc')
+      al_simple.save!
+
+      # Fill the address limit (1) at the MASTER level, not linked to al_simple itself - so
+      # al_simple's own model_references (from: this) never sees an address reference, while the
+      # limit check (which always counts references from the master) correctly sees it as full.
+      address = Address.create!(master: @player_contact.master, rank: -1)
+      ModelReference.create_from_master_with(@player_contact.master, address)
+
+      # Link a player_contact reference TO al_simple - a DIFFERENT reference type than the
+      # always_embed_creatable_reference target ('address') - so al_simple's own mrs has exactly
+      # one entry, but it is not of the preferred type.
+      ModelReference.create_with(al_simple, @player_contact3)
+      al_simple.reset_model_references
+
+      cmrs = al_simple.creatable_model_references(only_creatables: true, force_reload: true)
+      expect(cmrs.keys).to eq %i[player_contact]
+
+      # address has reached its limit (via the master, not al_simple) - the fallback must not
+      # raise, AND must not incorrectly return the unrelated player_contact reference.
+      result = nil
+      expect do
+        result = al_simple.embedded_item(embed_action_type: :creating, force_reload: true)
+      end.not_to raise_error
+      expect(result).to be_nil
     end
 
     it 'handles embedded references without a view_options definition' do
@@ -1083,11 +1234,70 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(embedded_item.id).to be > first_id
     end
 
+    # Regression test for Issue #1303: #memoize_embedded_item used to key its cache by calling
+    # #embed_action_type directly, ignoring the actual embed_action_type resolved for the current
+    # call. That meant an explicit override (like this one) could be cached under the wrong key,
+    # and a later call using a different embed_action_type override could read back that
+    # unrelated, incorrect result instead of recomputing.
+    it 'keys the embedded_item memo by the actual resolved embed_action_type, not derived state' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      # This instance is unpersisted, so its own #embed_action_type would naturally resolve to
+      # :creating. Force a :viewing evaluation instead - nothing is embedded yet, so this
+      # correctly returns nil.
+      expect(dm.embedded_item(embed_action_type: :viewing)).to be nil
+
+      # A separate :creating evaluation on the same instance must not be poisoned by the cached
+      # :viewing result above - it should still build the creatable embedded item.
+      expect(dm.embedded_item(embed_action_type: :creating)).to be_a DynamicModel::TestEmbeddedRec
+    end
+
+    # Regression test for Issue #1303: HandlesUserBase#valid_embedded_item validates on every save,
+    # including the one that creates a direct embed's link. If that validation's :viewing evaluation
+    # runs before the link is established, it memoizes #model_references / #creatable_model_references
+    # against the not-yet-linked state. Without invalidating that memo once the link is in place,
+    # later evaluations on the same in-memory instance would incorrectly keep returning nil forever.
+    it 'does not leave a stale pre-link cache on the same instance after the embed is established' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      results = {}
+      # Simulate another after_create callback that runs before link_embedded_item's own
+      # after_create invocation (Rails runs after_create callbacks in declaration order, and e.g.
+      # NfsStore::Manage::ContainerFile#process_new_file is declared, and so runs, before
+      # Dynamic::ModelReferenceHandler's `after_create :link_embedded_item`) reading the embedded
+      # item in :viewing mode before the direct embed link has been established.
+      dm.class.after_create(prepend: true) { |r| r.embedded_item(embed_action_type: :viewing) }
+      # And another that runs AFTER link_embedded_item (appended normally), capturing what a
+      # caller would see mid-transaction, before after_commit's #reset_model_references has a
+      # chance to clean up any staleness independently of this fix.
+      dm.class.after_create { |r| results[:mid_transaction] = r.embedded_item(embed_action_type: :viewing) }
+
+      dm.save!
+
+      expect(results[:mid_transaction]).to be_a DynamicModel::TestEmbeddedRec
+
+      # Without #link_embedded_item clearing the stale pre-link memo once persisted, this would
+      # incorrectly keep returning the nil cached by the prepended callback above, even though the
+      # link is now set.
+      embedded_item = dm.embedded_item(embed_action_type: :viewing)
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item.test_embed_field_id).to eq dm.id
+    end
+
     it 'ignores the embed if the embed resource is not accessible by the user' do
       revoke_user_create :dynamic_model__test_embedded_recs
 
       dm = @dynamic_model_w_field.implementation_class.new(
         master: @master,
+
         embed_resource_name: @dynamic_model_embed.resource_name,
         action_name: 'new'
       )

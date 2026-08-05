@@ -4,9 +4,14 @@
 # It provides the full chronological list of tracker events in the front end
 # and the underlying table is routinely inserted to outside the app to track participant
 # events within a study.
-# Both trackers and tracker_history (intentionally singular, despite convention) are supported
-# by database triggers that allow inserts and updates into either of them to be reflected
-# correctly in the trackers table.
+# tracker_history.tracker_id is maintained by a database trigger that
+# unconditionally recomputes it as master_id * MULTIPLIER + protocol_id on
+# every INSERT/UPDATE, where MULTIPLIER is 1_000_000 (bigint tracker_id) or
+# 1_000 (integer tracker_id), depending on the database - see migration
+# AssignTrackerIdDeterministicallyOnTrackerHistory (issue #1309). Both
+# trackers and tracker_history (intentionally singular,
+# despite convention) are supported by database triggers that allow inserts and
+# updates into either of them to be reflected correctly in the trackers table.
 # @see Tracker for more information.
 class TrackerHistory < UserBase
   self.table_name = 'tracker_history'
@@ -64,6 +69,6 @@ class TrackerHistory < UserBase
     extras[:methods] << :record_id
     extras[:methods] << :event_milestone
 
-    super(extras)
+    super
   end
 end

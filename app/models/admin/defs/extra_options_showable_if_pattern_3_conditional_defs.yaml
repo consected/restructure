@@ -1,0 +1,8 @@
+# Pattern 3: Show only when conditions are met
+  showable_if:
+    all:
+      this:
+        status: active
+    not_any:
+      activity_log__example_reviews:
+        extra_log_type: hidden

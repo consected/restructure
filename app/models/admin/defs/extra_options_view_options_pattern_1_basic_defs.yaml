@@ -1,0 +1,9 @@
+# Pattern 1: Basic display and styling
+  view_options:
+    data_attribute: string or list of fields to use as the data attribute
+    header_caption: header caption to use - may include {{substitutions}}
+    alt_width_classes: html classes replacing standard col-* classes
+    extra_class: additional html classes for the block
+    view_handlers:
+      - address
+      - contact

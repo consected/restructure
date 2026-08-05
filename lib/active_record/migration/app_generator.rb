@@ -669,9 +669,9 @@ module ActiveRecord
           end
         end
 
-        # Recreate the trigger if any field types changed, since the trigger function
-        # needs to reflect the correct types for the fields being copied to history
-        if changed.present? || changed_history.present?
+        # Recreate the trigger whenever tracked fields change so the history
+        # function matches the current table shape.
+        if field_changes || added_history.present? || removed_history.present? || changed.present? || changed_history.present?
           case resource_type
           when :dynamic_model
             create_dynamic_model_trigger

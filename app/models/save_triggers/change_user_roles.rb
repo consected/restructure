@@ -44,7 +44,10 @@ class SaveTriggers::ChangeUserRoles < SaveTriggers::SaveTriggersBase
   # If for_user was not set, default to the current user
   def handle_role_def(role_def)
     if role_def.is_a? Hash
-      app_type = role_def[:app_type]
+      # app_type accepts a literal id/name, a {{substitution}}, or a conditional
+      # Hash reference (e.g. {this: {field: return_value}}), resolved here via
+      # FieldDefaults before being passed to the id/name lookup below.
+      app_type = FieldDefaults.calculate_default(item, role_def[:app_type], allow_nil: true, ignore_missing: true)
       self.role_name = role_def[:role_name]
       self.for_user = role_def[:for_user]
     else
@@ -52,7 +55,7 @@ class SaveTriggers::ChangeUserRoles < SaveTriggers::SaveTriggersBase
     end
 
     self.app_type_id = if app_type
-                         Admin::AppType.active_app_types.find_by(name: app_type)&.id
+                         Admin::AppType.find_active_by_name_or_id(app_type, only_active_on_server: true)&.id
                        else
                          item.current_user.app_type_id
                        end

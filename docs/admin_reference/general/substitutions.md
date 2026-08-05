@@ -37,6 +37,15 @@ the embedded form data may be accessed in captions, etc, through:
   - `\{\{<string_is_json_array>.json_parse.<index>\}\}`
   - `\{\{<string_is_json_hash_with_array>.json_parse.<key_name>.<index>\}\}`
 
+## Parse a YAML encoded string
+
+- Parse a YAML string and allow its elements to be accessed, mirroring `json_parse`:
+
+  - `\{\{<string_is_yaml_hash>.yaml_parse.<key_name>\}\}`
+  - `\{\{<string_is_yaml_array>.yaml_parse.<index>\}\}`
+  - `\{\{<string_is_yaml_hash_with_array>.yaml_parse.<key_name>.<index>\}\}`
+
+
 ## Drill into Object / JSON fields
 
 Simply name the keys in turn:
@@ -53,7 +62,7 @@ Parts of the full data tree may be extracted and stored in this way.
 
 ## Specifying item in an array
 
-When working with object or array fields, or the result of `json_parse`, the following
+When working with object or array fields, or the result of `json_parse` or `yaml_parse`, the following
 mechanism allows selection of a specific element:
 
 - `\{\{array.first\}\}`

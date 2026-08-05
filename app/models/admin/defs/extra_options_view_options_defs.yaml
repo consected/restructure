@@ -1,54 +1,46 @@
 # view_options options
+#
+# Pattern 1: Basic display text and styling
   view_options:
-    show_embedded_at_top: |
-      true | false to position a single auto loaded embedded item
-    hide_unless_creatable: |
-      true | false to hide add-item buttons in activity logs if
-      they are not creatable
     data_attribute: string or list of fields to use as the data attribute
-    always_embed_reference: reference name to always show embedded (or 'never' to never embed one)
-    always_embed_creatable_reference: |
-      reference name to always show embedded during
-      new/create (or 'never' to never embed one)
-    alt_order: string or list of date / time or integer fields to use for ordering
-    show_cancel: show cancel button alongside save button
-    only_create_as_reference: |
-      prevent creation as a standalone item, only embedded
-      / referenced within another
-    sort_references: 
-      # Sort model references in an alternative order, using the specified model_reference attribute      
-      # Typically this will be "id" to sort by when the reference was created, as opposed to the
-      # typical sorting which groups references in the order of their definition.
-      # NOTE: this setting may override *order_by:* specified for a specific *references:* configuration 
-      attribute: |
-        one of: id, from_record_type, from_record_id, from_record_master_id, to_record_type, to_record_id, 
-        to_record_master_id, user_id, created_at, updated_at, disabled      
-      direction: |
-        Default is ascending sort. To reverse the sort order use
-        "desc" or "reverse" for descending results
-      keep_top: |
-        If the sorting moves the top item that you want to keep in place, set this to *true*
-      null_value: |
-        If sorting items that may have a null value in the specified attribute, this specifies the value
-        to use for the comparison of that item
+    header_caption: header caption to use - may include {{substitutions}}
+    alt_width_classes: html classes replacing standard col-* classes
+    extra_class: additional html classes for the block
+    view_handlers:
+      - address
+      - contact
 
-    view_handlers: |
-      name of handler for UI, and models if they exist 
-      (prebuilt UI and model options include: address, contact, subject, secondary_info)
-    header_caption: header caption to use - can include [substitutions](../general/substitutions.md)
-    alt_width_classes: html classes (space separated) to replace standard col-* classes
-      # For example:
-      #   resized-width col-md-18 col-lg-18 col-md-offset-3 prevent_nfs_resize
-      # This forces the width of the block, and prevents the NFS filestore block changing the container width
-    extra_class: html classes (space separated) to add to block
-      # Useful classes:
-      # - allow-refresh-item-on-modal-close
-      #   - to ensure an embedded_report_* field refreshes the block when the modal is closed
-      # - prevent-reload-on-reference-save
-      #   - by default the container will reload when a reference is created or updated. This prevents it
-      # - no-scroll-on-click-edit
-      #   - prevent scrolling to this item if edit is clicked (manually or automatically)
-      # - make-labels-placeholders
-      #   - show fields with in field placeholders rather than labels
-      # - hide-form-metadata
-      #   - hides the form metadata in edit mode
+# Pattern 2: Embedded-reference presentation
+  view_options:
+    show_embedded_at_top: true | false
+    always_embed_reference: reference name | never
+    always_embed_creatable_reference: reference name | never
+    hide_unless_creatable: true | false
+    only_create_as_reference: true | false
+
+# Pattern 3: Alternative ordering of item lists
+  view_options:
+    alt_order: string or list of date / time / integer fields
+
+# Pattern 4: Cross-reference sorting
+# sort_references interacts with references.order_by by applying an overall sort across
+# the combined reference results.
+  view_options:
+    sort_references:
+      attribute: id | from_record_type | from_record_id | from_record_master_id | to_record_type | to_record_id | to_record_master_id | user_id | created_at | updated_at | disabled
+      direction: asc | desc | reverse
+      keep_top: true | false
+      null_value: value used when the sorted attribute is null
+
+# Pattern 5: Form button behavior
+  view_options:
+    show_cancel: true | false
+
+# Notes:
+# - view_options must be a Hash.
+# - Only the documented top-level keys are supported.
+# - data_attribute, alt_order and view_handlers may be a single string or an array of strings.
+# - sort_references must be a Hash when present.
+# - Boolean flags such as show_embedded_at_top, hide_unless_creatable, show_cancel and only_create_as_reference should use true or false.
+# - Common extra_class values include prevent-reload-on-reference-save, no-scroll-on-click-edit,
+#   make-labels-placeholders and hide-form-metadata.

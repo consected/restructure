@@ -47,6 +47,16 @@ class Admin
       res
     end
 
+    #
+    # The app types that are active and loaded on this server.
+    # When Settings::OnlyLoadAppTypes (FPHS_LOAD_APP_TYPES) is set, this restricts
+    # the result to just those app type ids, in addition to being active
+    # (disabled is null or false). When unset, all active app types are returned.
+    # Results are memoized per distinct Settings::OnlyLoadAppTypes value until
+    # reset_active_app_types! is called (e.g. after an app type is saved) or force
+    # is passed.
+    # @param force [Boolean] when true, bypass the memoized cache and reload
+    # @return [ActiveRecord::Relation<Admin::AppType>]
     def self.active_app_types(force: nil)
       olat = Settings::OnlyLoadAppTypes
       return @active_app_types if @old_olat == olat && @active_app_types && !force
@@ -62,7 +72,11 @@ class Admin
     def self.all_ids_available_to(user)
       return unless user
 
-      Rails.cache.fetch("all_app_type_ids_available_to::#{user.id}") do
+      # The key must change whenever access controls, roles or app type definitions change,
+      # since the result depends on them. Whole-cache clears on those saves currently mask
+      # an under-scoped key, but must not be relied upon (see issues #1270 / #1287)
+      ckey = "all_app_type_ids_available_to--#{user.id}-#{Admin::UserAccessControl.access_control_version_token}"
+      Rails.cache.fetch(ckey) do
         all_available_to(user).map(&:id)
       end
     end
@@ -103,13 +117,22 @@ class Admin
       user
     end
 
-    def self.find_active_by_name_or_id(name_or_id)
+    #
+    # Find an active app type by literal ID or name.
+    # @param name_or_id [Integer, String] app type id or name
+    # @param only_active_on_server [Boolean] when true, restrict the lookup to app types
+    #   actually active on this server (respecting Settings::OnlyLoadAppTypes), rather than
+    #   all active app types across the whole database
+    # @return [Admin::AppType, nil]
+    def self.find_active_by_name_or_id(name_or_id, only_active_on_server: false)
       return if name_or_id.to_s.blank?
 
+      scope = only_active_on_server ? active_app_types : active
+
       if name_or_id.is_a?(Integer) || name_or_id.to_i.to_s == name_or_id
-        Admin::AppType.active.find(name_or_id)
+        scope.find(name_or_id)
       else
-        Admin::AppType.active.find_by_name(name_or_id)
+        scope.find_by_name(name_or_id)
       end
     end
 

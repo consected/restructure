@@ -41,8 +41,10 @@ module Redcap
           end
           stub_request_project_users p[:server_url], p[:api_key]
           stub_request_instruments p[:server_url], p[:api_key]
+          stub_request_remove_project_user p[:server_url], p[:api_key]
         end
 
+        expect(@admin.email).to eq @admin.matching_user&.email
         pa = Redcap::ProjectAdmin.create! current_admin: @admin,
                                           study: DefaultStudy,
                                           name: p[:name],
@@ -73,16 +75,18 @@ module Redcap
       # Create a matching user for the admin
       @app_type = Admin::AppType.active.find_by(name: 'ref-data')
 
-      admin ||= @admin
-      user = User.active.find_by_email(admin.email)
-      if user
-        @user = user
-        @user.app_type = @app_type
-      else
-        @user, = create_user nil, '', email: admin.email, app_type: @app_type
+      @admin = admin if admin
+      @user = @admin&.matching_user
+
+      unless @user
+        admin, = create_admin(with_matching_user: true)
+        @admin = admin
       end
-      setup_access :app_type, resource_type: :general, access: :read, user: @user
-      @user.save!
+      user = @user
+
+      setup_access :app_type, resource_type: :general, access: :read, user: @user, app_type: @app_type
+      @user.app_type_id = @app_type.id
+      @user.save! if @user.changed?
       expect(@user.can?(:app_type)).to be_truthy
       expect(@user.app_type.id).to eq @app_type.id
 
@@ -224,6 +228,35 @@ module Redcap
 
         )
         .to_return(status: 200, body: import_record_save_trigger_response, headers: {})
+    end
+
+    def stub_request_import_project_user(server_url, api_key, user_data:)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key,
+            'data' => [user_data].to_json
+          }
+        )
+        .to_return(status: 200, body: import_project_user_response, headers: {})
+    end
+
+    def stub_request_remove_project_user(server_url, api_key, username: 'd20', usernames: nil)
+      usernames ||= [username]
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'action' => 'delete',
+            'users' => usernames,
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: remove_project_user_response, headers: {})
     end
 
     def stub_request_metadata(server_url, api_key)
@@ -585,6 +618,14 @@ module Redcap
 
     def import_record_save_trigger_response
       File.read('spec/fixtures/redcap/save_trigger_import_record.json')
+    end
+
+    def remove_project_user_response
+      File.read('spec/fixtures/redcap/save_trigger_remove_project_user.json')
+    end
+
+    def import_project_user_response
+      File.read('spec/fixtures/redcap/save_trigger_import_project_user.json')
     end
 
     def project_admin_repeat_instrument_response

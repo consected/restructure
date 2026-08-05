@@ -37,6 +37,7 @@ RSpec.describe 'Redcap::DataRecords requested options & skipped files', type: :m
   include Redcap::RedcapSupport
 
   before :all do
+    change_setting('AllowDynamicMigrations', true)
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
@@ -78,7 +79,7 @@ RSpec.describe 'Redcap::DataRecords requested options & skipped files', type: :m
   # Helper: configure stubs so request_records proceeds past the inline adapter guard
   # and past the existing-jobs guard, without running a real background job.
   def stub_for_request_records
-    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return(double(count: 0))
+    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return([])
 
     fake_job = double('job', job_id: 'test-job-id')
     allow(Redcap::CaptureRecordsJob).to receive(:perform_later).and_return(fake_job)

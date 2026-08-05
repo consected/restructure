@@ -4,6 +4,19 @@ class Admin::ActivityLogsController < AdminController
   before_action :set_defaults
   # after_action :routes_reload, only: %i[update create]
 
+  def schema_reference
+    respond_to do |format|
+      format.json do
+        render json: OptionConfigs::ActivityLogOptions.accepted_config_schema(format: :json),
+               content_type: 'application/json'
+      end
+      format.yaml do
+        render plain: OptionConfigs::ActivityLogOptions.accepted_config_schema(format: :yaml),
+               content_type: 'application/x-yaml'
+      end
+    end
+  end
+
   def versions
     set_instance_from_id
     object_instance.current_admin = current_admin
