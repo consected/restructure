@@ -7745,122 +7745,6 @@ $_$;
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
--- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.masters (
-    id integer NOT NULL,
-    msid integer,
-    pro_id integer,
-    pro_info_id integer,
-    rank integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    user_id integer,
-    contact_id integer,
-    created_by_user_id bigint
-);
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
-
-
---
--- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.tracker_history (
-    id integer NOT NULL,
-    master_id integer NOT NULL,
-    protocol_id integer NOT NULL,
-    tracker_id bigint NOT NULL,
-    event_date timestamp without time zone,
-    user_id integer,
-    notes character varying,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    sub_process_id integer,
-    protocol_event_id integer,
-    item_id integer,
-    item_type character varying
-);
-
-
---
--- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.scantrons (
-    id integer NOT NULL,
-    master_id integer,
-    scantron_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: activity_logs; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.activity_logs (
-    id integer NOT NULL,
-    name character varying,
-    item_type character varying,
-    rec_type character varying,
-    admin_id integer,
-    disabled boolean,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    action_when_attribute character varying,
-    field_list character varying,
-    blank_log_field_list character varying,
-    blank_log_name character varying,
-    extra_log_types character varying,
-    hide_item_list_panel boolean,
-    main_log_name character varying,
-    process_name character varying,
-    table_name character varying,
-    category character varying,
-    schema_name character varying
-);
-
-
---
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -11199,35 +11083,6 @@ ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
 
 
 --
--- Name: q1_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q1_rc_links AS
- SELECT id,
-    master_id,
-    link AS q1_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM q1.rc_links;
-
-
---
--- Name: q2_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q2_rc_links AS
- SELECT rc.id,
-    masters.id AS master_id,
-    split_part((rc.link)::text, '='::text, 2) AS q2_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM (q2.rc_links rc
-     JOIN ml_app.masters ON ((masters.msid = rc.msid)));
-
-
---
 -- Name: rails_spec_db_tally; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -12457,9 +12312,9 @@ ALTER SEQUENCE ml_app.test_items_id_seq OWNED BY ml_app.test_items.id;
 
 CREATE TABLE ml_app.tracker_history (
     id integer NOT NULL,
-    master_id integer,
-    protocol_id integer,
-    tracker_id integer,
+    master_id integer NOT NULL,
+    protocol_id integer NOT NULL,
+    tracker_id bigint NOT NULL,
     event_date timestamp without time zone,
     user_id integer,
     notes character varying,
@@ -14474,7 +14329,7 @@ ALTER SEQUENCE ref_data.domain_mappings_id_seq OWNED BY ref_data.domain_mappings
 --
 
 CREATE VIEW ref_data.next_msid_values AS
- SELECT (max(msid) + 1) AS msid
+ SELECT (max(masters.msid) + 1) AS msid
    FROM ml_app.masters;
 
 
