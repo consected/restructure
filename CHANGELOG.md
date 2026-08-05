@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [9.47.0] - 2026-08-05
+
 - [DB-Migration] required before upgrade
 - [DB-Seeds] update required from admin panel
 - [Security][Updated] gems to address activestorage CVE: CVE-2026-66066
