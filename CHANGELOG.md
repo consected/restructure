@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [DB-Migration] required before upgrade
+- [DB-Seeds] update required from admin panel
 - [Security][Updated] gems to address activestorage CVE: CVE-2026-66066
 
 ### From FPHS - PR #1336 - 2026-08-04
@@ -71,8 +73,6 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 ### From FPHS - PR #1307 - 2026-07-22
 
 - [Fixed] pre-existing memoization test-isolation failures in external_identifier_spec and container_file_spec - fixes #1303
-
-
 
 ### From FPHS - PR #1301 - 2026-07-22
 
@@ -178,7 +178,6 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 ### From FPHS - PR #1247 - 2026-06-27
 
 - [Fixed] YAML corruption and config library cycle expansion in dynamic model options - fixes #676
-
 
 ## [9.46.0] - 2026-06-25
 
@@ -459,7 +458,6 @@ Fixed notes field format: plain newlines overridden by app config markdown setti
 ### From FPHS - PR #1113 - 2026-05-06
 
 - [Fixed] tracker history protocol casing in history view - fixes #1112
-
 
 ## [9.44.0] - 2026-05-02
 
