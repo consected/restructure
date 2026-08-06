@@ -22,6 +22,7 @@ require 'rails_helper'
 
 describe 'admin report preview columns - Issue #1000', js: true, driver: $browser_driver do
   include ModelSupport
+  include MasterSupport
   include AdminActionsSetup
   include FeatureSupport
 
@@ -94,8 +95,8 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
       first_row_cells = all('tbody tr:first-child td')
 
       expect(all_header_cells.length).to eq(first_row_cells.length),
-        "Header row has #{all_header_cells.length} columns but data row has #{first_row_cells.length} — " \
-        'columns are visually misaligned'
+                                         "Header row has #{all_header_cells.length} columns but data row has #{first_row_cells.length} — " \
+                                         'columns are visually misaligned'
 
       # Collect just the data column headers (with data-col-type attribute)
       data_header_cells = all('thead th.table-header')
@@ -103,26 +104,26 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
 
       # Verify we got headers for all expected columns
       expect(data_header_cells.length).to eq(@expected_columns.length),
-        "Expected #{@expected_columns.length} column headers but found #{data_header_cells.length}"
+                                          "Expected #{@expected_columns.length} column headers but found #{data_header_cells.length}"
 
       # Verify each header's data-col-type matches the expected column name in order
       @expected_columns.each_with_index do |expected_col, i|
         expect(header_col_types[i]).to eq(expected_col),
-          "Header at position #{i} has data-col-type '#{header_col_types[i]}' " \
-          "but expected '#{expected_col}'. " \
-          "Full header order: #{header_col_types.inspect}"
+                                       "Header at position #{i} has data-col-type '#{header_col_types[i]}' " \
+                                       "but expected '#{expected_col}'. " \
+                                       "Full header order: #{header_col_types.inspect}"
       end
 
       # Verify the first data row's td data-col-type values align positionally with headers
       data_cells = all('tbody tr:first-child td.report-el')
       expect(data_cells.length).to eq(@expected_columns.length),
-        "Expected #{@expected_columns.length} data cells but found #{data_cells.length}"
+                                   "Expected #{@expected_columns.length} data cells but found #{data_cells.length}"
 
       data_cells.each_with_index do |td, i|
         td_col_type = td[:'data-col-type']
         expect(td_col_type).to eq(header_col_types[i]),
-          "Data cell at position #{i} has data-col-type '#{td_col_type}' " \
-          "but header has '#{header_col_types[i]}'"
+                               "Data cell at position #{i} has data-col-type '#{td_col_type}' " \
+                               "but header has '#{header_col_types[i]}'"
       end
     end
   end
@@ -186,26 +187,26 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
         first_row_cells = all('tbody tr:first-child td')
 
         expect(all_header_cells.length).to eq(first_row_cells.length),
-          "Header row has #{all_header_cells.length} columns but data row has #{first_row_cells.length} — " \
-          'column misalignment detected (likely stale cached header with edit-button-column <th>)'
+                                           "Header row has #{all_header_cells.length} columns but data row has #{first_row_cells.length} — " \
+                                           'column misalignment detected (likely stale cached header with edit-button-column <th>)'
 
         # The admin preview should NOT have an edit-button-column header since @embedded_report is set
         edit_button_headers = all('thead th.edit-button-column', minimum: 0)
         expect(edit_button_headers.length).to eq(0),
-          'Admin preview should not show edit-button-column header when @embedded_report is set'
+                                              'Admin preview should not show edit-button-column header when @embedded_report is set'
 
         # Verify positional alignment of data column headers with data cells
         data_header_cells = all('thead th.table-header')
         data_cells = all('tbody tr:first-child td.report-el')
         expect(data_header_cells.length).to eq(data_cells.length),
-          "Data header count (#{data_header_cells.length}) != data cell count (#{data_cells.length})"
+                                            "Data header count (#{data_header_cells.length}) != data cell count (#{data_cells.length})"
 
         data_header_cells.each_with_index do |th, i|
           th_col = th[:'data-col-type']
           td_col = data_cells[i][:'data-col-type']
           expect(th_col).to eq(td_col),
-            "Header at position #{i} has data-col-type '#{th_col}' " \
-            "but data cell has '#{td_col}' — columns are shifted"
+                            "Header at position #{i} has data-col-type '#{th_col}' " \
+                            "but data cell has '#{td_col}' — columns are shifted"
         end
       end
     end
@@ -227,9 +228,9 @@ describe 'admin report preview columns - Issue #1000', js: true, driver: $browse
       # The "Edit table data?" button should have a visual indicator (btn-info class and check icon)
       edit_table_btn = find('a[href="#edit_table_block"]')
       expect(edit_table_btn[:class]).to include('btn-info'),
-        'Edit table data button should have btn-info class when edit table fields are configured'
+                                        'Edit table data button should have btn-info class when edit table fields are configured'
       expect(edit_table_btn).to have_css('.glyphicon-ok'),
-        'Edit table data button should show a check icon when edit table fields are configured'
+                                'Edit table data button should show a check icon when edit table fields are configured'
     end
   end
 end
