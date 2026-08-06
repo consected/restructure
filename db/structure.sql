@@ -23422,6 +23422,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260804160000'),
 ('20260730120000'),
 ('20260723161812'),
 ('20260723161807'),
