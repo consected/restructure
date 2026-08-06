@@ -30,7 +30,7 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 - [Rails8][Upgrade] Adopt active_record.postgresql_adapter_decode_dates = true
 
-### From FPHS - PR #1299 - 2026-08-06
+### From FPHS - PR #1329 - 2026-08-06
 
 - [Rails8][Upgrade] to_time_preserves_timezone audit - fixes #1302
 
@@ -53,7 +53,6 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 ### From FPHS - PR #1340 - 2026-08-06
 
 - [Fixed] a range of flakey spec tests
-
 
 ## [9.47.0] - 2026-08-05
 
