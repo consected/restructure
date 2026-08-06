@@ -21,7 +21,7 @@ Bundler.require(*Rails.groups)
 module Fpa1
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 7.2
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -31,5 +31,33 @@ module Fpa1
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.active_record.schema_format = :sql
+
+    # Enables YJIT as of Ruby 3.3, to bring sizeable performance improvements.
+    # Moved here from config/initializers/new_framework_defaults_7_2.rb (issue #1015).
+    config.yjit = true
+
+    # Conservative overrides of Rails 7.2 defaults adopted via load_defaults 7.2 (issue #1015).
+    # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
+    # Remove each override when the corresponding tracking sub-issue is resolved.
+
+    # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
+    # consumers are audited. Tracking: issue #1295.
+    config.active_record.postgresql_adapter_decode_dates = false
+
+    # Keep Active Job enqueuing immediately (pre-7.2 behaviour) rather than deferring
+    # until after transaction commit, until delayed_job commit-timing is validated.
+    # Tracking: issue #1296.
+    config.active_job.enqueue_after_transaction_commit = :never
+
+    # Rails 7.1+ defaults to a SHA256-derived key for non-deterministic ActiveRecord
+    # Encryption attributes (e.g. otp_secret, dynamic model fields marked encrypted: true).
+    # This app has existing production data encrypted under the old SHA1-derived key.
+    # Keep SHA1 supported as a decrypt-only "previous scheme" so that data stays
+    # readable; new writes still use the SHA256-derived key. Must be set here (not in
+    # config/initializers) because config.active_record.encryption is a buffer that
+    # Rails' "active_record_encryption.configuration" railtie initializer merges
+    # into ActiveRecord::Encryption.config before config/initializers/*.rb load.
+    # Tracking: issue #1293 (re-encrypt existing data and drop this fallback).
+    config.active_record.encryption.support_sha1_for_non_deterministic_encryption = true
   end
 end

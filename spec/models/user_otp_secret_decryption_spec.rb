@@ -92,4 +92,37 @@ RSpec.describe User, 'OTP secret decryption handling' do
       expect(@user.active_for_authentication?).to be true
     end
   end
+
+  # Related issue: consected/restructure#1015 (Rails 8 upgrade prep) / #1293
+  #
+  # Advancing config.load_defaults to 7.2 switches ActiveRecord::Encryption's
+  # hash_digest_class from SHA1 to SHA256 for deriving non-deterministic
+  # encryption keys (otp_secret is non-deterministic - see
+  # devise-two-factor's `encrypts :otp_secret`). Without
+  # `support_sha1_for_non_deterministic_encryption = true`, any otp_secret
+  # value encrypted under the old SHA1-derived key becomes undecryptable,
+  # silently breaking 2FA login for every existing user.
+  describe 'decrypting otp_secret values encrypted under the legacy SHA1-derived key' do
+    def legacy_sha1_key_provider
+      key_generator = ActiveRecord::Encryption::KeyGenerator.new(hash_digest_class: OpenSSL::Digest::SHA1)
+      ActiveRecord::Encryption::DerivedSecretKeyProvider.new(
+        ActiveRecord::Encryption.config.primary_key,
+        key_generator: key_generator
+      )
+    end
+
+    it 'still decrypts correctly now that SHA1 is supported as a previous scheme' do
+      legacy_secret = 'JBSWY3DPEHPK3PXP'
+
+      ActiveRecord::Encryption.with_encryption_context(key_provider: legacy_sha1_key_provider) do
+        @user.otp_secret = legacy_secret
+        @user.save!(validate: false)
+      end
+
+      reloaded = User.find(@user.id)
+
+      expect(reloaded.otp_secret_decryption_failed?).to be false
+      expect(reloaded.otp_secret).to eq(legacy_secret)
+    end
+  end
 end
