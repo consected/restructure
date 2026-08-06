@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [10.0.1] - 2026-08-06
+
 ### From FPHS - PR #1338 - 2026-08-06
 
 - [Rails8][Upgrade] Upgrade to Rails 8.1.3.1 (part of #1015) - resolves #1325 and upgrades from PR #1305
