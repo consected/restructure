@@ -14,6 +14,27 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+- [Merged] release 9.47.0 back to develop
+- [Fixed] a range of flakey spec tests
+- [Updated] DB schema dump
+- [Fixed] otp_enc_key fallback to use Rails.application.secret_key_base - fixes #1015
+- [Advanced] config.load_defaults to 7.2 and removed stale defaults files - refs #1015
+- [Kept] SHA1 as previous scheme for AR encryption to decrypt legacy data - refs #1015 #1293
+- [Fixed] FrozenError in as_json methods for Rails 8 compatibility - refs #1015
+- [Moved] enqueue_after_transaction_commit to job base classes, removing deprecated global config - refs #1015 #1296
+- [Bumped] Rails to 8.0.5 and Puma to 8.0.2 - refs #1015
+- [Fixed] filter_parameters spec assertion for Rails 7.2+ regex compilation - refs #1015
+- [Added] new_framework_defaults_8_0.rb documenting reviewed Rails 8 template additions - refs #1327
+- [Changed] to_time_preserves_timezone to :zone - resolves #1302
+- [Fixed] review findings for to_time_preserves_timezone audit - refs #1302
+- [Adopted] postgresql_adapter_decode_dates = true - resolves #1295
+- [Migrated] otp_secret to SHA256 hash digest - resolves #1293
+- [Added] configurable hash_digest_class option for encrypted dynamic model fields - resolves #1294
+- [Upgraded] to Rails 8.1.3.1 and refreshed brakeman ignore fingerprints - refs #1325
+- [Updated] DB schema dump
+- [Fixed] spec test bug
+- [Bumped] version for Rails 8.1 upgrade
+
 ## [9.47.0] - 2026-08-05
 
 - [DB-Migration] required before upgrade
