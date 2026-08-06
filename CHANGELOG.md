@@ -14,6 +14,46 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+### From FPHS - PR #1338 - 2026-08-06
+
+- [Rails8][Upgrade] Upgrade to Rails 8.1.3.1 (part of #1015) - resolves #1325 and upgrades from PR #1305
+
+### From FPHS - PR #1335 - 2026-08-06
+
+- [Rails8][Upgrade] Add configurable hash_digest_class option for encrypted dynamic model fields - resolves #1294
+
+### From FPHS - PR #1332 - 2026-08-06
+
+- [Rails8][Upgrade] Migrate OTP encrypted field (otp_secret) to SHA256 hash digest - resolves #1293
+
+### From FPHS - PR #1333 - 2026-08-06
+
+- [Rails8][Upgrade] Adopt active_record.postgresql_adapter_decode_dates = true
+
+### From FPHS - PR #1329 - 2026-08-06
+
+- [Rails8][Upgrade] to_time_preserves_timezone audit - fixes #1302
+
+### From FPHS - PR #1328 - 2026-08-06
+
+- [Rails8][Upgrade] app:update audit + deploy/rollback acceptance checks - fixes #1327
+
+### From FPHS - PR #1305 - 2026-08-06
+
+- [Rails8][Upgrade] Upgrade Rails to 8.0.5 and Puma to 8.0.2
+
+### From FPHS - PR #1299 - 2026-08-06
+
+- [Rails8][Upgrade] Rails 8 upgrade prep: fix otp_enc_key, advance load_defaults to 7.2
+
+### From FPHS - PR #1341 - 2026-08-06
+
+- [Updated] DB schema dump
+
+### From FPHS - PR #1340 - 2026-08-06
+
+- [Fixed] a range of flakey spec tests
+
 ## [9.47.0] - 2026-08-05
 
 - [DB-Migration] required before upgrade

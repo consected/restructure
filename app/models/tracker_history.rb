@@ -60,6 +60,7 @@ class TrackerHistory < UserBase
   end
 
   def as_json(extras = {})
+    extras = extras.dup
     extras[:methods] ||= []
     extras[:methods] << :protocol_name
     extras[:methods] << :sub_process_name

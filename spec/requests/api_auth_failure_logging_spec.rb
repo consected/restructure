@@ -92,8 +92,11 @@ describe 'API authentication failure logging', type: :request do
     end
 
     it 'does not log sensitive tokens in the warn message' do
-      # Arrange: Verify filtered params configuration
-      expect(Rails.application.config.filter_parameters).to include(:user_token)
+      # Arrange: Verify that user_token is covered by the parameter filter.
+      # Rails 7.2+ compiles symbol entries into a single regex, so we verify
+      # actual filtering behaviour rather than checking for a specific symbol.
+      filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+      expect(filter.filter({ 'user_token' => 'test_value' })['user_token']).to eq('[FILTERED]')
 
       allow(Rails.logger).to receive(:warn).and_call_original
 

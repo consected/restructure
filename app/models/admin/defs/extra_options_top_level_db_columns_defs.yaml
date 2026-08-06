@@ -7,5 +7,6 @@ _db_columns:
     array: false (default) | true - optional flag to indicate if this is an array type column
     index: false (default) | true - add an index
     encrypted: false (default) | true - use Rails encrypted attribute for transparent encryption/decryption
+    hash_digest_class: sha256 (default) | sha1 - digest algorithm for encrypted field key derivation; use sha1 only to read pre-existing legacy-encrypted data
   field_name2:
     type: ...

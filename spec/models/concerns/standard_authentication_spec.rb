@@ -2,6 +2,11 @@
 
 require 'rails_helper'
 
+# Tests for StandardAuthentication#otp_enc_key (issue #1015 - Rails 8 upgrade prep).
+# `Rails.application.secrets` was removed, so the previous fallback
+# `Devise.secret_key || Rails.application.secrets[:secret_key_base]` raises
+# NoMethodError whenever Devise.secret_key is falsy. These specs demonstrate
+# that otp_enc_key must fall back to Rails.application.secret_key_base instead.
 RSpec.describe 'StandardAuthentication', type: :model do
   TestRegex = '^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$'
   TestRegex2 = '^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$'
@@ -65,5 +70,20 @@ RSpec.describe 'StandardAuthentication', type: :model do
     res = User.password_strong_enough('a', result: result)
     expect(res).to be false
     expect(result[:test]).to eq :regex
+  end
+
+  describe '.otp_enc_key' do
+    it 'uses Devise.secret_key when it is present' do
+      allow(Devise).to receive(:secret_key).and_return('a-devise-secret-key-that-is-long-enough')
+
+      expect(User.otp_enc_key).to eq('a-devise-secret-key-that-is-long-enough-User')
+    end
+
+    it 'falls back to Rails.application.secret_key_base when Devise.secret_key is not set (issue #1015)' do
+      allow(Devise).to receive(:secret_key).and_return(nil)
+
+      expect { User.otp_enc_key }.not_to raise_error
+      expect(User.otp_enc_key).to eq("#{Rails.application.secret_key_base}-User")
+    end
   end
 end

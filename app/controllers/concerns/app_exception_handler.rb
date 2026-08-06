@@ -139,7 +139,11 @@ module AppExceptionHandler
   end
 
   def routing_error_handler(error)
-    msg = 'The request URL does not exist.'
+    msg = if Rails.env.production?
+            'The request URL does not exist.'
+          else
+            "The request URL does not exist: #{request.original_fullpath}"
+          end
     code = 404
     return_and_log_error error, msg, code, log_level: Settings::LogLevel[__method__]
   end

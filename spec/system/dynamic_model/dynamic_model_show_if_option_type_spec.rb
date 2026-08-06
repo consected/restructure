@@ -51,6 +51,7 @@ describe 'dynamic model show_if in show mode with option types', js: true, drive
     # The master record panel templates require tracker access to render
     setup_access :trackers, user: @user, app_type: @app_type
     expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+    SetupHelper.reload_configs
     Rails.application.routes_reloader.reload!
 
     # Record where the show_if conditions are NOT met (visit_name != '1'):
