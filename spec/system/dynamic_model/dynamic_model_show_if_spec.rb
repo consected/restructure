@@ -45,6 +45,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       expect(@resource_name).to eq :dynamic_model__test_show_if_fields
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 

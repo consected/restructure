@@ -55,6 +55,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -252,6 +253,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -638,6 +640,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 
@@ -894,6 +897,7 @@ describe 'dynamic models fields and views', js: true, driver: $browser_driver do
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+      SetupHelper.reload_configs
       Rails.application.routes_reloader.reload!
     end
 

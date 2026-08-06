@@ -55,7 +55,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
 
       set_up_feature
       setup_redcap_email_dm
-
+      SetupHelper.reload_configs
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name, user: @user, app_type: @app_type
       expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
@@ -117,13 +117,13 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
         email_field = find("[data-field-name='email_address']")
         email_strong = email_field.find('strong')
         expect(email_strong.text.strip).to eq('testuser@example.com'),
-          "Expected email 'testuser@example.com' visible in show mode <strong>, got '#{email_strong.text.strip}' (bug #558: redcap_email shows blank)"
+                                           "Expected email 'testuser@example.com' visible in show mode <strong>, got '#{email_strong.text.strip}' (bug #558: redcap_email shows blank)"
 
         # Verify the phone number value is visible in show mode
         phone_field = find("[data-field-name='phone_number']")
         phone_strong = phone_field.find('strong')
         expect(phone_strong.text.strip).not_to be_empty,
-          'Expected phone number visible in show mode <strong>, got blank (bug #558: redcap_phone shows blank)'
+                                               'Expected phone number visible in show mode <strong>, got blank (bug #558: redcap_phone shows blank)'
 
         # Verify description is visible (standard field, capitalized on display)
         expect(page).to have_css("[data-field-name='description']", text: 'Test redcap email record')
@@ -192,6 +192,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
 
       set_up_feature
       setup_redcap_email_named_email_dm
+      SetupHelper.reload_configs
 
       expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id))
       setup_access @resource_name_named, user: @user, app_type: @app_type
@@ -248,7 +249,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
         email_field = find("[data-field-name='email']")
         email_strong = email_field.find('strong')
         expect(email_strong.text.strip).to eq('namedfield@example.com'),
-          "Expected email 'namedfield@example.com' visible in show mode, got '#{email_strong.text.strip}'"
+                                           "Expected email 'namedfield@example.com' visible in show mode, got '#{email_strong.text.strip}'"
       end
     end
   end
@@ -258,9 +259,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
   def setup_redcap_email_dm
     # Clean up any existing definitions with this table name
     DynamicModel.active.where(table_name: 'test_redcap_email_fields').reload.each { |dm| dm.disable!(@admin) }
-    if defined?(DynamicModel::TestRedcapEmailField)
-      DynamicModel.send(:remove_const, :TestRedcapEmailField)
-    end
+    DynamicModel.send(:remove_const, :TestRedcapEmailField) if defined?(DynamicModel::TestRedcapEmailField)
 
     dm_options = <<~YAML
       _configurations: {}
@@ -297,7 +296,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
     dm.current_admin = @admin
     dm.update_tracker_events
 
-    expect(dm).to be_a ::DynamicModel
+    expect(dm).to be_a DynamicModel
 
     app = @user.app_type
     expect(app).to be_a Admin::AppType
@@ -313,9 +312,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
   def setup_redcap_email_named_email_dm
     # Clean up any existing definitions with this table name
     DynamicModel.active.where(table_name: 'test_redcap_email_nameds').reload.each { |dm| dm.disable!(@admin) }
-    if defined?(DynamicModel::TestRedcapEmailNamed)
-      DynamicModel.send(:remove_const, :TestRedcapEmailNamed)
-    end
+    DynamicModel.send(:remove_const, :TestRedcapEmailNamed) if defined?(DynamicModel::TestRedcapEmailNamed)
 
     dm_options = <<~YAML
       _configurations: {}
@@ -352,7 +349,7 @@ describe 'dynamic model redcap email and phone fields', js: true, driver: $brows
     dm.current_admin = @admin
     dm.update_tracker_events
 
-    expect(dm).to be_a ::DynamicModel
+    expect(dm).to be_a DynamicModel
 
     app = @user.app_type
     expect(app).to be_a Admin::AppType

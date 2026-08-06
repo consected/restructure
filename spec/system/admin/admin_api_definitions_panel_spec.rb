@@ -16,16 +16,23 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
   include ModelSupport
   include AdminActionsSetup
   include FeatureSupport
+  include TestFieldsDmSupport
+  include TestNoMasterDmRecSupport
 
   before(:all) do
     SetupHelper.feature_setup
+    create_admin
+    create_user
+    @master ||= Master.first
+    setup_fields_dm
+    setup_test_no_master_dm_rec_dynamic_model
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
     make_an_admin
   end
 
   describe 'dynamic models' do
     it 'displays the API tab with endpoints, curl examples, fields, and save trigger' do
-      dm = DynamicModel.active.find(&:table_or_view_ready?)
+      dm = DynamicModel.active.find { |d| d.table_or_view_ready? && d.field_list_array.present? }
       skip 'No active dynamic models with ready tables found' unless dm
 
       admin_sign_in_with_2fa
@@ -81,6 +88,7 @@ describe 'admin API definitions panel', js: true, driver: $browser_driver do
 
         # Verify fields section
         expect(page).to have_content('fields')
+        scroll_to('.api-panel__fields-list-block', check_it: false)
         expect(page).to have_css('.api-panel__fields-list-block')
 
         # Verify standard fields are excluded from the fields list

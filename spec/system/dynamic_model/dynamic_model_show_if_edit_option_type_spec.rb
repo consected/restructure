@@ -57,6 +57,7 @@ describe 'dynamic model show_if in edit mode with custom option_type_attr_name',
     # The master record panel templates require tracker access to render
     setup_access :trackers, user: @user, app_type: @app_type
     expect(@user.has_access_to?(:create, :table, @resource_name)).to be_truthy
+    SetupHelper.reload_configs
     Rails.application.routes_reloader.reload!
 
     # A type_b record with no trigger value set (cond_field hidden initially)

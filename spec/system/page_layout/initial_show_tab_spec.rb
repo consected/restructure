@@ -30,7 +30,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
   include MasterDataSupport
   include FeatureSupport
 
-  def navigate_to_master
+  def navigate_to_master_and_allow_auto_expand
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
     finish_page_loading
     expect(page).to have_css("#master-#{@master.id}", wait: 15)
@@ -204,7 +204,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
     end
@@ -214,7 +214,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       expect_panel_collapsed('details')
       expect_panel_collapsed('trackers')
     end
@@ -226,7 +226,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
     end
@@ -240,7 +240,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('trackers')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # details opens because initial_show: true is not suppressed by open_panels
       wait_for_panel_expanded('details')
       # trackers also opens because it is listed in open_panels (initial_show: nil allows the override)
@@ -255,7 +255,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml(initial_show: true))
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # Both open because initial_show: true is not overridden by open_panels
       wait_for_panel_expanded('details')
       wait_for_panel_expanded('trackers')
@@ -266,7 +266,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml)
       set_open_panels('details')
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       # details expands because open_panels evaluation is independent of initial_show
       wait_for_panel_expanded('details')
       expect_panel_collapsed('trackers')
@@ -279,7 +279,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
       update_layout(@trackers_panel, trackers_layout_yaml(initial_show: true))
       set_open_panels(nil)
 
-      navigate_to_master
+      navigate_to_master_and_allow_auto_expand
       wait_for_panel_expanded('details')
       wait_for_panel_expanded('trackers')
     end

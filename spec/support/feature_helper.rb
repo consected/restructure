@@ -30,9 +30,9 @@ module FeatureHelper
     options[:check_it] = true if options[:check_it].nil?
 
     puts "FeatureHelper#scroll_to: Scrolling to #{el_selector}"
-    if all(el_selector).present?
+    if all(el_selector, visible: false).present?
 
-      run_script = "document.querySelectorAll('#{el_selector.gsub("'", '"')}')[0].scrollTop += 100;"
+      run_script = "_fpa.utils.scrollTo('#{el_selector.gsub("'", '"')}');"
       begin
         page.execute_script run_script
       rescue StandardError => e
@@ -41,7 +41,7 @@ module FeatureHelper
       end
     end
 
-    expect(page).to have_selector(el_selector.to_s, visible: true) if options[:check_it]
+    expect(find(el_selector).visible?).to be true if options[:check_it]
   end
 
   def force_modal_hide
@@ -49,7 +49,7 @@ module FeatureHelper
     begin
       page.execute_script run_script
     rescue StandardError => e
-      puts "Failed to run the scroll_to javascript: #{run_script}."
+      puts "Failed to run the force_modal_hide javascript: #{run_script}."
       puts e.backtrace.join("\n")
     end
   end
