@@ -273,7 +273,7 @@ describe 'big-select field component', js: true, driver: $browser_driver do
         dm.generate_model
         dm.add_master_association
       end
-
+      SetupHelper.reload_configs
       DynamicModel.routes_load
       Rails.application.routes_reloader.reload!
     end

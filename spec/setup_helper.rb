@@ -104,6 +104,17 @@ module SetupHelper
     HandlebarsPrecompiler.cleanup_public_dir
   end
 
+  # Remove any leftover app migration files for specified schema(s) to avoid conflicts
+  # when the config is re-imported.
+  def self.cleanup_migrations(*schema_names)
+    puts "Cleaning up migrations for schemas: #{schema_names.join(', ')}"
+    schema_names.each do |schema_name|
+      puts "Cleaning up migrations for schema: #{schema_name}"
+      db_migration_dirname = Rails.root.join('db', 'app_migrations', schema_name)
+      FileUtils.rm_rf(db_migration_dirname)
+    end
+  end
+
   def self.run_test_migrations
     # Checks for pending migrations before tests are run.
     # If you are not using ActiveRecord, you can remove this line.

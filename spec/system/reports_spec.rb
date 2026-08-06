@@ -361,7 +361,7 @@ describe 'reports', js: true, driver: $browser_driver do
   before :each do
     setup_report_user
     validate_setup
-    setup_markdown_notes
+    set_up_markdown_notes
 
     login
   end

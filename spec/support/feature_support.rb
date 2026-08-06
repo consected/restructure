@@ -192,6 +192,11 @@ module FeatureSupport
     have_no_css('.collapsing')
   end
 
+  # Navigate to the master record search result and expand it so tabs are rendered
+  def expand_test_master
+    navigate_to_master(@master_id)
+  end
+
   # Navigate to a master record by ID
   def navigate_to_master(master_id)
     expect(master_id).not_to be nil

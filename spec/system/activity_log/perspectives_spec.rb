@@ -50,12 +50,12 @@ describe 'activity log panel perspectives', js: true, driver: $browser_driver do
     persp_indented = persp_yaml.present? ? persp_yaml.lines.map { |l| "    #{l}" }.join : ''
 
     <<~YAML
-      contains:
-        resources:
-          - #{PERSP_RESOURCE}
-      view_options:
-        initial_show: true
-    #{persp_indented}#{default_yaml}
+        contains:
+          resources:
+            - #{PERSP_RESOURCE}
+        view_options:
+          initial_show: true
+      #{persp_indented}#{default_yaml}
     YAML
   end
 
@@ -85,7 +85,7 @@ describe 'activity log panel perspectives', js: true, driver: $browser_driver do
   end
 
   def al_content_block
-    find("[data-sub-item='#{PERSP_RESOURCE}']", wait: 15)
+    find("[data-sub-item='#{PERSP_RESOURCE}'] .activity-log-list", wait: 15)
   end
 
   def click_perspective_btn(data_perspective)
@@ -265,7 +265,7 @@ describe 'activity log panel perspectives', js: true, driver: $browser_driver do
 
     # Click the named perspective button
     click_perspective_btn(PERSP_SLUG)
-    sleep 1  # Allow JavaScript and AJAX to complete
+    sleep 1 # Allow JavaScript and AJAX to complete
 
     # Verify the named button is now active
     all_btn = find(".activity-log-perspectives__btn[data-perspective='']")
