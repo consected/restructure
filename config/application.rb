@@ -36,16 +36,25 @@ module Fpa1
     # Moved here from config/initializers/new_framework_defaults_7_2.rb (issue #1015).
     config.yjit = true
 
+    # Adopt the Rails 8.1 behaviour early: `to_time` preserves the full named timezone
+    # of the receiver, returning an ActiveSupport::TimeWithZone, rather than a plain
+    # Time with only the UTC offset. Audited in issue #1302: every explicit `.to_time`
+    # call in the codebase either (a) chains `.utc`/`.to_i` immediately afterwards
+    # (unaffected either way, since only ActiveSupport::TimeWithZone#to_time
+    # distinguishes `:offset` from `:zone`; Time#to_time and DateTime#to_time treat
+    # both as truthy and are unchanged), or (b) is called on a String/Date (not
+    # overridden by this setting at all).
+    #
+    # NOTE: this line cannot simply be deleted once #1015 is closed. Leaving the
+    # setting unset resolves to `false` on Rails 8.0 (system-local time via
+    # `getlocal`), which is worse than either `:offset` or `:zone`. Tracking: #1015
+    # (remove this line only when the app upgrades to Rails 8.1, where :zone becomes
+    # the sole, non-configurable behaviour).
+    config.active_support.to_time_preserves_timezone = :zone
+
     # Conservative overrides of Rails 7.2 defaults adopted via load_defaults 7.2 (issue #1015).
     # These are pinned to the pre-7.2 behaviour until their risk areas are validated.
     # Remove each override when the corresponding tracking sub-issue is resolved.
-
-    # Keep the pre-8.1 behaviour where `to_time` preserves only the UTC offset of
-    # the receiver, rather than its full named timezone. Opt into the new :zone
-    # behaviour only after all date/time handling has been audited for TZ-aware code.
-    # Rails 8.1 will remove this option and make :zone the only behaviour.
-    # Tracking: issue #1302 (audit to_time usage before Rails 8.1 upgrade).
-    config.active_support.to_time_preserves_timezone = :offset
 
     # Keep raw-SQL `date` columns decoding as String (not Ruby Date) until all raw-SQL
     # consumers are audited. Tracking: issue #1295.
