@@ -659,6 +659,7 @@ class Master < ActiveRecord::Base
   # rubocop:disable Metrics/MethodLength
   def as_json(extras = {})
     # rubocop:enable Metrics/MethodLength
+    extras = extras.dup
     included_tables = {}
 
     self.current_user ||= extras[:current_user]

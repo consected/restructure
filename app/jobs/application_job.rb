@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class ApplicationJob < ActiveJob::Base
+  # Keep pre-7.2 behaviour: enqueue immediately, not deferred until after
+  # transaction commit. Remove this once delayed_job commit-timing is validated.
+  # Tracking: issue #1296.
+  self.enqueue_after_transaction_commit = :never
+
   attr_accessor :provider_job
 
   def log(txt)
