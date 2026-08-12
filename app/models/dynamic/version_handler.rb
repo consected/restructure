@@ -4,6 +4,12 @@ module Dynamic
   module VersionHandler
     extend ActiveSupport::Concern
 
+    # Maximum number of historical version rows fetched/displayed for the admin
+    # versions panel at once. Definitions with very large histories otherwise
+    # cause the panel to time out (see issue #1343). This does not limit
+    # `all_versions`, which is used for real definition-version lookups.
+    MAX_DISPLAYED_VERSIONS = 10
+
     included do
       attr_accessor :def_version # definition version = corresponging id of record in definition history table
       attr_accessor :current_definition # latest defined configuration
@@ -105,15 +111,31 @@ module Dynamic
       self.class.all_versions_memo[versions_memo_key] = vs
     end
 
-    def all_versions_query
+    # @param limit [Integer, nil] restrict to at most this many of the most recent
+    #   version rows. Used by the admin versions panel display; pass nil (the
+    #   default) to fetch the full history, as required by `all_versions`.
+    def all_versions_query(limit: nil)
+      limit_clause = limit ? "limit #{limit.to_i}" : ''
       qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
         select * from #{self.class.history_table_name}
         where #{history_id_attr} = #{id}
         order by
           EXTRACT(EPOCH FROM coalesce(updated_at, created_at)) desc nulls last,
           id desc
+        #{limit_clause}
       END_SQL
       qres.map(&:to_h)
+    end
+
+    # Total number of historical version rows for this record, independent of
+    # any display limit applied by all_versions_query.
+    # @return [Integer]
+    def all_versions_count
+      qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
+        select count(*) as count from #{self.class.history_table_name}
+        where #{history_id_attr} = #{id}
+      END_SQL
+      qres.first['count'].to_i
     end
 
     private

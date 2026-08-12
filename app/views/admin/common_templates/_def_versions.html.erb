@@ -1,5 +1,13 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
+    <% if @total_version_count %>
+      <p class="admin-version__count text-muted">
+        <%= pluralize(@total_version_count, 'version') %>
+        <% if @version_limit && @total_version_count > @version_limit %>
+          (most recent <%= @version_limit %> versions shown)
+        <% end %>
+      </p>
+    <% end %>
     <% if @version_diffs.blank? %>
       <p class="text-muted">No version changes to display.</p>
     <% else %>
@@ -8,9 +16,9 @@
           <h4>
             Version Change <%= idx + 1 %>
             <small class="text-muted">
-              <%= Time.parse(diff_data[:current]['updated_at'] || diff_data[:current]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+              <%= format_version_timestamp(diff_data[:previous]['updated_at'] || diff_data[:previous]['created_at']) %>
               →
-              <%= Time.parse(diff_data[:previous]['updated_at'] || diff_data[:previous]['created_at']).strftime('%Y-%m-%d %H:%M:%S') rescue 'Unknown' %>
+              <%= format_version_timestamp(diff_data[:current]['updated_at'] || diff_data[:current]['created_at']) %>
             </small>
           </h4>
           
@@ -22,6 +30,16 @@
           </table>
         </div>
       <% end %>
+    <% end %>
+
+    <% if @next_versions_page_path %>
+      <p class="admin-version__load-more">
+        <%= link_to "Load #{[Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS, @total_version_count - @version_limit].min} more versions",
+                    @next_versions_page_path,
+                    'data-remote': true,
+                    'data-target-force': true,
+                    'data-target': "##{@versions_container_id}" %>
+      </p>
     <% end %>
 
   </div>
