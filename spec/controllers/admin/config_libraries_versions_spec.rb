@@ -39,6 +39,35 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
       expect(diffs[0][:changes]['options'][1]).to include('value_b')
     end
 
+    it 'excludes created_at/updated_at from the diffed changes even when timestamps differ alongside a real change' do
+      # created_at/updated_at are already shown in the header row for each
+      # version - they should not also appear as a diffed field.
+      versions = [
+        {
+          'id' => '1',
+          'name' => 'test_library',
+          'category' => 'test_category',
+          'options' => 'content_new',
+          'created_at' => '2024-01-01 10:00:00',
+          'updated_at' => '2024-01-02 10:00:00'
+        },
+        {
+          'id' => '1',
+          'name' => 'test_library',
+          'category' => 'test_category',
+          'options' => 'content_old',
+          'created_at' => '2024-01-01 10:00:00',
+          'updated_at' => '2024-01-01 12:00:00'
+        }
+      ]
+
+      diffs = @controller.send(:calculate_version_diffs, versions)
+
+      expect(diffs[0][:changes].keys).not_to include('created_at')
+      expect(diffs[0][:changes].keys).not_to include('updated_at')
+      expect(diffs[0][:changes].keys).to include('options')
+    end
+
     it 'returns empty array when there are no changes' do
       versions = [
         {

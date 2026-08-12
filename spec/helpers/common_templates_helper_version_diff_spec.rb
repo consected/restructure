@@ -174,4 +174,30 @@ RSpec.describe CommonTemplatesHelper, type: :helper do
       expect(results.last[:left]).not_to include('<strong>')
     end
   end
+
+  describe '#format_version_timestamp' do
+    # The "Version Change" heading always showed "Unknown → Unknown": the raw
+    # history rows returned by Dynamic::VersionHandler#all_versions_query come
+    # from ActiveRecord::Base.connection.execute, which type-casts timestamp
+    # columns to real Time objects - but the view called `Time.parse(value)`,
+    # which requires a String and always raised TypeError (silently rescued to
+    # 'Unknown'). This helper accepts either a Time-like object or a String.
+    it 'formats a real Time object directly, without calling Time.parse on it' do
+      time = Time.new(2024, 3, 5, 14, 30, 0)
+
+      expect(helper.format_version_timestamp(time)).to eq('2024-03-05 14:30:00')
+    end
+
+    it 'formats a timestamp string' do
+      expect(helper.format_version_timestamp('2024-03-05 14:30:00 UTC')).to eq('2024-03-05 14:30:00')
+    end
+
+    it 'returns "Unknown" for a nil value' do
+      expect(helper.format_version_timestamp(nil)).to eq('Unknown')
+    end
+
+    it 'returns "Unknown" for an unparseable string' do
+      expect(helper.format_version_timestamp('not a timestamp')).to eq('Unknown')
+    end
+  end
 end

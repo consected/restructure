@@ -97,6 +97,23 @@ module CommonTemplatesHelper
       (current_app_type_id.present? && uac_data[:current_app_uacs].empty?)
   end
 
+  #
+  # Format a version history row's created_at/updated_at value for display in
+  # the "Version Change" heading. Values from Dynamic::VersionHandler's raw SQL
+  # history rows come back as real Time objects (not Strings), so calling
+  # `Time.parse` directly on them always raised TypeError - silently shown as
+  # "Unknown" for every version. Accepts either a Time-like object or a String.
+  # @param value [Time, ActiveSupport::TimeWithZone, String, nil]
+  # @return [String]
+  def format_version_timestamp(value)
+    return 'Unknown' if value.blank?
+
+    time = value.respond_to?(:strftime) ? value : Time.parse(value.to_s)
+    time.strftime('%Y-%m-%d %H:%M:%S')
+  rescue StandardError
+    'Unknown'
+  end
+
   # Above this many separate del/ins chunk-pairs in a SINGLE field's diff, skip
   # Diffy's word-level highlighting for that field. Diffy forks a small extra
   # `diff` process PER changed chunk-pair to compute character-level
