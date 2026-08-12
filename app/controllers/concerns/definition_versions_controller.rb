@@ -16,7 +16,13 @@ module DefinitionVersionsController
     'admin/activity_logs' => { route_helper: :versions_admin_activity_log_path,
                                container_id: 'embedded-dynamic-def-versions-embedded' },
     'admin/config_libraries' => { route_helper: :versions_admin_config_library_path,
-                                  container_id: 'embedded-config-library-def-versions-embedded' }
+                                  container_id: 'embedded-config-library-def-versions-embedded' },
+    'admin/external_identifiers' => { route_helper: :versions_admin_external_identifier_path,
+                                      container_id: 'embedded-dynamic-def-versions-embedded' },
+    'admin/message_templates' => { route_helper: :versions_admin_message_template_path,
+                                   container_id: 'embedded-dynamic-def-versions-embedded' },
+    'admin/reports' => { route_helper: :versions_admin_report_path,
+                         container_id: 'embedded-dynamic-def-versions-embedded' }
   }.freeze
 
   def versions
@@ -85,7 +91,12 @@ module DefinitionVersionsController
         diff_data[:changes][key] = [previous_val, current_val] if current_val != previous_val
       end
 
-      diffs << diff_data if diff_data[:changes].present?
+      # Always record a diff entry for this pair, even with no field changes
+      # (e.g. a `touch` or no-op re-save) - otherwise the number of sections
+      # shown no longer matches the number of versions loaded, silently
+      # hiding versions with no explanation (see issue: ExternalIdentifier
+      # #3 bhs_assignments showed 21 versions but only 6 diff sections).
+      diffs << diff_data
     end
 
     diffs

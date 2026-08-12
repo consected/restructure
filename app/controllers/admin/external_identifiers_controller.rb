@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::ExternalIdentifiersController < AdminController
+  include DefinitionVersionsController
+
   helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_defaults
   # after_action :routes_reload, only: %i[update create]

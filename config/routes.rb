@@ -30,11 +30,15 @@ Rails.application.routes.draw do
       collection do
         get :schema_reference
       end
+      member do
+        get :versions
+      end
     end
     get :external_identifier_details, to: 'external_identifiers#details'
     resources :reports, except: %i[show destroy] do
       member do
         get :preview
+        get :versions
       end
     end
     get :report_search_attr_definer, to: 'reports#search_attr_definer'
@@ -71,7 +75,11 @@ Rails.application.routes.draw do
       end
     end
     resources :app_configurations, except: %i[show destroy]
-    resources :message_templates, except: %i[show destroy]
+    resources :message_templates, except: %i[show destroy] do
+      member do
+        get :versions
+      end
+    end
     resources :message_notifications, except: %i[show destroy] do
       member do
         get :attachment
