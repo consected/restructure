@@ -1,0 +1,12 @@
+<div id="def-versions-embedded" class="def-versions-embedded--message-template">
+  <h4>Definition Versions</h4>
+  <% if object_instance.persisted? %>
+    <div class="admin-result-index" id="embedded-dynamic-def-versions-embedded">
+      <%= link_to "Load", versions_admin_message_template_path(
+                            view_as: 'simple-embedded', readonly: true, id: object_instance.id),
+                            'data-remote': true,
+                            'data-target-force': true,
+                            'data-target': '#embedded-dynamic-def-versions-embedded' %>
+    </div>
+  <% end %>
+</div>

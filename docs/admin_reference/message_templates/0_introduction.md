@@ -75,12 +75,14 @@ For example: `/info_pages/ipa_screening__intro_call_faq`
 
 ### UI Templates
 
-The *plain* message type with template type *content* is used to configure UI specific messages to the end user. These UI template
+The following UI template
 blocks are typically dependent on the server environment, and allow for admin configuration of the messages presented to guide
 users in the app usage and meet the policies of a specific organization.
 
 Only if a UI template block with the appropriate name is defined will the block appear in the UI. Although not essential, it is
 recommended that the category option be set to **ui** to keep the definitions grouped.
+
+Use template type **content** and message type set to *is a* **plain** for plain text or **dialog** for a markdown editor.
 
 The current UI template names are
 used in the following forms / pages:
@@ -101,6 +103,9 @@ used in the following forms / pages:
 - `ui user credential text` - configurable text to appear in a user password change template document
 
 ### HTML Markup Snippets
+
+The *plain* message type with template type *content* is used to configure UI specific CSS and Javascript to be
+embedded into the app page.
 
 - `ui page css - {app type name}` - plain CSS to place in a *style* block in the *head* section
 - `ui page js - {app type name}` - plain Javascript to place in a *style* block in the *head* section

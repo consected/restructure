@@ -29,5 +29,12 @@ if changes.present?
 %>
 </tbody>
 <% 
+else %>
+<tbody>
+  <tr>
+    <td colspan="3" class="text-muted">No changes recorded for this version.</td>
+  </tr>
+</tbody>
+<% 
 end # if changes.present?
 %>

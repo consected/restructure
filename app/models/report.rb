@@ -8,6 +8,7 @@ require_dependency 'address'
 require_dependency 'datadic/user_variable'
 class Report < ActiveRecord::Base
   include AdminHandler
+  include Dynamic::VersionHandler
   include SelectorCache
 
   # @todo refactor this to be a separate class, or incorporate into Reports::Runner
