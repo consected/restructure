@@ -1,5 +1,13 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
+    <% if @total_version_count %>
+      <p class="admin-version__count text-muted">
+        <%= pluralize(@total_version_count, 'version') %>
+        <% if @version_limit && @total_version_count > @version_limit %>
+          (most recent <%= @version_limit %> versions shown)
+        <% end %>
+      </p>
+    <% end %>
     <% if @version_diffs.blank? %>
       <p class="text-muted">No version changes to display.</p>
     <% else %>

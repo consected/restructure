@@ -170,4 +170,54 @@ describe 'admin config library versions', js: true, driver: $browser_driver do
       expect(version_sections.length).to eq(0)
     end
   end
+
+  it 'shows the total version count and a truncation note when history exceeds the display limit' do
+    stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+
+    cl = Admin::ConfigLibrary.create!(
+      current_admin: @admin,
+      name: 'test_version_count_library',
+      category: 'test',
+      format: 'yaml',
+      options: "field_1:\n  label: First Field"
+    )
+
+    # Insert extra history rows directly so the total exceeds the display limit
+    # without needing many slow real updates.
+    5.times do |i|
+      Admin::MigrationGenerator.connection.execute <<~SQL
+        insert into config_library_history (config_library_id, name, category, format, created_at, updated_at)
+        values (
+          #{cl.id},
+          'test_version_count_library',
+          'test',
+          'yaml',
+          now() - interval '#{5 - i} minutes',
+          now() - interval '#{5 - i} minutes'
+        )
+      SQL
+    end
+
+    admin_sign_in_with_2fa
+
+    visit '/admin/config_libraries'
+    expect(page).to have_css("#admin-item-#{cl.id}", wait: 10)
+
+    within "#admin-item-#{cl.id}" do
+      find('a.edit-entity.glyphicon-pencil').click
+    end
+
+    expect(page).to have_css('.nav-tabs', wait: 15)
+    sleep 1
+
+    within '.nav-tabs' do
+      click_link 'Versions'
+    end
+    expect(page).to have_css('#def-versions-embedded', visible: true, wait: 10)
+
+    within '#embedded-config-library-def-versions-embedded' do
+      expect(page).to have_css('.admin-version__count', text: '6 versions', wait: 10)
+      expect(page).to have_content('most recent 3 versions shown')
+    end
+  end
 end

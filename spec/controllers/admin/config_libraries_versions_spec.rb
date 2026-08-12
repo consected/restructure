@@ -141,4 +141,83 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
       expect(diffs).to be_empty
     end
   end
+
+  # Issue #1343 - the admin versions panel must limit the number of history rows
+  # fetched/displayed and expose the true total count, so admins aren't hit with
+  # a proxy timeout when a definition has a very large version history.
+  describe 'GET #versions with a large history (issue #1343)' do
+    before do
+      create_admin
+      sign_in @admin
+      @library = Admin::ConfigLibrary.create!(
+        current_admin: @admin,
+        name: 'test_version_limit_library',
+        category: 'test',
+        format: 'yaml',
+        options: "field_1:\n  label: First Field"
+      )
+    end
+
+    def insert_history_rows(count)
+      count.times do |i|
+        Admin::MigrationGenerator.connection.execute <<~SQL
+          insert into config_library_history (config_library_id, name, category, format, created_at, updated_at)
+          values (
+            #{@library.id},
+            'test_version_limit_library',
+            'test',
+            'yaml',
+            now() - interval '#{count - i} minutes',
+            now() - interval '#{count - i} minutes'
+          )
+        SQL
+      end
+    end
+
+    it 'limits the versions displayed and exposes the total count' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(5)
+
+      get :versions, params: { id: @library.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(assigns(:version_limit)).to eq(3)
+      expect(assigns(:all_versions).length).to eq(3)
+      expect(assigns(:total_version_count)).to be >= 5
+    end
+
+    it 'does not limit or report an inflated count when history is below the limit' do
+      get :versions, params: { id: @library.id }
+
+      expect(assigns(:total_version_count)).to eq(1)
+      expect(assigns(:all_versions).length).to eq(1)
+    end
+
+    context 'rendered view' do
+      render_views
+
+      it 'does not show a truncation note when the count is exactly at the limit' do
+        stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+        insert_history_rows(2) # 1 (from create!) + 2 = 3, exactly at the limit
+
+        get :versions, params: { id: @library.id }
+
+        expect(assigns(:total_version_count)).to eq(3)
+        expect(assigns(:all_versions).length).to eq(3)
+        expect(response.body).to include('3 versions')
+        expect(response.body).not_to include('most recent')
+      end
+
+      it 'shows a truncation note as soon as the count exceeds the limit' do
+        stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+        insert_history_rows(3) # 1 (from create!) + 3 = 4, one over the limit
+
+        get :versions, params: { id: @library.id }
+
+        expect(assigns(:total_version_count)).to eq(4)
+        expect(response.body).to include('4 versions')
+        expect(response.body).to include('most recent 3 versions shown')
+      end
+    end
+  end
 end
