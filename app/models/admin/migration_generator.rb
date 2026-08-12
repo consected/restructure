@@ -362,6 +362,11 @@ class Admin::MigrationGenerator
   # @param [String] export_type - a suffix to add to the migration name,
   #                               such as 'app-export'
   def add_schema(export_type = nil)
+    if db_migration_schema.blank?
+      Rails.logger.warn 'Skipping schema migration generation because the schema name is blank.'
+      return
+    end
+
     mig_text = schema_generator_script(db_migration_schema, 'create')
     write_db_migration mig_text, "#{db_migration_schema}_schema", export_type:
   end
@@ -871,6 +876,11 @@ class Admin::MigrationGenerator
   #
   # Content for a migration to create a schema
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
+    if schema_name.blank?
+      Rails.logger.warn 'Skipping schema migration generation because the schema name is blank.'
+      return
+    end
+
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
 
     raise FphsException, "No schema owner provided for schema #{schema_name}" unless owner.present?
