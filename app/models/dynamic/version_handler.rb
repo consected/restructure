@@ -8,7 +8,7 @@ module Dynamic
     # versions panel at once. Definitions with very large histories otherwise
     # cause the panel to time out (see issue #1343). This does not limit
     # `all_versions`, which is used for real definition-version lookups.
-    MAX_DISPLAYED_VERSIONS = 100
+    MAX_DISPLAYED_VERSIONS = 10
 
     included do
       attr_accessor :def_version # definition version = corresponging id of record in definition history table
