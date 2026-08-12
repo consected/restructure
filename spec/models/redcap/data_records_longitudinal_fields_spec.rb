@@ -9,10 +9,11 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
   before :all do
     # SetupHelper.get_webmock_responses
+    change_setting('AllowDynamicMigrations', true)
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
-    @projects = setup_redcap_project_admin_configs #(only_project: 'longitudinal')
+    @projects = setup_redcap_project_admin_configs # (only_project: 'longitudinal')
     @project = @projects.first
     @metadata_project = @projects.find { |p| p[:name] == 'longitudinal' }
     setup_longitudinal_fields
@@ -43,7 +44,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dm.attribute_names.include?('test_name')).to be true
     expect(dm.attribute_names.include?('email')).to be true
     expect(dm.attribute_names.include?('redcap_event_name')).to be true
-    
+
     dr = Redcap::DataRecords.new(rc, dm.name)
     dr.retrieve
     dr.summarize_fields
@@ -91,7 +92,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
 
     # Now add a record by hand and repeat the run to simulate the deletion of redcap record
-    newrec = dm.new test_name: 'birthwt', redcap_event_name: "event_2_arm_2" , current_user: @admin.matching_user
+    newrec = dm.new test_name: 'birthwt', redcap_event_name: 'event_2_arm_2', current_user: @admin.matching_user
     newrec.force_save!
     newrec.save!
 
@@ -142,7 +143,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dm.attribute_names.include?('test_name')).to be true
     expect(dm.attribute_names.include?('email')).to be true
     expect(dm.attribute_names.include?('redcap_event_name')).to be true
-    
+
     dr = Redcap::DataRecords.new(rc, dm.name)
     dr.retrieve
     dr.summarize_fields
