@@ -7,6 +7,10 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
+  before :all do
+    change_setting('AllowDynamicMigrations', true)
+  end
+
   before :example do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true

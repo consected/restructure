@@ -199,6 +199,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
   describe 'dynamic storage for Redcap project getting fields by option type' do
     before :all do
+      change_setting('AllowDynamicMigrations', true)
       create_admin
       setup_redcap_project_admin_configs
       setup_repeat_instrument_fields
@@ -263,6 +264,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
   describe 'dynamic storage for Redcap project with multiple choice summary fields' do
     before :all do
+      change_setting('AllowDynamicMigrations', true)
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
