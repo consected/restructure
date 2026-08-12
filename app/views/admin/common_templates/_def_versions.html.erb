@@ -32,5 +32,15 @@
       <% end %>
     <% end %>
 
+    <% if @next_versions_page_path %>
+      <p class="admin-version__load-more">
+        <%= link_to "Load #{[Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS, @total_version_count - @version_limit].min} more versions",
+                    @next_versions_page_path,
+                    'data-remote': true,
+                    'data-target-force': true,
+                    'data-target': "##{@versions_container_id}" %>
+      </p>
+    <% end %>
+
   </div>
 </div>

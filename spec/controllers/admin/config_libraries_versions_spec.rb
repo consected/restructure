@@ -222,6 +222,25 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
       expect(assigns(:all_versions).length).to eq(1)
     end
 
+    it 'fetches a larger cumulative limit when a page param is given' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(10)
+
+      get :versions, params: { id: @library.id, page: 2 }
+
+      expect(assigns(:version_limit)).to eq(6)
+      expect(assigns(:all_versions).length).to eq(6)
+    end
+
+    it 'treats a blank or invalid page param as page 1' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(5)
+
+      get :versions, params: { id: @library.id, page: '0' }
+
+      expect(assigns(:version_limit)).to eq(3)
+    end
+
     context 'rendered view' do
       render_views
 
@@ -246,6 +265,36 @@ RSpec.describe Admin::ConfigLibrariesController, type: :controller do
         expect(assigns(:total_version_count)).to eq(4)
         expect(response.body).to include('4 versions')
         expect(response.body).to include('most recent 3 versions shown')
+      end
+
+      it 'shows a "load more" link to the next page when more versions remain' do
+        stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+        insert_history_rows(3) # 1 (from create!) + 3 = 4, one over the limit
+
+        get :versions, params: { id: @library.id }
+
+        expect(response.body).to include('Load')
+        expect(response.body).to include('page=2')
+      end
+
+      it 'does not show a "load more" link once all versions are loaded' do
+        stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+        insert_history_rows(2) # 1 (from create!) + 2 = 3, exactly at the limit
+
+        get :versions, params: { id: @library.id }
+
+        expect(response.body).not_to include('page=2')
+      end
+
+      it 'fetches the next cumulative page when the "load more" link is followed' do
+        stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+        insert_history_rows(10) # 1 (from create!) + 10 = 11
+
+        get :versions, params: { id: @library.id, page: 2 }
+
+        expect(assigns(:version_limit)).to eq(6)
+        expect(assigns(:all_versions).length).to eq(6)
+        expect(response.body).to include('page=3') # still more remaining (11 total)
       end
     end
   end

@@ -146,5 +146,16 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       expect(assigns(:all_versions).length).to eq(3)
       expect(assigns(:total_version_count)).to be >= 5
     end
+
+    it 'fetches a larger cumulative limit when a page param is given, and points "load more" at the next page' do
+      stub_const('Dynamic::VersionHandler::MAX_DISPLAYED_VERSIONS', 3)
+      insert_history_rows(10)
+
+      get :versions, params: { id: @dm.id, page: 2 }
+
+      expect(assigns(:version_limit)).to eq(6)
+      expect(assigns(:all_versions).length).to eq(6)
+      expect(assigns(:next_versions_page_path)).to include('page=3')
+    end
   end
 end
