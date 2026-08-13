@@ -166,8 +166,9 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     unless response_code == 200
       return if response_code&.in?(allow_response_codes)
 
+      uri = url.split('?').first
       raise FphsException,
-            "#{http_method} external data: failed request with code '#{response_code}' from url #{url}"
+            "#{http_method} external data: failed request with code '#{response_code}' from url #{uri}"
     end
 
     content = response.body
@@ -175,7 +176,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     if content.blank?
       return if allow_empty_result
 
-      raise FphsException, "#{http_method} external data: empty content received from #{url}"
+      uri = url.split('?').first
+      raise FphsException, "#{http_method} external data: empty content received from #{uri}"
     end
 
     case format
