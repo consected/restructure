@@ -62,6 +62,32 @@
           model_table_name:
             field_name: 'any conditional value must be false'
 
+        all_item_flags:
+          # Item flags attached to the *current record's own table* can be checked using the
+          # <plural_table_name>_item_flags association name as the table key. This works the
+          # same way for standard models, dynamic models, activity logs and external identifiers -
+          # the association name always follows this pattern, matching the pluralized resource name
+          # with `_item_flags` appended (e.g. player_infos_item_flags, dynamic_model__some_tables_item_flags,
+          # activity_log__some_type_item_flags).
+          #
+          # Since the association itself is already scoped to flags belonging to that specific
+          # table/resource, an explicit `item_type` condition is not required (and is redundant) -
+          # the join enforces this automatically.
+          player_infos_item_flags:
+            item_flag_name_id: 123
+            item_id:
+              this: id
+
+          # Dynamic models, activity logs and external identifiers follow the same convention,
+          # using their normal resource_name (e.g. dynamic_model__some_tables, activity_log__some_type)
+          # with `_item_flags` appended. return_value, return_value_list, return_result and
+          # return_all_results are all supported for item_flags conditions too, exactly as for
+          # any other table condition:
+          dynamic_model__some_tables_item_flags:
+            item_flag_name_id: return_value
+            item_id:
+              this: id
+
         # Only creatable if this extra log type hasn't already been performed
         # `definition_resources` resolves to the definition activity log association for an activity log
         # or the dynamic model / external identifier association otherwise

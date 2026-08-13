@@ -315,6 +315,11 @@ module Dynamic
       self.class.preload
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
+
+      if respond_to?(:item_type_name) && ItemFlag.active_class_names.include?(item_type_name.ns_underscore)
+        ItemFlag.add_master_association(item_type_name.ns_underscore)
+      end
+
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
     end

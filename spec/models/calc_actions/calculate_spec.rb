@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
+# Covers the generic conditional-action evaluator against real database records,
+# including table-based checks like item_flags so creatable_if / showable_if
+# conditions can be validated in app configuration.
 require 'rails_helper'
 
 RSpec.describe 'Calculate conditional actions', type: :model do
   include ModelSupport
   include ActivityLogSupport
+  include DynamicModelSupport
   include TestNoMasterDmRecSupport
 
   def setup_config(confy)
@@ -62,6 +66,294 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     conf = { always: true }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
+  end
+
+  it 'supports item_flags table checks against the current record' do
+    setup_access :player_infos
+    setup_access :item_flags
+
+    master = create_master
+    player = master.player_infos.create!(
+      first_name: 'Flag',
+      last_name: 'Check',
+      birth_date: Date.today - 30.years,
+      rank: 10,
+      source: 'nflpa'
+    )
+    player.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "flag-#{SecureRandom.hex(6)}",
+      item_type: 'player_info',
+      current_admin: @admin
+    )
+    player.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    conf = {
+      all: {
+        player_infos_item_flags: {
+          item_flag_name_id: flag_name.id,
+          item_id: { this: :id }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, player
+    expect(res.calc_action_if).to be true
+  end
+
+  it 'supports item_flags table checks against a generated dynamic model record' do
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "dm-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    rec.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    conf = {
+      all: {
+        dynamic_model__test_created_by_recs_item_flags: {
+          item_flag_name_id: flag_name.id,
+          item_id: { this: :id }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, rec
+    expect(res.calc_action_if).to be true
+  end
+
+  it 'supports combined item_flags conditions for a standard model and a dynamic model in one evaluation' do
+    setup_access :player_infos
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+    player = master.player_infos.create!(
+      first_name: 'Flag',
+      last_name: 'Check',
+      birth_date: Date.today - 30.years,
+      rank: 10,
+      source: 'nflpa'
+    )
+    player.current_user = @user
+
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    player_flag_name = Classification::ItemFlagName.create!(
+      name: "flag-#{SecureRandom.hex(6)}",
+      item_type: 'player_info',
+      current_admin: @admin
+    )
+    player.item_flags.create!(item_flag_name: player_flag_name, user: @user)
+
+    dm_flag_name = Classification::ItemFlagName.create!(
+      name: "dm-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    rec.item_flags.create!(item_flag_name: dm_flag_name, user: @user)
+
+    conf = {
+      all: {
+        player_infos_item_flags: {
+          item_flag_name_id: player_flag_name.id,
+          item_id: { this: :id }
+        },
+        dynamic_model__test_created_by_recs_item_flags: {
+          item_flag_name_id: dm_flag_name.id,
+          item_id: rec.id
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, player
+    expect(res.calc_action_if).to be true
+
+    # Each *_item_flags association must be joined and filtered independently - a mismatch on
+    # just the dynamic model side must not be masked by the standard model side still matching
+    mismatched_conf = conf.deep_dup
+    mismatched_conf[:all][:dynamic_model__test_created_by_recs_item_flags][:item_flag_name_id] = 0
+
+    res = ConditionalActions.new mismatched_conf, player
+    expect(res.calc_action_if).to be false
+
+    # And the reverse - a mismatch on just the standard model side must not be masked by the
+    # dynamic model side still matching (proves neither side's WHERE values overwrite the other's)
+    other_mismatched_conf = conf.deep_dup
+    other_mismatched_conf[:all][:player_infos_item_flags][:item_flag_name_id] = 0
+
+    res = ConditionalActions.new other_mismatched_conf, player
+    expect(res.calc_action_if).to be false
+  end
+
+  it 'supports item_flags return_result for a dynamic model record' do
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "dm-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    item_flag = rec.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    conf = {
+      dynamic_model__test_created_by_recs_item_flags: {
+        item_flag_name_id: flag_name.id,
+        item_id: rec.id,
+        return: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, rec
+    expect(ca.get_this_val).to eq item_flag
+  end
+
+  it 'supports item_flags return_value and return_value_list for a dynamic model record' do
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "dm-val-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    item_flag = rec.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    value_conf = {
+      dynamic_model__test_created_by_recs_item_flags: {
+        item_flag_name_id: 'return_value',
+        item_id: rec.id
+      }
+    }
+    ca = ConditionalActions.new value_conf, rec
+    expect(ca.get_this_val).to eq flag_name.id
+
+    value_list_conf = {
+      dynamic_model__test_created_by_recs_item_flags: {
+        id: 'return_value_list',
+        item_id: rec.id
+      }
+    }
+    ca = ConditionalActions.new value_list_conf, rec
+    expect(ca.get_this_val).to eq [item_flag.id]
+  end
+
+  it 'supports item_flags return_all_results for a dynamic model record' do
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "dm-all-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    item_flag = rec.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    conf = {
+      dynamic_model__test_created_by_recs_item_flags: {
+        item_flag_name_id: flag_name.id,
+        item_id: rec.id,
+        return: 'return_all_results'
+      }
+    }
+
+    ca = ConditionalActions.new conf, rec
+    expect(ca.get_this_val.to_a).to eq [item_flag]
+  end
+
+  it 'supports any / not_any / not_all with item_flags conditions' do
+    setup_access :item_flags
+    generate_test_dynamic_model
+
+    master = create_master
+    rec = master.dynamic_model__test_created_by_recs.create!(
+      test1: 'Flag',
+      test2: 'Check',
+      created_by_user_id: @user.id
+    )
+    rec.current_user = @user
+
+    flag_name = Classification::ItemFlagName.create!(
+      name: "dm-any-flag-#{SecureRandom.hex(6)}",
+      item_type: rec.class.name.ns_underscore,
+      current_admin: @admin
+    )
+    rec.item_flags.create!(item_flag_name: flag_name, user: @user)
+
+    any_conf = {
+      any: {
+        dynamic_model__test_created_by_recs_item_flags: {
+          item_flag_name_id: [flag_name.id, 0],
+          item_id: rec.id
+        }
+      }
+    }
+    expect(ConditionalActions.new(any_conf, rec).calc_action_if).to be true
+
+    # NOTE: any/not_any treat multiple fields in one table hash as independent OR'd single-field
+    # checks (not a combined AND match), so every field here must independently fail to match
+    not_any_conf = {
+      not_any: {
+        dynamic_model__test_created_by_recs_item_flags: {
+          item_flag_name_id: 0,
+          item_id: 0
+        }
+      }
+    }
+    expect(ConditionalActions.new(not_any_conf, rec).calc_action_if).to be true
+
+    not_all_conf = {
+      not_all: {
+        dynamic_model__test_created_by_recs_item_flags: {
+          item_flag_name_id: 0,
+          item_id: 0
+        }
+      }
+    }
+    expect(ConditionalActions.new(not_all_conf, rec).calc_action_if).to be true
   end
 
   it 'checks if all attributes have a certain value' do
@@ -372,7 +664,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     m.current_user = @user
 
     a1 = m.addresses.create! city: 'Portland',
-                             state: 'OR',\
+                             state: 'OR',
                              zip: rand(99_999).to_s.rjust(5, '0').to_s,
                              rank: 0,
                              rec_type: 'home',
@@ -583,16 +875,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           }
         },
         any: [
-          all: {
-            addresses: {
-              id: a1.id,
-              zip: a1.zip
-            }
-          },
-          all_2: {
-            addresses: {
-              id: a2.id,
-              zip: a1.zip
+          {
+            all: {
+              addresses: {
+                id: a1.id,
+                zip: a1.zip
+              }
+            },
+            all_2: {
+              addresses: {
+                id: a2.id,
+                zip: a1.zip
+              }
             }
           }
         ]
@@ -613,16 +907,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             }
           },
           any: [
-            all: {
-              addresses: {
-                id: a1.id,
-                zip: 'x'
-              }
-            },
-            all_2: {
-              addresses: {
-                id: a2.id,
-                zip: 'x'
+            {
+              all: {
+                addresses: {
+                  id: a1.id,
+                  zip: 'x'
+                }
+              },
+              all_2: {
+                addresses: {
+                  id: a2.id,
+                  zip: 'x'
+                }
               }
             }
           ]
@@ -642,16 +938,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           }
         },
         any: [
-          all: {
-            addresses: {
-              id: a1.id,
-              zip: 'x'
-            }
-          },
-          all_2: {
-            addresses: {
-              id: a2.id,
-              zip: 'x'
+          {
+            all: {
+              addresses: {
+                id: a1.id,
+                zip: 'x'
+              }
+            },
+            all_2: {
+              addresses: {
+                id: a2.id,
+                zip: 'x'
+              }
             }
           }
         ]
@@ -669,16 +967,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           }
         },
         any: [
-          all: {
-            addresses: {
-              id: a1.id,
-              zip: 'x'
-            }
-          },
-          all_2: {
-            addresses: {
-              id: a2.id,
-              zip: 'x'
+          {
+            all: {
+              addresses: {
+                id: a1.id,
+                zip: 'x'
+              }
+            },
+            all_2: {
+              addresses: {
+                id: a2.id,
+                zip: 'x'
+              }
             }
           }
         ]
@@ -696,16 +996,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           }
         },
         any: [
-          all: {
-            addresses: {
-              id: a1.id,
-              zip: 'x'
-            }
-          },
-          all_2: {
-            addresses: {
-              id: a2.id,
-              zip: 'x'
+          {
+            all: {
+              addresses: {
+                id: a1.id,
+                zip: 'x'
+              }
+            },
+            all_2: {
+              addresses: {
+                id: a2.id,
+                zip: 'x'
+              }
             }
           }
         ]
@@ -723,16 +1025,18 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           }
         },
         any: [
-          all: {
-            addresses: {
-              id: a1.id,
-              zip: 'x'
-            }
-          },
-          all_2: {
-            addresses: {
-              id: a2.id,
-              zip: 'x'
+          {
+            all: {
+              addresses: {
+                id: a1.id,
+                zip: 'x'
+              }
+            },
+            all_2: {
+              addresses: {
+                id: a2.id,
+                zip: 'x'
+              }
             }
           }
         ]
@@ -2348,8 +2652,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       al = create_item
       al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
       al.save_trigger_results = {
-        'result1': {
-          'res_value': 'element result value'
+        result1: {
+          res_value: 'element result value'
         }
       }
 
@@ -2403,7 +2707,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       al = create_item
       al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
       al.save_trigger_results = {
-        'result1': ['abc', 'def', 4, nil, [{ 'status': 'updated', 'data': 'abcdefg' }, 2, 3, 4]]
+        result1: ['abc', 'def', 4, nil, [{ status: 'updated', data: 'abcdefg' }, 2, 3, 4]]
       }
 
       conf = {
@@ -2471,8 +2775,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       al = create_item
       al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
       al.save_trigger_results = {
-        'result1': {
-          'res_value': 'element result value'
+        result1: {
+          res_value: 'element result value'
         }
       }
 
@@ -2517,8 +2821,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       al = create_item
       al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
       al.save_trigger_results = {
-        'result1': {
-          'res_value': 'element result value'
+        result1: {
+          res_value: 'element result value'
         }
       }
 
@@ -2543,8 +2847,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       al = create_item
       al.update! select_who: 'someone new', current_user: @user, master_id: al.master_id
       al.save_trigger_results = {
-        'result1': {
-          'res_value': 'element result value|pipe value 2|3|abc'
+        result1: {
+          res_value: 'element result value|pipe value 2|3|abc'
         }
       }
 
