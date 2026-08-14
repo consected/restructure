@@ -19,6 +19,11 @@ require 'rails_helper'
 # - batch_jobs_column now renders a boolean indicator, rather than the batch_trigger frequency
 # - the scan is scoped to the _configurations: block only, so a field/label elsewhere in the
 #   config happening to be named batch_trigger/view_sql is not treated as a false positive
+#
+# Additional follow-up UI tweaks:
+# - "Batch jobs" column header renamed to "Batch job?"
+# - Position column removed from index_params
+# - Added an id filter dropdown
 RSpec.describe Admin::DynamicModelsController, type: :controller do
   include ModelSupport
   include DynamicModelSupport
@@ -40,20 +45,27 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
   end
 
   describe 'index_params' do
-    it 'does not include schema_name, table_key_name, primary_key_name, foreign_key_name, or result_order' do
-      removed_columns = %i[schema_name table_key_name primary_key_name foreign_key_name result_order]
+    it 'does not include schema_name, table_key_name, primary_key_name, foreign_key_name, result_order, or position' do
+      removed_columns = %i[schema_name table_key_name primary_key_name foreign_key_name result_order position]
       result = controller.send(:index_params)
       removed_columns.each do |col|
         expect(result).not_to include(col), "Expected index_params not to include #{col}"
       end
     end
 
-    it 'includes id, category, name, table_name, resource_name, position, and admin_id' do
-      required_columns = %i[id category name table_name resource_name position admin_id]
+    it 'includes id, category, name, table_name, resource_name, and admin_id' do
+      required_columns = %i[id category name table_name resource_name admin_id]
       result = controller.send(:index_params)
       required_columns.each do |col|
         expect(result).to include(col), "Expected index_params to include #{col}"
       end
+    end
+  end
+
+  describe 'filters and filters_on' do
+    it 'includes an id filter dropdown' do
+      expect(controller.send(:filters_on)).to include(:id)
+      expect(controller.send(:filters)).to have_key(:id)
     end
   end
 
@@ -66,7 +78,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
     it 'includes batch_jobs column' do
       result = controller.send(:extra_index_columns)
       expect(result).to have_key(:batch_jobs_column)
-      expect(result[:batch_jobs_column]).to eq('Batch jobs')
+      expect(result[:batch_jobs_column]).to eq('Batch job?')
     end
 
     it 'includes "Is a view?" column' do

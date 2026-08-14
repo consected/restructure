@@ -98,6 +98,7 @@ class Admin::DynamicModelsController < AdminController
 
   def filters
     {
+      id: DynamicModel.order(:id).pluck(:id),
       category: DynamicModel.categories,
       table_name: DynamicModel.table_names,
       in_current_app_type: %w[yes no]
@@ -105,7 +106,7 @@ class Admin::DynamicModelsController < AdminController
   end
 
   def filters_on
-    %i[category table_name in_current_app_type]
+    %i[id category table_name in_current_app_type]
   end
 
   #
@@ -133,7 +134,7 @@ class Admin::DynamicModelsController < AdminController
   # and whether the dynamic model is in the current app type
   def extra_index_columns
     {
-      batch_jobs_column: 'Batch jobs',
+      batch_jobs_column: 'Batch job?',
       view_sql_column: 'Is a view?',
       in_current_app_type_result_checkbox: 'In current app type'
     }
@@ -234,7 +235,7 @@ class Admin::DynamicModelsController < AdminController
   end
 
   def index_params
-    %i[id category name table_name resource_name position admin_id]
+    %i[id category name table_name resource_name admin_id]
   end
 
   #
