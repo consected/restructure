@@ -828,17 +828,9 @@ module OptionConfigs
       end
 
       types_to_check.uniq.each do |type|
-        defsw = [
-          'app',
-          'models',
-          'admin',
-          'defs',
-          "#{type}_standard_option_defs.yaml"
-        ]
-        path = Rails.root.join(*defsw)
-        next unless File.exist?(path)
+        content = standard_option_defs_yaml(type)
+        next unless content
 
-        content = File.read(path)
         # Match YAML anchor definitions: &anchor_name
         content.scan(/&([a-zA-Z0-9_]+)/).each do |match|
           anchors << match[0]
@@ -909,19 +901,26 @@ module OptionConfigs
 
       force_type ||= new_force_type
 
-      defsw = [
-        'app',
-        'models',
-        'admin',
-        'defs',
-        "#{force_type}_standard_option_defs.yaml"
-      ]
+      defs_yaml = standard_option_defs_yaml(force_type)
+      return content_to_update unless defs_yaml
 
-      path = Rails.root.join(*defsw)
-      return content_to_update unless File.exist?(path)
-
-      defs_yaml = File.read(path)
       "# @#{force_type}_standard_definitions_start\n#{defs_yaml}\n# @#{force_type}_standard_definitions_end\n#{content_to_update}\n"
+    end
+
+    #
+    # Read (and memoize) the contents of a standard_option_defs.yaml file for the given type.
+    # These files are static application code, not admin-editable data, so their content cannot
+    # change without a deploy/restart - memoizing avoids re-reading the same file from disk on
+    # every single option_configs parse (previously once per dynamic definition, e.g. on the
+    # admin index page - see issue #1354).
+    # @param [String] force_type
+    # @return [String, nil] file contents, or nil if the file doesn't exist
+    def self.standard_option_defs_yaml(force_type)
+      @standard_option_defs_yaml ||= {}
+      return @standard_option_defs_yaml[force_type] if @standard_option_defs_yaml.key?(force_type)
+
+      path = Rails.root.join('app', 'models', 'admin', 'defs', "#{force_type}_standard_option_defs.yaml")
+      @standard_option_defs_yaml[force_type] = File.exist?(path) ? File.read(path) : nil
     end
 
     #

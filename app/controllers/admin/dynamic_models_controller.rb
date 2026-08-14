@@ -140,22 +140,13 @@ class Admin::DynamicModelsController < AdminController
   end
 
   #
-  # Show the batch jobs status for the dynamic model.
-  # If batch_trigger is configured, shows the frequency.
+  # Show a boolean checkbox if the dynamic model has a batch_trigger configured
   # @param [DynamicModel] list_item
-  # @return [String]
+  # @return [String] HTML for checked/unchecked indicator
   def batch_jobs_column(list_item)
-    return '' unless list_item.persisted?
+    return helpers.index_list_item_boolean_field(false) unless list_item.persisted?
 
-    # Ensure configurations is loaded
-    list_item.option_configs unless list_item.configurations
-    bt = list_item.configurations&.dig(:batch_trigger)
-    return '' unless bt.present?
-
-    frequency = bt[:frequency]
-    frequency.present? ? frequency.to_s : 'configured'
-  rescue StandardError
-    ''
+    helpers.index_list_item_boolean_field(configuration_key_present?(list_item, :batch_trigger))
   end
 
   #
@@ -165,12 +156,70 @@ class Admin::DynamicModelsController < AdminController
   def view_sql_column(list_item)
     return helpers.index_list_item_boolean_field(false) unless list_item.persisted?
 
-    # Ensure configurations is loaded
-    list_item.option_configs unless list_item.configurations
-    has_view_sql = list_item.configurations&.dig(:view_sql).present?
-    helpers.index_list_item_boolean_field(has_view_sql)
+    helpers.index_list_item_boolean_field(configuration_key_present?(list_item, :view_sql))
+  end
+
+  #
+  # Quick presence check for a top-level _configurations: key (e.g. batch_trigger, view_sql),
+  # scanning just the _configurations: block of the definition's resolved options text
+  # (standard defs and config libraries substituted in, but not fully YAML-parsed/merged)
+  # rather than running the full option_configs parse for every index row - see issue #1354.
+  # Scoping the scan to the _configurations: block (rather than the whole text) avoids false
+  # positives from a field or label elsewhere in the config happening to be named
+  # batch_trigger/view_sql. This is still an approximation: it does not evaluate
+  # _merge_default/_override semantics, so a key could show as present even if a later
+  # override removes it.
+  # Note: unlike option_configs, this does not suppress the result for disabled definitions,
+  # since the raw text scan doesn't depend on the definition being active.
+  # @param [DynamicModel] list_item
+  # @param [Symbol] key
+  # @return [Boolean]
+  def configuration_key_present?(list_item, key)
+    block = configurations_block_for_scan(list_item)
+    block.present? && block.match?(/^\s*#{Regexp.escape(key.to_s)}:/)
   rescue StandardError
-    helpers.index_list_item_boolean_field(false)
+    false
+  end
+
+  # Matches the indented body of a top-level `_configurations:` YAML section, stopping at
+  # the next top-level (non-indented, non-blank) key.
+  ConfigurationsBlockRegex = /^_configurations:[ \t]*\n((?:[ \t].*\n?|[ \t]*\n)*)/
+
+  #
+  # Extract just the _configurations: block from the resolved options text.
+  # @param [DynamicModel] list_item
+  # @return [String, nil]
+  def configurations_block_for_scan(list_item)
+    text = resolved_options_text_for_scan(list_item)
+    text&.[](ConfigurationsBlockRegex, 1)
+  end
+
+  #
+  # Build the resolved options text (standard defs prepended, config libraries substituted)
+  # for a quick text scan, without the full YAML parse. Deliberately avoids
+  # OptionConfigs::ExtraOptions#prepare_options_text, which resolves
+  # `uses_current_definition_version?` internally - that triggers a full option_configs
+  # parse just to read one flag, defeating the point of a lightweight scan. Since the admin
+  # index always shows the current (not a historical versioned) definition record, libraries
+  # can safely be resolved to their current content here.
+  # Memoized per list_item since both batch_jobs_column and view_sql_column need it for the
+  # same row - without this, the index would resolve the text twice per row.
+  # @param [DynamicModel] list_item
+  # @return [String, nil]
+  def resolved_options_text_for_scan(list_item)
+    memo_key = :@resolved_options_text_for_scan
+    return list_item.instance_variable_get(memo_key) if list_item.instance_variable_defined?(memo_key)
+
+    provider = list_item.class.options_provider
+    config_text = list_item.options_text
+    result = if config_text.blank?
+               nil
+             else
+               config_text = config_text.gsub(/^---.*\n/, '')
+               config_text = provider.prepend_standard_definitions(config_text)
+               provider.include_libraries(config_text)
+             end
+    list_item.instance_variable_set(memo_key, result)
   end
 
   def view_folder
