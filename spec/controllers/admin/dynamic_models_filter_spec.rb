@@ -118,5 +118,10 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       filters_on = controller.send(:filters_on)
       expect(filters_on).to include(:in_current_app_type)
     end
+
+    it 'does not strip in_current_app_type from filter_params, so the filter dropdown can show the current selection' do
+      get :index, params: { filter: { in_current_app_type: 'yes' } }
+      expect(controller.send(:filter_params)[:in_current_app_type]).to eq('yes')
+    end
   end
 end
