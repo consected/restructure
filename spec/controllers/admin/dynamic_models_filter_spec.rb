@@ -123,5 +123,9 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       get :index, params: { filter: { in_current_app_type: 'yes' } }
       expect(controller.send(:filter_params)[:in_current_app_type]).to eq('yes')
     end
+
+    it 'declares in_current_app_type as a non-column filter key, so its "Not set" dropdown option is suppressed' do
+      expect(controller.send(:non_column_filter_keys)).to include(:in_current_app_type)
+    end
   end
 end
