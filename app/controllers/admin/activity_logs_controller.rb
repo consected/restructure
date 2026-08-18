@@ -42,13 +42,25 @@ class Admin::ActivityLogsController < AdminController
   end
 
   #
-  # Override filter_params to extract the custom in_current_app_type filter
-  # before the parent class processes it as a database column
+  # Extract the custom in_current_app_type filter value for use by
+  # filtered_in_current_app_type. The key is NOT deleted from the returned hash here -
+  # doing so also stripped it from the hash the filter dropdown UI reads to show the
+  # current selection (filter_select), causing the dropdown to always show "All" even
+  # though filtering was working correctly. The key is instead excluded from the database
+  # `where` clause via #non_column_filter_keys below.
   # @return [Hash]
   def filter_params
     result = super
-    @in_current_app_type_filter = result&.delete(:in_current_app_type)
+    @in_current_app_type_filter = result&.[](:in_current_app_type)
     result
+  end
+
+  #
+  # Exclude in_current_app_type from the where-clause hash in filtered_primary_model,
+  # since it isn't a real database column - see #filter_params above.
+  # @return [Array<Symbol>]
+  def non_column_filter_keys
+    [:in_current_app_type]
   end
 
   #

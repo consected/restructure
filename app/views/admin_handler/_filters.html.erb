@@ -28,10 +28,14 @@ fo.each do |filter_on|
   end
 
   next if all_values.empty?
+
+  # "Not set" (IS NULL) only makes sense for real, nullable database columns - suppress it
+  # for virtual/computed filters (e.g. in_current_app_type) declared via non_column_filter_keys.
+  allow_not_set = !(respond_to?(:non_column_filter_keys) && non_column_filter_keys.include?(filter_on))
 %>
   <span class="filter-select-group">
     <label class="filter-select-label"><%= filter_on.to_s.humanize %>:</label>
-    <%= filter_select(filter_on, all_values) %>
+    <%= filter_select(filter_on, all_values, allow_not_set:) %>
   </span>
 <% end %>
 </div>
