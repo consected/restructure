@@ -510,7 +510,7 @@ module OptionConfigs
           Rails.logger.warn e
           Rails.logger.warn errtext
           if Rails.env.test? || Rails.env.development?
-            $stderr.puts e
+            $stderr.puts "#{config_obj&.resource_name} - #{e}"
             $stderr.puts errtext
           end
           Rails.logger.warn 'Failed configuration YAML at:'
