@@ -734,3 +734,27 @@ trigger_types:
       on_failure:
         type: hash_or_array
         description: Nested trigger task(s) to run on failure
+
+  # ---------------------------------------------------------------------------
+  # exception
+  # ---------------------------------------------------------------------------
+  exception:
+    pattern: direct_config
+    description: >
+      Raise an exception conditionally, or re-raise original failure inside on_failure hooks.
+    keys:
+      if:
+        type: hash
+        description: Conditional expression
+      message:
+        type: string
+        description: Custom exception message (supports substitution variables)
+      original_failure:
+        type: boolean
+        description: Re-raise original exception (must be inside an on_failure hook)
+      on_complete:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on success
+      on_failure:
+        type: hash_or_array
+        description: Nested trigger task(s) to run on failure

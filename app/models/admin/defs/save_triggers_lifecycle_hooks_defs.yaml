@@ -32,9 +32,8 @@
             on_failure: |
               (optional) triggers to run if an exception is raised.
               Accepts a single trigger hash or an array of trigger configurations.
-              The original exception is re-raised after on_failure triggers execute.
-              Errors within on_failure triggers are logged but do not suppress
-              the original exception.
+              By default, the original exception is NOT re-raised after on_failure executes, which prevents rolling back the DB transaction unless configured otherwise.
+              To explicitly raise a new error or re-raise the original failure, use the `exception` trigger.
               Can be placed at the top level or inside each named entry,
               matching on_complete placement.
               
@@ -47,3 +46,5 @@
                       one:
                         with:
                           status: failed
+                  - exception:
+                      original_failure: true

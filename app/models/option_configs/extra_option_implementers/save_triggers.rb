@@ -28,7 +28,8 @@ module OptionConfigs
                              set_save_trigger_results
                              set_variables
                              generate_document
-                             full_text_search].freeze
+                             full_text_search
+                             exception].freeze
 
       class_methods do
         #

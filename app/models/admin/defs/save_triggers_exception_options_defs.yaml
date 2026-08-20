@@ -1,0 +1,25 @@
+# exception options
+# Canonical schema
+# exception: <Hash(ExceptionValue) | Array(ExceptionValue)>
+#
+# Value type
+# ExceptionValue: <Hash(
+#   if: Hash,
+#   message: String,
+#   original_failure: Boolean,
+#   on_complete: Hash | Array,
+#   on_failure: Hash | Array
+# )>
+# All keys are optional.
+#
+# Special keys
+        exception:
+          if: #if_extras
+          message: 'Custom save trigger failure'  # Message to include in the raised FphsException, supports substitutions
+          original_failure: false  # (optional, default false) to re-raise the on_failure exception, raising an error if used outside an on_failure block
+#!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - If message is specified, variables are substituted using normal curly notation (e.g. {{select_call_direction}}).
+# - original_failure when true, re-raises the original exception. Must be placed within an on_failure block.
+# - If both original_failure and message are specified, raises an FphsException wrapping both the custom message and original error message.

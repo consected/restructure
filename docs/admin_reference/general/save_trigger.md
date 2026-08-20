@@ -78,6 +78,7 @@ Each trigger task listed under an event key corresponds to one of the following 
 
 | Trigger | Description |
 |---|---|
+| [exception](save_trigger_exception.md) | Conditional exception raising / error bubble-up (critical for rolling back transactions) |
 | [log](save_trigger_log.md) | Write a log entry (useful for debugging and audit trails) |
 
 
@@ -86,7 +87,7 @@ Each trigger task listed under an event key corresponds to one of the following 
 All save trigger types support `on_complete` and `on_failure` lifecycle hooks. These fire additional triggers after the main trigger succeeds or fails.
 
 - **`on_complete`**: triggers to run after successful completion
-- **`on_failure`**: triggers to run when an exception is raised (the original exception is re-raised afterwards)
+- **`on_failure`**: triggers to run when an exception is raised (does NOT re-raise by default unless the `exception` save trigger with `original_failure: true` is executed)
 
 Both accept a single trigger hash or an array of trigger configurations.
 
@@ -135,3 +136,20 @@ save_trigger:
                 message: 'Tracker Q2 failed'
                 severity: error
 ```
+
+### Transaction & Rollback Behavior
+
+When an exception occurs during the execution of a save trigger in a database transaction (or standard model save transaction):
+
+1. **Without an `on_failure` block**: If no `on_failure` hooks are defined, the exception propagates immediately, causing the database transaction to rollback, rolling back any actions like `add_tracker` already performed inside the transaction.
+2. **With an `on_failure` block**: By default, `on_failure` intercepts and swallows the raised exception to run its child triggers. Since the exception is caught, the surrounding database transaction completes and **commits successfully**. Any triggers executed successfully within `on_failure` (e.g. `add_tracker` or status updates) will be committed to the database as normal. Handlers queued (such as `background` or `notify` jobs) are posted to delayed_job and executed.
+3. **Re-raising an Exception**: If you want to perform cleanup or logging in `on_failure` but still rollback the database transaction, you must explicitly raise an exception at the end of the `on_failure` block. This is achieved using the `exception` save trigger:
+   ```yaml
+   on_failure:
+     - log:
+         message: 'Tracker addition failed, rolling back save'
+         severity: error
+     - exception:
+         original_failure: true
+   ```
+   Executing `exception: { original_failure: true }` will re-raise the original exception, restoring transaction rollback behavior. Any side effects executed in external services (like third-party APIs or emails already sent out) cannot be rolled back by the database transaction.
