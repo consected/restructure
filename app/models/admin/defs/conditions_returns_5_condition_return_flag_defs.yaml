@@ -1,0 +1,16 @@
+# Pattern 5: Filtering and returning the same field
+# @runnable: true
+# @instance: activity_log
+# @return: portland
+
+# A `condition` hash may carry a return flag, so the field is used both to filter
+# the query and to provide the returned result. This avoids repeating the field.
+#
+# Exactly one of return_value, return_value_list, return_result or
+# return_all_results may be given; supplying more than one raises an error.
+all:
+  addresses:
+    zip: '12345'
+    city:
+      condition: 'IS NOT NULL'
+      return_value: true

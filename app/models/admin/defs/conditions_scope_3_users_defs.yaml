@@ -1,0 +1,16 @@
+# Pattern 3: Searching the users table
+# @runnable: true
+# @instance: activity_log
+# @return_class: Integer
+
+# When `users` is the first table listed, the query runs against all users rather
+# than against the current master record. This is how a user is looked up by
+# email address, for example to assign work to them.
+all:
+  users:
+    email:
+      user: email
+    disabled:
+      - null
+      - false
+    id: return_value

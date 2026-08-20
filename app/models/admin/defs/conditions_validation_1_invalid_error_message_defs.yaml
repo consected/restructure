@@ -1,0 +1,19 @@
+# Pattern 1: Custom validation failure messages
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# When conditions are used for validation (valid_if), the failing field and
+# condition are reported back to the user. invalid_error_message replaces the
+# generated wording with your own.
+#
+# Placed alongside a field it describes that field. Placed at the top of a
+# condition block it describes the whole block, and the most specific message
+# that applies to the failure is the one reported.
+all:
+  this:
+    invalid_error_message: 'This entry cannot be completed yet'
+    extra_log_type: primary
+    select_who:
+      condition: 'IS NOT NULL'
+      invalid_error_message: 'Select who was contacted'

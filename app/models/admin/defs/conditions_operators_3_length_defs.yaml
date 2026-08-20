@@ -1,0 +1,14 @@
+# Pattern 3: Length comparisons
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# = LENGTH and <> LENGTH compare an integer value against the character length of
+# a string (varchar or text) field.
+all:
+  activity_log__player_contact_phones:
+    id:
+      this: id
+    select_who:
+      condition: '= LENGTH'
+      value: 4

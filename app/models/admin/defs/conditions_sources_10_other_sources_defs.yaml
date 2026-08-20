@@ -1,0 +1,19 @@
+# Pattern 10: Other special record sources
+# @runnable: false
+
+# embedded_item - the record embedded within the current activity log entry
+all:
+  embedded_item:
+    some_field: a value
+
+# reference - the current to_record while iterating model references, for example
+# within an add_reference_if or a save trigger operating on each reference
+all_2:
+  reference:
+    some_field: a value
+
+# parent - the parent item of the current record. This is only available for
+# records that define a parent_item, such as filestore containers.
+all_3:
+  parent:
+    some_field: a value

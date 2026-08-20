@@ -1,0 +1,20 @@
+# Pattern 8: Requiring the most recent matching record to match
+# @runnable: true
+# @instance: activity_log_latest
+# @expect: true
+
+# and_latest_matches re-tests only the most recently created record that matched
+# the sibling field conditions. Use it when a list of acceptable values is
+# allowed, but the latest record must be a specific one - for example a sequence
+# of lock / unlock activities where the current state must be unlocked.
+#
+# This cannot be expressed with nested conditions, because those narrow the set
+# of records rather than picking the latest of them.
+all:
+  activity_log__player_contact_phones:
+    select_who:
+      - who_0
+      - who_1
+      - who_2
+    and_latest_matches:
+      select_who: who_2

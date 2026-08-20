@@ -1,0 +1,21 @@
+# Pattern 2: Querying a table without joining to masters
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# `no_masters: {}` makes the first table listed the base of the query, with no
+# join to the masters table. Use it for tables and views that have no master_id,
+# or where master_id may be null.
+#
+# Additional tables may be listed, but they must be associations defined on the
+# new base table. In particular, comparisons that reach back into the current
+# record through an association may fail; substitute the value instead:
+#
+#   no_masters: {}
+#   player_contacts:
+#     data: '{{email}}'
+all:
+  no_masters: {}
+  addresses:
+    city: portland
+    zip: '12345'

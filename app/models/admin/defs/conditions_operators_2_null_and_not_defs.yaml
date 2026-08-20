@@ -1,0 +1,24 @@
+# Pattern 2: Null tests and negation
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# IS NULL and IS NOT NULL are unary - they take no `value`.
+all:
+  activity_log__player_contact_phones:
+    id:
+      this: id
+    select_who:
+      condition: 'IS NOT NULL'
+    notes:
+      condition: 'IS NULL'
+
+# `not: true` negates the result of the comparison. On database table conditions
+# it only applies to the array operators (= ANY, &&, ARRAY_LENGTH, ...); on the
+# in-memory record sources such as `this` it applies to every operator.
+all_2:
+  this:
+    select_who:
+      condition: '='
+      value: 'a different value'
+      not: true

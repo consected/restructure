@@ -1,0 +1,30 @@
+# Pattern 8: Testing variables set by save triggers
+# @runnable: true
+# @instance: activity_log_with_trigger_results
+# @expect: true
+
+# The set_variables save trigger stores values on the record's trigger_variables,
+# making them available to later triggers in the same save. Some triggers write
+# there too - pull_emails exposes each parsed message as trigger_variables.email.
+#
+# In a condition the record source is `this` and the attribute name is
+# trigger_variables. Note that this differs from the substitution tag namespace,
+# where the same values are addressed as {{variables.<name>}}.
+#
+# Use `element` to address a variable by name, with dot notation for nested keys.
+all:
+  this:
+    trigger_variables:
+      element: contact_record
+      value: 'sample@example.com'
+
+# With no `condition` the comparison is equality, and a list of values matches if
+# the variable holds any one of them. This is the usual way to test that a
+# variable was never set, or was set to a blank value.
+all_2:
+  this:
+    trigger_variables:
+      element: 'nested_var.status'
+      value:
+        - null
+        - ''
