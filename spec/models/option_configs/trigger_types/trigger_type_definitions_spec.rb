@@ -309,6 +309,23 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
     end
   end
 
+  describe 'Exception' do
+    let(:type_class) { OptionConfigs::TriggerTypes::Exception }
+
+    it 'has :direct_config pattern' do
+      expect(type_class.pattern).to eq(:direct_config)
+    end
+
+    it 'declares the expected allowed_keys' do
+      expect(type_class.allowed_keys).to match_array(%i[if message original_failure on_complete on_failure])
+    end
+
+    it 'declares message as :string and original_failure as :boolean' do
+      expect(type_class.key_type_rules[:message]).to eq(:string)
+      expect(type_class.key_type_rules[:original_failure]).to eq(:boolean)
+    end
+  end
+
   describe 'GenerateDocument' do
     let(:type_class) { OptionConfigs::TriggerTypes::GenerateDocument }
 
