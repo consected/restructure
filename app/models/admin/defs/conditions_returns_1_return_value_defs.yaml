@@ -1,0 +1,12 @@
+# Pattern 1: Returning a single value
+# @runnable: true
+# @instance: activity_log
+# @return: portland
+
+# Setting a field's value to the keyword return_value makes the condition return
+# that field from the most recently created matching record, instead of a
+# true / false result. Used by save triggers, preset fields and field defaults.
+all:
+  addresses:
+    zip: '12345'
+    city: return_value

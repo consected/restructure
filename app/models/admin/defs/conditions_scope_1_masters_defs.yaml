@@ -1,0 +1,28 @@
+# Pattern 1: Widening the search beyond the current master
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# By default every table condition is joined to the current record's master, so
+# only records belonging to that master are considered.
+#
+# `masters: {}` searches all master records instead. Conditions may be added to
+# restrict which masters are searched, for example:
+#
+#   masters:
+#     id:
+#       - 1
+#       - 2
+#
+# A crosswalk identifier can also be resolved this way, by matching a master
+# record on one of its external identifiers and returning its id:
+#
+#   all:
+#     masters:
+#       msid: 12345
+#       id: return_value
+all:
+  masters: {}
+  addresses:
+    city: portland
+    zip: '12345'

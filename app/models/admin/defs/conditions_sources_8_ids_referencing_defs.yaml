@@ -1,0 +1,21 @@
+# Pattern 8: Finding records by what they reference
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# ids_referencing returns the ids of the `from` records that reference a record
+# matching the `target` conditions. Unlike this_references, the `from` records do
+# not have to be related to the current record.
+#
+# The `from` block must request return: return_all_results.
+all:
+  activity_log__player_contact_phones:
+    id:
+      ids_referencing:
+        target:
+          addresses:
+            city: portland
+        from:
+          activity_log__player_contact_phones:
+            select_who: user
+            return: return_all_results

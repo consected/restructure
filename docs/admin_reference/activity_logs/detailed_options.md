@@ -72,6 +72,11 @@ These options are used in activity logs that manage NFS filestore containers. Ty
 ## Conditions Reference
 
 - [Conditions](../general/conditions.md) — full reference for condition syntax used in `*_if` options and trigger `if:` clauses
+- [Record sources](../general/conditions_record_sources.md) — `this`, `referring_record`, `user` and reference traversal
+- [Operators and values](../general/conditions_operators.md) — comparison operators, JSON elements, calculations and dynamic values
+- [Returning values](../general/conditions_returns.md) — `return_value`, `return_result`, `return_constant` and `lookup`
+- [Search scope](../general/conditions_scope.md) — `masters:`, `no_masters:`, `users`, item flags and activity shortcuts
+- [Validation messages](../general/conditions_validation.md) — `invalid_error_message`, `validate:` and `hide_error`
 
 ## Standard Options (Reusable Anchors)
 

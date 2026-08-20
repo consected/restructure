@@ -1,0 +1,20 @@
+# Pattern 7: Records referenced by this record's parent
+# @runnable: false
+
+# parent_references works exactly like this_references, but resolves the
+# references of the record referring to this one (its parent). Use it from a
+# child activity log to test what the parent activity log references.
+all:
+  addresses:
+    city: portland
+    id:
+      parent_references: id
+
+# parent_or_this_references falls back to the current record's own references
+# when there is no referring record, which makes a single definition usable both
+# standalone and when embedded under a parent.
+all_2:
+  addresses:
+    id:
+      parent_or_this_references:
+        address: id

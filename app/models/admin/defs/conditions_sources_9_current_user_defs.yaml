@@ -1,0 +1,17 @@
+# Pattern 9: The current user
+# @runnable: true
+# @instance: activity_log
+# @expect: true
+
+# `user` refers to the user performing the current action. Any user attribute may
+# be used as the comparison value for a field.
+all:
+  this:
+    user_id:
+      user: id
+
+# The special attribute role_name returns the list of role names the current user
+# holds, so a field can be matched against them.
+all_2:
+  user:
+    role_name: test
