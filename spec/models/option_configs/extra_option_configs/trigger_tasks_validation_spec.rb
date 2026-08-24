@@ -28,7 +28,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                           set_variables generate_document full_text_search]
 
       # Build a minimal valid config with every trigger name
-      config = valid_triggers.each_with_object({}) { |name, h| h[name] = {} }
+      config = valid_triggers.to_h { |name| [name, {}] }
       instance = klass.new(config)
       expect(instance.config_warnings.select { |w| w[:message]&.match?(/trigger|action|unrecognized/) }).to be_empty
     end
@@ -456,9 +456,91 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
     context 'redcap_request' do
       it 'accepts valid keys inside the named entry without warnings' do
-        instance = klass.new(redcap_request: { rc1: { study: 'study1', project_name: 'proj', method: 'post' } })
+        instance = klass.new(redcap_request: {
+                               rc1: { study: '{{study}}', project_name: '{{project}}', method: 'post' }
+                             })
         key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
         expect(key_warnings).to be_empty
+      end
+
+      it 'accepts literal study and project_name when they identify an active REDCap project' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        allow(project_admins).to receive(:find_by).with(study: 'Q2', name: 'existing_project')
+                                                  .and_return(instance_double(Redcap::ProjectAdmin))
+
+        instance = klass.new(redcap_request: {
+                               rc1: { study: 'Q2', project_name: 'existing_project', method: 'post' }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'warns when literal study and project_name do not identify an active REDCap project' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        allow(project_admins).to receive(:find_by).with(study: 'Q2', name: 'missing_project').and_return(nil)
+
+        instance = klass.new(redcap_request: {
+                               rc1: { study: 'Q2', project_name: 'missing_project', method: 'post' }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings.map { |warning| warning[:message] }).to include(
+          'tasks redcap_request study / project_name does not identify an active REDCap project'
+        )
+      end
+
+      it 'skips the REDCap project lookup when study or project_name is dynamic' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: '{{variables.redcap_study}}',
+                                 project_name: 'missing_project',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'also skips the REDCap project lookup when project_name is dynamic' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: 'Q2',
+                                 project_name: '{{variables.redcap_project_name}}',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
+      end
+
+      it 'skips validation when a dynamic value is embedded anywhere in either field' do
+        project_admins = instance_double(ActiveRecord::Relation)
+        allow(Redcap::ProjectAdmin).to receive(:active).and_return(project_admins)
+        expect(project_admins).not_to receive(:find_by)
+
+        instance = klass.new(redcap_request: {
+                               rc1: {
+                                 study: 'prefix_{{variables.redcap_study}}',
+                                 project_name: 'project_{{variables.redcap_project_name}}_suffix',
+                                 method: 'post'
+                               }
+                             })
+
+        warnings = instance.config_warnings.select { |w| w[:message]&.match?(/redcap_request/) }
+        expect(warnings).to be_empty
       end
 
       it 'warns on unrecognized keys inside the named entry' do

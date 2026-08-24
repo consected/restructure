@@ -6,6 +6,9 @@ require 'rails_helper'
 # user's access from a project via the REDCap API), and the import_project_user
 # method for adding or updating a user's privileges in a REDCap project via
 # a save_trigger or batch_trigger (both share the same RedcapRequest handler).
+# Also covers issue #1364: config substitutions for study and project_name
+# attributes must be resolved before the Redcap::ProjectAdmin lookup, and the
+# error message for a missing project must have correct formatting.
 RSpec.describe SaveTriggers::RedcapRequest, type: :model do
   include ModelSupport
   include ActivityLogSupport
@@ -271,5 +274,55 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
 
     expect(@al.save_trigger_results['batch_update_user_response']).to eq 1
     expect(@al.save_trigger_results['batch_update_user_response_http_response_code']).to eq 200
+  end
+
+  # Issue #1364 - config substitutions for study and project_name
+  describe 'config substitutions for study and project_name (issue #1364)' do
+    it 'resolves {{variables.*}} templates in study and project_name before lookup' do
+      project_name = @project[:name]
+      study = @project[:study] || Redcap::RedcapSupport::DefaultStudy
+
+      @al.trigger_variables = {
+        redcap_study_name: study,
+        redcap_project_name: project_name
+      }
+
+      config = {
+        this1: {
+          study: '{{variables.redcap_study_name}}',
+          project_name: '{{variables.redcap_project_name}}',
+          local_data: 'templated_response',
+          method: 'project_users',
+          post_data: {}
+        }
+      }
+
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['templated_response']).to be_a(Array)
+      expect(@al.save_trigger_results['templated_response_http_response_code']).to eq 200
+    end
+
+    it 'formats the missing-project error with balanced study / project_name' do
+      @al.trigger_variables = {}
+
+      config = {
+        this1: {
+          study: 'nonexistent_study',
+          project_name: 'nonexistent_project',
+          local_data: 'err_response',
+          method: 'project_users',
+          post_data: {}
+        }
+      }
+
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(
+        FphsException,
+        'save_trigger redcap_request: cannot find REDCap project nonexistent_study / nonexistent_project'
+      )
+    end
   end
 end
