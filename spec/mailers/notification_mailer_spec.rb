@@ -65,7 +65,8 @@ RSpec.describe NotificationMailer, type: :mailer do
       item_type: @activity_log.class.name,
       item_id: @activity_log.id,
       master: @activity_log.master,
-      message_type: :email
+      message_type: :email,
+      subject: 'Test Subject'
     )
     mn.generate
     mn
@@ -210,6 +211,7 @@ RSpec.describe NotificationMailer, type: :mailer do
         item_id: @activity_log.id,
         master: @activity_log.master,
         message_type: :email,
+        subject: 'Test Subject',
         extra_substitutions: { calendar_invite: calendar_data }
       )
       mn.generate

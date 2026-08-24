@@ -1291,4 +1291,54 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   ensure
     Admin::AppType.reset_active_app_types!
   end
+
+  describe 'runtime validation resilience (issue #1370)' do
+    it 'rescues ActiveRecord::RecordInvalid when MessageNotification fails validation, recording error in notify_errors' do
+      @al.update!(notes: '', current_user: @user)
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: '{{notes}}'
+      }
+
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['notify_results']).to eq([false])
+      expect(@al.save_trigger_results['notify_errors'].first).to include('Failed to create message notification')
+      expect(@al.save_trigger_results['notify_errors'].first).to include("Subject can't be blank")
+      expect(@al.save_trigger_results['notify_messages']).to be_empty
+    end
+
+    it 'processes remaining valid notifications in an array when one fails runtime validation' do
+      @al.update!(notes: '', current_user: @user)
+      configs = [
+        {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: '{{notes}}'
+        },
+        {
+          type: 'email',
+          role: 'test',
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: 'Valid Second Subject'
+        }
+      ]
+
+      @trigger = SaveTriggers::Notify.new(configs, @al)
+      expect { @trigger.perform }.not_to raise_error
+
+      expect(@al.save_trigger_results['notify_results']).to eq([false, true])
+      expect(@al.save_trigger_results['notify_errors'].first).to include("Subject can't be blank")
+      expect(@al.save_trigger_results['notify_errors'].second).to be_nil
+      expect(@al.save_trigger_results['notify_messages'].length).to eq(1)
+      expect(@al.save_trigger_results['notify_messages'].first.subject).to eq('Valid Second Subject')
+    end
+  end
 end

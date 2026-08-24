@@ -186,4 +186,34 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
       expect(oc.config_warnings).to be_empty
     end
   end
+
+  describe 'notify save trigger with configuration notices (issue #1370)' do
+    let(:yaml) do
+      <<~YAML
+        default:
+          fields:
+            - test1
+          save_trigger:
+            on_create:
+              notify:
+                type: email
+                role: admin
+                layout_template: nonexistent_layout
+                content_template: nonexistent_content
+      YAML
+    end
+
+    it 'produces warnings for invalid notify options and allows saving' do
+      @dm.update!(options: yaml, current_admin: @admin)
+      expect(@dm).to be_persisted
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      expect(notices).not_to be_empty
+
+      messages = notices.map { |n| n[:message] }
+      expect(messages.any? { |m| m.include?('subject is required when type is email') }).to be true
+      expect(messages.any? { |m| m.include?("layout_template 'nonexistent_layout' not found") }).to be true
+      expect(messages.any? { |m| m.include?("content_template 'nonexistent_content' not found") }).to be true
+    end
+  end
 end
