@@ -779,7 +779,10 @@ module CalcActions
       # Use the first specified table as the base, not joining on masters table
       @join_tables.delete_if { |a| a == :no_masters }
       rn = @join_tables.first
-      r = Resources::Models.find_by(resource_name: rn)
+      # Config authors typically write the real table name here (matching every other join
+      # condition), but a resource's registered resource_name may differ from its table_name
+      # (e.g. tracker_history is deliberately singular) - fall back to a table_name match
+      r = Resources::Models.find_by(resource_name: rn) || Resources::Models.find_by(table_name: rn.to_s)
       raise FphsException, "No resource found for #{rn} with no_masters specified in calc_actions" unless r
 
       c = r.class_name.constantize

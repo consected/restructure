@@ -61,6 +61,8 @@ class Tracker < UserBase
   # record on creation
   attr_accessor :_merged, :saving_update
 
+  add_model_to_list
+
   # Avoids a lot of unnecessary database lookups
   def self.uses_item_flags?(_user)
     false
