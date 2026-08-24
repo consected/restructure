@@ -530,7 +530,7 @@ module Redcap
         .to_return(status: 200, body:, headers: {})
     end
 
-    def stub_request_project_xml(server_url, api_key, body: nil)
+    def stub_request_project_xml(server_url, api_key, body: nil, definition_only: false)
       body ||= File.read('spec/fixtures/redcap/q2_demo_project.xml')
 
       stub_request(:post, server_url)
@@ -541,7 +541,7 @@ module Redcap
             'exportSurveyFields' => 'true',
             'format' => 'json',
             'returnFormat' => 'json',
-            'returnMetadataOnly' => 'false',
+            'returnMetadataOnly' => definition_only ? 'true' : 'false',
             'token' => api_key
           }
         )

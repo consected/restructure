@@ -57,6 +57,16 @@ class Redcap::ProjectAdminsController < AdminController
     render json: { message: msg }, status: 200
   end
 
+  def request_archive_definition
+    set_instance_from_id
+    check_transfer_mode_not_none
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.dump_archive(definition_only: true)
+
+    msg = "Project definition requested at #{DateTime.now}"
+    render json: { message: msg }, status: 200
+  end
+
   def request_users
     set_instance_from_id
     check_transfer_mode_not_none
