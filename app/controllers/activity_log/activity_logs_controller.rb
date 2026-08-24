@@ -301,7 +301,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
       raw_default = defaults[resource_name.to_sym].presence || defaults[resource_name].presence
       if raw_default.present?
         resolved = if raw_default.is_a?(String) && raw_default.include?('{{')
-                     Formatter::Substitution.substitute(raw_default, data: current_user, tag_subs: nil,
+                     # Only role_name is exposed to the substitution (issue #1362) - mirrors
+                     # the fix in masters/_search_results_resources_panel.html.erb, so a
+                     # literal (non-structural) tag such as {{first_name}} can never resolve
+                     # to real per-user data here; it silently resolves blank instead.
+                     current_user_role_name = current_user&.role_names&.first.to_s
+                     substitution_data = { role_name: current_user_role_name }
+                     Formatter::Substitution.substitute(raw_default, data: substitution_data, tag_subs: nil,
                                                                      ignore_missing: true)&.strip
                    else
                      raw_default

@@ -205,7 +205,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   # by clearing the precompiled Handlebars cache first (so stale disk files do
   # not mask a change in the emitted config blocks).
   def page_template_text
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
 
     # Clear all_versions memoization so changed definitions are re-read from DB.
     DynamicModel.all_versions_memo      = {}

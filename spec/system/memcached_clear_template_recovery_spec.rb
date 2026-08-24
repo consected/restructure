@@ -14,7 +14,7 @@
 # Test Coverage:
 # - Page loads normally with templates compiled
 # - After simulated cleanup + cache invalidation, page still loads correctly
-# - server_cache_version changes after cleanup_public_dir + cache invalidation
+# - server_cache_version changes after cleanup_compiled_output + cache invalidation
 # - Without cache invalidation, server_cache_version remains stale (proves bug)
 
 require 'rails_helper'
@@ -43,19 +43,19 @@ RSpec.describe 'Template recovery after memcached clear', type: :system, js: tru
       scv_before = Application.server_cache_version
 
       # Simulate what happens on server restart: compiled files are deleted
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
 
       # Without the fix, server_cache_version remains unchanged
       # This means template_version stays the same, and browsers serve cached
       # template HTML referencing deleted multi files
       scv_after_no_fix = Application.server_cache_version
       expect(scv_after_no_fix).to eq(scv_before),
-                                   'Bug: server_cache_version should remain stale without cache invalidation'
+                                  'Bug: server_cache_version should remain stale without cache invalidation'
 
       # Verify that compiled multi files were actually deleted
-      multi_files = Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js'))
+      multi_files = Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js'))
       expect(multi_files).to be_empty,
-                             'cleanup_public_dir should have deleted all multi files'
+                             'cleanup_compiled_output should have deleted all multi files'
 
       # Now apply the fix: invalidate server_cache_version
       Rails.cache.delete('server_cache_version')
@@ -68,7 +68,7 @@ RSpec.describe 'Template recovery after memcached clear', type: :system, js: tru
   end
 
   describe 'page recovery after cleanup with cache invalidation' do
-    it 'reloads templates successfully after cleanup_public_dir and cache invalidation' do
+    it 'reloads templates successfully after cleanup_compiled_output and cache invalidation' do
       # Step 1: Load page normally - templates compile and UI works
       visit '/'
       finish_page_loading
@@ -79,7 +79,7 @@ RSpec.describe 'Template recovery after memcached clear', type: :system, js: tru
 
       # Step 2: Simulate server restart scenario
       # Cleanup compiled files (what happens on Rails startup)
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
       HandlebarsPrecompiler.cleanup_tmp_dir
       # Invalidate server_cache_version (the fix from issue #987)
       Rails.cache.delete('server_cache_version')
@@ -101,7 +101,7 @@ RSpec.describe 'Template recovery after memcached clear', type: :system, js: tru
       expect(page).to have_css('body.loaded-templates--masters__search_results_template', wait: 30)
 
       # Simulate cleanup + fix
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
       HandlebarsPrecompiler.cleanup_tmp_dir
       Rails.cache.delete('server_cache_version')
 

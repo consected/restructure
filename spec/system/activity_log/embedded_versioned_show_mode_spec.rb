@@ -209,7 +209,7 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
     # (Pattern from spec/system/page_layout/initial_show_tab_spec.rb)
     Admin::AppConfiguration.clear_memo!
     HandlebarsPrecompiler.cleanup_tmp_dir
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
     Rails.cache.delete('server_cache_version')
     login
     # Each example creates its own records before calling navigate_to_master,
@@ -304,7 +304,7 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
   def clear_caches_and_navigate
     Admin::AppConfiguration.clear_memo!
     HandlebarsPrecompiler.cleanup_tmp_dir
-    HandlebarsPrecompiler.cleanup_public_dir
+    HandlebarsPrecompiler.cleanup_compiled_output
     Rails.cache.delete('server_cache_version')
     page.driver.browser.execute_cdp('Network.clearBrowserCache')
     navigate_and_expand_al_panel
@@ -552,7 +552,7 @@ describe 'Activity log embedded versioned dynamic model show mode (issue 1238)',
       # One search returns BOTH masters; expanding each is SPA navigation (no reload).
       Admin::AppConfiguration.clear_memo!
       HandlebarsPrecompiler.cleanup_tmp_dir
-      HandlebarsPrecompiler.cleanup_public_dir
+      HandlebarsPrecompiler.cleanup_compiled_output
       Rails.cache.delete('server_cache_version')
       visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id},#{master2.id}"
       dismiss_modal
