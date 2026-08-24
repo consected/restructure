@@ -91,18 +91,19 @@ module Redcap
     end
 
     #
-    # Get the project archive XML file, including study fields.
+    # Get the project archive XML file, optionally without project data.
     # Return a temp file result.
+    # @param [Boolean] definition_only - whether to omit project data
     # @return [File] - temp file result
-    def project_archive
+    def project_archive(definition_only: false)
       tempfile = redcap.project_xml request_options: {
-        returnMetadataOnly: 'false',
+        returnMetadataOnly: definition_only ? 'true' : 'false',
         exportSurveyFields: 'true',
         exportDataAccessGroups: 'true',
         returnFormat: 'json'
       }
 
-      project_admin.record_job_request 'project_xml', result: { retrieved_from: 'api' }
+      project_admin.record_job_request 'project_xml', result: { retrieved_from: 'api', definition_only: }
 
       FileUtils.chmod 0o660, tempfile
       tempfile

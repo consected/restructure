@@ -7,11 +7,25 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
+  around do |example|
+    if example.metadata[:queue_adapter_test]
+      original_adapter = ActiveJob::Base.queue_adapter
+      ActiveJob::Base.queue_adapter = :test
+      example.run
+      ActiveJob::Base.queue_adapter = original_adapter
+    else
+      example.run
+    end
+  end
+
   before :all do
     change_setting('AllowDynamicMigrations', true)
   end
 
   before :example do
+    # Just in case a previous example changed it and failed to change it back
+    change_setting('AllowDynamicMigrations', true)
+
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin
@@ -105,6 +119,8 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
   end
 
   it 'dumps the full project XML to the filestore container' do
+    change_setting('AllowDynamicMigrations', false)
+
     mock_file_field_requests
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
@@ -120,6 +136,50 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc.dump_archive
 
     expect(rc.file_store.stored_files.where(path: 'test.test_file_field_sf_recs/project').count).not_to eq 0
+  end
+
+  it 'queues a project definition dump without project data', queue_adapter_test: true do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    expect do
+      rc.dump_archive(definition_only: true)
+    end.to have_enqueued_job(Redcap::CaptureProjectArchiveJob).with(rc, definition_only: true)
+  end
+
+  it 'allows full and definition-only archive jobs to be queued independently', queue_adapter_test: true do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    allow(Redcap::CaptureProjectArchiveJob).to receive(:perform_later)
+    jobs = double('archive jobs')
+    where_proxy = double('archive jobs filtered by project')
+    allow(Redcap::ProjectAdmin).to receive(:existing_jobs).and_return(jobs)
+    allow(jobs).to receive(:where).and_return(where_proxy)
+    allow(jobs).to receive(:where).with('handler LIKE ?', '%definition_only: true%').and_return([])
+    allow(where_proxy).to receive(:not).with('handler LIKE ?', '%definition_only: true%').and_return([])
+
+    rc.dump_archive
+    rc.dump_archive(definition_only: true)
+
+    expect(Redcap::CaptureProjectArchiveJob).to have_received(:perform_later).twice
+  end
+
+  it 'stores a project definition in a separate filestore path' do
+    change_setting('AllowDynamicMigrations', false)
+
+    mock_file_field_requests
+    stub_request_project_xml(server_url('file_field'), @project[:api_key], definition_only: true)
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.dynamic_model_table = 'test.test_file_field_sf_recs'
+    rc.server_url = server_url('file_field')
+    rc.data_options.run_jobs_as_user = @user.email
+    rc.save!
+
+    rc.dump_archive(definition_only: true)
+
+    definition_files = rc.file_store.stored_files.where(path: 'test.test_file_field_sf_recs/project-definition')
+    expect(definition_files.map(&:file_name).join).to match(/\Adefinition-.*\.xml\z/)
   end
 
   describe 'failed project detection' do

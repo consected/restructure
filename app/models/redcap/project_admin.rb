@@ -369,15 +369,15 @@ module Redcap
     end
 
     #
-    # In the background, download the full XML project archive,
+    # In the background, download the XML project archive,
     # and store it to the file_store container.
-    def dump_archive
+    def dump_archive(definition_only: false)
       jobclass = Redcap::CaptureProjectArchiveJob
-      jobs = self.class.existing_jobs(jobclass, self)
+      jobs = archive_jobs(jobclass, definition_only:)
       return if jobs.count > 0
 
-      jobclass.perform_later(self)
-      record_job_request('setup job: project_xml')
+      jobclass.perform_later(self, definition_only:)
+      record_job_request(archive_job_action(definition_only), result: { requested: true, definition_only: })
     end
 
     #
@@ -499,6 +499,16 @@ module Redcap
                                   ref_record:,
                                   queue: ProjectAdmin::JobQueue,
                                   failed: false
+    end
+
+    def archive_jobs(jobclass, definition_only:)
+      jobs = self.class.existing_jobs(jobclass, self)
+      pattern = '%definition_only: true%'
+      definition_only ? jobs.where('handler LIKE ?', pattern) : jobs.where.not('handler LIKE ?', pattern)
+    end
+
+    def archive_job_action(definition_only)
+      definition_only ? 'setup job: project definition' : 'setup job: project_xml'
     end
 
     #
