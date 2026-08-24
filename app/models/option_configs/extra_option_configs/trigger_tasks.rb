@@ -159,7 +159,7 @@ module OptionConfigs
       # @param config [Hash] the trigger's configuration
       # @return [void]
       def validate_trigger_keys(trigger_name, trigger_type, config)
-        warnings = trigger_type.validate_config(config)
+        warnings = trigger_type.validate_for_trigger_tasks(config)
         warnings.each do |warning|
           add_validation_notice(:tasks, "#{trigger_name} #{warning}", level: :warn)
         end

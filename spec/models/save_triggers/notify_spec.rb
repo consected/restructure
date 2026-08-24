@@ -1341,4 +1341,73 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       expect(@al.save_trigger_results['notify_messages'].first.subject).to eq('Valid Second Subject')
     end
   end
+
+  describe 'excludes expired and disabled users from recipients - issue #1374' do
+    before(:each) do
+      @active_user, = create_user
+      @expired_user, = create_user
+      @expired_user.update_columns(expire_datetime: 1.hour.ago)
+
+      Admin::UserRole.create! app_type: @active_user.app_type, user: @active_user, role_name: 'test_1374', current_admin: @admin
+      Admin::UserRole.create! app_type: @active_user.app_type, user: @expired_user, role_name: 'test_1374', current_admin: @admin
+    end
+
+    it 'role-based recipients exclude a user whose account has expired' do
+      config = {
+        type: 'email',
+        role: 'test_1374',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'expiry test'
+      }
+
+      trigger = SaveTriggers::Notify.new(config, @al)
+      trigger.perform
+
+      expect(trigger.receiving_user_ids).to include(@active_user.id)
+      expect(trigger.receiving_user_ids).not_to include(@expired_user.id)
+    end
+
+    it 'role-based recipients exclude a disabled user' do
+      disabled_user, = create_user
+      disabled_user.current_admin = @admin
+      disabled_user.disable!
+      Admin::UserRole.create! app_type: @active_user.app_type, user: disabled_user, role_name: 'test_1374', current_admin: @admin
+
+      config = {
+        type: 'email',
+        role: 'test_1374',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'disabled test'
+      }
+
+      trigger = SaveTriggers::Notify.new(config, @al)
+      trigger.perform
+
+      expect(trigger.receiving_user_ids).to include(@active_user.id)
+      expect(trigger.receiving_user_ids).not_to include(disabled_user.id)
+    end
+
+    it 'explicit users: recipients exclude expired and disabled users' do
+      disabled_user, = create_user
+      disabled_user.current_admin = @admin
+      disabled_user.disable!
+
+      config = {
+        type: 'email',
+        users: [@active_user.id, @expired_user.id, disabled_user.id],
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'users filter test'
+      }
+
+      trigger = SaveTriggers::Notify.new(config, @al)
+      trigger.perform
+
+      expect(trigger.receiving_user_ids).to include(@active_user.id)
+      expect(trigger.receiving_user_ids).not_to include(@expired_user.id)
+      expect(trigger.receiving_user_ids).not_to include(disabled_user.id)
+    end
+  end
 end

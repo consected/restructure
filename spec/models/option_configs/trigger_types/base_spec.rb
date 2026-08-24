@@ -41,11 +41,11 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         notify create_reference update_reference update_this add_tracker
         pull_external_data pull_emails run_batch_trigger set_save_trigger_results set_variables
         log generate_document redcap_request create_master full_text_search
-        transaction background case
+        transaction background case exception
       ]
     end
 
-    it 'includes all 22 trigger types' do
+    it 'includes all 23 trigger types' do
       expect(base.registered_types.keys).to match_array(expected_types)
     end
 
@@ -59,7 +59,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
 
   describe 'pattern classification' do
     it 'direct-config types return :direct_config pattern' do
-      %i[change_user_roles set_item_flags create_filestore_container reload_this notify log create_master].each do |name|
+      %i[change_user_roles set_item_flags create_filestore_container reload_this notify log create_master exception].each do |name|
         expect(base.for(name).pattern).to eq(:direct_config),
                                           "Expected #{name} to have :direct_config pattern"
       end
@@ -89,7 +89,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
     let(:universal_keys) { %i[if on_complete on_failure] }
 
     it 'all direct-config types include universal keys in allowed_keys' do
-      %i[change_user_roles set_item_flags create_filestore_container reload_this notify log create_master].each do |name|
+      %i[change_user_roles set_item_flags create_filestore_container reload_this notify log create_master exception].each do |name|
         type_class = base.for(name)
         universal_keys.each do |key|
           expect(type_class.allowed_keys).to include(key),
@@ -128,7 +128,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
       # equivalent to the key being absent — the runtime handles nil fine.
       type_class = base.for(:notify)
       config = { type: 'email', extra_substitutions: nil }
-      warnings = type_class.validate_config(config)
+      warnings = type_class.validate_structural_config(config)
       expect(warnings).to be_empty
     end
 
@@ -146,7 +146,7 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         if: nil,
         on_complete: nil
       }
-      warnings = type_class.validate_config(config)
+      warnings = type_class.validate_structural_config(config)
       expect(warnings).to be_empty
     end
   end

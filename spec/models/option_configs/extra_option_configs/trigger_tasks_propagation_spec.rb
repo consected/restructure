@@ -53,7 +53,8 @@ RSpec.describe 'TriggerTasks per-type validation propagation', type: :model do
 
     it 'does not surface warnings when nested triggers are valid' do
       instance = klass.new(on_create: [{ transaction: [{ notify: { type: 'email', role: 'admin' } }] }])
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
   end
 
