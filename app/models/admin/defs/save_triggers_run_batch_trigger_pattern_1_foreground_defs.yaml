@@ -1,0 +1,5 @@
+# Pattern 1: Run a batch trigger synchronously (foreground)
+run_batch_trigger:
+  resource_name: dynamic_model__view_handle_recs
+  mode: foreground
+  limit: 100

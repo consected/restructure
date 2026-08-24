@@ -7,6 +7,37 @@ Send a notification (email, SMS, etc.) using a configured message template when 
 !defs(save_triggers_notify_options_defs.yaml)
 ```
 
+### Pattern 1: Email notification to a role
+
+```yaml
+!defs(save_triggers_notify_pattern_1_email_defs.yaml)
+```
+
+### Pattern 2: SMS notification to phone numbers
+
+```yaml
+!defs(save_triggers_notify_pattern_2_sms_defs.yaml)
+```
+
+### Pattern 3: Recipients via phone_records association
+
+```yaml
+!defs(save_triggers_notify_pattern_3_phone_records_defs.yaml)
+```
+
+### Pattern 4: Calendar invite (email only)
+
+```yaml
+!defs(save_triggers_notify_pattern_4_calendar_invite_defs.yaml)
+```
+
+### Pattern 5: File attachments (email only)
+
+```yaml
+!defs(save_triggers_notify_pattern_5_attachments_defs.yaml)
+```
+
+
 ## Inline Image Handling
 
 Email bodies can contain `<img src="data:image/...;base64,...">` tags. When such tags are

@@ -1,0 +1,4 @@
+# Pattern 1: Add/remove literal role names for the current user
+change_user_roles:
+  add_role_names: ['viewer-has-agreement']
+  remove_role_names: ['viewer-no-agreement']

@@ -1,0 +1,12 @@
+# Pattern 4: import_project_user
+redcap_request:
+  request_4:
+    study: Test
+    project_name: Test API
+    local_data: update_project_user_response
+    method: import_project_user
+    post_data:
+      username: "{{item.username}}"
+      expiration: '2036-01-01'
+      record_delete: 1
+      api_import: 1

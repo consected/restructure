@@ -1,0 +1,7 @@
+# Pattern 1: S3 source
+pull_emails:
+  source:
+    type: s3
+    bucket: my-ses-bucket
+    prefix: 'inbox/'
+    since_modified: '{{variables.last_run.at}}'

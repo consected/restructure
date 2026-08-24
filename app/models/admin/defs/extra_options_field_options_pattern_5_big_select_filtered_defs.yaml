@@ -1,0 +1,19 @@
+# Pattern 5: One big-select field filters another, via select_filtering_target
+field_options:
+  filter_field:
+    edit_as:
+      field_type: select_filter_values
+      alt_options:
+        Type A: type_a
+        Type B: type_b
+      select_filtering_target: item_id
+  item_id:
+    edit_as:
+      field_type: select_record_from_table_items
+      value_attr: id
+      label_attr: name
+      big_select:
+        filtered: true
+    blank_preset_value:
+      items:
+        item_type: '{{filter_field}}'

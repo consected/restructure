@@ -1,39 +1,23 @@
-# YAML definition for transaction save trigger options
-# Used by admin panel to display configuration options
+# Save Trigger: Transaction options
+#
+# Canonical schema
+# transaction: <TriggerTaskList>
+#
+# TriggerTaskList type - see save_trigger.md
+# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
 #
 
-      transaction: &st_transaction
-        - array of save triggers to execute within a transaction block
-        - all triggers succeed or all are rolled back
-        - e.g. |-
-            save_trigger:
-              on_create:
-                transaction:
-                  - create_master:
-                      with:
-                        field_name: value
-                  - create_reference:
-                      model_name:
-                        in: master
-                  - update_this:
-                      one:
-                        with:
-                          status: completed
-        - |
-          All listed save triggers will be executed within a single database
-          transaction. If any trigger raises an exception, the entire transaction
-          is rolled back and no changes are persisted to the database.
+# TriggerTaskList type - see save_trigger.md
+# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
+#
+# Pattern 1: Create related records atomically (save_triggers_transaction_pattern_1_basic_defs.yaml)
+# See save_trigger_transaction.md for the worked example and usage notes.
 
-          This is useful when multiple related records must be created atomically,
-          ensuring data consistency.
-
-          The trigger accepts an array of save trigger configurations, where each
-          item is a standard save trigger definition (create_master, create_reference,
-          update_this, notify, etc.).
-
-          Results from all executed triggers are stored in save_trigger_results['transaction']
-          as an array of {trigger:, result:} hashes.
-
-          Individual triggers within the transaction support on_complete and on_failure
-          lifecycle hooks. See on_complete / on_failure documentation for details.
+# Notes:
+# - All inner triggers run in the same DB transaction as the outer save - an exception in
+#   any inner trigger rolls back everything, including the record's own save.
+# - Results from all executed triggers are stored in save_trigger_results['transaction']
+#   as an array of {trigger:, result:} hashes.
+# - Individual triggers within the transaction support on_complete and on_failure
+#   lifecycle hooks - see the lifecycle hooks documentation for details.
 

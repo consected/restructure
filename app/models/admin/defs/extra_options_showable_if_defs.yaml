@@ -1,21 +1,14 @@
 # showable_if options
+# Canonical schema
+# showable_if: <Condition>
 #
-# Pattern 1: Always show the option type
-  showable_if:
-    always: true
-
-# Pattern 2: Never show the option type
-  showable_if:
-    never: true
-
-# Pattern 3: Show only when conditions are met
-  showable_if:
-    all:
-      this:
-        status: active
-    not_any:
-      activity_log__example_reviews:
-        extra_log_type: hidden
+# Condition type - see conditions.md for the full syntax
+# Condition: <Hash(always: Boolean) | Hash(never: Boolean) | Hash(selection_type: record_source: field_conditions)>
+#
+# Pattern 1: Always show the option type (extra_options_showable_if_pattern_1_always_defs.yaml)
+# Pattern 2: Never show the option type (extra_options_showable_if_pattern_2_never_defs.yaml)
+# Pattern 3: Show only when conditions are met (extra_options_showable_if_pattern_3_conditional_defs.yaml)
+# See showable_if.md for the worked examples.
 
 # Notes:
 # - showable_if must be a Hash using the standard conditional-actions syntax.

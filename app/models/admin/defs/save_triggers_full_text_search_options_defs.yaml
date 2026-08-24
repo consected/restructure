@@ -1,23 +1,32 @@
 # Save Trigger: Full Text Search options
-        full_text_search:
-          - index_this:
-            if: #if_extras
-            source_fields:       # required Array of field names used to build text content
-              - field_name
-            target_column: tsv_column_name  # required tsvector field to update
-            target_table: schema_name.records_search_index  # optional; when set, writes to a separate table
-            target_foreign_key_column: source_record_id     # required when target_table is set
-            extra_content: '{{some_field}}'                 # optional additional text appended to indexed content
-            ts_config: english                              # optional PostgreSQL text search configuration (default: english)
-          # NOTE: builds text from `source_fields` and persists a PostgreSQL tsvector into `target_column`
-          # e.g. |-
-          #   save_trigger:
-          #     on_save:
-          #       full_text_search:
-          #         - index_this:
-          #             target_column: search_index
-          #             source_fields:
-          #               - title
-          #               - description
-          #             ts_config: english
+# Canonical schema
+# full_text_search: <Hash(entry_label: FullTextSearchEntry) | Array(Hash(entry_label: FullTextSearchEntry))>
+#
+# Key type
+# entry_label: <any label - purely for identification>
+#
+# Value type
+# FullTextSearchEntry: <Hash(
+#   if: Condition,
+#   source_fields: Array(String) (required),
+#   target_column: String (required),
+#   target_table: String,
+#   target_foreign_key_column: String (required when target_table is set),
+#   extra_content: String | {{substitution}},
+#   ts_config: String,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required). ts_config defaults to english.
+#
+# Pattern 1: Same-table mode - write directly to a tsvector column on this record's table (save_triggers_full_text_search_pattern_1_same_table_defs.yaml)
+# Pattern 2: Separate-table mode - upsert into a target table via a foreign key reference (save_triggers_full_text_search_pattern_2_separate_table_defs.yaml)
+# See save_trigger_full_text_search.md for the worked examples.
+#
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - full_text_search may be a single Hash or an Array of Hashes to build multiple indexes
+#   from the same record (e.g. different source_fields into different target_columns).
+# - Setting target_table switches from same-table mode (Pattern 1) to separate-table mode
+#   (Pattern 2), which also requires target_foreign_key_column.

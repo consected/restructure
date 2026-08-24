@@ -1,8 +1,7 @@
 # Pattern 3: View-specific captions
-# Specify a field with captions that appear in different views.
-  caption_before:
-    field_name:
-      show_caption: caption in show mode
-      edit_caption: caption in edit mode
-      new_caption: caption in new mode
-      keep_label: true
+caption_before:
+  field_name:
+    show_caption: caption in show mode
+    edit_caption: caption in edit mode
+    new_caption: caption in new mode
+    keep_label: true

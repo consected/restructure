@@ -1,0 +1,4 @@
+# Pattern 2: Directory name built from a list of attribute names
+create_filestore_container:
+  name: ['last_name', 'first_name']
+  skip_if_exists: true

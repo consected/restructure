@@ -1,69 +1,45 @@
 # Save Trigger: Update Reference options
-        update_reference:
-          - model_name:
-            if: if_extras
-            first:
-              # Update the first matching reference with this configuration, specifying {update: return_result}
-              # Possible formats are:
-              # Simply update the latest record
-              player_contacts:
-                update: return_result
-
-              # Compare with a value in the referring (parent) record with a matching email address
-              dynamic_model__org_alt_usernames:
-                master_id: # This comparison is necessary to trigger the correct operation
-                  this: master_id
-                email: 
-                  referring_record: select_alt_username
-                update: return_result
-                
-              # Or a dynamic model has an id that matches the parent's associated dynamic model id
-              dynamic_model__zeus_bulk_messages:
-                id:
-                  parent_references:
-                    dynamic_model__zeus_bulk_messages: id
-                update: return_result
-
-            force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable'
-            force_not_valid: 'true to allow valid_if checks to be ignored'
-
-            with_result: 
-            # Map attributes from a related item to the target item.
-            # A list of models to retrieve from and attributes to assign allow multiple sources to
-            # be used.
-            # NOTE: with: fields override any specified here
-            # from: may also just take a simple String such as `from: embedded_item` to
-            # as shorthand for the following full calculation
-              - from:
-                  embedded_item:
-                    return: return_result
-                attributes:
-                  receipt_date: event_date
-                  receipt_time: event_time
-                  received_by: received_by
-                  select_facility: 'Lab: {{select_lab}}'
-                  # Substitutions use data only from the "from:" item
-
-                  # Also set attributes in the embedded item
-                  embedded_item:
-                    rank: rank
-                    rec_type: rec_type
-                    data: '{{select_lab}}'
-              - from: 
-                  dynamic_model__some_recs:
-                    return: return_result
-                attributes:
-                  a_value: value_from_result
+# Canonical schema
+# update_reference: <Hash(entry_label: UpdateReferenceEntry) | Array(Hash(entry_label: UpdateReferenceEntry))>
+#
+# Key type
+# entry_label: <target model_name (recommended) | any label>
+#
+# Value type
+# UpdateReferenceEntry: <Hash(
+#   if: Condition,
+#   first: ReferenceLookup (required),
+#   force_not_editable_save: Boolean,
+#   force_not_valid: Boolean,
+#   with_result: WithResultValue,
+#   with: WithValue,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required).
+#
+# ReferenceLookup type (first) - identifies which existing reference(s) to update - see
+# Patterns 1-3 below for the three forms (latest record, matching a referring-record value,
+# matching a parent's associated dynamic model id)
+# ReferenceLookup: <Hash(model_name: Hash(match_field: value | Condition, update: 'return_result'))>
+#
+# Pattern 1: Update the latest matching reference (save_triggers_update_reference_pattern_1_latest_defs.yaml)
+# Pattern 2: Match by a value from the referring (parent) record (save_triggers_update_reference_pattern_2_referring_record_defs.yaml)
+# Pattern 3: Match via a parent's associated dynamic model id (save_triggers_update_reference_pattern_3_parent_references_defs.yaml)
+# Pattern 4: Map attributes from a related item using with_result (save_triggers_update_reference_pattern_4_with_result_defs.yaml)
+# See save_trigger_update_reference.md for the worked examples.
 
 #!defs(save_triggers_with_attribute_values_defs.yaml)
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
-              field_name_5:
-                # An association belonging to the parent
-                association_name:
-                  id:
-                    parent_references: id
-                  field_name: return_value
 
-          # NOTE: this sets:
-          # - save_trigger_results.updated_items (list of updated items - skipped if an item wasn't updated)
-          # - save_trigger_results.updated_results (list of results indicating if an item was updated based on "if:" conditions)
+# NOTE: this sets:
+# - save_trigger_results.updated_items (list of updated items - skipped if an item wasn't updated)
+# - save_trigger_results.updated_results (list of results indicating if an item was updated based on "if:" conditions)
+
+# Notes:
+# - first: must resolve to an existing reference - an absent or unresolvable first: raises
+#   'No reference found to update'.
+# - with: fields take precedence over with_result: fields when both set the same attribute.
+# - In addition to the forms documented in the shared with: type, with: values may also
+#   source from an association belonging to the parent record via parent_references, e.g.
+#   association_name: { id: { parent_references: id }, field_name: return_value }.

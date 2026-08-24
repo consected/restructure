@@ -1,21 +1,14 @@
 # creatable_if options
+# Canonical schema
+# creatable_if: <Condition>
 #
-# Pattern 1: Always creatable
-  creatable_if:
-    always: true
-
-# Pattern 2: Never creatable
-  creatable_if:
-    never: true
-
-# Pattern 3: Creatable only when conditions are met
-  creatable_if:
-    all:
-      this:
-        status: active
-    not_any:
-      activity_log__example_reviews:
-        extra_log_type: closed
+# Condition type - see conditions.md for the full syntax
+# Condition: <Hash(always: Boolean) | Hash(never: Boolean) | Hash(selection_type: record_source: field_conditions)>
+#
+# Pattern 1: Always creatable (extra_options_creatable_if_pattern_1_always_defs.yaml)
+# Pattern 2: Never creatable (extra_options_creatable_if_pattern_2_never_defs.yaml)
+# Pattern 3: Creatable only when conditions are met (extra_options_creatable_if_pattern_3_conditional_defs.yaml)
+# See creatable_if.md for the worked examples.
 
 # Notes:
 # - creatable_if must be a Hash using the standard conditional-actions syntax.

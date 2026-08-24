@@ -1,0 +1,12 @@
+# Pattern 3: IMAP source
+pull_emails:
+  source:
+    type: imap
+    host: imap.example.com
+    port: 993
+    ssl: true
+    username: inbox@example.com
+    password: '{{variables.imap_secret.password}}'
+    mailbox: 'INBOX'
+    search: ['UNSEEN']
+    since_uid: '{{variables.last_run.uid}}'

@@ -1,0 +1,14 @@
+# Pattern 1: Create related records atomically within one transaction
+save_trigger:
+  on_create:
+    transaction:
+      - create_master:
+          with:
+            field_name: value
+      - create_reference:
+          model_name:
+            in: master
+      - update_this:
+          one:
+            with:
+              status: completed

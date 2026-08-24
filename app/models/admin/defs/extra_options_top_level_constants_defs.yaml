@@ -3,7 +3,15 @@
 # The category and name must match one of the Config Library entries
 # @library category name
 
+# Canonical schema
+# _constants: <Hash(constant_name: Any)>
+# All keys are optional. Key names are user-defined - any key: value pair is accepted.
+#
 # Any key: value pairs set here will be included in the object for use within
 # runtime `\{\{constants.constant_name\}\}` substitutions
 _constants:
   constant_name: a value
+
+# Notes:
+# - Values are static - unlike set_variables, they cannot use {{substitution}} tags or
+#   an `if:` condition, and are the same across every option type in the definition.

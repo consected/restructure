@@ -1,17 +1,27 @@
 # Save Trigger: Create Master options
-        create_master:
-          - if: #if_extras
-            force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
-            move_this: 'true to move the current instance to the new master'
-            with: 
-              field_name: 'now()'
-              field_name_2: 'literal value'
-              field_name_3: 
-                this: 
-                  field_name: return_value
-              field_name_4: 
-                reference_name:
-                  field_name: return_value
-          # NOTE: this sets:
-          # - save_trigger_results.created_masters (with the master record created, if it was created)
+# Canonical schema
+# create_master: <CreateMasterEntry | Array(CreateMasterEntry)>
+#
+# Value type
+# CreateMasterEntry: <Hash(
+#   if: Condition,
+#   force_create: Boolean,
+#   move_this: Boolean,
+#   with: WithValue,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# All keys are optional.
+#
+# Pattern 1: Create a new master record (save_triggers_create_master_pattern_1_basic_defs.yaml)
+# Pattern 2: Create and move the current item to the new master (save_triggers_create_master_pattern_2_move_this_defs.yaml)
+# See save_trigger_create_master.md for the worked examples.
+
+#!defs(save_triggers_with_attribute_values_defs.yaml)
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - move_this: true reassigns the current item (and any embedded item) to belong to the newly
+#   created master, rather than just creating an additional master record.
+# - The created master is stored in save_trigger_results.created_master (and appended to the
+#   array save_trigger_results.created_masters).

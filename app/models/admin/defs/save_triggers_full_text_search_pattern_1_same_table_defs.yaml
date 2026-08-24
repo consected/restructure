@@ -1,0 +1,8 @@
+# Pattern 1: Same-table mode - write directly to a tsvector column on this record's table
+full_text_search:
+  index_this:
+    source_fields:
+      - title
+      - description
+    target_column: search_index
+    ts_config: english

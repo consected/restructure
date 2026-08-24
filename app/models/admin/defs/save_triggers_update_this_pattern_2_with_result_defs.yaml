@@ -1,0 +1,10 @@
+# Pattern 2: Map attributes from a related item using with_result
+update_this:
+  this_1:
+    with_result:
+      from:
+        embedded_item:
+          return: return_result
+      attributes:
+        receipt_date: event_date
+        receipt_time: event_time

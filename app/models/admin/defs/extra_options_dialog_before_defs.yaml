@@ -13,11 +13,9 @@
 # )>
 # Keys are optional unless marked (required).
 #
-# Pattern 1: Simple string (template name only)
-#!defs(extra_options_dialog_before_pattern_1_simple_defs.yaml)
-#
-# Pattern 2: Hash with label
-#!defs(extra_options_dialog_before_pattern_2_hash_defs.yaml)
+# Pattern 1: Simple string (extra_options_dialog_before_pattern_1_simple_defs.yaml)
+# Pattern 2: Hash with label (extra_options_dialog_before_pattern_2_hash_defs.yaml)
+# See dialog_before.md for the worked examples.
 #
 # Special keys
   dialog_before:

@@ -1,0 +1,7 @@
+# Pattern 8: value/preset_value as an Array of strings, for multi-value fields
+field_options:
+  field_name:
+    preset_value:
+      - blood spot card
+      - saliva tube
+      - test kit

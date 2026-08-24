@@ -1,0 +1,10 @@
+# Pattern 1: Email notification to a role
+notify:
+  type: email
+  role: admin
+  subject: 'Item {{name}} was updated'
+  layout_template: standard email layout
+  content_template: item_updated_notification
+  from_user_email:
+    address: noreply@example.com
+    display_name: Example System

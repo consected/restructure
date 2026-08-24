@@ -1,8 +1,8 @@
 # Pattern 3: Conditional editable rules
-  editable_if:
-    all:
-      this:
-        status: draft
-    not_any:
-      activity_log__example_reviews:
-        extra_log_type: finalized
+editable_if:
+  all:
+    this:
+      status: draft
+  not_any:
+    activity_log__example_reviews:
+      extra_log_type: finalized

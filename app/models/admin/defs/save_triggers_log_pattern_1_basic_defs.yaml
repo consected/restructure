@@ -1,0 +1,4 @@
+# Pattern 1: Log a message with substitutions
+log:
+  message: 'Processing record {{id}} for master {{master_id}}'
+  severity: info

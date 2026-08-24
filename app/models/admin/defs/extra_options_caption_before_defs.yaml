@@ -15,14 +15,10 @@
 # )>
 # All keys are optional.
 #
-# Pattern 1: Simple caption string
-#!defs(extra_options_caption_before_pattern_1_simple_defs.yaml)
-#
-# Pattern 2: Caption hash with keep_label
-#!defs(extra_options_caption_before_pattern_2_keep_label_defs.yaml)
-#
-# Pattern 3: View-specific captions
-#!defs(extra_options_caption_before_pattern_3_view_specific_defs.yaml)
+# Pattern 1: Simple caption string (extra_options_caption_before_pattern_1_simple_defs.yaml)
+# Pattern 2: Caption hash with keep_label (extra_options_caption_before_pattern_2_keep_label_defs.yaml)
+# Pattern 3: View-specific captions (extra_options_caption_before_pattern_3_view_specific_defs.yaml)
+# See caption_before.md for the worked examples.
 #
 # Special keys
   caption_before:

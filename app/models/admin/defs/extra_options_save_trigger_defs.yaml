@@ -1,4 +1,20 @@
 # save_trigger options
+# Canonical schema
+# save_trigger: <Hash(
+#   on_create: TriggerTaskList,
+#   on_update: TriggerTaskList,
+#   on_save: TriggerTaskList,
+#   on_disable: TriggerTaskList,
+#   on_upload: TriggerTaskList,
+#   before_save: TriggerTaskList
+# )>
+# All keys are optional.
+#
+# TriggerTaskList type - an ordered list of trigger tasks, run in sequence.
+# Each trigger_type's own configuration shape is documented on its own page - see the
+# Trigger Types table in save_trigger.md.
+# TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
+#
   save_trigger:
     # Each trigger definition is run in order within the list
     # simpler definitions may not use a list, and just specify a hash of key value pairs, run in order
@@ -26,3 +42,10 @@
       # in the UI update, but before reference updates are available
       # Typically used for update_this, although can be applied to the other triggers if necessary
       - <trigger type>: 
+
+# Notes:
+# - on_save cascades into on_create and on_update (wrapped into a list if given as a Hash);
+#   any key also present directly under on_create/on_update takes precedence.
+# - on_disable fires for any item with a `disabled` field switching to true.
+# - A Hash form (rather than an Array) only allows one configuration of each trigger type
+#   per event key; use an Array to run the same trigger type more than once.

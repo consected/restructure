@@ -1,0 +1,9 @@
+# Pattern 3: Match a reference via a parent's associated dynamic model id
+update_reference:
+  zeus_bulk_message:
+    first:
+      dynamic_model__zeus_bulk_messages:
+        id:
+          parent_references:
+            dynamic_model__zeus_bulk_messages: id
+        update: return_result

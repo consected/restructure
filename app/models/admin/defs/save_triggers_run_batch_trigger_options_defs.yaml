@@ -1,10 +1,29 @@
 # Save Trigger: Run Batch Trigger options
-        run_batch_trigger:
-          - run_batch_1:
-            if: #if_extras
-            resource_name: dynamic_model__view_handle_recs  # Resource name of the dynamic model to run batch trigger for
-            mode: foreground  # 'foreground' (default) runs synchronously, 'background' queues as a job
-            limit: 100  # Optional limit on number of records to process
-          # NOTE: this sets:
-          # - save_trigger_results.run_batch_trigger (array of results with resource_name, mode, status, and processed_ids for foreground mode)
+# Canonical schema
+# run_batch_trigger: <Hash(entry_label: RunBatchTriggerEntry) | Array(Hash(entry_label: RunBatchTriggerEntry))>
+#
+# Key type
+# entry_label: <any label - purely for identification, see Notes>
+#
+# Value type
+# RunBatchTriggerEntry: <Hash(
+#   if: Condition,
+#   resource_name: String (required),
+#   mode: <foreground | background>,
+#   limit: Integer,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# All keys are optional. mode defaults to foreground.
+#
+# Pattern 1: Run a batch trigger synchronously (save_triggers_run_batch_trigger_pattern_1_foreground_defs.yaml)
+# Pattern 2: Queue a batch trigger to run in the background (save_triggers_run_batch_trigger_pattern_2_background_defs.yaml)
+# See save_trigger_run_batch_trigger.md for the worked examples.
+
+# NOTE: this sets:
+# - save_trigger_results.run_batch_trigger (array of results with resource_name, mode, status, and processed_ids for foreground mode)
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - resource_name must have a batch_trigger: defined in its own configuration (see batch_trigger.md).
+# - mode: background queues the batch as an async job rather than running it inline.

@@ -1,49 +1,16 @@
-# YAML definition for reload_this save trigger options
-# Used by admin panel to display configuration options
+# Save Trigger: Reload This options
 #
-      reload_this: &st_reload_this
-        - reloads the current item from the database
-        - allows subsequent triggers to see updated data
-        - e.g. |-
-            save_trigger:
-              on_create:
-                - update_reference:
-                    - pi:
-                        first:
-                          player_infos:
-                            last_name: new name
-                - reload_this:
-                    if:
-                      always: true
-                - update_reference:
-                    - pi:
-                        first:
-                          player_infos:
-                            last_name: 'updated - {{last_name}}'
-        - |
-          Reloads the current item from the database, refreshing all attribute
-          values. This is particularly useful when:
+# Canonical schema
+# reload_this: <Hash(if: Condition, on_complete: TriggerTaskList, on_failure: TriggerTaskList)>
+# All keys are optional.
+#
+# Pattern 1: Reload between two dependent triggers (save_triggers_reload_this_pattern_1_basic_defs.yaml)
+# See save_trigger_reload_this.md for the worked example and usage notes.
 
-          1. Working with views where the view_sql includes joins to other tables
-            that may have been updated by previous triggers
-
-          2. After create_reference or update_reference triggers that modify
-            related data which affects the current item's attributes
-
-          3. When subsequent triggers need to use `this.attribute` conditions
-            or `{{attribute}}` substitutions that reflect recent changes
-
-          Without reload_this, the `{{attribute}}` substitutions and
-          `this.attribute` conditions would show the original values from when
-          the trigger pipeline started.
-
-          The trigger preserves the current_user and save_trigger_results
-          across the reload.
-
-          Configuration options:
-            if: # optional condition to control when reload occurs
-              always: true  # always reload
-              never: true   # never reload (useful for testing)
-              # or any other valid condition
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - reload_this accepts only the universal if/on_complete/on_failure keys - it has no
+#   trigger-specific configuration of its own.
+# - The trigger preserves current_user and save_trigger_results across the reload.
 
