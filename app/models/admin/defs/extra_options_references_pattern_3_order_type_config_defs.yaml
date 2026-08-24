@@ -1,11 +1,11 @@
 # Pattern 3: order_by and type_config
-  references:
-    activity_log__example_step:
-      from: this
-      add: many
-      order_by:
-        created_at: desc
-      type_config:
-        activity_selector:
-          extra_log_type_key1: Label for button
-          extra_log_type_key2: Another label
+references:
+  activity_log__example_step:
+    from: this
+    add: many
+    order_by:
+      created_at: desc
+    type_config:
+      activity_selector:
+        extra_log_type_key1: Label for button
+        extra_log_type_key2: Another label

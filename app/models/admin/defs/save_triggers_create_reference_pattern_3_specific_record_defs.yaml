@@ -1,0 +1,12 @@
+# Pattern 3: Create a reference from a specific record, looked up by criteria (in: specific_record)
+create_reference:
+  player_contact:
+    in:
+      specific_record:
+        activity_log__player_contact_phones:
+          id: '{{some_field_id}}'
+          return: return_result
+    with:
+      data: '{{cell_phone}}'
+      rec_type: phone
+      rank: 5

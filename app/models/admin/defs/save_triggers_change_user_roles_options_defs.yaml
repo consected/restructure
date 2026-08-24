@@ -1,27 +1,30 @@
 # Save Trigger: Change User Roles options
-        change_user_roles:
-          if: if_extras
+# Canonical schema
+# change_user_roles: <Hash(
+#   if: Condition,
+#   add_role_names: RoleExpr | Array(RoleExpr),
+#   remove_role_names: RoleExpr | Array(RoleExpr),
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# All keys are optional.
+#
+# RoleExpr type (add_role_names, remove_role_names entries)
+# RoleExpr: <String (literal role name) | Hash(app_type: String | Integer | Hash, role_name: String | Hash, for_user: String | Integer | Hash)>
+# All keys are optional. app_type/for_user default to the current user('s app type) when omitted.
+#
+# Pattern 1: Add/remove literal role names for the current user (save_triggers_change_user_roles_pattern_1_basic_defs.yaml)
+# Pattern 2: Role scoped to a specific app_type (save_triggers_change_user_roles_pattern_2_app_type_defs.yaml)
+# Pattern 3: Change the roles of a different user (save_triggers_change_user_roles_pattern_3_for_user_defs.yaml)
+# See save_trigger_change_user_roles.md for the worked examples.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
-        add_role_names:
-          # app_type accepts an app type id (integer), an app type name (string), a
-          # {{curly}} substitution, or a conditional Hash reference (e.g.
-          # {this: {field: return_value}}). If omitted, defaults to the current user's app type.
-          - app_type: study info
-            role_name: viewer-has-agreement
-            # Defaults to the current user
-          - app_type: data-requests
-            role_name: nfs_store group 600
-            for_user: 
-              this:
-                created_by_user_id: return_value
-          - app_type: study info
-            role_name: 
-              this:
-                role_name_attr: return_value
-            for_user: 
-              this:
-                user_email: return_value
-        remove_role_names:
-          - app_type: study info
-            role_name: viewer-no-agreement
-        
+
+# Notes:
+# - add_role_names is processed before remove_role_names.
+# - A plain string entry is shorthand for { role_name: <string> } using the current user's app type.
+# - app_type accepts an app type id (integer), an app type name (string), a {{curly}}
+#   substitution, or a conditional Hash reference (e.g. {this: {field: return_value}}).
+# - role_name may also be a conditional Hash reference, resolved the same way as app_type.
+# - for_user accepts a user id (integer), a user email (string), or a conditional Hash
+#   reference; if omitted, defaults to the current user.

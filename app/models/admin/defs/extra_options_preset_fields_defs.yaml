@@ -1,4 +1,33 @@
 # preset_fields options
+# Canonical schema
+# preset_fields: <Hash(preset_target_key: PresetFieldsValue)>
+#
+# Key type
+# preset_target_key: <valid_field_name | with_result | with>
+#
+# Value type (depends on the key)
+# PresetFieldsValue: <ValueExpr (field_name key) | WithResultValue (with_result key) | WithValue (with key)>
+#
+# WithResultValue type (with_result)
+# WithResultValue: <WithResultEntry | Array(WithResultEntry)>
+#
+# WithResultEntry: <Hash(
+#   from: FromSource (required),
+#   attributes: Hash(target_field_name: source_field_name | AttributeValueExpr) (required)
+# )>
+#
+# FromSource type (with_result.from)
+# FromSource: <String (shorthand for Hash(String: Hash(return: 'return_result'))) | Hash(record_source: Hash(return: 'return_result'))>
+#
+# WithValue type (with) - same value forms accepted by save_trigger's `with:`
+# WithValue: <Hash(target_field_name: AttributeValueExpr)>
+#
+# ValueExpr / AttributeValueExpr type
+# AttributeValueExpr: <String | now() | today() | {{substitution}} | ReturnValueLookup | Hash(object: Hash)>
+#
+# ReturnValueLookup type
+# ReturnValueLookup: <Hash(this | reference_<reference_name>: Hash(model_name: Hash(field_name: 'return_value')))>
+#
   # Add preset values to a mass of fields on initialization of new items, or before
   # creating a reference.
   # `field_options.<field_name>.preset_value` and `field_options.<field_name>.blank_preset_value` are
@@ -32,3 +61,14 @@
         attributes:
           a_value: value_from_result
 #!defs(save_triggers_with_attribute_values_defs.yaml)
+
+# Notes:
+# - with_result entries are processed in the order listed; each maps attributes from one
+#   related record (found via `from:`) onto the target item's attributes.
+# - `with:` fields are applied after `with_result:` fields and take precedence on conflict.
+# - field_options.<field_name>.preset_value / blank_preset_value are evaluated after
+#   preset_fields and may override values set here.
+# - Plain `field_name: value` entries (other than with_result/with) pass field-key
+#   validation, but the runtime handler (SaveTriggers::PresetFields#perform) only reads
+#   the `with` and `with_result` keys - use `field_options.<field_name>.preset_value` for
+#   a direct single-field preset instead.

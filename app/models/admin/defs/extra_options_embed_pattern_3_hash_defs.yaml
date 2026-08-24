@@ -1,5 +1,5 @@
 # Pattern 3: Explicit hash configuration
-  embed:
-    resource_name: dynamic_model__resource_name
-    resource_id: 123 | attribute_name
-    limit: 1
+embed:
+  resource_name: dynamic_model__resource_name
+  resource_id: 123 | attribute_name
+  limit: 1

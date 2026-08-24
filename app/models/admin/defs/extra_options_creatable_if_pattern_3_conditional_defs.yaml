@@ -1,8 +1,8 @@
 # Pattern 3: Creatable only when conditions are met
-  creatable_if:
-    all:
-      this:
-        status: active
-    not_any:
-      activity_log__example_reviews:
-        extra_log_type: closed
+creatable_if:
+  all:
+    this:
+      status: active
+  not_any:
+    activity_log__example_reviews:
+      extra_log_type: closed

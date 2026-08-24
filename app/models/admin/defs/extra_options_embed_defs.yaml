@@ -1,16 +1,15 @@
 # embed options
+# Canonical schema
+# embed: <String (special value: default_embed_resource) | EmbedValue>
 #
-# Pattern 1: Use the activity's default embedded resource
-  embed: default_embed_resource
-
-# Pattern 2: Embed a specific resource by resource name string
-  embed: dynamic_model__resource_name
-
-# Pattern 3: Explicit Hash form for direct embed configuration
-  embed:
-    resource_name: dynamic_model__resource_name
-    resource_id: 123 | attribute_name
-    limit: 1
+# EmbedValue type (Hash form)
+# EmbedValue: <Hash(resource_name: String, resource_id: Integer | String, limit: Integer)>
+# All keys are optional.
+#
+# Pattern 1: Use the activity's default embedded resource (extra_options_embed_pattern_1_default_defs.yaml)
+# Pattern 2: Embed a specific resource by resource name string (extra_options_embed_pattern_2_resource_name_defs.yaml)
+# Pattern 3: Explicit Hash form for direct embed configuration (extra_options_embed_pattern_3_hash_defs.yaml)
+# See embed.md for the worked examples.
 
 # Notes:
 # - embed supports only the three patterns above.

@@ -1,0 +1,7 @@
+# Pattern 2: Add and remove specific flags from the existing set
+set_item_flags:
+  first:
+    player_infos:
+      update: return_result
+  add_flags: ['reviewed']
+  remove_flags: ['pending review']

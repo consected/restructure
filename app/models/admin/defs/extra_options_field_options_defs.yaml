@@ -1,4 +1,85 @@
 # field_options options
+# Canonical schema
+# field_options: <Hash(field_name: FieldOptionValue)>
+#
+# Key type
+# field_name: <valid_field_name>
+#
+# Value type
+# FieldOptionValue: <Hash(
+#   include_blank: Boolean,
+#   pattern: String,
+#   value: ValueExpr,
+#   blank_value: ValueExpr,
+#   preset_value: ValueExpr,
+#   blank_preset_value: ValueExpr,
+#   active_value: ActiveValueExpr,
+#   no_downcase: Boolean,
+#   view_original_case: Boolean,
+#   view_with_formats: Array(String),
+#   format: <plain | markdown>,
+#   config: Hash,
+#   edit_as: EditAsValue,
+#   calculate_with: Hash,
+#   prompt: String,
+#   use_app_type: String,
+#   selected: ValueExpr,
+#   show_expanded: Boolean,
+#   keep_label: Boolean,
+#   class: String,
+#   capitalize: Boolean,
+#   default_value: String,
+#   placeholder: String,
+#   min: String,
+#   max: String,
+#   step: String
+# )>
+# All keys are optional.
+#
+# ValueExpr type (value, blank_value, preset_value, blank_preset_value, selected)
+# ValueExpr: <String | now() | today() | {{substitution}} | ReturnValueLookup | Array(String)>
+#
+# ActiveValueExpr type (active_value)
+# ActiveValueExpr: <String | now() | today() | {{substitution}} | ReturnValueLookup>
+#
+# ReturnValueLookup type - shared by ValueExpr and ActiveValueExpr
+# ReturnValueLookup: <Hash(this | reference_<reference_name>: Hash(model_name: Hash(field_name: 'return_value')))>
+#
+# EditAsValue type (edit_as) - only relevant to select_ / select_record_* field types
+# EditAsValue: <Hash(
+#   field_type: String,
+#   alt_options: Hash(label: value) | Array(String),
+#   general_selection: String,
+#   value_attr: String,
+#   label_attr: String | Array(String),
+#   group_split_char: String,
+#   sort_order: String,
+#   no_assoc: Boolean,
+#   big_select: BigSelectValue,
+#   select_filtering_target: String,
+#   creatable: CreatableValue
+# )>
+# All keys are optional.
+#
+# BigSelectValue type (edit_as.big_select) - applies to select_record_* fields
+# BigSelectValue: <Hash(hide_popover: Boolean, hide_key: Boolean, filtered: Boolean)>
+# All keys are optional.
+#
+# CreatableValue type (edit_as.creatable) - applies to select_record_from_table_* fields
+# CreatableValue: <Hash(enabled: Boolean)>
+# All keys are optional.
+#
+# Pattern 1: Override field_type and alt_options (extra_options_field_options_pattern_1_edit_as_defs.yaml)
+# Pattern 2: big_select basic (extra_options_field_options_pattern_2_big_select_basic_defs.yaml)
+# Pattern 3: big_select with a '>>>' two-part display separator (extra_options_field_options_pattern_3_big_select_separator_defs.yaml)
+# Pattern 4: big_select grouped by category (extra_options_field_options_pattern_4_big_select_grouped_defs.yaml)
+# Pattern 5: big_select filtered by another field (extra_options_field_options_pattern_5_big_select_filtered_defs.yaml)
+# Pattern 6: creatable - allow creating a new record inline (extra_options_field_options_pattern_6_creatable_defs.yaml)
+# Pattern 7: value/preset_value via a return_value Hash lookup (extra_options_field_options_pattern_7_value_lookup_defs.yaml)
+# Pattern 8: value/preset_value as an Array of strings (extra_options_field_options_pattern_8_value_array_defs.yaml)
+# Pattern 9: active_value with a live substitution (extra_options_field_options_pattern_9_active_value_defs.yaml)
+# See field_options.md for the worked examples.
+#
   field_options:
     field_name:
       include_blank: |
@@ -7,218 +88,42 @@
       pattern: '.+\\d{3}-\\D{1-4}.*'
         # provide a mask for a text field using basic regex
         # This example accepts one or more characters of any type, 3 digits, a hyphen, 1 to 4 letters and any number of final characters
-      value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
-        
-        NOTE this is set in the form fields UI only if the item has not yet been created and no preset_value has been set.
-        It is not set before building the instances, so will not be available for data conditions.
-        A hash return_value lookup form is also accepted, e.g.:
-          value:
-            this:
-              dynamic_model__some_table:
-                field_name: return_value
-        An array of strings is accepted for multi-value fields (e.g. multi-select), e.g.:
-          value:
-            - blood spot card
-            - saliva tube
-      blank_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
-        
-        NOTE this is set in the form fields UI only if the item has been created and the current value is blank.
-        It is not set before building the instances, so will not be available for data conditions.
-        A hash return_value lookup form is also accepted (same form as value above).
-        An array of strings is also accepted (same form as value above).
-      preset_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
-        
-        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field.
-        It is not applied to persisted instances.
-        A hash return_value lookup form is also accepted, e.g.:
-          preset_value:
-            this:
-              dynamic_model__some_table:
-                field_name: return_value
-        An array of strings is accepted for multi-value fields (e.g. multi-select), e.g.:
-          preset_value:
-            - blood spot card
-            - saliva tube
-            - test kit
-      blank_preset_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash} | [array of strings]
-        
-        NOTE this is set only if the attribute is blank when building the instances 
-        and may be used to drive logic like an embed_resource_name field.
-        It is not applied to persisted instances.
-        A hash return_value lookup form is also accepted (same form as preset_value above).
-        An array of strings is also accepted (same form as preset_value above).
-      active_value: |
-        default value | now() | today() | \{\{substitutions\}\} | {return_value hash}
-        
-        NOTE this is set whenever an instance is initialized. It allows for live UI substitutions that wouldn't otherwise
-        have access to attributes in other models. The data generated will be persisted to the database whenever the item is saved.
-        On re-accessing the item, the value will be re-evaluated. If not saved, the live value will be lost and will be
-        re-evaluated on the next access.
-        A hash return_value lookup form is also accepted (same form as preset_value above).
+      value: ValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
+      blank_value: ValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
+      preset_value: ValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
+      blank_preset_value: ValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
+      active_value: ActiveValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
       no_downcase: true - to prevent downcasing of the attribute when stored to the database
       view_original_case: true - to prevent the UI capitalizing downcased fields
+      selected: ValueExpr - normally computed automatically, see field_options.md
+      show_expanded: true - to render an embedded view-object list expanded (uncollapsed) by default
+      keep_label: true - to keep showing the field label even where it would otherwise be hidden
       view_with_formats: |
         list of formatters to apply to a string field when being viewed
       format: plain | markdown - for free text editor fields such as notes and description
       config:
         _comment: additional configurations for editor fields
         toolbar_type: advanced - adds in additional editor toolbar controls
-      edit_as:
-        field_type: alternative field name to use for selection of edit field
-        alt_options: |
-          optional specification of options for a select_ type field to
-          use instead of general selection specified list. {Label: value, ...} or [Label,...].
-          For the latter the Label is downcased automatically to generate the value
-        
-        # For select_record_* fields:
-        general_selection: |
-          use a general selection definition with an alternative name, or belonging to a
-          different prefix name
-        value_attr: attribute_name to use for selection value in select_record_* fields
-        label_attr: attribute_name to use for selection label in select_record_* fields
-        group_split_char: optional character to split on when grouping selections in select_record_* fields
-        sort_order: |
-          optional sort order for select_record_* fields, as "attribute direction"
-          where attribute is "value" or "label" and direction is "asc" or "desc".
-          For example: "value desc" or "label asc". Default is "label asc".
-        no_assoc: | 
-          false | true - optionally specify that no association should be used in select_record_* data lookup
-                         select_record_from_table_* automatically sets this to true
-                         select_record_from_* defaults to false but this setting overrides the default
-        
-        # configuration options for big-select modal dialog UI (applies to select_record_* fields)
-        big_select:
-        
-          hide_popover: true | false
-            Hides the info popover button and shows an overlay with selected value text instead.
-            Default is false (info popover is shown).
-          
-          hide_key: true | false
-            Controls visibility of the value key in the selection list and enables '>>>' separator processing.
-            When true: 
-              - The database key (id) is hidden from display
-              - If the label contains '>>>' or newline '\n', the label is split:
-                * First part appears as the primary heading (larger text)
-                * Remaining parts appear as secondary description (smaller text below)
-              - Without '>>>' or '\n', the entire label is shown as the heading
-            When false: 
-              - The database key is shown alongside the full label
-              - No special processing of '>>>' or newline separators
-            Default is true (key is hidden).
-            
-            Special separator usage:
-              Use ' >>> ' (with spaces) in label_attr to create two-part displays:
-                label_attr: [name, ' >>> ', description]
-              Results in:
-                name               ← primary heading
-                description        ← secondary description
-              
-              Alternatively, use '\n' (newline) for the same effect:
-                label_attr: [name, '\n', description]
-          
-          filtered: true | false
-            When true, the big-select options are filtered based on another field's value
-            using the select_filtering_target configuration.
-            Default is false (no filtering).
-
-        big select examples: |  
-          Example basic big-select:
-            edit_as:
-              field_type: select_record_from_table_some_items
-              value_attr: id
-              label_attr: name
-              big_select:
-                hide_key: true
-          
-          Example with '>>>' separator for two-part display:
-            edit_as:
-              field_type: select_record_from_table_some_items
-              value_attr: id
-              label_attr:
-                - name
-                - ' >>> '
-                - description
-              big_select:
-                hide_key: true
-            # Displays as:
-            #   Item Name          ← primary heading (larger)
-            #   Item description   ← secondary text (smaller)
-          
-          Example grouped big-select:
-            edit_as:
-              field_type: select_record_from_table_some_items
-              value_attr: id
-              label_attr:
-                - category
-                - '|'
-                - name
-              group_split_char: '|'
-              big_select:
-                hide_key: true
-          
-          Example grouped with '>>>' separator:
-            edit_as:
-              field_type: select_record_from_table_some_items
-              value_attr: id
-              label_attr:
-                - category
-                - '|'
-                - name
-                - ' >>> '
-                - description
-              group_split_char: '|'
-              big_select:
-                hide_key: true
-            # Groups by category, then displays each item as:
-            #   Item Name          ← primary heading
-            #   Item description   ← secondary text
-          
-          Example filtered big-select:
-            filter_field:
-              edit_as:
-                field_type: select_filter_values
-                alt_options:
-                  'Type A': type_a
-                  'Type B': type_b
-                select_filtering_target: 'my_select_field'
-            
-            my_select_field:
-              edit_as:
-                field_type: select_record_from_table_some_items
-                value_attr: id
-                label_attr:
-                  - item_type
-                  - '|'
-                  - name
-                group_split_char: '|'
-                big_select:
-                  filtered: true
-              blank_preset_value:
-                table_name:
-                  filter_field_name: "{{filter_field}}"
-        
-        select_filtering_target: field_name
-          # Specifies the target field to be filtered when this field changes.
-          # Used with big_select.filtered configuration to dynamically filter another big-select field.
-          # The filter value from this field is passed via blank_preset_value to constrain the query.
-        
-        # configuration for allowing users to create new items in the source model
-        # when their entered value doesn't already exist (applies to select_record_from_table_* fields)
-        creatable:
-          enabled: true | false
-            # When true, the field renders as a typeahead text input instead of a select dropdown.
-            # If the user enters a value that doesn't exist in the source model, a new record
-            # is automatically created on save.
-            # Requires the user to have 'create' access on the source dynamic model.
-            # If the user lacks create access, they can only select from existing items.
-            # Default is false (standard select dropdown behavior).
+      edit_as: EditAsValue - see the edit_as/big_select/creatable sections in field_options.md
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text
       use_app_type: |
         use the specified app type id or name instead of the user's current app type
         to filter protocol (and in the future other) selections
+
+      # class, capitalize, default_value, placeholder, min, max, step are pass-through
+      # HTML input hints, forwarded directly to the rendered form field
+      class: additional CSS class(es) for the form field
+      capitalize: true - to capitalize the displayed value
+      default_value: HTML default value attribute for the form field
+      placeholder: HTML placeholder attribute for the form field
+      min: HTML min attribute, for numeric/date fields
+      max: HTML max attribute, for numeric/date fields
+      step: HTML step attribute, for numeric fields
+
+# Notes:
+# - See field_options.md for value/blank_value/preset_value/blank_preset_value/active_value
+#   timing, edit_as/big_select/creatable semantics, pass-through HTML keys, and library
+#   _default handling for fields absent from the current model.
+

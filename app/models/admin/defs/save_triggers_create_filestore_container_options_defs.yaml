@@ -1,7 +1,25 @@
 # Save Trigger: Create Filestore Container options
-        create_filestore_container:
-          name: 'part of directory name or array of attribute names to use to generate directory name (value used directly if attribute not found)'
-        label: 'human name'
-        create_with_role: 'role name'
-        if: if_extras
+# Canonical schema
+# create_filestore_container: <Hash(
+#   name: String (required),
+#   label: String,
+#   create_with_role: String,
+#   skip_if_exists: Boolean,
+#   if: Condition,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required).
+#
+# Pattern 1: Directory name from a literal/substituted string (save_triggers_create_filestore_container_pattern_1_basic_defs.yaml)
+# Pattern 2: Directory name built from a list of attribute names (save_triggers_create_filestore_container_pattern_2_attribute_list_defs.yaml)
+# See save_trigger_create_filestore_container.md for the worked examples.
+
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - skip_if_exists: true avoids creating a duplicate container if one already exists.
+# - name must resolve to a non-nil value - a nil name crashes with a NoMethodError rather
+#   than a friendly validation error.
+# - label is currently unused by the runtime handler (SaveTriggers::CreateFilestoreContainer)
+#   despite being accepted in the config - documented for completeness, but has no effect.

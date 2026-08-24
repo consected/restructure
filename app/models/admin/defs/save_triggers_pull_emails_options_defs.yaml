@@ -1,52 +1,58 @@
 # Save Trigger: Pull Emails options
+# Canonical schema
+# pull_emails: <Hash(
+#   if: Condition,
+#   source: SourceValue (required),
+#   limit: Integer,
+#   after_processing: AfterProcessingValue,
+#   attachments: AttachmentsValue,
+#   on_email: TriggerTaskList,
+#   on_email_complete: TriggerTaskList,
+#   on_email_failure: TriggerTaskList,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required).
+#
+# SourceValue type (source) - shape depends on type; see Patterns 1-3 below
+# SourceValue: <Hash(type: <s3 | filesystem | imap> (required), ...type-specific keys)>
+#
+# AfterProcessingValue type (after_processing)
+# AfterProcessingValue: <Hash(if: Condition, move_to: Hash, delete: Boolean)>
+# All keys are optional. move_to and delete are mutually exclusive.
+#
+# AttachmentsValue type (attachments)
+# AttachmentsValue: <Hash(
+#   if: Condition,
+#   container: Hash(from_this: String) | Hash(id: Integer | String) | Hash(name: String) (required),
+#   path: String,
+#   store_as_user: String | Integer | Hash,
+#   store_in_app_type: String | Integer | Hash,
+#   skip_existing: Boolean,
+#   replace: Boolean
+# )>
+# Keys are optional unless marked (required). container is only required if attachments: is used.
+#
+# All string values within source, limit, after_processing and attachments (except the
+# on_email triggers themselves) are passed through FieldDefaults, so {{variables.*}}
+# substitutions are supported for hostnames, bucket names, paths, usernames, passwords, etc.
+# (e.g. populated by an earlier set_variables save trigger from secret config).
+#
+# The parsed fields of the email currently being processed are exposed via
+# trigger_variables[:email] for use in on_email's substitutions, e.g. {{variables.email.subject}}.
+
+# Pattern 1: S3 source (save_triggers_pull_emails_pattern_1_s3_defs.yaml)
+# Pattern 2: Filesystem source (save_triggers_pull_emails_pattern_2_filesystem_defs.yaml)
+# Pattern 3: IMAP source (save_triggers_pull_emails_pattern_3_imap_defs.yaml)
+# See save_trigger_pull_emails.md for the worked examples and required fields per source type.
+
+# Common keys - apply regardless of source type
         pull_emails:
-          if: #if_extras
-          # Read MIME-encoded email files (e.g. captured by AWS SES into an S3 bucket
-          # or stored on a filesystem) and run a list of inner save triggers per email.
-          # The parsed fields are exposed via trigger_variables[:email] for use in
-          # the inner triggers' substitutions, e.g. {{variables.email.subject}}.
-          #
-          # All string values within `source`, `limit`, `after_processing` and
-          # `attachments` (except the `on_email` triggers themselves) are passed
-          # through FieldDefaults, so {{variables.*}} substitutions are supported
-          # for hostnames, bucket names, paths, usernames, passwords, etc. (e.g.
-          # populated by an earlier set_variables save trigger from secret config).
-          source:
-            type: s3                  # 's3', 'filesystem' or 'imap'
-            # For S3 sources:
-            bucket: my-ses-bucket     # required for s3
-            prefix: 'inbox/'          # optional key prefix to list
-            # since_modified: '{{variables.last_run.at}}' # (optional) only objects whose
-            #                                              # last_modified is strictly newer than
-            #                                              # the supplied timestamp (ISO8601 string
-            #                                              # or anything Time.parse understands).
-            #                                              # {{variables.*}} substitutions allowed.
-
-            # For filesystem sources:
-            # type: filesystem
-            # path: /var/mail/incoming  # required for filesystem; directory of *.eml files
-            # since_modified: '{{variables.last_run.at}}' # (optional) only files whose mtime is
-            #                                              # strictly newer than the supplied time
-
-            # For IMAP sources:
-            # type: imap
-            # host: imap.example.com    # required for imap
-            # port: 993                 # optional; defaults to 993 (ssl) or 143
-            # ssl: true                 # optional; default false
-            # username: inbox@example.com   # required
-            # password: '...'               # required (use a secret reference)
-            # mailbox: 'INBOX'              # optional; mailbox/folder to read from
-            # search: ['UNSEEN']            # optional; IMAP search criteria, defaults to ['ALL']
-            # since_uid: '{{variables.last_run.uid}}' # (optional) only messages whose UID is
-            #                                          # strictly greater than the supplied value.
-            #                                          # Combined with `search` (AND) when both set.
-            #                                          # {{variables.*}} substitutions allowed.
-            #
-            # Incremental retrieval pattern: capture the last processed UID (imap) or
-            # latest last_modified timestamp (s3/filesystem) - e.g. via an inner
-            # set_variables / update trigger - and store it on a tracking record.
-            # On the next run, feed that value back in via {{variables.last_run.*}}
-            # so previously processed messages are skipped.
+          # Incremental retrieval pattern: capture the last processed UID (imap) or
+          # latest last_modified timestamp (s3/filesystem) - e.g. via an inner
+          # set_variables / update trigger - and store it on a tracking record.
+          # On the next run, feed that value back in via {{variables.last_run.*}}
+          # so previously processed messages are skipped.
 
           limit: 50                   # (optional) maximum number of emails to process per run
 
@@ -176,3 +182,12 @@
                 with:
                   notes: 'Failed: {{variables.email.subject}} - {{variables.email.error}}'
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - source.type selects the retrieval mechanism (s3, filesystem or imap) - see Patterns 1-3
+#   above for the type-specific required/optional keys of each.
+# - on_email_complete/on_email_failure fire per-email and are distinct from the trigger-level
+#   on_complete/on_failure, which fire once for the whole batch (on_failure only if perform
+#   itself raises - per-email FphsExceptions are caught and isolated per email instead).
+# - A failed email (on_email raised, or an attachment failed to store) is left in the source
+#   (not moved/deleted by after_processing) so it can be retried on the next run.

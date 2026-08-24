@@ -1,0 +1,4 @@
+# Pattern 2: Queue a batch trigger to run in the background
+run_batch_trigger:
+  resource_name: dynamic_model__view_handle_recs
+  mode: background

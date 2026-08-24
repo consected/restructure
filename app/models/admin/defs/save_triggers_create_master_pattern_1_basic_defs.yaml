@@ -1,0 +1,4 @@
+# Pattern 1: Create a new master record
+create_master:
+  with:
+    msid: '{{new_msid}}'

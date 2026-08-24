@@ -1,0 +1,15 @@
+# Pattern 1: Queue several triggers to run together in a background job
+save_trigger:
+  on_create:
+    background:
+      - create_reference:
+          model_name:
+            in: master
+      - notify:
+          type: email
+          role: data_coordinator
+          subject: "Processing complete"
+      - update_this:
+          one:
+            with:
+              status: processing

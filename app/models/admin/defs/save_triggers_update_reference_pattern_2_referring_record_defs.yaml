@@ -1,0 +1,10 @@
+# Pattern 2: Match a reference by a value from the referring (parent) record
+update_reference:
+  org_alt_username:
+    first:
+      dynamic_model__org_alt_usernames:
+        master_id:
+          this: master_id
+        email:
+          referring_record: select_alt_username
+        update: return_result

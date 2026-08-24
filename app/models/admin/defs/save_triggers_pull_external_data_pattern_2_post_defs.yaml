@@ -1,0 +1,19 @@
+# Pattern 2: POST request with headers and a body
+pull_external_data:
+  identity:
+    local_data: identity
+    method: post
+    to:
+      url: 'https://example.com/api/token'
+      format: json
+      headers:
+        'Authorization': 'Bearer {{save_trigger_results.identity.access_token}}'
+        'Content-Type': 'application/json'
+    post_data:
+      grant_type: client_credentials
+    success_if:
+      all:
+        this:
+          save_trigger_results:
+            element: 'identity_success_if_res'
+            value: true

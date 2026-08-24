@@ -1,99 +1,46 @@
 # Save Trigger: Redcap Request options
-        redcap_request:
-          - request_1:
-            # Import a record into the project and store the result in the local data.
-            # The response should be a single element array (or more if extra data: array items are specified)
-            # with the record id of the stored record.
-            study: Test
-            project_name: Test API
-            local_data: import_response
-            method: import_records
-            post_data:
-              data:
-              - record_id: -1 # Note, a record_id is always needed, even with autonumbering
-                study_id: '{{test_study_id}}'
-              force_auto_number: true
-            success_if:
-              all:
-                this:
-                  save_trigger_results:
-                    element: import_response
-                    condition: "<> ARRAY_LENGTH"
-                    value: 0
-        - request_2:
-            # If the previous record import was successful, go on to get the survey link
-            # for the new record and save it to the data field. 
-            # NOTE: the data field must be set to no_downcase: true and view_original_case: true in the field options,
-            # otherwise the mixed case URLs will become mangled.
-            # For example:
-            #    default:
-            #      field_options:
-            #        econsent_rc_link:
-            #          no_downcase: true
-            #          view_original_case: true            
-            study: Test
-            project_name: Test API
-            local_data: link_response
-            method: survey_link
-            force_not_editable_save: true
-            data_field: econsent_rc_link
-            data_field_format: txt
-            post_data:
-              instrument: research_form
-              record_id: "{{save_trigger_results.import_response.first}}"
-            success_if:
-              all:
-                this:
-                  save_trigger_results:
-                    element: link_response
-                    condition: "<> LENGTH"
-                    value: 0
-        - request_3:
-            # Remove a user's access from the REDCap project.
-            # This can also be used within a batch_trigger definition, since batch
-            # triggers share the same handler and configuration as save_trigger redcap_request.
-            # The result is the count of users removed, as returned by the REDCap API.
-            # Pass a single "username" (as shown below), or an array of usernames using
-            # "usernames" instead, to remove multiple users in one request.
-            # NOTE: the REDCap API user used for this project (the token owner) requires the
-            # following privileges in the REDCap project: "API Import/Update",
-            # "User Rights" (Full Access) and "Delete Records".
-            # Removing a user does NOT automatically refresh the project's cached user list.
-            # Use an on_complete hook (see below) to explicitly call project_users
-            # with force_reload: true, if the refreshed list is needed straight away.
-            study: Test
-            project_name: Test API
-            local_data: remove_user_response
-            method: remove_project_user
-            post_data:
-              username: "{{item.username}}"
-              # usernames: ["{{item.username}}", "{{item.other_username}}"]
-            on_complete:
-              - redcap_request:
-                  request_3a:
-                    # Force reload the cached project_users list from the REDCap API
-                    # now that a user has been removed.
-                    study: Test
-                    project_name: Test API
-                    local_data: remove_user_refreshed_users_response
-                    method: project_users
-                    post_data:
-                      force_reload: true
-        - request_4:
-            # Add a user or update their privileges in a REDCap project.
-            # If the user running the request has the "User Rights" privilege,
-            # they can add a new user or update an existing user's privileges, including
-            # their own. For example, this would allow them to add
-            # record_delete and api_import privileges, allowing them to delete
-            # records and use the REDCap API.
-            study: Test
-            project_name: Test API
-            local_data: update_project_user_response
-            method: import_project_user
-            post_data:
-              username: "{{item.username}}"
-              expiration: '2036-01-01'
-              record_delete: 1
-              api_import: 1
+# Canonical schema
+# redcap_request: <Hash(entry_label: RedcapRequestEntry) | Array(Hash(entry_label: RedcapRequestEntry))>
+#
+# Key type
+# entry_label: <any label - purely for identification, referenced in on_complete examples below>
+#
+# Value type
+# RedcapRequestEntry: <Hash(
+#   study: String (required),
+#   project_name: String (required),
+#   local_data: String,
+#   method: String (required),
+#   post_data: Scalar | Array | Hash,
+#   success_if: Condition,
+#   force_not_editable_save: Boolean,
+#   force_not_valid: Boolean,
+#   data_field: String,
+#   data_field_format: String,
+#   response_code_field: String,
+#   allow_empty_result: Boolean,
+#   allow_response_codes: Array(Integer),
+#   request_options: Hash,
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList,
+#   if: Condition
+# )>
+# Keys are optional unless marked (required). See "Available methods" below for method values.
+#
+# Pattern 1: import_records - import a record into the project (save_triggers_redcap_request_pattern_1_import_records_defs.yaml)
+# Pattern 2: survey_link - get a survey link for a record, chained after Pattern 1 (save_triggers_redcap_request_pattern_2_survey_link_defs.yaml)
+# Pattern 3: remove_project_user - remove a user's access, with an on_complete follow-up request (save_triggers_redcap_request_pattern_3_remove_project_user_defs.yaml)
+# Pattern 4: import_project_user - add a user or update their privileges (save_triggers_redcap_request_pattern_4_import_project_user_defs.yaml)
+# See save_trigger_redcap_request.md for the worked examples.
+#
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
+
+# Notes:
+# - redcap_request may be a single Hash or an Array of Hashes to make multiple requests in
+#   sequence within one trigger task list.
+# - local_data is optional, but without it the response is not stored in save_trigger_results
+#   and cannot be referenced by success_if or subsequent triggers.
+# - success_if is evaluated against save_trigger_results.<local_data> after the request; if it
+#   fails, the request is treated as unsuccessful even if the HTTP call itself succeeded.
+# - The same handler and configuration is shared with batch_trigger's redcap_request entries.
                     

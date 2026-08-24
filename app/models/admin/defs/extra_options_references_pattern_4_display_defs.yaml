@@ -1,16 +1,16 @@
 # Pattern 4: Display behavior
-  references:
-    model_name:
-      result_label: alternative label shown in the result caption
-      view_as:
-        edit: hide | readonly | not_embedded | select_or_add
-        show: hide | readonly | see_presence | filestore | as_edit
-        new: outside_this | not_embedded | select_or_add
-      view_options:
-        always_open: true
-      showable_if:
-        always: true
-      creatable_if:
-        all:
-          this:
-            status: active
+references:
+  model_name:
+    result_label: alternative label shown in the result caption
+    view_as:
+      edit: hide | readonly | not_embedded | select_or_add
+      show: hide | readonly | see_presence | filestore | as_edit
+      new: outside_this | not_embedded | select_or_add
+    view_options:
+      always_open: true
+    showable_if:
+      always: true
+    creatable_if:
+      all:
+        this:
+          status: active

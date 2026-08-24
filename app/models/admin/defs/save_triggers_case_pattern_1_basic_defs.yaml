@@ -1,0 +1,29 @@
+# Pattern 1: Branch on field value, with a fallback else
+save_trigger:
+  on_create:
+    case:
+      - when:
+          all:
+            this:
+              field1: value 1
+        then:
+          - log:
+              message: Matched value 1
+          - create_reference:
+              model_name:
+                in: master
+      - when:
+          all:
+            this:
+              field1: value 2
+        then:
+          - update_reference:
+              model_name:
+                in: master
+          - log:
+              message: Matched value 2
+      - else:
+          - notify:
+              type: email
+              role: data_coordinator
+              subject: "No condition matched"

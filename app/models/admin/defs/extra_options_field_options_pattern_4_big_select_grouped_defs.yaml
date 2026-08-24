@@ -1,0 +1,13 @@
+# Pattern 4: big_select grouped by category using group_split_char
+field_options:
+  item_id:
+    edit_as:
+      field_type: select_record_from_table_items
+      value_attr: id
+      label_attr:
+        - category
+        - '|'
+        - name
+      group_split_char: '|'
+      big_select:
+        hide_key: true

@@ -1,51 +1,17 @@
-# YAML definition for background save trigger options
-# Used by admin panel to display configuration options
+# Save Trigger: Background options
 #
+# Canonical schema
+# background: <TriggerTaskList>
+#
+# TriggerTaskList type - see save_trigger.md
+# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
+#
+# Pattern 1: Queue several triggers to run together (save_triggers_background_pattern_1_basic_defs.yaml)
+# See save_trigger_background.md for the worked example and usage notes.
 
-      background: &st_background
-        - array of save triggers to execute in a background job
-        - returns immediately, triggers run asynchronously
-        - e.g. |-
-            save_trigger:
-              on_create:
-                background:
-                  - create_reference:
-                      model_name:
-                        in: master
-                  - notify:
-                      type: email
-                      role: data_coordinator
-                      subject: "Processing complete"
-                  - update_this:
-                      one:
-                        with:
-                          status: processing
-        - |
-          All listed save triggers will be queued to run in a single background job.
-          The save operation returns immediately without waiting for the triggers
-          to complete.
-
-          This is useful for long-running operations like sending notifications,
-          processing large datasets, or calling external APIs that shouldn't block
-          the main request.
-
-          The trigger accepts an array of save trigger configurations, where each
-          item is a standard save trigger definition (create_master, create_reference,
-          update_this, notify, etc.).
-
-          Results from the queue operation are stored in save_trigger_results['background']
-          with the following structure:
-            {
-              status: 'queued',
-              item_class: 'DynamicModel::ClassName',
-              item_id: 123,
-              trigger_count: 3,
-              queued_at: <timestamp>
-            }
-
-          Note: The current_user context is preserved in the background job,
-          allowing triggers that depend on user context to function correctly.
-
-          Individual triggers within the background job support on_complete and on_failure
-          lifecycle hooks. See on_complete / on_failure documentation for details.
+# Notes:
+# - The queued job's result summary (status, item_class, item_id, trigger_count, queued_at)
+#   is stored in save_trigger_results['background'], not the inner triggers' own results.
+# - Individual triggers within the background job support on_complete and on_failure
+#   lifecycle hooks - see the lifecycle hooks documentation for details.
 

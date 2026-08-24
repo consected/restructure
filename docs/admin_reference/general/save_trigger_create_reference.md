@@ -28,6 +28,51 @@ association involved and no model reference is needed.
 !defs(save_triggers_create_reference_options_defs.yaml)
 ```
 
+### Pattern 1: Create a reference from the current item (default)
+
+The most common form - `in: this` creates the reference from the record that fired the trigger.
+
+```yaml
+!defs(save_triggers_create_reference_pattern_1_this_defs.yaml)
+```
+
+### Pattern 2: Create under the master, with a model reference
+
+`in: master_with_reference` creates the record under the master and also creates a model
+reference from the master. Use `in: master` instead to create the record under the master
+WITHOUT a model reference.
+
+```yaml
+!defs(save_triggers_create_reference_pattern_2_master_defs.yaml)
+```
+
+### Pattern 3: Create a reference from a specific record
+
+`in: specific_record` creates the reference from a record looked up by criteria, rather than
+from the current item or the master.
+
+```yaml
+!defs(save_triggers_create_reference_pattern_3_specific_record_defs.yaml)
+```
+
+### Pattern 4: Reference an existing record
+
+`to_existing_record` attaches a reference to an already-existing record instead of creating a
+new one.
+
+```yaml
+!defs(save_triggers_create_reference_pattern_4_to_existing_record_defs.yaml)
+```
+
+### Pattern 5: Map attributes from a related item
+
+`with_result` maps attributes from one or more related items into the newly created record.
+`with:` fields (if also present) override any attributes set here.
+
+```yaml
+!defs(save_triggers_create_reference_pattern_5_with_result_defs.yaml)
+```
+
 ### Source Items Without Master Association
 
 When the source item (the item firing the trigger) has no master association, set

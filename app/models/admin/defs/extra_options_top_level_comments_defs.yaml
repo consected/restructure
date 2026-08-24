@@ -1,9 +1,17 @@
-# Add table and field comments to the underlying database.
-# If not set here, defaults are added:
-#   table: a representation of the dynamic model, activity log or external identifier name
-#   field: *caption_before:* or *labels:* setting for the field, if present
+# Canonical schema
+# _comments: <Hash(table: String, fields: Hash(field_name: String))>
+# All keys are optional.
+#
 _comments:
   table: describe the table
   fields:
     field1: describe the field
     field2: ...
+
+# Notes:
+# - If not set here, defaults are generated: table defaults to a representation of the
+#   dynamic model, activity log or external identifier name; each field defaults to its
+#   caption_before / labels setting, if present.
+# - An `original_fields` key is also recognized, but is computed internally to track the
+#   prior comment set for change detection - it is not intended to be set in configuration.
+# - Unrecognized keys produce a warning.

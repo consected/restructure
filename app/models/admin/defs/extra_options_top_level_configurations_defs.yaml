@@ -1,4 +1,24 @@
-# _configurations options
+# Canonical schema
+# _configurations: <Hash(
+#   use_current_version: Boolean,
+#   prevent_migrations: Boolean,
+#   can_change_master: Boolean,
+#   no_user_id: Boolean,
+#   secondary_key: String,
+#   view_sql: String,
+#   tab_caption: String,
+#   foreign_key_through_external_id: String,
+#   option_type_attr_name: String,
+#   default_option_type_name: String,
+#   uniqueness_fields: String | Array(String),
+#   batch_trigger: BatchTriggerScheduleValue
+# )>
+# All keys are optional.
+#
+# BatchTriggerScheduleValue type (batch_trigger) - schedules the batch_trigger: task
+# BatchTriggerScheduleValue: <Hash(frequency: String, run_at: String | Array(String), limit: Integer, if: Condition, app_type: String, user: String)>
+# All keys are optional.
+#
 _configurations:
   use_current_version: force the use of the current definition version when defining a dynamic class
   secondary_key: field name to use as a secondary key to lookup items
@@ -53,3 +73,9 @@ _configurations:
     # REDCap dynamic models may use 'redcap_repeat_instrument' as the option type attribute.
   default_option_type_name: name of the default option type (default 'default')
     # Specifies the option type name to use when no explicit option type is matched.
+
+# Notes:
+# - batch_trigger here only schedules the frequency/limit/selection for the batch_trigger:
+#   task defined in default: or an activity log's options - it does not define the task itself.
+# - option_type_attr_name always behaves as 'extra_log_type' for activity logs, regardless
+#   of this setting; it only applies to dynamic models.

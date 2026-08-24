@@ -1,29 +1,59 @@
 # Save Trigger: Create Reference options
+# Canonical schema
+# create_reference: <Hash(entry_label: CreateReferenceEntry) | Array(Hash(entry_label: CreateReferenceEntry))>
+#
+# Key type
+# entry_label: <target model_name (recommended) | any label>
+#
+# Value type
+# CreateReferenceEntry: <Hash(
+#   if: Condition,
+#   in: InValue (required),
+#   force_create: Boolean,
+#   force_not_valid: Boolean,
+#   this_has_no_master_association: Boolean,
+#   with_result: WithResultValue,
+#   with: WithValue,
+#   to_existing_record: Hash(record_id: ReturnValueLookup),
+#   on_complete: TriggerTaskList,
+#   on_failure: TriggerTaskList
+# )>
+# Keys are optional unless marked (required). Omitting in: raises 'Unknown in value'.
+#
+# InValue type (in) - selects the "from" record the new reference is created from
+# InValue: <
+#   this |
+#   referring_record |
+#   master |
+#   master_with_reference |
+#   none |
+#   Hash(specific_record: Hash(resource_name: Hash(criteria_field: criteria_value, id: 'return_value')))
+# >
+#
+# Pattern 1: Create a reference from the current item, in: this - default/most common case (save_triggers_create_reference_pattern_1_this_defs.yaml)
+# Pattern 2: Create under the master, with a model reference, in: master_with_reference (save_triggers_create_reference_pattern_2_master_defs.yaml)
+# Pattern 3: Create a reference from a specific record, looked up by criteria, in: specific_record (save_triggers_create_reference_pattern_3_specific_record_defs.yaml)
+# Pattern 4: Reference an existing record instead of creating a new one, to_existing_record (save_triggers_create_reference_pattern_4_to_existing_record_defs.yaml)
+# Pattern 5: Map attributes from a related item into the newly created record, with_result (save_triggers_create_reference_pattern_5_with_result_defs.yaml)
+# See save_trigger_create_reference.md for the worked examples.
+#
+# Common keys - apply regardless of which pattern above is used
         create_reference:
-          - model_name:
+          model_name:
             if: if_extras
             in: |
-              Specify the record from which the model reference is created (i.e., the "from" record).
-              One of:
-                - this (default: creates a reference from the current item)
+              Specify the record from which the model reference is created (i.e., the "from" record) -
+              see Patterns 1-3 above. One of:
+                - this (default: creates a reference from the current item - Pattern 1)
                 - referring_record (creates a reference from the record that referred to this item)
                 - master (creates the new record under the master, without creating a model reference)
-                - master_with_reference (creates the new record and a reference from the master record)
+                - master_with_reference (creates the new record and a reference from the master record - Pattern 2)
                 - none (creates the record without any model reference — useful for standalone models)
-                - specific_record: (creates a reference from a specified item, looked up by criteria)
-                    resource_name:
-                      criteria_field: criteria_value
-                      id: return_value
-              # Example using specific_record:
-              # in:
-              #   specific_record:
-              #     activity_log__player_contact_phones:
-              #       id: '{{some_field_id}}'
-              #       return: return_result
-              #
-              # Standalone dynamic models (no_master_association, i.e. no master_id column) are
-              # supported as targets. The record is created directly using the model class rather
-              # than through the master association. All 'in:' options work with standalone models.
+                - specific_record: (creates a reference from a specified item, looked up by criteria - Pattern 3)
+
+              Standalone dynamic models (no_master_association, i.e. no master_id column) are
+              supported as targets. The record is created directly using the model class rather
+              than through the master association. All 'in:' options work with standalone models.
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             force_not_valid: 'true to allow valid_if checks to be ignored'
@@ -33,40 +63,22 @@
               in: none is set, to ensure the target record is created directly using the model
               class rather than attempting to resolve through a master association.
 
-            with_result: 
-            # Map attributes from a related item to the target item.
-            # A list of models to retrieve from and attributes to assign allow multiple sources to
-            # be used.
-            # NOTE: with: fields override any specified here
-            # from: may also just take a simple String such as `from: embedded_item` to
-            # as shorthand for the following full calculation
-              - from:
-                  embedded_item:
-                    return: return_result
-                attributes:
-                  receipt_date: event_date
-                  receipt_time: event_time
-                  received_by: received_by
-                  select_facility: 'Lab: {{select_lab}}'
-                  # Substitutions use data only from the "from:" item
-
-                  # Also set attributes in the embedded item
-                  embedded_item:
-                    rank: rank
-                    rec_type: rec_type
-                    data: '{{select_lab}}'
-              - from: 
-                  dynamic_model__some_recs:
-                    return: return_result
-                attributes:
-                  a_value: value_from_result
+            with_result: 'map attributes from one or more related items into the new record - see Pattern 5 above'
+            to_existing_record: 'attach a reference to an existing record instead of creating a new one - see Pattern 4 above'
 
 #!defs(save_triggers_with_attribute_values_defs.yaml)
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
 
-            to_existing_record: # use an existing record of type "model_name", rather than creating a new one
-              record_id: 'Hash with return_value, such as {model_name: {match: value, id: "return_value"\}\}'
-          # NOTE: this sets:
-          # - save_trigger_results.created_references (list of model_reference items created - skipped if an item wasn't created)
-          # - save_trigger_results.created_items (list of created items - skipped if an item wasn't created)
-          # - save_trigger_results.created_results (list of results indicating if an item was created based on "if:" conditions)
+# NOTE: this sets:
+# - save_trigger_results.created_references (list of model_reference items created - skipped if an item wasn't created)
+# - save_trigger_results.created_items (list of created items - skipped if an item wasn't created)
+# - save_trigger_results.created_results (list of results indicating if an item was created based on "if:" conditions)
+
+# Notes:
+# - in: is required - there is no default; omitting it (or using an unrecognized value that
+#   isn't a specific_record Hash) raises 'Unknown in value in create_reference'.
+# - to_existing_record switches from creating a new record to attaching a reference to an
+#   already-existing record instead - it is mutually exclusive in intent with with/with_result,
+#   which populate attributes on a newly created record.
+# - this_has_no_master_association is only relevant when the source item is itself a
+#   standalone (no_master_association) model and in: none is set.

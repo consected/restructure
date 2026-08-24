@@ -1,10 +1,25 @@
 # Save Trigger: Each options
-          each:
-            value: # list of literal values, triple curly substitution returning a list, or hash conditional result returning a list
-          do:
-            - <trigger 1> # a trigger configuration such as update_this:
-            - <trigger 2>
-          if: # optionally specify a condition to skip a whole iteration. Individual trigger ifs are still available.
-          # The iterator index and value can be accessed inside the triggers with:
-          # - {{save_trigger_results.iterator_index}}
-          # - {{save_trigger_results.iterator_value}}
+# Canonical schema
+# each: <Hash(value: EachValueExpr (required))>
+# do: <TriggerTaskList (required)>
+# if: <Condition>
+# Keys are optional unless marked (required).
+#
+# EachValueExpr type (each.value)
+# EachValueExpr: <Array(Scalar) | {{{triple_curly_substitution}}} returning a list | Condition returning a list>
+#
+# TriggerTaskList type - see save_trigger.md
+# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
+#
+# Pattern 1: Iterate over a substitution-derived list (save_triggers_each_pattern_1_basic_defs.yaml)
+# See save_trigger_each.md for the worked example.
+
+# Notes:
+# - each: and do: are sibling keys at the same level as the trigger's own if: (they are not
+#   nested inside each other).
+# - if: (at this level) skips the entire iteration; conditions inside individual triggers in
+#   do: are still evaluated separately per-iteration.
+# - The iterator index and value are accessible inside do: triggers via
+#   {{save_trigger_results.iterator_index}} and {{save_trigger_results.iterator_value}}.
+# - Individual triggers within do: support on_complete and on_failure lifecycle hooks - see
+#   the lifecycle hooks documentation for details.

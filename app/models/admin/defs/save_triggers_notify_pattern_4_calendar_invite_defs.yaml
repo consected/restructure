@@ -1,0 +1,13 @@
+# Pattern 4: Calendar invite (email only)
+notify:
+  type: email
+  role: admin
+  subject: 'Meeting invite: {{summary}}'
+  layout_template: standard email layout
+  content_template: meeting_invite_notification
+  calendar_invite:
+    method: REQUEST
+    summary: '{{summary}}'
+    dtstart: '{{event_at}}'
+    duration: '1 hour'
+    organizer: organizer@example.com

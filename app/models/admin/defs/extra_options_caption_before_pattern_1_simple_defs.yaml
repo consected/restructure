@@ -1,7 +1,6 @@
 # Pattern 1: Simple caption string
-# Specify a caption to appear before a field, hiding the field's label.
-  caption_before:
-    field_name: |
-      String caption to appear before field. Use markdown formatting if needed.
+caption_before:
+  field_name: |
+    String caption to appear before field. Use markdown formatting if needed.
 
-      [Substitutions](../general/substitutions.md) of data can be performed with `\{\{data_attribute\}\}` notation.
+    Substitutions of data can be performed with `\{\{data_attribute\}\}` notation.

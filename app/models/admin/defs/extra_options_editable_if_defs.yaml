@@ -1,28 +1,15 @@
 # editable_if options
+# Canonical schema
+# editable_if: <Condition>
 #
-# Pattern 1: Explicitly always editable
-  editable_if:
-    always: true
-
-# Pattern 2: Explicitly never editable
-  editable_if:
-    never: true
-
-# Pattern 3: Conditional editable rules using the standard conditions reference
-  editable_if:
-    all:
-      this:
-        status: draft
-    not_any:
-      activity_log__example_reviews:
-        extra_log_type: finalized
-
-# Pattern 4: Merge reusable conditions with local rules
-  editable_if:
-    <<: *some_condition_anchor
-    all:
-      this:
-        status: draft
+# Condition type - see conditions.md for the full syntax
+# Condition: <Hash(always: Boolean) | Hash(never: Boolean) | Hash(selection_type: record_source: field_conditions)>
+#
+# Pattern 1: Explicitly always editable (extra_options_editable_if_pattern_1_always_defs.yaml)
+# Pattern 2: Explicitly never editable (extra_options_editable_if_pattern_2_never_defs.yaml)
+# Pattern 3: Conditional editable rules using the standard conditions reference (extra_options_editable_if_pattern_3_conditional_defs.yaml)
+# Pattern 4: Merge reusable conditions with local rules (extra_options_editable_if_pattern_4_merge_anchor_defs.yaml)
+# See editable_if.md for the worked examples.
 
 # Notes:
 # - editable_if must be a Hash using the standard conditional-actions syntax.

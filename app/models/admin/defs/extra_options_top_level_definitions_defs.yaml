@@ -1,4 +1,13 @@
-# _definitions options
+# Canonical schema
+# _definitions: <Hash(anchor_name: Any)>
+# All keys are optional. Key names are user-defined.
+#
 _definitions:
   reusable_key: |
     &anchor reusable objects for substitution in definitions
+
+# Notes:
+# - _definitions (and library-prefixed _definitions__xxx variants) exist purely to hold
+#   YAML anchors for use elsewhere in the same file via standard YAML alias syntax.
+# - The whole _definitions key (matched by prefix) is deleted before the configuration is
+#   otherwise processed - it has no runtime schema or effect of its own.

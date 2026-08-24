@@ -1,4 +1,12 @@
 # fields options
+# Canonical schema
+# fields: <Array(String)>
+#
   fields:
   - field_name_1
   - field_name_2
+
+# Notes:
+# - Only fields listed here are displayed/editable for the option type; fields on the
+#   underlying table that are omitted are neither shown nor form-submittable.
+# - Order in the array is the display order.

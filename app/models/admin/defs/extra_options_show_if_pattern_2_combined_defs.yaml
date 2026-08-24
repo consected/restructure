@@ -1,10 +1,10 @@
 # Pattern 2: Combined conditions
-  show_if:
-    field_name:
-      all:
-        depends_on_field_name: conditional value
-        current_mode: show | edit
-      any:
-        alternative_field: another conditional value
-      not_all:
-        hidden_when_field: hidden value
+show_if:
+  field_name:
+    all:
+      depends_on_field_name: conditional value
+      current_mode: show | edit
+    any:
+      alternative_field: another conditional value
+    not_all:
+      hidden_when_field: hidden value
