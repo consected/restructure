@@ -16,13 +16,8 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   describe 'caption_before with unrecognized attributes' do
