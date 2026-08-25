@@ -23,6 +23,29 @@ class Settings
   UserTimeout = (ENV['USER_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
   AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'].presence || 30).to_i.minutes.freeze
 
+  # Max seconds a request will retry acquiring HandlebarsPrecompiler::FileLock before
+  # proceeding unlocked (issue #1362). Short by design: the lock is a work-duplication
+  # optimisation, never a correctness mechanism, so a user request must not wait long.
+  HandlebarsLockWaitSeconds = (ENV['FPHS_HANDLEBARS_LOCK_WAIT'].presence || 2).to_f
+
+  # How many previous compiled-Handlebars generations to retain on disk alongside the
+  # current one (issue #1362), so a process/request that has not yet observed a
+  # rotation can still find its generation's compiled files. Older generations are
+  # swept opportunistically.
+  HandlebarsKeepGenerations = (ENV['FPHS_HANDLEBARS_KEEP_GENERATIONS'].presence || 2).to_i
+
+  # A generation directory younger than this is never swept, regardless of
+  # HandlebarsKeepGenerations, so one created moments ago can't be deleted out from
+  # under a concurrent writer (issue #1362).
+  HandlebarsGenerationSafetyWindowSeconds = (ENV['FPHS_HANDLEBARS_GENERATION_SAFETY_WINDOW'].presence || 60).to_i
+
+  # HandlebarsPrecompiler::FileLock files older than this are swept opportunistically
+  # (issue #1362 S7 fix) - lock file names are per user/app_type/template-set, so without
+  # this they would accumulate without bound on a long-lived server. Generous relative to
+  # HandlebarsLockWaitSeconds, since a lock file's mtime is its CREATION time (re-opening
+  # an existing file for flock does not bump it), not its last-used time.
+  HandlebarsLockFileMaxAgeSeconds = (ENV['FPHS_HANDLEBARS_LOCK_FILE_MAX_AGE'].presence || 300).to_i
+
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
   # password setting.

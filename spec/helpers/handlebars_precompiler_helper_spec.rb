@@ -35,6 +35,11 @@
 #   render differently per user (individual role/access-control grants), so two users in
 #   the same app_type must never share a compiled file. The resolved user/admin's class
 #   name is also folded in so a User and an Admin sharing the same id can never collide.
+#
+# - Issue #1362 (Stage 1): #split_compiled_output and #write_multiple_handlebars_templates
+#   must write atomically (temp file + rename) so a concurrent reader is never handed a
+#   partially-written compiled template or multi bundle, and a failed write never
+#   corrupts an existing good file already on disk.
 
 require 'rails_helper'
 
@@ -222,11 +227,74 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     end
   end
 
+  # Issue #1362 (Stage 1) - content-addressed naming. Compiled filenames are keyed on a
+  # digest of the actual preprocessed SOURCE (when given), not on who asked for it, so
+  # identical content compiled by different users/app_types shares one file, while
+  # differing content never collides - regardless of why it differs. Every template id is
+  # content-addressed when a source is given (issue #1362 S4) - see
+  # content_addressing_safety_spec.rb / the option-3 fix in
+  # _search_results_resources_panel.html.erb for why this is safe even for
+  # master_main_inner. The digest is 32 hex chars (issue #1362 S5), not truncated to 13.
+  describe '#handlebars_compiled_filename content addressing (issue #1362)' do
+    it 'produces the SAME filename for the SAME source regardless of handlebars_cache_key' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-one-key-12')
+      filename_one = helper.handlebars_compiled_filename('some-template', '<div>{{a}}</div>')
+
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-two-key-99')
+      filename_two = helper.handlebars_compiled_filename('some-template', '<div>{{a}}</div>')
+
+      expect(filename_one).to eq(filename_two)
+    end
+
+    it 'produces DIFFERENT filenames for different source, same id and same handlebars_cache_key' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('same-key-123456')
+
+      filename_a = helper.handlebars_compiled_filename('some-template', '<div>{{a}}</div>')
+      filename_b = helper.handlebars_compiled_filename('some-template', '<div>{{b}}</div>')
+
+      expect(filename_a).not_to eq(filename_b)
+    end
+
+    it 'still includes the sanitized template id as a prefix' do
+      result = helper.handlebars_compiled_filename('template.with/chars', '<div>{{a}}</div>')
+
+      expect(result).to start_with('template_with_chars-')
+    end
+
+    it 'falls back to handlebars_cache_key when no source is given (backward compatible)' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('fallback-key12')
+
+      result = helper.handlebars_compiled_filename('some-template')
+
+      expect(result).to eq('some-template-fallback-key12.js')
+    end
+
+    it 'uses a 32-character digest, not the old truncated 13-character one' do
+      result = helper.handlebars_compiled_filename('some-template', '<div>{{a}}</div>')
+
+      digest = result.delete_prefix('some-template-').delete_suffix('.js')
+      expect(digest.length).to eq(32)
+      expect(digest).to eq(Digest::SHA256.hexdigest('<div>{{a}}</div>')[0..31])
+    end
+
+    it 'content-addresses master_main_inner too, now that the substitution risk is closed at its source' do
+      filename_a = helper.handlebars_compiled_filename('master_main_inner', '<div>{{a}}</div>')
+      filename_b = helper.handlebars_compiled_filename('master_main_inner', '<div>{{b}}</div>')
+      filename_same = helper.handlebars_compiled_filename('master_main_inner', '<div>{{a}}</div>')
+
+      expect(filename_a).not_to eq(filename_b)
+      expect(filename_a).to eq(filename_same)
+    end
+  end
+
   describe '#write_handlebars_template' do
     let(:template_id) { 'test-template' }
     let(:template_content) { '<div>{{name}}</div>' }
     let(:cache_key) { 'abc123def4567' }
-    let(:expected_filename) { "#{template_id}-#{cache_key}.js" }
+    # content-addressed (issue #1362): the compiled filename is derived from the
+    # preprocessed source (32 hex chars - issue #1362 S5), not handlebars_cache_key.
+    # template_content has no preprocess_handlebars_source shorthand, so preprocessed == raw.
+    let(:expected_filename) { "#{template_id}-#{Digest::SHA256.hexdigest(template_content)[0..31]}.js" }
 
     before do
       allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
@@ -235,6 +303,8 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.partials_compiled_dir.join('*')))
     end
 
     context 'when temp file does not exist' do
@@ -259,7 +329,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       it 'returns URL path to compiled file location' do
         result = helper.write_handlebars_template(template_id, template_content)
 
-        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}templates/#{expected_filename}")
+        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{expected_filename}")
       end
 
       it 'preprocesses content before writing to temp file' do
@@ -294,14 +364,14 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       it 'still returns correct URL path' do
         result = helper.write_handlebars_template(template_id, template_content)
 
-        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}templates/#{expected_filename}")
+        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{expected_filename}")
       end
     end
 
     context 'when compiled file already exists in public directory' do
       before do
-        FileUtils.mkdir_p(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR)
-        compiled_file = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join(expected_filename)
+        FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+        compiled_file = HandlebarsPrecompiler.templates_compiled_dir.join(expected_filename)
         File.write(compiled_file, '// already compiled')
       end
 
@@ -315,8 +385,122 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       it 'returns correct URL path to existing compiled file' do
         result = helper.write_handlebars_template(template_id, template_content)
 
-        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}templates/#{expected_filename}")
+        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{expected_filename}")
       end
+    end
+  end
+
+  # Issue #1362 (Stage 1) - the actual sharing/isolation guarantee content addressing is
+  # for: two DIFFERENT users with IDENTICAL rendered content share one compiled file (no
+  # redundant compile); two calls with DIFFERING content (whatever the reason) are always
+  # isolated. master_main_inner is no longer excluded (issue #1362 S4) - see
+  # content_addressing_safety_spec.rb / the option-3 fix in
+  # _search_results_resources_panel.html.erb for the safety investigation and fix behind
+  # why it can now be content-addressed like every other template.
+  describe '#write_handlebars_template content addressing sharing/isolation (issue #1362)' do
+    let(:template_id) { 'shared-template' }
+    let(:identical_content) { '<div>{{field}}</div>' }
+
+    before do
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.partials_compiled_dir.join('*')))
+    end
+
+    it 'returns the SAME compiled path for two different users rendering IDENTICAL content' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-one-key-12')
+      path_one = helper.write_handlebars_template(template_id, identical_content)
+
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-two-key-99')
+      path_two = helper.write_handlebars_template(template_id, identical_content)
+
+      expect(path_two).to eq(path_one)
+    end
+
+    it 'writes the temp file only once for two different users rendering IDENTICAL content' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-one-key-12')
+      helper.write_handlebars_template(template_id, identical_content)
+
+      # Simulate the FIRST user's compile having already completed and been written
+      # to the public dir at the path just returned, so the second (different) user's
+      # call should skip re-writing a temp file entirely.
+      compiled_filename = helper.handlebars_compiled_filename(template_id, identical_content)
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename), '// compiled')
+
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-two-key-99')
+      helper.write_handlebars_template(template_id, identical_content)
+
+      temp_file = helper.handlebars_temp_dir(is_partial: false).join("#{template_id}.handlebars")
+      expect(File.exist?(temp_file)).to be false
+    end
+
+    it 'returns DIFFERENT compiled paths for the SAME user rendering DIFFERENT content' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('same-user-key1')
+
+      path_a = helper.write_handlebars_template(template_id, '<div>{{a}}</div>')
+
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+      path_b = helper.write_handlebars_template(template_id, '<div>{{b}}</div>')
+
+      expect(path_b).not_to eq(path_a)
+    end
+
+    it 'shares master_main_inner across users too, now that the substitution risk is closed at its source' do
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-one-key-12')
+      path_one = helper.write_handlebars_template('master_main_inner', identical_content, is_partial: true)
+
+      helper.instance_variable_set(:@handlebars_request_id, nil)
+      allow(helper).to receive(:handlebars_cache_key).and_return('user-two-key-99')
+      path_two = helper.write_handlebars_template('master_main_inner', identical_content, is_partial: true)
+
+      expect(path_two).to eq(path_one)
+    end
+  end
+
+  # Issue #1362 (Stage 1) - the opportunistic sweep trigger: no cron/background thread
+  # exists in Stage 1, so a request notices a rotation itself (its generation's directory
+  # doesn't exist yet) and sweeps old generations as a side effect, at most once per request.
+  describe '#write_handlebars_template opportunistic generation sweep (issue #1362)' do
+    before do
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TMP_DIR.join('gen-*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('gen-*')))
+    end
+
+    it 'triggers a sweep the first time this request sees the current generation is missing' do
+      expect(HandlebarsPrecompiler).to receive(:sweep_old_generations)
+
+      helper.write_handlebars_template('trigger-test', '<div>{{a}}</div>')
+    end
+
+    it 'only checks/triggers once per request even across many write_handlebars_template calls' do
+      expect(HandlebarsPrecompiler).to receive(:sweep_old_generations).once
+
+      helper.write_handlebars_template('trigger-test-a', '<div>{{a}}</div>')
+      helper.write_handlebars_template('trigger-test-b', '<div>{{b}}</div>')
+      helper.write_handlebars_template('trigger-test-c', '<div>{{c}}</div>')
+    end
+
+    it 'does not trigger a sweep at all once the current generation directory already exists' do
+      FileUtils.mkdir_p(HandlebarsPrecompiler.tmp_generation_dir)
+
+      expect(HandlebarsPrecompiler).not_to receive(:sweep_old_generations)
+
+      helper.write_handlebars_template('trigger-test', '<div>{{a}}</div>')
+    end
+
+    it 'skips the sweep without raising if the sweep lock is already held elsewhere' do
+      allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).with('generation-sweep', wait: 0, on_contention: :skip)
+      expect(HandlebarsPrecompiler).not_to receive(:sweep_old_generations)
+
+      expect { helper.write_handlebars_template('trigger-test', '<div>{{a}}</div>') }.not_to raise_error
     end
   end
 
@@ -330,6 +514,8 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.partials_compiled_dir.join('*')))
     end
 
     context 'when no templates have been written' do
@@ -416,7 +602,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         helper.compile_handlebars_templates
 
         # Should have created compiled file in templates public subdirectory
-        compiled_files = Dir.glob(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join('integration-test-*.js'))
+        compiled_files = Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('integration-test-*.js'))
         expect(compiled_files).not_to be_empty
 
         content = File.read(compiled_files.first)
@@ -448,6 +634,249 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     end
   end
 
+  # Issue #1362 (Stage 1) - duplicate-compile avoidance around the CLI batch compile step.
+  # The FileLock primitive's own concurrency guarantees are proven in file_lock_spec.rb;
+  # these specs prove compile_handlebars_templates_for_type USES it correctly (right
+  # trigger, right re-check timing), using deterministic scenarios rather than real threads.
+  describe '#compile_handlebars_templates duplicate-compile avoidance (issue #1362)' do
+    context 'when the content-addressed output already exists before compiling' do
+      it 'never invokes the CLI at all (cheap pre-filter, no lock needed)' do
+        content = '<div>{{already_done}}</div>'
+        helper.write_handlebars_template('already-compiled', content)
+
+        compiled_filename = helper.handlebars_compiled_filename('already-compiled', content)
+        FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+        File.write(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename), '// already compiled')
+
+        expect(Utilities::ProcessPipes).not_to receive(:pipe_in_out)
+
+        helper.compile_handlebars_templates
+      end
+
+      it 'still cleans up the request-specific temp directory' do
+        content = '<div>{{already_done}}</div>'
+        helper.write_handlebars_template('already-compiled', content)
+
+        compiled_filename = helper.handlebars_compiled_filename('already-compiled', content)
+        FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+        File.write(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename), '// already compiled')
+
+        helper.compile_handlebars_templates
+
+        request_dir = helper.handlebars_temp_dir(is_partial: false)
+        expect(Dir.exist?(request_dir)).to be false
+      end
+    end
+
+    context 'when only SOME of the pending templates are already compiled' do
+      it 'invokes the CLI only for the templates still missing' do
+        pending_content = '<div>{{pending}}</div>'
+        done_content = '<div>{{done}}</div>'
+        helper.write_handlebars_template('pending-one', pending_content)
+        helper.write_handlebars_template('done-one', done_content)
+
+        done_filename = helper.handlebars_compiled_filename('done-one', done_content)
+        FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+        File.write(HandlebarsPrecompiler.templates_compiled_dir.join(done_filename), '// already compiled')
+
+        allow(Utilities::ProcessPipes).to receive(:pipe_in_out).and_return('')
+
+        helper.compile_handlebars_templates
+
+        expect(Utilities::ProcessPipes).to have_received(:pipe_in_out) do |_stdin, cmd|
+          expect(cmd.any? { |arg| arg.to_s.include?('pending-one.handlebars') }).to be true
+          expect(cmd.any? { |arg| arg.to_s.include?('done-one.handlebars') }).to be false
+        end
+      end
+    end
+
+    context 'when the lock is contended by another process' do
+      it 'still runs the CLI unlocked rather than waiting or skipping (on_contention: :proceed)' do
+        helper.write_handlebars_template('contended-one', '<div>{{x}}</div>')
+
+        allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_wrap_original do |original, name, **opts, &block|
+          expect(opts[:wait]).to eq(Settings::HandlebarsLockWaitSeconds)
+          original.call(name, **opts, &block)
+        end
+        allow(Utilities::ProcessPipes).to receive(:pipe_in_out).and_return('')
+
+        helper.compile_handlebars_templates
+
+        expect(Utilities::ProcessPipes).to have_received(:pipe_in_out)
+      end
+
+      it 'skips the CLI if the other process finishes DURING the lock wait (double-checked re-filter)' do
+        content = '<div>{{race}}</div>'
+        helper.write_handlebars_template('race-one', content)
+        compiled_filename = helper.handlebars_compiled_filename('race-one', content)
+        compiled_path = HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename)
+
+        # Simulate another process finishing the compile WHILE this one was
+        # attempting/waiting for the lock, by writing the output just before
+        # the lock block is allowed to run.
+        allow(HandlebarsPrecompiler::FileLock).to receive(:acquire) do |_name, **_opts, &block|
+          FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+          File.write(compiled_path, '// finished by the other process')
+          block.call
+        end
+
+        expect(Utilities::ProcessPipes).not_to receive(:pipe_in_out)
+
+        helper.compile_handlebars_templates
+      end
+    end
+  end
+
+  # Issue #1362 (Stage 1) - split_compiled_output must never leave a partially-written
+  # compiled file visible to a concurrent reader. Calls #split_compiled_output directly
+  # with fake CLI-style output (bypassing the real CLI) so the write behaviour can be
+  # exercised in isolation.
+  describe '#split_compiled_output atomic writes (issue #1362)' do
+    let(:cache_key) { 'atomicsplit1234' }
+    let(:template_source) { '<div>{{hi}}</div>' }
+    let(:cli_output_file) { HandlebarsPrecompiler::TMP_DIR.join('fake_cli_output.js') }
+    let(:cli_output_content) do
+      <<~JS
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates['atomic-template'] = template({"1":function(){return "hi";}});
+        })();
+      JS
+    end
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      File.write(cli_output_file, cli_output_content)
+
+      # split_compiled_output re-reads the preprocessed source from the request-specific
+      # temp dir (content-addressed naming, issue #1362) - normally written earlier by
+      # #write_handlebars_template, recreated here since this spec calls
+      # split_compiled_output directly with fake CLI output.
+      temp_dir = helper.handlebars_temp_dir(is_partial: false)
+      FileUtils.mkdir_p(temp_dir)
+      File.write(temp_dir.join('atomic-template.handlebars'), template_source)
+    end
+
+    after do
+      FileUtils.rm_f(cli_output_file)
+    end
+
+    def compiled_file
+      compiled_filename = helper.handlebars_compiled_filename('atomic-template', template_source)
+      HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename)
+    end
+
+    it 'writes the complete compiled file when no error occurs (regression)' do
+      helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+      expect(File.exist?(compiled_file)).to be true
+      expect(File.read(compiled_file)).to include('Handlebars.template')
+    end
+
+    it 'never leaves a partially-written target file if the write is interrupted' do
+      # Simulate a crash partway through writing the destination content: the first
+      # File.write call (to the atomic temp file) writes truncated bytes then raises.
+      call_count = 0
+      allow(File).to receive(:write).and_wrap_original do |original, path, content|
+        call_count += 1
+        if call_count == 1
+          original.call(path, content[0..2])
+          raise IOError, 'simulated crash mid-write'
+        else
+          original.call(path, content)
+        end
+      end
+
+      expect do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+      end.to raise_error(IOError)
+
+      expect(File.exist?(compiled_file)).to be false
+    end
+
+    it 'does not leave a stray .tmp file behind after a failed write' do
+      allow(File).to receive(:write).and_raise(IOError, 'simulated crash')
+
+      expect do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+      end.to raise_error(IOError)
+
+      leftover_tmp_files = Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*.tmp'))
+      expect(leftover_tmp_files).to be_empty
+    end
+
+    it 'does not overwrite an existing compiled file with partial content on failure' do
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(compiled_file, '// previous good content')
+
+      allow(File).to receive(:write).and_raise(IOError, 'simulated crash')
+
+      expect do
+        helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+      end.to raise_error(IOError)
+
+      expect(File.read(compiled_file)).to eq('// previous good content')
+    end
+  end
+
+  # Issue #1362 should-fix - a per-request temp source file can vanish (cleanup racing
+  # ahead, or a non-web process wiping tmp dirs) between the CLI batch-compiling it and
+  # split_compiled_output re-reading it to compute the compiled filename. Must skip that
+  # one entry rather than raise Errno::ENOENT and fail the WHOLE batch (including other,
+  # unrelated templates compiled in the same CLI call).
+  describe '#split_compiled_output missing source file (issue #1362 should-fix)' do
+    let(:cache_key) { 'missingsrc123456' }
+    let(:present_source) { '<div>{{hi}}</div>' }
+    let(:cli_output_file) { HandlebarsPrecompiler::TMP_DIR.join('fake_cli_output_missing_src.js') }
+    let(:cli_output_content) do
+      <<~JS
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates['vanished-template'] = template({"1":function(){return "gone";}});
+        templates['present-template'] = template({"1":function(){return "hi";}});
+        })();
+      JS
+    end
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      File.write(cli_output_file, cli_output_content)
+
+      temp_dir = helper.handlebars_temp_dir(is_partial: false)
+      FileUtils.mkdir_p(temp_dir)
+      # 'vanished-template.handlebars' is deliberately NOT created, simulating the race.
+      File.write(temp_dir.join('present-template.handlebars'), present_source)
+    end
+
+    after do
+      FileUtils.rm_f(cli_output_file)
+    end
+
+    it 'does not raise when a template\'s source file is missing' do
+      expect { helper.send(:split_compiled_output, cli_output_file, is_partial: false) }.not_to raise_error
+    end
+
+    it 'logs a warning naming the missing source file' do
+      warnings = []
+      allow(Rails.logger).to receive(:warn) { |msg| warnings << msg }
+
+      helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+      expect(warnings).to include(a_string_matching(/vanished-template.*source file missing/))
+    end
+
+    it 'still compiles the OTHER template whose source file is present' do
+      helper.send(:split_compiled_output, cli_output_file, is_partial: false)
+
+      compiled_filename = helper.handlebars_compiled_filename('present-template', present_source)
+      expect(File.exist?(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename))).to be true
+    end
+  end
+
   describe '#write_multiple_handlebars_templates' do
     let(:cache_key) { 'multi123456789' }
 
@@ -457,21 +886,292 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       allow(helper).to receive(:current_admin).and_return(nil)
 
       HandlebarsPrecompiler.setup_directories
-      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
     end
 
     it 'generates multi file URL without double slashes' do
-      # Create a compiled template file so read_handlebars_template can find it
-      FileUtils.mkdir_p(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR)
-      compiled_file = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("test_template-#{cache_key}.js")
+      # Create a compiled template file so it can be read via its compiled_file_path
+      source = '<div>{{x}}</div>'
+      compiled_filename = helper.handlebars_compiled_filename('test_template', source)
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      compiled_file = HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename)
       File.write(compiled_file, '(function() { var template = Handlebars.template; })();')
 
-      templates = [{ id: 'test_template', is_partial: false, compiled_file_path: 'irrelevant' }]
+      templates = [{ id: 'test_template', is_partial: false,
+                     compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{compiled_filename}" }]
       url, = helper.write_multiple_handlebars_templates(templates)
 
       expect(url).not_to include('//')
       expect(url).to start_with(HandlebarsPrecompiler::URL_RELATIVE_PATH)
       expect(url).to include('/multi/')
+    end
+  end
+
+  # Issue #1362 S6 fix - a generation can be swept, or a delayed_job restart can wipe the
+  # tmp dirs, in the narrow window between write_handlebars_template confirming a compiled
+  # file exists and write_multiple_handlebars_templates reading it back. Must degrade
+  # (omit that one template) rather than raise and fail the whole bundle/page - the
+  # front-end already tolerates a missing template (see _fpa.js's "Template not found"
+  # console.log guard).
+  describe '#write_multiple_handlebars_templates missing compiled file (issue #1362 S6 fix)' do
+    let(:missing_template_path) do
+      "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/does-not-exist-abc123.js"
+    end
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return('missingfile123456')
+      allow(helper).to receive(:current_user).and_return(Struct.new(:id, :current_sign_in_at, :app_type_id).new(1, Time.at(1_000_000), 2))
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
+    end
+
+    it 'omits a template whose compiled file is missing instead of raising' do
+      templates = [{ id: 'missing_template', is_partial: false, compiled_file_path: missing_template_path }]
+
+      expect { helper.write_multiple_handlebars_templates(templates) }.not_to raise_error
+    end
+
+    it 'logs a warning naming the missing file' do
+      templates = [{ id: 'missing_template', is_partial: false, compiled_file_path: missing_template_path }]
+
+      # Also logs a separate "skipping multi-file assembly" warning (issue #1362
+      # should-fix) - collect all warnings rather than a strict single-call expectation.
+      warnings = []
+      allow(Rails.logger).to receive(:warn) { |msg| warnings << msg }
+
+      helper.write_multiple_handlebars_templates(templates)
+
+      expect(warnings).to include(a_string_matching(/missing at read time/))
+    end
+
+    it 'does NOT persist the multi bundle when a requested template is missing (avoids permanently caching a degraded bundle)' do
+      good_source = '<div>{{ok}}</div>'
+      good_filename = helper.handlebars_compiled_filename('present_template', good_source)
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(good_filename),
+                 '(function() { templates["present_template"] = 1; })();')
+
+      templates = [
+        { id: 'missing_template', is_partial: false, compiled_file_path: missing_template_path },
+        { id: 'present_template', is_partial: false,
+          compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{good_filename}" }
+      ]
+
+      url, = helper.write_multiple_handlebars_templates(templates)
+      multi_file = HandlebarsPrecompiler.multi_dir.join(url.split('/').last)
+
+      expect(File.exist?(multi_file)).to be false
+    end
+
+    it 'assembles and persists the bundle on a LATER request once the missing template becomes available' do
+      good_source = '<div>{{ok}}</div>'
+      good_filename = helper.handlebars_compiled_filename('present_template', good_source)
+      recovered_source = '<div>{{later}}</div>'
+      recovered_filename = helper.handlebars_compiled_filename('missing_template', recovered_source)
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(good_filename),
+                 '(function() { templates["present_template"] = 1; })();')
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(recovered_filename),
+                 '(function() { templates["missing_template"] = 1; })();')
+
+      templates = [
+        { id: 'missing_template', is_partial: false,
+          compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{recovered_filename}" },
+        { id: 'present_template', is_partial: false,
+          compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{good_filename}" }
+      ]
+
+      url, = helper.write_multiple_handlebars_templates(templates)
+      multi_file = HandlebarsPrecompiler.multi_dir.join(url.split('/').last)
+
+      expect(File.exist?(multi_file)).to be true
+      content = File.read(multi_file)
+      expect(content).to include('present_template')
+      expect(content).to include('missing_template')
+    end
+  end
+
+  # Issue #1362 S11 fix - the template name is parsed out of the Handlebars CLI's own
+  # output, not generated by us, so it must be sanitized the same way every other path
+  # built from a template id in this file already is, before being interpolated into a
+  # filesystem path.
+  describe '#split_compiled_output template name sanitization (issue #1362 S11 fix)' do
+    let(:malicious_name) { '../../etc/passwd' }
+    let(:malicious_source) { '<div>{{danger}}</div>' }
+    let(:cli_output_file) { HandlebarsPrecompiler::TMP_DIR.join('fake_cli_output_sanitize.js') }
+    let(:cli_output_content) do
+      <<~JS
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates['#{malicious_name}'] = template({"1":function(){return "danger";}});
+        })();
+      JS
+    end
+
+    before do
+      HandlebarsPrecompiler.setup_directories
+      File.write(cli_output_file, cli_output_content)
+
+      # Written at the SANITIZED path, exactly as #write_handlebars_template would have
+      # written it (it sanitizes the id before ever touching the filesystem).
+      safe_name = malicious_name.gsub(/[^a-zA-Z0-9_-]/, '_')
+      temp_dir = helper.handlebars_temp_dir(is_partial: false)
+      FileUtils.mkdir_p(temp_dir)
+      File.write(temp_dir.join("#{safe_name}.handlebars"), malicious_source)
+    end
+
+    after do
+      FileUtils.rm_f(cli_output_file)
+    end
+
+    it 'reads the source from the sanitized path rather than the raw CLI-provided name' do
+      expect { helper.send(:split_compiled_output, cli_output_file, is_partial: false) }.not_to raise_error
+
+      compiled_filename = helper.handlebars_compiled_filename(malicious_name, malicious_source)
+      expect(File.exist?(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename))).to be true
+    end
+  end
+
+  # Issue #1362 (Stage 1) - write_multiple_handlebars_templates must never leave a
+  # partially-written multi bundle visible to a concurrent reader.
+  describe '#write_multiple_handlebars_templates atomic writes (issue #1362)' do
+    let(:cache_key) { 'atomicmulti1234' }
+    let(:user) { Struct.new(:id, :current_sign_in_at, :app_type_id).new(99, Time.at(1_000_000), 3) }
+    let(:template_source) { '<div>{{x}}</div>' }
+    let(:compiled_filename) { helper.handlebars_compiled_filename('atomic_multi_tpl', template_source) }
+    let(:templates) do
+      [{ id: 'atomic_multi_tpl', is_partial: false,
+         compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{compiled_filename}" }]
+    end
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*')))
+
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename),
+                 '(function() { var t = Handlebars.template; })();')
+    end
+
+    def multi_file_path
+      req_digest = Digest::SHA256.hexdigest([%w[atomic_multi_tpl], []].join(','))
+      access_control_version = helper.access_control_version
+      HandlebarsPrecompiler.multi_dir.join(
+        "requested-templates-#{user.id}-#{user.app_type_id}-#{req_digest}-#{access_control_version}.js"
+      )
+    end
+
+    it 'never leaves a partially-written multi bundle if the write is interrupted' do
+      allow(File).to receive(:write).and_raise(IOError, 'simulated crash mid-write')
+
+      expect do
+        helper.write_multiple_handlebars_templates(templates)
+      end.to raise_error(IOError)
+
+      expect(File.exist?(multi_file_path)).to be false
+    end
+
+    it 'does not leave a stray .tmp file behind after a failed write' do
+      allow(File).to receive(:write).and_raise(IOError, 'simulated crash')
+
+      expect do
+        helper.write_multiple_handlebars_templates(templates)
+      end.to raise_error(IOError)
+
+      leftover_tmp_files = Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.tmp'))
+      expect(leftover_tmp_files).to be_empty
+    end
+
+    it 'does not overwrite an existing multi bundle with partial content on failure' do
+      # Prime a good file first
+      helper.write_multiple_handlebars_templates(templates)
+      good_content = File.read(multi_file_path)
+
+      # Force a re-write by deleting the marker the code uses to decide freshness is not
+      # applicable here (File.exist? check) — instead simulate an external forced rebuild
+      # by stubbing File.exist? for the multi file to false so it re-enters the write path.
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with(multi_file_path).and_return(false)
+      allow(File).to receive(:write).and_raise(IOError, 'simulated crash')
+
+      expect do
+        helper.write_multiple_handlebars_templates(templates)
+      end.to raise_error(IOError)
+
+      expect(File.read(multi_file_path)).to eq(good_content)
+    end
+  end
+
+  # Issue #1362 (Stage 1) - duplicate-assembly avoidance around the multi-bundle write.
+  describe '#write_multiple_handlebars_templates duplicate-write avoidance (issue #1362)' do
+    let(:cache_key) { 'lockmulti123456' }
+    let(:user) { Struct.new(:id, :current_sign_in_at, :app_type_id).new(7, Time.at(1_000_000), 4) }
+    let(:template_source) { '<div>{{lock}}</div>' }
+    let(:compiled_filename) { helper.handlebars_compiled_filename('lock_multi_tpl', template_source) }
+    let(:templates) do
+      [{ id: 'lock_multi_tpl', is_partial: false,
+         compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{compiled_filename}" }]
+    end
+
+    before do
+      allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:current_admin).and_return(nil)
+
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*')))
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      File.write(HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename),
+                 '(function() { var t = Handlebars.template; })();')
+    end
+
+    it 'acquires the lock with the configured wait before assembling a new bundle' do
+      allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_wrap_original do |original, name, **opts, &block|
+        expect(opts[:wait]).to eq(Settings::HandlebarsLockWaitSeconds)
+        original.call(name, **opts, &block)
+      end
+
+      helper.write_multiple_handlebars_templates(templates)
+
+      expect(HandlebarsPrecompiler::FileLock).to have_received(:acquire)
+    end
+
+    it 'skips assembling the bundle if another process finishes DURING the lock wait' do
+      req_digest = Digest::SHA256.hexdigest([%w[lock_multi_tpl], []].join(','))
+      multi_file = HandlebarsPrecompiler.multi_dir.join(
+        "requested-templates-#{user.id}-#{user.app_type_id}-#{req_digest}-#{helper.access_control_version}.js"
+      )
+
+      # Simulate another process finishing the bundle WHILE this one was attempting/
+      # waiting for the lock.
+      allow(HandlebarsPrecompiler::FileLock).to receive(:acquire) do |_name, **_opts, &block|
+        FileUtils.mkdir_p(HandlebarsPrecompiler.multi_dir)
+        File.write(multi_file, '// finished by the other process')
+        block.call
+      end
+
+      expect(File).not_to receive(:read).with(a_string_including('lock_multi_tpl'))
+
+      helper.write_multiple_handlebars_templates(templates)
+    end
+
+    it 'does not attempt to acquire a lock when the bundle already exists up front' do
+      req_digest = Digest::SHA256.hexdigest([%w[lock_multi_tpl], []].join(','))
+      multi_file = HandlebarsPrecompiler.multi_dir.join(
+        "requested-templates-#{user.id}-#{user.app_type_id}-#{req_digest}-#{helper.access_control_version}.js"
+      )
+      FileUtils.mkdir_p(HandlebarsPrecompiler.multi_dir)
+      File.write(multi_file, '// already there')
+
+      expect(HandlebarsPrecompiler::FileLock).not_to receive(:acquire)
+
+      helper.write_multiple_handlebars_templates(templates)
     end
   end
 
@@ -488,7 +1188,12 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     let(:cache_key) { 'cachekey123456' }
     let(:sign_in_time) { Time.at(1_000_000) }
     let(:user) { Struct.new(:id, :current_sign_in_at, :app_type_id).new(42, sign_in_time, 7) }
-    let(:templates) { [{ id: 'tpl_alpha', is_partial: false, compiled_file_path: 'irrelevant' }] }
+    let(:template_source) { '<div>{{alpha}}</div>' }
+    let(:compiled_filename) { helper.handlebars_compiled_filename('tpl_alpha', template_source) }
+    let(:templates) do
+      [{ id: 'tpl_alpha', is_partial: false,
+         compiled_file_path: "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{compiled_filename}" }]
+    end
 
     before do
       allow(helper).to receive(:handlebars_cache_key).and_return(cache_key)
@@ -496,11 +1201,11 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       allow(helper).to receive(:current_admin).and_return(nil)
 
       HandlebarsPrecompiler.setup_directories
-      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
 
-      # Create compiled template files so read_handlebars_template succeeds
-      FileUtils.mkdir_p(HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR)
-      compiled_file = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("tpl_alpha-#{cache_key}.js")
+      # Create the compiled template file so it can be read via its compiled_file_path
+      FileUtils.mkdir_p(HandlebarsPrecompiler.templates_compiled_dir)
+      compiled_file = HandlebarsPrecompiler.templates_compiled_dir.join(compiled_filename)
       File.write(compiled_file, '(function() { var t = Handlebars.template; })();')
     end
 
@@ -534,7 +1239,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       it 'calls File.write exactly once for two identical invocations' do
         write_count = 0
         allow(File).to receive(:write).and_wrap_original do |original, *args|
-          # Only count writes to the MULTI_PUBLIC_DIR
+          # Only count writes to the multi dir
           write_count += 1 if args.first.to_s.include?('multi/')
           original.call(*args)
         end
@@ -565,7 +1270,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         allow(helper).to receive(:current_user).and_return(new_user)
 
         # Clean multi dir to force fresh write
-        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
 
         url_after, = helper.write_multiple_handlebars_templates(templates)
 
@@ -609,7 +1314,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         url_before, = helper.write_multiple_handlebars_templates(templates)
 
         # Clean multi dir and change userrole timestamp
-        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
         allow(Admin::UserRole).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(5_000_000)])
 
         # Clear any memoization
@@ -624,7 +1329,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         url_before, = helper.write_multiple_handlebars_templates(templates)
 
         # Clean multi dir and change uac timestamp
-        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
         allow(Admin::UserAccessControl).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(8_000_000)])
 
         # Clear any memoization
@@ -645,11 +1350,11 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         new_cache_key = 'newcachekey1234'
         allow(helper).to receive(:handlebars_cache_key).and_return(new_cache_key)
 
-        new_compiled = HandlebarsPrecompiler::TEMPLATES_PUBLIC_DIR.join("tpl_alpha-#{new_cache_key}.js")
+        new_compiled = HandlebarsPrecompiler.templates_compiled_dir.join("tpl_alpha-#{new_cache_key}.js")
         File.write(new_compiled, '(function() { var t = Handlebars.template; })();')
 
         # Clean multi dir to force fresh write
-        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::MULTI_PUBLIC_DIR.join('*.js')))
+        FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.multi_dir.join('*.js')))
 
         # Clear any memoization
         helper.instance_variable_set(:@access_control_version, nil)
@@ -933,73 +1638,16 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     end
   end
 
-  # Issue #1279 follow-up - write_handlebars_template cross-user cache poisoning within
-  # the same app_type
-  #
-  # Mirrors the cross-app_type poisoning tests above, but holds app_type_id constant and
-  # varies only the user, proving that two different users in the same app_type no longer
-  # share (and poison) a single compiled file.
-  describe '#write_handlebars_template cross-user cache poisoning within same app_type (issue #1279 follow-up)' do
-    let(:user_one) do
-      Struct.new(:id, :app_type_id, :current_sign_in_at).new(11, 1, Time.current)
-    end
-    let(:user_two) do
-      Struct.new(:id, :app_type_id, :current_sign_in_at).new(12, 1, Time.current)
-    end
-    let(:template_id) { 'master_tabs' }
-    let(:content_user_one) { '<div class="panel-user1">{{panel_one}}</div>' }
-    let(:content_user_two) { '<div class="panel-user2">{{panel_two}}{{panel_three}}</div>' }
-
-    before do
-      allow(helper).to receive(:current_admin).and_return(nil)
-      HandlebarsPrecompiler.setup_directories
-      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
-      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
-      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
-    end
-
-    it 'writes separate compiled files for different users with the same template_id and app_type' do
-      allow(helper).to receive(:current_user).and_return(user_one)
-      path_user_one = helper.write_handlebars_template(template_id, content_user_one, is_partial: true)
-
-      helper.instance_variable_set(:@handlebars_cache_key, nil)
-      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
-      helper.instance_variable_set(:@handlebars_request_id, nil)
-
-      allow(helper).to receive(:current_user).and_return(user_two)
-      path_user_two = helper.write_handlebars_template(template_id, content_user_two, is_partial: true)
-
-      expect(path_user_one).not_to eq(path_user_two),
-                                   'Expected write_handlebars_template to produce different compiled file paths ' \
-                                   'for different users (11 vs 12) in the same app_type, but both returned ' \
-                                   "'#{path_user_one}'. Cross-user cache poisoning within an app_type " \
-                                   '(issue #1279 follow-up).'
-    end
-
-    it 'does not skip writing when a compiled file exists from a different user in the same app_type' do
-      allow(helper).to receive(:current_user).and_return(user_one)
-      compiled_filename = helper.handlebars_compiled_filename(template_id)
-      public_dir = helper.handlebars_public_dir(is_partial: true)
-      FileUtils.mkdir_p(public_dir)
-      compiled_file = public_dir.join(compiled_filename)
-      File.write(compiled_file, "// compiled for user 11: #{content_user_one}")
-
-      helper.instance_variable_set(:@handlebars_cache_key, nil)
-      helper.instance_variable_set(:@handlebars_item_updates_key, nil)
-      helper.instance_variable_set(:@handlebars_request_id, nil)
-
-      allow(helper).to receive(:current_user).and_return(user_two)
-      helper.write_handlebars_template(template_id, content_user_two, is_partial: true)
-
-      request_dir = helper.handlebars_temp_dir(is_partial: true)
-      temp_file = request_dir.join("#{template_id}.handlebars")
-
-      expect(File.exist?(temp_file)).to be(true),
-                                        'Expected write_handlebars_template to write a temp file for user 12, ' \
-                                        'but it skipped because a compiled file from user 11 already exists at ' \
-                                        "'#{compiled_file}'. Cross-user cache poisoning (issue #1279 follow-up)."
-    end
-  end
+  # Issue #1362 S9 fix: the former "#write_handlebars_template cross-user cache
+  # poisoning within same app_type (issue #1279 follow-up)" spec block was removed here -
+  # under content addressing it only proved that DIFFERENT content produces different
+  # paths (true for any two users, tautological, and already covered more directly by
+  # "content addressing sharing/isolation" above), and its "does not skip writing" example
+  # built its fixture at the non-addressed handlebars_cache_key path, which
+  # write_handlebars_template no longer checks for a content-addressed template id. The
+  # actual #1279 guarantee (handlebars_cache_key/handlebars_compiled_filename differ per
+  # user) is still directly tested by "#handlebars_cache_key user scope (issue #1279
+  # follow-up - per-user)" below.
 
   # Issue #1279 follow-up - global (app_type_id: nil) role/access-control changes must
   # invalidate the cache key too.
@@ -1067,6 +1715,8 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PARTIALS_TMP_DIR.join('*')))
       FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.partials_compiled_dir.join('*')))
     end
 
     it 'writes separate temp files for different app_type contexts with the same template_id' do
