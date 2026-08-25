@@ -148,6 +148,31 @@ module OptionConfigs
           end
         end
 
+        # Validate only the structural and type constraints. Nested trigger tasks
+        # do not have the context needed for descriptor-level semantic checks.
+        def validate_structural_config(config)
+          return [] if @_pattern == :delegate
+
+          return config.flat_map { |entry| validate_structural_config(entry) } if config.is_a?(Array)
+
+          return [] unless config.is_a?(Hash)
+
+          case @_pattern
+          when :direct_config
+            validate_direct(config)
+          when :named_entry
+            validate_named_entries(config)
+          else
+            []
+          end
+        end
+
+        # Validation hook for trigger tasks. Most trigger types can use their
+        # complete validation; types with context-dependent semantics may narrow it.
+        def validate_for_trigger_tasks(config)
+          validate_config(config)
+        end
+
         private
 
         # Ensure all trigger type descriptor classes are loaded.
@@ -241,6 +266,74 @@ module OptionConfigs
             warnings << "#{key} must be #{desc}"
           end
           warnings
+        end
+
+        # Returns true if a config value is a dynamic substitution ({{...}}) or
+        # conditional Hash that cannot be statically validated.
+        def skip_dynamic_value?(value)
+          value.is_a?(Hash) || ((value.is_a?(String) || value.is_a?(Symbol)) && value.to_s.include?('{{'))
+        end
+
+        # Validate an app_type reference value. Returns warning strings.
+        # @param value [Object] the raw config value
+        # @param key_label [String] label for warning messages (e.g. "app_type", "store_in_app_type")
+        # @return [Array<String>]
+        def validate_app_type_ref(value, key_label)
+          return [] if value.nil?
+          return [] if skip_dynamic_value?(value)
+
+          app_type = find_app_type_for_validation(value)
+          if app_type.nil?
+            ["#{key_label} '#{value}' does not reference a known app type"]
+          elsif app_type.disabled
+            ["#{key_label} '#{value}' references a disabled app type"]
+          else
+            []
+          end
+        rescue ActiveRecord::StatementInvalid
+          []
+        end
+
+        # Validate a user reference value (by ID or email). Returns warning strings.
+        # @param value [Object] the raw config value
+        # @param key_label [String] label for warning messages (e.g. "user", "for_user")
+        # @return [Array<String>]
+        def validate_user_ref(value, key_label)
+          return [] if value.nil?
+          return [] if skip_dynamic_value?(value)
+
+          user = find_user_for_validation(value)
+          if user.nil?
+            ["#{key_label} '#{value}' does not reference a known user"]
+          elsif user.disabled
+            ["#{key_label} '#{value}' references a disabled user"]
+          elsif user.account_expired?
+            ["#{key_label} '#{value}' references an expired user"]
+          else
+            []
+          end
+        rescue ActiveRecord::StatementInvalid
+          []
+        end
+
+        def find_app_type_for_validation(value)
+          if integer_reference?(value)
+            Admin::AppType.find_by(id: value.to_i)
+          else
+            Admin::AppType.find_by(name: value.to_s)
+          end
+        end
+
+        def find_user_for_validation(value)
+          if integer_reference?(value)
+            User.find_by(id: value.to_i)
+          else
+            User.find_by(email: value.to_s)
+          end
+        end
+
+        def integer_reference?(value)
+          value.is_a?(Integer) || value.to_i.to_s == value.to_s
         end
 
         # Validate the inner keys of a nested Hash value (or each Hash within an

@@ -37,7 +37,7 @@ module OptionConfigs
           return config.flat_map { |entry| validate_config(entry) } if config.is_a?(Array)
           return [] unless config.is_a?(Hash)
 
-          warnings = super
+          warnings = validate_structural_config(config)
           warnings.concat(semantic_warnings(config))
           warnings
         end
@@ -53,6 +53,10 @@ module OptionConfigs
           check_subject_semantics(hash, warnings)
           check_layout_template_semantics(hash, warnings)
           check_content_template_semantics(hash, warnings)
+          check_role_semantics(hash, warnings)
+          check_users_semantics(hash, warnings)
+          check_app_type_semantics(hash, warnings)
+          check_user_semantics(hash, warnings)
 
           warnings
         end
@@ -115,6 +119,63 @@ module OptionConfigs
               warnings << msg
             end
           end
+        end
+
+        def check_role_semantics(hash, warnings)
+          roles = literal_values(hash[:role]).select { |val| literal_string?(val) }
+          return if roles.empty?
+
+          active_role_names = active_role_names_for_validation(app_type: role_app_type(hash))
+          roles.each do |role|
+            next if active_role_names.include?(role.to_s)
+
+            warnings << "role '#{role}' is not a known active role"
+          end
+        end
+
+        def check_users_semantics(hash, warnings)
+          user_ids = literal_values(hash[:users]).filter_map do |val|
+            next unless val.is_a?(Integer) || (literal_string?(val) && val.to_s.match?(/\A-?\d+\z/))
+
+            val.to_i
+          end
+          return if user_ids.empty?
+
+          user_ids.each do |user_id|
+            warnings.concat(validate_user_ref(user_id, 'users'))
+          end
+        end
+
+        def check_app_type_semantics(hash, warnings)
+          warnings.concat(validate_app_type_ref(hash[:app_type], 'app_type'))
+        end
+
+        def check_user_semantics(hash, warnings)
+          warnings.concat(validate_user_ref(hash[:user], 'user'))
+        end
+
+        def literal_values(val)
+          return [] if val.nil? || val.is_a?(Hash)
+
+          values = val.is_a?(Array) ? val : [val]
+          values.grep_v(Hash)
+        end
+
+        def active_role_names_for_validation(app_type: nil)
+          return [] if app_type == false
+
+          Admin::UserRole.active_role_names(app_type && { app_type: })
+        rescue ActiveRecord::StatementInvalid
+          []
+        end
+
+        def role_app_type(hash)
+          app_type = hash[:app_type]
+          return unless app_type.is_a?(Integer) || literal_string?(app_type)
+
+          Admin::AppType.find_active_by_name_or_id(app_type, only_active_on_server: true) || false
+        rescue ActiveRecord::RecordNotFound
+          false
         end
 
         def literal_string?(val)

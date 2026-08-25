@@ -168,9 +168,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @receiving_user_ids.uniq!
 
     # Clean up user list to remove users that are set to no-send emails (if an email is being sent)
-    # or are template users
+    # or are template users or have expired accounts
     rusers = User.active.where(id: @receiving_user_ids)
-    rusers = rusers.reject { |u| u.a_template_or_batch_user? || (email? && u.do_not_email) }
+    rusers = rusers.reject { |u| u.a_template_or_batch_user? || u.account_expired? || (email? && u.do_not_email) }
     @receiving_user_ids = rusers.map(&:id)
   end
 

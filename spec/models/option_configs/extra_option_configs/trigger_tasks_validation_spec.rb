@@ -64,7 +64,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'universal keys' do
     it 'accepts :if as a valid key in a direct-config trigger type' do
       instance = klass.new(notify: { type: 'email', role: 'admin', if: { always: true } })
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
 
     it 'accepts :on_complete as a valid key in a direct-config trigger type with no spurious warnings' do
@@ -123,7 +124,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
     it 'does not warn for a valid array-valued notify' do
       instance = klass.new(notify: [{ type: 'email', role: 'admin' }, { type: 'sms', phones: '{{phone}}' }])
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
 
     it 'validates keys in each element of an array-valued log' do
@@ -259,18 +261,23 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
   describe 'named-entry trigger key validation' do
     context 'notify (direct-config)' do
       it 'accepts valid keys without warnings' do
+        # Only structural (unrecognized-key / type-mismatch) warnings are checked here;
+        # this minimal fixture has no DB-backed template/role data for semantic checks.
         instance = klass.new(notify: { type: 'email', role: 'admin', subject: 'Test' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts an integer app_type without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 1 })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/app_type must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a string app_type without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', app_type: 'study info' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/app_type must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a Hash app_type without warnings, since it is resolved via FieldDefaults' do
@@ -281,12 +288,14 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts an integer user without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', user: 1 })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/user must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a string (email) user without warnings' do
         instance = klass.new(notify: { type: 'email', role: 'admin', user: 'fphsetl@hms.harvard.edu' })
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/user must be/) }
+        expect(key_warnings).to be_empty
       end
 
       it 'accepts a Hash user without warnings, since it is resolved via FieldDefaults' do
@@ -436,7 +445,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts an integer store_as_user and store_in_app_type without warnings' do
         instance = klass.new(generate_document: { doc1: { content_template_name: 'template', filename: 'out.pdf',
-                                                          store_as_user: 1, store_in_app_type: 2 } })
+                                                          store_as_user: 1, store_in_app_type: 1 } })
         expect(instance.config_warnings).to be_empty
       end
 
@@ -701,7 +710,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                                { when: { all: { this: { f: 1 } } }, then: [{ notify: { type: 'email', role: 'admin' } }] },
                                { else: [{ log: { message: 'no match' } }] }
                              ])
-        expect(instance.config_warnings).to be_empty
+        key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+        expect(key_warnings).to be_empty
       end
     end
   end
@@ -740,7 +750,8 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                              { change_user_roles: { add_role_names: ['admin'] } },
                              { transaction: [{ log: { message: 'done' } }] }
                            ])
-      expect(instance.config_warnings).to be_empty
+      key_warnings = instance.config_warnings.select { |w| w[:message]&.match?(/unrecognized key|must be /) }
+      expect(key_warnings).to be_empty
     end
   end
 

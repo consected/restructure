@@ -13,13 +13,8 @@ RSpec.describe 'ExtraOptionConfigs registry and class structure', type: :model d
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:each) do
-    create_admin
-    create_user
-    setup_access :trackers
-    setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+  before(:all) do
+    set_up_extra_options_configs
   end
 
   # ──────────────────────────────────────────────────────────────
@@ -97,8 +92,8 @@ RSpec.describe 'ExtraOptionConfigs registry and class structure', type: :model d
         next unless config_class.respond_to?(:source_attribute) && config_class.source_attribute
 
         expect(base).to include(config_class.source_attribute),
-                         "Expected base_key_attributes to include :#{config_class.source_attribute} " \
-                         "for source_attribute class #{config_class.name}"
+                        "Expected base_key_attributes to include :#{config_class.source_attribute} " \
+                        "for source_attribute class #{config_class.name}"
       end
 
       # ActivityLogOptions source_attribute classes (e.g. ESignConfig)
@@ -108,8 +103,8 @@ RSpec.describe 'ExtraOptionConfigs registry and class structure', type: :model d
         next unless config_class.respond_to?(:source_attribute) && config_class.source_attribute
 
         expect(alo_all_attrs).to include(config_class.source_attribute),
-                                  "Expected ActivityLogOptions key_attributes to include :#{config_class.source_attribute} " \
-                                  "for source_attribute class #{config_class.name}"
+                                 "Expected ActivityLogOptions key_attributes to include :#{config_class.source_attribute} " \
+                                 "for source_attribute class #{config_class.name}"
       end
     end
 

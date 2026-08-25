@@ -56,4 +56,13 @@ module ExtraOptionConfigsSupport
     @dm.update!(options: yaml, current_admin: @admin)
     @dm.option_configs
   end
+
+  def set_up_extra_options_configs
+    create_admin
+    create_user
+    setup_access :trackers
+    setup_access :tracker_histories
+    @dm = generate_test_dynamic_model
+    setup_access :dynamic_model__test_created_by_recs, user: @user
+  end
 end
