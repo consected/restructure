@@ -435,6 +435,19 @@
     } %>
 
 
+<%
+  # The bare and "dynamic_model__"-stripped ids below do NOT vary per option_type_config
+  # (unlike the id used just below, which embeds name_with_option_type), yet a def_record
+  # with more than one option_type_config renders this whole partial once per config - so
+  # without this guard, these two ids get re-registered on each iteration with DIFFERING
+  # baked-in content (a different name_with_option_type each time), which the Handlebars
+  # runtime can only ever store one version of anyway (Handlebars.templates[id] is a single
+  # slot) and which broke the server-side compile pipeline entirely (issue #1379). Only the
+  # DEFAULT option type's content is a meaningful "no option type" fallback, so only emit
+  # these two ids once, for that one config.
+  emit_option_type_agnostic_ids = emit_option_type_agnostic_handlebars_ids?(option_type_config_name, default_option_type_name)
+%>
+<% if emit_option_type_agnostic_ids %>
 <%= handlebars_template_tag("#{name.underscore.gsub('dynamic_model__', '').hyphenate}-result-template") do %>
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
@@ -445,6 +458,7 @@
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name_with_option_type%>' orig_name="<%=name.underscore%>" activity_log_references_name='<%=activity_log_references_name%>' result_data=this}}
   {{/with}}
+<% end %>
 <% end %>
 
 <%= handlebars_template_tag("#{name_with_option_type.hyphenate}-result-template") do %>

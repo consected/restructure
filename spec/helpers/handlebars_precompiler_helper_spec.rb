@@ -287,6 +287,119 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
     end
   end
 
+  # Issue #1379 upstream fix: common_templates/_search_results_template.html.erb renders once
+  # per option_type_config for a def_record (see OptionConfigs::TemplateOptionMapping.dynamic_model_mapping),
+  # but its bare/"dynamic_model__"-stripped result-template ids do not vary by option type, so
+  # a def_record with 2+ option_type_configs used to queue the SAME id with DIFFERING content
+  # (a different name_with_option_type baked in) on each iteration - exactly the collision that
+  # broke the whole page's multi-bundle (see the '#write_handlebars_template content addressing
+  # sharing/isolation' spec above). This method decides whether the view should emit those two
+  # ids for the CURRENT option_type_config - only true for the def_record's default option type.
+  describe '#emit_option_type_agnostic_handlebars_ids?' do
+    it 'is true when there is no option type at all (option_type_config_name is nil)' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?(nil, :default)).to be true
+    end
+
+    it 'is true when there is no option type at all (option_type_config_name is blank)' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?('', :default)).to be true
+    end
+
+    it 'is true for the def_record\'s default option type' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?(:default, :default)).to be true
+    end
+
+    it 'is true for the default option type even when the default has a custom name' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?('alt_default', 'alt_default')).to be true
+    end
+
+    it 'is true when comparing a String option_type_config_name against a Symbol default' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?('default', :default)).to be true
+    end
+
+    it 'is false for a NON-default option type' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?('view_1', :default)).to be false
+    end
+
+    it 'is false for a non-default option type even with a custom default name' do
+      expect(helper.emit_option_type_agnostic_handlebars_ids?('view_1', 'alt_default')).to be false
+    end
+  end
+
+  # End-to-end proof (issue #1379) that the view guard, once wired into
+  # common_templates/_search_results_template.html.erb, stops a multi-option-type def_record
+  # from queuing a guaranteed-broken duplicate of the bare result-template id. Simulates the
+  # two calls _search_results_template.html.erb makes per option_type_config, gated by
+  # #emit_option_type_agnostic_handlebars_ids? exactly as the view does.
+  describe 'view guard integration (issue #1379)' do
+    before do
+      HandlebarsPrecompiler.setup_directories
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::TEMPLATES_TMP_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler::PUBLIC_DIR.join('*')))
+      FileUtils.rm_rf(Dir.glob(HandlebarsPrecompiler.templates_compiled_dir.join('*')))
+    end
+
+    def simulate_option_type_iteration(option_type_config_name:, default_option_type_name: :default)
+      bare_id = 'femfl-former-spouses-data-rc-result-template'
+      content = "<div>{{option_type_config_name}}#{option_type_config_name}</div>"
+
+      if helper.emit_option_type_agnostic_handlebars_ids?(option_type_config_name, default_option_type_name)
+        helper.handlebars_template_tag(bare_id) { content }
+      end
+
+      option_type_specific_id = "femfl-former-spouses-data-#{option_type_config_name}-rc-result-template"
+      helper.handlebars_template_tag(option_type_specific_id) { content }
+    end
+
+    it 'queues the bare id exactly ONCE across multiple option_type_config iterations' do
+      simulate_option_type_iteration(option_type_config_name: :default)
+      simulate_option_type_iteration(option_type_config_name: :view_1)
+      simulate_option_type_iteration(option_type_config_name: :view_2)
+
+      queued = helper.instance_variable_get(:@requested_handlebars_templates)
+      bare_id_entries = queued.select { |t| t[:id] == 'femfl-former-spouses-data-rc-result-template' }
+
+      expect(bare_id_entries.length).to eq(1)
+    end
+
+    it 'the single queued bare-id entry resolves to a compiled file that actually exists after compiling' do
+      simulate_option_type_iteration(option_type_config_name: :default)
+      simulate_option_type_iteration(option_type_config_name: :view_1)
+
+      queued = helper.instance_variable_get(:@requested_handlebars_templates)
+      bare_id_entry = queued.find { |t| t[:id] == 'femfl-former-spouses-data-rc-result-template' }
+
+      cli_output = <<~JS
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates['femfl-former-spouses-data-rc-result-template'] = template({"1":function(){return "bare";}});
+        templates['femfl-former-spouses-data-default-rc-result-template'] = template({"1":function(){return "default";}});
+        templates['femfl-former-spouses-data-view_1-rc-result-template'] = template({"1":function(){return "view_1";}});
+        })();
+      JS
+      allow(Utilities::ProcessPipes).to receive(:pipe_in_out) do |_stdin, cmd|
+        output_path = cmd[cmd.index('-f') + 1]
+        File.write(output_path, cli_output)
+        ''
+      end
+
+      helper.compile_handlebars_templates
+
+      expect(helper.read_compiled_handlebars_file(bare_id_entry[:compiled_file_path])).to include('Handlebars.template')
+    end
+
+    it 'still queues the option-type-specific id once per iteration (unaffected by the guard)' do
+      simulate_option_type_iteration(option_type_config_name: :default)
+      simulate_option_type_iteration(option_type_config_name: :view_1)
+
+      queued = helper.instance_variable_get(:@requested_handlebars_templates)
+
+      expect(queued.map { |t| t[:id] }).to include(
+        'femfl-former-spouses-data-default-rc-result-template',
+        'femfl-former-spouses-data-view_1-rc-result-template'
+      )
+    end
+  end
+
   describe '#write_handlebars_template' do
     let(:template_id) { 'test-template' }
     let(:template_content) { '<div>{{name}}</div>' }
@@ -361,10 +474,14 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         expect(File.read(temp_file)).to eq('existing content')
       end
 
-      it 'still returns correct URL path' do
+      it 'returns the URL path addressed to the ALREADY-WRITTEN content, not the new call\'s content' do
+        # The before block wrote 'existing content' (not template_content) to temp_file, so the
+        # only filename that will ever actually be compiled is the one derived from THAT content.
+        existing_content_filename = "#{template_id}-#{Digest::SHA256.hexdigest('existing content')[0..31]}.js"
+
         result = helper.write_handlebars_template(template_id, template_content)
 
-        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{expected_filename}")
+        expect(result).to eq("#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{HandlebarsPrecompiler.generation_key}/templates/#{existing_content_filename}")
       end
     end
 
@@ -449,6 +566,38 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       path_b = helper.write_handlebars_template(template_id, '<div>{{b}}</div>')
 
       expect(path_b).not_to eq(path_a)
+    end
+
+    # Production bug: a single page render can legitimately call #write_handlebars_template
+    # for the SAME template id twice with DIFFERENT content within the SAME request (e.g.
+    # two dynamic models/embeds sharing a derived id) - the temp file is keyed only by id,
+    # not content, so the SECOND call must never return a path that never gets written/
+    # compiled (previously guaranteed-missing, which poisoned the whole page's multi-bundle
+    # via #write_multiple_handlebars_templates skipping the write entirely).
+    it 'returns a path that will actually be compiled when the SAME id is written twice ' \
+       'with DIFFERENT content in the SAME request' do
+      path_a = helper.write_handlebars_template(template_id, '<div>{{a}}</div>')
+      path_b = helper.write_handlebars_template(template_id, '<div>{{b}}</div>')
+
+      # Both calls happened within the same request (request id not reset), so only the
+      # FIRST content is ever queued/compiled - the second call must be addressed to it too.
+      expect(path_b).to eq(path_a)
+
+      cli_output = <<~JS
+        (function() {
+          var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+        templates['#{template_id}'] = template({"1":function(){return "a";}});
+        })();
+      JS
+      allow(Utilities::ProcessPipes).to receive(:pipe_in_out) do |_stdin, cmd|
+        output_path = cmd[cmd.index('-f') + 1]
+        File.write(output_path, cli_output)
+        ''
+      end
+
+      helper.compile_handlebars_templates
+
+      expect(helper.read_compiled_handlebars_file(path_b)).to include('Handlebars.template')
     end
 
     it 'shares master_main_inner across users too, now that the substitution risk is closed at its source' do
