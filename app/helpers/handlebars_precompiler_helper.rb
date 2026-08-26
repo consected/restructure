@@ -61,6 +61,19 @@ module HandlebarsPrecompilerHelper
     @handlebars_generation_key ||= HandlebarsPrecompiler.generation_key
   end
 
+  # Whether the option-type-agnostic result-template ids (the bare and "dynamic_model__"-
+  # stripped ids in common_templates/_search_results_template.html.erb) should be emitted
+  # for this option_type_config. Those two ids do not vary per option_type_config, so a
+  # def_record with more than one option_type_config must only emit them once (issue #1379)
+  # - otherwise the same id gets queued in the same request with differing content on each
+  # iteration, which write_handlebars_template can only ever compile one version of.
+  # @param option_type_config_name [String, Symbol, nil] the current iteration's option type
+  # @param default_option_type_name [String, Symbol, nil] the def_record's default option type
+  # @return [Boolean]
+  def emit_option_type_agnostic_handlebars_ids?(option_type_config_name, default_option_type_name)
+    option_type_config_name.blank? || option_type_config_name.to_s == default_option_type_name.to_s
+  end
+
   # Opportunistically sweep old compiled-Handlebars generations (and stale FileLock lock
   # files - issue #1362 S7 fix) the first time THIS request notices the current
   # generation's directory doesn't exist yet (issue #1362) - i.e. a rotation happened
@@ -233,6 +246,23 @@ module HandlebarsPrecompilerHelper
     effective_id = is_partial ? safe_id.sub(/-partial\z/, '') : safe_id
     temp_file = dir.join("#{effective_id}.handlebars")
 
+    # A given id can only ever be queued/compiled ONCE per request: #compile_handlebars_templates
+    # reads whichever content currently sits at +temp_file+, and the Handlebars runtime can
+    # only register one function per id anyway (Handlebars.templates[id] is a single slot).
+    # If this id was already written earlier in this same request - even with DIFFERENT
+    # content (e.g. two dynamic models/embeds sharing the same derived template id) - reuse
+    # the ALREADY-WRITTEN content's filename rather than recomputing one from this call's
+    # (different) content: returning a filename addressed to content that is never actually
+    # written/compiled left it permanently missing, which made
+    # #write_multiple_handlebars_templates discard the whole page's multi-bundle rather than
+    # just this one template. NOTE: this early return never captures +content+ from a block,
+    # so handlebars_template_tag blocks must stay free of side effects other callers rely on.
+    if File.exist?(temp_file)
+      existing_processed = File.read(temp_file)
+      compiled_filename = handlebars_compiled_filename(effective_id, existing_processed)
+      return "#{url_path}#{compiled_filename}"
+    end
+
     # Content must be resolved BEFORE the filename can be computed, since the filename is
     # a digest of the source for content-addressed (non-excluded) template ids.
     content ||= capture(&) if block_given?
@@ -249,9 +279,6 @@ module HandlebarsPrecompilerHelper
 
     # Skip if compiled file already exists (avoid recompilation)
     return relative_path if File.exist?(compiled_file)
-
-    # Skip if temp file already written (deduplication within same request)
-    return relative_path if File.exist?(temp_file)
 
     # Ensure directory exists before writing
     FileUtils.mkdir_p(dir)
