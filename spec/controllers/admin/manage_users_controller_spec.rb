@@ -19,6 +19,9 @@
 #   - filters hash includes :id key
 #   - filters_on includes :id
 #   - Filtering by id returns only that specific user
+# - disabled filter All option: Issue #1387
+#   - First page load defaults disabled filter to 'enabled'
+#   - Selecting "All" with other filters active returns both enabled and disabled users
 
 require 'rails_helper'
 
@@ -426,6 +429,49 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(assigns(:users)).to include(@user_for_id_filter)
         expect(assigns(:users).length).to eq(1)
       end
+    end
+  end
+
+  describe 'disabled filter All option - Issue #1387' do
+    before_each_login_admin
+
+    before :each do
+      @test_app_type = Admin::AppType.active.first
+      raise 'No active app type found for disabled filter tests' unless @test_app_type
+
+      @enabled_user = User.create!(
+        email: "dis_enabled_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      Admin::UserAccessControl.create!(
+        user: @enabled_user,
+        app_type: @test_app_type,
+        access: :read,
+        resource_type: :general,
+        resource_name: :app_type,
+        current_admin: @admin
+      )
+
+      @disabled_user = User.create!(
+        email: "dis_disabled_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+      @disabled_user.current_admin = @admin
+      @disabled_user.disabled = true
+      @disabled_user.save!
+    end
+
+    it 'defaults disabled to enabled on first page load' do
+      get :index
+      expect(response).to have_http_status(200)
+      expect(assigns(:users)).to include(@enabled_user)
+      expect(assigns(:users)).not_to include(@disabled_user)
+    end
+
+    it 'shows disabled users when disabled filter is All and filtering by email' do
+      get :index, params: { filter: { email: @disabled_user.email } }
+      expect(response).to have_http_status(200)
+      expect(assigns(:users)).to include(@disabled_user)
     end
   end
 end

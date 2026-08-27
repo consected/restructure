@@ -149,7 +149,10 @@ module FilterUtils
       return @filter_params
     end
 
-    fpp[:disabled] ||= 'enabled' if has_disabled_field
+    # Only default to 'enabled' on first page load (no filter params in URL).
+    # When params[:filter] exists, the user has interacted with filters and
+    # an absent disabled key means they chose "All".
+    fpp[:disabled] ||= 'enabled' if has_disabled_field && !params[:filter]
 
     res = fpp || {}
     res = filter_defaults.merge(res)
