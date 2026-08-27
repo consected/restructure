@@ -6,9 +6,20 @@ The ReStructure API is a REST API allowing access to all aspects of user functio
 
 ## Authentication
 
-Simple authentication uses a shared secret. Set the following URL params in the call:
+Simple authentication uses a shared secret. Pass the API credentials as HTTP headers
+and set the app type as a URL parameter:
 
-`use_app_type=<app-type name or id>&user_email=<api user email address>&user_token=<shared secret>`
+```text
+X-User-Email: <api user email address>
+X-User-Token: <shared secret>
+```
+
+`use_app_type=<app-type name or id>`
+
+As a fallback, you can alternatively pass the email and token as query parameters.
+This risks leaking sensitive information in URLs and server logs.
+
+`?user_email={{user_email}}&user_token={{user_token}}`
 
 ## Endpoints
 
