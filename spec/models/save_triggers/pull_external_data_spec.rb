@@ -897,4 +897,26 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       expect(@al.save_trigger_results).not_to have_key('_submitted_request')
     end
   end
+
+  # Issue #1384 - pull_external_data updates `this` via a genuine #update!, which is
+  # reentrant (and silently corrupts on_create/on_update/on_disable dispatch) when run
+  # from a before_save trigger, since the record isn't (fully) saved yet at that point.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    it 'raises instead of silently corrupting the outer save' do
+      config = {
+        this1: {
+          data_field: 'notes',
+          from: {
+            url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=14760269&retmode=xml',
+            format: 'xml'
+          }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
+  end
 end

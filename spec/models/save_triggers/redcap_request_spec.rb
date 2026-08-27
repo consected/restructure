@@ -325,4 +325,31 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
       )
     end
   end
+
+  # Issue #1384 - redcap_request updates `this` via a genuine #update!, which is
+  # reentrant (and silently corrupts on_create/on_update/on_disable dispatch) when run
+  # from a before_save trigger, since the record isn't (fully) saved yet at that point.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    it 'raises instead of silently corrupting the outer save' do
+      config = {
+        this1: {
+          study: @project[:study] || Redcap::RedcapSupport::DefaultStudy,
+          project_name: @project[:name],
+          local_data: 'link_response',
+          method: 'survey_link',
+          data_field: 'notes',
+          data_field_format: 'json',
+          post_data: {
+            instrument: 'research_form',
+            record_id: 107
+          }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::RedcapRequest.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
+  end
 end

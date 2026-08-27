@@ -41,6 +41,8 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
 
           self.in_master = @master
 
+          raise_if_in_before_save_trigger!(create_in)
+
           handle_with_result with_result, vals
           handle_with_attributes create_with, vals
 
@@ -124,5 +126,19 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         end
       end
     end
+  end
+
+  private
+
+  # in: this/referring_record needs @item's own id (to set from_record_id on the new
+  # ModelReference), which doesn't exist yet when run from a before_save trigger (issue #1384).
+  def raise_if_in_before_save_trigger!(create_in)
+    return unless %w[this referring_record].include?(create_in.to_s)
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          "create_reference with in: #{create_in} can not run within a before_save trigger - " \
+          'the record being saved has no id yet, so the reference would be created with a ' \
+          'nil from_record_id (issue #1384); use on_create/on_update instead'
   end
 end

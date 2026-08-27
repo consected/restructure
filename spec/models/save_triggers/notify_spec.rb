@@ -108,6 +108,31 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       expect(res).to eq expected_text
     end
 
+    # Issue #1384 - when notify queues a background job for an item that tracks
+    # background_job_ref, it persists that ref via a genuine @item.save, which is
+    # reentrant (and silently corrupts on_create/on_update/on_disable dispatch) when
+    # run from a before_save trigger, since the record isn't (fully) saved yet.
+    it 'raises instead of persisting background_job_ref when invoked from a before_save trigger' do
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+
+      @al.in_before_save_trigger = true
+      allow(@al).to receive(:respond_to?).and_call_original
+      allow(@al).to receive(:respond_to?).with(:background_job_ref).and_return(true)
+      @al.define_singleton_method(:background_job_ref=) { |value| value }
+
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      provider_job = double('provider_job', id: 123)
+      allow(@trigger).to receive(:queue_job).and_return(double('job', provider_job:))
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
+
     it 'generates a message notification and job with referring_record substitutions' do
       @al1 = create_item
       @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id

@@ -10,6 +10,7 @@ module OptionConfigs
     class Notify < Base
       trigger_name :notify
       pattern :direct_config
+      not_valid_in_before_save
       allowed_keys %i[
         type role users emails phones phone_records list_type default_country_code
         from_user_email ignore_no_recipients layout_template content_template

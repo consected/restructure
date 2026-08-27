@@ -112,6 +112,31 @@ module OptionConfigs
           key_type :hash_or_array, :on_complete, :on_failure
         end
 
+        # DSL: mark this trigger type as unconditionally unsafe within save_trigger.before_save
+        # when targeting the record currently being saved - it performs a genuine update of
+        # that record from within its own before_save callback chain, corrupting the outer
+        # save's dirty-tracking and silently breaking on_create/on_update/on_disable trigger
+        # dispatch (see issue #1384). Subclasses with config-dependent semantics (e.g.
+        # create_reference, which is only unsafe for certain `in:` values) should instead
+        # override #before_save_warning directly.
+        # @return [void]
+        def not_valid_in_before_save
+          @_not_valid_in_before_save = true
+        end
+
+        # Returns a warning message if the given config is unsafe to use within
+        # save_trigger.before_save, or nil if it's safe. Default checks the
+        # unconditional #not_valid_in_before_save flag; override for config-dependent cases.
+        # @param _config [Hash, Array] the trigger's configuration
+        # @return [String, nil]
+        def before_save_warning(_config)
+          return unless @_not_valid_in_before_save
+
+          'performs an update of the record being saved from within its own before_save ' \
+            'callback chain, which corrupts on_create/on_update/on_disable trigger dispatch - ' \
+            'use on_create/on_update/on_disable instead'
+        end
+
         # Accessor for key type rules hash.
         # @return [Hash{Symbol => Symbol}]
         def key_type_rules

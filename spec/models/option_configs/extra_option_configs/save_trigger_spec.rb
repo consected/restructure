@@ -122,6 +122,63 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
     end
   end
 
+  # Issue #1384 - pull_external_data, redcap_request and notify all perform a genuine
+  # update of `this` (the record being saved), and create_reference with in: this/
+  # referring_record needs this record's id - none of these work correctly from
+  # before_save, since the record isn't persisted (or fully saved) yet at that point.
+  describe 'before_save unsupported trigger warnings (issue #1384)' do
+    it 'warns when pull_external_data is used within before_save' do
+      instance = klass.new(before_save: { pull_external_data: { url: 'http://example.com' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/pull_external_data/)
+    end
+
+    it 'warns when redcap_request is used within before_save' do
+      instance = klass.new(before_save: { redcap_request: { study: 'Q1', method: 'project' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/redcap_request/)
+    end
+
+    it 'warns when notify is used within before_save' do
+      instance = klass.new(before_save: { notify: { role: 'admin' } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+
+    it 'warns when create_reference with in: this is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'this' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/create_reference/)
+    end
+
+    it 'warns when create_reference with in: referring_record is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'referring_record' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+    end
+
+    it 'does not warn when create_reference with in: master is used within before_save' do
+      instance = klass.new(before_save: { create_reference: { player_contacts: { in: 'master' } } })
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'still warns for a trigger nested inside a transaction within before_save' do
+      instance = klass.new(before_save: { transaction: { notify: { role: 'admin' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+
+    it 'does not warn when the same triggers are used within on_create' do
+      instance = klass.new(on_create: { pull_external_data: { url: 'http://example.com' } })
+      expect(instance.config_warnings).to be_empty
+    end
+  end
+
   describe 'ExtraOptions integration' do
     it 'defaults save_trigger to a SaveTrigger with blank TriggerTasks' do
       eo = config_for(<<~YAML)

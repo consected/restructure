@@ -7,6 +7,7 @@ module OptionConfigs
     class PullExternalData < Base
       trigger_name :pull_external_data
       pattern :named_entry
+      not_valid_in_before_save
       allowed_keys %i[
         if force_not_editable_save force_not_valid local_data data_field data_field_format
         response_code_field method from to post_data send_data form success_if on_complete on_failure
