@@ -17,7 +17,7 @@ module ActiveRecord
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
                       :requested_action, :resource_type, :prev_table_name, :view_sql, :all_referenced_tables,
-                      :class_name, :view_sql_changed, :no_user_id, :al_reference_views
+                      :class_name, :view_sql_changed, :no_user_id, :al_reference_views, :view_skip_updates
       end
 
       #
@@ -297,25 +297,33 @@ module ActiveRecord
       def create_dynamic_model_view
         miv = model_is_view
         # There is no need to recreate the view if the SQL has not changed
-        # and the view actually exists in the database.
-        if !view_sql_changed && miv
+        # and the view actually exists in the database. The view_skip_updates trigger
+        # is still (re)applied below regardless, since it's cheap/idempotent and may
+        # have changed independently of the view SQL.
+        skip_view_recreate = !view_sql_changed && miv
+        if skip_view_recreate
           Rails.logger.warn "Skipping view creation for #{schema}.#{table_name} as the SQL has not changed"
-          return
         end
 
-        if miv
+        if miv && !skip_view_recreate
           deps = get_dependent_objects(schema, table_name)
           extra = "\ndependent objects:\n#{deps.to_yaml}\n\n"
         end
 
         reversible do |dir|
           dir.up do
-            puts "-- create or replace view #{schema}.#{table_name}"
-            execute dynamic_model_view_sql
+            unless skip_view_recreate
+              puts "-- create or replace view #{schema}.#{table_name}"
+              execute dynamic_model_view_sql
+            end
+            execute view_skip_updates_trigger_sql
           end
           dir.down do
-            puts "-- drop view #{schema}.#{table_name}"
-            execute reverse_dynamic_model_view_sql
+            unless skip_view_recreate
+              puts "-- drop view #{schema}.#{table_name}"
+              execute reverse_dynamic_model_view_sql
+            end
+            execute reverse_view_skip_updates_trigger_sql
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -1121,6 +1129,31 @@ module ActiveRecord
           dynamic_model_view_sql
         else
           "DROP VIEW if exists #{schema}.#{table_name} CASCADE;"
+        end
+      end
+
+      #
+      # Dummy INSTEAD OF INSERT/UPDATE trigger so a view configured with
+      # view_skip_updates appears updatable, allowing save triggers to fire.
+      # Reapplied on every migration (idempotent), independent of whether view_sql itself changed.
+      def view_skip_updates_trigger_sql
+        if view_skip_updates
+          <<~DO_TEXT
+            DROP TRIGGER IF EXISTS view_skip_updates_trig ON #{schema}.#{table_name};
+            CREATE TRIGGER view_skip_updates_trig
+            INSTEAD OF INSERT OR UPDATE ON #{schema}.#{table_name}
+            FOR EACH ROW EXECUTE PROCEDURE ml_app.view_skip_updates();
+          DO_TEXT
+        else
+          "DROP TRIGGER IF EXISTS view_skip_updates_trig ON #{schema}.#{table_name};"
+        end
+      end
+
+      def reverse_view_skip_updates_trigger_sql
+        if updating?
+          view_skip_updates_trigger_sql
+        else
+          "DROP TRIGGER IF EXISTS view_skip_updates_trig ON #{schema}.#{table_name};"
         end
       end
 

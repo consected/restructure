@@ -11,7 +11,8 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id
+                :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id,
+                :view_skip_updates
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
@@ -19,6 +20,7 @@ class Admin::MigrationGenerator
                  resource_type: nil,
                  view_sql: nil,
                  view_sql_changed: nil,
+                 view_skip_updates: nil,
                  allow_migrations: nil,
                  all_referenced_tables: nil,
                  dynamic_def: nil,
@@ -36,6 +38,7 @@ class Admin::MigrationGenerator
     self.db_configs = db_configs
     self.view_sql = view_sql
     self.view_sql_changed = view_sql_changed
+    self.view_skip_updates = view_skip_updates
     self.all_referenced_tables = all_referenced_tables
     self.dynamic_def = dynamic_def
 
@@ -635,6 +638,7 @@ class Admin::MigrationGenerator
         VIEWSQL
 
         self.view_sql_changed = #{!!view_sql_changed}
+        self.view_skip_updates = #{!!view_skip_updates}
       VSTEXT
     end
 

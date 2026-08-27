@@ -136,6 +136,26 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       end
     end
 
+    describe 'view_skip_updates' do
+      it 'accepts true when view_sql is also set' do
+        instance = klass.new(view_sql: 'select 1', view_skip_updates: true)
+        instance.valid?
+        expect(instance.errors).to be_empty
+      end
+
+      it 'accepts false without view_sql' do
+        instance = klass.new(view_skip_updates: false)
+        instance.valid?
+        expect(instance.errors).to be_empty
+      end
+
+      it 'rejects true when view_sql is not set' do
+        instance = klass.new(view_skip_updates: true)
+        instance.valid?
+        expect(instance.errors.full_messages.join).to include('view_skip_updates requires view_sql to be set')
+      end
+    end
+
     describe 'string keys' do
       it 'accepts string values' do
         instance = klass.new(secondary_key: 'alt_id', tab_caption: 'My Tab')
