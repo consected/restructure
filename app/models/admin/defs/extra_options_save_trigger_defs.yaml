@@ -27,25 +27,14 @@
       - <trigger type>: 
     
     on_save:
-      # on_save provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.
       - <trigger type>: 
     
     on_disable:
-      # on_disable is triggered for any item that has a field named disabled that is switched to true
       - <trigger type>: 
     
     on_upload:
       - <trigger type>: 
 
     before_save:
-      # Run specified triggers before the current item has saved, allowing output to be reflected 
-      # in the UI update, but before reference updates are available
-      # Typically used for update_this, although can be applied to the other triggers if necessary
       - <trigger type>: 
 
-# Notes:
-# - on_save cascades into on_create and on_update (wrapped into a list if given as a Hash);
-#   any key also present directly under on_create/on_update takes precedence.
-# - on_disable fires for any item with a `disabled` field switching to true.
-# - A Hash form (rather than an Array) only allows one configuration of each trigger type
-#   per event key; use an Array to run the same trigger type more than once.
