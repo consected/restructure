@@ -204,6 +204,9 @@ RSpec.configure do |config|
 
   config.exclude_pattern = 'spec/system/apps/**/*_spec.rb' unless ENV['RUN_APP_SPECS'] == 'true'
 
+  # Measurement specs (issue #1362 Stage 2 Phase 0) are opt-in only, via `--tag benchmark`.
+  config.filter_run_excluding benchmark: true unless ENV['RUN_BENCHMARKS'] == 'true'
+
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
   config.include Devise::Test::ControllerHelpers, type: :controller

@@ -268,4 +268,11 @@ Rails.application.config.after_initialize do
   end
 
   Rails.logger.info "HandlebarsPrecompiler initialized. CLI: #{HandlebarsPrecompiler.cli_path}"
+
+  # Must run AFTER startup_cleanup! above (issue #1362 Stage 2): server_cache_version is
+  # shared (memcached) and startup_cleanup! deletes it on web boot. If the prewarm child
+  # process ran first, it would resolve/set a value that the web process then deletes,
+  # picking a different one - every artifact the child warms would land in an orphaned
+  # generation directory.
+  Prewarm::Spawner.spawn_async
 end
