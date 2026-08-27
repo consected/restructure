@@ -394,6 +394,26 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
                         data: data
                         rec_type: rec_type
 
+        mr_ref_pc_before_save_test:
+          label: Reference Player Contact Before Save Test
+          fields:
+            - select_call_direction
+            - select_who
+          references:
+            player_contacts:
+              from: this
+              add: one_to_this
+
+          save_trigger:
+            before_save:
+              create_reference:
+                player_contacts:
+                  in: this
+                  with:
+                    data: '(555)555-5555'
+                    rec_type: phone
+                    rank: 10
+
       END_DEF
 
       al.current_admin = @admin
@@ -405,6 +425,7 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       setup_option_config 0, 'Reference Player Contact', %w[select_call_direction select_who]
       setup_option_config 1, 'Reference Activity Log', %w[select_call_direction select_who disabled]
       setup_option_config 2, 'Reference Activity Log 2', %w[select_call_direction select_who disabled]
+      setup_option_config 3, 'Reference Player Contact Before Save Test', %w[select_call_direction select_who]
     end
 
     it 'creates an embedded_item when creating another record' do
@@ -485,6 +506,18 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(pc2).not_to be nil
 
       expect(al_cr.embedded_item.embedded_item).to eq pc2
+    end
+
+    it 'raises when create_reference in: this is invoked from a real before_save trigger (issue #1384)' do
+      # End-to-end regression: drives the guard through the real before_save callback
+      # chain (a genuine .create! call), rather than manually setting
+      # in_before_save_trigger and calling #perform in isolation.
+      expect do
+        ActivityLog::PlayerContactElt.create!(select_call_direction: 'from staff',
+                                              extra_log_type: 'mr_ref_pc_before_save_test',
+                                              select_who: 'abc',
+                                              master: @master)
+      end.to raise_error(FphsException, /create_reference with in: this can not run within a before_save trigger/)
     end
   end
 
@@ -1032,6 +1065,50 @@ RSpec.describe SaveTriggers::CreateReference, type: :model do
       expect(created_item.master_id).to eq @master.id
       expect(source_record.save_trigger_results['created_references'].last).to be_nil
       expect(source_record.save_trigger_results['created_results'].last).to eq true
+    end
+  end
+
+  # Issue #1384 - create_reference with in: this/referring_record needs @item's own id
+  # (to set from_record_id on the new ModelReference), which doesn't exist yet when run
+  # from a before_save trigger.
+  describe 'invoked from a before_save trigger (issue #1384)' do
+    before :example do
+      SetupHelper.setup_al_player_contact_phones
+      SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
+      create_user
+      @master = create_master
+      @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
+      @al = create_item master: @master
+      add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
+      setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    end
+
+    it 'raises for in: this instead of silently creating an orphaned reference' do
+      config = {
+        player_contact: {
+          in: 'this',
+          with: { data: random_phone_number, rec_type: :phone, rank: 5 }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
+    end
+
+    it 'raises for in: referring_record instead of silently creating an orphaned reference' do
+      config = {
+        player_contact: {
+          in: 'referring_record',
+          with: { data: random_phone_number, rec_type: :phone, rank: 5 }
+        }
+      }
+
+      @al.in_before_save_trigger = true
+      @trigger = SaveTriggers::CreateReference.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /before_save/)
     end
   end
 end

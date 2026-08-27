@@ -79,6 +79,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
           next unless vals.present?
 
+          raise_if_in_before_save_trigger!
+
           # Retain the flags so that the #update! doesn't change
           # what we need to report through the API
           res = @item
@@ -224,6 +226,18 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
   end
 
   private
+
+  # Reentrant #update! on `this` from within a before_save trigger corrupts the outer
+  # save's dirty-tracking, silently breaking on_create/on_update/on_disable dispatch (issue #1384).
+  def raise_if_in_before_save_trigger!
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          'pull_external_data can not update the record being saved from within a ' \
+          'before_save trigger - the outer save is still in progress, so this write would ' \
+          'be lost or corrupt on_create/on_update/on_disable trigger dispatch (issue #1384); ' \
+          'use on_create/on_update/on_disable instead'
+  end
 
   #
   # Serialize the send_data / post_data configuration value to a JSON string

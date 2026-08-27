@@ -79,11 +79,26 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       next unless @item.respond_to?(:background_job_ref) && res&.provider_job
 
       @item.set_background_job_ref res
+
+      raise_if_in_before_save_trigger!
+
       @item.save
     end
   end
 
   private
+
+  # Reentrant save of `this` from within a before_save trigger corrupts the outer
+  # save's dirty-tracking, silently breaking on_create/on_update/on_disable dispatch (issue #1384).
+  def raise_if_in_before_save_trigger!
+    return unless @item.respond_to?(:in_before_save_trigger) && @item.in_before_save_trigger
+
+    raise FphsException,
+          'notify can not persist background_job_ref on the record being saved from within a ' \
+          'before_save trigger - the outer save is still in progress, so this write would be ' \
+          'lost or corrupt on_create/on_update/on_disable trigger dispatch (issue #1384); use ' \
+          'on_create/on_update instead'
+  end
 
   def init_attribs(config)
     @config = config

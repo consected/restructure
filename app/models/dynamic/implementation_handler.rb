@@ -22,7 +22,11 @@ module Dynamic
       # skip_save_trigger: Prevent save triggers from running
       # save_trigger_results: Results from stored locally by save triggers
       # trigger_variables: Variables set by the set_variables save trigger
-      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type
+      # in_before_save_trigger: true while a before_save trigger is being processed for this
+      #   record - lets a trigger (e.g. update_this) detect it's targeting the very record
+      #   currently being saved, so it can avoid a reentrant save (see issue #1384)
+      attr_accessor :skip_save_trigger, :save_trigger_results, :trigger_variables, :option_type,
+                    :in_before_save_trigger
     end
 
     class_methods do
@@ -367,8 +371,39 @@ module Dynamic
     # Handle actions that must be performed before on save save triggers
     def handle_before_save_triggers
       self.save_trigger_results ||= {}
-      option_type_config&.calc_save_trigger_if self, alt_on: :before_save unless skip_save_trigger
+
+      # Defense in depth for issue #1384: a save_trigger action (existing or future)
+      # that calls save/update!/save! on `this` while its own before_save pass is
+      # still running would corrupt this save's dirty-tracking, silently breaking
+      # on_create/on_update/on_disable dispatch. Several trigger types already guard
+      # against this themselves with a clearer message (see update_this,
+      # pull_external_data, redcap_request, notify, create_reference) - this catches
+      # any other/future trigger that doesn't.
+      if in_before_save_trigger
+        raise FphsException,
+              "#{self.class.name} attempted to save/update the record being saved from within " \
+              'its own before_save trigger - this is not supported (issue #1384); use ' \
+              'assign_attributes instead of save/update!, or defer the write to on_create/on_update'
+      end
+
+      return true if skip_save_trigger
+
+      # Only worth the cost of a second validation pass below if there's actually a
+      # before_save trigger configured to run one.
+      has_before_save_config = option_type_config&.save_trigger&.before_save.present?
+
+      self.in_before_save_trigger = true
+      option_type_config&.calc_save_trigger_if self, alt_on: :before_save
+
+      # Attribute changes assigned directly by a before_save trigger (e.g. update_this on
+      # `this`) bypass Rails' validate phase, since before_save always runs after it -
+      # re-validate once now that all before_save triggers have finished mutating this
+      # record (issue #1384).
+      raise ActiveRecord::RecordInvalid, self if has_before_save_config && !valid?
+
       true
+    ensure
+      self.in_before_save_trigger = false
     end
 
     #
