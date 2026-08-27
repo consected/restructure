@@ -11,7 +11,8 @@
 #   option_type_attr_name: String,
 #   default_option_type_name: String,
 #   uniqueness_fields: String | Array(String),
-#   batch_trigger: BatchTriggerScheduleValue
+#   batch_trigger: BatchTriggerScheduleValue,
+#   view_skip_updates: Boolean
 # )>
 # All keys are optional.
 #
@@ -23,6 +24,7 @@ _configurations:
   use_current_version: force the use of the current definition version when defining a dynamic class
   secondary_key: field name to use as a secondary key to lookup items
   view_sql: define a view instead of a table to underpin this model
+  view_skip_updates: false (default) | true - only valid when view_sql is set. Installs a dummy INSTEAD OF INSERT/UPDATE trigger on the view, so it appears updatable and save triggers can fire on its records
   prevent_migrations: false (default) | true - prevent field / comment changes attempting to run DB migrations
   batch_trigger: 
     # Fire **batch_trigger:** task for each record, based on the batch_trigger in **default:** or activity log options
