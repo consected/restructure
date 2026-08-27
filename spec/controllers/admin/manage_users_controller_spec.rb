@@ -15,6 +15,10 @@
 #     the admin's current app type
 #   - Filtering by current_app_access: 'false' returns only users without access
 #     to the admin's current app type
+# - id filter for Issue #1386
+#   - filters hash includes :id key
+#   - filters_on includes :id
+#   - Filtering by id returns only that specific user
 
 require 'rails_helper'
 
@@ -387,6 +391,40 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(response).to have_http_status(200)
         expect(assigns(:users)).not_to include(@user_with_access)
         expect(assigns(:users)).to include(@user_without_access)
+      end
+    end
+  end
+
+  describe 'id filter - Issue #1386' do
+    before_each_login_admin
+
+    before :each do
+      @user_for_id_filter = User.create!(
+        email: "id_filter_#{SecureRandom.hex(4)}@test.com",
+        current_admin: @admin
+      )
+    end
+
+    describe '#filters' do
+      it 'includes :id key' do
+        get :index
+        f = controller.send(:filters)
+        expect(f).to have_key(:id)
+      end
+    end
+
+    describe '#filters_on' do
+      it 'includes :id' do
+        expect(controller.send(:filters_on)).to include(:id)
+      end
+    end
+
+    describe 'GET #index with id filter' do
+      it 'returns only the user matching the given id' do
+        get :index, params: { filter: { id: @user_for_id_filter.id.to_s } }
+        expect(response).to have_http_status(200)
+        expect(assigns(:users)).to include(@user_for_id_filter)
+        expect(assigns(:users).length).to eq(1)
       end
     end
   end

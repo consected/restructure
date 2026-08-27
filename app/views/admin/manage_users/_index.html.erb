@@ -17,6 +17,7 @@
           <th class="no-sort"></th>
           <th class="no-sort"></th>
           <th class="no-sort"></th>
+          <th>ID</th>
           <th>User</th>
           <th>First Name</th>
           <th>Last Name</th>
@@ -41,6 +42,7 @@
             <td><%= link_to "contact", users_contact_infos_path(filter: {user_id: list_item.id})  %></td>
             <td><%= link_to "roles", admin_user_roles_path(filter: {user_id: list_item.id}) %></td>
             <td><%= user_access_overview_link 'access overview', :by_role, search_attrs: { user: list_item.id }, required: %i[user] %></td>
+            <td><%= list_item.id %></td>
             <td><%= list_item.email %></td>
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>
