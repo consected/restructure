@@ -46,6 +46,20 @@ class Settings
   # an existing file for flock does not bump it), not its last-used time.
   HandlebarsLockFileMaxAgeSeconds = (ENV['FPHS_HANDLEBARS_LOCK_FILE_MAX_AGE'].presence || 300).to_i
 
+  # Whether the server spawns a `prewarm:templates` pass on boot (issue #1362 Stage 2).
+  # Opt-in, and always disabled in test, since specs exercise prewarming directly.
+  PrewarmTemplatesEnabled = ENV['FPHS_PREWARM_TEMPLATES'] == 'true' && !Rails.env.test?
+
+  # Only users who have signed in within this many days are candidates for prewarming.
+  PrewarmSignInWindowDays = (ENV['FPHS_PREWARM_SIGN_IN_WINDOW_DAYS'].presence || 30).to_i
+
+  # Upper bound on the number of distinct (app_type, access variant) combinations warmed
+  # in one pass, to cap worst-case pass duration on an app with many disjoint variants.
+  PrewarmMaxVariants = (ENV['FPHS_PREWARM_MAX_VARIANTS'].presence || 50).to_i
+
+  # Pause between warmed renders, to keep the pass low priority relative to user requests.
+  PrewarmThrottleSeconds = (ENV['FPHS_PREWARM_THROTTLE'].presence || 0.5).to_f
+
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
   # password setting.
