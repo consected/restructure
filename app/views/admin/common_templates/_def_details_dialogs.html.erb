@@ -1,14 +1,12 @@
 <% if object_instance.persisted? && !object_instance.disabled
      dialogs = (object_instance.option_configs || []).flat_map do |d|
        dialog_before = d.dialog_before
-       case dialog_before
-       when Hash
-         dialog_before.values
-       when String
-         [dialog_before]
-       else
-         []
-       end
+       # dialog_before is an OptionConfigs::ExtraOptionConfigs::DialogBefore instance
+       # (field-keyed configuration), not a plain Hash or String - use its Hash-like
+       # #each to collect the per-field NamedConfiguration/value entries.
+       next [] if dialog_before.blank?
+
+       dialog_before.map { |_key, value| value }
      end %>
 <div class="activity-list-dialogs">
   <% if dialogs.present? %>
