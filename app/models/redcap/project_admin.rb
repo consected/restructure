@@ -635,8 +635,26 @@ module Redcap
     end
 
     #
-    # Specifies the foreign key name from associate_master_through_external_identifer
+    # Specifies the foreign key name from associate_master_through_external_identifer.
+    # For longitudinal projects, returns 'longitudinal_study_id' since the original
+    # study id field is only populated for the first event of each record_id.
     def associate_master_through_external_id_fkey_name
+      res = data_options.associate_master_through_external_identifer
+      return unless res.present?
+
+      return 'longitudinal_study_id' if is_longitudinal?
+
+      res.split(' ')[1] || integer_survey_identifier_field
+    end
+
+    #
+    # For longitudinal projects, returns the original source field name from
+    # associate_master_through_external_identifer that contains the study id value.
+    # This is the REDCap field we look up to populate longitudinal_study_id.
+    # @return [String | nil]
+    def longitudinal_fkey_source_field
+      return unless is_longitudinal?
+
       res = data_options.associate_master_through_external_identifer
       return unless res.present?
 

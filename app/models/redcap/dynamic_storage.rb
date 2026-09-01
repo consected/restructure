@@ -9,7 +9,8 @@ module Redcap
 
     ExtraFieldTypes = {
       disabled: 'boolean',
-      master_id: 'integer'
+      master_id: 'integer',
+      longitudinal_study_id: 'integer'
     }.freeze
 
     attr_accessor :project_admin, :qualified_table_name, :category
@@ -272,6 +273,7 @@ module Redcap
       @extra_fields = []
       @extra_fields << 'disabled' if project_admin.disable_deleted_records?
       @extra_fields << 'master_id' if project_admin.data_options.set_master_id_using_association
+      @extra_fields << 'longitudinal_study_id' if project_admin.is_longitudinal? && project_admin.longitudinal_fkey_source_field.present?
 
       return @extra_fields unless project_admin.data_options.add_multi_choice_summary_fields
 
