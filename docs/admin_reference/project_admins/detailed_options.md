@@ -34,10 +34,20 @@ data_options:
   handle_deleted_records: value
     # one of
     #   - disable
+    #   - disable unless re-entered
     #   - ignore
     #   - (blank)
     #   - null
     #   - false
+    #
+    # 'disable': sets disabled = true for records deleted from
+    #   REDCap. Records that reappear will remain disabled.
+    # 'disable unless re-entered': sets disabled = true for
+    #   deleted records AND sets disabled = false when records
+    #   reappear in REDCap.
+    # 'ignore': skips any deleted records silently.
+    # blank/null/false: (default) raises an error if records
+    #   are missing, preventing the transfer.
   prefix_dynamic_model_config_library: category name
     # The "<category> <name>" string identifier for a
     # config library to be prefixed to the dynamic

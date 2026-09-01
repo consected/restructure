@@ -197,7 +197,7 @@ module Redcap
       end
 
       # Add a disabled field if one is not present and we need to disable deleted records
-      @fields['disabled'] ||= { label: 'disabled' } if project_admin.data_options.handle_deleted_records == 'disabled'
+      @fields['disabled'] ||= { label: 'disabled' } if project_admin.disables_deleted_records?
 
       @fields.stringify_keys
     end
@@ -262,15 +262,15 @@ module Redcap
     end
 
     #
-    # Dfeine the extra fields to be included in a dynamic model, based on project
+    # Define the extra fields to be included in a dynamic model, based on project
     # configurations. This includes `disabled`, `master_id` and array fields summarizing
     # chosen values for multiple choice (checkbox) fields.
-    # @return [<Type>] <description>
+    # @return [Array<String>] list of extra field names
     def extra_fields
       return @extra_fields if @extra_fields
 
       @extra_fields = []
-      @extra_fields << 'disabled' if project_admin.disable_deleted_records?
+      @extra_fields << 'disabled' if project_admin.disables_deleted_records?
       @extra_fields << 'master_id' if project_admin.data_options.set_master_id_using_association
 
       return @extra_fields unless project_admin.data_options.add_multi_choice_summary_fields
