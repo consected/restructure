@@ -24,7 +24,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Handlebars compile cost per distinct user after a restart (issue #1362 Stage 2 Phase 0)',
-               type: :request do
+               type: :request, benchmark: true do
   include ModelSupport
   include MasterSupport
   include DynamicModelSupport
