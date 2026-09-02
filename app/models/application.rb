@@ -28,6 +28,14 @@ class Application
     end
   end
 
+  # Force this process's cache to hold a specific server_cache_version (issue #1362) -
+  # used to make a spawned process agree with its parent's value even when Rails.cache is
+  # not actually shared across processes (e.g. :memory_store), rather than each process
+  # independently computing its own random value.
+  def self.server_cache_version=(value)
+    Rails.cache.write('server_cache_version', value)
+  end
+
   def self.record_error_message(record)
     res = []
 

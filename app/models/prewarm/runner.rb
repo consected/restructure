@@ -12,11 +12,17 @@ module Prewarm
   # user request. A warm marker per (user, app_type) combination makes a re-run of an
   # already-warmed generation cheap, and one failing combination never aborts the rest.
   class Runner
-    def self.run
-      new.run
+    def self.run(server_cache_version: nil)
+      new(server_cache_version:).run
+    end
+
+    def initialize(server_cache_version: nil)
+      @server_cache_version = server_cache_version
     end
 
     def run
+      Application.server_cache_version = @server_cache_version if @server_cache_version
+
       HandlebarsPrecompiler.setup_directories
 
       HandlebarsPrecompiler::FileLock.acquire('prewarm-pass', wait: 0, on_contention: :skip) do
@@ -28,8 +34,11 @@ module Prewarm
 
     def warm_all
       summary = { warmed: 0, skipped: 0, failed: 0 }
+      candidates = Prewarm::Candidates.representatives
+      Rails.logger.info "Prewarm::Runner: starting pass over #{candidates.size} candidate(s)"
+      pass_started_at = monotonic_now
 
-      Prewarm::Candidates.representatives.each do |user, app_type|
+      candidates.each do |user, app_type|
         marker = warm_marker_path(user, app_type)
         if File.exist?(marker)
           summary[:skipped] += 1
@@ -40,15 +49,20 @@ module Prewarm
         sleep Settings::PrewarmThrottleSeconds if Settings::PrewarmThrottleSeconds.positive?
       end
 
+      summary[:elapsed_seconds] = elapsed_since(pass_started_at)
       Rails.logger.info "Prewarm::Runner pass complete: #{summary}"
       summary
     end
 
     def warm_one(user, app_type, marker, summary)
+      started_at = monotonic_now
       if Prewarm::MasterTemplates.render_for(user, app_type)
         FileUtils.mkdir_p(marker.dirname)
         FileUtils.touch(marker)
         summary[:warmed] += 1
+        Rails.logger.info(
+          "Prewarm::Runner: warmed user=#{user.id} app_type=#{app_type.id} in #{elapsed_since(started_at)}s"
+        )
       else
         summary[:failed] += 1
       end
@@ -58,6 +72,14 @@ module Prewarm
         "app_type=#{app_type.id}: #{e.class}: #{e.message}"
       )
       summary[:failed] += 1
+    end
+
+    def monotonic_now
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
+
+    def elapsed_since(started_at)
+      (monotonic_now - started_at).round(2)
     end
 
     def warm_marker_path(user, app_type)

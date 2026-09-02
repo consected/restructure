@@ -26,8 +26,42 @@ RSpec.describe Prewarm::Spawner do
 
     described_class.spawn_async
 
-    expect(IO).to have_received(:popen).with(%w[bundle exec rake prewarm:templates], hash_including(chdir: Rails.root.to_s))
+    expect(IO).to have_received(:popen)
+      .with(anything, %w[bundle exec rake prewarm:templates], hash_including(chdir: Rails.root.to_s))
     expect(::Process).to have_received(:detach).with(4242)
+  ensure
+    change_setting('PrewarmTemplatesEnabled', false)
+  end
+
+  it "passes the parent process's current Application.server_cache_version to the child via env" do
+    change_setting('PrewarmTemplatesEnabled', true)
+    current_version = Application.server_cache_version
+
+    described_class.spawn_async
+
+    expect(IO).to have_received(:popen)
+      .with({ 'PREWARM_SERVER_CACHE_VERSION' => current_version }, anything, anything)
+  ensure
+    change_setting('PrewarmTemplatesEnabled', false)
+  end
+
+  it 'logs the child pid when it spawns' do
+    change_setting('PrewarmTemplatesEnabled', true)
+
+    expect(Rails.logger).to receive(:info).with(/Prewarm::Spawner: spawned rake prewarm:templates.*pid=4242/)
+
+    described_class.spawn_async
+  ensure
+    change_setting('PrewarmTemplatesEnabled', false)
+  end
+
+  it 'does not raise, and logs a warning, when IO.popen itself fails' do
+    change_setting('PrewarmTemplatesEnabled', true)
+    allow(IO).to receive(:popen).and_raise(Errno::ENOENT, 'bundle')
+
+    expect(Rails.logger).to receive(:warn).with(/Prewarm::Spawner: failed to spawn/)
+
+    expect { described_class.spawn_async }.not_to raise_error
   ensure
     change_setting('PrewarmTemplatesEnabled', false)
   end
