@@ -34,10 +34,22 @@ module Prewarm
     end
 
     def do_spawn
-      io = IO.popen(%w[bundle exec rake prewarm:templates], chdir: Rails.root.to_s, err: %i[child out])
+      # The child is a SEPARATE OS process, and Rails.cache is not guaranteed to be
+      # shared across processes (e.g. :memory_store is per-process) - pass the parent's
+      # current value explicitly so the child agrees with it rather than independently
+      # computing its own, which would land its warmed artifacts in a generation the
+      # real web process never uses.
+      env = { 'PREWARM_SERVER_CACHE_VERSION' => Application.server_cache_version }
+      io = IO.popen(env, %w[bundle exec rake prewarm:templates], chdir: Rails.root.to_s, err: %i[child out])
       Process.detach(io.pid)
       Thread.new { drain(io) }
+      Rails.logger.info "Prewarm::Spawner: spawned rake prewarm:templates (pid=#{io.pid})"
       io.pid
+    rescue StandardError => e
+      # Must never propagate: this runs synchronously inside Rails.application.config.after_initialize
+      # during server boot, so an uncaught error here would abort the whole boot, not just prewarming.
+      Rails.logger.warn "Prewarm::Spawner: failed to spawn rake prewarm:templates: #{e.class}: #{e.message}"
+      nil
     end
 
     def drain(io)
