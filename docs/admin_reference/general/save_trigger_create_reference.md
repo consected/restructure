@@ -9,7 +9,9 @@ Create a model reference (and optionally a related record) when this trigger fir
 Standalone dynamic models (those defined with no `foreign_key_name`, i.e. `no_master_association`)
 are supported as targets. These models have no `master_id` column and are not associated with
 a specific master record. When `create_reference` targets a standalone model, the record is
-created directly using the model class rather than through the master association.
+created directly using the model class rather than through the master association. See
+[record scoping](scoping.md) for how this affects conditions and substitutions written
+against such a model.
 
 All `in:` options are supported with standalone models. Since the target record has no
 master association, the record is always created directly. The `in:` option only determines

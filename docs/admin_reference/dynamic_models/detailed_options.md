@@ -62,6 +62,7 @@ These options appear outside the `default:` key.
 - [Operators and values](../general/conditions_operators.md) — comparison operators, JSON elements, calculations and dynamic values
 - [Returning values](../general/conditions_returns.md) — `return_value`, `return_result`, `return_constant` and `lookup`
 - [Search scope](../general/conditions_scope.md) — `masters:`, `no_masters:`, `users`, item flags and activity shortcuts
+- [Record scoping](../general/scoping.md) — how the *Foreign key name* and `foreign_key_through_external_id` decide which records conditions and substitutions can reach
 - [Validation messages](../general/conditions_validation.md) — `invalid_error_message`, `validate:` and `hide_error`
 
 ## Standard Options (Reusable Anchors)

@@ -4,6 +4,11 @@
 
 Define actions to perform automatically when a record is created, updated, saved, disabled, uploaded, or before saving. Each event key (`on_create`, `on_update`, `on_save`, `on_disable`, `on_upload`, `before_save`) takes an ordered list of trigger tasks. See [Event Keys](#event-keys) for more detail.
 
+Every `if:` condition and curly brace substitution in a trigger is evaluated against the
+record that fired it, and against the other records belonging to that record's master. See
+[record scoping](scoping.md) for what this means for definitions that reach their master
+record in an unusual way, or not at all.
+
 ```yaml
 !defs(extra_options_save_trigger_defs.yaml)
 ```

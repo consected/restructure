@@ -9,6 +9,10 @@ long-running operations like sending notifications, processing large datasets, o
 external APIs that shouldn't block the main request. The `current_user` context is preserved
 in the background job.
 
+The job loads the record again from the database by ID, so background triggers see the
+saved record. Any `save_trigger_results` or `variables` accumulated by foreground triggers
+are held in memory only and are not available to them. See [record scoping](scoping.md).
+
 Results from the queue operation are stored in `save_trigger_results['background']`:
 ```
 {

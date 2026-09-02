@@ -3,7 +3,9 @@
 Table conditions are joined to the current record's master by default, so only records
 belonging to that master are considered. These options change what is searched.
 
-See the [conditions reference](conditions.md) for the overall syntax.
+See the [conditions reference](conditions.md) for the overall syntax, and
+[record scoping](scoping.md) for how a definition comes to have a master record in the
+first place — and what these options are needed for when it has none.
 
 ## Searching all master records
 
