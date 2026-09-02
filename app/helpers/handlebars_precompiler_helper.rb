@@ -115,7 +115,7 @@ module HandlebarsPrecompilerHelper
       user_type = u&.class&.name
       user_id = u&.id
       app_type_id = u&.app_type_id if u.respond_to?(:app_type_id)
-      userrole, uac = app_type_access_control_timestamps(app_type_id)
+      userrole, uac = HandlebarsPrecompiler.app_type_access_control_timestamps(app_type_id)
 
       # app_type_id is included directly (not just via the userrole/uac timestamps) so that
       # two different app_type contexts can never collide even if neither has any
@@ -295,7 +295,7 @@ module HandlebarsPrecompilerHelper
   # @return [String] 13-character hex string (truncated SHA256)
   def access_control_version
     @access_control_version ||= begin
-      userrole, uac = app_type_access_control_timestamps(current_user_or_admin_app_type_id)
+      userrole, uac = HandlebarsPrecompiler.app_type_access_control_timestamps(current_user_or_admin_app_type_id)
 
       Digest::SHA256.hexdigest("#{userrole}-#{uac}-#{handlebars_cache_key}")[0..12]
     end
@@ -410,32 +410,6 @@ module HandlebarsPrecompilerHelper
   def current_user_or_admin_app_type_id
     u = current_user_or_admin
     u&.app_type_id if u.respond_to?(:app_type_id)
-  end
-
-  # Look up the latest updated_at timestamps for Admin::UserRole and
-  # Admin::UserAccessControl scoped to a given app_type_id. Used to derive
-  # cache keys that must change whenever access control for that app_type changes.
-  # Includes app_type_id: nil rows too (global/shared roles and access controls that
-  # apply across all app types via role_name matching), matching the scoping pattern
-  # used elsewhere for this purpose (see UserAndRoles#where_user_and_role and
-  # PageLayoutsHelper#page_layout_panels) — otherwise a change to a global role/access
-  # control would not be reflected in any app_type-scoped cache key.
-  # @param app_type_id [Integer, nil] the app_type to scope the queries to
-  # @return [Array(String, String)] [userrole_timestamp, uac_timestamp] as epoch-integer strings
-  def app_type_access_control_timestamps(app_type_id)
-    userrole = Admin::UserRole.where(app_type_id: [app_type_id, nil])
-                              .reorder(updated_at: :desc)
-                              .limit(1)
-                              .pluck(:updated_at)
-                              &.first.to_i.to_s
-
-    uac = Admin::UserAccessControl.where(app_type_id: [app_type_id, nil])
-                                  .reorder(updated_at: :desc)
-                                  .limit(1)
-                                  .pluck(:updated_at)
-                                  &.first.to_i.to_s
-
-    [userrole, uac]
   end
 
   # Compile templates or partials from their respective temp directory.

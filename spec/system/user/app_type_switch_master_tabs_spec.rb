@@ -22,6 +22,12 @@ require 'rails_helper'
 # generation, Handlebars compilation and client-side rendering) in single examples that:
 # - switch a user between two app types and verify the correct tabs are shown in each
 # - switch between two users with different access and verify per-user tabs are correct
+# - (issue #1400 Phase 1) repeat logins/app-loads across multiple users as SMOKE coverage
+#   that widening the UAC/role cache-key scope to include app_type_id: nil rows did not
+#   break ordinary multi-user template loading. It is NOT a regression test for the
+#   global-row cache-key fix itself (that is spec/helpers/application_helper_spec.rb's
+#   'changes the full cache key when a global access-control timestamp changes' example) -
+#   this example would pass identically before and after that fix.
 describe 'master panel tabs across app type and user switches', js: true, driver: $browser_driver do
   include ModelSupport
   include MasterDataSupport
@@ -201,5 +207,25 @@ describe 'master panel tabs across app type and user switches', js: true, driver
     expand_test_master
     expect(page).to have_css("a[data-panel-tab='#{PanelC}']", wait: 15)
     expect(page).not_to have_css("a[data-panel-tab='#{PanelA}']")
+  end
+
+  # Smoke test only (see top-of-file comment) - not a regression test for the global-row fix.
+  it 'keeps template loading and master UI functional across repeated requests from multiple users' do
+    login_as @user1, @user1_password
+    expand_test_master
+    expect(page.evaluate_script('_fpa.status.loaded_templates')).to be true
+    expect_master_to_have_expanded(@master_id)
+    logout
+
+    login_as @user2, @user2_password
+    expand_test_master
+    expect(page.evaluate_script('_fpa.status.loaded_templates')).to be true
+    expect_master_to_have_expanded(@master_id)
+    logout
+
+    login_as @user1, @user1_password
+    expand_test_master
+    expect(page.evaluate_script('_fpa.status.loaded_templates')).to be true
+    expect_master_to_have_expanded(@master_id)
   end
 end
