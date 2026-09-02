@@ -81,6 +81,7 @@ given a meaningful name. A selection type may also be given a list of blocks.
 | [Returning values](conditions_returns.md) | `return_value`, `return_value_list`, `return_result`, `return_all_results`, `return_constant` and `lookup` |
 | [Search scope](conditions_scope.md) | `masters:`, `no_masters:`, `users`, `definition_resources`, item flags and activity shortcuts |
 | [Validation messages](conditions_validation.md) | `invalid_error_message`, `validate:` and `hide_error` |
+| [Record scoping](scoping.md) | How a definition reaches its master record, and what changes when it has none |
 
 ## Limitations to be aware of
 
@@ -92,6 +93,9 @@ given a meaningful name. A selection type may also be given a list of blocks.
   for presence first.
 - Table conditions are joined to the current master by default. Use
   [`masters:` or `no_masters:`](conditions_scope.md) to search more widely.
+- A definition with no *Foreign key name* has no master record at all, so a table
+  condition raises an error rather than returning false unless `masters:` or
+  `no_masters:` is used. See [record scoping](scoping.md).
 - When `no_masters: {}` is used, the **first** table listed becomes the base of the
   query, so ordering matters.
 

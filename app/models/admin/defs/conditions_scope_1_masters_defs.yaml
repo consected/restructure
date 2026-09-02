@@ -15,12 +15,19 @@
 #       - 2
 #
 # A crosswalk identifier can also be resolved this way, by matching a master
-# record on one of its external identifiers and returning its id:
+# record on one of its crosswalk attributes - the alternative ID columns held
+# directly on the masters table - and returning its id:
 #
 #   all:
 #     masters:
 #       msid: 12345
 #       id: return_value
+#
+# The masters table remains the base of the query, so every table named alongside
+# `masters:` must have an association to the master record. Naming a standalone
+# table (one whose definition has no foreign key name) fails with
+# "Can't join 'Master' to association named '<resource_name>'" - use
+# `no_masters: {}` for those instead.
 all:
   masters: {}
   addresses:

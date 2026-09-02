@@ -5,7 +5,8 @@
 
 # `no_masters: {}` makes the first table listed the base of the query, with no
 # join to the masters table. Use it for tables and views that have no master_id,
-# or where master_id may be null.
+# or where master_id may be null - including standalone definitions, which have
+# no foreign key name and so can not be reached through `masters:` at all.
 #
 # Additional tables may be listed, but they must be associations defined on the
 # new base table. In particular, comparisons that reach back into the current

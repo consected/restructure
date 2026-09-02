@@ -46,8 +46,8 @@ _configurations:
     # may now return multiple results, since there is currently no way to specify the other fields that make up a unique search.
   can_change_master: allow assigned external identifiers to be moved to a different master record
   foreign_key_through_external_id: external identifier resource name to join to master through when the *foreign key name* is defined
-    # Allows a dynamic model to be have a master association without a master_id (or other crosswalk attribute) column configured on the
-    # table. Instead, the column name specified in the *foreign key name* definition name the field this model, the value
+    # Allows a dynamic model to be have a master association without a master_id column configured on the
+    # table. Instead, the column name specified in the *foreign key name* definition names the external ID field on this model, the value
     # of which is then used to look up the external identifier record of type defined in this configuration. This then makes the connection
     # back to the master record.
     # The inverse of this is that the master record can create one of these dynamic models if an external identifier of this type has been created.
@@ -66,6 +66,10 @@ _configurations:
     #
     # Another common use case might be to have the *Foreign key name* set to "redcap_survey_identifier" and the
     # *foreign_key_through_external_id:* configuration would specify the external identifier type to use to lookup the associated master.
+    #
+    # Once set, the model gains a full master record scope: conditional calculations join through the master by
+    # default and curly brace substitutions naming an association resolve. See scoping.md for the full explanation
+    # of how this and the *Foreign key name* affect conditions and substitutions.
   no_user_id: true|false (default)
     # The table should be created without a user_id field or foreign key onto `users.id` and association to the User model.
   option_type_attr_name: field name to use as the option type attribute (default 'option_type')

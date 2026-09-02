@@ -3,6 +3,31 @@
 
 Send a notification (email, SMS, etc.) using a configured message template when this trigger fires.
 
+### When substitutions are made
+
+The trigger runs in two stages, and it matters which values are resolved in each.
+
+When the trigger fires, the recipients, `subject:`, the string values of
+`extra_substitutions:` and `content_template_text:` are substituted against the record that
+fired it, while that record is still in memory. A message notification record is then
+created holding those resolved values, and a job is queued to send it.
+
+The message body is not rendered until that job runs. It re-loads the record from the
+database by ID and substitutes the layout together with the content in a single pass, so
+those tags resolve against the saved record and its master record.
+
+This gives the two ways of supplying content different behaviour:
+
+| | `content_template_text:` | Named `content_template:` |
+| --- | --- | --- |
+| Substituted when the trigger fires | Yes, against the in-memory record | No — only the template name is stored |
+| Substituted when the message is sent | Yes, with the layout | Yes, with the layout |
+| A tag that can not be resolved | Silently replaced with a blank at the first stage, so it never reaches the second | Raises an error when the message is sent |
+
+Values held on the record but not yet saved are therefore visible to
+`content_template_text:` and not to a named `content_template:`. See
+[record scoping](scoping.md) for what each stage can reach.
+
 ```yaml
 !defs(save_triggers_notify_options_defs.yaml)
 ```
