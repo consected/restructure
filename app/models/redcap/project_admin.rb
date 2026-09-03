@@ -38,8 +38,10 @@ module Redcap
     Statuses = {
       schedule_run_set_configured: 'scheduled run configured',
       scheduled_run_successful: 'scheduled run successful',
+      scheduled_run_completed_with_errors: 'scheduled run completed with errors',
       scheduled_run_failed: 'scheduled run failed',
       manual_run_successful: 'manual run successful',
+      manual_run_completed_with_errors: 'manual run completed with errors',
       manual_run_failed: 'manual run failed',
       stopped_manually: 'stopped manually',
       changes_detected: 'changes detected',
@@ -127,13 +129,13 @@ module Redcap
                                                  captured_project_info.present? &&
                                                  valid_metadata? &&
                                                  (
-                                                    saved_change_to_server_url? ||
-                                                    saved_change_to_api_key? ||
-                                                    saved_change_to_name? ||
-                                                    !data_dictionary_ready? ||
-                                                    force_refresh ||
-                                                    request_latest_config
-                                                  )
+                                                   saved_change_to_server_url? ||
+                                                   saved_change_to_api_key? ||
+                                                   saved_change_to_name? ||
+                                                   !data_dictionary_ready? ||
+                                                   force_refresh ||
+                                                   request_latest_config
+                                                 )
                                              }
 
     after_save :capture_project_users, if: lambda {
@@ -253,8 +255,20 @@ module Redcap
     #     - nil/blank: disabled (exports all records)
     #     NOTE: returned subsets must be handled correctly by deleted record handling to avoid incorrectly
     #     marking excluded records as deleted.
+    # continue_on_record_error: true | false | nil
+    #     If true, an exception raised while persisting or triggering a single record during `store`
+    #     (for example a before_save or after_commit save trigger) is caught and recorded in `errors` as
+    #     `{ id:, errors:, action: :create_or_update }`, allowing the pull to continue processing the
+    #     remaining records instead of aborting the entire run.
+    #     - A failure during the before_save phase means the record's transaction was rolled back and the
+    #       record was NOT persisted; it is not counted in #created_ids/#updated_ids.
+    #     - A failure during the after_commit phase (e.g. create_reference, add_tracker, generate_document)
+    #       means the record WAS already committed; it IS counted in #created_ids/#updated_ids, even though
+    #       the failing trigger's own action did not complete.
+    #     Default (false/nil): an unhandled exception aborts the entire pull (fail-fast, current behavior).
 
     ValidExportOnlyUpdatedRecordsValues = [nil, '', 'always', 'manual', 'scheduled'].freeze
+    ValidContinueOnRecordErrorValues = [nil, '', true, false].freeze
 
     configure :data_options, with: %i[add_multi_choice_summary_fields
                                       handle_deleted_records
@@ -267,7 +281,8 @@ module Redcap
                                       metadata_export_cache_time
                                       record_export_cache_time
                                       export_only_updated_records
-                                      server_time_zone]
+                                      server_time_zone
+                                      continue_on_record_error]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
@@ -287,6 +302,12 @@ module Redcap
       return if ActiveSupport::TimeZone[tz].present?
 
       errors.add(:data_options, "server_time_zone '#{tz}' is not a valid time zone identifier")
+    }
+
+    validate :data_options, lambda {
+      return if data_options.continue_on_record_error.in?(ValidContinueOnRecordErrorValues)
+
+      errors.add(:data_options, "continue_on_record_error must be one of: #{ValidContinueOnRecordErrorValues}")
     }
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
@@ -763,6 +784,32 @@ module Redcap
                    Statuses[:manual_run_failed],
                    Statuses[:request_failed]
                  ])
+    end
+
+    #
+    # Check if the most recent run completed but with some individual record errors
+    # recorded (see Redcap::DataRecords#errors), rather than a fully successful or
+    # failed run
+    # @return [Boolean]
+    def completed_with_errors?
+      status.in?([
+                   Statuses[:scheduled_run_completed_with_errors],
+                   Statuses[:manual_run_completed_with_errors]
+                 ])
+    end
+
+    #
+    # The status key (see Statuses) to use after a run completes without raising,
+    # based on whether any per-record errors were recorded.
+    # @param [Boolean] errors_present
+    # @param [true | false] is_manual_pull
+    # @return [Symbol]
+    def self.completed_status(errors_present:, is_manual_pull:)
+      if is_manual_pull
+        errors_present ? :manual_run_completed_with_errors : :manual_run_successful
+      else
+        errors_present ? :scheduled_run_completed_with_errors : :scheduled_run_successful
+      end
     end
 
     #

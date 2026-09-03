@@ -99,4 +99,58 @@ RSpec.describe Redcap::CaptureRecordsJob, type: :job do
       RSpec::Expectations.configuration.on_potential_false_positives = :warn
     end
   end
+
+  # Tests for the job status set after a run completes without raising: distinguishes
+  # a fully clean run ("manual run successful") from one where Redcap::DataRecords#errors
+  # was non-empty ("manual run completed with errors"), per the completed_status helper
+  # on Redcap::ProjectAdmin.
+  describe 'status set after a completed pull' do
+    before :all do
+      change_setting('AllowDynamicMigrations', true)
+      create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
+    end
+
+    after :all do
+      change_setting('AllowDynamicMigrations', false)
+    end
+
+    def prepare_project_admin_for_job
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+      dm = create_dynamic_model_for_sample_response
+      setup_file_store
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.dynamic_model_table = dm.table_name
+      rc.save!
+
+      [rc, dm.implementation_class]
+    end
+
+    it 'marks the project "manual run successful" when the pull recorded no errors' do
+      rc, model_class = prepare_project_admin_for_job
+
+      allow_any_instance_of(Redcap::DataRecords).to receive(:retrieve_validate_store)
+      allow_any_instance_of(Redcap::DataRecords).to receive(:errors).and_return([])
+
+      described_class.new.perform(rc, model_class.name)
+
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:manual_run_successful])
+    end
+
+    it 'marks the project "manual run completed with errors" when the pull recorded errors' do
+      rc, model_class = prepare_project_admin_for_job
+
+      allow_any_instance_of(Redcap::DataRecords).to receive(:retrieve_validate_store)
+      allow_any_instance_of(Redcap::DataRecords).to receive(:errors).and_return(
+        [{ id: { record_id: '1' }, errors: { store: 'boom' }, action: :create_or_update }]
+      )
+
+      described_class.new.perform(rc, model_class.name)
+
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:manual_run_completed_with_errors])
+    end
+  end
 end
