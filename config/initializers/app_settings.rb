@@ -96,6 +96,10 @@ class Settings
   BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'].presence || AdminEmail.presence
   # Email address that identifies the Redcap job user profile. Defaults to the BatchUserEmail
   RedcapJobUserEmail = ENV['FPHS_RC_JOB_USER_EMAIL'].presence || BatchUserEmail.presence
+  # Email address of the API-only user recommended for submitting REDCap Data Entry Trigger
+  # requests. Shown as the default in the generated Data Entry Trigger endpoint URL/instructions;
+  # this user still needs its own real API token, substituted manually by an admin.
+  RedcapDetUserEmail = ENV['FPHS_RC_DET_USER_EMAIL'].presence || 'redcap_det@system-user'
   # Provide an email address for a technical admin to receive failure notifications
   FailureNotificationsToEmail = ENV['FAIL_TO_EMAIL'].presence || ENV['FAIL_FROM_EMAIL'].presence || DefaultSettings::FailureNotificationsToEmail.presence || Settings::AdminEmail.presence
 
@@ -393,7 +397,7 @@ class Settings
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
-    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail
+    NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail RedcapDetUserEmail
     TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift TwoFactorAuthIdleTimeout
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage

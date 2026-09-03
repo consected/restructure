@@ -513,4 +513,141 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
       rc.remove_project_user('d20')
     end
   end
+
+  # Tests for issue #1403: REDCap Data Entry Trigger endpoint support.
+  # Covers the internal_project_token generated for each project (used to protect the
+  # Data Entry Trigger endpoint from misuse) and the project_id/server_url lookup used
+  # by that endpoint to identify the matching project.
+  describe '#internal_project_token' do
+    it 'is blank until first accessed' do
+      rc = Redcap::ProjectAdmin.active.first
+      expect(rc.data_options.internal_project_token).to be_blank
+    end
+
+    it 'is generated and persisted the first time it is accessed' do
+      rc = Redcap::ProjectAdmin.active.first
+      token = rc.internal_project_token
+      expect(token).to be_present
+      expect(token.length).to be >= 32
+
+      rc = Redcap::ProjectAdmin.find(rc.id)
+      expect(rc.data_options.internal_project_token).to eq token
+    end
+
+    it 'is not regenerated on subsequent accesses' do
+      rc = Redcap::ProjectAdmin.active.first
+      original_token = rc.internal_project_token
+
+      rc = Redcap::ProjectAdmin.find(rc.id)
+      expect(rc.internal_project_token).to eq original_token
+    end
+
+    it 'does not disturb other unsaved data_options changes made after it is generated' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.internal_project_token
+
+      rc.current_admin = @admin
+      rc.data_options.export_only_updated_records = 'manual'
+      rc.save!
+
+      rc = Redcap::ProjectAdmin.find(rc.id)
+      expect(rc.data_options.export_only_updated_records).to eq 'manual'
+    end
+
+    it 'generates distinct tokens for different projects' do
+      projects = Redcap::ProjectAdmin.active.limit(2).to_a
+      expect(projects.length).to eq 2
+      expect(projects[0].internal_project_token).not_to eq projects[1].internal_project_token
+    end
+
+    it 'does not mutate captured_project_info in place when read beforehand' do
+      # Regression test: #captured_project_info used to mutate the JSONB attribute's Hash in
+      # place (via #symbolize_keys!), falsely marking it "changed" after a mere read.
+      rc = Redcap::ProjectAdmin.active.first
+      rc.update_columns(captured_project_info: { 'project_id' => '123' })
+
+      rc.captured_project_info
+      expect(rc.has_changes_to_save?).to be false
+
+      expect { rc.internal_project_token }.not_to raise_error
+    end
+  end
+
+  describe '#matches_internal_project_token?' do
+    let(:rc) { Redcap::ProjectAdmin.active.first }
+
+    it 'returns true for the exact configured token' do
+      token = rc.internal_project_token
+      expect(rc.matches_internal_project_token?(token)).to be true
+    end
+
+    it 'returns false for an incorrect token' do
+      expect(rc.matches_internal_project_token?('not-the-right-token')).to be false
+    end
+
+    it 'returns false when no token is supplied' do
+      expect(rc.matches_internal_project_token?(nil)).to be false
+      expect(rc.matches_internal_project_token?('')).to be false
+    end
+
+    it 'returns false when the project has no configured token' do
+      rc.data_options.internal_project_token = nil
+      expect(rc.matches_internal_project_token?('anything')).to be false
+    end
+  end
+
+  describe '.find_active_by_redcap_project' do
+    let(:captured_project_id) { 88_888 }
+
+    before do
+      @project_admin = Redcap::ProjectAdmin.active.first
+      @project_admin.update_columns(captured_project_info: { 'project_id' => captured_project_id })
+    end
+
+    it 'finds the project via an exact server_url match' do
+      result = Redcap::ProjectAdmin.find_active_by_redcap_project(captured_project_id.to_s, @project_admin.server_url)
+      expect(result&.id).to eq @project_admin.id
+    end
+
+    it 'finds the project via protocol+host match when the path differs' do
+      uri = URI.parse(@project_admin.server_url)
+      alt_url = "#{uri.scheme}://#{uri.host}/different/path/"
+
+      result = Redcap::ProjectAdmin.find_active_by_redcap_project(captured_project_id.to_s, alt_url)
+      expect(result&.id).to eq @project_admin.id
+    end
+
+    it 'returns nil when no project matches' do
+      result = Redcap::ProjectAdmin.find_active_by_redcap_project(captured_project_id.to_s,
+                                                                  'https://no-match.example.com/api/')
+      expect(result).to be_nil
+    end
+
+    it 'returns nil (not raise) for a malformed server_url' do
+      expect do
+        result = Redcap::ProjectAdmin.find_active_by_redcap_project(captured_project_id.to_s, 'not a valid url %%')
+        expect(result).to be_nil
+      end.not_to raise_error
+    end
+  end
+
+  describe '.find_active_by_internal_project_token' do
+    it 'finds the project matching the given token' do
+      rc = Redcap::ProjectAdmin.active.first
+      token = rc.internal_project_token
+
+      result = Redcap::ProjectAdmin.find_active_by_internal_project_token(token)
+      expect(result&.id).to eq rc.id
+    end
+
+    it 'returns nil for an unknown token' do
+      expect(Redcap::ProjectAdmin.find_active_by_internal_project_token('not-a-real-token')).to be_nil
+    end
+
+    it 'returns nil (without querying) for a blank token' do
+      expect(Redcap::ProjectAdmin).not_to receive(:active)
+      expect(Redcap::ProjectAdmin.find_active_by_internal_project_token(nil)).to be_nil
+      expect(Redcap::ProjectAdmin.find_active_by_internal_project_token('')).to be_nil
+    end
+  end
 end
