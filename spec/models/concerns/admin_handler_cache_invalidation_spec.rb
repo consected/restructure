@@ -65,8 +65,8 @@ RSpec.describe AdminHandler, type: :model do
   describe 'a standard AdminHandler model' do
     it 'still clears the Rails cache on every save' do
       expect(Rails.cache).to receive(:clear).at_least(:once)
-      Classification::GeneralSelection.create! item_type: 'player_contacts_type', name: 'Cache Test',
-                                               value: 'cache_test', current_admin: @admin
+      Admin::MessageTemplate.create! name: 'Cache Test', message_type: :plain, template_type: :content,
+                                     template: 'Cache test', current_admin: @admin
     end
   end
 end

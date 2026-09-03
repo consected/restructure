@@ -287,7 +287,7 @@ class Classification::SelectionOptionsHandler
   end
 
   def self.selector_with_config_overrides(conditions = nil)
-    cname = "#{CacheKeySelectorWithConfigOverrides}--#{conditions}"
+    cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{conditions}"
     @cache_keys_list ||= []
     @cache_keys_list << cname
     Rails.cache.fetch(cname) { selector_with_config_overrides_processing(conditions) }
