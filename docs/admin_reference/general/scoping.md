@@ -140,9 +140,13 @@ several external identifier records match, the most recent one is used.
 ### Crosswalk attributes on the masters table
 
 Crosswalk attributes are the alternative identifier columns held directly on the masters
-table, such as `msid` or `pro_id`. They are a way of *finding* a master record, not a way
-of attaching a definition to one. A definition still needs `master_id` (or the external
-identifier route above) to gain a master scope.
+table: `msid`, `pro_id`, `pro_info_id`, and `contact_id`. They can identify a master in
+conditions, and a dynamic model can also use one of these columns as its Foreign key name
+to attach directly to that master. In that case the dynamic model's `primary_key_name`
+still identifies records in its own table; the crosswalk column is only the master join key.
+
+Other fields on a dynamic model are not master join keys. They require `master_id`, or the
+external identifier route above, to gain a master scope.
 
 Once the current record has a master, a crosswalk attribute can be used to reach a
 *different* master record from within a condition:
@@ -172,9 +176,12 @@ valid_if:
         rec_type: email
 ```
 
-This is a condition-time join only. It gives the definition no master association, so
-`{{association_name.field_name}}` substitutions still return blank, and the records are
-still not shown in master record panels.
+This is a condition-time join only when the definition itself is standalone. It gives the
+definition no master association, so `{{association_name.field_name}}` substitutions still
+return blank, and the records are still not shown in master record panels. A dynamic model
+whose Foreign key name is one of the four supported crosswalk columns has a direct master
+association instead, so its normal master scope, substitutions, and master-panel loading
+are available.
 
 To make a table keyed by a crosswalk value behave as a full master-associated definition,
 back the definition with a view that resolves the master, using
@@ -332,7 +339,7 @@ no master scope for any of its records.
 | --- | --- |
 | Records belong to a participant | *Foreign key name* `master_id` |
 | Records are keyed by a study or survey ID, with no `master_id` column | *Foreign key name* set to that column, plus `_configurations.foreign_key_through_external_id` |
-| Records are keyed by a masters crosswalk value such as `msid` | Back the definition with a `_configurations.view_sql` view that joins to masters and exposes `master_id` |
+| Records are keyed by a masters crosswalk value (`msid`, `pro_id`, `pro_info_id`, or `contact_id`) | Set *Foreign key name* to that crosswalk column; keep *Primary key name* set to the dynamic table's own key, normally `id` |
 | Records are a shared lookup table, unrelated to participants | *Foreign key name* blank, and `no_masters: {}` in conditions |
 | A condition must reach records belonging to another participant | `masters: {}`, restricted by ID or a crosswalk attribute |
 | A substitution must use a value from outside the current master | Return it with a condition into a save trigger variable, then substitute the variable |
