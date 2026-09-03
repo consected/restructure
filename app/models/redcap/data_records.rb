@@ -14,6 +14,20 @@ module Redcap
     # The string is designed to be unlikely to be a valid filename.
     FailedFileFieldMarker = '<<FAILED-FILE-CAPTURE>>'
 
+    # Maximum number of #record_store_error entries retained in #errors when
+    # continue_on_record_error is enabled. Once exceeded, further per-record
+    # exceptions are only counted (see #record_store_error) to avoid unbounded
+    # growth of the job request result for a project with many failing records.
+    # This does not cap other, pre-existing error sources (e.g. validation
+    # failures or #capture_files failures), which are unrelated to this option.
+    MaxRecordErrorsRecorded = 100
+
+    # Maximum length of an exception message recorded in #errors. Raw exception text
+    # (e.g. from ActiveRecord/PG errors) can include bound SQL parameter values, so only
+    # a truncated message is persisted; the full exception and backtrace are always
+    # logged via Rails.logger.
+    MaxRecordErrorMessageLength = 300
+
     attr_accessor :project_admin, :records, :class_name, :errors,
                   :created_ids, :updated_ids, :unchanged_ids, :disabled_ids, :storage_stage,
                   :current_admin, :retrieved_files, :upserted_records, :imported_files, :failed_files,
@@ -25,7 +39,8 @@ module Redcap
                   :retrieved_from_cache, :using_date_range_filter, :is_manual_pull,
                   :date_range_begin,
                   :request_source,
-                  :ignore_cache, :retrieve_all, :verify_file_fields
+                  :ignore_cache, :retrieve_all, :verify_file_fields,
+                  :continue_on_record_error
 
     def initialize(project_admin, class_name, is_manual_pull: false, request_source: nil, verify_file_fields: false)
       super()
@@ -51,6 +66,9 @@ module Redcap
       self.external_id_fkey_name = project_admin.associate_master_through_external_id_fkey_name&.to_sym
       self.set_master_id_using_association = project_admin.data_options.set_master_id_using_association
       self.skip_store_if_no_survey_identifier = project_admin.data_options.skip_store_if_no_survey_identifier
+      # data_options.continue_on_record_error may be blank ('') as well as nil/false to mean disabled
+      # (see Redcap::ProjectAdmin::ValidContinueOnRecordErrorValues); only `true` enables the option.
+      self.continue_on_record_error = project_admin.data_options.continue_on_record_error == true
       self.retrieved_from_cache = false
       self.using_date_range_filter = false
       self.is_manual_pull = is_manual_pull
@@ -324,7 +342,7 @@ module Redcap
         subset = records[from, step]
         self.upserted_records = []
         subset.each do |record|
-          res = create_or_update record
+          res = create_or_update_continuing(record)
           upserts << res if res
         end
 
@@ -334,6 +352,12 @@ module Redcap
         from += step
         self.done = from
         update_job_request
+      end
+
+      if @record_error_overflow_count.to_i.positive?
+        errors << { id: nil,
+                    errors: { store: "#{@record_error_overflow_count} additional record errors were suppressed" },
+                    action: :record_error_overflow }
       end
 
       self.done = records.length
@@ -465,6 +489,83 @@ module Redcap
       rec_ids
     end
 
+    # Wraps #create_or_update so a per-record exception does not abort the whole #store run
+    # when continue_on_record_error is enabled. Used both by #store's main loop and by
+    # #disable_deleted_records, so a failing save trigger on a to-be-disabled record is
+    # handled the same way as one on a newly retrieved record.
+    # NOTE: calls #create_or_update the same way callers always have (a bare positional
+    # call when keep_results is true, its default) rather than always forwarding
+    # keep_results: explicitly - existing specs stub #create_or_update via
+    # `and_wrap_original do |method, *args| ... method.call(*args) end`, which cannot
+    # round-trip an explicitly-passed keyword argument back to the original method.
+    # @param [Hash] record
+    # @param [Boolean] keep_results
+    # @return [Hash, nil, false]
+    def create_or_update_continuing(record, keep_results: true)
+      if keep_results
+        create_or_update(record)
+      else
+        create_or_update(record, keep_results: false)
+      end
+    rescue StandardError => e
+      raise unless continue_on_record_error
+
+      record_store_error(record, e)
+      nil
+    end
+
+    # #record_identifiers can itself raise (e.g. a misconfigured data dictionary).
+    # Fall back to the raw record_id_field value (and extra identifier fields, so
+    # repeating-instrument ids stay comparable to normal #record_identifiers results)
+    # so the failing record can still be identified in #errors, rather than raising
+    # again from within the rescue in #store. Guaranteed not to raise, even if
+    # record_id_field/record_id_extra_fields themselves raise.
+    # @param [Hash] record
+    # @return [Hash]
+    def safe_record_identifiers(record)
+      record_identifiers(record)
+    rescue StandardError
+      fallback_record_identifiers(record)
+    end
+
+    def fallback_record_identifiers(record)
+      field = record_id_field
+      rec_ids = { field => record[field] }
+      record_id_extra_fields&.each { |f| rec_ids[f] = record[f] }
+      rec_ids
+    rescue StandardError
+      { unidentified_record: true }
+    end
+
+    # Record a per-record exception caught by #store's continue_on_record_error
+    # handling. The full exception and backtrace are always logged; only a class name
+    # and truncated message are persisted to #errors (see MaxRecordErrorMessageLength),
+    # since raw exception text (e.g. from ActiveRecord/PG errors) can include bound SQL
+    # parameter values. Once MaxRecordErrorsRecorded is reached, further exceptions
+    # caught here are only counted, to avoid unbounded growth of the job request result
+    # from this source. The cap is tracked independently of #errors, so it is not
+    # consumed by unrelated pre-existing error entries (e.g. validation failures from
+    # #create_or_update, or #capture_files failures).
+    # @param [Hash] record
+    # @param [StandardError] exception
+    def record_store_error(record, exception)
+      Rails.logger.warn(
+        'Redcap::DataRecords#store: record raised and was skipped ' \
+        "(continue_on_record_error): #{exception.class}: #{exception.message}\n" \
+        "#{exception.short_string_backtrace}"
+      )
+
+      @record_store_error_count = @record_store_error_count.to_i
+      if @record_store_error_count >= MaxRecordErrorsRecorded
+        @record_error_overflow_count = @record_error_overflow_count.to_i + 1
+        return
+      end
+
+      @record_store_error_count += 1
+      message = "#{exception.class}: #{exception.message}".truncate(MaxRecordErrorMessageLength)
+      errors << { id: safe_record_identifiers(record), errors: { store: message }, action: :create_or_update }
+    end
+
     #
     # If Redcap records were previously transferred to the local database then
     # subsequently deleted, set them as disabled
@@ -486,7 +587,7 @@ module Redcap
                       .reject { |k, _v| k.in?(%w[id created_at updated_at user_id]) }
                       .symbolize_keys
 
-        res = create_or_update(attrs, keep_results: false)
+        res = create_or_update_continuing(attrs, keep_results: false)
         disabled_ids << res[record_id_field] if res
       end
 
@@ -554,87 +655,118 @@ module Redcap
       rec_ids = record_identifiers(retrieved_record)
       attrs_for_persistence = retrieved_record.dup
       existing_record = model.where(rec_ids).first
+
       if existing_record
-        existing_record.no_track = true if existing_record.respond_to? :no_track
-        if existing_record.respond_to? :current_user=
-          existing_record.current_user = current_user
-        else
-          Rails.logger.warn "Redcap::DataRecords#create_or_update: existing record #{model} doesn't respond to current_user"
-        end
-
-        # Check if there is an exact match for the record. If so, we are done
-        if record_matches_retrieved(existing_record, retrieved_record)
-          unchanged_ids << rec_ids
-          return false
-        end
-
-        res = handle_setting_master_id(existing_record, retrieved_record)
-        # No valid result, but no exception, so just skip this one
-        unless res
-          skipped_ids << rec_ids
-          return
-        end
-
-        # Defer file field values until the actual file has been captured.
-        # Persisting the filename string before capture_files runs leaves the
-        # row inconsistent (filename present, no stored file) if anything
-        # between the commit and capture_files raises - notably the
-        # after_commit save trigger handlers. By nulling the field here and
-        # writing the filename back via update_columns only after a successful
-        # file import, a failed pull leaves the field NULL so the next pull
-        # detects the mismatch and retries.
-        pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
-
-        existing_record.force_save!
-        if existing_record.update(attrs_for_persistence)
-          stash_pending_file_fields(existing_record, pending_file_field_values)
-          if keep_results
-            updated_ids << rec_ids
-            upserted_records << existing_record
-          end
-          return rec_ids
-        else
-          errors << { id: rec_ids, errors: existing_record.errors, action: :update }
-        end
+        update_existing_record(existing_record, retrieved_record, attrs_for_persistence, rec_ids, keep_results:)
       else
-        # See comment above on deferring file field values until capture_files
-        # has actually stored the file.
-        pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
+        create_new_record(retrieved_record, attrs_for_persistence, rec_ids, keep_results:)
+      end
+    end
 
-        new_record = model.new(attrs_for_persistence)
-        new_record.no_track = true if new_record.respond_to? :no_track
-        if new_record.respond_to? :current_user=
-          new_record.current_user = current_user
-        else
-          Rails.logger.warn "Redcap::DataRecords#create_or_update: new record #{model} doesn't respond to current_user"
-        end
-
-        res = handle_setting_master_id(new_record, retrieved_record)
-        unless res
-          skipped_ids << rec_ids
-          return
-        end
-
-        new_record.force_save!
-        if new_record.save
-          stash_pending_file_fields(new_record, pending_file_field_values)
-          if keep_results
-            created_ids << rec_ids
-            upserted_records << new_record
-          end
-          return rec_ids
-        else
-          errors << { id: rec_ids, errors: new_record.errors, action: :create }
-        end
+    def update_existing_record(existing_record, retrieved_record, attrs_for_persistence, rec_ids, keep_results:)
+      existing_record.no_track = true if existing_record.respond_to? :no_track
+      if existing_record.respond_to? :current_user=
+        existing_record.current_user = current_user
+      else
+        Rails.logger.warn "Redcap::DataRecords#create_or_update: existing record #{model} doesn't respond to current_user"
       end
 
+      # Check if there is an exact match for the record. If so, we are done
+      if record_matches_retrieved(existing_record, retrieved_record)
+        unchanged_ids << rec_ids
+        return false
+      end
+
+      res = handle_setting_master_id(existing_record, retrieved_record)
+      # No valid result, but no exception, so just skip this one
+      unless res
+        skipped_ids << rec_ids
+        return
+      end
+
+      # See the comment on #extract_and_null_file_fields for why file field
+      # values are deferred until the actual file has been captured.
+      pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
+      existing_record.force_save!
+
+      persist_record(existing_record, rec_ids, pending_file_field_values, updated_ids,
+                     action: :update, keep_results:) do
+        existing_record.update(attrs_for_persistence)
+      end
+    end
+
+    def create_new_record(retrieved_record, attrs_for_persistence, rec_ids, keep_results:)
+      # See the comment on #extract_and_null_file_fields for why file field
+      # values are deferred until the actual file has been captured.
+      pending_file_field_values = extract_and_null_file_fields(attrs_for_persistence)
+
+      new_record = model.new(attrs_for_persistence)
+      new_record.no_track = true if new_record.respond_to? :no_track
+      if new_record.respond_to? :current_user=
+        new_record.current_user = current_user
+      else
+        Rails.logger.warn "Redcap::DataRecords#create_or_update: new record #{model} doesn't respond to current_user"
+      end
+
+      res = handle_setting_master_id(new_record, retrieved_record)
+      unless res
+        skipped_ids << rec_ids
+        return
+      end
+
+      new_record.force_save!
+
+      persist_record(new_record, rec_ids, pending_file_field_values, created_ids, action: :create, keep_results:) do
+        new_record.save
+      end
+    end
+
+    # Persists +record+ via the given block (either #update or #save) and tracks the
+    # result into +ids_list+/#upserted_records. On StandardError, if continue_on_record_error
+    # is enabled and the record's transaction actually committed (#saved_changes?), the record
+    # is still counted as an upsert: a before_save-phase trigger failure rolls back the
+    # transaction, leaving #saved_changes? false, so it is correctly excluded; an after_commit-phase
+    # trigger failure means the record is already committed and #saved_changes? is true, so it is
+    # counted even though the failing trigger's own action did not complete. The exception is
+    # always re-raised, so #store's rescue can record it.
+    # @param [ActiveRecord::Base] record
+    # @param [Hash] rec_ids
+    # @param [Hash] pending_file_field_values
+    # @param [Array] ids_list - #created_ids or #updated_ids
+    # @param [Symbol] action - :create or :update, used in the #errors entry on failure
+    # @param [Boolean] keep_results
+    # @return [Hash, nil] rec_ids on success, nil on validation failure
+    def persist_record(record, rec_ids, pending_file_field_values, ids_list, action:, keep_results:)
+      if yield
+        stash_pending_file_fields(record, pending_file_field_values)
+        track_upsert(record, rec_ids, ids_list) if keep_results
+        return rec_ids
+      end
+
+      errors << { id: rec_ids, errors: record.errors, action: action }
       nil
+    rescue StandardError
+      if continue_on_record_error && record.saved_changes?
+        stash_pending_file_fields(record, pending_file_field_values)
+        track_upsert(record, rec_ids, ids_list) if keep_results
+      end
+      raise
+    end
+
+    def track_upsert(record, rec_ids, ids_list)
+      ids_list << rec_ids
+      upserted_records << record
     end
 
     # Remove file field values from the retrieved record hash so the row is
     # persisted without filename strings for fields whose underlying files have
-    # not yet been captured. Returns the removed { field_name => value } hash
-    # to be replayed by #capture_files once the file is stored.
+    # not yet been captured. Persisting the filename string before capture_files
+    # runs leaves the row inconsistent (filename present, no stored file) if
+    # anything between the commit and capture_files raises - notably the
+    # after_commit save trigger handlers. Returns the removed { field_name => value }
+    # hash to be replayed by #capture_files once the file is stored: writing the
+    # filename back via update_columns only after a successful file import means a
+    # failed pull leaves the field NULL, so the next pull detects the mismatch and retries.
     # @param [Hash] retrieved_record - mutated in place
     # @return [Hash{Symbol => String}]
     def extract_and_null_file_fields(retrieved_record)

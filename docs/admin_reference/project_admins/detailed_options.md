@@ -115,6 +115,22 @@ data_options:
     #   - UTC
     #
     # If not set, timestamps are sent as-is (typically UTC).
+  continue_on_record_error: true | false | null
+    # If true, an exception raised while persisting or triggering a single record
+    # during the store step (for example a before_save or after_commit save trigger)
+    # is caught and recorded in the job request's errors, allowing the pull to continue
+    # processing the remaining records instead of aborting the entire run.
+    #
+    # - A failure during the before_save phase means the record's transaction was
+    #   rolled back and the record was NOT persisted; it is not counted as created
+    #   or updated.
+    # - A failure during the after_commit phase (e.g. create_reference, add_tracker,
+    #   generate_document) means the record WAS already committed; it IS counted as
+    #   created or updated, even though the failing trigger's own action did not
+    #   complete.
+    #
+    # Default (false/null): an unhandled exception aborts the entire pull
+    # (fail-fast, current behavior).
 
 data_dictionary_version: random hash
     # do not change - a hash generated internally to 

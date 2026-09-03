@@ -248,6 +248,31 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
       expect(rc.failed?).to be false
     end
 
+    it 'does not identify projects with a "completed with errors" status as failed' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.frequency = '1 hour'
+      rc.transfer_mode = 'scheduled'
+      rc.save!
+
+      rc.update_columns(status: Redcap::ProjectAdmin::Statuses[:scheduled_run_completed_with_errors])
+      rc.reload
+
+      expect(rc.failed?).to be false
+      expect(rc.completed_with_errors?).to be true
+    end
+
+    it 'selects the manual/scheduled successful or completed_with_errors status key based on errors_present' do
+      expect(Redcap::ProjectAdmin.completed_status(errors_present: false, is_manual_pull: true))
+        .to eq(:manual_run_successful)
+      expect(Redcap::ProjectAdmin.completed_status(errors_present: true, is_manual_pull: true))
+        .to eq(:manual_run_completed_with_errors)
+      expect(Redcap::ProjectAdmin.completed_status(errors_present: false, is_manual_pull: false))
+        .to eq(:scheduled_run_successful)
+      expect(Redcap::ProjectAdmin.completed_status(errors_present: true, is_manual_pull: false))
+        .to eq(:scheduled_run_completed_with_errors)
+    end
+
     it 'returns the failed_at timestamp' do
       rc = Redcap::ProjectAdmin.active.first
       rc.current_admin = @admin

@@ -106,7 +106,6 @@ require 'capybara/rspec'
 require 'browser_helper'
 include BrowserHelper
 
-setup_browser unless ENV['SKIP_BROWSER_SETUP']
 SetupHelper.clean_conflicting_activity_logs
 SetupHelper.setup_nfs_directories
 SetupHelper.clean_app_migrations_dirs
@@ -215,6 +214,10 @@ RSpec.configure do |config|
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!
+  end
+
+  config.before(:all, type: :system, js: true) do
+    setup_browser unless ENV['SKIP_BROWSER_SETUP']
   end
 
   # For system tests that need javascript, use selenium_chrome

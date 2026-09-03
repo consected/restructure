@@ -46,7 +46,8 @@ module Redcap
 
       dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: false, request_source: :scheduled)
       dr.retrieve_validate_store
-      project_admin.update_status(:scheduled_run_successful)
+      status = Redcap::ProjectAdmin.completed_status(errors_present: dr.errors.present?, is_manual_pull: false)
+      project_admin.update_status(status)
     rescue StandardError => e
       create_failure_record(e, 'recurring capture records job', project_admin)
       project_admin.update_status(:scheduled_run_failed) unless status_already_set
