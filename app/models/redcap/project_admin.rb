@@ -246,6 +246,11 @@ module Redcap
     #     Time in seconds to cache metadata requests. Default is 60 seconds. Set to 0 to disable caching.
     # record_export_cache_time: <Integer seconds>
     #     Time in seconds to cache record requests. Default is 60 seconds. Set to 0 to disable caching.
+    # internal_project_token: <String>
+    #     A secret, per-project token required (in addition to a valid user_email/user_token) to authorize
+    #     requests to the REDCap Data Entry Trigger endpoint (Redcap::ProjectUserRequestsController#data_entry_trigger).
+    #     Automatically generated the first time the project is saved if not already set. Never regenerated
+    #     automatically thereafter, since it is embedded in the Data Entry Trigger URL configured in REDCap.
     # export_only_updated_records: always | manual | nil
     #     If set, override the setting `dateRangeBegin` passed to the REDCap API and set it with the
     #     max(created_at, updated_at) for the table. This exports only records updated since the last retrieval.
@@ -282,7 +287,8 @@ module Redcap
                                       record_export_cache_time
                                       export_only_updated_records
                                       server_time_zone
-                                      continue_on_record_error]
+                                      continue_on_record_error
+                                      internal_project_token]
 
     validate :data_options, lambda {
       return if data_options.handle_deleted_records.in?(ValidHandleDeletedRecordsValues)
@@ -312,6 +318,52 @@ module Redcap
     #
     # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
     configure_attributes :data_dictionary_version
+
+    #
+    # This project's secret internal_project_token, used to authorize requests to the REDCap
+    # Data Entry Trigger endpoint. Generated and persisted (via #save_options/#update_columns,
+    # bypassing validations/callbacks, matching #set_data_dictionary_version's pattern) the first
+    # time it is accessed, if not already set; never regenerated once set.
+    # NOTE: deliberately NOT a before_validation/before_save callback - OptionsHandler tracks
+    # whether #config_text has changed since the record was loaded by comparing it against a
+    # snapshot taken once at initialization (#orig_config_text). Since a new record's initial
+    # snapshot is taken before any before_validation callback runs, generating this value in a
+    # callback would permanently desynchronize that snapshot from the persisted value, causing
+    # #update_options to discard unrelated, not-yet-saved data_options changes on every
+    # subsequent save for the lifetime of the object.
+    # @return [String]
+    def internal_project_token
+      token = data_options.internal_project_token
+      return token if token.present?
+
+      token = SecureRandom.hex(20)
+      data_options.internal_project_token = token
+      if persisted?
+        save_options
+        update_columns(options:)
+        # Keep OptionsHandler's staleness snapshot in sync with the value we just wrote directly,
+        # so a later #save! on this same instance doesn't see config_text as "changed elsewhere"
+        # and reload (discarding) any other unsaved data_options changes.
+        self.orig_config_text = config_text
+      end
+      token
+    end
+
+    #
+    # Securely compare a token supplied by a caller (e.g. the REDCap Data Entry Trigger request)
+    # against this project's internal_project_token, to protect against timing attacks.
+    # Read-only: does not generate a token if one has not already been set.
+    # @param [String] token
+    # @return [Boolean]
+    def matches_internal_project_token?(token)
+      expected = data_options.internal_project_token
+      return false if expected.blank? || token.blank?
+
+      ActiveSupport::SecurityUtils.secure_compare(
+        ::Digest::SHA256.hexdigest(expected.to_s),
+        ::Digest::SHA256.hexdigest(token.to_s)
+      )
+    end
 
     #
     # Initialize with default request options for records and metadata
@@ -373,10 +425,13 @@ module Redcap
     end
 
     #
-    # Override accessor for the attribute, to symbolize keys before return
+    # Override accessor for the attribute, to symbolize keys before return.
+    # Uses the non-mutating #symbolize_keys (not #symbolize_keys!): mutating the JSONB attribute's
+    # Hash in place makes ActiveRecord's dirty tracking see it as "changed" on every read, even
+    # though nothing semantically changed.
     # @return [Hash | nil]
     def captured_project_info
-      super&.symbolize_keys!
+      super&.symbolize_keys
     end
 
     #
@@ -509,6 +564,18 @@ module Redcap
     end
 
     #
+    # The full REDCap Data Entry Trigger URL for this project, to be entered in REDCap's
+    # Project Setup > Additional customizations > Data Entry Trigger "URL of website" field.
+    # The `<user API token>` portion must be substituted by an admin with the real API token
+    # of the user configured to submit these requests (see #data_entry_trigger_setup_info).
+    # @return [String]
+    def data_entry_trigger_url
+      "#{Settings::BaseUrl}/redcap/project_user_requests/data_entry_trigger.json" \
+        "?user_email=#{CGI.escape(Settings::RedcapDetUserEmail)}&user_token=<user API token>" \
+        "&internal_project_token=#{internal_project_token}"
+    end
+
+    #
     # Lookup existing jobs, based on the jobclass being run, and the global id record
     # referenced in the arguments. Returns a scoped query, typically checked with something
     # like result.count > 0
@@ -542,6 +609,59 @@ module Redcap
     def self.preferred_active(table_names)
       ordered = active.where(dynamic_model_table: table_names).order(id: :desc)
       ordered.where.not(frequency: 'never').first || ordered.first
+    end
+
+    #
+    # Find an active project admin matching a REDCap project_id, tolerating differences in the
+    # supplied server_url. Used to identify the project associated with REDCap API callers that only
+    # know their own project_id and REDCap base URL, such as project_id-based job requests and the
+    # Data Entry Trigger endpoint.
+    # Matching is attempted, in order:
+    #  - exact server_url match
+    #  - protocol + host match only (tolerating path differences, e.g. a caller sending
+    #    https://redcap.partners.org/redcap/ when the project stores .../redcap/api/)
+    # @param [String | Integer] project_id - REDCap project_id (captured_project_info['project_id'])
+    # @param [String] server_url - the caller's REDCap base URL
+    # @return [Redcap::ProjectAdmin, nil]
+    def self.find_active_by_redcap_project(project_id, server_url)
+      by_project_id = active
+                      .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                      .reorder('')
+                      .order(updated_at: :desc)
+
+      found = by_project_id.where(server_url:).first
+      return found if found
+      return if server_url.blank?
+
+      uri = URI.parse(server_url)
+      return unless uri.scheme.present? && uri.host.present?
+
+      request_scheme = uri.scheme.downcase
+      request_host = uri.host.downcase
+
+      by_project_id.find do |project_admin|
+        stored_uri = URI.parse(project_admin.server_url.to_s)
+        stored_uri.scheme.present? &&
+          stored_uri.host.present? &&
+          stored_uri.scheme.downcase == request_scheme &&
+          stored_uri.host.downcase == request_host
+      rescue URI::InvalidURIError
+        false
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
+
+    #
+    # Find an active project admin by its internal_project_token alone. Used by the Data Entry
+    # Trigger endpoint's GET "test" flow, which REDCap calls with only the params embedded in the
+    # configured URL (no project_id/redcap_url).
+    # @param [String] token
+    # @return [Redcap::ProjectAdmin, nil]
+    def self.find_active_by_internal_project_token(token)
+      return if token.blank?
+
+      active.find { |project_admin| project_admin.matches_internal_project_token?(token) }
     end
 
     #

@@ -175,6 +175,10 @@ Rails.application.routes.draw do
         post :request_users
         get 'download_field_file/:field_name/:record_id', to: 'download_field_file'
       end
+      collection do
+        get :data_entry_trigger
+        post :data_entry_trigger
+      end
     end
   end
 

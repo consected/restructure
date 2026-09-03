@@ -131,6 +131,11 @@ data_options:
     #
     # Default (false/null): an unhandled exception aborts the entire pull
     # (fail-fast, current behavior).
+  internal_project_token: <string>
+    # A secret token, automatically generated the first time it is needed (e.g. the first time
+    # the **Data Entry Trigger** tab on the project admin page is viewed), required (in addition
+    # to a valid user_email/user_token) to authorize requests to the REDCap Data Entry Trigger
+    # endpoint. Never regenerated automatically once set. Do not set this manually.
 
 data_dictionary_version: random hash
     # do not change - a hash generated internally to 
