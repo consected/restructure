@@ -8,7 +8,8 @@
 # - a dynamic model with a foreign key name other than master_id, and no
 #   _configurations.foreign_key_through_external_id to resolve it
 # - a dynamic model whose table already has a master_id column
-# - a dynamic model carrying a master crosswalk attribute (msid)
+# - a dynamic model associated through each supported master crosswalk attribute
+#   (msid, pro_id, pro_info_id, and contact_id)
 # - a dynamic model joined to the master through an external identifier, using
 #   _configurations.foreign_key_through_external_id
 #
@@ -50,6 +51,26 @@ RSpec.describe 'Definition scoping', type: :model do
     setup_access :"dynamic_model__#{name}", user: @user
     setup_access :"dynamic_model__#{name}", user: @user0
     dm
+  end
+
+  def build_dynamic_model_for_table(name, columns, **defn)
+    ActiveRecord::Base.connection.execute <<~END_SQL
+      CREATE TABLE IF NOT EXISTS dynamic_test.#{name} (
+        id bigserial primary key,
+        #{columns},
+        user_id bigint,
+        created_at timestamp without time zone NOT NULL DEFAULT now(),
+        updated_at timestamp without time zone NOT NULL DEFAULT now()
+      );
+    END_SQL
+
+    DynamicModel.new(current_admin: @admin,
+                     table_name: name,
+                     schema_name: 'dynamic_test',
+                     primary_key_name: :id,
+                     category: :test,
+                     options: "_configurations:\n  prevent_migrations: true\n",
+                     **defn)
   end
 
   before :example do
@@ -204,41 +225,82 @@ RSpec.describe 'Definition scoping', type: :model do
   end
 
   describe 'a definition with the foreign key name set to a masters crosswalk column' do
-    it 'can not use a crosswalk column such as msid to drive the master association' do
-      dm = setup_dynamic_model_for_table 'test_msid_fk_recs',
-                                         'data character varying, msid integer',
-                                         name: 'test msid fk rec',
-                                         primary_key_name: :msid,
+    it 'accepts database integer types normalized to the same Rails type' do
+      dm = build_dynamic_model_for_table 'test_msid_type_mismatch_recs',
+                                         'data character varying, msid bigint',
+                                         name: 'test msid type mismatch rec',
                                          foreign_key_name: :msid,
                                          field_list: 'msid data'
 
-      # primary_key_name names the masters column to match, but doubles as this table's
-      # own primary key, and is forced back to id whenever the table has an id column
+      expect(dm).to be_valid
+    end
+
+    it 'reports an error when the crosswalk column has an incompatible Rails type' do
+      dm = build_dynamic_model_for_table 'test_msid_type_mismatch_recs',
+                                         'data character varying, msid character varying',
+                                         name: 'test msid type mismatch rec',
+                                         foreign_key_name: :msid,
+                                         field_list: 'msid data'
+
+      expect(dm).to be_invalid
+      expect(dm.errors[:foreign_key_name]).to include(/type.*Master.*msid/i)
+    end
+
+    %i[msid pro_id pro_info_id contact_id].each do |crosswalk_column|
+      it "resolves the master and default scope through #{crosswalk_column}" do
+        table_name = "test_#{crosswalk_column}_fk_recs"
+        dm = setup_dynamic_model_for_table table_name,
+                                           "data character varying, #{crosswalk_column} integer",
+                                           name: "test #{crosswalk_column} fk rec",
+                                           primary_key_name: :id,
+                                           foreign_key_name: crosswalk_column,
+                                           field_list: "#{crosswalk_column} data"
+
+        expect(dm.primary_key_name).to eq 'id'
+        expect(dm.foreign_key_name).to eq crosswalk_column.to_s
+
+        master = create_master(@user, crosswalk_column == :pro_info_id ? {} : { crosswalk_column => rand(1_000_000_000) })
+        if crosswalk_column == :pro_info_id
+          setup_access :pro_infos
+          pro_info = master.pro_infos.build(first_name: 'phil', last_name: 'good')
+          pro_info.current_user = @user
+          pro_info.save!
+          master.update_columns(pro_info_id: pro_info.id)
+        end
+        pc = master.player_contacts.create!(data: '(516)123-7612 31', rec_type: 'phone', rank: 10, source: 'nflpa')
+
+        rec = dm.implementation_class.new(crosswalk_column => master.public_send(crosswalk_column), data: 'x')
+        rec.current_user = @user
+        rec.save!
+
+        expect(rec.master).to eq master
+        expect(rec.master_id).to eq master.id
+
+        conf = { all: { player_contacts: { data: pc.data } } }
+        expect(ConditionalActions.new(conf, rec).calc_action_if).to be true
+        expect(Formatter::Substitution.substitute('[{{player_contacts.data}}]', data: rec)).to eq "[#{pc.data}]"
+      end
+    end
+  end
+
+  describe 'a definition for a table that already has a master_id column' do
+    it 'preserves a configured crosswalk foreign key and the dynamic table primary key' do
+      dm = setup_dynamic_model_for_table 'test_forced_fk_recs',
+                                         'data character varying, master_id integer, msid integer',
+                                         name: 'test forced fk rec',
+                                         primary_key_name: :id,
+                                         foreign_key_name: :msid,
+                                         field_list: 'msid data'
+
       expect(dm.primary_key_name).to eq 'id'
       expect(dm.foreign_key_name).to eq 'msid'
       expect(dm.implementation_class.primary_key).to eq 'id'
 
       master = create_master
-
-      # The association therefore matches masters.id against msid, not masters.msid,
-      # so a valid crosswalk value resolves to nothing
       rec = dm.implementation_class.new(msid: master.msid, data: 'x')
-      expect(rec.master).to be nil
-      expect(Master.find_by(msid: master.msid)).to eq master
 
-      expect { rec.save! }.to raise_error(StandardError)
-    end
-  end
-
-  describe 'a definition for a table that already has a master_id column' do
-    it 'forces the foreign key name to master_id when the definition is created' do
-      dm = setup_dynamic_model_for_table 'test_forced_fk_recs',
-                                         'data character varying, master_id integer, alt_master_id integer',
-                                         name: 'test forced fk rec',
-                                         foreign_key_name: :alt_master_id,
-                                         field_list: 'alt_master_id data'
-
-      expect(dm.foreign_key_name).to eq 'master_id'
+      expect(rec.master).to eq master
+      expect(rec.master_id).to eq master.id
     end
   end
 
@@ -295,6 +357,31 @@ RSpec.describe 'Definition scoping', type: :model do
       expect(ConditionalActions.new(conf, @rec).calc_action_if).to be true
 
       expect(Formatter::Substitution.substitute('[{{player_contacts.data}}]', data: @rec)).to eq "[#{@pc.data}]"
+    end
+
+    it 'accepts database integer types normalized to the same Rails type for external IDs' do
+      table_name = 'test_external_id_type_mismatch_recs'
+      dm = build_dynamic_model_for_table table_name,
+                                         'data character varying, scantron_id bigint',
+                                         name: 'test external ID type mismatch rec',
+                                         foreign_key_name: :scantron_id,
+                                         field_list: 'scantron_id data',
+                                         options: "_configurations:\n  prevent_migrations: true\n  foreign_key_through_external_id: #{@ext.resource_name}\n"
+
+      expect(dm).to be_valid
+    end
+
+    it 'reports an error when the external ID column has an incompatible Rails type' do
+      table_name = 'test_external_id_string_mismatch_recs'
+      dm = build_dynamic_model_for_table table_name,
+                                         'data character varying, scantron_id character varying',
+                                         name: 'test external ID string mismatch rec',
+                                         foreign_key_name: :scantron_id,
+                                         field_list: 'scantron_id data',
+                                         options: "_configurations:\n  prevent_migrations: true\n  foreign_key_through_external_id: #{@ext.resource_name}\n"
+
+      expect(dm).to be_invalid
+      expect(dm.errors[:foreign_key_name]).to include(/type.*#{@ext.resource_name}/i)
     end
   end
 end

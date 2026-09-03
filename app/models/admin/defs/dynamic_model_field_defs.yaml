@@ -13,16 +13,20 @@ Primary key name: |
   the table has an `id` column. Set it explicitly only for a view or table with no `id` column.
 
 Foreign key name: |
-  the field used to match with a master record. Almost always `master_id`.
+  the field used to match with a master record. Usually `master_id`.
 
   If the table has a `master_id` column, this is set to `master_id` automatically when the 
-  definition is created, whatever is entered here.
+  definition is created, unless a configured foreign key is retained explicitly.
 
-  Any other field name is only usable when it holds an external ID and 
-  *_configurations.foreign_key_through_external_id* names the external identifier definition 
-  holding the same value, which is what resolves the record to its master. Set on its own, a 
-  field other than `master_id` gives no working master association and records fail to save. 
-  A crosswalk field on the masters table, such as `msid`, can not be used here.
+  A masters crosswalk field (`msid`, `pro_id`, `pro_info_id`, or `contact_id`) can also be used
+  here. The value is matched directly to the same column on the master; the dynamic model's
+  `primary_key_name` remains its own record key, normally `id`.
+
+  Any other field name is only usable when it holds an external ID and
+  *_configurations.foreign_key_through_external_id* names the external identifier definition
+  holding the same value, which is what resolves the record to its master. Set on its own, a
+  field other than `master_id` or a supported crosswalk field gives no working master
+  association and records fail to save.
 
   If blank, then there is no connection to master records, but the table can be used for 
   lookups in forms using a field *select_record_from_table_...*
