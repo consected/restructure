@@ -20,6 +20,18 @@ class SaveTriggersBackgroundJob < ApplicationJob
     # than String#constantize. This prevents arbitrary class autoloading even if a
     # malicious or corrupted job payload provides an unexpected class name.
     klass = Resources::Models.find_model!(item_class)
+
+    # Refresh this item type's cached definition from the database before running
+    # triggers. `klass.definition` is a process-wide, memoized singleton
+    # (`option_configs` only re-parses when explicitly forced) - a long-running
+    # background worker process may have parsed and cached it before an admin last
+    # updated the definition (e.g. added `_constants`), and would otherwise keep
+    # using that stale, already-parsed copy forever. See issue #1406.
+    if klass.respond_to?(:definition) && klass.definition
+      klass.definition.reload
+      klass.definition.force_option_config_parse
+    end
+
     item = klass.find(item_id)
 
     # Set the current user
