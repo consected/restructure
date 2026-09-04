@@ -19,6 +19,7 @@
 # - Bug fix: toggling api_access_only on a user created without 2FA generates missing otp_secret
 # - Bug fix: creating an api_access_only user while 2FA is disabled still generates otp_secret
 # - Bug fix: toggling api_access_only off while 2FA is globally disabled still resets otp_required_for_login
+# - Bug fix: OTP secret generation remains available when Devise 2FA is disabled at boot (Issue #1410)
 
 require 'rails_helper'
 
@@ -33,6 +34,28 @@ RSpec.describe 'User api_access_only flag', type: :model do
 
   after :all do
     change_setting('TwoFactorAuthDisabledForUser', true)
+  end
+
+  describe '.generate_otp_secret - Issue #1410' do
+    let(:authentication_class) do
+      Class.new do
+        extend StandardAuthentication::ClassMethods
+      end
+    end
+
+    it 'generates a secret without relying on the optional Devise 2FA module' do
+      secret = authentication_class.generate_otp_secret
+
+      expect(ROTP::Base32.decode(secret).bytesize).to eq Devise.otp_secret_length
+    end
+
+    it 'honors a model-specific secret length without the optional Devise 2FA module' do
+      authentication_class.define_singleton_method(:otp_secret_length) { 18 }
+
+      secret = authentication_class.generate_otp_secret
+
+      expect(ROTP::Base32.decode(secret).bytesize).to eq 18
+    end
   end
 
   describe 'API-only user creation' do

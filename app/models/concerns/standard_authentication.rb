@@ -53,6 +53,11 @@ module StandardAuthentication
       true
     end
 
+    def generate_otp_secret(otp_secret_length = nil)
+      otp_secret_length ||= respond_to?(:otp_secret_length) ? self.otp_secret_length : Devise.otp_secret_length
+      ROTP::Base32.random(otp_secret_length)
+    end
+
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
@@ -435,6 +440,7 @@ module StandardAuthentication
   #
   # Ensure an API-only user has an otp_secret and otp_required_for_login is set.
   # otp_secret may be absent if the user was created when 2FA was globally disabled.
+  # Pre-setting both fields also avoids UserBaseController's shared 2FA setup redirect for API token requests.
   def ensure_api_access_only_otp
     self.otp_secret = self.class.generate_otp_secret unless otp_secret.present?
     self.otp_required_for_login = true

@@ -22,6 +22,7 @@
 # - disabled filter All option: Issue #1387
 #   - First page load defaults disabled filter to 'enabled'
 #   - Selecting "All" with other filters active returns both enabled and disabled users
+# - API-only user creation when global 2FA is disabled: Issue #1410
 
 require 'rails_helper'
 
@@ -145,6 +146,27 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         expect(response).to render_template '_index'
         expect(assigns(:user).email).to eq va[:email]
         expect(assigns(:user).new_password).to be_a String
+      end
+
+      context 'when global 2FA is disabled - Issue #1410' do
+        before do
+          change_setting('TwoFactorAuthDisabledForUser', true)
+        end
+
+        after do
+          change_setting('TwoFactorAuthDisabledForUser', false)
+        end
+
+        it 'creates an API-only user through the admin UI endpoint' do
+          attributes = valid_attributes.merge(api_access_only: true)
+
+          expect do
+            post :create, params: { user: attributes }
+          end.to change(object_class, :count).by(1)
+
+          expect(assigns(:user).otp_secret).to be_present
+          expect(assigns(:user).otp_required_for_login).to be true
+        end
       end
     end
 

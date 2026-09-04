@@ -13,6 +13,7 @@
 # - Server option: 2FA enforcement affects form options
 # - Server option: self-registration info shown vs hidden
 # - 2FA set up? column displays correct status per user
+# - Creating API-only users when global 2FA is disabled (Issue #1410)
 #
 # Related issues: #1025 (api_access_only flag), #330, #1047 (2FA column), #1096 (email/first/last filters)
 
@@ -149,6 +150,23 @@ describe 'admin manage users page - Issue #1027', js: true, driver: $browser_dri
 
       expect(page).to have_content('New API token:', wait: 10)
       expect(page).to have_content(api_email)
+    end
+
+    it 'adds an API-access-only user when global 2FA is disabled - Issue #1410' do
+      change_setting('TwoFactorAuthDisabledForUser', true)
+      visit_manage_users_page
+      click_add_user_button
+
+      api_email = "api_user_no_2fa_#{SecureRandom.hex(4)}@test.com"
+
+      within('#admin-edit- .admin-edit-form') do
+        fill_user_form(email: api_email, first_name: 'ApiNo2fa', last_name: 'User')
+        check_admin_checkbox('api_access_only')
+        submit_user_form
+      end
+
+      expect(page).to have_content('New API token:', wait: 10)
+      expect(User.find_by(email: api_email)).to be_present
     end
 
     it 'enforces email validation on create' do

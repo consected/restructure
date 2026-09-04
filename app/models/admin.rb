@@ -5,6 +5,7 @@ class Admin < ActiveRecord::Base
 
   include AdminHandler
   include RegistrationHandler
+  # Keep this before devise so the optional 2FA module overrides the fallback OTP generator when loaded.
   include StandardAuthentication
 
   # A configuration allows two factor authentication to be disabled for the app server
