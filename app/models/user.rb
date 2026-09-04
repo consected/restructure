@@ -6,6 +6,7 @@
 class User < ActiveRecord::Base
   include AdminHandler
   include RegistrationHandler
+  # Keep this before devise so the optional 2FA module overrides the fallback OTP generator when loaded.
   include StandardAuthentication
   include UserAccessHandler
   include UserRoleHandler
