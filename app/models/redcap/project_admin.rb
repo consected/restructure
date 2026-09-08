@@ -46,7 +46,23 @@ module Redcap
       stopped_manually: 'stopped manually',
       changes_detected: 'changes detected',
       request_failed: 'request failed',
-      invalid_metadata: 'invalid metadata'
+      invalid_metadata: 'invalid metadata',
+      records_request_job_set_up: 'records request job set up',
+      retrieving_records: 'retrieving records',
+      validating_records: 'validating records',
+      storing_records: 'storing records',
+      checking_deleted_records: 'checking for deleted records',
+      records_unchanged_since_last_pull: 'records unchanged since last successful pull'
+    }.freeze
+
+    StorageStageStatusKeys = {
+      'retrieve_validate_store' => :retrieving_records,
+      'retrieve' => :retrieving_records,
+      'skipped (from cache)' => :records_unchanged_since_last_pull,
+      'summarize_fields' => :validating_records,
+      'validate' => :validating_records,
+      'disable_deleted_records' => :checking_deleted_records,
+      'store' => :storing_records
     }.freeze
 
     JobQueue = 'redcap'
@@ -561,6 +577,11 @@ module Redcap
       return unless persisted?
 
       update_columns(status: Statuses[key], updated_at: DateTime.now)
+    end
+
+    def update_status_for_storage_stage(stage)
+      key = StorageStageStatusKeys[stage]
+      update_status(key) if key
     end
 
     #

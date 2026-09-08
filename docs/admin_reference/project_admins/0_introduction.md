@@ -19,3 +19,4 @@ Administration is provided in [REDCap: Project Transfer](/redcap/project_admins)
 
 - [Detailed Options](detailed_options.md)
 - [Action Buttons](action_buttons.md)
+- [Pull Process and Statuses](pull_process_and_statuses.md)
