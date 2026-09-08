@@ -179,6 +179,30 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
     end
   end
 
+  # Issue #1406 follow-up: background queues a job carrying the item's id, but
+  # before_save runs before the record has been persisted (no id yet on create).
+  describe 'background rejected within before_save' do
+    it 'reports an error (not just a warning) when background is used within before_save' do
+      instance = klass.new(before_save: { background: [{ log: { message: 'hi' } }] })
+      error = instance.config_errors.find { |e| e[:type] == :before_save }
+      expect(error).to be_present
+      expect(error[:message]).to match(/background/)
+    end
+
+    it 'does not warn when background is used within on_create' do
+      instance = klass.new(on_create: { background: [{ log: { message: 'hi' } }] })
+      expect(instance.config_errors).to be_empty
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'still allows a transaction nested within before_save to be scanned normally' do
+      instance = klass.new(before_save: { transaction: { notify: { role: 'admin' } } })
+      warning = instance.config_warnings.find { |w| w[:type] == :before_save }
+      expect(warning).to be_present
+      expect(warning[:message]).to match(/notify/)
+    end
+  end
+
   describe 'ExtraOptions integration' do
     it 'defaults save_trigger to a SaveTrigger with blank TriggerTasks' do
       eo = config_for(<<~YAML)
