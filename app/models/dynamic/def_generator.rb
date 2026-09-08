@@ -121,6 +121,7 @@ module Dynamic
             next unless d.options_text&.include?('# @library ')
 
             d.force_option_config_parse(raise_bad_configs: false)
+            definition_cache[d.id] = d
           end
           return
         end
