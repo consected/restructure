@@ -462,6 +462,13 @@ class DynamicModel < ActiveRecord::Base
 
   def dynamic_model_foreign_key_column
     qualified_table_name = [schema_name, table_name].compact.join('.')
+    unless Admin::MigrationGenerator.table_or_view_exists?(qualified_table_name)
+      Rails.logger.warn "Dynamic model #{name.inspect} (#{self.class.name}##{id || 'new'}) " \
+                        "cannot validate foreign key #{foreign_key_name.inspect}: " \
+                        "table or view #{qualified_table_name.inspect} does not exist"
+      return
+    end
+
     Admin::MigrationGenerator.connection.columns(qualified_table_name)
                              .find { |column| column.name == foreign_key_name.to_s }
   rescue ActiveRecord::StatementInvalid
