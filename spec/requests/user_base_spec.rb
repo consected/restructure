@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# These request specs verify that CSRF failures return the forbidden status while valid tokens remain accepted.
 require 'rails_helper'
 
 describe 'csrf protection' do
@@ -74,11 +75,12 @@ describe 'csrf protection' do
     end
 
     it 'logs in, but fails to add a master record due to missing CSRF token' do
-      expect(post_with_token('/masters/create', {}, '')).to eq(422)
+      expect(post_with_token('/masters/create', {}, '')).to eq(403)
+      expect(response.headers['X-ReStructure-Error']).to eq('invalid-authenticity-token')
     end
 
     it 'logs in, but fails to add a master record due to bad CSRF token' do
-      expect(post_with_token('/masters/create', {}, "#{retrieve_authenticity_token}1")).to eq(422)
+      expect(post_with_token('/masters/create', {}, "#{retrieve_authenticity_token}1")).to eq(403)
     end
 
     it 'logs in, and successfully creates a master record' do
@@ -98,7 +100,7 @@ describe 'csrf protection' do
 
     it 'attempts to get MFA requirement, but fails due to missing CSRF token' do
       get '/users/sign_in'
-      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, '')).to eq(422)
+      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, '')).to eq(403)
     end
 
     it 'attempts to get MFA requirement, and gets a valid response' do
@@ -108,7 +110,7 @@ describe 'csrf protection' do
 
     it 'attempts to get MFA requirement, but fails due to bad CSRF token' do
       get '/users/sign_in'
-      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, "#{retrieve_authenticity_token}1")).to eq(422)
+      expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, "#{retrieve_authenticity_token}1")).to eq(403)
     end
   end
 end
