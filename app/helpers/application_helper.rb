@@ -291,17 +291,13 @@ module ApplicationHelper
 
     if paired_user
       apptype = paired_user.app_type_id
-      userrole = latest_updated_at_token(Admin::UserRole, apptype)
-      uac = latest_updated_at_token(Admin::UserAccessControl, apptype)
+      userrole, uac = partial_cache_key_access_control_timestamps(apptype)
     end
 
     paired_user_key = "-#{paired_user.id}-#{paired_user.current_sign_in_at}" if u.is_a?(Admin) && paired_user
 
     unless @item_updates
-      cs = [Admin::MessageTemplate,
-            DynamicModel, ActivityLog, ExternalIdentifier,
-            Admin::ConfigLibrary, Admin::PageLayout, Admin::AppConfiguration]
-      @item_updates = cs.map do |c|
+      @item_updates = HandlebarsPrecompiler.item_update_classes.map do |c|
         c.reorder(updated_at: :desc)
          .limit(1)
          .pluck(:updated_at)
@@ -312,17 +308,22 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    res = "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
-          "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
-    prev_key = "#{partial}-#{auth_type}-#{u&.id}"
-    @@prev_partial_cache_key ||= {}
-    prev = @@prev_partial_cache_key[prev_key]
-    changed = prev != res
-    if changed
-      Rails.logger.warn "Partial cache key changed (#{prev_key}): \nfrom:#{prev}\nto:  #{res}"
-      @@prev_partial_cache_key[prev_key] = res
-    end
-    res
+    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
+      "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
+  end
+
+  #
+  # Role/UAC updated_at timestamps for the given app type, delegated to
+  # HandlebarsPrecompiler.app_type_access_control_timestamps (the single source of truth
+  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key/#access_control_version -
+  # issue #1400 Phase 1). Memoized per app_type_id so the ETag and template_version
+  # computations in one view context reuse the same values instead of re-querying.
+  # @param app_type_id [Integer, nil] the app_type to scope the queries to
+  # @return [Array(String, String)] [userrole_timestamp, uac_timestamp] as epoch-integer strings
+  def partial_cache_key_access_control_timestamps(app_type_id)
+    @partial_cache_key_access_control_timestamps ||= {}
+    @partial_cache_key_access_control_timestamps[app_type_id] ||=
+      HandlebarsPrecompiler.app_type_access_control_timestamps(app_type_id)
   end
 
   #
@@ -334,18 +335,6 @@ module ApplicationHelper
     current_user
   rescue StandardError
     nil
-  end
-
-  #
-  # Token representing the most recent +updated_at+ for the given class scoped to an
-  # app type. Used by #partial_cache_key to invalidate cached partials whenever related
-  # admin configuration (user roles / access controls) changes for that app type.
-  def latest_updated_at_token(klass, app_type_id)
-    klass.where(app_type_id:)
-         .reorder(updated_at: :desc)
-         .limit(1)
-         .pluck(:updated_at)
-         &.first.to_i.to_s
   end
 
   #

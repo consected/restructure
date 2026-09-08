@@ -12,6 +12,8 @@
 # - #partial_cache_key (issue #1270): the cache key/template version token stays stable
 #   across user saves that don't change relevant attributes, and still changes when the
 #   user's app type genuinely changes
+# - #partial_cache_key (issue #1400 Phase 1): shared role/UAC timestamp lookups include
+#   global rows, item updates use the precompiler list, and current_sign_in_at remains active
 
 require 'rails_helper'
 
@@ -154,6 +156,105 @@ describe '#partial_cache_key' do
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
 
     expect(after_key).to eq(before_key)
+  end
+
+  it 'changes when current_sign_in_at changes' do
+    user, = create_user
+    user.update!(current_sign_in_at: Time.current)
+    helper.instance_variable_set(:@current_user, user)
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+    user.update!(current_sign_in_at: 1.minute.from_now)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).not_to eq(before_key)
+  end
+
+  it 'changes when an admin current_sign_in_at changes' do
+    admin, = create_admin
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+    admin.update!(current_sign_in_at: 1.minute.from_now)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: admin)
+
+    expect(after_key).not_to eq(before_key)
+  end
+
+  # Report is deliberately absent from HandlebarsPrecompiler.item_update_classes (see
+  # 1362_final_stage_plan): that list also feeds HandlebarsPrecompiler.generation_key, so
+  # adding Report would rotate every compiled Handlebars generation - forcing a full
+  # node-CLI recompile of unrelated content - on every report config edit. This asserts the
+  # real (unstubbed) list, so it fails if Report is ever added back.
+  it 'never includes Report in the item-update classes used for cache keys' do
+    expect(HandlebarsPrecompiler.item_update_classes).not_to include(Report)
+  end
+
+  # Proves the actual bug fix (issue #1400 Phase 1): a global (app_type_id: nil)
+  # Admin::UserAccessControl row must still rotate the cache key for an app-type-scoped
+  # user. Uses a real row (not a stub) so a regression to `where(app_type_id:)` (dropping
+  # the `, nil`) is actually caught - see verification step 6.
+  it 'changes the full cache key when a global access-control timestamp changes' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    # Without this the create! below clears the whole Rails cache, dropping
+    # server_cache_version and rotating the key regardless of the global-row scoping -
+    # masking the very bug this asserts (same reason as app_type_available_ids_cache_spec).
+    allow_any_instance_of(Admin::UserAccessControl).to receive(:clear_rails_cache_on_save?).and_return(false)
+
+    # Cache-key timestamps interpolate at second granularity, so use an explicit future
+    # updated_at rather than Time.now to guarantee this write is seen as "newer".
+    Admin::UserAccessControl.create! app_type: nil, resource_type: :general,
+                                     resource_name: :app_type, access: :read,
+                                     user:, current_admin: @admin,
+                                     created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+
+    helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).not_to eq(before_key)
+  end
+
+  # Same global-row behaviour, for Admin::UserRole rather than Admin::UserAccessControl.
+  it 'changes the full cache key when a global role timestamp changes' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    before_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    allow_any_instance_of(Admin::UserRole).to receive(:clear_rails_cache_on_save?).and_return(false)
+
+    Admin::UserRole.create! current_admin: @admin, app_type: nil, role_name: 'global-role-1400',
+                            user:, created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+
+    helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
+    after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(after_key).not_to eq(before_key)
+  end
+
+  it 'reuses role and access-control timestamps for ETag and template-version keys' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    expect(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
+      .with(user.app_type_id).once.and_call_original
+
+    helper.partial_cache_key(:master__search_results_template, force_user_or_admin: user)
+    helper.template_version
+  end
+
+  it 'does not log partial cache-key changes or retain a previous-key hash' do
+    user, = create_user
+    helper.instance_variable_set(:@current_user, user)
+
+    expect(Rails.logger).not_to receive(:warn).with(/Partial cache key changed/)
+
+    helper.partial_cache_key(:loaded, force_user_or_admin: user)
+
+    expect(ApplicationHelper.class_variable_defined?(:@@prev_partial_cache_key)).to be(false)
   end
 
   it 'changes when the user app type changes' do
