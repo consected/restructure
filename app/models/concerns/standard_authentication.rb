@@ -54,6 +54,14 @@ module StandardAuthentication
     end
 
     def generate_otp_secret(otp_secret_length = nil)
+      # Defer to devise-two-factor's real generator wherever it sits in the ancestor chain,
+      # regardless of module include/extend order - this is only a fallback for when that
+      # optional module isn't loaded at all (e.g. FPHS_2FA_AUTH_DISABLED). Call with no args
+      # when none were given so Devise's own default (self.otp_secret_length) still applies.
+      if defined?(super)
+        return otp_secret_length.nil? ? super() : super
+      end
+
       otp_secret_length ||= respond_to?(:otp_secret_length) ? self.otp_secret_length : Devise.otp_secret_length
       ROTP::Base32.random(otp_secret_length)
     end

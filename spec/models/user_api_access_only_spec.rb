@@ -20,6 +20,7 @@
 # - Bug fix: creating an api_access_only user while 2FA is disabled still generates otp_secret
 # - Bug fix: toggling api_access_only off while 2FA is globally disabled still resets otp_required_for_login
 # - Bug fix: OTP secret generation remains available when Devise 2FA is disabled at boot (Issue #1410)
+# - generate_otp_secret defers to a real (e.g. Devise) generator regardless of module include order (Issue #1410)
 
 require 'rails_helper'
 
@@ -55,6 +56,32 @@ RSpec.describe 'User api_access_only flag', type: :model do
       secret = authentication_class.generate_otp_secret
 
       expect(ROTP::Base32.decode(secret).bytesize).to eq 18
+    end
+
+    def class_extending(*modules)
+      Class.new { modules.each { |m| extend m } }
+    end
+
+    it 'defers to a real generator extended after our fallback (matches User/Admin include order)' do
+      real_generator = Module.new { def generate_otp_secret(len = 42) = "real:#{len}" }
+      klass = class_extending(StandardAuthentication::ClassMethods, real_generator)
+
+      expect(klass.generate_otp_secret).to eq 'real:42'
+    end
+
+    it 'still defers to a real generator extended before our fallback (reversed include order)' do
+      real_generator = Module.new { def generate_otp_secret(len = 42) = "real:#{len}" }
+      klass = class_extending(real_generator, StandardAuthentication::ClassMethods)
+
+      expect(klass.generate_otp_secret).to eq 'real:42'
+    end
+
+    it 'lets a real generator apply its own default length when none is explicitly requested' do
+      real_generator = Module.new { def generate_otp_secret(len = 42) = "real:#{len}" }
+      klass = class_extending(real_generator, StandardAuthentication::ClassMethods)
+
+      expect(klass.generate_otp_secret).to eq 'real:42'
+      expect(klass.generate_otp_secret(7)).to eq 'real:7'
     end
   end
 
