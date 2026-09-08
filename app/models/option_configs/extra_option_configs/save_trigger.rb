@@ -45,7 +45,9 @@ module OptionConfigs
 
       # Trigger names whose config is itself a nested trigger task list, rather than
       # a task's own config - mirrors TriggerTasks#validate_nested_trigger_definitions.
-      DELEGATE_TRIGGERS = %i[transaction background].freeze
+      # `background` is handled separately (see #check_before_save_trigger) since it is
+      # rejected outright within before_save, rather than merely recursed into.
+      DELEGATE_TRIGGERS = %i[transaction].freeze
 
       private
 
@@ -109,6 +111,14 @@ module OptionConfigs
             scan_before_save_tasks(branch[:then])
             scan_before_save_tasks(branch[:else])
           end
+          return
+        when :background
+          # Rejected outright (not just warned): before_save runs before the record is
+          # persisted, so there is no id yet to serialize for the deferred job to look up.
+          add_validation_notice(:before_save,
+                                'background is not supported within before_save - the record ' \
+                                'has no persisted id yet for the background job to load; use ' \
+                                'on_create/on_update/on_disable instead')
           return
         when *DELEGATE_TRIGGERS
           scan_before_save_tasks(config)
