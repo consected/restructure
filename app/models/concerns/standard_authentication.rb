@@ -31,7 +31,6 @@ module StandardAuthentication
     validate :password_like_email, if: :password_changed?
     validate :check_strength, if: :password_changed?
     before_create :setup_two_factor_auth
-    before_create :handle_api_access_only_on_create
     before_save :handle_password_change
     before_save :handle_api_access_only_change
     after_save :handle_password_reminder_setup, if: :set_reminder
@@ -307,7 +306,10 @@ module StandardAuthentication
   #
   # Ensure 2FA has been set up if required
   def two_factor_setup_required?
-    !two_factor_auth_disabled && !(otp_secret.present? && otp_required_for_login)
+    return false if two_factor_auth_disabled
+    return false if respond_to?(:api_access_only?) && api_access_only?
+
+    !(otp_secret.present? && otp_required_for_login)
   end
 
   #
@@ -400,12 +402,6 @@ module StandardAuthentication
     temp_password_hash != prev_password_hash
   end
 
-  def handle_api_access_only_on_create
-    return unless respond_to?(:api_access_only)
-
-    ensure_api_access_only_otp if api_access_only?
-  end
-
   # Ensure API-only users always get a generated password on create,
   # even when setup_new_password skips generation (e.g. registration admin scenario)
   def ensure_api_access_only_password
@@ -419,25 +415,7 @@ module StandardAuthentication
     return unless respond_to?(:api_access_only)
     return if new_record?
 
-    if api_access_only? && api_access_only_changed?
-      ensure_api_access_only_otp
-    elsif api_access_only_changed? && !api_access_only?
-      # Always reset otp_required_for_login before calling setup_two_factor_auth.
-      # If 2FA is currently disabled globally, setup_two_factor_auth returns early without
-      # clearing this flag, leaving the user appearing "set up" with an API-generated secret
-      # they never registered. Resetting it here ensures they go through QR setup when
-      # 2FA is later re-enabled.
-      self.otp_required_for_login = false
-      setup_two_factor_auth
-    end
-  end
-
-  #
-  # Ensure an API-only user has an otp_secret and otp_required_for_login is set.
-  # otp_secret may be absent if the user was created when 2FA was globally disabled.
-  def ensure_api_access_only_otp
-    self.otp_secret = self.class.generate_otp_secret unless otp_secret.present?
-    self.otp_required_for_login = true
+    setup_two_factor_auth if api_access_only_changed? && !api_access_only?
   end
 
   #
@@ -446,6 +424,7 @@ module StandardAuthentication
   # the next time they login.
   def setup_two_factor_auth
     return true if self.class.two_factor_auth_disabled
+    return true if respond_to?(:api_access_only?) && api_access_only?
 
     # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
     self.otp_required_for_login = false
