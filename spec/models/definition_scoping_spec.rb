@@ -225,6 +225,24 @@ RSpec.describe 'Definition scoping', type: :model do
   end
 
   describe 'a definition with the foreign key name set to a masters crosswalk column' do
+    it 'does not abort the transaction when the referenced table does not exist yet' do
+      dm = DynamicModel.new(current_admin: @admin,
+                            table_name: 'test_missing_fk_recs',
+                            schema_name: 'dynamic_test',
+                            primary_key_name: :id,
+                            category: :test,
+                            name: 'test missing fk rec',
+                            foreign_key_name: :msid,
+                            field_list: 'msid data')
+
+      allow(Rails.logger).to receive(:warn)
+      expect(dm).to be_valid
+      expect(Rails.logger).to have_received(:warn).with(
+        include('test missing fk rec', 'dynamic_test.test_missing_fk_recs', 'msid', 'does not exist')
+      )
+      expect(ActiveRecord::Base.connection.select_value('SELECT 1')).to eq 1
+    end
+
     it 'accepts database integer types normalized to the same Rails type' do
       dm = build_dynamic_model_for_table 'test_msid_type_mismatch_recs',
                                          'data character varying, msid bigint',
