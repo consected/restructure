@@ -15,6 +15,7 @@ require 'rails_helper'
 # Related GitHub issue: #1058
 RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :model do
   let(:klass) { OptionConfigs::ExtraOptionConfigs::TriggerTasks }
+  let(:regular_app_type_name) { Admin::AppType.active.first.name }
 
   # ── Trigger action name validation ──────────────────────────────────
 
@@ -158,7 +159,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
 
       it 'accepts a Hash for_user within an add_role_names entry without warnings' do
         instance = klass.new(change_user_roles: { add_role_names: [
-                               { app_type: 'study info', role_name: 'viewer', for_user: { this: { created_by_user_id: 'return_value' } } }
+                               { app_type: regular_app_type_name, role_name: 'viewer', for_user: { this: { created_by_user_id: 'return_value' } } }
                              ] })
         expect(instance.config_warnings).to be_empty
       end
