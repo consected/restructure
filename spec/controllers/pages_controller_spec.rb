@@ -8,11 +8,11 @@
 # - Template action (issue #1004 - AC10, issue #63):
 #   - Returns 304 Not Modified when ETag matches (If-None-Match header)
 #   - Returns 200 with content on cache miss
-#   - Sets Cache-Control with private, max-age, and immutable directives
+#   - Sets Cache-Control with private and a one-hour max-age, without immutable
 #   - Sets Expires header computed from max-age
 # - Template version-token validation (issue #1287):
-#   - Matching token (params[:id] == helpers.template_version): immutable caching + ETag 304 flow
-#   - Stale/mismatched token: prevent_cache headers (no-store), no immutable, still returns 200
+#   - Matching token (params[:id] == helpers.template_version): one-hour caching + ETag 304 flow
+#   - Stale/mismatched token: prevent_cache headers (no-store), still returns 200
 
 require 'rails_helper'
 
@@ -41,11 +41,11 @@ RSpec.describe PagesController, type: :controller do
   end
 
   # AC10: ETag / 304 behavior for the template action (issue #1004)
-  # Issue #63: Add Cache-Control: private and immutable directives
+  # Issue #1400: revalidate after one hour so failed template responses can recover.
   #
   # The template action should:
   # - Return 200 with rendered content on first request (cache miss)
-  # - Set Cache-Control with private, max-age, and immutable for browser caching
+  # - Set Cache-Control with private and a one-hour max-age for browser caching
   # - Return 304 Not Modified when the client sends a matching If-None-Match ETag
   # - Return 200 with fresh content when the ETag does not match
   describe '#template (ETag/304 caching - issue #1004, #63)' do
@@ -61,13 +61,14 @@ RSpec.describe PagesController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'sets Cache-Control header with private, max-age, and immutable for browser caching' do
+    it 'sets Cache-Control for private one-hour browser caching without immutable' do
       get :template, params: { id: template_version }
 
       cache_control = response.headers['Cache-Control']
       expect(cache_control).to include('private')
-      expect(cache_control).to include('max-age=')
-      expect(cache_control).to include('immutable')
+      expect(cache_control).to include('max-age=3600')
+      expect(cache_control).to include('must-revalidate')
+      expect(cache_control).not_to include('immutable')
     end
 
     it 'sets Expires header computed from max-age' do
@@ -109,8 +110,8 @@ RSpec.describe PagesController, type: :controller do
   #
   # The template action embeds a content-addressed token (helpers.template_version) in the page URL.
   # If the token in params[:id] matches the current server-side digest, the response is safe to
-  # cache immutably. If it does NOT match (race condition: app_type changed between page render
-  # and deferred AJAX fetch), the response must NOT be cached immutably to prevent poisoning.
+  # cache for one hour. If it does NOT match (race condition: app_type changed between page
+  # render and deferred AJAX fetch), the response must not be cached at all.
   describe '#template version-token validation (issue #1287)' do
     include MasterSupport
 
@@ -120,12 +121,13 @@ RSpec.describe PagesController, type: :controller do
     let(:stale_token) { Digest::SHA256.hexdigest('stale-bogus-token') }
 
     context 'when params[:id] matches the current template_version (normal path)' do
-      it 'sets Cache-Control with immutable and max-age=604800' do
+      it 'sets Cache-Control with max-age=3600 and without immutable' do
         get :template, params: { id: real_token }
 
         cache_control = response.headers['Cache-Control']
-        expect(cache_control).to include('immutable')
-        expect(cache_control).to include('max-age=604800')
+        expect(cache_control).to include('max-age=3600')
+        expect(cache_control).to include('must-revalidate')
+        expect(cache_control).not_to include('immutable')
       end
 
       it 'returns 304 Not Modified when ETag matches' do
@@ -137,6 +139,16 @@ RSpec.describe PagesController, type: :controller do
         get :template, params: { id: real_token }
 
         expect(response).to have_http_status(:not_modified)
+      end
+
+      it 'deletes the master fragment and returns non-cacheable content when rebuild is requested' do
+        fragment_key = controller.helpers.partial_cache_key(:master__search_results_template)
+        expect(Rails.cache).to receive(:delete).with(fragment_key).and_call_original
+
+        get :template, params: { id: real_token, rebuild: 'true' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Cache-Control']).to include('no-store')
       end
     end
 
@@ -159,6 +171,16 @@ RSpec.describe PagesController, type: :controller do
         get :template, params: { id: stale_token }
 
         expect(response).to have_http_status(:ok)
+      end
+
+      it 'does not delete the master fragment when rebuild is requested with a stale token' do
+        fragment_key = controller.helpers.partial_cache_key(:master__search_results_template)
+        expect(Rails.cache).not_to receive(:delete).with(fragment_key)
+
+        get :template, params: { id: stale_token, rebuild: 'true' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Cache-Control']).to include('no-store')
       end
     end
   end

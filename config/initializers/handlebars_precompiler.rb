@@ -180,8 +180,9 @@ module HandlebarsPrecompiler
     end
 
     # Runs the startup compiled-output cleanup, UNLESS this process is the delayed_job
-    # worker or a `rails console`/`rails runner` invocation (issue #1362) - extracted from
-    # the after_initialize block below so the guard is independently testable.
+    # worker or a `rails console`/`rails runner` invocation (issue #1362). Production
+    # Puma must retain preload_app! so this destructive startup step runs once in the
+    # parent before workers fork, rather than independently in every worker.
     def startup_cleanup!
       if delayed_job_worker? || rails_console_or_runner?
         Rails.logger.info 'HandlebarsPrecompiler: skipping compiled-template cleanup in a ' \

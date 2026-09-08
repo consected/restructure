@@ -63,12 +63,18 @@ class PagesController < ApplicationController
   def template
     return not_authorized unless current_user || current_admin
 
-    etag = Digest::SHA256.hexdigest(helpers.partial_cache_key(:master__search_results_template))
+    fragment_cache_key = helpers.partial_cache_key(:master__search_results_template)
+    etag = Digest::SHA256.hexdigest(fragment_cache_key)
     if current_user
       current_version = helpers.template_version
       if params[:id].present? && params[:id] == current_version
-        set_browser_cache(max_age: 604_800, immutable: true)
-        return unless stale?(etag: etag)
+        if params[:rebuild] == 'true'
+          Rails.cache.delete(fragment_cache_key)
+          prevent_cache
+        else
+          set_browser_cache(max_age: Settings::TemplateBrowserCacheSeconds, must_revalidate: true)
+          return unless stale?(etag: etag)
+        end
       else
         prevent_cache
       end

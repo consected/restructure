@@ -306,7 +306,8 @@ module HandlebarsPrecompilerHelper
   # access_control_version — stable across login sessions for effective browser caching.
   # Skips all I/O if the output file already exists.
   # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial keys
-  # @return [Array(String, Array, Array)] URL path, template IDs, partial IDs
+  # @return [Array(String, Array, Array, Boolean)] URL path, template IDs, partial IDs,
+  #   and whether the complete bundle is available
   def write_multiple_handlebars_templates(requested_handlebars_templates)
     handlebars_partial_ids = []
     handlebars_template_ids = []
@@ -368,7 +369,7 @@ module HandlebarsPrecompilerHelper
       end
     end
 
-    ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids]
+    ["#{url_path}multi/#{filename}", handlebars_template_ids, handlebars_partial_ids, File.exist?(multi_file)]
   end
 
   # Compile all templates from temp directories in a single CLI call per type.

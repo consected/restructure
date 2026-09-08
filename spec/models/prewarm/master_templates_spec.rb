@@ -11,6 +11,7 @@
 require 'rails_helper'
 
 RSpec.describe Prewarm::MasterTemplates do
+  include CacheKeyMemoizationSupport
   include ModelSupport
   include MasterSupport
   include DynamicModelSupport
@@ -39,6 +40,14 @@ RSpec.describe Prewarm::MasterTemplates do
     change_setting('AllowDynamicMigrations', @prev_allow_dms)
   end
 
+  before do
+    reset_shared_helper_cache_key_memoization
+  end
+
+  after do
+    reset_shared_helper_cache_key_memoization
+  end
+
   def panel_name
     'pw-panel'
   end
@@ -65,6 +74,47 @@ RSpec.describe Prewarm::MasterTemplates do
 
   it 'renders without a signed-in user or raising Devise::MissingWarden' do
     expect { described_class.render_for(@user, @app_type) }.not_to raise_error
+  end
+
+  it 'renders the cache-owning outer partial so the Rails fragment is prewarmed' do
+    expect(PrewarmController.renderer).to receive(:render)
+      .with(partial: 'masters/cache_search_results_template').and_call_original
+
+    described_class.render_for(@user, @app_type)
+  end
+
+  it 'populates the Rails fragment cache for the representative user and app type' do
+    previous_caching = Rails.configuration.action_controller.perform_caching
+    Rails.configuration.action_controller.perform_caching = true
+    helper = ApplicationController.helpers
+    fragment_cache_key = helper.partial_cache_key(
+      :master__search_results_template,
+      force_user_or_admin: @user
+    )
+    Rails.cache.delete(fragment_cache_key)
+
+    described_class.render_for(@user, @app_type)
+
+    expect(Rails.cache.exist?(fragment_cache_key)).to be true
+  ensure
+    Rails.cache.delete(fragment_cache_key) if fragment_cache_key
+    Rails.configuration.action_controller.perform_caching = previous_caching
+  end
+
+  it 'returns nil when rendering does not populate the fragment cache' do
+    previous_caching = Rails.configuration.action_controller.perform_caching
+    Rails.configuration.action_controller.perform_caching = true
+    fragment_cache_key = ApplicationController.helpers.partial_cache_key(
+      :master__search_results_template,
+      force_user_or_admin: @user
+    )
+    Rails.cache.delete(fragment_cache_key)
+    allow(PrewarmController.renderer).to receive(:render).and_return('<script src="/missing.js"></script>')
+
+    expect(described_class.render_for(@user, @app_type)).to be_nil
+  ensure
+    Rails.cache.delete(fragment_cache_key) if fragment_cache_key
+    Rails.configuration.action_controller.perform_caching = previous_caching
   end
 
   it 'produces a compiled master_main_inner partial file on disk' do

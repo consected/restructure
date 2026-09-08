@@ -12,12 +12,11 @@
 #   - spec/controllers/pages_controller_spec.rb proves the local conditional
 #     branches (synthetic tokens, no real HTTP stack).
 #   - spec/system/user/template_version_cache_poisoning_spec.rb proves the
-#     browser-level headers via fetch() but uses logout/login to make the token
-#     stale (a different staleness trigger).
+#     browser-level headers via fetch(), including login-stable tokens.
 #   - This spec reproduces the ORIGINAL bug sequence: the token encodes
 #     app_type_A.id; after the DB row is switched to app_type_B the token is
 #     stale because template_version now encodes B.  Without the fix the server
-#     would still return immutable with B's content under A's URL.
+#     would still return B's content with normal cache headers under A's URL.
 #
 # Why a request spec (not a system spec) for this scenario:
 #   Capybara's Selenium driver uses a separate Puma process whose DB connections
@@ -28,9 +27,8 @@
 #   occurs and the render completes quickly.
 #
 # Examples:
-#   - Token V_A + user still on app-type A → Cache-Control includes immutable
-#   - Token V_A + user switched to app-type B → Cache-Control includes no-store,
-#     excludes immutable
+#   - Token V_A + user still on app-type A → private, one-hour browser caching
+#   - Token V_A + user switched to app-type B → Cache-Control includes no-store
 
 require 'rails_helper'
 
@@ -65,16 +63,16 @@ RSpec.describe 'PagesController#template app-type-switch race (issue #1287)', ty
   end
 
   describe 'positive path (no switch)' do
-    it 'returns Cache-Control with immutable and max-age=604800 for the current token' do
+    it 'returns private one-hour Cache-Control without immutable for the current token' do
       token_a = embedded_template_version
 
       get "/pages/#{token_a}/template"
 
       expect(response).to have_http_status(:ok)
-      expect(response.headers['Cache-Control']).to include('immutable'),
-        "Matching token must receive immutable cache headers; got: #{response.headers['Cache-Control']}"
-      expect(response.headers['Cache-Control']).to include('max-age=604800'),
-        "Matching token must receive max-age=604800; got: #{response.headers['Cache-Control']}"
+      expect(response.headers['Cache-Control']).to include('private')
+      expect(response.headers['Cache-Control']).to include('max-age=3600')
+      expect(response.headers['Cache-Control']).to include('must-revalidate')
+      expect(response.headers['Cache-Control']).not_to include('immutable')
     end
   end
 
@@ -82,7 +80,7 @@ RSpec.describe 'PagesController#template app-type-switch race (issue #1287)', ty
     it 'returns no-store and omits immutable for token V_A after the user is switched to app-type B' do
       # Step 1: capture V_A — the token embedded in the page while the user is on A.
       # template_version = SHA256(partial_cache_key(:loaded)) includes app_type_a.id,
-      # current_sign_in_at, userrole, uac, item_updates, and server_cache_version.
+      # userrole, uac, item_updates, and server_cache_version.
       token_a = embedded_template_version
       expect(token_a).to be_present
 
@@ -95,7 +93,7 @@ RSpec.describe 'PagesController#template app-type-switch race (issue #1287)', ty
 
       # Step 3: the deferred fetch fires with V_A.  The server now reloads the
       # user (app_type_b.id), recomputes template_version → V_B ≠ V_A, and must
-      # call prevent_cache instead of set_browser_cache(:immutable).
+      # call prevent_cache instead of applying the normal one-hour cache headers.
       get "/pages/#{token_a}/template"
 
       expect(response).to have_http_status(:ok)
