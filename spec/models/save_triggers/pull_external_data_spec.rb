@@ -7,6 +7,7 @@ require 'rails_helper'
 #   body-sending (put, patch, lock, mkcol, propfind, proppatch, unlock),
 #   no-body (head, delete, options, trace, copy, move)
 # - Response code handling, error whitelisting, local_data storage
+# - Non-200 response bodies for unhandled and whitelisted statuses (issue #1418)
 # - send_data config alias for post_data
 # - Submitted request data (data, url, method) saved to save_trigger_results (issue #950)
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
@@ -449,9 +450,52 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
     @trigger = SaveTriggers::PullExternalData.new(config, @al)
 
-    expect do
-      @trigger.perform
-    end.to raise_error(FphsException, "get external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+    expect { @trigger.perform }.to raise_error(
+      FphsException,
+      a_string_including("get external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+    )
+  end
+
+  it 'includes the remote response body in an unhandled error message (issue #1418)' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(
+      FphsException,
+      a_string_including('"header":{"type":"esummary"')
+    )
+  end
+
+  it 'bounds the remote response body included in an unhandled error (issue #1418)' do
+    oversized_url = 'https://eutils.ncbi.nlm.nih.gov/oversized-error'
+    oversized_body = 'x' * 10_001
+    stub_request(:get, oversized_url).to_return(status: 422, body: oversized_body)
+
+    config = {
+      this1: {
+        from: {
+          url: oversized_url,
+          format: 'text'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect { @trigger.perform }.to raise_error(FphsException) do |error|
+      body = error.message.split('response body: ', 2).last
+      expect(body).to start_with('x')
+      expect(body.length).to be <= 10_000
+    end
   end
 
   it 'fails to pull from a bad url but the failure can be whitelisted, and the result is saved to a field' do
@@ -474,6 +518,50 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     end.not_to raise_error
 
     expect(@al.select_result).to eq '404'
+  end
+
+  it 'parses a whitelisted non-200 response for data_field and local_data (issue #1418)' do
+    config = {
+      this1: {
+        data_field: 'result_json',
+        local_data: 'error_response',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json',
+          allow_response_codes: [404]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.result_json.dig('header', 'type')).to eq 'esummary'
+    expect(@al.save_trigger_results['error_response'].dig('header', 'type')).to eq 'esummary'
+  end
+
+  it 'falls back to the raw body for an unparseable whitelisted response (issue #1418)' do
+    error_url = 'https://eutils.ncbi.nlm.nih.gov/html-error'
+    error_body = '<html><body>Forbidden</body></html>'
+    stub_request(:get, error_url).to_return(status: 403, body: error_body)
+
+    config = {
+      this1: {
+        data_field: 'notes',
+        local_data: 'error_response',
+        from: {
+          url: error_url,
+          format: 'json',
+          allow_response_codes: [403]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    expect { @trigger.perform }.not_to raise_error
+
+    expect(@al.notes).to eq error_body
+    expect(@al.save_trigger_results['error_response']).to eq error_body
   end
 
   it 'fails if the content is blank' do
