@@ -999,7 +999,10 @@ _fpa = {
 
         if (status != 'abort') {
           var j = xhr.responseJSON;
-          if (xhr.status === 422) {
+          var is_authenticity_token_error = xhr.status === 403 &&
+            xhr.getResponseHeader &&
+            xhr.getResponseHeader('X-ReStructure-Error') === 'invalid-authenticity-token';
+          if (xhr.status === 422 || is_authenticity_token_error) {
             _fpa.form_utils.set_field_errors($('.ajax-running'), j);
             if (j) {
               var msg = '<p>Could not complete action:</p>';
