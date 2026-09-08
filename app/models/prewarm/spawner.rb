@@ -18,8 +18,8 @@ module Prewarm
     def spawn_async
       return unless should_spawn?
 
-      # Zero-wait, skip-on-contention: harmless with Puma in single-process mode today,
-      # but required if `workers` is ever enabled, so only one worker spawns per boot.
+      # Production Puma uses clustered workers with preload_app!, so this normally runs
+      # once in the parent; the lock also prevents overlapping spawn attempts.
       HandlebarsPrecompiler::FileLock.acquire('prewarm-spawn', wait: 0, on_contention: :skip) do
         do_spawn
       end

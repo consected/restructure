@@ -60,6 +60,9 @@ class Settings
   # Pause between warmed renders, to keep the pass low priority relative to user requests.
   PrewarmThrottleSeconds = (ENV['FPHS_PREWARM_THROTTLE'].presence || 0.5).to_f
 
+  # Browser lifetime for user-specific master-template HTML before ETag revalidation.
+  TemplateBrowserCacheSeconds = (ENV['FPHS_TEMPLATE_BROWSER_CACHE_SECONDS'].presence || 1.hour).to_i
+
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
   # password setting.

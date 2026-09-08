@@ -308,7 +308,10 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-" \
+    # Admin report partials use this key with 48-hour browser caching, while Report is
+    # deliberately absent from the shared item-update list; retain session rotation.
+    current_sign_in_at = u.current_sign_in_at if u.is_a?(Admin)
+    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{current_sign_in_at}-" \
       "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
   end
 
@@ -452,7 +455,9 @@ module ApplicationHelper
 
     from_file_path = from_file_path.to_s.split('/').last(2).join('-').gsub('.html.erb', '').id_underscore
     compile_handlebars_templates
-    url, handlebars_template_ids, handlebars_partial_ids = write_multiple_handlebars_templates(@requested_handlebars_templates)
+    url, handlebars_template_ids, handlebars_partial_ids, bundle_available =
+      write_multiple_handlebars_templates(@requested_handlebars_templates)
+    @handlebars_template_bundle_failed ||= !bundle_available
     @requested_handlebars_template_count = @requested_handlebars_templates.length
     @retrieved_requested_handlebars_template_count = (handlebars_template_ids + handlebars_partial_ids).length
     # Clean up before the next set of handlebars templates

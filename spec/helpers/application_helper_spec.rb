@@ -128,6 +128,23 @@ describe '#handlebars_template_tag' do
   end
 end
 
+describe '#retrieve_requested_handlebars_templates' do
+  it 'preserves an earlier bundle failure when a later bundle succeeds' do
+    helper.instance_variable_set(:@handlebars_template_bundle_failed, true)
+    helper.instance_variable_set(
+      :@requested_handlebars_templates,
+      [{ id: 'later-template', is_partial: false, compiled_file_path: '/later.js' }]
+    )
+    allow(helper).to receive(:compile_handlebars_templates)
+    allow(helper).to receive(:write_multiple_handlebars_templates)
+      .and_return(['/complete.js', ['later-template'], [], true])
+
+    helper.retrieve_requested_handlebars_templates('later.html.erb')
+
+    expect(helper.instance_variable_get(:@handlebars_template_bundle_failed)).to be true
+  end
+end
+
 # Purpose (issue #1270): partial_cache_key previously embedded the user's
 # `updated_at` timestamp. Since User is saved on almost every request (Devise
 # trackable sign-in tracking, app type switching), this made the cache key -
@@ -158,7 +175,7 @@ describe '#partial_cache_key' do
     expect(after_key).to eq(before_key)
   end
 
-  it 'changes when current_sign_in_at changes' do
+  it 'is unchanged when a user current_sign_in_at changes' do
     user, = create_user
     user.update!(current_sign_in_at: Time.current)
     helper.instance_variable_set(:@current_user, user)
@@ -167,7 +184,7 @@ describe '#partial_cache_key' do
     user.update!(current_sign_in_at: 1.minute.from_now)
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
 
-    expect(after_key).not_to eq(before_key)
+    expect(after_key).to eq(before_key)
   end
 
   it 'changes when an admin current_sign_in_at changes' do

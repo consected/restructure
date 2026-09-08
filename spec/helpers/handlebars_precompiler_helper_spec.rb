@@ -1114,6 +1114,14 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       expect(File.exist?(multi_file)).to be false
     end
 
+    it 'reports that the requested multi bundle is unavailable' do
+      templates = [{ id: 'missing_template', is_partial: false, compiled_file_path: missing_template_path }]
+
+      _, _, _, bundle_available = helper.write_multiple_handlebars_templates(templates)
+
+      expect(bundle_available).to be false
+    end
+
     it 'assembles and persists the bundle on a LATER request once the missing template becomes available' do
       good_source = '<div>{{ok}}</div>'
       good_filename = helper.handlebars_compiled_filename('present_template', good_source)
