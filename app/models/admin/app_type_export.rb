@@ -85,7 +85,7 @@ module Admin::AppTypeExport
     Zip::OutputStream.open(temp_file) { |zos| }
 
     # Add files to the zip file as usual
-    Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
+    Zip::File.open(temp_file.path, create: true) do |zip|
       Dir.glob("#{app_export_dir}/*.rb").each do |path|
         filename = path.split('/').last
         zip.add(filename, path)

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Tests for Admin::AppType export functionality.
+# Verifies RubyZip 3 compatibility for exported migration archives.
 # Verifies that export_config produces correct JSON including app configurations,
 # user access controls, activity logs, external identifiers, general selections,
 # and item flag names. Ensures exported item flag names are scoped to tables
@@ -174,5 +175,22 @@ RSpec.describe 'Export an app configuration', type: :model do
     exported_names = exported_flags.map { |f| f['name'] }
     expect(exported_names).to include(associated_flag.name)
     expect(exported_names).not_to include(unassociated_flag.name)
+  end
+
+  it 'exports app migration files as a readable zip archive' do
+    migration_directory = Dir.mktmpdir('app_type_export_spec')
+    allow(@app_type).to receive(:app_export_dir).and_return(migration_directory)
+    migration_path = File.join(migration_directory, '001_example.rb')
+    File.write(migration_path, 'migration contents')
+
+    zip_file = @app_type.zip_app_export_migrations
+
+    Zip::File.open(zip_file.path) do |zip|
+      expect(zip.entries.map(&:name)).to eq ['001_example.rb']
+      expect(zip.read('001_example.rb')).to eq 'migration contents'
+    end
+  ensure
+    zip_file&.close!
+    FileUtils.remove_entry(migration_directory) if migration_directory && File.exist?(migration_directory)
   end
 end
