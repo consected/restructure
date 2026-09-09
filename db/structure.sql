@@ -7205,6 +7205,19 @@ $$;
 
 
 --
+-- Name: view_skip_updates(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.view_skip_updates() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  begin
+    return new;
+  end
+$$;
+
+
+--
 -- Name: calc_var_stats_for_boolean(bigint); Type: FUNCTION; Schema: ref_data; Owner: -
 --
 
@@ -23422,6 +23435,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260827122800'),
 ('20260804160000'),
 ('20260730120000'),
 ('20260723161812'),
