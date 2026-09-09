@@ -44,10 +44,13 @@ module Redcap
       # Schedule an update of the data collection instruments list in the background
       project_admin.request_data_collection_instruments
 
+      project_admin.update_status(:records_request_job_set_up)
       dr = Redcap::DataRecords.new(project_admin, class_name, is_manual_pull: false, request_source: :scheduled)
       dr.retrieve_validate_store
-      status = Redcap::ProjectAdmin.completed_status(errors_present: dr.errors.present?, is_manual_pull: false)
-      project_admin.update_status(status)
+      unless dr.retrieved_from_cache
+        status = Redcap::ProjectAdmin.completed_status(errors_present: dr.errors.present?, is_manual_pull: false)
+        project_admin.update_status(status)
+      end
     rescue StandardError => e
       create_failure_record(e, 'recurring capture records job', project_admin)
       project_admin.update_status(:scheduled_run_failed) unless status_already_set

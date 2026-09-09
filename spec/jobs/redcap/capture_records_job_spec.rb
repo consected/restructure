@@ -152,5 +152,96 @@ RSpec.describe Redcap::CaptureRecordsJob, type: :job do
 
       expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:manual_run_completed_with_errors])
     end
+
+    it 'keeps the unchanged status when records were retrieved from cache' do
+      rc, model_class = prepare_project_admin_for_job
+
+      allow_any_instance_of(Redcap::DataRecords).to receive(:retrieve_validate_store) do
+        rc.update_status(:records_unchanged_since_last_pull)
+      end
+      allow_any_instance_of(Redcap::DataRecords).to receive(:retrieved_from_cache).and_return(true)
+      allow_any_instance_of(Redcap::DataRecords).to receive(:errors).and_return([])
+
+      described_class.new.perform(rc, model_class.name)
+
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:records_unchanged_since_last_pull])
+    end
+  end
+
+  describe Redcap::RecurringPullTask, type: :job do
+    before :all do
+      change_setting('AllowDynamicMigrations', true)
+      create_admin
+      change_setting('RedcapJobUserEmail', @admin.email)
+    end
+
+    after :all do
+      change_setting('AllowDynamicMigrations', false)
+    end
+
+    def recurring_task_for(project_admin, dynamic_model)
+      task = described_class.new
+      task.instance_variable_set(
+        :@schedule_options,
+        data: { project_admin: project_admin.to_global_id.to_s, class_name: dynamic_model.implementation_class.name }
+      )
+      task
+    end
+
+    def prepare_recurring_pull
+      projects = setup_redcap_project_admin_configs
+      @project = projects.first
+      dm = create_dynamic_model_for_sample_response
+      setup_file_store
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.dynamic_model_table = dm.table_name
+      rc.save!
+
+      allow(rc).to receive(:capture_project_users)
+      allow(rc).to receive(:request_data_collection_instruments)
+      allow(rc).to receive(:model_has_all_fields_for_storage?).and_return(true)
+      allow(rc).to receive(:dynamic_model_ready?).and_return(true)
+
+      [recurring_task_for(rc, dm), rc, dm]
+    end
+
+    it 'sets setup status and keeps unchanged status for a cached scheduled pull' do
+      task, rc, dm = prepare_recurring_pull
+      stub_request_records @project[:server_url], @project[:api_key]
+
+      task.perform
+      expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[:scheduled_run_successful]
+
+      recurring_task_for(rc, dm).perform
+
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:records_unchanged_since_last_pull])
+    end
+
+    it 'marks a scheduled pull failed when record retrieval raises' do
+      task, rc, = prepare_recurring_pull
+      data_records = instance_double(Redcap::DataRecords, errors: [], retrieved_from_cache: false)
+      allow(data_records).to receive(:retrieve_validate_store).and_raise(StandardError, 'scheduled pull failed')
+      allow(Redcap::DataRecords).to receive(:new).and_return(data_records)
+
+      expect { task.perform }.to raise_error(StandardError, 'scheduled pull failed')
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:scheduled_run_failed])
+    end
+
+    it 'marks a scheduled pull completed with errors when records have individual errors' do
+      task, rc, = prepare_recurring_pull
+      data_records = instance_double(
+        Redcap::DataRecords,
+        errors: [{ id: { record_id: '1' }, errors: { store: 'boom' }, action: :create_or_update }],
+        retrieved_from_cache: false
+      )
+      allow(data_records).to receive(:retrieve_validate_store)
+      allow(Redcap::DataRecords).to receive(:new).and_return(data_records)
+
+      task.perform
+
+      expect(rc.reload.status).to eq(Redcap::ProjectAdmin::Statuses[:scheduled_run_completed_with_errors])
+    end
   end
 end

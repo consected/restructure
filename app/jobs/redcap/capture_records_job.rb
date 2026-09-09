@@ -42,8 +42,10 @@ module Redcap
                                    is_manual_pull: true,
                                    verify_file_fields:)
       dr.retrieve_validate_store(ignore_cache:, retrieve_all:)
-      status = Redcap::ProjectAdmin.completed_status(errors_present: dr.errors.present?, is_manual_pull: true)
-      project_admin.update_status(status)
+      unless dr.retrieved_from_cache
+        status = Redcap::ProjectAdmin.completed_status(errors_present: dr.errors.present?, is_manual_pull: true)
+        project_admin.update_status(status)
+      end
     rescue StandardError => e
       create_failure_record(e, 'capture records job', project_admin)
       project_admin.update_status(:manual_run_failed) unless status_already_set

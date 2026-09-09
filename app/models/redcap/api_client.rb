@@ -156,15 +156,14 @@ module Redcap
     # @param [Boolean] ignore_cache - force pull from REDCap, bypassing cache
     # @return [Array{Hash}] hash with symbolized keys
     def records(request_options: nil, date_range_begin: nil, ignore_cache: false)
-      request_options ||= records_request_options.dup
-      request_options = request_options.dup if request_options.frozen?
-      if date_range_begin
-        server_tz = project_admin.data_options.server_time_zone
-        date_range_begin = date_range_begin.in_time_zone(server_tz) if server_tz.present?
-        request_options[:dateRangeBegin] = date_range_begin.strftime('%Y-%m-%d %H:%M:%S')
-      end
+      request_options = build_records_request_options(request_options:, date_range_begin:)
       cache_expires_in = ignore_cache ? nil : record_export_cache_time
       request :records, request_options:, cache_expires_in:
+    end
+
+    def invalidate_records_cache(request_options: nil, date_range_begin: nil)
+      request_options = build_records_request_options(request_options:, date_range_begin:)
+      clear_cache(cache_key(:records, request_options))
     end
 
     #
@@ -346,6 +345,17 @@ module Redcap
     end
 
     private
+
+    def build_records_request_options(request_options: nil, date_range_begin: nil)
+      request_options ||= records_request_options.dup
+      request_options = request_options.dup if request_options.frozen?
+      if date_range_begin
+        server_tz = project_admin.data_options.server_time_zone
+        date_range_begin = date_range_begin.in_time_zone(server_tz) if server_tz.present?
+        request_options[:dateRangeBegin] = date_range_begin.strftime('%Y-%m-%d %H:%M:%S')
+      end
+      request_options
+    end
 
     #
     # Make a request to the Redcap server, and save the request action as an audit record.

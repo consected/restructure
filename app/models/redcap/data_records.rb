@@ -98,11 +98,20 @@ module Redcap
       self.retrieve_all = retrieve_all
       self.verify_file_fields = verify_file_fields
 
-      self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name,
-                                                         ignore_cache:,
-                                                         retrieve_all:,
-                                                         verify_file_fields:)
-      return if Rails.application.config.active_job.queue_adapter == :inline
+      queue_adapter = Rails.application.config.active_job.queue_adapter
+      project_admin.update_status(:records_request_job_set_up) unless queue_adapter == :inline
+      begin
+        self.job = Redcap::CaptureRecordsJob.perform_later(project_admin, class_name,
+                                                           ignore_cache:,
+                                                           retrieve_all:,
+                                                           verify_file_fields:)
+        raise FphsException, 'Could not enqueue records request job' if queue_adapter != :inline && !job
+      rescue StandardError
+        project_admin.update_status(:request_failed) unless queue_adapter == :inline
+        raise
+      end
+
+      return if queue_adapter == :inline
 
       source_result = request_source ? { request_source => true } : {}
       project_admin.record_job_request(
@@ -152,6 +161,11 @@ module Redcap
       errors << { error: e.to_s, backtrace: e.short_string_backtrace }
       # Append failure indicator to preserve which stage failed
       self.storage_stage = "#{storage_stage} (failed)"
+      begin
+        project_admin.api_client.invalidate_records_cache(date_range_begin:)
+      rescue StandardError => cache_error
+        Rails.logger.warn "Redcap records cache invalidation failed: #{cache_error}"
+      end
       update_job_request
       raise
     end
@@ -1008,6 +1022,7 @@ module Redcap
         date_range_begin: (date_range_begin if using_date_range_filter),
         requested_options: requested_options
       }
+      project_admin.update_status_for_storage_stage(storage_stage)
       result[request_source] = true if request_source
 
       if create

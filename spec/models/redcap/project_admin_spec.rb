@@ -110,6 +110,38 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     expect(rc.captured_project_info).to eq rc.api_client.project
   end
 
+  # Tests for issue #1405: Redcap pull status should describe setup and active
+  # storage stages without overwriting a final or failed status.
+  describe '#update_status_for_storage_stage' do
+    it 'updates status for mapped active storage stages' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.update_columns(status: 'previous status')
+
+      {
+        'retrieve' => :retrieving_records,
+        'validate' => :validating_records,
+        'store' => :storing_records,
+        'disable_deleted_records' => :checking_deleted_records,
+        'skipped (from cache)' => :records_unchanged_since_last_pull
+      }.each do |stage, status_key|
+        rc.update_status_for_storage_stage(stage)
+
+        expect(rc.reload.status).to eq Redcap::ProjectAdmin::Statuses[status_key]
+      end
+    end
+
+    it 'does not update status for complete, failed, or unknown stages' do
+      rc = Redcap::ProjectAdmin.active.first
+      rc.update_columns(status: 'previous status')
+
+      ['store complete', 'disable_deleted_records complete', 'validate (failed)', 'unknown'].each do |stage|
+        rc.update_status_for_storage_stage(stage)
+
+        expect(rc.reload.status).to eq 'previous status'
+      end
+    end
+  end
+
   it 'creates a filestore container for file fields and project XML dump' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
