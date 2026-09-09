@@ -57,6 +57,18 @@
               The corresponding response code will be available as:
                   \{\{save_trigger_results.identity_http_response_code\}\}
 
+              Response headers will be available as a hash in:
+                  save_trigger_results.identity_http_response_headers
+
+                Header names are available as lowercase hyphenated strings or
+                underscored keys. For example:
+                  \{\{save_trigger_results.identity_http_response_headers.x_restructure_error\}\}
+
+                Headers with multiple values are exposed as one comma-separated string. If
+                different header names normalize to the same underscored key, the later value
+                overwrites the earlier value for that symbol key; use the hyphenated string
+                keys when those names must be distinguished.
+
               If *success_if:* condition is set, the following will also be set
                   \{\{save_trigger_results.identity_success_if_res\}\}
 
@@ -85,6 +97,12 @@
                       save_trigger_results:
                         element: identity_http_response_code
                         value: 200
+
+                  if:
+                    this:
+                      save_trigger_results:
+                        element: identity_http_response_headers.x_restructure_error
+                        value: invalid-authenticity-token
 
                   if:
                     this:
