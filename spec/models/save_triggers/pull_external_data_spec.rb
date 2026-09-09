@@ -8,6 +8,7 @@ require 'rails_helper'
 #   no-body (head, delete, options, trace, copy, move)
 # - Response code handling, error whitelisting, local_data storage
 # - Non-200 response bodies for unhandled and whitelisted statuses (issue #1418)
+# - Response headers stored under lowercase and underscored keys (issue #1430)
 # - send_data config alias for post_data
 # - Submitted request data (data, url, method) saved to save_trigger_results (issue #950)
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
@@ -704,6 +705,126 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     end
   end
 
+  context 'with response headers saved to save_trigger_results (issue #1430)' do
+    it 'stores response header names and underscored keys for conditions and substitutions' do
+      headers_url = 'https://rspec-test.example.com/api/headers'
+      consumer_url = 'https://rspec-test.example.com/api/header-consumer?request_id=abc-123'
+
+      stub_request(:get, headers_url)
+        .to_return(
+          status: 200,
+          body: '{"result":"headers"}',
+          headers: {
+            'X-Request-ID' => 'abc-123',
+            'X-ReStructure-Error' => 'invalid-authenticity-token'
+          }
+        )
+      stub_request(:get, consumer_url)
+        .to_return(status: 200, body: '{"result":"consumed"}', headers: {})
+
+      config = {
+        this1: {
+          local_data: 'header_response',
+          from: {
+            url: headers_url,
+            format: 'json'
+          }
+        },
+        this2: {
+          data_field: 'notes',
+          data_field_format: 'json',
+          if: {
+            all: {
+              this: {
+                save_trigger_results: {
+                  element: 'header_response_http_response_headers.x_request_id',
+                  value: 'abc-123'
+                }
+              }
+            }
+          },
+          from: {
+            url: 'https://rspec-test.example.com/api/header-consumer?request_id={{save_trigger_results.header_response_http_response_headers.x_request_id}}',
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      headers = @al.save_trigger_results['header_response_http_response_headers']
+      expect(headers['x-request-id']).to eq 'abc-123'
+      expect(headers[:x_request_id]).to eq 'abc-123'
+      expect(headers['x-restructure-error']).to eq 'invalid-authenticity-token'
+      expect(headers[:x_restructure_error]).to eq 'invalid-authenticity-token'
+      expect(@al.notes).to eq '{"result":"consumed"}'
+    end
+
+    it 'stores response headers before raising for a rejected response' do
+      error_url = 'https://rspec-test.example.com/api/rejected'
+
+      stub_request(:get, error_url)
+        .to_return(
+          status: 422,
+          body: '{"error":"invalid authenticity token"}',
+          headers: { 'X-ReStructure-Error' => 'invalid-authenticity-token' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          }
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+      expect { @trigger.perform }.to raise_error(FphsException, /code '422'/)
+
+      headers = @al.save_trigger_results['rejected_response_http_response_headers']
+      expect(headers['x-restructure-error']).to eq 'invalid-authenticity-token'
+      expect(headers[:x_restructure_error]).to eq 'invalid-authenticity-token'
+    end
+
+    it 'makes rejected response headers available to on_failure triggers' do
+      error_url = 'https://rspec-test.example.com/api/rejected-with-hook'
+
+      stub_request(:get, error_url)
+        .to_return(
+          status: 422,
+          body: '{"error":"invalid authenticity token"}',
+          headers: { 'X-ReStructure-Error' => 'invalid-authenticity-token' }
+        )
+
+      config = {
+        this1: {
+          local_data: 'rejected_response',
+          from: {
+            url: error_url,
+            format: 'json'
+          },
+          on_failure: [
+            {
+              set_save_trigger_results: {
+                element: 'failure_header',
+                value: '{{save_trigger_results.rejected_response_http_response_headers.x_restructure_error}}'
+              }
+            }
+          ]
+        }
+      }
+
+      @trigger = SaveTriggers::PullExternalData.new(config, @al)
+      @trigger.perform
+
+      expect(@al.save_trigger_results['failure_header']).to eq 'invalid-authenticity-token'
+    end
+  end
+
   context 'with unsupported HTTP method' do
     it 'raises an error for an invalid method' do
       config = {
@@ -983,6 +1104,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       @trigger.perform
 
       expect(@al.save_trigger_results).not_to have_key('_submitted_request')
+      expect(@al.save_trigger_results).not_to have_key('_http_response_headers')
     end
   end
 
