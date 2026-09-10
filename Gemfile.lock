@@ -428,7 +428,7 @@ GEM
     ruby_parser (3.22.0)
       racc (~> 1.5)
       sexp_processor (~> 4.16)
-    rubyzip (2.3.2)
+    rubyzip (3.6.0)
     sass (3.7.4)
       sass-listen (~> 4.0.0)
     sass-embedded (1.104.0-x86_64-linux-gnu)
@@ -439,11 +439,11 @@ GEM
     sassc-embedded (1.80.9)
       sass-embedded (~> 1.80)
     securerandom (0.4.1)
-    selenium-webdriver (4.28.0)
+    selenium-webdriver (4.39.0)
       base64 (~> 0.2)
       logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
-      rubyzip (>= 1.2.2, < 3.0)
+      rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
     sexp_processor (4.17.5)
     shoulda-matchers (5.3.0)
@@ -559,9 +559,9 @@ DEPENDENCIES
   rubocop-rails
   rubocop-rspec
   ruby_parser
-  rubyzip (~> 2.3.0)
+  rubyzip (~> 3.6)
   sassc-embedded
-  selenium-webdriver (= 4.28.0)
+  selenium-webdriver (= 4.39.0)
   shoulda-matchers (~> 5.1)
   simple_token_authentication (~> 1.0)!
   simplecov
