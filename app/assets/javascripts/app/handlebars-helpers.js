@@ -285,6 +285,20 @@
     return typeof obj;
   });
 
+  // Parse a YAML text string into its represented Hash/Array, for fields stored as
+  // plain YAML text (see name_starts_with_yaml_object edit fields). If obj is not a
+  // string (e.g. already parsed, null, or undefined), it is returned unchanged. If the
+  // string fails to parse as YAML, it is returned unchanged so rendering degrades
+  // gracefully rather than raising.
+  Handlebars.registerHelper('yaml_parse', function (obj) {
+    if (typeof obj !== 'string') return obj;
+    try {
+      return jsyaml.load(obj);
+    } catch (e) {
+      return obj;
+    }
+  });
+
   Handlebars.registerHelper('nl2br', function (text) {
     var nl2br = _fpa.utils.nl2br(text);
     return new Handlebars.SafeString(nl2br)
