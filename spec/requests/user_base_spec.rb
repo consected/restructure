@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# These request specs verify that CSRF failures return the forbidden status while valid tokens remain accepted.
+# These request specs verify that CSRF failures return the forbidden status while valid tokens
+# remain accepted, that API user_token authentication (as a param or as an X-User-Token header)
+# correctly bypasses CSRF protection, and that failed API authentication attempts get a
+# distinguishing X-ReStructure-Error response header (via ApiAwareFailureApp).
 require 'rails_helper'
 
 describe 'csrf protection' do
@@ -32,11 +35,11 @@ describe 'csrf protection' do
   end
 
   def put_with_token(path, params, token = nil)
-    put path, params: params.merge('authenticity_token' => (token || retrieve_authenticity_token)), xhr: true
+    put path, params: params.merge('authenticity_token' => token || retrieve_authenticity_token), xhr: true
   end
 
   def post_with_token(path, params, token = nil)
-    post path, params: params.merge(authenticity_token: (token || retrieve_authenticity_token)), xhr: true
+    post path, params: params.merge(authenticity_token: token || retrieve_authenticity_token), xhr: true
   end
 
   def form_authenticity_token
@@ -111,6 +114,76 @@ describe 'csrf protection' do
     it 'attempts to get MFA requirement, but fails due to bad CSRF token' do
       get '/users/sign_in'
       expect(post_with_token('/mfa/step1.json', { resource_type: 'user', user: { email: 'abc', password: 'def' } }, "#{retrieve_authenticity_token}1")).to eq(403)
+    end
+  end
+
+  describe 'API user_token CSRF bypass' do
+    before :example do
+      ActionController::Base.allow_forgery_protection = true
+      @user, = create_user(nil, '', create_master: true)
+    end
+
+    after :example do
+      ActionController::Base.allow_forgery_protection = false
+    end
+
+    it 'bypasses CSRF when user_token is supplied as a query/body param' do
+      last_master_id = Master.reorder('').last.id
+      post '/masters/create.json',
+           params: { master: {}, use_app_type: @user.app_type_id, user_email: @user.email,
+                     user_token: @user.authentication_token }
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['master']['id']).to be > last_master_id
+    end
+
+    it 'bypasses CSRF when user_token is supplied via the X-User-Token header' do
+      last_master_id = Master.reorder('').last.id
+      post '/masters/create.json',
+           params: { master: {}, use_app_type: @user.app_type_id },
+           headers: { 'X-User-Email' => @user.email, 'X-User-Token' => @user.authentication_token }
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['master']['id']).to be > last_master_id
+    end
+
+    it 'prefers an explicit query param token over a header token when both are supplied' do
+      # A bad param token must still fail authentication, even with a good header token present,
+      # since explicit URL/body params always take precedence over headers.
+      post '/masters/create.json',
+           params: { master: {}, use_app_type: @user.app_type_id, user_email: @user.email,
+                     user_token: 'badtoken' },
+           headers: { 'X-User-Email' => @user.email, 'X-User-Token' => @user.authentication_token }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'still fails CSRF when no user_token is supplied anywhere' do
+      post '/masters/create.json', params: { master: {}, use_app_type: @user.app_type_id }
+      expect(response.status).to eq(403)
+    end
+  end
+
+  describe 'API authentication failure header' do
+    before :example do
+      @user, = create_user
+    end
+
+    it 'adds X-ReStructure-Error when a bad user_token param was supplied' do
+      get '/masters.json', params: { use_app_type: @user.app_type_id, user_email: @user.email, user_token: 'badtoken' }
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.headers['X-ReStructure-Error']).to eq('api-token-authentication-failed')
+    end
+
+    it 'adds X-ReStructure-Error when a bad user_token header was supplied' do
+      get '/masters.json',
+          params: { use_app_type: @user.app_type_id },
+          headers: { 'X-User-Email' => @user.email, 'X-User-Token' => 'badtoken' }
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.headers['X-ReStructure-Error']).to eq('api-token-authentication-failed')
+    end
+
+    it 'does not add X-ReStructure-Error for an ordinary unauthenticated browser request' do
+      get '/masters.json', params: { use_app_type: @user.app_type_id }
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.headers['X-ReStructure-Error']).to be_nil
     end
   end
 end

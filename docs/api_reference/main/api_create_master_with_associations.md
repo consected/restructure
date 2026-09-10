@@ -137,6 +137,14 @@ Returned when any record fails validation. The entire transaction is rolled back
 }
 ```
 
+### Authentication Error Response (HTTP 401)
+
+Returned when `user_email`/`user_token` are supplied but invalid. If no credentials are supplied
+at all, this `POST` endpoint instead returns `403 Forbidden` (CSRF protection), since there is no
+token to justify bypassing the CSRF check. See
+[Authentication failures](README.md#authentication-failures) for the generic error body and the
+`X-ReStructure-Error` header sent when credentials were supplied but rejected.
+
 ## Access Control
 
 The API user must have:

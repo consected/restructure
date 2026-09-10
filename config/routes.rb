@@ -246,10 +246,12 @@ Rails.application.routes.draw do
   if Settings::AllowUsersToRegister
     devise_for :users,
                only: %i[sessions confirmations passwords registrations],
-               controllers: { registrations: 'users/registrations' }
+               controllers: { registrations: 'users/registrations' },
+               failure_app: ApiAwareFailureApp
   else
     devise_for :users,
-               only: %i[sessions]
+               only: %i[sessions],
+               failure_app: ApiAwareFailureApp
     as :user do
       get '/users/edit' => 'users/registrations#edit', as: :edit_user_registration
       put '/users' => 'users/registrations#update', as: :user_registration
