@@ -24,6 +24,7 @@ gem 'dicom'
 gem 'diffy'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'jquery-rails'
+gem 'json', '< 3' # json 3.0 breaks ActiveSupport::JSON.decode's call to JSON.parse
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mail', '>= 2.9.1'
