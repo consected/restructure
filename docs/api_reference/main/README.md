@@ -21,6 +21,19 @@ This risks leaking sensitive information in URLs and server logs.
 
 `?user_email={{user_email}}&user_token={{user_token}}`
 
+### Authentication failures
+
+If `user_email`/`user_token` are supplied (as headers or params) but rejected, the response has
+status `401 Unauthorized` with a generic JSON body
+(`{"error": "You need to sign in or sign up before continuing."}`) and an
+`X-ReStructure-Error: api-token-authentication-failed` header, letting API clients distinguish
+"credentials were sent but rejected" from other failures.
+
+For state-changing requests (`POST`/`PUT`/`PATCH`/`DELETE`), if no credentials are supplied at
+all, the request instead fails CSRF protection first and returns `403 Forbidden`, since there is
+no token to justify bypassing the CSRF check. `GET` requests are not CSRF-protected, so a missing
+credentials there returns the `401` response above (without the `X-ReStructure-Error` header).
+
 ## Endpoints
 
 Since new resources may be generated through the configuration of dynamic definitions (dynamic models, external identifiers and activity logs), the API definition is not static.
