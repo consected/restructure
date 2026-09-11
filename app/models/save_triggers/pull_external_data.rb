@@ -64,11 +64,13 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           uri = url_from_config.split('?').first
           logmsg = "pull_external_data #{method_from_config} -> #{uri} = response code #{response_code} " \
                    "&& success_if_res #{success_if_res}"
-          if response_code == 200 && success_if_res != false
+          if response_code.between?(200, 299) && success_if_res != false
             Rails.logger.info logmsg
           else
             Rails.logger.warn logmsg
           end
+
+          raise FphsException, "pull_external_data success_if condition failed for #{uri}" if success_if_res == false
 
           next unless vals.present?
 
@@ -143,11 +145,17 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     format = sub_config[:format]
 
     self.response_code = response.code.to_i
-    store_response_headers(@this_config[:local_data], response_headers(response))
+    local_data_name = @this_config[:local_data]
+    store_response_headers(local_data_name, response_headers(response))
+    # Store response code and submitted request details now, before any raise below, so
+    # on_failure hooks have them regardless of whether the request ultimately succeeds.
+    store_response_metadata(local_data_name)
     content = response.body
-    allowed_non_success_response = response_code != 200 && response_code.in?(allow_response_codes)
+    successful_response = response_code.between?(200, 299)
+    allowed_non_success_response = !successful_response && response_code.in?(allow_response_codes)
 
-    unless response_code == 200 || allowed_non_success_response
+    unless successful_response || allowed_non_success_response
+      store_failure_content(local_data_name, content, format)
       uri = url.split('?').first
       raise FphsException,
             "#{http_method} external data: failed request with code '#{response_code}' from url #{uri}; " \
@@ -157,11 +165,17 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     if content.blank?
       return if allow_empty_result || allowed_non_success_response
 
+      store_local_data_results(local_data_name, content)
       uri = url.split('?').first
       raise FphsException, "#{http_method} external data: empty content received from #{uri}"
     end
 
-    parse_response_content(content, format, fallback_to_raw: allowed_non_success_response)
+    begin
+      parse_response_content(content, format, fallback_to_raw: allowed_non_success_response)
+    rescue JSON::ParserError, REXML::ParseException, ActiveSupport::XMLConverter::DisallowedType
+      store_local_data_results(local_data_name, content)
+      raise
+    end
   end
 
   def url_from_config
@@ -238,7 +252,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
       Hash.from_xml(content)
     when 'json'
       JSON.parse(content)
-    when 'text'
+    when 'text', nil
       content
     end
   rescue JSON::ParserError, REXML::ParseException, ActiveSupport::XMLConverter::DisallowedType
@@ -260,16 +274,29 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     @item.save_trigger_results["#{local_data_name}_http_response_headers"] = headers
   end
 
-  def store_local_data_results(local_data_name, data)
+  def store_response_metadata(local_data_name)
     return unless local_data_name
 
-    @item.save_trigger_results[local_data_name] = data
     @item.save_trigger_results["#{local_data_name}_http_response_code"] = response_code
     @item.save_trigger_results["#{local_data_name}_submitted_request"] = {
       'data' => @submitted_request_data,
       'url' => url_from_config,
       'method' => method_from_config
     }
+  end
+
+  # Best-effort attempt to store a failed response's body under the local_data key, so
+  # on_failure hooks can inspect the error content the same way a successful result would be.
+  def store_failure_content(local_data_name, content, format)
+    return unless local_data_name
+
+    @item.save_trigger_results[local_data_name] = parse_response_content(content, format, fallback_to_raw: true)
+  end
+
+  def store_local_data_results(local_data_name, data)
+    return unless local_data_name
+
+    @item.save_trigger_results[local_data_name] = data
   end
 
   def update_item(vals, config)
