@@ -128,14 +128,14 @@
               url: url with substitutions
               format: xml|json|text
               allow_empty_result: true | false (default)
-              allow_response_codes: [array of allowable integer codes that are not 200]
+              allow_response_codes: [array of allowable integer codes outside the successful 2xx range]
 
             # For 'post' requests
             to:
               url: url with substitutions
               format: xml|json|text
               allow_empty_result: true | false (default)
-              allow_response_codes: [array of allowable integer codes that are not 200]
+              allow_response_codes: [array of allowable integer codes outside the successful 2xx range]
               headers:
                 'Authorization': 'Bearer {{save_trigger_results.identity.access_token}}'
                 'Content-Type': 'application/json'
@@ -157,5 +157,5 @@
 # - Use from: for get requests and to: for post requests - only the one matching method:
 #   is consulted; the other is ignored.
 # - entry_label becomes the base of the local_data substitution names shown above.
-# - success_if is checked in addition to the HTTP response code; a 200 response with a
+# - success_if is checked in addition to the HTTP response code; a successful 2xx response with a
 #   failing success_if is still treated as unsuccessful.

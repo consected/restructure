@@ -15,5 +15,5 @@ pull_external_data:
       all:
         this:
           save_trigger_results:
-            element: 'identity_success_if_res'
+            element: 'identity.result'
             value: true
