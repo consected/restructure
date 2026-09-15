@@ -345,7 +345,7 @@ module ActiveRecord
 
       def create_external_identifier_tables(id_field, id_field_type = :bigint)
         self.fields ||= []
-        self.fields.unshift id_field
+        fields.unshift id_field
         self.fields = fields.uniq
         setup_fields
 
@@ -380,7 +380,7 @@ module ActiveRecord
         raise e unless force_rollback
       end
 
-      def create_external_identifier_trigger(_id_field)
+      def create_external_identifier_trigger(_id_field = nil)
         return unless history_table_exists && !model_is_view
 
         self.fields ||= []
@@ -891,7 +891,7 @@ module ActiveRecord
 
         return if field_opts && !handle_fields
 
-        handle_fields ||= self.fields
+        handle_fields ||= fields
         handle_fields.reject! { |a| a.to_s.index(ignore_fields) }
         handle_fields = handle_fields.map(&:to_sym)
 
