@@ -75,11 +75,20 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
     end
 
     context 'field option hash key type validation' do
-      it 'rejects a non-boolean include_blank with a config error' do
-        instance = klass.new(field1: { include_blank: 'yes' })
+      it 'accepts true, false, or a string include_blank without a config error' do
+        [true, false, '(other)'].each do |include_blank|
+          instance = klass.new(field1: { include_blank: include_blank })
+          expect(instance.config_errors).to be_empty
+        end
+      end
+
+      it 'rejects a non-boolean, non-string include_blank with a config error' do
+        instance = klass.new(field1: { include_blank: 1 })
         expect(instance.config_errors).to be_present
         error_messages = instance.config_errors.map { |e| e[:message] }
-        expect(error_messages.any? { |m| m.include?('field1 include_blank must be true or false') }).to be(true)
+        expect(error_messages).to include(
+          a_string_including('field1 include_blank must be true, false or a string')
+        )
       end
 
       it 'rejects a non-hash edit_as with a config error' do

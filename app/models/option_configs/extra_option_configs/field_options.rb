@@ -49,7 +49,7 @@ module OptionConfigs
                     allowed_keys: NamedConfiguration.option_types[:simple] +
                                   NamedConfiguration::EXTRA_PASSTHROUGH_KEYS,
                     key_types: {
-                      include_blank: :boolean,
+                      include_blank: :boolean_or_string,
                       no_downcase: :boolean,
                       view_original_case: :boolean,
                       show_expanded: :boolean,
