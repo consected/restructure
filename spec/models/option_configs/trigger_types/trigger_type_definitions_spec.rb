@@ -70,11 +70,20 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
       )
     end
 
-    it 'declares name, label, create_with_role as :string_or_hash and skip_if_exists as :boolean' do
+    it 'declares name, label, create_with_role as :string_or_hash and skip_if_exists as :string' do
       expect(type_class.key_type_rules[:name]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:label]).to eq(:string_or_hash)
       expect(type_class.key_type_rules[:create_with_role]).to eq(:string_or_hash)
-      expect(type_class.key_type_rules[:skip_if_exists]).to eq(:boolean)
+      expect(type_class.key_type_rules[:skip_if_exists]).to eq(:string)
+    end
+
+    it 'accepts the supported skip_if_exists modes and rejects invalid values' do
+      expect(type_class.validate_config(skip_if_exists: 'master')).to be_empty
+      expect(type_class.validate_config(skip_if_exists: 'user_is_creator')).to be_empty
+      expect(type_class.validate_config(skip_if_exists: true)).not_to be_empty
+      expect(type_class.validate_config(skip_if_exists: 'unknown_scope')).to include(
+        "skip_if_exists 'unknown_scope' must be one of: master, user_is_creator"
+      )
     end
   end
 
