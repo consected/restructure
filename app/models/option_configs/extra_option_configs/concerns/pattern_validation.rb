@@ -51,7 +51,7 @@ module OptionConfigs
       #   key_type :string_or_array, %i[uniqueness_fields]
       #   key_type :hash, %i[batch_trigger], allowed_keys: %i[frequency run_at limit]
       #
-      # Supported type symbols: +:boolean+, +:string+, +:string_or_array+, +:integer+, +:hash+
+      # Supported type symbols: +:boolean+, +:string+, +:boolean_or_string+, +:string_or_array+, +:integer+, +:hash+
       #
       # == Automatic Validation
       #
@@ -77,6 +77,7 @@ module OptionConfigs
         # Type-checking lambdas for key_type and value_pattern key_types.
         KEY_TYPE_CHECKERS = {
           boolean: ->(v) { [true, false].include?(v) },
+          boolean_or_string: ->(v) { [true, false].include?(v) || v.is_a?(String) || v.is_a?(Symbol) },
           # Tri-state used by reference entries: accepts true/false or the
           # special string literal 'outside_master'.
           boolean_or_outside_master: ->(v) { [true, false, 'outside_master', :outside_master].include?(v) },
@@ -102,6 +103,7 @@ module OptionConfigs
         # Human-readable descriptions for each type symbol.
         KEY_TYPE_DESCRIPTIONS = {
           boolean: 'true or false',
+          boolean_or_string: 'true, false or a string',
           boolean_or_outside_master: "true, false or 'outside_master'",
           string: 'a string',
           string_or_hash: 'a string (literal or {{substitution}}) or a Hash (e.g. { this: { field: return_value } })',
