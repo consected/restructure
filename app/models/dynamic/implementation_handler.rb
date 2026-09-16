@@ -451,16 +451,17 @@ module Dynamic
         next unless attribute_names.include?(name.to_s)
 
         init_value = config[:preset_value]
-        if init_value
+        unless init_value.nil?
           res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end
 
         init_value = config[:blank_preset_value]
-        if init_value
-          res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
-          send "#{name}=", res if attributes[name.to_s].blank?
-        end
+        next if init_value.nil?
+
+        res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
+        current_value = attributes[name.to_s]
+        send "#{name}=", res if current_value.blank? && current_value != false
       end
     end
 
@@ -479,7 +480,7 @@ module Dynamic
         next unless attribute_names.include?(name.to_s) || @option_type_attr_name.to_s == name.to_s
 
         init_value = config[:active_value]
-        if init_value
+        unless init_value.nil?
           res = FieldDefaults.calculate_default self, init_value, ignore_missing: current_admin_sample
           send "#{name}=", res
         end

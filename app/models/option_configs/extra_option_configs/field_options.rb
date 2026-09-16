@@ -56,19 +56,13 @@ module OptionConfigs
                       keep_label: :boolean,
                       capitalize: :boolean,
                       pattern: :string,
-                      # active_value can be a literal string, a '{{substitution}}'
-                      # string, or a Hash with return_value lookup form
-                      # (e.g. { this: { field_name: return_value } }) so that
-                      # field defaults can be derived from other record values.
-                      # value, blank_value, preset_value, blank_preset_value all
-                      # accept the same Hash return_value lookup form as active_value
-                      # (e.g. { this: { model: { field: return_value } } })
-                      # They also accept an Array of strings for multi-value presets.
-                      value: :string_hash_or_array,
-                      blank_value: :string_hash_or_array,
-                      preset_value: :string_hash_or_array,
-                      blank_preset_value: :string_hash_or_array,
-                      active_value: :string_or_hash,
+                      # All field value options accept literal strings, booleans,
+                      # numerics, return_value Hash lookups, and arrays of strings.
+                      value: :boolean_numeric_string_hash_or_array,
+                      blank_value: :boolean_numeric_string_hash_or_array,
+                      preset_value: :boolean_numeric_string_hash_or_array,
+                      blank_preset_value: :boolean_numeric_string_hash_or_array,
+                      active_value: :boolean_numeric_string_hash_or_array,
                       format: :string,
                       class: :string,
                       placeholder: :string,

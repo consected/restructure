@@ -51,7 +51,9 @@ module OptionConfigs
       #   key_type :string_or_array, %i[uniqueness_fields]
       #   key_type :hash, %i[batch_trigger], allowed_keys: %i[frequency run_at limit]
       #
-      # Supported type symbols: +:boolean+, +:string+, +:boolean_or_string+, +:string_or_array+, +:integer+, +:hash+
+      # Supported type symbols: +:boolean+, +:string+, +:boolean_or_string+,
+      # +:string_or_array+, +:string_hash_or_array+, +:boolean_numeric_string_hash_or_array+,
+      # +:integer+, +:hash+
       #
       # == Automatic Validation
       #
@@ -84,17 +86,23 @@ module OptionConfigs
           string: ->(v) { v.is_a?(String) || v.is_a?(Symbol) },
           # Accepts a literal string (including substitution strings like
           # '{{field_name}}') or a Hash form such as { this: { field: return_value } }
-          # used by field_default-style lookups (e.g. active_value).
+          # used by field_default-style lookups.
           string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
           string_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
           },
-          # Accepts a string, a Hash (return_value lookup), or an Array of strings.
-          # Used by field value options (preset_value, blank_preset_value, value, blank_value).
+          # Base checker for field value options that do not accept scalar booleans
+          # or numerics.
           string_hash_or_array: lambda { |v|
             v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) ||
               (v.is_a?(Array) && v.all? { |i| i.is_a?(String) || i.is_a?(Symbol) })
+          },
+          # Extends string_hash_or_array for field value options that also accept
+          # scalar booleans and numerics.
+          boolean_numeric_string_hash_or_array: lambda { |v|
+            [true, false].include?(v) || v.is_a?(Numeric) ||
+              KEY_TYPE_CHECKERS[:string_hash_or_array].call(v)
           },
           integer: ->(v) { v.is_a?(Integer) },
           hash: ->(v) { v.is_a?(Hash) }
@@ -109,6 +117,7 @@ module OptionConfigs
           string_or_hash: 'a string (literal or {{substitution}}) or a Hash (e.g. { this: { field: return_value } })',
           string_or_array: 'a string or array of strings',
           string_hash_or_array: 'a string, a Hash (e.g. { this: { field: return_value } }), or an array of strings',
+          boolean_numeric_string_hash_or_array: 'true, false, numeric, string, Hash, or array of strings',
           integer: 'an integer',
           hash: 'a Hash'
         }.freeze
