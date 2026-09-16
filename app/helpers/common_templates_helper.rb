@@ -23,9 +23,9 @@ module CommonTemplatesHelper
 
     fopt ||= {}
 
-    if fopt[:value] || fopt[:blank_value]
+    unless fopt[:value].nil? && fopt[:blank_value].nil?
       fres = form_object_instance.attributes[field_name_sym.to_s]
-      if fres.blank?
+      if fres.blank? && fres != false
         fres = if form_object_instance.persisted?
                  fopt[:blank_value]
                else

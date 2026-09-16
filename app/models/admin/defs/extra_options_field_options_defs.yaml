@@ -37,10 +37,10 @@
 # All keys are optional.
 #
 # ValueExpr type (value, blank_value, preset_value, blank_preset_value, selected)
-# ValueExpr: <String | now() | today() | {{substitution}} | ReturnValueLookup | Array(String)>
+# ValueExpr: <String | Boolean | Numeric | now() | today() | {{substitution}} | ReturnValueLookup | Array(String)>
 #
 # ActiveValueExpr type (active_value)
-# ActiveValueExpr: <String | now() | today() | {{substitution}} | ReturnValueLookup>
+# ActiveValueExpr: <String | Boolean | Numeric | now() | today() | {{substitution}} | ReturnValueLookup | Array(String)>
 #
 # ReturnValueLookup type - shared by ValueExpr and ActiveValueExpr
 # ReturnValueLookup: <Hash(this | reference_<reference_name>: Hash(model_name: Hash(field_name: 'return_value')))>
@@ -76,7 +76,7 @@
 # Pattern 5: big_select filtered by another field (extra_options_field_options_pattern_5_big_select_filtered_defs.yaml)
 # Pattern 6: creatable - allow creating a new record inline (extra_options_field_options_pattern_6_creatable_defs.yaml)
 # Pattern 7: value/preset_value via a return_value Hash lookup (extra_options_field_options_pattern_7_value_lookup_defs.yaml)
-# Pattern 8: value/preset_value as an Array of strings (extra_options_field_options_pattern_8_value_array_defs.yaml)
+# Pattern 8: field value options as an Array of strings (extra_options_field_options_pattern_8_value_array_defs.yaml)
 # Pattern 9: active_value with a live substitution (extra_options_field_options_pattern_9_active_value_defs.yaml)
 # See field_options.md for the worked examples.
 #
