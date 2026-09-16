@@ -4,7 +4,7 @@
 #   name: String (required),
 #   label: String,
 #   create_with_role: String,
-#   skip_if_exists: Boolean,
+#   skip_if_exists: <master | user_is_creator>,
 #   if: Condition,
 #   on_complete: TriggerTaskList,
 #   on_failure: TriggerTaskList
@@ -18,7 +18,8 @@
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
 
 # Notes:
-# - skip_if_exists: true avoids creating a duplicate container if one already exists.
+# - skip_if_exists: master or user_is_creator avoids creating a duplicate container if one
+#   already exists in the selected reference scope.
 # - name must resolve to a non-nil value - a nil name crashes with a NoMethodError rather
 #   than a friendly validation error.
 # - label is currently unused by the runtime handler (SaveTriggers::CreateFilestoreContainer)

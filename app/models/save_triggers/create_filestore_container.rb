@@ -62,7 +62,7 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
       active: true
     }
 
-    case skip_if_exists
+    case skip_if_exists.to_s
     when 'master'
       ModelReference.find_references master, **pass_options
     when 'user_is_creator'
