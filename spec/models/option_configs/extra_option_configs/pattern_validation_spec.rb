@@ -450,6 +450,18 @@ RSpec.describe 'PatternValidation concern', type: :model do
       expect(kt[:array]).to eq :boolean
     end
 
+    it 'supports boolean_or_string key types' do
+      klass = OptionConfigs::ExtraOptionConfigs::FieldOptions
+
+      [true, false, '(other)'].each do |include_blank|
+        instance = klass.new(test1: { include_blank: include_blank })
+        expect(instance.config_errors).to be_empty
+      end
+
+      instance = klass.new(test1: { include_blank: 1 })
+      expect(instance.config_errors).to be_present
+    end
+
     it 'reports an error for key_types violation in value_pattern' do
       klass = OptionConfigs::ExtraOptionConfigs::DbColumns
       instance = klass.new(name: { type: 123, array: 'yes' })

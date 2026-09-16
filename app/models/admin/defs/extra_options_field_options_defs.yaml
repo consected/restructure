@@ -7,7 +7,7 @@
 #
 # Value type
 # FieldOptionValue: <Hash(
-#   include_blank: Boolean,
+#   include_blank: Boolean | String,
 #   pattern: String,
 #   value: ValueExpr,
 #   blank_value: ValueExpr,
@@ -83,8 +83,8 @@
   field_options:
     field_name:
       include_blank: |
-        true or false to force a drop down field to include a selectable
-        blank
+        true or false to force a drop down field to include a selectable blank,
+        or a string to use as the blank option's label
       pattern: '.+\\d{3}-\\D{1-4}.*'
         # provide a mask for a text field using basic regex
         # This example accepts one or more characters of any type, 3 digits, a hyphen, 1 to 4 letters and any number of final characters
