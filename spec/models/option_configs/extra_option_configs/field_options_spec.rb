@@ -7,8 +7,9 @@ require './db/table_generators/dynamic_models_table'
 # Verifies NamedConfiguration for per-field options (edit_as, value, pattern, etc.),
 # alt_options preprocessing, and integration through
 # ExtraOptions initialization (clean_field_options_def behavior).
-# Also verifies that preset_value, blank_preset_value, value, blank_value, and
-# default_value accept array values in addition to strings and hashes (issue #1313).
+# Also verifies that field value options accept array values in addition to strings
+# and hashes (issue #1313), and that all value forms accept boolean and numeric
+# literals (issue #1453). default_value remains string-only.
 RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
   include MasterSupport
   include ModelSupport
@@ -141,6 +142,54 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
                                })
           error_messages = instance.config_errors.map { |e| e[:message] }
           expect(error_messages).to be_empty
+        end
+
+        it 'accepts false and numeric literals for all field value options (issue #1453)' do
+          {
+            value: [false, 42],
+            blank_value: [false, 42],
+            preset_value: [false, 42],
+            blank_preset_value: [false, 42]
+          }.each do |option, literals|
+            literals.each do |literal|
+              instance = klass.new(field1: { option => literal })
+              failure_message = "#{option}=#{literal.inspect} should be accepted"
+              expect(instance.config_errors).to be_empty, failure_message
+            end
+          end
+        end
+
+        it 'accepts boolean, numeric, and array literals for active_value (issue #1453)' do
+          [false, 0, 3.14, %w[option1 option2]].each do |literal|
+            instance = klass.new(field1: { active_value: literal })
+            failure_message = "active_value=#{literal.inspect} should be accepted"
+            expect(instance.config_errors).to be_empty, failure_message
+          end
+        end
+
+        it 'accepts a boolean preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: true })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts an integer preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: 42 })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a float preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: 3.14 })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a BigDecimal decimal preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { preset_value: BigDecimal('12.50') })
+          expect(instance.config_errors).to be_empty
+        end
+
+        it 'accepts a boolean blank_preset_value without config errors (issue #1453)' do
+          instance = klass.new(field1: { blank_preset_value: false })
+          expect(instance.config_errors).to be_empty
         end
 
         it 'accepts an Array for preset_value without config errors' do
@@ -332,6 +381,47 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
 
       instance = @master.dynamic_model__test_created_by_recs.build
       expect(instance.text_array).to eq %w[blood\ spot\ card saliva\ tube test\ kit]
+    end
+
+    it 'applies a false preset_value at runtime via force_preset_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { preset_value: false } })
+      )
+
+      expect(instance).to receive(:test1=).with(false)
+      instance.force_preset_values
+    end
+
+    it 'applies a zero blank_preset_value at runtime via force_preset_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { blank_preset_value: 0 } })
+      )
+
+      expect(instance).to receive(:test1=).with(0)
+      instance.force_preset_values
+    end
+
+    it 'applies a false active_value at runtime via evaluate_active_values (issue #1453)' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { active_value: false } })
+      )
+
+      expect(instance).to receive(:test1=).with(false)
+      instance.evaluate_active_values
+    end
+
+    it 'does not replace an existing false value with blank_preset_value' do
+      instance = @master.dynamic_model__test_created_by_recs.build
+      allow(instance).to receive(:attributes).and_return('test1' => false)
+      allow(instance).to receive(:option_type_config).and_return(
+        double(field_options: { test1: { blank_preset_value: true } })
+      )
+
+      expect(instance).not_to receive(:test1=)
+      instance.force_preset_values
     end
   end
 end

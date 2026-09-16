@@ -10,8 +10,9 @@ Configure individual field behaviour: default and preset values, validation patt
 ## Value, Preset, and Active Value Timing
 
 `value`, `blank_value`, `preset_value`, `blank_preset_value` and `active_value` all accept a
-literal, `now()`, `today()`, a `{{substitution}}`, a return_value Hash lookup (Pattern 7), or
-an Array of strings for multi-value fields (Pattern 8) - but are applied at different times:
+string, boolean, numeric, `now()`, `today()`, a `{{substitution}}`, a return_value Hash lookup
+(Pattern 7), or an Array of strings for multi-value fields (Pattern 8) - but are applied at
+different times:
 
 - `value` is set in the form fields UI only, before the item has been created and only if no
   `preset_value` has been set. It is not set before building the instance, so is not available
@@ -35,7 +36,7 @@ an Array of strings for multi-value fields (Pattern 8) - but are applied at diff
 !defs(extra_options_field_options_pattern_7_value_lookup_defs.yaml)
 ```
 
-### Pattern 8: value/preset_value as an Array of strings
+### Pattern 8: field value options as an Array of strings
 
 For multi-value fields (e.g. multi-select).
 
