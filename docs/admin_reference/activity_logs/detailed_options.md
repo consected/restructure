@@ -23,6 +23,19 @@ These options appear outside any `default:` or extra log type key.
 
 - [Extra Log Type](../general/extra_log_type.md) — defining named extra log type keys
 
+## Fields synced from the parent item type
+
+A field listed in `fields:` (or a traditional `field_list`) that also exists as an attribute
+on the activity log's parent item type (`item_type`) is automatically excluded from the
+activity form and rejected from submitted form data, even though it is listed. Its value is
+instead copied from the parent record whenever the activity log is saved. This applies
+regardless of the parent's type (dynamic model, external identifier, or a core model such
+as `player_contact`). This behaviour is unique to activity logs; dynamic models and external
+identifiers have no equivalent parent-field synchronization.
+
+The admin panel's "synced fields" panel, on an activity log definition's Details tab, lists
+any fields currently affected by this for the definition being edited.
+
 ## Common Options (within `default:` and each extra log type)
 
 - [label / button_label](../general/label.md) — display and add-button labels

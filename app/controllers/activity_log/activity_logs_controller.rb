@@ -48,12 +48,15 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
     if @item
       caption ||= @item.data
-      item_list ||= @implementation_class.view_attribute_list -
+      # view_attribute_list returns Symbols; normalise to Strings to match fields_to_sync
+      item_list ||= @implementation_class.view_attribute_list.map(&:to_s) -
                     @implementation_class.fields_to_sync.map(&:to_s) -
                     ['tracker_history_id']
     else
       caption ||= 'log item'
-      item_list ||= @implementation_class.view_blank_log_attribute_list - ['tracker_history_id']
+      item_list ||= @implementation_class.view_blank_log_attribute_list.map(&:to_s) -
+                    @implementation_class.fields_to_sync.map(&:to_s) -
+                    ['tracker_history_id']
     end
 
     cb = {}

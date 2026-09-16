@@ -1,3 +1,26 @@
+<%
+  # Resolved once here so both the "parent item type" link below and the "activities" /
+  # "synced fields" accordion panels further down can reuse it. A failure here (e.g. the
+  # implementation class or parent item type can't be resolved, commonly because the table
+  # hasn't been migrated yet - see "table_or_view_ready?" below) is shown as a diagnostic
+  # message in the synced fields panel rather than silently hidden.
+  al_accordion_id = "al-details-accordion-#{object_instance.id || 'new'}"
+  synced_fields_info = nil
+  synced_fields_error = nil
+  begin
+    impl = object_instance.implementation_class
+    parent_class = impl.parent_class
+    synced_fields_info = {
+      fields: impl.fields_to_sync,
+      parent_type: impl.parent_type,
+      parent_class:,
+      parent_definition: parent_class.respond_to?(:definition) ? parent_class.definition : nil
+    }
+  rescue StandardError => e
+    synced_fields_error = e.message
+  end
+  al_synced_field_names = synced_fields_info&.dig(:fields) || []
+%>
 <% if object_instance.persisted? && object_instance.enabled?%>
 <div class="al-details-section">
   <% unless object_instance.implementation_class_defined?(::ActivityLog, fail_without_exception: true) %>
@@ -19,6 +42,39 @@
   <p class="al-resource-name-def">
     Options may simply reference this as: <code>definition_resources</code>
   </p>
+
+  <% parent_definition = synced_fields_info&.dig(:parent_definition)
+     # Core/native models (e.g. PlayerContact) have no admin definition record of their own,
+     # but are still administered read-only under "Master Records" - link there instead.
+     # Guarded on synced_fields_info being present so a resolution failure (shown in the
+     # synced fields panel below) doesn't also break this section.
+     parent_master_record = synced_fields_info && parent_class && parent_definition.nil? &&
+                             Admin::MasterRecord.all.find { |r| r.table_name == parent_class.table_name }
+     parent_link = case parent_definition&.class&.name
+                   when 'ActivityLog' then admin_activity_logs_path(filter: { id: parent_definition.id }, perform_action: 'edit')
+                   when 'DynamicModel' then admin_dynamic_models_path(filter: { id: parent_definition.id }, perform_action: 'edit')
+                   when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { id: parent_definition.id }, perform_action: 'edit')
+                   else
+                     admin_master_records_path if parent_master_record
+                   end
+  %>
+  <% if parent_link %>
+  <label>parent item type</label>
+  <p class="al-parent-item-type">
+    <%= link_to link_label_open_in_new(
+          "#{synced_fields_info[:parent_type]} #{parent_definition ? parent_definition.class.name.underscore.humanize.downcase : 'master record model'}"
+        ), parent_link, target: '_blank' %>
+  </p>
+  <% if al_synced_field_names.present? %>
+  <p class="al-parent-item-type__synced-note">
+    <%# "collapsed" is required (not just cosmetic) - the scroll-to-expanded click handler in
+        _fpa_form_utils.js only scrolls when the clicked link itself starts in that state. %>
+    <%= link_to 'Synced fields are present', "##{al_accordion_id}-synced-fields-collapse",
+                class: 'scroll-to-expanded collapsed',
+                data: { toggle: 'collapse', parent: "##{al_accordion_id}", target: "##{al_accordion_id}-synced-fields-collapse" } %>
+  </p>
+  <% end %>
+  <% end %>
 
   <%= render partial: 'admin/common_templates/def_details_version_mode', locals: { object_instance: } %>
 
@@ -53,7 +109,6 @@
 <%
   current_app_type_id = current_admin.matching_user&.app_type_id
   current_user = current_admin.matching_user
-  al_accordion_id = "al-details-accordion-#{object_instance.id || 'new'}"
   al_uac_needs_attention = def_uac_needs_attention?(
     object_instance:,
     current_user:,
@@ -113,7 +168,12 @@
             <div class="activity-list-item-block collapse" id="al_ib_<%=name%>">
               <% if conf&.fields&.present? %>
               <ul class="activity-list-activity-fields">
-                <li><%= conf.fields.join("</li> <li>").html_safe %></li>
+                <% conf.fields.each do |field_name| %>
+                  <% synced = al_synced_field_names.include?(field_name) %>
+                  <li class="activity-list-activity-fields__item<%= ' activity-list-activity-fields__item--synced' if synced %>">
+                    <%= field_name %><% if synced %> <span class="activity-list-activity-fields__synced-note">(synced from parent - hidden from this form)</span><% end %>
+                  </li>
+                <% end %>
               </ul>
               <% end %>
               <% ref_def = conf&.embed
@@ -305,6 +365,57 @@
       </div>
     </div>
   </div>
+
+  <% if synced_fields_error || al_synced_field_names.present? %>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-synced-fields-heading">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#<%= al_accordion_id %>"
+           href="#<%= al_accordion_id %>-synced-fields-collapse"
+           aria-expanded="false" aria-controls="<%= al_accordion_id %>-synced-fields-collapse">
+          synced fields
+        </a>
+      </h4>
+    </div>
+    <div id="<%= al_accordion_id %>-synced-fields-collapse" class="panel-collapse collapse"
+         role="tabpanel" aria-labelledby="<%= al_accordion_id %>-synced-fields-heading">
+      <div class="panel-body">
+        <div class="al-synced-fields">
+          <% if synced_fields_error %>
+          <p class="al-synced-fields__error info-danger">
+            Could not determine parent-synced fields: <%= synced_fields_error %>.
+            This is expected if the definition's database table has not yet been created.
+          </p>
+          <% else %>
+          <p>
+            These fields are synced from parent item type
+            <% if parent_link %>
+              <%= link_to(
+                    link_label_open_in_new(
+                      "<code class=\"al-synced-fields__parent-type\">#{synced_fields_info[:parent_type]}</code> (#{synced_fields_info[:parent_class].name})".html_safe
+                    ),
+                    parent_link, target: '_blank'
+                  ) %>
+            <% else %>
+              <code class="al-synced-fields__parent-type"><%= synced_fields_info[:parent_type] %></code>
+              (<%= synced_fields_info[:parent_class].name %>)
+            <% end %>. They are populated from the
+            parent record on save, are hidden from activity forms and not accepted from submitted form data
+            (even if listed in <code>fields:</code> or the definition's field list). They may still appear in
+            read-only results views, since - unlike edit forms - those are not filtered by this list; visibility
+            there depends only on whether the field is included in that activity's configured <code>fields:</code>.
+          </p>
+          <ul class="al-synced-fields__list">
+            <% al_synced_field_names.each do |f| %>
+              <li class="al-synced-fields__item"><%= f %></li>
+            <% end %>
+          </ul>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% end %>
 
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-field-configs-heading">
