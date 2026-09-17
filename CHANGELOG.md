@@ -14,6 +14,126 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [10.0.10] - 2026-09-11
+
+- [Merged] release 10.0.9 back to develop
+- [Fixed] pull_external_data failure response diagnostics - fixes #1442
+
+## [10.0.9] - 2026-09-10
+
+- [Merged] release 10.0.8 back to develop
+- [Added] X-ReStructure-Error header and fixed header-based API auth CSRF gap - fixes #1440
+
+## [10.0.8] - 2026-09-10
+
+- [Updated] API authentication documentation
+- [Merged] release 10.0.7 back to develop
+- [Added] save_trigger before_save test coverage and documentation - resolves #1382
+- [Added] ID column and filter to Usernames and Passwords admin page - fixes #1386
+- [Fixed] admin disabled filter All option always reverting to enabled - fixes #1387
+- [Updated] API authentication documentation
+- [Added] view_skip_updates config for view-backed dynamic models - fixes #1203
+- [Fixed] reentrant save from before_save triggers targeting this - fixes #1384
+- [Added] template pre-warming (Stage 2) - refs #1362
+- [Fixed] dynamic model admin dialogs section not listing dialog_before entries - fixes #1394
+- [Added] prewarm logging, robustness and cross-process cache-version fixes - refs #1362
+- [Added] admin documentation for record scoping of conditions, substitutions and save triggers - resolves #1381
+- [Fixed] global role and access-control rows not rotating partial cache keys - refs #1400
+- [Added] continue_on_record_error option for REDCap pulls - fixes #1383
+- [Added] dynamic model crosswalk associations - fixes #1399
+- [Fixed] selector cache invalidation - fixes #1312
+- [Added] REDCap Data Entry Trigger endpoint - fixes #1403
+- [Fixed] dynamic model validation transaction error - fixes #1416
+- [Fixed] stale definitions in background save triggers - fixes #1406
+- [Fixed] trigger task spec setup dependency - fixes #1419
+- [Fixed] master template cache churn on login - fixes #1400
+- [Fixed] pull_external_data error bodies - fixes #1418
+- [Fixed] API-only user creation when 2FA is disabled - fixes #1410
+- [Changed] CSRF failure status to 403 - fixes #1414
+- [Fixed] current config library cache refresh - fixes #1409
+- [Fixed] admin API definitions panel spec selection - fixes #1424
+- [Updated] DB schema dump
+- [Fixed] Redcap pull caching and status reporting - fixes #1405
+- [Added] pull external response headers - fixes #1430
+
+## [10.0.7] - 2026-08-27
+
+- [Merged] release 10.0.6 back to develop
+- [Fixed] handlebars multi-bundle permanently missing when same template id has different content in one request - fixes #1379
+
+## [10.0.6] - 2026-08-26
+
+- [Merged] release 10.0.5 back to develop
+- [Updated] gems to address "mail" GHSA: GHSA-mvxr-6m87-mv2q -  "Email address spoofing via malformed RFC 2047 encoded-words in mail"
+- [Updated] config validation checks - fixes #0
+- [Added] conditions documentation reference pages and verification harness - fixes #0
+- [Added] exception save trigger and changed on_failure default behavior - fixes #1365
+- [Fixed] no_masters conditional calculations with tracker_history - fixes #1367
+- [Added] redcap request config validation - fixes #1364
+- [Added] notify save_trigger option validation - fixes #1370
+- [Added] REDCap definition archive export - fixes #794
+- [Hardened] and shared the on-disk Handlebars template compile cache across users - refs #1362
+- [Added] recipient validation and expiry filtering - fixes #1374
+- [Sped] up extra_option_configs and save_trigger specs by consolidating expensive setup into before(:all)
+
+## [10.0.5] - 2026-08-19
+
+- [Merged] release 10.0.4 back to develop
+- [Changed] raising of exceptions in pull_external_data to avoid leaking sensitive URL params
+- [Fixed] API header auth checks - fixes #1342
+- [Fixed] item_flags conditional actions for dynamic model associations - fixes #1355
+- [Changed] batch jobs header, removed position column, added id filter on dynamic models index
+- [Fixed] in_current_app_type filter dropdown always showing All despite filtering correctly
+- [Fixed] Not set vs All filter dropdown ambiguity and hid Not set for non-column filters
+
+## [10.0.4] - 2026-08-13
+
+- [Merged] release 10.0.3 back to develop
+- [Limited] admin versions panel to 100 rows and fixed slow diff rendering - fixes #1343
+- [Fixed] reversed heading date order and duplicate updated_at diff row - fixes #1343
+- [Added] load-more paging link to admin versions panel - fixes #1343
+- [Changed] default admin versions panel page size to 10 - fixes #1343
+- [Fixed] blank schema migration generation - fixes #1339
+- [Added] fixes for spec relaibility
+- [Added] versions panels to reports, external identifiers, and message templates - fixes #1346
+- [Fixed] admin session timing out during active use - fixes #1345
+- [Fixed] session inactivity timer not persisting due to activerecord-session_store dirty-tracking bug - fixes #1345
+
+## [10.0.3] - 2026-08-07
+
+- [Merged] release 9.46.6 back to develop
+- [Updated] CHANGELOG.md with git commits
+- [Updated] brakeman ignore list
+- [Updated] CHANGELOG
+- [Merged] release 9.47.0 back to develop
+- [Fixed] a range of flakey spec tests
+- [Updated] DB schema dump
+- [Fixed] otp_enc_key fallback to use Rails.application.secret_key_base - fixes #1015
+- [Advanced] config.load_defaults to 7.2 and removed stale defaults files - refs #1015
+- [Kept] SHA1 as previous scheme for AR encryption to decrypt legacy data - refs #1015 #1293
+- [Fixed] FrozenError in as_json methods for Rails 8 compatibility - refs #1015
+- [Moved] enqueue_after_transaction_commit to job base classes, removing deprecated global config - refs #1015 #1296
+- [Bumped] Rails to 8.0.5 and Puma to 8.0.2 - refs #1015
+- [Fixed] filter_parameters spec assertion for Rails 7.2+ regex compilation - refs #1015
+- [Added] new_framework_defaults_8_0.rb documenting reviewed Rails 8 template additions - refs #1327
+- [Changed] to_time_preserves_timezone to :zone - resolves #1302
+- [Fixed] review findings for to_time_preserves_timezone audit - refs #1302
+- [Adopted] postgresql_adapter_decode_dates = true - resolves #1295
+- [Migrated] otp_secret to SHA256 hash digest - resolves #1293
+- [Added] configurable hash_digest_class option for encrypted dynamic model fields - resolves #1294
+- [Upgraded] to Rails 8.1.3.1 and refreshed brakeman ignore fingerprints - refs #1325
+- [Updated] DB schema dump
+- [Fixed] spec test bug
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG.md with git commits
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG
+- [Bumped] version for Rails 8.1 upgrade
+- [Updated] CHANGELOG and gems
+- [Merged] release 10.0.1 back to develop
+- [Updated] CHANGELOG.md with git commits
+- [Merged] release 10.0.2 back to develop
+
 ## [10.0.2] - 2026-08-06
 
 - [Merged] release 10.0.1 back to develop
