@@ -313,6 +313,40 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       Delayed::Worker.delay_jobs = false
     end
 
+    # extra_substitutions values are substituted the same way as content_template_text -
+    # against the in-memory item as the trigger fires, before the notification record is
+    # stored and the background job is queued to render/send the message.
+    it 'fully resolves extra_substitutions values before the background job is created' do
+      Delayed::Worker.delay_jobs = true
+
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text',
+        extra_substitutions: {
+          extra_text: 'Extra text at {{created_at}} for {{select_who}}'
+        }
+      }
+
+      SaveTriggers::Notify.new(config, @al).perform
+
+      new_mn = MessageNotification.order(id: :desc).first
+      # The deferred job has not run yet, so nothing has been generated or sent
+      expect(new_mn.status).to be_nil
+      expect(new_mn.generated_content).to be_blank
+
+      ca = Formatter::Formatters.formatter_do(@al.created_at.class, @al.created_at, current_user: @al.user)
+      es_data = YAML.safe_load(new_mn.extra_substitutions, permitted_classes: [Symbol])
+                    &.with_indifferent_access
+
+      # Resolved against @al while still in memory, ahead of the deferred job
+      expect(es_data['extra_text']).to eq("Extra text at #{ca} for #{@al.select_who}")
+    ensure
+      Delayed::Worker.delay_jobs = false
+    end
+
     it 'generates an sms notification with phone numbers' do
       # Numbers from https://fakenumber.org/us/boston
 
