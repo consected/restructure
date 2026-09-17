@@ -2,6 +2,8 @@
 
 require 'rails_helper'
 
+# Purpose: Regression coverage for issue #1459, including lenient loading of
+# persisted nested configuration while preserving strict explicit construction.
 RSpec.describe 'OptionsHandler', type: :model do
   before :example do
     Object.send :remove_const, 'TestOptionsHandler' if defined? TestOptionsHandler
@@ -25,6 +27,138 @@ RSpec.describe 'OptionsHandler', type: :model do
     )
 
     TestOptionsHandler.include OptionsHandler
+  end
+
+  it 'does not raise when loading persisted nested configuration with an unknown key for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+    record = TestOptionsHandler.new
+    record.options = <<~YAML
+      test2_var1:
+        test2_var1_a1: persisted-value
+        unknown_key: preserve-me
+    YAML
+
+    expect { record.send(:setup_options) }.not_to raise_error
+  end
+
+  it 'preserves unknown nested configuration keys in memory and serialization for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+    record = TestOptionsHandler.new
+    record.options = <<~YAML
+      test2_var1:
+        test2_var1_a1: persisted-value
+        unknown_key: preserve-me
+        unknown_nil:
+    YAML
+
+    record.send(:setup_options)
+
+    expect(record.test2_var1.to_h).to include(
+      test2_var1_a1: 'persisted-value',
+      unknown_key: 'preserve-me',
+      unknown_nil: nil
+    )
+    expect(record.send(:config_hash_to_yaml)).to include('unknown_key: preserve-me')
+    expect(record.send(:config_hash_to_yaml)).to include('unknown_nil')
+  end
+
+  it 'records the nested configuration class, message, and offending key for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+    record = TestOptionsHandler.new
+    record.options = <<~YAML
+      test2_var1:
+        test2_var1_a1: persisted-value
+        unknown_key: preserve-me
+        unknown_nil:
+    YAML
+
+    expect { record.send(:setup_options) }.not_to raise_error
+
+    expect(record.config_errors).to contain_exactly(
+      a_hash_including(
+        config_class: TestOptionsHandler::Test2Var1.name,
+        message: a_string_including('unknown_key'),
+        offending_keys: contain_exactly(:unknown_key, :unknown_nil)
+      )
+    )
+  end
+
+  it 'preserves unknown keys in persisted hash configurations for issue #1459' do
+    TestOptionsHandler.configure_hash :test3_var1, with: %i[test3_var1_a1]
+    record = TestOptionsHandler.new
+    record.options = <<~YAML
+      test3_var1:
+        entry:
+          test3_var1_a1: persisted-value
+          unknown_key: preserve-me
+    YAML
+
+    expect { record.send(:setup_options) }.not_to raise_error
+
+    configuration = record.test3_var1['entry']
+    expect(configuration.to_h).to include(
+      test3_var1_a1: 'persisted-value',
+      unknown_key: 'preserve-me'
+    )
+    expect(record.send(:config_hash_to_yaml)).to include('unknown_key: preserve-me')
+    expect(record.config_errors).to contain_exactly(
+      a_hash_including(
+        config_class: TestOptionsHandler::Test3Var1::Test3Var1.name,
+        message: a_string_including('unknown_key'),
+        offending_keys: contain_exactly(:unknown_key)
+      )
+    )
+
+    expect do
+      TestOptionsHandler.new use_hash_config: {
+        test3_var1: { entry: { unknown_key: 'reject-me' } }
+      }
+    end.to raise_error(
+      FphsException,
+      'Unrecognized configuration params in TestOptionsHandler::Test3Var1::Test3Var1: unknown_key'
+    )
+  end
+
+  it 'clears configuration errors after a non-hash persisted reload for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+    record = TestOptionsHandler.new
+    record.options = <<~YAML
+      test2_var1:
+        test2_var1_a1: persisted-value
+        unknown_key: preserve-me
+    YAML
+
+    record.send(:setup_options)
+    expect(record.config_errors).to be_present
+
+    record.options = "---\nnot-a-configuration-hash\n"
+    record.send(:setup_options)
+
+    expect(record.config_errors).to be_empty
+  end
+
+  it 'keeps direct Configuration.new strict for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+
+    expect do
+      TestOptionsHandler::Test2Var1.new(unknown_key: 'reject-me')
+    end.to raise_error(
+      FphsException,
+      'Unrecognized configuration params in TestOptionsHandler::Test2Var1: unknown_key'
+    )
+  end
+
+  it 'keeps explicit hash configuration strict for issue #1459' do
+    TestOptionsHandler.configure :test2_var1, with: %i[test2_var1_a1]
+
+    expect do
+      TestOptionsHandler.new use_hash_config: {
+        test2_var1: { unknown_key: 'reject-me' }
+      }
+    end.to raise_error(
+      FphsException,
+      'Unrecognized configuration params in TestOptionsHandler::Test2Var1: unknown_key'
+    )
   end
 
   it 'adds basic attributes' do

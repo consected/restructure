@@ -1,4 +1,5 @@
 <h4><%= object_instance.name %></h4>
+<%= render partial: 'redcap/project_admins/config_errors', locals: { object_instance: } %>
 <% if object_instance.persisted? %>
   <p><%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
   data: {
