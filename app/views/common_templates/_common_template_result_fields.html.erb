@@ -208,6 +208,17 @@
   {{else if (get result_data._general_selections key this_value 'name')}}
     <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label label_resource_name=(or name_with_option_type name) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize=false}}{{/if}}</strong></li>
 
+{{! ####### Field name starts with yaml_object_ - the stored value is plain YAML text
+      (from a text/varchar column). Parse it with the yaml_parse Handlebars helper, then
+      delegate back to this same partial with field_type cleared, reusing the existing
+      'typeof object' rendering below for the parsed Hash/Array (or falling through to
+      plain-text/null handling if parsing fails or the value is blank).
+      This must appear BEFORE all suffix-based handlers (notes, description, details,
+      etc.) so that e.g. yaml_object_notes is parsed as a YAML object rather than rendered
+      as raw text by a suffix handler. }}
+  {{else is field_type 'includes' '^yaml_object_'}}
+    {{> common_template_result_field this_value=(yaml_parse this_value) field_type=""}}
+
 {{! #######  Field ends with ... }}
   {{else is field_type 'includes' "_notes$"}}
   {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}

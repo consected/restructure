@@ -33,6 +33,10 @@
  *
  *= require ./big_select/big_select
  *
+ * CodeMirror - used to edit YAML content (see application.js and _fpa_form_utils.js)
+ *= require codemirror/lib/codemirror
+ *= require codemirror/addon/fold/foldgutter
+ *
  *= require_tree ./app
  *= require_self
  */

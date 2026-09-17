@@ -32,6 +32,12 @@ form .full-width input.form-control {
   text-align: left;
 }
 
+// Basic visual boundary for CodeMirror editors used by YAML/JSON edit fields
+// (see _fpa_form_utils.js#setup_codemirror_editors)
+.CodeMirror.cm-s-default {
+  border: 1px solid rgb(204, 204, 204);
+}
+
 .tt-menu {
   border: 1px solid silver;
   width: 100%;

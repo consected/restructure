@@ -138,6 +138,8 @@ _fpa.form_utils = {
   // form using the "form" attribute, indicating they belong to it. Check for this
   // and adjust the block to be formatted appropriately.
   on_form_submit: function (block) {
+    var form_block = block;
+
     if (block && block.is('form')) {
       var form_id = block.prop('id');
       if (form_id) {
@@ -148,8 +150,24 @@ _fpa.form_utils = {
       }
     }
 
+    // Synchronize CodeMirror editors to their backing textareas before submission
+    _fpa.form_utils.save_codemirror_editors(form_block);
+    if (block !== form_block) {
+      _fpa.form_utils.save_codemirror_editors(block);
+    }
+
     _fpa.form_utils.date_inputs_to_iso(block);
     _fpa.form_utils.unmask_inputs(block);
+  },
+
+  // Save all CodeMirror editor instances within a block back to their backing textareas.
+  // Safely skips elements where CodeMirror was never initialized.
+  save_codemirror_editors: function (block) {
+    block.find('.code-editor').each(function () {
+      if (this.CodeMirror) {
+        this.CodeMirror.save();
+      }
+    });
   },
 
   unmask_inputs: function (block) {
@@ -2452,6 +2470,36 @@ _fpa.form_utils = {
     _fpa.custom_editor.setup(block);
   },
 
+  // Initialize CodeMirror editors for textareas marked with class 'code-editor'
+  // (e.g. YAML/JSON edit fields - see common_templates/edit_fields/_column_type_jsonb.html.erb
+  // and _name_starts_with_yaml_object.html.erb). Without this, those fields render as plain
+  // textareas, since the main app does not otherwise load or initialize CodeMirror (unlike
+  // the admin panel - see admin/all/admin_edit_form.js#setup_codemirror_editors, which this
+  // mirrors).
+  setup_codemirror_editors: function (block) {
+    block.find('.code-editor').not('.code-editor-formatted').each(function () {
+      var code_el = $(this).get(0);
+      var mode = $(this).attr('data-code-editor-type');
+      if (!mode) mode = 'yaml';
+
+      var cm = CodeMirror.fromTextArea(code_el, {
+        lineNumbers: true,
+        mode: mode,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        extraKeys: {
+          Tab: function (cm) { cm.execCommand("indentMore") },
+          "Shift-Tab": function (cm) { cm.execCommand("indentLess") }
+        }
+      });
+      var cme = cm.getWrapperElement();
+      cme.style.width = '100%';
+      cme.style.height = '100%';
+      code_el.CodeMirror = cm;
+      cm.refresh();
+    }).addClass('code-editor-formatted');
+  },
+
   setup_filestore: function (block) {
     block
       .find('.browse-container')
@@ -2704,6 +2752,7 @@ _fpa.form_utils = {
     _fpa.form_utils.mask_inputs(block);
     _fpa.form_utils.setup_textarea_autogrow(block);
     _fpa.form_utils.setup_textarea_editor(block);
+    _fpa.form_utils.setup_codemirror_editors(block);
     _fpa.form_utils.setup_contact_field_mask(block);
     _fpa.form_utils.setup_filestore(block);
     _fpa.form_utils.setup_e_signature(block);
