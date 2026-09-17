@@ -96,6 +96,20 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       expect(@dm.configurations.dig(:batch_trigger, :limit)).to eq 50
     end
 
+    it 'parses no_sync_fields into definition configurations for issue #1451' do
+      @dm.update!(options: <<~YAML)
+        _configurations:
+          no_sync_fields: data
+        default:
+          label: Test
+      YAML
+      @dm.reload
+      @dm.option_configs force: true
+
+      expect(@dm.configurations[:no_sync_fields]).to eq 'data'
+      expect(@dm.configurations.config_warnings).to be_empty
+    end
+
     it 'returns blank Configurations when no _configurations defined' do
       @dm.update!(options: <<~YAML)
         default:
@@ -217,6 +231,32 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
         instance = klass.new(uniqueness_fields: ['email', 123])
         instance.valid?
         expect(instance.config_errors.map { |e| e[:message] }.join).to include('uniqueness_fields must be a string or array of strings')
+      end
+    end
+
+    describe 'no_sync_fields' do
+      it 'accepts a scalar field name for issue #1451' do
+        instance = klass.new(no_sync_fields: 'data')
+
+        expect(instance[:no_sync_fields]).to eq 'data'
+        expect(instance.config_warnings).to be_empty
+        expect(instance.errors).to be_empty
+      end
+
+      it 'accepts an array of string and symbol field names for issue #1451' do
+        instance = klass.new(no_sync_fields: [:data, 'source'])
+
+        expect(instance[:no_sync_fields]).to eq [:data, 'source']
+        expect(instance.config_warnings).to be_empty
+        expect(instance.errors).to be_empty
+      end
+
+      it 'rejects non-string and non-array values for issue #1451' do
+        instance = klass.new(no_sync_fields: { field: 'data' })
+
+        expect(instance.errors.full_messages.join).to match(
+          /no sync fields must be a string or array of strings/i
+        )
       end
     end
 

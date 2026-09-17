@@ -61,6 +61,18 @@ class ActivityLog < ActiveRecord::Base
     :extra_log_types
   end
 
+  def additional_configuration_notices(levels:)
+    return [] unless levels.include?(:errors)
+    return [] unless configurations&.dig(:no_sync_fields).present?
+
+    implementation_class.no_sync_fields_configuration_notices
+  rescue StandardError => e
+    [Dynamic::ActivityLogSyncHandler.no_sync_fields_configuration_notice(
+      definition: self,
+      message: "could not be validated: #{e.message}"
+    )]
+  end
+
   def human_name
     name
   end

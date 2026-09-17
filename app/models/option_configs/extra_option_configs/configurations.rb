@@ -14,7 +14,7 @@ module OptionConfigs
       key_type :boolean, %i[use_current_version prevent_migrations can_change_master no_user_id view_skip_updates]
       key_type :string, %i[secondary_key view_sql tab_caption foreign_key_through_external_id
                            option_type_attr_name default_option_type_name]
-      key_type :string_or_array, %i[uniqueness_fields]
+      key_type :string_or_array, %i[uniqueness_fields no_sync_fields]
       key_type :hash, %i[batch_trigger], allowed_keys: %i[frequency run_at limit if app_type user]
 
       validate :validate_key_types

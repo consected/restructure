@@ -4,6 +4,37 @@ module OptionConfigs
   module ConfigErrors
     extend ActiveSupport::Concern
 
+    def self.configuration_notice(config_obj:, type:, message:, name: nil, resource_name: nil,
+                                  config_def: {}, extra_details: nil)
+      config_resource_name = if config_obj && config_obj.class.respond_to?(:resource_name)
+                               config_obj.class.resource_name
+                             end
+      {
+        type:,
+        config_class: config_obj&.class&.name,
+        name:,
+        message:,
+        resource_name:,
+        config_resource_name:,
+        config_object: config_obj,
+        config_def:,
+        extra_details:
+      }
+    end
+
+    def self.enrich_configuration_notice(notice, object_instance, configuration)
+      resource_name = object_instance.resource_name if object_instance.respond_to?(:resource_name)
+      configuration_notice(
+        config_obj: object_instance,
+        type: "_configurations > #{notice[:type]}",
+        name: object_instance.respond_to?(:name) ? object_instance.name : object_instance.class.name,
+        resource_name:,
+        config_def: { '_configurations' => configuration.hash_configuration.deep_stringify_keys },
+        message: notice[:message],
+        extra_details: notice[:extra_details]
+      )
+    end
+
     included do
       attr_accessor :config_errors, :config_warnings
     end
@@ -36,6 +67,21 @@ module OptionConfigs
           config_def: cd,
           extra_details:
         }
+      end
+
+      def append_configuration_notices(notices, object_instance, configuration, levels)
+        if levels.include?(:errors) && configuration.config_errors
+          notices.concat(configuration.config_errors.map do |notice|
+            OptionConfigs::ConfigErrors.enrich_configuration_notice(notice, object_instance, configuration)
+          end)
+        end
+        if levels.include?(:warnings) && configuration.config_warnings
+          notices.concat(configuration.config_warnings.map do |notice|
+            OptionConfigs::ConfigErrors.enrich_configuration_notice(notice, object_instance, configuration)
+          end)
+        end
+
+        notices
       end
 
       #
@@ -92,6 +138,17 @@ module OptionConfigs
             res += val if val
           end
         end
+
+        if object_instance
+          configuration = object_instance.configurations if object_instance.respond_to?(:configurations)
+          res = append_configuration_notices(res, object_instance, configuration, levels) if configuration
+
+          if object_instance.respond_to?(:additional_configuration_notices)
+            val = object_instance.additional_configuration_notices(levels:)
+            res += val if val
+          end
+        end
+
         res = nil if res.empty?
         res
       end
