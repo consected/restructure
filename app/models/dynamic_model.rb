@@ -122,18 +122,32 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  #
+  # The column *on the masters table* that this definition's foreign_key_name values are
+  # matched against, for a direct master association. This is not the dynamic model's own
+  # primary_key_name, which identifies records within its own table (see issue #1399 - the
+  # two used to be conflated in a single setting).
+  # Only the direct association consults this. The foreign_key_through_external_id route
+  # matches on the external identifier's own ID column instead, so it never reaches here -
+  # see #add_master_association and #add_master_association_through_external_id.
+  # @return [Symbol | nil] nil only when there is no master association at all
   def master_primary_key_name
-    if foreign_key_name.present? && Master.crosswalk_attr?(foreign_key_name)
-      foreign_key_name
-    else
-      primary_key_name
-    end
+    return if foreign_key_name.blank?
+    return foreign_key_name.to_sym if master_crosswalk_association?
+
+    :id
   end
 
+  #
+  # True when the foreign key matches a masters crosswalk column directly, rather than
+  # master_id or an external identifier value.
   def master_crosswalk_association?
     foreign_key_name.present? && Master.crosswalk_attr?(foreign_key_name) && !foreign_key_through_external_id
   end
 
+  #
+  # True when records resolve their master through an association rather than a real
+  # master_id column, so UserHandler must derive master_id from the association.
   def virtual_master_id?
     master_crosswalk_association? || foreign_key_through_external_id.present?
   end
@@ -271,8 +285,9 @@ class DynamicModel < ActiveRecord::Base
               @primary_key_name ||= definition.primary_key_name.blank? ? :id : definition.primary_key_name.to_sym
             end
 
+            # nil when the definition has no master association at all
             def master_primary_key_name
-              definition.master_primary_key_name.to_sym
+              definition.master_primary_key_name
             end
 
             def master_crosswalk_association?
