@@ -126,13 +126,13 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       it 'rejects string values for boolean keys' do
         instance = klass.new(prevent_migrations: 'yes')
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('prevent_migrations must be true or false')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('prevent_migrations must be true or false')
       end
 
       it 'rejects integer values for boolean keys' do
         instance = klass.new(use_current_version: 1)
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('use_current_version must be true or false')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('use_current_version must be true or false')
       end
     end
 
@@ -172,25 +172,25 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       it 'rejects non-string values for string keys' do
         instance = klass.new(secondary_key: 123)
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('secondary_key must be a string')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('secondary_key must be a string')
       end
 
       it 'rejects hash values for string keys' do
         instance = klass.new(view_sql: { query: 'SELECT 1' })
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('view_sql must be a string')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('view_sql must be a string')
       end
 
       it 'validates option_type_attr_name as a string key' do
         instance = klass.new(option_type_attr_name: 42)
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('option_type_attr_name must be a string')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('option_type_attr_name must be a string')
       end
 
       it 'validates default_option_type_name as a string key' do
         instance = klass.new(default_option_type_name: true)
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('default_option_type_name must be a string')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('default_option_type_name must be a string')
       end
     end
 
@@ -210,13 +210,13 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       it 'rejects numeric values' do
         instance = klass.new(uniqueness_fields: 42)
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('uniqueness_fields must be a string or array of strings')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('uniqueness_fields must be a string or array of strings')
       end
 
       it 'rejects arrays containing non-strings' do
         instance = klass.new(uniqueness_fields: ['email', 123])
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('uniqueness_fields must be a string or array of strings')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('uniqueness_fields must be a string or array of strings')
       end
     end
 
@@ -230,7 +230,7 @@ RSpec.describe 'ExtraOptionConfigs::Configurations', type: :model do
       it 'rejects non-hash values' do
         instance = klass.new(batch_trigger: 'every hour')
         instance.valid?
-        expect(instance.errors.full_messages.join).to include('batch_trigger must be a Hash')
+        expect(instance.config_errors.map { |e| e[:message] }.join).to include('batch_trigger must be a Hash')
       end
 
       it 'warns about unrecognized sub-keys' do

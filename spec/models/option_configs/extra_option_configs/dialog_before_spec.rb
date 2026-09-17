@@ -83,6 +83,16 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
         expect(error_messages.any? { |m| m.include?('test_field keep_label must be true or false') }).to be(true)
       end
     end
+
+    # Regression test for issue #1456: the missing-required-keys error must not
+    # duplicate the field name (previously e.g. "test_field test_field is missing
+    # required keys [...]").
+    it 'does not duplicate the field name in the missing required keys error message (issue #1456)' do
+      instance = klass.new(test_field: { keep_label: true })
+      error_messages = instance.config_errors.map { |e| e[:message] }
+      error = error_messages.find { |m| m.include?('missing required keys') }
+      expect(error).to eq 'test_field is missing required keys [:name]'
+    end
   end
 
   describe 'ExtraOptions integration' do

@@ -43,6 +43,23 @@ module OptionConfigs
         self.class.option_types[:typed].all? { |key| send(key).blank? }
       end
 
+      # on_save is only ever used as a source cascaded into on_create/on_update
+      # (see #cascade_on_save) and is never itself executed as a trigger hook, so
+      # propagating its own notices would just repeat whatever on_create/on_update
+      # already report for the same cascaded content.
+      # @return [void]
+      def collect_typed_attribute_notices
+        typed_keys = self.class.option_types[:typed] || []
+        typed_keys.each do |key|
+          next if key == :on_save
+
+          child = send(key)
+          next unless child.is_a?(BaseConfiguration)
+
+          propagate_child_notices(child, key)
+        end
+      end
+
       # Trigger names whose config is itself a nested trigger task list, rather than
       # a task's own config - mirrors TriggerTasks#validate_nested_trigger_definitions.
       # `background` is handled separately (see #check_before_save_trigger) since it is

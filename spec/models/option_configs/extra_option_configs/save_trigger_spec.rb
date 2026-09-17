@@ -288,6 +288,57 @@ RSpec.describe 'ExtraOptionConfigs::SaveTrigger', type: :model do
       expect(eo.save_trigger[:on_create]).to be_a Array
     end
 
+    # Regression test: on_save is never itself executed as a trigger hook - it is
+    # only a source cascaded into on_create/on_update (#cascade_on_save) - so a
+    # config issue authored under on_save was being reported 3 times (once per
+    # hook, including the never-executed on_save copy) instead of the 2 hooks
+    # (on_create, on_update) it actually affects at runtime.
+    it 'does not report an on_save-cascaded task issue a third time for the never-executed on_save copy' do
+      config_for(<<~YAML)
+        default:
+          fields:
+            - name
+          save_trigger:
+            on_save:
+            - create_reference:
+              - ipa_sample:
+                  in: master
+                  force_not_editable_save: true
+                  with:
+                    select_project: biodata
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      matches = notices.select { |n| n[:message].to_s.include?("unrecognized key 'force_not_editable_save'") }
+      expect(matches.map { |n| n[:parent_attribute] }).to contain_exactly(:on_create, :on_update)
+    end
+
+    # Regression test: two independently authored problems under on_create and
+    # on_update must never be collapsed into one, even if their messages happen
+    # to be identical text - only the on_save phantom copy should be dropped.
+    it 'still reports separately authored on_create and on_update issues as distinct notices' do
+      config_for(<<~YAML)
+        default:
+          fields:
+            - name
+          save_trigger:
+            on_create:
+              create_reference:
+                - ipa_sample:
+                    in: master
+                    bogus_key_a: true
+            on_update:
+              create_reference:
+                - ipa_sample:
+                    in: master
+                    bogus_key_a: true
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_notices(@dm)
+      matches = notices.select { |n| n[:message].to_s.include?("unrecognized key 'bogus_key_a'") }
+      expect(matches.map { |n| n[:parent_attribute] }).to contain_exactly(:on_create, :on_update)
+    end
+
     it 'normalizes nested create_reference trigger lists to plain hashes and arrays' do
       eo = config_for(<<~YAML)
         default:
