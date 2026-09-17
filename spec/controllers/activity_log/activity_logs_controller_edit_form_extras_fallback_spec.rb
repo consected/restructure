@@ -30,6 +30,10 @@ RSpec.describe ActivityLog::ActivityLogsController, type: :controller do
 
   before(:each) do
     SetupHelper.setup_al_player_contact_phones
+    definition = ActivityLog::PlayerContactPhone.definition.reload
+    definition.configurations = nil
+    definition.option_configs(force: true)
+    ActivityLog.definition_cache[ActivityLog::PlayerContactPhone.definition_id] = definition
 
     create_admin
     create_user
@@ -87,6 +91,17 @@ RSpec.describe ActivityLog::ActivityLogsController, type: :controller do
       extras = controller.send(:edit_form_extras)
 
       expect(extras[:item_list]).to all(be_a(String))
+    end
+
+    it 'includes a configured no_sync_fields value in the activity form for issue #1451' do
+      implementation_class.definition.configurations = OptionConfigs::ExtraOptionConfigs::Configurations.new(
+        no_sync_fields: 'data'
+      )
+      allow(implementation_class).to receive(:view_attribute_list).and_return(%i[data notes])
+
+      extras = controller.send(:edit_form_extras)
+
+      expect(extras[:item_list]).to include('data')
     end
   end
 

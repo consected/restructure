@@ -11,6 +11,7 @@
 #   option_type_attr_name: String,
 #   default_option_type_name: String,
 #   uniqueness_fields: String | Array(String),
+#   no_sync_fields: String | Array(String),
 #   batch_trigger: BatchTriggerScheduleValue,
 #   view_skip_updates: Boolean
 # )>
@@ -45,6 +46,7 @@ _configurations:
     # NOTE: searches through the UI against the external ID (using the default capabilities)
     # may now return multiple results, since there is currently no way to specify the other fields that make up a unique search.
   can_change_master: allow assigned external identifiers to be moved to a different master record
+  no_sync_fields: activity-log-only field name or list of field names to keep independently editable instead of syncing from the parent; every name must be in the inferred activity-log/parent overlap or a configuration error is reported
   foreign_key_through_external_id: external identifier resource name to join to master through when the *foreign key name* is defined
     # Allows a dynamic model to be have a master association without a master_id column configured on the
     # table. Instead, the column name specified in the *foreign key name* definition names the external ID field on this model, the value

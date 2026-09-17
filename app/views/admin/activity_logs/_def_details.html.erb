@@ -7,11 +7,14 @@
   al_accordion_id = "al-details-accordion-#{object_instance.id || 'new'}"
   synced_fields_info = nil
   synced_fields_error = nil
+  definition_configuration = object_instance.configurations
   begin
     impl = object_instance.implementation_class
     parent_class = impl.parent_class
+    definition_configuration = impl.definition&.configurations || definition_configuration
     synced_fields_info = {
       fields: impl.fields_to_sync,
+      no_sync_fields_notices: impl.no_sync_fields_configuration_notices,
       parent_type: impl.parent_type,
       parent_class:,
       parent_definition: parent_class.respond_to?(:definition) ? parent_class.definition : nil
@@ -20,6 +23,15 @@
     synced_fields_error = e.message
   end
   al_synced_field_names = synced_fields_info&.dig(:fields) || []
+  configured_no_sync_fields = definition_configuration&.dig(:no_sync_fields)
+  al_no_sync_field_names = if configured_no_sync_fields.is_a?(Array)
+                             configured_no_sync_fields
+                           else
+                             [configured_no_sync_fields]
+                           end.select { |field| field.is_a?(String) || field.is_a?(Symbol) }.map(&:to_s)
+  al_invalid_no_sync_field_names = synced_fields_info.to_h.fetch(:no_sync_fields_notices, [])
+    .flat_map { |notice| notice.dig(:extra_details, :invalid_fields) || [] }
+    .map(&:to_s)
 %>
 <% if object_instance.persisted? && object_instance.enabled?%>
 <div class="al-details-section">
@@ -366,7 +378,7 @@
     </div>
   </div>
 
-  <% if synced_fields_error || al_synced_field_names.present? %>
+  <% if synced_fields_error || al_synced_field_names.present? || al_no_sync_field_names.present? %>
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="<%= al_accordion_id %>-synced-fields-heading">
       <h4 class="panel-title">
@@ -387,6 +399,7 @@
             This is expected if the definition's database table has not yet been created.
           </p>
           <% else %>
+          <% if al_synced_field_names.present? %>
           <p>
             These fields are synced from parent item type
             <% if parent_link %>
@@ -405,9 +418,25 @@
             read-only results views, since - unlike edit forms - those are not filtered by this list; visibility
             there depends only on whether the field is included in that activity's configured <code>fields:</code>.
           </p>
+          <% end %>
+          <% end %>
+          <% if al_synced_field_names.present? %>
           <ul class="al-synced-fields__list">
             <% al_synced_field_names.each do |f| %>
               <li class="al-synced-fields__item"><%= f %></li>
+            <% end %>
+          </ul>
+          <% end %>
+          <% if al_no_sync_field_names.present? %>
+          <p>
+            These fields are configured not to sync from the parent and remain independently editable on the activity log.
+            <% if synced_fields_error %>Their relationship to the parent could not be verified yet.<% end %>
+          </p>
+          <ul class="al-no-sync-fields__list">
+            <% al_no_sync_field_names.each do |f| %>
+              <li class="al-no-sync-fields__item<%= ' al-no-sync-fields__item--invalid' if al_invalid_no_sync_field_names.include?(f) %>">
+                <%= f %><% if al_invalid_no_sync_field_names.include?(f) %> <span class="al-no-sync-fields__invalid-note">(not an overlapping parent field; opt-out is inactive)</span><% end %>
+              </li>
             <% end %>
           </ul>
           <% end %>

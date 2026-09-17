@@ -163,6 +163,28 @@ RSpec.describe 'ExtraOptions config notice enrichment', type: :model do
         expect { notice[:config_def].to_yaml }.not_to raise_error
       end
     end
+
+    it 'enriches top-level _configurations notices with definition context' do
+      @dm.update!(options: <<~YAML, current_admin: @admin)
+        _configurations:
+          view_skip_updates: true
+        default:
+          label: Test
+      YAML
+
+      notices = OptionConfigs::ExtraOptions.all_option_configs_errors(@dm)
+      notice = notices.find { |entry| entry[:type].to_s.include?('view_skip_updates') }
+
+      expect(notice).not_to be_nil
+      expect(notice[:name]).to eq @dm.name
+      expect(notice[:resource_name]).to be_present
+      expect(notice[:config_class]).to be_present
+      expect(notice[:config_resource_name]).to be_present
+      expect(notice[:config_object]).to eq @dm
+      expect(notice[:config_def]).to eq(
+        '_configurations' => { 'view_skip_updates' => true }
+      )
+    end
   end
 
   describe 'valid configuration produces no notices' do

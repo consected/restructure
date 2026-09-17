@@ -63,6 +63,9 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
       @phone_log = ActivityLog.where(name: 'Phone Log').first
       raise 'Phone Log activity log definition not found' unless @phone_log
 
+      @phone_log.force_regenerate = true
+      @phone_log.generate_model
+
       expect(ActivityLog::PlayerContactPhone.fields_to_sync).to eq(['data'])
     end
 
@@ -107,6 +110,69 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
       expect(synced_items).not_to be_empty
       expect(synced_items.any? { |t| t.start_with?('data') }).to be(true)
       expect(synced_items.any? { |t| t.match?(/synced from parent/i) }).to be(true)
+    end
+  end
+
+  describe 'the definition details page with a configured synced-field opt-out' do
+    before do
+      ActivityLog.active.where(item_type: 'player_contact', rec_type: 'phone').where.not(name: 'Phone Log')
+                 .update_all(disabled: true)
+
+      SetupHelper.setup_al_player_contact_phones
+      @phone_log = ActivityLog.where(name: 'Phone Log').first
+      raise 'Phone Log activity log definition not found' unless @phone_log
+
+      @phone_log.force_regenerate = true
+      @phone_log.generate_model
+      parsed_options = YAML.safe_load(
+        @phone_log.extra_log_types || '{}',
+        permitted_classes: [],
+        permitted_symbols: [],
+        aliases: true
+      ) || {}
+      parsed_options['_configurations'] ||= {}
+      parsed_options['_configurations']['no_sync_fields'] = 'data'
+      @phone_log.extra_log_types = String.yaml_dump(parsed_options)
+      @phone_log.option_configs(force: true)
+      ActivityLog.definition_cache[@phone_log.id] = @phone_log
+    end
+
+    it 'shows configured opt-outs separately from effective synced fields for issue #1451' do
+      get :edit, params: { id: @phone_log.id }
+
+      expect(response).to have_http_status(:ok)
+
+      doc = Nokogiri::HTML(response.body)
+      panel = doc.at_css('.al-synced-fields')
+      expect(panel).not_to be_nil
+
+      effective_fields = panel.css('.al-synced-fields__item').map { |li| li.text.strip }
+      configured_opt_outs = panel.css('.al-no-sync-fields__item').map { |li| li.text.strip }
+
+      expect(effective_fields).not_to include('data')
+      expect(configured_opt_outs).to eq(['data'])
+    end
+
+    it 'marks a non-overlapping configured opt-out as inactive' do
+      parsed_options = YAML.safe_load(
+        @phone_log.extra_log_types || '{}',
+        permitted_classes: [],
+        permitted_symbols: [],
+        aliases: true
+      ) || {}
+      parsed_options['_configurations']['no_sync_fields'] = ['data', 'not_a_real_parent_field']
+      @phone_log.extra_log_types = String.yaml_dump(parsed_options)
+      @phone_log.option_configs(force: true)
+      ActivityLog.definition_cache[@phone_log.id] = @phone_log
+
+      get :edit, params: { id: @phone_log.id }
+
+      doc = Nokogiri::HTML(response.body)
+      invalid_item = doc.at_css('.al-no-sync-fields__item--invalid')
+
+      expect(invalid_item).not_to be_nil
+      expect(invalid_item.text).to match(/not_a_real_parent_field/)
+      expect(invalid_item.text).to match(/opt-out is inactive/i)
     end
   end
 
