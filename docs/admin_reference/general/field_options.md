@@ -137,6 +137,11 @@ without it, the user can only select from existing items.
 
 - `class`, `capitalize`, `default_value`, `placeholder`, `min`, `max`, `step` are pass-through
   HTML input hints, forwarded directly to the rendered form field as-is.
+- Any other key not listed in the schema above is also accepted and forwarded as a raw HTML
+  attribute on the rendered form field - there are no truly unrecognized keys for a field's
+  options. Since dynamic definitions are only editable by admins, use this with the same care
+  as any other admin-authored HTML attribute (e.g. avoid keys that would render inline
+  JavaScript event handlers from untrusted input).
 - Fields absent from the current model are tolerated without warning - library `_default`
   blocks may legitimately inject `field_options` entries for fields on other models.
 
