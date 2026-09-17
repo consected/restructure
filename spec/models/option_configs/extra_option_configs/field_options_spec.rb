@@ -69,10 +69,36 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
       expect(result[:field1][:value]).to eq 'x'
     end
 
-    it 'warns about unrecognized keys in field config' do
-      instance = klass.new(field1: { no_downcase: true, bogus_key: 'bad' })
+    # Regression tests for issue #1456: there are no truly unrecognized keys for
+    # field_options.field_name.<key> — any key/value pair is historically passed
+    # through to the HTML input (see CommonTemplatesHelper#field_options_for and
+    # edit_fields/_default.html.erb), so an arbitrary key must not raise a warning
+    # and must still be forwarded raw for rendering.
+    it 'does not warn about an arbitrary (non-declared) key in field config (issue #1456)' do
+      instance = klass.new(field1: { no_downcase: true, some_random_html_attr: 'bad' })
       expect(instance[:field1]).to be_a(klass::NamedConfiguration)
-      expect(instance.config_warnings).not_to be_empty
+      expect(instance.config_warnings).to be_empty
+      expect(instance.config_errors).to be_empty
+    end
+
+    it 'forwards an arbitrary (non-declared) key raw so it reaches the rendered field (issue #1456)' do
+      instance = klass.new(field1: { placeholder: 'Pick one', some_random_html_attr: 'foo' })
+      expect(instance[:field1].dup).to include(placeholder: 'Pick one', some_random_html_attr: 'foo')
+    end
+
+    it 'forwards an arbitrary key via to_hash and implicit Hash() conversion too (issue #1456)' do
+      instance = klass.new(field1: { some_random_html_attr: 'foo' })
+      nc = instance[:field1]
+      expect(nc.to_hash).to include(some_random_html_attr: 'foo')
+      expect(Hash(nc)).to include(some_random_html_attr: 'foo')
+    end
+
+    it 'accepts disabled as a valid field option key without warnings or errors (issue #1456)' do
+      instance = klass.new(status: { disabled: true, edit_as: { field_type: 'select_status' } })
+      expect(instance.config_warnings).to be_empty
+      expect(instance.config_errors).to be_empty
+      expect(instance[:status][:disabled]).to be true
+      expect(instance[:status].disabled).to be true
     end
 
     context 'field option hash key type validation' do

@@ -15,6 +15,7 @@
 #   blank_preset_value: ValueExpr,
 #   active_value: ActiveValueExpr,
 #   no_downcase: Boolean,
+#   disabled: Boolean,
 #   view_original_case: Boolean,
 #   view_with_formats: Array(String),
 #   format: <plain | markdown>,
@@ -94,6 +95,7 @@
       blank_preset_value: ValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
       active_value: ActiveValueExpr - see 'Value, Preset, and Active Value Timing' in field_options.md
       no_downcase: true - to prevent downcasing of the attribute when stored to the database
+      disabled: true - to render the field's HTML input as disabled
       view_original_case: true - to prevent the UI capitalizing downcased fields
       selected: ValueExpr - normally computed automatically, see field_options.md
       show_expanded: true - to render an embedded view-object list expanded (uncollapsed) by default

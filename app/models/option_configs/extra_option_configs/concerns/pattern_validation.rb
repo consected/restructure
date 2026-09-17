@@ -300,7 +300,7 @@ module OptionConfigs
 
             extra_keys_desc = self.class._extra_keys.map { |k| k.is_a?(Regexp) ? k.inspect : k }.join(', ')
             add_validation_notice(field_name,
-                                  "#{field_name} is not a valid field name" \
+                                  'is not a valid field name' \
                                   "#{" or extra key (#{extra_keys_desc})" if extra_keys_desc.present?}",
                                   level: :warn)
           end
@@ -318,8 +318,7 @@ module OptionConfigs
             matched = match_value_pattern(value)
             unless matched
               types = self.class._value_patterns.values.map { |p| describe_match(p[:match]) }.join(' or ')
-              add_validation_notice(field_name,
-                                    "#{field_name} must be #{types}, got #{value.class}")
+              add_validation_notice(field_name, "must be #{types}, got #{value.class}")
               next
             end
 
@@ -348,10 +347,7 @@ module OptionConfigs
             checker = KEY_TYPE_CHECKERS[rule[:type]]
             unless checker&.call(value)
               desc = KEY_TYPE_DESCRIPTIONS[rule[:type]] || rule[:type].to_s
-              add_validation_notice(
-                key,
-                "#{key} must be #{desc}, current value: #{value.inspect} (#{value.class})"
-              )
+              add_validation_notice(key, "must be #{desc}, current value: #{value.inspect} (#{value.class})")
               next
             end
 
@@ -404,11 +400,10 @@ module OptionConfigs
 
           if pattern[:allowed_keys]
             invalid = value.keys.map(&:to_sym) - pattern[:allowed_keys]
-            if invalid.present?
-              add_validation_notice(field_name,
-                                    "#{field_name} contains unrecognized keys #{invalid}",
-                                    level: :warn)
-            end
+            # run_validations bridges ActiveModel errors into config_warnings and already
+            # prepends the field name (see base_configuration.rb#run_validations), so the
+            # message here must not repeat it or the field name is duplicated.
+            add_validation_notice(field_name, "contains unrecognized keys #{invalid}", level: :warn) if invalid.present?
           end
 
           validate_pattern_key_types(field_name, value, pattern[:key_types]) if pattern[:key_types]
@@ -418,8 +413,7 @@ module OptionConfigs
           missing = pattern[:required_keys] - value.keys.map(&:to_sym)
           return if missing.empty?
 
-          add_validation_notice(field_name,
-                                "#{field_name} is missing required keys #{missing}")
+          add_validation_notice(field_name, "is missing required keys #{missing}")
         end
 
         # Check value types within a hash against key_types declarations.
@@ -432,9 +426,11 @@ module OptionConfigs
 
             desc = KEY_TYPE_DESCRIPTIONS[type] || type.to_s
             invalid_value = value[kt_key]
+            # run_validations already prepends field_name once (see base_configuration.rb),
+            # so it must not be repeated here or it is duplicated.
             add_validation_notice(
               field_name,
-              "#{field_name} #{kt_key} must be #{desc}, current value: #{invalid_value.inspect} (#{invalid_value.class})"
+              "#{kt_key} must be #{desc}, current value: #{invalid_value.inspect} (#{invalid_value.class})"
             )
           end
         end

@@ -16,8 +16,8 @@ module OptionConfigs
 
       def failed_config(from_options, target, type, message,
                         name = nil, resource_name = nil,
-                        extra_details: nil, level: :error)
-        config_obj = from_options&.config_obj
+                        extra_details: nil, level: :error, config_obj: nil)
+        config_obj ||= from_options&.config_obj
         name ||= self.name if respond_to?(:name)
         resource_name ||= self.resource_name if respond_to?(:resource_name)
         crn = config_obj.class&.resource_name if config_obj
@@ -74,8 +74,9 @@ module OptionConfigs
           Rails.logger.error e.short_string_backtrace
           res = []
           bt = e.short_string_backtrace.presence || e.backtrace.join("\n")
-          failed_config(nil, res, :parse_error, msg, 'YAML options', nil, extra_details: bt,
-                                                                          level: :error)
+          resource_name = object_instance.resource_name if object_instance.respond_to?(:resource_name)
+          failed_config(nil, res, :parse_error, msg, 'YAML options', resource_name,
+                        extra_details: bt, level: :error, config_obj: object_instance)
           return res
         end
 

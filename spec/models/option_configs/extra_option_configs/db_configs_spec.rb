@@ -94,5 +94,26 @@ RSpec.describe 'ExtraOptionConfigs::DbConfigs', type: :model do
       expect(eo.db_configs[:some_column]).to be_a(klass::NamedConfiguration)
       expect(eo.config_warnings).not_to be_empty
     end
+
+    # Regression test for issue #1456: the unrecognized-keys warning must not
+    # duplicate the field name (previously e.g. "some_column some_column contains
+    # unrecognized keys [...]"), since run_validations already prepends the field
+    # name once when bridging ActiveModel errors into config_warnings.
+    it 'does not duplicate the field name in the unrecognized keys warning message (issue #1456)' do
+      instance = klass.new(some_column: { type: 'string', bogus_key: 'invalid' })
+      messages = instance.config_warnings.map { |w| w[:message] }
+      warning = messages.find { |m| m.include?('unrecognized keys') }
+      expect(warning).to eq 'some_column contains unrecognized keys [:bogus_key]'
+    end
+
+    # Regression test for issue #1456: the key_types mismatch error must not
+    # duplicate the field name either (previously e.g. "some_column some_column
+    # type must be a string...").
+    it 'does not duplicate the field name in the key_types mismatch error message (issue #1456)' do
+      instance = klass.new(some_column: { type: 123 })
+      messages = instance.config_errors.map { |e| e[:message] }
+      error = messages.find { |m| m.include?('must be a string') }
+      expect(error).to eq 'some_column type must be a string, current value: 123 (Integer)'
+    end
   end
 end

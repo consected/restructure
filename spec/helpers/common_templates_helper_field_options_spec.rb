@@ -62,5 +62,23 @@ RSpec.describe CommonTemplatesHelper, type: :helper do
       expect(result[:value]).to be false
       expect(result[:selected]).to be false
     end
+
+    it 'forwards disabled and an arbitrary pass-through key to the rendered field (issue #1456)' do
+      field_options = OptionConfigs::ExtraOptionConfigs::FieldOptions.new(
+        test1: { disabled: true, placeholder: 'Pick one', some_random_html_attr: 'foo' }
+      )
+      option_type_config = double(field_options: field_options)
+      form_object = double(
+        option_type_config: option_type_config,
+        attributes: { 'test1' => nil },
+        persisted?: false
+      )
+
+      result = helper.field_options_for(form_object, :test1)
+
+      expect(result[:disabled]).to be true
+      expect(result[:placeholder]).to eq 'Pick one'
+      expect(result[:some_random_html_attr]).to eq 'foo'
+    end
   end
 end
