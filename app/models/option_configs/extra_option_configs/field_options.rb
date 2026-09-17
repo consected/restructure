@@ -47,7 +47,7 @@ module OptionConfigs
                     # for field_options (see NamedConfiguration#validate_recognized_keys).
                     key_types: {
                       include_blank: :boolean_or_string,
-                      no_downcase: :boolean,
+                      no_downcase: :nullable_boolean,
                       disabled: :boolean,
                       view_original_case: :boolean,
                       show_expanded: :boolean,

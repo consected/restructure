@@ -9,7 +9,8 @@ require './db/table_generators/dynamic_models_table'
 # ExtraOptions initialization (clean_field_options_def behavior).
 # Also verifies that field value options accept array values in addition to strings
 # and hashes (issue #1313), and that all value forms accept boolean and numeric
-# literals (issue #1453). default_value remains string-only.
+# literals (issue #1453). default_value remains string-only. no_downcase accepts
+# nil as an unset value (issue #1462).
 RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
   include MasterSupport
   include ModelSupport
@@ -115,6 +116,23 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
         error_messages = instance.config_errors.map { |e| e[:message] }
         expect(error_messages).to include(
           a_string_including('field1 include_blank must be true, false or a string')
+        )
+      end
+
+      it 'accepts nil for no_downcase and preserves the unset value (issue #1462)' do
+        instance = klass.new(field1: { no_downcase: nil })
+
+        expect(instance.config_errors).to be_empty
+        expect(instance[:field1].no_downcase).to be_nil
+      end
+
+      it 'keeps unrelated boolean options strict when given nil' do
+        instance = klass.new(field1: { disabled: nil })
+
+        expect(instance.config_errors).to be_present
+        error_messages = instance.config_errors.map { |e| e[:message] }
+        expect(error_messages).to include(
+          a_string_including('field1 disabled must be true or false')
         )
       end
 
@@ -353,6 +371,20 @@ RSpec.describe 'ExtraOptionConfigs::FieldOptions', type: :model do
               no_downcase: true
       YAML
       expect(eo.field_options[:test1]).to eq(no_downcase: true)
+    end
+
+    it 'accepts an unset no_downcase value through ExtraOptions YAML configuration (issue #1462)' do
+      eo = config_for(<<~YAML)
+        default:
+          fields:
+            - test1
+          field_options:
+            test1:
+              no_downcase:
+      YAML
+
+      expect(eo.config_errors).to be_empty
+      expect(eo.field_options[:test1].no_downcase).to be_nil
     end
 
     it 'converts edit_as.alt_options from Array to Hash' do
