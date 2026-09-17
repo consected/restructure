@@ -128,22 +128,27 @@ _configurations:
 ```
 
 With both set, the platform joins the record to the external identifier record with a
-matching ID, and from there to its master. The record then behaves like any
-`master_id`-based definition: `master` and `master_id` both resolve, table conditions use
-the default master join, and `{{association_name.field_name}}` substitutions work. If
-several external identifier records match, the most recent one is used.
+matching ID, and from there to its master. The join is made on the external identifier's
+own ID column — the *Foreign key name* column is never matched against a column on the
+masters table. The record then behaves like any `master_id`-based definition: `master` and
+`master_id` both resolve, table conditions use the default master join, and
+`{{association_name.field_name}}` substitutions work. If several external identifier
+records match, the most recent one is used.
 
-> Setting *Foreign key name* to a column other than `master_id` **without** also setting
-> `foreign_key_through_external_id` is not supported. There is nothing to resolve the
-> column to a master record, and saving a record fails with an error about `master_id`.
+> Setting *Foreign key name* to a column that is neither `master_id` nor one of the
+> [masters crosswalk attributes](#crosswalk-attributes-on-the-masters-table) **without**
+> also setting `foreign_key_through_external_id` is not supported. There is nothing to
+> resolve the column to a master record, and saving a record fails with an error about
+> `master_id`.
 
 ### Crosswalk attributes on the masters table
 
 Crosswalk attributes are the alternative identifier columns held directly on the masters
 table: `msid`, `pro_id`, `pro_info_id`, and `contact_id`. They can identify a master in
 conditions, and a dynamic model can also use one of these columns as its Foreign key name
-to attach directly to that master. In that case the dynamic model's `primary_key_name`
-still identifies records in its own table; the crosswalk column is only the master join key.
+to attach directly to that master. The value is matched against the column of the same
+name on the masters table. In that case the dynamic model's `primary_key_name` still
+identifies records in its own table; the crosswalk column is only the master join key.
 
 Other fields on a dynamic model are not master join keys. They require `master_id`, or the
 external identifier route above, to gain a master scope.
