@@ -25,6 +25,24 @@ RSpec.describe 'Settings::AppSettingsVars', type: :model do
     end
   end
 
+  describe 'recent environment-backed settings' do
+    it 'includes public operational settings in AppSettingsVars' do
+      expect(Settings::AppSettingsVars).to include(
+        'HandlebarsLockWaitSeconds',
+        'HandlebarsKeepGenerations',
+        'HandlebarsGenerationSafetyWindowSeconds',
+        'HandlebarsLockFileMaxAgeSeconds',
+        'PrewarmTemplatesEnabled',
+        'PrewarmSignInWindowDays',
+        'PrewarmMaxVariants',
+        'PrewarmThrottleSeconds',
+        'TemplateBrowserCacheSeconds',
+        'PullExternalDataAllowedHosts',
+        'PullExternalDataAllowPrivateHosts'
+      )
+    end
+  end
+
   describe 'NfsStoreJobDefaultAppTypeId (removed)' do
     it 'is NOT included in AppSettingsVars' do
       expect(Settings::AppSettingsVars).not_to include('NfsStoreJobDefaultAppTypeId')
