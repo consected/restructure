@@ -204,9 +204,9 @@ class Settings
   # and a template is a good way to allow all related roles to be represented, for copying by an admin
   TemplateUserEmailPattern = '@template'
   # For the SQL LIKE operator
-  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}"
+  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}".freeze
   # A template user is defined to allow user roles to be set up even if no real users are assigned
-  TemplateUserEmail = "template#{TemplateUserEmailPattern}"
+  TemplateUserEmail = "template#{TemplateUserEmailPattern}".freeze
 
   # A dummy role used by all user access controls to allow them to be exported, even if no other
   # roles or users are assigned
@@ -233,7 +233,7 @@ class Settings
   end
 
   def self.nfs_store_default_app_type_id
-    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || OnlyLoadAppTypes&.first || Admin::AppType.active.first&.id || 1).to_i
+    (ENV['NFS_STORE_DEFAULT_APP_TYPE_ID'].presence || Array(OnlyLoadAppTypes).first || Admin::AppType.active.first&.id || 1).to_i
   end
 
   # Allow-list mapping of resource names => fully qualified class name strings for
@@ -358,7 +358,7 @@ class Settings
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   # If setting more than one country, separate them with a blank-space.
   # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
-  DefaultCountryCodesForTimezones = %w[us ie gb de gr au nz]
+  DefaultCountryCodesForTimezones = %w[us ie gb de gr au nz].freeze
   CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'].presence&.split || DefaultCountryCodesForTimezones).freeze
 
   # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
@@ -390,7 +390,7 @@ class Settings
   AdminReportItemTypes = {
     'z-admin' => 'Admin Reports',
     'admin-user-access-overview' => 'User Access Overview'
-  }
+  }.freeze
 
   # IMPORTANT: add any app setting config variable to the following array
   # that is worthy of showing to the admin users,
@@ -400,17 +400,21 @@ class Settings
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordConfig
+    HandlebarsLockWaitSeconds HandlebarsKeepGenerations HandlebarsGenerationSafetyWindowSeconds HandlebarsLockFileMaxAgeSeconds
+    PrewarmTemplatesEnabled PrewarmSignInWindowDays PrewarmMaxVariants PrewarmThrottleSeconds TemplateBrowserCacheSeconds
     NotificationsFromEmail AdminEmail BatchUserEmail FailureNotificationsToEmail RedcapJobUserEmail RedcapDetUserEmail
+    MaxNotificationRecipients
     TwoFactorAuthDisabledForUser TwoFactorAuthDisabledForAdmin TwoFactorAuthIssuer TwoFactorAuthDrift TwoFactorAuthIdleTimeout
-    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
+    CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordReminderRepeatDays PasswordMaxAttempts PasswordUnlockStrategy PasswordUnlockTimeMins
     LoginIssuesUrl LoginMessage
     SearchResultsLimit
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
     DisableVDef AllowDynamicMigrations ProcessInlineDataUriImages
-    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration NotifyEmailOnRegistration
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
+    PullExternalDataAllowedHosts PullExternalDataAllowPrivateHosts
     CountryCodesForTimezones DefaultUserTimezone
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     nfs_store_default_app_type_id
