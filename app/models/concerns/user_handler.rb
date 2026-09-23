@@ -217,10 +217,19 @@ module UserHandler
     super
   end
 
-  # For virtual master ids, there's no column to persist to; the getter always
-  # derives the value from the current association, so this assignment is discarded.
+  # For virtual master ids, there is usually no column to persist to, so the assignment is
+  # discarded (the getter always derives the value from the current association instead).
+  # Some foreign_key_through_external_id definitions (e.g. Redcap dynamic models) do keep a
+  # physical master_id column alongside the association, to materialize the looked-up value -
+  # for those (only), still persist the assignment as normal. Masters-crosswalk associations
+  # never persist master_id, even if a legacy physical column happens to exist on the table.
   def master_id=(value)
-    return if self.class.respond_to?(:virtual_master_id?) && self.class.virtual_master_id?
+    virtual_master_id = self.class.respond_to?(:virtual_master_id?) && self.class.virtual_master_id?
+    through_external_id = self.class.respond_to?(:foreign_key_through_external_id) &&
+                          self.class.foreign_key_through_external_id.present?
+    persist_physical_column = through_external_id && self.class.has_attribute?(:master_id)
+
+    return if virtual_master_id && !persist_physical_column
 
     super
   end
