@@ -290,6 +290,8 @@ class Settings
 
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
+  # Set to true to allow production dynamic migrations to drop removed database columns.
+  AllowDropColumns = ENV['ALLOW_DROP_COLUMNS'] == 'true'
 
   # Convert inline data URI images in email bodies to MIME inline attachments
   ProcessInlineDataUriImages = ENV.key?('FPHS_PROCESS_INLINE_DATA_URI_IMAGES') ? ENV['FPHS_PROCESS_INLINE_DATA_URI_IMAGES'] == 'true' : true
@@ -411,7 +413,7 @@ class Settings
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
-    DisableVDef AllowDynamicMigrations ProcessInlineDataUriImages
+    DisableVDef AllowDynamicMigrations AllowDropColumns ProcessInlineDataUriImages
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration NotifyEmailOnRegistration
     InvitationCode ReCaptchaSiteKey ReCaptchaMinScore
     PullExternalDataAllowedHosts PullExternalDataAllowPrivateHosts
