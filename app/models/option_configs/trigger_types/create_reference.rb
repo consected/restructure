@@ -7,8 +7,11 @@ module OptionConfigs
     class CreateReference < Base
       trigger_name :create_reference
       pattern :named_entry
+      # SaveTriggers::CreateReference#perform always expects `model_name: { in: ... }` - an
+      # unwrapped config is misread as `model_name.each` over its own keys (see issue #1444).
+      no_direct_form
       allowed_keys %i[if in force_create force_not_valid with_result with on_complete on_failure
-                       to_existing_record this_has_no_master_association]
+                      to_existing_record this_has_no_master_association]
       standard_hook_key_types
       key_type :string_or_hash, :in
       key_type :boolean, :force_create, :force_not_valid, :this_has_no_master_association

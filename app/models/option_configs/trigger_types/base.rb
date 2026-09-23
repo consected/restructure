@@ -112,6 +112,16 @@ module OptionConfigs
           key_type :hash_or_array, :on_complete, :on_failure
         end
 
+        # DSL: mark a :named_entry trigger type as NOT supporting a direct (unwrapped) config
+        # form, even though its top-level keys happen to overlap with #allowed_keys (which
+        # would otherwise auto-detect direct form - see #validate_named_entries). Declare this
+        # when the trigger's runtime implementation always expects `label: { actual_keys... }`
+        # and would otherwise silently misinterpret an unwrapped config (see issue #1444).
+        # @return [void]
+        def no_direct_form
+          @_no_direct_form = true
+        end
+
         # DSL: mark this trigger type as unconditionally unsafe within save_trigger.before_save
         # when targeting the record currently being saved - it performs a genuine update of
         # that record from within its own before_save callback chain, corrupting the outer
@@ -238,10 +248,23 @@ module OptionConfigs
         # Auto-detects direct form when any outer key (excluding lifecycle hook
         # keys which are valid at both levels) is present in @_allowed_keys.
         # This handles trigger types whose runtime implementation accepts both a
-        # direct hash and a named-entry hash.
+        # direct hash and a named-entry hash - unless #no_direct_form was declared,
+        # in which case this shape is always a misconfiguration (see issue #1444):
+        # the runtime's `model_def.each { |label, config| ... }`/`each_value` loop
+        # would instead treat one of these keys as if it were the label, silently
+        # discarding the real config rather than raising or applying it.
         def validate_named_entries(config)
           non_lifecycle_keys = config.keys.map(&:to_sym) - NAMED_ENTRY_OUTER_KEYS
-          return validate_direct(config) if @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
+          looks_like_direct_form = @_allowed_keys && non_lifecycle_keys.any? { |k| @_allowed_keys.include?(k) }
+
+          if looks_like_direct_form
+            return validate_direct(config) unless @_no_direct_form
+
+            return ["is missing its named-entry label - found key(s) #{non_lifecycle_keys.join(', ')} " \
+                    'directly under the trigger instead of nested inside an arbitrary label, e.g. ' \
+                    "`my_label: { #{non_lifecycle_keys.first}: ... }` - as configured this is silently " \
+                    'ignored at runtime rather than applied']
+          end
 
           warnings = []
           config.each do |k, inner|
