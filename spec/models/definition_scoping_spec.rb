@@ -16,6 +16,11 @@
 # These examples back the admin documentation in
 # docs/admin_reference/general/scoping.md, so that the scoping rules described
 # there cannot silently drift away from the implementation.
+#
+# Also covers issue #1472: UserHandler#master_id= must persist to a physical
+# master_id column kept alongside a foreign_key_through_external_id association
+# (e.g. Redcap dynamic models), while still discarding the assignment for a
+# masters-crosswalk association even if a legacy physical master_id column exists.
 require 'rails_helper'
 
 RSpec.describe 'Definition scoping', type: :model do
@@ -320,6 +325,24 @@ RSpec.describe 'Definition scoping', type: :model do
       expect(rec.master).to eq master
       expect(rec.master_id).to eq master.id
     end
+
+    it 'does not persist an explicit master_id= assignment to the legacy physical column' do
+      dm = setup_dynamic_model_for_table 'test_forced_fk_write_recs',
+                                         'data character varying, master_id integer, msid integer',
+                                         name: 'test forced fk write rec',
+                                         primary_key_name: :id,
+                                         foreign_key_name: :msid,
+                                         field_list: 'msid data'
+
+      master = create_master
+      other_master = create_master
+      rec = dm.implementation_class.new(msid: master.msid, data: 'x', current_user: @user)
+      rec.master_id = other_master.id
+      rec.save!
+
+      expect(rec.reload['master_id']).to be_nil
+      expect(rec.master_id).to eq master.id
+    end
   end
 
   describe 'a definition with a master crosswalk attribute column' do
@@ -387,6 +410,24 @@ RSpec.describe 'Definition scoping', type: :model do
                                          options: "_configurations:\n  prevent_migrations: true\n  foreign_key_through_external_id: #{@ext.resource_name}\n"
 
       expect(dm).to be_valid
+    end
+
+    it 'persists master_id to a physical column kept alongside the external identifier association' do
+      table_name = 'test_external_id_with_master_id_recs'
+      dm = setup_dynamic_model_for_table table_name,
+                                         'data character varying, scantron_id bigint, master_id integer',
+                                         name: 'test external ID with master id rec',
+                                         foreign_key_name: :scantron_id,
+                                         field_list: 'scantron_id master_id data',
+                                         options: "_configurations:\n  prevent_migrations: true\n  foreign_key_through_external_id: #{@ext.resource_name}\n"
+
+      rec = dm.implementation_class.new(scantron_id: @extid, data: 'x', current_user: @user)
+      # Mirrors Redcap::DataRecords#handle_setting_master_id: read the association-derived
+      # value via the getter, then write it back through the setter to persist it.
+      rec.master_id = rec.master_id # rubocop:disable Lint/SelfAssignment
+      rec.save!
+
+      expect(rec.reload['master_id']).to eq @master.id
     end
 
     it 'reports an error when the external ID column has an incompatible Rails type' do
