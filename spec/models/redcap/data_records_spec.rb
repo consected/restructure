@@ -108,6 +108,48 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect { dr.validate }.not_to raise_error
     end
 
+    # Regression test: a dynamic model configured with `_configurations.foreign_key_through_external_id`
+    # resolves its master through a `has_one :master, through: ...` association keyed on a foreign key
+    # column (e.g. `ext_survey_id`). #existing_not_in_retrieved_ids previously used
+    # `existing_records.select(record_identifier_fields).to_a`, instantiating partially-loaded model
+    # records missing that foreign key column. The `after_initialize :evaluate_active_values` callback
+    # then evaluated a field's `{{...}}` active_value template, which resolves `master` and raised
+    # `ActiveModel::MissingAttributeError` for the un-selected foreign key column.
+    # The dynamic model (and its underlying table) is created in `before :all`, since creating a new
+    # dynamic-model table inside an `it` block runs the real migration in a separate thread that can
+    # deadlock/timeout against the example's own open per-example transaction.
+    context 'with a dynamic model resolving master through foreign_key_through_external_id' do
+      before :all do
+        @ext_id_dm = create_dynamic_model_for_sample_response(foreign_key_through_external_id: 'scantrons')
+      end
+
+      it 'validates records without raising a missing attribute error' do
+        ext_value = rand(100_000..199_999)
+        setup_access :scantrons, user: @user
+        master = create_master(@user)
+        master.current_user = @user
+        master.scantrons.create!(scantron_id: ext_value)
+
+        rec = @ext_id_dm.implementation_class.new(record_id: 'existing-not-retrieved',
+                                                  ext_survey_id: ext_value, current_user: @user)
+        # Bypass user-level access controls, matching how the real REDCap job writes records
+        # using the project's batch job user rather than an arbitrary test @user.
+        rec.force_save!
+        rec.save!
+
+        rc = Redcap::ProjectAdmin.active.first
+        rc.current_admin = @admin
+        rc.data_options.handle_deleted_records = 'ignore'
+
+        dr = Redcap::DataRecords.new(rc, @ext_id_dm.implementation_class.name)
+        dr.retrieve
+        dr.summarize_fields
+        dr.handle_survey_identifier
+
+        expect { dr.validate }.not_to raise_error
+      end
+    end
+
     it 'raises errors if retrieved records id is missing' do
       dm = create_dynamic_model_for_sample_response
 

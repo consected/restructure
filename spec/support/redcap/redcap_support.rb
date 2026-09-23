@@ -726,7 +726,11 @@ module Redcap
     # Set up the appropriate dynamic model for the narrow record data.
     # The spec/migrations/20210212065538_create_rc_sample_responses_qoezsq.rb migration
     # handles the creation of the table
-    def create_dynamic_model_for_sample_response(survey_fields: nil, disable: nil)
+    # @param [String|nil] foreign_key_through_external_id - resource name of an external
+    #   identifier to associate the master through (e.g. 'scantrons'), instead of master_id.
+    #   Adds an `ext_survey_id` foreign key column used to look up the master via that
+    #   external identifier's association (regression coverage for issue #1477).
+    def create_dynamic_model_for_sample_response(survey_fields: nil, disable: nil, foreign_key_through_external_id: nil)
       j = {
         default: {
           db_configs: {
@@ -784,13 +788,26 @@ module Redcap
       field_list = data_sample_response_fields(type).dup
       field_list << 'disabled' if disable
 
+      fkey_name = nil
+      schema_name = nil
+      if foreign_key_through_external_id
+        j[:default][:db_configs][:ext_survey_id] = { type: 'integer' }
+        j[:_configurations] = { foreign_key_through_external_id: }
+        field_list << 'ext_survey_id'
+        fkey_name = :ext_survey_id
+        # Use the dedicated dynamic_test schema for test-only tables, per repo convention.
+        tn = 'rc_sample_ext_id_responses'
+        schema_name = 'dynamic_test'
+      end
+
       options = String.yaml_dump(j)
 
       @dynamic_model = DynamicModel.create! current_admin: @admin,
                                             name: @project[:name],
                                             table_name: tn,
+                                            schema_name:,
                                             primary_key_name: :id,
-                                            foreign_key_name: nil,
+                                            foreign_key_name: fkey_name,
                                             category: :test,
                                             field_list: field_list.join(' '),
                                             options:
