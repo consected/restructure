@@ -41,6 +41,11 @@ RSpec.describe 'Settings::AppSettingsVars', type: :model do
         'PullExternalDataAllowPrivateHosts'
       )
     end
+
+    it 'defines and exposes the setting for allowing dynamic migration column drops' do
+      expect(Settings::AllowDropColumns).to eq(ENV['ALLOW_DROP_COLUMNS'] == 'true')
+      expect(Settings::AppSettingsVars).to include('AllowDropColumns')
+    end
   end
 
   describe 'NfsStoreJobDefaultAppTypeId (removed)' do
