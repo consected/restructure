@@ -8,6 +8,9 @@ module OptionConfigs
       trigger_name :redcap_request
       pattern :named_entry
       not_valid_in_before_save
+      # SaveTriggers::RedcapRequest#perform always expects `label: { study: ... }` - an
+      # unwrapped config is misread via `each_value` (see issue #1444).
+      no_direct_form
       allowed_keys %i[
         study project_name local_data method post_data success_if
         force_not_editable_save force_not_valid data_field data_field_format

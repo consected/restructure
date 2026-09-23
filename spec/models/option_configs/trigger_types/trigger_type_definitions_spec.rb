@@ -517,11 +517,49 @@ RSpec.describe 'OptionConfigs::TriggerTypes definitions', type: :model do
         expect(warnings.any? { |w| w.include?('unknown_key') }).to be(true)
       end
 
+      # Regression test for issue #1444: `update_this: { with: {...} }` (missing the
+      # required entry-name wrapper, e.g. `my_update:`) is silently ignored at runtime
+      # (see SaveTriggers::UpdateThis#perform) rather than applying the update, but
+      # previously produced no config validation notice at all.
+      it 'warns when the required entry-name wrapper is missing (issue #1444)' do
+        config = { with: { status: 'active' } }
+        warnings = type_class.validate_config(config)
+        expect(warnings).to be_present
+        expect(warnings.any? { |w| w.include?('with') && w.include?('label') }).to be(true)
+      end
+
       it 'warns about key type violations' do
         config = { my_update: { with: 'not_a_hash' } }
         warnings = type_class.validate_config(config)
         expect(warnings).to be_present
         expect(warnings.any? { |w| w.include?('with') }).to be(true)
+      end
+    end
+
+    # Regression tests for issue #1444, expanded scope: every :named_entry trigger type whose
+    # runtime always does `model_def.each { |label, config| ... }`/`each_value` (i.e. genuinely
+    # requires the label wrapper, unlike e.g. set_variables) shares update_this's bug - an
+    # unwrapped config is silently misread rather than flagged as invalid.
+    describe 'missing named-entry wrapper across other trigger types (issue #1444)' do
+      {
+        OptionConfigs::TriggerTypes::CreateReference => { with: { status: 'active' } },
+        OptionConfigs::TriggerTypes::AddTracker => { with: { notes: 'a note' } },
+        OptionConfigs::TriggerTypes::PullExternalData => { method: 'get' },
+        OptionConfigs::TriggerTypes::RedcapRequest => { method: 'records' },
+        OptionConfigs::TriggerTypes::UpdateReference => { with: { status: 'active' } },
+        OptionConfigs::TriggerTypes::FullTextSearch => { target_column: 'tsv' }
+      }.each do |type_class, unwrapped_config|
+        it "warns when #{type_class.name.demodulize} is configured without its entry-name wrapper" do
+          warnings = type_class.validate_config(unwrapped_config)
+          expect(warnings).to be_present
+          expect(warnings.any? { |w| w.include?('label') }).to be(true)
+        end
+
+        it "still returns no wrapper-related warning for #{type_class.name.demodulize} when correctly wrapped" do
+          wrapped_config = { my_label: unwrapped_config }
+          warnings = type_class.validate_config(wrapped_config)
+          expect(warnings.none? { |w| w.include?('label') }).to be(true)
+        end
       end
     end
 
