@@ -151,17 +151,20 @@
             # A failed email is NOT moved or deleted by after_processing;
             # it remains in the source so it can be retried on the next run.
             - create_reference:
-                # Example: store captured email metadata to a reference record
-                to_existing_record: false
-                to_record_type: dynamic_model__captured_emails
-                with:
-                  email_from: '{{variables.email.from}}'
-                  email_to: '{{variables.email.to}}'
-                  email_subject: '{{variables.email.subject}}'
-                  email_body: '{{variables.email.body}}'
+                # Example: store captured email metadata to a reference record.
+                # The entry label (dynamic_model__captured_email) identifies the
+                # target dynamic model resource - it is pluralized to look up
+                # dynamic_model__captured_emails.
+                dynamic_model__captured_email:
+                  with:
+                    email_from: '{{variables.email.from}}'
+                    email_to: '{{variables.email.to}}'
+                    email_subject: '{{variables.email.subject}}'
+                    email_body: '{{variables.email.body}}'
             - update_this:
-                with:
-                  notes: 'Last email subject: {{variables.email.subject}}'
+                this_1:
+                  with:
+                    notes: 'Last email subject: {{variables.email.subject}}'
 
           # Per-email lifecycle hooks. Run for each individual email
           # AFTER its on_email triggers have completed.
@@ -175,12 +178,14 @@
           # raises (per-email FphsExceptions are caught and isolated).
           on_email_complete:
             - update_this:
-                with:
-                  notes: 'Processed: {{variables.email.subject}}'
+                this_1:
+                  with:
+                    notes: 'Processed: {{variables.email.subject}}'
           on_email_failure:
             - update_this:
-                with:
-                  notes: 'Failed: {{variables.email.subject}} - {{variables.email.error}}'
+                this_1:
+                  with:
+                    notes: 'Failed: {{variables.email.subject}} - {{variables.email.error}}'
 #!defs(save_triggers_lifecycle_hooks_defs.yaml)
 
 # Notes:
