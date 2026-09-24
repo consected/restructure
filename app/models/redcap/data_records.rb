@@ -413,8 +413,16 @@ module Redcap
     def existing_not_in_retrieved_ids
       return @existing_not_in_retrieved_ids if @existing_not_in_retrieved_ids
 
-      existing_rec_ids = existing_records.select(record_identifier_fields).to_a
-      existing_rec_ids = existing_rec_ids.map { |r| r.attributes.symbolize_keys.slice(*record_identifier_fields) }
+      # Use #pluck rather than #select(...).to_a, since instantiating full model
+      # records fires after_initialize callbacks (e.g. evaluate_active_values). For
+      # definitions using foreign_key_through_external_id, those callbacks may attempt
+      # to resolve the #master association, which depends on a foreign key column not
+      # included in this narrow set of identifier fields, raising
+      # ActiveModel::MissingAttributeError.
+      identifier_fields = record_identifier_fields
+      existing_rec_ids = existing_records.pluck(*identifier_fields).map do |vals|
+        identifier_fields.zip(Array.wrap(vals)).to_h
+      end
       @existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_ids
     end
 
