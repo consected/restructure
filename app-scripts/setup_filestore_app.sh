@@ -28,15 +28,15 @@ if [ -z "$MOUNTPOINT" ]; then
     MOUNTPOINT=/efs1
   else
 
-    if [ -d /media/$USER/Data ]; then
-      MOUNTPOINT=/media/$USER/Data
+    if [ -d "/media/$USER/Data" ]; then
+      MOUNTPOINT="/media/$USER/Data"
     else
       FS_TEST_BASE=${FS_TEST_BASE:=$HOME}
       MOUNTPOINT=${FS_TEST_BASE}/dev-filestore
     fi
 
   fi
-  if [ ! -d ${MOUNTPOINT} ]; then
+  if [ ! -d "${MOUNTPOINT}" ]; then
     echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
     read -r -p 'MOUNTPOINT directory: ' MOUNTPOINT
   fi
@@ -50,20 +50,26 @@ fi
 echo "Mountpoint is: $MOUNTPOINT"
 
 if [ -z "${SUBDIR}" ]; then
-  ls "${MOUNTPOINT}"
-  read -r -p 'Enter the selected directory: ' SUBDIR
+  if [ -t 0 ]; then
+  #  This is a terminal, so ask the user for the selected directory
+    ls "${MOUNTPOINT}"
+    read -r -p 'Enter the selected directory: ' SUBDIR
+  else
+    SUBDIR=.
+  fi
 fi
 
 OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
-FS_ROOT=${MOUNTPOINT}/${SUBDIR}
+FS_ROOT="${MOUNTPOINT}/${SUBDIR}"
+FS_DIR=
 
-if [ -d ${FS_ROOT}/main ]; then
+if [ -d "${FS_ROOT}/main" ]; then
   FS_DIR=main
 fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
-cd "$FS_ROOT"/$FS_DIR || exit 1
+cd "${FS_ROOT}/${FS_DIR}" || exit 1
 
 mkdir -p "$APPTYPE_DIR"/containers
 
