@@ -32,7 +32,20 @@ module Resources
     # @param [String] resource_type
     # @return [Array{String}]
     def self.resource_names_for(resource_type)
+      return resource_names_for_activity_log_type if resource_type.to_sym == :activity_log_type
+
       keys_from_grouped_config(Resources::UserAccessControl.resource_descriptions_for(resource_type)).map(&:to_s)
+    end
+
+    # Fast path for :activity_log_type validity checks (Admin::UserAccessControl#bad_resource_name /
+    # #valid_resources), which only need the resource_name strings, not the labelled/grouped
+    # descriptions the admin form uses. Resources::Models is already kept in sync with every active
+    # ActivityLog on every save/regenerate (ActivityLog#add_model_to_list) and at boot
+    # (ActivityLog.define_models), so this avoids re-parsing option_configs for every active
+    # ActivityLog system-wide on every call (see resource_descriptions_for_activity_log_type).
+    # @return [Array{String}]
+    def self.resource_names_for_activity_log_type
+      Resources::Models.to_a.select { |m| m[:type] == :activity_log_type }.map { |m| m[:resource_name].to_s }
     end
 
     def self.resource_descriptions_for_table
@@ -119,9 +132,10 @@ module Resources
       res
     end
 
+    # NOTE: does not force a reset of ActivityLog's option config caches - those are
+    # already invalidated on save/regenerate (see Dynamic::DefGenerator, ActivityLog#other_regenerate_actions),
+    # so forcing it here just re-pays the parse cost on every call (was several seconds per call).
     def self.resource_descriptions_for_activity_log_type
-      ActivityLog.reset_all_option_configs_resource_names!
-      ActivityLog.reset_active_model_configurations!
       ActivityLog.all_option_configs_grouped_resources
     end
 
