@@ -13,6 +13,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
   scope :dialog_templates, -> { where message_type: 'dialog' }
   scope :plain_templates, -> { where message_type: 'plain' }
 
+  # Admin::AppType#associated_message_templates memoizes its result per app type; a message
+  # template change must invalidate it too, since it isn't reached via ActivityLog/DynamicModel saves.
+  after_commit :reset_associated_items_memo
+
+  def reset_associated_items_memo
+    Admin::AppType.reset_memo_associated_items!
+  end
+
   #
   # First matching definition matching name and optional type
   # This includes disabled templates. Scope MessageTemplate.active

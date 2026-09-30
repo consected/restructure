@@ -175,6 +175,16 @@ class Admin
       @memo_associated_items = {}
     end
 
+    # Swap a freshly-queried dynamic definition record for its already-parsed
+    # (option_configs memoized) definition_cache instance, if one is registered - avoids
+    # re-parsing option_configs for definitions that are already loaded/regenerated
+    # (e.g. at boot via ActivityLog.define_models). Falls back to the given record if not cached.
+    # @param [ActivityLog, DynamicModel, ExternalIdentifier] definition
+    # @return [ActivityLog, DynamicModel, ExternalIdentifier]
+    def cached_definition(definition)
+      definition.class.definition_cache[definition.id] || definition
+    end
+
     # Select activity logs that have some kind of access, typically scoped to a specific app type
     # @return [ActiveRecord::Relation]
     def associated_activity_logs(valid_resources_only: false, not_resource_names: nil, force_update: nil)
@@ -245,16 +255,18 @@ class Admin
       end
     end
 
-    def associated_reports
-      names = user_access_controls
-              .valid_resources([:report]).where(resource_type: :report)
-              .where("access IS NOT NULL and access <> ''")
-              .map(&:resource_name)
-              .uniq
-      names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
+    def associated_reports(force_update: nil)
+      memoize_associated_items(:reports, nil, force_update:) do
+        names = user_access_controls
+                .valid_resources([:report]).where(resource_type: :report)
+                .where("access IS NOT NULL and access <> ''")
+                .map(&:resource_name)
+                .uniq
+        names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
 
-      Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_', 'g') || '__' || short_name) in (?)",
-                          names).reorder('').order(id: :asc)
+        Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_', 'g') || '__' || short_name) in (?)",
+                            names).reorder('').order(id: :asc)
+      end
     end
 
     def associated_general_selections
@@ -293,70 +305,80 @@ class Admin
         .order(id: :asc)
     end
 
-    def associated_message_templates
-      ms = []
-      active_mts = Admin::MessageTemplate.active
-      associated_activity_logs.all.each do |a|
-        a.option_configs.each do |c|
-          c.dialog_before.each_value do |v|
-            res = active_mts.find do |b|
-              b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content'
+    def associated_message_templates(force_update: nil)
+      memoize_associated_items(:message_templates, nil, force_update:) do
+        ms = []
+        active_mts = Admin::MessageTemplate.active.to_a
+
+        # Index active_mts once instead of linearly scanning it for every dialog_before/
+        # save_trigger entry across every associated activity log and dynamic model - was
+        # O(configs * templates), now O(configs + templates).
+        by_name_type_template = {}
+        by_name_template = {}
+        active_mts.each do |b|
+          by_name_type_template[[b.name, b.message_type, b.template_type]] ||= b
+          by_name_template[[b.name, b.template_type]] ||= b
+        end
+
+        associated_activity_logs.all.each do |a|
+          cached_definition(a).option_configs.each do |c|
+            c.dialog_before.each_value do |v|
+              res = by_name_type_template[[v[:name], 'dialog', 'content']]
+              ms << res if res
             end
-            ms << res if res
-          end
-          c.save_trigger.each_value do |sts|
-            sts = [sts] unless sts.is_a? Array
-            sts.each do |stconfig|
-              stsconfigs = stconfig.dig(:each, :do) || stconfig
-              stsconfigs = [stsconfigs] unless stsconfigs.is_a? Array
+            c.save_trigger.each_value do |sts|
+              sts = [sts] unless sts.is_a? Array
+              sts.each do |stconfig|
+                stsconfigs = stconfig.dig(:each, :do) || stconfig
+                stsconfigs = [stsconfigs] unless stsconfigs.is_a? Array
 
-              stsconfigs.each do |st|
-                ns = st[:notify] || []
-                ns = [ns] if ns.is_a? Hash
+                stsconfigs.each do |st|
+                  ns = st[:notify] || []
+                  ns = [ns] if ns.is_a? Hash
 
-                ns.each do |v|
-                  lt = v[:layout_template]
-                  ct = v[:content_template]
-                  mt = v[:type]
+                  ns.each do |v|
+                    lt = v[:layout_template]
+                    ct = v[:content_template]
+                    mt = v[:type]
 
-                  res = active_mts.find { |b| b.name == lt && b.message_type == mt && b.template_type == 'layout' }
-                  ms << res if res
-                  res = active_mts.find { |b| b.name == ct && b.message_type == mt && b.template_type == 'content' }
-                  ms << res if res
+                    res = by_name_type_template[[lt, mt, 'layout']]
+                    ms << res if res
+                    res = by_name_type_template[[ct, mt, 'content']]
+                    ms << res if res
+                  end
                 end
               end
             end
           end
         end
-      end
-      associated_dynamic_models.all.each do |a|
-        a.option_configs.each do |c|
-          c.dialog_before.each_value do |v|
-            res = active_mts
-                  .find { |b| b.name == v[:name] && b.message_type == 'dialog' && b.template_type == 'content' }
+        associated_dynamic_models.all.each do |a|
+          cached_definition(a).option_configs.each do |c|
+            c.dialog_before.each_value do |v|
+              res = by_name_type_template[[v[:name], 'dialog', 'content']]
+              ms << res if res
+            end
+          end
+        end
+
+        associated_reports.all.each do |a|
+          rex = Regexp.new('{{template\\\\_block\\\\_(.+?)}}')
+          a.description&.scan(rex) do |t|
+            res = by_name_template[[t[0]&.gsub('\\_', ' '), 'content']]
             ms << res if res
           end
         end
+
+        ms +=
+          active_mts.select do |a|
+            a.name.in?(["ui page css - #{name}",
+                        "ui page js - #{name}"]) &&
+              a.message_type == 'plain' &&
+              a.template_type == 'content'
+          end.compact
+
+        ms.compact!
+        ms.sort { |a, b| a.id <=> b.id }.uniq
       end
-
-      associated_reports.all.each do |a|
-        rex = Regexp.new('{{template\\\\_block\\\\_(.+?)}}')
-        a.description&.scan(rex) do |t|
-          res = active_mts.find { |b| b.name == t[0]&.gsub('\\_', ' ') && b.template_type == 'content' }
-          ms << res if res
-        end
-      end
-
-      ms +=
-        active_mts.select do |a|
-          a.name.in?(["ui page css - #{name}",
-                      "ui page js - #{name}"]) &&
-            a.message_type == 'plain' &&
-            a.template_type == 'content'
-        end.compact
-
-      ms.compact!
-      ms.sort { |a, b| a.id <=> b.id }.uniq
     end
 
     # Which configurations are associated with this app indirectly,
@@ -368,26 +390,28 @@ class Admin
     # template@template that ensures that we can export configurations
     # that are not directly used, or for which there are no other
     # matching user records on the destination server
-    def associated_config_libraries
-      ms = []
+    def associated_config_libraries(force_update: nil)
+      memoize_associated_items(:config_libraries, nil, force_update:) do
+        ms = []
 
-      associated_activity_logs.all.each do |a|
-        ms += OptionConfigs::ActivityLogOptions.config_libraries a
+        associated_activity_logs.all.each do |a|
+          ms += OptionConfigs::ActivityLogOptions.config_libraries cached_definition(a)
+        end
+
+        associated_dynamic_models.all.each do |a|
+          ms += OptionConfigs::DynamicModelOptions.config_libraries cached_definition(a)
+        end
+
+        associated_external_identifiers.all.each do |a|
+          ms += OptionConfigs::ExternalIdentifierOptions.config_libraries cached_definition(a)
+        end
+
+        associated_reports.all.each do |a|
+          ms += OptionConfigs::ReportOptions.config_libraries a
+        end
+
+        ms.sort { |a, b| a.id <=> b.id }.uniq
       end
-
-      associated_dynamic_models.all.each do |a|
-        ms += OptionConfigs::DynamicModelOptions.config_libraries a
-      end
-
-      associated_external_identifiers.all.each do |a|
-        ms += OptionConfigs::ExternalIdentifierOptions.config_libraries a
-      end
-
-      associated_reports.all.each do |a|
-        ms += OptionConfigs::ReportOptions.config_libraries a
-      end
-
-      ms.sort { |a, b| a.id <=> b.id }.uniq
     end
 
     def add_template_access
