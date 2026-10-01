@@ -1,25 +1,31 @@
 # Save Trigger: Each options
 # Canonical schema
-# each: <Hash(value: EachValueExpr (required))>
-# do: <TriggerTaskList (required)>
-# if: <Condition>
-# Keys are optional unless marked (required).
+# each: <Hash(value: EachValueExpr, iterator_name: String, do: TriggerTaskList, if: Condition)>
+# `each` is a trigger task and can appear anywhere a TriggerTaskList is accepted,
+# including save-trigger event lists, lifecycle hooks, case branches, transactions,
+# and background trigger lists.
+# `value`, `iterator_name`, and `do` are optional for backward compatibility. Without
+# `value`, the nested list runs once with a nil iterator value; without `do`, no nested
+# triggers run. The default iterator name is `iterator`.
+# `iterator_name: loop_result` stores the context as `loop_result_index` and
+# `loop_result_value`, allowing nested loops to use separate context keys.
 #
 # EachValueExpr type (each.value)
 # EachValueExpr: <Array(Scalar) | {{{triple_curly_substitution}}} returning a list | Condition returning a list>
 #
 # TriggerTaskList type - see save_trigger.md
-# TriggerTaskList: <Array(Hash(trigger_type: TriggerConfig))>
+# TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
 #
 # Pattern 1: Iterate over a substitution-derived list (save_triggers_each_pattern_1_basic_defs.yaml)
 # See save_trigger_each.md for the worked example.
+# Pattern 2: Name nested iterator contexts (save_triggers_each_pattern_2_named_iterator_defs.yaml)
+# See save_trigger_each.md for the worked example.
 
 # Notes:
-# - each: and do: are sibling keys at the same level as the trigger's own if: (they are not
-#   nested inside each other).
-# - if: (at this level) skips the entire iteration; conditions inside individual triggers in
-#   do: are still evaluated separately per-iteration.
+# - `if:` inside the each configuration skips that iteration; conditions inside individual
+#   triggers in `do:` are still evaluated separately per iteration.
 # - The iterator index and value are accessible inside do: triggers via
-#   {{save_trigger_results.iterator_index}} and {{save_trigger_results.iterator_value}}.
-# - Individual triggers within do: support on_complete and on_failure lifecycle hooks - see
-#   the lifecycle hooks documentation for details.
+#   `{{save_trigger_results.iterator_index}}` and `{{save_trigger_results.iterator_value}}`,
+#   or via `<iterator_name>_index` and `<iterator_name>_value` when a name is supplied.
+# - Individual triggers within `do:` support on_complete and on_failure lifecycle hooks, and
+#   those callbacks retain the current iterator context.

@@ -25,6 +25,7 @@ module OptionConfigs
                              background
                              reload_this
                              case
+                             each
                              set_save_trigger_results
                              set_variables
                              generate_document
@@ -48,7 +49,9 @@ module OptionConfigs
             # to automatically fire on_complete/on_failure
             o.perform_with_lifecycle
           rescue FphsException => e
-            raise FphsException, "#{e.message}. Full config:\n#{String.yaml_dump(configs)}\nTriggering instance: #{obj.class.name}##{obj.id || '(new)'}"
+            raise FphsException,
+                  "#{e.message}. Full config:\n#{String.yaml_dump(configs)}\n" \
+                  "Triggering instance: #{obj.class.name}##{obj.id || '(new)'}"
           end
 
           # If we had any results then check if they were all true. If they were then return true.
@@ -118,36 +121,14 @@ module OptionConfigs
         all_configs.each do |configs|
           next unless configs
 
-          iter_configs = configs[:each] || { do: configs }
-          # Assuming this is an each: definition, get an if: config
-          do_if = configs.dig(:each, :if)
-
-          val_configs = iter_configs[:value]
-          iter_values = if val_configs
-                          FieldDefaults.calculate_default obj, val_configs
-                        else
-                          [nil]
-                        end
-
-          raise FphsException, "No iterator values were found for save trigger each: #{iter_configs}" unless iter_values
-
-          iter_values.each_with_index do |iter_value, iter_index|
-            obj.save_trigger_results['iterator_index'] = iter_index
-            obj.save_trigger_results['iterator_value'] = iter_value
-
-            # Provide the ability to skip all triggers for this iteration
-            if do_if
-              ca = ConditionalActions.new do_if, obj
-              next unless ca.calc_action_if
-            end
-
-            all_iter_configs = iter_configs[:do]
-            all_iter_configs = [all_iter_configs] unless all_iter_configs.is_a? Array
-            all_iter_configs.each do |iter_config|
-              result = calc_triggers_for_action(obj, action, iter_config)
-              res &&= result
-            end
+          unless configs.is_a?(Hash) && configs.key?(:each)
+            # Preserve the legacy context values for non-iterating save actions.
+            obj.save_trigger_results['iterator_index'] = 0
+            obj.save_trigger_results['iterator_value'] = nil
           end
+
+          result = calc_triggers_for_action(obj, action, configs)
+          res &&= result
         end
 
         res
