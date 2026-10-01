@@ -5,7 +5,7 @@ require 'rails_helper'
 # Tests for OptionConfigs::TriggerTypes::Base — the base class for per-trigger-type
 # descriptor classes. Verifies the DSL (pattern, allowed_keys, key_type), the registry
 # (Base.for, Base.registered_types), and universal key inclusion across all non-delegate
-# trigger types.
+# trigger types, including composable control-flow triggers.
 #
 # These tests drive the implementation of issue #1058: refactoring hardcoded constant-based
 # trigger validation into a proper class hierarchy under OptionConfigs::TriggerTypes.
@@ -41,11 +41,11 @@ RSpec.describe 'OptionConfigs::TriggerTypes::Base', type: :model do
         notify create_reference update_reference update_this add_tracker
         pull_external_data pull_emails run_batch_trigger set_save_trigger_results set_variables
         log generate_document redcap_request create_master full_text_search
-        transaction background case exception
+        transaction background case each exception
       ]
     end
 
-    it 'includes all 23 trigger types' do
+    it 'includes all 24 trigger types' do
       expect(base.registered_types.keys).to match_array(expected_types)
     end
 

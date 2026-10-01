@@ -13,6 +13,24 @@ The job loads the record again from the database by ID, so background triggers s
 saved record. Any `save_trigger_results` or `variables` accumulated by foreground triggers
 are held in memory only and are not available to them. See [record scoping](scoping.md).
 
+For example, when `background` is nested inside `each`, the queued triggers cannot currently
+read the foreground iterator value:
+
+```yaml
+each:
+  iterator_name: loop_result
+  value: [first, second]
+  do:
+    - background:
+        - log:
+            message: "{{save_trigger_results.loop_result_value}}"
+```
+
+Both jobs are queued, but `loop_result_value` is not carried into the background process.
+Passing selected foreground context values is tracked in [issue #1498](https://github.com/consected/restructure/issues/1498).
+Until that feature is implemented, persist values that background triggers need or resolve them
+again from the reloaded record.
+
 Results from the queue operation are stored in `save_trigger_results['background']`:
 ```
 {

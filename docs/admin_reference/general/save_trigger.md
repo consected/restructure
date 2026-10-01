@@ -95,6 +95,22 @@ All save trigger types support `on_complete` and `on_failure` lifecycle hooks. T
 
 Both accept a single trigger hash or an array of trigger configurations.
 
+`each` is itself a trigger-list entry. It can therefore be placed directly in either
+lifecycle hook, and its nested triggers can use the current iterator index and value:
+
+```yaml
+save_trigger:
+  on_update:
+    - log:
+        message: 'Processing record'
+        on_complete:
+          - each:
+              value: ['first', 'second']
+              do:
+                - log:
+                    message: 'Completed {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}'
+```
+
 ### Top-level usage
 
 Place `on_complete` / `on_failure` alongside the trigger's own configuration keys:
