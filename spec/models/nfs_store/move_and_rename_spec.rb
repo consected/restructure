@@ -263,5 +263,15 @@ RSpec.describe 'Move and rename stored files', type: :model do
       expect { @sf.move_to nil, "evil\x00.txt" }
         .to raise_error(FsException::Action)
     end
+
+    it 'StoredFile#move_to rejects a new_name matching the reserved internal flag/indicator convention' do
+      orig_path = @sf.retrieval_path
+
+      expect { @sf.move_to nil, 'evil.__processing__' }
+        .to raise_error(FsException::Action)
+
+      # Rejected upfront, before any filesystem operation - the original file is untouched.
+      expect(File.exist?(orig_path)).to be true
+    end
   end
 end

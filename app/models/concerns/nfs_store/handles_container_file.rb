@@ -152,7 +152,30 @@ module NfsStore
       self.current_role_name = role_name
       self.current_gid = Manage::Group.group_id_from_role_name role_name
 
-      File.join(*parts)
+      full_path = File.join(*parts)
+      raise_if_symlink! full_path
+      full_path
+    end
+
+    # Defence-in-depth: a container/archived file's location must always be the regular
+    # file the app itself wrote there. If it (or any directory leading to it) has been
+    # replaced with a symlink - however that happened (direct filesystem access, a
+    # scripted job, a sync tool, etc.) - following it would serve whatever it points to,
+    # bypassing container/role-based access control entirely. Refuse to resolve such a
+    # path rather than following it. See Manage::Filesystem#raise_if_symlink_in_path! for
+    # the shared per-component containment walk (also used to guard write destinations).
+    #
+    # Known accepted residual gaps, not addressed here: hardlinks (indistinguishable from a
+    # regular file by any check available at this level) and the inherent TOCTOU window
+    # between this check and whichever consumer actually opens the path afterwards. Both
+    # require the same filesystem write access an attacker would already need to plant the
+    # symlink this guard blocks, so they are not a privilege escalation beyond that.
+    def raise_if_symlink!(full_path)
+      last_stat = Manage::Filesystem.raise_if_symlink_in_path!(full_path)
+      return if last_stat.nil? || last_stat.file?
+
+      raise FsException::Action,
+            "File is not a regular file (#{last_stat.ftype}) and can not be accessed: #{file_name}"
     end
 
     # Skip the uniqueness check if the caller requested it OR if basic field
