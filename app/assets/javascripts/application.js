@@ -55,4 +55,13 @@
 //= require ./big_select/big_select.js
 //= require js-yaml/dist/js-yaml 
 
+// CodeMirror - used to edit YAML content for fields such as
+// common_templates/edit_fields/_column_type_jsonb.html.erb and
+// _name_starts_with_yaml_object.html.erb (see _fpa_form_utils.js#setup_codemirror_editors)
+//= require codemirror/lib/codemirror
+//= require codemirror/addon/fold/foldcode
+//= require codemirror/addon/fold/foldgutter
+//= require codemirror/addon/fold/indent-fold
+//= require codemirror/mode/yaml/yaml
+
 //= require_tree ./app
