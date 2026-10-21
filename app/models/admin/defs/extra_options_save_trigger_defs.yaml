@@ -14,6 +14,9 @@
 # Each trigger_type's own configuration shape is documented on its own page - see the
 # Trigger Types table in save_trigger.md.
 # TriggerTaskList: <Hash(trigger_type: TriggerConfig) | Array(Hash(trigger_type: TriggerConfig))>
+# The `each` trigger is one composable trigger_type in this list. Its `do` value is
+# another TriggerTaskList, so it can be nested in event lists, lifecycle hooks, case
+# branches, transactions, background lists, and other nested trigger blocks.
 #
   save_trigger:
     # Each trigger definition is run in order within the list

@@ -72,8 +72,8 @@ module OptionConfigs
       end
 
       # Validates each trigger name in a hash against ValidSaveTriggers.
-      # Also handles the special +each:+ iterator key, which is not a trigger
-      # action name but a loop construct accepted by +iterate_triggers_for_action+.
+      # Also handles the composable +each:+ trigger, whose nested task and lifecycle
+      # blocks need recursive validation.
       # @param hash [Hash] a single trigger task hash
       # @return [void]
       def validate_trigger_hash(hash)
@@ -98,19 +98,21 @@ module OptionConfigs
       end
 
       # Validates an +each:+ iterator block.
-      # Accepted keys are +value+, +if+, and +do+.  The +do+ value is itself
-      # a trigger task list (Hash or Array of Hashes) and is validated recursively.
+      # Accepted keys are +value+, +iterator_name+, +if+, +do+, +on_complete+,
+      # and +on_failure+. Nested trigger lists are validated recursively.
       # @param config [Hash] the iterator configuration
       # @return [void]
       def validate_each_iterator(config)
         return unless config.is_a?(Hash)
 
-        invalid_keys = config.keys.map(&:to_sym) - %i[value if do]
+        invalid_keys = config.keys.map(&:to_sym) - %i[value iterator_name if do on_complete on_failure]
         invalid_keys.each do |k|
           add_validation_notice(:tasks, "each iterator has unrecognized key: #{k}", level: :warn)
         end
 
-        validate_nested_trigger_task_list(config[:do]) if config.key?(:do)
+        %i[do on_complete on_failure].each do |key|
+          validate_nested_trigger_task_list(config[key]) if config.key?(key)
+        end
       end
 
       # Recursively validates nested trigger definitions for delegate-pattern triggers

@@ -1,18 +1,21 @@
-# Pattern 1: Iterate over a substitution-derived list, skipping blank values
-each:
-  value: '{{{select_who::split_csv}}}'
-  if:
-    not_any:
-      this:
-        save_trigger_results:
-          element: iterator_value
-          value:
-            - ''
-            - null
-do:
-  - update_this:
-      one:
-        with:
-          notes: |-
-            {{notes}}
-            - {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}
+# Pattern 1: Iterate over a substitution-derived list, skipping blank values.
+# `each` is one entry in the surrounding trigger task list.
+save_trigger:
+  on_update:
+    - each:
+        value: '{{{select_who::split_csv}}}'
+        if:
+          not_any:
+            this:
+              save_trigger_results:
+                element: iterator_value
+                value:
+                  - ''
+                  - null
+        do:
+          - update_this:
+              one:
+                with:
+                  notes: |-
+                    {{notes}}
+                    - {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}

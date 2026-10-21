@@ -9,7 +9,7 @@
 # - Top-level: extracted in initialize via extract_lifecycle_hooks, fired by perform_with_lifecycle
 # - Per-entry: extracted inside each named entry via with_entry_lifecycle in the trigger's perform loop
 #
-# See GitHub Issue #982.
+# See GitHub Issues #982 and #1495.
 require 'rails_helper'
 
 RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :model do
@@ -153,6 +153,90 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
 
       trigger.perform_with_lifecycle
     end
+
+    it 'supports each directly in on_complete and preserves iterator context in callbacks' do
+      config = {
+        message: 'Main lifecycle trigger',
+        severity: 'info',
+        on_complete: [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                {
+                  log: {
+                    message: 'Complete {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                    severity: 'info',
+                    on_complete: [
+                      {
+                        log: {
+                          message: 'Callback {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                          severity: 'info'
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Log.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:info).with(/Complete 0 => first/)
+      expect(Rails.logger).to receive(:info).with(/Callback 0 => first/)
+      expect(Rails.logger).to receive(:info).with(/Complete 1 => second/)
+      expect(Rails.logger).to receive(:info).with(/Callback 1 => second/)
+      allow(Rails.logger).to receive(:info)
+
+      trigger.perform_with_lifecycle
+
+      expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+      expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
+    end
+
+    it 'supports named iterator context for nested each triggers' do
+      config = {
+        value: %w[outer_a outer_b],
+        iterator_name: 'outer_loop',
+        do: [
+          {
+            each: {
+              value: %w[inner_a inner_b],
+              iterator_name: 'inner_loop',
+              do: [
+                {
+                  log: {
+                    message: 'Nested {{save_trigger_results.outer_loop_index}}/' \
+                             '{{save_trigger_results.outer_loop_value}} => ' \
+                             '{{save_trigger_results.inner_loop_index}}/' \
+                             '{{save_trigger_results.inner_loop_value}}',
+                    severity: 'info'
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Each.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:info).with(/0\/outer_a => 0\/inner_a/)
+      expect(Rails.logger).to receive(:info).with(/0\/outer_a => 1\/inner_b/)
+      expect(Rails.logger).to receive(:info).with(/1\/outer_b => 0\/inner_a/)
+      expect(Rails.logger).to receive(:info).with(/1\/outer_b => 1\/inner_b/)
+      allow(Rails.logger).to receive(:info)
+
+      trigger.perform
+
+      expect(@activity_log.save_trigger_results['outer_loop_index']).to eq 1
+      expect(@activity_log.save_trigger_results['outer_loop_value']).to eq 'outer_b'
+      expect(@activity_log.save_trigger_results['inner_loop_index']).to eq 1
+      expect(@activity_log.save_trigger_results['inner_loop_value']).to eq 'inner_b'
+    end
   end
 
   describe 'on_failure' do
@@ -218,6 +302,38 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
       expect(Rails.logger).to receive(:error).with(/Single failure trigger/)
 
       expect { trigger.perform_with_lifecycle }.not_to raise_error
+    end
+
+    it 'supports each directly in on_failure and preserves iterator context' do
+      config = {
+        message: nil,
+        severity: 'info',
+        on_failure: [
+          {
+            each: {
+              value: %w[first second],
+              do: [
+                {
+                  log: {
+                    message: 'Failure {{save_trigger_results.iterator_index}} => {{save_trigger_results.iterator_value}}',
+                    severity: 'error'
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      trigger = SaveTriggers::Log.new(config, @activity_log)
+
+      expect(Rails.logger).to receive(:error).with(/Failure 0 => first/)
+      expect(Rails.logger).to receive(:error).with(/Failure 1 => second/)
+      allow(Rails.logger).to receive(:error)
+
+      expect { trigger.perform_with_lifecycle }.not_to raise_error
+      expect(@activity_log.save_trigger_results['iterator_index']).to eq 1
+      expect(@activity_log.save_trigger_results['iterator_value']).to eq 'second'
     end
   end
 
