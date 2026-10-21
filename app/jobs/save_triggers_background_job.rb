@@ -62,7 +62,7 @@ class SaveTriggersBackgroundJob < ApplicationJob
         # unintended constant.
         trigger_klass = OptionConfigs::ExtraOptions.trigger_class(trigger_name)
         trigger = trigger_klass.new(config, item)
-        result = trigger.perform
+        result = trigger.perform_with_lifecycle
         results << { trigger: trigger_name, result: }
 
         Rails.logger.info "[SaveTriggersBackgroundJob] Completed trigger: #{trigger_name}"
