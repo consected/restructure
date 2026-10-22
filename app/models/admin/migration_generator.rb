@@ -746,9 +746,8 @@ class Admin::MigrationGenerator
           self.class.migration_context(db_migration_dirname).migrate
         end
       rescue Exception => e
-        FileUtils.mkdir_p db_migration_failed_dirname
-        FileUtils.mv @do_migration, db_migration_failed_dirname
-        msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
+        migration_file_status = move_failed_migration_file
+        msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
         Rails.logger.warn msg
         unless Rails.env.production?
           warn msg
@@ -765,9 +764,8 @@ class Admin::MigrationGenerator
 
     true
   rescue Exception => e
-    FileUtils.mkdir_p db_migration_failed_dirname
-    FileUtils.mv @do_migration, db_migration_failed_dirname
-    msg = "Failed migration for path '#{db_migration_dirname}' - moved '#{@do_migration}' to '#{db_migration_failed_dirname}' - database #{Admin::MigrationGenerator.current_database}"
+    migration_file_status = move_failed_migration_file
+    msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
     Rails.logger.warn msg
     unless Rails.env.production?
       warn msg
@@ -876,6 +874,18 @@ class Admin::MigrationGenerator
   end
 
   private
+
+  def move_failed_migration_file
+    if @do_migration.present? && File.exist?(@do_migration)
+      FileUtils.mkdir_p db_migration_failed_dirname
+      FileUtils.mv @do_migration, db_migration_failed_dirname
+      "moved '#{@do_migration}' to '#{db_migration_failed_dirname}'"
+    else
+      "migration file '#{@do_migration}' was not present to move"
+    end
+  rescue SystemCallError => e
+    "failed to move '#{@do_migration}' to '#{db_migration_failed_dirname}': #{e.message}"
+  end
 
   #
   # Content for a migration to create a schema
