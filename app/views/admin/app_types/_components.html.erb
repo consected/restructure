@@ -5,7 +5,7 @@
   
   exclude_components = %i[associated_sub_processes associated_protocol_events]
 
-  options = {main_components: , exclude_components: }
+  options = {main_components: , exclude_components: , generated_definitions_only: true}
 
   unless defined? open_in_new
     open_in_new = false
@@ -69,6 +69,11 @@
       </div>
       <div id="<%="app-type-components-#{title_hyph}"%>" class="panel-collapse collapse <%=init_panel_class%>" role="tabpanel" aria-labelledby="<%="app-type-component-heading-#{title_hyph}"%>">
         <div class="panel-body">
+          <% if k.to_s == 'associated_message_templates' && admin_app_type.skipped_message_template_definition_count.positive? %>
+            <p class="help-block text-muted">
+              Templates used by <%= pluralize(admin_app_type.skipped_message_template_definition_count, 'definition') %> not generated on this server are not listed.
+            </p>
+          <% end %>
           <ul>
           <%
             constants = {}
@@ -77,11 +82,13 @@
             v_hash.map do |k2_hash|
               k2_cn = k2_hash['_class_name']
               k2_const = constants[k2_cn] ||= k2_cn.constantize
-              k2_all = results["#{k2_cn}--all"] ||= k2_const.send(active_or_all)
+              k2_by_id = results["#{k2_cn}--by_id"] ||= k2_const.send(active_or_all)
+                                                                .where(id: v_hash.filter_map { |h| h['id'] if h['_class_name'] == k2_cn })
+                                                                .index_by(&:id)
               k2_id = k2_hash['id']
               next unless k2_id
 
-              k2 = k2_all.find { |r| r && r['id'] == k2_id }
+              k2 = k2_by_id[k2_id]
               next unless k2
 
               rn = k2.respond_to?(:alt_resource_name) && k2.alt_resource_name
