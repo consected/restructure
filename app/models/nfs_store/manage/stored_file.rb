@@ -83,13 +83,17 @@ module NfsStore
 
         msf.analyze_file!
         msf.file_hash = msf.class.hash_for_file(msf.retrieval_path)
-        begin
-          msf.save!
-        rescue FsException::Action, StandardError => e
-          msf.title = "Failed to index file - #{e.message}"
-          Rails.logger.warn "Failed to index missing entry #{path} / #{file_name} - container #{container.id}"
-          Rails.logger.warn "#{e}\n#{e.short_string_backtrace}"
-        end
+        msf.save!
+        msf
+      rescue FsException::Action, StandardError => e
+        # A filesystem entry that fails analysis (e.g. NfsStore::HandlesContainerFile
+        # #raise_if_symlink! refusing a planted symlink with no DB record of its own) must
+        # not abort the whole container listing - return an unsaved placeholder instead.
+        # Covers the entire method body (not just #save!) since #failed_indicator? and
+        # #analyze_file! above also resolve the file's guarded retrieval_path.
+        msf.title = "Failed to index file - #{e.message}"
+        Rails.logger.warn "Failed to index missing entry #{path} / #{file_name} - container #{container&.id}"
+        Rails.logger.warn "#{e}\n#{e.short_string_backtrace}"
         msf
       end
 

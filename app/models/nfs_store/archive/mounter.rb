@@ -62,6 +62,10 @@ module NfsStore
       def self.mount_all(stored_files)
         stored_files.all.each do |sf|
           next unless has_archive_extension?(sf)
+          # No role grants this user access - retrieval_path is nil, so the flag helpers
+          # below would build a bare relative suffix (e.g. '.__processing-archive__')
+          # instead of a real path, which the containment guard correctly refuses.
+          next if sf.retrieval_path.nil?
 
           # if File.mtime(sf.retrieval_path)
           mounter = new
@@ -85,6 +89,14 @@ module NfsStore
         rescue SystemCallError, IOError => e
           raise_flag_file_error("mount_all for stored file '#{sf&.file_name}' (id: #{sf&.id})",
                                 sf&.retrieval_path, e, stored_file: sf)
+        rescue FsException::SymlinkBlocked => e
+          # A deliberate app-level refusal (a tampered archive file) is not a filesystem
+          # fault - skip just this one stored file rather than aborting mount_all for
+          # every other file in the container (mount_all runs as a side effect of listing
+          # a container). Narrowly scoped to SymlinkBlocked, not FsException::Action in
+          # general, since extract_completed!/index_completed! above convert genuine
+          # SystemCallErrors into FsException::Action themselves - those must still raise.
+          Rails.logger.warn "mount_all skipping stored file '#{sf&.file_name}' (id: #{sf&.id}) - #{e.class}: #{e.message}"
         end
       end
 
@@ -173,6 +185,11 @@ module NfsStore
       # Filename of the flag used to indicate an archive extract is in progress
       # @param archive_file_name [String] the file name of the archive file to be mounted
       # @return [String] the flag filename
+      #
+      # Flag paths below are guarded with Filesystem#raise_if_symlink_in_path! before any
+      # write - archive_path's own parent is already proven symlink-free, but this exact
+      # suffixed sibling name has not been checked, and a planted symlink there would let
+      # touch/write/rm_f act on an arbitrary file instead.
       def processing_archive_flag_path
         "#{archive_path}#{ProcessingArchiveSuffix}"
       end
@@ -208,6 +225,7 @@ module NfsStore
       end
 
       def extract_in_progress!
+        Manage::Filesystem.raise_if_symlink_in_path!(processing_archive_flag_path)
         FileUtils.touch(processing_archive_flag_path)
       rescue SystemCallError, IOError => e
         raise_flag_file_error('extract_in_progress!', processing_archive_flag_path, e)
@@ -215,6 +233,7 @@ module NfsStore
 
       def extract_failed!(exception)
         extract_completed!
+        Manage::Filesystem.raise_if_symlink_in_path!(failed_archive_flag_path)
         File.write(failed_archive_flag_path, exception.message)
       rescue SystemCallError, IOError => e
         raise_flag_file_error('extract_failed!', failed_archive_flag_path, e)
@@ -229,6 +248,7 @@ module NfsStore
       end
 
       def extract_completed!
+        Manage::Filesystem.raise_if_symlink_in_path!(processing_archive_flag_path)
         FileUtils.rm_f(processing_archive_flag_path)
       rescue SystemCallError, IOError => e
         raise_flag_file_error('extract_completed!', processing_archive_flag_path, e)
@@ -246,12 +266,14 @@ module NfsStore
       end
 
       def index_in_progress!
+        Manage::Filesystem.raise_if_symlink_in_path!(processing_index_flag_path)
         FileUtils.touch(processing_index_flag_path)
       rescue SystemCallError, IOError => e
         raise_flag_file_error('index_in_progress!', processing_index_flag_path, e)
       end
 
       def index_completed!
+        Manage::Filesystem.raise_if_symlink_in_path!(processing_index_flag_path)
         FileUtils.rm_f(processing_index_flag_path)
       rescue SystemCallError, IOError => e
         raise_flag_file_error('index_completed!', processing_index_flag_path, e)
@@ -321,6 +343,9 @@ module NfsStore
         extract_completed! if res
         res
       rescue FsException::Action, StandardError => e
+        # Clean up the local extraction working directory on any failure (e.g. group
+        # validation, unzip failure) - it is otherwise never removed.
+        FileUtils.rm_rf(dir) if dir && Dir.exist?(dir)
         extract_failed! e
         raise
       end

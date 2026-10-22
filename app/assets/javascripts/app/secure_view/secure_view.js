@@ -563,7 +563,7 @@ var SecureView = function () {
     }
     url += $.param(params);
 
-    $.ajax({ url: url }).done(function (data) {
+    $.ajax({ url: url, dataType: 'json' }).done(function (data) {
       _this.page_count = data.page_count;
       _this.current_zoom = data.default_zoom || 'fit';
       _this.can_preview = data.can_preview;

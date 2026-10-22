@@ -216,6 +216,12 @@ module NfsStore
           curr_path = file_path_for(role_name:)
           next unless File.exist?(curr_path)
 
+          # Guard the source, not just the destination (already guarded inside
+          # Filesystem#move_file_to_final_location) - a symlinked ancestor directory here
+          # would otherwise let `mv` pull a *different* file's real content into the
+          # (correctly guarded) destination.
+          Filesystem.raise_if_symlink_in_path!(curr_path)
+
           self.path = new_path if new_path
           self.file_name = new_file_name
           self.valid_path_change = true
@@ -409,7 +415,10 @@ module NfsStore
       def file_path_and_role_name
         current_user_role_names.each do |role_name|
           fs_path = file_path_for(role_name:)
-          return [fs_path, role_name] if File.exist?(fs_path)
+          next unless File.exist?(fs_path)
+
+          Filesystem.raise_if_symlink_in_path!(fs_path)
+          return [fs_path, role_name]
         end
         nil
       end

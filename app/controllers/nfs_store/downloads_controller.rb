@@ -19,6 +19,18 @@ module NfsStore
     before_action :set_download!, only: %i[show show_from_activity_log search_doc search_doc_from_activity_log]
     before_action :setup_selected_items, only: %i[create trash]
 
+    # A blocked symlink is a deliberate safety response for actions that *serve file
+    # bytes*, not an application error - give those a friendly result rather than falling
+    # through to FsExceptionHandler's generic error page/message. Mutating actions (trash,
+    # move, rename, trigger_file_action) are deliberately excluded: they must still surface
+    # as a real, logged error, since a silent-looking "success" response would leave a user
+    # believing a tampered file had been removed/renamed/moved when it was not. Declared
+    # after FsBaseController's inclusion of FsExceptionHandler so it takes precedence for
+    # this specific (sub)class of exception.
+    SymlinkBlockedMessage = 'Symbolic link file not returned.'
+    ByteServingActions = %w[show show_from_activity_log search_doc search_doc_from_activity_log multi].freeze
+    rescue_from FsException::SymlinkBlocked, with: :render_symlink_blocked
+
     #
     # Request download of a single file for download or view
     # Specify either a download_id & retrieval_type or download_path
@@ -60,10 +72,10 @@ module NfsStore
     # Handle the request for a user action to be triggered, such as rename or trash a file
     # or multiple files.
     def create
-      do_action = @commit.split(':').first&.id_underscore
-      do_action = ValidActions.select { |va| va == do_action&.to_sym }.first
-      if do_action
-        send do_action
+      @do_action = @commit.split(':').first&.id_underscore
+      @do_action = ValidActions.select { |va| va == @do_action&.to_sym }.first
+      if @do_action
+        send @do_action
       else
         not_found
       end
@@ -142,6 +154,38 @@ module NfsStore
     end
 
     private
+
+    # Friendly, format-aware response for a blocked symlink, scoped to byte-serving
+    # actions only (see ByteServingActions) - a request with an ambiguous/non-JSON Accept
+    # header gets an actual small text file explaining why (rather than an error page),
+    # verified empirically to be the default Rails picks for a bare `*/*`/no-format
+    # request; an explicit `Accept: application/json` caller gets a structured, non-error
+    # body it can key off of to show its own inline message instead of a generic failure
+    # toast. Any other action (trash/move/rename/trigger_file_action, all dispatched
+    # through #create) falls through to the normal logged FsException::Action handling.
+    def render_symlink_blocked(error)
+      return fs_app_exception_handler(error) unless serving_file_bytes?
+
+      Rails.logger.warn(
+        "Blocked symlink retrieval attempt: #{error.message} " \
+        "(user_id=#{current_user&.id}, container_id=#{@container&.id}, action=#{action_name}/#{@do_action})"
+      )
+
+      respond_to do |type|
+        type.any do
+          send_data SymlinkBlockedMessage, filename: 'symbolic-link-blocked.txt', type: 'text/plain',
+                                           disposition: 'attachment'
+        end
+        type.json do
+          render json: { blocked: true, reason: 'symbolic_link', message: SymlinkBlockedMessage },
+                 status: :conflict
+        end
+      end
+    end
+
+    def serving_file_bytes?
+      action_name.in?(ByteServingActions) || (action_name == 'create' && @do_action == :download)
+    end
 
     def trash
       setup_action Trash

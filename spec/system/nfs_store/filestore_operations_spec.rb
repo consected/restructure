@@ -12,6 +12,10 @@
 #   - Moving files between folders
 #   - Downloading single and multiple files
 #   - Sending a file to trash
+#   - Downloading a stored file whose on-disk location has been replaced with a symlink
+#     receives a friendly placeholder response instead of following it or showing a
+#     generic error (NfsStore::HandlesContainerFile#raise_if_symlink!,
+#     FsException::SymlinkBlocked, NfsStore::DownloadsController#render_symlink_blocked)
 #
 # Regression test for Issue #878:
 #   Error when renaming or sending files to trash due to
@@ -448,6 +452,94 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
 
       # Verify no error occurred
       expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+    end
+  end
+
+  describe 'Symlink protection' do
+    it 'returns a friendly placeholder instead of following a symlink planted at a stored file location' do
+      # Navigate to the master record
+      navigate_to_master(@master.id)
+
+      # Expand the phone log tab
+      expand_phone_log_tab
+
+      # Wait for the filestore container to be visible
+      wait_for_filestore_container
+
+      # Create and upload a real test file via the UI
+      filename = "symlink-blocked-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      expect(file_exists_in_browser?(filename)).to be true
+
+      stored_file = @container.stored_files.find_by!(file_name: filename)
+      retrieval_path = stored_file.retrieval_path
+
+      # Stand-in for a file outside the container entirely - e.g. another user's home
+      # directory, or any other file the app server process can read.
+      secret_path = Rails.root.join('tmp', "secret-#{SecureRandom.hex}.txt").to_s
+      File.write(secret_path, 'unauthorized secret content')
+
+      begin
+        # Replace the stored file's on-disk entry with a symlink, simulating tampering
+        # by some means other than the app's own upload code.
+        File.delete(retrieval_path)
+        File.symlink(secret_path, retrieval_path)
+
+        select_file_in_browser(filename)
+        click_download_button
+
+        # A blocked symlink is a deliberate safety response, not an application error -
+        # it must not show up as a scary generic error alert.
+        expect(has_error_alert?).to be(false), "Unexpected error: #{error_alert_text}"
+
+        # Verify the actual served response, via same-origin requests from within the
+        # authenticated browser session (so they go through real routing, auth and access
+        # control - not just a Ruby-level model check). This is the same URL the filestore
+        # UI itself constructs for a single-file download (see
+        # app/assets/javascripts/app/_fpa_ajax_processors_nfs_store.js).
+        download_url = "/nfs_store/downloads/#{@container.id}?activity_log_id=#{@activity_log.id}" \
+                       "&activity_log_type=#{@activity_log.class.to_s.ns_underscore}" \
+                       "&download_id=#{stored_file.id}&retrieval_type=stored_file"
+
+        # Plain browser navigation (an <a href> click, an ambiguous Accept header) gets an
+        # actual small text file, not an error page.
+        download_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText, type: xhr.getResponseHeader('Content-Type') };
+          })()
+        JS
+
+        expect(download_response['status']).to eq(200)
+        expect(download_response['body']).to eq('Symbolic link file not returned.')
+        expect(download_response['type']).to include('text/plain')
+
+        # An explicit JSON/AJAX request gets a structured, non-error body the UI can key
+        # off of instead of a generic failure toast. 409 (not 200), since this represents
+        # a blocked security event, not an unconditional success.
+        json_response = page.evaluate_script(<<~JS)
+          (function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', #{download_url.to_json}, false);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send(null);
+            return { status: xhr.status, body: xhr.responseText };
+          })()
+        JS
+
+        expect(json_response['status']).to eq(409)
+        parsed = JSON.parse(json_response['body'])
+        expect(parsed).to eq(
+          'blocked' => true,
+          'reason' => 'symbolic_link',
+          'message' => 'Symbolic link file not returned.'
+        )
+      ensure
+        File.delete(secret_path) if File.exist?(secret_path)
+      end
     end
   end
 end

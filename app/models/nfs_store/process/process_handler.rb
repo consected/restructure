@@ -65,20 +65,41 @@ module NfsStore
       end
 
       # File path for flag to indicate file is being processed
-      # @return [String] file path
+      # @return [String, nil] file path, or nil if the file isn't accessible to the
+      #   current user under any role (retrieval_path itself is nil)
+      #
+      # Guarded with Filesystem#raise_if_symlink_in_path! before any write below - the
+      # container_file's own retrieval_path is already proven symlink-free, but this exact
+      # suffixed sibling name has not been checked, and a planted symlink there would let
+      # touch/rm_f act on an arbitrary file instead.
       def processing_flag_file_path(container_file)
-        "#{container_file.retrieval_path}.__processing__"
+        rp = container_file.retrieval_path
+        return unless rp
+
+        "#{rp}.__processing__"
       end
 
       def set_processing_flags
         container_files.each do |container_file|
-          FileUtils.touch processing_flag_file_path(container_file)
+          flag_path = processing_flag_file_path(container_file)
+          next unless flag_path
+
+          NfsStore::Manage::Filesystem.raise_if_symlink_in_path!(flag_path)
+          FileUtils.touch flag_path
+        rescue FsException::SymlinkBlocked => e
+          Rails.logger.warn "set_processing_flags skipping container_file id=#{container_file&.id} - #{e.message}"
         end
       end
 
       def clear_processing_flags
         container_files.each do |container_file|
-          FileUtils.rm_f processing_flag_file_path(container_file)
+          flag_path = processing_flag_file_path(container_file)
+          next unless flag_path
+
+          NfsStore::Manage::Filesystem.raise_if_symlink_in_path!(flag_path)
+          FileUtils.rm_f flag_path
+        rescue FsException::SymlinkBlocked => e
+          Rails.logger.warn "clear_processing_flags skipping container_file id=#{container_file&.id} - #{e.message}"
         end
       end
 

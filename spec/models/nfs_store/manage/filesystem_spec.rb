@@ -165,7 +165,7 @@ RSpec.describe NfsStore::Manage::Filesystem, type: :model do
   # `FsException::Action` at the boundary, and the planted secret file
   # is never reached.
   describe 'path traversal proof-of-concept (now blocked)' do
-    let(:sandbox)   { Dir.mktmpdir('nfs_store_traversal_poc') }
+    let(:sandbox) { Dir.mktmpdir('nfs_store_traversal_poc') }
     let(:secret_dir)    { File.join(sandbox, 'secrets') }
     let(:secret_name)   { 'PRIVATE.txt' }
     let(:secret_path)   { File.join(secret_dir, secret_name) }
@@ -292,7 +292,7 @@ RSpec.describe NfsStore::Manage::Filesystem, type: :model do
     end
 
     it 'raises FsException::Action for backslash separators' do
-      expect { described_class.validate_file_name!("foo\\bar.txt") }.to raise_error(FsException::Action)
+      expect { described_class.validate_file_name!('foo\\bar.txt') }.to raise_error(FsException::Action)
     end
 
     it 'raises FsException::Action for embedded NUL' do
@@ -305,6 +305,42 @@ RSpec.describe NfsStore::Manage::Filesystem, type: :model do
 
     it 'raises FsException::Action for traversal payload' do
       expect { described_class.validate_file_name!('../../etc/passwd') }.to raise_error(FsException::Action)
+    end
+
+    it 'raises FsException::Action for a name matching the reserved internal flag/indicator convention' do
+      expect { described_class.validate_file_name!('foo.__processing__') }.to raise_error(FsException::Action)
+    end
+
+    it 'raises FsException::Action for a name matching the archive-mount reserved convention' do
+      expect { described_class.validate_file_name!('payload.zip.__mounted-archive__') }.to raise_error(FsException::Action)
+    end
+  end
+
+  # -------------------------------------------------------------------
+  # .raise_if_symlink_in_path! — shared containment walk for reads and writes
+  # -------------------------------------------------------------------
+  describe '.raise_if_symlink_in_path!' do
+    it 'returns nil for a path that does not exist yet under the root' do
+      path = File.join(described_class.nfs_store_directory, "nonexistent-#{SecureRandom.hex(4)}", 'file.txt')
+
+      expect(described_class.raise_if_symlink_in_path!(path)).to be_nil
+    end
+
+    it 'raises FsException::Action for a relative-looking string that is not under the root' do
+      expect { described_class.raise_if_symlink_in_path!('some/other/tree/file.txt') }
+        .to raise_error(FsException::Action, /not under the nfs_store root/)
+    end
+
+    it 'raises FsException::Action for an absolute path outside the root' do
+      expect { described_class.raise_if_symlink_in_path!('/etc/passwd') }
+        .to raise_error(FsException::Action, /not under the nfs_store root/)
+    end
+
+    it 'raises FsException::Action for an absolute path under a differently-named sibling root' do
+      other_root = "#{described_class.nfs_store_directory}-other"
+
+      expect { described_class.raise_if_symlink_in_path!(File.join(other_root, 'file.txt')) }
+        .to raise_error(FsException::Action, /not under the nfs_store root/)
     end
   end
 end
