@@ -135,6 +135,18 @@ module Dynamic
         @active_model_configurations[ckey] = dma
       end
 
+      # Reuse the generated definition when its timestamp still matches.
+      def cached_definition_for(definition)
+        cached = definition_cache[definition.id]
+        same_definition_version?(cached, definition) ? cached : definition
+      end
+
+      def same_definition_version?(cached, definition)
+        return false unless cached&.updated_at && definition.updated_at
+
+        [cached.updated_at.to_i, cached.updated_at.usec] == [definition.updated_at.to_i, definition.updated_at.usec]
+      end
+
       # Get all the resource names for options configs in all active dynamic definitions
       # Used by user filestore filters
       # @param [Proc] an optional block may be passed to allow filtering based
@@ -145,7 +157,9 @@ module Dynamic
       def all_option_configs_resource_names(&)
         res = []
 
-        @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+        @all_option_configs_resource_names ||= active_model_configurations.map do |definition|
+          cached_definition_for(definition).option_configs
+        end
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
@@ -170,7 +184,9 @@ module Dynamic
       def all_option_configs_grouped_resources(&)
         res = {}
 
-        @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+        @all_option_configs_resource_names ||= active_model_configurations.map do |definition|
+          cached_definition_for(definition).option_configs
+        end
 
         @all_option_configs_resource_names.each do |a|
           elts = if block_given?
@@ -316,7 +332,7 @@ module Dynamic
         if user
           user = User.find_active_by_email_or_id(user)
           if app_type && user.app_type != app_type
-            user.app_type = app_type 
+            user.app_type = app_type
             user.save
           end
         elsif app_type
