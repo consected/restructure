@@ -19,7 +19,7 @@ module NfsStore
     # within the archive, over the networked NFS mount. The current
     # implementation extracts files physically from the archive into a directory.
     class Mounter
-      ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2', '.7z'].freeze
+      ArchiveExtensions = ['.zip', '.tar', '.gz', '.tar.xz', '.bz2', '.7z'].freeze
 
       # Suffix added to archive directories where files are extracted from
       # original stored files with ArchiveExtensions

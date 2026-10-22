@@ -55,6 +55,9 @@ ActiveSupport.on_load(:nfs_store_config) do
     ares = Kernel.system 'which unzip'
     configuration_failed_reason << 'unzip not in the path' unless ares
 
+    ares = Kernel.system 'which xz'
+    configuration_failed_reason << 'xz not in the path' unless ares
+
     begin
       File.open(NFS_APPS_LIST_FILE, 'w') do |nfs_apps_list_file|
         app_types = Admin::AppType.active_app_types
