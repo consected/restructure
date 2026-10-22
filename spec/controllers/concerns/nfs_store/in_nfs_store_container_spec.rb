@@ -27,7 +27,7 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
   include NfsStore::InNfsStoreContainer
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
 
     setup_nfs_store
     create_item

@@ -14,15 +14,15 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include TestNoUserIdDmRecSupport
 
   describe 'dynamic models with foreign key as master_id' do
-    before :all do
+    before_all do
       expect(Admin::MigrationGenerator.view_definition('dynamic_test', 'test_views')).to be nil
       generate_test_dynamic_view
     rescue StandardError => e
       puts e
     end
 
-    before :example do
-      # Seeds.setup
+    before_all do
+      # seed_database
 
       @user0, = create_user
       create_admin
@@ -72,19 +72,23 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     end
 
     it "saves the current user's user_id if the created_by_user_id field is present" do
-      generate_test_dynamic_model
+      @user = @master.current_user
+      unless @user
+        create_user
+        @master.current_user = @user
+      end
+      generate_test_dynamic_model table_name: 'test_dm_spec_created_by_recs', reset_access: true
+      rec = @master.dynamic_model__test_dm_spec_created_by_recs.create! test1: 'abc'
+      expect(rec).to be_a DynamicModel::TestDmSpecCreatedByRec
 
-      rec = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
-      expect(rec).to be_a DynamicModel::TestCreatedByRec
-
-      rec = DynamicModel::TestCreatedByRec.find rec.id
+      rec = DynamicModel::TestDmSpecCreatedByRec.find rec.id
       expect(rec).to be_persisted
       expect(rec.user_id).to eq @user.id
       # Expect the created_by_user_id field value to match the current user
       expect(rec.created_by_user_id).to eq @user.id
 
       rec.update!(current_user: @user0, test2: 'def')
-      rec = DynamicModel::TestCreatedByRec.find rec.id
+      rec = DynamicModel::TestDmSpecCreatedByRec.find rec.id
 
       expect(rec.user_id).to eq @user0.id
       # Expect the created_by_user_id field value to be unchanged
@@ -141,9 +145,8 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     end
 
     it 'pulls the current configuration from a table' do
-      unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-        TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
-      end
+      table_name = 'test_pulls_config_created_by_recs'
+      TableGenerators.dynamic_models_table(table_name, :create_do, 'test1', 'test2', 'created_by_user_id', skip_if_exists: true)
 
       table_comment = 'a test table'
       test2_comment = 'test2 column comment'
@@ -153,13 +156,13 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
       new_test2_comment = 'new test2 column comment'
 
       Admin::MigrationGenerator.connection.execute <<~END_SQL
-        comment on table test_created_by_recs is '#{table_comment}';
-        comment on column test_created_by_recs.test2 is '#{test2_comment}';
+        comment on table #{table_name} is '#{table_comment}';
+        comment on column #{table_name}.test2 is '#{test2_comment}';
       END_SQL
 
       dm = DynamicModel.create! current_admin: @admin,
-                                name: 'test created by',
-                                table_name: 'test_created_by_recs',
+                                name: 'test pull configs created by',
+                                table_name: table_name,
                                 schema_name: 'ml_app',
                                 category: :test
 
@@ -181,9 +184,9 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       # Make changes to the comments and see them reflected in the options after the next save
       Admin::MigrationGenerator.connection.execute <<~END_SQL
-        comment on table test_created_by_recs is '#{new_table_comment}';
-        comment on column test_created_by_recs.test1 is '#{new_test1_comment}';
-        comment on column test_created_by_recs.test2 is '#{new_test2_comment}';
+        comment on table #{table_name} is '#{new_table_comment}';
+        comment on column #{table_name}.test1 is '#{new_test1_comment}';
+        comment on column #{table_name}.test2 is '#{new_test2_comment}';
       END_SQL
 
       # Force a full reload
@@ -250,7 +253,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
   describe 'no foreign key' do
     before :example do
-      # Seeds.setup
+      # seed_database
 
       @user0, = create_user
       create_admin
@@ -278,8 +281,8 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   end
 
   describe 'no user_id' do
-    before :example do
-      # Seeds.setup
+    before_all do
+      # seed_database
 
       @user0, = create_user
       create_admin

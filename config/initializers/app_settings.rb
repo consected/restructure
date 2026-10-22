@@ -4,7 +4,7 @@ class Settings
   LogLevel = DefaultSettings::LogLevel
   DefaultMigrationSchema = DefaultSettings::DefaultMigrationSchema
   DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'].presence || DefaultSettings::DefaultSchemaOwner
-  MigrationTimeoutSec = 120
+  MigrationTimeoutSec = Rails.env.test? ? 10 : 120
   MaxPostgresIdentifierLength = 63
 
   # Does not set the prefix, just specifies what we search by in jobs

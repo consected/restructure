@@ -11,10 +11,12 @@ module TableGenerators
     end
   end
 
-  def self.dynamic_models_table(*args)
+  def self.dynamic_models_table(*args, **kwargs)
+    skip_if_exists = kwargs[:skip_if_exists]
     name = args[0]
     generate_table = args[1]
     attrib = args[2..-1]
+    return if skip_if_exists && Admin::MigrationGenerator.table_exists?(name)
 
     if name.nil? || name == ''
       puts "Usage:
@@ -85,7 +87,7 @@ EOF
                           INSERT INTO #{singular_name}_history
                           (
                               master_id,
-                              #{attrib.join(",\n                      ")}#{!attrib.empty? ? ',' : ''}
+                              #{attrib.join(",\n                      ")}#{',' unless attrib.empty?}
                               user_id,
                               created_at,
                               updated_at,
@@ -93,7 +95,7 @@ EOF
                               )
                           SELECT
                               NEW.master_id,
-                              #{!attrib.empty? ? 'NEW.' : ''}#{attrib.join(",\n                      NEW.")}#{!attrib.empty? ? ',' : ''}
+                              #{'NEW.' unless attrib.empty?}#{attrib.join(",\n                      NEW.")}#{',' unless attrib.empty?}
                               NEW.user_id,
                               NEW.created_at,
                               NEW.updated_at,
@@ -166,8 +168,8 @@ EOF
                   ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
               ALTER TABLE ONLY #{name}
                   ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{name}
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{name}
+              #{'--' unless created_by}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
 
@@ -177,8 +179,8 @@ EOF
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
-              #{created_by ? '' : '--'} ALTER TABLE ONLY #{singular_name}_history
-              #{created_by ? '' : '--'}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+              #{'--' unless created_by} ALTER TABLE ONLY #{singular_name}_history
+              #{'--' unless created_by}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
               ALTER TABLE ONLY #{singular_name}_history

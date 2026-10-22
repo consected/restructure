@@ -28,7 +28,7 @@ describe 'advanced search', js: true, driver: $browser_driver do
   it 'should test switching to advanced search and search a player' do
     visit '/masters/search'
 
-    sleep 10
+    finish_page_loading
 
     within '#simple_search_master' do
       fill_in 'Last name', with: 'bad1'

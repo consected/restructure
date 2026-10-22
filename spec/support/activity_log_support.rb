@@ -19,27 +19,32 @@ module ActivityLogSupport
   end
 
   def generate_test_activity_log
-    unless Admin::MigrationGenerator.table_exists? 'activity_log_player_contact_emails'
-      TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
-    end
-
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
-    ActivityLogSupport.cleanup_matching_activity_logs('player_contact', 'email', nil, admin: @admin)
-    al = ActivityLog.create! current_admin: @admin,
-                             name: 'activity_log_player_contact_emails',
-                             item_type: 'player_contact',
-                             rec_type: 'email',
-                             action_when_attribute: 'emailed_when',
-                             field_list: 'data, select_call_direction, select_who, emailed_when, select_result, select_next_step, follow_up_when, notes, protocol_id',
-                             blank_log_field_list: 'select_who, emailed_when, select_next_step, follow_up_when, notes, protocol_id'
+    # unless Admin::MigrationGenerator.table_exists? 'activity_log_player_contact_emails'
+    #   TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
+    # end
+    # ActivityLogSupport.cleanup_matching_activity_logs('player_contact', 'email', nil, admin: @admin)
+    al = ActivityLog.active.find_by(name: 'activity_log_player_contact_emails')
 
-    al.current_admin = @admin
+    attrs = {
+      current_admin: @admin,
+      name: 'activity_log_player_contact_emails',
+      item_type: 'player_contact',
+      rec_type: 'email',
+      action_when_attribute: 'emailed_when',
+      field_list: 'data, select_call_direction, select_who, emailed_when, select_result, select_next_step, follow_up_when, notes, protocol_id',
+      blank_log_field_list: 'select_who, emailed_when, select_next_step, follow_up_when, notes, protocol_id'
+    }
+    if al
+      al.update! attrs
+    else
+      al = ActivityLog.create! attrs
+    end
+
     al.update_tracker_events
-
     expect(al).to be_a ::ActivityLog
-
     refresh_step_access al
 
     al
@@ -143,21 +148,18 @@ module ActivityLogSupport
   end
 
   def create_al_for_resource_name(resource_name, att = nil)
-    skip_setup = att.delete(:skip_setup) if att && att[:skip_setup]
+    setup_access :player_contacts, user: @user
+    att ||= valid_attribs
+    # master ||= @master || @player_contact.master
+    # item ||= @player_contact
+    # att[:player_contact] = item
+    att[:master] ||= @player_contact.master
+    @player_contact.current_user = @user
 
-    unless skip_setup
-      setup_access :player_contacts, user: @user
-      att ||= valid_attribs
-      # master ||= @master || @player_contact.master
-      # item ||= @player_contact
-      # att[:player_contact] = item
-      att[:master] ||= @player_contact.master
-      @player_contact.current_user = @user
+    setup_access resource_name, user: @user
+    setup_access :"#{resource_name.singularize}__primary", resource_type: :activity_log_type, user: @user
+    setup_access :"#{resource_name.singularize}__blank_log", resource_type: :activity_log_type, user: @user
 
-      setup_access resource_name, user: @user
-      setup_access :"#{resource_name.singularize}__primary", resource_type: :activity_log_type, user: @user
-      setup_access :"#{resource_name.singularize}__blank_log", resource_type: :activity_log_type, user: @user
-    end
     @activity_log = @player_contact.send(resource_name).create! att
   end
 
@@ -191,6 +193,8 @@ module ActivityLogSupport
 
   def setup_option_config(position, label, fields)
     c = @activity_log.option_configs[position]
+    raise "Option config at position #{position} not found" unless c
+
     expect(c.label).to eq label
     expect(c.fields).to eq fields
 

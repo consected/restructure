@@ -16,7 +16,9 @@ module TableGenerators
   # base parent table name (plural)
   # true to generate, false to create script text, :drop to create drop sql, :drop_do to actually drop the table
   # field names for the table
-  def self.activity_logs_table(*args)
+  def self.activity_logs_table(*args, **kwargs)
+    schema_name = kwargs[:schema_name]
+    schema_prefix = schema_name ? "#{schema_name}." : ''
     name = args[0]
     base_name_plural = args[1]
     generate_table = args[2]
@@ -99,8 +101,8 @@ module TableGenerators
         -- Command line:
         -- table_generators/generate.sh activity_logs_table create #{name} #{base_name} #{attrib.join(' ')}
 
-              DROP TABLE if exists #{singular_name}_history CASCADE;
-              CREATE TABLE #{singular_name}_history (
+              DROP TABLE if exists #{schema_prefix}#{singular_name}_history CASCADE;
+              CREATE TABLE #{schema_prefix}#{singular_name}_history (
                   id integer NOT NULL,
                   master_id integer,
                   #{base_name_id} integer,
@@ -112,7 +114,7 @@ module TableGenerators
                   disabled boolean default false,
                   #{singular_name}_id integer
               );
-              CREATE TABLE #{name} (
+              CREATE TABLE #{schema_prefix}#{name} (
                   id integer NOT NULL,
                   master_id integer,
                   #{base_name_id} integer,
@@ -124,7 +126,7 @@ module TableGenerators
                   disabled boolean default false
               );
 
-              CREATE or replace FUNCTION log_#{singular_name}_update() RETURNS trigger
+              CREATE or replace FUNCTION #{schema_prefix}log_#{singular_name}_update() RETURNS trigger
                   LANGUAGE plpgsql
                   AS $$
                       BEGIN
@@ -157,72 +159,72 @@ module TableGenerators
                       END;
                   $$;
 
-              CREATE SEQUENCE #{singular_name}_history_id_seq
+              CREATE SEQUENCE #{schema_prefix}#{singular_name}_history_id_seq
                   START WITH 1
                   INCREMENT BY 1
                   NO MINVALUE
                   NO MAXVALUE
                   CACHE 1;
 
-              ALTER SEQUENCE #{singular_name}_history_id_seq OWNED BY #{singular_name}_history.id;
+              ALTER SEQUENCE #{schema_prefix}#{singular_name}_history_id_seq OWNED BY #{singular_name}_history.id;
 
 
-              CREATE SEQUENCE #{name}_id_seq
+              CREATE SEQUENCE #{schema_prefix}#{name}_id_seq
                   START WITH 1
                   INCREMENT BY 1
                   NO MINVALUE
                   NO MAXVALUE
                   CACHE 1;
 
-              ALTER SEQUENCE #{name}_id_seq OWNED BY #{name}.id;
+              ALTER SEQUENCE #{schema_prefix}#{name}_id_seq OWNED BY #{name}.id;
 
-              ALTER TABLE ONLY #{name} ALTER COLUMN id SET DEFAULT nextval('#{name}_id_seq'::regclass);
-              ALTER TABLE ONLY #{singular_name}_history ALTER COLUMN id SET DEFAULT nextval('#{singular_name}_history_id_seq'::regclass);
+              ALTER TABLE ONLY #{schema_prefix}#{name} ALTER COLUMN id SET DEFAULT nextval('#{name}_id_seq'::regclass);
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history ALTER COLUMN id SET DEFAULT nextval('#{singular_name}_history_id_seq'::regclass);
 
-              ALTER TABLE ONLY #{singular_name}_history
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
                   ADD CONSTRAINT #{singular_name}_history_pkey PRIMARY KEY (id);
 
-              ALTER TABLE ONLY #{name}
+              ALTER TABLE ONLY #{schema_prefix}#{name}
                   ADD CONSTRAINT #{name}_pkey PRIMARY KEY (id);
 
-              CREATE INDEX index_#{short_name}_history_on_master_id ON #{singular_name}_history USING btree (master_id);
-              CREATE INDEX index_#{short_name}_history_on_#{item_type_id} ON #{singular_name}_history USING btree (#{base_name_id});
+              CREATE INDEX index_#{short_name}_history_on_master_id ON #{schema_prefix}#{singular_name}_history USING btree (master_id);
+              CREATE INDEX index_#{short_name}_history_on_#{item_type_id} ON #{schema_prefix}#{singular_name}_history USING btree (#{base_name_id});
 
-              CREATE INDEX index_#{short_name}_history_on_#{singular_name}_id ON #{singular_name}_history USING btree (#{singular_name}_id);
-              CREATE INDEX index_#{short_name}_history_on_user_id ON #{singular_name}_history USING btree (user_id);
+              CREATE INDEX index_#{short_name}_history_on_#{singular_name}_id ON #{schema_prefix}#{singular_name}_history USING btree (#{singular_name}_id);
+              CREATE INDEX index_#{short_name}_history_on_user_id ON #{schema_prefix}#{singular_name}_history USING btree (user_id);
 
-              CREATE INDEX index_#{name}_on_master_id ON #{name} USING btree (master_id);
-              CREATE INDEX index_#{name}_on_#{item_type_id} ON #{name} USING btree (#{base_name_id});
-              CREATE INDEX index_#{name}_on_user_id ON #{name} USING btree (user_id);
+              CREATE INDEX index_#{name}_on_master_id ON #{schema_prefix}#{name} USING btree (master_id);
+              CREATE INDEX index_#{name}_on_#{item_type_id} ON #{schema_prefix}#{name} USING btree (#{base_name_id});
+              CREATE INDEX index_#{name}_on_user_id ON #{schema_prefix}#{name} USING btree (user_id);
 
-              CREATE TRIGGER #{singular_name}_history_insert AFTER INSERT ON #{name} FOR EACH ROW EXECUTE PROCEDURE log_#{singular_name}_update();
-              CREATE TRIGGER #{singular_name}_history_update AFTER UPDATE ON #{name} FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_#{singular_name}_update();
+              CREATE TRIGGER #{singular_name}_history_insert AFTER INSERT ON #{schema_prefix}#{name} FOR EACH ROW EXECUTE PROCEDURE #{schema_prefix}log_#{singular_name}_update();
+              CREATE TRIGGER #{singular_name}_history_update AFTER UPDATE ON #{schema_prefix}#{name} FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE #{schema_prefix}log_#{singular_name}_update();
 
 
-              ALTER TABLE ONLY #{name}
+              ALTER TABLE ONLY #{schema_prefix}#{name}
                   ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-              ALTER TABLE ONLY #{name}
+              ALTER TABLE ONLY #{schema_prefix}#{name}
                   ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-              ALTER TABLE ONLY #{name}
+              ALTER TABLE ONLY #{schema_prefix}#{name}
                   ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (#{base_name_id}) REFERENCES #{item_type_name}(id);
-              #{'--' unless created_by} ALTER TABLE ONLY #{name}
+              #{'--' unless created_by} ALTER TABLE ONLY #{schema_prefix}#{name}
               #{unless created_by
                   '--'
                 end}     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
-              ALTER TABLE ONLY #{singular_name}_history
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-              ALTER TABLE ONLY #{singular_name}_history
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
-              ALTER TABLE ONLY #{singular_name}_history
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{item_type_id} FOREIGN KEY (#{base_name_id}) REFERENCES #{item_type_name}(id);
 
-              ALTER TABLE ONLY #{singular_name}_history
+              ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
 
-              #{'--' unless created_by} ALTER TABLE ONLY #{singular_name}_history
+              #{'--' unless created_by} ALTER TABLE ONLY #{schema_prefix}#{singular_name}_history
               #{unless created_by
                   '--'
                 end}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);

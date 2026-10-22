@@ -316,7 +316,7 @@ module Dynamic
         if user
           user = User.find_active_by_email_or_id(user)
           if app_type && user.app_type != app_type
-            user.app_type = app_type 
+            user.app_type = app_type
             user.save
           end
         elsif app_type
@@ -399,6 +399,10 @@ module Dynamic
       respond_to?(:use_current_version) && use_current_version
     end
 
+    #
+    # Determine if migrations should be prevented for this definition
+    # based on the _configurations.prevent_migrations
+    # This checks the configuration and memoizes the result
     def prevent_migrations
       return @prevent_migrations if @prevent_migrations_set
 
@@ -406,6 +410,11 @@ module Dynamic
       # Parse option configs if necessary
       option_configs
       @prevent_migrations = configurations && configurations[:prevent_migrations]
+    end
+
+    def force_prevent_migrations=(val)
+      @prevent_migrations_set = true
+      @prevent_migrations = val
     end
 
     # Return result based on the current
