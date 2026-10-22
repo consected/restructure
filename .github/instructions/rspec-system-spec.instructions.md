@@ -19,7 +19,8 @@ The following information builds on For general Rspec standards: [Rspec project 
 5. **Never write raw Capybara selectors in system specs**
 6. **Use the VSCode internal browser (vscode/openSimpleBrowser) if needed**
 7. **Interactively work on difficult issues** with `interactive_debug_session` to pause execution for analysis - this will require the command to be run in an async terminal and occasional polling to watch for the debugger prompt
-8. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
+8. **Before starting any RSpec process, run `app-scripts/check_rspec_processes.sh`** and investigate any reported process in this workspace before starting another one
+9. **Run the full system spec suite locally before pushing changes** - `app-scripts/parallel_test.sh spec/system`
 
 ## Interactive Debugging
 
