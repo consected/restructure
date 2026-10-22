@@ -81,7 +81,7 @@ module Dynamic
       def option_type_attr_name
         return unless respond_to?(:definition)
 
-        definition.option_type_attr_name
+        definition&.option_type_attr_name
       end
 
       def default_option_type_name
@@ -490,7 +490,7 @@ module Dynamic
     def set_option_type_attr_name
       return unless self.class.respond_to? :definition
 
-      @option_type_attr_name = self.class.definition.option_type_attr_name
+      @option_type_attr_name = self.class.definition&.option_type_attr_name
     end
   end
 end

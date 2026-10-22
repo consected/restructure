@@ -109,7 +109,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
     rc.current_admin = @admin
     rc.api_key = @metadata_project[:api_key]
     rc.data_options.handle_deleted_records = 'disable'
+    change_setting('AllowDynamicMigrations', false)
     rc.save!
+    change_setting('AllowDynamicMigrations', true)
     rc.reload
     rc.api_key = @metadata_project[:api_key]
     pi = rc.captured_project_info

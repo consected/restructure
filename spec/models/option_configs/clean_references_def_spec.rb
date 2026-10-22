@@ -35,7 +35,7 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
   include ActivityLogSupport
   include ModelSupport
 
-  before :example do
+  before_all do
     SetupHelper.setup_al_player_contact_phones
     create_user
     create_master
@@ -48,7 +48,10 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
     setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, user: @user
+  end
 
+  before :each do
+    SetupHelper.setup_al_player_contact_phones
     @al = create_item
   end
 

@@ -18,6 +18,10 @@ RSpec.describe 'save_trigger before_save', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
+  before :context do
+    SetupHelper.setup_al_gen_tests('Before Save Btt Process Log', 'btt', 'player_contact')
+  end
+
   before :each do
     create_user
     setup_access :player_contacts
@@ -27,9 +31,11 @@ RSpec.describe 'save_trigger before_save', type: :model do
     @master = @player_contact.master
     expect(@master).not_to be nil
 
-    al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
+    al_def = ActivityLog.unscoped.find_by!(name: 'Before Save Btt Process Log',
+                                           item_type: 'player_contact', process_name: 'btt')
 
-    ActivityLog.active.where(item_type: al_def.item_type).where.not(id: al_def.id).each do |oal|
+    ActivityLog.active.where(item_type: al_def.item_type, rec_type: al_def.rec_type,
+                             process_name: al_def.process_name).where.not(id: al_def.id).each do |oal|
       oal.current_admin = @admin
       oal.disable!
     end
@@ -232,37 +238,37 @@ RSpec.describe 'save_trigger before_save', type: :model do
     al_def.reload
     al_def.force_option_config_parse
 
-    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_persist_test, resource_type: :activity_log_type,
+    setup_access :activity_log__player_contact_btts, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_btt__before_save_persist_test, resource_type: :activity_log_type,
+                                                                              access: :create, user: @user
+    setup_access :activity_log__player_contact_btt__before_save_order_test, resource_type: :activity_log_type,
+                                                                            access: :create, user: @user
+    setup_access :activity_log__player_contact_btt__before_save_exception_test, resource_type: :activity_log_type,
                                                                                 access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_order_test, resource_type: :activity_log_type,
-                                                                              access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_exception_test, resource_type: :activity_log_type,
+    setup_access :activity_log__player_contact_btt__before_save_multi_test, resource_type: :activity_log_type,
+                                                                            access: :create, user: @user
+    setup_access :activity_log__player_contact_btt__before_save_conditional_test, resource_type: :activity_log_type,
                                                                                   access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_multi_test, resource_type: :activity_log_type,
-                                                                              access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_conditional_test, resource_type: :activity_log_type,
-                                                                                    access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_reentrant_create_test,
+    setup_access :activity_log__player_contact_btt__before_save_reentrant_create_test,
                  resource_type: :activity_log_type, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_reentrant_update_test,
+    setup_access :activity_log__player_contact_btt__before_save_reentrant_update_test,
                  resource_type: :activity_log_type, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_reentrant_disable_test,
+    setup_access :activity_log__player_contact_btt__before_save_reentrant_disable_test,
                  resource_type: :activity_log_type, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_reentrant_embedded_item_test,
+    setup_access :activity_log__player_contact_btt__before_save_reentrant_embedded_item_test,
                  resource_type: :activity_log_type, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_downcase_bypass_test,
+    setup_access :activity_log__player_contact_btt__before_save_downcase_bypass_test,
                  resource_type: :activity_log_type, access: :create, user: @user
-    setup_access :activity_log__player_contact_phone__before_save_valid_if_bypass_test,
+    setup_access :activity_log__player_contact_btt__before_save_valid_if_bypass_test,
                  resource_type: :activity_log_type, access: :create, user: @user
     al_def.add_master_association
   end
 
   describe 'execution timing' do
     it 'persists the effect of a before_save trigger as part of the record\'s own save' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_persist_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_persist_test')
 
       expect(al.select_who).to eq 'set in before_save'
 
@@ -273,9 +279,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'runs before_save triggers before on_create (after_commit) triggers' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_order_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_order_test')
 
       # The on_create trigger reads the before_save-set variable via substitution -
       # if it saw a blank value, before_save would not have run first.
@@ -285,9 +291,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'runs the before_save trigger again on update, not just on create' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_persist_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_persist_test')
       expect(al.select_who).to eq 'set in before_save'
 
       # update_this (run during the initial before_save) leaves skip_save_trigger
@@ -302,9 +308,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'runs multiple before_save trigger tasks in sequence' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_multi_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_multi_test')
 
       # step_two's value substitutes step_one's, and the final update_this reads
       # step_two - proving all three tasks ran, in order, within before_save.
@@ -316,39 +322,39 @@ RSpec.describe 'save_trigger before_save', type: :model do
 
   describe 'exception handling' do
     it 'does not raise or block the save when the before_save condition is not met' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'allowed value',
-                                                                       extra_log_type: 'before_save_exception_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'allowed value',
+                                                                     extra_log_type: 'before_save_exception_test')
 
       expect(al).to be_persisted
     end
 
     it 'aborts the save and does not persist the record when a before_save trigger raises' do
-      count_before = @player_contact.activity_log__player_contact_phones.count
+      count_before = @player_contact.activity_log__player_contact_btts.count
 
       expect do
-        @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                    select_who: 'blocked value',
-                                                                    extra_log_type: 'before_save_exception_test')
+        @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                  select_who: 'blocked value',
+                                                                  extra_log_type: 'before_save_exception_test')
       end.to raise_error(FphsException, /\ABlocked in before_save/)
 
-      expect(@player_contact.activity_log__player_contact_phones.count).to eq count_before
+      expect(@player_contact.activity_log__player_contact_btts.count).to eq count_before
     end
   end
 
   describe 'conditional execution' do
     it 'runs the before_save trigger when its if: condition matches' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'trigger me',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_conditional_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'trigger me',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_conditional_test')
 
       expect(al.select_who).to eq 'set in before_save'
     end
 
     it 'does not run the before_save trigger when its if: condition does not match' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'do not trigger',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_conditional_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'do not trigger',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_conditional_test')
 
       expect(al.select_who).to eq 'original value'
       al.reload
@@ -365,9 +371,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
   # `_created`/`_updated`/`_disabled`) silently picked the wrong action - or none at all.
   describe 'reentrant update_this on this (issue #1384)' do
     it 'fires the on_create trigger for a record whose before_save trigger uses update_this on this' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_reentrant_create_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_reentrant_create_test')
 
       expect(al.select_call_direction).to eq 'on_create saw: set in before_save'
       al.reload
@@ -375,9 +381,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'fires the on_update trigger for a record whose before_save trigger uses update_this on this' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_reentrant_update_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_reentrant_update_test')
       al.skip_save_trigger = false
       al.current_user = @master.current_user
       al.update!(select_call_direction: 'updated direction')
@@ -388,9 +394,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'fires the on_disable trigger for a record whose before_save trigger uses update_this on this' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_reentrant_disable_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_reentrant_disable_test')
       al.skip_save_trigger = false
       al.current_user = @master.current_user
       al.update!(disabled: true)
@@ -401,9 +407,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
     end
 
     it 'updates an embedded item via update_this called from a before_save trigger' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_reentrant_embedded_item_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_reentrant_embedded_item_test')
 
       pn = random_phone_number
       ei = al.create_embedded_item({ rank: 10, data: pn, rec_type: :phone })
@@ -431,9 +437,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
   # validation still apply to values a before_save trigger assigns.
   describe 'validation after before_save triggers (issue #1384)' do
     it 'downcases a value set via a before_save-triggered update_this' do
-      al = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
-                                                                       select_who: 'original value',
-                                                                       extra_log_type: 'before_save_downcase_bypass_test')
+      al = @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'from player',
+                                                                     select_who: 'original value',
+                                                                     extra_log_type: 'before_save_downcase_bypass_test')
 
       expect(al.select_who).to eq 'mixed case value'
       al.reload
@@ -445,9 +451,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
       # overwrites it with 'blocked value' - the record is re-validated after before_save
       # triggers finish, so the save is rejected instead of silently persisting bad data.
       expect do
-        @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'allowed value',
-                                                                    select_who: 'original value',
-                                                                    extra_log_type: 'before_save_valid_if_bypass_test')
+        @player_contact.activity_log__player_contact_btts.create!(select_call_direction: 'allowed value',
+                                                                  select_who: 'original value',
+                                                                  extra_log_type: 'before_save_valid_if_bypass_test')
       end.to raise_error(ActiveRecord::RecordInvalid)
     end
 
@@ -456,9 +462,9 @@ RSpec.describe 'save_trigger before_save', type: :model do
       # anywhere in the callback chain (including from handle_before_save_triggers) and returns
       # false, so plain #save keeps its normal (non-raising) contract even though the record was
       # only made invalid by a before_save trigger, not by the caller's own attributes.
-      al = @player_contact.activity_log__player_contact_phones.create(select_call_direction: 'allowed value',
-                                                                      select_who: 'original value',
-                                                                      extra_log_type: 'before_save_valid_if_bypass_test')
+      al = @player_contact.activity_log__player_contact_btts.create(select_call_direction: 'allowed value',
+                                                                    select_who: 'original value',
+                                                                    extra_log_type: 'before_save_valid_if_bypass_test')
 
       expect(al).not_to be_persisted
       expect(al.errors.full_messages).not_to be_empty

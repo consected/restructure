@@ -70,9 +70,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
     change_setting('DisableVDef', false)
 
     # Create EI table once (it cannot be created inside a transaction that rolls back).
-    unless Admin::MigrationGenerator.table_exists?(EI_NAME)
-      TableGenerators.external_identifiers_table(EI_NAME, true, EI_ATTR)
-    end
+    TableGenerators.external_identifiers_table(EI_NAME, true, EI_ATTR, skip_if_exists: true)
   end
 
   after(:all) do

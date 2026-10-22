@@ -8,7 +8,6 @@ describe Classification::ProtocolEvent do
 
   describe 'definition' do
     before :each do
-      seed_database
       create_user
       create_admin
       Classification::ProtocolEvent.active.each do |p|

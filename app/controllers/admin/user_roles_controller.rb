@@ -66,6 +66,15 @@ class Admin::UserRolesController < AdminController
     %i[app_type_id role_name user_id]
   end
 
+  #
+  # Intentionally unscope the UserRole model query
+  # to allow all app types to be returned in admin views.
+  # The default scope on Admin::UserRole enforces a the specification
+  # of an app type, which is too restrictive for admin views.
+  def filtered_primary_model(primary_model_override = nil)
+    super((primary_model_override || primary_model).unscoped)
+  end
+
   def admin_links(item = nil)
     return [true] if item.nil?
 

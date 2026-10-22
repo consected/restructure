@@ -7,7 +7,6 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
   include PlayerContactSupport
 
   it 'generates dialog text from a template' do
-    seed_database
     create_user
     create_master
     create_item
@@ -30,7 +29,6 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
   end
 
   it 'generates versioned dialog text from a template' do
-    seed_database
     create_user
     create_master
 
@@ -80,7 +78,6 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
   end
 
   it 'raises when dialog content contains dangerous HTML' do
-    seed_database
     create_user
     create_master
     create_item

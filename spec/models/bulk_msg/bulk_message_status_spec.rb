@@ -11,7 +11,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include BulkMsgSupport
   include AwsApiStubs
 
-  before :example do
+  before_all do
     BulkMsgSupport.import_bulk_msg_app
     seed_database
     create_admin
@@ -32,7 +32,9 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     expect(has_ranks.length).to be > 0
 
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
+  end
 
+  before :example do
     setup_stub(:sns_log)
     setup_stub(:sns_direct_publish)
     setup_stub(:sns_direct_publish_page2)

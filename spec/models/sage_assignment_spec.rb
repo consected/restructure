@@ -8,7 +8,6 @@ RSpec.describe 'SageAssignment', type: :model do
 
   describe 'SageAssignment' do
     before :each do
-      seed_database
       create_user
       setup_access :sage_assignments
       @alt_master = create_master

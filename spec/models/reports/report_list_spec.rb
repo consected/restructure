@@ -119,10 +119,6 @@ RSpec.describe Reports::ReportList, type: :model do
     change_setting('AllowDynamicMigrations', false)
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   before :example do
     # Remove all list records between tests for isolation.
     # History must be deleted first to satisfy the FK constraint.

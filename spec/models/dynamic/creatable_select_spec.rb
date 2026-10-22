@@ -24,25 +24,20 @@ RSpec.describe 'Creatable select fields', type: :model do
   include DynamicModelSupport
 
   before :all do
+    # Pre-create tables to avoid auto-migration timeout issues
+
+    TableGenerators.dynamic_models_table('test_creatable_sources', :create_do, 'name', skip_if_exists: true)
+    TableGenerators.dynamic_models_table('test_creatable_consumers', :create_do, 'select_record_from_table_test_creatable_sources', skip_if_exists: true)
+    TableGenerators.dynamic_models_table('test_creatable_assoc_consumers', :create_do, 'select_record_from_test_creatable_sources', skip_if_exists: true)
+    TableGenerators.dynamic_models_table('test_creatable_id_consumers', :create_do,
+                                         'select_record_id_from_table_test_creatable_sources',
+                                         'select_record_id_from_test_creatable_sources', skip_if_exists: true)
+  end
+
+  before_all do
     change_setting('AllowDynamicMigrations', true)
     create_admin
     create_user
-
-    # Pre-create tables to avoid auto-migration timeout issues
-    unless Admin::MigrationGenerator.table_exists? 'test_creatable_sources'
-      TableGenerators.dynamic_models_table('test_creatable_sources', :create_do, 'name')
-    end
-    unless Admin::MigrationGenerator.table_exists? 'test_creatable_consumers'
-      TableGenerators.dynamic_models_table('test_creatable_consumers', :create_do, 'select_record_from_table_test_creatable_sources')
-    end
-    unless Admin::MigrationGenerator.table_exists? 'test_creatable_assoc_consumers'
-      TableGenerators.dynamic_models_table('test_creatable_assoc_consumers', :create_do, 'select_record_from_test_creatable_sources')
-    end
-    unless Admin::MigrationGenerator.table_exists? 'test_creatable_id_consumers'
-      TableGenerators.dynamic_models_table('test_creatable_id_consumers', :create_do,
-                                           'select_record_id_from_table_test_creatable_sources',
-                                           'select_record_id_from_test_creatable_sources')
-    end
 
     @master = create_master
 
@@ -179,10 +174,6 @@ RSpec.describe 'Creatable select fields', type: :model do
     @id_consumer_dm.update_tracker_events
 
     setup_access :dynamic_model__test_creatable_id_consumers, user: @user
-  end
-
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
   end
 
   before :example do
