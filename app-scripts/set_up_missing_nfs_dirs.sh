@@ -27,20 +27,24 @@ if [ "${RAILS_ENV}" == 'production' ]; then
   fi
 fi
 
-cat tmp/nfs_apps_list.txt | while read -r line; do
+# Fed via redirection (not a `cat |` pipe) so the loop doesn't run in a subshell -
+# otherwise RESTART_REQUIRED set below would be lost once the loop exits.
+while read -r line; do
   APP_TYPE_ID=$(echo "$line" | cut -d' ' -f1)
   EXISTS=$(echo "$line" | cut -d' ' -f2)
   SUBDIR=$(echo "$line" | cut -d' ' -f3)
 
   [ "${EXISTS}" == 'true' ] && continue 
   
-  SUBDIR=${SUBDIR} app-scripts/setup_filestore_app.sh "${APP_TYPE_ID}"
+  # Detach from the loop's stdin so an unexpected interactive prompt fails fast
+  # instead of silently consuming the next line of nfs_apps_list.txt.
+  SUBDIR=${SUBDIR} app-scripts/setup_filestore_app.sh "${APP_TYPE_ID}" < /dev/null
   if [ $? -ne 0 ]; then
     echo "Failed to set up app type ${APP_TYPE_ID}" >&2
   else
     RESTART_REQUIRED=true
   fi
-done
+done < tmp/nfs_apps_list.txt
 
 mv -f tmp/nfs_apps_list.txt tmp/nfs_apps_list.txt.bak
 if [ "${RESTART_REQUIRED}" ]; then

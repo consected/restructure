@@ -49,7 +49,9 @@ fi
 
 echo "Mountpoint is: $MOUNTPOINT"
 
-if [ -z "${SUBDIR}" ]; then
+# SUBDIR may legitimately be set to an empty string by a caller (e.g. production
+# has no subdir layer), so only prompt when it was never provided at all.
+if [ -z "${SUBDIR+x}" ]; then
   ls "${MOUNTPOINT}"
   read -r -p 'Enter the selected directory: ' SUBDIR
 fi
@@ -58,7 +60,7 @@ OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
 
-if [ -d ${FS_ROOT}/main ]; then
+if [ -d "${FS_ROOT}/main" ]; then
   FS_DIR=main
 fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}

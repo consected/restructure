@@ -25,7 +25,7 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
                           create_filestore_container update_this add_tracker
                           change_user_roles pull_external_data set_item_flags
                           redcap_request run_batch_trigger log transaction
-                          background reload_this case set_save_trigger_results
+                          background reload_this case each set_save_trigger_results
                           set_variables generate_document full_text_search]
 
       # Build a minimal valid config with every trigger name
@@ -111,6 +111,46 @@ RSpec.describe 'ExtraOptionConfigs::TriggerTasks per-type validation', type: :mo
       instance = klass.new(each: { value: { this: { field: 'items' } }, do: { change_user_roles: { add_role_names: ['r'], phantom: true } } })
       warnings = instance.config_warnings.select { |w| w[:message]&.match?(/phantom/) }
       expect(warnings).not_to be_empty
+    end
+
+    it 'allows iterator_name and lifecycle hooks on each:' do
+      instance = klass.new(
+        each: {
+          iterator_name: 'loop_result',
+          value: %w[first second],
+          do: { log: { message: '{{save_trigger_results.loop_result_value}}' } },
+          on_complete: { log: { message: 'completed' } },
+          on_failure: { log: { message: 'failed' } }
+        }
+      )
+
+      expect(instance.config_warnings).to be_empty
+    end
+
+    it 'allows each in lifecycle and delegate trigger blocks' do
+      each_config = {
+        each: {
+          value: %w[first second],
+          do: { log: { message: '{{save_trigger_results.iterator_value}}' } }
+        }
+      }
+      config = {
+        log: {
+          message: 'main',
+          on_complete: each_config,
+          on_failure: each_config
+        },
+        case: [
+          { when: { always: true }, then: [each_config] },
+          { else: [each_config] }
+        ],
+        transaction: [each_config],
+        background: [each_config]
+      }
+
+      instance = klass.new(config)
+
+      expect(instance.config_warnings).to be_empty
     end
   end
 
