@@ -15,7 +15,7 @@ RSpec.describe SaveTriggers::Background, type: :model do
     ActiveJob::Base.queue_adapter = original_adapter
   end
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
@@ -230,7 +230,7 @@ RSpec.describe SaveTriggersBackgroundJob, type: :job do
     ActiveJob::Base.queue_adapter = original_adapter
   end
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts

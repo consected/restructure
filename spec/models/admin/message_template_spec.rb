@@ -11,7 +11,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include ReportSupport
   include ItemFlagSupport
 
-  before :all do
+  before_all do
     seed_database # to ensure embedded reports work
     create_admin
     create_user

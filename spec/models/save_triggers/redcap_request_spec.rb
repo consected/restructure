@@ -15,19 +15,19 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
 
   include Redcap::RedcapSupport
 
-  before :example do
+  before_all do
     create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.find { |h| h[:name] == 'save_trigger' }
+    SetupHelper.setup_al_player_contact_phones
+    @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
   end
 
   before :example do
-    SetupHelper.setup_al_player_contact_phones
-    res = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
+    @projects = setup_redcap_project_admin_configs
+    @project = @projects.find { |h| h[:name] == 'save_trigger' }
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
-    @al = create_al_for_resource_name(res.resource_name, master: @master)
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end

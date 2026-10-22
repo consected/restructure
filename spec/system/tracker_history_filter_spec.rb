@@ -137,9 +137,9 @@ describe 'tracker history filter panel', js: true, driver: $browser_driver do
     expand_tracker_panel
 
     expect(page).to have_css('table.tracker-tree-results', wait: 10)
-    chron_link = find('table.tracker-tree-results thead a[data-template="tracker-chron-result-template"]')
-    scroll_into_view(chron_link)
-    chron_link.click
+    chron_link_selector = 'table.tracker-tree-results thead a[data-template="tracker-chron-result-template"]'
+    scroll_into_view(find(chron_link_selector))
+    find(chron_link_selector).click
 
     expect(page).to have_css('table.tracker-chron-results', wait: 10)
     expect(page).to have_css('.tracker-chron-results-wrap select.tracker-history-filter.attached-chosen',

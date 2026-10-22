@@ -33,7 +33,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   describe 'retrieving records and files' do
-    before :all do
+    before_all do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -41,9 +41,6 @@ RSpec.describe Redcap::DataRecords, type: :model do
       @project = @projects.first
       @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
       setup_file_fields
-    end
-
-    before :example do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -51,6 +48,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
       setup_file_store
       @projects = setup_redcap_project_admin_configs
       @project = @projects.first
+    end
+
+    before :example do
       reset_mocks
     end
 
@@ -977,15 +977,19 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.current_admin = @admin
       rc.save!
 
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_dr_recs'
+      ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
-    before :example do
+    before_all do
       create_admin
       setup_file_store
+    end
+
+    before :example do
       reset_mocks
     end
 
@@ -1031,7 +1035,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   describe 'handling of deleted records allows transfer' do
-    before :all do
+    before(:all) do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -1043,15 +1047,19 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.current_admin = @admin
       rc.save!
 
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_dr2_recs'
+      ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
-    before :example do
+    before_all do
       create_admin
       setup_file_store
+    end
+
+    before :example do
       reset_mocks
     end
 
@@ -1153,7 +1161,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   describe 'project with summary choice array fields' do
-    before :all do
+    before(:all) do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -1166,14 +1174,18 @@ RSpec.describe Redcap::DataRecords, type: :model do
       rc.current_admin = @admin
       rc.save!
 
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_dr3_recs'
+      ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
-    before :example do
+    before_all do
       create_admin
+    end
+
+    before :example do
       reset_mocks
     end
 
@@ -1244,7 +1256,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   describe 'project associating foreign key with external id' do
-    before :all do
+    before(:all) do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -1263,19 +1275,23 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
       puts "rc.id: #{rc.id}"
 
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_dr4_recs'
+      ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
     end
 
-    before :example do
+    before_all do
       create_admin
       setup_file_store
+      setup_access :scantrons unless @user.has_access_to? :create, :table, :scantrons
+    end
+
+    before :example do
       reset_mocks
 
       # Set up scantrons to match to redcap_survey_identifiers
-      setup_access :scantrons unless @user.has_access_to? :create, :table, :scantrons
 
       create_sid_scantrons
     end
@@ -1318,7 +1334,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   describe 'project associating foreign key with external id and setting master_id field' do
-    before :all do
+    before(:all) do
       @bad_admin, = create_admin
       @bad_admin.update! disabled: true
       create_admin
@@ -1338,22 +1354,25 @@ RSpec.describe Redcap::DataRecords, type: :model do
       expect(rc.data_options.associate_master_through_external_identifer).to eq 'scantrons'
       puts "rc.id: #{rc.id}"
 
-      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      @table_name = 'redcap_test.test_rc_dr5_recs'
+      ds = Redcap::DynamicStorage.new rc, @table_name
       ds.category = 'redcap-test-env'
       @dm = ds.create_dynamic_model
       expect(ds.dynamic_model_ready?).to be_truthy
       expect(@dm.field_list).to include('master_id')
     end
 
-    before :example do
+    before_all do
       create_admin
       setup_file_store
-      reset_mocks
-
       # Set up scantrons to match to redcap_survey_identifiers
       setup_access :scantrons unless @user.has_access_to? :create, :table, :scantrons
 
       create_sid_scantrons
+    end
+
+    before :example do
+      reset_mocks
     end
 
     it 'saves records with integer survey identifiers and associated master_id' do

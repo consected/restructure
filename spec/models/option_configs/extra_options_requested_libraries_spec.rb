@@ -21,10 +21,6 @@ RSpec.describe OptionConfigs::ExtraOptions, type: :model do
     @rand_suffix = rand(1_000_000_000)
   end
 
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
   describe '.requested_libraries' do
     context 'with no library references' do
       it 'returns an empty array when content has no @library lines' do

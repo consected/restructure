@@ -6,7 +6,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  before :example do
+  before_all do
     SetupHelper.setup_al_player_contact_phones
     SetupHelper.setup_al_gen_tests AlNameGenTestAt, 'elt2_test', 'player_contact'
     ud, = create_user

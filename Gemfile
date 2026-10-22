@@ -91,6 +91,7 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
+  gem 'test-prof', '~> 1.0'
   gem 'webmock'
 end
 

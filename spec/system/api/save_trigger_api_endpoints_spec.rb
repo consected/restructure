@@ -626,8 +626,8 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       )
 
       @al = ActivityLog.active.where(item_type: 'player_contact', rec_type: nil,
-                                    process_name: 'api_panel_trigger_test_email',
-                                    table_name: AL_TABLE_NAME, schema_name: SCHEMA_NAME).first
+                                     process_name: 'api_panel_trigger_test_email',
+                                     table_name: AL_TABLE_NAME, schema_name: SCHEMA_NAME).first
       @al ||= ActivityLog.create!(
         current_admin: @admin,
         name: AL_TABLE_NAME,
@@ -692,6 +692,7 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
 
       setup_access EI_NAME.to_sym, user: @user
 
+      @ei.update_tracker_events
       @ei.other_regenerate_actions if @ei.respond_to?(:other_regenerate_actions)
       ExternalIdentifier.define_models
       # Use routes_reloader.reload! instead of ExternalIdentifier.routes_load to ensure EI routes

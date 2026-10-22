@@ -57,7 +57,7 @@ RSpec.describe NfsStore::Process::MountArchiveJob, type: :model do
 
   describe 'with use_parent_sub_dir enabled' do
     before :each do
-      seed_database && ActivityLog.define_models
+      ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first
@@ -166,7 +166,7 @@ RSpec.describe NfsStore::Process::MountArchiveJob, type: :model do
 
   describe 'with use_parent_sub_dir disabled' do
     before :each do
-      seed_database && ActivityLog.define_models
+      ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first

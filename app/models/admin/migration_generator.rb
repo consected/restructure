@@ -361,6 +361,17 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Run the migrations and reset tables and view cache
+  def self.migrate(dirname = nil, do_migration: nil)
+    msg = "Running migration from #{dirname}"
+    Rails.logger.warn msg
+    ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
+
+    Admin::MigrationConnection.migrate(dirname, do_migration:)
+    tables_and_views_reset!
+  end
+
+  #
   # Create a migration to add a schema
   # @param [String] export_type - a suffix to add to the migration name,
   #                               such as 'app-export'
@@ -674,7 +685,7 @@ class Admin::MigrationGenerator
     dirname = db_migration_dirname export_type
 
     # Ensure we don't get overlapping migration version numbers or class names
-    migtime = Time.new.to_fs(:number)
+    migtime = Time.now.to_fs(:number)
     cname = nil
     version ||= migration_version
     cname_us = "#{mode}_#{name}_#{version}"
@@ -683,7 +694,7 @@ class Admin::MigrationGenerator
     while Dir.glob("#{migtime}*", base: dirname).length > 0
       sleep 1.5
 
-      migtime = Time.new.to_fs(:number)
+      migtime = Time.now.to_fs(:number)
     end
 
     filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
@@ -718,63 +729,35 @@ class Admin::MigrationGenerator
     dirname
   end
 
-  #
-  # Relative path to the failed migrations directory
+  # Relative path to the failed migrations directory.
   def db_migration_failed_dirname
-    'db/app_migrations/failed'
+    Admin::MigrationConnection.db_migration_failed_dirname
   end
 
   #
   # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
     if Admin::AppTypeImport.prevent_migrations?
-      Rails.logger.warn 'Migrations prevented by Admin::AppTypeImport - skipping migration'
+      msg = 'Migrations prevented by Admin::AppTypeImport - skipping migration'
+      Rails.logger.warn msg
+      ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
       return
     end
 
     unless allow_migrations && db_migration_schema != DefaultMigrationSchema
-      Rails.logger.warn "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
+      msg = "Migrations not allowed or targeting (#{db_migration_schema}) default schema (#{DefaultMigrationSchema}) - skipping migration"
+      Rails.logger.warn msg
+      ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
       return
     end
-    puts "Running migration from #{db_migration_dirname}"
-    Rails.logger.warn "Running migration from #{db_migration_dirname}"
 
-    Timeout.timeout(Settings::MigrationTimeoutSec) do
-      # Outside the current transaction
-      Thread.new do
-        ActiveRecord::Base.connection_pool.with_connection do
-          self.class.migration_context(db_migration_dirname).migrate
-        end
-      rescue Exception => e
-        migration_file_status = move_failed_migration_file
-        msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
-        Rails.logger.warn msg
-        unless Rails.env.production?
-          warn msg
-          warn e
-        end
-        bt = e.backtrace
-              .reject { |m| m.include?('/vendor/bundle/ruby/') }
-              .join("\n")
-        raise FphsException, "#{msg}:\n#{e}\n#{bt}"
-      end.join
-    end
+    migrate
+  end
 
-    self.class.tables_and_views_reset!
-
-    true
-  rescue Exception => e
-    migration_file_status = move_failed_migration_file
-    msg = "Failed migration for path '#{db_migration_dirname}' - #{migration_file_status} - database #{Admin::MigrationGenerator.current_database}"
-    Rails.logger.warn msg
-    unless Rails.env.production?
-      warn msg
-      warn e
-    end
-    bt = e.backtrace
-          .reject { |m| m.include?('/vendor/bundle/ruby/') }
-          .join("\n")
-    raise FphsException, "#{msg}:\n#{e}\n#{bt}"
+  def migrate(dirname = nil, do_migration: nil)
+    @do_migration = do_migration unless do_migration.nil?
+    dirname ||= db_migration_dirname
+    self.class.migrate(dirname, do_migration: @do_migration)
   end
 
   #

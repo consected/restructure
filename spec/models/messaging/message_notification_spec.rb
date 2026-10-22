@@ -27,7 +27,6 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     create_admin
     @rec_user, = create_user
     create_user
-    seed_database
     ActivityLog.define_models
     setup_access :player_contacts
     create_item(data: rand(10_000_000_000_000_000), rank: 10)

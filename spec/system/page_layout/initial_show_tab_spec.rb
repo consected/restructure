@@ -86,7 +86,7 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     yaml
   end
 
-  before(:all) do
+  before_all do
     change_setting('TwoFactorAuthDisabledForUser', true)
     change_setting('TwoFactorAuthDisabledForAdmin', true)
     SetupHelper.feature_setup
@@ -155,37 +155,37 @@ describe 'page layout initial_show tab auto-expand', js: true, driver: $browser_
     @original_open_panels_disabled = @original_open_panels_config&.disabled
   end
 
-  after(:all) do
-    # Remove test layouts FIRST to avoid panel_name uniqueness conflicts when restoring originals
-    [@details_panel, @trackers_panel].compact.each do |pl|
-      ActiveRecord::Base.connection.execute(
-        "DELETE FROM page_layout_history WHERE page_layout_id = #{pl.id}"
-      )
-      pl.destroy
-    end
+  # after(:all) do
+  #   # Remove test layouts FIRST to avoid panel_name uniqueness conflicts when restoring originals
+  #   [@details_panel, @trackers_panel].compact.each do |pl|
+  #     ActiveRecord::Base.connection.execute(
+  #       "DELETE FROM page_layout_history WHERE page_layout_id = #{pl.id}"
+  #     )
+  #     pl.destroy
+  #   end
 
-    # Restore original layouts (no panel_name conflicts now)
-    @original_layouts&.each do |id, attrs|
-      pl = Admin::PageLayout.find_by(id: id)
-      pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
-    end
+  #   # Restore original layouts (no panel_name conflicts now)
+  #   @original_layouts&.each do |id, attrs|
+  #     pl = Admin::PageLayout.find_by(id: id)
+  #     pl&.update!(current_admin: @admin, options: attrs[:options], disabled: attrs[:disabled])
+  #   end
 
-    # Restore original open_panels config
-    if @original_open_panels_config
-      @original_open_panels_config.update!(
-        current_admin: @admin,
-        value: @original_open_panels_value,
-        disabled: @original_open_panels_disabled
-      )
-    else
-      ac = @app_type.app_configurations.active.where(name: 'open panels').first
-      ac&.update!(current_admin: @admin, disabled: true)
-    end
-  end
+  #   # Restore original open_panels config
+  #   if @original_open_panels_config
+  #     @original_open_panels_config.update!(
+  #       current_admin: @admin,
+  #       value: @original_open_panels_value,
+  #       disabled: @original_open_panels_disabled
+  #     )
+  #   else
+  #     ac = @app_type.app_configurations.active.where(name: 'open panels').first
+  #     ac&.update!(current_admin: @admin, disabled: true)
+  #   end
+  # end
 
   before(:each) do
     # Clear the AppConfiguration memoization cache before each test.
-    # DatabaseCleaner truncates records between tests, so any user-specific config
+    # Transactional fixtures roll back records between tests, so any user-specific config
     # created by a previous test is gone from the DB. Without clearing the memo,
     # value_for still returns the stale cached value from the prior test even though
     # the record no longer exists, causing incorrect open_panels behavior.

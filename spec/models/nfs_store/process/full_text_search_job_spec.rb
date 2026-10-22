@@ -67,7 +67,7 @@ RSpec.describe 'NfsStore::Process::FullTextSearchJob', type: :model do
   end
 
   before :each do
-    seed_database && ActivityLog.define_models
+    ActivityLog.define_models
     setup_nfs_store
     setup_fts_pipeline
     setup_container_and_al activity: :fts_test

@@ -5,13 +5,13 @@ require 'rails_helper'
 RSpec.describe Classification::AccuracyScore, type: :model do
   include ModelSupport
   include AccuracyScoreSupport
+
   describe 'definition' do
     def disable_all
       Classification::AccuracyScore.active.update_all(disabled: true)
     end
 
     before :each do
-      seed_database
       create_user
       create_admin
       create_master

@@ -10,9 +10,9 @@ RSpec.describe Redcap::DataDictionary, type: :model do
     create_admin
     setup_redcap_project_admin_configs
     setup_repeat_instrument_fields
-  end
+    # end
 
-  before :example do
+    # before :example do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
     create_admin

@@ -15,7 +15,7 @@ RSpec.describe NfsStore::Process::ScriptedJob, type: :model do
   end
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
 
     @other_users = []
     @other_users << create_user.first

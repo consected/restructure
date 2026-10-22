@@ -15,7 +15,7 @@ RSpec.describe NfsStore::Manage::Container, type: :model do
   include NfsStore::InNfsStoreContainer
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
 
     setup_nfs_store
     generate_test_dynamic_model

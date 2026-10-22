@@ -16,7 +16,7 @@ RSpec.describe NfsStore::Process::RerunAllJob, type: :model do
   def do_dicom_test_uploads; end
 
   before :each do
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
 
     @other_users = []
     @other_users << create_user.first
