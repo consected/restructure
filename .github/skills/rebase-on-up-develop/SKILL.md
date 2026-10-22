@@ -1,3 +1,8 @@
+---
+name: rebase-on-up-develop
+description: rebase-on-up-develop
+disable-model-invocation: true
+---
 name: rebase-on-up-develop
 description: Rebase a feature branch onto the latest up-develop branch
 ---

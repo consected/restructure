@@ -1,3 +1,8 @@
+---
+name: merge-from-up-develop
+description: merge-from-up-develop
+disable-model-invocation: true
+---
 name: merge-from-up-develop
 description: Merge the latest changes from up-develop into the local develop branch
 ---

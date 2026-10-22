@@ -1,3 +1,8 @@
+---
+name: refactor
+description: refactor
+disable-model-invocation: true
+---
 name: refactor
 description: Run TDD Refactor Phase
 agent: tdd-refactor

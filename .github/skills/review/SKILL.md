@@ -1,3 +1,8 @@
+---
+name: review
+description: review
+disable-model-invocation: true
+---
 name: review
 description: Review PR for completeness and security issues
 ---

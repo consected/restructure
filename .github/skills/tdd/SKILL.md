@@ -1,3 +1,8 @@
+---
+name: tdd
+description: tdd
+disable-model-invocation: true
+---
 name: tdd
 description: Run TDD Red, Green, and Refactor Phases
 agent: tdd-implementation

@@ -1,3 +1,8 @@
+---
+name: remove-branch
+description: remove-branch
+disable-model-invocation: true
+---
 name: remove-branch
 description: Remove a feature branch after merging a pull request
 ---
