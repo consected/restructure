@@ -184,6 +184,16 @@ module FilestoreUiActions
     expect(page).to have_css('#primary-modal', visible: true, wait: 10)
   end
 
+  def expect_move_modal_path_as_literal_text(path)
+    within '#primary-modal' do
+      aggregate_failures do
+        expect(find('.container-browser-move-from').text).to eq(path)
+        expect(page).to have_no_css('.container-browser-move-from img', visible: :all)
+        expect(page.evaluate_script('window.__xss')).to be_nil
+      end
+    end
+  end
+
   # Enter a folder name and submit the move files action
   # @param folder_name [String] the destination folder name (can be new or existing)
   def move_files_to_folder(folder_name)
