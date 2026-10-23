@@ -101,6 +101,25 @@ module FilestoreUiActions
     sleep 0.5
   end
 
+  # Select a folder in the filestore browser by clicking its checkbox
+  # @param folder_name [String] displayed name of the folder to select
+  def select_folder_in_browser(folder_name)
+    folder_row = find('.container-browser .container-folder', text: folder_name, wait: 10)
+    checkbox = folder_row.find('input[type="checkbox"]', visible: :all)
+    scroll_into_view(folder_row)
+    page.execute_script('arguments[0].click();', checkbox)
+    sleep 0.5
+  end
+
+  # Select an existing destination folder in the move modal
+  # @param folder_name [String] displayed name of the destination folder
+  def select_move_destination_folder(folder_name)
+    folder_row = find('#primary-modal .browse-move-to-folders .container-folder', text: folder_name, wait: 10)
+    checkbox = folder_row.find('input.container-folder-selector', visible: :all)
+    page.execute_script('arguments[0].click();', checkbox)
+    finish_page_loading
+  end
+
   # Open the hamburger menu in the filestore browser
   def open_filestore_menu
     hamburger_btn = find('.nfs-store-container-block button.hamburger', wait: 10)

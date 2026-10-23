@@ -28,6 +28,10 @@
 # NOTE: The core bug fix for Issue #878 is validated by the unit test in:
 #   spec/models/nfs_store/manage/container_file_spec.rb
 #
+# Regression test for Issue #1492:
+#   Stored folder paths must remain text and attribute values in the move modal,
+#   rather than being interpreted as HTML.
+#
 # This system spec provides UI-level regression testing for the filestore operations.
 
 require 'rails_helper'
@@ -241,6 +245,41 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expect(file_exists_in_browser?(new_filename)).to be true
       expect(file_exists_in_browser?(original_filename)).to be false
     end
+
+    it 'preserves escaped filename characters through rename and on disk' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      unique_part = SecureRandom.hex(4)
+      original_filename = "roundtrip-#{unique_part} &amp; <draft> \"quoted\".txt"
+      upload_file_to_filestore(create_temp_test_file(filename: original_filename))
+
+      stored_file = @container.stored_files.find_by!(file_name: original_filename)
+      stored_file.current_user = @user
+      original_retrieval_path = stored_file.retrieval_path
+      expect(File.exist?(original_retrieval_path)).to be(true)
+
+      select_file_in_browser(original_filename)
+      open_filestore_menu
+      click_rename_file_menu_item
+      expect(page).to have_field('new_name', with: original_filename)
+
+      renamed_filename = "renamed-#{unique_part} <final> &amp; \"quoted\".txt"
+      rename_file_to(renamed_filename)
+      refresh_filestore_list
+
+      expect(file_exists_in_browser?(renamed_filename)).to be(true)
+      expect(file_exists_in_browser?(original_filename)).to be(false)
+
+      stored_file.reload
+      stored_file.current_user = @user
+      renamed_retrieval_path = stored_file.retrieval_path
+      expect(stored_file.file_name).to eq(renamed_filename)
+      expect(File.basename(renamed_retrieval_path)).to eq(renamed_filename)
+      expect(File.exist?(renamed_retrieval_path)).to be(true)
+      expect(File.exist?(original_retrieval_path)).to be(false)
+    end
   end
 
   describe 'Send file to trash' do
@@ -385,6 +424,76 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       # Expand the folder and verify the file is inside
       expand_folder(new_folder_name)
       expect(file_exists_in_browser?(filename)).to be true
+    end
+
+    it 'renders a selected source folder path as text in the move modal (regression for issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-path-test-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = '<img src=x data-xss-probe="issue1492-display" onerror="window.__issue1492_display_xss=1">'
+      move_files_to_folder(folder_name)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+      select_folder_in_browser(folder_name)
+      page.execute_script('window.__issue1492_display_xss = false;')
+      open_filestore_menu
+      click_move_files_menu_item
+
+      move_from = find('#primary-modal .container-browser-move-from', visible: :all)
+
+      aggregate_failures('issue #1492 stored folder path handling') do
+        expect(move_from.text).to eq(folder_name)
+        expect(move_from).not_to have_css('img[data-xss-probe="issue1492-display"]')
+        expect(page.evaluate_script('window.__issue1492_display_xss')).to be(false)
+      end
+    end
+
+    it 'keeps stored folder paths out of move-modal HTML attributes (regression for issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-attribute-test-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename:))
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = 'x" data-xss-marker="y"><img src=x data-xss-probe=issue1492-attribute onerror=window.__issue1492_attribute_xss=1>'
+      page.execute_script('window.__issue1492_attribute_xss = false;')
+      move_files_to_folder(folder_name)
+      expect(page.evaluate_script('window.__issue1492_attribute_xss')).to be(false)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+      safe_filename = "safe-source-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename: safe_filename))
+      select_file_in_browser(safe_filename)
+      page.execute_script('window.__issue1492_attribute_xss = false;')
+      open_filestore_menu
+      click_move_files_menu_item
+
+      move_folder_choices = find('#primary-modal .browse-move-to-folders')
+      destination_paths = move_folder_choices.all('input.container-folder-add', visible: :all).map do |input|
+        input['data-folder-path']
+      end
+      select_move_destination_folder(folder_name)
+
+      aggregate_failures('issue #1492 stored folder path handling') do
+        expect(destination_paths).to include("./#{folder_name}")
+        expect(page).to have_field('new_path', with: folder_name)
+        expect(move_folder_choices).not_to have_css('img[data-xss-probe="issue1492-attribute"]')
+        expect(page.evaluate_script('window.__issue1492_attribute_xss')).to be(false)
+      end
     end
   end
 
