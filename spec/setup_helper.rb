@@ -8,6 +8,7 @@ $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
   SpecTallyTable = 'rails_spec_db_tally'
+  DefaultMigrationsDir = 'db/migrations'
 
   def self.raise_if_stale_instance_variables!(instance_variables)
     instance_variables.each do |var|
@@ -29,6 +30,7 @@ module SetupHelper
   end
 
   def self.registration_admin
+    @registration_admin = nil if @registration_admin && !Admin.exists?(id: @registration_admin.id)
     @registration_admin ||= ::UserSupport.create_admin('registration').first
   end
 
@@ -39,10 +41,11 @@ module SetupHelper
   def self.clear_delayed_job
     put_now 'Clear delayed_job'
 
-    Delayed::Job.delete_all
+    ActiveRecord::Base.connection.execute 'truncate delayed_jobs;'
   end
 
   def self.setup_template_user
+    put_now 'Setup template user'
     # Do some setup that could impact all tests through the availability of master associations
     tue = Settings::TemplateUserEmail&.downcase
     require "#{Rails.root}/db/seeds.rb" unless User.active.find_by(email: tue)
@@ -64,11 +67,9 @@ module SetupHelper
     ActiveRecord::Base.connection.execute sql
     put_now 'Setup ActivityLogPlayerContactPhone'
     SetupHelper.setup_al_player_contact_phones
-    # Seeds::ActivityLogPlayerContactPhone.setup
-    put_now 'setup_al_player_contact_emails'
-    SetupHelper.setup_al_player_contact_emails
-    put_now 'setup_al_player_contact_embed_tests'
-    SetupHelper.setup_al_player_contact_embed_tests
+    %i[email embed_test].each do |process_name|
+      SetupHelper.setup_al_player_contact(process_name)
+    end
     put_now 'Setup ext_identifier'
     SetupHelper.setup_ext_identifier
     put_now 'setup_test_app'
@@ -84,6 +85,18 @@ module SetupHelper
     als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
     als.each do |a|
       a.update! current_admin: a.admin, disabled: true if a.enabled?
+    end
+
+    # Create DMs that should never be edited
+    %w[test_created_by_recs test_dm_spec_created_by_recs].each do |table_name|
+      DynamicModelSupport.generate_test_dynamic_model table_name: table_name
+    end
+
+    # Create DMs that can be updated during tests (uses an alt option to generate the full name)
+    # test_<alt-option>_recs
+    %w[orig_opt dialog_before comments config_triggers].each do |alt_option|
+      table_name = "test_#{alt_option}_recs"
+      DynamicModelSupport.generate_test_dynamic_model table_name: table_name, allow_updating: true
     end
 
     SetupHelper.add_to_spec_db('app_setup')
@@ -254,19 +267,11 @@ module SetupHelper
     puts 'Check migrations'
 
     # Outside the current transaction
-    Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        dirname = 'db/migrations'
-        mc = Admin::MigrationGenerator.migration_context(dirname)
-        if mc.needs_migration?
-          puts 'Running migrations'
-          mc.migrate
-        end
-      end
-    end.join
+    Admin::MigrationGenerator.migrate(DefaultMigrationsDir)
   end
 
   def self.reload_configs
+    put_now 'Reload configs'
     Rails.logger.info 'Reload configs'
     Admin::AppType.reset_memo_associated_items!
     AppControl.define_models
@@ -302,29 +307,22 @@ module SetupHelper
     # MasterDataSupport.create_data_set_outside_tx options
   end
 
-  def self.setup_al_player_contact_emails
-    Rails.logger.info 'Setting up al player contact emails'
+  def self.setup_al_player_contact(process_name)
+    suffix = process_name.to_s.pluralize
+    msg = "Setting up al player contact #{suffix}"
+    Rails.logger.info msg
+    put_now msg
+
     ActiveRecord::Base.connection.schema_cache.clear!
 
-    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
+    table_name = "activity_log_player_contact_#{suffix}"
+    return if ActivityLog.connection.table_exists? table_name
 
-    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
+    TableGenerators.activity_logs_table(table_name, 'player_contacts', true,
                                         'data', 'select_email_direction', 'select_who',
                                         'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
-                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
-    Rails.cache.clear
-  end
-
-  def self.setup_al_player_contact_embed_tests
-    Rails.logger.info 'Setting up al player contact embed tests'
-    ActiveRecord::Base.connection.schema_cache.clear!
-
-    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_embed_tests'
-
-    TableGenerators.activity_logs_table('activity_log_player_contact_embed_tests', 'player_contacts', true,
-                                        'data', 'select_email_direction', 'select_who',
-                                        'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
-                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
+                                        'protocol_id', 'notes', 'set_related_player_contact_rank',
+                                        schema_name: 'dynamic_test')
     Rails.cache.clear
   end
 
@@ -425,10 +423,8 @@ module SetupHelper
     Rails.logger.info "Setting up external identifier #{name}"
     @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
     @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
-    ActiveRecord::Base.connection.schema_cache.clear!
-    return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
 
-    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, created_by, assign_access, add_disabled)
+    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name, created_by, assign_access, add_disabled, skip_if_exists: true)
   end
 
   def self.setup_test_app
@@ -494,6 +490,7 @@ module SetupHelper
   end
 
   def self.setup_nfs_directories
+    FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
     FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
@@ -631,5 +628,60 @@ module SetupHelper
   def self.add_to_extra_setups(block)
     @@extra_setups ||= []
     @@extra_setups << block
+  end
+
+  def self.seed_database_info
+    put_now 'Getting seed database info'
+    table_list = %w[app_types app_configurations message_templates
+                    page_layouts
+                    reports activity_logs external_identifiers accuracy_scores
+                    general_selections item_flag_names protocols sub_processes protocol_events]
+
+    # excluded [masters users user_access_controls user_roles]
+
+    results = {}
+    table_list.each do |table|
+      sql = <<~SQL
+        SELECT count(*) "count", max(updated_at) "max_updated_at", md5(string_agg(id::text || ':' || coalesce(disabled::text,'-'), ',' ORDER BY id)) "md5"
+        from #{table};
+      SQL
+      results[table] = ActiveRecord::Base.connection.execute(sql).first.to_h
+    end
+
+    put_now 'Finished getting seed database info'
+
+    results
+  end
+
+  def self.orig_seed_database_info
+    @orig_seed_database_info
+  end
+
+  def self.seed_database_info_correct?
+    (seed_database_info.to_a - orig_seed_database_info.to_a).empty?
+  end
+
+  def self.seed_database_info_diff
+    (seed_database_info.to_a - orig_seed_database_info.to_a).to_h
+  end
+
+  def self.seed_database
+    put_now 'Seeding database'
+    unless SetupHelper.spec_tally_done?('seed_database')
+      SeedSupport.setup
+      SetupHelper.add_to_spec_db('seed_database')
+    end
+    put_now 'Seeded database'
+    @orig_seed_database_info = seed_database_info
+  end
+
+  def self.record_seed_database_info_change(caller_info)
+    return if SetupHelper.seed_database_info_correct?
+
+    seed_database_info_changes << [caller_info, SetupHelper.seed_database_info_diff]
+  end
+
+  def self.seed_database_info_changes
+    @seed_database_info_changes ||= []
   end
 end

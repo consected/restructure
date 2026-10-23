@@ -37,7 +37,7 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
       expect(diffs[0][:changes]['options'][1]).to include('value_b')
     end
 
-    it 'returns empty array when there are no changes' do
+    it 'returns an empty changes hash when there are no changes' do
       versions = [
         {
           'id' => '1',
@@ -57,7 +57,8 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
 
       diffs = @controller.send(:calculate_version_diffs, versions)
 
-      expect(diffs).to be_empty
+      expect(diffs.length).to eq(1)
+      expect(diffs.first[:changes]).to be_empty
     end
 
     it 'handles empty versions array' do
@@ -102,7 +103,8 @@ RSpec.describe Admin::DynamicModelsController, type: :controller do
 
       diffs = @controller.send(:calculate_version_diffs, versions)
 
-      expect(diffs).to be_empty
+      expect(diffs.length).to eq(1)
+      expect(diffs.first[:changes]).to be_empty
     end
   end
 

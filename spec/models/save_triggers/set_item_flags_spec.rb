@@ -1,21 +1,24 @@
 require 'rails_helper'
 
-AlNameGenTestCr = 'Gen Test ELT Save'
+AlNameGenTestSif = 'Gen Test ELT Save'
 
 RSpec.describe SaveTriggers::SetItemFlags, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  before :example do
+  before_all do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestCr, 'elt_save_test', 'player_contact'
+    SetupHelper.setup_al_gen_tests AlNameGenTestSif, 'elt_save_test', 'player_contact'
     create_user
     @master = create_master
     setup_access PlayerInfo.resource_name, resource_type: :table, access: :create, user: @user
+  end
+
+  before :each do
     @player_info = @master.player_infos.create! first_name: 'bob', last_name: 'smith', rank: 10, birth_date: '2000-02-01', source: 'nflpa'
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
     @al = create_item master: @master
-    add_reference_def_to(@al, [player_contacts: { from: 'this', add: 'many' }])
+    add_reference_def_to(@al, [{ player_contacts: { from: 'this', add: 'many' } }])
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
     Classification::Protocol.reset_record_updates_protocol!

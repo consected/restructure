@@ -12,8 +12,8 @@ RSpec.describe 'ExtraOptionConfigs::Filestore', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:all) do
-    set_up_extra_options_configs
+  before_all do
+    set_up_extra_options_configs alt_type: alt_name_for_file(__FILE__)
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::Filestore }

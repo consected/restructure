@@ -13,8 +13,9 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
   include DynamicModelSupport
   include ExtraOptionConfigsSupport
 
-  before(:all) do
-    set_up_extra_options_configs
+  before_all do
+    set_up_extra_options_configs alt_type: 'caption_before'
+    change_setting('AllowDynamicMigrations', false)
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::CaptionBefore }
@@ -204,6 +205,10 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
   end
 
   describe 'ExtraOptions integration' do
+    before_all do
+      change_setting('AllowDynamicMigrations', false)
+    end
+
     it 'defaults caption_before to a blank CaptionBefore when not specified' do
       eo = config_for(<<~YAML)
         default:

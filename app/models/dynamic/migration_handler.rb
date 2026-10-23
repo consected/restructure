@@ -36,6 +36,7 @@ module Dynamic
       alias_method :db_configs=, :db_columns=
       attr_writer :allow_migrations
 
+      before_validation :prep_migration
       before_validation :init_schema_name
       validate :schema_name_ok
       validate :table_name_ok
@@ -70,13 +71,25 @@ module Dynamic
     # In the test environment, we don't memoize the value, since the server settings may change
     # between tests that reuse a dynamic definition.
     def allow_migrations
-      unless @allow_migrations.nil? || Rails.env.test?
-        Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      env_test = Rails.env.test?
+      unless @allow_migrations.nil? || env_test
+        unless @allow_migrations
+          msg = "Migrations not allowed for '#{schema_name}' (table name: #{table_name})"
+          Rails.logger.warn msg
+          ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
+        end
         return @allow_migrations
       end
 
-      @allow_migrations = Settings::AllowDynamicMigrations && !prevent_migrations
-      Rails.logger.warn "Migrations not allowed for #{schema_name}" unless @allow_migrations
+      setting = Settings::AllowDynamicMigrations
+      @allow_migrations = setting && !prevent_migrations
+      unless @allow_migrations
+        msg = "Migrations not allowed #{'(test environment)' if env_test} #{self} for schema '#{schema_name}' (table name: #{table_name}) - Allow based on setting: '#{setting}' && *not* configuration prevent_migrations: '#{!prevent_migrations}'"
+        Rails.logger.warn msg
+        ExceptionExtensions.puts_or_tmp_log msg unless Rails.env.production?
+        ExceptionExtensions.puts_or_tmp_log ExceptionExtensions.short_string_backtrace(caller) if Rails.env.test?
+      end
+
       @allow_migrations
     end
 
@@ -324,6 +337,10 @@ module Dynamic
 
       errors.add :schema_name, "(#{schema_name}) not in current search_path for #{table_name} - " \
                                "#{Admin::MigrationGenerator.current_search_paths}\#{nattributes}"
+    end
+
+    def prep_migration
+      @ran_migration = false
     end
   end
 end

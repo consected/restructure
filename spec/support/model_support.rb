@@ -7,6 +7,8 @@ module ModelSupport
   include ::UserSupport
 
   def seed_database
+    return if SetupHelper.seed_database_info_correct?
+
     Rails.logger.info 'Starting seed setup in Model Support'
     # puts "#{Time.now} Starting seed setup in Model Support"
     SeedSupport.setup

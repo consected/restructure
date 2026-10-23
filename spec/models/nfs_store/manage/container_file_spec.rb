@@ -41,12 +41,15 @@ RSpec.describe NfsStore::Manage::ContainerFile, type: :model do
     # expect(@uploaded_files.length).to be > 2
   end
 
-  before :each do
+  before :all do
     seed_database && ActivityLog.define_models
 
-    setup_nfs_store
     generate_test_dynamic_model
     generate_test_embed_dynamic_models
+  end
+
+  before :each do
+    setup_nfs_store
     @activity_log = @container.parent_item
 
     # upload_test_dicom_files

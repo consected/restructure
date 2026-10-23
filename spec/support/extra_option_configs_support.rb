@@ -57,12 +57,15 @@ module ExtraOptionConfigsSupport
     @dm.option_configs
   end
 
-  def set_up_extra_options_configs
+  def set_up_extra_options_configs(alt_type: nil)
+    alt_type ||= 'created_by'
+    table_name = "test_#{alt_type}_recs"
     create_admin
     create_user
     setup_access :trackers
     setup_access :tracker_histories
-    @dm = generate_test_dynamic_model
-    setup_access :dynamic_model__test_created_by_recs, user: @user
+    @dm = generate_test_dynamic_model table_name: table_name
+    @dm.current_admin = @admin
+    setup_access :"dynamic_model__#{table_name}", user: @user
   end
 end

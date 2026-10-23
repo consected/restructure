@@ -161,8 +161,7 @@ describe 'admin sign in process', js: true, driver: $browser_driver do
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
 
-    # Wait until the next otp becomes valid
-    sleep 31
+    reset_last_otp_timestamp(@final_admin)
     just_signed_in = false
 
     # visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"

@@ -15,7 +15,6 @@ RSpec.describe PlayerContact, type: :model do
   describe "Check for appropriate data construction" do
 
     before :each do
-      seed_database
       create_user
       create_master
 

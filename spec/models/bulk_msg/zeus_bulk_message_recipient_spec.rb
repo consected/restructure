@@ -23,7 +23,6 @@ RSpec.describe 'DynamicModelExtension::ZeusBulkMessageRecipient set_response', t
 
   before :example do
     BulkMsgSupport.import_bulk_msg_app
-    seed_database
     create_admin
     create_user
 

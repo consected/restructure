@@ -84,6 +84,7 @@ module NfsStoreSupport
       puts 'About to fail' unless @aldef
     end
     expect(@aldef).not_to be nil
+    refresh_activity_log_definition(@aldef)
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
@@ -313,6 +314,19 @@ module NfsStoreSupport
     finalize_al_setup user: batch_user, skip_al_setup: true
   end
 
+  def refresh_activity_log_definition(aldef)
+    Admin::MigrationGenerator.tables_and_views_reset!
+    schema_name = Admin::MigrationGenerator.table_schema_hash[aldef.table_name]
+    aldef.update_columns(schema_name:) if schema_name.present?
+    ActivityLog.reset_active_model_configurations!
+
+    implementation_class_name = aldef.model_class_name
+    if ActivityLog.const_defined?(implementation_class_name, false)
+      ActivityLog.send(:remove_const, implementation_class_name)
+    end
+    aldef.generate_model
+  end
+
   def finalize_al_setup(activity: nil, user: nil, skip_al_setup: nil)
     user ||= @user
     activity ||= :step_1
@@ -322,7 +336,7 @@ module NfsStoreSupport
 
     setup_access 'activity_log__player_contact_phones', user: user
     setup_access @resource_name, resource_type: :activity_log_type, user: user
-    setup_access "activity_log__player_contact_phone__#{activity}".to_sym, resource_type: :activity_log_type, user: user
+    setup_access :"activity_log__player_contact_phone__#{activity}", resource_type: :activity_log_type, user: user
 
     setup_access 'nfs_store__manage__containers', user: user
     setup_access 'nfs_store__manage__stored_files', user: user
