@@ -221,7 +221,7 @@ _nfs_store.fs_browser = function ($outer) {
     var total_checked = all_checked.length;
     var total_checked_folders = all_checked_folders.length;
 
-    var first_file = all_checked.first().siblings('.browse-filename').html();
+    var first_file = all_checked.first().siblings('.browse-filename').text();
 
     var $folders = all_checked.first().parents('.container-folder-items');
     var $folder_top = $folders.not('[data-folder-items="."]').last();
