@@ -71,7 +71,7 @@ _nfs_store.fs_browser = function ($outer) {
   };
 
   var set_submit_download_caption = function ($this, caption) {
-    $('#container-browse-download-' + container_id + ' .btn-caption').html(caption);
+    $('#container-browse-download-' + container_id + ' .btn-caption').text(caption);
   };
 
 
@@ -105,8 +105,11 @@ _nfs_store.fs_browser = function ($outer) {
       for (var k in extra_params) {
         if (extra_params.hasOwnProperty(k)) {
           var v = extra_params[k];
-          v = v.replace(/"/, '&quot;')
-          form_ep.append('<input type="hidden" name="nfs_store_download[' + k + ']" value="' + v + '" />');
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'nfs_store_download[' + k + ']';
+          input.value = v;
+          form_ep.append(input);
         }
       }
     }
@@ -256,7 +259,9 @@ _nfs_store.fs_browser = function ($outer) {
     var $checkboxes_in_folder = folder.find('> .container-entry input[type="checkbox"]');
     var all_checked = $checkboxes_in_folder.length == $checkboxes_in_folder.closest(':checked').length;
 
-    $browser.find('.container-folder input[type="checkbox"][data-folder-path="' + path + '"] ').prop('checked', all_checked);
+    $browser.find('.container-folder input[type="checkbox"]').filter(function () {
+      return $(this).attr('data-folder-path') === path;
+    }).prop('checked', all_checked);
 
     count_downloads($this);
   };
@@ -264,7 +269,9 @@ _nfs_store.fs_browser = function ($outer) {
   var folder_checked = function ($this) {
     var path = $this.attr('data-folder-path');
     var checked = $this.is(':checked');
-    $browser.find('.container-folder-items[data-folder-items="' + path + '"] li input[type="checkbox"]').prop('checked', checked);
+    $browser.find('.container-folder-items').filter(function () {
+      return $(this).attr('data-folder-items') === path;
+    }).find('li input[type="checkbox"]').prop('checked', checked);
     count_downloads($this);
   };
 
@@ -304,7 +311,7 @@ _nfs_store.fs_browser = function ($outer) {
       var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
     }
 
-    $modal.find('.container-browser-move-from').html(new_path);
+    $modal.find('.container-browser-move-from').text(new_path);
   };
 
   var container_id = get_container_id($outer);
@@ -372,7 +379,22 @@ _nfs_store.fs_browser = function ($outer) {
       $this.attr('aria-expanded', 'true');
       $this.addClass('in');
       var dfp = $this.attr('data-folder-items');
-      var $newf = $('<a class="container-add"><input type="checkbox" class="container-folder-add hidden" data-folder-path="' + dfp + '" /> <span class="glyphicon glyphicon-plus"></span> folder</a>').appendTo($folder_line);
+      var new_folder_link = document.createElement('a');
+      new_folder_link.className = 'container-add';
+
+      var new_folder_checkbox = document.createElement('input');
+      new_folder_checkbox.type = 'checkbox';
+      new_folder_checkbox.className = 'container-folder-add hidden';
+      new_folder_checkbox.setAttribute('data-folder-path', dfp);
+      new_folder_link.appendChild(new_folder_checkbox);
+      new_folder_link.appendChild(document.createTextNode(' '));
+
+      var new_folder_icon = document.createElement('span');
+      new_folder_icon.className = 'glyphicon glyphicon-plus';
+      new_folder_link.appendChild(new_folder_icon);
+      new_folder_link.appendChild(document.createTextNode(' folder'));
+
+      var $newf = $(new_folder_link).appendTo($folder_line);
       $newf.on('click', function (e) {
         e.preventDefault();
         $(this).find('input.container-folder-add').prop('checked', true).change();
@@ -413,7 +435,9 @@ _nfs_store.fs_browser = function ($outer) {
     $bmtf.on('change', 'input[type="checkbox"]', function () {
       var $this = $(this);
       var dfp = $this.attr('data-folder-path');
-      $checkboxes.not('[data-folder-path="' + dfp + '"]').prop('checked', false);
+      $checkboxes.not(function () {
+        return $(this).attr('data-folder-path') === dfp;
+      }).prop('checked', false);
 
       var $cnfn = $modal.find('.container-new-folder-name');
       if (!$this.hasClass('container-folder-add'))

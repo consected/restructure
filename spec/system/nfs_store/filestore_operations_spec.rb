@@ -21,6 +21,10 @@
 #   Error when renaming or sending files to trash due to
 #   "undefined method 'definition' for class NfsStore::Manage::StoredFile"
 #
+# Regression test for Issue #1492:
+#   Stored folder paths must remain text and attribute values in the move modal,
+#   rather than being interpreted as HTML.
+#
 # The issue was that the JSON serialization of the action result (containing StoredFile objects)
 # was calling methods from Dynamic::ImplementationHandler that expected a 'definition' class
 # method to exist, which is only present on ActivityLog/DynamicModel implementations.
@@ -385,6 +389,76 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       # Expand the folder and verify the file is inside
       expand_folder(new_folder_name)
       expect(file_exists_in_browser?(filename)).to be true
+    end
+
+    it 'renders a selected source folder path as text in the move modal (regression for issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-path-test-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = '<img src=x data-xss-probe="issue1492-display" onerror="window.__issue1492_display_xss=1">'
+      move_files_to_folder(folder_name)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+      select_folder_in_browser(folder_name)
+      page.execute_script('window.__issue1492_display_xss = false;')
+      open_filestore_menu
+      click_move_files_menu_item
+
+      move_from = find('#primary-modal .container-browser-move-from', visible: :all)
+
+      aggregate_failures('issue #1492 stored folder path handling') do
+        expect(move_from.text).to eq(folder_name)
+        expect(move_from).not_to have_css('img[data-xss-probe="issue1492-display"]')
+        expect(page.evaluate_script('window.__issue1492_display_xss')).to be(false)
+      end
+    end
+
+    it 'keeps stored folder paths out of move-modal HTML attributes (regression for issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-attribute-test-#{SecureRandom.hex(4)}.txt"
+      upload_file_to_filestore(create_temp_test_file(filename:))
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = 'x" data-xss-marker="y"><img src=x data-xss-probe=issue1492-attribute onerror=window.__issue1492_attribute_xss=1>'
+      page.execute_script('window.__issue1492_attribute_xss = false;')
+      aggregate_failures('issue #1492 stored folder path handling') do
+        move_files_to_folder(folder_name)
+        expect(page.evaluate_script('window.__issue1492_attribute_xss')).to be(false)
+        refresh_filestore_list
+        expect(folder_exists_in_browser?(folder_name)).to be(true)
+
+        safe_filename = "safe-source-#{SecureRandom.hex(4)}.txt"
+        upload_file_to_filestore(create_temp_test_file(filename: safe_filename))
+        select_file_in_browser(safe_filename)
+        page.execute_script('window.__issue1492_attribute_xss = false;')
+        open_filestore_menu
+        click_move_files_menu_item
+
+        move_folder_choices = find('#primary-modal .browse-move-to-folders')
+        destination_paths = move_folder_choices.all('input.container-folder-add', visible: :all).map do |input|
+          input['data-folder-path']
+        end
+        select_move_destination_folder(folder_name)
+
+        expect(destination_paths).to include("./#{folder_name}")
+        expect(page).to have_field('new_path', with: folder_name)
+        expect(move_folder_choices).not_to have_css('img[data-xss-probe="issue1492-attribute"]')
+        expect(page.evaluate_script('window.__issue1492_attribute_xss')).to be(false)
+      end
     end
   end
 
