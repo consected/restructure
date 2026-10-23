@@ -18,6 +18,7 @@ module Admin::AppTypeExport
   # If in the development environment, also export migrations
   # to allow a complete build of an environment to be completed
   def export_config(format: :json, export_migrations: nil)
+    reset_associated_item_memos!
     force_validations!
 
     export_migrations if Settings::AllowDynamicMigrations && export_migrations
@@ -34,6 +35,8 @@ module Admin::AppTypeExport
   # if options is set to main_components: true, only the main components
   # are returned (to support the admin panel display)
   def as_json(options = {})
+    reset_associated_item_memos!
+    @generated_definitions_only = options.delete(:generated_definitions_only)
     if options[:main_components]
       main_components = true
       options.delete :main_components
