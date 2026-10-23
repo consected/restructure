@@ -386,6 +386,32 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expand_folder(new_folder_name)
       expect(file_exists_in_browser?(filename)).to be true
     end
+
+    it 'renders a hostile folder name as literal text in the move modal (Issue #1492)' do
+      navigate_to_master(@master.id)
+      expand_phone_log_tab
+      wait_for_filestore_container
+
+      filename = "xss-move-test-#{SecureRandom.hex(4)}.txt"
+      test_file_path = create_temp_test_file(filename:)
+      upload_file_to_filestore(test_file_path)
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      folder_name = "<img src=x onerror='window.__xss=1'>-#{SecureRandom.hex(3)}"
+      move_files_to_folder(folder_name)
+      refresh_filestore_list
+      expect(folder_exists_in_browser?(folder_name)).to be true
+
+      expand_folder(folder_name)
+      expect(file_exists_in_browser?(filename)).to be true
+      select_file_in_browser(filename)
+      open_filestore_menu
+      click_move_files_menu_item
+
+      expect_move_modal_path_as_literal_text(folder_name)
+    end
   end
 
   describe 'File download' do
