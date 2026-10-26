@@ -184,6 +184,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
     end
 
     to_path = 'new path - ' + from_path
+    expect(to_path).not_to include NfsStore::Archive::Mounter::ArchiveMountSuffix
     res = NfsStore::Manage::ContainerFile.move_folder in_container, from_path, to_path
 
     expect(res).to eq afs.length

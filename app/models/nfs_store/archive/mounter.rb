@@ -423,7 +423,7 @@ module NfsStore
         from_path = file.path
 
         # If this is the base archive folder, we must ensure the new name reflects this
-        to_path = "#{to_path}#{ArchiveMountSuffix}" if path_is_archive?(from_path) && !path_is_archive?(arch_to_path)
+        to_path = "#{to_path}#{ArchiveMountSuffix}" if path_is_archive?(from_path) && !path_is_archive?(to_path)
 
         file.move_to to_path
       end
