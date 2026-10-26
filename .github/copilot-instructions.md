@@ -21,7 +21,7 @@
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
-Before starting any RSpec process, run `app-scripts/check_rspec_processes.sh`. Do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
+`app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
 
 ### Git and GitHub Usage
 
