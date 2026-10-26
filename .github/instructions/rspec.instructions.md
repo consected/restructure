@@ -11,7 +11,7 @@ applyTo: 'spec/**'
 - Use schema name `dynamic_test` for test dynamic models, activity logs and external identifiers
 - Be sure to read the Rails logger output in `log/test.log` for errors not shown in Rspec output
 - **Always wait for commands to complete before proceeding** - for long-running commands (such as rspec tests), don't poll - call the `get_terminal_output` once so you can be notified automatically when the command exits
-- Before starting `rspec`, `headless_rspec.sh`, or `not_headless_rspec.sh`, run `app-scripts/check_rspec_processes.sh`. If it exits with status 1, do not start another run until the reported process has been investigated; the output includes its workspace and test-environment values.
+- Before a direct `rspec` call, run `app-scripts/check_rspec_processes.sh`. If it exits with status 1, do not start another run until the reported process has been investigated; the output includes its workspace and test-environment values. `headless_rspec.sh` and `not_headless_rspec.sh` run this check automatically (and exit 1 if a process is found), so do not call it separately for them.
 
 
 ## Running Bash Scripts and Terminal Commands
