@@ -3,14 +3,7 @@
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
   no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
-<%= handlebars_template_tag('search-count-template') do %>
-  <span>
-  {{#with count}}
-  <span class="search_count">{{count}}</span> record{{#is count '!==' 1}}s{{/is}}
-  {{#is count '>' show_count }} - showing {{show_count}} results - refine search to show others{{/is}}
-  </span>
-  {{/with}}
-<% end %>
+<%= render partial: 'common_templates/search_count_template' %>
 
 <%= handlebars_template_tag('search-action-template') do %>
   <span id="search-action" class="hidden search-action">{{search_action}}</span>
