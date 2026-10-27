@@ -21,6 +21,8 @@
 3. **Never redirect scripts stdout or stderr to /dev/null or /tmp**
 4. If creating long text files (e.g., PR body, issue body), **write them directly to a temporary or session file** rather than using command line tools that may escape characters or truncate output
 
+When not in a sandboxed environment, **preferably run each command in a terminal** on a single line rather than chaining multiple commands together with semicolons. This avoids the need for unnecessary human approvals.
+
 `app-scripts/headless_rspec.sh` and `app-scripts/not_headless_rspec.sh` automatically run `app-scripts/check_rspec_processes.sh` and refuse to start (exit 1) if another RSpec process is using this workspace; do not call the check separately for them. Before any direct `bundle exec rspec` call, run `app-scripts/check_rspec_processes.sh` and do not start the new run if it exits with status 1; inspect the reported workspace, PID, and test-environment values first.
 
 ### Git and GitHub Usage
@@ -71,7 +73,7 @@ For general Rspec standards refer to: [Rspec project coding standards](instructi
 For Rspec System Specs Refer to: [Rspec System Specs project coding standards](instructions/rspec-system-spec.instructions.md)
 
 ### Command Line Usage
-- Create a directory `./tmp/agent-tmp` in the workspace root
+- Create a directory `./tmp/agent-tmp` in the workspace root or the sandbox environment if applicable
 - Use `./tmp/agent-tmp` for all temporary files and logs
 - DO NOT set environment variables or prefix commands with `VAR=VALUE`; use the appropriate app-scripts instead or `export VAR=value` in the terminal before running commands
 - DO NOT run commands in the background using `&` or `nohup` unless absolutely necessary, and if so, ensure output is redirected to a file in `./tmp/agent-tmp` or '/tmp' for later analysis
