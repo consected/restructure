@@ -101,16 +101,19 @@ class Admin::MessageTemplate < ActiveRecord::Base
   #                                              if the content template should convert markdown to html.
   #                                              Otherwise use the provided value (Truthy | Falsey)
   # @param [String] category- optionally request content from the stated category
+  # @param [String] message_type - optionally request content of the stated type
   # @return [String] resulting text
   def self.generate_content(content_template_name: nil, content_template_text: nil,
                             data: {}, ignore_missing: false, no_substitutions: false,
                             allow_missing_template: false, markdown_to_html: false,
-                            check_xss: true, category: nil)
+                            check_xss: true, category: nil, message_type: nil)
     if content_template_name
       # Lookup the template based on its name
       cond = { name: content_template_name }
       cond[:category] = category if category
-      content_template = Admin::MessageTemplate.active.content_templates.find_by(cond)
+      content_templates = Admin::MessageTemplate.active.content_templates
+      content_templates = content_templates.where(message_type:) if message_type
+      content_template = content_templates.find_by(cond)
       return nil if allow_missing_template && !content_template
 
       raise FphsException, "No content template found with name: #{content_template_name}" unless content_template

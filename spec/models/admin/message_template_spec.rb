@@ -25,6 +25,32 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     create_items
   end
 
+  describe 'generate_content message type filtering' do
+    it 'filters by message type only when the optional keyword is provided' do
+      template_name = 'optional message type filter'
+      Admin::MessageTemplate.create!(
+        name: template_name,
+        category: 'issue-1484',
+        message_type: :email,
+        template_type: :content,
+        template: 'Email template content',
+        current_admin: @admin
+      )
+
+      expect(
+        Admin::MessageTemplate.generate_content(content_template_name: template_name, category: 'issue-1484')
+      ).to eq 'Email template content'
+      expect(
+        Admin::MessageTemplate.generate_content(
+          content_template_name: template_name,
+          category: 'issue-1484',
+          message_type: :dialog,
+          allow_missing_template: true
+        )
+      ).to be_nil
+    end
+  end
+
   it 'generates a message' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
