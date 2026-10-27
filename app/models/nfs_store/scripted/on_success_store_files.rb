@@ -65,7 +65,20 @@ module NfsStore
       # in the {NfsStore::Manage::Container}
       # @return [Boolean] success
       def store_to_same_path_as_source
-        path = container_file.path
+        store_results(container_file.path)
+      end
+
+      #
+      # Store the result files to the specified path in {#to_path}
+      # @return [Boolean] success
+      def store_to_path
+        store_results(to_path)
+      end
+
+      # Store each script result using the supplied container-relative path.
+      # @param path [String] destination path
+      # @return [Boolean] success
+      def store_results(path)
         res = true
         raise FsException::Action, 'no results returned to store' unless result
 
@@ -75,24 +88,6 @@ module NfsStore
 
           attrs = {
             path: path,
-            file_name: tmp_filename
-          }
-          res &&= NfsStore::Manage::StoredFile.store_new_file(new_tmp_path, container, attrs)
-        end
-
-        res
-      end
-
-      #
-      # Store the result files to the specified path in {#to_path}
-      # @return [Boolean] success
-      def store_to_path
-        res = true
-        raise FsException::Action, 'no results returned to store' unless result
-
-        result.each do |new_tmp_path|
-          attrs = {
-            path: to_path,
             file_name: tmp_filename
           }
           res &&= NfsStore::Manage::StoredFile.store_new_file(new_tmp_path, container, attrs)
@@ -114,6 +109,8 @@ module NfsStore
 
         ValidConfigMethods.each { |m| instance_variable_set("@#{m}", config[m]) }
       end
+
+      private :store_results
     end
   end
 end

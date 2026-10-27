@@ -237,4 +237,30 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
     fe = File.exist?(c.stored_files.last.retrieval_path)
     expect(fe).to be_truthy
   end
+
+  it 'stores script results at an explicit destination path' do
+    config = {
+      script_filename: 'store_back_test.sh',
+      args: %w[container_file_path],
+      on_success: {
+        store_files: {
+          to_path: 'test_path'
+        }
+      }
+    }
+
+    setup_test_container
+
+    container = @activity_log.container
+    container_file = container.stored_files.first
+    script_handler = NfsStore::Scripted::ScriptHandler.new(config)
+
+    expect(script_handler.run_script(container_file)).to be true
+    expect(script_handler.result).to eq ['/tmp/rspec-test-script-handler/newfile1.txt',
+                                         '/tmp/rspec-test-script-handler/newfile2.txt']
+
+    stored_files = container.stored_files.where(path: 'test_path')
+    expect(stored_files.pluck(:file_name)).to include('newfile1.txt', 'newfile2.txt')
+    expect(File.exist?(stored_files.find_by(file_name: 'newfile1.txt').retrieval_path)).to be true
+  end
 end
