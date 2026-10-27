@@ -274,7 +274,7 @@ module CalcActions
 
         val = attribute_from_instance(from_instance, val_item_value)
 
-      elsif val_item_key == :embedded_item
+      elsif val_item_key == :embedded_item && !val_item_value.is_a?(Hash)
         from_instance = @current_instance.embedded_item
         val = from_instance && attribute_from_instance(from_instance, val_item_value)
       elsif val_item_key == :referring_record && !val_item_value.is_a?(Hash)

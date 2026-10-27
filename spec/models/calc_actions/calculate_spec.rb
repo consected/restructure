@@ -3484,6 +3484,68 @@ RSpec.describe 'Calculate conditional actions', type: :model do
       res = ca.get_this_val
       expect(res).to eq a1.zip
     end
+
+    # Regression coverage for issue #1515: nested embedded-item conditions must
+    # be evaluated against the embedded record, not treated as attribute names.
+    describe 'nested conditions against embedded items' do
+      before :example do
+        add_reference_def_to @al, [player_contacts: { from: 'this', add: 'one_to_this' }]
+        @embedded_item = @al.create_embedded_item({ rank: 10, data: '(516)262-1289', rec_type: :phone })
+        expect(@al.embedded_item(embed_action_type: :viewing, force_reload: true)).to eq @embedded_item
+      end
+
+      it 'evaluates the issue-shaped nested condition when embedded item data is set' do
+        conf = {
+          all: {
+            all: {
+              this: {
+                extra_log_type: 'primary'
+              }
+            },
+            not_any: {
+              embedded_item: {
+                data: [nil, '']
+              }
+            }
+          }
+        }
+
+        expect(ConditionalActions.new(conf, @al).calc_action_if).to be true
+      end
+
+      it 'returns false for the issue-shaped nested condition when embedded item data is blank' do
+        @al.embedded_item(embed_action_type: :viewing).update_column(:data, '')
+
+        conf = {
+          all: {
+            all: {
+              this: {
+                extra_log_type: 'primary'
+              }
+            },
+            not_any: {
+              embedded_item: {
+                data: [nil, '']
+              }
+            }
+          }
+        }
+
+        expect(ConditionalActions.new(conf, @al).calc_action_if).to be false
+      end
+
+      it 'returns true for top-level not_any when embedded item data is set' do
+        conf = {
+          not_any: {
+            embedded_item: {
+              data: [nil, '']
+            }
+          }
+        }
+
+        expect(ConditionalActions.new(conf, @al).calc_action_if).to be true
+      end
+    end
   end
 
   describe 'finding parent references' do
