@@ -73,6 +73,17 @@ The name should be underscored or hyphenated, and represents the page *slug* for
 
 For example: `/info_pages/ipa_screening__intro_call_faq`
 
+### Help Page Overrides
+
+An active message template can override a page in the help libraries. Configure it with:
+
+- **Category:** one of `guest_reference`, `admin_reference`, `user_reference`, `app_reference`, `dev_reference`, or `api_reference`.
+- **Name:** the help page's section and subsection separated by `/`, such as `main/login_issues`. Do not include the `.md` extension.
+- **Message type:** `dialog`.
+- **Template type:** `content`.
+
+Help pages fall back to their `.md` file when no matching active template exists, or when the template is disabled or generates blank content. Templates support Markdown and message-template substitutions. Access control is unchanged: each page and its override are available under the same authorization rules as the corresponding help library.
+
 ### UI Templates
 
 The following UI template
