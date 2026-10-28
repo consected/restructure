@@ -153,6 +153,19 @@ module OptionConfigs
       end
     end
 
+    def record_unresolved_model_reference(config_class, model_name)
+      model_names = unresolved_model_references[config_class] ||= []
+      model_names << model_name unless model_names.include?(model_name)
+    end
+
+    def unresolved_model_references?
+      unresolved_model_references.present?
+    end
+
+    def clear_unresolved_model_references(config_class)
+      unresolved_model_references.delete(config_class)
+    end
+
     #
     # Get the model reference configuration hash, based on the to_record.
     # For flexibility, this may be keyed with a singular or plural key that is one of:
@@ -178,6 +191,7 @@ module OptionConfigs
     # This is the public post-initialization API for cases where +references+ is
     # assigned directly (e.g. after runtime config changes or in tests).
     def clean_references_def
+      clear_unresolved_model_references(ExtraOptionConfigs::References)
       return unless references
 
       new_ref = ExtraOptionConfigs::References.prepare_config(references, self)
@@ -210,6 +224,10 @@ module OptionConfigs
           field_configs[k].merge!({ vc => v })
         end
       end
+    end
+
+    def unresolved_model_references
+      @unresolved_model_references ||= {}
     end
 
     # For dynamic model definitions, fields that are selection-like by naming
