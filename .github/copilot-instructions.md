@@ -27,8 +27,9 @@ When not in a sandboxed environment, **preferably run each command in a terminal
 
 ### Git and GitHub Usage
 
-- Use `git` and `gh` CLI tools for version control and repository management.
+- Use `git` and `gh` CLI tools for version control and repository management unless MCP tools are enabled.
 - Before starting work, add a tag `start-<feature-name>-<issue-number>` then create a features/bug branch `<feature-name>-<issue-number>`.
+- Add a label `WIP` to the GitHub issue, to indicate to others that this is being worked on.
 - Commit messages should be short (1 line) and clear, typically starting with one of the past tense verbs (Added, Fixed, Changed, Removed, Refactored, Updated) and ending with a suffix like ` - fixes #123` or ` - resolves #123` to reference related issues.
 
 ### Creating a Pull Request
