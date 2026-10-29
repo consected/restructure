@@ -455,9 +455,8 @@ module Dynamic
       # This may fail if an underlying dependent class (parent class) has been redefined by
       # another dynamic implementation, such as external identifier.
       # A missing class is also expected here on first generation, since there is nothing to remove yet
-      return unless implementation_class_defined?(klass, fail_without_exception: true,
-                                                         fail_without_exception_newable_result: true,
-                                                         not_found_ok: true)
+      # Check the exact constant being removed; implementation_class_defined? instantiates the model.
+      return unless klass.const_defined?(model_class_name, false)
 
       remove_const_for(klass, model_class_name)
     rescue StandardError => e

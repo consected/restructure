@@ -6,7 +6,8 @@ require './db/table_generators/dynamic_models_table'
 # Tests for CaptionBefore configuration class.
 # Verifies the BaseConfiguration/NamedConfiguration pattern, hash-like interface,
 # JSON serialization, unrecognized attribute warnings, and integration through
-# ExtraOptions initialization (clean_caption_before_def behavior).
+# ExtraOptions initialization (clean_caption_before_def behavior). Also pins
+# caption parsing output and verifies each caption value is HTML-preprocessed once.
 RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
   include MasterSupport
   include ModelSupport
@@ -18,6 +19,108 @@ RSpec.describe 'ExtraOptionConfigs::CaptionBefore', type: :model do
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::CaptionBefore }
+
+  describe 'caption preprocessing' do
+    it 'preprocesses string captions once per value' do
+      expect(Formatter::Substitution).to receive(:text_to_html).with('String caption').exactly(1).times.and_call_original
+
+      klass.new(test1: 'String caption')
+    end
+
+    it 'preprocesses each hash caption mode once' do
+      raw = {
+        caption: 'Caption text',
+        edit_caption: 'Edit caption text',
+        show_caption: 'Show caption text',
+        new_caption: 'New caption text'
+      }
+      expect(Formatter::Substitution).to receive(:text_to_html).exactly(4).times.and_call_original
+
+      klass.new(test1: raw)
+    end
+
+    it 'preserves the parsed output for a string caption' do
+      raw = 'String caption output'
+      expected = Formatter::Substitution.text_to_html(raw).strip
+      parsed = klass.new(test1: raw)[:test1]
+
+      expect(parsed.caption).to eq expected
+      expect(parsed.edit_caption).to eq expected
+      expect(parsed.show_caption).to eq expected
+      expect(parsed.new_caption).to eq expected
+    end
+
+    it 'carries the preprocessed values in hash_configuration' do
+      raw = { caption: 'Caption output', edit_caption: 'Edit output' }
+      instance = klass.new(string_field: 'String caption output', hash_field: raw)
+
+      html = Formatter::Substitution.text_to_html('String caption output').strip
+      expect(instance.hash_configuration[:string_field]).to eq(
+        caption: html, edit_caption: html, show_caption: html, new_caption: html
+      )
+      expect(instance.hash_configuration[:hash_field]).to eq(
+        caption: Formatter::Substitution.text_to_html('Caption output').strip,
+        edit_caption: Formatter::Substitution.text_to_html('Edit output').strip,
+        new_caption: Formatter::Substitution.text_to_html('Edit output').strip
+      )
+    end
+
+    it 'keeps the raw value in hash_configuration when nothing is left after preprocessing' do
+      instance = klass.new(test1: { caption: nil })
+
+      expect(instance.hash_configuration[:test1]).to eq(caption: nil)
+      expect(instance[:test1].caption).to be_nil
+    end
+
+    it 'preserves parsed output for every hash caption mode' do
+      raw = {
+        caption: 'Caption output',
+        edit_caption: 'Edit output',
+        show_caption: 'Show output',
+        new_caption: 'New output'
+      }
+      parsed = klass.new(test1: raw)[:test1]
+
+      raw.each do |mode, value|
+        expect(parsed[mode]).to eq Formatter::Substitution.text_to_html(value).strip
+      end
+    end
+
+    it 'coerces boolean and string keep_label values without changing their meaning' do
+      { true => true, false => false, 'true' => true, 'false' => false }.each do |raw, expected|
+        parsed = klass.new(test1: { caption: 'Label output', keep_label: raw })[:test1]
+
+        expect(parsed.keep_label).to eq expected
+      end
+    end
+
+    it 'defaults nil or missing new_caption from edit_caption and then caption' do
+      configurations = [
+        [{ caption: 'Caption', edit_caption: 'Edit', new_caption: nil }, 'Edit'],
+        [{ caption: 'Caption', edit_caption: 'Edit' }, 'Edit'],
+        [{ caption: 'Caption', new_caption: nil }, 'Caption'],
+        [{ caption: 'Caption' }, 'Caption']
+      ]
+
+      configurations.each do |raw, expected|
+        parsed = klass.new(test1: raw)[:test1]
+
+        expect(parsed.new_caption).to eq Formatter::Substitution.text_to_html(expected).strip
+      end
+    end
+
+    it 'still preprocesses raw values added through the hash-like interface' do
+      instance = klass.new({})
+      instance[:assigned] = 'Assigned raw caption'
+      instance.add_named_configuration(:added, { caption: 'Added raw caption' })
+      instance.merge!(merged: { caption: 'Merged raw caption' })
+
+      { assigned: 'Assigned raw caption', added: 'Added raw caption', merged: 'Merged raw caption' }.each do |key, raw|
+        expect(instance[key].caption).to eq Formatter::Substitution.text_to_html(raw).strip
+        expect(instance[key].new_caption).to eq Formatter::Substitution.text_to_html(raw).strip
+      end
+    end
+  end
 
   describe 'class structure' do
     it 'inherits from BaseConfiguration' do
