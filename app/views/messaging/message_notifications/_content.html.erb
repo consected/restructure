@@ -1,0 +1,21 @@
+<% if local_assigns[:deferred] %>
+  <iframe id="message-iframe-<%= notification.id %>" src="javascript:void(0)" srcdoc="" class="iframe-message-notification if-mn-type-<%= notification.message_type %> if-mn-status-<%= notification.status %>" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+  <%= xhtml_script_tag(id: "message-content-#{notification.id}", class: 'hidden', nonce: true) do %>
+    <%= notification.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe %>
+  <% end %>
+<% elsif notification.email? %>
+  <% sanitized_email_content = sanitize(
+    notification.generated_content.to_s,
+    tags: %w[a abbr address article aside b blockquote body br caption center cite code col colgroup dd del div dl dt em font footer h1 h2 h3 h4 h5 h6 head hr html i img ins li meta ol p pre q s section small span strike strong style sub sup table tbody td tfoot th thead title tr u ul],
+    attributes: %w[align alt bgcolor border cellpadding cellspacing class colspan height href id rel rowspan src style target title valign width]
+  ) %>
+  <%= tag.iframe(
+    nil,
+    title: 'Email message preview',
+    class: "iframe-message-notification if-mn-type-email if-mn-status-#{notification.status} message-notification-preview__email",
+    sandbox: 'allow-popups allow-popups-to-escape-sandbox',
+    srcdoc: tag.base(target: '_blank').to_s + sanitized_email_content
+  ) %>
+<% else %>
+  <pre class="message-notification-preview__sms"><%= notification.generated_content %></pre>
+<% end %>

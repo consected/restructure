@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Seeds
   module TrackerGeneralProtocol
     def self.add_values(values, sub_process)
@@ -22,11 +24,22 @@ module Seeds
       ]
 
       add_values values, sp
+
+      notification = protocol.sub_processes.active.find_or_initialize_by(name: 'Notification')
+      notification.current_admin = Seeds.auto_admin
+      notification.save!
+
+      notification_values = [
+        { name: 'Sent' },
+        { name: 'Failed' }
+      ]
+
+      add_values notification_values, notification
     end
 
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || Classification::Protocol.active.count == 0
+      if Rails.env.test? || Classification::Protocol.active.where(name: 'General').empty?
         create_protocol_events
         log "Ran #{self}.setup"
       else

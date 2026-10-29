@@ -1,0 +1,25 @@
+<% note_fields = tracker_history.notes.to_s.lines.map(&:strip) %>
+<% recipient = note_fields.find { |line| line.start_with?('to:') }&.delete_prefix('to:')&.strip %>
+<% subject = notification.subject.presence ||
+             note_fields.find { |line| line.start_with?('subject:') }&.delete_prefix('subject:')&.strip %>
+<% subject = '(no subject)' if subject.blank? && notification.email? %>
+<% time_label = notification.status == Messaging::MessageNotification::StatusFailed ? 'Failed' : 'Sent' %>
+<% status_label_class = case notification.status
+                        when Messaging::MessageNotification::StatusComplete then 'label-success'
+                        when Messaging::MessageNotification::StatusFailed then 'label-danger'
+                        else 'label-default'
+                        end %>
+<section class="message-notification-preview" aria-label="Message notification preview">
+  <dl class="dl-horizontal message-notification-preview__metadata">
+    <dt>Type</dt><dd><%= notification.message_type %></dd>
+    <dt>Status</dt><dd><span class="label <%= status_label_class %>"><%= notification.status.presence || 'not sent' %></span></dd>
+    <dt><%= time_label %></dt>
+    <dd><%= Formatter::DateTime.format(notification.updated_at, current_user: current_user, current_timezone: :user) %></dd>
+    <dt>To</dt><dd><%= recipient.presence || '(not recorded)' %></dd>
+    <% if subject.present? %><dt>Subject</dt><dd><%= subject %></dd><% end %>
+  </dl>
+  <div class="message-notification-preview__content">
+    <%= render partial: 'messaging/message_notifications/content',
+               locals: { notification: notification, deferred: false } %>
+  </div>
+</section>

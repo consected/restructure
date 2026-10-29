@@ -208,6 +208,9 @@ Rails.application.routes.draw do
 
   resources :masters, only: %i[show index new create] do
     resources :tracker_histories, only: [:index]
+    scope module: :messaging do
+      resources :message_notifications, only: [:show], constraints: { id: /\d+/ }
+    end
     resources :player_infos, except: [:destroy]
     resources :player_contacts, except: [:destroy]
     resources :pro_infos, only: %i[show index], constraints: { id: /\d+/ }

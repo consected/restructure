@@ -32,6 +32,10 @@ Values held on the record but not yet saved are therefore visible to
 !defs(save_triggers_notify_options_defs.yaml)
 ```
 
+Completed and failed notifications automatically create tracker entries by default. Set
+`no_tracker_entry: true` to prevent that entry for a notification; the value may also be
+resolved from a `{{substitution}}` or conditional reference.
+
 ### Pattern 1: Email notification to a role
 
 ```yaml
