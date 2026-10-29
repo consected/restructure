@@ -10,6 +10,7 @@ module Dynamic
       after_save :handle_batch_schedule
       attr_accessor :configurations, :data_dictionary, :options_constants, :foreign_key_through_external_id,
                     :failed_option_configs
+      attr_reader :option_configs_parse_error
     end
 
     class_methods do
@@ -464,6 +465,7 @@ module Dynamic
       @failed_option_configs = nil
       @option_configs = nil if force
       @option_configs ||= self.class.options_provider.parse_config(self, force)
+      @option_configs_parse_error = nil
       if raise_bad_configs
         self.class.options_provider.raise_bad_configs @option_configs
       else
@@ -475,6 +477,8 @@ module Dynamic
       Rails.logger.error "Error retrieving option_configs for #{self.class.name}/#{id}: #{e}"
       Rails.logger.error e.short_string_backtrace
       @failed_option_configs = true
+      # Without option configs the parse itself raised; configuration validation errors leave them set
+      @option_configs_parse_error = e.message unless @option_configs
       raise if raise_bad_configs == true || raise_bad_configs == e.class || (
         raise_bad_configs.is_a?(Array) && raise_bad_configs&.include?(e.class)
       )
@@ -484,6 +488,20 @@ module Dynamic
 
     def failed_option_configs?
       @failed_option_configs
+    end
+
+    def option_configs_have_unresolved_references?
+      return false unless @option_configs
+
+      @option_configs.any?(&:unresolved_model_references?)
+    end
+
+    # Names of models that the parsed option configs could not resolve
+    # @return [Array<String>]
+    def unresolved_model_reference_names
+      return [] unless @option_configs
+
+      @option_configs.flat_map { |config| config.unresolved_model_references.values.flatten }.uniq
     end
 
     #

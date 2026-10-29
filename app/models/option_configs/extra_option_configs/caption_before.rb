@@ -63,7 +63,7 @@ module OptionConfigs
 
           processed = preprocess_field(v)
           hash_configuration[k] = processed if processed.is_a?(Hash) && !processed.empty?
-          add_named_configuration(k.to_sym, v)
+          add_named_configuration(k.to_sym, processed, preprocessed: true)
         end
 
         nil_keys.each { |k| hash_configuration.delete(k) }
@@ -71,8 +71,9 @@ module OptionConfigs
 
       # Override to preprocess caption values before creating NamedConfiguration.
       # Handles string → hash expansion and text_to_html conversion.
-      def add_named_configuration(sym_key, value)
-        super(sym_key, preprocess_field(value))
+      def add_named_configuration(sym_key, value, preprocessed: false)
+        value = preprocess_field(value) unless preprocessed
+        super(sym_key, value)
       end
 
       private

@@ -251,6 +251,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res2.include ExternalIdControllerHandler
       rescue StandardError => e
         failed = true
+        record_generation_failure(e)
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         warn "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
       end

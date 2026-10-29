@@ -350,6 +350,7 @@ class DynamicModel < ActiveRecord::Base
         res2.include DynamicModelControllerHandler
       rescue StandardError => e
         failed = true
+        record_generation_failure(e)
         warn "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         logger.info '*************************************************************************************'
         logger.info "Failure creating dynamic log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
