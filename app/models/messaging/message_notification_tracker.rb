@@ -18,16 +18,27 @@ module Messaging
 
       protocol = Classification::Protocol.active.find_by(name: 'General')
       sub_process = protocol && protocol.sub_processes.active.find_by(name: 'Notification')
-      protocol_event = sub_process && sub_process.protocol_events.active.find_by(name: event_name)
 
-      unless protocol && sub_process && protocol_event
+      unless protocol && sub_process
         Rails.logger.warn 'Unable to create notification tracker entry: ' \
                           "General/Notification/#{event_name} was not found"
         return
       end
 
-      tracker_targets.each do |master_id, recipients|
-        create_tracker_history(master_id, recipients, protocol, sub_process, protocol_event)
+      targets = tracker_targets(event_name)
+      event_names = targets.values.map { |target| target[:event_name] }.uniq
+      event_names = [event_name] if event_names.empty?
+      protocol_events = sub_process.protocol_events.active.where(name: event_names).index_by(&:name)
+      missing_event_names = event_names - protocol_events.keys
+      unless missing_event_names.empty?
+        Rails.logger.warn 'Unable to create notification tracker entry: ' \
+                          "General/Notification/#{missing_event_names.join(', ')} was not found"
+        return
+      end
+
+      targets.each do |master_id, target|
+        protocol_event = protocol_events.fetch(target[:event_name])
+        create_tracker_history(master_id, target[:recipients], protocol, sub_process, protocol_event)
       end
     rescue StandardError => e
       Rails.logger.warn "Unable to create notification tracker entry for #{@notification.id}: #{e.class}: #{e.message}"
@@ -35,9 +46,38 @@ module Messaging
 
     private
 
-    def tracker_targets
-      addresses = recipient_addresses
-      return { @notification.master_id => addresses } if @notification.master_id.present?
+    def tracker_targets(event_name)
+      return list_tracker_targets(event_name) if @notification.recipient_hash_from_data
+
+      master_id = real_master_id(@notification.master_id)
+      return { master_id => { recipients: recipient_addresses, event_name: } } if master_id
+
+      matched_contacts_by_master(recipient_addresses).transform_values do |recipients|
+        { recipients:, event_name: }
+      end
+    end
+
+    def list_tracker_targets(event_name)
+      targets = {}
+      @notification.recipient_hash_from_data.each do |recipient|
+        list_item = notification_list_item(recipient)
+        record_item = notification_record_item(list_item)
+        master_id = real_master_id(record_item&.master_id)
+        address = recipient[:data].presence || list_item&.data
+        target_master_ids = master_id ? [master_id] : matched_contacts_by_master([address]).keys
+        target_event_name = list_recipient_event_name(event_name, list_item)
+
+        target_master_ids.each do |target_master_id|
+          target = targets[target_master_id] ||= { recipients: [], event_name: target_event_name }
+          target[:recipients] << address if address.present? && !target[:recipients].include?(address)
+          target[:event_name] = 'Failed' if target_event_name == 'Failed'
+        end
+      end
+      targets
+    end
+
+    def matched_contacts_by_master(addresses)
+      addresses = Array(addresses).filter_map { |address| address.to_s if address.present? }.uniq
       return {} if addresses.empty?
 
       rec_type = @notification.sms? ? 'phone' : 'email'
@@ -60,6 +100,43 @@ module Messaging
       matches_by_master.transform_values do |matched_addresses|
         addresses.select { |address| matched_addresses.include?(address) }
       end
+    end
+
+    def real_master_id(master_id)
+      return unless master_id.present?
+      return master_id unless Master::TemporaryMasterIds.include?(master_id.to_i)
+
+      Rails.logger.info "Skipping notification tracker target for temporary master #{master_id}"
+      nil
+    end
+
+    def notification_list_item(recipient)
+      return unless recipient[:list_type].present? && recipient[:id].present?
+
+      @notification.send(:list_item_for, recipient[:list_type], recipient[:id])
+    rescue StandardError => e
+      Rails.logger.info "Unable to resolve notification list item #{recipient[:list_type]}[#{recipient[:id]}]: " \
+                        "#{e.class}: #{e.message}"
+      nil
+    end
+
+    def notification_record_item(list_item)
+      return unless list_item.respond_to?(:record_item)
+
+      list_item.record_item(no_exception: true)
+    rescue StandardError => e
+      Rails.logger.info "Unable to resolve notification list record item: #{e.class}: #{e.message}"
+      nil
+    end
+
+    def list_recipient_event_name(event_name, list_item)
+      return event_name unless event_name == 'Failed' && list_item
+      return 'Sent' if %w[sent success].include?(list_item.send_status)
+
+      'Failed'
+    rescue StandardError => e
+      Rails.logger.info "Unable to resolve notification list recipient status: #{e.class}: #{e.message}"
+      event_name
     end
 
     def email_contacts(relation, addresses)
@@ -159,9 +236,7 @@ module Messaging
     end
 
     def recipient_addresses
-      values = if @notification.recipient_hash_from_data
-                 @notification.recipient_hash_from_data.filter_map { |recipient| recipient[:data] }
-               elsif @notification.sms?
+      values = if @notification.sms?
                  @notification.recipient_sms_numbers
                else
                  @notification.recipient_emails
@@ -171,6 +246,11 @@ module Messaging
     end
 
     def create_tracker_history(master_id, recipients, protocol, sub_process, protocol_event)
+      if Master::TemporaryMasterIds.include?(master_id.to_i)
+        Rails.logger.info "Skipping notification tracker entry for temporary master #{master_id}"
+        return
+      end
+
       tracker = Master.find(master_id).trackers.build(
         protocol_id: protocol.id,
         sub_process_id: sub_process.id,

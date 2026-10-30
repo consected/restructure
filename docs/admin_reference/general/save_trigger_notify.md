@@ -36,6 +36,10 @@ Completed and failed notifications automatically create tracker entries by defau
 `no_tracker_entry: true` to prevent that entry for a notification; the value may also be
 resolved from a `{{substitution}}` or conditional reference.
 
+Notifications associated with a real master are tracked against that master. List-style
+recipients are tracked against each resolved recipient master, using the referenced record
+or a matching contact; temporary holding masters are never used as tracker targets.
+
 ### Pattern 1: Email notification to a role
 
 ```yaml

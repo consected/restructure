@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Purpose: Verify real notify-trigger and job flows create the expected tracker histories for every supported recipient source.
+# Purpose: Verify notify-trigger tracker histories follow recipient masters, including bulk-list contacts.
 require 'rails_helper'
 
 NOTIFY_TRACKER_RECIPIENT_SCENARIOS = {
@@ -165,10 +165,14 @@ RSpec.describe 'SaveTriggers::Notify tracker integration', type: :model do
         expect(notification.reload.status).to eq 'complete'
         expect_tracker_history(
           notification,
-          expected_master: @al.master,
+          expected_master: recipient_mode == :phone_records ? @player_contact.master : @al.master,
           event_name: 'Sent',
           recipients: notification_recipients(notification)
         )
+        if recipient_mode == :phone_records
+          expect(TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)
+                               .pluck(:master_id)).not_to include(@bulk_master.id)
+        end
       end
 
       unless recipient_mode == :phone_records

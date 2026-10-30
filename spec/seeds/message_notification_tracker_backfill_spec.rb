@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Purpose: Verify sent and failed message notifications, including master-targeted notifications without recipients, are backfilled safely.
+# Purpose: Verify message notification backfills resolve temporary masters and list recipients safely.
 require 'rails_helper'
 
 RSpec.describe 'Message notification tracker history backfill' do
@@ -70,12 +70,12 @@ RSpec.describe 'Message notification tracker history backfill' do
     @dynamic_phone_resource = "#{association_prefix}_phones"
   end
 
-  def create_legacy_notification(status:, event_date:, master: nil, recipients: ['recipient@example.test'],
+  def create_legacy_notification(status:, event_date:, master: nil, master_id: nil, recipients: ['recipient@example.test'],
                                  subject: 'Legacy subject', message_type: 'email', user: nil,
                                  recipient_user_ids: nil)
     attributes = {
       app_type_id: user&.app_type_id,
-      master_id: master&.id,
+      master_id: master_id.nil? ? master&.id : master_id,
       message_type:,
       recipient_data: recipients,
       recipient_user_ids:,
@@ -93,6 +93,12 @@ RSpec.describe 'Message notification tracker history backfill' do
 
   def tracker_histories(notification)
     TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)
+  end
+
+  def stub_backfill_list_items(list_items)
+    allow_any_instance_of(Messaging::MessageNotification).to receive(:list_item_for) do |_notification, list_type, id|
+      list_items[[list_type, id]]
+    end
   end
 
   it 'backfills complete and failed notifications using their updated_at without modifying source records' do
@@ -149,6 +155,82 @@ RSpec.describe 'Message notification tracker history backfill' do
     run_backfill_migration
 
     expect(tracker_histories(notification)).to be_empty
+  end
+
+  it 'backfills SMS and email recipients instead of either temporary master' do
+    cases = [-1, -2].flat_map do |temporary_master_id|
+      %w[sms email].map do |message_type|
+        address = message_type == 'email' ? "backfill-#{temporary_master_id}@example.test" : "+1617555#{temporary_master_id.abs}120"
+        rec_type = message_type == 'email' ? 'email' : 'phone'
+        target_master = create_master
+        create_item({ data: address, rec_type:, source: rec_type == 'email' ? 'nflpa' : 'nfl', rank: 10 },
+                    target_master)
+        notification = create_legacy_notification(
+          status: 'complete',
+          event_date: Time.zone.parse('2026-10-19 08:15:00'),
+          master_id: temporary_master_id,
+          recipients: [address],
+          subject: message_type == 'email' ? 'Legacy subject' : nil,
+          message_type:
+        )
+        [notification, target_master, address, message_type]
+      end
+    end
+
+    run_backfill_migration
+
+    cases.each do |notification, target_master, address, message_type|
+      history = tracker_histories(notification).sole
+      expect(history.master_id).to eq target_master.id
+      expect(history.master_id).to be_positive
+      expect(history.notes).to include("type: #{message_type}", "to: #{address}")
+    end
+  end
+
+  it 'backfills failed list batches using each list record and recipient outcome' do
+    sent_master = create_master
+    failed_master = create_master
+    sent_address = '+16175550128'
+    failed_address = '+16175550129'
+    sent_contact = create_item(
+      { data: sent_address, rec_type: 'phone', source: 'nfl', rank: 10 }, sent_master
+    )
+    failed_contact = create_item(
+      { data: failed_address, rec_type: 'phone', source: 'nfl', rank: 10 }, failed_master
+    )
+    list_type = 'tracker_test_list_items'
+    sent_list_item = double('sent notification list item', data: sent_address, master_id: -1, send_status: 'sent')
+    failed_list_item = double('failed notification list item', data: failed_address, master_id: -1,
+                                                               send_status: 'not sent')
+    allow(sent_list_item).to receive(:record_item).with(no_exception: true).and_return(sent_contact)
+    allow(failed_list_item).to receive(:record_item).with(no_exception: true).and_return(failed_contact)
+    stub_backfill_list_items(
+      [
+        [[list_type, 1], sent_list_item],
+        [[list_type, 2], failed_list_item]
+      ].to_h
+    )
+    notification = create_legacy_notification(
+      status: 'failed',
+      event_date: Time.zone.parse('2026-10-19 09:00:00'),
+      master_id: -1,
+      recipients: [
+        { list_type:, id: 1 }.to_json,
+        { list_type:, id: 2 }.to_json
+      ],
+      subject: nil,
+      message_type: 'sms'
+    )
+
+    run_backfill_migration
+
+    histories = tracker_histories(notification).index_by(&:master_id)
+    expect(histories.keys).to contain_exactly(sent_master.id, failed_master.id)
+    expect(histories.fetch(sent_master.id).protocol_event.name).to eq 'Sent'
+    expect(histories.fetch(sent_master.id).notes).to eq "type: sms\nto: #{sent_address}"
+    expect(histories.fetch(failed_master.id).protocol_event.name).to eq 'Failed'
+    expect(histories.fetch(failed_master.id).notes).to eq "type: sms\nto: #{failed_address}"
+    expect(histories.keys).to all(be_positive)
   end
 
   it 'backfills a complete SMS with a master and no recipients without duplicating it' do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Purpose: Verify secure, recipient-scoped message-notification previews, including a placeholder when tracker notes omit recipients.
+# Purpose: Verify secure recipient-scoped notification previews, including list notifications tracked on participants.
 
 require 'rails_helper'
 
@@ -115,6 +115,39 @@ RSpec.describe 'Message notification previews', type: :request do
         formatted_notification_time(notification), 'Email preview content'
       )
       expect(response.body).not_to include('private@example.test')
+    end
+
+    it 'renders a list-style notification from the participant master that owns its tracker entry' do
+      grant_notification_read
+      email = 'list-preview@example.test'
+      setup_access :player_contacts, user: @user
+      @master.current_user = @user
+      contact = @master.player_contacts.create!(
+        current_user: @user,
+        rec_type: 'email',
+        data: email,
+        source: 'nflpa',
+        rank: 10
+      )
+      notification = create_notification(
+        master: Master.find(-1),
+        recipients: [{ list_type: 'dynamic_model__zeus_bulk_message_recipients', id: 1 }],
+        content: '<p>List notification preview content</p>'
+      )
+      notification.update_column(:master_id, -1)
+      list_item = double('notification list item', data: email)
+      allow(list_item).to receive(:record_item).with(no_exception: true).and_return(contact)
+      allow(notification).to receive(:list_item_for)
+        .with('dynamic_model__zeus_bulk_message_recipients', 1).and_return(list_item)
+
+      Messaging::MessageNotificationTracker.create_for(notification)
+
+      get preview_path(master: @master, notification_id: notification.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('list-preview@example.test', 'List notification preview content')
+      expect(TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)
+                           .pluck(:master_id)).to eq [@master.id]
     end
 
     it 'renders SMS content as escaped plain text' do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Purpose: Exercise tracker history behavior across notification channels, recipient sources, master matching, status changes, and handling paths.
+# Purpose: Exercise notification tracker behavior across channels, recipient sources, status changes, and nonnegative master targets.
 require 'rails_helper'
 
 module MessageNotificationTrackerMatrix
@@ -106,8 +106,9 @@ RSpec.describe 'Message notification tracker status matrix', type: :model do
 
   def expect_tracker_result(notification, message_type:, mode:, with_master:, status:, contact_match:)
     terminal = %w[complete failed].include?(status)
+    list_recipients = mode == :phone_records
     recipients = resolved_recipients(message_type, mode)
-    expected_master_ids = if terminal && (with_master || (contact_match && recipients.any?))
+    expected_master_ids = if terminal && ((with_master && !list_recipients) || (contact_match && recipients.any?))
                             [@matrix_master.id]
                           else
                             []
@@ -118,7 +119,7 @@ RSpec.describe 'Message notification tracker status matrix', type: :model do
     expect(histories.map(&:master_id)).to eq expected_master_ids
     histories.each do |history|
       expected_event = status == 'complete' ? 'Sent' : 'Failed'
-      expected_recipients = with_master || contact_match ? recipients : []
+      expected_recipients = (with_master && !list_recipients) || contact_match ? recipients : []
       expected_notes = ["type: #{message_type}"]
       expected_notes << "to: #{expected_recipients.join(', ')}" if expected_recipients.any?
       expected_notes << 'subject: Matrix subject' if message_type == :email
@@ -176,6 +177,34 @@ RSpec.describe 'Message notification tracker status matrix', type: :model do
 
       expect(notification.reload.status).to eq(status)
       expect_tracker_result(notification, message_type:, mode:, with_master:, status:, contact_match:)
+
+      expect(tracker_histories(notification).where('master_id < 0')).to be_empty
+      expect(Tracker.where(item_type: notification.class.name, item_id: notification.id)
+                    .where('master_id < 0')).to be_empty
+    end
+  end
+
+  [-1, -2].each do |temporary_master_id|
+    %i[email sms].each do |message_type|
+      it "matches #{message_type} matrix recipients instead of tracking temporary master #{temporary_master_id}" do
+        mode = :raw
+        create_matching_contact(message_type, mode)
+        notification = create_notification(message_type, mode, with_master: false)
+        notification.update_column(:master_id, temporary_master_id)
+        notification.update!(status: 'complete')
+
+        expect_tracker_result(
+          notification,
+          message_type:,
+          mode:,
+          with_master: false,
+          status: 'complete',
+          contact_match: true
+        )
+        expect(tracker_histories(notification).where('master_id < 0')).to be_empty
+        expect(Tracker.where(item_type: notification.class.name, item_id: notification.id)
+                      .where('master_id < 0')).to be_empty
+      end
     end
   end
 end
