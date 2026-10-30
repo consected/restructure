@@ -11,7 +11,7 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
   include ScriptedJobSupport
 
   def setup_test_container
-    seed_database && ::ActivityLog.define_models
+    ::ActivityLog.define_models
     create_admin
     create_user
     @app_type = @user.app_type

@@ -15,7 +15,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   include DynamicModelSupport
 
   describe 'DynamicModel.ids_in_app_type' do
-    before :all do
+    before_all do
       create_admin
       create_user
       @app_type = create_app_type(name: "uac_test_app_#{rand(100_000)}", label: 'UAC Test App')
@@ -45,9 +45,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns IDs of dynamic models associated with an app type' do
       ids = DynamicModel.ids_in_app_type(@app_type)
@@ -68,7 +68,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   end
 
   describe 'DynamicModel#in_app_type?' do
-    before :all do
+    before_all do
       create_admin
       create_user
       @app_type = create_app_type(name: "in_app_test_#{rand(100_000)}", label: 'In App Test')
@@ -98,9 +98,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns true when dynamic model is in the app type' do
       expect(@dm.in_app_type?(@app_type)).to be true
@@ -114,7 +114,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   end
 
   describe 'ExternalIdentifier.ids_in_app_type' do
-    before :all do
+    before_all do
       create_admin
 
       @app_type = create_app_type(name: "ext_id_test_#{rand(100_000)}", label: 'Ext ID Test')
@@ -133,9 +133,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns IDs of external identifiers associated with an app type', if: -> { ExternalIdentifier.active.any? } do
       next unless @ext_id
@@ -153,7 +153,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   end
 
   describe 'ExternalIdentifier#in_app_type?' do
-    before :all do
+    before_all do
       create_admin
 
       @app_type = create_app_type(name: "ext_in_app_#{rand(100_000)}", label: 'Ext In App')
@@ -170,9 +170,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns true when external identifier is in the app type', if: -> { ExternalIdentifier.active.any? } do
       next unless @ext_id
@@ -194,7 +194,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   # These methods enable the admin panel to show which activity logs are associated
   # with the current app type and filter the index accordingly.
   describe 'ActivityLog.ids_in_app_type' do
-    before :all do
+    before_all do
       create_admin
       create_user
       @app_type = create_app_type(name: "al_uac_test_#{rand(100_000)}", label: 'AL UAC Test')
@@ -213,9 +213,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns IDs of activity logs associated with an app type' do
       ids = ActivityLog.ids_in_app_type(@app_type)
@@ -236,7 +236,7 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
   end
 
   describe 'ActivityLog#in_app_type?' do
-    before :all do
+    before_all do
       create_admin
       create_user
       @app_type = create_app_type(name: "al_in_app_test_#{rand(100_000)}", label: 'AL In App Test')
@@ -253,9 +253,9 @@ RSpec.describe 'Dynamic Definition Admin UAC Features', type: :model do
       )
     end
 
-    after :all do
-      @app_type&.update!(disabled: true, current_admin: @admin)
-    end
+    # after :all do
+    #   @app_type&.update!(disabled: true, current_admin: @admin)
+    # end
 
     it 'returns true when activity log is in the app type' do
       expect(@activity_log.in_app_type?(@app_type)).to be true

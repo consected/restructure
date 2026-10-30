@@ -19,7 +19,7 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
   describe 'zip file handling' do
     before :each do
-      seed_database && ::ActivityLog.define_models
+      ::ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first
@@ -152,7 +152,7 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
 
   describe '.tar.gz file handling' do
     before :each do
-      seed_database && ::ActivityLog.define_models
+      ::ActivityLog.define_models
 
       @other_users = []
       @other_users << create_user.first

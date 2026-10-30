@@ -16,15 +16,10 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
   include ModelSupport
   include PlayerContactSupport
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
-    create_item(data: rand(10_000_000_000_000_000), rank: 10)
-    @player_contact.master.current_user = @user
-    @master = @player_contact.master
-    expect(@master).not_to be nil
-
     # Set up activity log definition
     al_def = ActivityLog.find(ActivityLog::PlayerContactPhone.definition.id)
 
@@ -55,13 +50,20 @@ RSpec.describe 'SaveTrigger lifecycle hooks (on_complete / on_failure)', type: :
     setup_access :activity_log__player_contact_phone__lifecycle_test_1, resource_type: :activity_log_type,
                                                                         access: :create, user: @user
     al_def.add_master_association
+  end
+
+  before :each do
+    create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact.master.current_user = @user
+    @master = @player_contact.master
+    expect(@master).not_to be nil
 
     @activity_log = @player_contact.activity_log__player_contact_phones.create!(
       select_call_direction: 'from player',
       select_who: 'test user',
       extra_log_type: 'lifecycle_test_1'
     )
-    @activity_log.save_trigger_results ||= {}
+    @activity_log.save_trigger_results = {}
   end
 
   describe 'on_complete' do

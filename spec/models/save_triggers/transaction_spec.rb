@@ -7,15 +7,10 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :each do
+  before_all do
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts
-    create_item(data: rand(10_000_000_000_000_000), rank: 10)
-    @player_contact.master.current_user = @user
-    @master = @player_contact.master
-    expect(@master).not_to be nil
-
     # Set up activity log definition with save_trigger_results support
     # Re-setup the activity log if it was removed by other specs during this test run
     al_def = ActivityLog.find_by(id: ActivityLog::PlayerContactPhone.definition.id)
@@ -46,6 +41,13 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, access: :create,
                                                               user: @user
     al_def.add_master_association
+  end
+
+  before :each do
+    create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact.master.current_user = @user
+    @master = @player_contact.master
+    expect(@master).not_to be nil
 
     @activity_log = @master.activity_log__player_contact_phones.create!(
       select_call_direction: 'to player',
@@ -55,7 +57,7 @@ RSpec.describe SaveTriggers::Transaction, type: :model do
       master: @master,
       current_user: @user
     )
-    @activity_log.save_trigger_results ||= {}
+    @activity_log.save_trigger_results = {}
   end
 
   describe '#perform' do

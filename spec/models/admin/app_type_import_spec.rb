@@ -13,8 +13,6 @@ RSpec.describe 'Import an app configuration', type: :model do
   include ModelSupport
 
   before :each do
-    Seeds.setup
-
     create_admin
     create_user
     SetupHelper.setup_al_player_contact_phones
@@ -145,8 +143,6 @@ RSpec.describe 'Import an app configuration', type: :model do
   end
 
   it 'imports a test JSON config file' do
-    Seeds.setup
-
     res = import_test_app
 
     expect(res).to be_a Admin::AppType

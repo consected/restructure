@@ -31,15 +31,7 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
   include ModelSupport
   include NfsStoreSupport
 
-  before :all do
-    change_setting('AllowDynamicMigrations', true)
-  end
-
-  after :all do
-    change_setting('AllowDynamicMigrations', false)
-  end
-
-  before :all do
+  before_all do
     setup_nfs_store
     @master = @player_contact.master
     @master.current_user = @user

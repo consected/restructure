@@ -136,6 +136,7 @@ describe 'User Access Overview drill-down links', type: :system do
   describe 'User Roles admin page' do
     it 'shows drill-down links to User Access Overview using user, role, and app type' do
       visit "/admin/user_roles?filter%5Buser_id%5D=#{@drill_user.id}"
+      finish_page_loading
 
       user_role_link = report_url('user_access_overview_by_role',
                                   user: @drill_user.id,

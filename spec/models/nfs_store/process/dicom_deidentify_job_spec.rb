@@ -29,7 +29,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
   end
 
   before :each do
-    seed_database && ActivityLog.define_models
+    ActivityLog.define_models
 
     @other_users = Array.new(3) { create_user.first }
 

@@ -4,7 +4,7 @@ require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
 # Describe how dynamic model options work, especially with versioning
-RSpec.describe 'Dynamic Model Options', type: :model do
+RSpec.describe 'Extra Options', type: :model do
   include MasterSupport
   include ModelSupport
   include DynamicModelSupport

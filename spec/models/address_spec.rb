@@ -8,7 +8,6 @@ RSpec.describe Address, type: :model do
 
   describe 'Address' do
     before :each do
-      seed_database
       create_user
       create_master
       setup_access :addresses

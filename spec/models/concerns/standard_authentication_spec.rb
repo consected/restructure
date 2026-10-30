@@ -16,7 +16,7 @@ RSpec.describe 'StandardAuthentication', type: :model do
     change_setting('PasswordConfig', conf)
   end
 
-  before :all do
+  before_all do
     unfreeze_config
   end
 
