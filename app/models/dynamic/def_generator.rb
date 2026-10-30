@@ -14,8 +14,10 @@ module Dynamic
       after_save :reset_active_model_configurations!, if: -> { @regenerate || disabled }
       after_save :handle_config_triggers
 
-      # This double reset is intentional
-      after_commit :reset_active_model_configurations!, if: -> { @regenerate || disabled }
+      # This double reset is intentional; options-only edits skip regeneration but still leave loaded records stale
+      after_commit :reset_active_model_configurations!, if: lambda {
+        @regenerate || disabled || saved_change_to_attribute?(self.class.option_configs_attr)
+      }
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
