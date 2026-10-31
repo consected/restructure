@@ -79,6 +79,7 @@ class PagesController < ApplicationController
         prevent_cache
       end
 
+      Application.refresh_dynamic_defs
       render partial: 'masters/cache_search_results_template'
     else
       render plain: ''
