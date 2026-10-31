@@ -29,6 +29,11 @@ module Dynamic
     end
 
     class_methods do
+      # Messages for definitions whose implementation class failed to generate, keyed by definition id
+      def generation_failures
+        @generation_failures ||= {}
+      end
+
       #
       # Run through the configurations to implement them and make them available for use
       # Since ActivityLog types actually preload DynamicModel and ExternalIdentifier types
@@ -180,6 +185,17 @@ module Dynamic
       end
 
       # End of class_methods
+    end
+
+    # Definitions parsed before a referenced class was generated later in the same pass drop that reference
+    def self.resolve_cached_forward_references!
+      [DynamicModel, ActivityLog, ExternalIdentifier].each do |definition_class|
+        definition_class.definition_cache.each_value do |definition|
+          next unless definition.option_configs_have_unresolved_references?
+
+          definition.force_option_config_parse(raise_bad_configs: false)
+        end
+      end
     end
 
     #
@@ -392,10 +408,17 @@ module Dynamic
     # Add an item to this list
     def add_model_to_list(m)
       tn = implementation_model_name
+      self.class.generation_failures.delete(id)
       self.class.models[tn] = m
       logger.info "Added new model #{tn}"
       self.class.model_names << tn unless self.class.model_names.include? tn
       Resources::Models.add(m)
+    end
+
+    # Remember why this definition's class could not be generated, until it next generates successfully
+    # @param [Exception | String] error
+    def record_generation_failure(error)
+      self.class.generation_failures[id] = error.to_s
     end
 
     # Remove an item from the list of available dynamic classes
