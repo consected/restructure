@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Purpose: Verify tracker targets for temporary notification masters and individual list recipients.
+# Purpose: Verify tracker targets, per-target retries, and failures for message notifications.
 require 'rails_helper'
 
 RSpec.describe Messaging::MessageNotification, type: :model do
@@ -100,6 +100,20 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       recipient_data: tracker_list_recipient_data(list_items, include_data:),
       status:
     )
+  end
+
+  def create_tracker_multi_target_notification
+    failed_master = create_tracker_target_master
+    succeeding_master = create_tracker_target_master
+    failed_contact = create_tracker_contact(master: failed_master, rec_type: 'phone', data: '+16175550140')
+    succeeding_contact = create_tracker_contact(master: succeeding_master, rec_type: 'phone', data: '+16175550141')
+    list_items = [
+      create_tracker_list_item(id: 20, data: failed_contact.data, record_item: failed_contact),
+      create_tracker_list_item(id: 21, data: succeeding_contact.data, record_item: succeeding_contact)
+    ]
+    notification = create_tracker_list_notification(list_items:, master_id: -1)
+
+    [notification, failed_master, succeeding_master]
   end
 
   def notification_tracker_histories(notification)
@@ -314,6 +328,56 @@ RSpec.describe Messaging::MessageNotification, type: :model do
                                                 recipients: [address])
       expect_notification_tracker(notification, master: record_master, message_type: 'sms', event_name: 'Sent',
                                                 recipients: [record_contact.data])
+    end
+  end
+
+  describe '.create_for options' do
+    it 'skips an existing target while creating a missing target' do
+      notification, existing_master, missing_master = create_tracker_multi_target_notification
+      notification_tracker_histories(notification).where(master_id: missing_master.id).delete_all
+
+      result = Messaging::MessageNotificationTracker.create_for(notification, skip_existing: true)
+
+      expect(result).to have_attributes(created: 1, skipped: 1, failed: 0)
+      expect(notification_tracker_histories(notification).pluck(:master_id)).to contain_exactly(
+        existing_master.id, missing_master.id
+      )
+    end
+
+    it 'continues to later targets in non-strict mode when a target fails' do
+      notification, failed_master, succeeding_master = create_tracker_multi_target_notification
+      notification_tracker_histories(notification).delete_all
+      allow(Master).to receive(:find).and_wrap_original do |original, master_id|
+        raise ActiveRecord::RecordNotFound, 'simulated missing master' if master_id == failed_master.id
+
+        original.call(master_id)
+      end
+
+      result = Messaging::MessageNotificationTracker.create_for(notification)
+
+      expect(result).to have_attributes(created: 1, skipped: 0, failed: 1)
+      expect(notification_tracker_histories(notification).pluck(:master_id)).to eq [succeeding_master.id]
+    end
+
+    it 'tries all targets then raises collected errors in strict mode' do
+      notification, failed_master, succeeding_master = create_tracker_multi_target_notification
+      notification_tracker_histories(notification).delete_all
+      allow(Master).to receive(:find).and_wrap_original do |original, master_id|
+        raise ActiveRecord::RecordNotFound, 'simulated missing master' if master_id == failed_master.id
+
+        original.call(master_id)
+      end
+
+      error = nil
+      begin
+        Messaging::MessageNotificationTracker.create_for(notification, strict: true)
+      rescue Messaging::MessageNotificationTracker::TargetCreationError => e
+        error = e
+      end
+
+      expect(error).to be_a(Messaging::MessageNotificationTracker::TargetCreationError)
+      expect(error.result).to have_attributes(created: 1, skipped: 0, failed: 1)
+      expect(notification_tracker_histories(notification).pluck(:master_id)).to eq [succeeding_master.id]
     end
   end
 end

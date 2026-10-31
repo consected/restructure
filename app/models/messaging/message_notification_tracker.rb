@@ -3,26 +3,38 @@
 module Messaging
   class MessageNotificationTracker
     EVENT_NAMES = { 'complete' => 'Sent', 'failed' => 'Failed' }.freeze
+    Result = Struct.new(:created, :skipped, :failed, :errors, keyword_init: true)
 
-    def self.create_for(notification)
-      new(notification).create
+    class TargetCreationError < StandardError
+      attr_reader :result
+
+      def initialize(result)
+        @result = result
+        super("Unable to create #{result.failed} notification tracker target(s)")
+      end
+    end
+
+    def self.create_for(notification, skip_existing: false, strict: false)
+      new(notification).create(skip_existing:, strict:)
     end
 
     def initialize(notification)
       @notification = notification
     end
 
-    def create
+    def create(skip_existing: false, strict: false)
+      result = Result.new(created: 0, skipped: 0, failed: 0, errors: [])
       event_name = EVENT_NAMES[@notification.status]
-      return unless event_name
+      return result unless event_name
 
       protocol = Classification::Protocol.active.find_by(name: 'General')
       sub_process = protocol && protocol.sub_processes.active.find_by(name: 'Notification')
 
       unless protocol && sub_process
-        Rails.logger.warn 'Unable to create notification tracker entry: ' \
-                          "General/Notification/#{event_name} was not found"
-        return
+        record_failure(result, nil, StandardError.new("General/Notification/#{event_name} was not found"), strict:)
+        raise TargetCreationError, result if strict
+
+        return result
       end
 
       targets = tracker_targets(event_name)
@@ -31,17 +43,38 @@ module Messaging
       protocol_events = sub_process.protocol_events.active.where(name: event_names).index_by(&:name)
       missing_event_names = event_names - protocol_events.keys
       unless missing_event_names.empty?
-        Rails.logger.warn 'Unable to create notification tracker entry: ' \
-                          "General/Notification/#{missing_event_names.join(', ')} was not found"
-        return
+        record_failure(result, nil,
+                       StandardError.new("General/Notification/#{missing_event_names.join(', ')} was not found"),
+                       strict:)
+        raise TargetCreationError, result if strict
+
+        return result
       end
 
       targets.each do |master_id, target|
+        if skip_existing && tracker_history_exists?(master_id)
+          result.skipped += 1
+          next
+        end
+
         protocol_event = protocol_events.fetch(target[:event_name])
-        create_tracker_history(master_id, target[:recipients], protocol, sub_process, protocol_event)
+        result.created += 1 if save_tracker_history(
+          master_id, target[:recipients], protocol, sub_process, protocol_event
+        )
+      rescue StandardError => e
+        record_failure(result, master_id, e, strict:)
       end
+
+      raise TargetCreationError, result if strict && result.failed.positive?
+
+      result
+    rescue TargetCreationError
+      raise
     rescue StandardError => e
-      Rails.logger.warn "Unable to create notification tracker entry for #{@notification.id}: #{e.class}: #{e.message}"
+      record_failure(result, nil, e, strict:)
+      raise TargetCreationError, result if strict
+
+      result
     end
 
     private
@@ -245,7 +278,7 @@ module Messaging
       Array(values).filter_map { |value| value.to_s if value.present? }.uniq
     end
 
-    def create_tracker_history(master_id, recipients, protocol, sub_process, protocol_event)
+    def save_tracker_history(master_id, recipients, protocol, sub_process, protocol_event)
       if Master::TemporaryMasterIds.include?(master_id.to_i)
         Rails.logger.info "Skipping notification tracker entry for temporary master #{master_id}"
         return
@@ -262,6 +295,21 @@ module Messaging
       tracker[:user_id] = @notification.user_id
       tracker.force_save!
       tracker.save!
+      :created
+    end
+
+    def tracker_history_exists?(master_id)
+      TrackerHistory.exists?(item_type: 'Messaging::MessageNotification', item_id: @notification.id, master_id:)
+    end
+
+    def record_failure(result, master_id, error, strict:)
+      result.failed += 1
+      result.errors << { master_id:, error: }
+      return if strict
+
+      target = master_id ? " for master #{master_id}" : ''
+      Rails.logger.warn "Unable to create notification tracker entry for #{@notification.id}#{target}: " \
+                        "#{error.class}: #{error.message}"
     end
 
     def tracker_notes(recipients)

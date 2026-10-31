@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# Purpose: Verify message notification backfills resolve temporary masters and list recipients safely.
+# Purpose: Verify the re-runnable task backfills notification tracker entries safely and resumably.
 require 'rails_helper'
+
+# Notifications opted out with no_tracker_entry cannot be distinguished from older notifications without history.
 
 RSpec.describe 'Message notification tracker history backfill' do
   include MasterSupport
@@ -25,11 +27,10 @@ RSpec.describe 'Message notification tracker history backfill' do
     create_admin
   end
 
-  def run_backfill_migration
-    migration_path = Rails.root.join('db/migrate/20261027130000_backfill_message_notification_tracker_history.rb')
-    load migration_path.to_s unless Object.const_defined?(:BackfillMessageNotificationTrackerHistory, false)
-
-    Object.const_get(:BackfillMessageNotificationTrackerHistory).new.up
+  def run_backfill_task(batch_size: 250, from_id: nil)
+    task = Rake::Task['message_notifications:backfill_tracker_entries']
+    task.reenable
+    task.invoke(batch_size.to_s, from_id&.to_s)
   end
 
   def create_dynamic_contact_model
@@ -101,6 +102,26 @@ RSpec.describe 'Message notification tracker history backfill' do
     end
   end
 
+  def create_list_backfill_notification(targets:, status: 'complete')
+    list_type = 'backfill_tracker_test_list_items'
+    list_items = {}
+    recipients = targets.each_with_index.map do |target, index|
+      address = target.fetch(:address)
+      contact = create_item({ data: address, rec_type: 'phone', source: 'nfl', rank: 10 }, target.fetch(:master))
+      list_item = double('backfill tracker list item', data: address, master_id: -1, send_status: 'not sent')
+      allow(list_item).to receive(:record_item).with(no_exception: true).and_return(contact)
+      list_items[[list_type, index + 1]] = list_item
+      { list_type:, id: index + 1 }.to_json
+    end
+    stub_backfill_list_items(list_items)
+
+    notification = create_legacy_notification(
+      status:, event_date: Time.zone.parse('2026-10-17 04:00:00'), master_id: -1,
+      recipients:, subject: nil, message_type: 'sms'
+    )
+    [notification, targets]
+  end
+
   it 'backfills complete and failed notifications using their updated_at without modifying source records' do
     master = create_master
     completed_date = Time.zone.parse('2026-10-20 09:15:00')
@@ -116,7 +137,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     notifications = [completed, failed, in_progress, pending, invalid_status]
     source_timestamps = notifications.to_h { |notification| [notification.id, notification.updated_at] }
 
-    run_backfill_migration
+    run_backfill_task
 
     completed_history = tracker_histories(completed).sole
     expect(Classification::ProtocolEvent.find(completed_history.protocol_event_id).name).to eq 'Sent'
@@ -141,7 +162,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     notification = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-19 08:00:00'),
                                               recipients: [email])
 
-    run_backfill_migration
+    run_backfill_task
 
     history = tracker_histories(notification).sole
     expect(history.master_id).to eq master.id
@@ -152,7 +173,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     notification = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-18 07:00:00'),
                                               recipients: ['unmatched-recipient@example.test'])
 
-    run_backfill_migration
+    run_backfill_task
 
     expect(tracker_histories(notification)).to be_empty
   end
@@ -177,7 +198,7 @@ RSpec.describe 'Message notification tracker history backfill' do
       end
     end
 
-    run_backfill_migration
+    run_backfill_task
 
     cases.each do |notification, target_master, address, message_type|
       history = tracker_histories(notification).sole
@@ -222,7 +243,7 @@ RSpec.describe 'Message notification tracker history backfill' do
       message_type: 'sms'
     )
 
-    run_backfill_migration
+    run_backfill_task
 
     histories = tracker_histories(notification).index_by(&:master_id)
     expect(histories.keys).to contain_exactly(sent_master.id, failed_master.id)
@@ -238,7 +259,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     notification = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-17 05:00:00'),
                                               master:, recipients: [], subject: nil, message_type: 'sms')
 
-    run_backfill_migration
+    run_backfill_task
 
     history = tracker_histories(notification).sole
     expect(Classification::ProtocolEvent.find(history.protocol_event_id).name).to eq 'Sent'
@@ -246,7 +267,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     expect(history.notes).to eq 'type: sms'
     original_history_ids = tracker_histories(notification).pluck(:id)
 
-    run_backfill_migration
+    run_backfill_task
 
     expect(tracker_histories(notification).pluck(:id)).to eq original_history_ids
   end
@@ -266,7 +287,7 @@ RSpec.describe 'Message notification tracker history backfill' do
       recipient_user_ids: [user.id]
     )
 
-    run_backfill_migration
+    run_backfill_task
 
     history = tracker_histories(notification).sole
     expect(history.master_id).to eq master.id
@@ -308,7 +329,7 @@ RSpec.describe 'Message notification tracker history backfill' do
       user:
     )
 
-    run_backfill_migration
+    run_backfill_task
 
     history = tracker_histories(notification).sole
     expect(history.master_id).to eq master.id
@@ -322,7 +343,7 @@ RSpec.describe 'Message notification tracker history backfill' do
     Messaging::MessageNotificationTracker.create_for(existing)
     existing_history_ids = tracker_histories(existing).pluck(:id)
 
-    run_backfill_migration
+    run_backfill_task
 
     expect(tracker_histories(existing).pluck(:id)).to eq existing_history_ids
     expect(tracker_histories(missing).sole.protocol_event.name).to eq 'Failed'
@@ -332,49 +353,179 @@ RSpec.describe 'Message notification tracker history backfill' do
     master = create_master
     notification = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-17 06:00:00'), master:)
 
-    run_backfill_migration
+    run_backfill_task
     original_history_ids = tracker_histories(notification).pluck(:id)
-    run_backfill_migration
+    run_backfill_task
 
     expect(tracker_histories(notification).pluck(:id)).to eq original_history_ids
   end
 
-  it 'creates missing General notification protocol records before backfilling' do
-    Admin.where(email: 'auto-admin@dummy.aaa').delete_all
-    admin_count = Admin.count
-    expected_admin = Admin.active.find_by(email: Settings::AdminEmail.downcase) || Admin.active.first
+  it 'aborts with seed instructions when the General protocol is missing' do
     Classification::Protocol.active.where(name: 'General').update_all(name: "Hidden General #{SecureRandom.hex(4)}")
-    master = create_master
-    notification = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-16 05:00:00'), master:)
 
-    run_backfill_migration
+    error = nil
+    begin
+      run_backfill_task
+    rescue SystemExit => e
+      error = e
+    end
 
-    expect(Admin.count).to eq(admin_count)
-    expect(Admin.find_by(email: 'auto-admin@dummy.aaa')).to be_nil
+    expect(error).to be_a(SystemExit)
+    expect(error.status).not_to eq(0)
+    expect(error.message).to match(/Run rails db:seed or rails db:migrate VERSION=20261027120000/)
+  end
 
+  it 'aborts with seed instructions when the Notification subprocess is missing' do
     protocol = Classification::Protocol.active.find_by!(name: 'General')
-    notification_protocol = protocol.sub_processes.active.find_by!(name: 'Notification')
-    records = [protocol, notification_protocol, *notification_protocol.protocol_events.active]
-    expect(records.map(&:admin_id)).to all(eq(expected_admin.id))
+    protocol.sub_processes.active.where(name: 'Notification').update_all(
+      name: "Hidden Notification #{SecureRandom.hex(4)}"
+    )
 
-    history = tracker_histories(notification).sole
-    expect(history.protocol.sub_processes.active.find_by!(name: 'Notification')
-      .protocol_events.active.find_by!(name: 'Sent')).to be_present
+    error = nil
+    begin
+      run_backfill_task
+    rescue SystemExit => e
+      error = e
+    end
+
+    expect(error).to be_a(SystemExit)
+    expect(error.status).not_to eq(0)
+    expect(error.message).to match(/Run rails db:seed or rails db:migrate VERSION=20261027120000/)
+  end
+
+  it 'aborts with seed instructions when Sent or Failed is missing' do
+    protocol = Classification::Protocol.active.find_by!(name: 'General')
+    notification = protocol.sub_processes.active.find_by!(name: 'Notification')
+    notification.protocol_events.active.where(name: 'Failed').update_all(name: 'Hidden Failed')
+
+    error = nil
+    begin
+      run_backfill_task
+    rescue SystemExit => e
+      error = e
+    end
+
+    expect(error).to be_a(SystemExit)
+    expect(error.status).not_to eq(0)
+    expect(error.message).to match(%r{General > Notification > Sent/Failed})
   end
 
   it 'continues to later notifications when tracker creation raises for one record' do
     master = create_master
     failing = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-15 04:00:00'), master:)
     succeeding = create_legacy_notification(status: 'complete', event_date: Time.zone.parse('2026-10-14 03:00:00'), master:)
-    allow(Messaging::MessageNotificationTracker).to receive(:create_for).and_wrap_original do |original, notification|
+    allow(Messaging::MessageNotificationTracker).to receive(:create_for).and_wrap_original do |original, notification, **options|
       raise StandardError, 'simulated tracker failure' if notification.id == failing.id
 
-      original.call(notification)
+      original.call(notification, **options)
     end
+    output = StringIO.new
+    allow($stdout).to receive(:puts) { |*args| output.puts(*args) }
 
-    expect { run_backfill_migration }.not_to raise_error
+    expect do
+      run_backfill_task
+    end.to raise_error(SystemExit) { |error| expect(error.status).not_to eq(0) }
 
     expect(tracker_histories(failing)).to be_empty
     expect(tracker_histories(succeeding)).not_to be_empty
+    expect(output.string).to include("Failed notification ids: #{failing.id}")
+  end
+
+  it 'finishes later targets, reports the notification id, and exits nonzero after a target failure' do
+    failed_master = create_master
+    succeeding_master = create_master
+    notification, = create_list_backfill_notification(
+      targets: [
+        { master: failed_master, address: '+16175550150' },
+        { master: succeeding_master, address: '+16175550151' }
+      ]
+    )
+    allow(Master).to receive(:find).and_wrap_original do |original, master_id|
+      raise ActiveRecord::RecordNotFound, 'simulated missing target' if master_id == failed_master.id
+
+      original.call(master_id)
+    end
+    output = StringIO.new
+    allow($stdout).to receive(:puts) { |*args| output.puts(*args) }
+
+    expect do
+      run_backfill_task
+    end.to raise_error(SystemExit) { |error| expect(error.status).not_to eq(0) }
+
+    expect(tracker_histories(notification).pluck(:master_id)).to eq [succeeding_master.id]
+    expect(output.string).to include("Failed notification ids: #{notification.id}")
+    expect(output.string).to include('1 failure(s)')
+  end
+
+  it 'resumes a partial target run by skipping the existing master and creating the missing one' do
+    first_master = create_master
+    second_master = create_master
+    notification, = create_list_backfill_notification(
+      targets: [
+        { master: first_master, address: '+16175550152' },
+        { master: second_master, address: '+16175550153' }
+      ]
+    )
+    allow(Master).to receive(:find).and_wrap_original do |original, master_id|
+      raise ActiveRecord::RecordNotFound, 'simulated partial run' if master_id == second_master.id
+
+      original.call(master_id)
+    end
+
+    first_result = Messaging::MessageNotificationTracker.create_for(notification)
+    expect(first_result).to have_attributes(created: 1, skipped: 0, failed: 1)
+    expect(tracker_histories(notification).pluck(:master_id)).to eq [first_master.id]
+
+    allow(Master).to receive(:find).and_call_original
+    output = StringIO.new
+    allow($stdout).to receive(:puts) { |*args| output.puts(*args) }
+    run_backfill_task
+
+    expect(tracker_histories(notification).pluck(:master_id)).to contain_exactly(first_master.id, second_master.id)
+    expect(output.string).to include('1 target(s) skipped because an entry already existed')
+    expect(output.string).to include('1 tracker entry/entries created')
+  end
+
+  it 'resumes from the requested notification id, inclusively' do
+    master = create_master
+    earlier = create_legacy_notification(
+      status: 'complete', event_date: Time.zone.parse('2026-10-12 01:00:00'), master:
+    )
+    resume_at = create_legacy_notification(
+      status: 'failed', event_date: Time.zone.parse('2026-10-11 01:00:00'), master:
+    )
+
+    run_backfill_task(from_id: resume_at.id)
+
+    expect(tracker_histories(earlier)).to be_empty
+    expect(tracker_histories(resume_at).sole.protocol_event.name).to eq 'Failed'
+  end
+
+  it 'honors batch_size and prints progress after each batch' do
+    master = create_master
+    notification = create_legacy_notification(
+      status: 'complete', event_date: Time.zone.parse('2026-10-10 01:00:00'), master:
+    )
+    relation = double('eligible notification relation')
+    allow(Messaging::MessageNotification).to receive(:where).with(status: %w[complete failed]).and_return(relation)
+    expect(relation).to receive(:find_each).with(batch_size: 1).and_yield(notification)
+    output = StringIO.new
+    allow($stdout).to receive(:puts) { |*args| output.puts(*args) }
+
+    run_backfill_task(batch_size: 1)
+
+    expect(output.string).to include('Examined 1 notification(s)')
+    expect(tracker_histories(notification)).to be_present
+  end
+
+  it 'backfills complete notifications through the re-runnable task' do
+    master = create_master
+    notification = create_legacy_notification(
+      status: 'complete', event_date: Time.zone.parse('2026-10-13 02:00:00'), master:
+    )
+
+    run_backfill_task
+
+    expect(tracker_histories(notification).sole.protocol_event.name).to eq 'Sent'
   end
 end

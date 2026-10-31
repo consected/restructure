@@ -25,7 +25,16 @@ module Messaging
     end
 
     def candidates(value)
-      number = national(value)
+      original = value.to_s
+      digits = digits_only(original)
+      return [] if digits.blank?
+
+      if original.start_with?('+') && (@country_code.blank? || !digits.start_with?(@country_code))
+        # Foreign digits can still collide with a local number that has the same digits; this is accepted.
+        return [digits]
+      end
+
+      number = national(original)
       return [] unless number
 
       [number, "#{@trunk_number}#{number}", "#{@country_code}#{number}"].uniq

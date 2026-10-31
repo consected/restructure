@@ -40,6 +40,31 @@ Notifications associated with a real master are tracked against that master. Lis
 recipients are tracked against each resolved recipient master, using the referenced record
 or a matching contact; temporary holding masters are never used as tracker targets.
 
+### Backfilling existing notifications
+
+After deploying this tracker-entry feature, run the task once to add history for existing
+completed and failed notifications:
+
+```sh
+bundle exec rake message_notifications:backfill_tracker_entries
+```
+
+The task is safe to rerun: it skips each notification/master target that already has an
+entry, so a run interrupted partway through can complete the remaining targets. The
+optional `batch_size` defaults to `250`; the optional `from_id` resumes inclusively from a
+notification ID:
+
+```sh
+bundle exec rake 'message_notifications:backfill_tracker_entries[500,12345]'
+```
+
+The task requires the `General > Notification > Sent/Failed` tracker records. If they are
+missing, run `rails db:seed` or migration `20261027120000` first. Notifications opted out
+with `no_tracker_entry: true` cannot be distinguished from older notifications that have
+no tracker history, so they will also receive entries during the backfill. List recipients
+and notifications on temporary holding masters follow the same targeting rules as live
+notifications; holding masters themselves are not tracker targets.
+
 ### Pattern 1: Email notification to a role
 
 ```yaml

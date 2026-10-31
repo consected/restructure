@@ -31,22 +31,21 @@ RSpec.describe 'Messaging::PhoneNumberMatcher' do
   end
 
   describe '#candidates' do
-    it 'returns national, trunk-prefixed, and country-prefixed digits without duplicates' do
-      matcher = matcher_class.new(country_code: '1', trunk_number: '1')
+    it 'uses only digits for foreign E.164 numbers and preserves other candidate rules' do
+      [
+        ['foreign E.164 number with US defaults', '+4732123456', '1', '1', %w[4732123456]],
+        ['foreign E.164 number with UK defaults', '+14155551212', '44', '0', %w[14155551212]],
+        ['E.164 number with configured country code', '+16175551212', '1', '1', %w[6175551212 16175551212]],
+        ['UK E.164 number with configured country code', '+447700900123', '44', '0',
+         %w[7700900123 07700900123 447700900123]],
+        ['formatted local number', '(617) 555-1212', '1', '1', %w[6175551212 16175551212]],
+        ['digits-only value without a plus sign', '4732123456', '1', '1', %w[4732123456 14732123456]],
+        ['blank value', '---', '44', '0', []]
+      ].each do |description, value, country_code, trunk_number, expected|
+        matcher = matcher_class.new(country_code:, trunk_number:)
 
-      expect(matcher.candidates('+16175551212')).to eq %w[6175551212 16175551212]
-    end
-
-    it 'returns no candidates for blank or non-numeric values' do
-      matcher = matcher_class.new(country_code: '44', trunk_number: '0')
-
-      expect(matcher.candidates('---')).to eq []
-    end
-
-    it 'matches E.164 numbers to contacts with a national trunk prefix' do
-      matcher = matcher_class.new(country_code: '44', trunk_number: '0')
-
-      expect(matcher.candidates('+447700900123')).to eq %w[7700900123 07700900123 447700900123]
+        expect(matcher.candidates(value)).to eq(expected), description
+      end
     end
 
     it 'ignores a phone extension when building lookup candidates' do

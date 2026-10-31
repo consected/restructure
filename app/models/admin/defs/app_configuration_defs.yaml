@@ -158,6 +158,8 @@ message notification contact resources: |
 default phone country code: |
   Digits used as the default international country calling code for notification phone matching.
   Defaults to the server setting DefaultPhoneCountryCode (FPHS_DEFAULT_PHONE_COUNTRY_CODE), or 1.
+  Explicit + numbers from another country are matched only by their full digits. Those digits can still collide
+  with a local number; this is an accepted limitation.
 default phone trunk number: |
   Digits used as the default national trunk prefix for notification phone matching.
   Defaults to the server setting DefaultPhoneTrunkNumber (FPHS_DEFAULT_PHONE_TRUNK_NUMBER), or 1.
