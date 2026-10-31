@@ -8,11 +8,10 @@
 # config app_type for role lookup + error message improvements (#1172), and when
 # substitutions are made - content_template_text is resolved as the trigger fires, with
 # missing tags blanked, while a named content template is resolved when the message is
-# sent, where a missing tag raises (#1381).
+# sent, where a missing tag raises (#1381), and automatic tracker-entry opt-out (#1479).
 
 require 'rails_helper'
 
-AlNameGenTestN = 'Gen Test ELT 2'
 # Minimal valid 1x1 red pixel PNG in base64
 PNG_BASE64_NOTIFY = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=='
 
@@ -20,60 +19,16 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   include ModelSupport
   include ActivityLogSupport
   include AwsApiStubs
-
-  def example_setup
-    ud, = create_user
-    ud.disable!
-    @u0, = create_user
-    u1, = create_user
-    create_user
-    let_user_create :player_contacts
-    create_master
-    ActivityLog::PlayerContactPhone.definition.update_tracker_events
-    ActivityLog::PlayerContactElt2Test.definition.update_tracker_events
-
-    @al = create_item
-    setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
-
-    # @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
-
-    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    @layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
-    t = '{{main_content}}'
-    @layout_sms = Admin::MessageTemplate.create! name: 'test sms layout', message_type: :sms, template_type: :layout, template: t, current_admin: @admin
-
-    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
-    @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
-
-    n = Admin::UserRole.order(id: :desc).limit(1).pluck(:id).first
-    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).update_all(role_name: "test-old-#{n}")
-
-    Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
-    Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
-    Admin::UserRole.create! app_type: u1.app_type, user: ud, role_name: 'test', current_admin: @admin
-
-    Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test_2', current_admin: @admin
-
-    @at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
-    Admin::UserRole.create! app_type: @at2, user: @u0, role_name: 'test', current_admin: @admin
-
-    # The number of roles is one more than we added due to automatic setup of a template@template item
-    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
-
-    @non_template_user_ids = [u1.id, @user.id, ud.id]
-    @role_user_ids = @non_template_user_ids + [User.template_user.id]
-
-    setup_stub(:sns_send_sms)
-  end
+  include SaveTriggerNotifySpecSupport
 
   describe 'notify trigger' do
     before :all do
       SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
+      SetupHelper.setup_al_gen_tests SaveTriggerNotifySpecSupport::AL_NAME_GEN_TEST, 'elt2_test', 'player_contact'
     end
 
     before :example do
-      example_setup
+      setup_notify_example
     end
 
     it 'generates a message notification and job' do
@@ -109,6 +64,83 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
 
       expect(res).to eq expected_text
+    end
+
+    it 'passes no_tracker_entry to the notification job and skips tracker history after completion' do
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text',
+        no_tracker_entry: true
+      }
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      Seeds::TrackerGeneralProtocol.create_protocol_events
+
+      expect(HandleMessageNotificationJob).to receive(:perform_later)
+        .with(instance_of(Messaging::MessageNotification), hash_including(no_tracker_entry: true))
+        .and_return(nil)
+
+      @trigger.perform
+
+      notification = Messaging::MessageNotification.order(id: :desc).first
+
+      allow(notification).to receive(:generate_and_send).and_return(true)
+      HandleMessageNotificationJob.perform_now(notification, no_tracker_entry: true)
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+      expect(TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)).not_to exist
+    end
+
+    it 'creates tracker history by default after the notification job completes' do
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text'
+      }
+      @trigger = SaveTriggers::Notify.new(config, @al)
+      Seeds::TrackerGeneralProtocol.create_protocol_events
+
+      expect(HandleMessageNotificationJob).to receive(:perform_later)
+        .with(instance_of(Messaging::MessageNotification), hash_including(no_tracker_entry: false))
+        .and_return(nil)
+
+      @trigger.perform
+
+      notification = Messaging::MessageNotification.order(id: :desc).first
+
+      allow(notification).to receive(:generate_and_send).and_return(true)
+      HandleMessageNotificationJob.perform_now(notification)
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+      expect(TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)).to exist
+    end
+
+    it 'casts a string false no_tracker_entry value to false' do
+      config = {
+        type: 'email',
+        role: 'test',
+        layout_template: @layout.name,
+        content_template: @content.name,
+        subject: 'subject text',
+        no_tracker_entry: 'false'
+      }
+      @trigger = SaveTriggers::Notify.new(config, @al)
+
+      expect(HandleMessageNotificationJob).to receive(:perform_later)
+        .with(instance_of(Messaging::MessageNotification), hash_including(no_tracker_entry: false))
+        .and_return(nil)
+
+      @trigger.perform
+
+      notification = Messaging::MessageNotification.order(id: :desc).first
+      allow(notification).to receive(:generate_and_send).and_return(true)
+      HandleMessageNotificationJob.perform_now(notification, no_tracker_entry: false)
+
+      expect(TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)).to exist
     end
 
     # Issue #1384 - when notify queues a background job for an item that tracks
@@ -904,9 +936,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
       t = '<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}} in {{id}}.</p>'
 
-      @activity_log = al = ActivityLog.active.where(name: AlNameGenTestN).first
+      @activity_log = al = ActivityLog.active.where(name: SaveTriggerNotifySpecSupport::AL_NAME_GEN_TEST).first
 
-      raise "Activity Log #{AlNameGenTestN} not set up" if al.nil?
+      raise "Activity Log #{SaveTriggerNotifySpecSupport::AL_NAME_GEN_TEST} not set up" if al.nil?
 
       al.extra_log_types = <<~END_DEF
         step_1:
@@ -1512,11 +1544,11 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   describe 'resolving app_type and user from conditional Hash references - issue #1318' do
     before :all do
       SetupHelper.setup_al_player_contact_phones
-      SetupHelper.setup_al_gen_tests AlNameGenTestN, 'elt2_test', 'player_contact'
+      SetupHelper.setup_al_gen_tests SaveTriggerNotifySpecSupport::AL_NAME_GEN_TEST, 'elt2_test', 'player_contact'
     end
 
     before :example do
-      example_setup
+      setup_notify_example
       @at2 = Admin::AppType.create! name: 'new-notify-clean', label: 'Test Notify App', current_admin: @admin
       Admin::UserRole.create! app_type: @at2, user: @u0, role_name: 'test', current_admin: @admin
     end

@@ -38,11 +38,13 @@ module Messaging
     before_save :set_recipient_data
 
     before_save :set_from_email_address
+    after_commit :create_tracker_entry_for_status, if: :trackable_tracker_status_change?
 
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 50 }
 
-    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config, :ignore_no_recipients,
+                  :no_tracker_entry
     attr_writer :extra_substitutions_data, :batch_user
 
     #
@@ -218,7 +220,8 @@ module Messaging
     # @param [UserBase] for_item - typically an activity log item
     # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {}, alt_batch_user: nil,
-                                ignore_no_recipients: nil)
+                                ignore_no_recipients: nil, no_tracker_entry: nil)
+      self.no_tracker_entry ||= no_tracker_entry
       logger.info "MessageNotification: handling item #{id}"
       update! status: StatusInProgress
 
@@ -304,6 +307,10 @@ module Messaging
       @recipient_emails = nil
     end
 
+    def create_tracker_entry?
+      !no_tracker_entry
+    end
+
     #
     # The message notification works with an underlying item (likely an activity log implementation)
     # Handle setting of the item and use of the actual class referenced
@@ -368,6 +375,14 @@ module Messaging
     end
 
     private
+
+    def trackable_tracker_status_change?
+      saved_change_to_status? && [StatusComplete, StatusFailed].include?(status) && create_tracker_entry?
+    end
+
+    def create_tracker_entry_for_status
+      MessageNotificationTracker.create_for(self)
+    end
 
     #
     # If we have been passed recipient records, use these to generate each message for sending

@@ -386,6 +386,11 @@ class Settings
   # Set the priority listing for the country select
   DefaultCountrySelect = (ENV['DEFAULT_COUNTRY_SELECT'].presence&.split || %w[US CA DE]).freeze
 
+  DefaultPhoneCountryCode = (ENV['FPHS_DEFAULT_PHONE_COUNTRY_CODE'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneCountryCode.freeze
+  DefaultPhoneTrunkNumber = (ENV['FPHS_DEFAULT_PHONE_TRUNK_NUMBER'].presence || '1').delete_prefix('+').gsub(/[^0-9]/, '').presence || '1'
+  DefaultPhoneTrunkNumber.freeze
+
   # Countries for which GDPR specific terms of use should be shown
   GdprCountryCodes = %w[AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SE SK SI ES SE GB].freeze
 
@@ -421,6 +426,6 @@ class Settings
     DefaultDateFormat DefaultTimeFormat DefaultDateTimeFormat
     nfs_store_default_app_type_id
     admin_nfs_role
-    DefaultCountrySelect GdprCountryCodes
+    DefaultCountrySelect DefaultPhoneCountryCode DefaultPhoneTrunkNumber GdprCountryCodes
   ].freeze
 end

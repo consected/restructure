@@ -14,6 +14,7 @@
 #   default_country_code: String,
 #   from_user_email: FromUserEmailValue,
 #   ignore_no_recipients: Boolean,
+#   no_tracker_entry: Boolean | Template | ConditionalHash,
 #   layout_template: String (required),
 #   content_template: String,
 #   content_template_text: String | Hash,
@@ -132,6 +133,11 @@
 
           "from_user_email(alternative)": 'string email address'
           ignore_no_recipients: nil (default) | true - don't raise an error if no recipients are specified or found in the role
+          no_tracker_entry: |
+            (optional) true to prevent notifications sent by this trigger from automatically creating a tracker entry.
+            Supports a boolean, a {{substitution}}, or a conditional reference such as {this: {skip_tracker: return_value}}.
+            Example: no_tracker_entry: true
+            List-style notifications are tracked against each resolved recipient master; temporary holding masters are never targets.
 
           layout_template: 'name of layout template'  # required - see Notes
           content_template: 'name of content template'  # one of content_template / content_template_text is required

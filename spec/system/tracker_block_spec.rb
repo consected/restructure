@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Purpose: Verify tracker previews open in a large modal and render full email documents without exposing their title as visible text.
+
 require 'rails_helper'
 
 describe 'tracker block', js: true, driver: $browser_driver do
@@ -68,6 +70,59 @@ describe 'tracker block', js: true, driver: $browser_driver do
 
   def expect_tracker_date_to_be_today
     expect(tracker_field_event_date).not_to be nil
+  end
+
+  it 'opens the message notification preview from the tracker panel' do
+    setup_access :message_notifications, access: :read, user: @user
+    @master.current_user = @user
+
+    layout_template = Admin::MessageTemplate.create!(
+      name: "system preview layout #{SecureRandom.hex(4)}",
+      message_type: :email,
+      template_type: :layout,
+      template: '<html><body>{{main_content}}</body></html>',
+      current_admin: @admin
+    )
+    notification = Messaging::MessageNotification.create!(
+      app_type: @user.app_type,
+      user: @user,
+      master: @master,
+      item_type: 'Master',
+      item_id: @master.id,
+      recipient_data: ['preview@example.test'],
+      layout_template_name: layout_template.name,
+      content_template_text: 'System preview content',
+      message_type: :email,
+      subject: 'System notification preview',
+      generated_content: '<html><head><title>PRESS App Message Notification</title><style>body {font-family: sans-serif;}</style></head><body><p>System notification body</p></body></html>'
+    )
+    notification.update_column(:status, Messaging::MessageNotification::StatusComplete)
+
+    protocol = Classification::Protocol.create!(name: "System Preview #{SecureRandom.hex(4)}", current_admin: @admin)
+    sub_process = protocol.sub_processes.create!(name: 'Notifications', current_admin: @admin)
+    protocol_event = sub_process.protocol_events.create!(name: 'Sent', current_admin: @admin)
+    @master.trackers.create!(
+      protocol_id: protocol.id,
+      sub_process_id: sub_process.id,
+      protocol_event_id: protocol_event.id,
+      event_date: Time.current,
+      notes: "type: email\nto: preview@example.test\nsubject: #{notification.subject}",
+      item_type: notification.class.name,
+      item_id: notification.id
+    )
+
+    navigate_to_master(@master.id)
+    expand_tracker_panel
+    click_link 'view message notification'
+    finish_page_loading
+
+    expect(page).to have_css('#primary-modal .message-notification-preview', text: 'System notification preview')
+    expect(page).to have_css('#primary-modal.in')
+    expect(page).to have_css('#primary-modal .modal-dialog.modal-lg')
+    expect(page).not_to have_css('#primary-modal .modal-body', text: 'PRESS App Message Notification')
+    within_frame(find('#primary-modal .message-notification-preview__email')) do
+      expect(page).to have_text('System notification body')
+    end
   end
 
   it 'should create a new tracker item in an empty list' do

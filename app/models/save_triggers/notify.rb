@@ -113,6 +113,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @on_complete = config[:on_complete] || @on_complete_triggers
     @from_user_email = config[:from_user_email]
     @ignore_no_recipients = config[:ignore_no_recipients]
+    @no_tracker_entry = ActiveModel::Type::Boolean.new.cast(calc_field_or_return(config[:no_tracker_entry])) || false
     # app_type/user accept a literal id/name, a {{substitution}}, or a conditional
     # Hash reference (e.g. {this: {field: return_value}}) - resolved here via
     # FieldDefaults before being passed to the id/name lookups below.
@@ -448,7 +449,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     job.perform_later(@message_notification, for_item: @item,
                                              on_complete_config: @on_complete,
                                              alt_batch_user: @alt_batch_user,
-                                             ignore_no_recipients: @ignore_no_recipients)
+                                             ignore_no_recipients: @ignore_no_recipients,
+                                             no_tracker_entry: @no_tracker_entry)
   end
 
   def calc_field_or_return(cond)

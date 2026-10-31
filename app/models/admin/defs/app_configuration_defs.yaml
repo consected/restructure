@@ -148,6 +148,21 @@ crosswalk field labels: |
       pro_id: Pro Football ID
   
   If not set, field names will be humanized (e.g., "msid" becomes "Msid")
+message notification contact resources: |
+  YAML hash mapping notification recipient types to Master contact association names.
+  The keys are email and phone. Defaults are player_contact_emails and player_contact_phones.
+  Example:
+
+      email: dynamic_model__femfl_contact_emails
+      phone: dynamic_model__femfl_contact_phones
+default phone country code: |
+  Digits used as the default international country calling code for notification phone matching.
+  Defaults to the server setting DefaultPhoneCountryCode (FPHS_DEFAULT_PHONE_COUNTRY_CODE), or 1.
+  Explicit + numbers from another country are matched only by their full digits. Those digits can still collide
+  with a local number; this is an accepted limitation.
+default phone trunk number: |
+  Digits used as the default national trunk prefix for notification phone matching.
+  Defaults to the server setting DefaultPhoneTrunkNumber (FPHS_DEFAULT_PHONE_TRUNK_NUMBER), or 1.
 tracker order: |
   Tracker records are ordered by "protocol position", "protocol name", or "latest entry date"
 user session timeout: |

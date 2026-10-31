@@ -3,7 +3,8 @@
 # Tests for Messaging::MessageNotification
 # Covers message generation, template rendering, recipient handling (email/SMS/records),
 # calendar invite attachment resolution (#953), NfsStore file attachment resolution (#954),
-# and NotificationMailer integration with attachment support.
+# NotificationMailer integration with attachment support, and status-based tracker entries
+# including master-targeted notifications without resolved recipients (#1479).
 
 require 'rails_helper'
 
@@ -56,6 +57,25 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
+  end
+
+  def create_tracker_notification(attributes = {})
+    message_type = attributes.fetch(:message_type, :email)
+    defaults = {
+      user: @user,
+      master: @activity_log.master,
+      recipient_data: ['recipient@example.test'],
+      layout_template_name: message_type.to_s == 'sms' ? @layout_sms.name : @layout.name,
+      content_template_text: 'Notification content',
+      message_type:,
+      subject: 'Notification subject'
+    }
+
+    Messaging::MessageNotification.create! defaults.merge(attributes)
+  end
+
+  def notification_tracker_histories(notification)
+    TrackerHistory.where(item_type: notification.class.name, item_id: notification.id)
   end
 
   describe 'message notification generation and handling' do
@@ -385,6 +405,334 @@ RSpec.describe Messaging::MessageNotification, type: :model do
       # This doesn't work in test environment since delayed job doesn't run. Need to mock to test this
       # res = testcnx.exec_query "select status, id from  ml_app.message_notifications order by id desc limit 1;"
       # expect(res.rows.first[0]).to eq 'complete'
+    end
+  end
+
+  describe 'tracker entries' do
+    before :example do
+      setup_messaging_test
+      @general_protocol = Classification::Protocol.active.find_by!(name: 'General')
+      @notification_sub_process = @general_protocol.sub_processes.active.find_by!(name: 'Notification')
+      @sent_event = @notification_sub_process.protocol_events.active.find_by!(name: 'Sent')
+      @failed_event = @notification_sub_process.protocol_events.active.find_by!(name: 'Failed')
+    end
+
+    it 'creates a Sent tracker history for a complete status with notification details' do
+      notification = create_tracker_notification
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      notification.reload
+      expect(history.master_id).to eq notification.master_id
+      expect(history.protocol_id).to eq @general_protocol.id
+      expect(history.sub_process_id).to eq @notification_sub_process.id
+      expect(history.protocol_event_id).to eq @sent_event.id
+      expect(history.event_date).to eq notification.updated_at
+      expect(history.user_id).to eq notification.user_id
+      expect(history.notes).to eq "type: email\nto: recipient@example.test\nsubject: Notification subject"
+      expect(history.item).to eq notification
+      expect(notification.master.trackers.find_by!(protocol_id: @general_protocol.id)).to be_present
+    end
+
+    it 'creates a Sent tracker history for a master SMS notification with no recipients' do
+      notification = create_tracker_notification(message_type: :sms, subject: nil, recipient_user_ids: [@rec_user])
+      expect(notification.recipient_sms_numbers).to be_empty
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq notification.master_id
+      expect(history.protocol_event_id).to eq @sent_event.id
+      expect(history.notes).to eq 'type: sms'
+    end
+
+    it 'creates a Failed tracker history for a master SMS notification with no recipients' do
+      notification = create_tracker_notification(message_type: :sms, subject: nil, recipient_user_ids: [@rec_user])
+      expect(notification.recipient_sms_numbers).to be_empty
+
+      notification.update!(status: Messaging::MessageNotification::StatusFailed)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq notification.master_id
+      expect(history.protocol_event_id).to eq @failed_event.id
+      expect(history.notes).to eq 'type: sms'
+    end
+
+    it 'creates a master email tracker history when recipient data is empty' do
+      notification = create_tracker_notification(recipient_data: [])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq notification.master_id
+      expect(history.notes).to eq "type: email\nsubject: Notification subject"
+    end
+
+    it 'does not create a tracker history without a master or recipient addresses' do
+      notification = create_tracker_notification(master: nil, recipient_data: [])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      expect(notification_tracker_histories(notification)).to be_empty
+    end
+
+    it 'creates one tracker history for a master notification with multiple recipients' do
+      recipients = %w[a@example.test b@example.test]
+      notification = create_tracker_notification(master: create_master, recipient_data: recipients)
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.notes).to eq "type: email\nto: a@example.test, b@example.test\nsubject: Notification subject"
+    end
+
+    it 'creates a Failed tracker history for a failed status' do
+      notification = create_tracker_notification
+      notification.update!(status: Messaging::MessageNotification::StatusFailed)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.protocol_event_id).to eq @failed_event.id
+      expect(history.notes).to eq "type: email\nto: recipient@example.test\nsubject: Notification subject"
+    end
+
+    it 'keeps user_id nil when the notification has no user' do
+      notification = create_tracker_notification(user: nil)
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      expect(notification_tracker_histories(notification).sole.user_id).to be_nil
+    end
+
+    it 'creates one history per matched master with only that master recipient address' do
+      first_master = create_master
+      second_master = create_master
+      create_item({ data: 'first@example.test', rec_type: 'email', source: 'nflpa', rank: 10 }, first_master)
+      create_item({ data: 'second@example.test', rec_type: 'email', source: 'nflpa', rank: 10 }, second_master)
+      notification = create_tracker_notification(master: nil,
+                                                 recipient_data: %w[first@example.test second@example.test])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      histories = notification_tracker_histories(notification).order(:master_id).to_a
+      expect(histories.map(&:master_id)).to eq [first_master.id, second_master.id].sort
+      expect(histories.map(&:notes)).to contain_exactly(
+        "type: email\nto: first@example.test\nsubject: Notification subject",
+        "type: email\nto: second@example.test\nsubject: Notification subject"
+      )
+    end
+
+    it 'creates no history when no recipient address matches a player contact' do
+      notification = create_tracker_notification(master: nil, recipient_data: ['missing@example.test'])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      expect(notification_tracker_histories(notification)).to be_empty
+    end
+
+    it 'matches SMS recipients against phone contacts and omits a blank subject' do
+      master = create_master
+      phone_number = '(516)555-0101'
+      create_item({ data: phone_number, rec_type: 'phone', source: 'nfl', rank: 10 }, master)
+      notification = create_tracker_notification(master: nil,
+                                                 message_type: :sms,
+                                                 subject: nil,
+                                                 recipient_data: [phone_number])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq master.id
+      expect(history.notes).to eq "type: sms\nto: #{phone_number}"
+    end
+
+    it 'matches E.164 SMS recipients with formatted local phone contacts' do
+      master = create_master
+      sent_number = '+16175551212'
+      create_item({ data: '(617)555-1212', rec_type: 'phone', source: 'nfl', rank: 10 }, master)
+      notification = create_tracker_notification(master: nil,
+                                                 message_type: :sms,
+                                                 subject: nil,
+                                                 recipient_data: [sent_number])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      histories = notification_tracker_histories(notification)
+      expect(histories.map(&:master_id)).to eq [master.id]
+      expect(histories.sole.notes).to eq "type: sms\nto: #{sent_number}"
+    end
+
+    it 'uses the notification app type phone country code and trunk number' do
+      master = create_master
+      notification_app_type = create_app_type(name: 'notification country settings', label: 'Notification Country Settings')
+      add_app_config(notification_app_type, 'default phone country code', '44')
+      add_app_config(notification_app_type, 'default phone trunk number', '0')
+      create_item({ data: '07700900123', rec_type: 'phone', source: 'nfl', rank: 10 }, master)
+      sent_number = '+447700900123'
+      notification = create_tracker_notification(master: nil,
+                                                 app_type: notification_app_type,
+                                                 item_type: UserPreference.name,
+                                                 message_type: :sms,
+                                                 subject: nil,
+                                                 recipient_data: [sent_number])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq master.id
+      expect(history.notes).to eq "type: sms\nto: #{sent_number}"
+    end
+
+    it 'matches email recipients using the configured dynamic contact resource' do
+      master = create_master
+      notification_app_type = create_app_type(name: 'notification contact resources', label: 'Notification Contact Resources')
+      resource_name = 'dynamic_model__femfl_contact_emails'
+      reflection = Master.reflect_on_association(:player_contact_emails)
+      allow(Master).to receive(:reflect_on_association).and_call_original
+      allow(Master).to receive(:reflect_on_association).with(resource_name).and_return(reflection)
+      add_app_config(notification_app_type, 'message notification contact resources',
+                     { email: resource_name, phone: 'player_contact_phones' }.to_yaml)
+      create_item({ data: 'alternative@example.test', rec_type: 'email', source: 'nflpa', rank: 10 }, master)
+      notification = create_tracker_notification(master: nil,
+                                                 app_type: notification_app_type,
+                                                 item_type: UserPreference.name,
+                                                 recipient_data: ['alternative@example.test'])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq master.id
+      expect(history.notes).to eq "type: email\nto: alternative@example.test\nsubject: Notification subject"
+    end
+
+    it 'logs and skips matching when the configured contact resource is unknown' do
+      notification_app_type = create_app_type(name: 'notification invalid resources', label: 'Notification Invalid Resources')
+      add_app_config(notification_app_type, 'message notification contact resources',
+                     { email: 'unknown_contact_emails', phone: 'player_contact_phones' }.to_yaml)
+      notification = create_tracker_notification(master: nil, app_type: notification_app_type,
+                                                 item_type: UserPreference.name,
+                                                 recipient_data: ['missing@example.test'])
+      expect(Rails.logger).to receive(:warn).with(a_string_including('unknown_contact_emails'))
+
+      expect do
+        notification.update!(status: Messaging::MessageNotification::StatusComplete)
+      end.not_to raise_error
+
+      expect(notification_tracker_histories(notification)).to be_empty
+    end
+
+    it 'downcases email recipients for matching while retaining the sent value in notes' do
+      master = create_master
+      create_item({ data: 'recipient@example.test', rec_type: 'email', source: 'nflpa', rank: 10 }, master)
+      sent_address = 'Recipient@example.test'
+      notification = create_tracker_notification(master: nil, recipient_data: [sent_address])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq master.id
+      expect(history.notes).to eq "type: email\nto: #{sent_address}\nsubject: Notification subject"
+    end
+
+    it 'uses the phone number in JSON recipient records after a send' do
+      master = create_master
+      phone_number = '(516)555-0102'
+      create_item({ data: phone_number, rec_type: 'phone', source: 'nfl', rank: 10 }, master)
+      notification = create_tracker_notification(master: nil,
+                                                 message_type: :sms,
+                                                 subject: nil,
+                                                 recipient_data: [{ list_type: 'test_recipients', id: 1, data: phone_number }])
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      history = notification_tracker_histories(notification).sole
+      expect(history.master_id).to eq master.id
+      expect(history.notes).to eq "type: sms\nto: #{phone_number}"
+    end
+
+    it 'does not create a history for in-progress status changes' do
+      notification = create_tracker_notification
+
+      notification.update!(status: Messaging::MessageNotification::StatusInProgress)
+
+      expect(notification_tracker_histories(notification)).to be_empty
+    end
+
+    it 'does not duplicate a history when a completed notification is saved again' do
+      notification = create_tracker_notification
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      notification.update!(generated_content: 'Updated after completion')
+
+      expect(notification_tracker_histories(notification).count).to eq 1
+    end
+
+    it 'creates a Sent tracker entry through handle_notification_now' do
+      notification = create_tracker_notification
+      expect(notification.create_tracker_entry?).to be(true)
+      allow(notification).to receive(:generate_and_send).and_return(true)
+
+      notification.handle_notification_now
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+      expect(notification_tracker_histories(notification).sole.protocol_event_id).to eq @sent_event.id
+    end
+
+    it 'suppresses Sent and Failed tracker entries when no_tracker_entry is passed to handling' do
+      sent_notification = create_tracker_notification
+      allow(sent_notification).to receive(:generate_and_send).and_return(true)
+
+      sent_notification.handle_notification_now(no_tracker_entry: true)
+
+      expect(sent_notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+      expect(notification_tracker_histories(sent_notification)).to be_empty
+
+      failed_notification = create_tracker_notification
+      allow(failed_notification).to receive(:generate_and_send).and_raise(StandardError, 'mailer failed')
+
+      expect { failed_notification.handle_notification_now(no_tracker_entry: true) }
+        .to raise_error(FphsException, /Exception captured in handle_notification_now: mailer failed/)
+
+      expect(failed_notification.reload.status).to eq Messaging::MessageNotification::StatusFailed
+      expect(notification_tracker_histories(failed_notification)).to be_empty
+    end
+
+    it 'creates a Failed tracker entry when handle_notification_now raises' do
+      notification = create_tracker_notification
+      allow(notification).to receive(:generate_and_send).and_raise(StandardError, 'mailer failed')
+
+      expect { notification.handle_notification_now }
+        .to raise_error(FphsException, /Exception captured in handle_notification_now: mailer failed/)
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusFailed
+      expect(notification_tracker_histories(notification).sole.protocol_event_id).to eq @failed_event.id
+    end
+
+    it 'logs and carries on when the General notification protocol is missing' do
+      notification = create_tracker_notification
+      allow(Classification::Protocol).to receive(:active).and_return(Classification::Protocol.none)
+      expect(Rails.logger).to receive(:warn).with(a_string_including('tracker'))
+
+      expect { notification.update!(status: Messaging::MessageNotification::StatusComplete) }.not_to raise_error
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+      expect(notification_tracker_histories(notification)).to be_empty
+    end
+
+    it 'logs and carries on when tracker creation raises' do
+      notification = create_tracker_notification
+      allow_any_instance_of(Tracker).to receive(:save!).and_raise(StandardError, 'tracker insert failed')
+      expect(Rails.logger).to receive(:warn).with(a_string_including('tracker insert failed'))
+
+      expect { notification.update!(status: Messaging::MessageNotification::StatusComplete) }.not_to raise_error
+
+      expect(notification.reload.status).to eq Messaging::MessageNotification::StatusComplete
+    end
+
+    it 'allows the tracker callback predicate to be overridden' do
+      notification = create_tracker_notification
+      allow(notification).to receive(:create_tracker_entry?).and_return(false)
+
+      notification.update!(status: Messaging::MessageNotification::StatusComplete)
+
+      expect(notification_tracker_histories(notification)).to be_empty
     end
   end
 

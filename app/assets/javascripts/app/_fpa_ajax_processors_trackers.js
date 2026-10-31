@@ -129,6 +129,16 @@ _fpa.postprocessors_trackers = {
 
     },
 
+    open_message_notification: function (link, block, href) {
+        $.get(href)
+            .done(function (content) {
+                _fpa.show_modal(content, 'Message notification preview', 'lg');
+            })
+            .fail(function () {
+                _fpa.flash_notice('Message notification preview could not be loaded.', 'warning');
+            });
+    },
+
     tracker_histories_result_template: function (block, data) {
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
