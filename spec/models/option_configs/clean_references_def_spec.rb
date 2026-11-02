@@ -108,6 +108,26 @@ RSpec.describe 'OptionConfigs::ExtraOptions#clean_references_def', type: :model 
     expect(config.config_errors).to be_blank
   end
 
+  it 'clears stale unresolved-reference tracking when a previously missing class resolves' do
+    reference_class = OptionConfigs::ExtraOptionConfigs::References
+    allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+      model_name == :late_reference_target ? nil : original.call(model_name)
+    end
+
+    config.references = { late_reference_target: { from: 'this', add: 'many' } }
+    config.clean_references_def
+    expect(config.unresolved_model_references[reference_class]).to include(:late_reference_target)
+
+    allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+      model_name == :late_reference_target ? PlayerContact : original.call(model_name)
+    end
+    config.references = { late_reference_target: { from: 'this', add: 'many' } }
+    config.clean_references_def
+
+    expect(config.unresolved_model_references).not_to have_key(reference_class)
+    expect(config.unresolved_model_references?).to be false
+  end
+
   # Helper shared by the two definition-missing examples below.
   # Returns an anonymous class whose .definition returns nil, simulating a
   # generated implementation class whose backing definition record has been

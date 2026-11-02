@@ -3,7 +3,8 @@
 
   unless @server_info.configuration_successful
     content = @server_info.configuration_failed_reason
-    content_html = "<ul><li>#{ content.join('<li>') }</ul>".html_safe
+    # h leaves html_safe reasons (linked dynamic definition load issues) unchanged and escapes the rest
+    content_html = "<ul><li>#{ content.map { |reason| h(reason) }.join('<li>') }</ul>"
 %>
 <i class="glyphicon glyphicon-alert error-mark"
     data-toggle="popover"

@@ -15,6 +15,7 @@ module OptionConfigs
     # - Define a NamedConfiguration inner class for structured field values
     # - Override `add_named_configuration` for preprocessing (call super with processed value)
     # - Define `self.prepare_config(raw, parent)` for pre-initialization context needs
+    # - Use `resolve_model_reference_class` in `prepare_config` when resolving model classes
     # - Override `self.store_processed_value?` to return true for classes that should
     #   store their processed attribute value on the parent ExtraOptions instead of the object
     class BaseConfiguration < OptionConfigs::BaseConfiguration
@@ -30,6 +31,18 @@ module OptionConfigs
       # Falls back to 'Configuration' for anonymous classes.
       def self.model_name
         @_model_name ||= ActiveModel::Name.new(self, nil, name || 'Configuration')
+      end
+
+      def self.resolve_model_reference_class(model_name, parent)
+        to_class = ModelReference.to_record_class_for_type(model_name)
+        unresolved = to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
+        return to_class unless unresolved
+
+        if parent.respond_to?(:record_unresolved_model_reference) && !Admin::AppTypeImport.import_in_progress?
+          parent.record_unresolved_model_reference(self, model_name)
+        end
+
+        nil
       end
 
       # Whether the registry should store the processed attribute value (not the object)

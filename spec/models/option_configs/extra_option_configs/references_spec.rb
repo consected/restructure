@@ -177,6 +177,29 @@ RSpec.describe 'ExtraOptionConfigs::References', type: :model do
       expect(reprocessed_ref).to be_present, 'Expected plural key :player_contacts to be singularized to :player_contact'
       expect(reprocessed_ref[:player_contact][:to_record_label]).to be_present
     end
+
+    it 'clears stale unresolved-reference tracking when a previously missing class resolves' do
+      allow(Admin::AppTypeImport).to receive(:import_in_progress?).and_return(false)
+      allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+        model_name == :late_reference_target ? nil : original.call(model_name)
+      end
+      eo = config_for("default:\n  label: Test\n")
+      eo.references = { late_reference_target: { from: 'this', add: 'many' } }
+
+      klass.reprocess(eo)
+
+      expect(eo.unresolved_model_references[klass]).to include(:late_reference_target)
+
+      allow(ModelReference).to receive(:to_record_class_for_type).and_wrap_original do |original, model_name|
+        model_name == :late_reference_target ? PlayerContact : original.call(model_name)
+      end
+      eo.references = { late_reference_target: { from: 'this', add: 'many' } }
+
+      klass.reprocess(eo)
+
+      expect(eo.unresolved_model_references).not_to have_key(klass)
+      expect(eo.unresolved_model_references?).to be false
+    end
   end
 
   describe 'ExtraOptions integration' do

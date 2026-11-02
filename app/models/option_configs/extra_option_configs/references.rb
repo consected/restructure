@@ -163,10 +163,9 @@ module OptionConfigs
           bad_items = []
 
           refitem.each do |mn, conf|
-            to_class = ModelReference.to_record_class_for_type(mn)
+            to_class = resolve_model_reference_class(mn, parent)
 
-            # Skip references whose target model or definition isn't set up yet.
-            if to_class.nil? || (to_class.respond_to?(:definition) && !to_class.definition)
+            if to_class.nil?
               if Admin::AppTypeImport.import_in_progress?
                 # Avoid breaking app type imports if the resource being pointed to in the
                 # reference hasn't been set up yet. Leave the raw entry untouched and don't
@@ -222,6 +221,7 @@ module OptionConfigs
       # @param instance [ExtraOptions] the ExtraOptions instance to reprocess
       # @return [void]
       def self.reprocess(instance)
+        instance.clear_unresolved_model_references(self)
         instance.references = prepare_config(instance.references, instance)
       end
 

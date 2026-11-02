@@ -34,9 +34,9 @@ module OptionConfigs
       # Pre-process the e_sign config: wrap document_reference, singularize keys,
       # and resolve model references.
       # @param raw [Hash, nil] the raw e_sign config
-      # @param _parent [ExtraOptions] the parent ExtraOptions instance (unused)
+      # @param parent [ExtraOptions] the parent ExtraOptions instance
       # @return [Hash, nil] the processed e_sign hash
-      def self.prepare_config(raw, _parent)
+      def self.prepare_config(raw, parent)
         return nil unless raw
 
         raw = raw.symbolize_keys if raw.is_a?(Hash)
@@ -51,7 +51,7 @@ module OptionConfigs
           end
 
           refitem.each do |mn, conf|
-            to_class = ModelReference.to_record_class_for_type(mn)
+            to_class = resolve_model_reference_class(mn, parent)
 
             refitem[mn][:to_record_label] = conf[:label] || to_class&.human_name
             if to_class&.respond_to?(:no_master_association)
