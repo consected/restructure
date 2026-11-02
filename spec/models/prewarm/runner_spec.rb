@@ -13,6 +13,10 @@
 # this the child could independently compute a DIFFERENT value than its parent, causing
 # the Handlebars generation key to diverge and every warmed artifact to land in a
 # generation the real web process never uses.
+#
+# Issue #1481 (Phase 1): the generation no longer rotates on definition changes, so the warm
+# marker is versioned by the definition and app-type access-control timestamps instead.
+# A re-run skips unchanged state and re-warms after a genuine content change.
 
 require 'rails_helper'
 

@@ -11,6 +11,8 @@
 # - Directory creation for tmp/handlebars and public/handlebars
 # - Cleanup operations for temporary and compiled files
 # - Environment-based flags for minification and source maps
+# - Issue #1481 (Phase 1): generation_key depends only on server_cache_version, and the
+#   startup cleanup also removes FileLock lock files (not in delayed_job/console/runner)
 
 require 'rails_helper'
 

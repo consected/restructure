@@ -40,6 +40,10 @@
 #   must write atomically (temp file + rename) so a concurrent reader is never handed a
 #   partially-written compiled template or multi bundle, and a failed write never
 #   corrupts an existing good file already on disk.
+#
+# - Issue #1481 (Phase 1): the multi bundle filename is content-addressed on the sorted
+#   compiled file paths plus user id and app_type id. It must not change with role,
+#   access-control or definition timestamps when compiled content is identical.
 
 require 'rails_helper'
 
@@ -1440,14 +1444,22 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         expect(filename).to include("-#{user.id}-")
       end
 
-      it 'uses the ordered compiled file paths as its only digest and has no access-control suffix' do
+      it 'uses the sorted compiled file paths as its only digest and has no access-control suffix' do
         url, = helper.write_multiple_handlebars_templates(templates)
         filename = File.basename(url)
         compiled_paths = templates.map { |template_info| template_info[:compiled_file_path] }
-        expected_digest = Digest::SHA256.hexdigest(compiled_paths.join(','))
+        expected_digest = Digest::SHA256.hexdigest(compiled_paths.sort.join(','))
 
         expect(filename).to eq("requested-templates-#{user.id}-#{user.app_type_id}-#{expected_digest}.js")
         expect(filename.delete_suffix('.js').split('-').length).to eq(5)
+      end
+
+      it 'produces the same filename when the same templates and partials are requested in another order' do
+        url_before, = helper.write_multiple_handlebars_templates(templates)
+
+        url_after, = helper.write_multiple_handlebars_templates(templates.reverse)
+
+        expect(File.basename(url_after)).to eq(File.basename(url_before))
       end
 
       it 'changes when any compiled file path content digest changes' do
@@ -1487,6 +1499,14 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       end
     end
 
+    # Clears the per-helper memos the pre-#1481 filename depended on, so an unchanged filename
+    # proves it no longer depends on role/access-control/definition state.
+    def reset_bundle_filename_memos
+      %i[@access_control_version @handlebars_cache_key @handlebars_item_updates_key].each do |ivar|
+        helper.instance_variable_set(ivar, nil)
+      end
+    end
+
     context 'when user roles or access controls change but compiled content does not' do
       before do
         allow(Admin::UserRole).to receive_message_chain(:where, :reorder, :limit, :pluck).and_return([Time.at(2_000_000)])
@@ -1498,6 +1518,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps) { timestamps }
         url_before, = helper.write_multiple_handlebars_templates(templates)
         timestamps[0] = 'role-v2'
+        reset_bundle_filename_memos
 
         url_after, = helper.write_multiple_handlebars_templates(templates)
 
@@ -1509,6 +1530,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
         allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps) { timestamps }
         url_before, = helper.write_multiple_handlebars_templates(templates)
         timestamps[1] = 'uac-v2'
+        reset_bundle_filename_memos
 
         url_after, = helper.write_multiple_handlebars_templates(templates)
 
@@ -1526,6 +1548,7 @@ RSpec.describe HandlebarsPrecompilerHelper, type: :helper do
       )
       url_before, = helper.write_multiple_handlebars_templates(templates)
       record.touch(time: Time.utc(2099, 1, 1))
+      reset_bundle_filename_memos
 
       url_after, = helper.write_multiple_handlebars_templates(templates)
 

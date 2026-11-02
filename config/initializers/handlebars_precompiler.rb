@@ -94,7 +94,7 @@ module HandlebarsPrecompiler
     # Non-user-specific generation key, stable for the server uptime.
     # @return [String] 13-character hex string (truncated SHA256)
     def generation_key
-      # Memcached eviction is now the only runtime rotation source.
+      # Eviction (or another instance's boot) of the shared server_cache_version is the only runtime rotation.
       Digest::SHA256.hexdigest(Application.server_cache_version.to_s)[0..12]
     end
 

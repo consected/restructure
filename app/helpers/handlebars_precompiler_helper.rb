@@ -289,7 +289,7 @@ module HandlebarsPrecompilerHelper
   end
 
   # Write a concatenated multi-file combining all requested compiled templates.
-  # The ordered compiled paths content-address the requested templates; user_id and
+  # The sorted compiled paths content-address the requested templates; user_id and
   # app_type_id keep user-specific bundles isolated.
   # Skips all I/O if the output file already exists.
   # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial,
@@ -310,7 +310,8 @@ module HandlebarsPrecompilerHelper
     u = current_user_or_admin
     app_type_id = u&.app_type_id if u.respond_to? :app_type_id
     compiled_paths = requested_handlebars_templates.map { |template_info| template_info[:compiled_file_path] }
-    content_digest = Digest::SHA256.hexdigest(compiled_paths.join(','))
+    # Sorted so workers that render the same templates in a different order share one bundle.
+    content_digest = Digest::SHA256.hexdigest(compiled_paths.sort.join(','))
     filename = "requested-templates-#{u&.id}-#{app_type_id}-#{content_digest}.js"
     url_path = "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{handlebars_generation_key}/"
     multi_file = HandlebarsPrecompiler.multi_dir(handlebars_generation_key).join(filename)
