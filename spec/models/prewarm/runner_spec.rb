@@ -13,6 +13,10 @@
 # this the child could independently compute a DIFFERENT value than its parent, causing
 # the Handlebars generation key to diverge and every warmed artifact to land in a
 # generation the real web process never uses.
+#
+# Issue #1481 (Phase 1): the generation no longer rotates on definition changes, so the warm
+# marker is versioned by the definition and app-type access-control timestamps instead.
+# A re-run skips unchanged state and re-warms after a genuine content change.
 
 require 'rails_helper'
 
@@ -114,6 +118,68 @@ RSpec.describe Prewarm::Runner do
     result = described_class.run
 
     expect(result[:skipped]).to eq(2)
+  end
+
+  describe '#warm_marker_path' do
+    before do
+      allow(HandlebarsPrecompiler).to receive(:item_updates_key).and_return('definitions-v1')
+      allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
+        .with(app_type.id).and_return(['role-v1', 'uac-v1'])
+    end
+
+    it 'is stable for an unchanged definition and access-control state' do
+      first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+      second_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+
+      expect(second_path).to eq(first_path)
+    end
+
+    it 'changes when the item update key changes after a definition update' do
+      allow(HandlebarsPrecompiler).to receive(:item_updates_key).and_call_original
+      record = Admin::MessageTemplate.create!(
+        name: "prewarm-marker-#{SecureRandom.hex(4)}",
+        message_type: :plain,
+        template_type: :content,
+        template: '',
+        current_admin: SetupHelper.auto_admin
+      )
+      first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+
+      record.touch(time: Time.utc(2099, 1, 1))
+      second_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+
+      expect(second_path).not_to eq(first_path)
+    end
+
+    it 'changes when app-type access-control timestamps change' do
+      access_timestamps = ['role-v1', 'uac-v1']
+      allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
+        .with(app_type.id) { access_timestamps }
+      first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+
+      access_timestamps = ['role-v2', 'uac-v1']
+      second_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+
+      expect(second_path).not_to eq(first_path)
+    end
+  end
+
+  it 'skips unchanged warm state and re-warms after the definition update key changes' do
+    allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_yield
+    definition_key = 'definitions-v1'
+    allow(HandlebarsPrecompiler).to receive(:item_updates_key) { definition_key }
+    allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
+      .and_return(['role-v1', 'uac-v1'])
+    expect(Prewarm::MasterTemplates).to receive(:render_for).exactly(4).times.and_return('<html/>')
+
+    first_pass = described_class.run
+    unchanged_pass = described_class.run
+    definition_key = 'definitions-v2'
+    changed_pass = described_class.run
+
+    expect(first_pass[:warmed]).to eq(2)
+    expect(unchanged_pass[:skipped]).to eq(2)
+    expect(changed_pass[:warmed]).to eq(2)
   end
 
   it 'continues the pass when one combination raises, without aborting the rest' do
