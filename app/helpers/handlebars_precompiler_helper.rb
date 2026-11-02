@@ -53,9 +53,8 @@ module HandlebarsPrecompilerHelper
     "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{handlebars_generation_key}/#{subdir}/"
   end
 
-  # Non-user-specific generation key (issue #1362), memoized per request/helper instance so
-  # it stays stable even if a dynamic definition is touched mid-request. Identical for every
-  # user; rotates only on server_cache_version change or a dynamic-definition/config update.
+  # Non-user-specific generation key (issue #1362), memoized per request/helper instance.
+  # It stays stable through definition edits and rotates only with server_cache_version.
   # @return [String] 13-character hex string (truncated SHA256)
   def handlebars_generation_key
     @handlebars_generation_key ||= HandlebarsPrecompiler.generation_key
@@ -85,6 +84,7 @@ module HandlebarsPrecompilerHelper
     return if @handlebars_generation_sweep_checked
 
     @handlebars_generation_sweep_checked = true
+    # Keep the sweeps for a runtime memcached eviction, which is the remaining rotation path.
     return if Dir.exist?(HandlebarsPrecompiler.tmp_generation_dir(handlebars_generation_key))
 
     HandlebarsPrecompiler::FileLock.acquire('generation-sweep', wait: 0, on_contention: :skip) do
@@ -288,24 +288,12 @@ module HandlebarsPrecompilerHelper
     relative_path
   end
 
-  # Compute an access-control version string for multi-file caching.
-  # Combines user role timestamps, access control timestamps, and handlebars_cache_key
-  # into a stable identifier that changes only when access controls or template
-  # definitions change — NOT on every login.
-  # @return [String] 13-character hex string (truncated SHA256)
-  def access_control_version
-    @access_control_version ||= begin
-      userrole, uac = HandlebarsPrecompiler.app_type_access_control_timestamps(current_user_or_admin_app_type_id)
-
-      Digest::SHA256.hexdigest("#{userrole}-#{uac}-#{handlebars_cache_key}")[0..12]
-    end
-  end
-
   # Write a concatenated multi-file combining all requested compiled templates.
-  # Uses a stable filename based on user_id, app_type_id, content digest, and
-  # access_control_version — stable across login sessions for effective browser caching.
+  # The ordered compiled paths content-address the requested templates; user_id and
+  # app_type_id keep user-specific bundles isolated.
   # Skips all I/O if the output file already exists.
-  # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial keys
+  # @param requested_handlebars_templates [Array<Hash>] template info hashes with :id, :is_partial,
+  #   and :compiled_file_path keys
   # @return [Array(String, Array, Array, Boolean)] URL path, template IDs, partial IDs,
   #   and whether the complete bundle is available
   def write_multiple_handlebars_templates(requested_handlebars_templates)
@@ -321,8 +309,9 @@ module HandlebarsPrecompilerHelper
 
     u = current_user_or_admin
     app_type_id = u&.app_type_id if u.respond_to? :app_type_id
-    req_digest = Digest::SHA256.hexdigest([handlebars_template_ids, handlebars_partial_ids].join(','))
-    filename = "requested-templates-#{u&.id}-#{app_type_id}-#{req_digest}-#{access_control_version}.js"
+    compiled_paths = requested_handlebars_templates.map { |template_info| template_info[:compiled_file_path] }
+    content_digest = Digest::SHA256.hexdigest(compiled_paths.join(','))
+    filename = "requested-templates-#{u&.id}-#{app_type_id}-#{content_digest}.js"
     url_path = "#{HandlebarsPrecompiler::URL_RELATIVE_PATH}gen-#{handlebars_generation_key}/"
     multi_file = HandlebarsPrecompiler.multi_dir(handlebars_generation_key).join(filename)
 
@@ -344,7 +333,7 @@ module HandlebarsPrecompilerHelper
 
           if template_html.any?(&:nil?)
             # Do not persist a degraded bundle (issue #1362 should-fix): filename depends
-            # only on the requested template set/access version, not on whether every read
+            # only on the requested compiled paths, not on whether every read
             # succeeded, so writing a partial bundle here would serve the SAME broken
             # content to every future request for this exact set until the generation
             # rotates. Skipping the write lets a later request retry from scratch once the
@@ -404,13 +393,6 @@ module HandlebarsPrecompilerHelper
     current_user || current_admin
   rescue Devise::MissingWarden
     nil
-  end
-
-  # Resolve the app_type_id of the current user or admin, if any.
-  # @return [Integer, nil] the app_type_id of the current_user/current_admin, or nil
-  def current_user_or_admin_app_type_id
-    u = current_user_or_admin
-    u&.app_type_id if u.respond_to?(:app_type_id)
   end
 
   # Compile templates or partials from their respective temp directory.

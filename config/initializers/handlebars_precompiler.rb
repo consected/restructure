@@ -7,12 +7,10 @@
 #
 # Generation-scoped compiled output (issue #1362):
 # Compiled templates/partials/multi-bundles live under a "gen-<key>" directory, where
-# +generation_key+ is derived ONLY from non-user-specific inputs (server_cache_version and
-# dynamic-definition/config updated_at timestamps) - identical for every user, and it
-# rotates exactly when a dynamic definition changes or the server restarts. Bucketing by
+# +generation_key+ is derived only from +server_cache_version+ - identical for every user,
+# and stable for the server uptime unless the shared cache entry is evicted. Bucketing by
 # generation lets old rotations be deleted wholesale (a single directory rm_rf) rather than
-# by pattern-matching filenames, and bounds disk usage to a small, count-based number of
-# generations (see #sweep_old_generations) instead of accumulating indefinitely.
+# by pattern-matching filenames. The generation sweeps remain useful after cache eviction.
 module HandlebarsPrecompiler
   HANDLEBARS_CLI = ENV.fetch('HANDLEBARS_CLI', Rails.root.join('node_modules', 'handlebars', 'bin', 'handlebars').to_s)
 
@@ -45,9 +43,8 @@ module HandlebarsPrecompiler
                     end
     end
 
-    # Dynamic-definition/config classes whose most recent updated_at contributes to the
-    # generation key - identical list to (and the single source of truth for) what used to
-    # be duplicated inline in HandlebarsPrecompilerHelper#handlebars_item_updates_key.
+    # Dynamic-definition/config classes whose latest updated_at contributes to the
+    # definition freshness key - shared by the helper and prewarm marker generation.
     # A method (not a top-level constant) so these autoloaded AR classes are only resolved
     # when actually called, well after boot - referencing them eagerly at file-load time
     # breaks Zeitwerk/Rails initialization order.
@@ -67,8 +64,8 @@ module HandlebarsPrecompiler
     # Look up the latest updated_at timestamps for Admin::UserRole and
     # Admin::UserAccessControl scoped to a given app_type_id. Used to derive cache keys
     # that must change whenever access control for that app_type changes. Single source of
-    # truth for both HandlebarsPrecompilerHelper (handlebars_cache_key/access_control_version)
-    # and ApplicationHelper (partial_cache_key/template_version) - issue #1400 Phase 1
+    # truth for HandlebarsPrecompilerHelper#handlebars_cache_key and
+    # ApplicationHelper#partial_cache_key/#template_version - issue #1400 Phase 1
     # consolidated what had been two independently-drifting copies of this query.
     # Includes app_type_id: nil rows too (global/shared roles and access controls that
     # apply across all app types via role_name matching), matching the scoping pattern
@@ -94,12 +91,11 @@ module HandlebarsPrecompiler
       [userrole, uac]
     end
 
-    # Non-user-specific generation key: identical for every user, rotates exactly when
-    # server_cache_version changes (deploy/restart) or a dynamic definition/config class is
-    # touched.
+    # Non-user-specific generation key, stable for the server uptime.
     # @return [String] 13-character hex string (truncated SHA256)
     def generation_key
-      Digest::SHA256.hexdigest("#{Application.server_cache_version}-#{item_updates_key}")[0..12]
+      # Memcached eviction is now the only runtime rotation source.
+      Digest::SHA256.hexdigest(Application.server_cache_version.to_s)[0..12]
     end
 
     # @param key [String] generation key, defaults to the CURRENT one
@@ -179,13 +175,13 @@ module HandlebarsPrecompiler
       %w[console c runner r].include?(ARGV.first.to_s)
     end
 
-    # Runs the startup compiled-output cleanup, UNLESS this process is the delayed_job
+    # Runs the startup compiled-output and lock cleanup, UNLESS this process is the delayed_job
     # worker or a `rails console`/`rails runner` invocation (issue #1362). Production
     # Puma must retain preload_app! so this destructive startup step runs once in the
     # parent before workers fork, rather than independently in every worker.
     def startup_cleanup!
       if delayed_job_worker? || rails_console_or_runner?
-        Rails.logger.info 'HandlebarsPrecompiler: skipping compiled-template cleanup in a ' \
+        Rails.logger.info 'HandlebarsPrecompiler: skipping compiled-template/lock cleanup in a ' \
                           'non-web process (delayed_job/console/runner) - it shares disk ' \
                           'with the web process and must not wipe its compiled templates ' \
                           '(issue #1362).'
@@ -194,6 +190,7 @@ module HandlebarsPrecompiler
 
       cleanup_tmp_dir
       cleanup_compiled_output
+      FileUtils.rm_rf(FileLock::LOCK_DIR)
 
       # Invalidate server_cache_version since compiled files were cleaned up.
       # This forces browsers and fragment caches to use fresh template URLs,
@@ -234,7 +231,8 @@ module HandlebarsPrecompiler
     # yet observed a rotation can still find its generation's compiled files. A generation
     # younger than Settings::HandlebarsGenerationSafetyWindowSeconds is never swept,
     # regardless of the count, so one created moments ago can't be deleted out from under a
-    # concurrent writer.
+    # concurrent writer. Retain these safeguards for a runtime memcached eviction, the only
+    # event that can now rotate the generation before the next boot.
     #
     # "current" is computed independently of whether its directory exists yet: the real
     # (opportunistic) trigger only ever runs when the current generation's directory is
@@ -263,6 +261,8 @@ module HandlebarsPrecompiler
       end
     end
 
+    # Retain this sweep for stale locks after a runtime memcached-eviction rotation; boot
+    # cleanup clears the directory on ordinary web restarts.
     # Delete HandlebarsPrecompiler::FileLock lock files older than
     # Settings::HandlebarsLockFileMaxAgeSeconds (issue #1362 S7 fix). Lock names are per
     # user/app_type/template-set, so without this they accumulate forever on a long-lived

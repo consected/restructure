@@ -31,6 +31,33 @@ RSpec.describe HandlebarsPrecompiler do
     end
   end
 
+  describe '.generation_key' do
+    it 'does not rotate when an item update class record is touched' do
+      allow(Application).to receive(:server_cache_version).and_return('stable-server-version')
+      record = Admin::MessageTemplate.create!(
+        name: "generation-key-#{SecureRandom.hex(4)}",
+        message_type: :plain,
+        template_type: :content,
+        template: '',
+        current_admin: SetupHelper.auto_admin
+      )
+      key_before_touch = described_class.generation_key
+
+      record.touch(time: Time.utc(2099, 1, 1))
+
+      expect(described_class.generation_key).to eq(key_before_touch)
+    end
+
+    it 'rotates when Application.server_cache_version changes' do
+      allow(Application).to receive(:server_cache_version).and_return('server-version-one', 'server-version-two')
+
+      key_before = described_class.generation_key
+      key_after = described_class.generation_key
+
+      expect(key_after).not_to eq(key_before)
+    end
+  end
+
   describe '.setup_directories' do
     before do
       FileUtils.rm_rf(described_class::TMP_DIR)
@@ -98,16 +125,21 @@ RSpec.describe HandlebarsPrecompiler do
     # concurrently-running test suite sharing the same test database/memcached.
     let(:key) { described_class.generation_key }
     let(:compiled_dir) { described_class.templates_compiled_dir(key) }
+    let(:lock_file) { described_class::FileLock::LOCK_DIR.join("startup-cleanup-#{SecureRandom.hex(4)}") }
 
     before do
       described_class.setup_directories
       FileUtils.mkdir_p(compiled_dir)
       FileUtils.touch(compiled_dir.join('leftover.js'))
+      FileUtils.mkdir_p(lock_file.dirname)
+      FileUtils.touch(lock_file)
       # Also simulate an in-flight web request's source tmp files (issue #1362 B2 fix):
       # these live under TEMPLATES_TMP_DIR/PARTIALS_TMP_DIR, shared with the delayed_job
       # process, and must be just as protected as the compiled output above.
       FileUtils.touch(described_class::TEMPLATES_TMP_DIR.join('in-flight.handlebars'))
     end
+
+    after { FileUtils.rm_f(lock_file) }
 
     it 'cleans up compiled and tmp output, and invalidates server_cache_version outside the delayed_job process' do
       allow(described_class).to receive(:delayed_job_worker?).and_return(false)
@@ -117,6 +149,7 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(Dir.glob(compiled_dir.join('*.js'))).to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).to be_empty
+      expect(File.exist?(lock_file)).to be false
     end
 
     it 'does NOT clean up compiled/tmp output or invalidate server_cache_version inside the delayed_job process' do
@@ -127,6 +160,7 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(Dir.glob(compiled_dir.join('*.js'))).not_to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).not_to be_empty
+      expect(File.exist?(lock_file)).to be true
     end
 
     it 'does NOT clean up compiled/tmp output or invalidate server_cache_version under rails console/runner' do
@@ -138,6 +172,7 @@ RSpec.describe HandlebarsPrecompiler do
 
       expect(Dir.glob(compiled_dir.join('*.js'))).not_to be_empty
       expect(Dir.glob(described_class::TEMPLATES_TMP_DIR.join('*'))).not_to be_empty
+      expect(File.exist?(lock_file)).to be true
     end
   end
 
@@ -213,10 +248,9 @@ RSpec.describe HandlebarsPrecompiler do
   end
 
   # Issue #1362 (Stage 1) - DISK GUARANTEE SPEC: bounds how many compiled-Handlebars
-  # generations can accumulate on disk, regardless of how many times a dynamic
-  # definition/config change rotates the generation key. Operates on fabricated generation
-  # directories (with controlled mtimes) rather than real DB-driven rotations, so the sweep
-  # LOGIC can be exercised precisely and quickly, independent of directory-creation timing.
+  # generations can accumulate after runtime memcached-eviction rotations. Operates on
+  # fabricated generation directories (with controlled mtimes) rather than real DB-driven
+  # rotations, so the sweep logic is exercised precisely and quickly.
   describe '.sweep_old_generations' do
     def make_generation(name, mtime:)
       FileUtils.mkdir_p(HandlebarsPrecompiler::TMP_DIR.join(name))
