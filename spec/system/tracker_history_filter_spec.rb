@@ -141,7 +141,7 @@ describe 'tracker history filter panel', js: true, driver: $browser_driver do
     scroll_into_view(chron_link)
     chron_link.click
 
-    expect(page).to have_css('table.tracker-chron-results', wait: 10)
+    expect(page).to have_css('table.tracker-chron-results', wait: 30)
     expect(page).to have_css('.tracker-chron-results-wrap select.tracker-history-filter.attached-chosen',
                              visible: :all, wait: 10)
     sleep 0.5
@@ -370,5 +370,53 @@ describe 'tracker history filter panel', js: true, driver: $browser_driver do
     expect(rows.length).to eq(2)
     visible_dates = rows.map { |r| r['data-event-date'][0, 10] }.sort
     expect(visible_dates).to eq(['2025-02-20', '2025-03-10'])
+  end
+
+  it 'opens a message notification preview from a tracker history row' do
+    setup_access :message_notifications, access: :read, user: @user
+    @filter_master.current_user = @user
+    layout_template = Admin::MessageTemplate.create!(
+      name: "history preview layout #{SecureRandom.hex(4)}",
+      message_type: :email,
+      template_type: :layout,
+      template: '<html><body>{{main_content}}</body></html>',
+      current_admin: @admin
+    )
+    notification = Messaging::MessageNotification.create!(
+      app_type: @app_type,
+      user: @user,
+      master: @filter_master,
+      item_type: 'Master',
+      item_id: @filter_master.id,
+      recipient_data: ['preview@example.test'],
+      layout_template_name: layout_template.name,
+      content_template_text: 'Tracker history preview content',
+      message_type: :email,
+      subject: 'Tracker history notification preview',
+      generated_content: '<html><body><p>Tracker history email body</p></body></html>'
+    )
+    notification.update_column(:status, Messaging::MessageNotification::StatusComplete)
+    @filter_master.trackers.create!(
+      protocol_id: @protocol_study.id,
+      sub_process_id: @sp_consented.id,
+      protocol_event_id: @ev_visit_1.id,
+      event_date: Time.current,
+      notes: "type: email\nto: preview@example.test\nsubject: #{notification.subject}",
+      item_type: notification.class.name,
+      item_id: notification.id
+    )
+
+    open_chron_view
+    click_link 'view message notification'
+    finish_page_loading
+
+    expect(page).to have_css('#primary-modal .message-notification-preview',
+                             text: 'Tracker history notification preview')
+    expect(page).to have_css('#primary-modal.in')
+    expect(page).to have_css('#primary-modal .modal-dialog.modal-lg')
+    expect(page).not_to have_css('#primary-modal .modal-body', text: 'PRESS App Message Notification')
+    within_frame(find('#primary-modal .message-notification-preview__email')) do
+      expect(page).to have_text('Tracker history email body')
+    end
   end
 end

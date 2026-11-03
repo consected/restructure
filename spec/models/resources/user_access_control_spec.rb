@@ -6,6 +6,12 @@
 require 'rails_helper'
 
 RSpec.describe Resources::UserAccessControl do
+  describe '.resource_descriptions_for_table' do
+    it 'makes message notification previews available as a table access resource' do
+      expect(described_class.resource_names_for(:table)).to include('message_notifications')
+    end
+  end
+
   describe '.resource_names_for(:activity_log_type)' do
     it 'returns the names represented by the full labelled descriptions' do
       names = Admin::UserAccessControl.resource_names_for(:activity_log_type)

@@ -13,7 +13,7 @@ module OptionConfigs
       not_valid_in_before_save
       allowed_keys %i[
         type role users emails phones phone_records list_type default_country_code
-        from_user_email ignore_no_recipients layout_template content_template
+        from_user_email ignore_no_recipients no_tracker_entry layout_template content_template
         content_template_text subject calendar_invite attachments extra_substitutions
         importance when on_complete on_failure if app_type user
       ]
@@ -29,6 +29,7 @@ module OptionConfigs
       key_type :hash, :from_user_email, :calendar_invite, :extra_substitutions, :when
       key_type :array, :attachments
       key_type :boolean, :ignore_no_recipients
+      key_type :boolean_or_dynamic, :no_tracker_entry
 
       class << self
         # Validate a config hash (or array of config hashes) including semantic checks.
