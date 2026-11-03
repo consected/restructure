@@ -1,4 +1,5 @@
 # Pattern 1: Basic display and styling
+# address/contact require their corresponding fields; rec_type/rank work on any dynamic model with those columns.
 view_options:
   data_attribute: string or list of fields to use as the data attribute
   header_caption: header caption to use - may include {{substitutions}}
@@ -7,3 +8,5 @@ view_options:
   view_handlers:
     - address
     - contact
+    - rec_type
+    - rank
