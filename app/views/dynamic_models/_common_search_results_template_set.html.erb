@@ -53,7 +53,7 @@ done_templates = []
     end 
   end
   
-  oi.model_references.each do |mr|
+  (oi.model_references if oi.respond_to?(:model_references)).to_a.each do |mr|
     mrto = mr.to_record
     next unless mrto.respond_to? :versioned_definition
     mrtovd = mrto.versioned_definition

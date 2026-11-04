@@ -20,15 +20,13 @@
 #     for exactly the versions referenced by records currently being rendered;
 #   - gates rendering via a promise (`_fpa.prepare_template_configs`) so the
 #     versioned config is guaranteed present before Handlebars renders the item.
-# Records at the CURRENT definition version are unaffected (their config is still
-# emitted globally with `def_version = nil`).
+# The CURRENT definition's template state is keyed by its latest history-row ID,
+# while the live definition's `def_version` metadata remains nil.
 #
 # These specs assert the DETERMINISTIC signal: the global page template emits
-# config blocks ONLY for current definition versions (id attribute ending in `--v`
-# with NO digit). No historical version block (id ending in `--v<number>`) should
-# be present for any definition whose table name matches the test fixtures. This
-# count is completely independent of wall-clock timing and remains robust under
-# any server load.
+# config blocks for current definition versions, aliases that state under `v0`,
+# and does not emit historical version blocks. This count is independent of
+# wall-clock timing and remains robust under any server load.
 #
 # Companion system spec:
 #   spec/system/activity_log/embedded_versioned_show_mode_spec.rb
@@ -119,34 +117,37 @@ RSpec.describe 'Global page template historical version emission', type: :reques
   end
 
   # Create a DM definition with default (versioned) options.
-  def create_dm
+  def create_dm(options: nil)
     unless Admin::MigrationGenerator.table_exists?(DM_TABLE)
       TableGenerators.dynamic_models_table(DM_TABLE, :create_do, 'test1', 'test2')
     end
-    dm = DynamicModel.create!(
+    attributes = {
       current_admin: @admin,
       name: DM_TABLE.tr('_', ' '),
       table_name: DM_TABLE,
       schema_name: 'dynamic_test',
       category: :test
-    )
+    }
+    attributes[:options] = options if options
+    dm = DynamicModel.create!(**attributes)
     dm.current_admin = @admin
     dm.update_tracker_events
     DynamicModel.define_models
     Application.refresh_dynamic_defs
-    setup_access :"dynamic_model__#{DM_TABLE}", user: @user
+    setup_access :"dynamic_model__#{DM_TABLE}", app_type: @user.app_type
     dm
   end
 
   # Bump a DM's definition version, creating a new history row.
   # AllowDynamicMigrations is briefly disabled during the save to avoid a
   # competing table-comment migration lock (the history trigger still fires).
-  def bump_dm_version(dm_def, label_suffix)
+  def bump_dm_version(dm_def, label_suffix, fields: %w[test1 test2])
     sleep 2
     change_setting('AllowDynamicMigrations', false)
     dm = DynamicModel.active.find(dm_def.id)
     dm.current_admin = @admin
-    dm.options = "default:\n  label: Test DM v#{label_suffix}\n  fields:\n    - test1\n    - test2\n"
+    field_lines = fields.map { |field_name| "    - #{field_name}" }.join("\n")
+    dm.options = "default:\n  label: Test DM v#{label_suffix}\n  fields:\n#{field_lines}\n"
     dm.save!
     change_setting('AllowDynamicMigrations', true)
     DynamicModel.define_models
@@ -223,18 +224,29 @@ RSpec.describe 'Global page template historical version emission', type: :reques
     response.body
   end
 
+  def requested_handlebars_bundle(text)
+    bundle_url = text[/_fpa\.retrieve_requested_handlebars_templates\('([^']+)'/, 1]
+    return '' unless bundle_url
+
+    File.read(Rails.root.join('public', bundle_url.delete_prefix('/')))
+  end
+
   # Count how many HISTORICAL (versioned) config blocks the template emits for
   # definitions whose config-block id contains the given name_fragment. Historical
   # blocks have a numeric def_version appended to their `id` attribute:
   #   id="fpa_state_config--<resource_name>--v<number>"
-  # The current-version block uses a nil def_version, rendered as `--v` (no digit)
-  # and is NOT counted by this helper.
+  # The current version is excluded from this count; older history rows are not.
   #
   # name_fragment should be a substring of the resource name as it appears in the
   # id (e.g. 'dynamic_model__test_global_tpl_hist_dm_recs' or a unique prefix).
-  def historical_config_block_count(name_fragment, text)
-    # Match the id attribute pattern with a numeric version suffix.
-    text.scan(/fpa_state_config--#{Regexp.escape(name_fragment)}[^"]*--v\d+/).size
+  def historical_config_block_count(name_fragment, current_version, text)
+    versions = text.scan(/fpa_state_config--#{Regexp.escape(name_fragment)}[^"]*--v(\d+)/).flatten
+    versions.count { |version| version.to_i != current_version }
+  end
+
+  def current_config_block_count(name_fragment, current_version, text, form_state: false)
+    form_suffix = form_state ? '(?:--form)?' : ''
+    text.scan(/id="fpa_state_config--#{Regexp.escape(name_fragment)}[^"]*--v#{current_version}#{form_suffix}"/).size
   end
 
   # -----------------------------------------------------------------------
@@ -265,20 +277,131 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # Use the singular resource name as a prefix so we match any option type suffix.
       dm_resource_prefix = "dynamic_model__#{DM_TABLE.singularize}"
 
-      # Sanity check: the CURRENT version (def_version=nil, rendered as '--v' with no digit)
-      # must be present, confirming the DM IS included in active_model_configurations and
+      # Sanity check: the CURRENT version must be present, confirming the DM IS included in active_model_configurations and
       # the global template is actually rendering it.
-      expect(text).to include("fpa_state_config--#{dm_resource_prefix}"),
+      expect(current_config_block_count(dm_resource_prefix, dm.current_def_version, text)).to be > 0,
                       "expected a current-version config block for #{dm_resource_prefix} to be " \
                       'present in the global page template but it was not. ' \
                       'The test DM may not be associated with the active app type.'
 
-      actual = historical_config_block_count(dm_resource_prefix, text)
+      actual = historical_config_block_count(dm_resource_prefix, dm.current_def_version, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{dm_resource_prefix} " \
                         "(any option type) in the global page template, but found #{actual}. " \
                         'The all_versions loop must be removed from ' \
                         'app/views/dynamic_models/_search_results_template.html.erb.'
+    end
+
+    it 'keeps live Handlebars templates registered when the state config has a version' do
+      dm = create_dm
+      DynamicModel.reset_active_model_configurations!
+      expect(DynamicModel.active_model_configurations.pluck(:table_name)).to include(DM_TABLE)
+      login_user
+
+      text = page_template_text
+
+      expect(current_config_block_count("dynamic_model__#{DM_TABLE.singularize}", dm.current_def_version, text))
+        .to be > 0
+      expect(requested_handlebars_bundle(text)).to include(DM_TABLE.tr('_', '-'))
+    end
+
+    it 'writes the current state to v0 and uses v0 for list templates' do
+      dm = create_dm
+      DynamicModel.reset_active_model_configurations!
+      login_user
+
+      text = page_template_text
+      state_name = "dynamic_model__#{DM_TABLE.singularize}_default"
+      state_reference = "_fpa.state.template_config.#{state_name}"
+      show_if_reference = "_fpa.show_if.forms['#{state_name}']"
+      bundle = requested_handlebars_bundle(text)
+
+      expect(text).to include(
+        "set_v0(#{state_reference}, #{state_reference}.v#{dm.current_def_version});"
+      )
+      expect(text).to include('})(false, false);')
+      expect(text).to include(
+        "set_v0(#{show_if_reference}, #{show_if_reference}.v#{dm.current_def_version});"
+      )
+      expect(text).not_to match(
+        /_fpa\.state\.template_config\.[^\n]*#{Regexp.escape(DM_TABLE.singularize)}[^\n]*\.v0 = [^\n]*\|\|/
+      ), 'live DynamicModel aliases must replace their v0 slot when a newer config is loaded'
+      expect(bundle).to include(DM_TABLE.tr('_', '-'))
+      expect(bundle).to match(/"list_template_config".{0,600}"v0"/)
+    end
+
+    it 'emits current template state inline in the dynamic-model form response' do
+      dm = create_dm
+      DynamicModel.reset_active_model_configurations!
+      DynamicModel.routes_load
+      Rails.application.routes_reloader.reload!
+      login_user
+
+      path = "/masters/#{@master.id}/dynamic_model/#{DM_TABLE}/new"
+      expect(Rails.application.routes.recognize_path(path, method: :get)[:controller]).to eq(
+        "dynamic_model/#{DM_TABLE}"
+      )
+      expect(@user.has_access_to?(:create, :table, dm.resource_name)).to be_truthy
+      get path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(
+        "fpa_state_config--dynamic_model__#{DM_TABLE.singularize}_default--v#{dm.current_def_version}--form"
+      )
+      form_state_name = "dynamic_model__#{DM_TABLE.singularize}_default"
+      expect(response.body).to include(
+        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version}  = {"
+      )
+      expect(response.body).to include(
+        "set_v0(_fpa.state.template_config.#{form_state_name}, " \
+        "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version});"
+      )
+      expect(response.body).to include('})(true, false);')
+    end
+
+    it 'keeps historical edit-form state in its version slot while live records use the current slot' do
+      initial_options = "default:\n  label: Test DM v1\n  fields:\n    - test1\n    - test2\n"
+      dm = create_dm(options: initial_options)
+      old_record = @master.dynamic_model__test_global_tpl_hist_dm_recs.create!(
+        current_user: @user,
+        test1: 'historical value'
+      )
+      old_token = old_record.vdef_version
+
+      dm = bump_dm_version(dm, 'v2', fields: ['test1'])
+      current_token = "v#{dm.current_def_version}"
+      state_name = "dynamic_model__#{DM_TABLE.singularize}_default"
+      edit_path = lambda do |record|
+        "/masters/#{@master.id}/dynamic_model/#{DM_TABLE}/#{record.id}/edit"
+      end
+      DynamicModel.reset_active_model_configurations!
+      DynamicModel.routes_load
+      Rails.application.routes_reloader.reload!
+      expect(Rails.application.routes.recognize_path(edit_path.call(old_record), method: :get)[:controller])
+        .to eq("dynamic_model/#{DM_TABLE}")
+      live_record = @master.dynamic_model__test_global_tpl_hist_dm_recs.create!(
+        current_user: @user,
+        test1: 'live value'
+      )
+      setup_access :"dynamic_model__#{DM_TABLE}", access: :update, user: @user, app_type: @user.app_type
+      login_user
+
+      get edit_path.call(old_record)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("fpa_state_config--#{state_name}--#{old_token}--form")
+      expect(response.body).to include("def_version: #{old_token.delete_prefix('v')}")
+      expect(response.body).to include("item_list: 'test1,test2'")
+      expect(response.body).not_to include("fpa_state_config--#{state_name}--#{current_token}--form")
+      expect(response.body).to include('})(true, true);')
+
+      get edit_path.call(live_record)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("fpa_state_config--#{state_name}--#{current_token}--form")
+      expect(response.body).to include('def_version: null')
+      expect(response.body).to include("item_list: 'test1'")
+      expect(response.body).to include('})(true, false);')
     end
 
     # A use_current_version: true DM always resolves records to the current
@@ -337,11 +460,11 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       dm_resource_prefix = "dynamic_model__#{DM_TABLE.singularize}"
 
       # Current version must be present.
-      expect(text).to include("fpa_state_config--#{dm_resource_prefix}"),
+      expect(current_config_block_count(dm_resource_prefix, dm.current_def_version, text)).to be > 0,
                       "expected a current-version config block for #{dm_resource_prefix} (use_current_version) " \
                       'to be present in the global page template.'
 
-      actual = historical_config_block_count(dm_resource_prefix, text)
+      actual = historical_config_block_count(dm_resource_prefix, dm.current_def_version, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{dm_resource_prefix} " \
                         "(use_current_version: true) in the global page template, but found #{actual}."
@@ -381,6 +504,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       history_count = al.all_versions.size
       expect(history_count).to be >= N_AL_BUMPS,
                                "expected at least #{N_AL_BUMPS} history rows, got #{history_count}"
+      active_definition = ActivityLog.active_model_configurations.find_by(id: al.id)
+      expect(Dynamic::TemplateVersionTokens.resource_token(active_definition)).to eq(al.current_def_version)
 
       login_user
       text = page_template_text
@@ -389,13 +514,17 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # with option type suffix. Match any option type suffix of this AL:
       # fpa_state_config--activity_log__player_contact_test_global_hist[__<type>]--v<n>
       al_base_name = 'activity_log__player_contact_test_global_hist'
+      actual_config_blocks = text.scan(/id="fpa_state_config--#{Regexp.escape(al_base_name)}[^"]*"/)
 
       # Sanity check: the CURRENT version config block must be present.
-      expect(text).to include("fpa_state_config--#{al_base_name}"),
+      expect(current_config_block_count(al_base_name, al.current_def_version, text)).to be > 0,
                       "expected a current-version config block for #{al_base_name} (any extra_log_type) " \
-                      'to be present in the global page template but it was not.'
+              "to be present in the global page template but it was not. Found: #{actual_config_blocks.join(', ')}"
+      expect(text).to match(
+        /<script[^>]*id="fpa_state_config--#{Regexp.escape(al_base_name)}_primary--v#{al.current_def_version}"[^>]*>.*?def_version: null/m
+      )
 
-      actual = historical_config_block_count(al_base_name, text)
+      actual = historical_config_block_count(al_base_name, al.current_def_version, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{al_base_name} " \
                         "(any extra_log_type) in the global page template, but found #{actual}. " \
@@ -426,12 +555,12 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       # Use the singular name as prefix so we match any option type suffix.
       ei_resource_prefix = EI_NAME.singularize
 
-      # Sanity check: the CURRENT version config block must be present.
-      expect(text).to include("fpa_state_config--#{ei_resource_prefix}"),
+      # Sanity check: the CURRENT version config block must be present with its history ID.
+      expect(current_config_block_count(ei_resource_prefix, ei.current_def_version, text, form_state: true)).to be > 0,
                       "expected a current-version config block for #{ei_resource_prefix} (any option type) " \
                       'to be present in the global page template but it was not.'
 
-      actual = historical_config_block_count(ei_resource_prefix, text)
+      actual = historical_config_block_count(ei_resource_prefix, ei.current_def_version, text)
       expect(actual).to eq(0),
                         "expected 0 historical version config blocks for #{ei_resource_prefix} " \
                         "(any option type) in the global page template, but found #{actual}. " \

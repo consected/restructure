@@ -227,6 +227,18 @@ RSpec.describe 'Config library cache invalidation for dynamic definitions', type
   # refresh when touch is skipped (use_current_version definitions)
   # ---------------------------------------------------------------------------
   describe 'AC1 & AC3: refresh_outdated lightweight path (config-library-only change)' do
+    it 'rotates dependent cache versions when a live YAML library changes' do
+      allow(DynamicModel).to receive(:active).and_return(DynamicModel.where(id: @dm.id))
+      allow(ActivityLog).to receive(:active).and_return(ActivityLog.none)
+      allow(ExternalIdentifier).to receive(:active).and_return(ExternalIdentifier.none)
+      version_before = DynamicModel.definition_cache_version_token
+
+      @config_library.current_admin = @admin
+      @config_library.update!(options: @library_v2_options)
+
+      expect(DynamicModel.definition_cache_version_token).not_to eq(version_before)
+    end
+
     it 'calls force_option_config_parse without full regen when only config library changed' do
       # Prime
       expect(DynamicModel.up_to_date?).to be_nil

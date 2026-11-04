@@ -27,8 +27,12 @@ module EmbeddedItemHandler
     return unless oi
 
     oi.current_user = current_user
-    oi.action_name = action_name
-    @embedded_item = oi.embedded_item(current_admin_sample:)
+    oi.action_name = action_name if oi.respond_to?(:action_name=)
+    @embedded_item = if oi.respond_to?(:model_references)
+                       oi.embedded_item(current_admin_sample:)
+                     else
+                       oi.embedded_item
+                     end
 
     return unless @embedded_item
 

@@ -127,6 +127,33 @@ module Dynamic
       qres.map(&:to_h)
     end
 
+    # Latest history-row id used to label the live definition's template config.
+    def current_def_version
+      return if id.blank?
+      return @current_def_version if instance_variable_defined?(:@current_def_version)
+
+      @current_def_version = latest_history_row_id
+    end
+
+    def refresh_current_def_version!
+      return if id.blank?
+
+      @current_def_version = latest_history_row_id
+      remove_instance_variable(:@current_template_library_tokens) if
+        instance_variable_defined?(:@current_template_library_tokens)
+      remove_instance_variable(:@template_version_token) if instance_variable_defined?(:@template_version_token)
+      @template_version_token = calculate_template_version_token
+      @current_def_version
+    end
+
+    # Label the current or historical template config without changing def_version semantics.
+    def template_version_token
+      return def_version.to_i if def_version
+      return @template_version_token if instance_variable_defined?(:@template_version_token)
+
+      @template_version_token = calculate_template_version_token
+    end
+
     # Total number of historical version rows for this record, independent of
     # any display limit applied by all_versions_query.
     # @return [Integer]
@@ -138,6 +165,12 @@ module Dynamic
       qres.first['count'].to_i
     end
 
+    def current_template_library_tokens
+      return [] unless uses_current_definition_version?
+
+      @current_template_library_tokens ||= Dynamic::TemplateVersionTokens.live_config_library_tokens([self])
+    end
+
     private
 
     def history_id_attr
@@ -146,6 +179,37 @@ module Dynamic
 
     def reset_all_versions
       self.class.all_versions_memo.delete versions_memo_key
+      remove_instance_variable(:@current_def_version) if instance_variable_defined?(:@current_def_version)
+      remove_instance_variable(:@template_version_token) if instance_variable_defined?(:@template_version_token)
+      remove_instance_variable(:@current_template_library_tokens) if
+        instance_variable_defined?(:@current_template_library_tokens)
+    end
+
+    def calculate_template_version_token
+      history_id = current_def_version || updated_at_version_token
+      return history_id unless uses_current_definition_version?
+
+      library_tokens = current_template_library_tokens
+      return history_id if library_tokens.empty?
+
+      digest = Digest::SHA256.hexdigest([history_id, library_tokens].to_json)
+      1_000_000_000_000 + digest.first(12).to_i(16)
+    end
+
+    def latest_history_row_id
+      all_versions_query(limit: 1).first&.fetch('id')&.to_i
+    rescue ActiveRecord::StatementInvalid => e
+      raise unless e.cause.is_a?(PG::UndefinedTable)
+
+      nil
+    rescue PG::UndefinedTable
+      nil
+    end
+
+    def updated_at_version_token
+      return 0 unless updated_at
+
+      (updated_at.to_r * 1_000_000).to_i
     end
 
     def versions_memo_key

@@ -21,6 +21,7 @@ module Dynamic
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :clean_schema, if: -> { @regenerate }
+      after_commit :rotate_dynamic_definition_cache_version
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
       after_update_commit -> { self.class.routes_reload }, if: -> { saved_change_to_disabled? }
@@ -177,6 +178,19 @@ module Dynamic
       # so that an implementation can always look up the current definition rapidly
       def definition_cache
         @definition_cache ||= {}
+      end
+
+      def definition_cache_version_token
+        Rails.cache.fetch("#{name}_definition_cache_version-#{Application.version}") { SecureRandom.hex }
+      end
+
+      def shared_definition_cache_version_token
+        Rails.cache.fetch("dynamic-definitions-cache-version-#{Application.version}") { SecureRandom.hex }
+      end
+
+      def rotate_definition_cache_version!
+        Rails.cache.write("#{name}_definition_cache_version-#{Application.version}", SecureRandom.hex)
+        Rails.cache.write("dynamic-definitions-cache-version-#{Application.version}", SecureRandom.hex)
       end
 
       def reset_active_model_configurations!
@@ -602,6 +616,10 @@ module Dynamic
     def clean_schema
       # AppControl.restart_server # if Rails.env.production?
       ActiveRecord::Base.connection.schema_cache.clear!
+    end
+
+    def rotate_dynamic_definition_cache_version
+      self.class.rotate_definition_cache_version!
     end
 
     # Get a complete set of all tables to be accessed by embed configurations
