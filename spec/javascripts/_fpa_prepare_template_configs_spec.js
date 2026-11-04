@@ -396,4 +396,97 @@ describe('_fpa.prepare_template_configs', function () {
       expect(Object.keys(_fpa.state.template_config_requests)).toEqual([]);
     });
   });
+
+  // The template_config response is cached by the browser for a short time, so its URL must
+  // change whenever the signed-in session or access context changes.
+  describe('session scoped request URL', function () {
+    var previousUser, previousAdmin, previousRoles;
+
+    var pageData = {
+      multiple_results: 'activity_log__player_contact_phone_primaries',
+      activity_log__player_contact_phone_primaries: [{ id: 42, vdef_version: 'v20' }],
+      master_id: 99
+    };
+
+    var requestUrl = function () {
+      var requestedUrl;
+      _fpa.state.template_config = {};
+      _fpa.state.template_config_requests = {};
+      $.ajax.and.callFake(function (url, options) {
+        requestedUrl = url;
+        options.success('');
+      });
+
+      return _fpa.prepare_template_configs(pageData).then(function () {
+        return requestedUrl;
+      });
+    };
+
+    beforeEach(function () {
+      previousUser = _fpa.state.current_user;
+      previousAdmin = _fpa.state.current_admin;
+      previousRoles = _fpa.state.current_user_roles;
+      _fpa.state.current_user = { id: 7, current_sign_in_at: '2026-11-04T10:00:00Z', app_type_id: 3 };
+      _fpa.state.current_user_roles = ['role_a'];
+      _fpa.state.current_admin = undefined;
+      spyOn($, 'ajax');
+    });
+
+    afterEach(function () {
+      _fpa.state.current_user = previousUser;
+      _fpa.state.current_admin = previousAdmin;
+      _fpa.state.current_user_roles = previousRoles;
+    });
+
+    it('uses the same URL while the session is unchanged, so the browser cache still applies', function () {
+      return requestUrl().then(function (first) {
+        return requestUrl().then(function (second) {
+          expect(first).toMatch(/[?&]s=/);
+          expect(second).toBe(first);
+        });
+      });
+    });
+
+    it('uses a different URL after a new sign in', function () {
+      return requestUrl().then(function (first) {
+        _fpa.state.current_user = { id: 7, current_sign_in_at: '2026-11-04T11:00:00Z', app_type_id: 3 };
+        return requestUrl().then(function (second) {
+          expect(second).not.toBe(first);
+        });
+      });
+    });
+
+    it('uses a different URL for another user', function () {
+      return requestUrl().then(function (first) {
+        _fpa.state.current_user = { id: 8, current_sign_in_at: '2026-11-04T10:00:00Z', app_type_id: 3 };
+        return requestUrl().then(function (second) {
+          expect(second).not.toBe(first);
+        });
+      });
+    });
+
+    it('uses a different URL after switching app type or roles', function () {
+      return requestUrl().then(function (first) {
+        _fpa.state.current_user = { id: 7, current_sign_in_at: '2026-11-04T10:00:00Z', app_type_id: 4 };
+        return requestUrl().then(function (second) {
+          expect(second).not.toBe(first);
+          _fpa.state.current_user = { id: 7, current_sign_in_at: '2026-11-04T10:00:00Z', app_type_id: 3 };
+          _fpa.state.current_user_roles = ['role_a', 'role_b'];
+          return requestUrl().then(function (third) {
+            expect(third).not.toBe(first);
+          });
+        });
+      });
+    });
+
+    it('uses a different URL for an admin session', function () {
+      return requestUrl().then(function (first) {
+        _fpa.state.current_user = undefined;
+        _fpa.state.current_admin = { id: 2, current_sign_in_at: '2026-11-04T10:00:00Z' };
+        return requestUrl().then(function (second) {
+          expect(second).not.toBe(first);
+        });
+      });
+    });
+  });
 });

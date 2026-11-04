@@ -259,6 +259,20 @@ _fpa = {
     options.template_name = template_name;
   },
 
+  // Short key for the signed-in session and access context, added to template_config URLs so a
+  // browser-cached response is never reused after a new sign in, user, app type or role change.
+  template_config_session_key: function () {
+    var user = _fpa.state.current_user, admin = _fpa.state.current_admin;
+    var parts = [
+      user ? [user.id, user.current_sign_in_at, user.app_type_id, (_fpa.state.current_user_roles || []).slice().sort()] : null,
+      admin ? [admin.id, admin.current_sign_in_at] : null
+    ];
+    var text = JSON.stringify(parts), hash = 5381;
+    for (var i = 0; i < text.length; i++) hash = ((hash * 33) ^ text.charCodeAt(i)) >>> 0;
+
+    return hash.toString(36);
+  },
+
   // A function that provides a promise.
   // Allow background loading of versioned definition template configs
   // that have not already been downloaded.
@@ -436,7 +450,8 @@ _fpa = {
       }
 
       var request_cache_version = encodeURIComponent(JSON.stringify(Object.keys(request_group_ids).sort()));
-      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config?v=' + request_cache_version;
+      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config?v=' + request_cache_version +
+        '&s=' + _fpa.template_config_session_key();
 
       var resolve_request;
       var request_promise = new Promise(function (request_resolve) {
