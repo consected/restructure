@@ -319,7 +319,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(text).to include(
         "set_v0(#{state_reference}, #{state_reference}.v#{dm.current_def_version});"
       )
-      expect(text).to include('})(false, false);')
+      expect(text).to include('})(false);')
       expect(text).to include(
         "set_v0(#{show_if_reference}, #{show_if_reference}.v#{dm.current_def_version});"
       )
@@ -356,7 +356,8 @@ RSpec.describe 'Global page template historical version emission', type: :reques
         "set_v0(_fpa.state.template_config.#{form_state_name}, " \
         "_fpa.state.template_config.#{form_state_name}.v#{dm.current_def_version});"
       )
-      expect(response.body).to include('})(true, false);')
+      expect(response.body).not_to include('preserve_existing_v0')
+      expect(response.body).to include('})(false);')
     end
 
     it 'keeps historical edit-form state in its version slot while live records use the current slot' do
@@ -393,7 +394,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(response.body).to include("def_version: #{old_token.delete_prefix('v')}")
       expect(response.body).to include("item_list: 'test1,test2'")
       expect(response.body).not_to include("fpa_state_config--#{state_name}--#{current_token}--form")
-      expect(response.body).to include('})(true, true);')
+      expect(response.body).to include('})(true);')
 
       get edit_path.call(live_record)
 
@@ -401,7 +402,7 @@ RSpec.describe 'Global page template historical version emission', type: :reques
       expect(response.body).to include("fpa_state_config--#{state_name}--#{current_token}--form")
       expect(response.body).to include('def_version: null')
       expect(response.body).to include("item_list: 'test1'")
-      expect(response.body).to include('})(true, false);')
+      expect(response.body).to include('})(false);')
     end
 
     # A use_current_version: true DM always resolves records to the current

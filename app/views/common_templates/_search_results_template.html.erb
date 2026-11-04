@@ -42,10 +42,6 @@
     state_only = false
   end
 
-  unless defined? preserve_v0_alias
-    preserve_v0_alias = false
-  end
-
   historical_version = def_version.present? || def_record&.current_definition.present?
   def_version ||= def_record&.def_version if historical_version
   template_version_token ||= def_version || Dynamic::TemplateVersionTokens.resource_token(def_record)
@@ -392,26 +388,26 @@
   _fpa.show_if.forms.<%=full_name.underscore%> = _fpa.show_if.forms.<%=full_name.underscore%> || {};
   _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> = _fpa.show_if.forms.<%=full_name.underscore%>.<%=vdef_version%> || _fpa.show_if.forms.<%=name_with_option_type.underscore%>.<%=vdef_version%>;
 <% end %>
-  (function (preserve_existing_v0, is_historical_version) {
+    (function (is_historical_version) {
     var set_v0 = function (target, value) {
-      if (!preserve_existing_v0 || !Object.prototype.hasOwnProperty.call(target, 'v0')) target.v0 = value;
+      target.v0 = value;
     };
     if (!is_historical_version) {
-    set_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
-    set_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
-    set_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
+      set_v0(_fpa.state.caption_before.<%=name_with_option_type.underscore%>, _fpa.state.caption_before.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
+      set_v0(_fpa.state.labels_<%=name_with_option_type.underscore%>, _fpa.state.labels_<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
+      set_v0(_fpa.state.template_config.<%=name_with_option_type.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v<%=template_version_token%>);
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-    set_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0);
+      set_v0(_fpa.state.template_config.<%=full_name.underscore%>, _fpa.state.template_config.<%=name_with_option_type.underscore%>.v0);
 <% end %>
 <% if resource_name && resource_name != name_with_option_type.underscore.to_s && resource_name != full_name.underscore.to_s %>
-    set_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0);
+      set_v0(_fpa.state.template_config.<%=resource_name%>, _fpa.state.template_config.<%=name.underscore%>.v0);
 <% end %>
-    set_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>);
+      set_v0(_fpa.show_if.forms['<%=name_with_option_type%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].<%=vdef_version%>);
 <% if full_name.to_s.end_with?('_primary') %>
-    set_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
+      set_v0(_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'], _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
 <% end %>
 <% unless full_name.underscore.to_s == name_with_option_type.underscore.to_s %>
-    set_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
+      set_v0(_fpa.show_if.forms.<%=full_name.underscore%>, _fpa.show_if.forms['<%=name_with_option_type%>'].v0);
 <% end %>
     }
 <% if full_name.to_s.start_with?('dynamic_model__') && option_type_config_name.to_s == default_option_type_name.to_s %>
@@ -433,7 +429,7 @@
   }
   <% end %>
 <% end %>
-  })(<%= preserve_v0_alias ? 'true' : 'false' %>, <%= historical_version ? 'true' : 'false' %>);
+  })(<%= historical_version ? 'true' : 'false' %>);
 <% end %>
 
 

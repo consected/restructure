@@ -401,10 +401,14 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
         "!!_fpa.state.template_config[#{state_name.to_json}].v#{new_token}"
       )
       expect(current_state_present).to be(true)
-      current_alias_preserved = page.evaluate_script(
-        "window.__reloadedTemplateConfigV0 === _fpa.state.template_config[#{state_name.to_json}].v0"
+      current_alias_matches_form = page.evaluate_script(
+        "_fpa.state.template_config[#{state_name.to_json}].v0 === " \
+        "_fpa.state.template_config[#{state_name.to_json}].v#{new_token}"
       )
-      expect(current_alias_preserved).to be(true)
+      expect(current_alias_matches_form).to be(true)
+      expect(page.evaluate_script(
+        "_fpa.state.template_config[#{state_name.to_json}].v0 === window.__initialTemplateConfigV0"
+      )).to be(false)
 
       dm_form_mode :new
       within(new_form) do
@@ -417,8 +421,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
     end
   end
 
-  # Documents the empty-list limitation: cached v0 stays old after a config-only edit
-  # until a record triggers the new version's template_config request.
+  # A current form refreshes stale empty-list v0 inline, without a template-config fetch.
   describe 'list-level v0 config after a config-only definition edit' do
     before(:all) do
       @previous_disable_vdef = Settings::DisableVDef
@@ -465,7 +468,7 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       page.evaluate_script("_fpa.state.template_config[#{list_key.to_json}].v0.add_item_label")
     end
 
-    it 'keeps the old v0 after a reload while the list is empty, and updates it once a record fetches the new config' do
+    it 'updates list-level v0 from the current form without a template-config request' do
       DynamicModel::TestShowIfField.where(master_id: @master_id).delete_all
       Rails.cache.delete(skeleton_key)
       page.driver.browser.execute_cdp('Network.clearBrowserCache')
@@ -530,20 +533,13 @@ describe 'dynamic model show_if with embedded_item', js: true, driver: $browser_
       expect(page.evaluate_script("!!_fpa.state.template_config[#{list_key.to_json}].v#{new_token}")).to be(false)
       expect(page.evaluate_script('window.__templateConfigRequests.length')).to eq(0)
 
-      @master.current_user = @user
-      @master.dynamic_model__test_show_if_fields.create!(current_user: @user, main_field_1: 'now not empty')
-      index_path = "/masters/#{@master_id}/#{@show_if_dm.base_route_segments}"
-      page.execute_script(<<~JS)
-        $.ajax(#{index_path.to_json}, { dataType: 'json' }).done(function (data) {
-          _fpa.prepare_template_configs(data).then(function () {
-            document.body.setAttribute('data-config-fetch-complete', 'true');
-          });
-        });
-      JS
-      expect(page).to have_css('body[data-config-fetch-complete="true"]', wait: 60)
+      new_button_css = '.details-item-type-dynamic-model--test-show-if-fields .new-button-container a.btn'
+      expect(page).to have_css(new_button_css)
+      find(new_button_css).click
+      expect(page).to have_css(new_form_css(@resource_name), wait: 20)
 
-      expect(page.evaluate_script('window.__templateConfigRequests.length')).to eq(1)
       expect(v0_add_item_label(list_key)).to eq(new_label)
+      expect(page.evaluate_script('window.__templateConfigRequests.length')).to eq(0)
     end
   end
 end

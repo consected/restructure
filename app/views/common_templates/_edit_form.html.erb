@@ -154,7 +154,7 @@
   <div data-result="<%= edit_form_id %>"<% if template_state_locals %> data-vdef-version="v<%= template_state_locals[:template_version_token] %>"<% end %>>
     <% if template_state_locals %>
       <%= render partial: 'common_templates/search_results_template',
-                 locals: template_state_locals.merge(state_only: true, preserve_v0_alias: true) %>
+                 locals: template_state_locals.merge(state_only: true) %>
     <% end %>
 <% end %>
     <div class="<%= view_options[:extra_class] %>">
