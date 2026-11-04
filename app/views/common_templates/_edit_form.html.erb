@@ -26,7 +26,17 @@
   option_type_config = form_object_instance.option_type_config
 
   dyn_definition = form_object_instance.class.definition if form_object_instance.class.respond_to?(:definition)
-  default_option_type_name = dyn_definition.default_option_type_name if dyn_definition.respond_to?(:default_option_type_name)
+  template_definition = if form_object_instance.respond_to?(:versioned_definition)
+                          form_object_instance.versioned_definition
+                        else
+                          dyn_definition
+                        end
+  default_option_type_name = template_definition.default_option_type_name if
+    template_definition.respond_to?(:default_option_type_name)
+
+  # An embedded form emits the state for its OWN definition version, independent of the outer form
+  template_state_locals = edit_form_template_state(form_object_instance, option_type_config, template_definition:)
+  template_vdef_version = template_state_locals&.dig(:vdef_version)
   
   unless defined?(view_options) && view_options
     view_options = option_type_config&.view_options
@@ -51,6 +61,9 @@
     edit_form_hash_val[:html] ||= {}
     edit_form_hash_val[:html]["data-view-handlers"] = view_handlers if view_handlers.present?
     edit_form_hash_val[:html]['data-option-type-config-name'] = option_type_config.name if option_type_config
+    if template_vdef_version
+      edit_form_hash_val[:html]['data-vdef-version'] = template_vdef_version
+    end
     
     form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_val]
     form_block_object = self
@@ -120,9 +133,17 @@
   select_desc = {}
 
 %>
+<% if embedded && template_state_locals %>
+  <%= render partial: 'common_templates/search_results_template',
+             locals: template_state_locals.merge(state_only: true) %>
+<% end %>
 <% unless embedded %>
 <div class="data-results">
-  <div data-result="<%= edit_form_id %>">
+  <div data-result="<%= edit_form_id %>"<% if template_vdef_version %> data-vdef-version="<%= template_vdef_version %>"<% end %>>
+    <% if template_state_locals %>
+      <%= render partial: 'common_templates/search_results_template',
+                 locals: template_state_locals.merge(state_only: true) %>
+    <% end %>
 <% end %>
     <div class="<%= view_options[:extra_class] %>">
       <% if selectable_model_reference %>
@@ -163,7 +184,7 @@
            end
          else 
       %>
-        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
+        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us, vdef_version: (template_vdef_version if embedded)} %>
       <% end %>
       <%= model_reference_fields form %>
 

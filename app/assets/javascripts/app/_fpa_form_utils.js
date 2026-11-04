@@ -459,6 +459,12 @@ _fpa.form_utils = {
         form_data[obj_name] = { item_type: obj_name };
         form_data[obj_name].full_option_type = full_option_type;
       }
+      // An embedded form's fields carry the embedded definition's own version, unrelated to the outer form
+      var own_vdef_version = e.attr('data-vdef-version');
+      if (own_vdef_version) {
+        form_data[obj_name].vdef_version = own_vdef_version;
+        form_data[obj_name].embedded_form = true;
+      }
       if (e[0] && e[0].type == 'radio') {
         if (e.is(':checked')) form_data[obj_name][a_name] = e.val();
       } else if (e[0] && e[0].type == 'checkbox') {

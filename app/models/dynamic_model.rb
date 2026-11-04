@@ -35,6 +35,10 @@ class DynamicModel < ActiveRecord::Base
     "dynamic_model__#{table_name}"
   end
 
+  def clear_rails_cache_on_save?
+    false
+  end
+
   # Resource name for a single instance of the model
   def resource_item_name
     resource_name.to_s.singularize.to_sym
@@ -557,8 +561,9 @@ class DynamicModel < ActiveRecord::Base
     # The table had a table comment
     tc[:table] = table_comment if table_comment
 
+    # Refresh the shared cache, since these comments are written back to the database by a later migration
     column_comments = Admin::MigrationGenerator
-                      .column_comments
+                      .column_comments(force: true)
                       .select { |c| c['schema_name'] == schema_name && c['table_name'] == table_name }
 
     tc[:fields] = {}

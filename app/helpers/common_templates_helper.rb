@@ -26,6 +26,28 @@ module CommonTemplatesHelper
     object_instance.set_related_fields[field_name] if object_instance.respond_to?(:set_related_fields)
   end
 
+  #
+  # The locals for the state-only template partial rendered with an edit form, for the definition
+  # version the form's record uses. Embedded forms pass their own object and definition, so they
+  # emit state for their own definition version, independent of the outer form.
+  # @param [Object] form_object_instance - the record the form edits
+  # @param [OptionConfigs::ExtraOptions|nil] option_type_config
+  # @param [Object|nil] template_definition - the live or historical (versioned) definition
+  # @param [User] user
+  # @return [Hash|nil] - mapping locals plus :template_version_token and :vdef_version (as used in
+  #   data-vdef-version attributes), or nil if there is no template state for the form
+  def edit_form_template_state(form_object_instance, option_type_config, template_definition:, user: current_user)
+    return unless template_definition && option_type_config
+
+    locals = OptionConfigs::TemplateOptionMapping.mapping_for(
+      form_object_instance.model_data_type, template_definition, option_type_config, user
+    )
+    return unless locals
+
+    token = Dynamic::TemplateVersionTokens.resource_token(template_definition)
+    locals.merge(template_version_token: token, vdef_version: "v#{token}")
+  end
+
   def zip_field_props(init = {})
     init.merge({ pattern: '\\d{5,5}(-\\d{4,4})?' })
   end

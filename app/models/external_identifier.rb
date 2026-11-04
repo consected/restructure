@@ -76,6 +76,10 @@ class ExternalIdentifier < ActiveRecord::Base
     )]
   end
 
+  def clear_rails_cache_on_save?
+    false
+  end
+
   # Resource name for a single instance of the model
   def resource_item_name
     resource_name.to_s.singularize.to_sym
