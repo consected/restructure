@@ -27,6 +27,10 @@ module OptionConfigs
         hash_or_array: ->(v) { v.is_a?(Hash) || v.is_a?(Array) },
         string_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Hash) },
         string_or_integer_or_hash: ->(v) { v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Integer) || v.is_a?(Hash) },
+        boolean_or_dynamic: lambda { |v|
+          [true, false].include?(v) || v.is_a?(Hash) ||
+            ((v.is_a?(String) || v.is_a?(Symbol)) && v.to_s.include?('{{'))
+        },
         scalar_or_array_or_hash: lambda { |v|
           v.is_a?(String) || v.is_a?(Symbol) || v.is_a?(Numeric) ||
             [true, false, nil].include?(v) || v.is_a?(Array) || v.is_a?(Hash)
@@ -39,6 +43,7 @@ module OptionConfigs
         hash_or_array: 'a Hash or Array',
         string_or_hash: 'a string or Hash',
         string_or_integer_or_hash: 'a string, integer, or Hash',
+        boolean_or_dynamic: 'a boolean, template substitution, or conditional Hash',
         scalar_or_array_or_hash: 'a scalar, Array, or Hash'
       ).freeze
 

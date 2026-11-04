@@ -1,20 +1,3 @@
-.iframe-message-notification {
-  width: 100%;
-  height: 400px;
-  background: white;
-  border: 1px solid gray;
-
-  &.if-mn-type-sms {
-    height: 100px;
-  }
-
-  opacity: 30%;
-
-  &.if-mn-status-complete {
-    opacity: 100%;
-  }
-}
-
 .mn-table-status {
   font-weight: bold;
   font-style: italic;
