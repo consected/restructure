@@ -136,6 +136,8 @@ module Dynamic
 
         Rails.logger.warn "Refreshing outdated #{name}"
         reset_active_model_configurations!
+        # History rows may have been added by another worker, so drop the process-wide version lists
+        all_versions_memo.clear
         defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
         any_new = false
         defs.each do |d|

@@ -201,6 +201,29 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(Dynamic::TemplateVersionTokens.activity_log_item_type_token(item_type)).not_to eq(previous_token)
   end
 
+  it 'resolves an older record to its historical version after another worker edits the definition' do
+    ActivityLog.up_to_date?
+    stale_versions = @activity_log.all_versions
+    stale_update_marker = ActivityLog.instance_variable_get(:@prev_latest_update)
+    record_created_at = Time.current
+    sleep 2
+
+    worker_definition = ActivityLog.find(@activity_log.id)
+    worker_definition.current_admin = @admin
+    worker_definition.extra_log_types = "#{worker_definition.extra_log_types}\n# edited on another worker"
+    worker_definition.save!
+
+    # A save on this process updates its own markers, so restore what a second worker would still hold
+    ActivityLog.all_versions_memo[@activity_log.send(:versions_memo_key)] = stale_versions
+    ActivityLog.instance_variable_set(:@prev_latest_update, stale_update_marker)
+    ActivityLog.refresh_outdated
+
+    historical = @activity_log.versioned(record_created_at)
+
+    expect(historical).not_to be_nil
+    expect(historical.def_version).to eq(@activity_log.all_versions_query.second.fetch('id').to_i)
+  end
+
   it 'manages definition versions' do
     v1 = latest_history_item
     at_1 = DateTime.now
