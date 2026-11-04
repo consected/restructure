@@ -623,6 +623,52 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     expect(response.body).to include('ConfigTwo')
   end
 
+  it 'emits the live state of a referenced dynamic model in the referencing record template_config' do
+    create_dynamic_model(live_caption_options('RootCaption'))
+    ref_table = 'issue1525_ref_recs'
+    TableGenerators.dynamic_models_table(ref_table, :create_do, 'test1', 'test2') unless
+      Admin::MigrationGenerator.table_exists?(ref_table)
+    DynamicModel.send(:remove_const, ref_table.singularize.ns_camelize) if
+      DynamicModel.const_defined?(ref_table.singularize.ns_camelize, false)
+    ref_definition = DynamicModel.create!(
+      current_admin: @admin, name: "Issue1525 ref #{SecureRandom.hex(4)}", table_name: ref_table,
+      schema_name: 'dynamic_test', category: :test, options: live_caption_options('RefCaption')
+    )
+    DynamicModel.define_models
+    Application.refresh_dynamic_defs
+    setup_access :dynamic_model__issue1525_ref_recs, user: @user
+    save_definition_options_without_migration(@dm, <<~YAML)
+      _configurations:
+        use_current_version: true
+
+      default:
+        fields:
+          - test1
+          - test2
+        caption_before:
+          test1: RootCaption
+        references:
+          dynamic_model__issue1525_ref_recs:
+            from: this
+            add: many
+    YAML
+    DynamicModel.reset_active_model_configurations!
+    Application.refresh_dynamic_defs
+    @master.current_user = @user
+    root = @master.dynamic_model__issue1525_template_recs.create!(current_user: @user, test1: 'root')
+    referenced = @master.dynamic_model__issue1525_ref_recs.create!(current_user: @user, test1: 'referenced')
+    ModelReference.create_with(root, referenced, force_create: true)
+    expect(root.reload.model_references.map(&:to_record_id)).to include(referenced.id)
+
+    get "/masters/#{@master.id}/#{@dm.base_route_segments}/#{root.id}/template_config"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('RootCaption')
+    expect(response.body).to include('RefCaption')
+  ensure
+    ref_definition&.reload&.disable!(@admin) unless ref_definition&.disabled?
+  end
+
   it 'collects template-config cache dependencies from one representative per definition version' do
     create_dynamic_model(live_caption_options('Representative'))
     @master.current_user = @user
