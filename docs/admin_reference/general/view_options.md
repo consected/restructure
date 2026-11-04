@@ -39,3 +39,14 @@ Control the layout, ordering, embedding behaviour, reference sorting, UI classes
 ```yaml
 !defs(extra_options_view_options_pattern_5_form_button_defs.yaml)
 ```
+
+## View Handlers
+
+Dynamic models can use `view_options: view_handlers:` to add model-level behavior, such as rec types and ranks. `view_handlers` must be a YAML list, even when there is only one handler:
+
+```yaml
+view_handlers:
+	- rec_type
+```
+
+See [view_handlers](view_handlers.md) for the available handlers and their field and General Selection requirements.

@@ -22,8 +22,8 @@ module RankHandler
       #             Setting other records for this master to secondary if they were primary and have the type #{self.rec_type}."
       conditions = {rank: PrimaryRank, master: master}
 
-      unless defined?(no_rec_type) && no_rec_type
-        conditions[:rec_type] = self.rec_type
+      if respond_to?(:rec_type) && !(defined?(no_rec_type) && no_rec_type)
+        conditions[:rec_type] = rec_type
       end
 
       self.class.where(conditions).each do |a|
