@@ -250,7 +250,10 @@ module ReportsHelper
   # Options for select for a "select from model" resource names drop down
   # @return [options_for_select]
   def select_from_model_resource_name_options
-    Rails.cache.fetch("select_from_model_resource_name_options-#{Resources::Models.updated_at}") do
+    # The shared definition token covers definition changes within the same second as the registry update
+    cache_key = "select_from_model_resource_name_options-#{Resources::Models.updated_at}-" \
+                "#{DynamicModel.shared_definition_cache_version_token}"
+    Rails.cache.fetch(cache_key) do
       res = Resources::Models.all.values
                              .reject { |r| r.option_type }
                              .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }

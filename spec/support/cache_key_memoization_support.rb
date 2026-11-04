@@ -6,5 +6,7 @@ module CacheKeyMemoizationSupport
     # This proxy is process-wide, unlike the fresh view context used by a real request.
     helper.instance_variable_set(:@item_updates, nil)
     helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
+    helper.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
+    helper.instance_variable_set(:@master_templates_definition_structures, nil)
   end
 end

@@ -1,5 +1,6 @@
 <%
   Application.refresh_dynamic_defs
+  template_config_salt = session[:template_config_salt] ||= SecureRandom.hex(8)
 %>
 <%= javascript_tag nonce: true do %>
 
@@ -13,6 +14,7 @@
   _fpa.state.action_name = _fpa.state.action_name || '<%=action_name%>';
   _fpa.state.template_version = '<%=template_version%>';
   _fpa.state.rails_env = '<%=Rails.env%>';
+  _fpa.state.template_config_salt = <%= template_config_salt.to_json.html_safe %>;
   // Indicate whether the current request is being served as an admin page
   // (admin controller namespace, the redirect-to-admin-panel index, or any
   // request under /admin/). The front-end uses this to avoid blocking the

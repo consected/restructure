@@ -14,6 +14,8 @@
 #   user's app type genuinely changes
 # - #partial_cache_key (issue #1400 Phase 1): shared role/UAC timestamp lookups include
 #   global rows, item updates use the precompiler list, and current_sign_in_at remains active
+# - #master_templates_skeleton_cache_signature (issue #1481): tracks structural definition,
+#   panel/configuration, and global access-control changes without depending on process-local registries
 
 require 'rails_helper'
 
@@ -220,12 +222,21 @@ describe '#partial_cache_key' do
     # masking the very bug this asserts (same reason as app_type_available_ids_cache_spec).
     allow_any_instance_of(Admin::UserAccessControl).to receive(:clear_rails_cache_on_save?).and_return(false)
 
-    # Cache-key timestamps interpolate at second granularity, so use an explicit future
-    # updated_at rather than Time.now to guarantee this write is seen as "newer".
-    Admin::UserAccessControl.create! app_type: nil, resource_type: :general,
-                                     resource_name: :app_type, access: :read,
-                                     user:, current_admin: @admin,
-                                     created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+    previous_timestamp =
+      Admin::UserAccessControl.where(app_type_id: [user.app_type_id, nil]).maximum(:updated_at) ||
+      Time.current
+    updated_at = previous_timestamp + 3.seconds
+    access_control = Admin::UserAccessControl.create!(
+      app_type: nil,
+      resource_type: :general,
+      resource_name: :app_type,
+      access: :read,
+      user:,
+      current_admin: @admin,
+      created_at: updated_at,
+      updated_at:
+    )
+    access_control.update_column(:updated_at, updated_at)
 
     helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
@@ -242,8 +253,10 @@ describe '#partial_cache_key' do
 
     allow_any_instance_of(Admin::UserRole).to receive(:clear_rails_cache_on_save?).and_return(false)
 
+    previous_timestamp = Admin::UserRole.where(app_type_id: [user.app_type_id, nil]).maximum(:updated_at) || Time.current
+    updated_at = previous_timestamp + 3.seconds
     Admin::UserRole.create! current_admin: @admin, app_type: nil, role_name: 'global-role-1400',
-                            user:, created_at: 1.hour.from_now, updated_at: 1.hour.from_now
+                            user:, created_at: updated_at, updated_at:
 
     helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
     after_key = helper.partial_cache_key(:loaded, force_user_or_admin: user)
@@ -363,5 +376,104 @@ describe '#partial_cache_key' do
                                '(current_user takes precedence over matching_user in admin_app_type), ' \
                                "but both keys were: #{before_key}"
     end
+  end
+end
+
+describe '#master_templates_skeleton_cache_signature' do
+  include ModelSupport
+
+  before do
+    @admin, = create_admin
+    @user, = create_user
+    allow(Application).to receive(:server_cache_version).and_return('stable-skeleton-test-version')
+  end
+
+  def skeleton_signature
+    helper.instance_variable_set(:@master_templates_skeleton_cache_signatures, nil)
+    helper.instance_variable_set(:@partial_cache_key_access_control_timestamps, nil)
+    helper.master_templates_skeleton_cache_signature(app_type_id: @user.app_type_id)
+  end
+
+  it 'changes with page-layout and app-configuration content' do
+    initial_signature = skeleton_signature
+    layout = Admin::PageLayout.create!(
+      current_admin: @admin,
+      app_type_id: @user.app_type_id,
+      layout_name: 'master',
+      panel_name: "skeleton-signature-#{SecureRandom.hex(4)}",
+      panel_label: 'Initial panel',
+      panel_position: 301,
+      options: "contains:\n  resources:\n    - player_contacts\n"
+    )
+    layout_signature = skeleton_signature
+    expect(layout_signature).not_to eq(initial_signature)
+
+    layout.update!(panel_label: 'Changed panel', current_admin: @admin)
+    expect(skeleton_signature).not_to eq(layout_signature)
+
+    configuration = Admin::AppConfiguration.create!(
+      current_admin: @admin,
+      app_type_id: @user.app_type_id,
+      user_id: @user.id,
+      name: 'notes field format',
+      value: 'initial'
+    )
+    configuration_signature = skeleton_signature
+    expect(configuration_signature).not_to eq(layout_signature)
+
+    configuration.update!(value: 'changed', current_admin: @admin)
+    expect(skeleton_signature).not_to eq(configuration_signature)
+  end
+
+  it 'includes global role and access-control updates' do
+    initial_signature = skeleton_signature
+    allow_any_instance_of(Admin::UserAccessControl).to receive(:clear_rails_cache_on_save?).and_return(false)
+    allow_any_instance_of(Admin::UserRole).to receive(:clear_rails_cache_on_save?).and_return(false)
+
+    Admin::UserAccessControl.create!(
+      app_type: nil,
+      resource_type: :general,
+      resource_name: :app_type,
+      access: :read,
+      user: @user,
+      current_admin: @admin,
+      created_at: Admin::UserAccessControl.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at) + 3.seconds,
+      updated_at: Admin::UserAccessControl.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at) + 3.seconds
+    )
+    access_signature = skeleton_signature
+    expect(access_signature).not_to eq(initial_signature)
+
+    previous_timestamp = Admin::UserRole.where(app_type_id: [@user.app_type_id, nil]).maximum(:updated_at)
+    updated_at = previous_timestamp + 3.seconds
+    Admin::UserRole.create!(
+      current_admin: @admin,
+      app_type: nil,
+      role_name: "skeleton-global-role-#{SecureRandom.hex(3)}",
+      user: @user,
+      created_at: updated_at,
+      updated_at:
+    )
+    expect(skeleton_signature).not_to eq(access_signature)
+  end
+
+  it 'does not depend on the process-local model registry' do
+    initial_signature = skeleton_signature
+    original_resources = Resources::Models.resources.dup
+    Resources::Models.resources[:process_local_only] = Resources::Models::Item.new.merge(
+      type: :dynamic_model,
+      class_name: 'ProcessLocalOnly',
+      resource_name: :process_local_only
+    )
+
+    expect(skeleton_signature).to eq(initial_signature)
+  ensure
+    Resources::Models.resources.replace(original_resources) if original_resources
+  end
+
+  it 'builds a skeleton key when no user or admin is available' do
+    allow(helper).to receive(:current_user).and_return(nil)
+    allow(helper).to receive(:current_admin).and_return(nil)
+
+    expect(helper.master_templates_skeleton_cache_key).to match(/\A[a-f0-9]{64}\z/)
   end
 end

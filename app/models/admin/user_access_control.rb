@@ -371,6 +371,24 @@ class Admin::UserAccessControl < Admin::AdminBase
   end
 
   #
+  # Token that rotates whenever an activity log, dynamic model or external identifier definition is
+  # saved, or a YAML config library one of them uses changes. The resource names derived from those
+  # definitions, such as activity log types, are not otherwise covered by the access control timestamps
+  # now that these saves no longer clear the whole Rails cache.
+  # @return [String]
+  def self.definition_cache_versions
+    [ActivityLog, DynamicModel, ExternalIdentifier].map(&:definition_cache_version_token).join('-')
+  end
+
+  #
+  # Cache key for the resource names offered as filters in the admin access control UI. It follows the
+  # access control timestamps and the definitions that provide the resource names.
+  # @return [String]
+  def self.resource_names_cache_key
+    "admin_user_access_control_resource_names-#{latest_update}-#{definition_cache_versions}"
+  end
+
+  #
   # Check which tables a user can view in the current app type, or an alternative app type if specified
   # The effective app type id is included in the cache key, since the result depends on it:
   # without it, a user switching app type within a session (current_sign_in_at unchanged) would
@@ -378,7 +396,7 @@ class Admin::UserAccessControl < Admin::AdminBase
   def self.viewable_tables(user, alt_app_type_id: nil)
     effective_app_type_id = alt_app_type_id || user.app_type_id
     ckey = cache_key_for_access_for('viewable_tables--', user.id, user.current_sign_in_at&.to_i,
-                                    effective_app_type_id)
+                                    effective_app_type_id, definition_cache_versions)
     Rails.cache.fetch(ckey) do
       names = resource_names_for(:table)
       res = access_for_list?(user, :access, :table, names, alt_app_type_id:)

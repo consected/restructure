@@ -28,8 +28,10 @@ _fpa.show_if.methods = {
       var block_attr_name = embedded_item ? 'data-embedded-item-def-version' : 'data-def-version';
       def_version = block.attr(block_attr_name);
     }
-    var vdef_version = 'v';
-    if (def_version) vdef_version = `v${def_version}`;
+    var versioned_form = block.is('form[data-vdef-version]') ? block : block.find('form[data-vdef-version]').first();
+    var block_vdef_version = versioned_form.attr('data-vdef-version') ||
+      block.attr('data-vdef-version') || block.find('[data-vdef-version]').first().attr('data-vdef-version');
+    var vdef_version = block_vdef_version || data.vdef_version || `v${def_version || 0}`;
     if (!form_key && data.option_type && data.option_type != 'default') form_key = `${item_key}_${data.option_type}`;
     if (!form_key) form_key = item_key;
 

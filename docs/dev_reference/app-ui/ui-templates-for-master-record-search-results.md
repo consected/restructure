@@ -114,3 +114,13 @@
 - **update_metadata**: Created/updated timestamps and user info
 
 The template system uses Handlebars partials extensively, with {{> template_name}} calls creating the hierarchical structure. Each level can access parent context data and apply ReStructure-specific filters for user access controls, field visibility rules, and tag substitutions.
+
+## Template state, versions and the skeleton cache
+
+The master skeleton (served from `/pages/<token>/template` and fragment cached under `master_templates_skeleton_cache_key`) only changes for **structural** edits. A purely configuration edit to a dynamic model, activity log or external identifier (labels, captions, field options, `show_if`) is delivered lazily instead:
+
+- Each definition has a `template_version_token`. Its state is emitted as `_fpa.state.template_config.<name>.v<token>`, with a `v0` alias that list templates read.
+- When a data response reports a `vdef_version` whose slot is missing, `_fpa.prepare_template_configs` fetches `template_config` for one representative record per type, option type and version. Pending requests are keyed by the root record, version and the versions of its embedded items.
+- A form (new or edit) installs its own `v<token>` slot and promotes `v0` unless a newer `v0` is already installed. Shared base aliases are promoted only from the definition's default option type. If a form leaves `v0` older than the live slot, for example a form for a non-default option type, the client makes a single reconciling `template_config` fetch.
+- Inputs baked into the skeleton are part of its signature: active definitions, the option types, `references` and `embed` structure, reference `caption_before` captions, the default option type's `alt_width_classes`, dynamic model `position`, page layout panels and access timestamps. Changing any of them rebuilds the skeleton.
+- Saving a dynamic model, external identifier or YAML config library does not clear the whole Rails cache. Caches that depend on definitions must be keyed by `definition_cache_version_token` or invalidated explicitly, as `Admin::UserAccessControl.resource_names_cache_key` and `Classification::GeneralSelection::InfoBlockCacheKey` are.

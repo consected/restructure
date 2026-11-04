@@ -266,6 +266,82 @@ RSpec.describe 'ActivityLog embedded dynamic model template_config', type: :requ
   end
 
   describe 'unversioned embedded dynamic model' do
+    it 'scopes its ETag to the activity and embedded definition versions' do
+      al = create_activity_with_embed('test_activity_unversioned')
+      path = template_config_path(al)
+
+      get path
+      expect(response).to have_http_status(:ok)
+      original_etag = response.headers['ETag']
+      expect(original_etag).to be_present
+
+      unrelated_definition = DynamicModel.active.find_by!(table_name: 'test_embed_versioned_recs')
+      unrelated_definition.current_admin = @admin
+      unrelated_definition.options = "default:\n  label: Unrelated definition #{SecureRandom.hex(3)}\n"
+      change_setting('AllowDynamicMigrations', false)
+      begin
+        unrelated_definition.save!
+      ensure
+        change_setting('AllowDynamicMigrations', true)
+      end
+
+      get path, headers: { 'HTTP_IF_NONE_MATCH' => original_etag }
+      expect(response).to have_http_status(:not_modified)
+
+      embedded_definition = DynamicModel.active.find_by!(table_name: 'test_embed_unversioned_recs')
+      embedded_definition.current_admin = @admin
+      embedded_definition.options = <<~YAML
+        _configurations:
+          use_current_version: true
+
+        default:
+          fields:
+            - test1
+          labels:
+            test1: Embedded Field Fresh
+      YAML
+      change_setting('AllowDynamicMigrations', false)
+      begin
+        embedded_definition.save!
+      ensure
+        change_setting('AllowDynamicMigrations', true)
+      end
+
+      get path, headers: { 'HTTP_IF_NONE_MATCH' => original_etag }
+      expect(response).to have_http_status(:ok)
+      expect(response.headers['ETag']).not_to eq(original_etag)
+      expect(response.body).to include('Embedded Field Fresh')
+    end
+
+    it 'returns state-only configs for the live activity log and embedded model' do
+      al = create_activity_with_embed('test_activity_unversioned')
+      al.current_user = @user
+      embedded_item = al.embedded_item
+      expect(embedded_item).not_to be_nil
+
+      activity_definition = al.versioned_definition
+      activity_option_config = activity_definition.option_type_config_for(al.extra_log_type)
+      activity_state_name = "#{activity_definition.full_item_type_name}_#{activity_option_config.name}".underscore
+      embedded_definition = embedded_item.versioned_definition
+      embedded_state_name = "#{embedded_definition.item_type_name}_#{embedded_definition.default_option_type_name}".underscore
+
+      get template_config_path(al)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body)
+        .to include("fpa_state_config--#{activity_state_name}--#{al.vdef_version}")
+      expect(response.body)
+        .to include("fpa_state_config--#{embedded_state_name}--#{embedded_item.vdef_version}")
+      expect(response.body)
+        .to include("set_v0(_fpa.state.template_config.#{activity_state_name}, " \
+                    "_fpa.state.template_config.#{activity_state_name}.#{al.vdef_version});")
+      expect(response.body)
+        .to include("set_v0(_fpa.state.template_config.#{embedded_state_name}, " \
+                    "_fpa.state.template_config.#{embedded_state_name}.#{embedded_item.vdef_version});")
+      expect(response.body).not_to include('_fpa.retrieve_requested_handlebars_templates')
+      expect(response.body).not_to include('references_results')
+    end
+
     it 'includes the embedded model template config in the template_config response' do
       al = create_activity_with_embed('test_activity_unversioned')
 

@@ -12,9 +12,14 @@ end
 
 done_templates = []
 
+# Live definitions all have a nil def_version, so the definition identity must be part of the key
+template_done_key = lambda do |view_type, definition|
+  "#{view_type}/#{definition.class.name}-#{definition.id}/#{definition.def_version}"
+end
+
 @instance_list.each do |oi|
   ovd = oi.versioned_definition 
-  done_oid = "#{type}/#{ovd.def_version}"
+  done_oid = template_done_key.call(type, ovd)
   ovd.option_configs.each do |otc|
 
     # If this template has already been done, don't do it again.
@@ -35,7 +40,7 @@ done_templates = []
   if oi.embedded_item
     evd = oi.embedded_item.versioned_definition
     view_type = oi.embedded_item.model_data_type.to_s.pluralize
-    done_id = "#{view_type}/#{evd.def_version}"
+    done_id = template_done_key.call(view_type, evd)
 
     unless done_templates.include? done_id
       done_templates << done_id
@@ -53,14 +58,14 @@ done_templates = []
     end 
   end
   
-  oi.model_references.each do |mr|
+  (oi.model_references if oi.respond_to?(:model_references)).to_a.each do |mr|
     mrto = mr.to_record
     next unless mrto.respond_to? :versioned_definition
     mrtovd = mrto.versioned_definition
     mrto_view_type = mrto.model_data_type.to_s.pluralize
 
     # Ensure we only do this version once for this type of template
-    done_id = "#{mrto_view_type}/#{mrtovd.def_version}"
+    done_id = template_done_key.call(mrto_view_type, mrtovd)
     next if done_templates.include? done_id
 
     done_templates << done_id

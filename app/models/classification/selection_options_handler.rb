@@ -9,6 +9,11 @@ class Classification::SelectionOptionsHandler
   attr_accessor :user_base_object, :table_name
 
   CacheKeySelectorWithConfigOverrides = 'selector_with_config_overrides'
+  MaxTrackedCacheKeys = 500
+
+  class RequestCache < ActiveSupport::CurrentAttributes
+    attribute :shared_definition_cache_version
+  end
 
   #
   # The canonical list of "self-sourcing" field name prefixes.
@@ -287,9 +292,14 @@ class Classification::SelectionOptionsHandler
   end
 
   def self.selector_with_config_overrides(conditions = nil)
-    cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{conditions}"
-    @cache_keys_list ||= []
-    @cache_keys_list << cname
+    definition_versions = RequestCache.shared_definition_cache_version ||=
+      DynamicModel.shared_definition_cache_version_token
+    cname = "#{CacheKeySelectorWithConfigOverrides}--#{Classification::GeneralSelection.selector_cache_version_token}--#{definition_versions}--#{conditions}"
+    @cache_keys_list ||= {}
+    unless @cache_keys_list.key?(cname)
+      Rails.cache.delete(@cache_keys_list.shift.first) if @cache_keys_list.length >= MaxTrackedCacheKeys
+      @cache_keys_list[cname] = true
+    end
     Rails.cache.fetch(cname) { selector_with_config_overrides_processing(conditions) }
   end
 
@@ -419,10 +429,10 @@ class Classification::SelectionOptionsHandler
   #
   # Reset memoized items
   def self.reset!
-    @cache_keys_list&.each do |cname|
+    @cache_keys_list&.each_key do |cname|
       Rails.cache.delete(cname)
     end
-    @cache_keys_list = []
+    @cache_keys_list = {}
     @implementation_classes = nil
   end
 
