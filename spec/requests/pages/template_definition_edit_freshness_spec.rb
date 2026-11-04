@@ -72,6 +72,8 @@ RSpec.describe 'Pages template freshness after dynamic definition edits', type: 
     Application.refresh_dynamic_defs
     setup_access :dynamic_model__issue1525_template_recs, user: @user
     DynamicModel.reset_active_model_configurations!
+    # The definition only becomes active once access is set up, so its routes must be drawn now
+    Rails.application.routes_reloader.reload!
     @dm = definition
   end
 
