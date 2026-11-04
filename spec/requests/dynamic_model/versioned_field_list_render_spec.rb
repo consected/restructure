@@ -175,6 +175,14 @@ RSpec.describe 'DynamicModel versioned field list rendering', type: :request do
       get template_config_path(v2_record)
       expect(response).to have_http_status(:ok)
       v2_item_list = emitted_item_list(response.body)
+      state_name = "#{@dm.item_type_name}_default".underscore
+      expect(response.body)
+        .to include("fpa_state_config--#{state_name}--#{v2_record.vdef_version}")
+      expect(response.body)
+        .to include("set_v0(_fpa.state.template_config.#{state_name}, " \
+                    "_fpa.state.template_config.#{state_name}.#{v2_record.vdef_version});")
+      expect(response.body).not_to include('_fpa.retrieve_requested_handlebars_templates')
+      expect(response.body).not_to include('references_results')
       expect(v2_item_list).to include(DmNewFieldVersionedRender),
                               "Expected v2 record item_list to include '#{DmNewFieldVersionedRender}', " \
                               "but got: #{v2_item_list}"

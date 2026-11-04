@@ -9,6 +9,8 @@ class Admin::MigrationGenerator
   DefaultSchemaOwner = Settings::DefaultSchemaOwner
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
   MIGRATION_TIMESTAMP_MUTEX = Mutex.new
+  # Data dictionary rows change without any migration, so the cached copy must expire
+  DataDicCacheTTL = 5.minutes
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
@@ -161,6 +163,17 @@ class Admin::MigrationGenerator
     @tables_and_views = nil
   end
 
+  def self.invalidate_definition_metadata_cache!(table_names:)
+    Rails.cache.delete("db_column_comments-#{Application.version}")
+    Rails.cache.delete("db_foreign_keys-#{Application.version}")
+    table_names.compact.uniq.each do |table_name|
+      # data_dic caches by basename, which is the table name without its _datadic suffix
+      [table_name, table_name.to_s.delete_suffix('_datadic')].uniq.each do |basename|
+        Rails.cache.delete("db_data_dic-#{basename}-#{Application.version}")
+      end
+    end
+  end
+
   #
   # Get the database comment for the table
   # @param [String] table_name
@@ -178,9 +191,10 @@ class Admin::MigrationGenerator
   # Get and cache database comments for all columns for all tables
   # in the search path.
   # Each entry is a Hash: { schema_name: , table_name: , column_name: , column_comment: }
+  # @param force [Boolean] re-run the catalog query and replace the cached result
   # @return [Array{Hash}]
-  def self.column_comments
-    Rails.cache.fetch("db_column_comments-#{Application.version}") do
+  def self.column_comments(force: false)
+    Rails.cache.fetch("db_column_comments-#{Application.version}", force:) do
       res = connection.execute <<~END_SQL
         SELECT
             cols.table_schema "schema_name",
@@ -284,7 +298,7 @@ class Admin::MigrationGenerator
 
     ddtab = ddtab['table_name']
 
-    Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}") do
+    Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}", expires_in: DataDicCacheTTL) do
       res = connection.execute <<~END_SQL
         SELECT * FROM #{ddtab};
       END_SQL
@@ -780,6 +794,8 @@ class Admin::MigrationGenerator
     @do_migration = do_migration unless do_migration.nil?
     dirname ||= db_migration_dirname
     self.class.migrate(dirname, do_migration: @do_migration)
+    # The migration may have changed comments, foreign keys or data dictionary tables
+    self.class.invalidate_definition_metadata_cache!(table_names: [prev_table_name, table_name])
   end
 
   #

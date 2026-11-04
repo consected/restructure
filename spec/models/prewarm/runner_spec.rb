@@ -14,9 +14,9 @@
 # the Handlebars generation key to diverge and every warmed artifact to land in a
 # generation the real web process never uses.
 #
-# Issue #1481 (Phase 1): the generation no longer rotates on definition changes, so the warm
-# marker is versioned by the definition and app-type access-control timestamps, and by the
-# cache epoch (which changes on any whole-cache clear, leaving fragment caches cold) instead.
+# Issue #1481 (Stage C): warm markers follow the masters skeleton's structural signature,
+# so definition config edits skip while set, chrome, and access changes re-warm. They also
+# follow the cache epoch, which changes on any whole-cache clear and leaves fragment caches cold.
 # A re-run skips unchanged state and re-warms after a genuine content change.
 
 require 'rails_helper'
@@ -25,12 +25,16 @@ RSpec.describe Prewarm::Runner do
   let(:user_one) { instance_double(User, id: 1) }
   let(:user_two) { instance_double(User, id: 2) }
   let(:app_type) { instance_double(Admin::AppType, id: 10) }
+  let(:cache_helper) { double }
 
   before do
     allow(Prewarm::Candidates).to receive(:representatives).and_return([[user_one, app_type], [user_two, app_type]])
     allow(HandlebarsPrecompiler).to receive(:setup_directories)
     allow(HandlebarsPrecompiler).to receive(:tmp_generation_dir)
       .and_return(Pathname.new(Dir.mktmpdir('prewarm_runner_spec')))
+    allow(ApplicationController).to receive(:helpers).and_return(cache_helper)
+    allow(cache_helper).to receive(:master_templates_skeleton_cache_signature)
+      .with(app_type_id: app_type.id).and_return('skeleton-v1')
   end
 
   it 'is a no-op when the pass lock is contended' do
@@ -147,18 +151,14 @@ RSpec.describe Prewarm::Runner do
       expect(second_path).to eq(first_path)
     end
 
-    it 'changes when the item update key changes after a definition update' do
-      allow(HandlebarsPrecompiler).to receive(:item_updates_key).and_call_original
-      record = Admin::MessageTemplate.create!(
-        name: "prewarm-marker-#{SecureRandom.hex(4)}",
-        message_type: :plain,
-        template_type: :content,
-        template: '',
-        current_admin: SetupHelper.auto_admin
-      )
+    it 'changes when the masters skeleton signature changes' do
+      signature = 'skeleton-v1'
+      allow(cache_helper).to receive(:master_templates_skeleton_cache_signature) do
+        signature
+      end
       first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
 
-      record.touch(time: Time.utc(2099, 1, 1))
+      signature = 'skeleton-v2'
       second_path = described_class.new.send(:warm_marker_path, user_one, app_type)
 
       expect(second_path).not_to eq(first_path)
@@ -173,30 +173,30 @@ RSpec.describe Prewarm::Runner do
       expect(second_path).not_to eq(first_path)
     end
 
-    it 'changes when app-type access-control timestamps change' do
-      access_timestamps = ['role-v1', 'uac-v1']
-      allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
-        .with(app_type.id) { access_timestamps }
-      first_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+    it 'uses the real masters skeleton signature and cache epoch in the marker path' do
+      allow(ApplicationController).to receive(:helpers).and_call_original
+      allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps).and_call_original
+      actual_app_type = Admin::AppType.active.first!
+      signature = ApplicationController.helpers.master_templates_skeleton_cache_signature(
+        app_type_id: actual_app_type.id
+      )
+      expected_version = Digest::SHA256.hexdigest([signature, Application.cache_epoch].join('-'))[0..31]
 
-      access_timestamps = ['role-v2', 'uac-v1']
-      second_path = described_class.new.send(:warm_marker_path, user_one, app_type)
+      marker = described_class.new.send(:warm_marker_path, user_one, actual_app_type)
 
-      expect(second_path).not_to eq(first_path)
+      expect(marker.basename.to_s).to eq("#{user_one.id}-#{actual_app_type.id}-#{expected_version}")
     end
   end
 
-  it 'skips unchanged warm state and re-warms after the definition update key changes' do
+  it 'skips unchanged warm state and re-warms after the skeleton signature changes' do
     allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_yield
-    definition_key = 'definitions-v1'
-    allow(HandlebarsPrecompiler).to receive(:item_updates_key) { definition_key }
-    allow(HandlebarsPrecompiler).to receive(:app_type_access_control_timestamps)
-      .and_return(['role-v1', 'uac-v1'])
+    signature = 'skeleton-v1'
+    allow(cache_helper).to receive(:master_templates_skeleton_cache_signature) { signature }
     expect(Prewarm::MasterTemplates).to receive(:render_for).exactly(4).times.and_return('<html/>')
 
     first_pass = described_class.run
     unchanged_pass = described_class.run
-    definition_key = 'definitions-v2'
+    signature = 'skeleton-v2'
     changed_pass = described_class.run
 
     expect(first_pass[:warmed]).to eq(2)

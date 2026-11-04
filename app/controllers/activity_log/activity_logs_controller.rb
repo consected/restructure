@@ -18,11 +18,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def template_config
     Application.refresh_dynamic_defs
 
-    cache_key = Digest::SHA256.hexdigest(helpers.partial_cache_key("activity-log-template-config-#{@item_type}-#{@id_list}"))
-    set_browser_cache(max_age: 30)
-    return unless stale?(etag: cache_key)
-
     refresh_embedded_item_for @instance_list
+    set_browser_cache(max_age: 30)
+    return unless stale?(etag: template_config_cache_key)
 
     render partial: 'activity_logs/common_search_results_template_set'
   end

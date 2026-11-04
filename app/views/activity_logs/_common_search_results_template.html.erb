@@ -37,6 +37,7 @@
 %>
 <% if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
   <%= render partial: 'common_templates/search_results_template', locals: {
+    def_record: def_record,
     def_version: def_version,
     name: main_log_full_name,
     model_data_type: :activity_log,
@@ -68,6 +69,7 @@
     extra_data_attribs: [:extra_log_type]
   } %>
   <%= render partial: 'common_templates/search_results_template', locals: {
+    def_record: def_record,
     def_version: def_version,
     name: blank_log_full_name,
     model_data_type: :activity_log,

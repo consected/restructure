@@ -9,6 +9,7 @@ module Dynamic
     # cause the panel to time out (see issue #1343). This does not limit
     # `all_versions`, which is used for real definition-version lookups.
     MAX_DISPLAYED_VERSIONS = 10
+    VERSION_MEMO_INITIALIZATION_LOCK = Mutex.new
 
     included do
       attr_accessor :def_version # definition version = corresponging id of record in definition history table
@@ -31,12 +32,51 @@ module Dynamic
       end
 
       def all_versions_memo
-        @all_versions_memo ||= {}
+        all_versions_mutex.synchronize { @all_versions_memo ||= {} }
       end
 
       def all_versions_memo=(av)
-        @all_versions_memo = av
+        all_versions_mutex.synchronize do
+          @all_versions_memo = av
+          @all_versions_generation = (@all_versions_generation || 0) + 1
+        end
       end
+
+      def read_all_versions_memo(key)
+        all_versions_mutex.synchronize do
+          [(@all_versions_memo ||= {})[key], (@all_versions_generation ||= 0)]
+        end
+      end
+
+      def write_all_versions_memo(key, versions, generation)
+        all_versions_mutex.synchronize do
+          return unless generation == (@all_versions_generation ||= 0)
+
+          (@all_versions_memo ||= {})[key] = versions
+        end
+      end
+
+      def clear_all_versions_memo
+        all_versions_mutex.synchronize do
+          (@all_versions_memo ||= {}).clear
+          @all_versions_generation = (@all_versions_generation || 0) + 1
+        end
+      end
+
+      def delete_all_versions_memo(key)
+        all_versions_mutex.synchronize do
+          deleted = (@all_versions_memo ||= {}).delete(key)
+          @all_versions_generation = (@all_versions_generation || 0) + 1
+          deleted
+        end
+      end
+
+      def all_versions_mutex
+        @all_versions_mutex ||= VERSION_MEMO_INITIALIZATION_LOCK.synchronize do
+          @all_versions_mutex ||= Mutex.new
+        end
+      end
+      private :all_versions_mutex
     end
 
     def history_table_name
@@ -91,7 +131,9 @@ module Dynamic
     # saving reloading the definition versions.
     # @return [Array {ActiveRecord::Base}] - list of dynamic definition records
     def all_versions
-      return self.class.all_versions_memo[versions_memo_key] if self.class.all_versions_memo.key? versions_memo_key
+      key = versions_memo_key
+      versions, generation = self.class.read_all_versions_memo(key)
+      return versions if versions
 
       vs = []
 
@@ -108,7 +150,8 @@ module Dynamic
         vs << self.class.new(res.to_h)
       end
 
-      self.class.all_versions_memo[versions_memo_key] = vs
+      self.class.write_all_versions_memo(key, vs, generation)
+      vs
     end
 
     # @param limit [Integer, nil] restrict to at most this many of the most recent
@@ -127,6 +170,33 @@ module Dynamic
       qres.map(&:to_h)
     end
 
+    # Latest history-row id used to label the live definition's template config.
+    def current_def_version
+      return if id.blank?
+      return @current_def_version if instance_variable_defined?(:@current_def_version)
+
+      @current_def_version = latest_history_row_id
+    end
+
+    def refresh_current_def_version!
+      return if id.blank?
+
+      @current_def_version = latest_history_row_id
+      remove_instance_variable(:@current_template_library_tokens) if
+        instance_variable_defined?(:@current_template_library_tokens)
+      remove_instance_variable(:@template_version_token) if instance_variable_defined?(:@template_version_token)
+      @template_version_token = calculate_template_version_token
+      @current_def_version
+    end
+
+    # Label the current or historical template config without changing def_version semantics.
+    def template_version_token
+      return def_version.to_i if def_version
+      return @template_version_token if instance_variable_defined?(:@template_version_token)
+
+      @template_version_token = calculate_template_version_token
+    end
+
     # Total number of historical version rows for this record, independent of
     # any display limit applied by all_versions_query.
     # @return [Integer]
@@ -138,6 +208,12 @@ module Dynamic
       qres.first['count'].to_i
     end
 
+    def current_template_library_tokens
+      return [] unless uses_current_definition_version?
+
+      @current_template_library_tokens ||= Dynamic::TemplateVersionTokens.live_config_library_tokens([self])
+    end
+
     private
 
     def history_id_attr
@@ -145,7 +221,38 @@ module Dynamic
     end
 
     def reset_all_versions
-      self.class.all_versions_memo.delete versions_memo_key
+      self.class.delete_all_versions_memo(versions_memo_key)
+      remove_instance_variable(:@current_def_version) if instance_variable_defined?(:@current_def_version)
+      remove_instance_variable(:@template_version_token) if instance_variable_defined?(:@template_version_token)
+      remove_instance_variable(:@current_template_library_tokens) if
+        instance_variable_defined?(:@current_template_library_tokens)
+    end
+
+    def calculate_template_version_token
+      history_id = current_def_version || updated_at_version_token
+      return history_id unless uses_current_definition_version?
+
+      library_tokens = current_template_library_tokens
+      return history_id if library_tokens.empty?
+
+      digest = Digest::SHA256.hexdigest([history_id, library_tokens].to_json)
+      1_000_000_000_000 + digest.first(12).to_i(16)
+    end
+
+    def latest_history_row_id
+      all_versions_query(limit: 1).first&.fetch('id')&.to_i
+    rescue ActiveRecord::StatementInvalid => e
+      raise unless e.cause.is_a?(PG::UndefinedTable)
+
+      nil
+    rescue PG::UndefinedTable
+      nil
+    end
+
+    def updated_at_version_token
+      return 0 unless updated_at
+
+      (updated_at.to_r * 1_000_000).to_i
     end
 
     def versions_memo_key

@@ -42,10 +42,7 @@ module Prewarm
     def master_fragment_cache_key(user)
       return unless Rails.configuration.action_controller.perform_caching
 
-      ApplicationController.helpers.partial_cache_key(
-        :master__search_results_template,
-        force_user_or_admin: user
-      )
+      ApplicationController.helpers.master_templates_skeleton_cache_key(force_user_or_admin: user)
     end
   end
 end
