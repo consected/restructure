@@ -17,6 +17,7 @@ module OptionConfigs
       key_type :boolean, :force_create, :force_not_valid, :this_has_no_master_association
       key_type :hash_or_array, :with_result
       key_type :hash, :with, :to_existing_record
+      value_map_keys :with
 
       # in: 'this'/'referring_record' resolve a not-yet-persisted record's id when run
       # from before_save, silently creating an orphaned ModelReference (see issue #1384).

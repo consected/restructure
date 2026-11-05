@@ -11,6 +11,7 @@ module OptionConfigs
       standard_hook_key_types
       key_type :string, :name
       key_type :scalar_or_array_or_hash, :value
+      value_keys :value
     end
   end
 end

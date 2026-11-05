@@ -7,6 +7,7 @@ module OptionConfigs
     class Transaction < Base
       trigger_name :transaction
       pattern :delegate
+      task_list_config!
     end
   end
 end

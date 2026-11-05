@@ -112,6 +112,52 @@ module OptionConfigs
           key_type :hash_or_array, :on_complete, :on_failure
         end
 
+        # DSL: keys whose values are conditions, evaluated with ConditionalActions in condition mode.
+        # Keys are added to those inherited from the parent trigger type.
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def condition_keys(*keys)
+          declared_keys(:@_condition_keys, :condition_keys, keys)
+        end
+
+        # DSL: keys whose values are single value expressions, evaluated with FieldDefaults.calculate_default
+        # (hash values are evaluated with ConditionalActions in value mode).
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def value_keys(*keys)
+          declared_keys(:@_value_keys, :value_keys, keys)
+        end
+
+        # DSL: keys whose values are Hashes of field name to value expression, such as with:
+        # Each value within the Hash is evaluated at runtime as a value expression, through
+        # FieldDefaults.calculate_default or the value mode of ConditionalActions. The declaration only tells the
+        # ConditionCollector what to lint: it does not change runtime behaviour or trigger validation.
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def value_map_keys(*keys)
+          declared_keys(:@_value_map_keys, :value_map_keys, keys)
+        end
+
+        # DSL: keys whose values are nested lists of trigger tasks, such as each: do: or case: then:
+        # @param keys [Array<Symbol>] keys to declare; none returns the effective keys
+        # @return [Array<Symbol>]
+        def task_keys(*keys)
+          declared_keys(:@_task_keys, :task_keys, keys)
+        end
+
+        # DSL: mark a trigger type whose configuration is itself a list of trigger tasks (transaction, background)
+        # @return [void]
+        def task_list_config!
+          @_task_list_config = true
+        end
+
+        # @return [true | false] true if the configuration is itself a list of trigger tasks
+        def task_list_config?
+          return @_task_list_config if defined?(@_task_list_config)
+
+          superclass.respond_to?(:task_list_config?) && superclass.task_list_config?
+        end
+
         # DSL: mark a :named_entry trigger type as NOT supporting a direct (unwrapped) config
         # form, even though its top-level keys happen to overlap with #allowed_keys (which
         # would otherwise auto-detect direct form - see #validate_named_entries). Declare this
@@ -209,6 +255,17 @@ module OptionConfigs
         end
 
         private
+
+        # Combine keys declared on this class with those inherited from the parent trigger type
+        # @param ivar [Symbol] instance variable holding the keys declared on this class
+        # @param reader [Symbol] DSL reader method name, used to read the parent's keys
+        # @param keys [Array<Symbol>] keys to add
+        # @return [Array<Symbol>]
+        def declared_keys(ivar, reader, keys)
+          instance_variable_set(ivar, (instance_variable_get(ivar) || []) | keys.flatten.map(&:to_sym)) if keys.any?
+          inherited = superclass.respond_to?(reader) ? superclass.public_send(reader) : []
+          (inherited | (instance_variable_get(ivar) || [])).freeze
+        end
 
         # Ensure all trigger type descriptor classes are loaded.
         # This guarantees registry lookups work regardless of spec/file load order.
@@ -423,6 +480,10 @@ module OptionConfigs
           warnings
         end
       end
+
+      # Every trigger type's +if:+ is a condition, and lifecycle hooks hold nested trigger tasks
+      condition_keys :if
+      task_keys :on_complete, :on_failure
     end
   end
 end
