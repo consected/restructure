@@ -13,6 +13,7 @@
 8. **Create new files and edit directly in the editor**; avoid using command line file operations to generate source code
 9. **Never update CHANGELOG.md directly** - the release process will handle this based on commit messages and pull request titles
 10. **You have permission to use interactive debugging tools** (e.g., `interactive_debug_session`, `debugger`) to pause execution and inspect state, either in Rspec tests or if we are collaborating on a development server.
+11. **Workspaces are isolated environments for each feature branch** - the database, file system, test environment and other resources are separate, ensuring changes in one branch do not affect others. This is controlled by the environment variable `TEST_ENV_SET`, which is normally set when opening a new terminal. There is no need to check the database for other workspace connections.
 
 
 ### Critical Rules for Running Terminal Commands
