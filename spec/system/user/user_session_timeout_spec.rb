@@ -8,8 +8,7 @@
 # Run with a short timeout using:
 #   app-scripts/test_session_timeout_rspec.sh spec/system/user/user_session_timeout_spec.rb
 #
-# The test_session_timeout_rspec.sh script sets USER_TIMEOUT_MINS=1 so sessions
-# expire after 1 minute of inactivity, making timeout behavior testable.
+# The timeout examples use a 30-second UserTimeout so they run quickly.
 #
 # Key regression: CSP violation reports (sent automatically by the browser) were
 # resetting the server-side last_request_at via the Warden after_set_user hook.
@@ -28,6 +27,8 @@ require 'rails_helper'
 describe 'user session timeout', js: true, driver: $browser_driver do
   include ModelSupport
   include FeatureSupport
+
+  let(:short_timeout) { 30.seconds }
 
   before(:all) do
     change_setting('TwoFactorAuthDisabledForUser', true)
@@ -73,7 +74,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'times out the session after inactivity and redirects to login' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -86,7 +87,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
 
     # Wait for the server-side timeout to expire
     server_timeout = Settings::UserTimeout.to_i
-    wait_time = server_timeout + 15
+    wait_time = server_timeout + 10
 
     sleep wait_time
 
@@ -101,7 +102,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'shows a timeout warning alarm before session expires' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -118,7 +119,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
   end
 
   it 'keeps the session alive when the user clicks Continue Working' do
-    change_setting('UserTimeout', 1.minute) # Set timeout to 1 minute for testing
+    change_setting('UserTimeout', short_timeout)
     login
     finish_page_loading
 
@@ -153,7 +154,7 @@ describe 'user session timeout', js: true, driver: $browser_driver do
 
     # Now wait for the page to time out
     server_timeout = Settings::UserTimeout.to_i
-    wait_time = server_timeout + 15
+    wait_time = server_timeout + 10
 
     sleep wait_time
 

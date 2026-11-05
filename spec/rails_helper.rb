@@ -12,6 +12,14 @@ def put_to_saved_log(msg)
   File.write('tmp/test_saved.log', msg, mode: 'a')
 end
 
+def reset_inline_migration_caches
+  return unless Admin::MigrationConnection.reset_inline_migration_flag!
+
+  SetupHelper.move_rolled_back_migration_files(Admin::MigrationConnection.take_inline_migration_files!)
+  Admin::MigrationGenerator.tables_and_views_reset!
+  ActiveRecord::Base.connection.schema_cache.clear!
+end
+
 # Provide a method to change app settings without a warning
 def change_setting(name, value)
   silence_warnings { Settings.const_set(name, value) }
@@ -218,6 +226,7 @@ RSpec.configure do |config|
 
   config.extend ControllerMacros, type: :controller
   config.after :each do
+    reset_inline_migration_caches
     Warden.test_reset!
   end
 
@@ -258,6 +267,7 @@ RSpec.configure do |config|
   end
 
   config.after(:context) do
+    reset_inline_migration_caches
     SetupHelper.record_seed_database_info_change(self.class)
   rescue StandardError, RuntimeError => e
     put_now 'RuntimeError encountered during after(:context) hook.'

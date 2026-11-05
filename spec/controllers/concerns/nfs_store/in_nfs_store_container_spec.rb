@@ -37,6 +37,11 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
     @container = nil
   end
 
+  # Discard in-memory configurations= changes so they do not leak into later specs
+  after :each do
+    nfs_al_class.definition.force_option_config_parse
+  end
+
   it 'finds a container with associated activity log by id' do
     cs = NfsStore::Manage::Container.last
     check_id = cs&.id
@@ -45,7 +50,7 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
 
     @params = {
       activity_log_id: @orig_activity_log.id,
-      activity_log_type: 'activity_log__player_contact_phone',
+      activity_log_type: nfs_al_type,
       id: check_id
     }
 
@@ -79,7 +84,7 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
 
     @params = {
       activity_log_id: @orig_activity_log.id,
-      activity_log_type: 'activity_log__player_contact_phone'
+      activity_log_type: nfs_al_type
     }
 
     expect { send(:find_container) }.to raise_error(FsException::Action, 'container id must be set')
@@ -98,7 +103,7 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
 
     @params = {
       activity_log_id: @orig_activity_log.id,
-      activity_log_type: 'activity_log__player_contact_phone'
+      activity_log_type: nfs_al_type
     }
 
     send(:find_container)
@@ -115,11 +120,11 @@ RSpec.describe NfsStore::InNfsStoreContainer, type: :controller do
 
     @set_container_from_activity_log = true
 
-    ActivityLog::PlayerContactPhone.definition.configurations = { secondary_key: 'data' }
+    nfs_al_class.definition.configurations = { secondary_key: 'data' }
 
     @params = {
       activity_log_id: @orig_activity_log.data,
-      activity_log_type: 'activity_log__player_contact_phone'
+      activity_log_type: nfs_al_type
     }
 
     send(:find_container)

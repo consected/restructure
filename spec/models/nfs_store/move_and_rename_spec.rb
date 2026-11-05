@@ -73,7 +73,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
-        activity_log_type: 'activity_log__player_contact_phone',
+        activity_log_type: nfs_al_type,
         activity_log_id: @activity_log.id
 
       }
@@ -82,11 +82,11 @@ RSpec.describe 'Move and rename stored files', type: :model do
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
 
-    setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access nfs_al_rn, resource_type: :table, user: @user
+    setup_access nfs_al_step_rn(:step_1), resource_type: :activity_log_type, user: @user
 
     expect(@user.app_type).to eq @app_type
-    expect(@activity_log.class.resource_name).to eq 'activity_log__player_contact_phones'
+    expect(@activity_log.class.resource_name).to eq nfs_al_rn
     expect(@activity_log).to eq @container.parent_item
     expect(@activity_log.extra_log_type).to eq :step_1
     expect(@activity_log.resource_name).to eq @activity_log.extra_log_type_config.resource_name
@@ -147,7 +147,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
-        activity_log_type: 'activity_log__player_contact_phone',
+        activity_log_type: nfs_al_type,
         activity_log_id: @activity_log.id
 
       }

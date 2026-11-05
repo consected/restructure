@@ -11,11 +11,16 @@
 require 'rails_helper'
 
 RSpec.describe Prewarm::Spawner do
-  let(:fake_io) { instance_double(IO, pid: 4242, each_line: nil, close: nil, closed?: true) }
+  let(:fake_io) do
+    reader, writer = IO.pipe
+    writer.close
+    reader.define_singleton_method(:pid) { 4242 }
+    reader
+  end
 
   before do
     allow(IO).to receive(:popen).and_return(fake_io)
-    allow(::Process).to receive(:detach)
+    allow(Process).to receive(:detach)
     allow(HandlebarsPrecompiler).to receive(:delayed_job_worker?).and_return(false)
     allow(HandlebarsPrecompiler).to receive(:rails_console_or_runner?).and_return(false)
     allow(HandlebarsPrecompiler::FileLock).to receive(:acquire).and_yield
@@ -28,7 +33,7 @@ RSpec.describe Prewarm::Spawner do
 
     expect(IO).to have_received(:popen)
       .with(anything, %w[bundle exec rake prewarm:templates], hash_including(chdir: Rails.root.to_s))
-    expect(::Process).to have_received(:detach).with(4242)
+    expect(Process).to have_received(:detach).with(4242)
   ensure
     change_setting('PrewarmTemplatesEnabled', false)
   end

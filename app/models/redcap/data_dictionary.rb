@@ -38,7 +38,13 @@ module Redcap
     end
 
     def captured_metadata
-      Redcap::ApiClient.symbolize_result super
+      metadata = super
+      return @symbolized_captured_metadata if metadata.equal?(@captured_metadata_source)
+
+      @captured_metadata_source = metadata
+      @symbolized_captured_metadata = Redcap::ApiClient.symbolize_result(metadata)
+      @forms = @all_fields = @all_retrievable_fields = nil
+      @symbolized_captured_metadata
     end
 
     #
@@ -111,10 +117,10 @@ module Redcap
     def all_retrievable_fields(summary_fields: false)
       return unless captured_metadata.present?
 
+      summary_fields = !!(summary_fields && redcap_project_admin.data_options.add_multi_choice_summary_fields)
       @all_retrievable_fields ||= {}
-      return @all_retrievable_fields[summary_fields] if @all_retrievable_fields[summary_fields]
+      return @all_retrievable_fields[summary_fields] if @all_retrievable_fields.key?(summary_fields)
 
-      summary_fields &&= redcap_project_admin.data_options.add_multi_choice_summary_fields
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self, summary_fields:)
 
       records_request_options = redcap_project_admin.records_request_options

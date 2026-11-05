@@ -81,11 +81,11 @@ RSpec.describe 'NfsStore::Process::FullTextSearchJob', type: :model do
   def setup_fts_pipeline(file_filters: ['.*'], ts_config: 'english')
     @al_name = NfsStoreSupport::AlFilterTestName
 
-    @aldef = ActivityLog.active.where(name: @al_name).first
+    @aldef = ActivityLog.active.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
     unless @aldef
-      @aldef = ActivityLog.where(name: @al_name).first
+      @aldef = ActivityLog.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
       @aldef.update(disabled: false, current_admin: @admin)
-      @aldef = ActivityLog.active.where(name: @al_name).first
+      @aldef = ActivityLog.active.where(name: @al_name, process_name: NfsStoreSupport::AlProcessName).first
     end
     expect(@aldef).not_to be nil
 
@@ -131,7 +131,7 @@ RSpec.describe 'NfsStore::Process::FullTextSearchJob', type: :model do
     @aldef.current_admin = @admin
     @aldef.save!
     @aldef.option_configs(force: true)
-    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    nfs_al_class.definition.option_configs(force: true)
 
     finalize_al_setup activity: :fts_test
   end

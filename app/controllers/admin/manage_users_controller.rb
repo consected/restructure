@@ -115,41 +115,41 @@ class Admin::ManageUsersController < AdminController
   # just get the users current app, but all they have access to.
   # current_app_access is a virtual boolean filter (not a DB column) indicating
   # whether a user has access to the admin's current app type.
+  # The column filters (disabled, email, etc) are applied first, so that the expensive
+  # per-user access evaluation only runs on the users that can appear in the results.
   def filtered_primary_model(_ = nil)
-    pm = primary_model
     a = filter_params_permitted[:app_type_id] if filter_params_permitted
+    caa = filter_params_permitted[:current_app_access] if filter_params_permitted
+
+    # Temporarily clear the virtual filters so the super method doesn't attempt to filter on them
+    filter_params_permitted[:app_type_id] = nil if a.present?
+    filter_params_permitted[:current_app_access] = nil if caa.present?
+
+    # Filter on everything except the virtual filters
+    pm = super(primary_model)
+
     if a.present?
       # A filter was selected. Limit the results to just users that can access the specified app.
-      a = a.to_i
-      # Set the app_type_id param to nil, so the super method doesn't attempt to filter on it
-      filter_params_permitted[:app_type_id] = nil
-      ids = pm.all.select { |u| a.in?(u.accessible_app_type_ids) }.map(&:id)
+      app_type_id = a.to_i
+      ids = pm.select { |u| app_type_id.in?(u.accessible_app_type_ids) }.map(&:id)
       pm = pm.where(id: ids)
     end
 
     # Handle current_app_access virtual filter: filter by the admin's current app type
-    caa = filter_params_permitted[:current_app_access] if filter_params_permitted
-    if caa.present?
-      # Temporarily clear so the super method doesn't attempt to filter on a non-existent column
-      filter_params_permitted[:current_app_access] = nil
-      current_app_type_id = admin_current_app_type&.id
-      if current_app_type_id
-        has_access_ids = pm.all.select { |u| current_app_type_id.in?(u.accessible_app_type_ids) }.map(&:id)
-        pm = if caa == 'true'
-               pm.where(id: has_access_ids)
-             else
-               pm.where.not(id: has_access_ids)
-             end
-      end
+    current_app_type_id = admin_current_app_type&.id if caa.present?
+    if current_app_type_id
+      has_access_ids = pm.select { |u| current_app_type_id.in?(u.accessible_app_type_ids) }.map(&:id)
+      pm = if caa == 'true'
+             pm.where(id: has_access_ids)
+           else
+             pm.where.not(id: has_access_ids)
+           end
     end
-
-    # Filter on everything (except the virtual filters temporarily removed above)
-    res = super(pm)
 
     # Reset the filter params so that the filter buttons appear correctly
     filter_params_permitted[:app_type_id] = a.to_s if a.present?
     filter_params_permitted[:current_app_access] = caa if caa.present?
-    res
+    pm
   end
 
   def show_head_info

@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Covers save-trigger updates to item flags by ID and name.
 require 'rails_helper'
 
 AlNameGenTestSif = 'Gen Test ELT Save'
@@ -6,9 +9,14 @@ RSpec.describe SaveTriggers::SetItemFlags, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
+  with_activity_log_setup(
+    gen_test_name: AlNameGenTestSif,
+    process_name: 'elt_save_test',
+    item_type: 'player_contact',
+    player_contact_phones: true
+  )
+
   before_all do
-    SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestSif, 'elt_save_test', 'player_contact'
     create_user
     @master = create_master
     setup_access PlayerInfo.resource_name, resource_type: :table, access: :create, user: @user

@@ -68,6 +68,11 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     @role_user_ids = [@u1.id, @user.id]
   end
 
+  # Groups assign references on the shared definition's option configs in memory; discard them for later specs
+  after :context do
+    ActivityLog::PlayerContactPhone.definition.force_option_config_parse
+  end
+
   it 'always returns false for never and true for always' do
     conf = { never: true }
     res = ConditionalActions.new conf, @al
@@ -1385,7 +1390,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           all:
             addresses:
               city: 'portland'
-              zip: #{a1.zip}
+              zip: '#{a1.zip}'
               id:
                 this_references: id
 
@@ -1433,7 +1438,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           all2:
             addresses:
               city: 'portland'
-              zip: #{a1.zip}
+              zip: '#{a1.zip}'
               id:
                 this_references: id
 
@@ -1471,7 +1476,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             all2:
               addresses:
                 city: 'portland'
-                zip: #{a1.zip}
+                zip: '#{a1.zip}'
                 id:
                   this_references: id
 
@@ -1599,7 +1604,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             city: #{m.addresses.first.city}
 
           player_contacts:
-            data: #{m.player_contacts.first.data}
+            data: '#{m.player_contacts.first.data}'
 
     EOF_YAML
 
@@ -1637,7 +1642,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
             city: #{m.addresses.first.city}
 
           player_contacts:
-            data: #{m.player_contacts.first.data}
+            data: '#{m.player_contacts.first.data}'
 
     EOF_YAML
 
@@ -1663,9 +1668,10 @@ RSpec.describe 'Calculate conditional actions', type: :model do
                              rec_type: 'home',
                              source: 'nflpa'
 
+    # A leading zero must survive YAML parsing of the conditions below
     a2 = m.addresses.create! city: 'Portland',
                              state: 'OR',
-                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             zip: "0#{rand(1000..9999)}",
                              rank: 10,
                              rec_type: 'home',
                              source: 'nflpa'
@@ -1738,7 +1744,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           all2:
             addresses:
               city: 'portland'
-              zip: #{a2.zip}
+              zip: '#{a2.zip}'
               id:
                 this_references: id
 
@@ -1788,7 +1794,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
           all2:
             addresses:
               city: 'portland'
-              zip: #{a2.zip}
+              zip: '#{a2.zip}'
               id:
                 this_references: id
 

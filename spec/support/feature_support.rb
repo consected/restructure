@@ -116,10 +116,9 @@ module FeatureSupport
         click_button 'Log in'
       end
 
-      # Check if 2FA form appears (it shouldn't if we disabled it correctly)
-      # Wait a bit to see if 2FA form shows up
-      sleep 2
-      if has_selector?('.login-2fa-block', visible: true, wait: 1)
+      # Wait for either the 2FA form or completed login state.
+      has_css?('.login-2fa-block, .nav a[data-do-action="show-user-options"]', visible: true, wait: 5)
+      if has_selector?('.login-2fa-block', visible: true, wait: 0)
         puts_debug 'WARNING: 2FA form appeared even though we disabled it!'
         # Handle it anyway
         within '#new_user' do

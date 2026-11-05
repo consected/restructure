@@ -339,10 +339,12 @@ RSpec.describe 'pull_external_data save trigger API endpoints', type: :system, j
       )
 
       # Grant the user access to view reports and this specific report
+      # User-specific (not app-wide) so the committed grant does not leak to other users
       unless @user.has_access_to?(:read, :general, :view_reports)
         Admin::UserAccessControl.create!(
           app_type: @user.app_type, access: :read,
           resource_type: :general, resource_name: :view_reports,
+          user: @user,
           current_admin: @admin
         )
       end

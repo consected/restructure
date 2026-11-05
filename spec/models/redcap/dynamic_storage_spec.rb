@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Covers REDCap dynamic model generation and option-type field configuration.
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table'
 
@@ -233,6 +234,15 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     end
 
     it 'generates a dynamic model with fields by option type from the data dictionary' do
+      storage_used_for_generation = nil
+      allow(Redcap::DynamicStorage).to receive(:new).and_wrap_original do |original, project_admin, table_name|
+        dynamic_storage = original.call(project_admin, table_name)
+        if table_name == 'test.test_repinst_field_recs' && storage_used_for_generation.nil?
+          storage_used_for_generation = dynamic_storage
+          expect(dynamic_storage).to receive(:field_options).thrice.and_call_original
+        end
+        dynamic_storage
+      end
       setup_repeat_instrument_fields
       rc = @project_admin_metadata
       rc.reload

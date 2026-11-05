@@ -36,15 +36,36 @@ require_relative '../../support/nfs_store_feature_support/z_filestore_feature_ma
 describe 'Filestore file operations', js: true, driver: $browser_driver, type: :system do
   include FilestoreFeatureMain
 
-  # rubocop:disable Lint/ConstantDefinitionInBlock
-  ActivityLogName = 'AL Filter Test 2'
-  # rubocop:enable Lint/ConstantDefinitionInBlock
+  def activity_log_name
+    'Filestore Ops Test'
+  end
+
+  def activity_log_process_name
+    'fs_ops'
+  end
+
+  def activity_log_class
+    @aldef.implementation_class
+  end
+
+  def activity_log_resource_name
+    @aldef.resource_name
+  end
+
+  def activity_log_step_resource_name
+    step_1_config = @aldef.option_configs(force: true).find { |config| config.name.to_s == 'step_1' }
+    step_1_config.resource_name
+  end
+
+  def activity_log_block_selector
+    ".activity-log--#{@aldef.item_type_name.dasherize.pluralize}-block"
+  end
 
   def set_up_user_access
     puts_debug 'set up user access'
     setup_access :player_contacts, user: @user
-    setup_access :activity_log__player_contact_phones, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access activity_log_resource_name.to_sym, user: @user
+    setup_access activity_log_step_resource_name.to_sym, resource_type: :activity_log_type, user: @user
 
     # NFS Store access
     setup_access :nfs_store__manage__containers, user: @user
@@ -64,7 +85,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
   end
 
   def expand_phone_log_tab
-    expand_master_record_tab('activity_log__player_contact_phones')
+    expand_master_record_tab(activity_log_resource_name)
   end
 
   before :all do
@@ -72,7 +93,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     change_setting('TwoFactorAuthDisabledForAdmin', true)
 
     # Setup activity log definitions first
-    SetupHelper.setup_al_gen_tests ActivityLogName, nil, 'player_contact', rec_type: 'phone'
+    SetupHelper.setup_al_gen_tests activity_log_name, activity_log_process_name, 'player_contact'
 
     # Create user first
     create_user(create_master: false)
@@ -96,7 +117,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     FileUtils.mkdir_p test_dir
 
     # Find and configure the activity log definition
-    @aldef = ActivityLog.active.where(name: ActivityLogName).first
+    @aldef = ActivityLog.active.where(name: activity_log_name, process_name: activity_log_process_name).first
     expect(@aldef).not_to be_nil
 
     # Configure step_1 with filestore
@@ -143,13 +164,13 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
     @aldef.save!
     @aldef.option_configs(force: true)
     ActivityLog.define_models
-    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
+    activity_log_class.definition.option_configs(force: true)
 
     # Set up user access before creating test data
     set_up_user_access
 
     # Setup NFS store filters
-    resource_name = 'activity_log__player_contact_phone__step_1'
+    resource_name = activity_log_step_resource_name
     NfsStore::Filter::Filter.active.where(app_type: @app_type, resource_name:).update_all(disabled: true)
     NfsStore::Filter::Filter.create!(
       current_admin: @admin,
@@ -169,9 +190,10 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       rec_type: :phone
     )
     @player_contact.master.current_user = @user
+    @master.current_user = @user
 
     # Create the activity log with filestore
-    @activity_log = ActivityLog::PlayerContactPhone.create!(
+    @activity_log = activity_log_class.create!(
       select_call_direction: 'from player',
       select_who: 'user',
       extra_log_type: :step_1,
@@ -206,7 +228,7 @@ describe 'Filestore file operations', js: true, driver: $browser_driver, type: :
       expand_phone_log_tab
 
       # Wait for activity log entries to load
-      expect(page).to have_css('.activity-log--player-contact-phones-block', wait: 15)
+      expect(page).to have_css(activity_log_block_selector, wait: 15)
 
       # The filestore should already be visible in the step_1 activity log entry
       # Wait for the filestore container to be visible

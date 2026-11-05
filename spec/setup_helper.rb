@@ -104,10 +104,34 @@ module SetupHelper
 
   def self.clean_app_migrations_dirs
     put_now 'Clean app migrations dirs'
-    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
-    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
-    `mkdir -p db/app_migrations/dynamic_test; rm -f db/app_migrations/dynamic_test/*.rb`
-    `rm -f db/app_migrations/test/*test_*.rb`
+    app_migrations_root = Rails.root.join(Admin::MigrationGenerator.app_migrations_root)
+    FileUtils.mkdir_p app_migrations_root
+    clean_rolled_back_migrations_dir
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'redcap_test', '*test_*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'imports_test', '*test_imports*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'dynamic_test', '*.rb'))
+    FileUtils.rm_f Dir.glob(File.join(app_migrations_root, 'test', '*test_*.rb'))
+  end
+
+  def self.rolled_back_migrations_dirname
+    Rails.root.join(Admin::MigrationGenerator.app_migrations_root, 'rolled_back')
+  end
+
+  def self.move_rolled_back_migration_files(files)
+    FileUtils.mkdir_p rolled_back_migrations_dirname
+    files.each do |file|
+      next unless File.exist?(file)
+
+      FileUtils.mv file, rolled_back_migrations_dirname, force: true
+    rescue SystemCallError => e
+      Rails.logger.warn "Failed to move rolled-back migration '#{file}': #{e.message}"
+    end
+  end
+
+  def self.clean_rolled_back_migrations_dir
+    Dir.glob(File.join(rolled_back_migrations_dirname, '*.rb')).each do |file|
+      FileUtils.rm_f file
+    end
   end
 
   def self.clean_handlebars_dirs
@@ -123,7 +147,7 @@ module SetupHelper
     puts "Cleaning up migrations for schemas: #{schema_names.join(', ')}"
     schema_names.each do |schema_name|
       puts "Cleaning up migrations for schema: #{schema_name}"
-      db_migration_dirname = Rails.root.join('db', 'app_migrations', schema_name)
+      db_migration_dirname = Rails.root.join(Admin::MigrationGenerator.app_migrations_root, schema_name)
       FileUtils.rm_rf(db_migration_dirname)
     end
   end
@@ -489,9 +513,18 @@ module SetupHelper
     a
   end
 
+  def self.setup_nfs_group_directories
+    NfsStore::Manage::Filesystem.group_id_range.each do |i|
+      check_dir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory,
+                            "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
+      FileUtils.mkdir_p check_dir
+    end
+  end
+
   def self.setup_nfs_directories
     FileUtils.rm_rf NfsStore::Manage::Filesystem.nfs_store_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.nfs_store_directory
+    setup_nfs_group_directories
     FileUtils.rm_rf NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p NfsStore::Manage::Filesystem.temp_directory
     setup_ref_data_app_nfs

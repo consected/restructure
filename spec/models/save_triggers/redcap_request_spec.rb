@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Tests for SaveTriggers::RedcapRequest, covering the import_records and
@@ -10,19 +12,16 @@ require 'rails_helper'
 # attributes must be resolved before the Redcap::ProjectAdmin lookup, and the
 # error message for a missing project must have correct formatting.
 RSpec.describe SaveTriggers::RedcapRequest, type: :model do
-  include ModelSupport
   include ActivityLogSupport
 
-  include Redcap::RedcapSupport
+  include_context 'with redcap project admins'
 
   before_all do
-    create_admin
     SetupHelper.setup_al_player_contact_phones
     @aldef = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
   end
 
   before :example do
-    @projects = setup_redcap_project_admin_configs
     @project = @projects.find { |h| h[:name] == 'save_trigger' }
     create_user
     @master = create_master
@@ -35,8 +34,6 @@ RSpec.describe SaveTriggers::RedcapRequest, type: :model do
   it 'pushes data to Redcap' do
     # SetupHelper.get_webmock_responses
     # WebMock.allow_net_connect!
-
-    lead_email = 'phil-test12@consected.com'
 
     instrument = 'research_form'
     record_id = -1

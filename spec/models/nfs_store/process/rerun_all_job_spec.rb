@@ -53,7 +53,7 @@ RSpec.describe NfsStore::Process::RerunAllJob, type: :model do
     sf.current_user = @user
     sf.update!(last_process_name_run: '_all_done_')
 
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
 
     expect(sf.last_process_name_run).to eq '_all_done_'
 

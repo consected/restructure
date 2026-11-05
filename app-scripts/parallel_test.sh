@@ -203,8 +203,15 @@ echo "========================================================================"
 rm -f tmp/parallel_specs_failed.txt
 
 # Clean up the temporary nfs_store directories
-rm -rf /var/tmp/nfs_store_tmp*
-rm -rf /var/tmp/nfs_store_test*
+for i in $(seq 1 "${PARALLEL_TEST_PROCESSORS}"); do
+  if [ "${i}" == 1 ]; then
+    n=''
+  else
+    n=${i}
+  fi
+  rm -rf "/var/tmp/nfs_store_test${n}${TEST_ENV_SET}"
+  rm -rf "/var/tmp/nfs_store_tmp${n}${TEST_ENV_SET}"
+done
 
 for spec in ${specs}; do
   echo "========================================================================"

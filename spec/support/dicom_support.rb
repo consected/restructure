@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require_relative 'nfs_store_support'
+
 module DicomSupport
-  AlFilterTestName = 'AL Filter Test 2'
+  AlFilterTestName = NfsStoreSupport::AlFilterTestName
 
   def test_dicom_files
     (0..9).map { |i| "00000#{i}.dcm" }
@@ -30,11 +32,11 @@ module DicomSupport
   def setup_deidentifier
     @al_name = AlFilterTestName
 
-    @aldef = ActivityLog.active.find_by(name: @al_name)
+    @aldef = ActivityLog.active.find_by(name: @al_name, process_name: NfsStoreSupport::AlProcessName)
     unless @aldef
-      @aldef = ActivityLog.find_by(name: @al_name)
+      @aldef = ActivityLog.find_by(name: @al_name, process_name: NfsStoreSupport::AlProcessName)
       @aldef.update!(disabled: false, current_admin: @admin)
-      @aldef = ActivityLog.active.find_by(name: @al_name)
+      @aldef = ActivityLog.active.find_by(name: @al_name, process_name: NfsStoreSupport::AlProcessName)
       puts 'About to fail!!!!!!' unless @aldef
     end
     expect(@aldef).not_to be nil

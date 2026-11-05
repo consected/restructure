@@ -56,7 +56,7 @@ RSpec.describe SaveTriggers::GenerateDocument, type: :model do
 
   before :example do
     # Create an activity log instance with a filestore container
-    @al = @player_contact.activity_log__player_contact_phones.create!(
+    @al = @player_contact.send(nfs_al_rn).create!(
       select_call_direction: 'from player',
       select_who: 'test user',
       extra_log_type: 'step_1',

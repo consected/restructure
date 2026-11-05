@@ -14,6 +14,15 @@ class Admin::MigrationGenerator
                 :class_name, :dynamic_def, :app_type_name, :view_sql_changed, :no_user_id,
                 :view_skip_updates
 
+  #
+  # Root directory for generated app migrations
+  # @return [String]
+  def self.app_migrations_root
+    return 'db/app_migrations' unless Rails.env.test?
+
+    "tmp/app_migrations_test#{ENV['TEST_ENV_NUMBER']}#{ENV['TEST_ENV_SET']}"
+  end
+
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
                  no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
@@ -724,7 +733,7 @@ class Admin::MigrationGenerator
   # @return [String]
   def db_migration_dirname(export_type = nil)
     loc = app_type_name || db_migration_schema
-    dirname = "db/app_migrations/#{loc}"
+    dirname = "#{self.class.app_migrations_root}/#{loc}"
     dirname += "--#{export_type}" if export_type
     dirname
   end
@@ -857,18 +866,6 @@ class Admin::MigrationGenerator
   end
 
   private
-
-  def move_failed_migration_file
-    if @do_migration.present? && File.exist?(@do_migration)
-      FileUtils.mkdir_p db_migration_failed_dirname
-      FileUtils.mv @do_migration, db_migration_failed_dirname
-      "moved '#{@do_migration}' to '#{db_migration_failed_dirname}'"
-    else
-      "migration file '#{@do_migration}' was not present to move"
-    end
-  rescue SystemCallError => e
-    "failed to move '#{@do_migration}' to '#{db_migration_failed_dirname}': #{e.message}"
-  end
 
   #
   # Content for a migration to create a schema

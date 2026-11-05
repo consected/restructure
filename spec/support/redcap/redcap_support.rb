@@ -8,6 +8,20 @@ module Redcap
     # During setup, use `WebMock.allow_net_connect!` in rails_helper.rb
     # @param [true|nil] mocks - mock the requests
     # @param [String] only_project - only set up a specific project
+    def setup_redcap_project_admin_configs_once(**)
+      @projects = setup_redcap_project_admin_configs(**)
+      @project = @projects.first
+      @projects
+    end
+
+    def restub_redcap_mocks
+      return if ENV['NO_REDCAP_MOCKS'] == 'true'
+
+      reset_mocks
+      projects = redcap_project_configs(mocks: false)
+      projects&.each { |project| stub_redcap_project_admin_requests(project) }
+    end
+
     def setup_redcap_project_admin_configs(mocks: true, only_project: nil)
       setup_file_store
 
@@ -19,30 +33,7 @@ module Redcap
       projects.each do |p|
         next unless only_project.nil? || p[:name] == only_project
 
-        if mocks
-          if p[:name].in?(['metadata'])
-            @metadata_project = p
-            stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
-            stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
-          elsif p[:name].in?(['longitudinal'])
-            @longitudinal_project = p
-            stub_request_longitudinal_field_project p[:server_url], p[:api_key]
-            stub_request_longitudinal_field_metadata p[:server_url], p[:api_key]
-            stub_request_longitudinal_field_instruments p[:server_url], p[:api_key]
-
-          elsif p[:name] == 'save_trigger'
-            stub_request_project_save_trigger p[:server_url], p[:api_key]
-            stub_request_survey_link_save_trigger p[:server_url], p[:api_key]
-            stub_request_import_record_save_trigger p[:server_url], p[:api_key]
-            stub_request_metadata p[:server_url], p[:api_key]
-          else
-            stub_request_project p[:server_url], p[:api_key]
-            stub_request_metadata p[:server_url], p[:api_key]
-          end
-          stub_request_project_users p[:server_url], p[:api_key]
-          stub_request_instruments p[:server_url], p[:api_key]
-          stub_request_remove_project_user p[:server_url], p[:api_key]
-        end
+        stub_redcap_project_admin_requests(p) if mocks
 
         expect(@admin.email).to eq @admin.matching_user&.email
         pa = Redcap::ProjectAdmin.active.find_by(name: p[:name], study: DefaultStudy, server_url: p[:server_url])
@@ -62,8 +53,8 @@ module Redcap
         expect(Dir.exist?(cpath)).to be true
         cpath = "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{app_type_id}/containers/#{container.id} -- #{p[:name]}"
         expect(Dir.exist?(cpath)).to be true
-        setup_file_store pa.job_admin
-        setup_file_store @admin
+        job_admin = pa.job_admin
+        setup_file_store job_admin if job_admin && job_admin.id != @admin.id
       end
 
       pcount = projects.count { |project| only_project.nil? || project[:name] == only_project }
@@ -72,9 +63,36 @@ module Redcap
       projects
     end
 
+    def stub_redcap_project_admin_requests(project)
+      case project[:name]
+      when 'metadata'
+        @metadata_project = project
+        stub_request_repeat_instrument_field_project project[:server_url], project[:api_key]
+        stub_request_repeat_instrument_field_metadata project[:server_url], project[:api_key]
+      when 'longitudinal'
+        @longitudinal_project = project
+        stub_request_longitudinal_field_project project[:server_url], project[:api_key]
+        stub_request_longitudinal_field_metadata project[:server_url], project[:api_key]
+        stub_request_longitudinal_field_instruments project[:server_url], project[:api_key]
+      when 'save_trigger'
+        stub_request_project_save_trigger project[:server_url], project[:api_key]
+        stub_request_survey_link_save_trigger project[:server_url], project[:api_key]
+        stub_request_import_record_save_trigger project[:server_url], project[:api_key]
+        stub_request_metadata project[:server_url], project[:api_key]
+      else
+        stub_request_project project[:server_url], project[:api_key]
+        stub_request_metadata project[:server_url], project[:api_key]
+      end
+
+      stub_request_project_users project[:server_url], project[:api_key]
+      stub_request_instruments project[:server_url], project[:api_key]
+      stub_request_remove_project_user project[:server_url], project[:api_key]
+    end
+
     def setup_file_store(admin = nil)
       # Create a matching user for the admin
       @app_type = Admin::AppType.active.find_by(name: 'ref-data')
+      SetupHelper.setup_ref_data_app_nfs
 
       @admin = admin if admin
       @user = @admin&.matching_user
@@ -804,12 +822,17 @@ module Redcap
       options = String.yaml_dump(j)
 
       @dynamic_model = DynamicModel.active.find_by(name: @project[:name],
-                                                   table_name: tn)
+                                                   table_name: tn,
+                                                   field_list: field_list.join(' '),
+                                                   options:,
+                                                   schema_name:,
+                                                   foreign_key_name: fkey_name)
       @dynamic_model ||= DynamicModel.create! current_admin: @admin,
                                               name: @project[:name],
                                               table_name: tn,
                                               primary_key_name: :id,
-                                              foreign_key_name: nil,
+                                              foreign_key_name: fkey_name,
+                                              schema_name:,
                                               category: :test,
                                               field_list: field_list.join(' '),
                                               options:

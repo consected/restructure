@@ -109,12 +109,11 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
   # is present, or redirects to masters search when only current_user remains.
   def admin_area_reachable?
     visit '/'
-    finish_page_loading
     current_path == '/'
   end
 
   it 'keeps the admin session alive across AdminTimeout when only shared XHR keep-alive requests occur' do
-    admin_timeout = 60
+    admin_timeout = 30
     change_setting('AdminTimeout', admin_timeout.seconds)
     change_setting('UserTimeout', 10.minutes)
 
@@ -127,8 +126,8 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
     # Fire the same XHR keep-alive request the "Continue working" link uses, repeatedly,
     # spanning well past admin_timeout - this only proves the fix if the admin scope's
     # inactivity timer is genuinely being refreshed by these background requests.
-    3.times do
-      sleep (admin_timeout * 0.7).round
+    4.times do
+      sleep (admin_timeout * 0.5).round
       expect(keep_alive_ping).to eq(200), "keep-alive ping should succeed #{(Time.now - start).round}s since sign-in"
     end
 
@@ -138,7 +137,7 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
   end
 
   it 'still times out the admin session on genuine inactivity' do
-    admin_timeout = 60
+    admin_timeout = 30
     change_setting('AdminTimeout', admin_timeout.seconds)
     change_setting('UserTimeout', 10.minutes)
 
@@ -147,7 +146,7 @@ describe 'admin session timeout via shared authentication gate', js: true, drive
 
     expect(admin_area_reachable?).to be(true)
 
-    sleep admin_timeout + 20
+    sleep admin_timeout + 10
 
     expect(admin_area_reachable?).to be(false),
                                      'admin session should time out after genuine inactivity beyond AdminTimeout'

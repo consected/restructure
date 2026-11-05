@@ -79,6 +79,7 @@ group :development, :test do
   gem 'ruby_parser'
   gem 'sassc-embedded'
   gem 'spring'
+  gem 'stackprof', require: false
   # gem 'spring-commands-parallel-tests'
 end
 
