@@ -283,6 +283,16 @@ RSpec.describe 'Conditions documentation', type: :model do
         instance = sample_instances.fetch(ann['instance'] || 'activity_log')
         conditional_actions = ConditionalActions.new config, instance
 
+        lint_mode = ann.key?('expect') ? :condition : :value
+        lint_notices = CalcActions::ConditionLinter.new(
+          condition: config,
+          path: "#{file}.example",
+          model_class: instance.class,
+          mode: lint_mode
+        ).lint
+        expect(lint_notices).to be_empty,
+                                "#{file} produced condition linter warnings: #{lint_notices.inspect}"
+
         if ann.key?('expect')
           expect(conditional_actions.calc_action_if).to eq(ann['expect'] == 'true')
         elsif ann.key?('return')

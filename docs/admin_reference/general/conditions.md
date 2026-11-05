@@ -99,6 +99,72 @@ given a meaningful name. A selection type may also be given a list of blocks.
 - When `no_masters: {}` is used, the **first** table listed becomes the base of the
   query, so ordering matters.
 
+## Configuration warnings
+
+When a dynamic definition, activity log, external identifier or page layout is saved, its
+conditions are checked for problems that would otherwise only appear when a user triggers
+the condition. These are shown as **condition configuration** notices alongside the other
+configuration errors on the definition's details, and on the app type's components page.
+Notices never prevent a save.
+
+Conditions are checked wherever they are evaluated, including:
+
+- `creatable_if`, `editable_if`, `showable_if`, `add_reference_if` and `valid_if`
+- `references`: the `*_if` keys and the `add_with` values
+- `save_action` and `set_variables`: the `if:` clauses, and the `set_variables` values
+- `nfs_store` `can` conditions (activity logs)
+- save, batch and config trigger tasks: `if:`, `success_if:`, `when:` (within `case`), `first:`,
+  and `with:` and `value:` values, including tasks nested in `each`, `case`, `transaction` and `background`
+- page layout `conditional_calculation` perspectives, which are evaluated with `no_masters: {}` added
+
+Each **condition configuration** notice states the problem, followed by a snippet of the configuration
+from its top-level key down to the offending key, holding the offending value. For example, a problem
+in `showable_if` of the `default` option type shows:
+
+```yaml
+default:
+  showable_if:
+    all:
+      missing_table:
+        missing_field: unexpected
+```
+
+A list item, such as a page layout perspective, is shown as a one-item list. A condition that is inherited
+from `_default` is shown within the option type it applies to.
+
+### What is checked
+
+- **Selection types**: top-level keys must be `all`, `any`, `not_all` or `not_any` (optionally with a suffix),
+  `always`, `never`, `has_created_activity` or `has_not_created_activity`. A record source must not appear
+  at the top level of a condition, and nested blocks are checked in the same way.
+- **Record sources**: tables must be resources, associations of masters (including `*_item_flags`),
+  or `masters`, `users` and `definition_resources`. The base table of `no_masters: {}` must be a known resource.
+- **Field names** of `this`, `user` and tables, where the model is known.
+- **Operators**: `condition:` operators must be valid for the record source. Database operators are not
+  valid on `this`, and in-memory operators are not valid on database tables. Binary and array operators
+  need a `value:`.
+- **Return flags**: at most one of `return_value`, `return_value_list`, `return_result` or `return_all_results`,
+  and only alongside a `condition:`. A value that is a near miss of a return keyword, such as `return_val`, is reported
+  as a probable typo. Other strings, such as `return_call`, are literal values.
+- **Database conditions within `any` and `not_any`**: these are not supported directly within the block.
+  Move them into an `all` or `not_all` block, or nest an `all` block within the `any`.
+- **Functions and validators**: `calculate:` functions and their `attributes:`, and `validate:` validator names.
+- **Lookups and references**: `lookup:` must return `return_value` or `return_value_list`. `ids_referencing:`
+  needs `target:` and a `from:` block that returns `return_all_results`. The forms of `this_references`,
+  `parent_references` and `parent_or_this_references` are checked.
+- **Typos**: keys that are not recognized alongside a `condition:`, such as `valu:`.
+
+### What is not checked
+
+- Problems that depend on data at runtime, such as no referring record or no current user.
+- Field names on record sources whose model is only known at runtime: `referring_record`,
+  `top_referring_record`, `parent`, `embedded_item`, `reference` and `definition_resources`.
+- Table names are checked against the resources and associations that are currently loaded. A table
+  from another definition that has not yet been generated is reported until it is available.
+- Conditions in other settings, such as `show_if` and `preset_fields`.
+
+If the checks themselves fail, a single **condition linter failed** warning is shown instead.
+
 ## Examples in this reference
 
 The runnable examples on these pages are checked automatically against a small set of

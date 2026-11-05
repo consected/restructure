@@ -12,6 +12,7 @@ module OptionConfigs
       standard_hook_key_types
       key_type :boolean, :force_create, :move_this
       key_type :hash, :with
+      value_map_keys :with
     end
   end
 end

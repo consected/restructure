@@ -21,6 +21,7 @@ module OptionConfigs
       # from and to are always Hashes with sub-keys (url:, format:, etc.);
       # a String value would raise TypeError at runtime when sub_config[:url] is called.
       key_type :hash, :from, :to, :success_if, :form
+      condition_keys :success_if
       key_type :scalar_or_array_or_hash, :post_data, :send_data
     end
   end
