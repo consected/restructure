@@ -59,22 +59,30 @@ ActiveSupport.on_load(:nfs_store_config) do
     configuration_failed_reason << 'xz not in the path' unless ares
 
     begin
-      File.open(NFS_APPS_LIST_FILE, 'w') do |nfs_apps_list_file|
+      # Write a temporary file and rename it into place, so set_up_missing_nfs_dirs.sh
+      # never reads or archives a partly written list
+      temp_list_file = "#{NFS_APPS_LIST_FILE}.#{Process.pid}.tmp"
+      File.open(temp_list_file, 'w') do |nfs_apps_list_file|
         app_types = Admin::AppType.active_app_types
+        role_name = NfsStore::Manage::Group.valid_role_names.first
         app_types.each do |app_type|
           exists = NfsStore::Manage::Filesystem.app_type_containers_path_exists?(app_type.id)
           subdir = Rails.env.production? || Rails.env.development? ? '' : 'test-fphsfs'
-          nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir}"
+          # The containers path is last so set_up_missing_nfs_dirs.sh can verify it after setup
+          containers_path = NfsStore::Manage::Filesystem.app_type_containers_path(app_type.id, role_name)
+          nfs_apps_list_file.puts "#{app_type.id} #{!!exists} #{subdir} #{containers_path}"
           next if exists
 
           configuration_failed_reason << "App Type filesystem not configured (#{app_type.id}), or NFS not set up"
         end
         configuration_failed_reason << 'No App Type available' if app_types.empty?
       end
+      File.rename(temp_list_file, NFS_APPS_LIST_FILE)
       unless File.exist?(NFS_APPS_LIST_FILE)
         Rails.logger.error "NFS apps list file not written to #{NFS_APPS_LIST_FILE}"
       end
     rescue Exception => e
+      FileUtils.rm_f(temp_list_file) if temp_list_file
       # Catch any exception, since we don't want the server to crash just because of some background file error.
       Rails.logger.error "Error writing NFS apps list file: #{e}\n#{e.short_string_backtrace}"
     end
