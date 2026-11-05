@@ -767,12 +767,15 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     create_admin
     create_user
 
-    res = @user.has_access_to? :access, :general, :create_master
-    if res
-      res.update! disabled: true, current_admin: @admin
+    # Committed UACs from other specs may persist, and has_access_to? returns an unpersisted copy,
+    # so disable the persisted records until no access is found
+    10.times do
       res = @user.has_access_to? :access, :general, :create_master
-    end
+      break unless res
 
+      Admin::UserAccessControl.find(res.id).update!(disabled: true, current_admin: @admin)
+    end
+    res = @user.has_access_to? :access, :general, :create_master
     expect(res).to be_falsey
 
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,

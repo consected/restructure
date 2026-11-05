@@ -116,10 +116,9 @@ module FeatureSupport
         click_button 'Log in'
       end
 
-      # Check if 2FA form appears (it shouldn't if we disabled it correctly)
-      # Wait a bit to see if 2FA form shows up
-      sleep 2
-      if has_selector?('.login-2fa-block', visible: true, wait: 1)
+      # Wait for either the 2FA form or completed login state.
+      has_css?('.login-2fa-block, .nav a[data-do-action="show-user-options"]', visible: true, wait: 5)
+      if has_selector?('.login-2fa-block', visible: true, wait: 0)
         puts_debug 'WARNING: 2FA form appeared even though we disabled it!'
         # Handle it anyway
         within '#new_user' do
@@ -153,7 +152,11 @@ module FeatureSupport
 
       break if just_signed_in
 
-      sleep 35 unless @user.two_factor_auth_disabled
+      unless @user.two_factor_auth_disabled
+        # sleep 35
+        # Avoid the need for a sleep to allow OTP to reset
+        reset_last_otp_timestamp
+      end
       puts_debug 'Attempting another login'
     end
 
@@ -161,6 +164,11 @@ module FeatureSupport
     expect(just_signed_in || already_signed_in).to be true
     dismiss_all_alerts
     finish_page_loading
+  end
+
+  # Avoid the need for a sleep to allow OTP to reset
+  def reset_last_otp_timestamp(user = @user)
+    user.update_column(:consumed_timestep, nil)
   end
 
   def logout

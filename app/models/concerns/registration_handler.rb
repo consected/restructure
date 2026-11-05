@@ -18,7 +18,7 @@ module RegistrationHandler
   end
 
   def a_template_or_batch_user?
-    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
+    email&.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
   end
 
   #

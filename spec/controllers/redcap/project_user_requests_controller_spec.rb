@@ -25,13 +25,12 @@ require 'rails_helper'
 RSpec.describe Redcap::ProjectUserRequestsController, type: :controller do
   include UserSupport
   include MasterSupport
-  include Redcap::RedcapSupport
   include Redcap::ProjectAdminSupport
+
+  include_context 'with redcap project admins'
 
   before(:context) do
     @path_prefix = '/redcap'
-    @admin, = ControllerMacros.create_admin
-    create_admin_matching_user
   end
 
   before(:example) do
@@ -45,7 +44,6 @@ RSpec.describe Redcap::ProjectUserRequestsController, type: :controller do
 
   describe 'set_instance_from_id with project_id' do
     before(:each) do
-      setup_redcap_project_admin_configs
       @project_admin = Redcap::ProjectAdmin.active.first
       @project_admin.update_columns(captured_project_info: { 'project_id' => captured_project_id })
       # Stub the downstream REDCap API call so the action can complete
@@ -147,7 +145,6 @@ RSpec.describe Redcap::ProjectUserRequestsController, type: :controller do
 
   describe 'set_instance_from_id with project_name' do
     before(:each) do
-      setup_redcap_project_admin_configs
       allow_any_instance_of(Redcap::ProjectAdmin).to receive(:capture_project_users)
     end
 
@@ -189,7 +186,6 @@ RSpec.describe Redcap::ProjectUserRequestsController, type: :controller do
     end
 
     before do
-      setup_redcap_project_admin_configs
       Resources::Models.add(
         model_class,
         resource_name: model_resource_name,

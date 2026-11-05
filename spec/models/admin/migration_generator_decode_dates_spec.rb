@@ -16,7 +16,7 @@ RSpec.describe 'Raw-SQL date decoding (issue #1295)', type: :model do
   SCHEMA = 'dynamic_test'
   TABLE = 'decode_dates_audit_test'
 
-  before :all do
+  before_all do
     ActiveRecord::Base.connection.execute(<<~SQL)
       CREATE TABLE IF NOT EXISTS #{SCHEMA}.#{TABLE} (
         id serial PRIMARY KEY,
@@ -29,7 +29,6 @@ RSpec.describe 'Raw-SQL date decoding (issue #1295)', type: :model do
   end
 
   after :all do
-    ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{SCHEMA}.#{TABLE} CASCADE")
     Admin::MigrationGenerator.tables_and_views_reset!
   end
 

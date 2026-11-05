@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'test_prof/recipes/rspec/let_it_be'
+require 'test_prof/recipes/rspec/before_all'
+
 def put_now(msg)
   puts "#{Time.now} #{msg}"
 end
@@ -7,6 +10,14 @@ end
 def put_to_saved_log(msg)
   msg = "#{Time.now} #{msg}\n"
   File.write('tmp/test_saved.log', msg, mode: 'a')
+end
+
+def reset_inline_migration_caches
+  return unless Admin::MigrationConnection.reset_inline_migration_flag!
+
+  SetupHelper.move_rolled_back_migration_files(Admin::MigrationConnection.take_inline_migration_files!)
+  Admin::MigrationGenerator.tables_and_views_reset!
+  ActiveRecord::Base.connection.schema_cache.clear!
 end
 
 # Provide a method to change app settings without a warning
@@ -58,7 +69,6 @@ end
 put_now 'Require spec_helper'
 require 'spec_helper'
 put_now 'Require environment'
-
 require File.expand_path('../config/environment', __dir__)
 put_now 'Require rspec/rails'
 require 'rspec/rails'
@@ -174,6 +184,9 @@ RSpec.configure do |config|
     if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV.fetch('SKIP_APP_SETUP', nil))
       Rake::Task['assets:precompile'].invoke
     end
+    put_now 'Precompiled assets'
+
+    SetupHelper.seed_database
     put_now 'Done before suite'
   end
 
@@ -213,6 +226,7 @@ RSpec.configure do |config|
 
   config.extend ControllerMacros, type: :controller
   config.after :each do
+    reset_inline_migration_caches
     Warden.test_reset!
   end
 
@@ -250,6 +264,30 @@ RSpec.configure do |config|
 
   config.before(:all, type: :requests) do
     change_setting('AllowDynamicMigrations', nil)
+  end
+
+  config.after(:context) do
+    reset_inline_migration_caches
+    SetupHelper.record_seed_database_info_change(self.class)
+  rescue StandardError, RuntimeError => e
+    put_now 'RuntimeError encountered during after(:context) hook.'
+    puts e.message
+    puts e.short_string_backtrace
+  end
+
+  config.after(:suite) do
+    res = SetupHelper.seed_database_info_changes
+    if res.any?
+      put_now 'Seed database info changes detected:'
+      res.each do |caller_info, diff|
+        put_now "Caller info: #{caller_info}"
+        put_now "Diff: #{diff}"
+      end
+    end
+  rescue StandardError, RuntimeError => e
+    put_now 'RuntimeError encountered during after(:suite) hook.'
+    puts e.message
+    puts e.backtrace.join("\n")
   end
 
   Shoulda::Matchers.configure do |config|

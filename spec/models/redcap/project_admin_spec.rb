@@ -3,10 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::ProjectAdmin, type: :model do
-  include UserSupport
-  include ModelSupport
-  include Redcap::RedcapSupport
-
   around do |example|
     if example.metadata[:queue_adapter_test]
       original_adapter = ActiveJob::Base.queue_adapter
@@ -18,7 +14,7 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     end
   end
 
-  before :all do
+  before_all do
     change_setting('AllowDynamicMigrations', true)
   end
 
@@ -28,10 +24,9 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
 
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
-    create_admin
-    @projects = setup_redcap_project_admin_configs
-    @project = @projects.first
   end
+
+  include_context 'with redcap project admins'
 
   it 'requires an admin' do
     expect do

@@ -243,7 +243,7 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
   end
 
   before :each do
-    @al = create_al_for_resource_name(@aldef.resource_name, master: @master, skip_setup: true)
+    @al = create_al_for_resource_name(@aldef.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end

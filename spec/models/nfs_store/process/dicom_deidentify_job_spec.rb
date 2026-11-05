@@ -29,7 +29,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
   end
 
   before :each do
-    seed_database && ActivityLog.define_models
+    ActivityLog.define_models
 
     @other_users = Array.new(3) { create_user.first }
 
@@ -103,7 +103,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     sf = @uploaded_files.first.stored_file
     sf.current_user = @user
 
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
 
     # Verify original metadata
     file_metadata = read_dicom_metadata(sf)
@@ -128,7 +128,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     sf = @substitute_file.stored_file
     sf.current_user = @user
     parent_item = sf.container.parent_item
-    expect(parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(parent_item).to be_a nfs_al_class
 
     # Verify original metadata
     file_metadata = read_dicom_metadata(sf)
@@ -154,7 +154,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     sf = @make_copy_file.stored_file
     sf.current_user = @user
 
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
 
     # Verify original metadata
     file_metadata = read_dicom_metadata(sf)
@@ -189,7 +189,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     original_app_type_id = @user.app_type_id
 
     expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
 
     # Verify original metadata
     file_metadata = read_dicom_metadata(sf)
@@ -240,7 +240,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     original_app_type_id = @user.app_type_id
     expect(original_app_type_id).to eq(Settings.nfs_store_default_app_type_id)
-    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+    expect(sf.container.parent_item).to be_a nfs_al_class
     expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
 
     # Verify original metadata

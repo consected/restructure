@@ -13,7 +13,7 @@ RSpec.describe 'ExtraOptionConfigs::DialogBefore', type: :model do
   include ExtraOptionConfigsSupport
 
   before(:all) do
-    set_up_extra_options_configs
+    set_up_extra_options_configs(alt_type: 'dialog_before')
   end
 
   let(:klass) { OptionConfigs::ExtraOptionConfigs::DialogBefore }

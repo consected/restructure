@@ -166,7 +166,7 @@ RSpec.describe 'Definition versioning', type: :model do
     expect(@activity_log.versioned(at_2)).to eq all_versions[1]
     expect(@activity_log.versioned(at_3)).to be nil # since it is the current version and this is what is returned
 
-    expect(@activity_log.versioned(DateTime.now + 99.years)).to be nil # simulates *use_def_version_time*
+    expect(@activity_log.versioned(DateTime.now + 99.years)).to be nil # simulates *use_def_version_at*
 
     new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
     c1 = new_al.versioned_definition.option_configs[1]

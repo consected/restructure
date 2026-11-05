@@ -15,38 +15,15 @@ require 'rails_helper'
 RSpec.describe 'Import app configuration with batch_trigger frequency once', type: :model do
   include ModelSupport
 
-  before :all do
-    # Enable delayed job creation for testing
-    @original_delay_jobs = Delayed::Worker.delay_jobs
-    Delayed::Worker.delay_jobs = true
-
-    Seeds.setup
-    create_admin
-    SetupHelper.setup_al_player_contact_phones
-
-    # Clean up any existing test app
-    @app_name = 'test_batch_once'
-    existing_app = Admin::AppType.where(name: @app_name).first
-    if existing_app
-      existing_app.disabled = true
-      existing_app.current_admin = @admin
-      existing_app.save!
+  # Create a dynamic model with batch_trigger frequency: once
+  # Use existing test table that's available
+  def set_up_dynamic_model
+    @dm = DynamicModel.active.find_by(name: 'test_batch_once_model')
+    if @dm
+      @dm.current_admin = @admin
+      return
     end
 
-    # Create test app type (must not be disabled to be active)
-    @app_type = Admin::AppType.create!(name: @app_name, label: 'Test Batch Once', disabled: false, current_admin: @admin)
-
-    # Create a batch user for the config
-    @batch_user = User.find_or_create_by!(email: 'batch_test@example.com') do |user|
-      user.first_name = 'Batch'
-      user.last_name = 'Test'
-      user.current_admin = @admin
-      user.app_type = @app_type
-      user.disabled = false
-    end
-
-    # Create a dynamic model with batch_trigger frequency: once
-    # Use existing test table that's available
     @dm = DynamicModel.create!(
       name: 'test_batch_once_model',
       table_name: 'test_version_tracking_recs',
@@ -76,6 +53,45 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
     @dm.current_admin = @admin
     @dm.update_tracker_events
     @dm.save!
+  end
+
+  # Do this once here to ensure the DM is migrated.
+  # This will save time later!
+  before :all do
+    create_admin
+    set_up_dynamic_model
+  end
+
+  before_all do
+    # Enable delayed job creation for testing
+    @original_delay_jobs = Delayed::Worker.delay_jobs
+    Delayed::Worker.delay_jobs = true
+
+    create_admin
+    SetupHelper.setup_al_player_contact_phones
+
+    # Clean up any existing test app
+    @app_name = 'test_batch_once'
+    existing_app = Admin::AppType.where(name: @app_name).first
+    if existing_app
+      existing_app.disabled = true
+      existing_app.current_admin = @admin
+      existing_app.save!
+    end
+
+    # Create test app type (must not be disabled to be active)
+    @app_type = Admin::AppType.create!(name: @app_name, label: 'Test Batch Once', disabled: false, current_admin: @admin)
+
+    # Create a batch user for the config
+    @batch_user = User.find_or_create_by!(email: 'batch_test@example.com') do |user|
+      user.first_name = 'Batch'
+      user.last_name = 'Test'
+      user.current_admin = @admin
+      user.app_type = @app_type
+      user.disabled = false
+    end
+
+    set_up_dynamic_model
 
     # Associate the dynamic model with the app type through user access control
     # This makes it an "active" model configuration
@@ -108,6 +124,7 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
   end
 
   it 'does not create batch trigger job when importing app with frequency: once' do
+    @dm.update!(updated_at: Time.current)
     # First, verify a job WAS created when we initially saved the dynamic model
     # (this proves our test setup is correct and jobs can be created)
     initial_job = Delayed::Job.where('handler LIKE ?', "%#{@dm.to_global_id}%").first
@@ -267,8 +284,8 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
                                      'Expected RecurringBatchTask.schedule_task to have been called with a run_at argument'
       # Compare as unix timestamps to avoid DateTime vs TimeWithZone type errors
       expect(captured_run_at.to_time.to_i).to be_within(60).of(specified_time.to_i),
-                                             "Expected run_at to be near #{specified_time} (from config), " \
-                                             "but got #{captured_run_at} — the implementation is ignoring the configured run_at"
+                                              "Expected run_at to be near #{specified_time} (from config), " \
+                                              "but got #{captured_run_at} — the implementation is ignoring the configured run_at"
     end
 
     it 'schedules the batch trigger job approximately 10 seconds from now when frequency is once and run_at is not specified' do
@@ -309,8 +326,8 @@ RSpec.describe 'Import app configuration with batch_trigger frequency once', typ
                                      'Expected RecurringBatchTask.schedule_task to have been called with a run_at argument'
       # Compare as unix timestamps to avoid DateTime vs TimeWithZone type errors
       expect(captured_run_at.to_time.to_i).to be_within(5).of((before_save + 10.seconds).to_time.to_i),
-                                             "Expected run_at to be approximately #{before_save + 10.seconds} " \
-                                             "(DateTime.now + 10s), but got #{captured_run_at}"
+                                              "Expected run_at to be approximately #{before_save + 10.seconds} " \
+                                              "(DateTime.now + 10s), but got #{captured_run_at}"
     end
   end
 end

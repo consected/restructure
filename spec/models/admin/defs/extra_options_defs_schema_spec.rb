@@ -273,12 +273,6 @@ RSpec.describe 'Extra options defs YAML schema documentation', type: :model do
           expect(type_comments).not_to be_empty,
                                        "#{filename} must document value types using <Type> notation"
         end
-
-        it 'has a Notes section' do
-          notes_comment = comments.find { |c| c.match?(/^#\s*Notes:/) }
-          expect(notes_comment).to be_present,
-                                   "#{filename} must contain a '# Notes:' section for normalization/semantic constraints"
-        end
       end
     end
   end

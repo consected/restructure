@@ -7,6 +7,8 @@ module ModelSupport
   include ::UserSupport
 
   def seed_database
+    return if SetupHelper.seed_database_info_correct?
+
     Rails.logger.info 'Starting seed setup in Model Support'
     # puts "#{Time.now} Starting seed setup in Model Support"
     SeedSupport.setup
@@ -27,14 +29,13 @@ module ModelSupport
   def add_app_config(app_type, name, value, user: nil, role_name: nil)
     @admin, = create_admin unless @admin
 
-    cond = { name: }
-    cond[:role_name] = role_name if role_name
-    cond[:user] = user if user
+    # Match exactly on role and user, so an app-wide config is not confused with user or role specific ones
+    cond = { name:, role_name:, user: }
 
     ac = app_type.app_configurations.active.where(cond).first
     if ac
-      cond[:current_admin] = @admin
-      ac.update! cond
+      # Apply the requested value, since configurations committed by earlier specs or runs may hold another value
+      ac.update! cond.merge(current_admin: @admin, value:)
     else
       cond = cond.merge(current_admin: @admin, app_type:, value:)
       Admin::AppConfiguration.create! cond

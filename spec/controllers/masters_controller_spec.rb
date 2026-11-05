@@ -21,10 +21,12 @@ RSpec.describe MastersController, type: :controller do
     end
 
     it 'creates a master record and shows it' do
-      ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+      # Scope to the app-wide config: user-specific configs from other specs persist between runs
+      ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with', user_id: nil, role_name: nil).first
 
       if ac
         ac.value = 'player_info'
+        ac.disabled = false
         ac.current_admin = @admin
         ac.save!
       else

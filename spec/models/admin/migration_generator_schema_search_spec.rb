@@ -11,7 +11,7 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
   # Test database schema_search_path is: ml_app,ipa_ops,testmybrain,persnet,bulk_msg,ref_data,test,redcap_test,dynamic_test
   # We'll use test, redcap_test, and dynamic_test for testing purposes as they appear in different positions
 
-  before :all do
+  before_all do
     create_admin
     @created_tables = []
     @test_table_name = 'schema_search_test_table'
@@ -19,11 +19,11 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
 
   after :all do
     # Clean up all test tables
-    @created_tables.each do |table_info|
-      ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{table_info[:schema]}.#{table_info[:table]} CASCADE")
-    rescue StandardError => e
-      Rails.logger.warn "Failed to drop test table #{table_info[:schema]}.#{table_info[:table]}: #{e}"
-    end
+    # @created_tables.each do |table_info|
+    #   ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS #{table_info[:schema]}.#{table_info[:table]} CASCADE")
+    # rescue StandardError => e
+    #   Rails.logger.warn "Failed to drop test table #{table_info[:schema]}.#{table_info[:table]}: #{e}"
+    # end
 
     # Reset the memoized tables and views
     Admin::MigrationGenerator.tables_and_views_reset!
@@ -37,7 +37,7 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
 
   describe 'table_schema_hash with duplicate table names in multiple schemas' do
     context 'when table exists in multiple schemas' do
-      before :all do
+      before_all do
         # Create the same table in three different schemas
         # These schemas are ordered in the test database search path as: test, redcap_test, dynamic_test
 
@@ -92,7 +92,7 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
     end
 
     context 'when table exists only in later search path schema' do
-      before :all do
+      before_all do
         @late_schema_table = 'late_schema_test_table'
         # Create table only in dynamic_test schema (last in our test trio)
         table_full_name = "dynamic_test.#{@late_schema_table}"
@@ -119,7 +119,7 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
     end
 
     context 'when table exists in first and last schema but not middle' do
-      before :all do
+      before_all do
         @gap_table = 'gap_test_table'
         # Create table in test and dynamic_test, but NOT in redcap_test
 
@@ -164,7 +164,7 @@ RSpec.describe 'Admin::MigrationGenerator schema search path handling', type: :m
   end
 
   describe 'dynamic model schema_name_in_db with duplicate tables' do
-    before :all do
+    before_all do
       create_admin
       @dm_test_table = 'dm_schema_test_table'
 

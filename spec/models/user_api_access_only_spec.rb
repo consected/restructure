@@ -24,7 +24,7 @@ RSpec.describe 'User api_access_only flag', type: :model do
   include ModelSupport
   include SetupHelper
 
-  before :all do
+  before_all do
     change_setting('TwoFactorAuthDisabledForUser', false)
     @admin, = create_admin
   end

@@ -20,19 +20,13 @@ require 'rails_helper'
 RSpec.describe 'REDCap Data Entry Trigger endpoint (API token auth)', type: :request do
   include UserSupport
   include MasterSupport
-  include Redcap::RedcapSupport
   include Redcap::ProjectAdminSupport
 
-  before(:all) do
-    @admin, = ControllerMacros.create_admin
-    create_admin_matching_user
-  end
+  include_context 'with redcap project admins'
 
   before(:each) do
     create_admin_matching_user
     setup_access :redcap_pull_request, resource_type: :general, access: :read, user: @user
-    # setup_redcap_project_admin_configs (below) reassigns @user/@admin to REDCap job admin/user
-    # as a side effect, so remember the actually authorized user separately.
     @authorized_user = @user
     @user_token = @authorized_user.authentication_token
     expect(@user_token).to be_present
@@ -41,7 +35,6 @@ RSpec.describe 'REDCap Data Entry Trigger endpoint (API token auth)', type: :req
   let(:captured_project_id) { 88_888 }
 
   before(:each) do
-    setup_redcap_project_admin_configs
     @project_admin = Redcap::ProjectAdmin.active.first
     @project_admin.update_columns(captured_project_info: { 'project_id' => captured_project_id })
     @valid_token = @project_admin.internal_project_token
