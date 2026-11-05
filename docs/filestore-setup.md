@@ -51,4 +51,34 @@ The NfsStore expects a specific structure for new App Types.
     chown nfsuser:nfs_store_all_access $APPTYPE_DIR
     chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
 
+The scheduled [filestore setup script](../app-scripts/set_up_missing_nfs_dirs.sh)
+stops on the first setup failure, returns an error, and retains
+`tmp/nfs_apps_list.txt` for the next retry without restarting the app server.
+Directories and permission changes already made are not rolled back. Resolve
+the reported error before retrying, and avoid restarting the app first: startup
+regenerates the list using directory existence and could mark a partially
+configured app type as complete.
+
+While it runs, the scheduled script moves the list to
+`tmp/nfs_apps_list.txt.processing` and holds a lock on
+`tmp/nfs_apps_list.lock`, so overlapping runs exit without doing anything. The
+app writes each new list to a temporary file and renames it into place, so a
+list written by an app boot during a run is never read half-written or archived
+unprocessed; it is processed on the next run, and on failure it takes priority
+over the list being retried. A working list left by an interrupted run is
+recovered on the next run unless a newer list has been written.
+
+Each list entry ends with the containers path the app checks. After setting up
+an app type, the scheduled script confirms that path exists, and otherwise fails
+the same way, so a `MOUNTPOINT` or `SUBDIR` mismatch is reported rather than
+causing repeated restarts. The app server is restarted only if an app type's
+directories, ownership or permissions were actually changed. If everything was
+already set up (for example by running `setup_filestore_app.sh` manually), the
+list is archived without a restart, and admin configuration alerts remain
+until the next restart.
+
+When run directly, `setup_filestore_app.sh` exits 0 on success, including when
+nothing needed to change. Set `UNCHANGED_EXIT_CODE` (1-255) to get that status
+instead when nothing was changed.
+
 **Note** the _nfs_store_all_access_ group owner can be changed to another owner, such as _nfs_store_group_0_ if access is to be controlled by the OS and user role _nfs_store group 600_
