@@ -2,6 +2,12 @@
 
 class Admin
   class AppTypeImport
+    DEFERRED_ACTION_MAX_PASSES = 100
+
+    @import_depth = 0
+    @deferred_actions = {}
+    @deferred_actions_mutex = Mutex.new
+
     attr_accessor :import_results, :admin, :app_type,
                   :config_text, :format, :force_update,
                   :dry_run, :name, :skip_fail,
@@ -25,8 +31,10 @@ class Admin
     def self.import_config(config_text, admin,
                            name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
                            prevent_migrations: false)
-      @@import_config_in_progress = true
-      @@prevent_migrations = prevent_migrations
+      previous_prevent_migrations = prevent_migrations?
+      @import_depth += 1
+      @import_config_in_progress = true
+      @prevent_migrations = prevent_migrations
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -38,18 +46,78 @@ class Admin
     rescue StandardError, FphsException => e
       [importer, e]
     ensure
-      @@import_config_in_progress = false
-      @@prevent_migrations = false
+      @import_depth -= 1
+      if @import_depth.zero?
+        @import_depth = 1
+        begin
+          drain_deferred_actions
+          clear_import_cache
+        ensure
+          @deferred_actions_mutex.synchronize { @deferred_actions.clear }
+          @import_depth = 0
+          @import_config_in_progress = false
+          @prevent_migrations = previous_prevent_migrations
+        end
+      else
+        @prevent_migrations = previous_prevent_migrations
+      end
     end
 
     def self.import_in_progress?
-      @@import_config_in_progress ||= nil
-      @@import_config_in_progress == true
+      @import_config_in_progress ||= nil
+      @import_config_in_progress == true
     end
 
     def self.prevent_migrations?
-      @@prevent_migrations ||= nil
-      @@prevent_migrations == true
+      @prevent_migrations ||= nil
+      @prevent_migrations == true
+    end
+
+    def self.run_now_or_after_import(key, &action)
+      raise ArgumentError, 'A block is required' unless action
+
+      if import_in_progress?
+        @deferred_actions_mutex.synchronize do
+          # The first block registered for a key wins for the current import.
+          @deferred_actions[key] ||= action
+        end
+        nil
+      else
+        action.call
+      end
+    end
+
+    def self.drain_deferred_actions
+      passes = 0
+      loop do
+        actions = @deferred_actions_mutex.synchronize do
+          pending = @deferred_actions
+          @deferred_actions = {}
+          pending
+        end
+        break if actions.empty?
+
+        passes += 1
+        if passes > DEFERRED_ACTION_MAX_PASSES
+          Rails.logger.error(
+            "Stopped draining deferred app type import actions after #{DEFERRED_ACTION_MAX_PASSES} passes"
+          )
+          @deferred_actions_mutex.synchronize { @deferred_actions.clear }
+          break
+        end
+
+        actions.each do |key, deferred_action|
+          deferred_action.call
+        rescue StandardError, FphsException => e
+          Rails.logger.error "Failed deferred app type import action #{key.inspect}: #{e.message}"
+        end
+      end
+    end
+
+    def self.clear_import_cache
+      Rails.cache.clear
+    rescue StandardError => e
+      Rails.logger.error "Failed to clear Rails cache after app type import: #{e.message}"
     end
 
     #
@@ -500,8 +568,6 @@ class Admin
 
       not_directly_associated = true if key.starts_with? 'associated_'
 
-      # Ensure a clean cache to reload previous items
-      Rails.cache.clear
       self.dyn_cname = nil
 
       if not_directly_associated
