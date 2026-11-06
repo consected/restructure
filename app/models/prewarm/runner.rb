@@ -18,9 +18,11 @@ module Prewarm
 
     def initialize(server_cache_version: nil)
       @server_cache_version = server_cache_version
+      @master_templates_cache_helper = ApplicationController.helpers
     end
 
     def run
+      @warm_marker_versions = {}
       Application.server_cache_version = @server_cache_version if @server_cache_version
 
       HandlebarsPrecompiler.setup_directories
@@ -83,7 +85,10 @@ module Prewarm
     end
 
     def warm_marker_path(user, app_type)
-      HandlebarsPrecompiler.tmp_generation_dir.join('warm', "#{user.id}-#{app_type.id}")
+      marker_version = (@warm_marker_versions ||= {})[app_type.id] ||= begin
+        @master_templates_cache_helper.master_templates_skeleton_cache_signature(app_type_id: app_type.id)
+      end
+      HandlebarsPrecompiler.tmp_generation_dir.join('warm', "#{user.id}-#{app_type.id}-#{marker_version}")
     end
   end
 end

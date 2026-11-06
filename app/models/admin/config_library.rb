@@ -17,6 +17,10 @@ class Admin::ConfigLibrary < Admin::AdminBase
 
   after_commit :refresh_dependencies
 
+  def clear_rails_cache_on_save?
+    format.to_s != 'yaml'
+  end
+
   def self.content_named(category, name, format: nil)
     find_active_library!(category, name, format:).options
   end
@@ -200,7 +204,10 @@ class Admin::ConfigLibrary < Admin::AdminBase
       end
     end
 
-    ms.map(&:class).uniq.each(&:reset_active_model_configurations!)
+    ms.map(&:class).uniq.each do |definition_class|
+      definition_class.reset_active_model_configurations!
+      definition_class.rotate_definition_cache_version!
+    end
   end
 
   def valid_options

@@ -26,7 +26,33 @@
   option_type_config = form_object_instance.option_type_config
 
   dyn_definition = form_object_instance.class.definition if form_object_instance.class.respond_to?(:definition)
-  default_option_type_name = dyn_definition.default_option_type_name if dyn_definition.respond_to?(:default_option_type_name)
+  template_definition = if form_object_instance.respond_to?(:versioned_definition)
+                          form_object_instance.versioned_definition
+                        else
+                          dyn_definition
+                        end
+  default_option_type_name = template_definition.default_option_type_name if
+    template_definition.respond_to?(:default_option_type_name)
+
+  template_state_locals = if !embedded && template_definition && option_type_config
+                            case form_object_instance.model_data_type
+                            when :dynamic_model
+                              OptionConfigs::TemplateOptionMapping.dynamic_model_mapping(
+                                template_definition, option_type_config, current_user
+                              )
+                            when :activity_log
+                              OptionConfigs::TemplateOptionMapping.activity_log_mapping(
+                                template_definition, option_type_config, current_user
+                              )
+                            when :external_identifier
+                              OptionConfigs::TemplateOptionMapping.external_identifier_mapping(
+                                template_definition, option_type_config, current_user
+                              )
+                            end
+                          end
+
+  template_state_locals[:template_version_token] =
+    Dynamic::TemplateVersionTokens.resource_token(template_definition) if template_state_locals
   
   unless defined?(view_options) && view_options
     view_options = option_type_config&.view_options
@@ -51,6 +77,9 @@
     edit_form_hash_val[:html] ||= {}
     edit_form_hash_val[:html]["data-view-handlers"] = view_handlers if view_handlers.present?
     edit_form_hash_val[:html]['data-option-type-config-name'] = option_type_config.name if option_type_config
+    if template_state_locals
+      edit_form_hash_val[:html]['data-vdef-version'] = "v#{template_state_locals[:template_version_token]}"
+    end
     
     form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_val]
     form_block_object = self
@@ -122,7 +151,11 @@
 %>
 <% unless embedded %>
 <div class="data-results">
-  <div data-result="<%= edit_form_id %>">
+  <div data-result="<%= edit_form_id %>"<% if template_state_locals %> data-vdef-version="v<%= template_state_locals[:template_version_token] %>"<% end %>>
+    <% if template_state_locals %>
+      <%= render partial: 'common_templates/search_results_template',
+                 locals: template_state_locals.merge(state_only: true) %>
+    <% end %>
 <% end %>
     <div class="<%= view_options[:extra_class] %>">
       <% if selectable_model_reference %>

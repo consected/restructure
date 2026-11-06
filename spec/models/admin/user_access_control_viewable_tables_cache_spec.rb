@@ -28,6 +28,7 @@ require 'rails_helper'
 # - viewable_tables reflects the user's current app type after an app type switch,
 #   even when the result for the previous app type was already cached
 # - results for an explicit alt_app_type_id remain correct and independent
+# - cached table visibility is recomputed after dynamic definitions change
 RSpec.describe Admin::UserAccessControl, type: :model do
   include ModelSupport
 
@@ -98,6 +99,23 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       # The current app type result must not have been affected
       res_a2 = Admin::UserAccessControl.viewable_tables(@user)
       expect(res_a2[:player_infos]).to be_truthy
+    end
+
+    it 'recomputes table visibility after a dynamic definition changes' do
+      resource_lookup = 0
+      allow(Admin::UserAccessControl).to receive(:resource_names_for).with(:table) do
+        resource_lookup += 1
+        ['player_infos']
+      end
+      allow(Admin::UserAccessControl).to receive(:access_for_list?).and_return({})
+
+      Admin::UserAccessControl.viewable_tables(@user)
+      definition = DynamicModel.active.first!
+      definition.current_admin = @admin
+      definition.update!(position: definition.position.to_i + 1)
+      Admin::UserAccessControl.viewable_tables(@user)
+
+      expect(resource_lookup).to eq 2
     end
   end
 end

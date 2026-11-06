@@ -2,11 +2,18 @@
 
 class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   include MasterHandler
+  include EmbeddedItemHandler
+
+  skip_before_action :handle_embedded_item
 
   def template_config
     Application.refresh_dynamic_defs
 
-    render plain: ''
+    refresh_embedded_item_for @instance_list
+    set_browser_cache(max_age: 30)
+    return unless stale?(etag: template_config_cache_key)
+
+    render partial: 'external_identifiers/common_search_results_template_set'
   end
 
   protected

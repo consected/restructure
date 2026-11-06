@@ -28,6 +28,8 @@ RSpec.describe Prewarm::Candidates do
     app_type = Admin::AppType.active.first
     stale = make_user(sign_in_ago: Settings::PrewarmSignInWindowDays.days + 1.day, app_type:)
     fresh = make_user(sign_in_ago: 1.day, app_type:)
+    # A unique role keeps fresh's variant distinct from any recently signed-in user left in the DB
+    Admin::UserRole.add_to_role(fresh, app_type, "prewarm_fresh_#{SecureRandom.hex(4)}", @admin)
 
     reps = described_class.new.representatives
     users = reps.map(&:first)

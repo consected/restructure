@@ -315,10 +315,78 @@ module ApplicationHelper
       "#{apptype}-#{@item_updates}-#{userrole}-#{uac}#{paired_user_key}"
   end
 
+  # Skeleton state is independent of per-definition config edits, which are fetched lazily.
+  def master_templates_skeleton_cache_key(force_user_or_admin: nil)
+    user_or_admin = force_user_or_admin || current_user || current_admin
+    paired_user = if user_or_admin.is_a?(User)
+                    user_or_admin
+                  elsif user_or_admin.is_a?(Admin)
+                    safe_current_user || user_or_admin.matching_user
+                  end
+    app_type_id = paired_user&.app_type_id
+
+    scope = [user_or_admin&.class&.name, user_or_admin&.id, app_type_id, paired_user&.id]
+    Digest::SHA256.hexdigest([master_templates_skeleton_cache_signature(app_type_id:), *scope].to_json)
+  end
+
+  # Shared by the fragment and prewarm marker so both follow structural changes only.
+  def master_templates_skeleton_cache_signature(app_type_id:)
+    @master_templates_skeleton_cache_signatures ||= {}
+    @master_templates_skeleton_cache_signatures[app_type_id] ||= begin
+      definition_sets = [DynamicModel, ActivityLog, ExternalIdentifier].map do |definition_class|
+        resource_name_column = %i[table_name name].find do |column|
+          column == :name || definition_class.column_names.include?(column.to_s)
+        end
+        columns = [:id, :name, resource_name_column].compact.uniq
+        columns << :category if definition_class.column_names.include?('category')
+        columns += %i[item_type rec_type] if definition_class == ActivityLog
+        definitions = definition_class.active.reorder(:id).to_a
+        [definition_class.name, definitions.map do |definition|
+          [columns.map { |column| definition.public_send(column) },
+           master_templates_definition_structure(definition)]
+        end]
+      end
+      matching_panels = Admin::PageLayout.active
+                                         .where(app_type_id: [app_type_id, nil], layout_name: 'master')
+                                         .order(Arel.sql('app_type_id ASC NULLS LAST, panel_position ASC, id ASC'))
+                                         .pluck(:id, :app_type_id, :panel_name, :disabled)
+      access_timestamps = partial_cache_key_access_control_timestamps(app_type_id)
+
+      Digest::SHA256.hexdigest([
+        Application.server_cache_version,
+        Settings::OnlyLoadAppTypes,
+        app_type_id,
+        definition_sets,
+        matching_panels,
+        *access_timestamps,
+        Dynamic::TemplateVersionTokens.panel_chrome_token
+      ].to_json)
+    end
+  end
+
+  def master_templates_definition_structure(definition)
+    @master_templates_definition_structures ||= {}
+    cached_definition = if definition.class.respond_to?(:definition_cache)
+                          definition.class.definition_cache[definition.id]
+                        end
+    definition = cached_definition if cached_definition && cached_definition.updated_at == definition.updated_at
+    key = [definition.class.name, definition.id, definition.updated_at&.to_f,
+           Dynamic::TemplateVersionTokens.resource_token(definition)]
+    @master_templates_definition_structures[key] ||= Array(definition.option_configs).map do |option_config|
+      embed = option_config.embed
+      embed = embed.except(:resource_model_def) if embed.is_a?(Hash)
+      config_digest = Digest::SHA256.hexdigest({
+        references: option_config.references,
+        embed:
+      }.to_json)
+      [option_config.name.to_s, config_digest]
+    end
+  end
+
   #
   # Role/UAC updated_at timestamps for the given app type, delegated to
   # HandlebarsPrecompiler.app_type_access_control_timestamps (the single source of truth
-  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key/#access_control_version -
+  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key -
   # issue #1400 Phase 1). Memoized per app_type_id so the ETag and template_version
   # computations in one view context reuse the same values instead of re-querying.
   # @param app_type_id [Integer, nil] the app_type to scope the queries to

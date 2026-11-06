@@ -377,8 +377,10 @@ class Admin::UserAccessControl < Admin::AdminBase
   # be served the previous app type's cached results, hiding master panel tabs (issue #1279 follow-up)
   def self.viewable_tables(user, alt_app_type_id: nil)
     effective_app_type_id = alt_app_type_id || user.app_type_id
+    definition_classes = [ActivityLog, DynamicModel, ExternalIdentifier]
+    definition_versions = definition_classes.map(&:definition_cache_version_token).join('-')
     ckey = cache_key_for_access_for('viewable_tables--', user.id, user.current_sign_in_at&.to_i,
-                                    effective_app_type_id)
+                                    effective_app_type_id, definition_versions)
     Rails.cache.fetch(ckey) do
       names = resource_names_for(:table)
       res = access_for_list?(user, :access, :table, names, alt_app_type_id:)

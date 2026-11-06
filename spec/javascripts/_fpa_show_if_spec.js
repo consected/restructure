@@ -1,5 +1,44 @@
 //= require app/_fpa_show_if.js
+// Covers show_if rule evaluation and version lookup for unversioned form blocks.
 describe('show_if', function () {
+  it('uses the v0 form definition when the block has no definition version', function () {
+    var block = {
+      attr: function (name) {
+        if (name === 'data-item-class') return 'test_type';
+        return undefined;
+      },
+      is: function () {
+        return false;
+      },
+      find: function () {
+        return {
+          first: function () {
+            return {
+              attr: function () {
+                return undefined;
+              }
+            };
+          }
+        };
+      }
+    };
+    var showIfDefinitions = { field_a: {} };
+    var data = {
+      item_type: 'test_type',
+      full_option_type: 'test_type'
+    };
+
+    _fpa.show_if.forms.test_type = { v0: showIfDefinitions };
+    spyOn(_fpa.show_if.methods, 'do_show_items');
+    spyOn(_fpa.show_if.methods, 'handle_post_show_if');
+
+    _fpa.show_if.methods.show_items(block, data, false);
+
+    expect(_fpa.show_if.methods.do_show_items).toHaveBeenCalledWith(
+      block, data, 'test_type', 'test_type', showIfDefinitions
+    );
+  });
+
   it("tests that all specified fields have a value", function () {
 
     var res

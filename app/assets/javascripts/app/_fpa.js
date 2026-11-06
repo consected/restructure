@@ -6,7 +6,7 @@ _fpa = {
     caption_before: {},
     dialog_before: {},
     template_config: {},
-    template_config_versions: {},
+    template_config_requests: {},
   },
 
   preprocessors: {},
@@ -259,12 +259,106 @@ _fpa = {
     options.template_name = template_name;
   },
 
+  // Short key for the signed-in session and access context, added to template_config URLs so a
+  // browser-cached response is never reused after a new sign in, user, app type or role change.
+  template_config_session_key: function () {
+    var user = _fpa.state.current_user, admin = _fpa.state.current_admin;
+    var parts = [
+      user ? [user.id, user.current_sign_in_at, user.app_type_id, (_fpa.state.current_user_roles || []).slice().sort()] : null,
+      admin ? [admin.id, admin.current_sign_in_at] : null
+    ];
+    var text = JSON.stringify(parts), hash = 5381;
+    for (var i = 0; i < text.length; i++) hash = ((hash * 33) ^ text.charCodeAt(i)) >>> 0;
+
+    return hash.toString(36);
+  },
+
   // A function that provides a promise.
   // Allow background loading of versioned definition template configs
   // that have not already been downloaded.
   // The promise is only resolved when the download has completed.
   prepare_template_configs: function (data) {
     return new Promise(function (resolve, reject) {
+      var state_slot_present = function (data_item, data_type, version) {
+        var type_names = [
+          data_item.item_type,
+          data_item.model_data_type,
+          data_item.resource_name,
+          data_item.name_with_option_type,
+          data_type
+        ];
+        for (var type_index = 0; type_index < type_names.length; type_index++) {
+          if (!type_names[type_index]) continue;
+
+          var type_name = String(type_names[type_index]);
+          var type_parts = type_name.split('__');
+          var last_type_part = type_parts.pop();
+          var singular_type_name = type_parts.concat(last_type_part.singularize()).join('__');
+          var candidate_type_names = [type_name, singular_type_name];
+
+          for (var candidate_index = 0; candidate_index < candidate_type_names.length; candidate_index++) {
+            var template_config = _fpa.state.template_config[candidate_type_names[candidate_index]];
+            if (!template_config) continue;
+
+            if (Object.prototype.hasOwnProperty.call(template_config, version)) return true;
+          }
+        }
+
+        return false;
+      };
+
+      var state_slots_present = function (data_item, data_type, version) {
+        if (!state_slot_present(data_item, data_type, version)) return false;
+
+        var dependency_items = [];
+        if (data_item.embedded_item) dependency_items.push(data_item.embedded_item);
+        if (Array.isArray(data_item.embedded_items)) {
+          dependency_items = dependency_items.concat(data_item.embedded_items);
+        }
+
+        for (var dependency_index = 0; dependency_index < dependency_items.length; dependency_index++) {
+          var dependency_item = dependency_items[dependency_index];
+          var dependency_type = dependency_item.item_type || dependency_item.resource_name ||
+            dependency_item.name_with_option_type || dependency_item.model_data_type;
+          var dependency_type_name = String(dependency_type || '');
+          var dependency_is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
+            .indexOf(String(dependency_item.model_data_type)) >= 0 ||
+            /^(dynamic_model|activity_log|external_identifier)__/.test(dependency_type_name);
+
+          if (!dependency_is_versioned) continue;
+
+          var dependency_version = dependency_item.vdef_version || 'v0';
+          if (!state_slot_present(dependency_item, dependency_type, dependency_version)) return false;
+        }
+
+        return true;
+      };
+
+      var embedded_dependency_groups = function (data_item) {
+        var dependency_items = [];
+        if (data_item.embedded_item) dependency_items.push(data_item.embedded_item);
+        if (Array.isArray(data_item.embedded_items)) {
+          dependency_items = dependency_items.concat(data_item.embedded_items);
+        }
+
+        return dependency_items.map(function (dependency_item) {
+          var dependency_type = dependency_item.item_type || dependency_item.resource_name ||
+            dependency_item.name_with_option_type || dependency_item.model_data_type;
+          var dependency_type_name = String(dependency_type || '');
+          var is_versioned = ['dynamic_model', 'activity_log', 'external_identifier']
+            .indexOf(String(dependency_item.model_data_type)) >= 0 ||
+            /^(dynamic_model|activity_log|external_identifier)__/.test(dependency_type_name);
+
+          if (!is_versioned) return null;
+
+          return JSON.stringify([
+            dependency_type,
+            dependency_item.name_with_option_type || dependency_item.option_type || dependency_type,
+            dependency_item.vdef_version || 'v0'
+          ]);
+        }).filter(Boolean).sort();
+      };
+
       var data_type = data.multiple_results;
 
       if (!data_type) {
@@ -291,7 +385,8 @@ _fpa = {
         }
 
         var data_array = [data_for_data_type];
-        var url_data_type = item_type.split('__').join('/').pluralize();
+        var url_data_type = item_type.split('__').join('/');
+        if (item_type != data_type) url_data_type = url_data_type.pluralize();
       } else {
         var data_array = data[data_type];
         var url_data_type = data_type.split('__').join('/');
@@ -299,6 +394,8 @@ _fpa = {
 
       var list_data_items = [];
       var list_data_item_state_ids = [];
+      var request_group_ids = Object.create(null);
+      var pending_requests = [];
 
       if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
         console.debug(`nothing: ${!url_data_type} or no non versioned template types`)
@@ -313,26 +410,37 @@ _fpa = {
 
         var data_item = data_array[k];
         data_master_id = data_master_id || data && data.master_id || data_item && data_item.master_id;
-        // Prevent requesting the template for the same instance multiple times.
-        // Keep the instance id in the cache key because different records on the same
-        // page can share a definition version yet still resolve different template
-        // dependencies through their referenced runtime models.
-        // Include the definition version as well so the same record can fetch the
-        // correct historical template config when multiple definition versions are
-        // shown together or after the current definition changes.
         if (data_item) {
           var did = url_data_type + '/' + data_item.id;
           if (data_item.vdef_version) did += '/' + data_item.vdef_version;
-          if (_fpa.state.template_config_versions[did] || !data_item.id) continue;
+          var requested_version = data_item.vdef_version || 'v0';
+          var option_type = data_item.name_with_option_type || data_item.option_type ||
+            data_item.item_type || data_item.resource_name || data_type;
+          var request_group_id = JSON.stringify([
+            url_data_type,
+            option_type,
+            requested_version,
+            embedded_dependency_groups(data_item)
+          ]);
+          if (!data_item.id) continue;
 
-          _fpa.state.template_config_versions[did] = true;
-          list_data_item_state_ids.push(did);
-          list_data_items.push(data_item.id);
+          var pending_request = _fpa.state.template_config_requests[did];
+          if (pending_request) {
+            pending_requests.push(pending_request);
+            continue;
+          }
+          if (state_slots_present(data_item, data_type, requested_version)) continue;
+
+          if (list_data_item_state_ids.indexOf(did) < 0) list_data_item_state_ids.push(did);
+          if (!Object.prototype.hasOwnProperty.call(request_group_ids, request_group_id)) {
+            request_group_ids[request_group_id] = data_item.id;
+            list_data_items.push(data_item.id);
+          }
         }
       }
       if (list_data_items.length == 0 || !list_data_items[0]) {
         console.log('no template configs to get');
-        resolve();
+        Promise.all(pending_requests).then(resolve);
         return;
       }
 
@@ -341,7 +449,17 @@ _fpa = {
         url = '/masters/' + data_master_id;
       }
 
-      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config';
+      var request_cache_version = encodeURIComponent(JSON.stringify(Object.keys(request_group_ids).sort()));
+      url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config?v=' + request_cache_version +
+        '&s=' + _fpa.template_config_session_key();
+
+      var resolve_request;
+      var request_promise = new Promise(function (request_resolve) {
+        resolve_request = request_resolve;
+      });
+      list_data_item_state_ids.forEach(function (did) {
+        _fpa.state.template_config_requests[did] = request_promise;
+      });
 
       $.ajax(url, {
         success: function (data) {
@@ -359,7 +477,10 @@ _fpa = {
             }
           });
           _fpa.compile_templates();
-          resolve();
+          list_data_item_state_ids.forEach(function (did) {
+            delete _fpa.state.template_config_requests[did];
+          });
+          resolve_request();
         },
         error: function (data) {
           // list_data_item_state_ids is an Array of cache keys. Iterate values
@@ -370,11 +491,14 @@ _fpa = {
           // permanently blocking retries after a transient failure.
           list_data_item_state_ids.forEach(function (did) {
             console.error(`Failed to get template ${did}`);
-            _fpa.state.template_config_versions[did] = false;
+            delete _fpa.state.template_config_requests[did];
           });
-          resolve();
+          resolve_request();
         },
       });
+
+      pending_requests.push(request_promise);
+      Promise.all(pending_requests).then(resolve);
     });
   },
 
