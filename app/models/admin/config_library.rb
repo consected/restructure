@@ -9,6 +9,50 @@ class Admin::ConfigLibrary < Admin::AdminBase
     %w[yaml html markdown sql]
   end
 
+  def self.defer_dependency_refresh(library)
+    @pending_dependency_refreshes ||= {}
+    @pending_dependency_refreshes[library.id || library.object_id] = library
+
+    Admin::AppTypeImport.run_now_or_after_import(:config_library_dependency_refresh) do
+      libraries = @pending_dependency_refreshes.values
+      @pending_dependency_refreshes = {}
+      refresh_dependencies_for(libraries)
+    end
+  end
+
+  def self.refresh_dependencies_for(libraries)
+    libraries = Array(libraries).compact.select { |library| library.format.to_s == 'yaml' }.uniq
+    return if libraries.empty?
+
+    dependants = []
+    [
+      [ActivityLog, OptionConfigs::ActivityLogOptions],
+      [DynamicModel, OptionConfigs::DynamicModelOptions],
+      [ExternalIdentifier, OptionConfigs::ExternalIdentifierOptions]
+    ].each do |definition_class, options_class|
+      definition_class.active.each do |definition|
+        referenced_libraries = options_class.config_libraries(definition)
+        changed_libraries = libraries.select { |library| referenced_libraries.include?(library) }
+        dependants << [definition, changed_libraries] if changed_libraries.any?
+      end
+    end
+
+    dependants.each do |definition, changed_libraries|
+      # Touch versioned definitions so existing instances retain their library version boundary.
+      if definition.uses_current_definition_version?
+        definition.force_option_config_parse
+        definition.class.definition_cache[definition.id] = definition
+      else
+        current_admin = changed_libraries.lazy.map(&:current_admin).find(&:present?)
+        definition.current_admin ||= current_admin
+        definition.touch
+        definition.force_option_config_parse
+      end
+    end
+
+    dependants.map(&:first).map(&:class).uniq.each(&:reset_active_model_configurations!)
+  end
+
   validates :name, presence: true
   validates :format, presence: true
   validates :format, inclusion: { in: valid_formats }
@@ -165,42 +209,13 @@ class Admin::ConfigLibrary < Admin::AdminBase
   end
 
   def refresh_dependencies
-    return unless self.format.to_s == 'yaml'
+    return unless format.to_s == 'yaml'
 
-    ms = []
-
-    ActivityLog.active.each do |a|
-      cl = OptionConfigs::ActivityLogOptions.config_libraries a
-      ms << a if cl.include? self
+    if Admin::AppTypeImport.import_in_progress?
+      self.class.defer_dependency_refresh(self)
+    else
+      self.class.refresh_dependencies_for([self])
     end
-
-    DynamicModel.active.each do |a|
-      cl = OptionConfigs::DynamicModelOptions.config_libraries a
-      ms << a if cl.include? self
-    end
-
-    ExternalIdentifier.active.each do |a|
-      cl = OptionConfigs::ExternalIdentifierOptions.config_libraries a
-      ms << a if cl.include? self
-    end
-
-    ms.each do |m|
-      # Touch the definition to create a new version history entry,
-      # so that instances created before and after this library change
-      # resolve to the correct library content via versioned definitions.
-      # Skip the touch when versioning is disabled globally (DisableVDef)
-      # or when the definition uses use_current_version (always uses latest).
-      if m.uses_current_definition_version?
-        m.force_option_config_parse
-        m.class.definition_cache[m.id] = m
-      else
-        m.current_admin ||= current_admin
-        m.touch
-        m.force_option_config_parse
-      end
-    end
-
-    ms.map(&:class).uniq.each(&:reset_active_model_configurations!)
   end
 
   def valid_options
