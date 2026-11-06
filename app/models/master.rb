@@ -641,6 +641,7 @@ class Master < ActiveRecord::Base
           else
             res - self.class.crosswalk_attrs - [:master_id]
           end
+    res = res.select { |field| self.class.alternative_id?(field, access_by: current_user) }
 
     @show_ids_in_results = res
   end
