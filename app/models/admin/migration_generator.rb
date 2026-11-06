@@ -73,15 +73,18 @@ class Admin::MigrationGenerator
     MIGRATION_TIMESTAMP_MUTEX.synchronize do
       current_time = Time.now
       previous_time = @last_migration_timestamp && Time.strptime(@last_migration_timestamp, '%Y%m%d%H%M%S')
-      timestamp_time = previous_time ? [current_time, previous_time + 1].max : current_time
-      timestamp = timestamp_time.strftime('%Y%m%d%H%M%S')
-
-      while Dir.exist?(dirname) && Dir.glob("#{timestamp}*", base: dirname).any?
-        timestamp_time = Time.strptime(timestamp, '%Y%m%d%H%M%S') + 1
-        timestamp = timestamp_time.strftime('%Y%m%d%H%M%S')
-      end
-
-      @last_migration_timestamp = timestamp
+      existing_times = if Dir.exist?(dirname)
+                         Dir.glob('*.rb', base: dirname).filter_map do |filename|
+                           timestamp = filename[/\A(\d{14})_/, 1]
+                           Time.strptime(timestamp, '%Y%m%d%H%M%S') if timestamp
+                         end
+                       else
+                         []
+                       end
+      timestamps = [current_time]
+      timestamps << (previous_time + 1) if previous_time
+      timestamps << (existing_times.max + 1) if existing_times.any?
+      @last_migration_timestamp = timestamps.max.strftime('%Y%m%d%H%M%S')
     end
   end
 

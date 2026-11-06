@@ -41,18 +41,17 @@ RSpec.describe Admin::MigrationGenerator, type: :model do
       end
     end
 
-    it 'skips timestamps already present in the target directory' do
-      seen_patterns = []
-      allow(Dir).to receive(:glob) do |pattern, base:|
-        expect(base).to eq('virtual/migrations')
-        seen_patterns << pattern
-        seen_patterns.length == 1 ? ['existing migration'] : []
-      end
+    it 'allocates beyond the newest existing migration timestamp after an in-memory reset' do
+      local_now = Time.local(2026, 11, 6, 12, 34, 56)
+      existing_timestamp = (local_now + 120).strftime('%Y%m%d%H%M%S')
+      allow(Time).to receive(:now).and_return(local_now)
+      allow(Dir).to receive(:glob)
+        .with('*.rb', base: 'virtual/migrations')
+        .and_return(["#{existing_timestamp}_create_old_table_abcdef.rb"])
 
-      path = generator.write_db_migration('migration', 'existing_table', 'abcdef')
+      timestamp = described_class.next_migration_timestamp('virtual/migrations')
 
-      expect(seen_patterns.length).to eq(2)
-      expect(File.basename(path).first(14)).to eq(seen_patterns.last.delete_suffix('*'))
+      expect(timestamp).to be > existing_timestamp
     end
   end
 end

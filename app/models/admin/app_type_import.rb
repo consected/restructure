@@ -6,7 +6,10 @@ class Admin
 
     @import_depth = 0
     @deferred_actions = {}
-    @deferred_actions_mutex = Mutex.new
+    @import_state_mutex = Mutex.new
+    @thread_prevent_migrations = {}
+    @prevent_migrations = false
+    @outermost_prevent_migrations = nil
 
     attr_accessor :import_results, :admin, :app_type,
                   :config_text, :format, :force_update,
@@ -31,10 +34,13 @@ class Admin
     def self.import_config(config_text, admin,
                            name: nil, format: :json, force_update: nil, dry_run: nil, skip_fail: nil,
                            prevent_migrations: false)
-      previous_prevent_migrations = prevent_migrations?
-      @import_depth += 1
-      @import_config_in_progress = true
-      @prevent_migrations = prevent_migrations
+      import_thread = Thread.current
+      @import_state_mutex.synchronize do
+        @outermost_prevent_migrations = @prevent_migrations if @import_depth.zero?
+        @import_depth += 1
+        (@thread_prevent_migrations[import_thread] ||= []) << prevent_migrations
+        @prevent_migrations = prevent_migrations
+      end
       importer = new(config_text, admin,
                      name:,
                      format:,
@@ -46,51 +52,73 @@ class Admin
     rescue StandardError, FphsException => e
       [importer, e]
     ensure
-      @import_depth -= 1
-      if @import_depth.zero?
-        @import_depth = 1
-        begin
-          drain_deferred_actions
-          clear_import_cache
-        ensure
-          @deferred_actions_mutex.synchronize { @deferred_actions.clear }
-          @import_depth = 0
-          @import_config_in_progress = false
-          @prevent_migrations = previous_prevent_migrations
-        end
-      else
-        @prevent_migrations = previous_prevent_migrations
-      end
+      finish_import(import_thread)
     end
 
     def self.import_in_progress?
-      @import_config_in_progress ||= nil
-      @import_config_in_progress == true
+      @import_state_mutex.synchronize { @import_depth.positive? }
     end
 
     def self.prevent_migrations?
-      @prevent_migrations ||= nil
-      @prevent_migrations == true
+      @import_state_mutex.synchronize do
+        thread_settings = @thread_prevent_migrations[Thread.current]
+        if thread_settings&.any?
+          thread_settings.last == true
+        else
+          @prevent_migrations == true
+        end
+      end
     end
 
     def self.run_now_or_after_import(key, &action)
       raise ArgumentError, 'A block is required' unless action
 
-      if import_in_progress?
-        @deferred_actions_mutex.synchronize do
+      run_now = @import_state_mutex.synchronize do
+        if @import_depth.positive?
           # The first block registered for a key wins for the current import.
           @deferred_actions[key] ||= action
+          false
+        else
+          true
         end
-        nil
-      else
-        action.call
+      end
+      action.call if run_now
+    end
+
+    def self.finish_import(import_thread)
+      loop do
+        outermost = @import_state_mutex.synchronize { @import_depth == 1 }
+        if outermost
+          drain_deferred_actions
+          clear_import_cache
+        end
+
+        finish_action = @import_state_mutex.synchronize do
+          if @import_depth == 1 && @deferred_actions.any?
+            :drain_again
+          elsif !outermost && @import_depth == 1
+            :retry_as_outermost
+          else
+            @import_depth -= 1 if @import_depth.positive?
+            thread_settings = @thread_prevent_migrations[import_thread]
+            thread_settings&.pop
+            @thread_prevent_migrations.delete(import_thread) if thread_settings && thread_settings.empty?
+            if @import_depth.zero?
+              @deferred_actions.clear
+              @prevent_migrations = @outermost_prevent_migrations
+              @outermost_prevent_migrations = nil
+            end
+            :finished
+          end
+        end
+        break if finish_action == :finished
       end
     end
 
     def self.drain_deferred_actions
       passes = 0
       loop do
-        actions = @deferred_actions_mutex.synchronize do
+        actions = @import_state_mutex.synchronize do
           pending = @deferred_actions
           @deferred_actions = {}
           pending
@@ -102,7 +130,7 @@ class Admin
           Rails.logger.error(
             "Stopped draining deferred app type import actions after #{DEFERRED_ACTION_MAX_PASSES} passes"
           )
-          @deferred_actions_mutex.synchronize { @deferred_actions.clear }
+          @import_state_mutex.synchronize { @deferred_actions.clear }
           break
         end
 

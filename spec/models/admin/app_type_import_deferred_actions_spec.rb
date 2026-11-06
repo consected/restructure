@@ -49,6 +49,49 @@ RSpec.describe Admin::AppTypeImport, type: :model do
       expect(calls).to eq(%i[first during_drain])
     end
 
+    it 'preserves depth and deferred actions when imports overlap during draining' do
+      importers = { 'A' => double('import A'), 'B' => double('import B') }
+      allow(described_class).to receive(:new) do |config_text, _admin, **_options|
+        importers.fetch(config_text)
+      end
+      b_started = Queue.new
+      release_b = Queue.new
+      b_calls = []
+      b_thread = nil
+      b_active_after_a = nil
+      b_depth_after_a = nil
+
+      allow(importers['A']).to receive(:do_import_config) do
+        described_class.run_now_or_after_import(:start_import_b) do
+          b_thread = Thread.new { described_class.import_config('B', nil) }
+          b_started.pop
+        end
+        [:imported_a]
+      end
+      allow(importers['B']).to receive(:do_import_config) do
+        described_class.run_now_or_after_import(:b_first_action) { b_calls << :first }
+        b_started << true
+        release_b.pop
+        b_active_after_a = described_class.import_in_progress?
+        b_depth_after_a = described_class.instance_variable_get(:@import_depth)
+        described_class.run_now_or_after_import(:b_late_action) { b_calls << :late }
+        [:imported_b]
+      end
+
+      begin
+        described_class.import_config('A', nil)
+      ensure
+        release_b << true
+        b_thread&.value
+      end
+
+      expect(b_active_after_a).to be(true)
+      expect(b_depth_after_a).to eq(1)
+      expect(b_calls).to eq(%i[first late])
+      expect(described_class.import_in_progress?).to be(false)
+      expect(described_class.instance_variable_get(:@import_depth)).to eq(0)
+    end
+
     it 'runs actions immediately when no import is active' do
       calls = []
 
