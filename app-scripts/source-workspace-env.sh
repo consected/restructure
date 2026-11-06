@@ -12,8 +12,11 @@ fi
 source '.env'
 export TEST_ENV_SET
 
+LATEST_NODE=$(ls -At $HOME/.nvm/versions/node | grep v | head -n 1)
+
 export PATH=$HOME/.rbenv/bin:$PATH
 export PATH=~/.local/bin:$PATH
+export PATH=$HOME/.nvm/versions/node/${LATEST_NODE}/bin:$PATH
 eval "$(rbenv init -)"
 echo TEST_ENV_SET: $TEST_ENV_SET
 echo bundle path: $(which bundle)
