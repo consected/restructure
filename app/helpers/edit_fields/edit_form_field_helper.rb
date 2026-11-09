@@ -73,6 +73,10 @@ module EditFields
           match_name = "name_starts_with_#{sw}"
           next unless curr_field_name.start_with?("#{sw}_") && f_names.include?(match_name)
 
+          # yaml_object editor is only valid for text/string columns; other column types
+          # (e.g. jsonb) fall through to normal column-type rendering.
+          next if (sw == 'yaml_object') && !%i[text string].include?(column_type.to_sym)
+
           partial_fn = "common_templates/edit_fields/#{match_name}"
 
           got = render partial: partial_fn, locals: local_vars[:locals]

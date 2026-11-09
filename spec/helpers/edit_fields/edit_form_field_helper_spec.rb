@@ -13,6 +13,9 @@
 #   - Regression test for bug where Rails 7.2 capture helper HTML-escaped plain String
 #     return values from javascript_tag blocks, producing invalid <script> content
 #     (e.g. _fpa.calculate_with[&#39;field&#39;] instead of _fpa.calculate_with['field']).
+# - name_starts_with_yaml_object edit field dispatch (issue #1269).
+#   - Fields whose names begin with 'yaml_object_' must be dispatched to the
+#     _name_starts_with_yaml_object partial (YAML codemirror editor).
 
 require 'rails_helper'
 
@@ -147,6 +150,126 @@ RSpec.describe EditFields::EditFormFieldHelper, type: :helper do
       # This demonstrates the bug: the content gets HTML-entity-encoded
       expect(result).to include('&#39;'), 'Expected HTML-encoded single quotes (demonstrating the bug)'
       expect(result).to include('&quot;'), 'Expected HTML-encoded double quotes (demonstrating the bug)'
+    end
+  end
+
+  describe 'name_starts_with_yaml_object dispatch' do
+    let(:form_object_instance) do
+      instance_double(
+        'DynamicModel::YamlTestRecord',
+        model_data_type: :dynamic_model,
+        class: double(name: 'DynamicModel::YamlTestRecord', table_name: 'yaml_test_records'),
+        send: nil
+      )
+    end
+
+    let(:locals) { { locals: {} } }
+    let(:rendered_partials) { [] }
+
+    before do
+      allow(helper).to receive(:field_options_for).and_return({})
+      allow(helper).to receive(:is_current_admin_sample?).and_return(false)
+      allow(helper).to receive(:respond_to?).and_call_original
+      allow(helper).to receive(:general_selection_prefix_name).and_return('dynamic_model__yaml_test_records')
+      allow(Classification::GeneralSelection).to receive(:exists_for?).and_return(false)
+
+      # Reset memoized file list so the new partial is discovered
+      helper.instance_variable_set(:@f_names, nil)
+
+      allow(helper).to receive(:render) do |args|
+        partial = args[:partial]
+        rendered_partials << partial
+        "RENDERED:#{partial}"
+      end
+    end
+
+    it 'dispatches to name_starts_with_yaml_object partial for a yaml_object_ prefixed field' do
+      result = helper.edit_form_field(
+        form: double('FormBuilder'),
+        field_name_sym: :yaml_object_config,
+        field_name: 'yaml_object_config',
+        column_type: :string,
+        general_selection_name: 'dynamic_model__yaml_test_records',
+        form_object_instance: form_object_instance,
+        form_object_item_type_us: 'dynamic_model__yaml_test_records',
+        caption_before: {},
+        labels: {},
+        locals:
+      )
+
+      expect(rendered_partials).to include('common_templates/edit_fields/name_starts_with_yaml_object')
+      expect(result).to include('name_starts_with_yaml_object')
+    end
+
+    it 'does not dispatch to name_starts_with_yaml_object partial for non-yaml_object_ prefixed fields' do
+      helper.edit_form_field(
+        form: double('FormBuilder'),
+        field_name_sym: :other_config,
+        field_name: 'other_config',
+        column_type: :string,
+        general_selection_name: 'dynamic_model__yaml_test_records',
+        form_object_instance: form_object_instance,
+        form_object_item_type_us: 'dynamic_model__yaml_test_records',
+        caption_before: {},
+        labels: {},
+        locals:
+      )
+
+      expect(rendered_partials).not_to include('common_templates/edit_fields/name_starts_with_yaml_object')
+    end
+
+    it 'does not dispatch to name_starts_with_yaml_object partial for a yaml_object_ field with jsonb column type' do
+      helper.edit_form_field(
+        form: double('FormBuilder'),
+        field_name_sym: :yaml_object_config,
+        field_name: 'yaml_object_config',
+        column_type: :jsonb,
+        general_selection_name: 'dynamic_model__yaml_test_records',
+        form_object_instance: form_object_instance,
+        form_object_item_type_us: 'dynamic_model__yaml_test_records',
+        caption_before: {},
+        labels: {},
+        locals:
+      )
+
+      expect(rendered_partials).not_to include('common_templates/edit_fields/name_starts_with_yaml_object')
+      # Should fall through to column_type_jsonb partial instead
+      expect(rendered_partials).to include('common_templates/edit_fields/column_type_jsonb')
+    end
+
+    it 'does not dispatch to name_starts_with_yaml_object partial for a yaml_object_ field with json column type' do
+      helper.edit_form_field(
+        form: double('FormBuilder'),
+        field_name_sym: :yaml_object_settings,
+        field_name: 'yaml_object_settings',
+        column_type: 'json',
+        general_selection_name: 'dynamic_model__yaml_test_records',
+        form_object_instance: form_object_instance,
+        form_object_item_type_us: 'dynamic_model__yaml_test_records',
+        caption_before: {},
+        labels: {},
+        locals:
+      )
+
+      expect(rendered_partials).not_to include('common_templates/edit_fields/name_starts_with_yaml_object')
+      expect(rendered_partials).to include('common_templates/edit_fields/column_type_json')
+    end
+
+    it 'dispatches to name_starts_with_yaml_object partial when column_type is a string "string"' do
+      helper.edit_form_field(
+        form: double('FormBuilder'),
+        field_name_sym: :yaml_object_config,
+        field_name: 'yaml_object_config',
+        column_type: 'string',
+        general_selection_name: 'dynamic_model__yaml_test_records',
+        form_object_instance: form_object_instance,
+        form_object_item_type_us: 'dynamic_model__yaml_test_records',
+        caption_before: {},
+        labels: {},
+        locals:
+      )
+
+      expect(rendered_partials).to include('common_templates/edit_fields/name_starts_with_yaml_object')
     end
   end
 end

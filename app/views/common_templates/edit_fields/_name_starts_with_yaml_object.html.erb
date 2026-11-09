@@ -1,0 +1,32 @@
+<%
+# Edit a text/varchar database column's contents as YAML text.
+#
+# DISPLAY (this template): the current column value IS the YAML text (a String, since
+# the backing column is text/varchar - NOT json/jsonb) and is shown directly in a YAML
+# codemirror editor (data-code-editor-type: 'yaml'). No hash/array conversion is
+# performed here, since the persisted value already IS the YAML text.
+#
+# SAVE: on submit, the edited YAML text arrives as a plain param string.
+# Dynamic::FieldEditAs::Handler resolves fields named "yaml_object_*" that are backed
+# by a text/varchar column (i.e. not json/jsonb) to the "yaml_object" edit_as
+# field_type, and hands the raw YAML string to
+# Dynamic::FieldEditAs::YamlObject.persistable_value, which validates that the text
+# parses as a YAML Hash/Array (raising FphsException if not) and returns the ORIGINAL
+# YAML TEXT to be persisted as-is into the text/varchar column.
+#
+# VIEW (search results): common_templates/_common_template_result_fields.html.erb
+# parses this stored YAML text back into a Hash/Array (client-side, via the
+# `yaml_parse` Handlebars helper) to render the same structured/collapsible object
+# view used for actual json/jsonb object fields.
+
+gs = form_object_instance[field_name_sym.to_s]
+options = field_options_for(form_object_instance, field_name_sym)
+
+html_options = {
+  data: { attr_name: field_name_sym, object_name: form_object_item_type_us, code_editor_type: 'yaml' },
+  class: 'code-editor code-editor-yaml',
+  value: gs
+}.merge(options)
+%>
+<%= edit_field_label(form, field_name_sym, labels, /^yaml_object_/) %>
+<%= form.text_area field_name_sym, html_options %>
