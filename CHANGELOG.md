@@ -14,6 +14,8 @@ Since [version 8.4.0](#840---2024-01-10) the convention is that releases made wi
 
 ## Unreleased
 
+## [10.1.0] - 2026-11-10
+
 ### From FPHS - PR #1544 - 2026-11-10
 
 - [Fixed] handlebars precompiler parsing of double-quoted template names - fixes #1543 which was a regression introduced by #1542 CVE fixes
