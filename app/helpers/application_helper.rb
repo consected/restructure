@@ -318,7 +318,7 @@ module ApplicationHelper
   #
   # Role/UAC updated_at timestamps for the given app type, delegated to
   # HandlebarsPrecompiler.app_type_access_control_timestamps (the single source of truth
-  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key/#access_control_version -
+  # shared with HandlebarsPrecompilerHelper#handlebars_cache_key -
   # issue #1400 Phase 1). Memoized per app_type_id so the ETag and template_version
   # computations in one view context reuse the same values instead of re-querying.
   # @param app_type_id [Integer, nil] the app_type to scope the queries to

@@ -197,11 +197,10 @@ describe '#partial_cache_key' do
     expect(after_key).not_to eq(before_key)
   end
 
-  # Report is deliberately absent from HandlebarsPrecompiler.item_update_classes (see
-  # 1362_final_stage_plan): that list also feeds HandlebarsPrecompiler.generation_key, so
-  # adding Report would rotate every compiled Handlebars generation - forcing a full
-  # node-CLI recompile of unrelated content - on every report config edit. This asserts the
-  # real (unstubbed) list, so it fails if Report is ever added back.
+  # Report is deliberately absent from HandlebarsPrecompiler.item_update_classes: the list
+  # feeds partial-cache and prewarm freshness keys, so adding Report would rotate those
+  # caches on every report config edit. This asserts the real (unstubbed) list, so it fails
+  # if Report is ever added back.
   it 'never includes Report in the item-update classes used for cache keys' do
     expect(HandlebarsPrecompiler.item_update_classes).not_to include(Report)
   end

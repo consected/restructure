@@ -104,6 +104,7 @@ RSpec.describe 'Handlebars compile cost per distinct user after a restart (issue
     HandlebarsPrecompiler.cleanup_compiled_output
     HandlebarsPrecompiler.cleanup_tmp_dir
     Rails.cache.delete('server_cache_version')
+    Rails.cache.delete(Application::HANDLEBARS_GENERATION_CACHE_KEY)
   end
 
   # Clears the outer per-user page-fragment cache without rotating server_cache_version,
@@ -111,7 +112,7 @@ RSpec.describe 'Handlebars compile cost per distinct user after a restart (issue
   # handlebars_cross_user_artifact_sharing_spec.rb).
   def bust_page_fragment_cache!
     scv = Rails.cache.read('server_cache_version')
-    Rails.cache.clear
+    Application.clear_cache_preserving_generation
     Rails.cache.write('server_cache_version', scv) if scv
   end
 
