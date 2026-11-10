@@ -15,6 +15,9 @@
 module HandlebarsPrecompilerHelper
   extend ActiveSupport::Concern
 
+  # Registration line of a compiled template or partial. The CLI may quote names with single or double quotes
+  TEMPLATE_REGISTRATION_REGEX = /^(?:Handlebars\.partials|templates)\[(['"])(.+?)\1\]/
+
   # JavaScript wrapper used by Handlebars CLI to register compiled templates
   COMPILED_HEAD = <<~ENDJS
     (function() {
@@ -553,15 +556,23 @@ module HandlebarsPrecompilerHelper
     # Ensure public directory exists
     FileUtils.mkdir_p(public_dir)
 
+    # Fail loudly if the CLI produced output but none of it could be parsed, such as when
+    # its output format changes. Otherwise no files are written and the page silently
+    # requests missing bundles (issue #1543).
+    unless template_parts.any? { |part| part.match?(TEMPLATE_REGISTRATION_REGEX) } || full_content.strip.empty?
+      raise FphsException, 'Handlebars CLI output not recognized: no template registrations could be parsed'
+    end
+
     # Write each template to its own file in the appropriate subdirectory
     template_parts.each do |part|
       next if part.strip.empty?
 
       # Extract template name from the registration line
-      name_match = part.match(/^(?:Handlebars\.partials|templates)\['(.+?)'\]/)
+      # The CLI may quote names with either single or double quotes (issue #1543)
+      name_match = part.match(TEMPLATE_REGISTRATION_REGEX)
       next unless name_match
 
-      template_name = name_match[1]
+      template_name = name_match[2]
 
       # Wrap in IIFE and write to file
       content = "#{COMPILED_HEAD}#{part}\n})();"

@@ -60,4 +60,54 @@ describe('_fpa template recovery', function () {
     });
     expect(_fpa.status.template_rebuild_attempted).toBe(true);
   });
+
+  // Issue #1543: when templates fail to compile, the rebuild request on an unauthenticated page
+  // is redirected to the sign-in page. Appending that full document duplicated the whole page
+  // and re-ran the app scripts.
+  describe('full page response instead of a template fragment', function () {
+    var fullPage = '<!DOCTYPE html><html><head><script src="/assets/application.js"></script></head>' +
+      '<body><div class="login-block"></div></body></html>';
+
+    beforeEach(function () {
+      $('#template-fragment-test').remove();
+      $('body').append('<div id="template-fragment-test"></div>');
+      spyOn(_fpa, 'one_time_setup');
+      spyOn(console, 'error');
+      jasmine.clock().install();
+    });
+
+    afterEach(function () {
+      jasmine.clock().uninstall();
+      $('#template-fragment-test').remove();
+    });
+
+    it('does not append a full HTML document to the page', function () {
+      var bodyAppend = spyOn($.fn, 'append').and.callThrough();
+
+      _fpa.load_template_version('current-template-token', 'test', true);
+      templateDeferred.resolve(fullPage);
+
+      expect(bodyAppend).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('still completes template loading so the page is not left waiting', function () {
+      _fpa.load_template_version('current-template-token', 'test', true);
+      templateDeferred.resolve(fullPage);
+      jasmine.clock().tick(50);
+
+      expect(_fpa.status.loaded_templates).toBe(true);
+      expect(_fpa.one_time_setup).toHaveBeenCalled();
+    });
+
+    it('appends a genuine template fragment', function () {
+      var bodyAppend = spyOn($.fn, 'append').and.callThrough();
+
+      _fpa.load_template_version('current-template-token', 'test', true);
+      templateDeferred.resolve('<div class="template-fragment-test-content"></div>');
+
+      expect(bodyAppend).toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+    });
+  });
 });

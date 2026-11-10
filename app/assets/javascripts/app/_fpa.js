@@ -1442,10 +1442,16 @@ _fpa = {
     }
 
     $.get({ url: url, cache: !rebuild }).done(function (data) {
-      // Inject the template HTML into the page and run any included scripts.
-      // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
-      // which increments pending_template_retrieves before starting async AJAX.
-      $('body').append(data);
+      // A full HTML document (such as a sign-in page after a redirect) is not a template fragment.
+      // Appending it would duplicate the whole page and re-run the app scripts.
+      if (typeof data === 'string' && /<(!doctype|html)\b/i.test(data)) {
+        console.error('Template response was a full page, not a template fragment', url);
+      } else {
+        // Inject the template HTML into the page and run any included scripts.
+        // Inline scripts in the appended HTML call retrieve_requested_handlebars_templates,
+        // which increments pending_template_retrieves before starting async AJAX.
+        $('body').append(data);
+      }
 
       // Wait for all pending multi file AJAX requests to complete before
       // marking templates as loaded. This prevents the splash guard from
